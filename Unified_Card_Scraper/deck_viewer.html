@@ -747,20 +747,39 @@
         }
         
         function loadCardImageWithProxy(imgElement, originalUrl, cardName, count) {
-            // If direct load fails, try with weserv.nl proxy
-            const proxiedImageUrl = `https://images.weserv.nl/?url=${encodeURIComponent(originalUrl)}`;
-            imgElement.src = proxiedImageUrl;
-            imgElement.onerror = function() {
-                // If proxy also fails, show fallback
-                this.parentElement.classList.add('no-image');
-                this.parentElement.innerHTML = `
-                    <div class='fallback-content'>
-                        <div class='fallback-icon'>🃏</div>
-                        <div>${cardName}</div>
-                        <div class='card-count-badge'>${count}</div>
-                    </div>
-                `;
-            };
+            // If direct load fails, try alternative image services
+            const proxies = [
+                // Try weserv.nl proxy
+                `https://images.weserv.nl/?url=${encodeURIComponent(originalUrl)}`,
+                // Try another proxy service  
+                `https://via.placeholder.com/200x280?text=${encodeURIComponent(cardName)}`
+            ];
+            
+            let proxyIndex = 0;
+            
+            function tryNextProxy() {
+                if (proxyIndex >= proxies.length) {
+                    // All proxies failed, show fallback
+                    imgElement.parentElement.classList.add('no-image');
+                    imgElement.parentElement.innerHTML = `
+                        <div class='fallback-content'>
+                            <div class='fallback-icon'>🃏</div>
+                            <div>${cardName}</div>
+                            <div class='card-count-badge'>${count}</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                imgElement.src = proxies[proxyIndex];
+                imgElement.onerror = () => {
+                    proxyIndex++;
+                    tryNextProxy();
+                };
+                proxyIndex++;
+            }
+            
+            tryNextProxy();
         }
         
         function parseCSV(text) {

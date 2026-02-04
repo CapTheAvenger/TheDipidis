@@ -1,24 +1,36 @@
-name: Deploy GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
+    paths:
+      - 'Unified_Card_Scraper/**'
+      - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
     
     - name: Setup Pages
       uses: actions/configure-pages@v4
     
-    - name: Build with GitHub Pages
+    - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: 'Unified_Card_Scraper/'
+        path: 'Unified_Card_Scraper'
     
     - name: Deploy to GitHub Pages
       id: deployment

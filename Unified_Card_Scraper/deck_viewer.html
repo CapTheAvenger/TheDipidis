@@ -771,12 +771,13 @@
                     return;
                 }
                 
-                imgElement.src = proxies[proxyIndex];
+                const currentUrl = proxies[proxyIndex];
+                proxyIndex++;
+                
+                imgElement.src = currentUrl;
                 imgElement.onerror = () => {
-                    proxyIndex++;
                     tryNextProxy();
                 };
-                proxyIndex++;
             }
             
             tryNextProxy();

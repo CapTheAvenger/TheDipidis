@@ -755,7 +755,8 @@
                 lines[0] = lines[0].substr(1);
             }
             
-            const headers = lines[0].split(';').map(h => h.trim().replace(/\r$/, ''));
+            const headerLine = lines[0].replace(/^\uFEFF/, ''); // Remove BOM from first line
+            const headers = headerLine.split(';').map(h => h.trim().replace(/\r$/, ''));
             const data = [];
             
             console.log('CSV Headers:', headers); // Debug
@@ -882,27 +883,26 @@
                 normalizeArchetypeName(m.archetype) === normalizeArchetypeName(deckName)
             );
             
+            // Get Limitless data from the main decks CSV (which has rank and win_rate)
             const limitlessMatch = matchupsData.find(m => 
-                normalizeArchetypeName(m.archetype || m.Archetype) === normalizeArchetypeName(deckName)
+                normalizeArchetypeName(m.deck_name) === normalizeArchetypeName(deckName)
             );
             
             // Show section if we have ANY data
             if (cityLeagueMatch || limitlessMatch) {
                 statsSection.style.display = 'block';
                 
-                // RANKING: IMMER Limitless wenn vorhanden, sonst City League Best Placement
-                if (limitlessMatch && (limitlessMatch.rank || limitlessMatch.new_rank)) {
-                    const rank = limitlessMatch.rank || limitlessMatch.new_rank;
-                    document.getElementById('statRanking').textContent = `#${rank}`;
-                } else if (cityLeagueMatch && cityLeagueMatch.new_best) {
-                    document.getElementById('statRanking').textContent = `#${cityLeagueMatch.new_best}`;
+                // RANKING: From limitless_online_decks.csv "rank" column (HIGHEST PRIORITY)
+                if (limitlessMatch && limitlessMatch.rank) {
+                    document.getElementById('statRanking').textContent = `#${limitlessMatch.rank}`;
                 } else {
                     document.getElementById('statRanking').textContent = '-';
                 }
                 
                 // WIN RATE / Ø PLATZIERUNG: Limitless > City League
                 if (limitlessMatch && limitlessMatch.win_rate) {
-                    document.getElementById('statWinRate').textContent = limitlessMatch.win_rate + '%';
+                    const winRateDisplay = limitlessMatch.win_rate.replace(',', '.');
+                    document.getElementById('statWinRate').textContent = winRateDisplay + '%';
                     document.getElementById('statWinRate').parentElement.querySelector('.label').textContent = 'Win Rate';
                 } else if (cityLeagueMatch && cityLeagueMatch.new_avg_placement) {
                     document.getElementById('statWinRate').textContent = cityLeagueMatch.new_avg_placement;
@@ -911,9 +911,9 @@
                     document.getElementById('statWinRate').textContent = '-';
                 }
                 
-                // MATCHES / AUFTRITTE: Limitless > City League  
-                if (limitlessMatch && limitlessMatch.total_matches) {
-                    document.getElementById('statMatches').textContent = limitlessMatch.total_matches;
+                // MATCHES / AUFTRITTE: Limitless count > City League appearances  
+                if (limitlessMatch && limitlessMatch.count) {
+                    document.getElementById('statMatches').textContent = limitlessMatch.count;
                     document.getElementById('statMatches').parentElement.querySelector('.label').textContent = 'Matches';
                 } else if (cityLeagueMatch && cityLeagueMatch.new_appearances) {
                     document.getElementById('statMatches').textContent = cityLeagueMatch.new_appearances;
@@ -922,21 +922,18 @@
                     document.getElementById('statMatches').textContent = '-';
                 }
                 
-                // STATUS: Zeige vollständige Limitless Info (Total WR + Top20 Matchup)
-                if (limitlessMatch) {
-                    const totalWR = limitlessMatch.win_rate || '0';
-                    const winsTop20 = parseInt(limitlessMatch.wins_vs_top20 || limitlessMatch.wins || 0);
-                    const lossesTop20 = parseInt(limitlessMatch.losses_vs_top20 || limitlessMatch.losses || 0);
-                    const statusText = `${deckName} (Total WR: ${totalWR}%, Matchup vs Top20: ${winsTop20}:${lossesTop20})`;
-                    document.getElementById('statBalance').textContent = statusText;
-                    document.getElementById('statBalance').parentElement.querySelector('.label').textContent = 'Status';
-                } else if (cityLeagueMatch && cityLeagueMatch.status) {
+                // STATUS: Show City League status first, otherwise Limitless rank-based status
+                if (cityLeagueMatch && cityLeagueMatch.status) {
                     const status = cityLeagueMatch.status;
                     let statusEmoji = '●';
                     if (status === 'NEU') statusEmoji = '🆕';
                     else if (status === 'BESTEHEND') statusEmoji = '✓';
                     else if (status === 'VERSCHWUNDEN') statusEmoji = '❌';
                     document.getElementById('statBalance').textContent = `${statusEmoji} ${status}`;
+                    document.getElementById('statBalance').parentElement.querySelector('.label').textContent = 'Status';
+                } else if (limitlessMatch) {
+                    // Fallback: Show as "Kompetitiv" if in Limitless data
+                    document.getElementById('statBalance').textContent = '✓ KOMPETITIV';
                     document.getElementById('statBalance').parentElement.querySelector('.label').textContent = 'Status';
                 } else {
                     document.getElementById('statBalance').textContent = '-';

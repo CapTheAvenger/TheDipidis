@@ -1,0 +1,7 @@
+﻿{
+    "start_date": "24.01.2026",
+    "end_date": "24.01.2026",
+    "max_decklists_per_league": 16,
+    "delay_between_requests": 0,
+    "output_file": "city_league_data.csv"
+}

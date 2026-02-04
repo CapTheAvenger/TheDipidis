@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Deck Viewer & Builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .control-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .control-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .variant-selector {
+            background: #e8f4f8;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .variant-selector h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .variant-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .variant-checkbox {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .variant-checkbox:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .variant-checkbox input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .variant-checkbox.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .deck-select-wrapper {
+            position: relative;
+        }
+        
+        .deck-select-wrapper input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+        
+        .deck-select-wrapper input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .stats-section {
+            padding: 30px;
+            background: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .matchups {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .matchup-box {
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .matchup-box h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .matchup-box.good {
+            border-left: 5px solid #28a745;
+        }
+        
+        .matchup-box.bad {
+            border-left: 5px solid #dc3545;
+        }
+        
+        .matchup-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .cards-section {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .cards-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .deck-visual {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .deck-visual h3 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .deck-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+            max-height: 800px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .card-visual {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            background: #f0f0f0;
+        }
+        
+        .card-visual:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        
+        .card-visual img {
+            width: 90px;
+            height: 126px;
+            display: block;
+            object-fit: cover;
+        }
+        
+        .card-visual .card-count-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .card-visual .card-name-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            padding: 10px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .card-visual.no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 210px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .card-visual.no-image .fallback-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-visual.no-image .fallback-icon {
+            font-size: 3em;
+        }
+        
+        .cards-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        th.col-image {
+            width: 100px;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .card-thumbnail {
+            width: 80px;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .card-thumbnail:hover {
+            transform: scale(1.1);
+        }
+        
+        .card-thumbnail-placeholder {
+            width: 80px;
+            height: 110px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2em;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .card-count {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        .deck-builder {
+            padding: 30px;
+            background: white;
+            border-top: 3px solid #667eea;
+        }
+        
+        .deck-builder h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .builder-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .deck-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .deck-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .deck-card-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .deck-card-controls button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn-add {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .deck-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .deck-summary h3 {
+            font-size: 1.5em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .error {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .percentage-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .percentage-high {
+            background: #28a745;
+            color: white;
+        }
+        
+        .percentage-medium {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .percentage-low {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎴 Pokemon Deck Viewer & Builder</h1>
+            <p>Analysiere Decks, filtere Karten und baue deine perfekte Liste</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="deckSearch">🔍 Deck suchen:</label>
+                    <input type="text" id="deckSearch" placeholder="Deck-Name eingeben..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                </div>
+                <div class="control-group">
+                    <label for="deckSelect">🎯 Deck Archetype wählen:</label>
+                    <select id="deckSelect" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                        <option value="">-- Bitte Deck auswählen --</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="filterSelect">🔍 Karten Filter:</label>
+                    <select id="filterSelect">
+                        <option value="all">Alle Karten</option>
+                        <option value="70">Karten in >70% der Decks</option>
+                        <option value="50">Karten in >50% der Decks</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-section" id="statsSection" style="display: none;">
+            <div class="variant-selector" id="variantSelector" style="display: none;">
+                <h3>🔄 Weitere Deck-Varianten dazupacken:</h3>
+                <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+                    Wähle zusätzliche Varianten aus, um mehr Karten-Optionen für dein Custom-Deck zu sehen
+                </p>
+                <div class="variant-options" id="variantOptions"></div>
+            </div>
+            
+            <h2>📊 Deck Statistiken</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">Ranking</div>
+                    <div class="value" id="statRanking">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Win Rate</div>
+                    <div class="value" id="statWinRate">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Matches Gespielt</div>
+                    <div class="value" id="statMatches">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Top 20 Balance</div>
+                    <div class="value" id="statBalance">-</div>
+                </div>
+            </div>
+            
+            <div class="matchups">
+                <div class="matchup-box good">
+                    <h3>✅ Top Matchups (>50%)</h3>
+                    <div id="topMatchups"></div>
+                </div>
+                <div class="matchup-box bad">
+                    <h3>❌ Worst Matchups (<50%)</h3>
+                    <div id="worstMatchups"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cards-section">
+            <div class="cards-header">
+                <h2>🃏 Karten Liste</h2>
+                <span id="cardCount">0 Karten</span>
+            </div>
+            
+            <!-- Deck Visualisierung -->
+            <div class="deck-visual" id="deckVisual" style="display: none;">
+                <h3>🎨 Deck Übersicht</h3>
+                <div class="deck-grid" id="deckGrid">
+                    <!-- Karten werden hier dynamisch eingefügt -->
+                </div>
+            </div>
+            
+            <div class="cards-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="col-image">Bild</th>
+                            <th>Anzahl</th>
+                            <th>Kartenname</th>
+                            <th>Set</th>
+                            <th>Nummer</th>
+                            <th>% in Archetype</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cardsBody">
+                        <tr>
+                            <td colspan="7" class="loading">Bitte wähle ein Deck aus...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="deck-builder">
+            <h2>🛠️ Deck Builder (60 Karten)</h2>
+            <div class="builder-controls">
+                <button class="btn btn-primary" onclick="exportToPokemonLive()">📋 Für Pokemon Live kopieren</button>
+                <button class="btn btn-secondary" onclick="clearDeck()">🗑️ Deck leeren</button>
+                <button class="btn btn-success" onclick="autoComplete()">⚡ Auto-Complete (60 Karten)</button>
+            </div>
+            
+            <div class="deck-summary">
+                <h3>Aktuell: <span id="deckCardCount">0</span> / 60 Karten</h3>
+            </div>
+            
+            <div id="myDeckVisual" style="display: none;">
+                <h3>🎴 Dein Deck Übersicht</h3>
+                <div class="deck-grid" id="myDeckGrid"></div>
+            </div>
+            
+            <div class="deck-list" id="deckList">
+                <p style="text-align: center; color: #666;">Füge Karten von oben hinzu...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global data storage
+        let cardsData = [];
+        let matchupsData = [];
+        let matchupDetailsData = [];
+        let cityLeagueData = [];
+        let myDeck = [];
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCardsData();
+            await loadMatchupsData();
+            await loadMatchupDetailsData();
+            await loadCityLeagueData();
+            setupEventListeners();
+        });
+        
+        async function loadCardsData() {
+            try {
+                const response = await fetch('unified_card_data.csv');
+                const text = await response.text();
+                cardsData = parseCSV(text);
+                populateDeckDropdown();
+            } catch (error) {
+                console.error('Error loading cards data:', error);
+                showError('Fehler beim Laden der Kartendaten. Stelle sicher, dass unified_card_data.csv vorhanden ist.');
+            }
+        }
+        
+        async function loadMatchupsData() {
+            try {
+                const response = await fetch('limitless_online_decks.csv');
+                if (response.ok) {
+                    const text = await response.text();
+                    matchupsData = parseCSV(text);
+                    console.log('Loaded Limitless Online decks - Entries:', matchupsData.length);
+                } else {
+                    console.warn('Limitless Online deck data not found');
+                }
+            } catch (error) {
+                console.error('Error loading Limitless deck data:', error);
+            }
+        }
+        
+        async function loadMatchupDetailsData() {
+            try {
+                const response = await fetch('limitless_online_decks_matchups.csv');
+                if (response.ok) {
+                    const text = await response.text();
+                    matchupDetailsData = parseCSV(text);
+                    console.log('Loaded Limitless matchup details - Entries:', matchupDetailsData.length);
+                } else {
+                    console.warn('Limitless matchup details not found');
+                }
+            } catch (error) {
+                console.error('Error loading matchup details:', error);
+            }
+        }
+        
+        async function loadCityLeagueData() {
+            try {
+                const response = await fetch('city_league_archetypes_comparison.csv');
+                if (response.ok) {
+                    const text = await response.text();
+                    cityLeagueData = parseCSV(text);
+                    console.log('Loaded City League comparison - Entries:', cityLeagueData.length);
+                } else {
+                    console.warn('City League comparison data not found');
+                }
+            } catch (error) {
+                console.error('Error loading City League data:', error);
+                // Not critical if this fails
+            }
+        }
+        
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            if (lines.length === 0) return [];
+            
+            // Handle BOM if present
+            if (lines[0].charCodeAt(0) === 0xFEFF) {
+                lines[0] = lines[0].substr(1);
+            }
+            
+            const headers = lines[0].split(';').map(h => h.trim().replace(/\r$/, ''));
+            const data = [];
+            
+            console.log('CSV Headers:', headers); // Debug
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = lines[i].split(';');
+                const row = {};
+                headers.forEach((header, index) => {
+                    let value = values[index] ? values[index].trim().replace(/\r$/, '') : '';
+                    row[header] = value;
+                });
+                data.push(row);
+            }
+            
+            console.log('Parsed', data.length, 'rows'); // Debug
+            return data;
+        }
+        
+        function populateDeckDropdown() {
+            const deckSelect = document.getElementById('deckSelect');
+            const archetypes = [...new Set(cardsData.map(c => c.archetype))].sort((a, b) => a.localeCompare(b));
+            
+            archetypes.forEach(archetype => {
+                const option = document.createElement('option');
+                option.value = archetype;
+                option.textContent = archetype;
+                deckSelect.appendChild(option);
+            });
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('deckSelect').addEventListener('change', onDeckChange);
+            document.getElementById('filterSelect').addEventListener('change', updateCardsDisplay);
+            document.getElementById('deckSearch').addEventListener('input', filterDeckList);
+        }
+        
+        function filterDeckList() {
+            const searchTerm = document.getElementById('deckSearch').value.toLowerCase();
+            const deckSelect = document.getElementById('deckSelect');
+            const options = deckSelect.getElementsByTagName('option');
+            
+            for (let i = 1; i < options.length; i++) { // Skip first "-- Bitte..." option
+                const optionText = options[i].textContent.toLowerCase();
+                if (optionText.includes(searchTerm)) {
+                    options[i].style.display = '';
+                } else {
+                    options[i].style.display = 'none';
+                }
+            }
+        }
+        
+        function onDeckChange() {
+            const selectedDeck = document.getElementById('deckSelect').value;
+            if (!selectedDeck) return;
+            
+            updateStats(selectedDeck);
+            updateVariantSelector(selectedDeck);
+            updateCardsDisplay();
+        }
+        
+        let selectedVariants = [];
+        
+        function updateVariantSelector(mainDeck) {
+            const variantSelector = document.getElementById('variantSelector');
+            const variantOptions = document.getElementById('variantOptions');
+            
+            // Clear previous selections
+            selectedVariants = [];
+            
+            // Find related variants (same base name)
+            const baseName = mainDeck.split(' ')[0]; // e.g., "Dragapult" from "Dragapult Dusknoir"
+            
+            // Get all unique archetypes
+            const allArchetypes = [...new Set(cardsData.map(c => c.archetype))].sort();
+            
+            // Find variants that start with the same base name but are different  
+            const variants = allArchetypes.filter(arch => 
+                arch.startsWith(baseName) && 
+                normalizeArchetypeName(arch) !== normalizeArchetypeName(mainDeck)
+            );
+            
+            console.log('Main deck:', mainDeck, '| Base:', baseName, '| Variants found:', variants.length);
+            
+            if (variants.length === 0) {
+                variantSelector.style.display = 'none';
+                return;
+            }
+            
+            // Show selector and populate options
+            variantSelector.style.display = 'block';
+            variantOptions.innerHTML = variants.map(variant => {
+                const safeVariant = variant.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                return `
+                    <label class="variant-checkbox">
+                        <input type="checkbox" value="${safeVariant}" onchange="toggleVariant('${safeVariant}')">
+                        <span>${variant}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+        
+        function toggleVariant(variantName) {
+            const checkbox = document.querySelector(`input[value="${variantName}"]`);
+            const label = checkbox.parentElement;
+            
+            if (checkbox.checked) {
+                selectedVariants.push(variantName);
+                label.classList.add('selected');
+            } else {
+                selectedVariants = selectedVariants.filter(v => v !== variantName);
+                label.classList.remove('selected');
+            }
+            
+            updateCardsDisplay();
+        }
+        
+        function updateStats(deckName) {
+            const statsSection = document.getElementById('statsSection');
+            
+            // Get both data sources
+            const cityLeagueMatch = cityLeagueData.find(m => 
+                normalizeArchetypeName(m.archetype) === normalizeArchetypeName(deckName)
+            );
+            
+            const limitlessMatch = matchupsData.find(m => 
+                normalizeArchetypeName(m.archetype || m.Archetype) === normalizeArchetypeName(deckName)
+            );
+            
+            // Show section if we have ANY data
+            if (cityLeagueMatch || limitlessMatch) {
+                statsSection.style.display = 'block';
+                
+                // RANKING: IMMER Limitless wenn vorhanden, sonst City League Best Placement
+                if (limitlessMatch && (limitlessMatch.rank || limitlessMatch.new_rank)) {
+                    const rank = limitlessMatch.rank || limitlessMatch.new_rank;
+                    document.getElementById('statRanking').textContent = `#${rank}`;
+                } else if (cityLeagueMatch && cityLeagueMatch.new_best) {
+                    document.getElementById('statRanking').textContent = `#${cityLeagueMatch.new_best}`;
+                } else {
+                    document.getElementById('statRanking').textContent = '-';
+                }
+                
+                // WIN RATE / Ø PLATZIERUNG: Limitless > City League
+                if (limitlessMatch && limitlessMatch.win_rate) {
+                    document.getElementById('statWinRate').textContent = limitlessMatch.win_rate + '%';
+                    document.getElementById('statWinRate').parentElement.querySelector('.label').textContent = 'Win Rate';
+                } else if (cityLeagueMatch && cityLeagueMatch.new_avg_placement) {
+                    document.getElementById('statWinRate').textContent = cityLeagueMatch.new_avg_placement;
+                    document.getElementById('statWinRate').parentElement.querySelector('.label').textContent = 'Ø Platzierung';
+                } else {
+                    document.getElementById('statWinRate').textContent = '-';
+                }
+                
+                // MATCHES / AUFTRITTE: Limitless > City League  
+                if (limitlessMatch && limitlessMatch.total_matches) {
+                    document.getElementById('statMatches').textContent = limitlessMatch.total_matches;
+                    document.getElementById('statMatches').parentElement.querySelector('.label').textContent = 'Matches';
+                } else if (cityLeagueMatch && cityLeagueMatch.new_appearances) {
+                    document.getElementById('statMatches').textContent = cityLeagueMatch.new_appearances;
+                    document.getElementById('statMatches').parentElement.querySelector('.label').textContent = 'Auftritte';
+                } else {
+                    document.getElementById('statMatches').textContent = '-';
+                }
+                
+                // STATUS: Zeige vollständige Limitless Info (Total WR + Top20 Matchup)
+                if (limitlessMatch) {
+                    const totalWR = limitlessMatch.win_rate || '0';
+                    const winsTop20 = parseInt(limitlessMatch.wins_vs_top20 || limitlessMatch.wins || 0);
+                    const lossesTop20 = parseInt(limitlessMatch.losses_vs_top20 || limitlessMatch.losses || 0);
+                    const statusText = `${deckName} (Total WR: ${totalWR}%, Matchup vs Top20: ${winsTop20}:${lossesTop20})`;
+                    document.getElementById('statBalance').textContent = statusText;
+                    document.getElementById('statBalance').parentElement.querySelector('.label').textContent = 'Status';
+                } else if (cityLeagueMatch && cityLeagueMatch.status) {
+                    const status = cityLeagueMatch.status;
+                    let statusEmoji = '●';
+                    if (status === 'NEU') statusEmoji = '🆕';
+                    else if (status === 'BESTEHEND') statusEmoji = '✓';
+                    else if (status === 'VERSCHWUNDEN') statusEmoji = '❌';
+                    document.getElementById('statBalance').textContent = `${statusEmoji} ${status}`;
+                    document.getElementById('statBalance').parentElement.querySelector('.label').textContent = 'Status';
+                } else {
+                    document.getElementById('statBalance').textContent = '-';
+                }
+                
+                // MATCHUPS: IMMER aus Limitless Matchup-Daten, wenn vorhanden
+                if (matchupDetailsData.length > 0) {
+                    updateMatchupsDisplay(deckName);
+                } else if (cityLeagueMatch) {
+                    // Fallback: City League Trend-Info
+                    const status = cityLeagueMatch.status || 'UNBEKANNT';
+                    const trend = cityLeagueMatch.trend || '-';
+                    const change = cityLeagueMatch.appearances_change || '0';
+                    
+                    let statusEmoji = '●';
+                    if (status === 'NEU') statusEmoji = '🆕';
+                    else if (status === 'BESTEHEND') statusEmoji = '✓';
+                    else if (status === 'VERSCHWUNDEN') statusEmoji = '❌';
+                    
+                    let trendEmoji = '→';
+                    if (trend === 'STEIGEND') trendEmoji = '📈';
+                    else if (trend === 'FALLEND') trendEmoji = '📉';
+                    else if (trend === 'STABIL') trendEmoji = '➡️';
+                    
+                    document.getElementById('topMatchups').innerHTML = `
+                        <div class="matchup-item">
+                            <span><strong>Status:</strong> ${statusEmoji} ${status}</span>
+                        </div>
+                        <div class="matchup-item">
+                            <span><strong>Trend:</strong> ${trendEmoji} ${trend}</span>
+                        </div>
+                        <div class="matchup-item">
+                            <span><strong>Veränderung:</strong></span>
+                            <span style="color: ${change > 0 ? '#28a745' : change < 0 ? '#dc3545' : '#666'}; font-weight: bold;">
+                                ${change > 0 ? '+' : ''}${change} Auftritte
+                            </span>
+                        </div>
+                    `;
+                    
+                    const placementChange = parseFloat(cityLeagueMatch.placement_change || '0').toFixed(1);
+                    const avgPlacement = cityLeagueMatch.new_avg_placement || '-';
+                    document.getElementById('worstMatchups').innerHTML = `
+                        <div class="matchup-item">
+                            <span><strong>Alte Ø Platzierung:</strong></span>
+                            <span>${cityLeagueMatch.old_avg_placement || '-'}</span>
+                        </div>
+                        <div class="matchup-item">
+                            <span><strong>Neue Ø Platzierung:</strong></span>
+                            <span>${avgPlacement}</span>
+                        </div>
+                        <div class="matchup-item">
+                            <span><strong>Änderung:</strong></span>
+                            <span style="color: ${placementChange < 0 ? '#28a745' : placementChange > 0 ? '#dc3545' : '#666'}; font-weight: bold;">
+                                ${placementChange > 0 ? '+' : ''}${placementChange}
+                            </span>
+                        </div>
+                        <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
+                            <strong>Info:</strong> City League Daten zeigen Trends über Zeiträume, keine direkten Matchups.
+                        </p>
+                    `;
+                }
+                
+            } else {
+                statsSection.style.display = 'none';
+            }
+        }
+        
+        function normalizeArchetypeName(name) {
+            if (!name) return '';
+            return name.toLowerCase().trim()
+                .replace(/\s+/g, ' ')
+                .replace(/[àáâãäå]/g, 'a')
+                .replace(/[èéêë]/g, 'e')
+                .replace(/[ìíîï]/g, 'i')
+                .replace(/[òóôõö]/g, 'o')
+                .replace(/[ùúûü]/g, 'u');
+        }
+        
+        function updateMatchupsDisplay(deckName) {
+            // Get matchup details from limitless_online_decks_matchups.csv
+            const deckMatchups = matchupDetailsData.filter(m => 
+                normalizeArchetypeName(m.deck_name) === normalizeArchetypeName(deckName)
+            );
+            
+            if (deckMatchups.length === 0) {
+                document.getElementById('topMatchups').innerHTML = '<p>Keine Matchup-Daten verfügbar</p>';
+                document.getElementById('worstMatchups').innerHTML = '<p>Keine Matchup-Daten verfügbar</p>';
+                return;
+            }
+            
+            const topMatchups = deckMatchups.filter(m => m.matchup_type === 'BEST').slice(0, 5);
+            const worstMatchups = deckMatchups.filter(m => m.matchup_type === 'WORST').slice(0, 5);
+            
+            document.getElementById('topMatchups').innerHTML = topMatchups.map(m => 
+                `<div class="matchup-item"><span>${m.opponent}</span><span style="color: #28a745; font-weight: bold;">${m.win_rate}% (${m.record})</span></div>`
+            ).join('') || '<p>Keine Daten verfügbar</p>';
+            
+            document.getElementById('worstMatchups').innerHTML = worstMatchups.map(m => 
+                `<div class="matchup-item"><span>${m.opponent}</span><span style="color: #dc3545; font-weight: bold;">${m.win_rate}% (${m.record})</span></div>`
+            ).join('') || '<p>Keine Daten verfügbar</p>';
+        }
+        
+        function updateCardsDisplay() {
+            const selectedDeck = document.getElementById('deckSelect').value;
+            const filter = document.getElementById('filterSelect').value;
+            
+            if (!selectedDeck) {
+                document.getElementById('cardsBody').innerHTML = '<tr><td colspan="7" class="loading">Bitte wähle ein Deck aus...</td></tr>';
+                document.getElementById('deckVisual').style.display = 'none';
+                return;
+            }
+            
+            // Filter cards for selected deck AND selected variants
+            const decksToInclude = [selectedDeck, ...selectedVariants];
+            let deckCards = cardsData.filter(c => decksToInclude.includes(c.archetype));
+            
+            // Aggregate cards by name (combine same cards from different variants)
+            const cardMap = new Map();
+            deckCards.forEach(card => {
+                const key = `${card.card_name}_${card.set_code}_${card.card_number}`;
+                if (!cardMap.has(key)) {
+                    cardMap.set(key, { ...card, sources: [card.archetype] });
+                } else {
+                    const existing = cardMap.get(key);
+                    if (!existing.sources.includes(card.archetype)) {
+                        existing.sources.push(card.archetype);
+                    }
+                }
+            });
+            
+            deckCards = Array.from(cardMap.values());
+            
+            // Apply percentage filter (only for main deck)
+            if (filter === '70') {
+                deckCards = deckCards.filter(c => 
+                    c.archetype === selectedDeck && parseFloat(c.percentage_in_archetype.replace(',', '.')) > 70 ||
+                    c.archetype !== selectedDeck
+                );
+            } else if (filter === '50') {
+                deckCards = deckCards.filter(c => 
+                    c.archetype === selectedDeck && parseFloat(c.percentage_in_archetype.replace(',', '.')) > 50 ||
+                    c.archetype !== selectedDeck
+                );
+            }
+            
+            // Update count
+            document.getElementById('cardCount').textContent = `${deckCards.length} Karten`;
+            
+            // Update deck visual grid
+            updateDeckVisual(deckCards);
+            
+            // Display cards in table
+            const tbody = document.getElementById('cardsBody');
+            if (deckCards.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">Keine Karten gefunden</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = deckCards.map(card => {
+                const percentage = parseFloat(card.percentage_in_archetype.replace(',', '.'));
+                const imageUrl = card.image_url || '';
+                
+                // Create thumbnail HTML
+                let thumbnailHtml;
+                if (imageUrl && imageUrl !== '') {
+                    thumbnailHtml = `<img src="${imageUrl}" alt="${card.card_name}" class="card-thumbnail" onclick="showCardImage('${imageUrl}', '${card.card_name}')" onerror="this.parentElement.innerHTML='<div class=\'card-thumbnail-placeholder\'>🃏</div>'">`;
+                } else {
+                    thumbnailHtml = `<div class="card-thumbnail-placeholder">🃏</div>`;
+                }
+                
+                // Show source decks if from variants
+                let sourceInfo = '';
+                if (card.sources && card.sources.length > 1) {
+                    sourceInfo = `<br><small style="color: #667eea;">aus: ${card.sources.join(', ')}</small>`;
+                } else if (card.sources && card.sources[0] !== document.getElementById('deckSelect').value) {
+                    sourceInfo = `<br><small style="color: #667eea;">aus: ${card.sources[0]}</small>`;
+                }
+                
+                return `
+                    <tr>
+                        <td>${thumbnailHtml}</td>
+                        <td class="card-count">${card.max_count}</td>
+                        <td><strong>${card.card_name}</strong>${sourceInfo}</td>
+                        <td>${card.set_code || '-'}</td>
+                        <td>${card.set_number || '-'}</td>
+                        <td><span style="color: ${percentage > 70 ? '#28a745' : percentage > 50 ? '#ffc107' : '#666'}; font-weight: bold;">${card.percentage_in_archetype}%</span></td>
+                        <td><button class="btn btn-sm" onclick="addToDeck('${card.card_identifier}', ${card.max_count}, '${card.card_name}', '${imageUrl}')">➕ Hinzufügen</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function updateDeckVisual(deckCards) {
+            const deckGrid = document.getElementById('deckGrid');
+            const deckVisual = document.getElementById('deckVisual');
+            
+            if (deckCards.length === 0) {
+                deckVisual.style.display = 'none';
+                return;
+            }
+            
+            deckVisual.style.display = 'block';
+            
+            // Show cards with images prominently
+            deckGrid.innerHTML = deckCards.map(card => {
+                const imageUrl = card.image_url || '';
+                const count = card.max_count || 1;
+                
+                if (imageUrl) {
+                    return `
+                        <div class="card-visual" onclick="showCardImage('${imageUrl}', '${card.card_name}')">
+                            <img src="${imageUrl}" alt="${card.card_name}" onerror="this.parentElement.innerHTML='<div class=\\'fallback-content\\'><div class=\\'fallback-icon\\'>\ud83c\udccf</div><div>${card.card_name}</div></div>'">
+                            <div class="card-count-badge">${count}</div>
+                            <div class="card-name-overlay">${card.card_name}</div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="card-visual no-image">
+                            <div class="fallback-content">
+                                <div class="fallback-icon">🃏</div>
+                                <div>${card.card_name}</div>
+                                <div class="card-count-badge">${count}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+        
+        function showCardImage(imageUrl, cardName) {
+            // Create modal to show full card image
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                cursor: pointer;
+            `;
+            
+            modal.innerHTML = `
+                <div style="max-width: 90%; max-height: 90%; text-align: center;">
+                    <img src="${imageUrl}" alt="${cardName}" style="max-width: 100%; max-height: 80vh; border-radius: 15px; box-shadow: 0 10px 50px rgba(0,0,0,0.5);">
+                    <div style="color: white; margin-top: 20px; font-size: 1.5em; font-weight: bold;">${cardName}</div>
+                    <div style="color: #ccc; margin-top: 10px;">Klicke irgendwo, um zu schließen</div>
+                </div>
+            `;
+            
+            modal.onclick = () => document.body.removeChild(modal);
+            document.body.appendChild(modal);
+        }
+        
+        function addToDeck(cardIdentifier, maxCount, cardName, imageUrl) {
+            const existingCard = myDeck.find(c => c.identifier === cardIdentifier);
+            
+            if (existingCard) {
+                if (existingCard.count < Math.min(4, maxCount)) {
+                    existingCard.count++;
+                }
+            } else {
+                myDeck.push({
+                    identifier: cardIdentifier,
+                    name: cardName,
+                    count: 1,
+                    maxCount: Math.min(4, maxCount),
+                    imageUrl: imageUrl
+                });
+            }
+            
+            updateDeckDisplay();
+        }
+        
+        function removeFromDeck(cardName) {
+            const card = myDeck.find(c => c.name === cardName);
+            if (card) {
+                card.count--;
+                if (card.count <= 0) {
+                    myDeck = myDeck.filter(c => c.name !== cardName);
+                }
+            }
+            updateDeckDisplay();
+        }
+        
+        function updateDeckDisplay() {
+            const deckList = document.getElementById('deckList');
+            const totalCards = myDeck.reduce((sum, card) => sum + card.count, 0);
+            
+            document.getElementById('deckCardCount').textContent = totalCards;
+            
+            // Update visual grid
+            updateMyDeckVisual();
+            
+            if (myDeck.length === 0) {
+                deckList.innerHTML = '<p style="text-align: center; color: #666;">Füge Karten von oben hinzu...</p>';
+                return;
+            }
+            
+            deckList.innerHTML = myDeck.map(card => {
+                let cardVisual = '';
+                if (card.imageUrl) {
+                    cardVisual = `
+                        <div style="width: 60px; height: 80px; margin-right: 10px; cursor: pointer;" onclick="showCardImage('${card.imageUrl}', '${card.name}')">
+                            <img src="${card.imageUrl}" alt="${card.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                        </div>
+                    `;
+                } else {
+                    cardVisual = `
+                        <div style="width: 60px; height: 80px; margin-right: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 5px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">
+                            🃏
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="deck-card" style="display: flex; align-items: center;">
+                        ${cardVisual}
+                        <div style="flex: 1;">
+                            <strong>${card.count}x ${card.name}</strong>
+                        </div>
+                        <div class="deck-card-controls">
+                            <button class="btn-add" onclick="addToDeck('${card.identifier}', ${card.maxCount}, '${escapeHtml(card.name)}', '${card.imageUrl || ''}')">+</button>
+                            <button class="btn-remove" onclick="removeFromDeck('${escapeHtml(card.name)}')">-</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateMyDeckVisual() {
+            const myDeckVisual = document.getElementById('myDeckVisual');
+            const myDeckGrid = document.getElementById('myDeckGrid');
+            
+            if (myDeck.length === 0) {
+                myDeckVisual.style.display = 'none';
+                return;
+            }
+            
+            myDeckVisual.style.display = 'block';
+            
+            // Show each card ONCE with count badge (nicht mehrfach)
+            myDeckGrid.innerHTML = myDeck.map(card => {
+                const imageUrl = card.imageUrl || '';
+                const count = card.count || 1;
+                
+                if (imageUrl) {
+                    return `
+                        <div class="card-visual" onclick="showCardImage('${imageUrl}', '${card.name}')">
+                            <img src="${imageUrl}" alt="${card.name}" onerror="this.parentElement.innerHTML='<div class=\\'fallback-content\\'><div class=\\'fallback-icon\\'>\ud83c\udccf</div><div>${card.name}</div></div>'">
+                            <div class="card-count-badge">${count}</div>
+                            <div class="card-name-overlay">${card.name}</div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="card-visual no-image">
+                            <div class="fallback-content">
+                                <div class="fallback-icon">\ud83c\udccf</div>
+                                <div>${card.name}</div>
+                                <div class="card-count-badge">${count}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+        
+        function clearDeck() {
+            if (confirm('Willst du das Deck wirklich leeren?')) {
+                myDeck = [];
+                updateDeckDisplay();
+            }
+        }
+        
+        function autoComplete() {
+            const selectedDeck = document.getElementById('deckSelect').value;
+            if (!selectedDeck) {
+                alert('Bitte wähle zuerst ein Deck aus!');
+                return;
+            }
+            
+            myDeck = [];
+            let deckCards = cardsData.filter(c => c.archetype === selectedDeck);
+            deckCards.sort((a, b) => parseFloat(b.percentage_in_archetype.replace(',', '.')) - parseFloat(a.percentage_in_archetype.replace(',', '.')));
+            
+            let totalCards = 0;
+            for (const card of deckCards) {
+                if (totalCards >= 60) break;
+                
+                // Berechne Durchschnitt: total_count / deck_count
+                const avgCount = parseFloat(card.total_count) / parseFloat(card.deck_count);
+                // Runde: ab x,5 aufrunden, sonst abrunden
+                const recommendedCount = Math.round(avgCount);
+                
+                const count = Math.min(
+                    recommendedCount || 1,
+                    4,
+                    60 - totalCards
+                );
+                
+                if (count > 0) {
+                    myDeck.push({
+                        identifier: card.card_identifier,
+                        name: card.card_name,
+                        count: count,
+                        maxCount: Math.min(4, recommendedCount || 4),
+                        imageUrl: card.image_url || ''
+                    });
+                    totalCards += count;
+                }
+            }
+            
+            updateDeckDisplay();
+        }
+        
+        function exportToPokemonLive() {
+            if (myDeck.length === 0) {
+                alert('Dein Deck ist leer!');
+                return;
+            }
+            
+            let exportText = 'Pokémon: \n';
+            let trainerText = 'Trainer: \n';
+            let energyText = 'Energy: \n';
+            
+            myDeck.forEach(card => {
+                const line = `${card.count} ${card.name} ${card.setCode || ''} ${card.setNumber || ''}\n`.trim() + '\n';
+                
+                // Simple categorization (you can improve this)
+                if (card.name.includes('Energy') || card.name.includes('energie')) {
+                    energyText += line;
+                } else if (isTrainerCard(card.name)) {
+                    trainerText += line;
+                } else {
+                    exportText += line;
+                }
+            });
+            
+            const fullExport = exportText + '\n' + trainerText + '\n' + energyText;
+            
+            navigator.clipboard.writeText(fullExport).then(() => {
+                alert('✅ Deckliste wurde in die Zwischenablage kopiert!\n\nFüge sie jetzt in Pokemon Live ein.');
+            }).catch(err => {
+                prompt('Kopiere diese Deckliste:', fullExport);
+            });
+        }
+        
+        function isTrainerCard(cardName) {
+            const trainerKeywords = ['Professor', 'Boss', 'Ball', 'Rod', 'Switch', 'Candy', 'Belt', 
+                                    'Poffin', 'Nest', 'Ultra', 'Search', 'Town', 'Iono', 'Arven',
+                                    'Colress', 'Stadium', 'Pokédex', 'Reversal', 'Cart', 'Potion'];
+            return trainerKeywords.some(keyword => cardName.includes(keyword));
+        }
+        
+        function escapeHtml(text) {
+            return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+        
+        function showError(message) {
+            const cardsBody = document.getElementById('cardsBody');
+            cardsBody.innerHTML = `<tr><td colspan="6"><div class="error">${message}</div></td></tr>`;
+        }
+    </script>
+</body>
+</html>

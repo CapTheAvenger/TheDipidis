@@ -1,0 +1,6 @@
+{
+    "max_tournaments": 150,
+    "max_decks_per_tournament": 1,
+    "delay_between_tournaments": 0,
+    "output_file": "tournament_cards_data.csv"
+}

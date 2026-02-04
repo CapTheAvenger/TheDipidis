@@ -1,0 +1,9 @@
+{
+    "max_decks": 10,
+    "max_lists_per_deck": 3,
+    "delay_between_lists": 1.5,
+    "delay_between_decks": 3,
+    "output_file": "limitless_deck_data.csv",
+    "format_filter": "pfl",
+    "_comment": "format_filter examples: 'SVI-PFL' (Phantasmal Flames), 'SVI-SCR' (Stellar Crown), 'SVI-TWM' (Twilight Masquerade), '' (all formats)"
+}

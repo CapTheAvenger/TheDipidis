@@ -1,0 +1,867 @@
+Set	No.	Name	Type	Rarity	USD	EUR	Result	Hilfe
+M3	1	Spinarak	GBasic	Common			Spinarak M3 1	Spinarak M3
+M3	2	Ariados	GStage 1	Common			Ariados M3 2	Ariados M3
+M3	3	Shaymin	GBasic	Uncommon			Shaymin M3 3	Shaymin M3
+M3	4	Snivy	GBasic	Common			Snivy M3 4	Snivy M3
+M3	5	Servine	GStage 1	Common			Servine M3 5	Servine M3
+M3	6	Serperior	GStage 2	Rare			Serperior M3 6	Serperior M3
+M3	7	Scatterbug	GBasic	Common			Scatterbug M3 7	Scatterbug M3
+M3	8	Spewpa	GStage 1	Common			Spewpa M3 8	Spewpa M3
+M3	9	Vivillon	GStage 2	Uncommon			Vivillon M3 9	Vivillon M3
+M3	10	Rowlet	GBasic	Common			Rowlet M3 10	Rowlet M3
+M3	11	Dartrix	GStage 1	Common			Dartrix M3 11	Dartrix M3
+M3	12	Decidueye ex	GStage 2	Double Rare			Decidueye ex M3 12	Decidueye ex M3
+M3	13	Fletchinder	RStage 1	Common			Fletchinder M3 13	Fletchinder M3
+M3	14	Talonflame	RStage 2	Uncommon			Talonflame M3 14	Talonflame M3
+M3	15	Salandit	RBasic	Common			Salandit M3 15	Salandit M3
+M3	16	Salazzle ex	RStage 1	Double Rare			Salazzle ex M3 16	Salazzle ex M3
+M3	17	Turtonator	RBasic	Uncommon			Turtonator M3 17	Turtonator M3
+M3	18	Seel	WBasic	Common			Seel M3 18	Seel M3
+M3	19	Dewgong	WStage 1	Rare			Dewgong M3 19	Dewgong M3
+M3	20	Staryu	WBasic	Common			Staryu M3 20	Staryu M3
+M3	21	Mega Starmie ex	WStage 1	Double Rare			Mega Starmie ex M3 21	Mega Starmie ex M3
+M3	22	Amaura	WStage 1	Common			Amaura M3 22	Amaura M3
+M3	23	Aurorus	WStage 2	Uncommon			Aurorus M3 23	Aurorus M3
+M3	24	Volcanion	WBasic	Uncommon			Volcanion M3 24	Volcanion M3
+M3	25	Shinx	LBasic	Common			Shinx M3 25	Shinx M3
+M3	26	Luxio	LStage 1	Uncommon			Luxio M3 26	Luxio M3
+M3	27	Luxray	LStage 2	Rare			Luxray M3 27	Luxray M3
+M3	28	Dedenne	LBasic	Common			Dedenne M3 28	Dedenne M3
+M3	29	Clefairy	PBasic	Common			Clefairy M3 29	Clefairy M3
+M3	30	Mega Clefable ex	PStage 1	Double Rare			Mega Clefable ex M3 30	Mega Clefable ex M3
+M3	31	Mawile	PBasic	Common			Mawile M3 31	Mawile M3
+M3	32	Espurr	PBasic	Common			Espurr M3 32	Espurr M3
+M3	33	Meowstic	PStage 1	Uncommon			Meowstic M3 33	Meowstic M3
+M3	34	Spritzee	PBasic	Common			Spritzee M3 34	Spritzee M3
+M3	35	Aromatisse	PStage 1	Uncommon			Aromatisse M3 35	Aromatisse M3
+M3	36	Nosepass	FBasic	Common			Nosepass M3 36	Nosepass M3
+M3	37	Probopass	FStage 1	Common			Probopass M3 37	Probopass M3
+M3	38	Hippopotas	FBasic	Common			Hippopotas M3 38	Hippopotas M3
+M3	39	Hippowdon	FStage 1	Uncommon			Hippowdon M3 39	Hippowdon M3
+M3	40	Landorus	FBasic	Rare			Landorus M3 40	Landorus M3
+M3	41	Binacle	FBasic	Common			Binacle M3 41	Binacle M3
+M3	42	Barbaracle	FStage 1	Uncommon			Barbaracle M3 42	Barbaracle M3
+M3	43	Tyrunt	FStage 1	Common			Tyrunt M3 43	Tyrunt M3
+M3	44	Tyrantrum	FStage 2	Uncommon			Tyrantrum M3 44	Tyrantrum M3
+M3	45	Hawlucha	FBasic	Common			Hawlucha M3 45	Hawlucha M3
+M3	46	Mega Zygarde ex	FBasic	Double Rare			Mega Zygarde ex M3 46	Mega Zygarde ex M3
+M3	47	Gastly	DBasic	Common			Gastly M3 47	Gastly M3
+M3	48	Haunter	DStage 1	Common			Haunter M3 48	Haunter M3
+M3	49	Gengar	DStage 2	Uncommon			Gengar M3 49	Gengar M3
+M3	50	Skorupi	DBasic	Common			Skorupi M3 50	Skorupi M3
+M3	51	Drapion	DStage 1	Uncommon			Drapion M3 51	Drapion M3
+M3	52	Yveltal ex	DBasic	Double Rare			Yveltal ex M3 52	Yveltal ex M3
+M3	53	Chien-Pao	DBasic	Rare			Chien-Pao M3 53	Chien-Pao M3
+M3	54	Mega Skarmory ex	MBasic	Double Rare			Mega Skarmory ex M3 54	Mega Skarmory ex M3
+M3	55	Honedge	MBasic	Common			Honedge M3 55	Honedge M3
+M3	56	Doublade	MStage 1	Common			Doublade M3 56	Doublade M3
+M3	57	Aegislash	MStage 2	Uncommon			Aegislash M3 57	Aegislash M3
+M3	58	Klefki	MBasic	Common			Klefki M3 58	Klefki M3
+M3	59	Rattata	CBasic	Common			Rattata M3 59	Rattata M3
+M3	60	Raticate	CStage 1	Uncommon			Raticate M3 60	Raticate M3
+M3	61	Meowth ex	CBasic	Double Rare			Meowth ex M3 61	Meowth ex M3
+M3	62	Snorlax	CBasic	Common			Snorlax M3 62	Snorlax M3
+M3	63	Bunnelby	CBasic	Common			Bunnelby M3 63	Bunnelby M3
+M3	64	Diggersby	CStage 1	Uncommon			Diggersby M3 64	Diggersby M3
+M3	65	Fletchling	CBasic	Common			Fletchling M3 65	Fletchling M3
+M3	66	Furfrou	CBasic	Common			Furfrou M3 66	Furfrou M3
+M3	67	Energy Duster	Item	Uncommon			Energy Duster M3 67	Energy Duster M3
+M3	68	Antique Jaw Fossil	Item	Common			Antique Jaw Fossil M3 68	Antique Jaw Fossil M3
+M3	69	Antique Sail Fossil	Item	Common			Antique Sail Fossil M3 69	Antique Sail Fossil M3
+M3	70	Poké Pad	Item	Uncommon			Poké Pad M3 70	Poké Pad M3
+M3	71	Lumiose Galette	Item	Uncommon			Lumiose Galette M3 71	Lumiose Galette M3
+M3	72	Core Memory	Tool	Uncommon			Core Memory M3 72	Core Memory M3
+M3	73	Tarragon	Supporter	Uncommon			Tarragon M3 73	Tarragon M3
+M3	74	Naveen	Supporter	Uncommon			Naveen M3 74	Naveen M3
+M3	75	Rosa's Encouragement	Supporter	Uncommon			Rosa's Encouragement M3 75	Rosa's Encouragement M3
+M3	76	Jacinthe	Supporter	Uncommon			Jacinthe M3 76	Jacinthe M3
+M3	77	Lumiose City	Stadium	Uncommon			Lumiose City M3 77	Lumiose City M3
+M3	78	Growth Grass Energy	Special Energy	Rare			Growth Grass Energy M3 78	Growth Grass Energy M3
+M3	79	Telepath Psychic Energy	Special Energy	Rare			Telepath Psychic Energy M3 79	Telepath Psychic Energy M3
+M3	80	Rock Fighting Energy	Special Energy	Rare			Rock Fighting Energy M3 80	Rock Fighting Energy M3
+MC	1	Erika's Oddish	GBasic				Erika's Oddish MC 1	Erika's Oddish MC
+MC	2	Erika's Gloom	GStage 1				Erika's Gloom MC 2	Erika's Gloom MC
+MC	3	Erika's Vileplume ex	GStage 2				Erika's Vileplume ex MC 3	Erika's Vileplume ex MC
+MC	4	Paras	GBasic				Paras MC 4	Paras MC
+MC	5	Parasect	GStage 1				Parasect MC 5	Parasect MC
+MC	6	Erika's Bellsprout	GBasic				Erika's Bellsprout MC 6	Erika's Bellsprout MC
+MC	7	Erika's Weepinbell	GStage 1				Erika's Weepinbell MC 7	Erika's Weepinbell MC
+MC	8	Erika's Victreebel	GStage 2				Erika's Victreebel MC 8	Erika's Victreebel MC
+MC	9	Exeggcute	GBasic				Exeggcute MC 9	Exeggcute MC
+MC	10	Exeggcute	GBasic				Exeggcute MC 10	Exeggcute MC
+MC	11	Exeggutor	GStage 1				Exeggutor MC 11	Exeggutor MC
+MC	12	Tangela	GBasic				Tangela MC 12	Tangela MC
+MC	13	Tangrowth	GStage 1				Tangrowth MC 13	Tangrowth MC
+MC	14	Erika's Tangela	GBasic				Erika's Tangela MC 14	Erika's Tangela MC
+MC	15	Scyther	GBasic				Scyther MC 15	Scyther MC
+MC	16	Chikorita	GBasic				Chikorita MC 16	Chikorita MC
+MC	17	Bayleef	GStage 1				Bayleef MC 17	Bayleef MC
+MC	18	Mega Meganium ex	GStage 2				Mega Meganium ex MC 18	Mega Meganium ex MC
+MC	19	Ledyba	GBasic				Ledyba MC 19	Ledyba MC
+MC	20	Ledian	GStage 1				Ledian MC 20	Ledian MC
+MC	21	Yanma	GBasic				Yanma MC 21	Yanma MC
+MC	22	Yanmega ex	GStage 1				Yanmega ex MC 22	Yanmega ex MC
+MC	23	Shuckle	GBasic				Shuckle MC 23	Shuckle MC
+MC	24	Heracross	GBasic				Heracross MC 24	Heracross MC
+MC	25	Celebi	GBasic				Celebi MC 25	Celebi MC
+MC	26	Shroomish	GBasic				Shroomish MC 26	Shroomish MC
+MC	27	Shroomish	GBasic				Shroomish MC 27	Shroomish MC
+MC	28	Breloom	GStage 1				Breloom MC 28	Breloom MC
+MC	29	Breloom	GStage 1				Breloom MC 29	Breloom MC
+MC	30	Roselia	GBasic				Roselia MC 30	Roselia MC
+MC	31	Roserade	GStage 1				Roserade MC 31	Roserade MC
+MC	32	Cynthia's Roselia	GBasic				Cynthia's Roselia MC 32	Cynthia's Roselia MC
+MC	33	Cynthia's Roserade	GStage 1				Cynthia's Roserade MC 33	Cynthia's Roserade MC
+MC	34	Turtwig	GBasic				Turtwig MC 34	Turtwig MC
+MC	35	Grotle	GStage 1				Grotle MC 35	Grotle MC
+MC	36	Torterra ex	GStage 2				Torterra ex MC 36	Torterra ex MC
+MC	37	Leafeon	GStage 1				Leafeon MC 37	Leafeon MC
+MC	38	Leafeon ex	GStage 1				Leafeon ex MC 38	Leafeon ex MC
+MC	39	Shaymin	GBasic				Shaymin MC 39	Shaymin MC
+MC	40	Snivy	GBasic				Snivy MC 40	Snivy MC
+MC	41	Servine	GStage 1				Servine MC 41	Servine MC
+MC	42	Serperior ex	GStage 2				Serperior ex MC 42	Serperior ex MC
+MC	43	Cottonee	GBasic				Cottonee MC 43	Cottonee MC
+MC	44	Whimsicott ex	GStage 1				Whimsicott ex MC 44	Whimsicott ex MC
+MC	45	Dwebble	GBasic				Dwebble MC 45	Dwebble MC
+MC	46	Crustle	GStage 1				Crustle MC 46	Crustle MC
+MC	47	Karrablast	GBasic				Karrablast MC 47	Karrablast MC
+MC	48	Foongus	GBasic				Foongus MC 48	Foongus MC
+MC	49	Amoonguss	GStage 1				Amoonguss MC 49	Amoonguss MC
+MC	50	Galvantula	GStage 1				Galvantula MC 50	Galvantula MC
+MC	51	Durant	GBasic				Durant MC 51	Durant MC
+MC	52	Durant ex	GBasic				Durant ex MC 52	Durant ex MC
+MC	53	Virizion	GBasic				Virizion MC 53	Virizion MC
+MC	54	Virizion	GBasic				Virizion MC 54	Virizion MC
+MC	55	Phantump	GBasic				Phantump MC 55	Phantump MC
+MC	56	Trevenant	GStage 1				Trevenant MC 56	Trevenant MC
+MC	57	Grubbin	GBasic				Grubbin MC 57	Grubbin MC
+MC	58	Morelull	GBasic				Morelull MC 58	Morelull MC
+MC	59	Shiinotic	GStage 1				Shiinotic MC 59	Shiinotic MC
+MC	60	Dhelmise	GBasic				Dhelmise MC 60	Dhelmise MC
+MC	61	Tapu Bulu	GBasic				Tapu Bulu MC 61	Tapu Bulu MC
+MC	62	Applin	GBasic				Applin MC 62	Applin MC
+MC	63	Dipplin	GStage 1				Dipplin MC 63	Dipplin MC
+MC	64	Hydrapple ex	GStage 2				Hydrapple ex MC 64	Hydrapple ex MC
+MC	65	Sprigatito	GBasic				Sprigatito MC 65	Sprigatito MC
+MC	66	Floragato	GStage 1				Floragato MC 66	Floragato MC
+MC	67	Meowscarada	GStage 2				Meowscarada MC 67	Meowscarada MC
+MC	68	Sprigatito ex	GBasic				Sprigatito ex MC 68	Sprigatito ex MC
+MC	69	Smoliv	GBasic				Smoliv MC 69	Smoliv MC
+MC	70	Dolliv	GStage 1				Dolliv MC 70	Dolliv MC
+MC	71	Arboliva ex	GStage 2				Arboliva ex MC 71	Arboliva ex MC
+MC	72	Bramblin	GBasic				Bramblin MC 72	Bramblin MC
+MC	73	Brambleghast	GStage 1				Brambleghast MC 73	Brambleghast MC
+MC	74	Toedscool	GBasic				Toedscool MC 74	Toedscool MC
+MC	75	Toedscruel	GStage 1				Toedscruel MC 75	Toedscruel MC
+MC	76	Capsakid	GBasic				Capsakid MC 76	Capsakid MC
+MC	77	Iron Leaves ex	GBasic				Iron Leaves ex MC 77	Iron Leaves ex MC
+MC	78	Poltchageist	GBasic				Poltchageist MC 78	Poltchageist MC
+MC	79	Sinistcha ex	GStage 1				Sinistcha ex MC 79	Sinistcha ex MC
+MC	80	Teal Mask Ogerpon	GBasic				Teal Mask Ogerpon MC 80	Teal Mask Ogerpon MC
+MC	81	Teal Mask Ogerpon	GBasic				Teal Mask Ogerpon MC 81	Teal Mask Ogerpon MC
+MC	82	Teal Mask Ogerpon ex	GBasic				Teal Mask Ogerpon ex MC 82	Teal Mask Ogerpon ex MC
+MC	83	Charmander	RBasic				Charmander MC 83	Charmander MC
+MC	84	Charmeleon	RStage 1				Charmeleon MC 84	Charmeleon MC
+MC	85	Mega Charizard Y ex	RStage 2				Mega Charizard Y ex MC 85	Mega Charizard Y ex MC
+MC	86	Ponyta	RBasic				Ponyta MC 86	Ponyta MC
+MC	87	Ponyta	RBasic				Ponyta MC 87	Ponyta MC
+MC	88	Rapidash	RStage 1				Rapidash MC 88	Rapidash MC
+MC	89	Rapidash	RStage 1				Rapidash MC 89	Rapidash MC
+MC	90	Rapidash	RStage 1				Rapidash MC 90	Rapidash MC
+MC	91	Magmar	RBasic				Magmar MC 91	Magmar MC
+MC	92	Magmortar	RStage 1				Magmortar MC 92	Magmortar MC
+MC	93	Paldean Tauros	RBasic				Paldean Tauros MC 93	Paldean Tauros MC
+MC	94	Flareon ex	RStage 1				Flareon ex MC 94	Flareon ex MC
+MC	95	Slugma	RBasic				Slugma MC 95	Slugma MC
+MC	96	Magcargo ex	RStage 1				Magcargo ex MC 96	Magcargo ex MC
+MC	97	Houndour	RBasic				Houndour MC 97	Houndour MC
+MC	98	Houndoom	RStage 1				Houndoom MC 98	Houndoom MC
+MC	99	Team Rocket's Houndour	RBasic				Team Rocket's Houndour MC 99	Team Rocket's Houndour MC
+MC	100	Team Rocket's Houndoom	RStage 1				Team Rocket's Houndoom MC 100	Team Rocket's Houndoom MC
+MC	101	Torkoal	RBasic				Torkoal MC 101	Torkoal MC
+MC	102	Castform Sunny Form	RBasic				Castform Sunny Form MC 102	Castform Sunny Form MC
+MC	103	Chimchar	RBasic				Chimchar MC 103	Chimchar MC
+MC	104	Monferno	RStage 1				Monferno MC 104	Monferno MC
+MC	105	Infernape	RStage 2				Infernape MC 105	Infernape MC
+MC	106	Victini	RBasic				Victini MC 106	Victini MC
+MC	107	Victini	RBasic				Victini MC 107	Victini MC
+MC	108	Tepig	RBasic				Tepig MC 108	Tepig MC
+MC	109	Tepig	RBasic				Tepig MC 109	Tepig MC
+MC	110	Pignite	RStage 1				Pignite MC 110	Pignite MC
+MC	111	Pignite	RStage 1				Pignite MC 111	Pignite MC
+MC	112	Emboar	RStage 2				Emboar MC 112	Emboar MC
+MC	113	Mega Emboar ex	RStage 2				Mega Emboar ex MC 113	Mega Emboar ex MC
+MC	114	Pansear	RBasic				Pansear MC 114	Pansear MC
+MC	115	Simisear	RStage 1				Simisear MC 115	Simisear MC
+MC	116	Darumaka	RBasic				Darumaka MC 116	Darumaka MC
+MC	117	Darmanitan	RStage 1				Darmanitan MC 117	Darmanitan MC
+MC	118	N's Darumaka	RBasic				N's Darumaka MC 118	N's Darumaka MC
+MC	119	N's Darmanitan	RStage 1				N's Darmanitan MC 119	N's Darmanitan MC
+MC	120	Heatmor	RBasic				Heatmor MC 120	Heatmor MC
+MC	121	Larvesta	RBasic				Larvesta MC 121	Larvesta MC
+MC	122	Volcarona	RStage 1				Volcarona MC 122	Volcarona MC
+MC	123	Volcarona	RStage 1				Volcarona MC 123	Volcarona MC
+MC	124	Volcarona	RStage 1				Volcarona MC 124	Volcarona MC
+MC	125	Reshiram	RBasic				Reshiram MC 125	Reshiram MC
+MC	126	Reshiram ex	RBasic				Reshiram ex MC 126	Reshiram ex MC
+MC	127	Litleo	RBasic				Litleo MC 127	Litleo MC
+MC	128	Pyroar	RStage 1				Pyroar MC 128	Pyroar MC
+MC	129	Volcanion ex	RBasic				Volcanion ex MC 129	Volcanion ex MC
+MC	130	Litten	RBasic				Litten MC 130	Litten MC
+MC	131	Torracat	RStage 1				Torracat MC 131	Torracat MC
+MC	132	Incineroar ex	RStage 2				Incineroar ex MC 132	Incineroar ex MC
+MC	133	Oricorio	RBasic				Oricorio MC 133	Oricorio MC
+MC	134	Salandit	RBasic				Salandit MC 134	Salandit MC
+MC	135	Salazzle	RStage 1				Salazzle MC 135	Salazzle MC
+MC	136	Turtonator	RBasic				Turtonator MC 136	Turtonator MC
+MC	137	Scorbunny	RBasic				Scorbunny MC 137	Scorbunny MC
+MC	138	Raboot	RStage 1				Raboot MC 138	Raboot MC
+MC	139	Cinderace ex	RStage 2				Cinderace ex MC 139	Cinderace ex MC
+MC	140	Sizzlipede	RBasic				Sizzlipede MC 140	Sizzlipede MC
+MC	141	Centiskorch	RStage 1				Centiskorch MC 141	Centiskorch MC
+MC	142	Fuecoco	RBasic				Fuecoco MC 142	Fuecoco MC
+MC	143	Crocalor	RStage 1				Crocalor MC 143	Crocalor MC
+MC	144	Skeledirge	RStage 2				Skeledirge MC 144	Skeledirge MC
+MC	145	Charcadet	RBasic				Charcadet MC 145	Charcadet MC
+MC	146	Armarouge ex	RStage 1				Armarouge ex MC 146	Armarouge ex MC
+MC	147	Scovillain ex	RStage 1				Scovillain ex MC 147	Scovillain ex MC
+MC	148	Hearthflame Mask Ogerpon	RBasic				Hearthflame Mask Ogerpon MC 148	Hearthflame Mask Ogerpon MC
+MC	149	Hearthflame Mask Ogerpon ex	RBasic				Hearthflame Mask Ogerpon ex MC 149	Hearthflame Mask Ogerpon ex MC
+MC	150	Gouging Fire	RBasic				Gouging Fire MC 150	Gouging Fire MC
+MC	151	Gouging Fire ex	RBasic				Gouging Fire ex MC 151	Gouging Fire ex MC
+MC	152	Horsea	WBasic				Horsea MC 152	Horsea MC
+MC	153	Seadra	WStage 1				Seadra MC 153	Seadra MC
+MC	154	Kingdra ex	WStage 2				Kingdra ex MC 154	Kingdra ex MC
+MC	155	Misty's Staryu	WBasic				Misty's Staryu MC 155	Misty's Staryu MC
+MC	156	Misty's Starmie	WStage 1				Misty's Starmie MC 156	Misty's Starmie MC
+MC	157	Misty's Magikarp	WBasic				Misty's Magikarp MC 157	Misty's Magikarp MC
+MC	158	Misty's Gyarados	WStage 1				Misty's Gyarados MC 158	Misty's Gyarados MC
+MC	159	Lapras	WBasic				Lapras MC 159	Lapras MC
+MC	160	Misty's Lapras	WBasic				Misty's Lapras MC 160	Misty's Lapras MC
+MC	161	Vaporeon ex	WStage 1				Vaporeon ex MC 161	Vaporeon ex MC
+MC	162	Glaceon ex	WStage 1				Glaceon ex MC 162	Glaceon ex MC
+MC	163	Articuno	WBasic				Articuno MC 163	Articuno MC
+MC	164	Totodile	WBasic				Totodile MC 164	Totodile MC
+MC	165	Totodile	WBasic				Totodile MC 165	Totodile MC
+MC	166	Croconaw	WStage 1				Croconaw MC 166	Croconaw MC
+MC	167	Croconaw	WStage 1				Croconaw MC 167	Croconaw MC
+MC	168	Feraligatr	WStage 2				Feraligatr MC 168	Feraligatr MC
+MC	169	Mega Feraligatr ex	WStage 2				Mega Feraligatr ex MC 169	Mega Feraligatr ex MC
+MC	170	Sneasel	WBasic				Sneasel MC 170	Sneasel MC
+MC	171	Weavile	WStage 1				Weavile MC 171	Weavile MC
+MC	172	Mantine	WBasic				Mantine MC 172	Mantine MC
+MC	173	Mantine	WBasic				Mantine MC 173	Mantine MC
+MC	174	Suicune	WBasic				Suicune MC 174	Suicune MC
+MC	175	Lotad	WBasic				Lotad MC 175	Lotad MC
+MC	176	Lombre	WStage 1				Lombre MC 176	Lombre MC
+MC	177	Ludicolo	WStage 2				Ludicolo MC 177	Ludicolo MC
+MC	178	Carvanha	WBasic				Carvanha MC 178	Carvanha MC
+MC	179	Sharpedo	WStage 1				Sharpedo MC 179	Sharpedo MC
+MC	180	Wailmer	WBasic				Wailmer MC 180	Wailmer MC
+MC	181	Wailord	WStage 1				Wailord MC 181	Wailord MC
+MC	182	Corphish	WBasic				Corphish MC 182	Corphish MC
+MC	183	Crawdaunt	WStage 1				Crawdaunt MC 183	Crawdaunt MC
+MC	184	Feebas	WBasic				Feebas MC 184	Feebas MC
+MC	185	Milotic ex	WStage 1				Milotic ex MC 185	Milotic ex MC
+MC	186	Snorunt	WBasic				Snorunt MC 186	Snorunt MC
+MC	187	Glalie	WStage 1				Glalie MC 187	Glalie MC
+MC	188	Spheal	WBasic				Spheal MC 188	Spheal MC
+MC	189	Sealeo	WStage 1				Sealeo MC 189	Sealeo MC
+MC	190	Walrein	WStage 2				Walrein MC 190	Walrein MC
+MC	191	Regice	WBasic				Regice MC 191	Regice MC
+MC	192	Regice ex	WBasic				Regice ex MC 192	Regice ex MC
+MC	193	Buizel	WBasic				Buizel MC 193	Buizel MC
+MC	194	Floatzel	WStage 1				Floatzel MC 194	Floatzel MC
+MC	195	Finneon	WBasic				Finneon MC 195	Finneon MC
+MC	196	Lumineon	WStage 1				Lumineon MC 196	Lumineon MC
+MC	197	Ducklett	WBasic				Ducklett MC 197	Ducklett MC
+MC	198	Swanna	WStage 1				Swanna MC 198	Swanna MC
+MC	199	Vanillite	WBasic				Vanillite MC 199	Vanillite MC
+MC	200	Vanillish	WStage 1				Vanillish MC 200	Vanillish MC
+MC	201	Vanilluxe	WStage 2				Vanilluxe MC 201	Vanilluxe MC
+MC	202	Cryogonal	WBasic				Cryogonal MC 202	Cryogonal MC
+MC	203	Kyurem ex	WBasic				Kyurem ex MC 203	Kyurem ex MC
+MC	204	Black Kyurem ex	WBasic				Black Kyurem ex MC 204	Black Kyurem ex MC
+MC	205	Keldeo ex	WBasic				Keldeo ex MC 205	Keldeo ex MC
+MC	206	Froakie	WBasic				Froakie MC 206	Froakie MC
+MC	207	Frogadier	WStage 1				Frogadier MC 207	Frogadier MC
+MC	208	Greninja ex	WStage 2				Greninja ex MC 208	Greninja ex MC
+MC	209	Crabominable	WStage 1				Crabominable MC 209	Crabominable MC
+MC	210	Cramorant	WBasic				Cramorant MC 210	Cramorant MC
+MC	211	Quaxly	WBasic				Quaxly MC 211	Quaxly MC
+MC	212	Quaxwell	WStage 1				Quaxwell MC 212	Quaxwell MC
+MC	213	Quaquaval	WStage 2				Quaquaval MC 213	Quaquaval MC
+MC	214	Finizen	WBasic				Finizen MC 214	Finizen MC
+MC	215	Palafin	WStage 1				Palafin MC 215	Palafin MC
+MC	216	Palafin ex	WStage 1				Palafin ex MC 216	Palafin ex MC
+MC	217	Cetoddle	WBasic				Cetoddle MC 217	Cetoddle MC
+MC	218	Cetitan	WStage 1				Cetitan MC 218	Cetitan MC
+MC	219	Veluza	WBasic				Veluza MC 219	Veluza MC
+MC	220	Dondozo ex	WBasic				Dondozo ex MC 220	Dondozo ex MC
+MC	221	Walking Wake	WBasic				Walking Wake MC 221	Walking Wake MC
+MC	222	Walking Wake ex	WBasic				Walking Wake ex MC 222	Walking Wake ex MC
+MC	223	Wellspring Mask Ogerpon	WBasic				Wellspring Mask Ogerpon MC 223	Wellspring Mask Ogerpon MC
+MC	224	Wellspring Mask Ogerpon ex	WBasic				Wellspring Mask Ogerpon ex MC 224	Wellspring Mask Ogerpon ex MC
+MC	225	Pikachu	LBasic				Pikachu MC 225	Pikachu MC
+MC	226	Raichu	LStage 1				Raichu MC 226	Raichu MC
+MC	227	Pikachu ex	LBasic				Pikachu ex MC 227	Pikachu ex MC
+MC	228	Alolan Geodude	LBasic				Alolan Geodude MC 228	Alolan Geodude MC
+MC	229	Alolan Graveler	LStage 1				Alolan Graveler MC 229	Alolan Graveler MC
+MC	230	Alolan Golem	LStage 2				Alolan Golem MC 230	Alolan Golem MC
+MC	231	Magnemite	LBasic				Magnemite MC 231	Magnemite MC
+MC	232	Magneton	LStage 1				Magneton MC 232	Magneton MC
+MC	233	Voltorb ex	LBasic				Voltorb ex MC 233	Voltorb ex MC
+MC	234	Iono's Voltorb	LBasic				Iono's Voltorb MC 234	Iono's Voltorb MC
+MC	235	Iono's Electrode	LStage 1				Iono's Electrode MC 235	Iono's Electrode MC
+MC	236	Electabuzz	LBasic				Electabuzz MC 236	Electabuzz MC
+MC	237	Electivire ex	LStage 1				Electivire ex MC 237	Electivire ex MC
+MC	238	Jolteon ex	LStage 1				Jolteon ex MC 238	Jolteon ex MC
+MC	239	Zapdos	LBasic				Zapdos MC 239	Zapdos MC
+MC	240	Zapdos	LBasic				Zapdos MC 240	Zapdos MC
+MC	241	Ethan's Pichu	LBasic				Ethan's Pichu MC 241	Ethan's Pichu MC
+MC	242	Electrike	LBasic				Electrike MC 242	Electrike MC
+MC	243	Manectric	LStage 1				Manectric MC 243	Manectric MC
+MC	244	Shinx	LBasic				Shinx MC 244	Shinx MC
+MC	245	Luxio	LStage 1				Luxio MC 245	Luxio MC
+MC	246	Luxray ex	LStage 2				Luxray ex MC 246	Luxray ex MC
+MC	247	Pachirisu	LBasic				Pachirisu MC 247	Pachirisu MC
+MC	248	Rotom	LBasic				Rotom MC 248	Rotom MC
+MC	249	Blitzle	LBasic				Blitzle MC 249	Blitzle MC
+MC	250	Blitzle	LBasic				Blitzle MC 250	Blitzle MC
+MC	251	Zebstrika	LStage 1				Zebstrika MC 251	Zebstrika MC
+MC	252	Zebstrika	LStage 1				Zebstrika MC 252	Zebstrika MC
+MC	253	Emolga	LBasic				Emolga MC 253	Emolga MC
+MC	254	Joltik	LBasic				Joltik MC 254	Joltik MC
+MC	255	Galvantula ex	LStage 1				Galvantula ex MC 255	Galvantula ex MC
+MC	256	Tynamo	LBasic				Tynamo MC 256	Tynamo MC
+MC	257	Eelektrik	LStage 1				Eelektrik MC 257	Eelektrik MC
+MC	258	Thundurus	LBasic				Thundurus MC 258	Thundurus MC
+MC	259	Zekrom ex	LBasic				Zekrom ex MC 259	Zekrom ex MC
+MC	260	Helioptile	LBasic				Helioptile MC 260	Helioptile MC
+MC	261	Heliolisk	LStage 1				Heliolisk MC 261	Heliolisk MC
+MC	262	Charjabug	LStage 1				Charjabug MC 262	Charjabug MC
+MC	263	Vikavolt	LStage 2				Vikavolt MC 263	Vikavolt MC
+MC	264	Togedemaru	LBasic				Togedemaru MC 264	Togedemaru MC
+MC	265	Tapu Koko	LBasic				Tapu Koko MC 265	Tapu Koko MC
+MC	266	Zeraora	LBasic				Zeraora MC 266	Zeraora MC
+MC	267	Zeraora	LBasic				Zeraora MC 267	Zeraora MC
+MC	268	Yamper	LBasic				Yamper MC 268	Yamper MC
+MC	269	Boltund	LStage 1				Boltund MC 269	Boltund MC
+MC	270	Morpeko	LBasic				Morpeko MC 270	Morpeko MC
+MC	271	Tadbulb	LBasic				Tadbulb MC 271	Tadbulb MC
+MC	272	Bellibolt	LStage 1				Bellibolt MC 272	Bellibolt MC
+MC	273	Iono's Tadbulb	LBasic				Iono's Tadbulb MC 273	Iono's Tadbulb MC
+MC	274	Iono's Bellibolt ex	LStage 1				Iono's Bellibolt ex MC 274	Iono's Bellibolt ex MC
+MC	275	Wattrel	LBasic				Wattrel MC 275	Wattrel MC
+MC	276	Kilowattrel	LStage 1				Kilowattrel MC 276	Kilowattrel MC
+MC	277	Kilowattrel	LStage 1				Kilowattrel MC 277	Kilowattrel MC
+MC	278	Iono's Wattrel	LBasic				Iono's Wattrel MC 278	Iono's Wattrel MC
+MC	279	Iono's Kilowattrel	LStage 1				Iono's Kilowattrel MC 279	Iono's Kilowattrel MC
+MC	280	Iron Hands	LBasic				Iron Hands MC 280	Iron Hands MC
+MC	281	Iron Thorns	LBasic				Iron Thorns MC 281	Iron Thorns MC
+MC	282	Iron Thorns ex	LBasic				Iron Thorns ex MC 282	Iron Thorns ex MC
+MC	283	Miraidon	LBasic				Miraidon MC 283	Miraidon MC
+MC	284	Miraidon ex	LBasic				Miraidon ex MC 284	Miraidon ex MC
+MC	285	Clefairy	PBasic				Clefairy MC 285	Clefairy MC
+MC	286	Clefable	PStage 1				Clefable MC 286	Clefable MC
+MC	287	Lillie's Clefairy ex	PBasic				Lillie's Clefairy ex MC 287	Lillie's Clefairy ex MC
+MC	288	Team Rocket's Drowzee	PBasic				Team Rocket's Drowzee MC 288	Team Rocket's Drowzee MC
+MC	289	Team Rocket's Hypno	PStage 1				Team Rocket's Hypno MC 289	Team Rocket's Hypno MC
+MC	290	Team Rocket's Mewtwo ex	PBasic				Team Rocket's Mewtwo ex MC 290	Team Rocket's Mewtwo ex MC
+MC	291	Togepi	PBasic				Togepi MC 291	Togepi MC
+MC	292	Togetic	PStage 1				Togetic MC 292	Togetic MC
+MC	293	Togekiss	PStage 2				Togekiss MC 293	Togekiss MC
+MC	294	Marill	PBasic				Marill MC 294	Marill MC
+MC	295	Marill	PBasic				Marill MC 295	Marill MC
+MC	296	Azumarill	PStage 1				Azumarill MC 296	Azumarill MC
+MC	297	Azumarill ex	PStage 1				Azumarill ex MC 297	Azumarill ex MC
+MC	298	Espeon ex	PStage 1				Espeon ex MC 298	Espeon ex MC
+MC	299	Sylveon ex	PStage 1				Sylveon ex MC 299	Sylveon ex MC
+MC	300	Girafarig	PBasic				Girafarig MC 300	Girafarig MC
+MC	301	Girafarig	PBasic				Girafarig MC 301	Girafarig MC
+MC	302	Farigiraf	PStage 1				Farigiraf MC 302	Farigiraf MC
+MC	303	Snubbull	PBasic				Snubbull MC 303	Snubbull MC
+MC	304	Granbull	PStage 1				Granbull MC 304	Granbull MC
+MC	305	Spoink	PBasic				Spoink MC 305	Spoink MC
+MC	306	Grumpig	PStage 1				Grumpig MC 306	Grumpig MC
+MC	307	Shuppet	PBasic				Shuppet MC 307	Shuppet MC
+MC	308	Duskull	PBasic				Duskull MC 308	Duskull MC
+MC	309	Dusclops	PStage 1				Dusclops MC 309	Dusclops MC
+MC	310	Dusknoir	PStage 2				Dusknoir MC 310	Dusknoir MC
+MC	311	Latias	PBasic				Latias MC 311	Latias MC
+MC	312	Latias ex	PBasic				Latias ex MC 312	Latias ex MC
+MC	313	Latios	PBasic				Latios MC 313	Latios MC
+MC	314	Uxie	PBasic				Uxie MC 314	Uxie MC
+MC	315	Mesprit	PBasic				Mesprit MC 315	Mesprit MC
+MC	316	Azelf	PBasic				Azelf MC 316	Azelf MC
+MC	317	Cresselia	PBasic				Cresselia MC 317	Cresselia MC
+MC	318	Sigilyph	PBasic				Sigilyph MC 318	Sigilyph MC
+MC	319	Yamask	PBasic				Yamask MC 319	Yamask MC
+MC	320	Yamask	PBasic				Yamask MC 320	Yamask MC
+MC	321	Cofagrigus	PStage 1				Cofagrigus MC 321	Cofagrigus MC
+MC	322	Cofagrigus	PStage 1				Cofagrigus MC 322	Cofagrigus MC
+MC	323	Gothita	PBasic				Gothita MC 323	Gothita MC
+MC	324	Gothorita	PStage 1				Gothorita MC 324	Gothorita MC
+MC	325	Gothitelle	PStage 2				Gothitelle MC 325	Gothitelle MC
+MC	326	Elgyem	PBasic				Elgyem MC 326	Elgyem MC
+MC	327	Beheeyem	PStage 1				Beheeyem MC 327	Beheeyem MC
+MC	328	Flabébé	PBasic				Flabébé MC 328	Flabébé MC
+MC	329	Floette	PStage 1				Floette MC 329	Floette MC
+MC	330	Florges	PStage 2				Florges MC 330	Florges MC
+MC	331	Espurr	PBasic				Espurr MC 331	Espurr MC
+MC	332	Meowstic	PStage 1				Meowstic MC 332	Meowstic MC
+MC	333	Swirlix	PBasic				Swirlix MC 333	Swirlix MC
+MC	334	Slurpuff	PStage 1				Slurpuff MC 334	Slurpuff MC
+MC	335	Xerneas	PBasic				Xerneas MC 335	Xerneas MC
+MC	336	Oricorio	PBasic				Oricorio MC 336	Oricorio MC
+MC	337	Oricorio	PBasic				Oricorio MC 337	Oricorio MC
+MC	338	Lillie's Cutiefly	PBasic				Lillie's Cutiefly MC 338	Lillie's Cutiefly MC
+MC	339	Lillie's Ribombee	PStage 1				Lillie's Ribombee MC 339	Lillie's Ribombee MC
+MC	340	Lillie's Comfey	PBasic				Lillie's Comfey MC 340	Lillie's Comfey MC
+MC	341	Team Rocket's Mimikyu	PBasic				Team Rocket's Mimikyu MC 341	Team Rocket's Mimikyu MC
+MC	342	Tapu Lele	PBasic				Tapu Lele MC 342	Tapu Lele MC
+MC	343	Impidimp	PBasic				Impidimp MC 343	Impidimp MC
+MC	344	Morgrem	PStage 1				Morgrem MC 344	Morgrem MC
+MC	345	Grimmsnarl	PStage 2				Grimmsnarl MC 345	Grimmsnarl MC
+MC	346	Enamorus	PBasic				Enamorus MC 346	Enamorus MC
+MC	347	Fidough	PBasic				Fidough MC 347	Fidough MC
+MC	348	Dachsbun ex	PStage 1				Dachsbun ex MC 348	Dachsbun ex MC
+MC	349	Greavard	PBasic				Greavard MC 349	Greavard MC
+MC	350	Houndstone	PStage 1				Houndstone MC 350	Houndstone MC
+MC	351	Houndstone ex	PStage 1				Houndstone ex MC 351	Houndstone ex MC
+MC	352	Scream Tail	PBasic				Scream Tail MC 352	Scream Tail MC
+MC	353	Scream Tail ex	PBasic				Scream Tail ex MC 353	Scream Tail ex MC
+MC	354	Flutter Mane	PBasic				Flutter Mane MC 354	Flutter Mane MC
+MC	355	Flutter Mane	PBasic				Flutter Mane MC 355	Flutter Mane MC
+MC	356	Gimmighoul	PBasic				Gimmighoul MC 356	Gimmighoul MC
+MC	357	Iron Valiant	PBasic				Iron Valiant MC 357	Iron Valiant MC
+MC	358	Munkidori	PBasic				Munkidori MC 358	Munkidori MC
+MC	359	Fezandipiti	PBasic				Fezandipiti MC 359	Fezandipiti MC
+MC	360	Iron Boulder	PBasic				Iron Boulder MC 360	Iron Boulder MC
+MC	361	Iron Crown ex	PBasic				Iron Crown ex MC 361	Iron Crown ex MC
+MC	362	Swinub	FBasic				Swinub MC 362	Swinub MC
+MC	363	Piloswine	FStage 1				Piloswine MC 363	Piloswine MC
+MC	364	Mamoswine ex	FStage 2				Mamoswine ex MC 364	Mamoswine ex MC
+MC	365	Phanpy	FBasic				Phanpy MC 365	Phanpy MC
+MC	366	Donphan	FStage 1				Donphan MC 366	Donphan MC
+MC	367	Hitmontop	FBasic				Hitmontop MC 367	Hitmontop MC
+MC	368	Meditite	FBasic				Meditite MC 368	Meditite MC
+MC	369	Medicham	FStage 1				Medicham MC 369	Medicham MC
+MC	370	Medicham ex	FStage 1				Medicham ex MC 370	Medicham ex MC
+MC	371	Lunatone	FBasic				Lunatone MC 371	Lunatone MC
+MC	372	Solrock	FBasic				Solrock MC 372	Solrock MC
+MC	373	Regirock	FBasic				Regirock MC 373	Regirock MC
+MC	374	Regirock ex	FBasic				Regirock ex MC 374	Regirock ex MC
+MC	375	Groudon	FBasic				Groudon MC 375	Groudon MC
+MC	376	Cynthia's Gible	FBasic				Cynthia's Gible MC 376	Cynthia's Gible MC
+MC	377	Cynthia's Gabite	FStage 1				Cynthia's Gabite MC 377	Cynthia's Gabite MC
+MC	378	Cynthia's Garchomp ex	FStage 2				Cynthia's Garchomp ex MC 378	Cynthia's Garchomp ex MC
+MC	379	Riolu	FBasic				Riolu MC 379	Riolu MC
+MC	380	Lucario ex	FStage 1				Lucario ex MC 380	Lucario ex MC
+MC	381	Croagunk	FBasic				Croagunk MC 381	Croagunk MC
+MC	382	Croagunk	FBasic				Croagunk MC 382	Croagunk MC
+MC	383	Toxicroak	FStage 1				Toxicroak MC 383	Toxicroak MC
+MC	384	Toxicroak	FStage 1				Toxicroak MC 384	Toxicroak MC
+MC	385	Drilbur	FBasic				Drilbur MC 385	Drilbur MC
+MC	386	Excadrill	FStage 1				Excadrill MC 386	Excadrill MC
+MC	387	Excadrill ex	FStage 1				Excadrill ex MC 387	Excadrill ex MC
+MC	388	Timburr	FBasic				Timburr MC 388	Timburr MC
+MC	389	Gurdurr	FStage 1				Gurdurr MC 389	Gurdurr MC
+MC	390	Conkeldurr	FStage 2				Conkeldurr MC 390	Conkeldurr MC
+MC	391	Sawk	FBasic				Sawk MC 391	Sawk MC
+MC	392	Archen	FStage 1				Archen MC 392	Archen MC
+MC	393	Archeops	FStage 2				Archeops MC 393	Archeops MC
+MC	394	Stunfisk ex	FBasic				Stunfisk ex MC 394	Stunfisk ex MC
+MC	395	Mienfoo	FBasic				Mienfoo MC 395	Mienfoo MC
+MC	396	Mienshao	FStage 1				Mienshao MC 396	Mienshao MC
+MC	397	Landorus	FBasic				Landorus MC 397	Landorus MC
+MC	398	Landorus	FBasic				Landorus MC 398	Landorus MC
+MC	399	Pancham	FBasic				Pancham MC 399	Pancham MC
+MC	400	Carbink	FBasic				Carbink MC 400	Carbink MC
+MC	401	Crabrawler	FBasic				Crabrawler MC 401	Crabrawler MC
+MC	402	Rockruff	FBasic				Rockruff MC 402	Rockruff MC
+MC	403	Lycanroc	FStage 1				Lycanroc MC 403	Lycanroc MC
+MC	404	Mudbray	FBasic				Mudbray MC 404	Mudbray MC
+MC	405	Mudsdale	FStage 1				Mudsdale MC 405	Mudsdale MC
+MC	406	Mudsdale	FStage 1				Mudsdale MC 406	Mudsdale MC
+MC	407	Passimian	FBasic				Passimian MC 407	Passimian MC
+MC	408	Marshadow	FBasic				Marshadow MC 408	Marshadow MC
+MC	409	Rolycoly	FBasic				Rolycoly MC 409	Rolycoly MC
+MC	410	Carkol	FStage 1				Carkol MC 410	Carkol MC
+MC	411	Coalossal	FStage 2				Coalossal MC 411	Coalossal MC
+MC	412	Clobbopus	FBasic				Clobbopus MC 412	Clobbopus MC
+MC	413	Grapploct	FStage 1				Grapploct MC 413	Grapploct MC
+MC	414	Stonjourner	FBasic				Stonjourner MC 414	Stonjourner MC
+MC	415	Bloodmoon Ursaluna	FBasic				Bloodmoon Ursaluna MC 415	Bloodmoon Ursaluna MC
+MC	416	Nacli	FBasic				Nacli MC 416	Nacli MC
+MC	417	Naclstack	FStage 1				Naclstack MC 417	Naclstack MC
+MC	418	Garganacl	FStage 2				Garganacl MC 418	Garganacl MC
+MC	419	Arven's Toedscool	FBasic				Arven's Toedscool MC 419	Arven's Toedscool MC
+MC	420	Arven's Toedscruel	FStage 1				Arven's Toedscruel MC 420	Arven's Toedscruel MC
+MC	421	Klawf	FBasic				Klawf MC 421	Klawf MC
+MC	422	Great Tusk	FBasic				Great Tusk MC 422	Great Tusk MC
+MC	423	Slither Wing	FBasic				Slither Wing MC 423	Slither Wing MC
+MC	424	Sandy Shocks	FBasic				Sandy Shocks MC 424	Sandy Shocks MC
+MC	425	Koraidon ex	FBasic				Koraidon ex MC 425	Koraidon ex MC
+MC	426	Okidogi	FBasic				Okidogi MC 426	Okidogi MC
+MC	427	Cornerstone Mask Ogerpon	FBasic				Cornerstone Mask Ogerpon MC 427	Cornerstone Mask Ogerpon MC
+MC	428	Cornerstone Mask Ogerpon ex	FBasic				Cornerstone Mask Ogerpon ex MC 428	Cornerstone Mask Ogerpon ex MC
+MC	429	Iron Boulder ex	FBasic				Iron Boulder ex MC 429	Iron Boulder ex MC
+MC	430	Ekans	DBasic				Ekans MC 430	Ekans MC
+MC	431	Arbok	DStage 1				Arbok MC 431	Arbok MC
+MC	432	Team Rocket's Nidoran♀	DBasic				Team Rocket's Nidoran♀ MC 432	Team Rocket's Nidoran♀ MC
+MC	433	Team Rocket's Nidorina	DStage 1				Team Rocket's Nidorina MC 433	Team Rocket's Nidorina MC
+MC	434	Team Rocket's Nidoqueen	DStage 2				Team Rocket's Nidoqueen MC 434	Team Rocket's Nidoqueen MC
+MC	435	Team Rocket's Nidoran♂	DBasic				Team Rocket's Nidoran♂ MC 435	Team Rocket's Nidoran♂ MC
+MC	436	Team Rocket's Nidorino	DStage 1				Team Rocket's Nidorino MC 436	Team Rocket's Nidorino MC
+MC	437	Team Rocket's Nidoking ex	DStage 2				Team Rocket's Nidoking ex MC 437	Team Rocket's Nidoking ex MC
+MC	438	Team Rocket's Zubat	DBasic				Team Rocket's Zubat MC 438	Team Rocket's Zubat MC
+MC	439	Team Rocket's Golbat	DStage 1				Team Rocket's Golbat MC 439	Team Rocket's Golbat MC
+MC	440	Team Rocket's Crobat ex	DStage 2				Team Rocket's Crobat ex MC 440	Team Rocket's Crobat ex MC
+MC	441	Gastly	DBasic				Gastly MC 441	Gastly MC
+MC	442	Gastly	DBasic				Gastly MC 442	Gastly MC
+MC	443	Haunter	DStage 1				Haunter MC 443	Haunter MC
+MC	444	Haunter	DStage 1				Haunter MC 444	Haunter MC
+MC	445	Gengar ex	DStage 2				Gengar ex MC 445	Gengar ex MC
+MC	446	Umbreon ex	DStage 1				Umbreon ex MC 446	Umbreon ex MC
+MC	447	Team Rocket's Murkrow	DBasic				Team Rocket's Murkrow MC 447	Team Rocket's Murkrow MC
+MC	448	Team Rocket's Sneasel	DBasic				Team Rocket's Sneasel MC 448	Team Rocket's Sneasel MC
+MC	449	Houndour	DBasic				Houndour MC 449	Houndour MC
+MC	450	Houndoom	DStage 1				Houndoom MC 450	Houndoom MC
+MC	451	Poochyena	DBasic				Poochyena MC 451	Poochyena MC
+MC	452	Mightyena	DStage 1				Mightyena MC 452	Mightyena MC
+MC	453	Sableye	DBasic				Sableye MC 453	Sableye MC
+MC	454	Absol	DBasic				Absol MC 454	Absol MC
+MC	455	Spiritomb	DBasic				Spiritomb MC 455	Spiritomb MC
+MC	456	Darkrai ex	DBasic				Darkrai ex MC 456	Darkrai ex MC
+MC	457	N's Purrloin	DBasic				N's Purrloin MC 457	N's Purrloin MC
+MC	458	Marnie's Purrloin	DBasic				Marnie's Purrloin MC 458	Marnie's Purrloin MC
+MC	459	Marnie's Liepard	DStage 1				Marnie's Liepard MC 459	Marnie's Liepard MC
+MC	460	Venipede	DBasic				Venipede MC 460	Venipede MC
+MC	461	Whirlipede	DStage 1				Whirlipede MC 461	Whirlipede MC
+MC	462	Scolipede	DStage 2				Scolipede MC 462	Scolipede MC
+MC	463	Marnie's Scraggy	DBasic				Marnie's Scraggy MC 463	Marnie's Scraggy MC
+MC	464	Marnie's Scrafty	DStage 1				Marnie's Scrafty MC 464	Marnie's Scrafty MC
+MC	465	Trubbish	DBasic				Trubbish MC 465	Trubbish MC
+MC	466	Garbodor	DStage 1				Garbodor MC 466	Garbodor MC
+MC	467	Zorua	DBasic				Zorua MC 467	Zorua MC
+MC	468	Zoroark	DStage 1				Zoroark MC 468	Zoroark MC
+MC	469	N's Zorua	DBasic				N's Zorua MC 469	N's Zorua MC
+MC	470	N's Zoroark ex	DStage 1				N's Zoroark ex MC 470	N's Zoroark ex MC
+MC	471	Pawniard	DBasic				Pawniard MC 471	Pawniard MC
+MC	472	Bisharp	DStage 1				Bisharp MC 472	Bisharp MC
+MC	473	Kingambit	DStage 2				Kingambit MC 473	Kingambit MC
+MC	474	Vullaby	DBasic				Vullaby MC 474	Vullaby MC
+MC	475	Mandibuzz ex	DStage 1				Mandibuzz ex MC 475	Mandibuzz ex MC
+MC	476	Deino	DBasic				Deino MC 476	Deino MC
+MC	477	Zweilous	DStage 1				Zweilous MC 477	Zweilous MC
+MC	478	Hydreigon ex	DStage 2				Hydreigon ex MC 478	Hydreigon ex MC
+MC	479	Pangoro	DStage 1				Pangoro MC 479	Pangoro MC
+MC	480	Yveltal	DBasic				Yveltal MC 480	Yveltal MC
+MC	481	Yveltal	DBasic				Yveltal MC 481	Yveltal MC
+MC	482	Hoopa	DBasic				Hoopa MC 482	Hoopa MC
+MC	483	Arven's Maschiff	DBasic				Arven's Maschiff MC 483	Arven's Maschiff MC
+MC	484	Arven's Mabosstiff ex	DStage 1				Arven's Mabosstiff ex MC 484	Arven's Mabosstiff ex MC
+MC	485	Bombirdier	DBasic				Bombirdier MC 485	Bombirdier MC
+MC	486	Farigiraf ex	DStage 1				Farigiraf ex MC 486	Farigiraf ex MC
+MC	487	Brute Bonnet	DBasic				Brute Bonnet MC 487	Brute Bonnet MC
+MC	488	Okidogi ex	DBasic				Okidogi ex MC 488	Okidogi ex MC
+MC	489	Fezandipiti ex	DBasic				Fezandipiti ex MC 489	Fezandipiti ex MC
+MC	490	Pecharunt	DBasic				Pecharunt MC 490	Pecharunt MC
+MC	491	Pecharunt ex	DBasic				Pecharunt ex MC 491	Pecharunt ex MC
+MC	492	Scizor ex	MStage 1				Scizor ex MC 492	Scizor ex MC
+MC	493	Skarmory	MBasic				Skarmory MC 493	Skarmory MC
+MC	494	Steven's Skarmory	MBasic				Steven's Skarmory MC 494	Steven's Skarmory MC
+MC	495	Mawile	MBasic				Mawile MC 495	Mawile MC
+MC	496	Beldum	MBasic				Beldum MC 496	Beldum MC
+MC	497	Metang	MStage 1				Metang MC 497	Metang MC
+MC	498	Registeel	MBasic				Registeel MC 498	Registeel MC
+MC	499	Registeel ex	MBasic				Registeel ex MC 499	Registeel ex MC
+MC	500	Bronzor	MBasic				Bronzor MC 500	Bronzor MC
+MC	501	Bronzong	MStage 1				Bronzong MC 501	Bronzong MC
+MC	502	Dialga	MBasic				Dialga MC 502	Dialga MC
+MC	503	Heatran	MBasic				Heatran MC 503	Heatran MC
+MC	504	Escavalier	MStage 1				Escavalier MC 504	Escavalier MC
+MC	505	Escavalier	MStage 1				Escavalier MC 505	Escavalier MC
+MC	506	Klink	MBasic				Klink MC 506	Klink MC
+MC	507	Klang	MStage 1				Klang MC 507	Klang MC
+MC	508	Klinklang	MStage 2				Klinklang MC 508	Klinklang MC
+MC	509	Galarian Stunfisk	MBasic				Galarian Stunfisk MC 509	Galarian Stunfisk MC
+MC	510	Pawniard	MBasic				Pawniard MC 510	Pawniard MC
+MC	511	Bisharp	MStage 1				Bisharp MC 511	Bisharp MC
+MC	512	Genesect ex	MBasic				Genesect ex MC 512	Genesect ex MC
+MC	513	Klefki	MBasic				Klefki MC 513	Klefki MC
+MC	514	Togedemaru ex	MBasic				Togedemaru ex MC 514	Togedemaru ex MC
+MC	515	Magearna	MBasic				Magearna MC 515	Magearna MC
+MC	516	Meltan	MBasic				Meltan MC 516	Meltan MC
+MC	517	Meltan	MBasic				Meltan MC 517	Meltan MC
+MC	518	Melmetal	MStage 1				Melmetal MC 518	Melmetal MC
+MC	519	Melmetal ex	MStage 1				Melmetal ex MC 519	Melmetal ex MC
+MC	520	Hop's Corviknight	MStage 2				Hop's Corviknight MC 520	Hop's Corviknight MC
+MC	521	Cufant	MBasic				Cufant MC 521	Cufant MC
+MC	522	Copperajah	MStage 1				Copperajah MC 522	Copperajah MC
+MC	523	Duraludon	MBasic				Duraludon MC 523	Duraludon MC
+MC	524	Duraludon	MBasic				Duraludon MC 524	Duraludon MC
+MC	525	Archaludon	MStage 1				Archaludon MC 525	Archaludon MC
+MC	526	Archaludon ex	MStage 1				Archaludon ex MC 526	Archaludon ex MC
+MC	527	Hop's Zacian ex	MBasic				Hop's Zacian ex MC 527	Hop's Zacian ex MC
+MC	528	Tinkatink	MBasic				Tinkatink MC 528	Tinkatink MC
+MC	529	Tinkatuff	MStage 1				Tinkatuff MC 529	Tinkatuff MC
+MC	530	Tinkaton	MStage 2				Tinkaton MC 530	Tinkaton MC
+MC	531	Varoom	MBasic				Varoom MC 531	Varoom MC
+MC	532	Revavroom	MStage 1				Revavroom MC 532	Revavroom MC
+MC	533	Orthworm ex	MBasic				Orthworm ex MC 533	Orthworm ex MC
+MC	534	Gholdengo	MStage 1				Gholdengo MC 534	Gholdengo MC
+MC	535	Gholdengo	MStage 1				Gholdengo MC 535	Gholdengo MC
+MC	536	Iron Crown	MBasic				Iron Crown MC 536	Iron Crown MC
+MC	537	Alolan Exeggutor ex	NStage 1				Alolan Exeggutor ex MC 537	Alolan Exeggutor ex MC
+MC	538	Bagon	NBasic				Bagon MC 538	Bagon MC
+MC	539	Shelgon	NStage 1				Shelgon MC 539	Shelgon MC
+MC	540	Salamence ex	NStage 2				Salamence ex MC 540	Salamence ex MC
+MC	541	Axew	NBasic				Axew MC 541	Axew MC
+MC	542	Fraxure	NStage 1				Fraxure MC 542	Fraxure MC
+MC	543	Haxorus	NStage 2				Haxorus MC 543	Haxorus MC
+MC	544	Druddigon	NBasic				Druddigon MC 544	Druddigon MC
+MC	545	N's Reshiram	NBasic				N's Reshiram MC 545	N's Reshiram MC
+MC	546	Dreepy	NBasic				Dreepy MC 546	Dreepy MC
+MC	547	Drakloak	NStage 1				Drakloak MC 547	Drakloak MC
+MC	548	Dragapult ex	NStage 2				Dragapult ex MC 548	Dragapult ex MC
+MC	549	Tatsugiri	NBasic				Tatsugiri MC 549	Tatsugiri MC
+MC	550	Koraidon	NBasic				Koraidon MC 550	Koraidon MC
+MC	551	Koraidon ex	NBasic				Koraidon ex MC 551	Koraidon ex MC
+MC	552	Miraidon	NBasic				Miraidon MC 552	Miraidon MC
+MC	553	Miraidon ex	NBasic				Miraidon ex MC 553	Miraidon ex MC
+MC	554	Raging Bolt ex	NBasic				Raging Bolt ex MC 554	Raging Bolt ex MC
+MC	555	Team Rocket's Rattata	CBasic				Team Rocket's Rattata MC 555	Team Rocket's Rattata MC
+MC	556	Team Rocket's Raticate	CStage 1				Team Rocket's Raticate MC 556	Team Rocket's Raticate MC
+MC	557	Spearow	CBasic				Spearow MC 557	Spearow MC
+MC	558	Fearow	CStage 1				Fearow MC 558	Fearow MC
+MC	559	Team Rocket's Meowth	CBasic				Team Rocket's Meowth MC 559	Team Rocket's Meowth MC
+MC	560	Team Rocket's Persian ex	CStage 1				Team Rocket's Persian ex MC 560	Team Rocket's Persian ex MC
+MC	561	Chansey	CBasic				Chansey MC 561	Chansey MC
+MC	562	Blissey ex	CStage 1				Blissey ex MC 562	Blissey ex MC
+MC	563	Tauros	CBasic				Tauros MC 563	Tauros MC
+MC	564	Eevee	CBasic				Eevee MC 564	Eevee MC
+MC	565	Eevee	CBasic				Eevee MC 565	Eevee MC
+MC	566	Eevee ex	CBasic				Eevee ex MC 566	Eevee ex MC
+MC	567	Snorlax	CBasic				Snorlax MC 567	Snorlax MC
+MC	568	Snorlax	CBasic				Snorlax MC 568	Snorlax MC
+MC	569	Hop's Snorlax	CBasic				Hop's Snorlax MC 569	Hop's Snorlax MC
+MC	570	Sentret	CBasic				Sentret MC 570	Sentret MC
+MC	571	Furret	CStage 1				Furret MC 571	Furret MC
+MC	572	Hoothoot	CBasic				Hoothoot MC 572	Hoothoot MC
+MC	573	Noctowl	CStage 1				Noctowl MC 573	Noctowl MC
+MC	574	Dunsparce	CBasic				Dunsparce MC 574	Dunsparce MC
+MC	575	Dudunsparce ex	CStage 1				Dudunsparce ex MC 575	Dudunsparce ex MC
+MC	576	Larry's Dunsparce	CBasic				Larry's Dunsparce MC 576	Larry's Dunsparce MC
+MC	577	Larry's Dudunsparce ex	CStage 1				Larry's Dudunsparce ex MC 577	Larry's Dudunsparce ex MC
+MC	578	Miltank	CBasic				Miltank MC 578	Miltank MC
+MC	579	Taillow	CBasic				Taillow MC 579	Taillow MC
+MC	580	Swellow	CStage 1				Swellow MC 580	Swellow MC
+MC	581	Slakoth	CBasic				Slakoth MC 581	Slakoth MC
+MC	582	Vigoroth	CStage 1				Vigoroth MC 582	Vigoroth MC
+MC	583	Slaking ex	CStage 2				Slaking ex MC 583	Slaking ex MC
+MC	584	Skitty	CBasic				Skitty MC 584	Skitty MC
+MC	585	Skitty	CBasic				Skitty MC 585	Skitty MC
+MC	586	Delcatty	CStage 1				Delcatty MC 586	Delcatty MC
+MC	587	Zangoose	CBasic				Zangoose MC 587	Zangoose MC
+MC	588	Zangoose ex	CBasic				Zangoose ex MC 588	Zangoose ex MC
+MC	589	Tropius	CBasic				Tropius MC 589	Tropius MC
+MC	590	Larry's Starly	CBasic				Larry's Starly MC 590	Larry's Starly MC
+MC	591	Larry's Staravia	CStage 1				Larry's Staravia MC 591	Larry's Staravia MC
+MC	592	Larry's Staraptor	CStage 2				Larry's Staraptor MC 592	Larry's Staraptor MC
+MC	593	Buneary	CBasic				Buneary MC 593	Buneary MC
+MC	594	Lopunny	CStage 1				Lopunny MC 594	Lopunny MC
+MC	595	Glameow	CBasic				Glameow MC 595	Glameow MC
+MC	596	Purugly	CStage 1				Purugly MC 596	Purugly MC
+MC	597	Chatot	CBasic				Chatot MC 597	Chatot MC
+MC	598	Pidove	CBasic				Pidove MC 598	Pidove MC
+MC	599	Tranquill	CStage 1				Tranquill MC 599	Tranquill MC
+MC	600	Unfezant	CStage 2				Unfezant MC 600	Unfezant MC
+MC	601	Audino	CBasic				Audino MC 601	Audino MC
+MC	602	Mega Audino ex	CBasic				Mega Audino ex MC 602	Mega Audino ex MC
+MC	603	Minccino	CBasic				Minccino MC 603	Minccino MC
+MC	604	Cinccino	CStage 1				Cinccino MC 604	Cinccino MC
+MC	605	Bouffalant ex	CBasic				Bouffalant ex MC 605	Bouffalant ex MC
+MC	606	Rufflet	CBasic				Rufflet MC 606	Rufflet MC
+MC	607	Braviary	CStage 1				Braviary MC 607	Braviary MC
+MC	608	Larry's Rufflet	CBasic				Larry's Rufflet MC 608	Larry's Rufflet MC
+MC	609	Larry's Braviary	CStage 1				Larry's Braviary MC 609	Larry's Braviary MC
+MC	610	Tornadus	CBasic				Tornadus MC 610	Tornadus MC
+MC	611	Furfrou	CBasic				Furfrou MC 611	Furfrou MC
+MC	612	Furfrou	CBasic				Furfrou MC 612	Furfrou MC
+MC	613	Hawlucha	CBasic				Hawlucha MC 613	Hawlucha MC
+MC	614	Noibat	CBasic				Noibat MC 614	Noibat MC
+MC	615	Noivern	CStage 1				Noivern MC 615	Noivern MC
+MC	616	Stufful	CBasic				Stufful MC 616	Stufful MC
+MC	617	Bewear	CStage 1				Bewear MC 617	Bewear MC
+MC	618	Oranguru	CBasic				Oranguru MC 618	Oranguru MC
+MC	619	Larry's Komala	CBasic				Larry's Komala MC 619	Larry's Komala MC
+MC	620	Drampa	CBasic				Drampa MC 620	Drampa MC
+MC	621	Drampa	CBasic				Drampa MC 621	Drampa MC
+MC	622	Hop's Rookidee	CBasic				Hop's Rookidee MC 622	Hop's Rookidee MC
+MC	623	Hop's Corvisquire	CStage 1				Hop's Corvisquire MC 623	Hop's Corvisquire MC
+MC	624	Hop's Cramorant	CBasic				Hop's Cramorant MC 624	Hop's Cramorant MC
+MC	625	Bloodmoon Ursaluna ex	CBasic				Bloodmoon Ursaluna ex MC 625	Bloodmoon Ursaluna ex MC
+MC	626	Squawkabilly	CBasic				Squawkabilly MC 626	Squawkabilly MC
+MC	627	Cyclizar	CBasic				Cyclizar MC 627	Cyclizar MC
+MC	628	Iron Jugulis	CBasic				Iron Jugulis MC 628	Iron Jugulis MC
+MC	629	Terapagos	CBasic				Terapagos MC 629	Terapagos MC
+MC	630	Terapagos ex	CBasic				Terapagos ex MC 630	Terapagos ex MC
+MC	631	Iron Defender	Item				Iron Defender MC 631	Iron Defender MC
+MC	632	Suspicious Clock	Item				Suspicious Clock MC 632	Suspicious Clock MC
+MC	633	Unfair Stamp	Item				Unfair Stamp MC 633	Unfair Stamp MC
+MC	634	Super Potion	Item				Super Potion MC 634	Super Potion MC
+MC	635	N's PP Up	Item				N's PP Up MC 635	N's PP Up MC
+MC	636	Energy Retrieval	Item				Energy Retrieval MC 636	Energy Retrieval MC
+MC	637	Energy Coin	Item				Energy Coin MC 637	Energy Coin MC
+MC	638	Energy Switch	Item				Energy Switch MC 638	Energy Switch MC
+MC	639	Energy Search	Item				Energy Search MC 639	Energy Search MC
+MC	641	Ogre's Mask	Item				Ogre's Mask MC 641	Ogre's Mask MC
+MC	642	Awakening Drum	Item				Awakening Drum MC 642	Awakening Drum MC
+MC	643	Potion	Item				Potion MC 643	Potion MC
+MC	644	Crushing Hammer	Item				Crushing Hammer MC 644	Crushing Hammer MC
+MC	645	Deduction Kit	Item				Deduction Kit MC 645	Deduction Kit MC
+MC	647	Dangerous Laser	Item				Dangerous Laser MC 647	Dangerous Laser MC
+MC	648	Buddy-Buddy Poffin	Item				Buddy-Buddy Poffin MC 648	Buddy-Buddy Poffin MC
+MC	649	Chill Teaser Toy	Item				Chill Teaser Toy MC 649	Chill Teaser Toy MC
+MC	650	Hyper Aroma	Item				Hyper Aroma MC 650	Hyper Aroma MC
+MC	651	Ultra Ball	Item				Ultra Ball MC 651	Ultra Ball MC
+MC	652	Premium Power Pro	Item				Premium Power Pro MC 652	Premium Power Pro MC
+MC	653	Hand Trimmer	Item				Hand Trimmer MC 653	Hand Trimmer MC
+MC	654	Fight Gong	Item				Fight Gong MC 654	Fight Gong MC
+MC	655	Rare Candy	Item				Rare Candy MC 655	Rare Candy MC
+MC	656	Prime Catcher	Item				Prime Catcher MC 656	Prime Catcher MC
+MC	657	Antique Plume Fossil	Item				Antique Plume Fossil MC 657	Antique Plume Fossil MC
+MC	658	Precious Carrier	Item				Precious Carrier MC 658	Precious Carrier MC
+MC	659	Arven's Sandwich	Item				Arven's Sandwich MC 659	Arven's Sandwich MC
+MC	660	Pokegear	Item				Pokegear MC 660	Pokegear MC
+MC	661	Poké-Vital A	Item				Poké-Vital A MC 661	Poké-Vital A MC
+MC	662	Poké Pad	Item				Poké Pad MC 662	Poké Pad MC
+MC	663	Switch	Item				Switch MC 663	Switch MC
+MC	664	Scoop Up Cyclone	Item				Scoop Up Cyclone MC 664	Scoop Up Cyclone MC
+MC	665	Pokemon Catcher	Item				Pokemon Catcher MC 665	Pokemon Catcher MC
+MC	666	Hop's Bag	Item				Hop's Bag MC 666	Hop's Bag MC
+MC	667	Bug Catching Set	Item				Bug Catching Set MC 667	Bug Catching Set MC
+MC	668	Repel	Item				Repel MC 668	Repel MC
+MC	670	Nightly Stretcher	Item				Nightly Stretcher MC 670	Nightly Stretcher MC
+MC	671	Reboot Pod	Item				Reboot Pod MC 671	Reboot Pod MC
+MC	672	Dragon Potion	Item				Dragon Potion MC 672	Dragon Potion MC
+MC	673	Team Rocket's Great Ball	Item				Team Rocket's Great Ball MC 673	Team Rocket's Great Ball MC
+MC	674	Team Rocket's Surprise Bomb	Item				Team Rocket's Surprise Bomb MC 674	Team Rocket's Surprise Bomb MC
+MC	675	Team Rocket's Receiver	Item				Team Rocket's Receiver MC 675	Team Rocket's Receiver MC
+MC	676	Passho Berry	Tool				Passho Berry MC 676	Passho Berry MC
+MC	677	Payapa Berry	Tool				Payapa Berry MC 677	Payapa Berry MC
+MC	678	Occa Berry	Tool				Occa Berry MC 678	Occa Berry MC
+MC	679	Counter Gain	Tool				Counter Gain MC 679	Counter Gain MC
+MC	680	Sparkling Crystal	Tool				Sparkling Crystal MC 680	Sparkling Crystal MC
+MC	681	Binding Mochi	Tool				Binding Mochi MC 681	Binding Mochi MC
+MC	682	Cynthia's Power Weight	Tool				Cynthia's Power Weight MC 682	Cynthia's Power Weight MC
+MC	683	Hourglass of Power	Tool				Hourglass of Power MC 683	Hourglass of Power MC
+MC	684	Deluxe Bomb	Tool				Deluxe Bomb MC 684	Deluxe Bomb MC
+MC	685	Colbur Berry	Tool				Colbur Berry MC 685	Colbur Berry MC
+MC	686	Haban Berry	Tool				Haban Berry MC 686	Haban Berry MC
+MC	687	Hero's Cape	Tool				Hero's Cape MC 687	Hero's Cape MC
+MC	688	Balloon	Tool				Balloon MC 688	Balloon MC
+MC	689	Brave Bangle	Tool				Brave Bangle MC 689	Brave Bangle MC
+MC	690	Hop's Choice Band	Tool				Hop's Choice Band MC 690	Hop's Choice Band MC
+MC	691	Maximum Belt	Tool				Maximum Belt MC 691	Maximum Belt MC
+MC	692	Lillie's Pearl	Tool				Lillie's Pearl MC 692	Lillie's Pearl MC
+MC	693	Babiri Berry	Tool				Babiri Berry MC 693	Babiri Berry MC
+MC	694	Iris's Fighting Spirit	Supporter				Iris's Fighting Spirit MC 694	Iris's Fighting Spirit MC
+MC	695	Larry's Efficiency	Supporter				Larry's Efficiency MC 695	Larry's Efficiency MC
+MC	696	Crispin	Supporter				Crispin MC 696	Crispin MC
+MC	697	Acerola's Mischief	Supporter				Acerola's Mischief MC 697	Acerola's Mischief MC
+MC	698	Ciphermaniac's Codebreaking	Supporter				Ciphermaniac's Codebreaking MC 698	Ciphermaniac's Codebreaking MC
+MC	699	Janine's Secret Technique	Supporter				Janine's Secret Technique MC 699	Janine's Secret Technique MC
+MC	700	Waitress	Supporter				Waitress MC 700	Waitress MC
+MC	701	N's Plot	Supporter				N's Plot MC 701	N's Plot MC
+MC	702	Urbain	Supporter				Urbain MC 702	Urbain MC
+MC	703	Drayton	Supporter				Drayton MC 703	Drayton MC
+MC	704	Black Belt's Training	Supporter				Black Belt's Training MC 704	Black Belt's Training MC
+MC	705	Xerosic's Scheme	Supporter				Xerosic's Scheme MC 705	Xerosic's Scheme MC
+MC	706	Cook	Supporter				Cook MC 706	Cook MC
+MC	707	Lucian	Supporter				Lucian MC 707	Lucian MC
+MC	708	Surfer	Supporter				Surfer MC 708	Surfer MC
+MC	709	Perrin	Supporter				Perrin MC 709	Perrin MC
+MC	710	Clemont's Quick Wit	Supporter				Clemont's Quick Wit MC 710	Clemont's Quick Wit MC
+MC	711	Judge	Supporter				Judge MC 711	Judge MC
+MC	712	Lana's Assistance	Supporter				Lana's Assistance MC 712	Lana's Assistance MC
+MC	713	Kieran	Supporter				Kieran MC 713	Kieran MC
+MC	714	Salvatore	Supporter				Salvatore MC 714	Salvatore MC
+MC	715	Carmine	Supporter				Carmine MC 715	Carmine MC
+MC	716	Lacey	Supporter				Lacey MC 716	Lacey MC
+MC	717	Explorer's Guidance	Supporter				Explorer's Guidance MC 717	Explorer's Guidance MC
+MC	718	Hilda	Supporter				Hilda MC 718	Hilda MC
+MC	719	Drasna	Supporter				Drasna MC 719	Drasna MC
+MC	720	Kofu	Supporter				Kofu MC 720	Kofu MC
+MC	721	Hassel	Supporter				Hassel MC 721	Hassel MC
+MC	722	Briar	Supporter				Briar MC 722	Briar MC
+MC	723	Bianca's Devotion	Supporter				Bianca's Devotion MC 723	Bianca's Devotion MC
+MC	724	Boss's Command	Supporter				Boss's Command MC 724	Boss's Command MC
+MC	725	Fennel	Supporter				Fennel MC 725	Fennel MC
+MC	726	Lt. Surge's Deal	Supporter				Lt. Surge's Deal MC 726	Lt. Surge's Deal MC
+MC	727	Morty's Confidence	Supporter				Morty's Confidence MC 727	Morty's Confidence MC
+MC	728	Jasmine's Gaze	Supporter				Jasmine's Gaze MC 728	Jasmine's Gaze MC
+MC	729	Lillie's Determination	Supporter				Lillie's Determination MC 729	Lillie's Determination MC
+MC	730	Lisia's Appeal	Supporter				Lisia's Appeal MC 730	Lisia's Appeal MC
+MC	731	Team Rocket's Ariana	Supporter				Team Rocket's Ariana MC 731	Team Rocket's Ariana MC
+MC	732	Team Rocket's Archer	Supporter				Team Rocket's Archer MC 732	Team Rocket's Archer MC
+MC	733	Team Rocket's Giovanni	Supporter				Team Rocket's Giovanni MC 733	Team Rocket's Giovanni MC
+MC	734	Team Rocket's Petrel	Supporter				Team Rocket's Petrel MC 734	Team Rocket's Petrel MC
+MC	735	Team Rocket's Proton	Supporter				Team Rocket's Proton MC 735	Team Rocket's Proton MC
+MC	736	Ignition Energy	Special Energy				Ignition Energy MC 736	Ignition Energy MC
+MC	737	Spike Energy	Special Energy				Spike Energy MC 737	Spike Energy MC
+MC	738	Boomerang Energy	Special Energy				Boomerang Energy MC 738	Boomerang Energy MC
+MC	739	Prism Energy	Special Energy				Prism Energy MC 739	Prism Energy MC
+MC	740	Rich Energy	Special Energy				Rich Energy MC 740	Rich Energy MC
+MC	741	Legacy Energy	Special Energy				Legacy Energy MC 741	Legacy Energy MC
+MC	742	Team Rocket's Energy	Special Energy				Team Rocket's Energy MC 742	Team Rocket's Energy MC
+MC	743	Erika's Tangela	GBasic				Erika's Tangela MC 743	Erika's Tangela MC
+MC	744	Salazzle	RStage 1				Salazzle MC 744	Salazzle MC
+MC	745	Scorbunny	RBasic				Scorbunny MC 745	Scorbunny MC
+MC	746	Weavile	WStage 1				Weavile MC 746	Weavile MC
+MC	747	Vikavolt	LStage 2				Vikavolt MC 747	Vikavolt MC
+MC	748	Marill	PBasic				Marill MC 748	Marill MC
+MC	749	Banette	PStage 1				Banette MC 749	Banette MC
+MC	750	Slurpuff	PStage 1				Slurpuff MC 750	Slurpuff MC
+MC	751	Hitmontop	FBasic				Hitmontop MC 751	Hitmontop MC
+MC	752	Carbink	FBasic				Carbink MC 752	Carbink MC
+MC	753	Mightyena	DStage 1				Mightyena MC 753	Mightyena MC
+MC	754	Mawile	MBasic				Mawile MC 754	Mawile MC
+MC	755	Eevee	CBasic				Eevee MC 755	Eevee MC
+MC	756	Larry's Staraptor	CStage 2				Larry's Staraptor MC 756	Larry's Staraptor MC
+MC	757	Sprigatito ex	GBasic				Sprigatito ex MC 757	Sprigatito ex MC
+MC	758	Stunfisk ex	FBasic				Stunfisk ex MC 758	Stunfisk ex MC
+MC	759	Mega Audino ex	CBasic				Mega Audino ex MC 759	Mega Audino ex MC
+MC	760	Boss's Command	Supporter				Boss's Command MC 760	Boss's Command MC
+MC	761	Mega Meganium ex	GStage 2				Mega Meganium ex MC 761	Mega Meganium ex MC
+MC	762	Mega Emboar ex	RStage 2				Mega Emboar ex MC 762	Mega Emboar ex MC
+MC	763	Mega Feraligatr ex	WStage 2				Mega Feraligatr ex MC 763	Mega Feraligatr ex MC
+MC	764	Pikachu ex	LBasic				Pikachu ex MC 764	Pikachu ex MC
+MC	765	Lillie's Clefairy ex	PBasic				Lillie's Clefairy ex MC 765	Lillie's Clefairy ex MC
+MC	766	Mega Charizard Y ex	RStage 2				Mega Charizard Y ex MC 766	Mega Charizard Y ex MC
+MP1	1	Durant	GBasic				Durant MP1 1	Durant MP1
+MP1	2	Virizion	GBasic				Virizion MP1 2	Virizion MP1
+MP1	3	Sprigatito	GBasic				Sprigatito MP1 3	Sprigatito MP1
+MP1	4	Floragato	GStage 1				Floragato MP1 4	Floragato MP1
+MP1	5	Meowscarada	GStage 2				Meowscarada MP1 5	Meowscarada MP1
+MP1	6	Pikachu ex	LBasic				Pikachu ex MP1 6	Pikachu ex MP1
+MP1	7	Emolga	LBasic				Emolga MP1 7	Emolga MP1
+MP1	8	Yamper	LBasic				Yamper MP1 8	Yamper MP1
+MP1	9	Boltund	LStage 1				Boltund MP1 9	Boltund MP1
+MP1	10	Tadbulb	LBasic				Tadbulb MP1 10	Tadbulb MP1
+MP1	11	Bellibolt	LStage 1				Bellibolt MP1 11	Bellibolt MP1
+MP1	12	Snorlax	CBasic				Snorlax MP1 12	Snorlax MP1
+MP1	13	Potion	Item				Potion MP1 13	Potion MP1
+MP1	14	Ultra Ball	Item				Ultra Ball MP1 14	Ultra Ball MP1
+MP1	15	Poké Pad	Item				Poké Pad MP1 15	Poké Pad MP1
+MP1	16	Switch	Item				Switch MP1 16	Switch MP1
+MP1	17	Pokemon Catcher	Item				Pokemon Catcher MP1 17	Pokemon Catcher MP1
+MP1	18	Iris's Fighting Spirit	Supporter				Iris's Fighting Spirit MP1 18	Iris's Fighting Spirit MP1
+MP1	19	Influencer's Presentation	Supporter				Influencer's Presentation MP1 19	Influencer's Presentation MP1
+MP1	20	Waitress	Supporter				Waitress MP1 20	Waitress MP1
+MP1	21	Urbain	Supporter				Urbain MP1 21	Urbain MP1
+MP1	22	Judge	Supporter				Judge MP1 22	Judge MP1
+MP1	23	Lillie's Determination	Supporter				Lillie's Determination MP1 23	Lillie's Determination MP1

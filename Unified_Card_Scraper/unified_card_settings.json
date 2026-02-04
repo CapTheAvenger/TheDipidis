@@ -1,0 +1,29 @@
+{
+    "sources": {
+        "city_league": {
+            "enabled": true,
+            "start_date": "24.01.2026",
+            "end_date": "auto",
+            "max_decklists_per_league": 16,
+            "_comment": "end_date: Use 'auto' for today-2, or 'DD.MM.YYYY' for fixed date. start_date is always fixed."
+        },
+        "limitless_online": {
+            "enabled": true,
+            "max_decks": 150,
+            "max_lists_per_deck": 20,
+            "delay_between_lists": 1.5,
+            "delay_between_decks": 3,
+            "format_filter": "pfl",
+            "_comment": "format_filter examples: 'SVI-PFL' (Phantasmal Flames), 'SVI-SCR' (Stellar Crown), 'SVI-TWM' (Twilight Masquerade), '' (all formats)"
+        },
+        "tournaments": {
+            "enabled": true,
+            "max_tournaments": 2,
+            "max_decks_per_tournament": 256,
+            "format_filter": ["Standard", "Standard (JP)"]
+        }
+    },
+    "delay_between_requests": 1.0,
+    "output_file": "unified_card_data.csv",
+    "api_cache_file": "pokemon_tcg_api_cache.json"
+}

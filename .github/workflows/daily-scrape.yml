@@ -5,6 +5,9 @@ on:
     - cron: '0 6 * * *'  # Täglich 6:00 UTC
   workflow_dispatch:  # Manuell auslösbar
 
+permissions:
+  contents: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -42,7 +45,7 @@ jobs:
         git config --local user.name "GitHub Action"
         git add -A
         git diff --cached --exit-code > /dev/null || git commit -m "🤖 Auto-update: Card data & statistics ($(date -u +'%Y-%m-%d %H:%M UTC'))"
-        git push
+        git push https://x-access-token:${{ github.token }}@github.com/CapTheAvenger/HausiTCG.git HEAD:main
       continue-on-error: true
     
     - name: Update GitHub Pages (if changed)

@@ -56,6 +56,9 @@ pokemon_tcg_api_cache.json
 **/limitless_online_decks_matchups.csv
 **/unified_card_data.csv
 
+# Keep main data for website
+!Unified_Card_Scraper/unified_card_data.csv
+
 # Aber KEEP diese (wichtige Outputs):
 !**/city_league_archetypes_comparison.csv
 !**/limitless_online_decks_comparison.csv

@@ -1,7 +1,0 @@
-{
-    "max_tournaments": 150,
-    "max_decks_per_tournament": 999,
-    "delay_between_tournaments": 0,
-    "output_file": "tournament_cards_data.csv",
-    "_comment": "Nur Standard-Format Turniere (Regional, Special Event, LAIC, EUIC, NAIC, Worlds) werden automatisch gescraped."
-}

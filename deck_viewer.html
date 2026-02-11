@@ -4467,7 +4467,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                 
                 if (imageUrl && imageUrl.trim() !== '') {
                     return `
-                        <div class="card-visual" data-image-url="${imageUrl}" data-card-name="${card.card_name}" style="cursor: pointer;" onclick="showCardImageFullscreen('${imageUrl}', '${card.card_name}')">
+                        <div class="card-visual" data-image-url="${imageUrl}" data-card-name="${card.card_name}" style="cursor: pointer;" onclick="showCardImage('${imageUrl.replace(/'/g, "\\'")}', '${card.card_name.replace(/'/g, "\\'")}')">
                             <img src="${imageUrl}" 
                                  alt="${card.card_name}" 
                                  loading="lazy"

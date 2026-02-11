@@ -1,0 +1,5 @@
+# GitHub Pages Site Configuration
+theme: null
+plugins: []
+exclude: [build/, __pycache__/, .git/, .gitignore]
+future: false

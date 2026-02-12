@@ -323,9 +323,15 @@
         
         .matchups {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 20px;
             margin-top: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .matchups {
+                grid-template-columns: 1fr 1fr;
+            }
         }
         
         .matchup-box {
@@ -545,6 +551,134 @@
         }
         
         /* Compact image view für Mobilansicht */
+        /* Mobile Card View für Karten-Liste */
+        .cards-list-mobile {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .cards-list-mobile {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+                padding: 10px;
+            }
+        }
+        
+        .card-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+        }
+        
+        .card-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        
+        .card-item img {
+            width: 100%;
+            aspect-ratio: 2.5/3.5;
+            display: block;
+            object-fit: cover;
+        }
+        
+        .card-item-info {
+            padding: 8px;
+            background: white;
+            font-size: 0.75em;
+            text-align: center;
+        }
+        
+        .card-item-count {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .card-item-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 600;
+            margin-bottom: 3px;
+            color: #333;
+        }
+        
+        .card-item-set {
+            color: #666;
+            font-size: 0.85em;
+        }
+        
+        .card-item-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+            justify-content: center;
+        }
+        
+        .card-item-actions button {
+            padding: 4px 8px;
+            font-size: 0.75em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .card-item-actions .btn-add {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+        
+        .card-item-actions .btn-add:active {
+            background: #218838;
+        }
+        
+        .cards-list-hidden {
+            display: none !important;
+        }
+        
+        /* Desktop vs Mobile Ansichts-Toggle */
+        #cardsTableDesktop {
+            display: block;
+        }
+        
+        #cardsGridMobile {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            #cardsTableDesktop {
+                display: none;
+            }
+            
+            #cardsGridMobile {
+                display: grid !important;
+            }
+        }
+
         .compact-card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
@@ -761,6 +895,20 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .builder-controls {
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 10px 12px;
+                font-size: 0.85em;
+                flex: 1;
+                min-width: 80px;
+            }
         }
         
         .btn {
@@ -1323,13 +1471,15 @@
                     </div>
                     
                     <!-- Opponent Analyzer -->
-                    <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
-                        <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
-                        <label for="opponentSelect" style="display: block; margin-bottom: 8px; font-weight: bold;">Choose Opponent:</label>
-                        <select id="opponentSelect" onchange="showMatchupAnalyzer(this.value)" style="width: 100%; padding: 10px; border: 1px solid #bbb; border-radius: 4px; font-size: 1em;">
-                            <option value="">-- Select a deck --</option>
+                    <div style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1)); padding: 20px; border-radius: 10px; border-left: 5px solid #3498db; margin-top: 20px;">
+                        <h4 style="margin-top: 0; color: #3498db; display: flex; align-items: center; gap: 10px;">
+                            <span>🔍</span>
+                            <span>Select & Analyze Opponent</span>
+                        </h4>
+                        <select id="opponentSelect" onchange="showMatchupAnalyzer(this.value)" style="width: 100%; padding: 12px 15px; border: 2px solid #3498db; border-radius: 8px; font-size: 1em; background: white; cursor: pointer; font-weight: 500;">
+                            <option value="">-- Choose Opponent Deck --</option>
                         </select>
-                        <div id="matchupAnalysisDetails" style="margin-top: 15px; display: none; background: #ecf0f1; padding: 15px; border-radius: 4px;"></div>
+                        <div id="matchupAnalysisDetails" style="margin-top: 15px; display: none; background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #27ae60;"></div>
                     </div>
                 </div>
             </div>
@@ -1365,7 +1515,8 @@
             <div id="cardsTableContent" style="display: none;">
                 <input type="text" id="cardSearchInput" placeholder="🔍 Karte suchen..." class="card-search-input" oninput="filterCards()" style="margin-bottom: 15px; width: 100%; max-width: 500px;">
                 
-                <div class="cards-table">
+                <!-- Desktop Tabellen-Ansicht -->
+                <div class="cards-table" id="cardsTableDesktop">
                     <table>
                         <thead>
                             <tr>
@@ -1385,16 +1536,21 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Mobile Cards Grid-Ansicht -->
+                <div class="cards-list-mobile" id="cardsGridMobile" style="display: none;">
+                    <!-- Wird dynamisch gefüllt -->
+                </div>
             </div>
         </div>
         
         <div class="deck-builder">
             <h2>🛠️ Deck Builder (60 Karten)</h2>
             <div class="builder-controls">
-                <button class="btn btn-primary" onclick="exportToPokemonLive()">📋 Für Pokemon Live kopieren</button>
-                <button class="btn btn-warning" onclick="generateDeckImage()">🖼️ Karten Übersicht generieren</button>
-                <button class="btn btn-secondary" onclick="clearDeck()">🗑️ Deck leeren</button>
-                <button class="btn btn-success" onclick="autoComplete()">⚡ Auto-Complete (60 Karten)</button>
+                <button class="btn btn-primary" onclick="exportToPokemonLive()">📋 Copy</button>
+                <button class="btn btn-warning" onclick="generateDeckImage()">🖼️ Grid</button>
+                <button class="btn btn-secondary" onclick="clearDeck()">🗑️ Clear</button>
+                <button class="btn btn-success" onclick="autoComplete()">⚡ Generate Deck</button>
             </div>
             
             <div class="deck-summary">
@@ -1429,6 +1585,7 @@
         let filteredCards = [];
         let currentDeckCards = [];
         let currentMainDeckName = '';
+        let currentAlternativeDeckName = '';  // Alternative Limitless deck for missing data
         let limitlessMatchupData = {};
 
                         // Generate matchupDetailsData from cardsData (global)
@@ -2909,7 +3066,11 @@
                 // Filter by search term
                 if (searchTerm && !cardName.toLowerCase().includes(searchTerm)) return;
 
-                const cardType = getCardType(cardName);
+                // Use the actual type from CSV for filtering
+                const csvType = card.type || '';
+                const cardType = getCardTypeFromCsvType(csvType);
+                
+                // Filter by selected types
                 if (selectedTypes.size > 0 && !selectedTypes.has(cardType)) return;
 
                 const key = `${cardName}|${setCode}|${cardNumber}`;
@@ -2922,9 +3083,11 @@
                         set_code: setCode,
                         set_number: cardNumber,
                         card_type: cardType,
+                        type: csvType,  // Keep original type field for sorting
                         total_count: totalCount,
                         max_count: maxCount,
-                        image_url: card.image_url || ''
+                        image_url: card.image_url || '',
+                        percentage_in_archetype: card.percentage_in_archetype || '0'
                     });
                 } else {
                     const existing = cardMap.get(key);
@@ -2937,74 +3100,40 @@
             // Sort by card type first
             filteredCards = sortCardsByType(filteredCards);
             
-            // Show grid only if single set selected and all types are selected (no specific type filter) and no search term
-            const allCardTypes = ['Pokemon', 'Supporter', 'Item', 'Tool', 'Stadium', 'Special Energy', 'Energy'];
-            const allTypesSelected = allCardTypes.every(type => selectedTypes.has(type));
-            const showGrid = selectedSet && allTypesSelected && !searchTerm;
-            updateFilteredCardsVisual(showGrid);
-            
             renderFilteredCards();
         }
-
-        function updateFilteredCardsVisual(show) {
-            const visualDiv = document.getElementById('filteredCardsVisual');
-            const grid = document.getElementById('filteredGrid');
-
-            if (!show || filteredCards.length === 0) {
-                visualDiv.classList.remove('show');
-                return;
+        
+        function getCardTypeFromCsvType(csvType) {
+            /**
+             * Convert CSV type field to our card type categories
+             * CSV types are like: "GBasic", "RStage1", "Supporter", "Item", etc.
+             */
+            if (!csvType) return 'Pokemon';
+            
+            // Direct matches for non-Pokemon types
+            if (csvType === 'Supporter') return 'Supporter';
+            if (csvType === 'Stadium') return 'Stadium';
+            if (csvType === 'Item') return 'Item';
+            if (csvType === 'Tool') return 'Tool';
+            
+            // Energy types
+            if (csvType.includes('Special Energy')) return 'Special Energy';
+            if (csvType === 'Energy') return 'Energy';
+            
+            // If it contains element letter + evolution stage, it's a Pokemon
+            if (csvType.match(/^[GRWLPFDMNC](Basic|Stage\s*1|Stage\s*2|V|VMAX|EX|V-UNION)/)) {
+                return 'Pokemon';
             }
-
-            visualDiv.classList.add('show');
-
-            // Sort cards by type, then set number, then relevance
-            const sortedForGrid = [...filteredCards].sort((a, b) => {
-                // First sort by card type
-                const typeOrder = ['Pokemon', 'Trainer', 'Supporter', 'Item', 'Tool', 'Stadium', 'Special Energy', 'Energy'];
-                const typeA = typeOrder.indexOf(a.card_type || 'Unknown');
-                const typeB = typeOrder.indexOf(b.card_type || 'Unknown');
-                if (typeA !== typeB) return (typeA === -1 ? 999 : typeA) - (typeB === -1 ? 999 : typeB);
-                
-                // Then by set number
-                const numA = parseInt(a.set_number || '0', 10);
-                const numB = parseInt(b.set_number || '0', 10);
-                if (numA !== numB) return numA - numB;
-                
-                // Finally by relevance (max_count descending)
-                const countA = parseInt(a.max_count || '0', 10);
-                const countB = parseInt(b.max_count || '0', 10);
-                return countB - countA;
-            });
-
-            grid.innerHTML = sortedForGrid.map(card => {
-                const imageUrl = card.image_url || '';
-                const count = card.max_count || 1;
-                
-                if (imageUrl && imageUrl.trim() !== '') {
-                    return `
-                        <div class="card-visual" data-image-url="${imageUrl}" data-card-name="${card.card_name}" style="cursor: pointer;">
-                            <img src="${imageUrl}" 
-                                 alt="${card.card_name}" 
-                                 loading="lazy"
-                                 referrerpolicy="no-referrer"
-                                 onerror="this.style.display='none'">
-                            <div class="card-count-badge">${count}</div>
-                            <div class="card-name-overlay">${card.card_name}</div>
-                        </div>
-                    `;
-                } else {
-                    return `
-                        <div class="card-visual no-image">
-                            <div class="fallback-content">
-                                <div class="fallback-icon">🃏</div>
-                                <div>${card.card_name}</div>
-                                <div class="card-count-badge">${count}</div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }).join('');
+            
+            // Default to Pokemon for types like "GBasic", "RStage1", etc.
+            if (csvType.match(/^[GRWLPFDMNC]/)) {
+                return 'Pokemon';
+            }
+            
+            return 'Pokemon';
         }
+
+
 
         function clearCardFilters() {
             const setSelect = document.getElementById('setFilterSelect');
@@ -3022,10 +3151,6 @@
             }
 
             updateTypeFilterButton();
-
-            const visualDiv = document.getElementById('filteredCardsVisual');
-            if (visualDiv) visualDiv.classList.remove('show');
-
             applyCardFilters();
         }
 
@@ -3129,20 +3254,40 @@
         }
         
         function filterDeckList() {
-            const searchTerm = document.getElementById('deckSearch').value.toLowerCase();
+            const searchTerm = document.getElementById('deckSearch').value.toLowerCase().trim();
             const deckSelect = document.getElementById('deckSelect');
-            const options = deckSelect.getElementsByTagName('option');
             
-            for (let i = 1; i < options.length; i++) { // Skip first "-- Bitte..." option
-                const optionText = options[i].textContent.toLowerCase();
-                if (optionText.includes(searchTerm)) {
-                    options[i].style.display = '';
-                } else {
-                    options[i].style.display = 'none';
-                }
+            // If search is empty, show all decks
+            if (!searchTerm) {
+                populateDeckDropdown();
+                return;
             }
             
-            // Also filter variant options based on search term
+            // Get all available deck names from cardsData
+            const allDecks = [...new Set(cardsData.map(c => c.archetype))].filter(Boolean).sort();
+            
+            // Filter decks based on search term
+            const filteredDecks = allDecks.filter(deck => deck.toLowerCase().includes(searchTerm));
+            
+            // Rebuild select with filtered options
+            deckSelect.innerHTML = '<option value="">-- Bitte einen gefilterten Deck wählen --</option>';
+            
+            if (filteredDecks.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '❌ Keine Decks gefunden';
+                option.disabled = true;
+                deckSelect.appendChild(option);
+            } else {
+                filteredDecks.forEach(deck => {
+                    const option = document.createElement('option');
+                    option.value = deck;
+                    option.textContent = deck;
+                    deckSelect.appendChild(option);
+                });
+            }
+            
+            // Also filter variant options
             filterVariantOptions(searchTerm);
         }
         
@@ -3176,10 +3321,155 @@
                 return;
             }
             
+            // Ensure alternative deck selector exists
+            createAlternativeDeckSelector();
+            
+            // Check if this deck has Limitless data
+            const hasLimitlessData = checkIfDeckHasLimitlessData(selectedDeck);
+            console.log('[onDeckChange] Has Limitless data:', hasLimitlessData, 'for:', selectedDeck);
+            
+            // Show/hide alternative deck selector
+            showAlternativeDeckSelector(!hasLimitlessData, selectedDeck);
+            
             console.log('[onDeckChange] Calling updateStats, updateVariantSelector, updateCardsDisplay');
             updateStats(selectedDeck);
             updateVariantSelector(selectedDeck);
             updateCardsDisplay();
+        }
+        
+        function checkIfDeckHasLimitlessData(deckName) {
+            // Normalize the deck name for comparison
+            const normalized = normalizeArchetypeName(deckName);
+            
+            // Check if deck exists in limitlessMatchupData
+            for (const key of Object.keys(limitlessMatchupData)) {
+                if (normalizeArchetypeName(key) === normalized) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        function findSimilarLimitlessDecks(cityLeagueDeckName) {
+            /**
+             * Find similar Limitless decks for a city league deck
+             * E.g., "Garchomp Roserade" -> ["Cynthia's Garchomp", "...]
+             */
+            const normalized = normalizeArchetypeName(cityLeagueDeckName).toLowerCase();
+            const keywords = normalized.split(' ').filter(k => k.length > 2);
+            
+            const similar = [];
+            for (const limitlessDeck of matchupsData) {
+                const limitlessName = normalizeArchetypeName(limitlessDeck.deck_name).toLowerCase();
+                
+                // Count matching keywords
+                let matchCount = 0;
+                keywords.forEach(keyword => {
+                    if (limitlessName.includes(keyword)) {
+                        matchCount++;
+                    }
+                });
+                
+                // If at least half of keywords match, consider it similar
+                if (matchCount >= Math.max(1, Math.ceil(keywords.length / 2))) {
+                    similar.push({
+                        name: limitlessDeck.deck_name,
+                        matches: matchCount,
+                        ranking: limitlessDeck.ranking || 999
+                    });
+                }
+            }
+            
+            // Sort by matches (descending) and then by ranking (ascending)
+            similar.sort((a, b) => {
+                if (b.matches !== a.matches) return b.matches - a.matches;
+                return a.ranking - b.ranking;
+            });
+            
+            return similar.map(d => d.name);
+        }
+        
+        function showAlternativeDeckSelector(show, cityLeagueDeck) {
+            const selector = document.getElementById('alternativeDeckSelector');
+            if (!selector) {
+                // Create the selector if it doesn't exist
+                createAlternativeDeckSelector();
+                return;
+            }
+            
+            if (!show) {
+                selector.style.display = 'none';
+                currentAlternativeDeckName = '';
+                return;
+            }
+            
+            // Show selector and populate with similar decks
+            selector.style.display = 'block';
+            const select = document.getElementById('alternativeDeckSelect');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">-- Wähle ein alternatives Limitless-Deck --</option>';
+            
+            const similarDecks = findSimilarLimitlessDecks(cityLeagueDeck);
+            similarDecks.forEach(deckName => {
+                const option = document.createElement('option');
+                option.value = deckName;
+                option.textContent = deckName;
+                select.appendChild(option);
+            });
+        }
+        
+        function createAlternativeDeckSelector() {
+            const variantSelector = document.getElementById('variantSelector');
+            if (!variantSelector) return;
+            
+            // Prüfe, ob Selector bereits existiert
+            if (document.getElementById('alternativeDeckSelector')) {
+                return;
+            }
+            
+            const selector = document.createElement('div');
+            selector.id = 'alternativeDeckSelector';
+            selector.style.display = 'none';
+            selector.style.marginTop = '20px';
+            selector.style.padding = '15px';
+            selector.style.background = '#fff3cd';
+            selector.style.borderRadius = '8px';
+            selector.style.borderLeft = '4px solid #ffc107';
+            
+            selector.innerHTML = `
+                <h3 style="margin-top: 0; color: #856404;">⚠️ Limitless-Daten nicht verfügbar</h3>
+                <p style="margin: 10px 0; color: #856404; font-size: 0.95em;">
+                    Dieses City League Deck hat keine Limitless-Matchup-Daten. 
+                    Wähle ein ähnliches Limitless-Deck, um Matchup-Informationen zu laden:
+                </p>
+                <select id="alternativeDeckSelect" onchange="onAlternativeDeckChange()" 
+                        style="width: 100%; padding: 10px; border: 2px solid #ffc107; border-radius: 4px; font-size: 14px;">
+                    <option value="">-- Wähle ein alternatives Limitless-Deck --</option>
+                </select>
+                <p style="margin-top: 10px; font-size: 0.85em; color: #666;">
+                    ℹ️ Die Platzierung bleibt vom City League Deck, nur Matchup-Daten werden vom alternativen Deck geladen.
+                </p>
+            `;
+            
+            variantSelector.parentNode.insertBefore(selector, variantSelector.nextSibling);
+        }
+        
+        function onAlternativeDeckChange() {
+            const alternativeSelect = document.getElementById('alternativeDeckSelect');
+            if (!alternativeSelect) return;
+            
+            currentAlternativeDeckName = alternativeSelect.value;
+            console.log('[onAlternativeDeckChange] Selected alternative deck:', currentAlternativeDeckName);
+            
+            // Refresh matchups display AND stats with alternative deck data
+            if (currentAlternativeDeckName) {
+                // Update stats with alternative deck
+                updateStatsForAlternativeDeck(currentAlternativeDeckName);
+                // Update matchups display
+                updateMatchupsDisplay(currentAlternativeDeckName);
+            }
         }
         
         let selectedVariants = [];
@@ -3288,27 +3578,44 @@
         function filterCards() {
             const searchInput = document.getElementById('cardSearchInput');
             const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            // Filter Desktop Table
             const tbody = document.getElementById('cardsBody');
+            if (tbody) {
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    // Skip loading/error rows
+                    if (row.cells.length === 1) {
+                        row.style.display = '';
+                        return;
+                    }
+                    
+                    const cardName = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
+                    const setName = row.cells[3] ? row.cells[3].textContent.toLowerCase() : '';
+                    
+                    if (cardName.includes(searchTerm) || setName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
             
-            if (!tbody) return;
-            
-            const rows = tbody.querySelectorAll('tr');
-            rows.forEach(row => {
-                // Skip loading/error rows
-                if (row.cells.length === 1) {
-                    row.style.display = '';
-                    return;
-                }
-                
-                const cardName = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
-                const setName = row.cells[3] ? row.cells[3].textContent.toLowerCase() : '';
-                
-                if (cardName.includes(searchTerm) || setName.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+            // Filter Mobile Card Grid
+            const gridContainer = document.getElementById('cardsGridMobile');
+            if (gridContainer) {
+                const cardItems = gridContainer.querySelectorAll('.card-item');
+                cardItems.forEach(cardItem => {
+                    const cardName = cardItem.querySelector('.card-item-name')?.textContent.toLowerCase() || '';
+                    const cardSet = cardItem.querySelector('.card-item-set')?.textContent.toLowerCase() || '';
+                    
+                    if (cardName.includes(searchTerm) || cardSet.includes(searchTerm)) {
+                        cardItem.style.display = '';
+                    } else {
+                        cardItem.style.display = 'none';
+                    }
+                });
+            }
         }
         
         function updateStats(deckName) {
@@ -3360,11 +3667,9 @@
                     document.getElementById('statWinRate').textContent = '-';
                 }
                 
-                // Ø PLATZIERUNG: City League avg placement
+                // Ø PLATZIERUNG: City League avg placement ONLY
                 if (cityLeagueMatch && cityLeagueMatch.new_avg_placement) {
                     document.getElementById('statMatches').textContent = cityLeagueMatch.new_avg_placement;
-                } else if (limitlessMatch && limitlessMatch.count) {
-                    document.getElementById('statMatches').textContent = limitlessMatch.count;
                 } else {
                     document.getElementById('statMatches').textContent = '-';
                 }
@@ -3373,7 +3678,9 @@
                 if (limitlessDeckInfo && limitlessDeckInfo.matchup) {
                     document.getElementById('statBalance').textContent = limitlessDeckInfo.matchup;
                 } else {
-                    const matchupBalance = getMatchupBalance(deckName);
+                    // Use alternative deck name for getMatchupBalance if available
+                    const deckForBalance = currentAlternativeDeckName || deckName;
+                    const matchupBalance = getMatchupBalance(deckForBalance);
                     if (matchupBalance) {
                         document.getElementById('statBalance').textContent = `${matchupBalance.over50}:${matchupBalance.under50}`;
                     } else if (cityLeagueMatch && cityLeagueMatch.status) {
@@ -3400,7 +3707,11 @@
                         console.log('[updateStats] Rebuilding limitlessMatchupData from matchupDetailsData');
                         limitlessMatchupData = buildLimitlessMatchupData(matchupDetailsData);
                     }
-                    updateMatchupsDisplay(deckName);
+                    
+                    // Use alternative deck name for matchups if available, otherwise use main deck name
+                    const deckForMatchups = currentAlternativeDeckName || deckName;
+                    console.log('[updateStats] Loading matchups for:', deckForMatchups, '(Main:', deckName, ', Alt:', currentAlternativeDeckName, ')');
+                    updateMatchupsDisplay(deckForMatchups);
                     
                     // SHOW/HIDE Matchups section when we have the data
                     const matchupsSection = document.getElementById('matchupsSection');
@@ -3518,6 +3829,59 @@
             });
 
             return { over50, under50 };
+        }
+        
+        function updateStatsForAlternativeDeck(alternativeDeckName) {
+            console.log('[updateStatsForAlternativeDeck] Updating stats for:', alternativeDeckName);
+            
+            // Get Limitless data for alternative deck from CSV
+            const limitlessMatch = matchupsData.find(m => 
+                normalizeArchetypeName(m.deck_name) === normalizeArchetypeName(alternativeDeckName)
+            );
+            
+            // Find Limitless deck stats from parsed HTML
+            let limitlessDeckInfo = null;
+            for (const [deckKey, stats] of Object.entries(limitlessDeckStats)) {
+                if (normalizeArchetypeName(deckKey) === normalizeArchetypeName(alternativeDeckName)) {
+                    limitlessDeckInfo = stats;
+                    break;
+                }
+            }
+            
+            console.log('[updateStatsForAlternativeDeck] Found limitlessDeckInfo:', !!limitlessDeckInfo, 'Found limitlessMatch:', !!limitlessMatch);
+            
+            // Update RANKING: Limitless HTML stats > Limitless CSV
+            if (limitlessDeckInfo && limitlessDeckInfo.rank) {
+                document.getElementById('statRanking').textContent = `#${limitlessDeckInfo.rank}`;
+            } else if (limitlessMatch && limitlessMatch.rank) {
+                document.getElementById('statRanking').textContent = `#${limitlessMatch.rank}`;
+            } else {
+                document.getElementById('statRanking').textContent = '-';
+            }
+            
+            // Update WIN RATE: Limitless HTML stats > Limitless CSV
+            if (limitlessDeckInfo && limitlessDeckInfo.wr) {
+                document.getElementById('statWinRate').textContent = limitlessDeckInfo.wr;
+            } else if (limitlessMatch && limitlessMatch.win_rate) {
+                document.getElementById('statWinRate').textContent = limitlessMatch.win_rate;
+            } else {
+                document.getElementById('statWinRate').textContent = '-';
+            }
+            
+            // Update VS TOP 20: Limitless HTML stats > getMatchupBalance
+            if (limitlessDeckInfo && limitlessDeckInfo.matchup) {
+                document.getElementById('statBalance').textContent = limitlessDeckInfo.matchup;
+            } else {
+                const matchupBalance = getMatchupBalance(alternativeDeckName);
+                if (matchupBalance) {
+                    document.getElementById('statBalance').textContent = `${matchupBalance.over50}:${matchupBalance.under50}`;
+                } else {
+                    document.getElementById('statBalance').textContent = '-';
+                }
+            }
+            
+            // NOTE: Ø PLATZIERUNG bleibt vom Haupt-City-League-Deck!
+            console.log('[updateStatsForAlternativeDeck] Placement stays from main City League deck');
         }
         
         function updateMatchupsDisplay(deckName) {
@@ -3818,6 +4182,9 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                     </tr>
                 `;
             }).join('');
+            
+            // Also render mobile card grid
+            renderCardGridMobile(deckCards);
         }
         
         function updateDeckVisual(deckCards) {
@@ -3862,6 +4229,40 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                         </div>
                     `;
                 }
+            }).join('');
+        }
+        
+        function renderCardGridMobile(deckCards) {
+            const gridContainer = document.getElementById('cardsGridMobile');
+            if (!gridContainer) return;
+            
+            if (deckCards.length === 0) {
+                gridContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">Keine Karten gefunden</div>';
+                return;
+            }
+            
+            gridContainer.innerHTML = deckCards.map(card => {
+                const percentage = parseFloat(card.percentage_in_archetype.replace(',', '.'));
+                const imageUrl = card.image_url || '';
+                const maxCount = card.max_count || '-';
+                
+                const imgHtml = imageUrl && imageUrl.trim() !== '' 
+                    ? `<img src="${imageUrl}" alt="${card.card_name}" referrerpolicy="no-referrer" onerror="this.style.opacity='0.3'">`
+                    : `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">🃏</div>`;
+                
+                return `
+                    <div class="card-item">
+                        ${imgHtml}
+                        <div class="card-item-count">${maxCount}</div>
+                        <div class="card-item-info">
+                            <div class="card-item-name">${card.card_name}</div>
+                            <div class="card-item-set">${card.set_code} ${card.set_number}</div>
+                        </div>
+                        <div class="card-item-actions">
+                            <button class="btn-add" data-identifier="${card.card_identifier}" data-max-count="${maxCount}" data-card-name="${card.card_name}" data-image-url="${imageUrl}" data-set-code="${card.set_code || ''}" data-set-number="${card.set_number || ''}">+ Add</button>
+                        </div>
+                    </div>
+                `;
             }).join('');
         }
         
@@ -3915,6 +4316,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                     type: cardType,
                     setCode: setCode || (cardData ? cardData.set_code : ''),
                     setNumber: setNumber || (cardData ? cardData.set_number : ''),
+                    setName: cardData ? cardData.set_name : '',
                     percentage_in_archetype: cardData ? cardData.percentage_in_archetype : '0'
                 });
             }
@@ -3948,11 +4350,12 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
             }
             
             deckList.innerHTML = myDeck.map(card => {
+                const imageUrl = card.imageUrl || '';
                 let cardVisual = '';
-                if (card.imageUrl && card.imageUrl.trim() !== '') {
+                if (imageUrl && imageUrl.trim() !== '') {
                     cardVisual = `
-                        <div style="width: 60px; height: 80px; margin-right: 10px; cursor: pointer;" data-image-url="${card.imageUrl}" data-card-name="${card.name}">
-                            <img src="${card.imageUrl}" alt="${card.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+                        <div style="width: 60px; height: 80px; margin-right: 10px; cursor: pointer;" data-image-url="${imageUrl}" data-card-name="${card.name}">
+                            <img src="${imageUrl}" alt="${card.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" referrerpolicy="no-referrer" onerror="this.style.display='none'">
                         </div>
                     `;
                 } else {
@@ -3971,7 +4374,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                             <br><small style="color: #666;">${card.setCode || ''} ${card.setNumber || ''}</small>
                         </div>
                         <div class="deck-card-controls">
-                            <button class="btn-add" data-identifier="${card.identifier}" data-max-count="${card.maxCount}" data-card-name="${card.name}" data-image-url="${card.imageUrl || ''}" data-set-code="${card.setCode || ''}" data-set-number="${card.setNumber || ''}">+</button>
+                            <button class="btn-add" data-identifier="${card.identifier}" data-max-count="${card.maxCount}" data-card-name="${card.name}" data-image-url="${imageUrl || card.imageUrl || ''}" data-set-code="${card.setCode || ''}" data-set-number="${card.setNumber || ''}">+</button>
                             <button class="btn-remove" data-card-name="${card.name}">-</button>
                         </div>
                     </div>
@@ -4063,32 +4466,30 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
             myDeck = [];
             let deckCards = cardsData.filter(c => c.archetype === selectedDeck);
             
-            // Separate cards into Core (>90%) and Optional (≤90%)
-            let coreCards = [];
-            let optionalCards = [];
-            
+            // Sort all cards by percentage (descending)
             deckCards.forEach(card => {
                 const percentage = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
-                if (percentage > 90) {
-                    coreCards.push(card);
-                } else {
-                    optionalCards.push(card);
-                }
+                card.percentage = percentage;
             });
             
-            // Sort both groups by type, then by percentage
-            coreCards = sortCardsByType(coreCards);
-            optionalCards = sortCardsByType(optionalCards);
+            deckCards.sort((a, b) => b.percentage - a.percentage);
             
             let totalCards = 0;
+            let addedEnergyTypes = new Set(); // Track which energies we've added
             
-            // Step 1: Add all Core cards (>90%)
-            for (const card of coreCards) {
+            // Step 1: Add cards from highest to lowest percentage until 60 cards
+            for (const card of deckCards) {
                 if (totalCards >= 60) break;
                 
                 // Berechne Durchschnitt: total_count / deck_count
                 const avgCount = parseFloat(card.total_count) / parseFloat(card.deck_count);
-                const recommendedCount = Math.round(avgCount);
+                let recommendedCount = Math.round(avgCount);
+                
+                // For energies, make sure we use the rounded value
+                const cardType = card.type || '';
+                if (cardType.includes('Energy')) {
+                    console.log('[autoComplete] Energy:', card.card_name, 'avgCount:', avgCount, 'rounded:', recommendedCount);
+                }
                 
                 const count = Math.min(
                     Math.max(1, recommendedCount || 1),
@@ -4106,41 +4507,90 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                         type: card.type || '',
                         setCode: card.set_code || '',
                         setNumber: card.set_number || '',
+                        setName: card.set_name || '',
                         percentage_in_archetype: card.percentage_in_archetype || '0'
                     });
                     totalCards += count;
+                    console.log('[autoComplete] Added:', card.card_name, 'count:', count, 'total:', totalCards);
+                    
+                    // Track energy types
+                    if (cardType.includes('Energy')) {
+                        addedEnergyTypes.add(card.card_name);
+                    }
                 }
             }
             
-            // Step 2: Fill remaining slots with Optional cards (≤90%)
-            for (const card of optionalCards) {
-                if (totalCards >= 60) break;
+            // Step 2: Check for Pokemon-Energy dependencies
+            // Wenn Pokemon mit bestimmtem Type im Deck, check ob entsprechende Energy vorhanden ist
+            const pokemonInDeck = myDeck.filter(c => {
+                const type = c.type || '';
+                return type && !type.includes('Energy');
+            });
+            
+            for (const pokemon of pokemonInDeck) {
+                const pokemonType = pokemon.type || '';
+                let requiredEnergy = null;
                 
-                const avgCount = parseFloat(card.total_count) / parseFloat(card.deck_count);
-                const recommendedCount = Math.round(avgCount);
+                // Map Pokemon types to required energies
+                if (pokemonType.startsWith('D')) {
+                    requiredEnergy = 'Darkness Energy';
+                } else if (pokemonType.startsWith('G')) {
+                    requiredEnergy = 'Grass Energy';
+                } else if (pokemonType.startsWith('R')) {
+                    requiredEnergy = 'Fire Energy';
+                } else if (pokemonType.startsWith('W')) {
+                    requiredEnergy = 'Water Energy';
+                } else if (pokemonType.startsWith('L')) {
+                    requiredEnergy = 'Lightning Energy';
+                } else if (pokemonType.startsWith('P')) {
+                    requiredEnergy = 'Psychic Energy';
+                } else if (pokemonType.startsWith('F')) {
+                    requiredEnergy = 'Fighting Energy';
+                } else if (pokemonType.startsWith('M')) {
+                    requiredEnergy = 'Metal Energy';
+                } else if (pokemonType.startsWith('N')) {
+                    requiredEnergy = 'Dragon Energy';
+                } else if (pokemonType.startsWith('C')) {
+                    requiredEnergy = 'Colorless Energy';
+                }
                 
-                const count = Math.min(
-                    recommendedCount || 1,
-                    4,
-                    60 - totalCards
-                );
-                
-                if (count > 0) {
-                    myDeck.push({
-                        identifier: card.card_identifier,
-                        name: card.card_name,
-                        count: count,
-                        maxCount: Math.min(4, recommendedCount || 4),
-                        imageUrl: card.image_url || '',
-                        type: card.type || '',
-                        setCode: card.set_code || '',
-                        setNumber: card.set_number || '',
-                        percentage_in_archetype: card.percentage_in_archetype || '0'
-                    });
-                    totalCards += count;
+                // Check if energy already in deck
+                if (requiredEnergy && !addedEnergyTypes.has(requiredEnergy)) {
+                    // Check if we have that energy in the database
+                    const energyCard = deckCards.find(c => 
+                        c.card_name === requiredEnergy && 
+                        c.archetype === selectedDeck
+                    );
+                    
+                    if (energyCard && totalCards < 60) {
+                        const avgCount = parseFloat(energyCard.total_count) / parseFloat(energyCard.deck_count);
+                        const recommendedCount = Math.round(avgCount);
+                        const count = Math.min(
+                            Math.max(1, recommendedCount),
+                            4,
+                            60 - totalCards
+                        );
+                        
+                        myDeck.push({
+                            identifier: energyCard.card_identifier,
+                            name: energyCard.card_name,
+                            count: count,
+                            maxCount: 4,
+                            imageUrl: energyCard.image_url || '',
+                            type: energyCard.type || '',
+                            setCode: energyCard.set_code || '',
+                            setNumber: energyCard.set_number || '',
+                            setName: energyCard.set_name || '',
+                            percentage_in_archetype: energyCard.percentage_in_archetype || '0'
+                        });
+                        totalCards += count;
+                        addedEnergyTypes.add(requiredEnergy);
+                        console.log('[autoComplete] Auto-added', requiredEnergy, 'for Pokemon:', pokemon.name);
+                    }
                 }
             }
             
+            console.log('[autoComplete] Finished with', totalCards, 'cards');
             updateDeckDisplay();
         }
         
@@ -4303,7 +4753,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
             
             // Helper function to determine card category
             function getCategory(card) {
-                const cardType = card.type || '';
+                const cardType = card.type || card.card_type || '';
                 const cardName = card.card_name || card.name || '';
                 
                 // Check if it's a Pokemon (type starts with element letter)
@@ -4349,9 +4799,9 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                 
                 // SECOND: Both are Pokemon - sort by element and evolution
                 if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
-                    // Get element and evolution from 'type' field (e.g., "GBasic", "RStage 1", "WStage 2")
-                    const cardTypeA = a.type || '';
-                    const cardTypeB = b.type || '';
+                    // Get element and evolution from 'type' or 'card_type' field (e.g., "GBasic", "RStage 1", "WStage 2")
+                    const cardTypeA = a.type || a.card_type || '';
+                    const cardTypeB = b.type || b.card_type || '';
                     
                     const elementA = cardTypeA.charAt(0);
                     const elementB = cardTypeB.charAt(0);
@@ -4452,51 +4902,84 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
             modal.classList.add('show');
         }
         
+        function fixImageUrl(card) {
+            /**
+             * Korrigiert image URLs für japanische Karten
+             * Japanische Karten haben leer set_name und falsche URL-Parameter:
+             * - tpci -> tpc
+             * - EN -> JP
+             * - Kartennummer muss 3-stellig sein (74 -> 074)
+             */
+            if (!card || !card.image_url && !card.imageUrl) return '';
+            
+            const imageUrl = card.image_url || card.imageUrl;
+            const setName = card.set_name || card.setName || '';
+            const setCode = card.set_code || card.setCode || '';
+            const setNumber = card.set_number || card.setNumber || '';
+            
+            // Prüfe ob japanische Karte (set_name ist leer)
+            if (!setName || setName.trim() === '') {
+                // Das ist wahrscheinlich eine japanische Karte
+                let url = imageUrl;
+                
+                // Ersetze tpci mit tpc (zur Japanese Collection)
+                url = url.replace('/tpci/', '/tpc/');
+                
+                // Ersetze _R_EN_ mit _R_JP_ (English -> Japanese)
+                url = url.replace(/_R_EN_/, '_R_JP_');
+                
+                // Padde set_number mit 0 (M3_41 -> M3_041)
+                if (setCode && setNumber) {
+                    const paddedNumber = setNumber.toString().padStart(3, '0');
+                    // Ersetze die alte Nummer mit der neuen über Regex
+                    url = url.replace(RegExp(`/${setCode}_(\\d+)_`), `/${setCode}_${paddedNumber}_`);
+                }
+                
+                console.log('[fixImageUrl] Japanese card:', card.name || card.card_name, 'Original:', imageUrl, 'Fixed:', url);
+                return url;
+            }
+            
+            return imageUrl;
+        }
+        
         function generateFilteredCardsImage() {
-            if (filteredCards.length === 0) {
+            // Generate image view for filtered cards list
+            if (!filteredCards || filteredCards.length === 0) {
                 alert('Keine Karten zum Anzeigen! Bitte Filter anwenden.');
                 return;
             }
             
-            // Show images in the Karten-Filter tab itself with LARGE card visual
-            const grid = document.getElementById('filteredGrid');
+            const modal = document.getElementById('filteredCardsModal');
+            const grid = document.getElementById('filteredCardGrid');
             
-            grid.innerHTML = filteredCards.map(card => {
+            // Sort cards by type before displaying
+            const sortedCards = sortCardsByType([...filteredCards]);
+            
+            grid.innerHTML = sortedCards.map(card => {
                 const imageUrl = card.image_url || '';
                 const count = card.max_count || 1;
                 
                 if (imageUrl && imageUrl.trim() !== '') {
                     return `
-                        <div class="card-visual" data-image-url="${imageUrl}" data-card-name="${card.card_name}" style="cursor: pointer;" onclick="showCardImage('${imageUrl.replace(/'/g, "\\'")}', '${card.card_name.replace(/'/g, "\\'")}')">
+                        <div class="compact-card" data-image-url="${imageUrl}" data-card-name="${card.card_name}" style="cursor: pointer;">
                             <img src="${imageUrl}" 
                                  alt="${card.card_name}" 
                                  loading="lazy"
                                  referrerpolicy="no-referrer"
                                  onerror="this.style.display='none'">
-                            <div class="card-count-badge">${count}</div>
-                            <div class="card-name-overlay">${card.card_name}</div>
+                            <div class="compact-badge">${count}</div>
                         </div>
                     `;
                 } else {
                     return `
-                        <div class="card-visual" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <div style="flex-direction: column;">
-                                <div style="color: white; text-align: center; padding: 10px; font-size: 0.85em;">${card.card_name}</div>
-                                <div class="card-count-badge" style="position: static; margin-top: 10px;">${count}</div>
-                            </div>
+                        <div class="compact-card" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="compact-badge" style="position: static; margin-top: 10px;">${count}</div>
                         </div>
                     `;
                 }
             }).join('');
             
-            // Make sure the visual section is visible
-            const visualDiv = document.getElementById('filteredCardsVisual');
-            if (visualDiv) {
-                visualDiv.classList.add('show');
-            }
-            
-            // Scroll to the visual section
-            document.getElementById('filteredCardsVisual').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            modal.classList.add('show');
         }
         
         function generateDeckCardsImage() {
@@ -4580,6 +5063,11 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
             const modal = document.getElementById('imageViewModal');
             modal.classList.remove('show');
         }
+        
+        function closeFiltedCardsModal() {
+            const modal = document.getElementById('filteredCardsModal');
+            modal.classList.remove('show');
+        }
     </script>
     
     <!-- Image View Modal -->
@@ -4633,11 +5121,6 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                         <span id="filteredCardCount">0 Karten</span>
                     </div>
 
-                    <div class="filtered-cards-visual" id="filteredCardsVisual">
-                        <h3>🃏 Karten-Übersicht</h3>
-                        <div class="filtered-grid" id="filteredGrid"></div>
-                    </div>
-
                     <div class="cards-table">
                         <table>
                             <thead>
@@ -4656,6 +5139,17 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+                
+                <!-- Filtered Cards Modal -->
+                <div id="filteredCardsModal" class="image-view-modal" onclick="if(event.target === this) closeFiltedCardsModal()">
+                    <div class="image-view-content">
+                        <div class="image-view-header">
+                            <h3>🎨 Gefilterte Karten Übersicht</h3>
+                            <button class="image-view-close" onclick="closeFiltedCardsModal()">✕</button>
+                        </div>
+                        <div id="filteredCardGrid" class="compact-card-grid"></div>
                     </div>
                 </div>
             </div>

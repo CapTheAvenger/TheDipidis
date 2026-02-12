@@ -234,7 +234,40 @@ class CardDatabaseLookup:
     def __init__(self, csv_path: str):
         self.csv_path = csv_path
         self.cards: Dict[str, List[Dict[str, str]]] = {}  # name -> list of card variants
+        self.english_set_codes: set = set()  # Cache of English set codes from limitlesstcg.com/cards
         self.load_database()
+        self.load_english_set_codes()
+    
+    def load_english_set_codes(self):
+        """Load list of English set codes from limitlesstcg.com/cards."""
+        try:
+            print("[DEBUG] Loading English set codes from limitlesstcg.com/cards...")
+            url = "https://limitlesstcg.com/cards"
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            
+            with urllib.request.urlopen(req, timeout=10) as response:
+                html = response.read().decode('utf-8')
+            
+            # Find all set codes in the HTML (they appear as data-set="XXX" or in URLs like /cards/XXX)
+            set_pattern = r'(?:data-set="|/cards/)([A-Z0-9]{2,5})(?:"|/|\s)'
+            matches = re.findall(set_pattern, html)
+            self.english_set_codes = set(matches)
+            
+            print(f"[DEBUG] Loaded {len(self.english_set_codes)} English set codes: {sorted(self.english_set_codes)}")
+        except Exception as e:
+            print(f"[DEBUG] Failed to load English set codes: {e}")
+            # Fallback: hardcode known English sets
+            self.english_set_codes = {
+                'PRE', 'SFA', 'ASC', 'MEG', 'MEP', 'SP', 'SVE', 'SCR', 'SSH', 
+                'MEW', 'BLK', 'SSP', 'SVI', 'TEF', 'TWM', 'PAR', 'PAF', 'PAL', 
+                'OBF', 'SVP', 'CRZ', 'SIT', 'LOR', 'PGO', 'ASR', 'BRS', 'FST', 
+                'CEL', 'EVS', 'CRE', 'BST', 'SHF', 'VIV', 'CPA', 'DAA', 'RCL'
+            }
+            print(f"[DEBUG] Using fallback English set codes: {len(self.english_set_codes)} sets")
+    
+    def is_japanese_set(self, set_code: str) -> bool:
+        """Check if set code is Japanese (not in English set list)."""
+        return set_code.upper() not in self.english_set_codes
     
     def normalize_name(self, name: str) -> str:
         """Normalize card name for matching."""
@@ -413,48 +446,26 @@ class CardDatabaseLookup:
         card_number_raw = card_number.replace('-', '_')
         card_number_no_pad = card_number_raw.lstrip('0') or '0'
         card_number_padded = card_number_no_pad.zfill(3)
-        rarity = rarity.upper()
         rarity_short = 'R'
-
-        # Always try EN first, then JP (JP images often use non-padded numbers)
-        en_url = (
-            f"https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/"
-            f"{set_code}/{set_code}_{card_number_padded}_{rarity_short}_EN_LG.png"
-        )
-        jp_url_no_pad = (
-            f"https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/"
-            f"{set_code}/{set_code}_{card_number_no_pad}_{rarity_short}_JP_LG.png"
-        )
-        jp_url_padded = (
-            f"https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/"
-            f"{set_code}/{set_code}_{card_number_padded}_{rarity_short}_JP_LG.png"
-        )
-
-        # Try EN image first, fallback to JP if not found
-        import urllib.request
-        try:
-            req = urllib.request.Request(en_url, method='HEAD')
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                if resp.status == 200:
-                    return en_url
-        except Exception:
-            pass
-        try:
-            req = urllib.request.Request(jp_url_no_pad, method='HEAD')
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                if resp.status == 200:
-                    return jp_url_no_pad
-        except Exception:
-            pass
-        try:
-            req = urllib.request.Request(jp_url_padded, method='HEAD')
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                if resp.status == 200:
-                    return jp_url_padded
-        except Exception:
-            pass
-        # If neither found, return EN by default
-        return en_url
+        
+        # Check if Japanese set
+        is_japanese = self.is_japanese_set(set_code)
+        
+        if is_japanese:
+            # Japanese card: use /tpc/, _JP_, NO padding (41 bleibt 41, nicht 041)
+            url = (
+                f"https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/"
+                f"{set_code}/{set_code}_{card_number_no_pad}_{rarity_short}_JP_LG.png"
+            )
+            print(f"[DEBUG] Japanese card detected: {set_code} {card_number} -> {url}")
+        else:
+            # English card: use /tpci/, _EN_, WITH padding (41 wird 041)
+            url = (
+                f"https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/"
+                f"{set_code}/{set_code}_{card_number_padded}_{rarity_short}_EN_LG.png"
+            )
+        
+        return url
     
     def get_card_info(self, card_name: str) -> Optional[Dict[str, str]]:
         """Get card info with proper handling of basic energies."""

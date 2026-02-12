@@ -1572,6 +1572,7 @@
         
         // Global data storage - MUST be at the top before any functions
         let cardsData = [];
+        let allCardsDatabase = [];  // All 8788 cards from all_cards_database.csv for searching all versions
         let matchupsData = [];
         let matchupDetailsData = [];
         let cityLeagueData = [];
@@ -1702,9 +1703,132 @@
             }
         }
 
+        // Load all cards from all_cards_database.csv for searching all versions
+        async function loadAllCardsDatabase() {
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(BASE_PATH + `all_cards_database.csv?t=${timestamp}`);
+                if (response.ok) {
+                    const text = await response.text();
+                    allCardsDatabase = parseCSV(text);
+                    console.log('✅ Loaded all_cards_database - Entries:', allCardsDatabase.length);
+                    if (allCardsDatabase.length > 0) {
+                        console.log('First card:', allCardsDatabase[0]);
+                    }
+                } else {
+                    console.warn('all_cards_database.csv not found');
+                }
+            } catch (error) {
+                console.error('Error loading all_cards_database:', error);
+            }
+        }
+
+        // Load CardMarket prices from cardmarket_prices.csv
+        let cardmarketPrices = new Map(); // Key: "SET/NUMBER", Value: {price, url}
+        async function loadCardMarketPrices() {
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(BASE_PATH + `cardmarket_prices.csv?t=${timestamp}`);
+                if (response.ok) {
+                    const text = await response.text();
+                    // Parse CSV with proper handling of quoted fields (comma-delimited)
+                    const lines = text.split('\n');
+                    if (lines.length === 0) return;
+                    
+                    // Parse header
+                    let headerLine = lines[0];
+                    if (headerLine.charCodeAt(0) === 0xFEFF) {
+                        headerLine = headerLine.substr(1);
+                    }
+                    const headers = parseCSVLine(headerLine);
+                    
+                    // Parse data rows
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+                        
+                        const values = parseCSVLine(line);
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            row[header] = values[index] || '';
+                        });
+                        
+                        const set = (row.set || '').trim().toUpperCase();
+                        const num = (row.number || '').trim();
+                        const version = (row.version || '').trim();
+                        
+                        if (set && num && version) {
+                            // Key: SET/NUMBER/VERSION (e.g., "MEG/184/3")
+                            const key = set + '/' + num + '/' + version;
+                            cardmarketPrices.set(key, {
+                                price: (row.price_eur || '').trim(),
+                                url: (row.cardmarket_url || '').trim(),
+                                version: version
+                            });
+                        }
+                    }
+                    
+                    console.log('✅ Loaded CardMarket Prices - Entries:', cardmarketPrices.size);
+                    if (cardmarketPrices.size > 0) {
+                        const sample = Array.from(cardmarketPrices.entries())[0];
+                        console.log('Sample:', sample[0], '->', sample[1]);
+                    }
+                } else {
+                    console.warn('cardmarket_prices.csv not found (status:', response.status, ')');
+                }
+            } catch (error) {
+                console.error('Error loading CardMarket prices:', error);
+            }
+        }
+        
+        // Helper function to parse CSV line with quoted field support
+        function parseCSVLine(line) {
+            const fields = [];
+            let current = '';
+            let insideQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                const nextChar = line[i + 1];
+                
+                if (char === '"') {
+                    if (insideQuotes && nextChar === '"') {
+                        // Escaped quote
+                        current += '"';
+                        i++; // Skip next quote
+                    } else {
+                        // Toggle quote state
+                        insideQuotes = !insideQuotes;
+                    }
+                } else if (char === ',' && !insideQuotes) {
+                    // Field separator
+                    let trimmed = current.trim();
+                    // Remove surrounding quotes if present
+                    if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+                        trimmed = trimmed.slice(1, -1);
+                    }
+                    fields.push(trimmed);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            // Add last field
+            let trimmed = current.trim();
+            // Remove surrounding quotes if present
+            if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+                trimmed = trimmed.slice(1, -1);
+            }
+            fields.push(trimmed);
+            return fields;
+        }
+
         // Load data on page load
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCardsData();
+            await loadAllCardsDatabase();  // Load all versions
+            await loadCardMarketPrices();  // Load CardMarket prices
             await loadCityLeagueData();
             await loadMatchupsData();
             buildMetaOptionsFromCards();
@@ -3066,33 +3190,101 @@
             return selected;
         }
 
+        function handleCardSearchInput() {
+            const searchInput = document.getElementById('cardSearchInput');
+            const suggestionsDiv = document.getElementById('cardSearchSuggestions');
+            const searchTerm = (searchInput.value || '').toLowerCase().trim();
+            
+            // Leere Eingabe = keine Vorschläge
+            if (searchTerm.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                applyCardFilters(); // Zeige alle Karten
+                return;
+            }
+            
+            // Sammle alle eindeutigen Kartennamen aus cardsData
+            const uniqueCardNames = new Set();
+            if (cardsData && cardsData.length > 0) {
+                cardsData.forEach(card => {
+                    const cardName = card.name || card.card_name || '';
+                    if (cardName) uniqueCardNames.add(cardName);
+                });
+            }
+            
+            // Filtere Vorschläge: Kartennamen die den Suchbegriff enthalten
+            const suggestions = Array.from(uniqueCardNames)
+                .filter(name => name.toLowerCase().includes(searchTerm))
+                .sort()
+                .slice(0, 15); // Max 15 Vorschläge
+            
+            // Zeige/verstecke Dropdown
+            if (suggestions.length === 0) {
+                suggestionsDiv.style.display = 'none';
+            } else {
+                suggestionsDiv.style.display = 'block';
+                suggestionsDiv.innerHTML = suggestions.map(name => {
+                    // Finde das Kartenbild für die Vorschau
+                    const cardData = cardsData.find(c => (c.name || c.card_name) === name);
+                    const imageUrl = cardData ? (cardData.image_url || cardData.imageUrl || '') : '';
+                    
+                    return `<div class="search-suggestion" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; gap: 10px; align-items: center; transition: background 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'" onclick="selectCardSuggestion('${name.replace(/'/g, "\\'")}')">
+                        ${imageUrl ? `<img src="${imageUrl}" style="width: 40px; height: 56px; border-radius: 4px; object-fit: cover;">` : ''}
+                        <span style="flex: 1; font-size: 14px;">${name}</span>
+                    </div>`;
+                }).join('');
+            }
+            
+            // Wende auch aktuell die Filter an während man tippt
+            applyCardFilters();
+        }
+        
+        function selectCardSuggestion(cardName) {
+            const searchInput = document.getElementById('cardSearchInput');
+            searchInput.value = cardName;
+            document.getElementById('cardSearchSuggestions').style.display = 'none';
+            applyCardFilters();
+        }
+
         function applyCardFilters() {
             const setFilter = document.getElementById('setFilterSelect');
             const selectedSet = setFilter ? setFilter.value : '';
             const searchInput = document.getElementById('cardSearchInput');
-            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
             const selectedTypes = getSelectedCardTypes();
             
             console.log('applyCardFilters called:');
-            console.log('  searchInput element:', searchInput);
-            console.log('  searchInput.value:', searchInput ? searchInput.value : 'NULL');
-            console.log('  searchTerm after trim/lowercase:', searchTerm);
+            console.log('  searchTerm:', searchTerm);
             console.log('  selectedSet:', selectedSet);
             console.log('  cardsData length:', cardsData.length);
 
+            // Main filter with cardsData - ALSO apply search term
             const cardMap = new Map();
 
             cardsData.forEach(card => {
                 const setCode = (card.set_code || '').trim();
                 const cardNumber = (card.set_number || '').trim();
-                const cardName = (card.card_name || '').trim().toLowerCase();
+                const cardName = (card.card_name || '').trim();
+                const cardNameLower = cardName.toLowerCase();
+                
                 if (!cardName) return;
 
+                // Filter by set
                 if (selectedSet && setCode !== selectedSet) return;
-                
-                // Filter by search term
-                if (searchTerm && !cardName.includes(searchTerm)) {
-                    return;
+
+                // APPLY SEARCH TERM FILTER - normalize for special characters
+                if (searchTerm) {
+                    const normalizedName = cardNameLower
+                        .replace(/['']/g, "'")
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    const normalizedSearch = searchTerm
+                        .replace(/['']/g, "'")
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    
+                    if (!normalizedName.includes(normalizedSearch)) {
+                        return;
+                    }
                 }
 
                 // Use the actual type from CSV for filtering
@@ -3102,7 +3294,7 @@
                 // Filter by selected types
                 if (selectedTypes.size > 0 && !selectedTypes.has(cardType)) return;
 
-                const key = `${cardName}|${setCode}|${cardNumber}`;
+                const key = `${cardNameLower}|${setCode}|${cardNumber}`;
                 const totalCount = parseInt(card.total_count || '0', 10) || 0;
                 const maxCount = parseInt(card.max_count || '0', 10) || 0;
 
@@ -3112,7 +3304,7 @@
                         set_code: setCode,
                         set_number: cardNumber,
                         card_type: cardType,
-                        type: csvType,  // Keep original type field for sorting
+                        type: csvType,
                         total_count: totalCount,
                         max_count: maxCount,
                         image_url: card.image_url || '',
@@ -3126,12 +3318,107 @@
             });
 
             filteredCards = Array.from(cardMap.values());
-            console.log('applyCardFilters - Filtered cards count:', filteredCards.length, 'with searchTerm:', searchTerm);
+            console.log('applyCardFilters - Main filter shows:', filteredCards.length, 'cards');
             
             // Sort by card type first
             filteredCards = sortCardsByType(filteredCards);
             
             renderFilteredCards();
+
+            // If search term exists, ALSO show search results section with all versions below
+            if (searchTerm) {
+                showSearchResults(searchTerm, selectedSet, selectedTypes);
+            } else {
+                // Hide artwork section if no search term
+                const artworkSection = document.getElementById('cardArtworkSection');
+                if (artworkSection) {
+                    artworkSection.style.display = 'none';
+                }
+            }
+        }
+
+        function showSearchResults(searchTerm, selectedSet, selectedTypes) {
+            // Use allCardsDatabase for searching all versions
+            const sourceData = allCardsDatabase.length > 0 ? allCardsDatabase : cardsData;
+            const cardMap = new Map();
+
+            sourceData.forEach(card => {
+                const setCode = (card.set || card.set_code || '').trim();
+                const cardNumber = (card.number || card.set_number || '').trim();
+                const cardName = (card.name || card.card_name || '').trim();
+                const cardNameLower = cardName.toLowerCase();
+                
+                if (!cardName) return;
+
+                // Filter by set
+                if (selectedSet && setCode !== selectedSet) return;
+                
+                // Filter by search term - handle special characters like apostrophes
+                if (searchTerm) {
+                    // Normalize both strings for comparison
+                    const normalizedName = cardNameLower
+                        .replace(/['']/g, "'")  // Normalize apostrophes
+                        .replace(/\s+/g, ' ')  // Normalize spaces
+                        .trim();
+                    const normalizedSearch = searchTerm
+                        .replace(/['']/g, "'")
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    
+                    if (!normalizedName.includes(normalizedSearch)) {
+                        return;
+                    }
+                }
+
+                // Use rarity from allCardsDatabase if available
+                const rarity = card.rarity || '';
+                const csvType = card.type || '';
+                const cardType = getCardTypeFromCsvType(csvType);
+                
+                // Filter by selected types
+                if (selectedTypes.size > 0 && !selectedTypes.has(cardType)) return;
+
+                // Use set+number as unique key to keep flat table structure
+                const key = `${cardNameLower}|${setCode}|${cardNumber}`;
+                const totalCount = parseInt(card.total_count || '0', 10) || 0;
+                const maxCount = parseInt(card.max_count || '0', 10) || 0;
+
+                if (!cardMap.has(key)) {
+                    cardMap.set(key, {
+                        card_name: cardName,
+                        card_name_lower: cardNameLower,
+                        set_code: setCode,
+                        set_number: cardNumber,
+                        card_type: cardType,
+                        type: csvType,
+                        total_count: totalCount,
+                        max_count: maxCount,
+                        image_url: card.image_url || '',
+                        rarity: rarity
+                    });
+                } else {
+                    const existing = cardMap.get(key);
+                    existing.total_count += totalCount;
+                    existing.max_count = Math.max(existing.max_count, maxCount);
+                }
+            });
+
+            const searchResults = Array.from(cardMap.values());
+            console.log('✅ showSearchResults - Found', searchResults.length, 'cards matching "' + searchTerm + '"');
+            
+            // Render search results to artwork section
+            renderSearchResults(searchResults);
+        }
+        
+        function renderSearchResults(results) {
+            // If there's only one unique card name, show artwork section
+            const uniqueNames = new Set(results.map(c => c.card_name.toLowerCase()));
+            if (uniqueNames.size === 1) {
+                // Show artwork section with all versions
+                showCardArtworks(results[0].card_name, results);
+            } else {
+                document.getElementById('cardArtworkSection').style.display = 'none';
+            }
         }
         
         function getCardTypeFromCsvType(csvType) {
@@ -3203,11 +3490,21 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `<td colspan="6" class="loading">Keine Karten gefunden.</td>`;
                 tbody.appendChild(row);
+                document.getElementById('cardArtworkSection').style.display = 'none';
                 return;
             }
 
             // Sort cards using the standard sorting function
             const sortedCards = sortCardsByType([...filteredCards]);
+
+            // Check if all filtered cards have the same name (for artwork display)
+            const uniqueNames = new Set(filteredCards.map(c => c.card_name.toLowerCase()));
+            if (uniqueNames.size === 1) {
+                // All cards are the same - show artwork section
+                showCardArtworks(filteredCards[0].card_name, filteredCards);
+            } else {
+                document.getElementById('cardArtworkSection').style.display = 'none';
+            }
 
             sortedCards.forEach(card => {
                 const row = document.createElement('tr');
@@ -3248,6 +3545,216 @@
 
                 tbody.appendChild(row);
             });
+        }
+        
+        // Store all card versions for artwork filtering
+        let currentCardArtworks = [];
+        let currentRarityFilter = 'all';
+        
+        function showCardArtworks(cardName, versions) {
+            const artworkSection = document.getElementById('cardArtworkSection');
+            
+            // Find all versions from allCardsDatabase (all versions), fallback to cardsData
+            const sourceData = allCardsDatabase.length > 0 ? allCardsDatabase : cardsData;
+            const allVersions = sourceData.filter(c => {
+                const cardDbName = (c.name || c.card_name || '').trim();
+                return cardDbName.toLowerCase() === cardName.toLowerCase();
+            });
+            
+            currentCardArtworks = allVersions;
+            console.log('🎨 showCardArtworks -', cardName, '- Found', allVersions.length, 'versions');
+            
+            if (allVersions.length === 0) {
+                artworkSection.style.display = 'none';
+                return;
+            }
+            
+            artworkSection.style.display = 'block';
+            
+            // Reset rarity filter and display all artworks
+            currentRarityFilter = 'all';
+            updateRarityButtons();
+            displayCardArtworks();
+        }
+        
+        function displayCardArtworks() {
+            const artworkGrid = document.getElementById('artworkGrid');
+            artworkGrid.innerHTML = '';
+            
+            // Filter by rarity if needed
+            let toDisplay = currentCardArtworks;
+            if (currentRarityFilter !== 'all') {
+                toDisplay = currentCardArtworks.filter(card => 
+                    getRarityCategory(card.rarity) === currentRarityFilter
+                );
+            }
+            
+            // Remove duplicates by set+number and filter out Japanese cards
+            const uniqueByVersion = new Map();
+            // English set codes to allow (filter out Japanese sets)
+            const englishSets = new Set(['SP', 'SS', 'RCL', 'EVS', 'FLI', 'SV', 'PAL', 'OSH', 'LOR', 'CRE', 'BRS', 'ASR', 'DAA', 'VIV', 'CEC', 'SSP', 'SFA', 'SCR', 'PRE', 'TEF', 'TWM', 'JTG', 'DRI', 'BLK', 'MEG', 'PFL', 'ALP', 'PMR', 'NSP', 'PSA', 'CLL']);
+            
+            toDisplay.forEach(card => {
+                const setCode = (card.set || card.set_code || '').trim().toUpperCase();
+                const setNumber = (card.number || card.set_number || '').trim();
+                
+                // Skip Japanese cards (check if set code is in English sets list)
+                if (!englishSets.has(setCode)) {
+                    console.log('Skipping Japanese card:', card.name || card.card_name, 'Set:', setCode);
+                    return;
+                }
+                
+                const key = setCode + '_' + setNumber;
+                if (!uniqueByVersion.has(key)) {
+                    uniqueByVersion.set(key, card);
+                }
+            });
+            
+            if (uniqueByVersion.size === 0) {
+                artworkGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #999;">Keine Versionen mit dieser Rarity gefunden.</div>';
+                return;
+            }
+            
+            console.log('displayCardArtworks - rendering', uniqueByVersion.size, 'cards');
+            uniqueByVersion.forEach((card, index) => {
+                const setCode = (card.set || card.set_code || '').trim();
+                const setNumber = (card.number || card.set_number || '').trim();
+                
+                console.log('Card', index, '- Code:', setCode, 'Num:', setNumber, 'URL:', card.image_url);
+                
+                const cardDiv = document.createElement('div');
+                cardDiv.style.cssText = 'display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid #ddd; border-radius: 6px; background: #f8f9fa;';
+                
+                const img = document.createElement('img');
+                img.src = card.image_url || '';
+                img.alt = card.name || card.card_name;
+                img.style.cssText = 'width: 100%; border-radius: 4px; cursor: pointer;';
+                img.onerror = () => {
+                    console.warn('❌ Image failed to load - set:', setCode, 'num:', setNumber);
+                };
+                img.onclick = () => showCardImage(card.image_url, card.name || card.card_name);
+                
+                const info = document.createElement('div');
+                info.style.cssText = 'font-size: 0.85em;';
+                const rarityLabel = getRarityLabel(card.rarity);
+                
+                info.style.textAlign = 'center';
+                
+                // Create info container
+                const infoContainer = document.createElement('div');
+                infoContainer.style.marginBottom = '6px';
+                infoContainer.innerHTML = `<strong>${setCode}</strong><br>#${setNumber}`;
+                info.appendChild(infoContainer);
+                
+                // Determine rarity version (1=Low, 2=Mid, 3=High)
+                const rarityCategory = getRarityCategory(card.rarity);
+                let version = '1';  // Default to Low
+                if (rarityCategory === 'mid') version = '2';
+                else if (rarityCategory === 'high') version = '3';
+                
+                // Get CardMarket price and URL using SET/NUMBER/VERSION key
+                const priceKey = setCode.toUpperCase() + '/' + setNumber + '/' + version;
+                const priceData = cardmarketPrices.get(priceKey);
+                
+                // Debug log (show first 3 cards only)
+                if (index < 3) {
+                    console.log('Price lookup -', priceKey, '- Found:', !!priceData, '- Rarity:', card.rarity, '- Category:', rarityCategory);
+                    if (priceData) console.log('  Price data:', priceData);
+                }
+                
+                // Create CardMarket link if available
+                if (priceData && priceData.url) {
+                    const link = document.createElement('a');
+                    link.href = priceData.url;  // Set href directly (safe from XSS)
+                    link.target = '_blank';
+                    link.style.cssText = 'text-decoration: none; cursor: pointer; display: block; margin-top: 4px;';
+                    
+                    // For Low Rarity (V1): Always show link only (no price)
+                    // For Mid/High (V2/V3): Show price if available, else link
+                    if (version === '1') {
+                        // Low Rarity: Link only
+                        link.innerHTML = '🔍 CardMarket';
+                        link.style.color = '#3498db';
+                        link.style.fontSize = '0.9em';
+                    } else {
+                        // Mid/High Rarity: Show price if scraped, else link
+                        if (priceData.price) {
+                            link.innerHTML = `💰 €${priceData.price}`;
+                            link.style.color = '#27ae60';
+                            link.style.fontWeight = 'bold';
+                            link.style.fontSize = '1.1em';
+                        } else {
+                            link.innerHTML = '🔍 CardMarket';
+                            link.style.color = '#3498db';
+                            link.style.fontSize = '0.9em';
+                        }
+                    }
+                    
+                    // Debug: log the actual link
+                    if (index < 3) {
+                        console.log('Created link for', priceKey, '- href:', link.href, '- version:', version, '- has price:', !!priceData.price);
+                    }
+                    
+                    info.appendChild(link);
+                }
+                
+                cardDiv.appendChild(img);
+                cardDiv.appendChild(info);
+                artworkGrid.appendChild(cardDiv);
+            });
+        }
+        
+        function filterCardArtworks(rarityFilter) {
+            currentRarityFilter = rarityFilter;
+            updateRarityButtons();
+            displayCardArtworks();
+        }
+        
+        function updateRarityButtons() {
+            const buttons = document.querySelectorAll('#cardArtworkSection .btn-sm');
+            buttons.forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+                btn.style.opacity = '0.6';
+            });
+            
+            // Highlight active button
+            const activeBtn = Array.from(buttons).find(btn => {
+                const onclick = btn.getAttribute('onclick');
+                return onclick.includes(`'${currentRarityFilter}'`);
+            });
+            if (activeBtn) {
+                activeBtn.classList.remove('btn-secondary');
+                activeBtn.classList.add('btn-primary');
+                activeBtn.style.opacity = '1';
+            }
+        }
+        
+        function getRarityCategory(rarity) {
+            if (!rarity) return 'all';
+            const r = rarity.toLowerCase();
+            // Low Rarity: Common, Uncommon, Rare, Holo Rare
+            if (r.includes('common') || r.includes('uncommon') || (r.includes('rare') && !r.includes('ultra') && !r.includes('rainbow') && !r.includes('special'))) return 'low';
+            // Mid Rarity: Ultra Rare, Rainbow Rare
+            if (r.includes('ultra') || r.includes('rainbow')) return 'mid';
+            // High Rarity: EX, V, VMAX, VSTAR, Special Art Rare
+            if (r.includes('ex') || r.includes('ex-') || r.includes(' v ') || r.includes(' v,') || r.includes('vmax') || r.includes('vstar') || r.includes('special')) return 'high';
+            return 'all';
+        }
+        
+        function getRarityLabel(rarity) {
+            if (!rarity) return 'Unknown';
+            const r = rarity.toLowerCase();
+            // Show rarity emojis without category labels
+            if (r.includes('uncommon')) return '◆ Uncommon';
+            if (r.includes('common')) return '● Common';
+            if (r.includes('holo')) return '✦ Holo Rare';
+            if (r.includes('rare')) return '★ Rare';
+            if (r.includes('rainbow')) return '🌈 Rainbow Rare';
+            if (r.includes('ultra')) return '💎 Ultra Rare';
+            if (r.includes('special')) return '🎨 Special Art';
+            if (r.includes('ex') || r.includes('ex-') || r.includes(' v ') || r.includes(' v,') || r.includes('vmax') || r.includes('vstar')) return '★★★ EX/V';
+            return rarity;
         }
 
         function copyFilteredCards() {
@@ -5209,7 +5716,10 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                         </div>
                         <div class="control-group">
                             <label for="cardSearchInput">🔍 Kartensuche</label>
-                            <input type="text" id="cardSearchInput" placeholder="Kartenname eingeben..." oninput="applyCardFilters()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                            <div style="position: relative;">
+                                <input type="text" id="cardSearchInput" placeholder="Kartenname eingeben..." oninput="handleCardSearchInput()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <div id="cardSearchSuggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+                            </div>
                         </div>
                         <div class="control-group">
                             <label for="cardTypeFiltersContainer">🧩 Kartentyp (Mehrfachauswahl)</label>
@@ -5246,6 +5756,24 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <!-- Search Results: All Artwork Versions Section -->
+                    <div id="cardArtworkSection" style="display: none; margin-top: 40px;">
+                        <h3 style="color: #2c3e50; margin-bottom: 20px;">🎨 Alle Versionen dieser Karte</h3>
+                        
+                    <!-- Rarity Filter -->
+                        <div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-sm btn-primary" onclick="filterCardArtworks('all')" id="rarityAllBtn" style="flex: 1 1 0%; min-width: 100px;">Alle</button>
+                            <button class="btn btn-sm btn-secondary" onclick="filterCardArtworks('low')" id="rarityLowBtn" style="flex: 1 1 0%; min-width: 100px;">Low Rarity</button>
+                            <button class="btn btn-sm btn-secondary" onclick="filterCardArtworks('mid')" id="rarityMidBtn" style="flex: 1 1 0%; min-width: 100px;">Mid Rarity</button>
+                            <button class="btn btn-sm btn-secondary" onclick="filterCardArtworks('high')" id="rarityHighBtn" style="flex: 1 1 0%; min-width: 100px;">High Rarity</button>
+                        </div>
+                        
+                        <!-- Artwork Grid -->
+                        <div id="artworkGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
                     </div>
                 </div>
                 

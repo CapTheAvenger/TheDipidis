@@ -1723,12 +1723,12 @@
             }
         }
 
-        // Load CardMarket prices from cardmarket_prices.csv
+        // Load CardMarket prices from data/cardmarket_prices.csv
         let cardmarketPrices = new Map(); // Key: "SET/NUMBER", Value: {price, url}
         async function loadCardMarketPrices() {
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(BASE_PATH + `cardmarket_prices.csv?t=${timestamp}`);
+            const response = await fetch(BASE_PATH + `data/cardmarket_prices.csv?t=${timestamp}`);
                 if (response.ok) {
                     const text = await response.text();
                     // Parse CSV with proper handling of quoted fields (comma-delimited)
@@ -1774,7 +1774,7 @@
                         console.log('Sample:', sample[0], '->', sample[1]);
                     }
                 } else {
-                    console.warn('cardmarket_prices.csv not found (status:', response.status, ')');
+                    console.warn('data/cardmarket_prices.csv not found (status:', response.status, ')');
                 }
             } catch (error) {
                 console.error('Error loading CardMarket prices:', error);

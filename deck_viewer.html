@@ -553,6 +553,24 @@
             z-index: 2;
         }
         
+        .card-visual .card-deck-count-badge {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            background: #28a745;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 11px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+        
         .card-visual .card-name-overlay {
             position: absolute;
             bottom: 0;
@@ -1601,6 +1619,12 @@
         let top10CityLeagueArchetypes = [];
         let limitlessDeckStats = {};
         let myDeck = [];
+        
+        // Helper function to get the count of a card in the deck
+        function getCardCountInDeck(cardIdentifier) {
+            const card = myDeck.find(c => c.identifier === cardIdentifier);
+            return card ? card.count : 0;
+        }
         let cardTypeDatabase = new Map();
         let filteredCards = [];
         let currentDeckCards = [];
@@ -1936,8 +1960,8 @@
                         // Remove any discovered metas that might already exist (prevent duplicates)
                         metaMainOptions = metaMainOptions.filter(opt => !discovered.has(opt.value));
                         
-                        // Now add the discovered metas in sorted order
-                        const ordered = Array.from(discovered).sort();
+                        // Now add the discovered metas in reverse sorted order (newest first)
+                        const ordered = Array.from(discovered).sort().reverse();
                         metaMainOptions.splice(insertIndex, 0, ...ordered.map(m => ({ label: m, value: m })));
                     }
                     
@@ -4703,9 +4727,10 @@
             
             // Update count with cumulative sum
             const cardCountTotal = deckCards.reduce((sum, card) => sum + (parseInt(card.max_count) || 1), 0);
+            const totalDecks = deckCards.length > 0 ? (deckCards[0].total_decks_in_archetype || '0') : '0';
             currentDeckCards = deckCards; // Store for filterCards() function
             document.getElementById('cardCount').textContent = `${deckCards.length} Karten`;
-            document.getElementById('cardCountSummary').textContent = `/ ${cardCountTotal} Total`;
+            document.getElementById('cardCountSummary').textContent = `/ ${cardCountTotal} Total / ${totalDecks} Decks`;
             
             // Sort cards by type (Pokemon, Supporter, Item, Tool, Stadium, Special Energy, Energy)
 console.log('BEFORE SORT - All cards count:', deckCards.length);
@@ -4772,6 +4797,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
             tbody.innerHTML = deckCards.map(card => {
                 const percentage = parseFloat(card.percentage_in_archetype.replace(',', '.'));
                 const imageUrl = card.image_url || '';
+                const deckCount = getCardCountInDeck(card.card_identifier);
                 
                 // Create thumbnail HTML
                 let thumbnailHtml;
@@ -4795,7 +4821,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                 return `
                     <tr>
                         <td>${thumbnailHtml}</td>
-                        <td class="card-count">${card.max_count}</td>
+                        <td class="card-count">${deckCount}/${card.max_count}</td>
                         <td><strong>${card.card_name}</strong>${aceSpecBadge}${sourceInfo}</td>
                         <td>${card.set_code || '-'}</td>
                         <td>${card.set_number || '-'}</td>
@@ -4827,6 +4853,8 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
             deckGrid.innerHTML = sortedCards.map(card => {
                 const imageUrl = card.image_url || '';
                 const count = card.max_count || 1;
+                const deckCount = getCardCountInDeck(card.card_identifier);
+                const percentage = card.percentage_in_archetype || '0';
                 
                 if (imageUrl && imageUrl.trim() !== '') {
                     return `
@@ -4836,8 +4864,9 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                                  loading="lazy"
                                  referrerpolicy="no-referrer"
                                  onerror="this.style.display='none'">
+                            ${deckCount > 0 ? `<div class="card-deck-count-badge">${deckCount}</div>` : ''}
                             <div class="card-count-badge">${count}</div>
-                            <div class="card-name-overlay">${card.card_name}</div>
+                            <div class="card-name-overlay">${card.card_name} (${percentage}%)</div>
                         </div>
                     `;
                 } else {
@@ -4845,7 +4874,8 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                         <div class="card-visual no-image">
                             <div class="fallback-content">
                                 <div class="fallback-icon">🃏</div>
-                                <div>${card.card_name}</div>
+                                <div>${card.card_name} (${percentage}%)</div>
+                                ${deckCount > 0 ? `<div class="card-deck-count-badge">${deckCount}</div>` : ''}
                                 <div class="card-count-badge">${count}</div>
                             </div>
                         </div>
@@ -4890,6 +4920,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                 const percentage = parseFloat(card.percentage_in_archetype.replace(',', '.'));
                 const imageUrl = card.image_url || '';
                 const maxCount = card.max_count || '-';
+                const deckCount = getCardCountInDeck(card.card_identifier);
                 const aceSpecBadge = card.is_ace_spec === 'Yes' ? '<span style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-weight: bold; display: inline-block; margin-top: 4px;">⭐ ACE SPEC</span>' : '';
                 
                 const imgHtml = imageUrl && imageUrl.trim() !== '' 
@@ -4919,6 +4950,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                 return `
                     <div class="card-item">
                         ${imgHtml}
+                        ${deckCount > 0 ? `<div class="card-deck-count-badge">${deckCount}</div>` : ''}
                         <div class="card-item-count">${maxCount}</div>
                         <div class="card-item-info">
                             <div class="card-item-name">${card.card_name}${aceSpecBadge}</div>
@@ -5034,6 +5066,9 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
             
             // Update visual grid
             updateMyDeckVisual();
+            
+            // Update archetype cards display to show updated deck counts
+            updateCardsDisplay();
             
             if (myDeck.length === 0) {
                 deckList.innerHTML = '<p style="text-align: center; color: #666;">Füge Karten von oben hinzu...</p>';

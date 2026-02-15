@@ -1943,7 +1943,7 @@
                 }
 
                 function buildMetaOptionsFromCards() {
-                    // Optional: neue Meta-Keys direkt nach City Leagues einfügen, falls Daten eine Meta-Spalte liefern
+                    // Optional: neue Meta-Keys die NICHT in der festen Liste sind hinzufügen
                     const existing = new Set(metaMainOptions.map(opt => opt.value));
                     const discovered = new Set();
                     cardsData.forEach(card => {
@@ -1954,13 +1954,10 @@
                     });
                     
                     if (discovered.size > 0) {
-                        // Find insertion point after 'all' option and remove any existing duplicates first
+                        // Find insertion point after 'all' option
                         const insertIndex = metaMainOptions.findIndex(opt => opt.value === 'all') + 1;
                         
-                        // Remove any discovered metas that might already exist (prevent duplicates)
-                        metaMainOptions = metaMainOptions.filter(opt => !discovered.has(opt.value));
-                        
-                        // Now add the discovered metas in reverse sorted order (newest first)
+                        // Add NEW discovered metas (die nicht in der festen Liste sind) in reverse sorted order
                         const ordered = Array.from(discovered).sort().reverse();
                         metaMainOptions.splice(insertIndex, 0, ...ordered.map(m => ({ label: m, value: m })));
                     }
@@ -4869,7 +4866,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                                  onerror="this.style.display='none'">
                             ${deckCount > 0 ? `<div class="card-deck-count-badge">${deckCount}</div>` : ''}
                             <div class="card-count-badge">${count}</div>
-                            <div class="card-name-overlay">${card.card_name} (${percentage}% | Ø ${avgCount}x)</div>
+                            <div class="card-name-overlay">${card.card_name} <span style="font-size: 0.85em;">(${percentage}% | Ø ${avgCount}x)</span></div>
                         </div>
                     `;
                 } else {
@@ -4877,7 +4874,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                         <div class="card-visual no-image">
                             <div class="fallback-content">
                                 <div class="fallback-icon">🃏</div>
-                                <div>${card.card_name} (${percentage}% | Ø ${avgCount}x)</div>
+                                <div>${card.card_name} <span style="font-size: 0.85em;">(${percentage}% | Ø ${avgCount}x)</span></div>
                                 ${deckCount > 0 ? `<div class="card-deck-count-badge">${deckCount}</div>` : ''}
                                 <div class="card-count-badge">${count}</div>
                             </div>

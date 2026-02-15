@@ -4855,6 +4855,9 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                 const count = card.max_count || 1;
                 const deckCount = getCardCountInDeck(card.card_identifier);
                 const percentage = card.percentage_in_archetype || '0';
+                const totalCount = parseInt(card.total_count || '0', 10) || 0;
+                const cardDeckCount = parseInt(card.deck_count || '0', 10) || 0;
+                const avgCount = cardDeckCount > 0 ? (totalCount / cardDeckCount).toFixed(1) : '0';
                 
                 if (imageUrl && imageUrl.trim() !== '') {
                     return `
@@ -4866,7 +4869,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                                  onerror="this.style.display='none'">
                             ${deckCount > 0 ? `<div class="card-deck-count-badge">${deckCount}</div>` : ''}
                             <div class="card-count-badge">${count}</div>
-                            <div class="card-name-overlay">${card.card_name} (${percentage}%)</div>
+                            <div class="card-name-overlay">${card.card_name} (${percentage}% | Ø ${avgCount}x)</div>
                         </div>
                     `;
                 } else {
@@ -4874,7 +4877,7 @@ console.log('BEFORE SORT - All cards count:', deckCards.length);
                         <div class="card-visual no-image">
                             <div class="fallback-content">
                                 <div class="fallback-icon">🃏</div>
-                                <div>${card.card_name} (${percentage}%)</div>
+                                <div>${card.card_name} (${percentage}% | Ø ${avgCount}x)</div>
                                 ${deckCount > 0 ? `<div class="card-deck-count-badge">${deckCount}</div>` : ''}
                                 <div class="card-count-badge">${count}</div>
                             </div>

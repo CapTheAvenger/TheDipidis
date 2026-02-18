@@ -1259,9 +1259,14 @@
             .controls select,
             .controls button {
                 min-height: 44px; /* Touch-Target Mindestgröße */
-                font-size: 16px; /* Verhindert Auto-Zoom auf iOS */
-                padding: 12px;
+                font-size: 14px; /* Kompakter für Mobile */
+                padding: 10px;
                 width: 100%;
+            }
+            
+            .control-group label {
+                font-size: 12px;
+                margin-bottom: 4px;
             }
 
             /* Grid-Layout für Datum-Filter auf Mobile: Stacked */
@@ -1585,7 +1590,10 @@
                         </div>
                         
                         <div id="cityLeagueMyDeckVisual" style="display: none;">
-                            <h3>🎴 Dein Deck Übersicht</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3 style="margin: 0;">🎴 Dein Deck Übersicht</h3>
+                                <button onclick="toggleDeckGridCompact()" id="deckGridToggleBtn" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9em;">📸 Kompakt</button>
+                            </div>
                             <div class="deck-grid" id="cityLeagueMyDeckGrid"></div>
                         </div>
                         
@@ -1907,6 +1915,12 @@
                     window.cardsByNameMap = cardsByNameMap;
                     console.log(`✅ Loaded ${allCardsDatabase.length} cards from all_cards_database.json`);
                     console.log(`📊 Karten mit mehreren Versionen:`, Object.keys(cardsByNameMap).filter(k => cardsByNameMap[k].length > 1).length);
+                    
+                    // Initialisiere Suche wenn sie existiert
+                    const searchInput = document.getElementById('cityLeagueDeckCardSearch');
+                    if (searchInput && searchInput.value.trim()) {
+                        searchDeckCards();
+                    }
                 } else {
                     console.error('❌ Failed to load all_cards_database.json');
                 }
@@ -2421,7 +2435,40 @@
             const container = document.getElementById('cityLeagueFullTable');
             if (!container) return;
             
-            let tableHTML = `
+            const isMobile = window.innerWidth <= 768;
+            let tableHTML = '';
+            
+            if (isMobile) {
+                // Mobile: Kompakte Version ohne Trend, Count Old, Best Placement
+                tableHTML = `
+                <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 0.85em;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <th style="padding: 8px 4px; text-align: left; font-weight: 600;">Deck</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600;">Count</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600;">Avg</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                
+                data.forEach(d => {
+                    const changeValue = parseInt(d.count_change || 0);
+                    const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
+                    const placementChange = parseFloat((d.avg_placement_change || '0').replace(',', '.'));
+                    const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
+                    
+                    tableHTML += `
+                        <tr style="border-bottom: 1px solid #ecf0f1;">
+                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.9em;">${d.archetype}</td>
+                            <td style="padding: 8px 4px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.85em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
+                            <td style="padding: 8px 4px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.85em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
+                        </tr>`;
+                });
+                
+                tableHTML += `</tbody></table>`;
+            } else {
+                // Desktop: Volle Version
+                tableHTML = `
                 <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                     <thead>
                         <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
@@ -2435,24 +2482,26 @@
                     </thead>
                     <tbody>`;
             
-            data.forEach(d => {
-                const trendColor = d.trend === 'VERBESSERT' ? '#27ae60' : d.trend === 'VERSCHLECHTERT' ? '#e67e22' : '#95a5a6';
-                const trendArrow = d.trend === 'VERBESSERT' ? '↑' : d.trend === 'VERSCHLECHTERT' ? '↓' : '→';
-                const changeValue = parseInt(d.count_change || 0);
-                const changeColor = changeValue > 0 ? '#27ae60' : '#e74c3c';
+                data.forEach(d => {
+                    const trendColor = d.trend === 'VERBESSERT' ? '#27ae60' : d.trend === 'VERSCHLECHTERT' ? '#e67e22' : '#95a5a6';
+                    const trendArrow = d.trend === 'VERBESSERT' ? '↑' : d.trend === 'VERSCHLECHTERT' ? '↓' : '→';
+                    const changeValue = parseInt(d.count_change || 0);
+                    const changeColor = changeValue > 0 ? '#27ae60' : '#e74c3c';
+                    
+                    tableHTML += `
+                        <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background=''">
+                            <td style="padding: 12px; font-weight: bold;">${d.archetype}</td>
+                            <td style="padding: 12px; text-align: center; font-size: 1.2em; color: ${trendColor}; font-weight: bold;">${trendArrow}</td>
+                            <td style="padding: 12px; text-align: center;">${d.old_count}</td>
+                            <td style="padding: 12px; text-align: center;">${d.new_count}</td>
+                            <td style="padding: 12px; text-align: center; color: ${changeColor}; font-weight: bold;">(${changeValue > 0 ? '+' : ''}${changeValue})</td>
+                            <td style="padding: 12px; text-align: center;">${d.new_avg_placement}</td>
+                        </tr>`;
+                });
                 
-                tableHTML += `
-                    <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background=''">
-                        <td style="padding: 12px; font-weight: bold;">${d.archetype}</td>
-                        <td style="padding: 12px; text-align: center; font-size: 1.2em; color: ${trendColor}; font-weight: bold;">${trendArrow}</td>
-                        <td style="padding: 12px; text-align: center;">${d.old_count}</td>
-                        <td style="padding: 12px; text-align: center;">${d.new_count}</td>
-                        <td style="padding: 12px; text-align: center; color: ${changeColor}; font-weight: bold;">(${changeValue > 0 ? '+' : ''}${changeValue})</td>
-                        <td style="padding: 12px; text-align: center;">${d.new_avg_placement}</td>
-                    </tr>`;
-            });
+                tableHTML += `</tbody></table>`;
+            }
             
-            tableHTML += `</tbody></table>`;
             container.innerHTML = tableHTML;
         }
         
@@ -3621,7 +3670,7 @@
                         
                         <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: 20px 1fr 20px; gap: 3px; z-index: 3; align-items: center;">
                             <button onclick="removeCardFromDeck('cityLeague', '${deckKeyEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; width: 20px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">−</button>
-                            <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; padding: 2px 6px; cursor: pointer; font-size: 12px; font-weight: bold; text-align: center;">★</button>
+                            <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; padding: 2px 4px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; min-width: 20px;">★</button>
                             <button onclick="addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; width: 20px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">+</button>
                         </div>
                         <div class="card-overlay">
@@ -4676,6 +4725,22 @@
                 searchInput.addEventListener('input', searchDeckCards);
             }
         });
+
+        function toggleDeckGridCompact() {
+            const grid = document.getElementById('cityLeagueMyDeckGrid');
+            const btn = document.getElementById('deckGridToggleBtn');
+            if (!grid || !btn) return;
+            
+            if (grid.classList.contains('mobile-compact-grid')) {
+                grid.classList.remove('mobile-compact-grid');
+                btn.textContent = '📸 Kompakt';
+                btn.style.background = '#6c757d';
+            } else {
+                grid.classList.add('mobile-compact-grid');
+                btn.textContent = '📊 Normal';
+                btn.style.background = '#28a745';
+            }
+        }
 
         function toggleCurrentCards() {
             const content = document.getElementById('currentCardsContent');

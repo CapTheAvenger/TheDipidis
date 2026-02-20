@@ -2106,17 +2106,25 @@
 
             if (globalPref && (globalPref === 'max' || globalPref === 'min')) {
                 const sorted = versions.slice().sort((a, b) => {
-                    const priorityA = getRarityPriority(a.rarity);
-                    const priorityB = getRarityPriority(b.rarity);
-                    return priorityA - priorityB;
+                    const priorityA = getRarityPriority(a.rarity, a.set);
+                    const priorityB = getRarityPriority(b.rarity, b.set);
+                    // Primary sort: by priority
+                    if (priorityA !== priorityB) {
+                        return priorityA - priorityB;
+                    }
+                    // Secondary sort (when priorities are equal): prefer later versions in the list
+                    // This assumes later versions in international_prints are newer/preferred
+                    const indexA = versions.indexOf(a);
+                    const indexB = versions.indexOf(b);
+                    return indexA - indexB; // Keep original order for stable sort
                 });
                 const selected = globalPref === 'max' ? sorted[sorted.length - 1] : sorted[0];
                 
                 // DEBUG: Log all versions and their priorities
                 console.log(`[getPreferredVersionForCard] All versions for "${cardName}":`, 
-                    versions.map(v => `${v.set} ${v.number} (${v.rarity || 'NO RARITY'}, priority: ${getRarityPriority(v.rarity)})`).join(', ')
+                    versions.map(v => `${v.set} ${v.number} (${v.rarity || 'NO RARITY'}, priority: ${getRarityPriority(v.rarity, v.set)})`).join(', ')
                 );
-                console.log(`[getPreferredVersionForCard] ${globalPref} rarity for "${cardName}": ${selected.set} ${selected.number} (${selected.rarity}, priority: ${getRarityPriority(selected.rarity)})`);
+                console.log(`[getPreferredVersionForCard] ${globalPref} rarity for "${cardName}": ${selected.set} ${selected.number} (${selected.rarity}, priority: ${getRarityPriority(selected.rarity, selected.set)})`);
                 return selected;
             }
 
@@ -2130,8 +2138,8 @@
 
             if (pref.mode === 'max' || pref.mode === 'min') {
                 const sorted = versions.slice().sort((a, b) => {
-                    const priorityA = getRarityPriority(a.rarity);
-                    const priorityB = getRarityPriority(b.rarity);
+                    const priorityA = getRarityPriority(a.rarity, a.set);
+                    const priorityB = getRarityPriority(b.rarity, b.set);
                     return priorityA - priorityB;
                 });
                 return pref.mode === 'max' ? sorted[sorted.length - 1] : sorted[0];
@@ -2140,8 +2148,15 @@
             return null;
         }
 
-        function getRarityPriority(rarity) {
-            if (!rarity) return 0;
+        function getRarityPriority(rarity, setCode = '') {
+            if (!rarity) {
+                // Special handling: Promo sets without rarity should be treated as mid-tier
+                const promoSets = ['MEP', 'PRE', 'SHP', 'PRO', 'MEE', 'BWP', 'XYP', 'SMP', 'SWP', 'SV-P'];
+                if (setCode && promoSets.includes(setCode)) {
+                    return 6; // Treat promo cards without rarity as Triple Rare level
+                }
+                return 0;
+            }
             const r = rarity.toLowerCase();
 
             // Standard rarities (check common/uncommon first)
@@ -3910,6 +3925,9 @@
             }
             
             // Sort by insertion order instead of type/percentage
+            console.log('[renderMyDeckGrid] Current deck order:', window.cityLeagueDeckOrder);
+            console.log('[renderMyDeckGrid] Deck cards to sort:', deckCards.map(c => c.deck_key));
+            
             const sortedDeckCards = deckCards.sort((a, b) => {
                 const indexA = window.cityLeagueDeckOrder.indexOf(a.deck_key);
                 const indexB = window.cityLeagueDeckOrder.indexOf(b.deck_key);
@@ -3919,6 +3937,8 @@
                 if (indexB === -1) return -1;
                 return indexA - indexB;
             });
+            
+            console.log('[renderMyDeckGrid] Sorted deck cards:', sortedDeckCards.map(c => c.deck_key));
             
             // Build grid from deck
             let html = '';

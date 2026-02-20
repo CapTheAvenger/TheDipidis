@@ -3738,7 +3738,8 @@
             
             // Then add cards from allCardsDatabase with both keys
             allCardsFromDb.forEach(card => {
-                const imageUrl = buildCardImageUrl(card.set, card.number, card.rarity);
+                // CRITICAL FIX: Use actual image_url from database, fallback to buildCardImageUrl only if missing
+                const imageUrl = card.image_url || buildCardImageUrl(card.set, card.number, card.rarity);
                 const cardData = {
                     card_name: card.name,
                     image_url: imageUrl,
@@ -3746,7 +3747,8 @@
                     type: card.type || 'Unknown',
                     card_type: card.type || 'Unknown',
                     set_code: card.set,
-                    set_number: card.number
+                    set_number: card.number,
+                    rarity: card.rarity
                 };
                 
                 // Key by name only
@@ -3784,7 +3786,8 @@
                             );
                             
                             if (exactCard) {
-                                const imageUrl = buildCardImageUrl(exactCard.set, exactCard.number, exactCard.rarity);
+                                // CRITICAL FIX: Use actual image_url from database, fallback to buildCardImageUrl only if missing
+                                const imageUrl = exactCard.image_url || buildCardImageUrl(exactCard.set, exactCard.number, exactCard.rarity);
                                 cardData = {
                                     card_name: exactCard.name,
                                     image_url: imageUrl,

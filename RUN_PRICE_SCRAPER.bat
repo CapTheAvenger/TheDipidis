@@ -1,31 +1,12 @@
 @echo off
-echo ===============================================================
-echo   CardMarket Price Scraper
-echo   Scrapes prices for set specified in scraper_config.json
-echo ===============================================================
+echo ============================================================
+echo CARD PRICE SCRAPER - Update EUR prices from Limitless
+echo ============================================================
 echo.
-
-REM Activate virtual environment
-echo [1/2] Activating Python environment...
-call .venv\Scripts\activate.bat
-
-REM Check if selenium is installed
-python -c "import selenium" 2>nul
-if errorlevel 1 (
-    echo.
-    echo [!] Selenium not found. Installing...
-    pip install selenium
-    echo.
-)
-
-REM Run scraper
-echo [2/2] Starting price scraper...
+echo This scraper updates ONLY the EUR prices for existing cards.
+echo It reads from all_cards_database.csv and updates price_data.csv
 echo.
-python cardmarket_price_scraper.py
-
+echo Run this weekly (e.g., every Monday) to keep prices up-to-date.
 echo.
-echo ===============================================================
-echo   Scraping completed!
-echo   Check price_scraper.log for details
-echo ===============================================================
+python card_price_scraper.py
 pause

@@ -1140,6 +1140,52 @@
             }
         }
 
+        /* Cardmarket Button Styles */
+        .btn-cardmarket {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-cardmarket:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-cardmarket:active {
+            transform: scale(0.95);
+        }
+
+        .btn-cardmarket.no-price {
+            background: linear-gradient(135deg, #777 0%, #999 100%);
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .compact-card-price {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .rarity-option-cardmarket {
+            margin-top: 8px;
+            width: 100%;
+            font-size: 10px;
+            padding: 6px 8px;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -1590,10 +1636,7 @@
                         </div>
                         
                         <div id="cityLeagueMyDeckVisual" style="display: none;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <h3 style="margin: 0;">🎴 Dein Deck Übersicht</h3>
-                                <button onclick="toggleDeckGridCompact()" id="deckGridToggleBtn" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 0.9em;">📸 Kompakt</button>
-                            </div>
+                            <h3>🎴 Dein Deck Übersicht</h3>
                             <div class="deck-grid" id="cityLeagueMyDeckGrid"></div>
                         </div>
                         
@@ -1905,7 +1948,7 @@
         async function loadAllCardsDatabase() {
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(`./data/all_cards_database.json?t=${timestamp}`);
+                const response = await fetch(`./data/all_cards_merged.json?t=${timestamp}`);
                 if (response.ok) {
                     const jsonData = await response.json();
                     // Extract cards array from JSON structure
@@ -1913,8 +1956,12 @@
                     window.allCardsDatabase = allCardsDatabase;
                     cardsByNameMap = buildCardsByNameMap(allCardsDatabase);
                     window.cardsByNameMap = cardsByNameMap;
-                    console.log(`✅ Loaded ${allCardsDatabase.length} cards from all_cards_database.json`);
+                    console.log(`✅ Loaded ${allCardsDatabase.length} cards from all_cards_merged.json (with prices)`);
                     console.log(`📊 Karten mit mehreren Versionen:`, Object.keys(cardsByNameMap).filter(k => cardsByNameMap[k].length > 1).length);
+                    
+                    // Count cards with prices
+                    const cardsWithPrices = allCardsDatabase.filter(c => c.eur_price).length;
+                    console.log(`💶 Karten mit Preisen: ${cardsWithPrices} (${Math.round(100*cardsWithPrices/allCardsDatabase.length)}%)`);
                     
                     // Initialisiere Suche wenn sie existiert
                     const searchInput = document.getElementById('cityLeagueDeckCardSearch');
@@ -1922,7 +1969,7 @@
                         searchDeckCards();
                     }
                 } else {
-                    console.error('❌ Failed to load all_cards_database.json');
+                    console.error('❌ Failed to load all_cards_merged.json');
                 }
             } catch (error) {
                 console.error('Error loading all cards database:', error);
@@ -2124,24 +2171,38 @@
             if (versions.length === 0) return null;
 
             if (globalPref && (globalPref === 'max' || globalPref === 'min')) {
+                // Set order (higher = newer): ASC=106 > MEG=105 > MEP=104, etc.
+                const SET_ORDER = {
+                    'PRE': 108, 'SFA': 107, 'ASC': 106,
+                    'MEG': 105, 'MEP': 104, 'SP': 103, 'SVE': 102,
+                    'SCR': 101, 'TWM': 100, 'TEF': 99, 'PAR': 98, 'PAF': 97, 'PAL': 96, 'OBF': 95,
+                    'MEW': 94, 'SVI': 93, 'CRZ': 92, 'SIT': 91, 'LOR': 90, 'PGO': 89,
+                    'BLK': 99, 'WHT': 98, 'SSP': 94,
+                    'ASR': 88, 'BRS': 87, 'FST': 86, 'CEL': 85, 'EVS': 84, 'CRE': 83,
+                    'BST': 82, 'SHF': 81, 'VIV': 80, 'CPA': 79, 'DAA': 78,
+                    'RCL': 77, 'SSH': 76, 'CEC': 75
+                };
+                
                 const sorted = versions.slice().sort((a, b) => {
                     const priorityA = getRarityPriority(a.rarity, a.set);
                     const priorityB = getRarityPriority(b.rarity, b.set);
-                    // Primary sort: by priority
+                    
+                    // Primary sort: by priority (rarity)
                     if (priorityA !== priorityB) {
                         return priorityA - priorityB;
                     }
-                    // Secondary sort (when priorities are equal): prefer later versions in the list
-                    // This assumes later versions in international_prints are newer/preferred
-                    const indexA = versions.indexOf(a);
-                    const indexB = versions.indexOf(b);
                     
-                    // DEBUG: Log index comparison for cards with same priority
-                    if (cardName.toLowerCase().includes('judge')) {
-                        console.log(`[Judge Debug] Comparing ${a.set} ${a.number} (index ${indexA}) vs ${b.set} ${b.number} (index ${indexB}), result: ${indexB - indexA}`);
+                    // Secondary sort (same priority): by SET ORDER (newer sets first)
+                    const setOrderA = SET_ORDER[a.set] || 0;
+                    const setOrderB = SET_ORDER[b.set] || 0;
+                    if (setOrderA !== setOrderB) {
+                        return setOrderB - setOrderA; // Higher number = newer = preferred
                     }
                     
-                    return indexB - indexA; // Prefer later versions (higher index = newer)
+                    // Tertiary sort (same set): by set number (lower number first)
+                    const numA = parseInt((a.number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    const numB = parseInt((b.number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    return numA - numB;
                 });
                 const selected = globalPref === 'max' ? sorted[sorted.length - 1] : sorted[0];
                 
@@ -3979,6 +4040,14 @@
                 const setCode = card.set_code || '';
                 const setNumber = card.set_number || '';
                 
+                // Get price and Cardmarket URL
+                const eurPrice = card.eur_price || '';
+                const cardmarketUrl = card.cardmarket_url || '';
+                const priceDisplay = eurPrice || '0,00€';
+                const priceClass = eurPrice ? 'btn-cardmarket' : 'btn-cardmarket no-price';
+                const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
+                const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
+                
                 // Calculate average count
                 const totalCount = parseInt(card.total_count || 0);
                 const totalDecksInArchetype = parseInt(card.total_decks_in_archetype || 1);
@@ -3994,10 +4063,12 @@
                             <div style="font-weight: bold;">${percentage}% | Ø ${avgCount}x</div>
                         </div>
                         
-                        <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: 20px 1fr 20px; gap: 3px; z-index: 3; align-items: center;">
-                            <button onclick="removeCardFromDeck('cityLeague', '${deckKeyEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; width: 20px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">−</button>
-                            <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; padding: 2px 4px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; min-width: 20px;">★</button>
-                            <button onclick="addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; width: 20px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">+</button>
+                        <!-- Action Buttons: - ★ 💶 + -->
+                        <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 3px; z-index: 3; align-items: stretch;">
+                            <button onclick="removeCardFromDeck('cityLeague', '${deckKeyEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">−</button>
+                            <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center;">★</button>
+                            <button class="${priceClass}" onclick="openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 20px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 10px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" title="${eurPrice ? 'Auf Cardmarket kaufen: ' + eurPrice : 'Preis nicht verfügbar'}">💶${priceDisplay}</button>
+                            <button onclick="addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">+</button>
                         </div>
                         <div class="card-overlay">
                             <div class="card-percentage">${percentage}%</div>
@@ -4194,7 +4265,22 @@
                         return percB - percA;
                     }
                     
-                    // Same percentage: sort by card name (keeps related Pokemon together)
+                    // Same percentage: sort by SET CODE + SET NUMBER (keeps same-set cards together)
+                    const setCodeA = a.set_code || '';
+                    const setCodeB = b.set_code || '';
+                    
+                    if (setCodeA !== setCodeB) {
+                        return setCodeA.localeCompare(setCodeB);
+                    }
+                    
+                    // Same set code: sort by SET NUMBER (numerically)
+                    const setNumA = parseInt((a.set_number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    const setNumB = parseInt((b.set_number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    if (setNumA !== setNumB) {
+                        return setNumA - setNumB;
+                    }
+                    
+                    // Same set+number: sort by card name (keeps related Pokemon together)
                     const nameA = a.card_name || a.name || '';
                     const nameB = b.card_name || b.name || '';
                     const nameCompare = nameA.localeCompare(nameB);
@@ -4206,16 +4292,7 @@
                     const evolOrderA = evolutionOrder[evolutionA] || 99;
                     const evolOrderB = evolutionOrder[evolutionB] || 99;
                     
-                    if (evolOrderA !== evolOrderB) {
-                        return evolOrderA - evolOrderB;
-                    }
-                    
-                    // Same evolution: sort by SET NUMBER
-                    const setNumA = parseInt((a.set_number || '0').toString().replace(/[^\d]/g, '')) || 0;
-                    const setNumB = parseInt((b.set_number || '0').toString().replace(/[^\d]/g, '')) || 0;
-                    if (setNumA !== setNumB) {
-                        return setNumA - setNumB;
-                    }
+                    return evolOrderA - evolOrderB;
                 }
                 
                 // For non-Pokemon cards: Sort by PERCENTAGE (highest first)
@@ -4530,31 +4607,25 @@
         }
         
         function copyDeck(source) {
-            if (source !== 'cityLeague') return;
+            console.log('[copyDeck] Called with source:', source);
             
-            const deck = window.cityLeagueDeck;
-            if (!deck || Object.keys(deck).length === 0) {
-                alert('Deck ist leer!');
+            if (source !== 'cityLeague') {
+                console.log('[copyDeck] Source not cityLeague, exiting');
                 return;
             }
             
-            const allCards = window.currentCityLeagueDeckCards || [];
-            const cardDataMap = {};
-            allCards.forEach(card => {
-                cardDataMap[card.card_name] = card;
-            });
+            // Use the same data as copyDeckOverview
+            const cards = window.currentCityLeagueDeckCards;
+            console.log('[copyDeck] currentCityLeagueDeckCards:', cards ? cards.length : 'undefined');
             
-            // Build array from deck with card data
-            const deckCards = [];
-            for (const [cardName, count] of Object.entries(deck)) {
-                if (count <= 0) continue;
-                const cardData = cardDataMap[cardName];
-                if (!cardData) continue;
-                deckCards.push({...cardData, deck_count_in_selected: count});
+            if (!cards || cards.length === 0) {
+                console.error('[copyDeck] No cards to copy');
+                alert('❌ Keine Karten zum Kopieren!');
+                return;
             }
             
-            // Sort using same logic
-            const sortedCards = sortCardsByType(deckCards);
+            // Sort cards using the same logic
+            const sortedCards = sortCardsByType([...cards]);
             
             // Group by category
             const pokemon = [];
@@ -4567,44 +4638,49 @@
             sortedCards.forEach(card => {
                 const cardType = card.type || card.card_type || '';
                 const category = getCardTypeCategory(cardType);
-                const count = card.deck_count_in_selected || 1;
+                const maxCount = parseInt(card.max_count) || 1;
                 const cardName = card.card_name || '';
                 const setCode = card.set_code || '';
                 const setNumber = card.set_number || '';
                 
-                const line = `${count} ${cardName} ${setCode} ${setNumber}`.trim();
+                const line = `${maxCount} ${cardName} ${setCode} ${setNumber}`.trim();
                 
                 if (category === 'Pokemon') {
                     pokemon.push(line);
-                    pokemonCount += count;
+                    pokemonCount += maxCount;
                 } else if (category === 'Energy' || category === 'Special Energy') {
                     energy.push(line);
-                    energyCount += count;
+                    energyCount += maxCount;
                 } else {
+                    // Supporter, Item, Tool, Stadium all go to Trainer
                     trainer.push(line);
-                    trainerCount += count;
+                    trainerCount += maxCount;
                 }
             });
             
-            // Build output
+            // Build output text
             let output = '';
+            
             if (pokemon.length > 0) {
                 output += `Pokémon: ${pokemonCount}\n`;
                 output += pokemon.join('\n') + '\n\n';
             }
+            
             if (trainer.length > 0) {
                 output += `Trainer: ${trainerCount}\n`;
                 output += trainer.join('\n') + '\n\n';
             }
+            
             if (energy.length > 0) {
                 output += `Energy: ${energyCount}\n`;
                 output += energy.join('\n');
             }
             
+            // Copy to clipboard
             navigator.clipboard.writeText(output).then(() => {
                 alert('✅ Deck wurde in die Zwischenablage kopiert!');
             }).catch(err => {
-                console.error('Fehler beim Kopieren:', err);
+                console.error('[copyDeck] Fehler beim Kopieren:', err);
                 alert('❌ Fehler beim Kopieren in die Zwischenablage!');
             });
         }
@@ -5059,22 +5135,6 @@
             }
         });
 
-        function toggleDeckGridCompact() {
-            const grid = document.getElementById('cityLeagueMyDeckGrid');
-            const btn = document.getElementById('deckGridToggleBtn');
-            if (!grid || !btn) return;
-            
-            if (grid.classList.contains('mobile-compact-grid')) {
-                grid.classList.remove('mobile-compact-grid');
-                btn.textContent = '📸 Kompakt';
-                btn.style.background = '#6c757d';
-            } else {
-                grid.classList.add('mobile-compact-grid');
-                btn.textContent = '📊 Normal';
-                btn.style.background = '#28a745';
-            }
-        }
-
         function toggleCurrentCards() {
             const content = document.getElementById('currentCardsContent');
             const toggle = document.getElementById('currentCardsToggle');
@@ -5459,6 +5519,12 @@
                 
                 const rarityBadgeColor = getRarityColor(version.rarity);
                 
+                // Get price and Cardmarket URL
+                const eurPrice = version.eur_price || '';
+                const cardmarketUrl = version.cardmarket_url || '';
+                const priceDisplay = eurPrice || 'Preis N/A';
+                const cardmarketBtnClass = eurPrice ? 'btn-cardmarket rarity-option-cardmarket' : 'btn-cardmarket rarity-option-cardmarket no-price';
+                
                 optionDiv.innerHTML = `
                     ${imageHtml}
                     <div class="rarity-option-info">
@@ -5468,6 +5534,13 @@
                     <div class="rarity-badge" style="background-color: ${rarityBadgeColor};">
                         ${version.rarity || 'Unknown'}
                     </div>
+                    ${cardmarketUrl ? `
+                        <button class="${cardmarketBtnClass}" 
+                                onclick="event.stopPropagation(); window.open('${cardmarketUrl}', '_blank');" 
+                                title="Auf Cardmarket kaufen: ${priceDisplay}">
+                            💶 ${priceDisplay}
+                        </button>
+                    ` : ''}
                 `;
                 
                 optionsList.appendChild(optionDiv);
@@ -5522,6 +5595,16 @@
             const modal = document.getElementById('raritySwitcherModal');
             modal.classList.remove('show');
             currentRaritySwitcherCard = null;
+        }
+
+        function openCardmarket(cardmarketUrl, cardName) {
+            if (!cardmarketUrl || cardmarketUrl.trim() === '') {
+                alert(`❌ Cardmarket Link nicht verfügbar für ${cardName}\n\nMögliche Gründe:\n- Price Scraper noch nicht gelaufen\n- Karte hat keine Cardmarket Daten\n\nBitte RUN_PRICE_SCRAPER.bat ausführen.`);
+                return;
+            }
+            
+            // Open Cardmarket URL in new tab
+            window.open(cardmarketUrl, '_blank');
         }
 
         function getRarityColor(rarity) {

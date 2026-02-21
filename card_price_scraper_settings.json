@@ -1,0 +1,6 @@
+{
+  "delay_seconds": 0.5,
+  "headless": true,
+  "batch_size": 100,
+  "skip_cards_with_prices": true
+}

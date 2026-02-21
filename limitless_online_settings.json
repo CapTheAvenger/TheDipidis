@@ -1,0 +1,9 @@
+{
+  "game": "POKEMON",
+  "format": "STANDARD",
+  "rotation": "2025",
+  "set": "PFL",
+  "top_decks_for_matchup": 10,
+  "delay_between_requests": 1.5,
+  "output_file": "limitless_online_decks.csv"
+}

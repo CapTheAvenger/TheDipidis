@@ -90,24 +90,29 @@ def load_settings() -> Dict[str, object]:
     candidates = [
         os.path.join(app_dir, "all_cards_scraper_settings.json"),
         os.path.join(os.getcwd(), "all_cards_scraper_settings.json"),
+        os.path.join(app_dir, "..", "all_cards_scraper_settings.json"),  # Parent dir (if running from dist/)
         os.path.join(app_dir, "data", "all_cards_scraper_settings.json")
     ]
 
     settings_path = None
     for path in candidates:
-        if os.path.isfile(path):
-            settings_path = path
+        normalized_path = os.path.normpath(path)
+        if os.path.isfile(normalized_path):
+            settings_path = normalized_path
             break
 
     if settings_path:
         try:
-            with open(settings_path, "r", encoding="utf-8") as f:
-                loaded = json.load(f)
+            # Read with explicit UTF-8 encoding without BOM
+            with open(settings_path, "r", encoding="utf-8-sig") as f:
+                content = f.read()
+                loaded = json.loads(content)
             if isinstance(loaded, dict):
                 settings.update(loaded)
             print(f"[All Cards Scraper] Loaded settings: {settings_path}")
         except Exception as e:
             print(f"[All Cards Scraper] WARNING: Failed to load settings: {e}")
+            # Use default settings
     else:
         print("[All Cards Scraper] No settings file found. Using defaults.")
 
@@ -223,7 +228,8 @@ def scrape_all_cards_list(settings: Dict[str, object], start_page: int = 1, exis
                                 'card_url': card_url,
                                 'image_url': '',
                                 'rarity': '',
-                                'international_prints': ''
+                                'international_prints': '',
+                                'cardmarket_url': ''
                             })
                             new_added_on_page += 1
 
@@ -287,9 +293,9 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True) -> (Lis
     """Load existing cards from CSV to avoid duplicates and allow append mode.
     
     Returns:
-        - existing_cards: Complete cards to keep (will be combined with newly scraped data)
+        - existing_cards: Complete cards to keep (have image_url + rarity + international_prints)
         - existing_keys: Set of unique identifiers for all cards (complete + incomplete)
-        - incomplete_cards: Cards missing image_url or rarity that should be re-scraped
+        - incomplete_cards: Cards missing any of: image_url, rarity, or international_prints
     """
     if not os.path.isfile(csv_path):
         return [], set(), []
@@ -308,6 +314,8 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True) -> (Lis
             set_number = (row.get('number') or '').strip()
             image_url = (row.get('image_url') or '').strip()
             rarity = (row.get('rarity') or '').strip()
+            international_prints = (row.get('international_prints') or '').strip()
+            cardmarket_url = (row.get('cardmarket_url') or '').strip()
             
             card_data = {
                 'name': name,
@@ -316,7 +324,8 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True) -> (Lis
                 'type': (row.get('type') or '').strip(),
                 'rarity': rarity,
                 'image_url': image_url,
-                'international_prints': (row.get('international_prints') or '').strip(),
+                'international_prints': international_prints,
+                'cardmarket_url': cardmarket_url,
                 'card_url': ''
             }
             
@@ -324,8 +333,25 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True) -> (Lis
                 key = f"{name}::{set_code}::{set_number}"
                 existing_keys.add(key)
                 
-                # Check if card is complete or incomplete
-                is_complete = bool(image_url and rarity)
+                # Check if card is complete: needs ALL essential fields
+                # This ensures cards get re-scraped when:
+                # - Missing image_url, rarity, or international_prints
+                # - OR has only self-reference in int.prints AND no Cardmarket link (indicates incomplete scrape)
+                has_basic_data = bool(image_url and rarity and international_prints)
+                
+                # Check if card has ONLY self-reference in international_prints
+                # (e.g., "WHT-126" = only itself, no other prints found)
+                only_self_reference = False
+                if international_prints:
+                    prints_list = [p.strip() for p in international_prints.split(',')]
+                    self_id = f"{set_code}-{set_number}"
+                    only_self_reference = (len(prints_list) == 1 and prints_list[0] == self_id)
+                
+                # Card is incomplete if:
+                # - Missing basic data OR
+                # - Has only self-reference AND no Cardmarket link (likely failed scrape)
+                is_incomplete = not has_basic_data or (only_self_reference and not cardmarket_url)
+                is_complete = not is_incomplete
                 
                 if is_complete:
                     complete_cards.append(card_data)
@@ -341,12 +367,14 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True) -> (Lis
     incomplete_count = len(incomplete_cards)
     
     print(f"[All Cards Scraper] Loaded {total_count} existing cards from CSV")
-    print(f"[All Cards Scraper]   ✓ {complete_count} cards are complete (have image_url + rarity)")
+    print(f"[All Cards Scraper]   ✓ {complete_count} cards are complete (have image + rarity + int.prints + cardmarket)")
     
     if rescrape_incomplete and incomplete_count > 0:
         print(f"[All Cards Scraper]   ⚠ {incomplete_count} cards are incomplete and will be re-scraped")
+        print(f"[All Cards Scraper]      (Missing data or Cardmarket link failed on previous run)")
     elif incomplete_count > 0:
         print(f"[All Cards Scraper]   ⚠ {incomplete_count} cards are incomplete (kept as-is, rescrape_incomplete=False)")
+
     
     return complete_cards, existing_keys, incomplete_cards
 
@@ -378,13 +406,23 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
     restart_counter = 0  # Track cards processed since last restart
     
     def write_csv_batch():
-        """Write all cards (existing + new with current details) to CSV."""
+        """Write all cards (existing + new with current details) to CSV with deduplication."""
         all_data = (existing_cards + cards) if append_mode else cards
+        
+        # Deduplicate by unique key (name::set::number) before writing
+        seen_keys = set()
+        deduplicated_data = []
+        for card in all_data:
+            key = f"{card.get('name', '')}::{card.get('set', '')}::{card.get('number', '')}"
+            if key and key not in seen_keys:
+                seen_keys.add(key)
+                deduplicated_data.append(card)
+        
         with open(csv_path, 'w', encoding='utf-8', newline='') as f:
-            fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints']
+            fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
-            for card in all_data:
+            for card in deduplicated_data:
                 writer.writerow({
                     'name': card.get('name', ''),
                     'set': card.get('set', ''),
@@ -392,7 +430,8 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
                     'type': card.get('type', ''),
                     'rarity': card.get('rarity', ''),
                     'image_url': card.get('image_url', ''),
-                    'international_prints': card.get('international_prints', '')
+                    'international_prints': card.get('international_prints', ''),
+                    'cardmarket_url': card.get('cardmarket_url', '')
                 })
     
     try:
@@ -429,7 +468,21 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
                         break  # Success, exit retry loop
                     except Exception as e:
                         error_msg = str(e).lower()
-                        if 'invalid session id' in error_msg or 'session' in error_msg:
+                        
+                        # Handle network errors (DNS resolution, connection errors)
+                        if 'err_name_not_resolved' in error_msg or 'err_connection' in error_msg or 'network' in error_msg:
+                            print(f"[All Cards Scraper] NETWORK ERROR: Cannot reach server")
+                            if retry < max_retries - 1:
+                                wait_time = 10 * (retry + 1)  # Increase wait time with each retry
+                                print(f"   ⏸ Waiting {wait_time} seconds before retry {retry+1}/{max_retries}...")
+                                time.sleep(wait_time)
+                            else:
+                                print(f"[All Cards Scraper] NETWORK FAILED after {max_retries} retries")
+                                print(f"   ⚠ Skipping card: {card['name']}")
+                                raise
+                        
+                        # Handle session errors (browser crashes, session timeouts)
+                        elif 'invalid session id' in error_msg or 'session' in error_msg:
                             print(f"[All Cards Scraper] SESSION ERROR detected: {e}")
                             if retry < max_retries - 1:
                                 print(f"[All Cards Scraper] RECOVERING: Restarting browser (retry {retry+1}/{max_retries})...")
@@ -444,7 +497,7 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
                                 print(f"[All Cards Scraper] FAILED after {max_retries} retries, skipping card")
                                 raise
                         else:
-                            raise  # Re-raise if it's not a session error
+                            raise  # Re-raise if it's not a known recoverable error
                 
                 # Wait for image to load
                 time.sleep(float(settings.get("detail_page_wait_seconds", 2.0)))
@@ -474,50 +527,111 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
                 except:
                     pass
                 
-                # Extract International Prints from "Int. Prints" table (the ONLY reliable source!)
-                # This table shows ALL functionally identical cards across sets, regardless of artwork/illustrator
+                # For Promo sets: If rarity is empty, set it to "Promo"
+                # This makes Promo cards easier to track and fixes threshold logic in frontend
+                PROMO_SETS = ['MEP', 'SVP', 'SP', 'SMP', 'XYP', 'BWP', 'HSP', 'DPP', 'NP', 'WP', 
+                              'POP', 'SWSH', 'SWSHP', 'PR-SW', 'PR-SM', 'PR-XY', 'PR-BLW', 'PR-HS', 'PR-DP']
+                if card['set'] in PROMO_SETS and not card.get('rarity'):
+                    card['rarity'] = 'Promo'
+                
+                # Extract International Prints + Cardmarket Link from the prints table
+                # HTML structure: <table class="card-prints-versions"> with rows containing card links and prices
                 try:
-                    # Find all links in the "Int. Prints" section
-                    # The table has class "card-prints-versions" and links like /cards/ASC/113, /cards/MEG/77, etc.
-                    int_prints_links = driver.find_elements(By.CSS_SELECTOR, ".card-prints-versions a[href^='/cards/']")
+                    int_prints = set()
+                    cardmarket_url = ''
                     
-                    if int_prints_links:
-                        # Collect all international print set-number combinations
-                        int_prints = set()
-                        for link in int_prints_links:
-                            href = link.get_attribute('href')
-                            # Extract card ID from URL:
-                            # - '/cards/ASC/32' -> 'ASC-32'
-                            # - 'https://limitlesstcg.com/cards/JTG/26' -> 'JTG-26'
-                            # - Skip Japanese cards like '/cards/jp/SV9/15'
-                            if href:
-                                # Get path after '/cards/'
-                                path = href.split('/cards/')[-1].strip()
-                                # Split by '/' to get parts
-                                parts = path.split('/')
-                                
-                                # Only process if format is SET/NUMBER (2 parts)
-                                # Skip Japanese cards (jp/SET/NUMBER = 3 parts)
-                                # Skip other paths like 'advanced', 'syntax', 'decklists', etc.
-                                if len(parts) == 2 and parts[1].isdigit():
-                                    card_id = f"{parts[0]}-{parts[1]}"
-                                    int_prints.add(card_id)
+                    # Find the card-prints-versions table
+                    try:
+                        table = driver.find_element(By.CSS_SELECTOR, "table.card-prints-versions")
                         
-                        # Always add current card's ID
+                        # Get all rows in the table body
+                        rows = table.find_elements(By.CSS_SELECTOR, "tbody tr")
+                        
+                        for row in rows:
+                            # Skip header row
+                            if row.find_elements(By.TAG_NAME, "th"):
+                                continue
+                            
+                            # Extract Int. Print from first column (td with <a href="/cards/SET/NUM">)
+                            try:
+                                first_td = row.find_element(By.CSS_SELECTOR, "td:first-child")
+                                card_link = first_td.find_element(By.CSS_SELECTOR, "a[href*='/cards/']")
+                                href = card_link.get_attribute('href')
+                                
+                                if href and '/cards/' in href:
+                                    # Extract SET/NUM from URL
+                                    # URLs can be: /cards/SET/NUM or /cards/en/SET/NUM (with language prefix)
+                                    path = href.split('/cards/')[-1].strip()
+                                    parts = path.split('/')
+                                    
+                                    # Remove language prefix (en, de, fr, etc.) if present
+                                    if len(parts) >= 3 and parts[0].lower() in ['en', 'de', 'fr', 'es', 'it', 'pt', 'ja', 'ko']:
+                                        # Format: /cards/en/SET/NUM
+                                        set_code = parts[1].upper()
+                                        set_num = parts[2]
+                                    elif len(parts) >= 2:
+                                        # Format: /cards/SET/NUM
+                                        set_code = parts[0].upper()
+                                        set_num = parts[1]
+                                    else:
+                                        continue
+                                    
+                                    # Skip Japanese sets
+                                    if set_code != 'JP':
+                                        card_id = f"{set_code}-{set_num}"
+                                        int_prints.add(card_id)
+                            except:
+                                pass  # Row might not have card link (could be current card without href)
+                            
+                            # Extract Cardmarket URL from current card's row (class="current")
+                            try:
+                                if 'current' in row.get_attribute('class'):
+                                    # Find EUR price column (third td) with Cardmarket link
+                                    eur_link = row.find_element(By.CSS_SELECTOR, "a.card-price.eur")
+                                    cardmarket_url = eur_link.get_attribute('href') or ''
+                            except:
+                                pass
+                        
+                        # Always add current card's ID to int_prints
                         current_id = f"{card['set']}-{card['number']}"
                         int_prints.add(current_id)
                         
-                        # Store as comma-separated string for CSV compatibility
+                        # Store results
                         card['international_prints'] = ','.join(sorted(list(int_prints)))
+                        card['cardmarket_url'] = cardmarket_url
                         
                         if len(int_prints) > 1:
                             print(f"   → Found {len(int_prints)} int. prints: {', '.join(sorted(list(int_prints))[:4])}{'...' if len(int_prints) > 4 else ''}")
-                    else:
-                        # No international prints found - just use current card
+                        else:
+                            print(f"   ℹ Single print: {card['name']}")
+                        
+                        if cardmarket_url:
+                            print(f"   ✓ Cardmarket link found")
+                        
+                    except Exception as e:
+                        # Fallback: use own ID if table not found
                         card['international_prints'] = f"{card['set']}-{card['number']}"
+                        card['cardmarket_url'] = ''
+                        
+                        # Check for network errors (critical)
+                        error_str = str(e)
+                        if 'ERR_NAME_NOT_RESOLVED' in error_str or 'ERR_CONNECTION' in error_str:
+                            print(f"   ⚠ NETWORK ERROR: {error_str.split('Stacktrace')[0].strip()}")
+                            print(f"   ⏸ Pausing for 10 seconds before retry...")
+                            time.sleep(10)
+                        elif 'no such element' in error_str and 'card-prints-versions' in error_str:
+                            # Table not found - normal for single-print cards
+                            print(f"   ℹ No int. prints table (single print)")
+                        else:
+                            # Other errors
+                            print(f"   ⚠ Could not extract prints: {error_str.split('Stacktrace')[0].strip()[:100]}")
+                    
                 except Exception as e:
-                    # Fallback: use own ID if we can't find int. prints table
+                    # Final fallback
                     card['international_prints'] = f"{card['set']}-{card['number']}"
+                    card['cardmarket_url'] = ''
+                    error_str = str(e)
+                    print(f"   ERROR: {error_str.split('Stacktrace')[0].strip()[:150]}")
                 
                 # Be nice to the server - small delay between requests
                 time.sleep(float(settings.get("detail_request_delay_seconds", 0.5)))
@@ -598,15 +712,27 @@ try:
     # Ensure output directory exists
     os.makedirs(data_dir, exist_ok=True)
 
-    # Save to CSV (append or overwrite)
-    file_exists = os.path.isfile(csv_path) and os.path.getsize(csv_path) > 0
-    file_mode = 'a' if append_mode else 'w'
-    with open(csv_path, file_mode, encoding='utf-8', newline='') as f:
-        fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints']
+    # Save to CSV (ALWAYS OVERWRITE with deduplicated data to prevent duplicates)
+    all_data_partial = (existing_cards + all_cards) if append_mode else all_cards
+    
+    # Deduplicate by unique key (name::set::number) before writing
+    seen_keys = set()
+    deduplicated_data = []
+    for card in all_data_partial:
+        key = f"{card.get('name', '')}::{card.get('set', '')}::{card.get('number', '')}"
+        if key and key not in seen_keys:
+            seen_keys.add(key)
+            deduplicated_data.append(card)
+    
+    duplicates_removed = len(all_data_partial) - len(deduplicated_data)
+    if duplicates_removed > 0:
+        print(f"[All Cards Scraper] ⚠ Removed {duplicates_removed} duplicate entries before writing")
+    
+    with open(csv_path, 'w', encoding='utf-8', newline='') as f:
+        fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
-        if not file_exists or not append_mode:
-            writer.writeheader()
-        for card in all_cards:
+        writer.writeheader()
+        for card in deduplicated_data:
             writer.writerow({
                 'name': card.get('name', ''),
                 'set': card.get('set', ''),
@@ -614,11 +740,12 @@ try:
                 'type': card.get('type', ''),
                 'rarity': card.get('rarity', ''),
                 'image_url': card.get('image_url', ''),
-                'international_prints': card.get('international_prints', '')
+                'international_prints': card.get('international_prints', ''),
+                'cardmarket_url': card.get('cardmarket_url', '')
             })
 
     print(f"[All Cards Scraper] OK: Partial CSV saved to {csv_path}")
-    print(f"[All Cards Scraper] {len(all_cards)} new cards are now available for other tools!")
+    print(f"[All Cards Scraper] {len(deduplicated_data)} unique cards are now available for other tools!")
     print("[All Cards Scraper] Will continue with detail scraping and update CSV with images/rarity...")
 
     # PHASE 2: Scrape detail pages (optional - can be skipped for fast testing)
@@ -642,13 +769,27 @@ try:
     # Ensure output directory exists
     os.makedirs(data_dir, exist_ok=True)
 
-    # Save to CSV (append or overwrite mode is determined by first write, now we always overwrite for final)
+    # Save to CSV with deduplication to prevent duplicate entries
     all_data = (existing_cards + all_cards) if append_mode else all_cards
+    
+    # Deduplicate by unique key (name::set::number) before writing
+    seen_keys = set()
+    deduplicated_data = []
+    for card in all_data:
+        key = f"{card.get('name', '')}::{card.get('set', '')}::{card.get('number', '')}"
+        if key and key not in seen_keys:
+            seen_keys.add(key)
+            deduplicated_data.append(card)
+    
+    duplicates_removed = len(all_data) - len(deduplicated_data)
+    if duplicates_removed > 0:
+        print(f"[All Cards Scraper] ⚠ Removed {duplicates_removed} duplicate entries before writing")
+    
     with open(csv_path, 'w', encoding='utf-8', newline='') as f:
-        fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints']
+        fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        for card in all_data:
+        for card in deduplicated_data:
             writer.writerow({
                 'name': card.get('name', ''),
                 'set': card.get('set', ''),
@@ -656,18 +797,19 @@ try:
                 'type': card.get('type', ''),
                 'rarity': card.get('rarity', ''),
                 'image_url': card.get('image_url', ''),
-                'international_prints': card.get('international_prints', '')
+                'international_prints': card.get('international_prints', ''),
+                'cardmarket_url': card.get('cardmarket_url', '')
             })
 
     print(f"\n[All Cards Scraper] OK: Saved to {csv_path}")
+    print(f"[All Cards Scraper] Total cards in database: {len(deduplicated_data)}")
 
-    # Also save to JSON for easy access
-    all_data_for_json = (existing_cards + all_cards) if append_mode else all_cards
+    # Also save to JSON for easy access (use same deduplicated data)
     json_data = {
         'timestamp': datetime.now().isoformat(),
         'source': 'https://limitlesstcg.com/cards?q=lang%3Aen',
-        'total_count': len(all_data_for_json),
-        'cards': all_data_for_json
+        'total_count': len(deduplicated_data),
+        'cards': deduplicated_data
     }
 
     with open(json_path, 'w', encoding='utf-8') as f:
@@ -677,13 +819,13 @@ try:
 
     print()
     print("Sample data (first 10):")
-    for card in all_data_for_json[:10]:
+    for card in deduplicated_data[:10]:
         img_status = "OK" if card['image_url'] else "NO"
         print(f"  {img_status} {card['name']} ({card['set']} {card['number']}) - {card['type']}")
         if card['image_url']:
             print(f"      └─ {card['image_url']}")
-    if len(all_data_for_json) > 10:
-        print(f"  ... and {len(all_data_for_json) - 10} more")
+    if len(deduplicated_data) > 10:
+        print(f"  ... and {len(deduplicated_data) - 10} more")
     print()
     print("=" * 80)
     print("SUCCESS: All cards database ready!")

@@ -288,6 +288,12 @@ def scrape_card_details(cards: List[Dict[str, str]]) -> List[Dict[str, str]]:
                 except:
                     pass
                 
+                # For Promo sets: If rarity is empty, set it to "Promo"
+                PROMO_SETS = ['MEP', 'SVP', 'SP', 'SMP', 'XYP', 'BWP', 'HSP', 'DPP', 'NP', 'WP', 
+                              'POP', 'SWSH', 'SWSHP', 'PR-SW', 'PR-SM', 'PR-XY', 'PR-BLW', 'PR-HS', 'PR-DP']
+                if card['set'] in PROMO_SETS and not card.get('rarity'):
+                    card['rarity'] = 'Promo'
+                
                 # Be nice to the server
                 time.sleep(SETTINGS['detail_request_delay_seconds'])
                 

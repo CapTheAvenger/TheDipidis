@@ -94,46 +94,40 @@ def calculate_date_range(start_date: str, end_date: str) -> Tuple[str, str]:
     return start_str, end_str
 
 def load_settings() -> Dict[str, Any]:
-    """Load settings from city_league_archetype_settings.json in dist/ folder."""
+    """Load settings from city_league_archetype_settings.json."""
+    settings = DEFAULT_SETTINGS.copy()
     app_path = get_app_path()
     
-    # Determine workspace root (same logic as get_data_dir)
-    parts = app_path.replace('\\', '/').split('/')
-    if 'dist' in parts:
-        dist_index = parts.index('dist')
-        workspace_root = '/'.join(parts[:dist_index])
-    else:
-        workspace_root = app_path
+    # Search for settings file in multiple locations
+    candidates = [
+        os.path.join(app_path, "city_league_archetype_settings.json"),
+        os.path.join(os.getcwd(), "city_league_archetype_settings.json"),
+        os.path.join(app_path, "..", "city_league_archetype_settings.json"),  # Parent dir (if running from dist/)
+        os.path.join(app_path, "data", "city_league_archetype_settings.json")
+    ]
     
-    # Always use settings from workspace_root/dist/
-    dist_dir = os.path.join(workspace_root, 'dist')
-    settings_path = os.path.join(dist_dir, 'city_league_archetype_settings.json')
+    settings_path = None
+    for path in candidates:
+        normalized_path = os.path.normpath(path)
+        if os.path.isfile(normalized_path):
+            settings_path = normalized_path
+            break
     
-    print(f"Loading settings from: {settings_path}")
-    
-    if os.path.exists(settings_path):
+    if settings_path:
         try:
-            with open(settings_path, 'r', encoding='utf-8') as f:
-                content = f.read().strip()
-                if not content:
-                    print("Settings file is empty. Using default settings.")
-                    return DEFAULT_SETTINGS.copy()
-                settings = json.loads(content)
-                print(f"Settings loaded successfully: {settings}")
-                for key, value in DEFAULT_SETTINGS.items():
-                    if key not in settings:
-                        settings[key] = value
-                return settings
-        except (json.JSONDecodeError, IOError) as e:
-            print(f"Error loading city_league_archetype_settings.json: {e}")
-            print("Using default settings.")
-            return DEFAULT_SETTINGS.copy()
+            with open(settings_path, "r", encoding="utf-8-sig") as f:
+                content = f.read()
+                loaded = json.loads(content)
+            if isinstance(loaded, dict):
+                settings.update(loaded)
+            print(f"[City League Archetype] Loaded settings: {settings_path}")
+        except Exception as e:
+            print(f"[City League Archetype] WARNING: Failed to load settings: {e}")
+            print(f"[City League Archetype] Using default settings.")
     else:
-        print(f"Settings file not found. Creating new file with defaults.")
-        with open(settings_path, 'w', encoding='utf-8') as f:
-            json.dump(DEFAULT_SETTINGS, f, indent=4)
-        print(f"Created default city_league_archetype_settings.json at {settings_path}")
-        return DEFAULT_SETTINGS.copy()
+        print(f"[City League Archetype] No settings file found. Using defaults.")
+    
+    return settings
 
 def parse_date(date_str: str) -> datetime:
     """Parse date from DD.MM.YYYY format."""

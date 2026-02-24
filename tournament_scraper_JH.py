@@ -35,6 +35,47 @@ if sys.platform == 'win32':
 from card_type_lookup import is_trainer_or_energy, is_valid_card
 from card_scraper_shared import CardDatabaseLookup
 
+# ============================================================================
+# TOURNAMENT TRACKING (Incremental Scraping)
+# ============================================================================
+
+def get_scraped_tournaments_file() -> str:
+    """Get path to scraped tournaments tracking file."""
+    data_dir = get_data_dir()
+    return os.path.join(data_dir, 'tournament_jh_scraped.json')
+
+
+def load_scraped_tournaments() -> set:
+    """Load set of already scraped tournament IDs."""
+    tracking_file = get_scraped_tournaments_file()
+    
+    if not os.path.exists(tracking_file):
+        return set()
+    
+    try:
+        with open(tracking_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return set(data.get('scraped_tournament_ids', []))
+    except Exception as e:
+        print(f"Warning: Could not load scraped tournaments: {e}")
+        return set()
+
+
+def save_scraped_tournaments(tournament_ids: set) -> None:
+    """Save set of scraped tournament IDs to tracking file."""
+    tracking_file = get_scraped_tournaments_file()
+    
+    try:
+        data = {
+            'scraped_tournament_ids': sorted(list(tournament_ids)),
+            'last_updated': time.strftime('%Y-%m-%d %H:%M:%S'),
+            'total_tournaments': len(tournament_ids)
+        }
+        with open(tracking_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Warning: Could not save scraped tournaments: {e}")
+
 # Default settings
 DEFAULT_SETTINGS = {
     "max_tournaments": 150,
@@ -59,8 +100,8 @@ def get_app_path() -> str:
 
 def get_data_dir() -> str:
     """Get the data directory, creating it if needed."""
-    parent_path = os.path.dirname(get_app_path())
-    data_dir = os.path.join(parent_path, 'data')
+    app_path = get_app_path()
+    data_dir = os.path.join(app_path, 'data')
     os.makedirs(data_dir, exist_ok=True)
     return data_dir
 
@@ -120,14 +161,18 @@ def fetch_page(url: str) -> str:
         print(f"Error fetching {url}: {e}")
         return ""
 
-def get_tournament_links(base_url: str, max_tournaments: int, start_tournament_id: int = None) -> List[Dict]:
+def get_tournament_links(base_url: str, max_tournaments: int, start_tournament_id: int = None, scraped_ids: set = None) -> List[Dict]:
     """Get tournament links from the main tournaments page with pagination support."""
     print("Fetching tournaments list...")
     if start_tournament_id:
         print(f"Filter: Tournaments from latest down to ID {start_tournament_id}")
     
+    if scraped_ids is None:
+        scraped_ids = set()
+    
     tournaments = []
     seen_ids = set()
+    skipped_count = 0
     page = 1
     stop_scraping = False
     
@@ -164,6 +209,12 @@ def get_tournament_links(base_url: str, max_tournaments: int, start_tournament_i
             
             if tournament_id not in seen_ids:
                 seen_ids.add(tournament_id)
+                
+                # Skip already scraped tournaments
+                if tournament_id in scraped_ids:
+                    skipped_count += 1
+                    continue
+                
                 tournaments.append({
                     'id': tournament_id,
                     'url': f'https://limitlesstcg.com{path}',
@@ -188,7 +239,7 @@ def get_tournament_links(base_url: str, max_tournaments: int, start_tournament_i
             print("Reached page limit (10 pages)")
             break
     
-    print(f"Found {len(tournaments)} tournaments total")
+    print(f"Found {len(tournaments)} new tournaments (skipped {skipped_count} already scraped)")
     return tournaments
 
 def get_format_code(format_name: str) -> str:
@@ -945,8 +996,15 @@ def main():
     print(f"Tournament types filter: {', '.join(tournament_types)}")
     print("=" * 50)
     
+    # Load scraped tournament tracking
+    scraped_ids = load_scraped_tournaments()
+    print(f"[DEBUG] Loaded {len(scraped_ids)} tournament IDs from tracking file")
+    if scraped_ids:
+        print(f"[DEBUG] First few IDs: {sorted(list(scraped_ids))[:10]}")
+    newly_scraped_ids = set()
+    
     # Get tournament links
-    tournaments = get_tournament_links(base_url, max_tournaments, start_tournament_id)
+    tournaments = get_tournament_links(base_url, max_tournaments, start_tournament_id, scraped_ids)
     if not tournaments:
         print("No tournaments found.")
         return
@@ -976,7 +1034,26 @@ def main():
         
         # Filter by tournament type (Regional, Special Event, LAIC, EUIC, NAIC, Worlds, etc.)
         tournament_name = tournament['name']
-        is_valid_type = any(ttype.lower() in tournament_name.lower() for ttype in tournament_types)
+        tournament_name_lower = tournament_name.lower()
+        
+        # Blacklist: Skip National Championships (format: "[Country] Championships YYYY")
+        # Examples: "Singapore Championships 2024", "Philippines Championships 2024"
+        # Should NOT match: "Regional Sydney", "LAIC São Paulo", etc.
+        national_championship_patterns = [
+            'singapore championships', 'philippines championships', 'japan championships',
+            'indonesia championships', 'thailand championships', 'malaysia championships',
+            'taiwan championships', 'korea championships', 'hong kong championships',
+            'australia championships', 'new zealand championships'
+        ]
+        
+        is_national_championship = any(pattern in tournament_name_lower for pattern in national_championship_patterns)
+        
+        if is_national_championship:
+            print(f"[SKIP] National Championship (not tracked): {tournament_name}")
+            continue
+        
+        # Check if tournament matches allowed types
+        is_valid_type = any(ttype.lower() in tournament_name_lower for ttype in tournament_types)
         
         if not is_valid_type:
             print(f"[SKIP] Non-major tournament: {tournament_name}")
@@ -1027,11 +1104,21 @@ def main():
         
         all_data.append(tournament)
         
+        # Track successfully scraped tournament
+        newly_scraped_ids.add(tournament['id'])
+        
         if delay > 0 and i < len(tournaments):
             time.sleep(delay)
     
     # Save to CSV
     if all_data:
+        # Save tracking first
+        if newly_scraped_ids:
+            all_scraped_ids = scraped_ids | newly_scraped_ids
+            save_scraped_tournaments(all_scraped_ids)
+            print(f"✓ Saved {len(newly_scraped_ids)} new tournament IDs to tracking file")
+            print(f"  Total tracked tournaments: {len(all_scraped_ids)}")
+        
         overview_file, cards_file = save_csv_files(all_data, output_file, append_mode=append_mode)
         
         print(f"\n" + "=" * 50)

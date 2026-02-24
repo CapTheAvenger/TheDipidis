@@ -1,0 +1,138 @@
+# ========================================
+# GitHub Landing-Website Daten-Update
+# ========================================
+# Dieses Script kopiert aktualisierte CSV-Dateien
+# ins GitHub-Repository und pusht die Änderungen
+
+Write-Host "=====================================" -ForegroundColor Cyan
+Write-Host "  HausiTCG Landing - Data Update  " -ForegroundColor Cyan
+Write-Host "=====================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Pfade definieren
+$sourceDataDir = "$PSScriptRoot\data"
+$targetDir = "C:\Users\haush\Desktop\HausiTCG-Landing"
+$targetDataDir = "$targetDir\data"
+
+# Prüfen ob Ziel-Ordner existiert
+if (-not (Test-Path $targetDir)) {
+    Write-Host "❌ Fehler: GitHub-Landing Ordner nicht gefunden!" -ForegroundColor Red
+    Write-Host "   Bitte erst PREPARE_GITHUB_LANDING.ps1 ausführen!" -ForegroundColor Yellow
+    Write-Host ""
+    Read-Host "Drücke Enter zum Beenden"
+    exit
+}
+
+# Prüfen ob Git-Repository
+$gitDir = "$targetDir\.git"
+if (-not (Test-Path $gitDir)) {
+    Write-Host "⚠ Warnung: Kein Git-Repository gefunden!" -ForegroundColor Yellow
+    Write-Host "   Möchten Sie trotzdem die Dateien aktualisieren? (j/n)" -ForegroundColor Yellow
+    $confirm = Read-Host
+    if ($confirm -ne "j") {
+        exit
+    }
+}
+
+# CSV-Dateien kopieren
+Write-Host "[1/3] Aktualisierte CSV-Dateien kopieren..." -ForegroundColor Yellow
+Write-Host ""
+
+$csvFiles = @(
+    "city_league_analysis.csv",
+    "city_league_archetypes_comparison.csv",
+    "current_meta_card_data.csv",
+    "all_cards_merged.csv",
+    "cardmarket_prices.csv",
+    "limitless_online_decks.csv"
+)
+
+$copiedFiles = 0
+foreach ($file in $csvFiles) {
+    $sourcePath = "$sourceDataDir\$file"
+    $targetPath = "$targetDataDir\$file"
+    
+    if (Test-Path $sourcePath) {
+        Copy-Item $sourcePath $targetPath -Force
+        
+        # Dateigröße anzeigen
+        $fileSize = (Get-Item $sourcePath).Length
+        $fileSizeKB = [math]::Round($fileSize / 1KB, 2)
+        
+        Write-Host "   OK $file ($fileSizeKB KB)" -ForegroundColor Green
+        $copiedFiles++
+    } else {
+        Write-Host "   WARNUNG: $file nicht gefunden!" -ForegroundColor Red
+    }
+}
+
+Write-Host ""
+Write-Host "   $copiedFiles von $($csvFiles.Count) Dateien kopiert" -ForegroundColor Cyan
+Write-Host ""
+
+# Git Status prüfen
+if (Test-Path $gitDir) {
+    Write-Host "[2/3] Git Status prüfen..." -ForegroundColor Yellow
+    
+    # In Ziel-Ordner wechseln
+    Push-Location $targetDir
+    
+    # Git Status
+    $gitStatus = git status --porcelain
+    
+    if ($gitStatus) {
+        Write-Host ""
+        Write-Host "   Geänderte Dateien:" -ForegroundColor White
+        git status --short | ForEach-Object { Write-Host "   $_" -ForegroundColor Gray }
+        Write-Host ""
+        
+        # Commit und Push
+        Write-Host "[3/3] Git Commit und Push..." -ForegroundColor Yellow
+        
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm"
+        $commitMessage = "Update: CSV data $timestamp"
+        
+        git add data/*.csv
+        git commit -m $commitMessage
+        
+        Write-Host ""
+        Write-Host "   Änderungen werden gepusht..." -ForegroundColor Yellow
+        git push > $null 2>&1
+        
+        Write-Host ""
+        Write-Host "=====================================" -ForegroundColor Green
+        Write-Host "        Update erfolgreich!        " -ForegroundColor Green
+        Write-Host "=====================================" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "GitHub Pages aktualisiert automatisch in ~1-2 Minuten" -ForegroundColor Cyan
+        Write-Host ""
+        
+    } else {
+        Write-Host ""
+        Write-Host "   INFO: Keine Änderungen in den CSV-Dateien" -ForegroundColor Cyan
+        Write-Host ""
+    }
+    
+    # Zurück zum ursprünglichen Ordner
+    Pop-Location
+    
+} else {
+    Write-Host "[2/3] Git-Repository nicht vorhanden - Übersprungen" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "=====================================" -ForegroundColor Yellow
+    Write-Host "    Dateien kopiert (ohne Git Push)    " -ForegroundColor Yellow
+    Write-Host "=====================================" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Bitte manuell committen und pushen:" -ForegroundColor White
+    Write-Host "  cd `"$targetDir`"" -ForegroundColor Cyan
+    Write-Host "  git add data/*.csv" -ForegroundColor Cyan
+    Write-Host "  git commit -m `"Update: CSV data`"" -ForegroundColor Cyan
+    Write-Host "  git push" -ForegroundColor Cyan
+    Write-Host ""
+}
+
+Write-Host "Fertig!" -ForegroundColor Green
+Write-Host ""
+
+# Kurze Pause, damit User die Meldung lesen kann
+Start-Sleep -Seconds 2

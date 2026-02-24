@@ -26,6 +26,47 @@ from card_scraper_shared import (
     parse_copy_button_decklist
 )
 
+# ============================================================================
+# TOURNAMENT TRACKING (Incremental Scraping for Meta Play!)
+# ============================================================================
+
+def get_scraped_meta_tournaments_file() -> str:
+    """Get path to scraped tournaments tracking file."""
+    data_dir = get_data_dir()
+    return os.path.join(data_dir, 'current_meta_scraped_tournaments.json')
+
+
+def load_scraped_meta_tournaments() -> set:
+    """Load set of already scraped tournament IDs (for Meta Play!)."""
+    tracking_file = get_scraped_meta_tournaments_file()
+    
+    if not os.path.exists(tracking_file):
+        return set()
+    
+    try:
+        with open(tracking_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return set(data.get('scraped_tournament_ids', []))
+    except Exception as e:
+        print(f"Warning: Could not load scraped tournaments: {e}", flush=True)
+        return set()
+
+
+def save_scraped_meta_tournaments(tournament_ids: set) -> None:
+    """Save set of scraped tournament IDs to tracking file."""
+    tracking_file = get_scraped_meta_tournaments_file()
+    
+    try:
+        data = {
+            'scraped_tournament_ids': sorted(list(tournament_ids)),
+            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'total_tournaments': len(tournament_ids)
+        }
+        with open(tracking_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Warning: Could not save scraped tournaments: {e}", flush=True)
+
 # Fix Windows console encoding for Unicode characters (✓, ×, •, etc.)
 if sys.platform == 'win32':
     if hasattr(sys.stdout, 'reconfigure'):
@@ -330,25 +371,38 @@ def scrape_limitless_online(settings: Dict[str, Any], card_db: CardDatabaseLooku
 # TOURNAMENTS (Meta Play! - from labs.limitlesstcg.com)
 # ============================================================
 
-def get_tournament_links(base_url: str, max_tournaments: int) -> List[Dict[str, str]]:
+def get_tournament_links(base_url: str, max_tournaments: int, scraped_ids: set = None) -> List[Dict[str, str]]:
     """Get tournament links from labs.limitlesstcg.com."""
     tournaments = []
     
-    print(f"  Loading tournaments from {base_url}...")
+    if scraped_ids is None:
+        scraped_ids = set()
+    
+    print(f"  Loading tournaments from {base_url}...", flush=True)
+    if scraped_ids:
+        print(f"  Tracking: {len(scraped_ids)} tournaments already scraped", flush=True)
+    
     html = fetch_page(base_url)
     if not html:
-        print(f"  [DEBUG] Failed to fetch {base_url}")
+        print(f"  [DEBUG] Failed to fetch {base_url}", flush=True)
         return []
     
     # Extract tournament IDs from links like /0050/standings
     matches = re.findall(r'/(\d+)/standings', html)
-    print(f"  [DEBUG] Found {len(matches)} tournament links in HTML")
+    print(f"  [DEBUG] Found {len(matches)} tournament links in HTML", flush=True)
     
     seen_ids = set()
+    skipped_count = 0
     
     for tournament_id in matches:
         if tournament_id not in seen_ids:
             seen_ids.add(tournament_id)
+            
+            # Skip if already scraped
+            if tournament_id in scraped_ids:
+                skipped_count += 1
+                continue
+            
             tournaments.append({
                 'id': tournament_id,
                 'url': f'https://labs.limitlesstcg.com/{tournament_id}/standings',
@@ -358,7 +412,7 @@ def get_tournament_links(base_url: str, max_tournaments: int) -> List[Dict[str, 
         if len(tournaments) >= max_tournaments:
             break
     
-    print(f"  Found {len(tournaments)} tournaments")
+    print(f"  📊 Tournaments to scrape: {len(tournaments)} new (skipped {skipped_count} already scraped)", flush=True)
     return tournaments
 
 
@@ -554,11 +608,21 @@ def scrape_tournaments(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
     delay_between_requests = settings.get("delay_between_requests", 3.0)
     request_timeout = settings.get("request_timeout", 20)
     
+    # Get tournament filters
+    allowed_types = config.get("tournament_types", [])
+    format_filter = config.get("format_filter", [])
+    start_date = config.get("start_date", "")
+    end_date = config.get("end_date", "")
+    
     base_url = "https://labs.limitlesstcg.com/"
     all_decks = []
     
+    # Load scraped tournament tracking
+    scraped_ids = load_scraped_meta_tournaments()
+    newly_scraped_ids = set()
+    
     # Get tournament links
-    tournaments = get_tournament_links(base_url, max_tournaments)
+    tournaments = get_tournament_links(base_url, max_tournaments, scraped_ids)
     if not tournaments:
         print("No tournaments found")
         return []
@@ -570,6 +634,17 @@ def scrape_tournaments(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
             # Get tournament info
             info = get_tournament_info(tournament['url'])
             print(f"  {info['name']}", flush=True)
+            print(f"  Type: {info.get('type', 'Unknown')} | Format: {info.get('meta', 'Unknown')}", flush=True)
+            
+            # Apply tournament type filter
+            if allowed_types and info.get('type') not in allowed_types:
+                print(f"  ⊘ Skipping - Tournament type '{info.get('type')}' not in allowed types: {allowed_types}", flush=True)
+                continue
+            
+            # Apply format filter
+            if format_filter and info.get('meta') not in format_filter:
+                print(f"  ⊘ Skipping - Format '{info.get('meta')}' not in allowed formats: {format_filter}", flush=True)
+                continue
             
             # Get deck links from standings
             deck_links = get_deck_links_from_standings(tournament['id'], max_decks_per_tournament)
@@ -607,6 +682,9 @@ def scrape_tournaments(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
                 
                 time.sleep(delay_between_requests / 10)  # Shorter delay between decks
             
+            # Track successfully scraped tournament
+            newly_scraped_ids.add(tournament['id'])
+            
             print(f"  Collected {len(all_decks)} complete decks so far", flush=True)
             time.sleep(delay_between_requests)
             
@@ -615,6 +693,14 @@ def scrape_tournaments(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
             continue
     
     print(f"\n✓ Total decks with FULL CARD LISTS from tournaments: {len(all_decks)}", flush=True)
+    
+    # Save tracking
+    if newly_scraped_ids:
+        all_scraped_ids = scraped_ids | newly_scraped_ids
+        save_scraped_meta_tournaments(all_scraped_ids)
+        print(f"✓ Saved {len(newly_scraped_ids)} new tournament IDs to tracking file", flush=True)
+        print(f"  Total tracked tournaments: {len(all_scraped_ids)}", flush=True)
+    
     return all_decks
 
 

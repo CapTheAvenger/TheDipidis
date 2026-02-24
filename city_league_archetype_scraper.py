@@ -36,7 +36,8 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "end_date": "auto",  # 'auto' = today - 2 days, or use 'DD.MM.YYYY'
     "delay_between_requests": 1.5,
     "output_file": "city_league_archetypes.csv",
-    "region": "jp"
+    "region": "jp",
+    "additional_tournament_ids": []  # List of tournament IDs to scrape from main site
 }
 
 def get_app_path() -> str:
@@ -217,8 +218,15 @@ def parse_tournament_date(date_str: str) -> Optional[datetime]:
         date_obj = datetime.strptime(date_str, "%d %b %y")
         return date_obj
     except ValueError:
-        print(f"Could not parse date: {date_str}")
-        return None
+        try:
+            # Try full date format "21st February 2026"
+            # Remove ordinal suffix (st, nd, rd, th)
+            clean_date = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_str)
+            date_obj = datetime.strptime(clean_date, "%d %B %Y")
+            return date_obj
+        except ValueError:
+            print(f"Could not parse date: {date_str}")
+            return None
 
 def clean_pokemon_name(name: str) -> str:
     """Remove card variant suffixes from pokemon names (EX, V, VMAX, VSTAR, GX, ex, etc)."""
@@ -279,6 +287,153 @@ def extract_tournament_data_regex(html: str) -> List[Dict[str, str]]:
                 })
     
     return archetypes
+
+class TournamentDateParser(HTMLParser):
+    """Parser to extract tournament date and player count from tournament detail page."""
+    def __init__(self):
+        super().__init__()
+        self.in_infobox = False
+        self.in_header = False
+        self.date_str = ""
+        self.player_count = ""
+        self.current_data = ""
+        self.all_infobox_lines = []
+        
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+        attrs_dict = dict(attrs)
+        
+        # Check for tournament header (often contains date)
+        if tag == 'div' and 'class' in attrs_dict:
+            if 'tournament-header' in attrs_dict.get('class', ''):
+                self.in_header = True
+                self.current_data = ""
+            elif 'infobox-line' in attrs_dict.get('class', ''):
+                self.in_infobox = True
+                self.current_data = ""
+        elif tag == 'span' and self.in_infobox:
+            # Check for player count span with apc class
+            if 'class' in attrs_dict and 'apc' in attrs_dict.get('class', ''):
+                self.current_data = ""
+    
+    def handle_data(self, data: str) -> None:
+        if self.in_infobox or self.in_header:
+            self.current_data += data.strip() + " "
+    
+    def handle_endtag(self, tag: str) -> None:
+        if tag == 'div':
+            if self.in_infobox:
+                # Store all infobox lines for analysis
+                text = self.current_data.strip()
+                if text:
+                    self.all_infobox_lines.append(text)
+                
+                # Try to parse date and player info
+                # Format 1: "21st February 2026 • 7000* Players"
+                if '•' in text and 'player' in text.lower():
+                    parts = text.split('•')
+                    if len(parts) >= 2:
+                        # Extract date (before the •)
+                        date_part = parts[0].strip()
+                        if date_part and not self.date_str:
+                            self.date_str = date_part
+                        
+                        # Extract player count
+                        player_part = parts[1].strip()
+                        player_match = re.search(r'(\d+)', player_part)
+                        if player_match and not self.player_count:
+                            self.player_count = player_match.group(1)
+                # Format 2: Just date line (fallback)
+                elif not self.date_str:
+                    # Try to find a date pattern: "DD Month YYYY" or "DD Month YY"
+                    date_patterns = [
+                        r'\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{2,4}',
+                        r'\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{2,4}'
+                    ]
+                    for pattern in date_patterns:
+                        match = re.search(pattern, text, re.IGNORECASE)
+                        if match:
+                            self.date_str = match.group(0)
+                            break
+                
+                self.in_infobox = False
+                self.current_data = ""
+            elif self.in_header:
+                self.in_header = False
+                self.current_data = ""
+
+def get_tournament_by_id(tournament_id: str, delay: float = 1.5) -> Optional[Dict[str, str]]:
+    """
+    Fetch tournament info from a specific tournament ID from the main site.
+    Extracts date and player count from the tournament detail page.
+    
+    Args:
+        tournament_id: The tournament ID (e.g., "547")
+        delay: Delay between requests
+        
+    Returns:
+        Dictionary with tournament info or None if failed
+    """
+    url = f"https://limitlesstcg.com/tournaments/{tournament_id}"
+    print(f"\nFetching tournament from: {url}")
+    
+    html = fetch_page(url)
+    if not html:
+        print(f"  Failed to fetch tournament page for ID {tournament_id}")
+        return None
+    
+    # Parse date and player count from infobox
+    parser = TournamentDateParser()
+    parser.feed(html)
+    
+    # Debug: Show what was found
+    if parser.all_infobox_lines:
+        print(f"  Found {len(parser.all_infobox_lines)} infobox lines")
+    
+    # If parser didn't find date, try regex fallback
+    if not parser.date_str:
+        print(f"  Parser failed, trying regex fallback...")
+        # Try to find date in HTML with regex
+        date_patterns = [
+            r'(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})',
+            r'(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{2,4})'
+        ]
+        for pattern in date_patterns:
+            match = re.search(pattern, html, re.IGNORECASE)
+            if match:
+                parser.date_str = match.group(1)
+                print(f"  Found date via regex: {parser.date_str}")
+                break
+    
+    if not parser.date_str:
+        print(f"  Warning: Could not extract date from tournament {tournament_id}")
+        print(f"  First 500 chars of HTML: {html[:500]}")
+        return None
+    
+    # Parse the date
+    tournament_date = parse_tournament_date(parser.date_str)
+    if not tournament_date:
+        print(f"  Warning: Could not parse date '{parser.date_str}' from tournament {tournament_id}")
+        return None
+    
+    # Format date as "24 Jan 26"
+    date_str = tournament_date.strftime("%d %b %y")
+    
+    # Extract tournament name/location from page title or heading
+    title_match = re.search(r'<h1[^>]*>([^<]+)</h1>', html)
+    tournament_name = title_match.group(1).strip() if title_match else f"Tournament {tournament_id}"
+    
+    tournament_info = {
+        'tournament_id': tournament_id,
+        'url': url,
+        'date_str': date_str,
+        'prefecture': 'Special Event',  # Mark as special event
+        'shop': tournament_name,
+        'player_count': parser.player_count if parser.player_count else 'Unknown'
+    }
+    
+    print(f"  ✓ Found: {date_str} - {tournament_name} ({parser.player_count} players)")
+    
+    return tournament_info
 
 def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: datetime, delay: float = 1.5) -> List[Dict[str, str]]:
     """
@@ -353,7 +508,7 @@ def scrape_tournament_archetypes(tournament_url: str, tournament_info: Dict[str,
     return results
 
 def save_to_csv(data: List[Dict[str, str]], output_file: str):
-    """Save the scraped data to a CSV file."""
+    """Save the scraped data to a CSV file (append mode - keeps existing data)."""
     if not data:
         print("No data to save.")
         return
@@ -363,7 +518,21 @@ def save_to_csv(data: List[Dict[str, str]], output_file: str):
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
-    print(f"\nSaving data to: {output_path}")
+    # Load existing data if file exists
+    existing_data = []
+    if os.path.exists(output_path):
+        try:
+            with open(output_path, 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f, delimiter=';')
+                existing_data = list(reader)
+            print(f"\nFound {len(existing_data)} existing entries")
+        except Exception as e:
+            print(f"\nCould not load existing data: {e}")
+    
+    # Combine existing and new data
+    combined_data = existing_data + data
+    
+    print(f"Saving {len(combined_data)} total entries ({len(existing_data)} existing + {len(data)} new)")
     
     try:
         with open(output_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
@@ -371,9 +540,9 @@ def save_to_csv(data: List[Dict[str, str]], output_file: str):
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
             
             writer.writeheader()
-            writer.writerows(data)
+            writer.writerows(combined_data)
         
-        print(f"Successfully saved {len(data)} entries to {output_file}")
+        print(f"✅ Successfully saved {len(data)} new entries to {output_file}")
     except Exception as e:
         print(f"Error saving to CSV: {e}")
 
@@ -890,6 +1059,10 @@ def main():
     print(f"  Output File: {settings['output_file']}")
     print(f"  Delay: {settings['delay_between_requests']}s")
     
+    additional_ids = settings.get('additional_tournament_ids', [])
+    if additional_ids:
+        print(f"  Additional Tournaments: {', '.join(str(id) for id in additional_ids)}")
+    
     # Get tournaments in date range
     tournaments = get_tournaments_in_date_range(
         settings['region'],
@@ -898,18 +1071,75 @@ def main():
         settings['delay_between_requests']
     )
     
+    # Add additional tournaments by ID from main site (e.g., Champions League)
+    additional_ids = settings.get('additional_tournament_ids', [])
+    if additional_ids:
+        print(f"\n{'='*60}")
+        print(f"Fetching {len(additional_ids)} additional tournament(s) by ID...")
+        print(f"{'='*60}")
+        
+        for tournament_id in additional_ids:
+            tournament_info = get_tournament_by_id(
+                str(tournament_id),
+                settings['delay_between_requests']
+            )
+            if tournament_info:
+                tournaments.append(tournament_info)
+                print(f"  ✓ Added tournament {tournament_id} to scraping queue")
+            else:
+                print(f"  ✗ Failed to fetch tournament {tournament_id}")
+    
     if not tournaments:
         print("\nNo tournaments found in the specified date range.")
         return
     
+    # Load existing tournament IDs to skip already scraped ones
+    existing_tournament_ids = set()
+    output_path = os.path.join(get_data_dir(), settings['output_file'])
+    if os.path.exists(output_path):
+        try:
+            with open(output_path, 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f, delimiter=';')
+                for row in reader:
+                    if 'tournament_id' in row and row['tournament_id']:
+                        existing_tournament_ids.add(row['tournament_id'])
+            print(f"\nFound {len(existing_tournament_ids)} already scraped tournaments")
+        except Exception as e:
+            print(f"\nCould not load existing tournament IDs: {e}")
+    
+    # Filter out already scraped tournaments
+    new_tournaments = [t for t in tournaments if str(t['tournament_id']) not in existing_tournament_ids]
+    
+    if not new_tournaments:
+        print("\n✅ All tournaments in date range already scraped! Nothing new to scrape.")
+        
+        # Load existing data and regenerate deck statistics
+        output_path = os.path.join(get_data_dir(), settings['output_file'])
+        if os.path.exists(output_path):
+            try:
+                with open(output_path, 'r', encoding='utf-8-sig') as f:
+                    reader = csv.DictReader(f, delimiter=';')
+                    all_saved_data = list(reader)
+                print(f"\n✓ Loaded {len(all_saved_data)} entries from existing CSV")
+                
+                # Regenerate deck statistics only (comparison stays the same since no new data)
+                save_deck_statistics(all_saved_data, settings['output_file'])
+                print("✓ Deck statistics regenerated from existing data")
+                print("   (Comparison report not updated - no new data to add)")
+            except Exception as e:
+                print(f"Error regenerating statistics: {e}")
+        return
+    
+    print(f"\n📊 Tournaments to scrape: {len(new_tournaments)} new (skipping {len(tournaments) - len(new_tournaments)} already scraped)")
+    
     # Scrape archetypes from each tournament
     all_data = []
     
-    print(f"\nStarting to scrape {len(tournaments)} tournaments...")
+    print(f"\nStarting to scrape {len(new_tournaments)} new tournaments...")
     print("=" * 60)
     
-    for i, tournament in enumerate(tournaments, 1):
-        print(f"\n[{i}/{len(tournaments)}] Processing tournament {tournament['tournament_id']}")
+    for i, tournament in enumerate(new_tournaments, 1):
+        print(f"\n[{i}/{len(new_tournaments)}] Processing tournament {tournament['tournament_id']}")
         
         archetypes = scrape_tournament_archetypes(
             tournament['url'],
@@ -923,27 +1153,48 @@ def main():
     print("\n" + "=" * 60)
     print(f"Scraping complete! Total entries collected: {len(all_data)}")
     
+    # Load existing data BEFORE saving new data (for comparison)
+    output_path = os.path.join(get_data_dir(), settings['output_file'])
+    old_data = []
+    
+    if os.path.exists(output_path):
+        try:
+            with open(output_path, 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f, delimiter=';')
+                old_data = list(reader)
+            print(f"\n✓ Loaded {len(old_data)} existing entries from CSV (for comparison)")
+        except Exception as e:
+            print(f"\n⚠️  Could not load existing data: {e}")
+            old_data = []
+    
+    # Combine old data + new data = complete dataset
+    new_data = old_data + all_data
+    
     if all_data:
-        # Load old data for comparison (if exists)
-        old_data = []
-        output_path = os.path.join(get_data_dir(), settings['output_file'])
-        if os.path.exists(output_path):
-            try:
-                with open(output_path, 'r', encoding='utf-8-sig') as f:
-                    reader = csv.DictReader(f, delimiter=';')
-                    old_data = list(reader)
-                print(f"\nLoaded {len(old_data)} old entries for comparison")
-            except Exception as e:
-                print(f"\nCould not load old data: {e}")
+        # Save complete dataset (overwrites CSV with old + new data combined)
+        save_to_csv(new_data, settings['output_file'])
+        print(f"✓ Saved {len(new_data)} total entries to CSV ({len(old_data)} existing + {len(all_data)} new)")
+    
+    # Generate deck statistics from complete dataset
+    if new_data:
+        save_deck_statistics(new_data, settings['output_file'])
         
-        # Save new data
-        save_to_csv(all_data, settings['output_file'])
-        save_deck_statistics(all_data, settings['output_file'])
+        # Create comparison: old_data (before scrape) vs. new_data (after scrape)
+        print(f"\n📊 Creating comparison report:")
+        print(f"   Before this scrape: {len(old_data)} entries")
+        print(f"   After this scrape:  {len(new_data)} entries")
+        print(f"   Change: +{len(all_data)} new entries")
         
-        # Always try to create HTML report
-        print("\n" + "=" * 60)
-        print("Creating HTML report...")
-        print("=" * 60)
+        create_comparison_report(old_data, new_data, settings['output_file'])
+        print("✓ Comparison report generated successfully!")
+    elif old_data:
+        # No new data scraped, but we can still regenerate stats from existing data
+        save_deck_statistics(old_data, settings['output_file'])
+        print("\n✓ Deck statistics regenerated from existing data")
+        print("   (No comparison report - no new data to compare)")
+    
+    # Create HTML report if we have data
+    if all_data:
         try:
             # Convert to comparison data format for HTML
             comparison_data = []
@@ -963,13 +1214,6 @@ def main():
             print(f"✓ HTML report created: {html_file}")
         except Exception as e:
             print(f"⚠️  Could not create HTML report: {e}")
-        
-        # Create comparison report if we have old data
-        if old_data:
-            print("\n" + "=" * 60)
-            print("Creating comparison report...")
-            print("=" * 60)
-            create_comparison_report(old_data, all_data, settings['output_file'])
         
         # Print summary statistics
         print("\n" + "=" * 60)

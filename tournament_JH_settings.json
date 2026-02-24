@@ -11,8 +11,7 @@
         "EUIC",
         "NAIC",
         "Worlds",
-        "International",
-        "Championship"
+        "International"
     ],
     "append_mode": true,
     "_comment": "Nur Standard-Format Turniere (Regional, Special Event, LAIC, EUIC, NAIC, Worlds) werden automatisch gescraped. Scraper stoppt bei Tournament ID 391. append_mode=true keeps old tournament data when adding new tournaments."

@@ -53,6 +53,7 @@ DEFAULT_SETTINGS = {
     "set_filter": [],   # Empty = all sets, or e.g. ["ASC", "SVI", "TWM"] for specific sets
     "append": True,
     "rescrape_incomplete": True,  # True = re-scrape cards missing image_url or rarity
+    "use_page_tracking": True,    # True = skip already scraped pages (huge time saver!)
     "headless": True,
     "skip_detail_scraping": False,  # True = only scrape list (fast), False = scrape details too
     "list_page_delay_seconds": 1.0,
@@ -82,6 +83,44 @@ def get_data_dir() -> str:
     
     # Otherwise use 'data' relative to current directory
     return "data"
+
+
+def get_scraped_pages_file() -> str:
+    """Get path to scraped pages tracking file."""
+    data_dir = get_data_dir()
+    return os.path.join(data_dir, 'all_cards_scraped_pages.json')
+
+
+def load_scraped_pages() -> set:
+    """Load set of already scraped page numbers."""
+    tracking_file = get_scraped_pages_file()
+    
+    if not os.path.exists(tracking_file):
+        return set()
+    
+    try:
+        with open(tracking_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return set(data.get('scraped_pages', []))
+    except Exception as e:
+        print(f"[All Cards Scraper] Warning: Could not load scraped pages: {e}")
+        return set()
+
+
+def save_scraped_pages(pages: set) -> None:
+    """Save set of scraped page numbers to tracking file."""
+    tracking_file = get_scraped_pages_file()
+    
+    try:
+        data = {
+            'scraped_pages': sorted(list(pages)),
+            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'total_pages': len(pages)
+        }
+        with open(tracking_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"[All Cards Scraper] Warning: Could not save scraped pages: {e}")
 
 
 def load_settings() -> Dict[str, object]:
@@ -139,6 +178,11 @@ def scrape_all_cards_list(settings: Dict[str, object], start_page: int = 1, exis
     max_pages = settings.get("max_pages")
     end_page = settings.get("end_page")
     set_filter = settings.get("set_filter", [])
+    use_page_tracking = settings.get("use_page_tracking", True)
+    
+    # Load page tracking
+    scraped_pages = load_scraped_pages() if use_page_tracking else set()
+    newly_scraped_pages = set()
     
     if max_pages:
         print(f"[All Cards Scraper] MAX PAGES LIMIT: {max_pages} (for testing)")
@@ -146,6 +190,8 @@ def scrape_all_cards_list(settings: Dict[str, object], start_page: int = 1, exis
         print(f"[All Cards Scraper] END PAGE: {end_page} (pages {start_page}-{end_page})")
     if set_filter:
         print(f"[All Cards Scraper] SET FILTER ACTIVE: {', '.join(set_filter)}")
+    if use_page_tracking and scraped_pages:
+        print(f"[All Cards Scraper] PAGE TRACKING: {len(scraped_pages)} pages already scraped (will be skipped)")
     
     try:
         # Use pagination to load all cards reliably
@@ -173,6 +219,13 @@ def scrape_all_cards_list(settings: Dict[str, object], start_page: int = 1, exis
                 break
             seen_pages.add(next_url)
 
+            # Check if page already scraped
+            if use_page_tracking and page_index in scraped_pages:
+                print(f"[All Cards Scraper] ⏭ Skipping page {page_index} (already scraped)")
+                page_index += 1
+                next_url = f"{base_url}&page={page_index}" if page_index > 1 else None
+                continue
+            
             print(f"[All Cards Scraper] Loading page {page_index}: {next_url}")
             driver.get(next_url)
 
@@ -240,6 +293,10 @@ def scrape_all_cards_list(settings: Dict[str, object], start_page: int = 1, exis
             
             if filtered_out_on_page > 0:
                 print(f"[All Cards Scraper]   Filtered out {filtered_out_on_page} cards (not in set_filter)")
+            
+            # Mark page as successfully scraped
+            if use_page_tracking:
+                newly_scraped_pages.add(page_index)
 
             # Find next page link
             next_link = None
@@ -255,8 +312,10 @@ def scrape_all_cards_list(settings: Dict[str, object], start_page: int = 1, exis
                     break
 
             if not next_link:
-                if len(rows) == 0 or new_added_on_page == 0:
-                    print("[All Cards Scraper] Reached last page (no next link).")
+                # If no next button found, try to construct next page URL manually
+                # Only stop if we have no rows at all (truly empty page)
+                if len(rows) == 0:
+                    print("[All Cards Scraper] Reached last page (no cards found).")
                     break
                 next_url = f"{base_url}&page={page_index + 1}"
                 page_index += 1
@@ -286,6 +345,14 @@ def scrape_all_cards_list(settings: Dict[str, object], start_page: int = 1, exis
         driver.quit()
     
     print(f"\n[All Cards Scraper] OK: Extracted {len(all_cards_data)} cards from list")
+    
+    # Save page tracking
+    if use_page_tracking and newly_scraped_pages:
+        all_scraped_pages = scraped_pages | newly_scraped_pages
+        save_scraped_pages(all_scraped_pages)
+        print(f"[All Cards Scraper] ✓ Saved {len(newly_scraped_pages)} new page(s) to tracking file")
+        print(f"[All Cards Scraper]   Total tracked pages: {len(all_scraped_pages)}")
+    
     return all_cards_data
 
 

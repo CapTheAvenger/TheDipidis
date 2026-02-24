@@ -10,8 +10,8 @@
         },
         "tournaments": {
             "enabled": true,
-            "start_date": "",
-            "max_tournaments": 60,
+            "start_date": "28.11.2026",
+            "max_tournaments": 10,
             "max_decks_per_tournament": 256,
             "format_filter": [
                 "Standard",

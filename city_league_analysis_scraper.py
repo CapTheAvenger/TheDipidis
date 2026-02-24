@@ -52,6 +52,47 @@ except Exception as e:
 
 
 # ============================================================================
+# TOURNAMENT TRACKING (Incremental Scraping)
+# ============================================================================
+
+def get_scraped_tournaments_file() -> str:
+    """Get path to scraped tournaments tracking file."""
+    data_dir = get_data_dir()
+    return os.path.join(data_dir, 'city_league_analysis_scraped.json')
+
+
+def load_scraped_tournaments() -> set:
+    """Load set of already scraped tournament IDs."""
+    tracking_file = get_scraped_tournaments_file()
+    
+    if not os.path.exists(tracking_file):
+        return set()
+    
+    try:
+        with open(tracking_file, 'r', encoding='utf-8-sig') as f:
+            data = json.load(f)
+            return set(data.get('scraped_tournament_ids', []))
+    except Exception as e:
+        print(f"Warning: Could not load scraped tournaments: {e}")
+        return set()
+
+
+def save_scraped_tournaments(tournament_ids: set) -> None:
+    """Save set of scraped tournament IDs to tracking file."""
+    tracking_file = get_scraped_tournaments_file()
+    
+    try:
+        data = {
+            'scraped_tournament_ids': sorted(list(tournament_ids)),
+            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        with open(tracking_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Warning: Could not save scraped tournaments: {e}")
+
+
+# ============================================================================
 # SETTINGS
 # ============================================================================
 
@@ -268,8 +309,17 @@ def process_tournament_decklists(
         else:
             deck_name = "Unknown"
         
-        # Extract deck list link
-        link_match = re.search(r'<a[^>]+href="(?:https://limitlesstcg\.com)?(/decks/list/jp/\d+)"', row)
+        # Extract deck list link (supports multiple formats):
+        # - /decks/list/jp/123 (Japanese tournaments)
+        # - /decks/list/24428 (Champions League, special events)
+        # - Links behind FontAwesome icons (<i class="fa-list-alt">)
+        link_match = re.search(r'<a[^>]+href="(?:https://limitlesstcg\.com)?(/decks/list/(?:jp/)?(\d+))"', row)
+        if not link_match:
+            # Try alternative pattern: find fa-list-alt icon and extract href from parent <a> tag
+            icon_match = re.search(r'<a[^>]+href="(/decks/list/(?:jp/)?(\d+))"[^>]*>.*?<i[^>]*fa-list-alt', row, re.DOTALL)
+            if icon_match:
+                link_match = icon_match
+        
         if link_match:
             list_links.append(link_match.group(1))
             deck_names.append(deck_name)
@@ -339,6 +389,7 @@ def scrape_city_league(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
     max_retries = config.get('max_retries', 2)
     retry_delay = config.get('retry_delay', 1.0)
     delay = settings.get('delay_between_requests', 1.5)
+    additional_ids = config.get('additional_tournament_ids', [])
     
     # Resolve date range
     start_dt, end_dt = resolve_date_range(start_date_str, end_date_str)
@@ -346,9 +397,29 @@ def scrape_city_league(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
     print(f"Max decklists per league: {max_decklists}", flush=True)
     if max_tournaments and max_tournaments > 0:
         print(f"Max tournaments: {max_tournaments}")
+    if additional_ids:
+        print(f"Additional tournaments: {', '.join(str(id) for id in additional_ids)}", flush=True)
     
     # Fetch tournaments
     tournaments = fetch_city_league_tournaments(start_dt, end_dt)
+    
+    # Add additional tournaments by ID (e.g., Champions League)
+    if additional_ids and _city_league_available and city_league_module:
+        print(f"\nFetching {len(additional_ids)} additional tournament(s) by ID...", flush=True)
+        for tournament_id in additional_ids:
+            try:
+                tournament_info = city_league_module.get_tournament_by_id(
+                    str(tournament_id),
+                    delay
+                )
+                if tournament_info:
+                    tournaments.append(tournament_info)
+                    print(f"  ✓ Added tournament {tournament_id}", flush=True)
+                else:
+                    print(f"  ✗ Failed to fetch tournament {tournament_id}", flush=True)
+            except Exception as e:
+                print(f"  ✗ Error fetching tournament {tournament_id}: {e}", flush=True)
+    
     if not tournaments:
         print("No tournaments found", flush=True)
         return []
@@ -357,10 +428,37 @@ def scrape_city_league(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
         tournaments = tournaments[:max_tournaments]
         print(f"Limiting to {len(tournaments)} tournaments for this run")
     
+    # Load already scraped tournaments for incremental scraping
+    scraped_ids = load_scraped_tournaments()
+    print(f"Found {len(scraped_ids)} already scraped tournaments", flush=True)
+    
+    # Filter out already scraped tournaments
+    new_tournaments = []
+    for t in tournaments:
+        tid = str(t.get('tournament_id') or t.get('id', ''))
+        if tid and tid not in scraped_ids:
+            new_tournaments.append(t)
+        elif tid:
+            # Tournament already scraped, skip
+            pass
+    
+    skipped_count = len(tournaments) - len(new_tournaments)
+    tournaments = new_tournaments
+    
+    if skipped_count > 0:
+        print(f"📊 Tournaments to scrape: {len(tournaments)} new (skipping {skipped_count} already scraped)", flush=True)
+    else:
+        print(f"📊 Tournaments to scrape: {len(tournaments)} (no previously scraped tournaments found)", flush=True)
+    
+    if not tournaments:
+        print("All tournaments already scraped! No new data to collect.", flush=True)
+        return []
+    
     # Process each tournament
     all_decks = []
+    newly_scraped_ids = set()
     total_tournaments = len(tournaments)
-    print(f"Starting tournament processing for {total_tournaments} tournaments...", flush=True)
+    print(f"\nStarting tournament processing for {total_tournaments} new tournaments...", flush=True)
     
     for i, tournament in enumerate(tournaments, 1):
         tournament_id = tournament.get('tournament_id') or tournament.get('id', 'unknown')
@@ -400,13 +498,24 @@ def scrape_city_league(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
             print(f"  Extracted {len(decklists)} decklists", flush=True)
             all_decks.extend(decklists)
             
+            # Track successfully scraped tournament
+            newly_scraped_ids.add(str(tournament_id))
+            
             time.sleep(delay)
         
         except Exception as e:
             print(f"  [WARN] Tournament error (ID: {tournament_id}): {e}", flush=True)
             continue
     
-    print(f"✓ Collected {len(all_decks)} complete decks from City League")
+    print(f"✓ Collected {len(all_decks)} complete decks from City League", flush=True)
+    
+    # Save newly scraped tournament IDs
+    if newly_scraped_ids:
+        all_scraped_ids = scraped_ids | newly_scraped_ids
+        save_scraped_tournaments(all_scraped_ids)
+        print(f"✓ Saved {len(newly_scraped_ids)} new tournament IDs to tracking file", flush=True)
+        print(f"  Total tracked tournaments: {len(all_scraped_ids)}", flush=True)
+    
     return all_decks
 
 

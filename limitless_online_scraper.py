@@ -140,11 +140,17 @@ class DeckStatsParser(HTMLParser):
         self.capture_data = False
         self.current_data = ""
         self.row_number = 0
+        self.meta_stats = {}  # Store meta statistics (tournaments, players, matches)
+        self.in_p_tag = False
+        self.p_content = ""
         
     def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
         attrs_dict = dict(attrs)
         
-        if tag == 'table':
+        if tag == 'p':
+            self.in_p_tag = True
+            self.p_content = ""
+        elif tag == 'table':
             self.in_table = True
         elif tag == 'tr' and self.in_table:
             self.in_row = True
@@ -175,7 +181,18 @@ class DeckStatsParser(HTMLParser):
                 self.current_deck['deck_url'] = deck_slug
     
     def handle_endtag(self, tag: str) -> None:
-        if tag == 'table':
+        if tag == 'p' and self.in_p_tag:
+            self.in_p_tag = False
+            # Check if this p tag contains meta statistics
+            import re
+            match = re.search(r'(\d+)\s+tournaments,\s+(\d+)\s+players,\s+(\d+)\s+matches', self.p_content)
+            if match:
+                self.meta_stats = {
+                    'tournaments': int(match.group(1)),
+                    'players': int(match.group(2)),
+                    'matches': int(match.group(3))
+                }
+        elif tag == 'table':
             self.in_table = False
         elif tag == 'tr' and self.in_row:
             self.in_row = False
@@ -205,6 +222,8 @@ class DeckStatsParser(HTMLParser):
             self.current_data = ""
     
     def handle_data(self, data: str) -> None:
+        if self.in_p_tag:
+            self.p_content += data
         if self.capture_data and self.in_cell:
             self.current_data += data
 
@@ -306,6 +325,13 @@ def scrape_deck_statistics(game: str, format_type: str, rotation: Optional[str] 
     
     parser = DeckStatsParser()
     parser.feed(html_content)
+    
+    # Save meta statistics to JSON file
+    if parser.meta_stats:
+        meta_stats_file = os.path.join('data', 'limitless_meta_stats.json')
+        with open(meta_stats_file, 'w', encoding='utf-8') as f:
+            json.dump(parser.meta_stats, f, indent=2)
+        print(f"  Meta statistics saved: {parser.meta_stats}")
     
     # Parse score into wins, losses, ties
     for deck in parser.decks:
@@ -984,6 +1010,14 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
     else:
         top3_by_count_html = "N/A"
     
+    # Calculate total deck count
+    total_deck_count = 0
+    if new_stats:
+        try:
+            total_deck_count = sum(int(v.get('count', '0').replace(',', '')) for v in new_stats.values())
+        except Exception as e:
+            print(f"Warning: Could not calculate total deck count: {e}")
+    
     top_by_winrate_html = "N/A"
     if new_stats:
         try:
@@ -1000,8 +1034,12 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             
             if decks_with_winrate:
                 decks_with_winrate.sort(key=lambda x: x['win_rate_numeric'], reverse=True)
-                top_deck = decks_with_winrate[0]
-                top_by_winrate_html = f'<span style="color: #27ae60;">{top_deck["deck_name"]}</span> ({top_deck["win_rate_numeric"]:.1f}%)'
+                # Get top 3 instead of just top 1
+                top3_winrate = decks_with_winrate[:3]
+                top_by_winrate_html = '<br>'.join(
+                    f'<span style="color: #27ae60;">{d["deck_name"]}</span> ({d["win_rate_numeric"]:.1f}%)'
+                    for d in top3_winrate
+                )
         except Exception as e:
             print(f"Warning: Could not calculate top by WR: {e}")
     
@@ -1155,20 +1193,14 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Limitless Online Deck Comparison</h1>
-        <div class="subtitle">Format: {settings.get('format', 'STANDARD')} | Game: {settings.get('game', 'POKEMON')}</div>
         
-        <div class="meta-info">
-            <span>📅 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</span>
-            <span>📊 Total Decks Tracked: {len(comparison_data)}</span>
-        </div>
 
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>📊 Archetype Overview</h3>
-                <div class="value">{len([d for d in new_stats.values()])}</div>
+                <div class="value">{total_deck_count:,} ({len(new_stats)})</div>
                 <p style="font-size: 0.9em; margin: 10px 0;"><strong>Top 3 by Count:</strong><br>{top3_by_count_html}</p>
-                <p style="font-size: 0.9em; margin: 10px 0;"><strong>Top by Win Rate (≥10% of #1 games):</strong><br>{top_by_winrate_html}</p>
+                <p style="font-size: 0.9em; margin: 10px 0;"><strong>Top 3 by Win Rate (≥10% of #1 games):</strong><br>{top_by_winrate_html}</p>
             </div>
             <div class="stat-card">
                 <h3>🔄 Top 10 Changes</h3>
@@ -1182,58 +1214,61 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             </div>
         </div>
 
-        <div class="section">
-            <h2>📈 Biggest Rank Climbers</h2>
-            <table>
-                <tr>
-                    <th>Deck</th>
-                    <th>Old Rank</th>
-                    <th>New Rank</th>
-                    <th>Change</th>
-                    <th>Win Rate</th>
-                </tr>
-                {''.join(f"""
-                <tr>
-                    <td><strong>{deck['deck_name']}</strong></td>
-                    <td>#{deck['old_rank']}</td>
-                    <td>#{deck['new_rank']}</td>
-                    <td><span class="rank-change rank-up">▲ {deck['rank_change']}</span></td>
-                    <td>{deck_lookup.get(deck['deck_name'], dict()).get('win_rate_numeric', 0):.1f}% <span class="{'positive' if deck['winrate_change'] > 0 else 'negative' if deck['winrate_change'] < 0 else 'neutral'}">({deck['winrate_change']:+.2f}%)</span></td>
-                </tr>
-                """ for deck in rank_climbers[:10])}
-            </table>
-        </div>
+        <!-- Climbers and Fallers Side by Side -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
+            <div class="section">
+                <h2>📈 Biggest Rank Climbers</h2>
+                <table>
+                    <tr>
+                        <th>Deck</th>
+                        <th>Rank</th>
+                        <th>Win Rate</th>
+                    </tr>
+                    {''.join(f"""
+                    <tr>
+                        <td><strong>{deck['deck_name']}</strong></td>
+                        <td>#{deck['new_rank']} <span class="rank-change rank-up">(▲ {deck['rank_change']})</span></td>
+                        <td>{deck_lookup.get(deck['deck_name'], dict()).get('win_rate_numeric', 0):.1f}% <span class="{'positive' if deck['winrate_change'] > 0 else 'negative' if deck['winrate_change'] < 0 else 'neutral'}">({deck['winrate_change']:+.2f}%)</span></td>
+                    </tr>
+                    """ for deck in rank_climbers[:10])}
+                </table>
+            </div>
 
-        <div class="section">
-            <h2>📉 Biggest Rank Fallers</h2>
-            <table>
-                <tr>
-                    <th>Deck</th>
-                    <th>Old Rank</th>
-                    <th>New Rank</th>
-                    <th>Change</th>
-                    <th>Win Rate</th>
-                </tr>
-                {''.join(f"""
-                <tr>
-                    <td><strong>{deck['deck_name']}</strong></td>
-                    <td>#{deck['old_rank']}</td>
-                    <td>#{deck['new_rank']}</td>
-                    <td><span class="rank-change rank-down">▼ {abs(deck['rank_change'])}</span></td>
-                    <td>{deck_lookup.get(deck['deck_name'], dict()).get('win_rate_numeric', 0):.1f}% <span class="{'positive' if deck['winrate_change'] > 0 else 'negative' if deck['winrate_change'] < 0 else 'neutral'}">({deck['winrate_change']:+.2f}%)</span></td>
-                </tr>
-                """ for deck in rank_fallers[:10])}
-            </table>
+            <div class="section">
+                <h2>📉 Biggest Rank Fallers</h2>
+                <table>
+                    <tr>
+                        <th>Deck</th>
+                        <th>Rank</th>
+                        <th>Win Rate</th>
+                    </tr>
+                    {''.join(f"""
+                    <tr>
+                        <td><strong>{deck['deck_name']}</strong></td>
+                        <td>#{deck['new_rank']} <span class="rank-change rank-down">(▼ {abs(deck['rank_change'])})</span></td>
+                        <td>{deck_lookup.get(deck['deck_name'], dict()).get('win_rate_numeric', 0):.1f}% <span class="{'positive' if deck['winrate_change'] > 0 else 'negative' if deck['winrate_change'] < 0 else 'neutral'}">({deck['winrate_change']:+.2f}%)</span></td>
+                    </tr>
+                    """ for deck in rank_fallers[:10])}
+                </table>
+            </div>
         </div>
 
         {f'''
         <div class="section">
-            <h2>🎯 Matchup Analysis - Top {settings.get('top_decks_for_matchup', 10)} Decks</h2>
+            <h2>🎯 Matchup Analysis - Top 100 Decks</h2>
             <p style="color: #7f8c8d; margin-bottom: 20px;">Best and Worst matchups against Top 10 decks · Select opponent deck for detailed matchup</p>
             
-            {''.join(f"""
+            ''' if matchup_data else ''}
+            
+            {f'''
+            <!-- Top 10 Decks - Expanded by default -->
+            <details open style="margin-bottom: 30px; border: 2px solid #3498db; border-radius: 8px; padding: 15px; background: #ecf7ff;">
+                <summary style="cursor: pointer; font-size: 1.3em; font-weight: bold; color: #2c3e50; padding: 10px; margin: -15px -15px 15px -15px; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border-radius: 6px 6px 0 0;">
+                    🏆 Top 10 Decks (Rank 1-10)
+                </summary>
+                {''.join(f"""
             <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #2c3e50; margin-top: 0;">{deck_name} <span style="font-size: 0.8em; color: #7f8c8d;">(Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
+                <h3 style="color: #2c3e50; margin-top: 0;">{deck_name} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
@@ -1275,22 +1310,157 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                 
                 <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
                     <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
-                    <label for="opponent_{deck_name.replace(' ', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
+                    <label for="opponent_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
                     <div style="position: relative;">
-                        <input type="text" id="opponent_search_{deck_name.replace(' ', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_')}')">
-                        <div id="opponent_dropdown_{deck_name.replace(' ', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
-                            {''.join(f"<div class=\"opponent-option\" data-value=\"{opponent}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_')}', '{opponent.replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{opponent}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
+                        <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
+                        <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
+                            {''.join(f"<div class=\"opponent-option\" data-value=\"{opponent}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{opponent.replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{opponent}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
                         </div>
                     </div>
-                    <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_')}" value="">
-                    <div id="matchup_details_{deck_name.replace(' ', '_')}" style="margin-top: 15px; display: none; background: #ecf0f1; padding: 15px; border-radius: 4px;"></div>
+                    <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" value="">
+                    <div id="matchup_details_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="margin-top: 15px; display: none; background: #ecf0f1; padding: 15px; border-radius: 4px;"></div>
                 </div>
                 
                 <script>
-                window.matchupData_{deck_name.replace(' ', '_')} = {json.dumps({k: {'opponent_deck': v.get('opponent_deck'), 'win_rate': v.get('win_rate'), 'win_rate_numeric': v.get('win_rate_numeric'), 'record': v.get('record'), 'total_games': v.get('total_games')} for k, v in matchups.get('all_opponent_matchups', dict()).items()})};
+                window.matchupData_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')} = {json.dumps({k: {'opponent_deck': v.get('opponent_deck'), 'win_rate': v.get('win_rate'), 'win_rate_numeric': v.get('win_rate_numeric'), 'record': v.get('record'), 'total_games': v.get('total_games')} for k, v in matchups.get('all_opponent_matchups', dict()).items()})};
                 </script>
             </div>
-            """ for deck_name, matchups in (matchup_data.items() if matchup_data else []) if deck_name.lower() != 'other')}
+            """ for deck_name, matchups in (sorted([(dn, m) for dn, m in matchup_data.items() if int(deck_lookup.get(dn, dict()).get('rank', 999)) <= 10], key=lambda x: int(deck_lookup.get(x[0], dict()).get('rank', 999))) if matchup_data else []) if deck_name.lower() != 'other')}
+            </details>
+            
+            <!-- Rank 11-30 - Collapsed by default -->
+            <details style="margin-bottom: 30px; border: 2px solid #e67e22; border-radius: 8px; padding: 15px; background: #fef5e7;">
+                <summary style="cursor: pointer; font-size: 1.3em; font-weight: bold; color: #2c3e50; padding: 10px; margin: -15px -15px 15px -15px; background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); color: white; border-radius: 6px 6px 0 0;">
+                    📊 Rank 11-30
+                </summary>
+                {''.join(f"""
+            <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h3 style="color: #2c3e50; margin-top: 0;">{deck_name} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: #27ae60; margin-bottom: 10px;">✅ Best Matchups</h4>
+                        <table style="box-shadow: none;">
+                            <tr style="background: #d4edda;">
+                                <th style="background: #27ae60;">Opponent</th>
+                                <th style="background: #27ae60;">Win Rate</th>
+                                <th style="background: #27ae60;">Record</th>
+                            </tr>
+                            {''.join(f"""
+                            <tr>
+                                <td><strong>{matchup['opponent_deck']}</strong></td>
+                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
+                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
+                            </tr>
+                            """ for matchup in matchups.get('best_matchups', [])) if matchups.get('best_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #e74c3c; margin-bottom: 10px;">❌ Worst Matchups</h4>
+                        <table style="box-shadow: none;">
+                            <tr style="background: #f8d7da;">
+                                <th style="background: #e74c3c;">Opponent</th>
+                                <th style="background: #e74c3c;">Win Rate</th>
+                                <th style="background: #e74c3c;">Record</th>
+                            </tr>
+                            {''.join(f"""
+                            <tr>
+                                <td><strong>{matchup['opponent_deck']}</strong></td>
+                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
+                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
+                            </tr>
+                            """ for matchup in matchups.get('worst_matchups', [])) if matchups.get('worst_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
+                        </table>
+                    </div>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
+                    <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
+                    <label for="opponent_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
+                    <div style="position: relative;">
+                        <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
+                        <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
+                            {''.join(f"<div class=\"opponent-option\" data-value=\"{opponent}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{opponent.replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{opponent}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
+                        </div>
+                    </div>
+                    <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" value="">
+                    <div id="matchup_details_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="margin-top: 15px; display: none; background: #ecf0f1; padding: 15px; border-radius: 4px;"></div>
+                </div>
+                
+                <script>
+                window.matchupData_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')} = {json.dumps({k: {'opponent_deck': v.get('opponent_deck'), 'win_rate': v.get('win_rate'), 'win_rate_numeric': v.get('win_rate_numeric'), 'record': v.get('record'), 'total_games': v.get('total_games')} for k, v in matchups.get('all_opponent_matchups', dict()).items()})};
+                </script>
+            </div>
+            """ for deck_name, matchups in (sorted([(dn, m) for dn, m in matchup_data.items() if 11 <= int(deck_lookup.get(dn, dict()).get('rank', 999)) <= 30], key=lambda x: int(deck_lookup.get(x[0], dict()).get('rank', 999))) if matchup_data else []) if deck_name.lower() != 'other')}
+            </details>
+            
+            <!-- Rank 31+ - Collapsed by default -->
+            <details style="margin-bottom: 30px; border: 2px solid #95a5a6; border-radius: 8px; padding: 15px; background: #f8f9fa;">
+                <summary style="cursor: pointer; font-size: 1.3em; font-weight: bold; color: #2c3e50; padding: 10px; margin: -15px -15px 15px -15px; background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%); color: white; border-radius: 6px 6px 0 0;">
+                    📋 Rest (Rank 31+)
+                </summary>
+                {''.join(f"""
+            <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h3 style="color: #2c3e50; margin-top: 0;">{deck_name} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4 style="color: #27ae60; margin-bottom: 10px;">✅ Best Matchups</h4>
+                        <table style="box-shadow: none;">
+                            <tr style="background: #d4edda;">
+                                <th style="background: #27ae60;">Opponent</th>
+                                <th style="background: #27ae60;">Win Rate</th>
+                                <th style="background: #27ae60;">Record</th>
+                            </tr>
+                            {''.join(f"""
+                            <tr>
+                                <td><strong>{matchup['opponent_deck']}</strong></td>
+                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
+                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
+                            </tr>
+                            """ for matchup in matchups.get('best_matchups', [])) if matchups.get('best_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #e74c3c; margin-bottom: 10px;">❌ Worst Matchups</h4>
+                        <table style="box-shadow: none;">
+                            <tr style="background: #f8d7da;">
+                                <th style="background: #e74c3c;">Opponent</th>
+                                <th style="background: #e74c3c;">Win Rate</th>
+                                <th style="background: #e74c3c;">Record</th>
+                            </tr>
+                            {''.join(f"""
+                            <tr>
+                                <td><strong>{matchup['opponent_deck']}</strong></td>
+                                <td><strong>{matchup['win_rate_numeric']:.1f}%</strong></td>
+                                <td>{matchup['record']} ({matchup['total_games']} games)</td>
+                            </tr>
+                            """ for matchup in matchups.get('worst_matchups', [])) if matchups.get('worst_matchups') else '<tr><td colspan="3" style="text-align: center; color: #95a5a6;">No data available</td></tr>'}
+                        </table>
+                    </div>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
+                    <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
+                    <label for="opponent_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
+                    <div style="position: relative;">
+                        <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
+                        <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
+                            {''.join(f"<div class=\"opponent-option\" data-value=\"{opponent}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{opponent.replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{opponent}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
+                        </div>
+                    </div>
+                    <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" value="">
+                    <div id="matchup_details_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="margin-top: 15px; display: none; background: #ecf0f1; padding: 15px; border-radius: 4px;"></div>
+                </div>
+                
+                <script>
+                window.matchupData_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')} = {json.dumps({k: {'opponent_deck': v.get('opponent_deck'), 'win_rate': v.get('win_rate'), 'win_rate_numeric': v.get('win_rate_numeric'), 'record': v.get('record'), 'total_games': v.get('total_games')} for k, v in matchups.get('all_opponent_matchups', dict()).items()})};
+                </script>
+            </div>
+            """ for deck_name, matchups in (sorted([(dn, m) for dn, m in matchup_data.items() if int(deck_lookup.get(dn, dict()).get('rank', 999)) > 30], key=lambda x: int(deck_lookup.get(x[0], dict()).get('rank', 999))) if matchup_data else []) if deck_name.lower() != 'other')}
+            </details>
         </div>
         
         <script>
@@ -1386,22 +1556,14 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             <table>
                 <tr>
                     <th>Deck</th>
-                    <th>Old Rank</th>
-                    <th>New Rank</th>
-                    <th>Rank Δ</th>
+                    <th>Rank</th>
                     <th>Count</th>
                     <th>Win Rate</th>
                 </tr>
                 {''.join(f"""
                 <tr>
                     <td><strong>{deck['deck_name']}</strong></td>
-                    <td>{deck['old_rank'] if deck['old_rank'] != '-' else '-'}</td>
-                    <td>{deck['new_rank'] if deck['new_rank'] != '-' else '-'}</td>
-                    <td>
-                        {f'<span class="rank-change rank-up">▲ {deck["rank_change"]}</span>' if deck['rank_change'] > 0 
-                         else f'<span class="rank-change rank-down">▼ {abs(deck["rank_change"])}</span>' if deck['rank_change'] < 0 
-                         else '-'}
-                    </td>
+                    <td>{deck['new_rank']} {f'<span class="rank-change rank-up">(▲{deck["rank_change"]})</span>' if deck['rank_change'] > 0 else f'<span class="rank-change rank-down">(▼{abs(deck["rank_change"])})</span>' if deck['rank_change'] < 0 else '(-)'}</td>
                     <td>{deck['new_count']} <span class="{'positive' if deck['count_change'] > 0 else 'negative' if deck['count_change'] < 0 else 'neutral'}">({deck['count_change']:+d})</span></td>
                     <td>{deck_lookup.get(deck['deck_name'], dict()).get('win_rate_numeric', 0):.1f}% <span class="{'positive' if deck['winrate_change'] > 0 else 'negative' if deck['winrate_change'] < 0 else 'neutral'}">({deck['winrate_change']:+.2f}%)</span></td>
                 </tr>

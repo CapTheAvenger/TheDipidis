@@ -3,12 +3,13 @@
         "city_league": {
             "enabled": true,
             "start_date": "24.01.2026",
-            "end_date": "auto",
-            "max_decklists_per_league": 16
+            "end_date": "23.02.2026",
+            "max_decklists_per_league": 16,
+            "additional_tournament_ids": [547]
         }
     },
     "output_file": "city_league_analysis.csv",
     "delay_between_requests": 1.5,
     "append_mode": true,
-    "_comment": "Scrapes City League tournaments and extracts card data by archetype. append_mode=true keeps old tournament dates when adding new data."
+    "_comment": "Scrapes City League tournaments and extracts card data by archetype. append_mode=true keeps old tournament dates when adding new data. additional_tournament_ids: Add tournament IDs from main site (e.g., Champions League) - format: [547, 550]"
 }

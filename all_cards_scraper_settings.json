@@ -2,7 +2,7 @@
     "start_page": 1,
     "end_page": null,
     "max_pages": null,
-    "set_filter": ["ASC", "PFL", "MEG", "MEE", "MEP", "BLK", "WHT", "DRI", "JTG", "PRE", "SSP", "SCR", "SFA", "TWM", "TEF", "PAF", "PAR", "MEW", "OBF", "PAL", "SVI", "SVE", "SVP"],
+    "set_filter": [],
     "append": true,
     "rescrape_incomplete": true,
     "headless": true,

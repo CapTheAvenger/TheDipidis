@@ -102,7 +102,7 @@ class CardTypeLookup:
         app_path = self.get_app_path()
         
         # Try new location first: data/all_cards_database.csv (relative to workspace root)
-        data_csv = os.path.join(os.path.dirname(app_path), 'data', 'all_cards_database.csv')
+        data_csv = os.path.join(app_path, 'data', 'all_cards_database.csv')
         
         # Fallback to old location: all_cards_database.csv in app directory
         app_csv = os.path.join(app_path, 'all_cards_database.csv')

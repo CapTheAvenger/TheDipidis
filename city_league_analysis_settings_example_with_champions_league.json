@@ -1,0 +1,15 @@
+{
+    "sources": {
+        "city_league": {
+            "enabled": true,
+            "start_date": "24.01.2026",
+            "end_date": "auto",
+            "max_decklists_per_league": 16,
+            "additional_tournament_ids": [547]
+        }
+    },
+    "output_file": "city_league_analysis.csv",
+    "delay_between_requests": 1.5,
+    "append_mode": true,
+    "_comment": "Example: Champions League Yokohama (ID 547) added to regular City League scraping"
+}

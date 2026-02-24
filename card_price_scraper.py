@@ -175,7 +175,9 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                 })
                 continue
             
-            print(f"[Price Scraper] [{idx+1}/{len(cards)}] {card['name']} ({card['set']} {card['number']})...")
+            # Only print every 10th card to reduce spam
+            if (idx + 1) % 10 == 0 or idx == 0:
+                print(f"[Price Scraper] Progress: {idx+1}/{len(cards)} cards...")
             
             try:
                 # Strategy: Prefer Cardmarket direct scraping (original source), fallback to Limitless
@@ -188,40 +190,37 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                 # Try Cardmarket first (if URL available)
                 if cardmarket_url_final:
                     try:
-                        print(f"   → Trying Cardmarket direct...")
                         driver.get(cardmarket_url_final)
-                        time.sleep(2)
+                        time.sleep(1.5)  # Reduced delay
                         
-                        # Find price in <dd class="col-6 col-xl-7">2,50 €</dd>
+                        # Try multiple robust selectors for Cardmarket price
                         try:
-                            # Try multiple selectors for Cardmarket price
-                            price_elem = None
+                            # Strategy 1: Find all dd elements with price pattern
+                            price_elems = driver.find_elements(By.CSS_SELECTOR, "dd.col-6, dd.col-xl-7, dd[class*='col']")
+                            for elem in price_elems:
+                                text = elem.text.strip()
+                                # Match price pattern: digits, comma/dot, digits, €
+                                if '€' in text and any(c.isdigit() for c in text):
+                                    eur_price = text
+                                    print(f"   ✓ CM: {eur_price}")
+                                    break
+                        except:
+                            pass
+                        
+                        if not eur_price:
+                            # Strategy 2: Try span.price or similar
                             try:
-                                # Primary: dd.col-6.col-xl-7 (often contains the "From" price)
-                                price_elems = driver.find_elements(By.CSS_SELECTOR, "dd.col-6.col-xl-7")
-                                for elem in price_elems:
-                                    text = elem.text.strip()
-                                    if '€' in text:
-                                        eur_price = text
-                                        print(f"   ✓ Cardmarket: {eur_price}")
-                                        break
+                                price_elem = driver.find_element(By.CSS_SELECTOR, "span.price, .price-container, [class*='price']")
+                                text = price_elem.text.strip()
+                                if '€' in text:
+                                    eur_price = text
+                                    print(f"   ✓ CM: {eur_price}")
                             except:
                                 pass
-                            
-                            if not eur_price:
-                                # Fallback: Try .price-container or other common Cardmarket selectors
-                                try:
-                                    price_elem = driver.find_element(By.CSS_SELECTOR, ".price-container .text-right")
-                                    eur_price = price_elem.text.strip()
-                                    print(f"   ✓ Cardmarket (fallback): {eur_price}")
-                                except:
-                                    pass
-                            
-                        except Exception as e:
-                            print(f"   ⚠ Cardmarket price not found: {str(e)[:80]}")
-                    
-                    except Exception as e:
-                        print(f"   ⚠ Cardmarket error: {str(e)[:80]}")
+                        
+                        # Silent fail - Cardmarket often blocks, this is expected
+                    except Exception:
+                        pass  # Silent - try Limitless instead
                 
                 # Fallback: Try Limitless if Cardmarket failed or no URL
                 if not eur_price:
@@ -236,9 +235,8 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                             # Build URL manually (format: /cards/SET/NUM)
                             url = f"https://limitlesstcg.com/cards/{card['set']}/{card['number']}"
                         
-                        print(f"   → Trying Limitless: {url}")
                         driver.get(url)
-                        time.sleep(2)
+                        time.sleep(1.5)  # Reduced delay
                         
                         # Find the table with prices
                         cardmarket_url_from_page = ''
@@ -253,20 +251,21 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                             eur_price = eur_link.text.strip()
                             cardmarket_url_from_page = eur_link.get_attribute('href') or ''
                             
-                            print(f"   ✓ Limitless: {eur_price}")
+                            print(f"   ✓ LT: {eur_price}")
                             
                             # Update Cardmarket URL if we got a new one from Limitless
                             if cardmarket_url_from_page and not cardmarket_url_final:
                                 cardmarket_url_final = cardmarket_url_from_page
                         except Exception as e:
-                            error_str = str(e)
-                            if 'no such element' in error_str and 'card-prints-versions' in error_str:
-                                print(f"   ℹ No price table on Limitless")
-                            else:
-                                print(f"   ⚠ Limitless error: {error_str.split('Stacktrace')[0].strip()[:80]}")
+                            error_str = str(e).lower()
+                            # Only log if it's NOT a common "no price table" case
+                            if 'no such element' not in error_str or 'card-prints-versions' not in error_str:
+                                # Real error - log it
+                                print(f"   ⚠ Error: {str(e).split('Stacktrace')[0].strip()[:60]}")
+                            # Silent fail for "no price table" - many cards don't have prices
                     
-                    except Exception as e:
-                        print(f"   ⚠ Limitless failed: {str(e)[:80]}")
+                    except Exception:
+                        pass  # Silent - no price available
                 
                 # Store result (even if price is empty - we track all attempts)
                 results.append({
@@ -321,15 +320,51 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
     return results
 
 def save_prices(prices: List[Dict[str, str]], csv_path: str):
-    """Save prices to price_data.csv."""
+    """
+    Save prices to price_data.csv, preserving existing prices.
+    Only overwrites when a new valid price is found.
+    """
+    # Load existing prices from CSV
+    existing_prices = {}
+    if os.path.isfile(csv_path):
+        with open(csv_path, 'r', encoding='utf-8', newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if not row:
+                    continue
+                key = f"{row.get('set', '')}_{row.get('number', '')}"
+                existing_prices[key] = {
+                    'name': row.get('name', ''),
+                    'set': row.get('set', ''),
+                    'number': row.get('number', ''),
+                    'eur_price': row.get('eur_price', ''),
+                    'cardmarket_url': row.get('cardmarket_url', ''),
+                    'last_updated': row.get('last_updated', '')
+                }
+    
+    # Merge new prices with existing ones
+    # Only update if new price is non-empty
+    for price in prices:
+        key = f"{price.get('set', '')}_{price.get('number', '')}"
+        new_price = (price.get('eur_price') or '').strip()
+        
+        if new_price:
+            # New valid price found - update everything
+            existing_prices[key] = price
+        elif key not in existing_prices:
+            # New card but no price yet - add entry with empty price
+            existing_prices[key] = price
+        # else: Keep existing price (don't overwrite with empty)
+    
+    # Write all prices back to CSV
     with open(csv_path, 'w', encoding='utf-8', newline='') as f:
         fieldnames = ['name', 'set', 'number', 'eur_price', 'cardmarket_url', 'last_updated']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        for price in prices:
-            writer.writerow(price)
+        for key in sorted(existing_prices.keys()):
+            writer.writerow(existing_prices[key])
     
-    print(f"[Price Scraper] OK: Saved {len(prices)} prices to {csv_path}")
+    print(f"[Price Scraper] OK: Saved {len(existing_prices)} prices to {csv_path}")
 
 
 # Main execution

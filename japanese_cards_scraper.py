@@ -87,6 +87,75 @@ def get_data_dir() -> str:
     return "data"
 
 
+def load_existing_sets() -> Set[str]:
+    """Load existing Japanese card sets from CSV to check if update is needed."""
+    data_dir = get_data_dir()
+    csv_path = os.path.join(data_dir, 'japanese_cards_database.csv')
+    
+    if not os.path.exists(csv_path):
+        return set()
+    
+    try:
+        existing_sets = set()
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if 'set' in row and row['set']:
+                    existing_sets.add(row['set'])
+        return existing_sets
+    except Exception as e:
+        print(f"[Japanese Scraper] Could not load existing sets: {e}")
+        return set()
+
+
+def quick_check_latest_sets() -> Set[str]:
+    """Quick check of first page to see what the latest sets are."""
+    print("[Japanese Scraper] Quick check: Loading first page to detect latest sets...")
+    
+    chrome_options = Options()
+    if SETTINGS['headless']:
+        chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080")
+    
+    driver = webdriver.Chrome(options=chrome_options)
+    current_sets = []
+    
+    try:
+        base_url = "https://limitlesstcg.com/cards?q=lang%3Aen.t&display=list"
+        driver.get(base_url)
+        
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "tbody tr"))
+        )
+        
+        rows = driver.find_elements(By.CSS_SELECTOR, "tbody tr")
+        seen_sets = []
+        
+        for row in rows:
+            try:
+                cells = row.find_elements(By.TAG_NAME, "td")
+                if len(cells) >= 1:
+                    set_code = cells[0].get_attribute('textContent').strip()
+                    if set_code and set_code not in seen_sets:
+                        seen_sets.append(set_code)
+                        if len(seen_sets) >= SETTINGS['keep_latest_sets']:
+                            break
+            except:
+                continue
+        
+        current_sets = seen_sets[:SETTINGS['keep_latest_sets']]
+        
+    except Exception as e:
+        print(f"[Japanese Scraper] Error during quick check: {e}")
+    finally:
+        driver.quit()
+    
+    return set(current_sets)
+
+
 def scrape_japanese_cards_list() -> List[Dict[str, str]]:
     """Scrape Japanese card list and extract set information."""
     print("[Japanese Scraper] Starting Selenium WebDriver...")
@@ -315,6 +384,41 @@ def scrape_card_details(cards: List[Dict[str, str]]) -> List[Dict[str, str]]:
 
 
 # Main execution
+print("\n" + "=" * 80)
+print("QUICK CHECK: Verifying if update is needed...")
+print("=" * 80)
+
+# Load existing sets from CSV
+existing_sets = load_existing_sets()
+if existing_sets:
+    print(f"[Japanese Scraper] Found existing database with {len(existing_sets)} sets")
+    print(f"[Japanese Scraper] Existing sets: {', '.join(sorted(existing_sets))}")
+else:
+    print("[Japanese Scraper] No existing database found - will scrape everything")
+
+# Quick check of latest sets from website
+current_latest_sets = quick_check_latest_sets()
+if current_latest_sets:
+    print(f"[Japanese Scraper] Latest {len(current_latest_sets)} sets on website: {', '.join(sorted(current_latest_sets))}")
+    
+    # Check if existing sets match current latest sets
+    if existing_sets == current_latest_sets:
+        print("\n" + "=" * 80)
+        print("✅ DATABASE IS UP TO DATE!")
+        print("=" * 80)
+        print(f"[Japanese Scraper] Existing database already has the latest {SETTINGS['keep_latest_sets']} sets")
+        print("[Japanese Scraper] No update needed - skipping scrape")
+        print("\n" + "=" * 80)
+        if getattr(sys, "frozen", False):
+            input("Press ENTER to close...")
+        sys.exit(0)
+    else:
+        print(f"[Japanese Scraper] ⚠️ Database needs update!")
+        print(f"[Japanese Scraper]   Sets to add: {current_latest_sets - existing_sets}")
+        print(f"[Japanese Scraper]   Sets to remove: {existing_sets - current_latest_sets}")
+else:
+    print("[Japanese Scraper] Could not determine latest sets - proceeding with full scrape")
+
 print("\n" + "=" * 80)
 print("PHASE 1: Scraping Japanese card list from Limitless...")
 print("=" * 80)

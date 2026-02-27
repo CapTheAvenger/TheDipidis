@@ -5,7 +5,7 @@ echo ============================================================
 echo              UNIFIED SCRAPER TCG - Quick Start
 echo ============================================================
 echo.
-echo Startet ALLE 9 Scraper gleichzeitig parallel:
+echo Startet ALLE 10 Scraper gleichzeitig parallel:
 echo   1. Ace Spec Scraper (aktualisiert bekannte Ace Specs)
 echo   2. All Cards Database Scraper (laut Settings-Datei)
 echo   3. Japanese Cards Database Scraper (4 neueste Sets)
@@ -15,6 +15,7 @@ echo   6. Limitless Online Scraper
 echo   7. Tournament Scraper JH
 echo   8. City League Analysis Scraper
 echo   9. Current Meta Analysis Scraper
+echo  10. Set List Scraper (aktualisiert SET_ORDER Mapping)
 echo.
 echo WICHTIG: Alle Scraper laufen parallel (maximale Geschwindigkeit)
 echo          Database-Scraper starten zuerst, andere nutzen dann die DBs
@@ -24,7 +25,7 @@ pause
 
 echo.
 echo ============================================================
-echo Starte ALLE 9 Scraper parallel...
+echo Starte ALLE 10 Scraper parallel...
 echo ============================================================
 echo.
 
@@ -38,9 +39,10 @@ start "Limitless-Online" /MIN .venv\Scripts\python.exe limitless_online_scraper.
 start "Tournament-JH" /MIN .venv\Scripts\python.exe tournament_scraper_JH.py
 start "City-Analysis" /MIN .venv\Scripts\python.exe city_league_analysis_scraper.py
 start "Current-Meta" /MIN .venv\Scripts\python.exe current_meta_analysis_scraper.py
+start "Set-List" /MIN .venv\Scripts\python.exe set_list_scraper.py
 
 echo.
-echo ✓ Alle 9 Scraper gestartet!
+echo ✓ Alle 10 Scraper gestartet!
 echo.
 echo Monitoring: Alle Fenster im Hintergrund (/MIN)
 echo Jedes Scraper-Fenster zeigt individuellen Fortschritt

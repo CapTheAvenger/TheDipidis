@@ -508,7 +508,7 @@ def scrape_tournament_archetypes(tournament_url: str, tournament_info: Dict[str,
     return results
 
 def save_to_csv(data: List[Dict[str, str]], output_file: str):
-    """Save the scraped data to a CSV file (append mode - keeps existing data)."""
+    """Save the scraped data to a CSV file (data already contains old + new combined)."""
     if not data:
         print("No data to save.")
         return
@@ -518,21 +518,7 @@ def save_to_csv(data: List[Dict[str, str]], output_file: str):
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
-    # Load existing data if file exists
-    existing_data = []
-    if os.path.exists(output_path):
-        try:
-            with open(output_path, 'r', encoding='utf-8-sig') as f:
-                reader = csv.DictReader(f, delimiter=';')
-                existing_data = list(reader)
-            print(f"\nFound {len(existing_data)} existing entries")
-        except Exception as e:
-            print(f"\nCould not load existing data: {e}")
-    
-    # Combine existing and new data
-    combined_data = existing_data + data
-    
-    print(f"Saving {len(combined_data)} total entries ({len(existing_data)} existing + {len(data)} new)")
+    print(f"Saving {len(data)} total entries to CSV")
     
     try:
         with open(output_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
@@ -540,9 +526,9 @@ def save_to_csv(data: List[Dict[str, str]], output_file: str):
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
             
             writer.writeheader()
-            writer.writerows(combined_data)
+            writer.writerows(data)
         
-        print(f"✅ Successfully saved {len(data)} new entries to {output_file}")
+        print(f"✅ Successfully saved data to {output_file}")
     except Exception as e:
         print(f"Error saving to CSV: {e}")
 

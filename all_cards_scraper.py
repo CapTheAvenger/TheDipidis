@@ -10,6 +10,7 @@ Supports pagination to get all cards.
 import csv
 import json
 import os
+import subprocess
 import sys
 import time
 from datetime import datetime
@@ -578,21 +579,55 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
                 except:
                     pass
                 
-                # Extract rarity from card-prints div
+                # Extract rarity from card-prints div with multiple fallback strategies
                 try:
-                    # Look for rarity in the prints section
-                    rarity_elem = driver.find_element(By.CSS_SELECTOR, ".card-prints-current .prints-current-details span.text-lg")
-                    rarity_text = rarity_elem.get_attribute('textContent').strip()
-                    # Try to find rarity in second span
-                    rarity_spans = driver.find_elements(By.CSS_SELECTOR, ".card-prints-current .prints-current-details span")
-                    if len(rarity_spans) >= 2:
-                        rarity_info = rarity_spans[1].get_attribute('textContent').strip()
-                        # Extract rarity from format like "· Double Rare"
-                        if '·' in rarity_info:
-                            rarity = rarity_info.split('·')[1].strip()
-                            card['rarity'] = rarity
-                except:
-                    pass
+                    rarity_found = False
+                    
+                    # Strategy 1: Try .card-prints-current .prints-current-details span (most reliable)
+                    try:
+                        rarity_spans = driver.find_elements(By.CSS_SELECTOR, ".card-prints-current .prints-current-details span")
+                        if len(rarity_spans) >= 2:
+                            rarity_info = rarity_spans[1].get_attribute('textContent').strip()
+                            # Extract rarity from format like "· Double Rare"
+                            if '·' in rarity_info:
+                                rarity = rarity_info.split('·')[1].strip()
+                                if rarity:
+                                    card['rarity'] = rarity
+                                    rarity_found = True
+                    except:
+                        pass
+                    
+                    # Strategy 2: Try the prints table rows (alternative method)
+                    if not rarity_found:
+                        try:
+                            # Look for the current card's row in the prints table
+                            table = driver.find_element(By.CSS_SELECTOR, "table.card-prints-versions")
+                            rows = table.find_elements(By.CSS_SELECTOR, "tbody tr")
+                            
+                            current_set = card['set']
+                            current_number = card['number']
+                            
+                            for row in rows:
+                                cells = row.find_elements(By.TAG_NAME, "td")
+                                if len(cells) >= 2:
+                                    # Check if this row matches current card (set-number)
+                                    first_cell_text = cells[0].get_attribute('textContent').strip()
+                                    if f"{current_set}-{current_number}" in first_cell_text or first_cell_text.startswith(f"{current_set} "):
+                                        # Extract rarity from second column
+                                        rarity_text = cells[1].get_attribute('textContent').strip()
+                                        if rarity_text and rarity_text not in ['—', '-', '']:
+                                            card['rarity'] = rarity_text
+                                            rarity_found = True
+                                            break
+                        except:
+                            pass
+                    
+                    # Log if rarity extraction failed
+                    if not rarity_found:
+                        print(f"      [WARNING] Could not extract rarity for {card['set']}-{card['number']}")
+                        
+                except Exception as e:
+                    print(f"      [ERROR] Rarity extraction failed for {card['set']}-{card['number']}: {e}")
                 
                 # For Promo sets: If rarity is empty, set it to "Promo"
                 # This makes Promo cards easier to track and fixes threshold logic in frontend
@@ -795,6 +830,8 @@ try:
     if duplicates_removed > 0:
         print(f"[All Cards Scraper] ⚠ Removed {duplicates_removed} duplicate entries before writing")
     
+    # NOTE: Sorting will happen in final CSV write, no need to sort partial data here
+    
     with open(csv_path, 'w', encoding='utf-8', newline='') as f:
         fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -852,6 +889,76 @@ try:
     if duplicates_removed > 0:
         print(f"[All Cards Scraper] ⚠ Removed {duplicates_removed} duplicate entries before writing")
     
+    # SORT cards by SET_ORDER (newest sets first) and then by card number
+    # This fixes the problem where sets are not in chronological order
+    SET_ORDER = {
+        # Mega (2025-2026)
+        'ASC': 130, 'PFL': 129, 'MEG': 128, 'MEE': 128, 'MEP': 128,
+        # Scarlet & Violet (2023-2025)
+        'BLK': 127, 'WHT': 126, 'DRI': 125, 'JTG': 124, 'PRE': 123,
+        'SSP': 122, 'SCR': 121, 'SFA': 120, 'TWM': 119, 'TEF': 118,
+        'PAF': 117, 'PAR': 116, 'MEW': 115, 'OBF': 114, 'PAL': 113,
+        'SVI': 112, 'SVE': 112, 'SVP': 112,
+        # Sword & Shield (2020-2023)
+        'CRZ': 111, 'SIT': 110, 'LOR': 109, 'PGO': 108, 'ASR': 107,
+        'BRS': 106, 'FST': 105, 'CEL': 104, 'EVS': 103, 'CRE': 102,
+        'BST': 101, 'SHF': 100, 'VIV': 99, 'CPA': 98, 'DAA': 97,
+        'RCL': 96, 'SSH': 95, 'SP': 95,
+        # Sun & Moon (2017-2019)
+        'CEC': 94, 'HIF': 93, 'UNM': 92, 'UNB': 91, 'DET': 90,
+        'TEU': 89, 'LOT': 88, 'DRM': 87, 'CES': 86, 'FLI': 85,
+        'UPR': 84, 'CIN': 83, 'SLG': 82, 'BUS': 81, 'GRI': 80,
+        'SUM': 79, 'SMP': 79,
+        # XY (2014-2016)
+        'EVO': 78, 'STS': 77, 'FCO': 76, 'GEN': 75, 'BKP': 74,
+        'BKT': 73, 'AOR': 72, 'ROS': 71, 'DCR': 70, 'PRC': 69,
+        'PHF': 68, 'FFI': 67, 'FLF': 66, 'XY': 65, 'XYP': 65,
+        # Black & White (2011-2013)
+        'LTR': 64, 'PLB': 63, 'PLF': 62, 'PLS': 61, 'BCR': 60,
+        'DRX': 59, 'DEX': 58, 'NXD': 57, 'NVI': 56, 'EPO': 55,
+        'BLW': 54, 'BWP': 54,
+        # HeartGold & SoulSilver (2010-2011)
+        'CL': 53, 'TM': 52, 'UD': 51, 'UL': 50, 'HS': 49,
+        # Platinum (2009-2010)
+        'AR': 48, 'SV': 47, 'RR': 46, 'PL': 45, 'SF': 44,
+        # Diamond & Pearl (2007-2009)
+        'LA': 43, 'MD': 42, 'GE': 41, 'SW': 40, 'MT': 39, 'DP': 38,
+        # EX (2003-2007)
+        'PK': 37, 'DF': 36, 'CG': 35, 'HP': 34, 'LM': 33, 'DS': 32,
+        'UF': 31, 'EM': 30, 'DX': 29, 'TRR': 28, 'RG': 27, 'HL': 26,
+        'MA': 25, 'DR': 24, 'SS': 23, 'RS': 22,
+        # e-Card & Neo (2000-2003)
+        'E3': 21, 'E2': 20, 'E1': 19, 'LC': 18, 'N4': 17, 'N3': 16,
+        'N2': 15, 'N1': 14,
+        # Classic (1999-2000)
+        'G2': 13, 'G1': 12, 'TR': 11, 'BS2': 10, 'FO': 9, 'JU': 8, 'BS': 7,
+        # Older Special Sets
+        'M3': 20, 'MC': 15, 'MP1': 50
+    }
+    
+    def sort_key(card):
+        set_code = card.get('set', '')
+        number_str = card.get('number', '0')
+        
+        # Get set order (higher = newer sets first)
+        set_order = SET_ORDER.get(set_code, 0)
+        
+        # Extract numeric part from card number (handles "185a", "185+" etc.)
+        try:
+            # Try to extract leading digits
+            import re
+            match = re.match(r'(\d+)', number_str)
+            card_number = int(match.group(1)) if match else 0
+        except:
+            card_number = 0
+        
+        # Sort by: set_order DESC (newest first), then card_number ASC
+        return (-set_order, card_number, number_str)
+    
+    print(f"[All Cards Scraper] Sorting {len(deduplicated_data)} cards by set release date and card number...")
+    deduplicated_data.sort(key=sort_key)
+    print(f"[All Cards Scraper] ✓ Cards sorted (newest sets first)")
+    
     with open(csv_path, 'w', encoding='utf-8', newline='') as f:
         fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -894,6 +1001,28 @@ try:
     if len(deduplicated_data) > 10:
         print(f"  ... and {len(deduplicated_data) - 10} more")
     print()
+    
+    # Auto-sort database by SET_ORDER → Number
+    print("=" * 80)
+    print("SORTING DATABASE...")
+    print("=" * 80)
+    try:
+        result = subprocess.run(
+            [sys.executable, 'sort_cards_database.py'],
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            timeout=60
+        )
+        if result.returncode == 0:
+            print(result.stdout)
+        else:
+            print(f"[WARN] Sort script failed with exit code {result.returncode}")
+            if result.stderr:
+                print(f"Error: {result.stderr}")
+    except Exception as e:
+        print(f"[WARN] Could not run sort script: {e}")
+    
     print("=" * 80)
     print("SUCCESS: All cards database ready!")
     print("=" * 80)

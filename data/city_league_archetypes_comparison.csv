@@ -1,272 +1,273 @@
 ﻿archetype;status;trend;old_count;new_count;count_change;old_avg_placement;new_avg_placement;avg_placement_change;old_best;new_best
-dragapult dusknoir;BESTEHEND;STABIL;520;520;0;8,37;8,37;0,0;1;1
-mega lucario hariyama;BESTEHEND;STABIL;519;519;0;8,71;8,71;0,0;1;1
-alakazam dudunsparce;BESTEHEND;STABIL;229;229;0;8,04;8,04;0,0;1;1
-garchomp roserade;BESTEHEND;STABIL;208;208;0;8,4;8,4;0,0;1;1
-dragapult;BESTEHEND;STABIL;175;175;0;7,72;7,72;0,0;1;1
-grimmsnarl froslass;BESTEHEND;STABIL;173;173;0;7,84;7,84;0,0;1;1
-mega lucario solrock;BESTEHEND;STABIL;160;160;0;8,28;8,28;0,0;1;1
-dragapult blaziken;BESTEHEND;STABIL;154;154;0;7,92;7,92;0,0;1;1
-honchkrow porygon-z;BESTEHEND;STABIL;145;145;0;8,17;8,17;0,0;1;1
-grimmsnarl munkidori;BESTEHEND;STABIL;138;138;0;7,82;7,82;0,0;1;1
-zoroark darmanitan;BESTEHEND;STABIL;135;135;0;8,14;8,14;0,0;1;1
+dragapult dusknoir;BESTEHEND;STABIL;522;523;1;8,37;8,38;0,01;1;1
+mega lucario hariyama;BESTEHEND;STABIL;522;522;0;8,71;8,71;0,0;1;1
+alakazam dudunsparce;BESTEHEND;STABIL;231;234;3;8,02;8,08;0,06;1;1
+garchomp roserade;BESTEHEND;STABIL;209;209;0;8,43;8,43;0,0;1;1
+dragapult;BESTEHEND;STABIL;178;180;2;7,81;7,85;0,04;1;1
+grimmsnarl froslass;BESTEHEND;STABIL;174;175;1;7,87;7,89;0,02;1;1
+mega lucario solrock;BESTEHEND;STABIL;163;163;0;8,31;8,31;0,0;1;1
+dragapult blaziken;BESTEHEND;STABIL;156;157;1;7,85;7,85;0,0;1;1
+honchkrow porygon-z;BESTEHEND;STABIL;146;146;0;8,18;8,18;0,0;1;1
+grimmsnarl munkidori;BESTEHEND;STABIL;139;143;4;7,86;7,83;-0,02;1;1
+zoroark darmanitan;BESTEHEND;STABIL;136;137;1;8,15;8,12;-0,03;1;1
 mega starmie mega froslass;BESTEHEND;STABIL;126;126;0;8,1;8,1;0,0;1;1
-mega venusaur ogerpon;BESTEHEND;STABIL;118;118;0;9,36;9,36;0,0;1;1
-spidops mewtwo;BESTEHEND;STABIL;105;105;0;8,48;8,48;0,0;1;1
+mega venusaur ogerpon;BESTEHEND;STABIL;119;119;0;9,3;9,3;0,0;1;1
+spidops mewtwo;BESTEHEND;STABIL;107;109;2;8,49;8,43;-0,05;1;1
 archaludon;BESTEHEND;STABIL;100;100;0;9,16;9,16;0,0;1;1
-dragapult noctowl;BESTEHEND;STABIL;92;92;0;8,26;8,26;0,0;1;1
-dusknoir mega diancie;BESTEHEND;STABIL;90;90;0;9,31;9,31;0,0;1;1
+dusknoir mega diancie;BESTEHEND;STABIL;92;93;1;9,29;9,33;0,04;1;1
+dragapult noctowl;BESTEHEND;STABIL;93;93;0;8,25;8,25;0,0;1;1
 barbaracle okidogi;BESTEHEND;STABIL;73;73;0;8,15;8,15;0,0;1;1
 dipplin thwackey;BESTEHEND;STABIL;67;67;0;8,66;8,66;0,0;1;1
-dragapult meowth;BESTEHEND;STABIL;58;58;0;7,64;7,64;0,0;1;1
+dragapult meowth;BESTEHEND;STABIL;61;64;3;7,72;7,73;0,01;1;1
 mega froslass mega starmie;BESTEHEND;STABIL;56;56;0;8,62;8,62;0,0;1;1
+ogerpon mega venusaur;BESTEHEND;STABIL;54;54;0;7,46;7,46;0,0;1;1
 mega meganium ogerpon;BESTEHEND;STABIL;53;53;0;8,4;8,4;0,0;1;1
-ogerpon mega venusaur;BESTEHEND;STABIL;53;53;0;7,42;7,42;0,0;1;1
 metagross empoleon;BESTEHEND;STABIL;50;50;0;8,92;8,92;0,0;1;1
 noctowl flareon;BESTEHEND;STABIL;41;41;0;8,32;8,32;0,0;1;1
-zoroark;BESTEHEND;STABIL;39;39;0;8,08;8,08;0,0;1;1
-ogerpon raging-bolt;BESTEHEND;STABIL;34;34;0;8,44;8,44;0,0;2;2
+zoroark;BESTEHEND;STABIL;39;40;1;8,08;7,97;-0,1;1;1
+ogerpon raging-bolt;BESTEHEND;STABIL;35;35;0;8,46;8,46;0,0;2;2
 greninja dusknoir;BESTEHEND;STABIL;30;30;0;7,6;7,6;0,0;1;1
+ogerpon noctowl;BESTEHEND;STABIL;26;28;2;8,31;7,82;-0,49;1;1
+rillaboom dipplin;BESTEHEND;STABIL;28;28;0;7,32;7,32;0,0;1;1
 mega meganium mega venusaur;BESTEHEND;STABIL;27;27;0;8,41;8,41;0,0;1;1
-rillaboom dipplin;BESTEHEND;STABIL;27;27;0;7,56;7,56;0,0;1;1
+noctowl ogerpon;BESTEHEND;STABIL;27;27;0;8,81;8,81;0,0;1;1
 dragapult crobat;BESTEHEND;STABIL;26;26;0;7,31;7,31;0,0;1;1
-ogerpon noctowl;BESTEHEND;STABIL;25;25;0;8,08;8,08;0,0;1;1
-noctowl ogerpon;BESTEHEND;STABIL;25;25;0;8,76;8,76;0,0;1;1
 dipplin rillaboom;BESTEHEND;STABIL;25;25;0;8,36;8,36;0,0;1;1
 dragapult latias;BESTEHEND;STABIL;24;24;0;8,38;8,38;0,0;1;1
+mega diancie dusknoir;BESTEHEND;STABIL;24;24;0;9,08;9,08;0,0;1;1
 mega sharpedo toxtricity;BESTEHEND;STABIL;24;24;0;8,83;8,83;0,0;3;3
 thwackey dipplin;BESTEHEND;STABIL;24;24;0;7,79;7,79;0,0;1;1
-mega diancie dusknoir;BESTEHEND;STABIL;24;24;0;9,08;9,08;0,0;1;1
 flareon noctowl;BESTEHEND;STABIL;23;23;0;7,17;7,17;0,0;1;1
 greninja mega starmie;BESTEHEND;STABIL;23;23;0;7,91;7,91;0,0;1;1
-raging-bolt ogerpon;BESTEHEND;STABIL;20;20;0;9,6;9,6;0,0;1;1
-ceruledge;BESTEHEND;STABIL;20;20;0;10,45;10,45;0,0;5;5
-clefairy ogerpon;BESTEHEND;STABIL;19;19;0;8,63;8,63;0,0;1;1
+raging-bolt ogerpon;BESTEHEND;STABIL;22;22;0;9,59;9,59;0,0;1;1
+ceruledge;BESTEHEND;STABIL;21;21;0;10,24;10,24;0,0;5;5
 grimmsnarl mega froslass;BESTEHEND;STABIL;19;19;0;7,58;7,58;0,0;1;1
-honchkrow porygon2;BESTEHEND;STABIL;16;16;0;8,06;8,06;0,0;1;1
+clefairy ogerpon;BESTEHEND;STABIL;19;19;0;8,63;8,63;0,0;1;1
+honchkrow porygon2;BESTEHEND;STABIL;18;19;1;7,61;7,95;0,34;1;1
 metagross jellicent;BESTEHEND;STABIL;16;16;0;8,69;8,69;0,0;3;3
-jellicent dusknoir;BESTEHEND;STABIL;14;14;0;7,14;7,14;0,0;1;1
 mega starmie dusknoir;BESTEHEND;STABIL;14;14;0;9,86;9,86;0,0;1;1
+jellicent dusknoir;BESTEHEND;STABIL;14;14;0;7,14;7,14;0,0;1;1
 zoroark pecharunt;BESTEHEND;STABIL;14;14;0;8,86;8,86;0,0;1;1
 dragapult jellicent;BESTEHEND;STABIL;13;13;0;6,77;6,77;0,0;1;1
+ogerpon arboliva;BESTEHEND;STABIL;11;13;2;6,64;6,46;-0,17;1;1
 noctowl ogerpon-wellspring;BESTEHEND;STABIL;13;13;0;7,46;7,46;0,0;1;1
 hydrapple ogerpon;BESTEHEND;STABIL;12;12;0;8,33;8,33;0,0;1;1
 alakazam dragapult;BESTEHEND;STABIL;12;12;0;10,33;10,33;0,0;1;1
-toxtricity munkidori;BESTEHEND;STABIL;11;11;0;10,55;10,55;0,0;1;1
+mega lucario;BESTEHEND;STABIL;12;12;0;8,25;8,25;0,0;1;1
 okidogi barbaracle;BESTEHEND;STABIL;11;11;0;6,36;6,36;0,0;1;1
+toxtricity munkidori;BESTEHEND;STABIL;11;11;0;10,55;10,55;0,0;1;1
 slowking;BESTEHEND;STABIL;11;11;0;8,09;8,09;0,0;1;1
-mega lucario;BESTEHEND;STABIL;11;11;0;8,82;8,82;0,0;1;1
-toxtricity mega absol;BESTEHEND;STABIL;10;10;0;9,6;9,6;0,0;4;4
 zoroark dusknoir;BESTEHEND;STABIL;10;10;0;5,0;5,0;0,0;1;1
-ogerpon arboliva;BESTEHEND;STABIL;10;10;0;5,8;5,8;0,0;1;1
+toxtricity mega absol;BESTEHEND;STABIL;10;10;0;9,6;9,6;0,0;4;4
 dragapult mega starmie;BESTEHEND;STABIL;10;10;0;7,4;7,4;0,0;2;2
-metagross genesect;BESTEHEND;STABIL;8;8;0;8,38;8,38;0,0;3;3
-mega lucario dusknoir;BESTEHEND;STABIL;8;8;0;9,12;9,12;0,0;4;4
-mega starmie dusclops;BESTEHEND;STABIL;7;7;0;7,0;7,0;0,0;1;1
-trevenant;BESTEHEND;STABIL;7;7;0;8,86;8,86;0,0;3;3
+metagross genesect;BESTEHEND;STABIL;8;9;1;8,38;8,22;-0,15;3;3
+mega lucario dusknoir;BESTEHEND;STABIL;8;9;1;9,12;9,11;-0,01;4;4
 dusknoir jellicent;BESTEHEND;STABIL;7;7;0;12,57;12,57;0,0;9;9
-mega kangaskhan latias;BESTEHEND;STABIL;7;7;0;10,14;10,14;0,0;1;1
-flareon leafeon;BESTEHEND;STABIL;7;7;0;10,29;10,29;0,0;5;5
 grimmsnarl dusknoir;BESTEHEND;STABIL;7;7;0;9,43;9,43;0,0;3;3
-mega diancie munkidori;BESTEHEND;STABIL;6;6;0;10,0;10,0;0,0;6;6
+mega kangaskhan latias;BESTEHEND;STABIL;7;7;0;10,14;10,14;0,0;1;1
+mega starmie dusclops;BESTEHEND;STABIL;7;7;0;7,0;7,0;0,0;1;1
+flareon leafeon;BESTEHEND;STABIL;7;7;0;10,29;10,29;0,0;5;5
+trevenant;BESTEHEND;STABIL;7;7;0;8,86;8,86;0,0;3;3
+decidueye vivillon;BESTEHEND;STABIL;7;7;0;11,14;11,14;0,0;3;3
+crustle munkidori;BESTEHEND;STABIL;6;6;0;9,0;9,0;0,0;3;3
 spidops;BESTEHEND;STABIL;6;6;0;11,83;11,83;0,0;2;2
-mega froslass bronzong;BESTEHEND;STABIL;6;6;0;11,0;11,0;0,0;6;6
-ogerpon mega kangaskhan;BESTEHEND;STABIL;6;6;0;9,5;9,5;0,0;1;1
 mega diancie latias;BESTEHEND;STABIL;6;6;0;9,33;9,33;0,0;3;3
-jellicent mega diancie;BESTEHEND;STABIL;6;6;0;7,5;7,5;0,0;1;1
-blaziken dragapult;BESTEHEND;STABIL;6;6;0;8,5;8,5;0,0;2;2
-decidueye vivillon;BESTEHEND;STABIL;6;6;0;11,33;11,33;0,0;3;3
+mega froslass bronzong;BESTEHEND;STABIL;6;6;0;11,0;11,0;0,0;6;6
 dragapult alakazam;BESTEHEND;STABIL;6;6;0;10,17;10,17;0,0;3;3
+greninja mega froslass;BESTEHEND;STABIL;6;6;0;9,83;9,83;0,0;2;2
+blaziken dragapult;BESTEHEND;STABIL;6;6;0;8,5;8,5;0,0;2;2
 bellibolt kilowattrel;BESTEHEND;STABIL;6;6;0;10,17;10,17;0,0;5;5
-dragapult froslass;BESTEHEND;STABIL;5;5;0;7,4;7,4;0,0;1;1
-dragapult mega froslass;BESTEHEND;STABIL;5;5;0;8,4;8,4;0,0;4;4
-mega charizard-mega-x mega charizard-mega-y;BESTEHEND;STABIL;5;5;0;12,8;12,8;0,0;8;8
-crustle munkidori;BESTEHEND;STABIL;5;5;0;9,4;9,4;0,0;3;3
+jellicent mega diancie;BESTEHEND;STABIL;6;6;0;7,5;7,5;0,0;1;1
+mega diancie munkidori;BESTEHEND;STABIL;6;6;0;10,0;10,0;0,0;6;6
+ogerpon mega kangaskhan;BESTEHEND;STABIL;6;6;0;9,5;9,5;0,0;1;1
 jellicent;BESTEHEND;STABIL;5;5;0;8,8;8,8;0,0;2;2
-dragapult mega kangaskhan;BESTEHEND;STABIL;5;5;0;6,6;6,6;0,0;2;2
+mega kangaskhan ogerpon;BESTEHEND;STABIL;5;5;0;3,8;3,8;0,0;1;1
+dragapult mega froslass;BESTEHEND;STABIL;5;5;0;8,4;8,4;0,0;4;4
 noctowl raging-bolt;BESTEHEND;STABIL;5;5;0;9,4;9,4;0,0;3;3
+dragapult froslass;BESTEHEND;STABIL;5;5;0;7,4;7,4;0,0;1;1
 yanmega raging-bolt;BESTEHEND;STABIL;5;5;0;7,4;7,4;0,0;1;1
-greninja mega froslass;BESTEHEND;STABIL;5;5;0;9,6;9,6;0,0;2;2
-mega kangaskhan ogerpon;BESTEHEND;STABIL;4;4;0;3,75;3,75;0,0;1;1
-ceruledge solrock;BESTEHEND;STABIL;4;4;0;9,25;9,25;0,0;5;5
-mega froslass munkidori;BESTEHEND;STABIL;4;4;0;8,75;8,75;0,0;5;5
+dragapult mega kangaskhan;BESTEHEND;STABIL;5;5;0;6,6;6,6;0,0;2;2
+dragapult munkidori;BESTEHEND;STABIL;5;5;0;7,6;7,6;0,0;2;2
+mega charizard-mega-x mega charizard-mega-y;BESTEHEND;STABIL;5;5;0;12,8;12,8;0,0;8;8
+trevenant dubwool;BESTEHEND;STABIL;4;4;0;7,25;7,25;0,0;1;1
 typhlosion;BESTEHEND;STABIL;4;4;0;9,75;9,75;0,0;4;4
 barbaracle mega zygarde;BESTEHEND;STABIL;4;4;0;13,0;13,0;0,0;12;12
-trevenant zacian-crowned;BESTEHEND;STABIL;4;4;0;8,75;8,75;0,0;3;3
-mega absol mega kangaskhan;BESTEHEND;STABIL;4;4;0;10,25;10,25;0,0;5;5
 toxtricity mega sharpedo;BESTEHEND;STABIL;4;4;0;8,5;8,5;0,0;3;3
-dragapult munkidori;BESTEHEND;STABIL;4;4;0;8,75;8,75;0,0;2;2
-trevenant dubwool;BESTEHEND;STABIL;4;4;0;7,25;7,25;0,0;1;1
+mega froslass munkidori;BESTEHEND;STABIL;4;4;0;8,75;8,75;0,0;5;5
 trevenant latias;BESTEHEND;STABIL;4;4;0;9,25;9,25;0,0;4;4
-grimmsnarl mega gengar;BESTEHEND;STABIL;3;3;0;6,67;6,67;0,0;1;1
-crustle mega kangaskhan;BESTEHEND;STABIL;3;3;0;7,0;7,0;0,0;3;3
-dusknoir greninja;BESTEHEND;STABIL;3;3;0;6,0;6,0;0,0;1;1
-aegislash genesect;BESTEHEND;STABIL;3;3;0;8,67;8,67;0,0;8;8
+trevenant zacian-crowned;BESTEHEND;STABIL;4;4;0;8,75;8,75;0,0;3;3
+ceruledge solrock;BESTEHEND;STABIL;4;4;0;9,25;9,25;0,0;5;5
+mega absol mega kangaskhan;BESTEHEND;STABIL;4;4;0;10,25;10,25;0,0;5;5
+mega venusaur mega meganium;BESTEHEND;STABIL;3;3;0;8,33;8,33;0,0;6;6
+zoroark munkidori;BESTEHEND;STABIL;3;3;0;4,0;4,0;0,0;2;2
 mega starmie froslass;BESTEHEND;STABIL;3;3;0;7,67;7,67;0,0;4;4
 dusknoir mega starmie;BESTEHEND;STABIL;3;3;0;10,33;10,33;0,0;6;6
-ceruledge meowth;BESTEHEND;STABIL;3;3;0;6,33;6,33;0,0;1;1
-aegislash dudunsparce;BESTEHEND;STABIL;3;3;0;11,33;11,33;0,0;3;3
-ogerpon ogerpon-wellspring;BESTEHEND;STABIL;3;3;0;4,33;4,33;0,0;1;1
-zoroark munkidori;BESTEHEND;STABIL;3;3;0;4,0;4,0;0,0;2;2
-mega venusaur mega meganium;BESTEHEND;STABIL;3;3;0;8,33;8,33;0,0;6;6
 archaludon zoroark;BESTEHEND;STABIL;3;3;0;6,67;6,67;0,0;6;6
-garchomp;BESTEHEND;STABIL;3;3;0;14,33;14,33;0,0;14;14
-slowking dudunsparce;BESTEHEND;STABIL;3;3;0;9,67;9,67;0,0;2;2
-meganium ogerpon;BESTEHEND;STABIL;3;3;0;12,0;12,0;0,0;9;9
-honchkrow;BESTEHEND;STABIL;3;3;0;8,67;8,67;0,0;4;4
-slowking latias;BESTEHEND;STABIL;3;3;0;9,33;9,33;0,0;4;4
 metagross;BESTEHEND;STABIL;3;3;0;8,0;8,0;0,0;2;2
-spidops crobat;BESTEHEND;STABIL;2;2;0;11,5;11,5;0,0;8;8
-zacian-crowned latias;BESTEHEND;STABIL;2;2;0;11,0;11,0;0,0;6;6
+aegislash dudunsparce;BESTEHEND;STABIL;3;3;0;11,33;11,33;0,0;3;3
+slowking dudunsparce;BESTEHEND;STABIL;3;3;0;9,67;9,67;0,0;2;2
+garchomp;BESTEHEND;STABIL;3;3;0;14,33;14,33;0,0;14;14
+honchkrow;BESTEHEND;STABIL;3;3;0;8,67;8,67;0,0;4;4
+dusknoir greninja;BESTEHEND;STABIL;3;3;0;6,0;6,0;0,0;1;1
+meganium ogerpon;BESTEHEND;STABIL;3;3;0;12,0;12,0;0,0;9;9
+aegislash genesect;BESTEHEND;STABIL;3;3;0;8,67;8,67;0,0;8;8
+grimmsnarl mega gengar;BESTEHEND;STABIL;3;3;0;6,67;6,67;0,0;1;1
+ogerpon ogerpon-wellspring;BESTEHEND;STABIL;3;3;0;4,33;4,33;0,0;1;1
+ceruledge meowth;BESTEHEND;STABIL;3;3;0;6,33;6,33;0,0;1;1
+crustle mega kangaskhan;BESTEHEND;STABIL;3;3;0;7,0;7,0;0,0;3;3
+slowking latias;BESTEHEND;STABIL;3;3;0;9,33;9,33;0,0;4;4
+zoroark archaludon;BESTEHEND;STABIL;2;2;0;4,0;4,0;0,0;3;3
+porygon-z honchkrow;BESTEHEND;STABIL;2;2;0;6,5;6,5;0,0;4;4
+barbaracle solrock;BESTEHEND;STABIL;2;2;0;11,0;11,0;0,0;8;8
+toxtricity yveltal;BESTEHEND;STABIL;2;2;0;12,0;12,0;0,0;10;10
 typhlosion dragapult;BESTEHEND;STABIL;2;2;0;10,5;10,5;0,0;7;7
-mega venusaur meganium;BESTEHEND;STABIL;2;2;0;10,5;10,5;0,0;8;8
-mega clefable aromatisse;BESTEHEND;STABIL;2;2;0;10,0;10,0;0,0;9;9
-greninja noctowl;BESTEHEND;STABIL;2;2;0;9,5;9,5;0,0;7;7
+spidops crobat;BESTEHEND;STABIL;2;2;0;11,5;11,5;0,0;8;8
+slowking mega slowbro;BESTEHEND;STABIL;2;2;0;12,5;12,5;0,0;11;11
+mega lucario meowth;BESTEHEND;STABIL;2;2;0;14,5;14,5;0,0;13;13
+zacian-crowned latias;BESTEHEND;STABIL;2;2;0;11,0;11,0;0,0;6;6
+ogerpon hydrapple;BESTEHEND;STABIL;2;2;0;6,0;6,0;0,0;2;2
+mega diancie clefairy;BESTEHEND;STABIL;2;2;0;13,0;13,0;0,0;10;10
 dragapult clefairy;BESTEHEND;STABIL;2;2;0;4,5;4,5;0,0;1;1
-ogerpon meowth;BESTEHEND;STABIL;2;2;0;12,0;12,0;0,0;8;8
 crobat mega starmie;BESTEHEND;STABIL;2;2;0;5,0;5,0;0,0;3;3
 typhlosion dudunsparce;BESTEHEND;STABIL;2;2;0;12,0;12,0;0,0;9;9
-hydreigon dragapult;BESTEHEND;STABIL;2;2;0;12,5;12,5;0,0;9;9
-mega lucario dudunsparce;BESTEHEND;STABIL;2;2;0;10,5;10,5;0,0;7;7
-slowking gumshoos;BESTEHEND;STABIL;2;2;0;6,0;6,0;0,0;4;4
-hydrapple meganium;BESTEHEND;STABIL;2;2;0;9,0;9,0;0,0;6;6
-mega dragonite mega starmie;BESTEHEND;STABIL;2;2;0;11,0;11,0;0,0;11;11
-hydreigon noctowl;BESTEHEND;STABIL;2;2;0;7,5;7,5;0,0;6;6
-porygon-z honchkrow;BESTEHEND;STABIL;2;2;0;6,5;6,5;0,0;4;4
-mega starmie munkidori;BESTEHEND;STABIL;2;2;0;7,5;7,5;0,0;7;7
-slowking meowth;BESTEHEND;STABIL;2;2;0;11,5;11,5;0,0;11;11
-mega diancie clefairy;BESTEHEND;STABIL;2;2;0;13,0;13,0;0,0;10;10
-mega lucario meowth;BESTEHEND;STABIL;2;2;0;14,5;14,5;0,0;13;13
 aegislash metagross;BESTEHEND;STABIL;2;2;0;6,5;6,5;0,0;4;4
-flareon jolteon;BESTEHEND;STABIL;2;2;0;9,5;9,5;0,0;3;3
-noctowl terapagos;BESTEHEND;STABIL;2;2;0;8,0;8,0;0,0;7;7
-metang orthworm;BESTEHEND;STABIL;2;2;0;10,0;10,0;0,0;5;5
-barbaracle solrock;BESTEHEND;STABIL;2;2;0;11,0;11,0;0,0;8;8
-pikachu latias;BESTEHEND;STABIL;2;2;0;11,5;11,5;0,0;9;9
-toxtricity yveltal;BESTEHEND;STABIL;2;2;0;12,0;12,0;0,0;10;10
-jellicent clefairy;BESTEHEND;STABIL;2;2;0;6,0;6,0;0,0;4;4
-zoroark archaludon;BESTEHEND;STABIL;2;2;0;4,0;4,0;0,0;3;3
-grimmsnarl blaziken;BESTEHEND;STABIL;2;2;0;5,0;5,0;0,0;5;5
-ogerpon hydrapple;BESTEHEND;STABIL;2;2;0;6,0;6,0;0,0;2;2
 diggersby munkidori;BESTEHEND;STABIL;2;2;0;5,5;5,5;0,0;1;1
+mega kangaskhan mega absol;BESTEHEND;VERBESSERT;1;2;1;12,0;7,5;-4,5;12;3
+slowking meowth;BESTEHEND;STABIL;2;2;0;11,5;11,5;0,0;11;11
+ogerpon latias;BESTEHEND;STABIL;1;2;1;10,0;10,0;0,0;10;10
+hydreigon dragapult;BESTEHEND;STABIL;2;2;0;12,5;12,5;0,0;9;9
+mega venusaur meganium;BESTEHEND;STABIL;2;2;0;10,5;10,5;0,0;8;8
 zoroark dusclops;BESTEHEND;STABIL;2;2;0;7,0;7,0;0,0;3;3
-aromatisse mega clefable;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-alakazam solrock;BESTEHEND;STABIL;1;1;0;2,0;2,0;0,0;2;2
-dragapult crustle;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
-trevenant clefairy;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+mega dragonite mega starmie;BESTEHEND;STABIL;2;2;0;11,0;11,0;0,0;11;11
+grimmsnarl blaziken;BESTEHEND;STABIL;2;2;0;5,0;5,0;0,0;5;5
+mega starmie munkidori;BESTEHEND;STABIL;2;2;0;7,5;7,5;0,0;7;7
+ogerpon clefairy;BESTEHEND;VERSCHLECHTERT;1;2;1;8,0;11,0;3,0;8;8
+noctowl terapagos;BESTEHEND;STABIL;2;2;0;8,0;8,0;0,0;7;7
+greninja noctowl;BESTEHEND;STABIL;2;2;0;9,5;9,5;0,0;7;7
+ogerpon meowth;BESTEHEND;STABIL;2;2;0;12,0;12,0;0,0;8;8
+yanmega dudunsparce;BESTEHEND;VERSCHLECHTERT;1;2;1;13,0;14,5;1,5;13;13
+hydrapple meganium;BESTEHEND;STABIL;2;2;0;9,0;9,0;0,0;6;6
+mega clefable aromatisse;BESTEHEND;STABIL;2;2;0;10,0;10,0;0,0;9;9
+metang orthworm;BESTEHEND;STABIL;2;2;0;10,0;10,0;0,0;5;5
+jellicent clefairy;BESTEHEND;STABIL;2;2;0;6,0;6,0;0,0;4;4
+slowking gumshoos;BESTEHEND;STABIL;2;2;0;6,0;6,0;0,0;4;4
+mega lucario dudunsparce;BESTEHEND;STABIL;2;2;0;10,5;10,5;0,0;7;7
+flareon jolteon;BESTEHEND;STABIL;2;2;0;9,5;9,5;0,0;3;3
+hydreigon noctowl;BESTEHEND;STABIL;2;2;0;7,5;7,5;0,0;6;6
+pikachu latias;BESTEHEND;STABIL;2;2;0;11,5;11,5;0,0;9;9
+dragapult flareon;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+dragapult hydreigon;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
+jellicent metagross;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
+mega starmie glalie;BESTEHEND;STABIL;1;1;0;1,0;1,0;0,0;1;1
+mega slowbro mega diancie;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
+dusknoir latias;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+zoroark greninja;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
+dragapult glaceon;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+ogerpon mega meganium;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
 mega audino mega absol;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
-solrock munkidori;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
-hydreigon mega gengar;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
-jellicent latias;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-noctowl clefairy;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-alakazam zoroark;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
-yanmega dusknoir;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
-vileplume drakloak;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
-ceruledge azumarill;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
-jellicent munkidori;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-mega froslass grimmsnarl;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-dusknoir mega froslass;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
-mega starmie mega feraligatr;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
-munkidori diggersby;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-mega sharpedo mega kangaskhan;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
-zacian-crowned munkidori;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
-alakazam dusknoir;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
-blaziken greninja;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
-okidogi solrock;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
+metagross dusknoir;BESTEHEND;STABIL;1;1;0;2,0;2,0;0,0;2;2
+mega charizard-mega-x oricorio;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
 spidops honchkrow;BESTEHEND;STABIL;1;1;0;2,0;2,0;0,0;2;2
 spidops arbok;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
-dragapult glaceon;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-mega starmie drakloak;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
-bronzong mega froslass;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
-toxtricity pecharunt;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
-dragapult grimmsnarl;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
+mega charizard-mega-x dudunsparce;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
+zoroark diggersby;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
 alakazam mega diancie;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
-froslass solrock;BESTEHEND;STABIL;1;1;0;6,0;6,0;0,0;6;6
-dragapult mega lopunny;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
-mega kangaskhan mega absol;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
-honchkrow spidops;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
-hydreigon toxtricity;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
-jellicent metagross;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
-mega abomasnow;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
-mega lucario noctowl;BESTEHEND;STABIL;1;1;0;2,0;2,0;0,0;2;2
-slowking mega diancie;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-dudunsparce clefable;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-dragapult yanmega;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-archaludon zacian-crowned;BESTEHEND;STABIL;1;1;0;1,0;1,0;0,0;1;1
-archaludon metang;BESTEHEND;STABIL;1;1;0;6,0;6,0;0,0;6;6
-blissey ogerpon;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
-yanmega dudunsparce;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-toxtricity;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
 mega meganium noctowl;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
-blaziken;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
-mega eelektross mega manectric;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
-mega slowbro dusknoir;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
-mega sharpedo pecharunt;BESTEHEND;STABIL;1;1;0;6,0;6,0;0,0;6;6
-typhlosion mega charizard-mega-x;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
-garchomp mega lucario;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-ogerpon clefairy;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
-mega froslass;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-palafin thwackey;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
+dragapult mega lopunny;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
+dusknoir mega kangaskhan;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
+mega lucario barbaracle;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
+crustle cinderace;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
+mega froslass grimmsnarl;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
 raging-bolt meowth;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+alakazam solrock;BESTEHEND;STABIL;1;1;0;2,0;2,0;0,0;2;2
+archaludon metang;BESTEHEND;STABIL;1;1;0;6,0;6,0;0,0;6;6
+mega gardevoir;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
+archaludon dusknoir;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
+mega sharpedo mega kangaskhan;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
+metagross slowking;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
+mega froslass;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+froslass solrock;BESTEHEND;STABIL;1;1;0;6,0;6,0;0,0;6;6
+hydreigon zoroark;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+hydreigon mega gengar;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+latias clefairy;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
+mega lucario mega zygarde;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+dudunsparce clefable;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+dragapult crustle;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
+alakazam jellicent;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
+toxtricity;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+dragapult yanmega;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+alakazam dusknoir;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
+blaziken zoroark;BESTEHEND;STABIL;1;1;0;6,0;6,0;0,0;6;6
+alakazam zoroark;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
+mega eelektross mega manectric;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
+toxtricity fezandipiti;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
+vileplume yanmega;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+garchomp solrock;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+mega slowbro dusknoir;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
+solrock munkidori;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
+raging-bolt noctowl;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
+mega absol latias;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+mega sharpedo pecharunt;BESTEHEND;STABIL;1;1;0;6,0;6,0;0,0;6;6
+mega charizard-mega-x zoroark;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+flareon dragapult;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+mega starmie grimmsnarl;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
+sylveon mega diancie;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
+jellicent munkidori;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+bronzong mega froslass;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
+alakazam reuniclus;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
+slowking zoroark;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
+zoroark mega diancie;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
+toxtricity pecharunt;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
+mega meganium yanmega;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+archaludon dudunsparce;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
+typhlosion mega charizard-mega-x;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
+mega starmie drakloak;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
+zacian-crowned munkidori;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
+blaziken solrock;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
+mega lucario lunatone;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
+magcargo ho-oh;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+ceruledge azumarill;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
+mega gardevoir togekiss;NEU;VERSCHLECHTERT;0;1;1;0;9,0;9,0;0;9
+mega feraligatr munkidori;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+noctowl clefairy;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+palafin thwackey;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
+blissey pikachu;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
+hydreigon toxtricity;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
+metagross dudunsparce;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
+munkidori diggersby;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+jellicent latias;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+alakazam slowking;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+slowking mega diancie;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+metang genesect;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
+aromatisse mega clefable;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+garchomp mega lucario;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+mega froslass dusknoir;BESTEHEND;STABIL;1;1;0;2,0;2,0;0,0;2;2
+dragapult grimmsnarl;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
+metagross clefairy;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
+mega gardevoir jellicent;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
+blissey ogerpon;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
+mega starmie mega lopunny;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
+mega lucario noctowl;BESTEHEND;STABIL;1;1;0;2,0;2,0;0,0;2;2
+mega kangaskhan clefairy;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+trevenant clefairy;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+slowking dusknoir;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
+mega gardevoir zoroark;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
+mega starmie mega feraligatr;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
+blaziken greninja;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
+okidogi solrock;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
+archaludon zacian-crowned;BESTEHEND;STABIL;1;1;0;1,0;1,0;0,0;1;1
+vileplume drakloak;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
+typhlosion victini;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
+meowth ogerpon;BESTEHEND;STABIL;1;1;0;1,0;1,0;0,0;1;1
+mega abomasnow;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
+yanmega dusknoir;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
+noctowl dusknoir;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
 archaludon cinderace;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
 metang empoleon;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
-archaludon dudunsparce;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
-mega absol latias;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
-mega meganium yanmega;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
-mega gardevoir zoroark;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
-mega charizard-mega-x zoroark;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
-mega feraligatr munkidori;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
-mega gardevoir;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
-metang genesect;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
-slowking mega kangaskhan;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
-dusknoir mega kangaskhan;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
-zoroark fezandipiti;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
-metagross clefairy;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
-ogerpon mega meganium;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-raging-bolt noctowl;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
-archaludon dusknoir;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
-vileplume yanmega;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-metagross slowking;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
-mega lucario barbaracle;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
-garchomp solrock;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-mega lucario mega zygarde;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-metagross dusknoir;BESTEHEND;STABIL;1;1;0;2,0;2,0;0,0;2;2
-mega slowbro mega diancie;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
-alakazam jellicent;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
-metagross dudunsparce;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
-zoroark mega diancie;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
-typhlosion victini;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
-mega starmie mega lopunny;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
-zoroark diggersby;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
-dragapult flareon;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-mega froslass dusknoir;BESTEHEND;STABIL;1;1;0;2,0;2,0;0,0;2;2
-alakazam slowking;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
-slowking mega slowbro;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
-mega charizard-mega-x dudunsparce;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
-mega gardevoir jellicent;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-blaziken solrock;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
-slowking zoroark;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
-blaziken zoroark;BESTEHEND;STABIL;1;1;0;6,0;6,0;0,0;6;6
-mega charizard-mega-x oricorio;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
-flareon dragapult;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-toxtricity fezandipiti;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
-alakazam reuniclus;BESTEHEND;STABIL;1;1;0;9,0;9,0;0,0;9;9
-meowth ogerpon;BESTEHEND;STABIL;1;1;0;1,0;1,0;0,0;1;1
-mega starmie glalie;BESTEHEND;STABIL;1;1;0;1,0;1,0;0,0;1;1
-ogerpon latias;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
-crustle cinderace;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
-mega starmie grimmsnarl;BESTEHEND;STABIL;1;1;0;14,0;14,0;0,0;14;14
-zoroark greninja;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
+blaziken;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
+dusknoir mega froslass;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
+honchkrow spidops;BESTEHEND;STABIL;1;1;0;4,0;4,0;0,0;4;4
 blaziken noctowl;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
-latias clefairy;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
-magcargo ho-oh;BESTEHEND;STABIL;1;1;0;16,0;16,0;0,0;16;16
-mega kangaskhan clefairy;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
-dusknoir latias;BESTEHEND;STABIL;1;1;0;11,0;11,0;0,0;11;11
+slowking mega kangaskhan;BESTEHEND;STABIL;1;1;0;3,0;3,0;0,0;3;3
 noctowl hydreigon;BESTEHEND;STABIL;1;1;0;7,0;7,0;0,0;7;7
-blissey pikachu;BESTEHEND;STABIL;1;1;0;15,0;15,0;0,0;15;15
-dragapult hydreigon;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
-noctowl dusknoir;BESTEHEND;STABIL;1;1;0;10,0;10,0;0,0;10;10
-mega lucario lunatone;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12
-sylveon mega diancie;BESTEHEND;STABIL;1;1;0;8,0;8,0;0,0;8;8
-slowking dusknoir;BESTEHEND;STABIL;1;1;0;5,0;5,0;0,0;5;5
-hydreigon zoroark;BESTEHEND;STABIL;1;1;0;13,0;13,0;0,0;13;13
+zoroark fezandipiti;BESTEHEND;STABIL;1;1;0;12,0;12,0;0,0;12;12

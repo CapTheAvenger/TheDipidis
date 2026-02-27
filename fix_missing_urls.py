@@ -140,7 +140,7 @@ def scrape_card_details_fix(cards):
 def save_cards_to_csv(cards, csv_path):
     """Save all cards back to CSV."""
     with open(csv_path, 'w', encoding='utf-8', newline='') as f:
-        fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url']
+        fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for card in cards:
@@ -149,7 +149,7 @@ def save_cards_to_csv(cards, csv_path):
     print(f"Saved {len(cards)} cards to {csv_path}")
 
 def main():
-    csv_path = 'dist/data/all_cards_database.csv'
+    csv_path = 'data/all_cards_database.csv'
     
     print("="*80)
     print("FIX MISSING URLs - Rescrape incomplete cards")

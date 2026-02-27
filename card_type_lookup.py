@@ -123,7 +123,7 @@ class CardTypeLookup:
         
         try:
             with open(csv_file, 'r', encoding='utf-8-sig') as f:
-                reader = csv.DictReader(f, delimiter=';')
+                reader = csv.DictReader(f, delimiter=',')  # Changed from ';' to ',' to match actual CSV format
                 
                 card_count = 0
                 pokemon_count = 0

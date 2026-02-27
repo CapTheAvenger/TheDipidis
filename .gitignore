@@ -5,6 +5,7 @@ __pycache__/
 *.so
 .Python
 venv/
+.venv/
 ENV/
 env/
 
@@ -26,10 +27,28 @@ dist/
 Thumbs.db
 *.tmp
 test_*.txt
+desktop.ini
 
-# Logs
+# Logs (keep important scraper logs, ignore test logs)
 scraper_output.txt
 scraper_test.txt
+*_debug.txt
 
 # CSV archives (only keep current data)
 data/archive/
+
+# Large HTML debug files
+data/debug_*.html
+
+# Backup files
+*_backup.csv
+*_backup.json
+*_backup.html
+*_OLD*.html
+index_OLD*.html
+
+# User-specific paths
+UPDATE_GITHUB_DATA.ps1
+
+# CardMarket scraper cache (optional - large files)
+# data/cardmarket_cache/

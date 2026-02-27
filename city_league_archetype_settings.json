@@ -1,6 +1,6 @@
 {
   "start_date": "24.01.2026",
-  "end_date": "23.02.2026",
+  "end_date": "auto",
   "delay_between_requests": 1.5,
   "output_file": "city_league_archetypes.csv",
   "region": "jp",

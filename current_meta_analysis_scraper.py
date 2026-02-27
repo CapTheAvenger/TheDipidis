@@ -391,23 +391,23 @@ def get_tournament_links(base_url: str, max_tournaments: int, scraped_ids: set =
     matches = re.findall(r'/(\d+)/standings', html)
     print(f"  [DEBUG] Found {len(matches)} tournament links in HTML", flush=True)
     
-    seen_ids = set()
+    # Remove duplicates and sort by ID (newest/highest first)
+    unique_ids = sorted(set(matches), key=lambda x: int(x), reverse=True)
+    print(f"  [DEBUG] Sorted {len(unique_ids)} unique tournament IDs (newest first)", flush=True)
+    
     skipped_count = 0
     
-    for tournament_id in matches:
-        if tournament_id not in seen_ids:
-            seen_ids.add(tournament_id)
-            
-            # Skip if already scraped
-            if tournament_id in scraped_ids:
-                skipped_count += 1
-                continue
-            
-            tournaments.append({
-                'id': tournament_id,
-                'url': f'https://labs.limitlesstcg.com/{tournament_id}/standings',
-                'standings_url': f'https://labs.limitlesstcg.com/{tournament_id}/standings'
-            })
+    for tournament_id in unique_ids:
+        # Skip if already scraped
+        if tournament_id in scraped_ids:
+            skipped_count += 1
+            continue
+        
+        tournaments.append({
+            'id': tournament_id,
+            'url': f'https://labs.limitlesstcg.com/{tournament_id}/standings',
+            'standings_url': f'https://labs.limitlesstcg.com/{tournament_id}/standings'
+        })
         
         if len(tournaments) >= max_tournaments:
             break
@@ -431,10 +431,22 @@ def get_tournament_info(tournament_url: str) -> Dict[str, str]:
         title = re.sub(r'\s*\|\s*Limitless.*$', '', title)
         info['name'] = title
     
-    # Extract date
-    date_match = re.search(r'(\d{1,2}(?:st|nd|rd|th)?\s+\w+\s+\d{4})', html)
+    # Extract date (supports both ranges "November 21–23, 2025" and single dates "13th February 2026")
+    # Try date range first (with en-dash – or regular dash -)
+    date_match = re.search(r'(\w+\s+\d{1,2}[–-]\d{1,2},?\s+\d{4})', html)
+    if not date_match:
+        # Try single date format (with optional ordinal suffix)
+        date_match = re.search(r'(\d{1,2}(?:st|nd|rd|th)?\s+\w+\s+\d{4})', html)
+    
     if date_match:
-        info['date'] = date_match.group(1)
+        date_str = date_match.group(1)
+        # For ranges like "November 21–23, 2025", extract first date for filtering
+        # Remove the range end: "21–23" → "21"
+        date_str_cleaned = re.sub(r'(\d{1,2})[–-]\d{1,2}', r'\1', date_str)
+        # Remove ordinal suffixes (st, nd, rd, th) if present
+        date_str_cleaned = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_str_cleaned)
+        # Remove commas and strip whitespace
+        info['date'] = date_str_cleaned.replace(',', '').strip()
     
     # Detect format and meta
     is_jp_tournament = False
@@ -611,8 +623,21 @@ def scrape_tournaments(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
     # Get tournament filters
     allowed_types = config.get("tournament_types", [])
     format_filter = config.get("format_filter", [])
-    start_date = config.get("start_date", "")
-    end_date = config.get("end_date", "")
+    start_date_str = config.get("start_date", "")
+    end_date_str = config.get("end_date", "")
+    
+    # Parse start_date if provided (supports DD.MM.YYYY or YYYY-MM-DD)
+    start_date = None
+    if start_date_str:
+        try:
+            # Try DD.MM.YYYY format first
+            if '.' in start_date_str:
+                start_date = datetime.strptime(start_date_str, "%d.%m.%Y")
+            else:
+                start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+            print(f"  📅 Filtering tournaments from {start_date.strftime('%d %B %Y')} onwards", flush=True)
+        except ValueError:
+            print(f"  ⚠️ Invalid start_date format: {start_date_str} (use DD.MM.YYYY or YYYY-MM-DD)", flush=True)
     
     base_url = "https://labs.limitlesstcg.com/"
     all_decks = []
@@ -634,7 +659,35 @@ def scrape_tournaments(settings: Dict[str, Any], card_db: CardDatabaseLookup) ->
             # Get tournament info
             info = get_tournament_info(tournament['url'])
             print(f"  {info['name']}", flush=True)
-            print(f"  Type: {info.get('type', 'Unknown')} | Format: {info.get('meta', 'Unknown')}", flush=True)
+            tournament_date_str = info.get('date', '')
+            print(f"  Type: {info.get('type', 'Unknown')} | Format: {info.get('meta', 'Unknown')} | Date: {tournament_date_str or 'Unknown'}", flush=True)
+            
+            # Apply date filter if start_date is set
+            if start_date:
+                if not tournament_date_str:
+                    # STRICT MODE: If start_date is set but tournament has no date → skip it
+                    print(f"  ⊘ Skipping - Tournament has no date (start_date filter active: >= {start_date.strftime('%d.%m.%Y')})", flush=True)
+                    continue
+                
+                try:
+                    # Parse tournament date - try both formats:
+                    # 1. "November 21 2025" (from range "November 21–23, 2025")
+                    # 2. "13 February 2026" (from single date "13th February 2026")
+                    tournament_date = None
+                    
+                    # Try "Month Day Year" format first
+                    try:
+                        tournament_date = datetime.strptime(tournament_date_str, "%B %d %Y")
+                    except ValueError:
+                        # Try "Day Month Year" format (with ordinals already removed)
+                        tournament_date = datetime.strptime(tournament_date_str, "%d %B %Y")
+                    
+                    if tournament_date < start_date:
+                        print(f"  ⊘ Skipping - Tournament date {tournament_date.strftime('%d %B %Y')} is before {start_date.strftime('%d %B %Y')}", flush=True)
+                        continue
+                except ValueError as e:
+                    print(f"  ⊘ Skipping - Could not parse tournament date: '{tournament_date_str}' (start_date filter active)", flush=True)
+                    continue
             
             # Apply tournament type filter
             if allowed_types and info.get('type') not in allowed_types:

@@ -79,14 +79,13 @@ def save_scraped_tournaments(tournament_ids: set) -> None:
 # Default settings
 DEFAULT_SETTINGS = {
     "max_tournaments": 150,
-    "max_decks_per_tournament": 1,
     "delay_between_tournaments": 0,
     "start_tournament_id": 391,
     "output_file": "tournament_cards_data.csv",
     "format_filter": ["Standard"],
     "tournament_types": ["Regional", "Special Event", "LAIC", "EUIC", "NAIC", "Worlds", "International", "Championship"],
     "append_mode": True,
-    "_comment": "Nur Standard-Format Turniere (Regional, Special Event, LAIC, EUIC, NAIC, Worlds) werden automatisch gescraped. append_mode=True keeps old tournament data."
+    "_comment": "Scrapes individual deck lists from each tournament. Nur Standard-Format Turniere (Regional, Special Event, LAIC, EUIC, NAIC, Worlds) werden automatisch gescraped. append_mode=True keeps old tournament data and only adds new tournaments."
 }
 
 def get_app_path() -> str:
@@ -177,7 +176,9 @@ def get_tournament_links(base_url: str, max_tournaments: int, start_tournament_i
     stop_scraping = False
     
     # Load multiple pages if needed
-    while len(tournaments) < max_tournaments and not stop_scraping:
+    # NOTE: Collect ALL tournaments down to start_tournament_id, don't limit by max_tournaments yet
+    # The main loop will filter by tournament type and then apply max_tournaments limit
+    while not stop_scraping:
         # Construct URL with pagination
         if '?' in base_url:
             fetch_url = f"{base_url}&show=100&page={page}"
@@ -221,11 +222,6 @@ def get_tournament_links(base_url: str, max_tournaments: int, start_tournament_i
                     'cards_url': f'https://limitlesstcg.com{path}/cards'
                 })
                 page_tournaments += 1
-                
-                # If we've reached max_tournaments, stop
-                if len(tournaments) >= max_tournaments:
-                    stop_scraping = True
-                    break
         
         # If no new tournaments found on this page, we've reached the end
         if page_tournaments == 0:
@@ -485,6 +481,51 @@ def get_tournament_info(tournament_url: str) -> Dict:
     
     return info
 
+def get_deck_list_links(tournament_url: str) -> List[Dict]:
+    """
+    Extract all individual deck list URLs from a tournament page.
+    Returns list of dicts: [{'url': 'https://...', 'player_count': 2}, ...]
+    where player_count = how many players used this exact deck.
+    """
+    # Try with high show parameter to get all decks on one page
+    if '?' in tournament_url:
+        fetch_url = f"{tournament_url}&show=2000"
+    else:
+        fetch_url = f"{tournament_url}?show=2000"
+    
+    html = fetch_page(fetch_url)
+    if not html:
+        return []
+    
+    # Find all deck list links - pattern: /decks/list/\d+
+    all_matches = re.findall(r'/decks/list/(\d+)', html)
+    
+    print(f"  [DEBUG] Found {len(all_matches)} total /decks/list/ mentions")
+    
+    # Count how many players used each deck
+    from collections import Counter
+    deck_id_counts = Counter(all_matches)
+    
+    print(f"  [DEBUG] Unique deck IDs: {len(deck_id_counts)}")
+    print(f"  [DEBUG] Total players: {sum(deck_id_counts.values())}")
+    
+    # Find decks used by multiple players
+    shared_decks = {deck_id: count for deck_id, count in deck_id_counts.items() if count > 1}
+    if shared_decks:
+        total_shared = sum(shared_decks.values())
+        print(f"  [DEBUG] {len(shared_decks)} decks shared by multiple players (total {total_shared} players)")
+    
+    # Build list with player counts
+    deck_list = []
+    for deck_id, player_count in deck_id_counts.items():
+        deck_list.append({
+            'url': f"https://limitlesstcg.com/decks/list/{deck_id}",
+            'player_count': player_count
+        })
+    
+    print(f"  Found {len(deck_list)} unique deck lists representing {sum(d['player_count'] for d in deck_list)} total players")
+    return deck_list
+
 def get_deck_options(cards_url: str) -> List[Dict]:
     """Extract deck options from the dropdown on the cards page."""
     html = fetch_page(cards_url)
@@ -687,6 +728,284 @@ def lookup_card_info(card_name: str, retries: int = 3) -> Optional[Dict]:
     _card_lookup_cache[card_name] = None
     return None
 
+def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> tuple:
+    """
+    Extract cards from a single deck list.
+    Returns: (cards_list, deck_name)
+        - cards_list: List of card dicts with exact counts
+        - deck_name: Archetype name (e.g., "Dragapult Dusknoir") or "Unknown Deck"
+    """
+    html_content = fetch_page(deck_url)
+    if not html_content:
+        return [], "Unknown Deck"
+    
+    # Extract deck archetype name from the page
+    # Try multiple patterns to find the archetype
+    deck_name = "Unknown Deck"
+    
+    # Pattern 1: Look for decklist-title div (primary source for deck name)
+    title_div_match = re.search(r'<div[^>]*class="decklist-title"[^>]*>\s*([^\n<]+)', html_content, re.IGNORECASE)
+    if title_div_match:
+        potential_name = title_div_match.group(1).strip()
+        # Clean up - remove extra whitespace
+        potential_name = re.sub(r'\s+', ' ', potential_name)
+        if potential_name and len(potential_name) > 2:
+            deck_name = potential_name
+    
+    # Pattern 2: Look for archetype in page title or meta tags
+    if deck_name == "Unknown Deck":
+        title_match = re.search(r'<title>([^|<]+)\s*\|', html_content)
+        if title_match:
+            potential_name = title_match.group(1).strip()
+            # Clean up common prefixes/suffixes
+            potential_name = re.sub(r'^(Deck(list)?\s*-\s*)', '', potential_name, flags=re.IGNORECASE)
+            if potential_name and not potential_name.startswith('http'):
+                deck_name = potential_name
+    
+    # Pattern 3: Look for archetype label/heading on the page
+    if deck_name == "Unknown Deck":
+        archetype_match = re.search(r'<div[^>]*class="[^"]*archetype[^"]*"[^>]*>([^<]+)</div>', html_content, re.IGNORECASE)
+        if archetype_match:
+            deck_name = archetype_match.group(1).strip()
+    
+    # Pattern 4: Look in breadcrumb or navigation
+    if deck_name == "Unknown Deck":
+        breadcrumb_match = re.search(r'<span[^>]*class="[^"]*breadcrumb[^"]*"[^>]*>([^<]+)</span>', html_content, re.IGNORECASE)
+        if breadcrumb_match:
+            potential_name = breadcrumb_match.group(1).strip()
+            if potential_name and not potential_name.lower() in ['home', 'decks', 'deck']:
+                deck_name = potential_name
+    
+    # Clean up deck name
+    deck_name = html.unescape(deck_name)
+    deck_name = deck_name.replace(''', "'").replace('`', "'").replace('´', "'").replace(''', "'").replace('ʼ', "'")
+
+    cards: List[Dict] = []
+    seen_cards = set()
+    cards_to_lookup = []
+    
+    # Regex patterns (same as extract_cards_from_page)
+    heading_pattern = re.compile(r'<div[^>]*class="decklist-column-heading"[^>]*>\s*([^<]+?)\s*</div>', re.IGNORECASE)
+    card_pattern = re.compile(r'<div[^>]*class="decklist-card"[^>]*data-set="([A-Z0-9]*)"[^>]*data-number="(\d*)"[^>]*>.*?<span class="card-count">([0-9.]+)</span>\s*<span class="card-name">([^<]+)</span>', re.IGNORECASE | re.DOTALL)
+
+    # Find all headings with their span (start/end ranges)
+    headings = []
+    for m in heading_pattern.finditer(html_content):
+        title = m.group(1).strip().lower()
+        if 'trainer' in title:
+            section_type = 'trainer'
+        elif 'energy' in title:
+            section_type = 'energy'
+        else:
+            section_type = 'pokemon'
+        headings.append({'start': m.end(), 'type': section_type})
+
+    # Determine end positions for headings
+    for idx in range(len(headings)):
+        start = headings[idx]['start']
+        end = headings[idx + 1]['start'] if idx + 1 < len(headings) else len(html_content)
+        headings[idx]['end'] = end
+
+    # Extract cards per section
+    for sec in headings if headings else [{'start': 0, 'end': len(html_content), 'type': 'pokemon'}]:
+        block = html_content[sec['start']:sec['end']]
+        section_type = sec['type']
+
+        for match in card_pattern.findall(block):
+            try:
+                set_code_raw = match[0].upper() if match[0] else ""
+                card_number_raw = match[1] if match[1] else ""
+                count_str = match[2]
+                name = match[3].strip()
+
+                # Decode HTML entities
+                name = html.unescape(name)
+                name = name.replace(''', "'").replace('`', "'").replace('´', "'").replace(''', "'").replace('ʼ', "'")
+
+                # Validate card name
+                if not is_valid_card(name):
+                    continue
+
+                # Parse count (should be integer for individual decks, but allow decimal)
+                count = int(float(count_str))
+
+                # Get set/number based on section type
+                if section_type in ['trainer', 'energy']:
+                    latest_card = card_db.get_latest_low_rarity_version(name)
+                    if latest_card:
+                        set_code = latest_card.set_code
+                        card_number = latest_card.number
+                        full_name = f"{name} {set_code} {card_number}"
+                        card_key = f"{name}|{set_code}|{card_number}".lower()
+                        needs_lookup = False
+                    else:
+                        set_code = ""
+                        card_number = ""
+                        full_name = name
+                        card_key = name.lower()
+                        needs_lookup = False
+                else:
+                    # Pokemon: require set/number
+                    set_code = set_code_raw
+                    card_number = card_number_raw
+                    
+                    if set_code == 'PR-SV':
+                        set_code = 'SVP'
+                    
+                    if not set_code or not card_number:
+                        cards_to_lookup.append(len(cards))
+                        full_name = name
+                        card_key = name.lower()
+                        needs_lookup = True
+                    else:
+                        full_name = f"{name} {set_code} {card_number}"
+                        card_key = f"{name}|{set_code}|{card_number}".lower()
+                        needs_lookup = False
+
+                if card_key not in seen_cards and name:
+                    seen_cards.add(card_key)
+                    is_ace_spec = card_db.is_ace_spec_by_name(name)
+                    cards.append({
+                        'count': count,
+                        'name': name,
+                        'set_code': set_code,
+                        'card_number': card_number,
+                        'full_name': full_name,
+                        'needs_lookup': needs_lookup,
+                        'is_ace_spec': 'Yes' if is_ace_spec else 'No'
+                    })
+            except (ValueError, IndexError):
+                continue
+
+    # Lookup missing Pokemon card info (skip for single deck scraping to save time)
+    # Can be re-enabled if needed
+    
+    return cards, deck_name
+
+def aggregate_tournament_cards(all_decks: List[Dict], tournament_info: Dict, card_db: CardDatabaseLookup) -> List[Dict]:
+    """
+    Aggregate card statistics from all decks in a tournament, grouped by deck archetype.
+    
+    Args:
+        all_decks: List of deck dicts: [{'cards': [...], 'player_count': 2, 'deck_name': 'Dragapult Dusknoir'}, ...]
+        tournament_info: Dict with tournament metadata (id, name, format, date, etc.)
+        card_db: CardDatabaseLookup instance for fetching card details
+    
+    Returns:
+        List of card dicts matching current_meta format:
+        - meta: Tournament format (e.g., "Standard", "Expanded")
+        - tournament_date: Tournament date
+        - archetype: Deck archetype name (e.g., "Dragapult Dusknoir")
+        - card_name: "Iron Bundle"
+        - card_identifier: "PAR 56"
+        - total_count: Total cards across all players of this archetype
+        - max_count: Maximum count in any single deck
+        - deck_count: Number of players with this card in this archetype
+        - total_decks_in_archetype: Total players using this archetype
+        - percentage_in_archetype: (deck_count / total_players_in_archetype) * 100
+        - set_code, set_name, set_number, rarity, type, image_url, is_ace_spec
+    """
+    if not all_decks:
+        return []
+    
+    # Group decks by archetype
+    archetype_groups = {}
+    for deck_info in all_decks:
+        deck_name = deck_info.get('deck_name', 'Unknown Deck')
+        if deck_name not in archetype_groups:
+            archetype_groups[deck_name] = []
+        archetype_groups[deck_name].append(deck_info)
+    
+    # Process each archetype separately
+    all_aggregated_cards = []
+    
+    for archetype_name, archetype_decks in archetype_groups.items():
+        # Total players in this archetype
+        total_players = sum(deck_info['player_count'] for deck_info in archetype_decks)
+        
+        # Map card_key -> {total_count: int, max_count: int, player_count: int, sample_card: Dict}
+        card_stats = {}
+        
+        for deck_info in archetype_decks:
+            player_count = deck_info['player_count']  # How many players used this deck
+            cards = deck_info['cards']
+            
+            # Track which cards appear in this deck (to count player occurrences)
+            cards_in_deck = set()
+            
+            for card in cards:
+                # Create unique key: "Name|SET|NUM"
+                card_key = f"{card['name']}|{card['set_code']}|{card['card_number']}".lower()
+                
+                if card_key not in card_stats:
+                    card_stats[card_key] = {
+                        'total_count': 0,
+                        'max_count': 0,
+                        'player_count': 0,
+                        'sample_card': card  # Keep one card for reference
+                    }
+                
+                # Add count * player_count (if 3 players used this deck with 4 Abra, that's 12 Abra total)
+                card_stats[card_key]['total_count'] += card['count'] * player_count
+                
+                # Track maximum count in any single deck
+                if card['count'] > card_stats[card_key]['max_count']:
+                    card_stats[card_key]['max_count'] = card['count']
+                
+                # Mark this card as appearing in this deck
+                if card_key not in cards_in_deck:
+                    cards_in_deck.add(card_key)
+                    card_stats[card_key]['player_count'] += player_count
+        
+        # Convert to output format (matching current_meta structure)
+        for card_key, stats in card_stats.items():
+            sample = stats['sample_card']
+            
+            # Calculate percentage
+            percentage = (stats['player_count'] / total_players * 100) if total_players > 0 else 0
+            
+            # Get card details from database
+            card_name = sample['name']
+            set_code = sample['set_code'] if sample['set_code'] else ''
+            card_number = sample['card_number'] if sample['card_number'] else ''
+            card_identifier = f"{set_code} {card_number}" if set_code and card_number else ''
+            
+            # Fetch full card details from database
+            set_name = ''
+            rarity = ''
+            card_type = ''
+            image_url = ''
+            
+            if set_code and card_number:
+                db_card = card_db.manager.get_card(set_code, card_number)
+                if db_card:
+                    set_name = db_card.get('set_name', '')
+                    rarity = db_card.get('rarity', '')
+                    card_type = db_card.get('type', '')
+                    image_url = db_card.get('image_url', '')
+            
+            all_aggregated_cards.append({
+                'meta': tournament_info.get('format', 'Past Meta'),  # Use actual tournament format
+                'tournament_date': tournament_info.get('date', ''),
+                'archetype': archetype_name,  # Deck archetype name (e.g., "Dragapult Dusknoir")
+                'card_name': card_name,
+                'card_identifier': card_identifier,
+                'total_count': stats['total_count'],
+                'max_count': stats['max_count'],
+                'deck_count': stats['player_count'],
+                'total_decks_in_archetype': total_players,
+                'percentage_in_archetype': round(percentage, 2),
+                'set_code': set_code,
+                'set_name': set_name,
+                'set_number': card_number,
+                'rarity': rarity,
+                'type': card_type,
+                'image_url': image_url,
+                'is_ace_spec': sample['is_ace_spec']
+            })
+    
+    return all_aggregated_cards
+
 def extract_cards_from_page(cards_url: str, card_db: CardDatabaseLookup, deck_name: str = None) -> List[Dict]:
     """Extract card data from a tournament's cards page."""
     print(f"Fetching cards from: {cards_url}")
@@ -697,7 +1016,7 @@ def extract_cards_from_page(cards_url: str, card_db: CardDatabaseLookup, deck_na
     cards: List[Dict] = []
     seen_cards = set()
     cards_to_lookup = []  # Track cards that need lookup
-
+    
     # Regex patterns
     heading_pattern = re.compile(r'<div[^>]*class="decklist-column-heading"[^>]*>\s*([^<]+?)\s*</div>', re.IGNORECASE)
     card_pattern = re.compile(r'<div[^>]*class="decklist-card"[^>]*data-set="([A-Z0-9]*)"[^>]*data-number="(\d*)"[^>]*>.*?<span class="card-count">([0-9.]+)</span>\s*<span class="card-name">([^<]+)</span>', re.IGNORECASE | re.DOTALL)
@@ -896,47 +1215,68 @@ def save_csv_files(all_data: List[Dict], output_file: str, append_mode: bool = F
             writer.writeheader()
             writer.writerows(overview_rows)
     
-    # Cards file
+    # Cards file (matching current_meta format)
     cards_file = os.path.join(get_data_dir(), output_file.replace('.csv', '_cards.csv'))
     card_rows = []
     
     for tournament in all_data:
         for card in tournament.get('cards', []):
-            # Round up the card count (e.g., 0.1 -> 1, 3.78 -> 4)
-            count = card.get('count', 0)
-            rounded_count = math.ceil(count) if count > 0 else 0
+            # Cards come pre-aggregated with all necessary fields
             card_rows.append({
-                'tournament_id': tournament['id'],
-                'tournament_name': tournament['name'],
-                'format': tournament.get('format', ''),
-                'deck_name': card.get('deck_name', ''),
-                'card_count': rounded_count,
-                'full_card_name': card.get('full_name', ''),
+                'meta': card.get('meta', 'Past Meta'),
+                'tournament_date': card.get('tournament_date', ''),
+                'archetype': card.get('archetype', ''),
+                'card_name': card.get('card_name', ''),
+                'card_identifier': card.get('card_identifier', ''),
+                'total_count': card.get('total_count', 0),
+                'max_count': card.get('max_count', 0),
+                'deck_count': card.get('deck_count', 0),
+                'total_decks_in_archetype': card.get('total_decks_in_archetype', 0),
+                'percentage_in_archetype': str(card.get('percentage_in_archetype', 0)).replace('.', ','),  # German format
+                'set_code': card.get('set_code', ''),
+                'set_name': card.get('set_name', ''),
+                'set_number': card.get('set_number', ''),
+                'rarity': card.get('rarity', ''),
+                'type': card.get('type', ''),
+                'image_url': card.get('image_url', ''),
                 'is_ace_spec': card.get('is_ace_spec', 'No')
             })
     
     # Handle append mode for cards file
     if card_rows:
         if append_mode and os.path.exists(cards_file):
-            # Load existing tournament IDs to avoid duplicates
-            existing_tournament_ids = set()
+            # Load existing data to avoid duplicates (check by archetype + card_name)
+            existing_entries = set()
             with open(cards_file, 'r', encoding='utf-8-sig') as f:
                 reader = csv.DictReader(f, delimiter=';')
                 for row in reader:
-                    existing_tournament_ids.add(row['tournament_id'])
-            # Filter out cards from tournaments that already exist
-            card_rows = [r for r in card_rows if r['tournament_id'] not in existing_tournament_ids]
-            if card_rows:
-                print(f"[Append Mode] Adding {len(card_rows)} new card entries to cards file")
+                    key = f"{row.get('archetype', '')}|{row.get('card_name', '')}|{row.get('card_identifier', '')}"
+                    existing_entries.add(key)
+            
+            # Filter out duplicate entries
+            new_card_rows = []
+            for r in card_rows:
+                key = f"{r['archetype']}|{r['card_name']}|{r['card_identifier']}"
+                if key not in existing_entries:
+                    new_card_rows.append(r)
+            
+            if new_card_rows:
+                print(f"[Append Mode] Adding {len(new_card_rows)} new card entries to cards file")
                 with open(cards_file, 'a', newline='', encoding='utf-8-sig') as f:
-                    fieldnames = ['tournament_id', 'tournament_name', 'format', 'deck_name', 'card_count', 'full_card_name', 'is_ace_spec']
+                    fieldnames = ['meta', 'tournament_date', 'archetype', 'card_name', 'card_identifier', 
+                                'total_count', 'max_count', 'deck_count', 'total_decks_in_archetype', 
+                                'percentage_in_archetype', 'set_code', 'set_name', 'set_number', 
+                                'rarity', 'type', 'image_url', 'is_ace_spec']
                     writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=';')
-                    writer.writerows(card_rows)
+                    writer.writerows(new_card_rows)
             else:
                 print(f"[Append Mode] No new card entries to add")
         else:
             with open(cards_file, 'w', newline='', encoding='utf-8-sig') as f:
-                fieldnames = ['tournament_id', 'tournament_name', 'format', 'deck_name', 'card_count', 'full_card_name', 'is_ace_spec']
+                fieldnames = ['meta', 'tournament_date', 'archetype', 'card_name', 'card_identifier', 
+                            'total_count', 'max_count', 'deck_count', 'total_decks_in_archetype', 
+                            'percentage_in_archetype', 'set_code', 'set_name', 'set_number', 
+                            'rarity', 'type', 'image_url', 'is_ace_spec']
                 writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=';')
                 writer.writeheader()
                 writer.writerows(card_rows)
@@ -960,7 +1300,6 @@ def main():
         return
     
     max_tournaments = settings['max_tournaments']
-    max_decks = settings.get('max_decks_per_tournament', 1)
     delay = settings['delay_between_tournaments']
     output_file = settings['output_file']
     start_tournament_id = settings.get('start_tournament_id', None)
@@ -970,6 +1309,7 @@ def main():
     print(f"✓ Settings loaded successfully")
     print(f"  Max tournaments: {max_tournaments}")
     print(f"  Append mode: {append_mode}")
+    print(f"  Scraping mode: INDIVIDUAL DECK LISTS (all decks per tournament)")
     print()
     
     # Initialize card database (now uses unified CardDataManager)
@@ -990,7 +1330,7 @@ def main():
     all_data = []
     
     print("Starting Limitless TCG Tournament Cards Scraper...")
-    print(f"Settings: max_tournaments={max_tournaments}, max_decks_per_tournament={max_decks}")
+    print(f"Settings: max_tournaments={max_tournaments}, scraping mode=INDIVIDUAL DECKS")
     if start_tournament_id:
         print(f"Stop at tournament ID: {start_tournament_id} (oldest tournament to include)")
     print(f"Tournament types filter: {', '.join(tournament_types)}")
@@ -998,10 +1338,8 @@ def main():
     
     # Load scraped tournament tracking
     scraped_ids = load_scraped_tournaments()
-    print(f"[DEBUG] Loaded {len(scraped_ids)} tournament IDs from tracking file")
-    if scraped_ids:
-        print(f"[DEBUG] First few IDs: {sorted(list(scraped_ids))[:10]}")
     newly_scraped_ids = set()
+    processed_count = 0  # Track successfully processed tournaments
     
     # Get tournament links
     tournaments = get_tournament_links(base_url, max_tournaments, start_tournament_id, scraped_ids)
@@ -1010,6 +1348,11 @@ def main():
         return
     
     for i, tournament in enumerate(tournaments, 1):
+        # Stop if we've processed enough tournaments
+        if processed_count >= max_tournaments:
+            print(f"\nReached max_tournaments limit ({max_tournaments}). Stopping.")
+            break
+        
         print(f"\nProcessing tournament {i}/{len(tournaments)}")
         print("-" * 30)
         
@@ -1064,77 +1407,115 @@ def main():
         if info['format']:
             print(f"     Format: {info['format']}")
         
-        # Get deck options from dropdown
-        deck_options = get_deck_options(tournament['cards_url'])
-        decks_to_scrape = deck_options[:max_decks] if deck_options else []
+        # NEW APPROACH: Scrape individual deck lists instead of archetyp aggregations
+        print(f"Fetching individual deck lists from tournament page...")
+        deck_list_urls = get_deck_list_links(tournament['url'])
         
-        # Add total deck count to tournament name
-        if deck_options:
-            tournament['name'] = f"{tournament['name']} ({len(deck_options)} decks)"
+        if not deck_list_urls:
+            print(f"  WARNING: No deck lists found for this tournament")
+            tournament['cards'] = []
+            tournament['total_cards'] = 0
+            tournament['status'] = 'no decks found'
+            all_data.append(tournament)
+            newly_scraped_ids.add(tournament['id'])
+            continue
         
-        all_cards = []
+        total_players = sum(d['player_count'] for d in deck_list_urls)
+        print(f"  Found {len(deck_list_urls)} unique decks representing {total_players} total players")
+        print(f"  Estimated time: ~{len(deck_list_urls) * 0.3 / 60:.1f} minutes")
         
-        if decks_to_scrape:
-            print(f"Found {len(deck_options)} deck archetypes, scraping top {len(decks_to_scrape)}")
+        # Scrape each individual deck (with player counts)
+        all_decks = []  # List of dicts: {'cards': [...], 'player_count': 2}
+        successful_decks = 0
+        failed_decks = 0
+        
+        for j, deck_info in enumerate(deck_list_urls, 1):
+            # Progress indicator every 10 decks
+            if j % 10 == 0 or j == 1:
+                print(f"  Progress: {j}/{len(deck_list_urls)} decks ({successful_decks} ok, {failed_decks} failed)")
             
-            for j, deck in enumerate(decks_to_scrape, 1):
-                deck_url = f"{tournament['cards_url']}?deck={deck['data_value']}"
-                print(f"  Deck {j}/{len(decks_to_scrape)}: {deck['deck_name']} ({deck['decklist_count']} lists)")
-                
-                cards = extract_cards_from_page(deck_url, card_db, deck['deck_name'])
-                
-                # Add deck name to each card
-                for card in cards:
-                    card['deck_name'] = deck['deck_name']
-                
-                all_cards.extend(cards)
+            try:
+                cards, deck_name = extract_single_deck(deck_info['url'], card_db)
+                if cards:
+                    all_decks.append({
+                        'cards': cards,
+                        'player_count': deck_info['player_count'],
+                        'deck_name': deck_name
+                    })
+                    successful_decks += 1
+                else:
+                    failed_decks += 1
+            except Exception as e:
+                print(f"    ERROR scraping {deck_info['url']}: {e}")
+                failed_decks += 1
+            
+            # Rate limiting: 0.3s between requests
+            if j < len(deck_list_urls):
+                time.sleep(0.3)
+        
+        print(f"  Scraping complete: {successful_decks} decks ok, {failed_decks} failed")
+        
+        # Aggregate statistics across all decks
+        if all_decks:
+            total_players = sum(d['player_count'] for d in all_decks)
+            print(f"  Aggregating statistics across {len(all_decks)} unique decks ({total_players} total players)...")
+            tournament_cards = aggregate_tournament_cards(all_decks, tournament, card_db)
+            tournament['cards'] = tournament_cards
+            tournament['total_cards'] = len(tournament_cards)
+            tournament['status'] = 'success'
+            print(f"  Found {len(tournament_cards)} unique cards")
         else:
-            # Fallback: just scrape the default page
-            print("No deck dropdown found, scraping default page")
-            cards = extract_cards_from_page(tournament['cards_url'], card_db)
-            for card in cards:
-                card['deck_name'] = 'Default'
-            all_cards.extend(cards)
-        
-        tournament['cards'] = all_cards
-        tournament['total_cards'] = len(all_cards)
-        tournament['status'] = 'success' if all_cards else 'no cards found'
-        
-        print(f"Found {len(all_cards)} total cards")
+            print(f"  No valid decks found")
+            tournament['cards'] = []
+            tournament['total_cards'] = 0
+            tournament['status'] = 'no valid decks'
         
         all_data.append(tournament)
         
         # Track successfully scraped tournament
         newly_scraped_ids.add(tournament['id'])
+        processed_count += 1  # Increment counter for successfully processed tournaments
+        
+        # AUTO-SAVE after each tournament (safe against interruptions)
+        print(f"  💾 Saving tournament data...")
+        try:
+            # For first tournament: use original append_mode setting
+            # For subsequent tournaments: always append
+            current_append_mode = append_mode if i == 1 else True
+            
+            # Save tracking first
+            all_scraped_ids = scraped_ids | newly_scraped_ids
+            save_scraped_tournaments(all_scraped_ids)
+            
+            # Save CSV files
+            overview_file, cards_file = save_csv_files([tournament], output_file, append_mode=current_append_mode)
+            print(f"  ✓ Saved to CSV (append_mode={current_append_mode})")
+        except Exception as save_error:
+            print(f"  ⚠ Warning: Could not save tournament data: {save_error}")
         
         if delay > 0 and i < len(tournaments):
             time.sleep(delay)
     
-    # Save to CSV
+    # Final summary
     if all_data:
-        # Save tracking first
-        if newly_scraped_ids:
-            all_scraped_ids = scraped_ids | newly_scraped_ids
-            save_scraped_tournaments(all_scraped_ids)
-            print(f"✓ Saved {len(newly_scraped_ids)} new tournament IDs to tracking file")
-            print(f"  Total tracked tournaments: {len(all_scraped_ids)}")
-        
-        overview_file, cards_file = save_csv_files(all_data, output_file, append_mode=append_mode)
-        
         print(f"\n" + "=" * 50)
         print(f"Scraping completed!")
-        print(f"Overview data saved to: {overview_file}")
-        print(f"Detailed card data saved to: {cards_file}")
-        
-        total_cards = sum(t.get('total_cards', 0) for t in all_data)
         print(f"Tournaments processed: {len(all_data)}")
-        print(f"Total cards extracted: {total_cards}")
+        total_cards = sum(t.get('total_cards', 0) for t in all_data)
+        print(f"Total unique cards extracted: {total_cards}")
+        print(f"Data saved to: {os.path.join(get_data_dir(), output_file.replace('.csv', '_cards.csv'))}")
     else:
         print("No data collected.")
 
 if __name__ == "__main__":
     try:
         main()
+    except KeyboardInterrupt:
+        print("\n\n" + "=" * 50)
+        print("SCRAPER INTERRUPTED BY USER (Ctrl+C)")
+        print("=" * 50)
+        print("\nNOTE: Partial data may not have been saved.")
+        print("To save progress during interruption, restart the scraper.")
     except Exception as e:
         print(f"\nError occurred: {e}")
         import traceback

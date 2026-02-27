@@ -252,24 +252,48 @@ class CardDatabaseLookup:
     
     # Set order priority (higher = newer/better)
     SET_ORDER = {
-        # 2026 Sets
-        'PRE': 108, 'SFA': 107, 'ASC': 106, 
-        # 2025 Sets
-        'MEG': 105, 'MEP': 104, 'SP': 103, 'SVE': 102,
-        # 2024 Sets  
-        'SCR': 101, 'TWM': 100, 'TEF': 99, 'PAR': 98, 'PAF': 97, 'PAL': 96, 'OBF': 95,
-        # 2023 Sets
-        'MEW': 94, 'SVI': 93, 'CRZ': 92, 'SIT': 91, 'LOR': 90, 'PGO': 89,
-        # 2022 Sets
-        'ASR': 88, 'BRS': 87, 'FST': 86, 'CEL': 85, 'EVS': 84, 'CRE': 83,
-        # 2021 Sets
-        'BST': 82, 'SHF': 81, 'VIV': 80, 'CPA': 79, 'DAA': 78,
-        # 2020 Sets (SSH Base)
-        'RCL': 77, 'SSH': 76,
-        # Special/Promo Sets
-        'BLK': 99, 'WHT': 98, 'SSP': 94, 'PR-SW': 87, 'SVP': 86,
-        # Older Sets
-        'MP1': 50, 'M3': 20, 'MC': 15, 'JTG': 10, 'PFL': 5, 'DRI': 2
+    # Mega (2025-2026)
+    'ASC': 130, 'PFL': 129, 'MEG': 128, 'MEE': 128, 'MEP': 128,
+    # Scarlet & Violet (2023-2025)
+    'BLK': 127, 'WHT': 126, 'DRI': 125, 'JTG': 124, 'PRE': 123,
+    'SSP': 122, 'SCR': 121, 'SFA': 120, 'TWM': 119, 'TEF': 118,
+    'PAF': 117, 'PAR': 116, 'MEW': 115, 'OBF': 114, 'PAL': 113,
+    'SVI': 112, 'SVE': 112, 'SVP': 112,
+    # Sword & Shield (2020-2023)
+    'CRZ': 111, 'SIT': 110, 'LOR': 109, 'PGO': 108, 'ASR': 107,
+    'BRS': 106, 'FST': 105, 'CEL': 104, 'EVS': 103, 'CRE': 102,
+    'BST': 101, 'SHF': 100, 'VIV': 99, 'CPA': 98, 'DAA': 97,
+    'RCL': 96, 'SSH': 95, 'SP': 95,
+    # Sun & Moon (2017-2019)
+    'CEC': 94, 'HIF': 93, 'UNM': 92, 'UNB': 91, 'DET': 90,
+    'TEU': 89, 'LOT': 88, 'DRM': 87, 'CES': 86, 'FLI': 85,
+    'UPR': 84, 'CIN': 83, 'SLG': 82, 'BUS': 81, 'GRI': 80,
+    'SUM': 79, 'SMP': 79,
+    # XY (2014-2016)
+    'EVO': 78, 'STS': 77, 'FCO': 76, 'GEN': 75, 'BKP': 74,
+    'BKT': 73, 'AOR': 72, 'ROS': 71, 'DCR': 70, 'PRC': 69,
+    'PHF': 68, 'FFI': 67, 'FLF': 66, 'XY': 65, 'XYP': 65,
+    # Black & White (2011-2013)
+    'LTR': 64, 'PLB': 63, 'PLF': 62, 'PLS': 61, 'BCR': 60,
+    'DRX': 59, 'DEX': 58, 'NXD': 57, 'NVI': 56, 'EPO': 55,
+    'BLW': 54, 'BWP': 54,
+    # HeartGold & SoulSilver (2010-2011)
+    'CL': 53, 'TM': 52, 'UD': 51, 'UL': 50, 'HS': 49,
+    # Platinum (2009-2010)
+    'AR': 48, 'SV': 47, 'RR': 46, 'PL': 45, 'SF': 44,
+    # Diamond & Pearl (2007-2009)
+    'LA': 43, 'MD': 42, 'GE': 41, 'SW': 40, 'MT': 39, 'DP': 38,
+    # EX (2003-2007)
+    'PK': 37, 'DF': 36, 'CG': 35, 'HP': 34, 'LM': 33, 'DS': 32,
+    'UF': 31, 'EM': 30, 'DX': 29, 'TRR': 28, 'RG': 27, 'HL': 26,
+    'MA': 25, 'DR': 24, 'SS': 23, 'RS': 22,
+    # e-Card & Neo (2000-2003)
+    'E3': 21, 'E2': 20, 'E1': 19, 'LC': 18, 'N4': 17, 'N3': 16,
+    'N2': 15, 'N1': 14,
+    # Classic (1999-2000)
+    'G2': 13, 'G1': 12, 'TR': 11, 'BS2': 10, 'FO': 9, 'JU': 8, 'BS': 7,
+    # Older Special Sets
+    'M3': 20, 'MC': 15, 'MP1': 50
     }
     
     def __init__(self, csv_path: str = None):
@@ -579,7 +603,6 @@ class CardDatabaseLookup:
         
         # If no low rarity version exists, fallback to ANY rarity (prefer newest set)
         if not low_rarity_variants:
-            print(f"[DEBUG] No low-rarity version for '{card_name}', using any rarity")
             low_rarity_variants = variants  # Use all variants as fallback
         
         # Find the NEWEST set among available variants
@@ -659,7 +682,6 @@ class CardDatabaseLookup:
                 f"https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/"
                 f"{set_code}/{set_code}_{card_number_no_pad}_{rarity_short}_JP_LG.png"
             )
-            print(f"[DEBUG] Japanese card detected: {set_code} {card_number} -> {url}")
         else:
             # English card: use /tpci/, _EN_, WITH padding (41 wird 041)
             url = (

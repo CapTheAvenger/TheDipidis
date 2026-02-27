@@ -1,6 +1,5 @@
 {
-    "max_tournaments": 100,
-    "max_decks_per_tournament": 100,
+    "max_tournaments": 20,
     "delay_between_tournaments": 1,
     "start_tournament_id": 391,
     "output_file": "tournament_cards_data.csv",
@@ -13,6 +12,6 @@
         "Worlds",
         "International"
     ],
-    "append_mode": true,
-    "_comment": "Nur Standard-Format Turniere (Regional, Special Event, LAIC, EUIC, NAIC, Worlds) werden automatisch gescraped. Scraper stoppt bei Tournament ID 391. append_mode=true keeps old tournament data when adding new tournaments."
+    "append_mode": false,
+    "_comment": "Scrapes individual deck lists from all tournaments (Regional, Special Event, LAIC, EUIC, NAIC, Worlds, International). Scraper stoppt bei Tournament ID 391. max_tournaments=100 ensures we get ~87 matching tournaments after filtering. append_mode=false for full rebuild. WICHTIG: Scraping dauert deutlich länger (ca. 1-2 Minuten pro Turnier)."
 }

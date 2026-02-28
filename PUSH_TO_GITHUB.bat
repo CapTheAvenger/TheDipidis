@@ -78,14 +78,21 @@ git commit -m "%commit_msg%"
 echo.
 
 echo [4/4] Push zu GitHub...
+echo.
+echo Pushe zu HausiTCG (origin)...
 git push origin main
+echo.
+echo Pushe zu TheDipidis (dipidis - LIVE SITE)...
+git push dipidis main
 echo.
 
 echo =====================================
 echo   Push erfolgreich!
 echo =====================================
 echo.
-echo Repository: https://github.com/CapTheAvenger/HausiTCG.git
+echo Repository 1: https://github.com/CapTheAvenger/HausiTCG.git
+echo Repository 2: https://github.com/CapTheAvenger/TheDipidis.git (LIVE)
+echo Live-Seite:   https://captheavenger.github.io/TheDipidis/
 echo.
 
 pause

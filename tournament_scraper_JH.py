@@ -16,18 +16,18 @@ import sys
 import html
 import math
 from html.parser import HTMLParser
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any, Set, Tuple
 
 # Fix Windows console encoding for Unicode characters (✓, ×, •, etc.)
 if sys.platform == 'win32':
     if hasattr(sys.stdout, 'reconfigure'):
         try:
-            sys.stdout.reconfigure(encoding='utf-8')
+            sys.stdout.reconfigure(encoding='utf-8')  # type: ignore
         except Exception:
             pass
     if hasattr(sys.stderr, 'reconfigure'):
         try:
-            sys.stderr.reconfigure(encoding='utf-8')
+            sys.stderr.reconfigure(encoding='utf-8')  # type: ignore
         except Exception:
             pass
 
@@ -45,7 +45,7 @@ def get_scraped_tournaments_file() -> str:
     return os.path.join(data_dir, 'tournament_jh_scraped.json')
 
 
-def load_scraped_tournaments() -> set:
+def load_scraped_tournaments() -> Set[str]:
     """Load set of already scraped tournament IDs."""
     tracking_file = get_scraped_tournaments_file()
     
@@ -61,7 +61,7 @@ def load_scraped_tournaments() -> set:
         return set()
 
 
-def save_scraped_tournaments(tournament_ids: set) -> None:
+def save_scraped_tournaments(tournament_ids: Set[str]) -> None:
     """Save set of scraped tournament IDs to tracking file."""
     tracking_file = get_scraped_tournaments_file()
     
@@ -77,7 +77,7 @@ def save_scraped_tournaments(tournament_ids: set) -> None:
         print(f"Warning: Could not save scraped tournaments: {e}")
 
 # Default settings
-DEFAULT_SETTINGS = {
+DEFAULT_SETTINGS: Dict[str, Any] = {
     "max_tournaments": 150,
     "delay_between_tournaments": 0,
     "start_tournament_id": 391,
@@ -104,7 +104,7 @@ def get_data_dir() -> str:
     os.makedirs(data_dir, exist_ok=True)
     return data_dir
 
-def load_settings() -> Dict:
+def load_settings() -> Dict[str, Any]:
     """Load settings from tournament_JH_settings.json, or create it with defaults if it doesn't exist."""
     app_path = get_app_path()
     settings_path = os.path.join(app_path, 'tournament_JH_settings.json')
@@ -160,7 +160,7 @@ def fetch_page(url: str) -> str:
         print(f"Error fetching {url}: {e}")
         return ""
 
-def get_tournament_links(base_url: str, max_tournaments: int, start_tournament_id: int = None, scraped_ids: set = None) -> List[Dict]:
+def get_tournament_links(base_url: str, max_tournaments: int, start_tournament_id: Optional[int] = None, scraped_ids: Optional[Set[str]] = None) -> List[Dict[str, Any]]:
     """Get tournament links from the main tournaments page with pagination support."""
     print("Fetching tournaments list...")
     if start_tournament_id:
@@ -169,8 +169,8 @@ def get_tournament_links(base_url: str, max_tournaments: int, start_tournament_i
     if scraped_ids is None:
         scraped_ids = set()
     
-    tournaments = []
-    seen_ids = set()
+    tournaments: List[Dict[str, Any]] = []
+    seen_ids: Set[str] = set()
     skipped_count = 0
     page = 1
     stop_scraping = False
@@ -313,7 +313,7 @@ def get_format_code(format_name: str) -> str:
     # Return original if no match found
     return format_name
 
-def get_tournament_info(tournament_url: str) -> Dict:
+def get_tournament_info(tournament_url: str) -> Dict[str, str]:
     """Get tournament name and details from the tournament page."""
     html = fetch_page(tournament_url)
     if not html:
@@ -481,7 +481,7 @@ def get_tournament_info(tournament_url: str) -> Dict:
     
     return info
 
-def get_deck_list_links(tournament_url: str) -> List[Dict]:
+def get_deck_list_links(tournament_url: str) -> List[Dict[str, Any]]:
     """
     Extract all individual deck list URLs from a tournament page.
     Returns list of dicts: [{'url': 'https://...', 'player_count': 2}, ...]
@@ -516,7 +516,7 @@ def get_deck_list_links(tournament_url: str) -> List[Dict]:
         print(f"  [DEBUG] {len(shared_decks)} decks shared by multiple players (total {total_shared} players)")
     
     # Build list with player counts
-    deck_list = []
+    deck_list: List[Dict[str, Any]] = []
     for deck_id, player_count in deck_id_counts.items():
         deck_list.append({
             'url': f"https://limitlesstcg.com/decks/list/{deck_id}",
@@ -526,13 +526,13 @@ def get_deck_list_links(tournament_url: str) -> List[Dict]:
     print(f"  Found {len(deck_list)} unique deck lists representing {sum(d['player_count'] for d in deck_list)} total players")
     return deck_list
 
-def get_deck_options(cards_url: str) -> List[Dict]:
+def get_deck_options(cards_url: str) -> List[Dict[str, Any]]:
     """Extract deck options from the dropdown on the cards page."""
     html = fetch_page(cards_url)
     if not html:
         return []
     
-    deck_options = []
+    deck_options: List[Dict[str, Any]] = []
     
     # Pattern to match dropdown options: <li data-value="267.40">Gholdengo Lunatone - 82 decklists</li>
     pattern = r'<li\s+data-value="([^"]+)"[^>]*>([^<]+)</li>'
@@ -567,9 +567,9 @@ def get_deck_options(cards_url: str) -> List[Dict]:
 # which provides 100% accurate card type detection based on Alle Karten.txt
 
 # Global cache for card lookups
-_card_lookup_cache = {}
+_card_lookup_cache: Dict[str, Optional[Dict[str, Any]]] = {}
 
-def lookup_card_info(card_name: str, retries: int = 3) -> Optional[Dict]:
+def lookup_card_info(card_name: str, retries: int = 3) -> Optional[Dict[str, Any]]:
     """Look up card information from Limitless TCG cards database with improved robustness."""
     # Check cache first
     if card_name in _card_lookup_cache:
@@ -728,7 +728,7 @@ def lookup_card_info(card_name: str, retries: int = 3) -> Optional[Dict]:
     _card_lookup_cache[card_name] = None
     return None
 
-def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> tuple:
+def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[List[Dict[str, Any]], str]:
     """
     Extract cards from a single deck list.
     Returns: (cards_list, deck_name)
@@ -780,16 +780,16 @@ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> tuple:
     deck_name = html.unescape(deck_name)
     deck_name = deck_name.replace(''', "'").replace('`', "'").replace('´', "'").replace(''', "'").replace('ʼ', "'")
 
-    cards: List[Dict] = []
-    seen_cards = set()
-    cards_to_lookup = []
+    cards: List[Dict[str, Any]] = []
+    seen_cards: Set[str] = set()
+    cards_to_lookup: List[int] = []
     
     # Regex patterns (same as extract_cards_from_page)
     heading_pattern = re.compile(r'<div[^>]*class="decklist-column-heading"[^>]*>\s*([^<]+?)\s*</div>', re.IGNORECASE)
     card_pattern = re.compile(r'<div[^>]*class="decklist-card"[^>]*data-set="([A-Z0-9]*)"[^>]*data-number="(\d*)"[^>]*>.*?<span class="card-count">([0-9.]+)</span>\s*<span class="card-name">([^<]+)</span>', re.IGNORECASE | re.DOTALL)
 
     # Find all headings with their span (start/end ranges)
-    headings = []
+    headings: List[Dict[str, Any]] = []
     for m in heading_pattern.finditer(html_content):
         title = m.group(1).strip().lower()
         if 'trainer' in title:
@@ -882,7 +882,7 @@ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> tuple:
     
     return cards, deck_name
 
-def aggregate_tournament_cards(all_decks: List[Dict], tournament_info: Dict, card_db: CardDatabaseLookup) -> List[Dict]:
+def aggregate_tournament_cards(all_decks: List[Dict[str, Any]], tournament_info: Dict[str, Any], card_db: CardDatabaseLookup) -> List[Dict[str, Any]]:
     """
     Aggregate card statistics from all decks in a tournament, grouped by deck archetype.
     
@@ -909,7 +909,7 @@ def aggregate_tournament_cards(all_decks: List[Dict], tournament_info: Dict, car
         return []
     
     # Group decks by archetype
-    archetype_groups = {}
+    archetype_groups: Dict[str, List[Dict[str, Any]]] = {}
     for deck_info in all_decks:
         deck_name = deck_info.get('deck_name', 'Unknown Deck')
         if deck_name not in archetype_groups:
@@ -917,21 +917,21 @@ def aggregate_tournament_cards(all_decks: List[Dict], tournament_info: Dict, car
         archetype_groups[deck_name].append(deck_info)
     
     # Process each archetype separately
-    all_aggregated_cards = []
+    all_aggregated_cards: List[Dict[str, Any]] = []
     
     for archetype_name, archetype_decks in archetype_groups.items():
         # Total players in this archetype
         total_players = sum(deck_info['player_count'] for deck_info in archetype_decks)
         
         # Map card_key -> {total_count: int, max_count: int, player_count: int, sample_card: Dict}
-        card_stats = {}
+        card_stats: Dict[str, Dict[str, Any]] = {}
         
         for deck_info in archetype_decks:
             player_count = deck_info['player_count']  # How many players used this deck
             cards = deck_info['cards']
             
             # Track which cards appear in this deck (to count player occurrences)
-            cards_in_deck = set()
+            cards_in_deck: Set[str] = set()
             
             for card in cards:
                 # Create unique key: "Name|SET|NUM"
@@ -1006,23 +1006,23 @@ def aggregate_tournament_cards(all_decks: List[Dict], tournament_info: Dict, car
     
     return all_aggregated_cards
 
-def extract_cards_from_page(cards_url: str, card_db: CardDatabaseLookup, deck_name: str = None) -> List[Dict]:
+def extract_cards_from_page(cards_url: str, card_db: CardDatabaseLookup, deck_name: Optional[str] = None) -> List[Dict[str, Any]]:
     """Extract card data from a tournament's cards page."""
     print(f"Fetching cards from: {cards_url}")
     html_content = fetch_page(cards_url)
     if not html_content:
         return []
 
-    cards: List[Dict] = []
-    seen_cards = set()
-    cards_to_lookup = []  # Track cards that need lookup
+    cards: List[Dict[str, Any]] = []
+    seen_cards: Set[str] = set()
+    cards_to_lookup: List[int] = []  # Track cards that need lookup
     
     # Regex patterns
     heading_pattern = re.compile(r'<div[^>]*class="decklist-column-heading"[^>]*>\s*([^<]+?)\s*</div>', re.IGNORECASE)
     card_pattern = re.compile(r'<div[^>]*class="decklist-card"[^>]*data-set="([A-Z0-9]*)"[^>]*data-number="(\d*)"[^>]*>.*?<span class="card-count">([0-9.]+)</span>\s*<span class="card-name">([^<]+)</span>', re.IGNORECASE | re.DOTALL)
 
     # Find all headings with their span (start/end ranges)
-    headings = []
+    headings: List[Dict[str, Any]] = []
     for m in heading_pattern.finditer(html_content):
         title = m.group(1).strip().lower()
         # Classify section by heading text
@@ -1169,12 +1169,12 @@ def extract_cards_from_page(cards_url: str, card_db: CardDatabaseLookup, deck_na
 
     return cards
 
-def save_csv_files(all_data: List[Dict], output_file: str, append_mode: bool = False):
+def save_csv_files(all_data: List[Dict[str, Any]], output_file: str, append_mode: bool = False):
     """Save scraped data to CSV files."""
     # Save to data/ directory like other scrapers
     # Overview file
     overview_file = os.path.join(get_data_dir(), output_file.replace('.csv', '_overview.csv'))
-    overview_rows = []
+    overview_rows: List[Dict[str, Any]] = []
     
     for tournament in all_data:
         overview_rows.append({
@@ -1191,7 +1191,7 @@ def save_csv_files(all_data: List[Dict], output_file: str, append_mode: bool = F
     # Handle append mode for overview file
     if append_mode and os.path.exists(overview_file):
         # Load existing data
-        existing_ids = set()
+        existing_ids: Set[str] = set()
         with open(overview_file, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             for row in reader:
@@ -1217,7 +1217,7 @@ def save_csv_files(all_data: List[Dict], output_file: str, append_mode: bool = F
     
     # Cards file (matching current_meta format)
     cards_file = os.path.join(get_data_dir(), output_file.replace('.csv', '_cards.csv'))
-    card_rows = []
+    card_rows: List[Dict[str, Any]] = []
     
     for tournament in all_data:
         for card in tournament.get('cards', []):
@@ -1246,7 +1246,7 @@ def save_csv_files(all_data: List[Dict], output_file: str, append_mode: bool = F
     if card_rows:
         if append_mode and os.path.exists(cards_file):
             # Load existing data to avoid duplicates (check by archetype + card_name)
-            existing_entries = set()
+            existing_entries: Set[str] = set()
             with open(cards_file, 'r', encoding='utf-8-sig') as f:
                 reader = csv.DictReader(f, delimiter=';')
                 for row in reader:
@@ -1254,7 +1254,7 @@ def save_csv_files(all_data: List[Dict], output_file: str, append_mode: bool = F
                     existing_entries.add(key)
             
             # Filter out duplicate entries
-            new_card_rows = []
+            new_card_rows: List[Dict[str, Any]] = []
             for r in card_rows:
                 key = f"{r['archetype']}|{r['card_name']}|{r['card_identifier']}"
                 if key not in existing_entries:
@@ -1327,7 +1327,7 @@ def main():
     print(f"Loaded card database with {len(card_db.cards)} unique cards")
     
     base_url = "https://limitlesstcg.com/tournaments"
-    all_data = []
+    all_data: List[Dict[str, Any]] = []
     
     print("Starting Limitless TCG Tournament Cards Scraper...")
     print(f"Settings: max_tournaments={max_tournaments}, scraping mode=INDIVIDUAL DECKS")
@@ -1338,7 +1338,7 @@ def main():
     
     # Load scraped tournament tracking
     scraped_ids = load_scraped_tournaments()
-    newly_scraped_ids = set()
+    newly_scraped_ids: Set[str] = set()
     processed_count = 0  # Track successfully processed tournaments
     
     # Get tournament links
@@ -1425,7 +1425,7 @@ def main():
         print(f"  Estimated time: ~{len(deck_list_urls) * 0.3 / 60:.1f} minutes")
         
         # Scrape each individual deck (with player counts)
-        all_decks = []  # List of dicts: {'cards': [...], 'player_count': 2}
+        all_decks: List[Dict[str, Any]] = []  # List of dicts: {'cards': [...], 'player_count': 2}
         successful_decks = 0
         failed_decks = 0
         

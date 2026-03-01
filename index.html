@@ -786,6 +786,36 @@
             background: white;
         }
         
+        .cards-filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+        }
+        
+        .cards-filter-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .cards-filter-header .toggle-icon {
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+        
+        .cards-filter-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        
         .cards-filter-options {
             max-height: 250px;
             overflow-y: auto;
@@ -795,6 +825,16 @@
             background: #fafafa;
             scrollbar-width: thin;
             scrollbar-color: #667eea #f0f0f0;
+            transition: all 0.3s ease;
+            margin-top: 5px;
+        }
+        
+        .cards-filter-options.collapsed {
+            max-height: 0 !important;
+            padding: 0 !important;
+            border-width: 0 !important;
+            overflow: hidden !important;
+            margin-top: 0 !important;
         }
         
         .cards-filter-options::-webkit-scrollbar {
@@ -2123,82 +2163,9 @@
             /* Karten-Badges optimiert */
             .compact-badge,
             [style*="border-radius: 50%"] {
-                font-size: 12px !important;
-                min-width: 22px !important;
-                min-height: 22px !important;
-            }
-            
-            /* Karten Grid: Info als Overlay am unteren Rand (Mobile) */
-            .card-item .card-image-container {
-                position: relative !important;
-            }
-            
-            .card-item .card-info-bottom {
-                position: absolute !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                background: linear-gradient(to top, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 60%, rgba(255, 255, 255, 0) 100%) !important;
-                backdrop-filter: blur(3px);
-                padding: 3px 2px !important;
-                min-height: auto !important;
-                max-height: 66% !important;
-                z-index: 10;
-            }
-            
-            .card-item .card-info-text {
-                margin-bottom: 1px;
-                max-height: 27px !important;
-                overflow: hidden;
-            }
-            
-            .card-item .card-info-text > div {
-                font-size: 0.50em !important;
-                margin-bottom: 0.5px !important;
-                line-height: 1.0;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            
-            /* Alle Infos sichtbar auf Mobile */
-            .card-item .card-info-text > div:nth-child(1) {
-                font-weight: 600;
-            }
-            
-            .card-item .card-action-buttons {
-                gap: 1px !important;
-                margin-top: 1px !important;
-            }
-            
-            .card-item .card-action-buttons button {
-                height: 13px !important;
-                width: 13px !important;
-                min-height: 13px !important;
-                min-width: 13px !important;
-                max-width: 13px !important;
-                font-size: 7px !important;
-                padding: 0 !important;
-            }
-            
-            /* Kompakte Badges auf Mobile (14x14 für mehr Kartenplatz) */
-            .card-item .card-image-container > div[style*="border-radius: 50%"],
-            div[style*="border-radius: 50%"][style*="width: 28px"] {
-                width: 14px !important;
-                height: 14px !important;
-                font-size: 0.50em !important;
-                top: 2px !important;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.25) !important;
-            }
-            
-            .card-item .card-image-container > div[style*="border-radius: 50%"][style*="right"],
-            div[style*="border-radius: 50%"][style*="width: 28px"][style*="right"] {
-                right: 2px !important;
-            }
-            
-            .card-item .card-image-container > div[style*="border-radius: 50%"][style*="left"],
-            div[style*="border-radius: 50%"][style*="width: 28px"][style*="left"] {
-                left: 2px !important;
+                font-size: 10px !important;
+                min-width: 18px !important;
+                min-height: 18px !important;
             }
         }
 
@@ -2315,6 +2282,443 @@
 
             table th, table td {
                 padding: 6px 4px;
+            }
+        }
+
+        /* ============================== */
+        /* MOBILE OPTIMIERUNGEN - CARDS TAB */
+        /* ============================== */
+        @media (max-width: 768px) {
+            /* ============================== */
+            /* DECK CARD OVERLAYS (City League, Current Meta, Past Meta) */
+            /* ============================== */
+            
+            /* Karten Grid: Info als Overlay am unteren Rand (Mobile) */
+            .card-item .card-image-container {
+                position: relative !important;
+            }
+            
+            .card-item .card-info-bottom {
+                position: absolute !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                height: 66.66% !important;
+                background: linear-gradient(to top, 
+                    rgba(255, 255, 255, 0.98) 0%, 
+                    rgba(255, 255, 255, 0.95) 40%, 
+                    rgba(255, 255, 255, 0.85) 60%,
+                    rgba(255, 255, 255, 0) 100%) !important;
+                backdrop-filter: blur(4px) !important;
+                padding: 4px 3px 3px 3px !important;
+                min-height: 66.66% !important;
+                max-height: 66.66% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-end !important;
+                z-index: 10 !important;
+                overflow: hidden !important;
+            }
+            
+            .card-item .card-info-text {
+                margin-bottom: 2px !important;
+                flex-shrink: 0 !important;
+            }
+            
+            .card-item .card-info-text > div {
+                font-size: 0.55em !important;
+                margin-bottom: 1px !important;
+                line-height: 1.1 !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+            
+            .card-item .card-info-text > div:nth-child(1) {
+                font-weight: 600 !important;
+                font-size: 0.6em !important;
+            }
+            
+            .card-item .card-action-buttons {
+                gap: 2px !important;
+                margin-top: 3px !important;
+                flex-shrink: 0 !important;
+            }
+            
+            .card-item .card-action-buttons button {
+                height: 15px !important;
+                width: auto !important;
+                min-height: 15px !important;
+                max-height: 15px !important;
+                font-size: 8px !important;
+                padding: 0 !important;
+            }
+            
+            /* Kompakte Badges auf Mobile (14x14 für mehr Kartenplatz) */
+            .card-item .card-image-container > div[style*="border-radius: 50%"],
+            div[style*="border-radius: 50%"][style*="width: 28px"],
+            div[style*="border-radius: 50%"][style*="width: 22px"] {
+                width: 16px !important;
+                height: 16px !important;
+                font-size: 0.55em !important;
+                top: 3px !important;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+            }
+            
+            .card-item .card-image-container > div[style*="border-radius: 50%"][style*="right"],
+            div[style*="border-radius: 50%"][style*="width: 28px"][style*="right"],
+            div[style*="border-radius: 50%"][style*="width: 22px"][style*="right"] {
+                right: 3px !important;
+            }
+            
+            .card-item .card-image-container > div[style*="border-radius: 50%"][style*="left"],
+            div[style*="border-radius: 50%"][style*="width: 28px"][style*="left"],
+            div[style*="border-radius: 50%"][style*="width: 22px"][style*="left"] {
+                left: 3px !important;
+            }
+            
+            /* ============================== */
+            /* CARDS TAB - Card Database */
+            /* ============================== */
+            
+            /* Cards Tab: Max 4 Spalten auf Mobile */
+            .card-database-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 8px !important;
+                padding: 8px !important;
+            }
+            
+            /* Card Items: Overlay-Design (Text/Buttons auf Karte) */
+            .card-database-item {
+                position: relative !important;
+                border-radius: 10px !important;
+                overflow: hidden !important;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+            }
+            
+            .card-database-item:hover {
+                transform: none !important;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+            }
+            
+            /* Bild nimmt volle Größe */
+            .card-database-item img {
+                width: 100% !important;
+                height: auto !important;
+                display: block !important;
+            }
+            
+            /* Info-Bereich als Overlay über untere 2/3 der Karte */
+            .card-database-info {
+                position: absolute !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                height: 66.66% !important;
+                padding: 6px 4px 4px 4px !important;
+                background: linear-gradient(to top, 
+                    rgba(255, 255, 255, 0.98) 0%, 
+                    rgba(255, 255, 255, 0.95) 40%, 
+                    rgba(255, 255, 255, 0.85) 60%,
+                    rgba(255, 255, 255, 0) 100%) !important;
+                backdrop-filter: blur(4px) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-end !important;
+                gap: 3px !important;
+            }
+            
+            /* Kartenname kompakt */
+            .card-database-name {
+                font-size: 9px !important;
+                font-weight: 700 !important;
+                line-height: 1.1 !important;
+                margin: 0 0 2px 0 !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
+            }
+            
+            /* Meta-Infos (Set, Type) kompakt */
+            .card-database-meta {
+                font-size: 7px !important;
+                gap: 2px !important;
+                margin-bottom: 2px !important;
+            }
+            
+            .card-database-set {
+                font-size: 7px !important;
+                padding: 1px 3px !important;
+                border-radius: 2px !important;
+            }
+            
+            .card-database-type {
+                font-size: 7px !important;
+                padding: 1px 3px !important;
+                border-radius: 2px !important;
+            }
+            
+            /* Rarity Badge kompakt */
+            .card-database-rarity {
+                font-size: 7px !important;
+                padding: 2px 4px !important;
+                border-radius: 3px !important;
+                margin-top: 2px !important;
+            }
+            
+            /* Action Buttons kompakt */
+            .card-database-actions {
+                gap: 3px !important;
+                margin-top: 3px !important;
+            }
+            
+            .card-database-actions button {
+                padding: 3px 5px !important;
+                font-size: 8px !important;
+                border-radius: 3px !important;
+                font-weight: 600 !important;
+            }
+            
+            /* Filter Section Mobile-optimiert */
+            .cards-filter-section {
+                padding: 12px !important;
+                margin-bottom: 12px !important;
+            }
+            
+            .cards-filter-section > div:first-child {
+                margin-bottom: 12px !important;
+            }
+            
+            .cards-filter-section > div:first-child input {
+                font-size: 14px !important;
+                padding: 8px !important;
+            }
+            
+            /* Filter Grid: untereinander auf Mobile */
+            .cards-filter-section > div:nth-child(2) {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            
+            /* Filter Header touch-friendly */
+            .cards-filter-header {
+                padding: 10px 12px !important;
+                font-size: 13px !important;
+            }
+            
+            /* Filter Options kompakt */
+            .cards-filter-options {
+                max-height: 180px !important;
+                padding: 8px !important;
+            }
+            
+            .cards-filter-options label {
+                font-size: 12px !important;
+                padding: 5px !important;
+            }
+            
+            .cards-filter-options input[type="checkbox"] {
+                width: 16px !important;
+                height: 16px !important;
+            }
+            
+            /* Reset Button und Results Info */
+            .cards-filter-section > div:nth-child(3) button {
+                padding: 10px 18px !important;
+                font-size: 13px !important;
+            }
+            
+            #cardResultsInfo {
+                font-size: 13px !important;
+                padding: 10px !important;
+            }
+            
+            /* ============================== */
+            /* WEITERE TAB-OPTIMIERUNGEN */
+            /* ============================== */
+            
+            /* Overview Tab: Stats kompakter */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+            }
+            
+            .stat-card {
+                padding: 15px !important;
+            }
+            
+            .stat-card .label {
+                font-size: 0.8em !important;
+            }
+            
+            .stat-card .value {
+                font-size: 1.6em !important;
+            }
+            
+            /* Overview Grid */
+            .overview-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+            
+            /* Controls Section kompakter */
+            .controls {
+                padding: 15px !important;
+                gap: 12px !important;
+            }
+            
+            .control-group {
+                margin-bottom: 10px !important;
+            }
+            
+            .control-group label {
+                font-size: 13px !important;
+                margin-bottom: 5px !important;
+            }
+            
+            .control-group select,
+            .control-group input {
+                padding: 8px !important;
+                font-size: 14px !important;
+            }
+            
+            /* Buttons touch-friendly */
+            .btn,
+            .btn-primary,
+            .btn-secondary,
+            .btn-warning {
+                padding: 10px 16px !important;
+                font-size: 13px !important;
+                min-height: 44px !important;
+            }
+            
+            /* Deck Grid kompakter */
+            .deck-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important;
+                gap: 6px !important;
+                padding: 8px !important;
+            }
+            
+            /* Deck Visual kompakter */
+            .deck-visual {
+                padding: 12px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .deck-visual h3 {
+                font-size: 1.2em !important;
+                margin-bottom: 12px !important;
+            }
+            
+            /* Tabellen mobile-optimiert */
+            table {
+                font-size: 11px !important;
+            }
+            
+            table th,
+            table td {
+                padding: 6px 4px !important;
+            }
+            
+            /* Matchups Grid untereinander */
+            .matchups-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+            
+            /* Header kompakter */
+            .header {
+                padding: 15px !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .header h1 {
+                font-size: 1.8em !important;
+            }
+            
+            .header p {
+                font-size: 0.95em !important;
+            }
+            
+            /* Tab Navigation kompakter */
+            .tab-navigation {
+                padding: 10px !important;
+                gap: 6px !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            
+            .tab-btn {
+                padding: 10px 14px !important;
+                font-size: 13px !important;
+                white-space: nowrap !important;
+                min-height: 44px !important;
+            }
+            
+            /* Tab Content */
+            .tab-content {
+                padding: 12px !important;
+            }
+            
+            /* Search Inputs */
+            input[type="text"],
+            input[type="search"] {
+                font-size: 14px !important;
+                padding: 10px !important;
+            }
+            
+            /* Pagination */
+            .pagination {
+                gap: 5px !important;
+            }
+            
+            .pagination button {
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+                min-height: 38px !important;
+            }
+        }
+        
+        /* Extra Mobile-Optimierung für sehr kleine Screens */
+        @media (max-width: 430px) {
+            /* Nur 3 Spalten auf sehr kleinen Screens für mehr Platz */
+            .card-database-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 6px !important;
+            }
+            
+            .card-database-name {
+                font-size: 8px !important;
+            }
+            
+            .card-database-meta,
+            .card-database-set,
+            .card-database-type,
+            .card-database-rarity {
+                font-size: 6px !important;
+            }
+            
+            .card-database-actions button {
+                font-size: 7px !important;
+                padding: 2px 4px !important;
+            }
+            
+            /* Header noch kompakter */
+            .header h1 {
+                font-size: 1.5em !important;
+            }
+            
+            /* Tab Buttons noch kleiner */
+            .tab-btn {
+                padding: 8px 10px !important;
+                font-size: 12px !important;
+            }
+            
+            /* Stats Grid: Einzelne Spalte auf sehr kleinen Screens */
+            .stats-grid {
+                grid-template-columns: 1fr !important;
             }
         }
 
@@ -2906,8 +3310,11 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
                         <!-- Meta/Format Filter -->
                         <div class="cards-filter-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 15px; color: #667eea;">📊 Meta / Format</label>
-                            <div class="cards-filter-options" id="metaFormatOptions" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
+                            <div class="cards-filter-header collapsed" onclick="toggleCardFilter('metaFormatOptions')">
+                                <span>📊 Meta / Format</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="cards-filter-options collapsed" id="metaFormatOptions">
                                 <label style="display: block; padding: 6px; cursor: pointer; border-radius: 4px;">
                                     <input type="checkbox" value="total" checked> <strong>Total (Alle Karten)</strong>
                                 </label>
@@ -2923,16 +3330,22 @@
                         
                         <!-- Set Filter -->
                         <div class="cards-filter-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 15px; color: #667eea;">📦 Set</label>
-                            <div class="cards-filter-options" id="setFilterOptions" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
+                            <div class="cards-filter-header collapsed" onclick="toggleCardFilter('setFilterOptions')">
+                                <span>📦 Set</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="cards-filter-options collapsed" id="setFilterOptions">
                                 <!-- Sets will be added dynamically -->
                             </div>
                         </div>
                         
                         <!-- Rarity Filter -->
                         <div class="cards-filter-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 15px; color: #667eea;">💎 Rarity</label>
-                            <div class="cards-filter-options" id="rarityFilterOptions" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
+                            <div class="cards-filter-header collapsed" onclick="toggleCardFilter('rarityFilterOptions')">
+                                <span>💎 Rarity</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="cards-filter-options collapsed" id="rarityFilterOptions" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="Common"> Common</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="Uncommon"> Uncommon</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="Rare"> Rare</label>
@@ -2955,8 +3368,11 @@
                         
                         <!-- Category Filter -->
                         <div class="cards-filter-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 700; font-size: 15px; color: #667eea;">🎴 Kategorie</label>
-                            <div class="cards-filter-options" id="categoryFilterOptions" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
+                            <div class="cards-filter-header collapsed" onclick="toggleCardFilter('categoryFilterOptions')">
+                                <span>🎴 Kategorie</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="cards-filter-options collapsed" id="categoryFilterOptions">
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="pokemon_all"> <strong>Pokémon (Alle)</strong></label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="pokemon_grass"> 🌿 Grass Pokémon</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="pokemon_fire"> 🔥 Fire Pokémon</label>
@@ -7762,6 +8178,7 @@
         
         let pastMetaAllData = [];
         let pastMetaDecks = [];
+        let pastMetaTournaments = [];
         let pastMetaCurrentDeck = null;
         let pastMetaCurrentCards = [];
         let pastMetaFilteredCards = [];
@@ -7771,29 +8188,45 @@
         async function loadPastMeta() {
             console.log('Loading Past Meta Deck Analysis...');
             
-            const data = await loadCSV('tournament_cards_data_cards.csv');
+            // Load tournament overview and cards data
+            const [tournamentOverview, cardsData] = await Promise.all([
+                loadCSV('tournament_cards_data_overview.csv'),
+                loadCSV('tournament_cards_data_cards.csv')
+            ]);
             
-            if (!data || data.length === 0) {
+            if (!cardsData || cardsData.length === 0) {
                 const errorMsg = 'Keine Past Tournament Daten gefunden';
                 alert(errorMsg);
                 console.error(errorMsg);
                 return;
             }
             
-            pastMetaAllData = data;
+            pastMetaAllData = cardsData;
             
-            // CSV structure: meta, tournament_date, archetype (=tournament name!), card_name, ...
-            // Group cards by tournament (archetype field) 
+            // Store tournament overview data
+            pastMetaTournaments = tournamentOverview || [];
+            
+            // CSV structure: meta (format), tournament_date, archetype (deck name!), card_name, ...
+            // Group cards by tournament_date + archetype (deck archetype)
             const deckMap = new Map();
-            data.forEach(card => {
-                const tournamentName = card.archetype || 'Unknown Tournament';
-                const deckKey = `${card.meta}|||${tournamentName}`;
+            cardsData.forEach(card => {
+                const deckArchetype = card.archetype || 'Unknown Deck';
+                const tournamentDate = card.tournament_date || 'Unknown Date';
+                const deckKey = `${card.meta}|||${tournamentDate}|||${deckArchetype}`;
+                
                 if (!deckMap.has(deckKey)) {
+                    // Find matching tournament from overview
+                    const tournament = pastMetaTournaments.find(t => 
+                        t.tournament_date === tournamentDate && t.format === card.meta
+                    );
+                    
                     deckMap.set(deckKey, {
                         key: deckKey,
-                        tournament_id: card.meta, // Use meta as ID
-                        tournament_name: tournamentName,
-                        deck_name: tournamentName, // Tournament name is the "deck"
+                        tournament_id: tournament ? tournament.tournament_id : tournamentDate,
+                        tournament_name: tournament ? tournament.tournament_name : tournamentDate,
+                        tournament_date: tournamentDate,
+                        deck_name: deckArchetype,
+                        archetype: deckArchetype,
                         format: card.meta || 'Unknown',
                         decklist_count: parseInt(card.total_decks_in_archetype || 1),
                         cards: []
@@ -7810,7 +8243,7 @@
             pastMetaDecks = Array.from(deckMap.values());
             
             // Populate Format Filter
-            const formats = [...new Set(data.map(c => c.meta).filter(f => f))].sort().reverse();
+            const formats = [...new Set(cardsData.map(c => c.meta).filter(f => f))].sort().reverse();
             const formatSelect = document.getElementById('pastMetaFormatFilter');
             formatSelect.innerHTML = '<option value="all">-- Alle Formate --</option>';
             formats.forEach(format => {
@@ -7837,7 +8270,8 @@
             // Initialize rarity mode button styling
             setPastMetaRarityMode('min');
             
-            console.log(`✅ Loaded ${pastMetaDecks.length} decks from ${tournaments.length} tournaments`);
+            const tournamentCount = [...new Set(pastMetaDecks.map(d => d.tournament_id))].length;
+            console.log(`✅ Loaded ${pastMetaDecks.length} decks from ${tournamentCount} tournaments`);
             window.pastMetaLoaded = true;
         }
         
@@ -7845,25 +8279,32 @@
             const formatFilter = document.getElementById('pastMetaFormatFilter').value;
             const tournamentSelect = document.getElementById('pastMetaTournamentFilter');
             
-            // Filter decks by selected format
+            // Filter decks by selected format to get relevant tournaments
             let filteredDecks = pastMetaDecks;
             if (formatFilter !== 'all') {
                 filteredDecks = pastMetaDecks.filter(deck => deck.format === formatFilter);
             }
             
-            // Get unique tournaments from filtered decks
-            const tournaments = [...new Set(filteredDecks.map(d => `${d.tournament_id}|||${d.tournament_name}`))];
+            // Get unique tournament IDs from filtered decks
+            const tournamentIds = [...new Set(filteredDecks.map(d => d.tournament_id))];
+            
+            // Get tournament details from pastMetaTournaments
+            const tournaments = tournamentIds
+                .map(id => pastMetaTournaments.find(t => t.tournament_id === id))
+                .filter(t => t) // Remove undefined entries
+                .sort((a, b) => {
+                    // Sort by date (newest first)
+                    const dateA = new Date(a.tournament_date || '1970-01-01');
+                    const dateB = new Date(b.tournament_date || '1970-01-01');
+                    return dateB - dateA;
+                });
             
             // Rebuild tournament filter dropdown
             tournamentSelect.innerHTML = '<option value="all">-- Alle Turniere --</option>';
-            tournaments.forEach(t => {
-                const [id, name] = t.split('|||');
-                if (name) {
-                    // Remove "(XX decks)" suffix and " – Limitless" / " - Limitless"
-                    let cleanName = name.replace(/\s*\(\d+\s+decks\)\s*$/i, '');
-                    cleanName = cleanName.replace(/\s*[–-]\s*Limitless\s*$/i, '');
-                    tournamentSelect.innerHTML += `<option value="${id}">${cleanName}</option>`;
-                }
+            tournaments.forEach(tournament => {
+                // Clean tournament name: remove " – Limitless" / " - Limitless"
+                let cleanName = tournament.tournament_name.replace(/\s*[–-]\s*Limitless\s*$/i, '');
+                tournamentSelect.innerHTML += `<option value="${tournament.tournament_id}">${cleanName}</option>`;
             });
             
             console.log(`[Past Meta] Tournament filter updated: ${tournaments.length} tournaments for format ${formatFilter}`);
@@ -7884,28 +8325,45 @@
                 return matchesFormat && matchesTournament && matchesSearch;
             });
             
-            // Sort by deck name
-            filteredDecks.sort((a, b) => (a.deck_name || '').localeCompare(b.deck_name || ''));
+            // Group by archetype (deck_name) to merge across tournaments
+            const archetypeMap = new Map();
+            filteredDecks.forEach(deck => {
+                const archetype = deck.deck_name || 'Unknown';
+                if (!archetypeMap.has(archetype)) {
+                    archetypeMap.set(archetype, {
+                        archetype: archetype,
+                        tournaments: [],
+                        totalDecklists: 0
+                    });
+                }
+                const entry = archetypeMap.get(archetype);
+                entry.tournaments.push(deck);
+                entry.totalDecklists += (deck.decklist_count || 0);
+            });
+            
+            // Convert to array and sort by archetype name
+            const archetypes = Array.from(archetypeMap.values());
+            archetypes.sort((a, b) => a.archetype.localeCompare(b.archetype));
             
             // Populate deck select dropdown
             const deckSelect = document.getElementById('pastMetaDeckSelect');
             deckSelect.innerHTML = '<option value="">-- Bitte Deck auswählen --</option>';
             
-            filteredDecks.forEach(deck => {
-                // Clean tournament name: remove "(XX decks)" and " – Limitless" / " - Limitless"
-                let cleanTournamentName = (deck.tournament_name || '').replace(/\s*\(\d+\s+decks\)\s*$/i, '');
-                cleanTournamentName = cleanTournamentName.replace(/\s*[–-]\s*Limitless\s*$/i, '');
-                const displayName = `${deck.deck_name} (${cleanTournamentName})`;
-                deckSelect.innerHTML += `<option value="${deck.key}">${displayName}</option>`;
+            archetypes.forEach(entry => {
+                const tournamentCount = entry.tournaments.length;
+                const displayName = tournamentCount > 1 
+                    ? `${entry.archetype} (${tournamentCount} Turniere)`
+                    : entry.archetype;
+                deckSelect.innerHTML += `<option value="${entry.archetype}">${displayName}</option>`;
             });
             
-            console.log(`Filtered to ${filteredDecks.length} decks`);
+            console.log(`Filtered to ${archetypes.length} unique archetypes from ${filteredDecks.length} tournament entries`);
         }
         
         function onPastMetaDeckSelect() {
-            const deckKey = document.getElementById('pastMetaDeckSelect').value;
+            const selectedArchetype = document.getElementById('pastMetaDeckSelect').value;
             
-            if (!deckKey) {
+            if (!selectedArchetype) {
                 // Hide stats and cards
                 document.getElementById('pastMetaStatsSection').style.display = 'none';
                 document.getElementById('pastMetaDeckTableView').style.display = 'none';
@@ -7915,34 +8373,91 @@
                 return;
             }
             
-            // Find selected deck
-            const deck = pastMetaDecks.find(d => d.key === deckKey);
-            if (!deck) {
-                console.error('Deck not found:', deckKey);
+            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
+            const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
+            
+            // Find all decks with matching archetype (respecting current filters)
+            const matchingDecks = pastMetaDecks.filter(deck => {
+                const matchesArchetype = deck.deck_name === selectedArchetype;
+                const matchesFormat = formatFilter === 'all' || deck.format === formatFilter;
+                const matchesTournament = tournamentFilter === 'all' || deck.tournament_id === tournamentFilter;
+                return matchesArchetype && matchesFormat && matchesTournament;
+            });
+            
+            if (matchingDecks.length === 0) {
+                console.error('No matching decks found for archetype:', selectedArchetype);
                 return;
             }
             
-            pastMetaCurrentDeck = deck;
-            pastMetaCurrentCards = deck.cards;
+            // Aggregate cards across all matching decks
+            const cardMap = new Map();
+            let totalDecklists = 0;
+            const tournamentNames = [];
+            
+            matchingDecks.forEach(deck => {
+                totalDecklists += (deck.decklist_count || 0);
+                
+                // Track tournament names for stats display
+                const cleanTournamentName = (deck.tournament_name || '').replace(/\s*[–-]\s*Limitless\s*$/i, '');
+                if (!tournamentNames.includes(cleanTournamentName)) {
+                    tournamentNames.push(cleanTournamentName);
+                }
+                
+                // Aggregate cards
+                deck.cards.forEach(card => {
+                    const cardKey = `${card.card_name}|${card.card_identifier}`;
+                    if (!cardMap.has(cardKey)) {
+                        cardMap.set(cardKey, {
+                            ...card,
+                            card_count: 0,
+                            deck_count: 0,
+                            total_decks_in_archetype: 0
+                        });
+                    }
+                    const aggregatedCard = cardMap.get(cardKey);
+                    aggregatedCard.card_count += parseFloat(card.card_count || card.total_count || 0);
+                    aggregatedCard.deck_count += parseInt(card.deck_count || 0);
+                    aggregatedCard.total_decks_in_archetype = totalDecklists;
+                });
+            });
+            
+            const aggregatedCards = Array.from(cardMap.values());
+            
+            // Create a virtual deck object for the aggregated data
+            pastMetaCurrentDeck = {
+                deck_name: selectedArchetype,
+                archetype: selectedArchetype,
+                format: formatFilter === 'all' ? 'Multi-Format' : formatFilter,
+                tournament_name: tournamentNames.join(', '),
+                tournament_count: matchingDecks.length,
+                decklist_count: totalDecklists,
+                cards: aggregatedCards
+            };
+            
+            pastMetaCurrentCards = aggregatedCards;
             
             // Update stats
             document.getElementById('pastMetaStatsSection').style.display = 'block';
-            const totalCards = deck.cards.reduce((sum, c) => sum + (parseFloat(c.card_count) || 0), 0);
-            const decklistCount = deck.decklist_count || 1;
-            // Clean tournament name: remove "(XX decks)" and " – Limitless" / " - Limitless"
-            let cleanTournamentName = (deck.tournament_name || '').replace(/\s*\(\d+\s+decks\)\s*$/i, '');
-            cleanTournamentName = cleanTournamentName.replace(/\s*[–-]\s*Limitless\s*$/i, '');
-            document.getElementById('pastMetaStatCards').textContent = `${deck.cards.length} / ${Math.round(totalCards)}`;
-            document.getElementById('pastMetaStatTournament').textContent = `${cleanTournamentName} (${decklistCount} decklists)`;
-            document.getElementById('pastMetaStatFormat').textContent = deck.format;
+            const totalCards = aggregatedCards.reduce((sum, c) => sum + (parseFloat(c.card_count) || 0), 0);
+            document.getElementById('pastMetaStatCards').textContent = `${aggregatedCards.length} / ${Math.round(totalCards)}`;
+            
+            // Show tournament info based on count
+            if (matchingDecks.length === 1) {
+                const cleanName = tournamentNames[0];
+                document.getElementById('pastMetaStatTournament').textContent = `${cleanName} (${totalDecklists} decklists)`;
+            } else {
+                document.getElementById('pastMetaStatTournament').textContent = `${matchingDecks.length} Turniere (${totalDecklists} total decklists)`;
+            }
+            
+            document.getElementById('pastMetaStatFormat').textContent = pastMetaCurrentDeck.format;
             
             // Save to window for deck builder
-            window.pastMetaCurrentArchetype = deck.deck_name;
+            window.pastMetaCurrentArchetype = selectedArchetype;
             
             // Apply filters and render
             filterPastMetaCards();
             
-            console.log(`Selected deck: ${deck.deck_name} (${deck.cards.length} unique cards)`);
+            console.log(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${matchingDecks.length} tournaments, ${totalDecklists} total decklists)`);
         }
         
         function filterPastMetaCards() {
@@ -8379,6 +8894,26 @@
         let allCardsData = [];
         let filteredCardsData = [];
         
+        // Toggle card filter visibility
+        function toggleCardFilter(filterId) {
+            const filterOptions = document.getElementById(filterId);
+            const header = filterOptions.previousElementSibling;
+            
+            if (filterOptions && header) {
+                const isCollapsed = filterOptions.classList.contains('collapsed');
+                
+                if (isCollapsed) {
+                    // Expand
+                    filterOptions.classList.remove('collapsed');
+                    header.classList.remove('collapsed');
+                } else {
+                    // Collapse
+                    filterOptions.classList.add('collapsed');
+                    header.classList.add('collapsed');
+                }
+            }
+        }
+        
         async function loadCards() {
             const content = document.getElementById('cardsContent');
             content.innerHTML = '<div class="loading">Lädt Kartendatenbank...</div>';
@@ -8487,28 +9022,54 @@
         
         async function loadFormatsForCards() {
             try {
-                // Load current meta card data to extract formats
-                const response = await fetch(BASE_PATH + 'current_meta_card_data.csv');
-                const csvText = await response.text();
+                const uniqueFormats = new Set();
                 
-                // Parse CSV manually (semicolon separated)
-                const lines = csvText.split('\n').filter(line => line.trim());
-                const headers = lines[0].split(';');
-                const metaIndex = headers.indexOf('meta');
-                
-                if (metaIndex === -1) {
-                    console.warn('[Cards Tab] No meta column found in current_meta_card_data.csv');
-                    window.cardFormatsData = { formats: [] };
-                    return;
+                // 1. Load formats from current meta card data
+                try {
+                    const response = await fetch(BASE_PATH + 'current_meta_card_data.csv');
+                    const csvText = await response.text();
+                    
+                    // Parse CSV manually (semicolon separated)
+                    const lines = csvText.split('\n').filter(line => line.trim());
+                    const headers = lines[0].split(';');
+                    const metaIndex = headers.indexOf('meta');
+                    
+                    if (metaIndex !== -1) {
+                        // Extract unique meta/format values
+                        for (let i = 1; i < lines.length; i++) {
+                            const cells = lines[i].split(';');
+                            if (cells[metaIndex] && cells[metaIndex].trim()) {
+                                uniqueFormats.add(cells[metaIndex].trim());
+                            }
+                        }
+                        console.log(`[Cards Tab] Loaded formats from current meta`);
+                    }
+                } catch (err) {
+                    console.warn('[Cards Tab] Could not load current_meta_card_data.csv:', err);
                 }
                 
-                // Extract unique meta/format values
-                const uniqueFormats = new Set();
-                for (let i = 1; i < lines.length; i++) {
-                    const cells = lines[i].split(';');
-                    if (cells[metaIndex] && cells[metaIndex].trim()) {
-                        uniqueFormats.add(cells[metaIndex].trim());
+                // 2. Load formats from tournament scraper JH overview
+                try {
+                    const response = await fetch(BASE_PATH + 'tournament_cards_data_overview.csv');
+                    const csvText = await response.text();
+                    
+                    // Parse CSV (semicolon separated)
+                    const lines = csvText.split('\n').filter(line => line.trim());
+                    const headers = lines[0].split(';');
+                    const formatIndex = headers.indexOf('format');
+                    
+                    if (formatIndex !== -1) {
+                        // Extract unique format values
+                        for (let i = 1; i < lines.length; i++) {
+                            const cells = lines[i].split(';');
+                            if (cells[formatIndex] && cells[formatIndex].trim()) {
+                                uniqueFormats.add(cells[formatIndex].trim());
+                            }
+                        }
+                        console.log(`[Cards Tab] Loaded formats from tournament overview`);
                     }
+                } catch (err) {
+                    console.warn('[Cards Tab] Could not load tournament_cards_data_overview.csv:', err);
                 }
                 
                 // Map Meta Play! and Meta Live to SVI-PFL (don't show them separately)
@@ -8524,8 +9085,8 @@
                     mappedFormats.add(mapped);
                 });
                 
-                // Create formats array sorted
-                const sortedFormats = Array.from(mappedFormats).sort();
+                // Create formats array sorted (newest to oldest - reverse alphabetical for SVI-XXX format)
+                const sortedFormats = Array.from(mappedFormats).sort((a, b) => b.localeCompare(a));
                 window.cardFormatsData = {
                     formats: sortedFormats.map(format => ({
                         code: format,
@@ -8537,7 +9098,7 @@
                 // Store mapping globally for filtering (reverse mapping too)
                 window.metaFormatMapping = formatMapping;
                 
-                console.log(`[Cards Tab] Loaded ${sortedFormats.length} formats from current meta:`, sortedFormats);
+                console.log(`[Cards Tab] Loaded ${sortedFormats.length} total unique formats:`, sortedFormats);
                 console.log(`[Cards Tab] Format mappings applied:`, formatMapping);
             } catch (error) {
                 console.error('[Cards Tab] Error loading formats:', error);

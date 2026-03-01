@@ -731,13 +731,10 @@ Meta Play!;;Forretress Ex;Hero's Cape;TEF 152;1;1;1;1;100,0;TEF;;152;Ultra Rare;
 Meta Play!;;Forretress Ex;Luxurious Cape;PAR 166;1;1;1;1;100,0;PAR;;166;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_166_R_EN_LG.png;No
 Meta Play!;;Forretress Ex;Technical Machine: Crisis Punch;PAF 90;1;1;1;1;100,0;PAF;;90;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_090_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Cleffa;OBF 80;1;1;1;9;11,11;OBF;;80;Common;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_080_R_EN_LG.png;No
-Meta Play!;;Froslass Munkidori;Frillish;WHT 44;1;1;1;9;11,11;WHT;;44;Common;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_044_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Latias ex;SSP 76;1;1;1;9;11,11;SSP;;76;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_076_R_EN_LG.png;No
-Meta Play!;;Froslass Munkidori;Ethan's Sudowoodo;DRI 93;1;1;1;9;11,11;DRI;;93;Common;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_093_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Fezandipiti ex;SFA 38;1;1;1;9;11,11;SFA;;38;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_038_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Crushing Hammer;SVI 168;3;2;2;9;22,22;SVI;;168;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_168_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Neutralization Zone;SFA 60;1;1;1;9;11,11;SFA;;60;Ultra Rare;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_060_R_EN_LG.png;Yes
-Meta Play!;;Froslass Munkidori;Hilda;WHT 84;1;1;1;9;11,11;WHT;;84;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_084_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Luxurious Cape;PAR 166;1;1;1;9;11,11;PAR;;166;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_166_R_EN_LG.png;No
 Meta Play!;;Gardevoir Ex Sv;Budew;ASC 16;3;1;3;158;1,9;ASC;;16;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_016_R_EN_LG.png;No
 Meta Play!;;Gardevoir Ex Sv;Shaymin;DRI 10;1;1;1;158;0,63;DRI;;10;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png;No
@@ -1582,6 +1579,7 @@ Meta Live;;Rocket'S Mewtwo;Rare Candy;MEG 125;1;1;1;20;5,0;MEG;;125;Common;Item;
 Meta Live;;Rocket'S Mewtwo;Sacred Ash;DRI 168;1;1;1;20;5,0;DRI;;168;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_168_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Gravity Mountain;SSP 177;1;1;1;20;5,0;SSP;;177;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Colress's Tenacity;SFA 57;1;1;1;20;5,0;SFA;;57;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Black Belt's Training;JTG 143;1;1;1;20;5,0;JTG;;143;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_143_R_EN_LG.png;Yes
 Meta Live;;Alakazam Dudunsparce;Shaymin;DRI 10;18;1;18;20;90,0;DRI;;10;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png;No
 Meta Live;;Alakazam Dudunsparce;Budew;PRE 4;2;1;2;20;10,0;PRE;;4;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_004_R_EN_LG.png;No
 Meta Live;;Alakazam Dudunsparce;Psyduck;MEP 7;11;1;11;20;55,0;MEP;;7;Promo;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_007_R_EN_LG.png;No
@@ -1643,40 +1641,41 @@ Meta Live;;Archaludon;Empoleon ex;PFL 70;2;2;1;20;5,0;PFL;;70;Double Rare;M Stag
 Meta Live;;Archaludon;Genesect;SFA 40;1;1;1;20;5,0;SFA;;40;Uncommon;M Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_040_R_EN_LG.png;No
 Meta Live;;Archaludon;Genesect ex;BLK 67;1;1;1;20;5,0;BLK;;67;Double Rare;M Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_067_R_EN_LG.png;No
 Meta Live;;Archaludon;Squawkabilly ex;PAL 169;17;1;17;20;85,0;PAL;;169;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_169_R_EN_LG.png;No
-Meta Live;;Archaludon;Metal Energy;SVE 24;153;12;20;20;100,0;SVE;;24;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_024_R_EN_LG.png;No
+Meta Live;;Archaludon;Metal Energy;SVE 24;152;12;20;20;100,0;SVE;;24;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_024_R_EN_LG.png;No
 Meta Live;;Archaludon;Darkness Energy;SVE 23;34;3;17;20;85,0;SVE;;23;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_023_R_EN_LG.png;No
 Meta Live;;Archaludon;Night Stretcher;ASC 196;74;4;20;20;100,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Archaludon;Ultra Ball;ASC 213;80;4;20;20;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
-Meta Live;;Archaludon;Earthen Vessel;PRE 106;67;4;19;20;95,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
+Meta Live;;Archaludon;Earthen Vessel;PRE 106;68;4;19;20;95,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Archaludon;Nest Ball;PAF 84;76;4;19;20;95,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Archaludon;Pal Pad;SVI 182;18;1;18;20;90,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
-Meta Live;;Archaludon;Pokégear 3.0;BLK 84;51;4;18;20;90,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
+Meta Live;;Archaludon;Pokégear 3.0;BLK 84;52;4;18;20;90,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Archaludon;Counter Catcher;PAR 160;2;1;2;20;10,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Archaludon;Scoop Up Cyclone;PRE 128;2;1;2;20;10,0;PRE;;128;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_128_R_EN_LG.png;Yes
-Meta Live;;Archaludon;Super Rod;PAL 188;2;1;2;20;10,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Archaludon;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
-Meta Live;;Archaludon;Team Rocket's Venture Bomb;DRI 179;3;2;2;20;10,0;DRI;;179;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_179_R_EN_LG.png;No
 Meta Live;;Archaludon;Iron Defender;MEG 118;4;4;1;20;5,0;MEG;;118;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_118_R_EN_LG.png;No
 Meta Live;;Archaludon;Poké Pad;ASC 198;4;4;1;20;5,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
 Meta Live;;Archaludon;Prime Catcher;PRE 119;1;1;1;20;5,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
 Meta Live;;Archaludon;Rare Candy;MEG 125;2;2;1;20;5,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
+Meta Live;;Archaludon;Super Rod;PAL 188;1;1;1;20;5,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
+Meta Live;;Archaludon;Switch;MEG 130;1;1;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Archaludon;Team Rocket's Venture Bomb;DRI 179;2;2;1;20;5,0;DRI;;179;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_179_R_EN_LG.png;No
 Meta Live;;Archaludon;Tool Scrapper;ASC 212;1;1;1;20;5,0;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Archaludon;Unfair Stamp;TWM 165;1;1;1;20;5,0;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
 Meta Live;;Archaludon;Legacy Energy;TWM 167;2;1;2;20;10,0;TWM;;167;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_167_R_EN_LG.png;Yes
-Meta Live;;Archaludon;Risky Ruins;MEG 127;31;3;13;20;65,0;MEG;;127;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_127_R_EN_LG.png;No
-Meta Live;;Archaludon;Team Rocket's Watchtower;ASC 210;5;1;5;20;25,0;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No
+Meta Live;;Archaludon;Risky Ruins;MEG 127;32;3;13;20;65,0;MEG;;127;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_127_R_EN_LG.png;No
 Meta Live;;Archaludon;Full Metal Lab;TEF 148;9;3;4;20;20,0;TEF;;148;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_148_R_EN_LG.png;No
+Meta Live;;Archaludon;Team Rocket's Watchtower;ASC 210;4;1;4;20;20,0;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No
 Meta Live;;Archaludon;Artazon;PAF 76;2;1;2;20;10,0;PAF;;76;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_076_R_EN_LG.png;No
 Meta Live;;Archaludon;Battle Cage;PFL 85;1;1;1;20;5,0;PFL;;85;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_085_R_EN_LG.png;No
 Meta Live;;Archaludon;Town Store;OBF 196;2;2;1;20;5,0;OBF;;196;Common;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_196_R_EN_LG.png;No
-Meta Live;;Archaludon;Boss's Orders;ASC 183;52;4;20;20;100,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
-Meta Live;;Archaludon;Iono;PAF 80;43;3;19;20;95,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
+Meta Live;;Archaludon;Boss's Orders;ASC 183;53;4;20;20;100,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
+Meta Live;;Archaludon;Iono;PAF 80;42;3;19;20;95,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
 Meta Live;;Archaludon;Professor Turo's Scenario;PRE 121;29;3;19;20;95,0;PRE;;121;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_121_R_EN_LG.png;No
-Meta Live;;Archaludon;Professor's Research;BLK 85;64;4;18;20;90,0;BLK;;85;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_085_R_EN_LG.png;No
+Meta Live;;Archaludon;Professor's Research;BLK 85;63;4;18;20;90,0;BLK;;85;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_085_R_EN_LG.png;No
 Meta Live;;Archaludon;Lillie's Determination;ASC 192;41;4;16;20;80,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
-Meta Live;;Archaludon;Black Belt's Training;JTG 143;12;2;8;20;40,0;JTG;;143;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_143_R_EN_LG.png;Yes
-Meta Live;;Archaludon;Carmine;PRE 103;12;4;4;20;20,0;PRE;;103;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_103_R_EN_LG.png;No
+Meta Live;;Archaludon;Black Belt's Training;JTG 143;13;2;9;20;45,0;JTG;;143;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_143_R_EN_LG.png;Yes
+Meta Live;;Archaludon;Carmine;PRE 103;13;4;5;20;25,0;PRE;;103;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_103_R_EN_LG.png;No
 Meta Live;;Archaludon;Larry's Skill;PRE 115;3;2;2;20;10,0;PRE;;115;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_115_R_EN_LG.png;No
+Meta Live;;Archaludon;Arven;OBF 186;1;1;1;20;5,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
 Meta Live;;Archaludon;Explorer's Guidance;PRE 107;4;4;1;20;5,0;PRE;;107;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_107_R_EN_LG.png;No
 Meta Live;;Archaludon;Judge;DRI 167;2;2;1;20;5,0;DRI;;167;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_167_R_EN_LG.png;No
 Meta Live;;Archaludon;Xerosic's Machinations;SFA 64;1;1;1;20;5,0;SFA;;64;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_064_R_EN_LG.png;No
@@ -2571,75 +2570,78 @@ Meta Live;;Flareon Noctowl;Sparkling Crystal;PRE 129;19;1;19;19;100,0;PRE;;129;U
 Meta Live;;Flareon Noctowl;Vitality Band;SVI 197;2;1;2;19;10,53;SVI;;197;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_197_R_EN_LG.png;No
 Meta Live;;Flareon Noctowl;Air Balloon;ASC 181;1;1;1;19;5,26;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
 Meta Live;;Flareon Noctowl;Occa Berry;SCR 140;1;1;1;19;5,26;SCR;;140;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_140_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Budew;PRE 4;46;3;18;19;94,74;PRE;;4;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_004_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Shaymin;DRI 10;13;1;13;19;68,42;DRI;;10;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Maractus;JTG 8;7;2;5;19;26,32;JTG;;8;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_008_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Arboliva ex;DRI 23;3;3;1;19;5,26;DRI;;23;Double Rare;G Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_023_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Dolliv;SVI 22;3;3;1;19;5,26;SVI;;22;Common;G Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_022_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Smoliv;SVI 21;4;4;1;19;5,26;SVI;;21;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_021_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Froslass;TWM 53;63;4;19;19;100,0;TWM;;53;Rare;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_053_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Snorunt;TWM 51;57;3;19;19;100,0;TWM;;51;Common;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_051_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Iron Bundle;PAR 56;9;1;9;19;47,37;PAR;;56;Uncommon;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_056_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Psyduck;MEP 7;8;1;8;19;42,11;MEP;;7;Promo;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_007_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Mega Froslass ex;ASC 47;4;1;4;19;21,05;ASC;;47;Double Rare;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_047_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Golduck;MEP 8;1;1;1;19;5,26;MEP;;8;Promo;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_008_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Munkidori;TWM 95;72;4;19;19;100,0;TWM;;95;Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_095_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Ting-Lu;TWM 110;5;1;5;19;26,32;TWM;;110;Rare;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_110_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Ting-Lu ex;PAL 127;4;1;4;19;21,05;PAL;;127;Double Rare;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_127_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Yveltal;MEG 88;13;2;12;19;63,16;MEG;;88;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_088_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Mega Absol ex;MEG 86;2;2;1;19;5,26;MEG;;86;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_086_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Pecharunt ex;SFA 39;1;1;1;19;5,26;SFA;;39;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_039_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Tatsugiri;TWM 131;1;1;1;19;5,26;TWM;;131;Uncommon;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_131_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Bloodmoon Ursaluna ex;TWM 141;14;1;14;19;73,68;TWM;;141;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_141_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Buneary;PFL 83;3;1;3;19;15,79;PFL;;83;Common;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_083_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Mega Lopunny ex;PFL 84;3;1;3;19;15,79;PFL;;84;Double Rare;C Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_084_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Darkness Energy;SVE 23;78;7;19;19;100,0;SVE;;23;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_023_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Grass Energy;SVE 17;5;5;1;19;5,26;SVE;;17;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_017_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Water Energy;SVE 19;1;1;1;19;5,26;SVE;;19;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_019_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Counter Catcher;PAR 160;53;4;19;19;100,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Night Stretcher;ASC 196;38;3;19;19;100,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Buddy-Buddy Poffin;ASC 184;23;3;18;19;94,74;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Ultra Ball;ASC 213;17;2;16;19;84,21;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Earthen Vessel;PRE 106;15;1;15;19;78,95;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Super Rod;PAL 188;15;1;15;19;78,95;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Nest Ball;PAF 84;19;2;14;19;73,68;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Secret Box;TWM 163;14;1;14;19;73,68;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
-Meta Live;;Froslass Munkidori;Pokégear 3.0;BLK 84;20;4;12;19;63,16;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Poké Pad;ASC 198;15;4;5;19;26,32;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Switch;MEG 130;5;1;5;19;26,32;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
-Meta Live;;Froslass Munkidori;Unfair Stamp;TWM 165;4;1;4;19;21,05;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
-Meta Live;;Froslass Munkidori;Energy Search;SVI 172;3;1;3;19;15,79;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Energy Switch;MEG 115;4;2;3;19;15,79;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Bug Catching Set;PRE 102;4;4;1;19;5,26;PRE;;102;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_102_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Enhanced Hammer;TWM 148;1;1;1;19;5,26;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Precious Trolley;SSP 185;1;1;1;19;5,26;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
-Meta Live;;Froslass Munkidori;Tool Scrapper;ASC 212;1;1;1;19;5,26;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Prism Energy;ASC 216;27;4;13;19;68,42;ASC;;216;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_216_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Luminous Energy;PAL 191;28;4;12;19;63,16;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Mist Energy;TEF 161;2;2;1;19;5,26;TEF;;161;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_161_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Artazon;PAF 76;49;4;17;19;89,47;PAF;;76;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_076_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Town Store;OBF 196;3;1;3;19;15,79;OBF;;196;Common;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_196_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Risky Ruins;MEG 127;2;1;2;19;10,53;MEG;;127;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_127_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Forest of Vitality;ASC 188;4;4;1;19;5,26;ASC;;188;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_188_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Lively Stadium;SSP 180;1;1;1;19;5,26;SSP;;180;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_180_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Team Rocket's Watchtower;ASC 210;1;1;1;19;5,26;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Arven;OBF 186;65;4;19;19;100,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Iono;PAF 80;73;4;19;19;100,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Lillie's Determination;ASC 192;72;4;19;19;100,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Professor's Research;BLK 85;6;1;6;19;31,58;BLK;;85;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_085_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Penny;SVI 183;2;1;2;19;10,53;SVI;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_183_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Boss's Orders;ASC 183;4;4;1;19;5,26;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Colress's Tenacity;SFA 57;1;1;1;19;5,26;SFA;;57;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Dawn;PFL 87;4;4;1;19;5,26;PFL;;87;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_087_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Eri;TEF 146;1;1;1;19;5,26;TEF;;146;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_146_R_EN_LG.png;Yes
-Meta Live;;Froslass Munkidori;Janine's Secret Art;PRE 112;2;2;1;19;5,26;PRE;;112;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_112_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Larry's Skill;PRE 115;1;1;1;19;5,26;PRE;;115;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_115_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Xerosic's Machinations;SFA 64;2;2;1;19;5,26;SFA;;64;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_064_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Air Balloon;ASC 181;32;2;18;19;94,74;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Technical Machine: Devolution;PAR 177;35;2;18;19;94,74;PAR;;177;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_177_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Bravery Charm;PAL 173;35;3;17;19;89,47;PAL;;173;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_173_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Technical Machine: Evolution;PAR 178;11;1;11;19;57,89;PAR;;178;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_178_R_EN_LG.png;No
-Meta Live;;Froslass Munkidori;Counter Gain;ASC 186;5;1;5;19;26,32;ASC;;186;Common;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_186_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Budew;PRE 4;50;3;19;20;95,0;PRE;;4;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_004_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Shaymin;DRI 10;14;1;14;20;70,0;DRI;;10;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Maractus;JTG 8;7;2;5;20;25,0;JTG;;8;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_008_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Arboliva ex;DRI 23;3;3;1;20;5,0;DRI;;23;Double Rare;G Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_023_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Dolliv;SVI 22;3;3;1;20;5,0;SVI;;22;Common;G Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_022_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Smoliv;SVI 21;4;4;1;20;5,0;SVI;;21;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_021_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Froslass;TWM 53;66;4;20;20;100,0;TWM;;53;Rare;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_053_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Snorunt;PAR 37;61;4;20;20;100,0;PAR;;37;Common;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_037_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Iron Bundle;PAR 56;10;1;10;20;50,0;PAR;;56;Uncommon;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_056_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Psyduck;MEP 7;7;1;7;20;35,0;MEP;;7;Promo;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_007_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Mega Froslass ex;ASC 47;6;1;6;20;30,0;ASC;;47;Double Rare;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_047_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Golduck;MEP 8;1;1;1;20;5,0;MEP;;8;Promo;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_008_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Munkidori;TWM 95;76;4;20;20;100,0;TWM;;95;Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_095_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Frillish;WHT 44;1;1;1;20;5,0;WHT;;44;Common;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_044_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Ting-Lu;TWM 110;6;1;6;20;30,0;TWM;;110;Rare;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_110_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Ting-Lu ex;PAL 127;4;1;4;20;20,0;PAL;;127;Double Rare;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_127_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Ethan's Sudowoodo;DRI 93;1;1;1;20;5,0;DRI;;93;Common;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_093_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Yveltal;MEG 88;12;2;11;20;55,0;MEG;;88;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_088_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Mega Absol ex;MEG 86;2;2;1;20;5,0;MEG;;86;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_086_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Pecharunt ex;SFA 39;1;1;1;20;5,0;SFA;;39;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_039_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Tatsugiri;TWM 131;1;1;1;20;5,0;TWM;;131;Uncommon;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_131_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Bloodmoon Ursaluna ex;TWM 141;13;1;13;20;65,0;TWM;;141;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_141_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Buneary;PFL 83;2;1;2;20;10,0;PFL;;83;Common;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_083_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Mega Lopunny ex;PFL 84;2;1;2;20;10,0;PFL;;84;Double Rare;C Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_084_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Darkness Energy;SVE 23;79;7;20;20;100,0;SVE;;23;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_023_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Grass Energy;SVE 17;5;5;1;20;5,0;SVE;;17;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_017_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Water Energy;SVE 19;1;1;1;20;5,0;SVE;;19;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_019_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Counter Catcher;PAR 160;54;4;20;20;100,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Night Stretcher;ASC 196;40;3;20;20;100,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Buddy-Buddy Poffin;ASC 184;25;3;19;20;95,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Ultra Ball;ASC 213;18;2;17;20;85,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Earthen Vessel;PRE 106;15;1;15;20;75,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Secret Box;TWM 163;15;1;15;20;75,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
+Meta Live;;Froslass Munkidori;Super Rod;PAL 188;14;1;14;20;70,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Nest Ball;PAF 84;18;2;13;20;65,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Pokégear 3.0;BLK 84;23;4;13;20;65,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Poké Pad;ASC 198;21;4;7;20;35,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Switch;MEG 130;4;1;4;20;20,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Froslass Munkidori;Unfair Stamp;TWM 165;4;1;4;20;20,0;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
+Meta Live;;Froslass Munkidori;Energy Search;SVI 172;3;1;3;20;15,0;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Energy Switch;MEG 115;3;2;2;20;10,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Bug Catching Set;PRE 102;4;4;1;20;5,0;PRE;;102;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_102_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Enhanced Hammer;TWM 148;1;1;1;20;5,0;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Precious Trolley;SSP 185;1;1;1;20;5,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
+Meta Live;;Froslass Munkidori;Tool Scrapper;ASC 212;1;1;1;20;5,0;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Prism Energy;ASC 216;29;4;14;20;70,0;ASC;;216;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_216_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Luminous Energy;PAL 191;34;4;13;20;65,0;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Mist Energy;TEF 161;2;2;1;20;5,0;TEF;;161;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_161_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Artazon;PAF 76;52;4;18;20;90,0;PAF;;76;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_076_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Town Store;OBF 196;3;1;3;20;15,0;OBF;;196;Common;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_196_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Risky Ruins;MEG 127;2;1;2;20;10,0;MEG;;127;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_127_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Forest of Vitality;ASC 188;4;4;1;20;5,0;ASC;;188;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_188_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Lively Stadium;SSP 180;1;1;1;20;5,0;SSP;;180;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_180_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Team Rocket's Watchtower;ASC 210;1;1;1;20;5,0;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Arven;OBF 186;69;4;20;20;100,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Iono;PAF 80;77;4;20;20;100,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Lillie's Determination;ASC 192;76;4;20;20;100,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Professor's Research;BLK 85;6;1;6;20;30,0;BLK;;85;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_085_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Hilda;WHT 84;2;1;2;20;10,0;WHT;;84;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_084_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Penny;SVI 183;2;1;2;20;10,0;SVI;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_183_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Boss's Orders;ASC 183;4;4;1;20;5,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Colress's Tenacity;SFA 57;1;1;1;20;5,0;SFA;;57;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Dawn;PFL 87;4;4;1;20;5,0;PFL;;87;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_087_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Eri;TEF 146;1;1;1;20;5,0;TEF;;146;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_146_R_EN_LG.png;Yes
+Meta Live;;Froslass Munkidori;Janine's Secret Art;PRE 112;2;2;1;20;5,0;PRE;;112;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_112_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Larry's Skill;PRE 115;1;1;1;20;5,0;PRE;;115;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_115_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Xerosic's Machinations;SFA 64;2;2;1;20;5,0;SFA;;64;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_064_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Air Balloon;ASC 181;33;2;19;20;95,0;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Technical Machine: Devolution;PAR 177;37;2;19;20;95,0;PAR;;177;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_177_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Bravery Charm;PAL 173;38;3;18;20;90,0;PAL;;173;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_173_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Technical Machine: Evolution;PAR 178;10;1;10;20;50,0;PAR;;178;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_178_R_EN_LG.png;No
+Meta Live;;Froslass Munkidori;Counter Gain;ASC 186;5;1;5;20;25,0;ASC;;186;Common;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_186_R_EN_LG.png;No
 Meta Live;;Gardevoir;Budew;PRE 4;3;1;3;18;16,67;PRE;;4;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_004_R_EN_LG.png;No
 Meta Live;;Gardevoir;Shaymin;DRI 10;1;1;1;18;5,56;DRI;;10;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png;No
 Meta Live;;Gardevoir;Iron Bundle;PAR 56;1;1;1;18;5,56;PAR;;56;Uncommon;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_056_R_EN_LG.png;No
@@ -2887,15 +2889,18 @@ Meta Live;;Greninja;Toedscruel;PAR 17;3;1;3;19;15,79;PAR;;17;Uncommon;G Stage 1;
 Meta Live;;Greninja;Froakie;OBF 56;57;4;19;19;100,0;OBF;;56;Common;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_056_R_EN_LG.png;No
 Meta Live;;Greninja;Frogadier;TWM 57;34;2;19;19;100,0;TWM;;57;Common;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_057_R_EN_LG.png;No
 Meta Live;;Greninja;Wellspring Mask Ogerpon ex;TWM 64;3;2;2;19;10,53;TWM;;64;Double Rare;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_064_R_EN_LG.png;No
-Meta Live;;Greninja;Dusclops;PRE 36;17;1;17;19;89,47;PRE;;36;Common;P Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_036_R_EN_LG.png;No
-Meta Live;;Greninja;Dusknoir;PRE 37;17;1;17;19;89,47;PRE;;37;Rare;P Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_037_R_EN_LG.png;No
-Meta Live;;Greninja;Duskull;PRE 35;33;2;17;19;89,47;PRE;;35;Common;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_035_R_EN_LG.png;No
+Meta Live;;Greninja;Dusclops;PRE 36;16;1;16;19;84,21;PRE;;36;Common;P Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_036_R_EN_LG.png;No
+Meta Live;;Greninja;Dusknoir;PRE 37;16;1;16;19;84,21;PRE;;37;Rare;P Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_037_R_EN_LG.png;No
+Meta Live;;Greninja;Duskull;PRE 35;31;2;16;19;84,21;PRE;;35;Common;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_035_R_EN_LG.png;No
 Meta Live;;Greninja;Klefki;SVI 96;7;1;7;19;36,84;SVI;;96;Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_096_R_EN_LG.png;No
 Meta Live;;Greninja;Latias ex;SSP 76;7;1;7;19;36,84;SSP;;76;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_076_R_EN_LG.png;No
 Meta Live;;Greninja;Greninja ex;TWM 106;41;3;19;19;100,0;TWM;;106;Double Rare;F Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_106_R_EN_LG.png;No
 Meta Live;;Greninja;Fezandipiti ex;SFA 38;18;1;18;19;94,74;SFA;;38;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_038_R_EN_LG.png;No
 Meta Live;;Greninja;Zoroark;WHT 62;3;2;2;19;10,53;WHT;;62;Rare;D Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_062_R_EN_LG.png;No
 Meta Live;;Greninja;Zorua;WHT 61;4;2;2;19;10,53;WHT;;61;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_061_R_EN_LG.png;No
+Meta Live;;Greninja;Dragonair;ASC 151;2;2;1;19;5,26;ASC;;151;Uncommon;N Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_151_R_EN_LG.png;No
+Meta Live;;Greninja;Dratini;OBF 157;2;2;1;19;5,26;OBF;;157;Common;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_157_R_EN_LG.png;No
+Meta Live;;Greninja;Mega Dragonite ex;ASC 152;2;2;1;19;5,26;ASC;;152;Double Rare;N Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_152_R_EN_LG.png;No
 Meta Live;;Greninja;Pidgeot ex;OBF 164;36;2;18;19;94,74;OBF;;164;Double Rare;C Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_164_R_EN_LG.png;No
 Meta Live;;Greninja;Pidgey;OBF 162;36;2;18;19;94,74;OBF;;162;Common;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_162_R_EN_LG.png;No
 Meta Live;;Greninja;Pidgeotto;MEW 17;20;2;17;19;89,47;MEW;;17;Common;C Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEW/MEW_017_R_EN_LG.png;No
@@ -2905,17 +2910,18 @@ Meta Live;;Greninja;Hoothoot;SCR 114;5;3;2;19;10,53;SCR;;114;Common;C Basic;http
 Meta Live;;Greninja;Noctowl;SCR 115;5;3;2;19;10,53;SCR;;115;Rare;C Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_115_R_EN_LG.png;No
 Meta Live;;Greninja;Buneary;PFL 83;1;1;1;19;5,26;PFL;;83;Common;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_083_R_EN_LG.png;No
 Meta Live;;Greninja;Mega Lopunny ex;PFL 84;1;1;1;19;5,26;PFL;;84;Double Rare;C Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_084_R_EN_LG.png;No
-Meta Live;;Greninja;Water Energy;SVE 19;76;5;19;19;100,0;SVE;;19;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_019_R_EN_LG.png;No
+Meta Live;;Greninja;Water Energy;SVE 19;75;5;19;19;100,0;SVE;;19;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_019_R_EN_LG.png;No
 Meta Live;;Greninja;Darkness Energy;SVE 23;1;1;1;19;5,26;SVE;;23;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_023_R_EN_LG.png;No
+Meta Live;;Greninja;Lightning Energy;SVE 20;4;4;1;19;5,26;SVE;;20;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_020_R_EN_LG.png;No
 Meta Live;;Greninja;Psychic Energy;SVE 21;1;1;1;19;5,26;SVE;;21;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_021_R_EN_LG.png;No
 Meta Live;;Greninja;Buddy-Buddy Poffin;ASC 184;76;4;19;19;100,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
 Meta Live;;Greninja;Night Stretcher;ASC 196;22;2;19;19;100,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Greninja;Rare Candy;MEG 125;59;4;19;19;100,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
-Meta Live;;Greninja;Super Rod;PAL 188;20;2;19;19;100,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Greninja;Ultra Ball;ASC 213;60;4;19;19;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Greninja;Counter Catcher;PAR 160;18;1;18;19;94,74;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
-Meta Live;;Greninja;Nest Ball;PAF 84;16;4;11;19;57,89;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
+Meta Live;;Greninja;Super Rod;PAL 188;19;2;18;19;94,74;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Greninja;Switch;MEG 130;12;2;11;19;57,89;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Greninja;Nest Ball;PAF 84;15;4;10;19;52,63;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Greninja;Energy Search;SVI 172;6;1;6;19;31,58;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
 Meta Live;;Greninja;Earthen Vessel;PRE 106;1;1;1;19;5,26;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Greninja;Premium Power Pro;ASC 199;1;1;1;19;5,26;ASC;;199;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_199_R_EN_LG.png;No
@@ -2924,7 +2930,7 @@ Meta Live;;Greninja;Tool Scrapper;ASC 212;1;1;1;19;5,26;ASC;;212;Common;Item;htt
 Meta Live;;Greninja;Ignition Energy;WHT 86;60;4;19;19;100,0;WHT;;86;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_086_R_EN_LG.png;Yes
 Meta Live;;Greninja;Luminous Energy;PAL 191;1;1;1;19;5,26;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
 Meta Live;;Greninja;Grand Tree;SCR 136;18;1;18;19;94,74;SCR;;136;Ultra Rare;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_136_R_EN_LG.png;Yes
-Meta Live;;Greninja;Jamming Tower;TWM 153;10;1;10;19;52,63;TWM;;153;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_153_R_EN_LG.png;Yes
+Meta Live;;Greninja;Jamming Tower;TWM 153;9;1;9;19;47,37;TWM;;153;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_153_R_EN_LG.png;Yes
 Meta Live;;Greninja;Beach Court;SVI 167;6;1;6;19;31,58;SVI;;167;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_167_R_EN_LG.png;No
 Meta Live;;Greninja;Artazon;PAF 76;4;1;4;19;21,05;PAF;;76;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_076_R_EN_LG.png;No
 Meta Live;;Greninja;Town Store;OBF 196;4;1;4;19;21,05;OBF;;196;Common;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_196_R_EN_LG.png;No
@@ -2933,22 +2939,23 @@ Meta Live;;Greninja;Battle Cage;PFL 85;1;1;1;19;5,26;PFL;;85;Uncommon;Stadium;ht
 Meta Live;;Greninja;Mesagoza;SVI 178;1;1;1;19;5,26;SVI;;178;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_178_R_EN_LG.png;No
 Meta Live;;Greninja;Boss's Orders;ASC 183;24;2;19;19;100,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
 Meta Live;;Greninja;Hilda;WHT 84;41;4;19;19;100,0;WHT;;84;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_084_R_EN_LG.png;No
-Meta Live;;Greninja;Colress's Tenacity;SFA 57;45;4;18;19;94,74;SFA;;57;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png;No
+Meta Live;;Greninja;Colress's Tenacity;SFA 57;44;4;18;19;94,74;SFA;;57;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png;No
 Meta Live;;Greninja;Iono;PAF 80;37;3;18;19;94,74;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
-Meta Live;;Greninja;Lillie's Determination;ASC 192;57;4;18;19;94,74;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
+Meta Live;;Greninja;Lillie's Determination;ASC 192;56;4;18;19;94,74;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
 Meta Live;;Greninja;Arven;OBF 186;12;3;6;19;31,58;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
-Meta Live;;Greninja;Briar;PRE 100;6;1;6;19;31,58;PRE;;100;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_100_R_EN_LG.png;No
+Meta Live;;Greninja;Briar;PRE 100;5;1;5;19;26,32;PRE;;100;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_100_R_EN_LG.png;No
+Meta Live;;Greninja;Crispin;PRE 105;3;2;2;19;10,53;PRE;;105;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_105_R_EN_LG.png;No
 Meta Live;;Greninja;Dawn;PFL 87;8;4;2;19;10,53;PFL;;87;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_087_R_EN_LG.png;No
 Meta Live;;Greninja;Team Rocket's Petrel;ASC 207;2;1;2;19;10,53;ASC;;207;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png;No
 Meta Live;;Greninja;Xerosic's Machinations;SFA 64;2;1;2;19;10,53;SFA;;64;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_064_R_EN_LG.png;No
 Meta Live;;Greninja;Black Belt's Training;JTG 143;1;1;1;19;5,26;JTG;;143;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_143_R_EN_LG.png;Yes
-Meta Live;;Greninja;Crispin;PRE 105;1;1;1;19;5,26;PRE;;105;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_105_R_EN_LG.png;No
 Meta Live;;Greninja;Professor Turo's Scenario;PRE 121;1;1;1;19;5,26;PRE;;121;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_121_R_EN_LG.png;No
 Meta Live;;Greninja;Air Balloon;ASC 181;12;2;11;19;57,89;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
-Meta Live;;Greninja;Technical Machine: Crisis Punch;PAF 90;11;1;11;19;57,89;PAF;;90;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_090_R_EN_LG.png;No
-Meta Live;;Greninja;Technical Machine: Devolution;PAR 177;10;1;10;19;52,63;PAR;;177;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_177_R_EN_LG.png;No
+Meta Live;;Greninja;Technical Machine: Crisis Punch;PAF 90;10;1;10;19;52,63;PAF;;90;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_090_R_EN_LG.png;No
+Meta Live;;Greninja;Technical Machine: Devolution;PAR 177;9;1;9;19;47,37;PAR;;177;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_177_R_EN_LG.png;No
 Meta Live;;Greninja;Exp. Share;SVI 174;4;1;4;19;21,05;SVI;;174;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_174_R_EN_LG.png;No
 Meta Live;;Greninja;Technical Machine: Evolution;PAR 178;2;1;2;19;10,53;PAR;;178;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_178_R_EN_LG.png;No
+Meta Live;;Greninja;Powerglass;SFA 63;1;1;1;19;5,26;SFA;;63;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_063_R_EN_LG.png;No
 Meta Live;;Greninja;Sparkling Crystal;PRE 129;1;1;1;19;5,26;PRE;;129;Ultra Rare;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_129_R_EN_LG.png;Yes
 Meta Live;;Grimmsnarl Froslass;Budew;PRE 4;8;1;8;19;42,11;PRE;;4;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_004_R_EN_LG.png;No
 Meta Live;;Grimmsnarl Froslass;Shaymin;DRI 10;5;1;5;19;26,32;DRI;;10;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png;No
@@ -3060,8 +3067,8 @@ Meta Live;;Ho-Oh Armarouge;Future Booster Energy Capsule;TEF 149;1;1;1;19;5,26;T
 Meta Live;;Hop'S Zacian;Moltres;PFL 14;1;1;1;20;5,0;PFL;;14;Rare;R Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_014_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Psyduck;MEP 7;11;1;11;20;55,0;MEP;;7;Promo;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_007_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Iron Bundle;PAR 56;8;1;8;20;40,0;PAR;;56;Uncommon;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_056_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Froslass;TWM 53;4;2;2;20;10,0;TWM;;53;Rare;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_053_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Snorunt;PAR 37;4;2;2;20;10,0;PAR;;37;Common;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_037_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Froslass;TWM 53;6;2;3;20;15,0;TWM;;53;Rare;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_053_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Snorunt;PAR 37;6;2;3;20;15,0;PAR;;37;Common;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_037_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Munkidori;TWM 95;43;4;15;20;75,0;TWM;;95;Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_095_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Latias ex;SSP 76;14;2;13;20;65,0;SSP;;76;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_076_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Mew ex;MEW 151;2;1;2;20;10,0;MEW;;151;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEW/MEW_151_R_EN_LG.png;No
@@ -3069,7 +3076,7 @@ Meta Live;;Hop'S Zacian;Hop's Phantump;ASC 95;2;2;1;20;5,0;ASC;;95;Common;P Basi
 Meta Live;;Hop'S Zacian;Hop's Trevenant;ASC 96;2;2;1;20;5,0;ASC;;96;Rare;P Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_096_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Lillie's Clefairy ex;JTG 56;1;1;1;20;5,0;JTG;;56;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_056_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Hawlucha;SVI 118;1;1;1;20;5,0;SVI;;118;Rare;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_118_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Fezandipiti ex;SFA 38;17;1;17;20;85,0;SFA;;38;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_038_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Fezandipiti ex;SFA 38;16;1;16;20;80,0;SFA;;38;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_038_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Hop's Zacian ex;JTG 111;45;3;20;20;100,0;JTG;;111;Double Rare;M Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_111_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Beldum;TEF 113;9;3;3;20;15,0;TEF;;113;Common;M Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_113_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Genesect ex;BLK 67;4;2;3;20;15,0;BLK;;67;Double Rare;M Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_067_R_EN_LG.png;No
@@ -3079,11 +3086,11 @@ Meta Live;;Hop'S Zacian;Duraludon;SCR 106;3;2;2;20;10,0;SCR;;106;Common;M Basic;
 Meta Live;;Hop'S Zacian;Genesect;SFA 40;2;1;2;20;10,0;SFA;;40;Uncommon;M Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_040_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Mega Mawile ex;MEG 94;2;1;2;20;10,0;MEG;;94;Double Rare;M Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_094_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Metagross;TEF 115;2;1;2;20;10,0;TEF;;115;Uncommon;M Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_115_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Tatsugiri;TWM 131;5;2;4;20;20,0;TWM;;131;Uncommon;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_131_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Tatsugiri;TWM 131;4;1;4;20;20,0;TWM;;131;Uncommon;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_131_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Dragapult ex;TWM 130;2;2;1;20;5,0;TWM;;130;Double Rare;N Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_130_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Drakloak;TWM 129;3;3;1;20;5,0;TWM;;129;Common;N Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_129_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Dreepy;TWM 128;3;3;1;20;5,0;TWM;;128;Common;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_128_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Hop's Snorlax;JTG 117;35;2;20;20;100,0;JTG;;117;Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_117_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Hop's Snorlax;JTG 117;36;2;20;20;100,0;JTG;;117;Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_117_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Hop's Cramorant;JTG 138;31;2;17;20;85,0;JTG;;138;Uncommon;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_138_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Bloodmoon Ursaluna ex;TWM 141;14;1;14;20;70,0;TWM;;141;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_141_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Buneary;PFL 83;12;2;7;20;35,0;PFL;;83;Common;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_083_R_EN_LG.png;No
@@ -3098,45 +3105,45 @@ Meta Live;;Hop'S Zacian;Darkness Energy;SVE 23;65;7;14;20;70,0;SVE;;23;Basic Ene
 Meta Live;;Hop'S Zacian;Metal Energy;SVE 24;58;13;6;20;30,0;SVE;;24;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_024_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Fire Energy;SVE 18;2;1;2;20;10,0;SVE;;18;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_018_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Psychic Energy;SVE 21;1;1;1;20;5,0;SVE;;21;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_021_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Nest Ball;PAF 84;61;4;20;20;100,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Hop's Bag;JTG 147;26;4;18;20;90,0;JTG;;147;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_147_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Nest Ball;PAF 84;60;4;20;20;100,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Hop's Bag;JTG 147;25;4;18;20;90,0;JTG;;147;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_147_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Night Stretcher;ASC 196;36;3;18;20;90,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Earthen Vessel;PRE 106;19;2;15;20;75,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Energy Switch;MEG 115;20;2;13;20;65,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Pokégear 3.0;BLK 84;31;3;12;20;60,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Precious Trolley;SSP 185;11;1;11;20;55,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
-Meta Live;;Hop'S Zacian;Counter Catcher;PAR 160;10;2;9;20;45,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Precious Trolley;SSP 185;12;1;12;20;60,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
+Meta Live;;Hop'S Zacian;Pokégear 3.0;BLK 84;30;3;11;20;55,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Switch;MEG 130;9;1;9;20;45,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
-Meta Live;;Hop'S Zacian;Ultra Ball;ASC 213;16;3;7;20;35,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Counter Catcher;PAR 160;9;2;8;20;40,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Ultra Ball;ASC 213;18;3;8;20;40,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Tool Scrapper;ASC 212;6;1;6;20;30,0;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Secret Box;TWM 163;5;1;5;20;25,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
-Meta Live;;Hop'S Zacian;Buddy-Buddy Poffin;ASC 184;5;2;4;20;20,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Buddy-Buddy Poffin;ASC 184;6;2;5;20;25,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Secret Box;TWM 163;4;1;4;20;20,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Hop'S Zacian;Super Rod;PAL 188;5;2;4;20;20,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Team Rocket's Venture Bomb;DRI 179;13;4;4;20;20,0;DRI;;179;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_179_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Pal Pad;SVI 182;2;1;2;20;10,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Prime Catcher;PRE 119;2;1;2;20;10,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
 Meta Live;;Hop'S Zacian;Rare Candy;MEG 125;2;2;1;20;5,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Unfair Stamp;TWM 165;1;1;1;20;5,0;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
-Meta Live;;Hop'S Zacian;Jet Energy;PAL 190;36;4;12;20;60,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Jet Energy;PAL 190;38;4;13;20;65,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Luminous Energy;PAL 191;4;4;1;20;5,0;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Postwick;JTG 154;52;3;20;20;100,0;JTG;;154;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_154_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Risky Ruins;MEG 127;18;3;8;20;40,0;MEG;;127;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_127_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Postwick;JTG 154;53;3;20;20;100,0;JTG;;154;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_154_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Risky Ruins;MEG 127;16;3;7;20;35,0;MEG;;127;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_127_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Arven;OBF 186;78;4;20;20;100,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Boss's Orders;ASC 183;49;3;19;20;95,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Iono;PAF 80;35;3;18;20;90,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Lillie's Determination;ASC 192;46;4;14;20;70,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Boss's Orders;ASC 183;48;3;19;20;95,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Iono;PAF 80;34;3;18;20;90,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Lillie's Determination;ASC 192;45;4;14;20;70,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Penny;SVI 183;11;1;11;20;55,0;SVI;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_183_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Kieran;PRE 113;6;1;6;20;30,0;PRE;;113;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_113_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Professor's Research;BLK 85;7;2;5;20;25,0;BLK;;85;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_085_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Professor's Research;BLK 85;8;2;6;20;30,0;BLK;;85;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_085_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Professor Turo's Scenario;PRE 121;3;1;3;20;15,0;PRE;;121;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_121_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Black Belt's Training;JTG 143;1;1;1;20;5,0;JTG;;143;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_143_R_EN_LG.png;Yes
 Meta Live;;Hop'S Zacian;Colress's Tenacity;SFA 57;1;1;1;20;5,0;SFA;;57;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Crispin;PRE 105;2;2;1;20;5,0;PRE;;105;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_105_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Hilda;WHT 84;3;3;1;20;5,0;WHT;;84;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_084_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Judge;DRI 167;1;1;1;20;5,0;DRI;;167;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_167_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Hop's Choice Band;JTG 148;66;4;20;20;100,0;JTG;;148;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_148_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Technical Machine: Devolution;PAR 177;23;2;15;20;75,0;PAR;;177;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_177_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Air Balloon;ASC 181;14;2;11;20;55,0;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Hop's Choice Band;JTG 148;65;4;20;20;100,0;JTG;;148;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_148_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Technical Machine: Devolution;PAR 177;24;2;15;20;75,0;PAR;;177;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_177_R_EN_LG.png;No
+Meta Live;;Hop'S Zacian;Air Balloon;ASC 181;13;2;11;20;55,0;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Vitality Band;SVI 197;8;1;8;20;40,0;SVI;;197;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_197_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Counter Gain;ASC 186;1;1;1;20;5,0;ASC;;186;Common;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_186_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Maximum Belt;PRE 117;1;1;1;20;5,0;PRE;;117;Ultra Rare;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_117_R_EN_LG.png;Yes
@@ -3460,7 +3467,7 @@ Meta Live;;Joltik Box;Iron Hands ex;PAR 70;38;2;19;19;100,0;PAR;;70;Double Rare;
 Meta Live;;Joltik Box;Joltik;SCR 50;38;2;19;19;100,0;SCR;;50;Common;L Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_050_R_EN_LG.png;No
 Meta Live;;Joltik Box;Miraidon ex;SVI 81;38;2;19;19;100,0;SVI;;81;Double Rare;L Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_081_R_EN_LG.png;No
 Meta Live;;Joltik Box;Pikachu ex;SSP 57;37;2;19;19;100,0;SSP;;57;Double Rare;L Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_057_R_EN_LG.png;No
-Meta Live;;Joltik Box;Galvantula ex;SCR 51;1;1;1;19;5,26;SCR;;51;Double Rare;L Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_051_R_EN_LG.png;No
+Meta Live;;Joltik Box;Galvantula ex;SCR 51;2;1;2;19;10,53;SCR;;51;Double Rare;L Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_051_R_EN_LG.png;No
 Meta Live;;Joltik Box;Latias ex;SSP 76;19;1;19;19;100,0;SSP;;76;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_076_R_EN_LG.png;No
 Meta Live;;Joltik Box;Mew ex;MEW 151;24;2;19;19;100,0;MEW;;151;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEW/MEW_151_R_EN_LG.png;No
 Meta Live;;Joltik Box;Lillie's Clefairy ex;JTG 56;7;1;7;19;36,84;JTG;;56;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_056_R_EN_LG.png;No
@@ -3475,33 +3482,33 @@ Meta Live;;Joltik Box;Psychic Energy;SVE 21;7;1;7;19;36,84;SVE;;21;Basic Energy;
 Meta Live;;Joltik Box;Fire Energy;SVE 18;2;1;2;19;10,53;SVE;;18;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_018_R_EN_LG.png;No
 Meta Live;;Joltik Box;Water Energy;SVE 19;1;1;1;19;5,26;SVE;;19;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_019_R_EN_LG.png;No
 Meta Live;;Joltik Box;Earthen Vessel;PRE 106;19;1;19;19;100,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
-Meta Live;;Joltik Box;Nest Ball;PAF 84;76;4;19;19;100,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
+Meta Live;;Joltik Box;Nest Ball;PAF 84;75;4;19;19;100,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Joltik Box;Pokégear 3.0;BLK 84;66;4;19;19;100,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Joltik Box;Prime Catcher;PRE 119;19;1;19;19;100,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
 Meta Live;;Joltik Box;Ultra Ball;ASC 213;72;4;19;19;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
-Meta Live;;Joltik Box;Super Rod;PAL 188;14;2;13;19;68,42;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Joltik Box;Energy Switch;MEG 115;11;2;10;19;52,63;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
-Meta Live;;Joltik Box;Night Stretcher;ASC 196;5;1;5;19;26,32;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
-Meta Live;;Joltik Box;Switch;MEG 130;5;1;5;19;26,32;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
-Meta Live;;Joltik Box;Tool Scrapper;ASC 212;4;1;4;19;21,05;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
+Meta Live;;Joltik Box;Super Rod;PAL 188;13;2;12;19;63,16;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
+Meta Live;;Joltik Box;Energy Switch;MEG 115;12;2;11;19;57,89;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
+Meta Live;;Joltik Box;Night Stretcher;ASC 196;6;1;6;19;31,58;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
+Meta Live;;Joltik Box;Switch;MEG 130;6;1;6;19;31,58;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Joltik Box;Tool Scrapper;ASC 212;5;1;5;19;26,32;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Joltik Box;Picnic Basket;SVI 184;1;1;1;19;5,26;SVI;;184;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_184_R_EN_LG.png;No
-Meta Live;;Joltik Box;Gravity Mountain;SSP 177;5;1;5;19;26,32;SSP;;177;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png;No
+Meta Live;;Joltik Box;Gravity Mountain;SSP 177;4;1;4;19;21,05;SSP;;177;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png;No
 Meta Live;;Joltik Box;Academy at Night;SFA 54;1;1;1;19;5,26;SFA;;54;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_054_R_EN_LG.png;No
 Meta Live;;Joltik Box;Town Store;OBF 196;1;1;1;19;5,26;OBF;;196;Common;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_196_R_EN_LG.png;No
 Meta Live;;Joltik Box;Arven;OBF 186;74;4;19;19;100,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
 Meta Live;;Joltik Box;Boss's Orders;ASC 183;74;4;19;19;100,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
-Meta Live;;Joltik Box;Crispin;PRE 105;76;4;19;19;100,0;PRE;;105;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_105_R_EN_LG.png;No
-Meta Live;;Joltik Box;Iono;PAF 80;2;1;2;19;10,53;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
+Meta Live;;Joltik Box;Crispin;PRE 105;75;4;19;19;100,0;PRE;;105;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_105_R_EN_LG.png;No
 Meta Live;;Joltik Box;Brock's Scouting;JTG 146;2;2;1;19;5,26;JTG;;146;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_146_R_EN_LG.png;No
 Meta Live;;Joltik Box;Cyrano;SSP 170;1;1;1;19;5,26;SSP;;170;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_170_R_EN_LG.png;No
+Meta Live;;Joltik Box;Iono;PAF 80;1;1;1;19;5,26;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
 Meta Live;;Joltik Box;Lisia's Appeal;SSP 179;1;1;1;19;5,26;SSP;;179;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_179_R_EN_LG.png;No
 Meta Live;;Joltik Box;Air Balloon;ASC 181;18;1;18;19;94,74;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
-Meta Live;;Joltik Box;Bravery Charm;PAL 173;26;2;18;19;94,74;PAL;;173;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_173_R_EN_LG.png;No
+Meta Live;;Joltik Box;Bravery Charm;PAL 173;25;2;18;19;94,74;PAL;;173;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_173_R_EN_LG.png;No
 Meta Live;;Joltik Box;Light Ball;ASC 191;11;1;11;19;57,89;ASC;;191;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_191_R_EN_LG.png;No
-Meta Live;;Joltik Box;Future Booster Energy Capsule;TEF 149;7;1;7;19;36,84;TEF;;149;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_149_R_EN_LG.png;No
-Meta Live;;Joltik Box;Powerglass;SFA 63;5;1;5;19;26,32;SFA;;63;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_063_R_EN_LG.png;No
-Meta Live;;Joltik Box;Exp. Share;SVI 174;3;1;3;19;15,79;SVI;;174;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_174_R_EN_LG.png;No
+Meta Live;;Joltik Box;Future Booster Energy Capsule;TEF 149;8;1;8;19;42,11;TEF;;149;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_149_R_EN_LG.png;No
+Meta Live;;Joltik Box;Powerglass;SFA 63;6;1;6;19;31,58;SFA;;63;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_063_R_EN_LG.png;No
 Meta Live;;Joltik Box;Brave Bangle;WHT 80;2;1;2;19;10,53;WHT;;80;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_080_R_EN_LG.png;No
+Meta Live;;Joltik Box;Exp. Share;SVI 174;2;1;2;19;10,53;SVI;;174;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_174_R_EN_LG.png;No
 Meta Live;;Joltik Box;Heavy Baton;TEF 151;1;1;1;19;5,26;TEF;;151;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_151_R_EN_LG.png;No
 Meta Live;;Joltik Box;Vitality Band;SVI 197;1;1;1;19;5,26;SVI;;197;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_197_R_EN_LG.png;No
 Meta Live;;Kangaskhan Bouffalant;Shaymin;DRI 10;6;1;6;19;31,58;DRI;;10;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png;No
@@ -4461,7 +4468,7 @@ Meta Live;;Other;Mega Froslass ex;ASC 47;6;2;5;20;25,0;ASC;;47;Double Rare;W Sta
 Meta Live;;Other;Iron Bundle;PAR 56;4;1;4;20;20,0;PAR;;56;Uncommon;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_056_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Articuno;DRI 51;5;2;3;20;15,0;DRI;;51;Rare;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_051_R_EN_LG.png;No
 Meta Live;;Other;Munkidori;ASC 99;29;4;8;20;40,0;ASC;;99;Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_099_R_EN_LG.png;No
-Meta Live;;Other;Latias ex;SSP 76;4;1;4;20;20,0;SSP;;76;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_076_R_EN_LG.png;No
+Meta Live;;Other;Latias ex;SSP 76;5;1;5;20;25,0;SSP;;76;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_076_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Mimikyu;DRI 87;2;1;2;20;10,0;DRI;;87;Uncommon;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_087_R_EN_LG.png;No
 Meta Live;;Other;Banette;JTG 60;2;2;1;20;5,0;JTG;;60;Uncommon;P Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_060_R_EN_LG.png;No
 Meta Live;;Other;Mew ex;MEW 151;1;1;1;20;5,0;MEW;;151;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEW/MEW_151_R_EN_LG.png;No
@@ -4470,7 +4477,7 @@ Meta Live;;Other;Sylveon ex;SSP 86;2;2;1;20;5,0;SSP;;86;Double Rare;P Stage 1;ht
 Meta Live;;Other;Hawlucha;SVI 118;8;2;4;20;20,0;SVI;;118;Rare;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_118_R_EN_LG.png;No
 Meta Live;;Other;Ting-Lu;TWM 110;2;1;2;20;10,0;TWM;;110;Rare;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_110_R_EN_LG.png;No
 Meta Live;;Other;Ting-Lu ex;PAL 127;1;1;1;20;5,0;PAL;;127;Double Rare;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_127_R_EN_LG.png;No
-Meta Live;;Other;Fezandipiti ex;ASC 142;10;2;9;20;45,0;ASC;;142;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_142_R_EN_LG.png;No
+Meta Live;;Other;Fezandipiti ex;ASC 142;9;1;9;20;45,0;ASC;;142;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_142_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Honchkrow;ASC 127;16;4;4;20;20,0;ASC;;127;Rare;D Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_127_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Murkrow;DRI 127;16;4;4;20;20,0;DRI;;127;Uncommon;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_127_R_EN_LG.png;No
 Meta Live;;Other;Yveltal;MEG 88;5;2;4;20;20,0;MEG;;88;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_088_R_EN_LG.png;No
@@ -4499,15 +4506,15 @@ Meta Live;;Other;Eevee ex;PRE 75;3;3;1;20;5,0;PRE;;75;Double Rare;C Basic;https:
 Meta Live;;Other;Regigigas;PRE 86;1;1;1;20;5,0;PRE;;86;Uncommon;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_086_R_EN_LG.png;No
 Meta Live;;Other;Squawkabilly ex;PAL 169;1;1;1;20;5,0;PAL;;169;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_169_R_EN_LG.png;No
 Meta Live;;Other;Darkness Energy;SVE 23;46;9;9;20;45,0;SVE;;23;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_023_R_EN_LG.png;No
-Meta Live;;Other;Grass Energy;SVE 17;52;12;6;20;30,0;SVE;;17;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_017_R_EN_LG.png;No
+Meta Live;;Other;Grass Energy;SVE 17;51;12;6;20;30,0;SVE;;17;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_017_R_EN_LG.png;No
 Meta Live;;Other;Water Energy;SVE 19;5;2;4;20;20,0;SVE;;19;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_019_R_EN_LG.png;No
 Meta Live;;Other;Lightning Energy;SVE 20;2;2;1;20;5,0;SVE;;20;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_020_R_EN_LG.png;No
 Meta Live;;Other;Metal Energy;SVE 24;18;18;1;20;5,0;SVE;;24;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_024_R_EN_LG.png;No
 Meta Live;;Other;Psychic Energy;SVE 21;4;4;1;20;5,0;SVE;;21;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_021_R_EN_LG.png;No
-Meta Live;;Other;Night Stretcher;ASC 196;31;2;17;20;85,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
-Meta Live;;Other;Buddy-Buddy Poffin;ASC 184;33;4;15;20;75,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
+Meta Live;;Other;Night Stretcher;ASC 196;32;2;17;20;85,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
+Meta Live;;Other;Buddy-Buddy Poffin;ASC 184;32;4;15;20;75,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
+Meta Live;;Other;Poké Pad;ASC 198;39;4;14;20;70,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
 Meta Live;;Other;Nest Ball;PAF 84;36;4;13;20;65,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
-Meta Live;;Other;Poké Pad;ASC 198;38;4;13;20;65,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
 Meta Live;;Other;Ultra Ball;ASC 213;31;4;13;20;65,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Other;Earthen Vessel;PRE 106;15;2;11;20;55,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Other;Super Rod;PAL 188;12;2;10;20;50,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
@@ -4516,10 +4523,10 @@ Meta Live;;Other;Pokégear 3.0;BLK 84;9;2;6;20;30,0;BLK;;84;Uncommon;Item;https:
 Meta Live;;Other;Secret Box;TWM 163;6;1;6;20;30,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Other;Energy Switch;MEG 115;7;4;4;20;20,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Other;Miracle Headset;SSP 183;4;1;4;20;20,0;SSP;;183;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_183_R_EN_LG.png;Yes
+Meta Live;;Other;Switch;MEG 130;4;1;4;20;20,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
 Meta Live;;Other;Team Rocket's Transceiver;ASC 209;16;4;4;20;20,0;ASC;;209;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_209_R_EN_LG.png;No
 Meta Live;;Other;Enhanced Hammer;TWM 148;3;1;3;20;15,0;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
 Meta Live;;Other;Roto-Stick;PRE 127;8;4;3;20;15,0;PRE;;127;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_127_R_EN_LG.png;No
-Meta Live;;Other;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
 Meta Live;;Other;Bug Catching Set;PRE 102;7;4;2;20;10,0;PRE;;102;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_102_R_EN_LG.png;No
 Meta Live;;Other;Sacred Ash;DRI 168;2;1;2;20;10,0;DRI;;168;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_168_R_EN_LG.png;No
 Meta Live;;Other;Unfair Stamp;TWM 165;2;1;2;20;10,0;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
@@ -4534,7 +4541,7 @@ Meta Live;;Other;Ignition Energy;WHT 86;15;4;4;20;20,0;WHT;;86;Uncommon;Special 
 Meta Live;;Other;Team Rocket's Energy;ASC 217;16;4;4;20;20,0;ASC;;217;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_217_R_EN_LG.png;No
 Meta Live;;Other;Prism Energy;ASC 216;2;2;1;20;5,0;ASC;;216;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_216_R_EN_LG.png;No
 Meta Live;;Other;Artazon;PAF 76;14;3;7;20;35,0;PAF;;76;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_076_R_EN_LG.png;No
-Meta Live;;Other;Area Zero Underdepths;PRE 94;10;3;6;20;30,0;PRE;;94;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_094_R_EN_LG.png;No
+Meta Live;;Other;Area Zero Underdepths;PRE 94;9;3;6;20;30,0;PRE;;94;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_094_R_EN_LG.png;No
 Meta Live;;Other;Forest of Vitality;ASC 188;12;4;5;20;25,0;ASC;;188;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_188_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Factory;ASC 203;15;4;4;20;20,0;ASC;;203;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_203_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Watchtower;ASC 210;4;2;3;20;15,0;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No
@@ -4546,8 +4553,8 @@ Meta Live;;Other;Arven;OBF 186;50;4;14;20;70,0;OBF;;186;Uncommon;Supporter;https
 Meta Live;;Other;Iono;PAF 80;37;4;11;20;55,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
 Meta Live;;Other;Lillie's Determination;ASC 192;38;4;11;20;55,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
 Meta Live;;Other;Boss's Orders;ASC 183;21;3;10;20;50,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
-Meta Live;;Other;Dawn;PFL 87;14;4;4;20;20,0;PFL;;87;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_087_R_EN_LG.png;No
-Meta Live;;Other;Hilda;WHT 84;4;1;4;20;20,0;WHT;;84;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_084_R_EN_LG.png;No
+Meta Live;;Other;Hilda;WHT 84;5;1;5;20;25,0;WHT;;84;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_084_R_EN_LG.png;No
+Meta Live;;Other;Dawn;PFL 87;13;4;4;20;20,0;PFL;;87;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_087_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Archer;ASC 201;16;4;4;20;20,0;ASC;;201;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_201_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Ariana;ASC 202;16;4;4;20;20,0;ASC;;202;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_202_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Giovanni;ASC 204;16;4;4;20;20,0;ASC;;204;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_204_R_EN_LG.png;No
@@ -4784,7 +4791,7 @@ Meta Live;;Raging Bolt Ogerpon;Xerosic's Machinations;SFA 64;1;1;1;20;5,0;SFA;;6
 Meta Live;;Raging Bolt Ogerpon;Air Balloon;ASC 181;5;2;3;20;15,0;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
 Meta Live;;Raging Bolt Ogerpon;Vitality Band;SVI 197;3;1;3;20;15,0;SVI;;197;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_197_R_EN_LG.png;No
 Meta Live;;Raging Bolt Ogerpon;Punk Helmet;PFL 92;1;1;1;20;5,0;PFL;;92;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_092_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Moltres;PFL 14;1;1;1;20;5,0;PFL;;14;Rare;R Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_014_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Moltres;PFL 14;2;1;2;20;10,0;PFL;;14;Rare;R Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_014_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Iron Bundle;PAR 56;4;1;4;20;20,0;PAR;;56;Uncommon;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_056_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Latias ex;SSP 76;15;1;15;20;75,0;SSP;;76;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_076_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Munkidori;TWM 95;17;2;14;20;70,0;TWM;;95;Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_095_R_EN_LG.png;No
@@ -4795,8 +4802,8 @@ Meta Live;;Roaring Moon;Pecharunt ex;SFA 39;26;2;20;20;100,0;SFA;;39;Double Rare
 Meta Live;;Roaring Moon;Roaring Moon ex;PAR 124;45;3;20;20;100,0;PAR;;124;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_124_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Brute Bonnet;PAR 123;32;2;16;20;80,0;PAR;;123;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_123_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Pecharunt;SVP 149;31;2;16;20;80,0;SVP;;149;Promo;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVP/SVP_149_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Yveltal;MEG 88;6;1;6;20;30,0;MEG;;88;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_088_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Roaring Moon;TEF 109;10;3;5;20;25,0;TEF;;109;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_109_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Yveltal;MEG 88;5;1;5;20;25,0;MEG;;88;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_088_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Toxel;PFL 67;5;2;3;20;15,0;PFL;;67;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_067_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Toxtricity;PFL 68;5;2;3;20;15,0;PFL;;68;Rare;D Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_068_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Gastly;PFL 54;2;2;1;20;5,0;PFL;;54;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_054_R_EN_LG.png;No
@@ -4805,26 +4812,26 @@ Meta Live;;Roaring Moon;Mega Gengar ex;PFL 56;2;2;1;20;5,0;PFL;;56;Double Rare;D
 Meta Live;;Roaring Moon;N's Zoroark ex;JTG 98;1;1;1;20;5,0;JTG;;98;Double Rare;D Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_098_R_EN_LG.png;No
 Meta Live;;Roaring Moon;N's Zorua;JTG 97;1;1;1;20;5,0;JTG;;97;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_097_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Sableye;PAL 136;1;1;1;20;5,0;PAL;;136;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_136_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Squawkabilly ex;PAL 169;29;2;18;20;90,0;PAL;;169;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_169_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Squawkabilly ex;PAL 169;28;2;18;20;90,0;PAL;;169;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_169_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Bloodmoon Ursaluna ex;TWM 141;13;1;13;20;65,0;TWM;;141;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_141_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Ditto;MEW 132;1;1;1;20;5,0;MEW;;132;Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEW/MEW_132_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Pidgeot ex;OBF 164;1;1;1;20;5,0;OBF;;164;Double Rare;C Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_164_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Pidgeotto;MEW 17;1;1;1;20;5,0;MEW;;17;Common;C Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEW/MEW_017_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Pidgey;MEW 16;1;1;1;20;5,0;MEW;;16;Common;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEW/MEW_016_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Darkness Energy;SVE 23;157;10;20;20;100,0;SVE;;23;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_023_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Fire Energy;SVE 18;2;2;1;20;5,0;SVE;;18;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_018_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Energy Switch;MEG 115;55;4;20;20;100,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Fire Energy;SVE 18;4;2;2;20;10,0;SVE;;18;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_018_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Energy Switch;MEG 115;54;4;20;20;100,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Nest Ball;PAF 84;78;4;20;20;100,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Night Stretcher;ASC 196;40;3;19;20;95,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Earthen Vessel;PRE 106;41;4;18;20;90,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Ultra Ball;ASC 213;62;4;18;20;90,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Earthen Vessel;PRE 106;40;4;18;20;90,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Ultra Ball;ASC 213;61;4;18;20;90,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Secret Box;TWM 163;15;1;15;20;75,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Roaring Moon;Pal Pad;SVI 182;14;1;14;20;70,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Pokégear 3.0;BLK 84;31;4;14;20;70,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Enhanced Hammer;TWM 148;7;2;6;20;30,0;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Super Rod;PAL 188;6;1;6;20;30,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Counter Catcher;PAR 160;7;2;4;20;20,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Pokémon Catcher;SVI 187;13;4;4;20;20,0;SVI;;187;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_187_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Pokémon Catcher;SVI 187;14;4;5;20;25,0;SVI;;187;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_187_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Counter Catcher;PAR 160;5;2;3;20;15,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
 Meta Live;;Roaring Moon;Prime Catcher;PRE 119;2;1;2;20;10,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
 Meta Live;;Roaring Moon;Buddy-Buddy Poffin;ASC 184;2;2;1;20;5,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
@@ -4841,17 +4848,17 @@ Meta Live;;Roaring Moon;Mesagoza;SVI 178;1;1;1;20;5,0;SVI;;178;Uncommon;Stadium;
 Meta Live;;Roaring Moon;Boss's Orders;ASC 183;44;3;20;20;100,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Professor Sada's Vitality;PRE 120;72;4;19;20;95,0;PRE;;120;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_120_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Carmine;PRE 103;53;4;15;20;75,0;PRE;;103;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_103_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Iono;PAF 80;13;3;9;20;45,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Iono;PAF 80;15;3;10;20;50,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Janine's Secret Art;PRE 112;18;4;8;20;40,0;PRE;;112;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_112_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Lillie's Determination;ASC 192;10;3;5;20;25,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Arven;OBF 186;12;4;4;20;20,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Lillie's Determination;ASC 192;9;3;4;20;20,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Penny;SVI 183;3;1;3;20;15,0;SVI;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_183_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Crispin;PRE 105;4;2;2;20;10,0;PRE;;105;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_105_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Professor Turo's Scenario;PRE 121;2;1;2;20;10,0;PRE;;121;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_121_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Acerola's Mischief;ASC 180;1;1;1;20;5,0;ASC;;180;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_180_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Colress's Tenacity;SFA 57;2;2;1;20;5,0;SFA;;57;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Crispin;PRE 105;2;2;1;20;5,0;PRE;;105;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_105_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Ancient Booster Energy Capsule;TEF 140;73;4;20;20;100,0;TEF;;140;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_140_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Binding Mochi;PRE 95;6;2;5;20;25,0;PRE;;95;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_095_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Ancient Booster Energy Capsule;TEF 140;72;4;20;20;100,0;TEF;;140;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_140_R_EN_LG.png;No
+Meta Live;;Roaring Moon;Binding Mochi;PRE 95;7;2;6;20;30,0;PRE;;95;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_095_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Air Balloon;ASC 181;1;1;1;20;5,0;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Technical Machine: Evolution;PAR 178;1;1;1;20;5,0;PAR;;178;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_178_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Team Rocket's Spidops;DRI 20;77;4;20;20;100,0;DRI;;20;Rare;G Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_020_R_EN_LG.png;No
@@ -4871,16 +4878,16 @@ Meta Live;;Rocket'S Mewtwo;Psychic Energy;SVE 21;29;6;14;20;70,0;SVE;;21;Basic E
 Meta Live;;Rocket'S Mewtwo;Darkness Energy;SVE 23;6;2;3;20;15,0;SVE;;23;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_023_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Fire Energy;SVE 18;1;1;1;20;5,0;SVE;;18;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_018_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Team Rocket's Transceiver;ASC 209;80;4;20;20;100,0;ASC;;209;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_209_R_EN_LG.png;No
-Meta Live;;Rocket'S Mewtwo;Ultra Ball;ASC 213;64;4;20;20;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
-Meta Live;;Rocket'S Mewtwo;Energy Switch;MEG 115;34;3;19;20;95,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
+Meta Live;;Rocket'S Mewtwo;Ultra Ball;ASC 213;66;4;20;20;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
+Meta Live;;Rocket'S Mewtwo;Energy Switch;MEG 115;32;3;19;20;95,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Night Stretcher;ASC 196;40;3;19;20;95,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Earthen Vessel;PRE 106;33;3;15;20;75,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Secret Box;TWM 163;8;1;8;20;40,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Rocket'S Mewtwo;Nest Ball;PAF 84;6;1;6;20;30,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Poké Pad;ASC 198;11;2;6;20;30,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
-Meta Live;;Rocket'S Mewtwo;Bug Catching Set;PRE 102;6;2;4;20;20,0;PRE;;102;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_102_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Pokégear 3.0;BLK 84;5;2;4;20;20,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Wondrous Patch;PFL 94;10;4;4;20;20,0;PFL;;94;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_094_R_EN_LG.png;No
+Meta Live;;Rocket'S Mewtwo;Bug Catching Set;PRE 102;3;1;3;20;15,0;PRE;;102;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_102_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Buddy-Buddy Poffin;ASC 184;4;2;2;20;10,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Counter Catcher;PAR 160;2;1;2;20;10,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
@@ -4893,12 +4900,12 @@ Meta Live;;Rocket'S Mewtwo;Team Rocket's Factory;ASC 203;57;4;20;20;100,0;ASC;;2
 Meta Live;;Rocket'S Mewtwo;Team Rocket's Watchtower;ASC 210;5;2;4;20;20,0;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Battle Cage;PFL 85;1;1;1;20;5,0;PFL;;85;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_085_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Neutralization Zone;SFA 60;1;1;1;20;5,0;SFA;;60;Ultra Rare;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_060_R_EN_LG.png;Yes
-Meta Live;;Rocket'S Mewtwo;Team Rocket's Archer;ASC 201;38;3;20;20;100,0;ASC;;201;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_201_R_EN_LG.png;No
+Meta Live;;Rocket'S Mewtwo;Team Rocket's Archer;ASC 201;36;2;20;20;100,0;ASC;;201;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_201_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Team Rocket's Ariana;ASC 202;72;4;20;20;100,0;ASC;;202;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_202_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Team Rocket's Giovanni;ASC 204;60;4;20;20;100,0;ASC;;204;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_204_R_EN_LG.png;No
-Meta Live;;Rocket'S Mewtwo;Team Rocket's Proton;ASC 208;66;4;20;20;100,0;ASC;;208;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_208_R_EN_LG.png;No
+Meta Live;;Rocket'S Mewtwo;Team Rocket's Proton;ASC 208;67;4;20;20;100,0;ASC;;208;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_208_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Team Rocket's Petrel;ASC 207;20;2;17;20;85,0;ASC;;207;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png;No
-Meta Live;;Rocket'S Mewtwo;Lillie's Determination;ASC 192;14;4;6;20;30,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
+Meta Live;;Rocket'S Mewtwo;Lillie's Determination;ASC 192;18;4;6;20;30,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Black Belt's Training;JTG 143;2;1;2;20;10,0;JTG;;143;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_143_R_EN_LG.png;Yes
 Meta Live;;Rocket'S Mewtwo;Hilda;WHT 84;3;2;2;20;10,0;WHT;;84;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_084_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Xerosic's Machinations;SFA 64;2;2;1;20;5,0;SFA;;64;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_064_R_EN_LG.png;No
@@ -4951,39 +4958,39 @@ Meta Live;;Seaking Festival Lead;Maximum Belt;PRE 117;19;1;19;19;100,0;PRE;;117;
 Meta Live;;Seaking Festival Lead;Vitality Band;SVI 197;16;1;16;19;84,21;SVI;;197;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_197_R_EN_LG.png;No
 Meta Live;;Seaking Festival Lead;Air Balloon;ASC 181;3;1;3;19;15,79;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
 Meta Live;;Seaking Festival Lead;Exp. Share;SVI 174;1;1;1;19;5,26;SVI;;174;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_174_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Toedscool;PAR 16;5;2;4;20;20,0;PAR;;16;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_016_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Toedscruel;PAR 17;4;1;4;20;20,0;PAR;;17;Uncommon;G Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_017_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Psyduck;MEP 7;12;1;12;20;60,0;MEP;;7;Promo;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_007_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Munkidori;TWM 95;40;3;20;20;100,0;TWM;;95;Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_095_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Toedscool;PAR 16;4;2;3;20;15,0;PAR;;16;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_016_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Toedscruel;PAR 17;3;1;3;20;15,0;PAR;;17;Uncommon;G Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_017_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Psyduck;MEP 7;11;1;11;20;55,0;MEP;;7;Promo;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_007_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Munkidori;TWM 95;41;3;20;20;100,0;TWM;;95;Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_095_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Cornerstone Mask Ogerpon ex;TWM 112;1;1;1;20;5,0;TWM;;112;Double Rare;F Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_112_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Carvanha;PFL 60;58;4;20;20;100,0;PFL;;60;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_060_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Mega Sharpedo ex;PFL 61;51;3;20;20;100,0;PFL;;61;Double Rare;D Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_061_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Pecharunt ex;SFA 39;28;2;20;20;100,0;SFA;;39;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_039_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Toxel;PFL 67;45;3;20;20;100,0;PFL;;67;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_067_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Pecharunt ex;SFA 39;29;2;20;20;100,0;SFA;;39;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_039_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Toxel;PFL 67;46;3;20;20;100,0;PFL;;67;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_067_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Toxtricity;PFL 68;41;3;20;20;100,0;PFL;;68;Rare;D Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_068_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Fezandipiti ex;SFA 38;18;1;18;20;90,0;SFA;;38;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_038_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Purrloin;WHT 55;13;2;9;20;45,0;WHT;;55;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_055_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Liepard;PAR 115;8;1;8;20;40,0;PAR;;115;Common;D Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_115_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Yveltal;MEG 88;7;1;7;20;35,0;MEG;;88;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_088_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Purrloin;WHT 55;12;2;8;20;40,0;WHT;;55;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_055_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Yveltal;MEG 88;8;1;8;20;40,0;MEG;;88;Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_088_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Liepard;PAR 115;7;1;7;20;35,0;PAR;;115;Common;D Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_115_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Gastly;PFL 54;10;2;5;20;25,0;PFL;;54;Common;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_054_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Haunter;PFL 55;5;1;5;20;25,0;PFL;;55;Uncommon;D Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_055_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Mega Gengar ex;PFL 56;10;2;5;20;25,0;PFL;;56;Double Rare;D Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_056_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Seviper;PFL 62;4;1;4;20;20,0;PFL;;62;Uncommon;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_062_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Brute Bonnet;TWM 118;2;1;2;20;10,0;TWM;;118;Uncommon;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_118_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Mega Absol ex;MEG 86;1;1;1;20;5,0;MEG;;86;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_086_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Tatsugiri;TWM 131;7;2;6;20;30,0;TWM;;131;Uncommon;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_131_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Mega Kangaskhan ex;MEG 104;4;1;4;20;20,0;MEG;;104;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_104_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Tatsugiri;TWM 131;8;2;6;20;30,0;TWM;;131;Uncommon;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_131_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Mega Kangaskhan ex;MEG 104;3;1;3;20;15,0;MEG;;104;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_104_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Darkness Energy;SVE 23;168;10;20;20;100,0;SVE;;23;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_023_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Buddy-Buddy Poffin;ASC 184;71;4;20;20;100,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Ultra Ball;ASC 213;59;4;20;20;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Nest Ball;PAF 84;38;4;19;20;95,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Super Rod;PAL 188;22;2;19;20;95,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Night Stretcher;ASC 196;18;2;15;20;75,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Counter Catcher;PAR 160;17;2;13;20;65,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Buddy-Buddy Poffin;ASC 184;72;4;20;20;100,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Ultra Ball;ASC 213;60;4;20;20;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Nest Ball;PAF 84;40;4;19;20;95,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Super Rod;PAL 188;21;2;18;20;90,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Night Stretcher;ASC 196;19;2;15;20;75,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Counter Catcher;PAR 160;16;2;12;20;60,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Mega Signal;ASC 193;8;2;7;20;35,0;ASC;;193;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_193_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Unfair Stamp;TWM 165;6;1;6;20;30,0;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
+Meta Live;;Sharpedo Toxtricity;Earthen Vessel;PRE 106;5;1;5;20;25,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Rare Candy;MEG 125;5;1;5;20;25,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Earthen Vessel;PRE 106;4;1;4;20;20,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Energy Switch;MEG 115;4;1;4;20;20,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Pokégear 3.0;BLK 84;10;3;4;20;20,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Secret Box;TWM 163;4;1;4;20;20,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
@@ -4991,9 +4998,10 @@ Meta Live;;Sharpedo Toxtricity;Enhanced Hammer;TWM 148;2;1;2;20;10,0;TWM;;148;Un
 Meta Live;;Sharpedo Toxtricity;Tool Scrapper;ASC 212;2;1;2;20;10,0;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Energy Search;SVI 172;1;1;1;20;5,0;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Pal Pad;SVI 182;1;1;1;20;5,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Prime Catcher;PRE 119;1;1;1;20;5,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
 Meta Live;;Sharpedo Toxtricity;Luminous Energy;PAL 191;2;2;1;20;5,0;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Gravity Mountain;SSP 177;21;2;12;20;60,0;SSP;;177;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Town Store;OBF 196;12;2;10;20;50,0;OBF;;196;Common;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_196_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Gravity Mountain;SSP 177;22;2;12;20;60,0;SSP;;177;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Town Store;OBF 196;11;2;9;20;45,0;OBF;;196;Common;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_196_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Battle Cage;PFL 85;5;1;5;20;25,0;PFL;;85;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_085_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Artazon;PAF 76;4;1;4;20;20,0;PAF;;76;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_076_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Team Rocket's Watchtower;ASC 210;4;1;4;20;20,0;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No
@@ -5001,21 +5009,20 @@ Meta Live;;Sharpedo Toxtricity;Risky Ruins;MEG 127;1;1;1;20;5,0;MEG;;127;Uncommo
 Meta Live;;Sharpedo Toxtricity;Boss's Orders;ASC 183;56;4;20;20;100,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Iono;PAF 80;57;4;20;20;100,0;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Lillie's Determination;ASC 192;69;4;20;20;100,0;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Arven;OBF 186;36;4;12;20;60,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Arven;OBF 186;35;4;12;20;60,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Professor's Research;BLK 85;27;4;9;20;45,0;BLK;;85;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_085_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Professor Turo's Scenario;PRE 121;8;1;8;20;40,0;PRE;;121;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_121_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Professor Turo's Scenario;PRE 121;7;1;7;20;35,0;PRE;;121;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_121_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Wally's Compassion;MEG 132;5;2;4;20;20,0;MEG;;132;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_132_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Dawn;PFL 87;2;1;2;20;10,0;PFL;;87;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_087_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Acerola's Mischief;ASC 180;1;1;1;20;5,0;ASC;;180;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_180_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Black Belt's Training;JTG 143;1;1;1;20;5,0;JTG;;143;Common;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_143_R_EN_LG.png;Yes
 Meta Live;;Sharpedo Toxtricity;Janine's Secret Art;PRE 112;1;1;1;20;5,0;PRE;;112;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_112_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Salvatore;TEF 160;2;2;1;20;5,0;TEF;;160;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_160_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Team Rocket's Petrel;ASC 207;1;1;1;20;5,0;ASC;;207;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Xerosic's Machinations;SFA 64;1;1;1;20;5,0;SFA;;64;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_064_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Binding Mochi;PRE 95;31;2;20;20;100,0;PRE;;95;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_095_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Air Balloon;ASC 181;18;2;13;20;65,0;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
-Meta Live;;Sharpedo Toxtricity;Hero's Cape;TEF 152;9;1;9;20;45,0;TEF;;152;Ultra Rare;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_152_R_EN_LG.png;Yes
+Meta Live;;Sharpedo Toxtricity;Binding Mochi;PRE 95;32;2;20;20;100,0;PRE;;95;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_095_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Air Balloon;ASC 181;17;2;12;20;60,0;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Technical Machine: Evolution;PAR 178;9;1;9;20;45,0;PAR;;178;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_178_R_EN_LG.png;No
+Meta Live;;Sharpedo Toxtricity;Hero's Cape;TEF 152;8;1;8;20;40,0;TEF;;152;Ultra Rare;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_152_R_EN_LG.png;Yes
 Meta Live;;Sharpedo Toxtricity;Rigid Band;MEW 165;2;1;2;20;10,0;MEW;;165;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEW/MEW_165_R_EN_LG.png;No
 Meta Live;;Sharpedo Toxtricity;Maximum Belt;PRE 117;1;1;1;20;5,0;PRE;;117;Ultra Rare;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_117_R_EN_LG.png;Yes
 Meta Live;;Slaking;Budew;PRE 4;10;1;10;20;50,0;PRE;;4;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_004_R_EN_LG.png;No
@@ -5081,18 +5088,19 @@ Meta Live;;Slaking;Technical Machine: Evolution;PAR 178;5;2;4;20;20,0;PAR;;178;U
 Meta Live;;Slaking;Counter Gain;ASC 186;2;1;2;20;10,0;ASC;;186;Common;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_186_R_EN_LG.png;No
 Meta Live;;Slaking;Vitality Band;SVI 197;1;1;1;20;5,0;SVI;;197;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_197_R_EN_LG.png;No
 Meta Live;;Slowking;Budew;PRE 4;18;2;17;19;89,47;PRE;;4;Common;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_004_R_EN_LG.png;No
-Meta Live;;Slowking;Shaymin;DRI 10;2;1;2;19;10,53;DRI;;10;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png;No
-Meta Live;;Slowking;Slowpoke;SVI 42;74;4;19;19;100,0;SVI;;42;Common;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_042_R_EN_LG.png;No
+Meta Live;;Slowking;Shaymin;DRI 10;1;1;1;19;5,26;DRI;;10;Uncommon;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_010_R_EN_LG.png;No
+Meta Live;;Slowking;Slowpoke;SVI 42;73;4;19;19;100,0;SVI;;42;Common;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_042_R_EN_LG.png;No
 Meta Live;;Slowking;Crabominable;SCR 42;3;1;3;19;15,79;SCR;;42;Uncommon;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_042_R_EN_LG.png;No
 Meta Live;;Slowking;Psyduck;MEP 7;1;1;1;19;5,26;MEP;;7;Promo;W Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEP/MEP_007_R_EN_LG.png;No
 Meta Live;;Slowking;Tirtouga;BLK 22;1;1;1;19;5,26;BLK;;22;Uncommon;W Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_022_R_EN_LG.png;No
-Meta Live;;Slowking;Slowking;SCR 58;58;4;19;19;100,0;SCR;;58;Uncommon;P Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_058_R_EN_LG.png;No
+Meta Live;;Slowking;Slowking;SCR 58;57;3;19;19;100,0;SCR;;58;Uncommon;P Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_058_R_EN_LG.png;No
 Meta Live;;Slowking;Latias ex;SSP 76;18;2;15;19;78,95;SSP;;76;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_076_R_EN_LG.png;No
 Meta Live;;Slowking;Natu;PAR 71;29;3;14;19;73,68;PAR;;71;Common;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_071_R_EN_LG.png;No
 Meta Live;;Slowking;Xatu;PAR 72;28;2;14;19;73,68;PAR;;72;Rare;P Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_072_R_EN_LG.png;No
 Meta Live;;Slowking;Drifblim;SVI 90;3;1;3;19;15,79;SVI;;90;Uncommon;P Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_090_R_EN_LG.png;No
 Meta Live;;Slowking;Lillie's Clefairy ex;JTG 56;3;1;3;19;15,79;JTG;;56;Double Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_056_R_EN_LG.png;No
 Meta Live;;Slowking;Alakazam;TWM 82;1;1;1;19;5,26;TWM;;82;Rare;P Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_082_R_EN_LG.png;No
+Meta Live;;Slowking;Spectrier;ASC 98;1;1;1;19;5,26;ASC;;98;Rare;P Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_098_R_EN_LG.png;No
 Meta Live;;Slowking;Annihilape;SSP 100;18;1;18;19;94,74;SSP;;100;Uncommon;F Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_100_R_EN_LG.png;No
 Meta Live;;Slowking;Conkeldurr;TWM 105;15;1;15;19;78,95;TWM;;105;Uncommon;F Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_105_R_EN_LG.png;No
 Meta Live;;Slowking;Fezandipiti ex;SFA 38;19;1;19;19;100,0;SFA;;38;Double Rare;D Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_038_R_EN_LG.png;No
@@ -5101,16 +5109,16 @@ Meta Live;;Slowking;N's Zorua;JTG 97;2;2;1;19;5,26;JTG;;97;Common;D Basic;https:
 Meta Live;;Slowking;Kyurem;SFA 47;38;2;19;19;100,0;SFA;;47;Uncommon;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_047_R_EN_LG.png;No
 Meta Live;;Slowking;Tatsugiri;TWM 131;15;1;15;19;78,95;TWM;;131;Uncommon;N Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_131_R_EN_LG.png;No
 Meta Live;;Slowking;Haxorus;BLK 70;13;1;13;19;68,42;BLK;;70;Rare;N Stage 2;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_070_R_EN_LG.png;No
-Meta Live;;Slowking;Regigigas;PRE 86;13;1;13;19;68,42;PRE;;86;Uncommon;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_086_R_EN_LG.png;No
+Meta Live;;Slowking;Regigigas;PRE 86;14;1;14;19;73,68;PRE;;86;Uncommon;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_086_R_EN_LG.png;No
 Meta Live;;Slowking;Squawkabilly ex;PAL 169;13;1;13;19;68,42;PAL;;169;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_169_R_EN_LG.png;No
 Meta Live;;Slowking;Mega Kangaskhan ex;MEG 104;8;2;4;19;21,05;MEG;;104;Double Rare;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_104_R_EN_LG.png;No
 Meta Live;;Slowking;Gumshoos;MEG 110;1;1;1;19;5,26;MEG;;110;Uncommon;C Stage 1;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_110_R_EN_LG.png;No
 Meta Live;;Slowking;Yungoos;MEG 109;1;1;1;19;5,26;MEG;;109;Common;C Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_109_R_EN_LG.png;No
 Meta Live;;Slowking;Psychic Energy;SVE 21;112;7;19;19;100,0;SVE;;21;Basic Energy;Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVE/SVE_021_R_EN_LG.png;No
-Meta Live;;Slowking;Night Stretcher;ASC 196;70;4;19;19;100,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
-Meta Live;;Slowking;Ultra Ball;ASC 213;71;4;19;19;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
+Meta Live;;Slowking;Night Stretcher;ASC 196;68;4;19;19;100,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
+Meta Live;;Slowking;Ultra Ball;ASC 213;69;4;19;19;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Slowking;Buddy-Buddy Poffin;ASC 184;48;4;14;19;73,68;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
-Meta Live;;Slowking;Nest Ball;PAF 84;40;4;13;19;68,42;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
+Meta Live;;Slowking;Nest Ball;PAF 84;43;4;14;19;73,68;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Slowking;Max Rod;PRE 116;12;1;12;19;63,16;PRE;;116;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_116_R_EN_LG.png;Yes
 Meta Live;;Slowking;Wondrous Patch;PFL 94;18;4;5;19;26,32;PFL;;94;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_094_R_EN_LG.png;No
 Meta Live;;Slowking;Earthen Vessel;PRE 106;4;1;4;19;21,05;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
@@ -5120,29 +5128,31 @@ Meta Live;;Slowking;Super Rod;PAL 188;3;1;3;19;15,79;PAL;;188;Common;Item;https:
 Meta Live;;Slowking;Enhanced Hammer;TWM 148;2;1;2;19;10,53;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
 Meta Live;;Slowking;Pokégear 3.0;BLK 84;4;2;2;19;10,53;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Slowking;Counter Catcher;PAR 160;1;1;1;19;5,26;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
-Meta Live;;Slowking;Poké Pad;ASC 198;4;4;1;19;5,26;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
-Meta Live;;Slowking;Jet Energy;PAL 190;60;4;19;19;100,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
+Meta Live;;Slowking;Poké Pad;ASC 198;3;3;1;19;5,26;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
+Meta Live;;Slowking;Sacred Ash;DRI 168;1;1;1;19;5,26;DRI;;168;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_168_R_EN_LG.png;No
+Meta Live;;Slowking;Jet Energy;PAL 190;62;4;19;19;100,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Live;;Slowking;Reversal Energy;PAL 192;9;3;7;19;36,84;PAL;;192;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_192_R_EN_LG.png;No
 Meta Live;;Slowking;Academy at Night;SFA 54;74;4;19;19;100,0;SFA;;54;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_054_R_EN_LG.png;No
-Meta Live;;Slowking;Lillie's Determination;ASC 192;67;4;18;19;94,74;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
-Meta Live;;Slowking;Ciphermaniac's Codebreaking;PRE 104;54;4;16;19;84,21;PRE;;104;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_104_R_EN_LG.png;No
-Meta Live;;Slowking;Lana's Aid;TWM 155;12;3;9;19;47,37;TWM;;155;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_155_R_EN_LG.png;No
-Meta Live;;Slowking;Arven;OBF 186;14;4;4;19;21,05;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
+Meta Live;;Slowking;Lillie's Determination;ASC 192;66;4;18;19;94,74;ASC;;192;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_192_R_EN_LG.png;No
+Meta Live;;Slowking;Ciphermaniac's Codebreaking;PRE 104;52;4;16;19;84,21;PRE;;104;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_104_R_EN_LG.png;No
+Meta Live;;Slowking;Lana's Aid;TWM 155;11;3;8;19;42,11;TWM;;155;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_155_R_EN_LG.png;No
+Meta Live;;Slowking;Arven;OBF 186;16;4;5;19;26,32;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
 Meta Live;;Slowking;Hilda;WHT 84;7;2;4;19;21,05;WHT;;84;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_084_R_EN_LG.png;No
 Meta Live;;Slowking;Professor's Research;BLK 85;11;4;4;19;21,05;BLK;;85;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_085_R_EN_LG.png;No
-Meta Live;;Slowking;Boss's Orders;ASC 183;3;1;3;19;15,79;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
+Meta Live;;Slowking;Boss's Orders;ASC 183;4;2;3;19;15,79;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
 Meta Live;;Slowking;Dawn;PFL 87;5;2;3;19;15,79;PFL;;87;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_087_R_EN_LG.png;No
-Meta Live;;Slowking;Colress's Tenacity;SFA 57;3;2;2;19;10,53;SFA;;57;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png;No
 Meta Live;;Slowking;Hassel;TWM 151;2;1;2;19;10,53;TWM;;151;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_151_R_EN_LG.png;No
-Meta Live;;Slowking;Team Rocket's Petrel;ASC 207;2;1;2;19;10,53;ASC;;207;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png;No
 Meta Live;;Slowking;Brock's Scouting;JTG 146;1;1;1;19;5,26;JTG;;146;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_146_R_EN_LG.png;No
 Meta Live;;Slowking;Carmine;PRE 103;1;1;1;19;5,26;PRE;;103;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_103_R_EN_LG.png;No
+Meta Live;;Slowking;Colress's Tenacity;SFA 57;1;1;1;19;5,26;SFA;;57;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_057_R_EN_LG.png;No
 Meta Live;;Slowking;Iono;PAF 80;1;1;1;19;5,26;PAF;;80;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_080_R_EN_LG.png;No
 Meta Live;;Slowking;Professor Turo's Scenario;PRE 121;1;1;1;19;5,26;PRE;;121;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_121_R_EN_LG.png;No
+Meta Live;;Slowking;Team Rocket's Petrel;ASC 207;1;1;1;19;5,26;ASC;;207;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_207_R_EN_LG.png;No
+Meta Live;;Slowking;Technical Machine: Devolution;PAR 177;5;1;5;19;26,32;PAR;;177;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_177_R_EN_LG.png;No
 Meta Live;;Slowking;Air Balloon;ASC 181;6;2;4;19;21,05;ASC;;181;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_181_R_EN_LG.png;No
-Meta Live;;Slowking;Technical Machine: Devolution;PAR 177;4;1;4;19;21,05;PAR;;177;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_177_R_EN_LG.png;No
 Meta Live;;Slowking;Technical Machine: Evolution;PAR 178;4;1;4;19;21,05;PAR;;178;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_178_R_EN_LG.png;No
-Meta Live;;Slowking;Powerglass;SFA 63;5;2;3;19;15,79;SFA;;63;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_063_R_EN_LG.png;No
+Meta Live;;Slowking;Powerglass;SFA 63;6;2;3;19;15,79;SFA;;63;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_063_R_EN_LG.png;No
+Meta Live;;Slowking;Brave Bangle;WHT 80;2;2;1;19;5,26;WHT;;80;Uncommon;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_080_R_EN_LG.png;No
 Meta Live;;Slowking;Counter Gain;ASC 186;1;1;1;19;5,26;ASC;;186;Common;Tool;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_186_R_EN_LG.png;No
 Meta Live;;Tera Box;Teal Mask Ogerpon ex;TWM 25;25;2;19;20;95,0;TWM;;25;Double Rare;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_025_R_EN_LG.png;No
 Meta Live;;Tera Box;Iron Leaves ex;TEF 25;17;1;17;20;85,0;TEF;;25;Double Rare;G Basic;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_025_R_EN_LG.png;No

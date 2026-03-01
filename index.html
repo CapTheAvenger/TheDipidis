@@ -2071,22 +2071,24 @@
                 gap: 3px;
             }
 
-            /* Mobile Deck Builder (Dein Deck) - 4 Spalten wie in Übersicht */
+            /* Mobile Deck Builder (Dein Deck) - 4 Spalten mit max 69px Breite */
             #cityLeagueMyDeckGrid,
             #currentMetaMyDeckGrid,
             #pastMetaMyDeckGrid {
-                grid-template-columns: repeat(4, 1fr) !important;
+                grid-template-columns: repeat(4, minmax(auto, 69px)) !important;
                 gap: 8px !important;
                 padding: 8px !important;
+                justify-content: center !important;
             }
 
-            /* Mobile Deck Builder Cards - max 69px breit, 97px hoch */
+            /* Mobile Deck Builder Cards - enforce 69px width */
             #cityLeagueMyDeckGrid .deck-card,
             #currentMetaMyDeckGrid .deck-card,
             #pastMetaMyDeckGrid .deck-card {
+                width: 69px !important;
                 max-width: 69px !important;
                 padding-bottom: 140% !important; /* Maintains aspect ratio 69x97 */
-                margin: 0 auto !important;
+                margin: 0 !important;
             }
 
             /* Mobile Deck Builder - stats badge */

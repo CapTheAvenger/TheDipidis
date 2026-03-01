@@ -2077,13 +2077,16 @@
             #pastMetaMyDeckGrid {
                 grid-template-columns: repeat(4, 1fr) !important;
                 gap: 8px !important;
+                padding: 8px !important;
             }
 
-            /* Mobile Deck Builder Cards - smaller sizing */
+            /* Mobile Deck Builder Cards - max 69px breit, 97px hoch */
             #cityLeagueMyDeckGrid .deck-card,
             #currentMetaMyDeckGrid .deck-card,
             #pastMetaMyDeckGrid .deck-card {
-                padding-bottom: 140% !important; /* Maintains aspect ratio */
+                max-width: 69px !important;
+                padding-bottom: 140% !important; /* Maintains aspect ratio 69x97 */
+                margin: 0 auto !important;
             }
 
             /* Mobile Deck Builder - stats badge */
@@ -2105,22 +2108,23 @@
                 text-overflow: ellipsis !important;
             }
 
-            /* Mobile Deck Builder - buttons angepasst an Kartengröße (69px breit) */
+            /* Mobile Deck Builder - buttons angepasst an Kartengröße (63px breit x 15px hoch) */
             #cityLeagueMyDeckGrid .deck-card div[style*="bottom: 5px"],
             #currentMetaMyDeckGrid .deck-card div[style*="bottom: 5px"],
             #pastMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] {
                 left: 3px !important;
                 right: 3px !important;
                 gap: 2px !important;
+                height: 15px !important;
             }
 
             #cityLeagueMyDeckGrid .deck-card div[style*="bottom: 5px"] button,
             #currentMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] button,
             #pastMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] button {
-                height: 16px !important;
+                height: 15px !important;
                 width: auto !important;
-                min-height: 16px !important;
-                font-size: 9px !important;
+                min-height: 15px !important;
+                font-size: 8px !important;
                 border-radius: 3px !important;
                 padding: 0 !important;
             }

@@ -2071,28 +2071,31 @@
                 gap: 3px;
             }
 
-            /* Mobile Deck Builder (Dein Deck) - compact cards for mobile */
+            /* Mobile Deck Builder (Dein Deck) - 4 Spalten wie in Übersicht */
             #cityLeagueMyDeckGrid,
-            #currentMetaMyDeckGrid {
-                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important;
-                gap: 3px !important;
+            #currentMetaMyDeckGrid,
+            #pastMetaMyDeckGrid {
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 8px !important;
             }
 
             /* Mobile Deck Builder Cards - smaller sizing */
             #cityLeagueMyDeckGrid .deck-card,
-            #currentMetaMyDeckGrid .deck-card {
+            #currentMetaMyDeckGrid .deck-card,
+            #pastMetaMyDeckGrid .deck-card {
                 padding-bottom: 140% !important; /* Maintains aspect ratio */
             }
 
-            /* Mobile Deck Builder - smaller stats badge */
+            /* Mobile Deck Builder - stats badge */
             #cityLeagueMyDeckGrid .deck-card div[style*="bottom: 30px"],
-            #currentMetaMyDeckGrid .deck-card div[style*="bottom: 30px"] {
-                bottom: 21px !important;
-                font-size: 6px !important;
-                padding: 1px 3px !important;
-                border-radius: 2px !important;
-                max-width: 59px !important;
-                height: 14px !important;
+            #currentMetaMyDeckGrid .deck-card div[style*="bottom: 30px"],
+            #pastMetaMyDeckGrid .deck-card div[style*="bottom: 30px"] {
+                bottom: 23px !important;
+                font-size: 7px !important;
+                padding: 2px 4px !important;
+                border-radius: 3px !important;
+                max-width: 65px !important;
+                height: 16px !important;
                 line-height: 12px !important;
                 display: flex !important;
                 align-items: center !important;
@@ -2102,33 +2105,34 @@
                 text-overflow: ellipsis !important;
             }
 
-            /* Mobile Deck Builder - smaller buttons */
+            /* Mobile Deck Builder - buttons angepasst an Kartengröße (69px breit) */
             #cityLeagueMyDeckGrid .deck-card div[style*="bottom: 5px"],
-            #currentMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] {
-                left: 2px !important;
-                right: 2px !important;
+            #currentMetaMyDeckGrid .deck-card div[style*="bottom: 5px"],
+            #pastMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] {
+                left: 3px !important;
+                right: 3px !important;
                 gap: 2px !important;
             }
 
             #cityLeagueMyDeckGrid .deck-card div[style*="bottom: 5px"] button,
-            #currentMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] button {
-                height: 13px !important;
-                width: 13px !important;
-                min-height: 13px !important;
-                min-width: 13px !important;
-                max-width: 13px !important;
-                font-size: 7px !important;
-                border-radius: 2px !important;
+            #currentMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] button,
+            #pastMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] button {
+                height: 16px !important;
+                width: auto !important;
+                min-height: 16px !important;
+                font-size: 9px !important;
+                border-radius: 3px !important;
                 padding: 0 !important;
             }
 
-            /* Mobile Deck Builder - smaller count badge */
+            /* Mobile Deck Builder - count badge */
             #cityLeagueMyDeckGrid .card-max-count,
-            #currentMetaMyDeckGrid .card-max-count {
-                font-size: 10px !important;
-                width: 18px !important;
-                height: 18px !important;
-                line-height: 18px !important;
+            #currentMetaMyDeckGrid .card-max-count,
+            #pastMetaMyDeckGrid .card-max-count {
+                font-size: 11px !important;
+                width: 20px !important;
+                height: 20px !important;
+                line-height: 20px !important;
             }
 
             /* Modals für mobile optimiert */

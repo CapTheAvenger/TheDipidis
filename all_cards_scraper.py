@@ -17,18 +17,11 @@ from datetime import datetime
 from typing import List, Dict, Optional
 from urllib.parse import urljoin
 
-# Fix Windows console encoding for Unicode characters (✓, •, etc.)
-if sys.platform == 'win32':
-    if hasattr(sys.stdout, 'reconfigure'):
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
-    if hasattr(sys.stderr, 'reconfigure'):
-        try:
-            sys.stderr.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
+# Import shared utilities
+from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, load_scraped_ids, save_scraped_ids
+
+# Fix Windows console encoding for Unicode characters
+setup_console_encoding()
 
 print("=" * 80)
 print("ALL CARDS SCRAPER - Scraping ALL Cards from Limitless TCG")
@@ -63,29 +56,6 @@ DEFAULT_SETTINGS = {
 }
 
 
-def get_app_dir() -> str:
-    if getattr(sys, "frozen", False):
-        return os.path.dirname(sys.executable)
-    return os.path.dirname(os.path.abspath(__file__))
-
-
-def get_data_dir() -> str:
-    """Get the correct data directory path.
-    
-    Returns:
-        - 'data' if running as Python script from root
-        - '../data' if running as EXE from dist/ folder (to write to root/data/)
-    """
-    app_dir = get_app_dir()
-    
-    # If running as EXE and in 'dist' folder, go up one level
-    if getattr(sys, "frozen", False) and app_dir.endswith("dist"):
-        return os.path.join(app_dir, "..", "data")
-    
-    # Otherwise use 'data' relative to current directory
-    return "data"
-
-
 def get_scraped_pages_file() -> str:
     """Get path to scraped pages tracking file."""
     data_dir = get_data_dir()
@@ -94,34 +64,12 @@ def get_scraped_pages_file() -> str:
 
 def load_scraped_pages() -> set:
     """Load set of already scraped page numbers."""
-    tracking_file = get_scraped_pages_file()
-    
-    if not os.path.exists(tracking_file):
-        return set()
-    
-    try:
-        with open(tracking_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            return set(data.get('scraped_pages', []))
-    except Exception as e:
-        print(f"[All Cards Scraper] Warning: Could not load scraped pages: {e}")
-        return set()
+    return load_scraped_ids(get_scraped_pages_file())
 
 
 def save_scraped_pages(pages: set) -> None:
     """Save set of scraped page numbers to tracking file."""
-    tracking_file = get_scraped_pages_file()
-    
-    try:
-        data = {
-            'scraped_pages': sorted(list(pages)),
-            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'total_pages': len(pages)
-        }
-        with open(tracking_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(f"[All Cards Scraper] Warning: Could not save scraped pages: {e}")
+    save_scraped_ids(get_scraped_pages_file(), pages, 'scraped_pages')
 
 
 def load_settings() -> Dict[str, object]:

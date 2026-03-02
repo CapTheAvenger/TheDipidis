@@ -10,9 +10,15 @@ echo Run this AFTER:
 echo   1. RUN_ALL_CARDS.bat (or incremental update)
 echo   2. RUN_PRICE_SCRAPER.bat
 echo.
-python prepare_card_data.py
+.venv\Scripts\python.exe prepare_card_data.py
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo FEHLER: Script fehlgeschlagen! Error Code: %ERRORLEVEL%
+    pause
+    exit /b %ERRORLEVEL%
+)
 echo.
 echo ============================================================
-echo Completed!
+echo Completed successfully!
 echo ============================================================
 pause

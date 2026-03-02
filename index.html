@@ -1062,6 +1062,8 @@
             text-align: center;
             text-decoration: none;
             display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
         }
         
         .card-database-btn-rarity {
@@ -1129,24 +1131,54 @@
         
         /* .card-deck-count removed as per user request */
 
-        @media (max-width: 768px) {
+        /* Matchups untereinander ab Tablet-Größe (iPhone Pro Max Landscape = 932px) */
+        @media (max-width: 932px) {
             .matchups-grid {
                 grid-template-columns: 1fr !important;
             }
             
-            /* Best/Worst Matchups untereinander auf Mobile */
+            /* Best/Worst Matchups untereinander auf Mobile/Tablet */
             .matchups-grid-container,
             .section-grid-container {
                 display: flex !important;
                 flex-direction: column !important;
-                gap: 20px !important;
+                gap: 15px !important;
+                grid-template-columns: none !important;
             }
             
             .matchups-grid-container > *,
             .section-grid-container > * {
                 width: 100% !important;
                 max-width: none !important;
+                min-width: 0 !important;
+                padding: 12px !important;
             }
+            
+            /* Matchup Tabellen: Mobile/Tablet Optimierung */
+            .matchups-grid-container table {
+                font-size: 0.75em !important;
+                display: block !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                table-layout: auto !important;
+            }
+            
+            .matchups-grid-container table th,
+            .matchups-grid-container table td {
+                padding: 6px 3px !important;
+                font-size: 0.85em !important;
+                white-space: normal !important;
+                word-wrap: break-word !important;
+            }
+            
+            .matchups-grid-container h4 {
+                font-size: 0.95em !important;
+                margin-bottom: 8px !important;
+                margin-top: 0 !important;
+            }
+        }
+
+        @media (max-width: 768px) {
             
             /* Only apply compact grid to card overview, not Deck Builder */
             #cityLeagueDeckGrid,
@@ -2328,12 +2360,15 @@
                 padding: 8px !important;
             }
             
-            /* Card Items: Overlay-Design (Text/Buttons auf Karte) */
+            /* Card Items: Sauberes Design mit Info unter der Karte */
             .card-database-item {
                 position: relative !important;
                 border-radius: 10px !important;
                 overflow: hidden !important;
                 box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+                background: white !important;
+                display: flex !important;
+                flex-direction: column !important;
             }
             
             .card-database-item:hover {
@@ -2348,76 +2383,106 @@
                 display: block !important;
             }
             
-            /* Info-Bereich als Overlay über untere 2/3 der Karte */
+            /* Info-Bereich unter der Karte (nicht als Overlay) */
             .card-database-info {
-                position: absolute !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                height: 60.5% !important;
-                padding: 4px 4px 3px 4px !important;
-                background: linear-gradient(to top, 
-                    rgba(255, 255, 255, 0.98) 0%, 
-                    rgba(255, 255, 255, 0.95) 40%, 
-                    rgba(255, 255, 255, 0.85) 60%,
-                    rgba(255, 255, 255, 0) 100%) !important;
-                backdrop-filter: blur(4px) !important;
+                position: relative !important;
+                padding: 5px !important;
+                background: white !important;
                 display: flex !important;
                 flex-direction: column !important;
-                justify-content: flex-end !important;
-                gap: 3px !important;
+                gap: 4px !important;
+                border-top: 1px solid #e0e0e0 !important;
             }
             
-            /* Kartenname kompakt */
+            /* Kartenname kompakt aber lesbar */
             .card-database-name {
-                font-size: 9px !important;
+                font-size: 11px !important;
                 font-weight: 700 !important;
-                line-height: 1.1 !important;
-                margin: 0 0 2px 0 !important;
+                line-height: 1.3 !important;
+                margin: 0 0 3px 0 !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
                 display: -webkit-box !important;
                 -webkit-line-clamp: 2 !important;
                 -webkit-box-orient: vertical !important;
+                color: #333 !important;
             }
             
             /* Meta-Infos (Set, Type) kompakt */
             .card-database-meta {
-                font-size: 7px !important;
-                gap: 2px !important;
-                margin-bottom: 2px !important;
+                display: flex !important;
+                gap: 4px !important;
+                flex-wrap: wrap !important;
+                margin-bottom: 3px !important;
             }
             
             .card-database-set {
-                font-size: 7px !important;
-                padding: 1px 3px !important;
-                border-radius: 2px !important;
+                font-size: 8px !important;
+                padding: 2px 5px !important;
+                border-radius: 3px !important;
+                background: #e0e0e0 !important;
+                color: #333 !important;
+                font-weight: 600 !important;
             }
             
             .card-database-type {
-                font-size: 7px !important;
-                padding: 1px 3px !important;
-                border-radius: 2px !important;
+                font-size: 8px !important;
+                padding: 2px 5px !important;
+                border-radius: 3px !important;
+                background: #f5f5f5 !important;
+                color: #333 !important;
+                font-weight: 600 !important;
             }
             
             /* Rarity Badge kompakt */
             .card-database-rarity {
-                font-size: 7px !important;
-                padding: 2px 4px !important;
-                border-radius: 3px !important;
-                margin-top: 2px !important;
+                font-size: 9px !important;
+                padding: 1px 3px !important;
+                border-radius: 2px !important;
+                margin-top: 1px !important;
             }
             
-            /* Action Buttons kompakt */
-            .card-database-actions {
-                gap: 3px !important;
-                margin-top: 3px !important;
+            /* Button Row vertikal auf Mobile - jeder Button in eigener Zeile */
+            .card-database-button-row {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 4px !important;
+                margin-top: 4px !important;
             }
             
-            .card-database-actions button {
-                padding: 3px 5px !important;
-                font-size: 8px !important;
-                border-radius: 3px !important;
+            /* Preis und Rarität Buttons mit voller Breite auf Mobile */
+            .card-database-price-btn,
+            .card-database-rarity-btn {
+                width: 100% !important;
+                height: 22px !important;
+                padding: 0 8px !important;
+                font-size: 10px !important;
+                border-radius: 5px !important;
+                font-weight: 700 !important;
+                line-height: 22px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                white-space: nowrap !important;
+                flex: none !important;
+            }
+            
+            /* Preis Badge kompakter */
+            .card-database-price {
+                margin-top: 1px !important;
+                padding: 1px 3px !important;
+                font-size: 10px !important;
+                border-radius: 2px !important;
+                font-weight: 600 !important;
+            }
+            
+            /* Coverage anzeigen auf Mobile */
+            .card-database-coverage {
+                margin-top: 4px !important;
+                padding: 5px !important;
+                font-size: 9px !important;
+                border-radius: 4px !important;
+                text-align: center !important;
                 font-weight: 600 !important;
             }
             
@@ -2733,12 +2798,90 @@
             .card-database-set,
             .card-database-type,
             .card-database-rarity {
-                font-size: 6px !important;
+                font-size: 8px !important;
             }
             
-            .card-database-actions button {
+            /* Noch kompaktere Info-Section */
+            .card-database-info {
+                padding: 3px !important;
+                gap: 2px !important;
+            }
+            
+            .card-database-name {
+                margin: 0 0 2px 0 !important;
+                font-size: 10px !important;
+            }
+            
+            .card-database-meta {
+                margin-bottom: 2px !important;
+            }
+            
+            .card-database-set,
+            .card-database-type {
                 font-size: 7px !important;
                 padding: 2px 4px !important;
+            }
+            
+            .card-database-button-row {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 2px !important;
+                margin-top: 2px !important;
+            }
+            
+            .card-database-rarity {
+                padding: 1px 2px !important;
+                margin-top: 0 !important;
+            }
+            
+            /* Buttons für Preis und Rarität auf sehr kleinen Screens - volle Breite */
+            .card-database-price-btn,
+            .card-database-rarity-btn {
+                width: 100% !important;
+                height: 20px !important;
+                padding: 0 6px !important;
+                font-size: 9px !important;
+                line-height: 20px !important;
+                border-radius: 4px !important;
+                flex: none !important;
+            }
+            
+            /* Coverage auch auf kleinen Screens anzeigen */
+            .card-database-coverage {
+                margin-top: 2px !important;
+                padding: 4px !important;
+                font-size: 8px !important;
+                border-radius: 4px !important;
+            }
+            
+            /* Buttons: gleiche Dimensionen auf sehr kleinen Screens */
+            .card-database-actions {
+                width: 69px !important;
+                height: 15px !important;
+                gap: 1px !important;
+                margin-top: 1px !important;
+            }
+            
+            .card-database-actions button,
+            .card-database-actions a {
+                width: 14px !important;
+                height: 15px !important;
+                padding: 0 !important;
+                font-size: 9px !important;
+                min-width: 14px !important;
+                flex: 0 0 14px !important;
+            }
+            
+            .card-database-btn-rarity::before,
+            .card-database-btn-market::before {
+                font-size: 9px !important;
+            }
+            
+            /* Preis extrem klein */
+            .card-database-price {
+                margin-top: 0 !important;
+                padding: 1px 2px !important;
+                font-size: 9px !important;
             }
             
             /* Header noch kompakter */
@@ -3426,6 +3569,20 @@
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="tool"> 🔧 Tool</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="stadium"> 🏟️ Stadium</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="special_energy"> ⚡ Special Energy</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Deck Coverage Filter -->
+                        <div class="cards-filter-group">
+                            <div class="cards-filter-header collapsed" onclick="toggleCardFilter('deckCoverageFilterOptions')">
+                                <span>📊 Deck Coverage</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="cards-filter-options collapsed" id="deckCoverageFilterOptions">
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="100"> 💯 In 100% aller Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="90"> 🔥 In ≥90% der Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="70"> ⭐ In ≥70% der Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="50"> 📈 In ≥50% der Decks</label>
                             </div>
                         </div>
                     </div>
@@ -5329,7 +5486,7 @@
                     <div class="card-table-row" data-card-name="${cardName.toLowerCase()}" style="display: flex; align-items: center; background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); gap: 20px;">
                         <!-- Card Image -->
                         <div style="flex-shrink: 0; position: relative; width: 120px;">
-                            <img src="${imageUrl}" alt="${cardName}" referrerpolicy="no-referrer" style="width: 100%; border-radius: 6px; cursor: zoom-in; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.opacity='0.3'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}');">
+                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; border-radius: 6px; cursor: zoom-in; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.opacity='0.3'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                             ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${deckCount}</div>` : ''}
                         </div>
                         
@@ -5434,6 +5591,22 @@
             // Get current deck to show deck counts
             const currentDeck = window.cityLeagueDeck || {};
             
+            // PERFORMANCE: Pre-build price lookup Map for O(1) access
+            const allCardsDatabase = window.allCardsDatabase || [];
+            const priceMap = new Map();
+            allCardsDatabase.forEach(card => {
+                if (card.set && card.number) {
+                    const key = `${card.set}-${card.number}`;
+                    priceMap.set(key, card);
+                    // Also store with normalized number (without leading zeros)
+                    const normalizedNumber = card.number.replace(/^0+/, '') || '0';
+                    const normalizedKey = `${card.set}-${normalizedNumber}`;
+                    if (normalizedKey !== key) {
+                        priceMap.set(normalizedKey, card);
+                    }
+                }
+            });
+            
             let html = '';
             sortedCards.forEach(card => {
                 const cardName = card.card_name;
@@ -5527,21 +5700,19 @@
                 const avgCountOverall = totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype).toFixed(2) : '0.00';  // Average over all decks
                 const avgCountInUsedDecks = decksWithCard > 0 ? (totalCount / decksWithCard).toFixed(2) : '0.00';  // Average in decks that use this card
                 
-                // Get price and Cardmarket URL from allCardsDatabase
+                // PERFORMANCE: Get price using Map lookup instead of find()
                 let eurPrice = '';
                 let cardmarketUrl = '';
-                if (setCode && setNumber && allCardsDatabase) {
+                if (setCode && setNumber) {
                     // Try exact match first
-                    let priceCard = allCardsDatabase.find(c => 
-                        c.set === setCode && c.number === setNumber
-                    );
+                    let key = `${setCode}-${setNumber}`;
+                    let priceCard = priceMap.get(key);
                     
                     // If no exact match, try with normalized numbers (remove leading zeros)
                     if (!priceCard) {
                         const normalizedNumber = setNumber.replace(/^0+/, '') || '0';
-                        priceCard = allCardsDatabase.find(c => 
-                            c.set === setCode && (c.number === normalizedNumber || c.number === setNumber)
-                        );
+                        const normalizedKey = `${setCode}-${normalizedNumber}`;
+                        priceCard = priceMap.get(normalizedKey);
                         if (priceCard) {
                             console.log(`[Price Lookup] Found with normalized number for ${cardName}: ${setCode} ${setNumber} -> ${normalizedNumber}`);
                         }
@@ -5561,7 +5732,7 @@
                 html += `
                     <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                         <div class="card-image-container" style="position: relative; width: 100%;">
-                            <img src="${imageUrl}" alt="${cardName}" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
+                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                             
                             <!-- Red badge: Max Count (top-right) -->
                             <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
@@ -5896,7 +6067,7 @@
                 html += '<tr>';
                 // Image with green badge if card is in deck
                 html += `<td class="col-image"><div style="position: relative; display: inline-block;">`;
-                html += `<img src="${imageUrl}" alt="${cardName}" style="width: 60px; border-radius: 4px; cursor: zoom-in;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2284%22%3E%3Crect width=%2260%22 height=%2284%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2210%22%3ENo Image%3C/text%3E%3C/svg%3E'" onclick="showSingleCard('${imageUrl}', '${cardName.replace(/'/g, "\\'")}')">`;
+                html += `<img src="${imageUrl}" alt="${cardName}" loading="lazy" style="width: 60px; border-radius: 4px; cursor: zoom-in;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2284%22%3E%3Crect width=%2260%22 height=%2284%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2210%22%3ENo Image%3C/text%3E%3C/svg%3E'" onclick="showSingleCard('${imageUrl}', '${cardName.replace(/'/g, "\\'")}')">`;
                 if (currentDeckCount > 0) {
                     html += `<div style="position: absolute; top: 2px; left: 2px; background: #28a745; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${currentDeckCount}</div>`;
                 }
@@ -6617,7 +6788,7 @@
                 
                 html += `
                     <div class="deck-card" style="position: relative;" title="${card.card_name} (${count}x) - ${percentage}%">
-                        <img src="${imageUrl}" alt="${card.card_name}" style="cursor: zoom-in;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22245%22 height=%22342%22%3E%3Crect fill=%22%23667eea%22 width=%22245%22 height=%22342%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22%3EKeine Bild%3C/text%3E%3C/svg%3E'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}')">
+                        <img src="${imageUrl}" alt="${card.card_name}" loading="lazy" style="cursor: zoom-in;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22245%22 height=%22342%22%3E%3Crect fill=%22%23667eea%22 width=%22245%22 height=%22342%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22%3EKeine Bild%3C/text%3E%3C/svg%3E'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}')">
                         
                         <div class="card-max-count">${count}</div>
                         
@@ -7047,7 +7218,7 @@
                 // Card image or placeholder
                 let imgHtml = '';
                 if (imageUrl && imageUrl.trim() !== '') {
-                    imgHtml = `<img src="${imageUrl}" alt="${card.card_name}" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${card.card_name.replace(/'/g, "\\'")}');">`;
+                    imgHtml = `<img src="${imageUrl}" alt="${card.card_name}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${card.card_name.replace(/'/g, "\\'")}');">`;
                 } else {
                     imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">🃏</div>`;
                 }
@@ -7119,13 +7290,20 @@
             const allCards = currentCardsKey ? (window[currentCardsKey] || []) : (pastMetaFilteredCards || []);
             const allCardsDb = window.allCardsDatabase || [];
             
-            // Build a map of card data keyed by name
-            const cardDataMap = {};
+            // PERFORMANCE: Build map for O(1) lookups
+            const cardDataMap = new Map();
             allCards.forEach(card => {
-                // Handle both 'card_name' (cityLeague/currentMeta) and 'full_card_name' (pastMeta)
                 const cardName = card.card_name || card.full_card_name;
                 if (cardName) {
-                    cardDataMap[cardName] = card;
+                    cardDataMap.set(cardName, card);
+                }
+            });
+            
+            // PERFORMANCE: Pre-build allCardsDb Map by name for O(1) lookup
+            const allCardsDbMap = new Map();
+            allCardsDb.forEach(card => {
+                if (card.name) {
+                    allCardsDbMap.set(card.name, card);
                 }
             });
             
@@ -7138,22 +7316,13 @@
                 const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
                 const cardName = baseNameMatch ? baseNameMatch[1] : deckKey;
                 
-                let cardData = cardDataMap[cardName] || cardDataMap[deckKey];
+                let cardData = cardDataMap.get(cardName) || cardDataMap.get(deckKey);
                 
-                // If not found, try to find in allCardsDatabase
+                // If not found, try allCardsDatabase with O(1) lookup
                 if (!cardData) {
                     const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
                     if (setMatch) {
-                        const exactCard = allCardsDb.find(c => c.name === cardName);
-                        if (exactCard) {
-                            const imageUrl = buildCardImageUrl(setMatch[1], setMatch[2], exactCard.rarity || 'Common');
-                            cardData = {
-                                card_name: exactCard.name,
-                                image_url: imageUrl,
-                                type: exactCard.type || 'Unknown',
-                                set_code: setMatch[1]
-                            };
-                        }
+                        const exactCard = allCardsDbMap.get(cardName);
                     }
                 }
                 
@@ -7836,6 +8005,25 @@
                 if (container) {
                     // Insert the full container HTML (includes stats, climbers, matchups, table)
                     currentMetaContent.innerHTML = container.innerHTML;
+                    
+                    // PATCH: Remove inline grid styles from matchup containers for mobile responsiveness
+                    const matchupGrids = currentMetaContent.querySelectorAll('div[style*="grid-template-columns"]');
+                    matchupGrids.forEach(grid => {
+                        // Only remove grid styles from matchup sections (they typically have 2 direct children with tables)
+                        const directChildren = grid.children;
+                        if (directChildren.length === 2) {
+                            const hasMatchupTables = grid.querySelectorAll('table').length >= 2;
+                            if (hasMatchupTables) {
+                                // Remove inline grid style, let CSS take over
+                                grid.style.display = '';
+                                grid.style.gridTemplateColumns = '';
+                                grid.style.gap = '';
+                                // Add the CSS class instead
+                                grid.classList.add('matchups-grid-container');
+                                console.log('✅ Removed inline grid styles from matchup container');
+                            }
+                        }
+                    });
                     
                     // Now patch ONLY the Full Comparison Table with our improved version
                     patchLimitlessComparisonTable();
@@ -8747,7 +8935,7 @@
                     html += `
                         <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                             <div class="card-image-container" style="position: relative; width: 100%;">
-                                <img src="${imageUrl}" alt="${cardName}" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                                 
                                 <!-- Red badge: Average Count (top-right) -->
                                 <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
@@ -8981,6 +9169,9 @@
                 // Load playable cards (from City League, Current Meta, Tournament JH)
                 await loadPlayableCards();
                 
+                // Load deck coverage statistics
+                await loadDeckCoverageStats();
+                
                 // Load formats from current meta data
                 await loadFormatsForCards();
                 
@@ -9053,6 +9244,79 @@
                 console.log(`Total unique playable cards: ${window.playableCardsSet.size}`);
             } catch (error) {
                 console.error('Error loading playable cards:', error);
+            }
+        }
+        
+        async function loadDeckCoverageStats() {
+            window.cardDeckCoverageMap = new Map(); // Map<card_name, {decksWithCard: Set, totalDecks: number, percentage: number}>
+            const allArchetypeDecksMap = new Set(); // Track all unique decks across both sources
+            
+            try {
+                // Load both City League and Tournament data for comprehensive coverage
+                const dataSources = [
+                    { file: 'city_league_analysis.csv', name: 'City League' },
+                    { file: 'tournament_cards_data_cards.csv', name: 'Tournament' }
+                ];
+                
+                for (const source of dataSources) {
+                    try {
+                        const response = await fetch(BASE_PATH + source.file);
+                        const text = await response.text();
+                        const rows = parseCSV(text);
+                        
+                        rows.forEach(row => {
+                            if (!row.card_name || !row.archetype || !row.meta) return;
+                            
+                            const cardName = row.card_name.toLowerCase();
+                            const archetypeKey = `${row.meta}|${row.archetype}`;
+                            
+                            // Track which archetype-decks this card appears in
+                            if (!window.cardDeckCoverageMap.has(cardName)) {
+                                window.cardDeckCoverageMap.set(cardName, {
+                                    decksWithCard: new Set(),
+                                    archetypes: new Set()
+                                });
+                            }
+                            
+                            const cardStats = window.cardDeckCoverageMap.get(cardName);
+                            cardStats.decksWithCard.add(archetypeKey);
+                            cardStats.archetypes.add(row.archetype);
+                            
+                            // Track all unique decks across all sources
+                            allArchetypeDecksMap.add(archetypeKey);
+                        });
+                        
+                        console.log(`[Deck Coverage] Loaded from ${source.name}`);
+                    } catch (err) {
+                        console.warn(`Could not load ${source.name} deck coverage:`, err);
+                    }
+                }
+                
+                // Set total unique decks from all sources combined
+                window.totalUniqueDecks = allArchetypeDecksMap.size;
+                
+                // Calculate percentages
+                if (window.totalUniqueDecks > 0) {
+                    window.cardDeckCoverageMap.forEach((stats, cardName) => {
+                        stats.percentage = (stats.decksWithCard.size / window.totalUniqueDecks) * 100;
+                        stats.deckCount = stats.decksWithCard.size;
+                    });
+                }
+                
+                console.log(`[Deck Coverage] Total unique decks: ${window.totalUniqueDecks}`);
+                console.log(`[Deck Coverage] Cards with coverage data: ${window.cardDeckCoverageMap.size}`);
+                
+                // Log some examples
+                const sortedByPercentage = Array.from(window.cardDeckCoverageMap.entries())
+                    .sort((a, b) => b[1].percentage - a[1].percentage)
+                    .slice(0, 10);
+                console.log('[Deck Coverage] Top 10 cards by deck coverage:');
+                sortedByPercentage.forEach(([name, stats]) => {
+                    console.log(`  ${name}: ${stats.percentage.toFixed(1)}% (${stats.deckCount}/${window.totalUniqueDecks} decks)`);
+                });
+                
+            } catch (error) {
+                console.error('Error loading deck coverage stats:', error);
             }
         }
         
@@ -9296,7 +9560,7 @@
                 
                 return `
                     <div class="cards-autocomplete-item" onclick="selectCardFromAutocomplete('${card.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
-                        <img src="${card.image_url}" alt="${card.name}">
+                        <img src="${card.image_url}" alt="${card.name}" loading="lazy">
                         <div class="cards-autocomplete-item-info">
                             <div class="cards-autocomplete-item-name">${card.name}</div>
                             <div class="cards-autocomplete-item-meta">${card.set} ${card.number} • ${card.type || 'Unknown'}</div>
@@ -9355,8 +9619,9 @@
             const selectedSets = Array.from(document.querySelectorAll('#setFilterOptions input:checked')).map(cb => cb.value);
             const selectedRarities = Array.from(document.querySelectorAll('#rarityFilterOptions input:checked')).map(cb => cb.value);
             const selectedCategories = Array.from(document.querySelectorAll('#categoryFilterOptions input:checked')).map(cb => cb.value);
+            const selectedDeckCoverages = Array.from(document.querySelectorAll('#deckCoverageFilterOptions input:checked')).map(cb => parseFloat(cb.value));
             
-            console.log(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}`);
+            console.log(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}, DeckCov: ${selectedDeckCoverages.length}`);
             
             let passedFilters = 0;
             let failedSearch = 0;
@@ -9364,6 +9629,7 @@
             let failedSet = 0;
             let failedRarity = 0;
             let failedCategory = 0;
+            let failedDeckCoverage = 0;
             let failedValidation = 0;
             
             window.filteredCardsData = window.allCardsData.filter(card => {
@@ -9464,6 +9730,43 @@
                     }
                 }
                 
+                // Deck Coverage filter
+                if (selectedDeckCoverages.length > 0 && window.cardDeckCoverageMap) {
+                    const cardNameLower = card.name.toLowerCase();
+                    const coverageStats = window.cardDeckCoverageMap.get(cardNameLower);
+                    
+                    if (!coverageStats) {
+                        // Card has no deck coverage data
+                        failedDeckCoverage++;
+                        return false;
+                    }
+                    
+                    const percentage = coverageStats.percentage || 0;
+                    let coverageMatch = false;
+                    
+                    // Check if card meets any of the selected coverage thresholds
+                    for (const threshold of selectedDeckCoverages) {
+                        if (threshold === 100) {
+                            // Exactly 100%
+                            if (percentage >= 99.5) { // Allow small rounding errors
+                                coverageMatch = true;
+                                break;
+                            }
+                        } else {
+                            // Greater than or equal to threshold
+                            if (percentage >= threshold) {
+                                coverageMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!coverageMatch) {
+                        failedDeckCoverage++;
+                        return false;
+                    }
+                }
+                
                 passedFilters++;
                 return true;
             });
@@ -9476,6 +9779,7 @@
             console.log(`  - Failed set: ${failedSet}`);
             console.log(`  - Failed rarity: ${failedRarity}`);
             console.log(`  - Failed category: ${failedCategory}`);
+            console.log(`  - Failed deck coverage: ${failedDeckCoverage}`);
             console.log(`[Cards Tab] Filtered ${window.filteredCardsData.length} cards from ${window.allCardsData.length} total`);
             renderCardDatabase(window.filteredCardsData);
         }
@@ -9531,35 +9835,66 @@
             const displayRarity = card.rarity || 'Unknown';
             const displayCardMarketUrl = card.cardmarket_url || '#';
             
-            // Format price
-            let priceDisplay = '';
+            // Format price button
+            let priceButton = '';
             if (card.eur_price && card.eur_price !== '' && card.eur_price !== '0' && card.eur_price !== 'N/A') {
                 const price = parseFloat(card.eur_price.replace(',', '.'));
                 if (!isNaN(price)) {
-                    priceDisplay = `<div style="margin-top: 8px; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 16px;">
+                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" class="card-database-price-btn" style="display: block; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; text-decoration: none; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View on CardMarket">
                         💰 ${price.toFixed(2).replace('.', ',')} €
+                    </a>`;
+                }
+            }
+            
+            // Deck Coverage display
+            let coverageDisplay = '';
+            if (window.cardDeckCoverageMap) {
+                const cardNameLower = card.name.toLowerCase();
+                const coverageStats = window.cardDeckCoverageMap.get(cardNameLower);
+                
+                if (coverageStats && window.totalUniqueDecks) {
+                    const percentage = coverageStats.percentage || 0;
+                    const deckCount = coverageStats.deckCount || 0;
+                    const archetypeCount = coverageStats.archetypes.size || 0;
+                    
+                    let coverageColor = '#95a5a6'; // Gray for < 50%
+                    let coverageIcon = '📊';
+                    
+                    if (percentage >= 99.5) {
+                        coverageColor = '#e74c3c'; // Red for 100%
+                        coverageIcon = '💯';
+                    } else if (percentage >= 90) {
+                        coverageColor = '#e67e22'; // Orange for ≥90%
+                        coverageIcon = '🔥';
+                    } else if (percentage >= 70) {
+                        coverageColor = '#f39c12'; // Yellow for ≥70%
+                        coverageIcon = '⭐';
+                    } else if (percentage >= 50) {
+                        coverageColor = '#3498db'; // Blue for ≥50%
+                        coverageIcon = '📈';
+                    }
+                    
+                    coverageDisplay = `<div class="card-database-coverage" style="margin-top: 8px; padding: 8px; background: ${coverageColor}; color: white; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px;" title="${deckCount} Decks / ${archetypeCount} Archetypes">
+                        ${coverageIcon} ${percentage.toFixed(1)}% Deck Coverage
                     </div>`;
                 }
             }
             
             item.innerHTML = `
-                <img src="${escapedImageUrl}" alt="${displayName}" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
+                <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
                 <div class="card-database-info">
                     <div class="card-database-name">${displayName}</div>
                     <div class="card-database-meta">
                         <span class="card-database-set">${displaySet} ${displayNumber}</span>
                         <span class="card-database-type">${displayType}</span>
                     </div>
-                    <span class="card-database-rarity ${rarityClass}">${displayRarity}</span>
-                    ${priceDisplay}
-                    <div class="card-database-actions">
-                        <button class="card-database-btn card-database-btn-rarity" onclick='openRaritySwitcherFromDB("${escapedName}", "${displaySet}", "${displayNumber}")'>
-                            🔄 Prints
-                        </button>
-                        <a href="${displayCardMarketUrl}" target="_blank" class="card-database-btn card-database-btn-market">
-                            💰 CardMarket
-                        </a>
+                    <div class="card-database-button-row" style="display: flex; gap: 8px; margin-top: 8px;">
+                        ${priceButton}
+                        <div class="card-database-rarity-btn ${rarityClass}" onclick='openRaritySwitcherFromDB("${escapedName}", "${displaySet}", "${displayNumber}")' style="display: block; padding: 8px; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View all prints for ${displayRarity}">
+                            ${displayRarity} 🔄
+                        </div>
                     </div>
+                    ${coverageDisplay}
                 </div>
             `;
             
@@ -10313,7 +10648,11 @@
             }
             
             // Extract the Best and Worst Matchups tables directly from HTML
-            const tablesGrid = matchingSection.querySelector('div[style*="grid-template-columns"]');
+            // (Look for .matchups-grid-container class OR inline grid style)
+            let tablesGrid = matchingSection.querySelector('.matchups-grid-container');
+            if (!tablesGrid) {
+                tablesGrid = matchingSection.querySelector('div[style*="grid-template-columns"]');
+            }
             if (!tablesGrid) {
                 console.error(`❌ No matchup tables found in section for: ${archetype}`);
                 matchupsSection.style.display = 'none';
@@ -10662,7 +11001,7 @@
                     html += `
                         <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                             <div class="card-image-container" style="position: relative; width: 100%;">
-                                <img src="${imageUrl}" alt="${cardName}" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                                 <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${maxCount}</div>
                                 ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
                                 
@@ -10768,7 +11107,7 @@
                 html += `
                     <div class="card-table-row" data-card-name="${cardName.toLowerCase()}" style="display: flex; align-items: center; background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); gap: 20px;">
                         <div style="flex-shrink: 0; position: relative; width: 120px;">
-                            <img src="${imageUrl}" alt="${cardName}" referrerpolicy="no-referrer" style="width: 100%; border-radius: 6px; cursor: zoom-in; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.opacity='0.3'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}');">
+                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; border-radius: 6px; cursor: zoom-in; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.opacity='0.3'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                             ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${deckCount}</div>` : ''}
                         </div>
                         <div style="flex-grow: 1; min-width: 0;">

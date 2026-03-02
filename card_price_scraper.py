@@ -14,18 +14,11 @@ import time
 from datetime import datetime
 from typing import List, Dict, Optional
 
+# Import shared utilities
+from card_scraper_shared import setup_console_encoding
+
 # Fix Windows console encoding for Unicode characters
-if sys.platform == 'win32':
-    if hasattr(sys.stdout, 'reconfigure'):
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
-    if hasattr(sys.stderr, 'reconfigure'):
-        try:
-            sys.stderr.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
+setup_console_encoding()
 
 # Selenium imports (only loaded when needed)
 try:

@@ -8,7 +8,13 @@ echo and update the Set Order mapping.
 echo.
 pause
 
-python set_list_scraper.py
+.venv\Scripts\python.exe set_list_scraper.py
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo FEHLER: Scraper fehlgeschlagen! Error Code: %ERRORLEVEL%
+    pause
+    exit /b %ERRORLEVEL%
+)
 
 echo.
 echo ========================================

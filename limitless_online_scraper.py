@@ -18,18 +18,11 @@ from datetime import datetime
 from html.parser import HTMLParser
 from typing import List, Dict, Optional, Tuple, Any
 
-# Fix Windows console encoding for Unicode characters (✓, ×, •, etc.)
-if sys.platform == 'win32':
-    if hasattr(sys.stdout, 'reconfigure'):
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
-    if hasattr(sys.stderr, 'reconfigure'):
-        try:
-            sys.stderr.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
+# Import shared utilities
+from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir
+
+# Fix Windows console encoding for Unicode characters
+setup_console_encoding()
 
 # Default settings
 DEFAULT_SETTINGS: Dict[str, Any] = {
@@ -41,34 +34,6 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "delay_between_requests": 1.5,
     "output_file": "limitless_online_decks.csv"
 }
-
-def get_app_path() -> str:
-    """Get the directory where the executable/script is located."""
-    if getattr(sys, 'frozen', False):
-        return os.path.dirname(sys.executable)
-    else:
-        return os.path.dirname(os.path.abspath(__file__))
-
-def get_data_dir() -> str:
-    """Get the shared data directory for CSV outputs."""
-    app_path = get_app_path()
-    
-    # Always use workspace root/data directory
-    parts = app_path.replace('\\', '/').split('/')
-    
-    # Find workspace root (before 'dist' or use current if not in dist)
-    if 'dist' in parts:
-        dist_index = parts.index('dist')
-        workspace_root = '/'.join(parts[:dist_index])  # Everything before 'dist'
-    else:
-        # Running from workspace root or as script
-        workspace_root = app_path
-    
-    # Ensure data directory exists
-    data_dir = os.path.join(workspace_root, 'data')
-    os.makedirs(data_dir, exist_ok=True)
-    
-    return data_dir
 
 def clean_deck_name(deck_name: str) -> str:
     """Clean deck name by removing extra whitespace and HTML artifacts."""

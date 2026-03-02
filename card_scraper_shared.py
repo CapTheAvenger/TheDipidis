@@ -181,6 +181,130 @@ def get_data_dir() -> str:
     
     return data_dir
 
+def setup_console_encoding() -> None:
+    """
+    Fix Windows console encoding for Unicode characters (✓, •, €, etc.).
+    This should be called at the start of every scraper script.
+    
+    Safely reconfigures stdout and stderr to use UTF-8 encoding on Windows.
+    Silently fails if reconfigure is not available (older Python versions).
+    """
+    if sys.platform == 'win32':
+        if hasattr(sys.stdout, 'reconfigure'):
+            try:
+                sys.stdout.reconfigure(encoding='utf-8')
+            except Exception:
+                pass
+        if hasattr(sys.stderr, 'reconfigure'):
+            try:
+                sys.stderr.reconfigure(encoding='utf-8')
+            except Exception:
+                pass
+
+def load_scraped_ids(tracking_file: str) -> set:
+    """
+    Load set of already scraped IDs from a JSON tracking file.
+    
+    Args:
+        tracking_file: Path to the JSON file containing scraped IDs
+        
+    Returns:
+        Set of scraped IDs (strings). Returns empty set if file doesn't exist.
+        
+    Expected JSON format:
+        {
+            "scraped_tournament_ids": ["id1", "id2", ...],  # or other key name
+            "last_updated": "2024-01-01 12:00:00",
+            "total_tournaments": 123
+        }
+    """
+    if not os.path.exists(tracking_file):
+        return set()
+    
+    try:
+        with open(tracking_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+            # Try different possible key names for the ID list
+            for key in ['scraped_tournament_ids', 'scraped_ids', 'ids']:
+                if key in data:
+                    return set(data.get(key, []))
+            
+            # Fallback: if data is a list directly
+            if isinstance(data, list):
+                return set(data)
+            
+            return set()
+    except Exception as e:
+        print(f"Warning: Could not load scraped IDs from {tracking_file}: {e}")
+        return set()
+
+def save_scraped_ids(tracking_file: str, ids: set, id_key: str = 'scraped_ids') -> None:
+    """
+    Save set of scraped IDs to a JSON tracking file.
+    
+    Args:
+        tracking_file: Path to the JSON file to save
+        ids: Set of IDs to save
+        id_key: Key name for the ID list in JSON (default: 'scraped_ids')
+        
+    JSON output format:
+        {
+            "scraped_ids": ["id1", "id2", ...],  # sorted
+            "last_updated": "2024-01-01 12:00:00",
+            "total_count": 123
+        }
+    """
+    try:
+        data = {
+            id_key: sorted(list(ids)),
+            'last_updated': time.strftime('%Y-%m-%d %H:%M:%S'),
+            'total_count': len(ids)
+        }
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(tracking_file) if os.path.dirname(tracking_file) else '.', exist_ok=True)
+        
+        with open(tracking_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Warning: Could not save scraped IDs to {tracking_file}: {e}")
+
+def load_generic_settings(settings_file: str, default_settings: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Load settings from a JSON file with fallback to defaults.
+    
+    Args:
+        settings_file: Path to the JSON settings file
+        default_settings: Dictionary with default settings
+        
+    Returns:
+        Merged settings dictionary (defaults + file overrides)
+        
+    Example:
+        DEFAULT_SETTINGS = {
+            "max_tournaments": 150,
+            "delay": 0,
+            "format_filter": ["Standard"]
+        }
+        settings = load_generic_settings('scraper_settings.json', DEFAULT_SETTINGS)
+    """
+    settings = default_settings.copy()
+    
+    if os.path.exists(settings_file):
+        try:
+            with open(settings_file, 'r', encoding='utf-8') as f:
+                user_settings = json.load(f)
+                settings.update(user_settings)
+            print(f"✓ Loaded settings from {settings_file}")
+        except Exception as e:
+            print(f"Warning: Could not load settings from {settings_file}: {e}")
+            print(f"Using default settings")
+    else:
+        print(f"Settings file '{settings_file}' not found, using defaults")
+    
+    return settings
+
 def fetch_page(url: str, timeout: int = 30) -> str:
     """Fetch a webpage and return its HTML content."""
     try:

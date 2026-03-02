@@ -18,22 +18,14 @@ import math
 from html.parser import HTMLParser
 from typing import List, Dict, Optional, Any, Set, Tuple
 
-# Fix Windows console encoding for Unicode characters (✓, ×, •, etc.)
-if sys.platform == 'win32':
-    if hasattr(sys.stdout, 'reconfigure'):
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')  # type: ignore
-        except Exception:
-            pass
-    if hasattr(sys.stderr, 'reconfigure'):
-        try:
-            sys.stderr.reconfigure(encoding='utf-8')  # type: ignore
-        except Exception:
-            pass
+# Import shared utilities
+from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, load_scraped_ids, save_scraped_ids, CardDatabaseLookup
+
+# Fix Windows console encoding for Unicode characters
+setup_console_encoding()
 
 # Import the reliable card type lookup module
 from card_type_lookup import is_trainer_or_energy, is_valid_card
-from card_scraper_shared import CardDatabaseLookup
 
 # ============================================================================
 # TOURNAMENT TRACKING (Incremental Scraping)
@@ -47,34 +39,12 @@ def get_scraped_tournaments_file() -> str:
 
 def load_scraped_tournaments() -> Set[str]:
     """Load set of already scraped tournament IDs."""
-    tracking_file = get_scraped_tournaments_file()
-    
-    if not os.path.exists(tracking_file):
-        return set()
-    
-    try:
-        with open(tracking_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            return set(data.get('scraped_tournament_ids', []))
-    except Exception as e:
-        print(f"Warning: Could not load scraped tournaments: {e}")
-        return set()
+    return load_scraped_ids(get_scraped_tournaments_file())
 
 
 def save_scraped_tournaments(tournament_ids: Set[str]) -> None:
     """Save set of scraped tournament IDs to tracking file."""
-    tracking_file = get_scraped_tournaments_file()
-    
-    try:
-        data = {
-            'scraped_tournament_ids': sorted(list(tournament_ids)),
-            'last_updated': time.strftime('%Y-%m-%d %H:%M:%S'),
-            'total_tournaments': len(tournament_ids)
-        }
-        with open(tracking_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(f"Warning: Could not save scraped tournaments: {e}")
+    save_scraped_ids(get_scraped_tournaments_file(), tournament_ids, 'scraped_tournament_ids')
 
 # Default settings
 DEFAULT_SETTINGS: Dict[str, Any] = {
@@ -87,22 +57,6 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "append_mode": True,
     "_comment": "Scrapes individual deck lists from each tournament. Nur Standard-Format Turniere (Regional, Special Event, LAIC, EUIC, NAIC, Worlds) werden automatisch gescraped. append_mode=True keeps old tournament data and only adds new tournaments."
 }
-
-def get_app_path() -> str:
-    """Get the directory where the executable/script is located."""
-    if getattr(sys, 'frozen', False):
-        # Running as compiled executable
-        return os.path.dirname(sys.executable)
-    else:
-        # Running as script
-        return os.path.dirname(os.path.abspath(__file__))
-
-def get_data_dir() -> str:
-    """Get the data directory, creating it if needed."""
-    app_path = get_app_path()
-    data_dir = os.path.join(app_path, 'data')
-    os.makedirs(data_dir, exist_ok=True)
-    return data_dir
 
 def load_settings() -> Dict[str, Any]:
     """Load settings from tournament_JH_settings.json, or create it with defaults if it doesn't exist."""

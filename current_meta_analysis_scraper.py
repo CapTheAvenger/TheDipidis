@@ -16,6 +16,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 
 from card_scraper_shared import (
+    setup_console_encoding,
     get_app_path,
     get_data_dir,
     CardDatabaseLookup,
@@ -23,7 +24,9 @@ from card_scraper_shared import (
     save_to_csv,
     fetch_page,
     normalize_archetype_name,
-    parse_copy_button_decklist
+    parse_copy_button_decklist,
+    load_scraped_ids,
+    save_scraped_ids
 )
 
 # ============================================================================
@@ -38,47 +41,15 @@ def get_scraped_meta_tournaments_file() -> str:
 
 def load_scraped_meta_tournaments() -> set:
     """Load set of already scraped tournament IDs (for Meta Play!)."""
-    tracking_file = get_scraped_meta_tournaments_file()
-    
-    if not os.path.exists(tracking_file):
-        return set()
-    
-    try:
-        with open(tracking_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            return set(data.get('scraped_tournament_ids', []))
-    except Exception as e:
-        print(f"Warning: Could not load scraped tournaments: {e}", flush=True)
-        return set()
+    return load_scraped_ids(get_scraped_meta_tournaments_file())
 
 
 def save_scraped_meta_tournaments(tournament_ids: set) -> None:
     """Save set of scraped tournament IDs to tracking file."""
-    tracking_file = get_scraped_meta_tournaments_file()
-    
-    try:
-        data = {
-            'scraped_tournament_ids': sorted(list(tournament_ids)),
-            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'total_tournaments': len(tournament_ids)
-        }
-        with open(tracking_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(f"Warning: Could not save scraped tournaments: {e}", flush=True)
+    save_scraped_ids(get_scraped_meta_tournaments_file(), tournament_ids, 'scraped_tournament_ids')
 
-# Fix Windows console encoding for Unicode characters (✓, ×, •, etc.)
-if sys.platform == 'win32':
-    if hasattr(sys.stdout, 'reconfigure'):
-        try:
-            sys.stdout.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
-    if hasattr(sys.stderr, 'reconfigure'):
-        try:
-            sys.stderr.reconfigure(encoding='utf-8')
-        except Exception:
-            pass
+# Fix Windows console encoding for Unicode characters
+setup_console_encoding()
 
 # Default settings
 DEFAULT_SETTINGS: Dict[str, Any] = {

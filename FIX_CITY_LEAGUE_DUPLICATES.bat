@@ -4,14 +4,16 @@ echo Fix City League Archetype Duplicates
 echo ========================================
 echo.
 
-REM Activate virtual environment if it exists
-if exist ".venv\Scripts\activate.bat" (
-    echo Activating virtual environment...
-    call .venv\Scripts\activate.bat
-)
-
 REM Run deduplication script
 echo Running deduplication script...
-python fix_city_league_duplicates.py
+.venv\Scripts\python.exe fix_city_league_duplicates.py
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo FEHLER: Script fehlgeschlagen! Error Code: %ERRORLEVEL%
+    pause
+    exit /b %ERRORLEVEL%
+)
 
+echo.
+echo Deduplication completed successfully!
 pause

@@ -2136,8 +2136,8 @@ const BASE_PATH = './data/';
             const cardEntries = allCards.filter(c => c.card_name === cardName);
             
             if (cardEntries.length === 0) {
-                console.log(`[Trend] No entries found for "${cardName}"`);
-                return { trend: 'neutral', delta: 0, symbol: '→', color: '#999' };
+                console.log(`[Trend] No entries found for "${cardName}" - marking as NEW`);
+                return { trend: 'new', delta: 0, symbol: '★', color: '#ffc107' };
             }
             
             console.log(`[Trend] Found ${cardEntries.length} entries for "${cardName}"`);
@@ -2165,8 +2165,8 @@ const BASE_PATH = './data/';
             
             if (entriesWithDates.length < 2) {
                 // Need at least 2 data points to calculate trend
-                console.log(`[Trend] Not enough data points for "${cardName}" (need >= 2, have ${entriesWithDates.length})`);
-                return { trend: 'neutral', delta: 0, symbol: '→', color: '#999' };
+                console.log(`[Trend] Not enough data points for "${cardName}" (need >= 2, have ${entriesWithDates.length}) - marking as NEW`);
+                return { trend: 'new', delta: 0, symbol: '★', color: '#ffc107' };
             }
             
             // Split into recent (first half) vs older (second half)
@@ -2383,6 +2383,9 @@ const BASE_PATH = './data/';
                             <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
                                 ${maxCount}
                             </div>
+                            
+                            <!-- Trend badge: Below Max Count (top-right, below red badge) -->
+                            ${trendData.trend !== 'neutral' ? `<div style="position: absolute; top: 30px; right: 5px; background: ${trendData.color}; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;" title="Trend: ${trendData.trend === 'new' ? 'Neue Karte' : (trendData.delta >= 0 ? '+' : '') + trendData.delta.toFixed(1) + '%'}">${trendData.symbol}</div>` : ''}
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
@@ -3899,6 +3902,9 @@ const BASE_PATH = './data/';
                             <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
                                 ${maxCount}
                             </div>
+                            
+                            <!-- Trend badge: Below Max Count (top-right, below red badge) -->
+                            ${trendData.trend !== 'neutral' ? `<div style="position: absolute; top: 32px; right: 5px; background: ${trendData.color}; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;" title="Trend: ${trendData.trend === 'new' ? 'Neue Karte' : (trendData.delta >= 0 ? '+' : '') + trendData.delta.toFixed(1) + '%'}">${trendData.symbol}</div>` : ''}
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `
@@ -9031,6 +9037,7 @@ const BASE_PATH = './data/';
                             <div class="card-image-container" style="position: relative; width: 100%;">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                                 <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${maxCount}</div>
+                                ${trendData.trend !== 'neutral' ? `<div style="position: absolute; top: 30px; right: 5px; background: ${trendData.color}; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;" title="Trend: ${trendData.trend === 'new' ? 'Neue Karte' : (trendData.delta >= 0 ? '+' : '') + trendData.delta.toFixed(1) + '%'}">${trendData.symbol}</div>` : ''}
                                 ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
                                 
                                 <!-- Card info section - Mobile Overlay -->

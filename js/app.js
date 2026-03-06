@@ -153,6 +153,17 @@ const BASE_PATH = './data/';
         let rarityPreferences = {};
         let globalRarityPreference = 'min'; // Default: Show lowest rarity from newest set
         let overviewRarityMode = 'min'; // Current rarity mode for overview section (min, max, or all)
+        let overviewCardTypeFilter = 'all'; // Current card type filter for overview section (all, Pokemon, Supporter, Item, Tool, Stadium, Energy, Special Energy, Ace Spec)
+        
+        // Ace Specs list - loaded from ace_specs.json
+        let aceSpecsList = [];
+        
+        // Central isAceSpec function - checks against ace_specs.json list ONLY
+        function isAceSpec(cardNameOrCard) {
+            const cardName = (typeof cardNameOrCard === 'string') ? cardNameOrCard : (cardNameOrCard.card_name || cardNameOrCard.full_card_name || cardNameOrCard.name || '');
+            const normalized = cardName.toLowerCase().trim();
+            return aceSpecsList.includes(normalized);
+        }
         async function loadAllCardsDatabase() {
             try {
                 const timestamp = new Date().getTime();
@@ -192,6 +203,22 @@ const BASE_PATH = './data/';
                 }
             } catch (error) {
                 console.error('Error loading all cards database:', error);
+            }
+        }
+        
+        async function loadAceSpecsList() {
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`./data/ace_specs.json?t=${timestamp}`);
+                if (response.ok) {
+                    const jsonData = await response.json();
+                    aceSpecsList = (jsonData.ace_specs || []).map(name => name.toLowerCase().trim());
+                    console.log(`✅ Loaded ${aceSpecsList.length} Ace Spec cards from ace_specs.json`);
+                } else {
+                    console.error('❌ Failed to load ace_specs.json');
+                }
+            } catch (error) {
+                console.error('Error loading ace specs list:', error);
             }
         }
 
@@ -2254,8 +2281,14 @@ const BASE_PATH = './data/';
                 const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                 const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                 
+                // Determine card type category for filtering
+                const cardType = card.type || card.card_type || '';
+                const cardCategory = getCardTypeCategory(cardType);
+                const isAceSpecCard = isAceSpec(cardName);
+                const filterCategory = isAceSpecCard ? 'Ace Spec' : cardCategory;
+                
                 html += `
-                    <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
+                    <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                         <div class="card-image-container" style="position: relative; width: 100%;">
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                             
@@ -2311,14 +2344,66 @@ const BASE_PATH = './data/';
             if (!gridContainer) return;
             
             const cards = gridContainer.querySelectorAll('.card-item');
+            let visibleCount = 0;
+            
             cards.forEach(card => {
                 const cardName = card.getAttribute('data-card-name') || '';
-                if (searchTerm === '' || cardName.includes(searchTerm)) {
+                const cardType = card.getAttribute('data-card-type') || '';
+                
+                // Check search term filter
+                const matchesSearch = searchTerm === '' || cardName.includes(searchTerm);
+                
+                // Check card type filter
+                const matchesType = overviewCardTypeFilter === 'all' || cardType === overviewCardTypeFilter;
+                
+                // Show card only if it matches both filters
+                if (matchesSearch && matchesType) {
                     card.style.display = '';
+                    visibleCount++;
                 } else {
                     card.style.display = 'none';
                 }
             });
+            
+            // Update card count
+            const countElement = document.getElementById('cityLeagueCardCount');
+            if (countElement) {
+                countElement.textContent = `${visibleCount} Karten`;
+            }
+        }
+        
+        function setOverviewCardTypeFilter(type) {
+            overviewCardTypeFilter = type;
+            
+            // Update button styles
+            const buttons = {
+                'all': document.getElementById('overviewTypeAll'),
+                'Pokemon': document.getElementById('overviewTypePokemon'),
+                'Supporter': document.getElementById('overviewTypeSupporter'),
+                'Item': document.getElementById('overviewTypeItem'),
+                'Tool': document.getElementById('overviewTypeTool'),
+                'Stadium': document.getElementById('overviewTypeStadium'),
+                'Energy': document.getElementById('overviewTypeEnergy'),
+                'Special Energy': document.getElementById('overviewTypeSpecialEnergy'),
+                'Ace Spec': document.getElementById('overviewTypeAceSpec')
+            };
+            
+            // Reset all button styles
+            Object.values(buttons).forEach(btn => {
+                if (btn) {
+                    btn.style.opacity = '0.6';
+                    btn.style.fontWeight = 'normal';
+                }
+            });
+            
+            // Highlight active button
+            if (buttons[type]) {
+                buttons[type].style.opacity = '1';
+                buttons[type].style.fontWeight = 'bold';
+            }
+            
+            // Apply filter
+            filterOverviewCards();
         }
         
         function toggleDeckGridView() {
@@ -2875,16 +2960,16 @@ const BASE_PATH = './data/';
             }
             const isBaseEnergy = cardData && (cardData.type || cardData.card_type || '').toLowerCase() === 'energy' && 
                                 (cardName || '').match(/^(Fire|Water|Grass|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon|Colorless|Neutral)\s+Energy$/i);
-            const isAceSpec = cardData && (cardData.is_ace_spec === 'Yes' || cardData.is_ace_spec === true);
+            const isAceSpecCard = isAceSpec(cardName);
             
             // Check if card already has 4 copies (only applies to non-energy, non-ace-spec cards)
-            if (!isBaseEnergy && !isAceSpec && deck[deckKey] >= 4) {
+            if (!isBaseEnergy && !isAceSpecCard && deck[deckKey] >= 4) {
                 alert('Maximal 4 Kopien pro Karte!');
                 return;
             }
             
             // Ace Spec cards can only have 1 copy in deck
-            if (isAceSpec && deck[deckKey] >= 1) {
+            if (isAceSpecCard && deck[deckKey] >= 1) {
                 alert('Ace Spec Karten dürfen nur 1x im Deck sein!');
                 return;
             }
@@ -4024,43 +4109,43 @@ const BASE_PATH = './data/';
             }
             let currentTotal = 0; // Start from 0 since we just cleared the deck
             
-            // Ace Spec Identifikation: erst is_ace_spec Feld nutzen, dann Type fallback
-            const isAceSpec = (card) => {
-                // Prefer is_ace_spec field if available
-                if (card.is_ace_spec !== undefined) {
-                    const val = (card.is_ace_spec || '').toString().toLowerCase();
-                    return val === 'yes' || val === 'true';
-                }
-                // Fallback: check type field
-                const type = (card.type || card.card_type || '').toLowerCase();
-                return type.includes('ace spec');
-            };
-            
             // Basis Energien Identifikation - dürfen öfter als 4x sein
             const isBaseEnergy = (card) => {
                 const type = (card.type || card.card_type || '').toLowerCase();
                 return type === 'energy' && (card.card_name || '').match(/^(Fire|Water|Grass|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon|Colorless|Neutral)\s+Energy$/i);
             };
             
-            // Step 1: Deduplicate cards by card_name (keep highest percentage)
+            // Step 1: Aggregate cards by card_name (sum deck_count across all tournaments)
             const uniqueCards = {};
             for (const card of cards) {
                 const cardName = card.card_name;
                 
                 if (!uniqueCards[cardName]) {
-                    uniqueCards[cardName] = card;
+                    // First occurrence - initialize with this card's data
+                    uniqueCards[cardName] = {
+                        ...card,
+                        deck_count: parseInt(card.deck_count || 0),
+                        total_count: parseFloat(card.total_count || 0)
+                    };
                 } else {
-                    const newPercentage = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
-                    const existingPercentage = parseFloat((uniqueCards[cardName].percentage_in_archetype || '0').toString().replace(',', '.'));
-                    
-                    if (newPercentage > existingPercentage) {
-                        uniqueCards[cardName] = card;
-                    }
+                    // Aggregate: sum deck_count and total_count across tournaments
+                    uniqueCards[cardName].deck_count += parseInt(card.deck_count || 0);
+                    uniqueCards[cardName].total_count += parseFloat(card.total_count || 0);
                 }
             }
             
+            // Recalculate percentage_in_archetype for each card based on aggregated deck_count
+            // total_decks_in_archetype should be the same for all cards in same archetype
+            for (const cardName in uniqueCards) {
+                const card = uniqueCards[cardName];
+                const totalDecks = parseFloat(card.total_decks_in_archetype || 1);
+                const deckCount = card.deck_count;
+                // Recalculate percentage using aggregated deck_count
+                card.percentage_in_archetype = ((deckCount / totalDecks) * 100).toFixed(2).replace('.', ',');
+            }
+            
             let deckCards = Object.values(uniqueCards);
-            console.log('[autoComplete] After deduplication:', deckCards.length, 'unique cards');
+            console.log('[autoComplete] After aggregation:', deckCards.length, 'unique cards');
             
             // Debug: Log all card types to understand structure
             const typeSet = new Set();
@@ -5296,12 +5381,12 @@ const BASE_PATH = './data/';
             cards.forEach(card => {
                 const cardName = card.full_card_name || card.card_name || 'Unknown Card';
                 const count = Math.round(parseFloat(card.card_count) || 0);
-                const isAceSpec = card.is_ace_spec === 'Yes' || card.is_ace_spec === 'yes' || card.is_ace_spec === '1' ? 'Yes' : 'No';
+                const isAceSpecCard = isAceSpec(cardName);
                 
                 html += '<tr>';
                 html += `<td style="text-align: center; font-weight: bold; color: #2c3e50;">${count}</td>`;
                 html += `<td>${cardName}</td>`;
-                html += `<td style="text-align: center;">${isAceSpec === 'Yes' ? '<span style="color: #e74c3c; font-weight: bold;">✓</span>' : '-'}</td>`;
+                html += `<td style="text-align: center;">${isAceSpecCard ? '<span style="color: #e74c3c; font-weight: bold;">✓</span>' : '-'}</td>`;
                 html += `<td style="text-align: center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${cardName.replace(/'/g, "\\'")}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button></td>`;
                 html += '</tr>';
             });
@@ -8109,6 +8194,7 @@ const BASE_PATH = './data/';
             
             // Load all cards database for deck builder
             loadAllCardsDatabase();
+            loadAceSpecsList();
             loadSetMapping();
             loadRarityPreferences();
             
@@ -9249,7 +9335,7 @@ const BASE_PATH = './data/';
         }
 
         function parseDeckList(text) {
-            const deck = {};
+            const deck = [];
             const lines = text.split('\n');
             
             for (let line of lines) {
@@ -9258,19 +9344,37 @@ const BASE_PATH = './data/';
                 if (line.includes('Pokémon:') || line.includes('Trainer:') || line.includes('Energy:')) continue;
                 
                 // Format: "2 Lunatone ASC 105" or "2 Lunatone ASC 105 PH"
-                const match = line.match(/^(\d+)\s+(.+?)(?:\s+[A-Z]{2,}[\s\d]+.*)?$/);
+                // Extract: count, card name, set code, set number
+                const match = line.match(/^(\d+)\s+(.+?)\s+([A-Z]{2,})\s+(\d+)/);
                 if (match) {
                     const count = parseInt(match[1]);
-                    let cardName = match[2].trim();
+                    const cardName = match[2].trim();
+                    const setCode = match[3];
+                    const setNumber = match[4];
                     
-                    // Remove set code and number from card name if still included
-                    cardName = cardName.replace(/\s+[A-Z]{2,}\s+\d+.*$/, '').trim();
-                    
-                    deck[cardName] = (deck[cardName] || 0) + count;
+                    deck.push({
+                        count: count,
+                        name: cardName,
+                        set: setCode,
+                        number: setNumber,
+                        key: `${setCode}-${setNumber}` // Unique identifier
+                    });
                 }
             }
             
             return deck;
+        }
+        
+        // Check if two cards are the same international print
+        function areSameInternationalPrint(set1, number1, set2, number2) {
+            if (set1 === set2 && number1 === number2) return true;
+            
+            // Get all international prints for card 1
+            const prints1 = getInternationalPrintsForCard(set1, number1);
+            if (!prints1 || prints1.length === 0) return false;
+            
+            // Check if card 2 is in the international prints of card 1
+            return prints1.some(p => p.set === set2 && p.number === number2);
         }
 
         function compareDeckLists() {
@@ -9286,74 +9390,238 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            // Parse old deck
+            // Parse old deck (from text input)
             const oldDeck = parseDeckList(oldDeckText);
+            console.log('[deckCompare] Old deck parsed:', oldDeck);
             
-            // Get current deck
-            const currentDeck = {};
+            // Get current deck and convert to same format
             const deckMap = currentDeckSource === 'cityLeague' ? window.cityLeagueDeck :
                            currentDeckSource === 'currentMeta' ? window.currentMetaDeck :
                            window.pastMetaDeck;
             
-            if (!deckMap) {
+            if (!deckMap || Object.keys(deckMap).length === 0) {
                 alert('⚠️ Fehler: Aktuelles Deck ist leer!');
                 return;
             }
             
-            // Convert current deck to card name -> count map
+            const currentDeck = [];
             for (const [key, count] of Object.entries(deckMap)) {
-                const cardName = key.split('_SET_')[0];
-                currentDeck[cardName] = (currentDeck[cardName] || 0) + count;
+                // Key format: "CardName_SET_SETCODE_NUMBER" or just "CardName"
+                const parts = key.split('_SET_');
+                if (parts.length === 2) {
+                    const cardName = parts[0];
+                    const [setCode, setNumber] = parts[1].split('_');
+                    currentDeck.push({
+                        count: count,
+                        name: cardName,
+                        set: setCode,
+                        number: setNumber,
+                        key: `${setCode}-${setNumber}`
+                    });
+                } else {
+                    // No set info available, just use card name
+                    currentDeck.push({
+                        count: count,
+                        name: key,
+                        set: null,
+                        number: null,
+                        key: key
+                    });
+                }
             }
+            console.log('[deckCompare] Current deck parsed:', currentDeck);
             
-            // Find cards removed (in old but not in new, or less in new)
+            // Track which cards in current deck have been matched
+            const currentDeckMatched = new Array(currentDeck.length).fill(false);
+            
+            // Find cards that changed (removed or count decreased)
             const cardsOut = [];
-            for (const [cardName, oldCount] of Object.entries(oldDeck)) {
-                const newCount = currentDeck[cardName] || 0;
-                if (newCount < oldCount) {
-                    cardsOut.push({ name: cardName, count: oldCount - newCount });
+            for (const oldCard of oldDeck) {
+                // Try to find matching card in current deck
+                let bestMatch = null;
+                let bestMatchIndex = -1;
+                
+                // First: Try exact match (same set + number)
+                for (let i = 0; i < currentDeck.length; i++) {
+                    if (currentDeckMatched[i]) continue;
+                    const newCard = currentDeck[i];
+                    if (oldCard.set === newCard.set && oldCard.number === newCard.number) {
+                        bestMatch = newCard;
+                        bestMatchIndex = i;
+                        break;
+                    }
+                }
+                
+                // Second: Try international print match
+                if (!bestMatch && oldCard.set && oldCard.number) {
+                    for (let i = 0; i < currentDeck.length; i++) {
+                        if (currentDeckMatched[i]) continue;
+                        const newCard = currentDeck[i];
+                        if (newCard.set && newCard.number && 
+                            areSameInternationalPrint(oldCard.set, oldCard.number, newCard.set, newCard.number)) {
+                            bestMatch = newCard;
+                            bestMatchIndex = i;
+                            break;
+                        }
+                    }
+                }
+                
+                if (bestMatch) {
+                    // Card found in new deck
+                    currentDeckMatched[bestMatchIndex] = true;
+                    const countDiff = oldCard.count - bestMatch.count;
+                    if (countDiff > 0) {
+                        // Count decreased
+                        cardsOut.push({
+                            name: oldCard.name,
+                            set: oldCard.set,
+                            number: oldCard.number,
+                            count: countDiff
+                        });
+                    } else if (countDiff < 0) {
+                        // Count increased (will be handled in cardsIn)
+                    }
+                    // If countDiff === 0, card is same count (no change)
+                } else {
+                    // Card not found in new deck at all
+                    cardsOut.push({
+                        name: oldCard.name,
+                        set: oldCard.set,
+                        number: oldCard.number,
+                        count: oldCard.count
+                    });
                 }
             }
             
-            // Find cards added (in new but not in old, or more in new)
+            // Find cards that were added or increased
             const cardsIn = [];
-            for (const [cardName, newCount] of Object.entries(currentDeck)) {
-                const oldCount = oldDeck[cardName] || 0;
-                if (newCount > oldCount) {
-                    cardsIn.push({ name: cardName, count: newCount - oldCount });
+            for (let i = 0; i < currentDeck.length; i++) {
+                const newCard = currentDeck[i];
+                
+                if (currentDeckMatched[i]) {
+                    // This card was already matched, check if count increased
+                    const oldCard = oldDeck.find(old => {
+                        if (old.set === newCard.set && old.number === newCard.number) return true;
+                        if (old.set && old.number && newCard.set && newCard.number &&
+                            areSameInternationalPrint(old.set, old.number, newCard.set, newCard.number)) return true;
+                        return false;
+                    });
+                    
+                    if (oldCard) {
+                        const countDiff = newCard.count - oldCard.count;
+                        if (countDiff > 0) {
+                            cardsIn.push({
+                                name: newCard.name,
+                                set: newCard.set,
+                                number: newCard.number,
+                                count: countDiff
+                            });
+                        }
+                    }
+                } else {
+                    // Card not matched = completely new
+                    cardsIn.push({
+                        name: newCard.name,
+                        set: newCard.set,
+                        number: newCard.number,
+                        count: newCard.count
+                    });
                 }
             }
             
-            // Generate result HTML
+            console.log('[deckCompare] Cards out:', cardsOut);
+            console.log('[deckCompare] Cards in:', cardsIn);
+            
+            // Get card images from database
+            const allCardsDb = window.allCardsDatabase || [];
+            
+            function getCardImage(set, number, name) {
+                if (!set || !number) return null;
+                const card = allCardsDb.find(c => c.set === set && c.number === number);
+                return card ? card.image_url : null;
+            }
+            
+            // Generate result HTML with images
             let html = '<div style="margin-top: 20px;">';
             
             if (cardsOut.length === 0 && cardsIn.length === 0) {
-                html += '<p style="text-align: center; color: #999;">✅ Die Decks sind identisch!</p>';
+                html += '<p style="text-align: center; color: #999; font-size: 1.2em;">✅ Die Decks sind identisch!</p>';
             } else {
+                // Summary
+                const totalOut = cardsOut.reduce((sum, c) => sum + c.count, 0);
+                const totalIn = cardsIn.reduce((sum, c) => sum + c.count, 0);
+                
+                html += `<div style="display: flex; justify-content: space-around; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2em; font-weight: bold; color: #dc3545;">−${totalOut}</div>
+                                <div style="color: #666;">Karten raus</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 2em; font-weight: bold; color: #28a745;">+${totalIn}</div>
+                                <div style="color: #666;">Karten rein</div>
+                            </div>
+                         </div>`;
+                
+                // Cards going out
                 if (cardsOut.length > 0) {
-                    html += '<div style="margin-bottom: 20px;">';
-                    html += '<h3 style="color: #dc3545;">🔴 Karten die rausgehen:</h3>';
-                    html += '<ul style="list-style: none; padding: 0;">';
+                    html += '<div style="margin-bottom: 30px;">';
+                    html += `<h3 style="color: #dc3545; margin-bottom: 15px;">🔴 Karten die rausgehen (${cardsOut.length} verschiedene):</h3>`;
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">';
+                    
                     cardsOut.forEach(card => {
-                        html += `<li style="padding: 5px; background: #ffe6e6; margin: 5px 0; border-radius: 5px;">
-                                    <strong>−${card.count}x</strong> ${card.name}
-                                 </li>`;
+                        const imageUrl = getCardImage(card.set, card.number, card.name);
+                        html += `<div style="position: relative; border: 2px solid #dc3545; border-radius: 8px; overflow: hidden; background: #ffe6e6;">`;
+                        
+                        if (imageUrl) {
+                            html += `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.display='none'">`;
+                        } else {
+                            html += `<div style="width: 100%; aspect-ratio: 2.5/3.5; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">No Image</div>`;
+                        }
+                        
+                        html += `<div style="position: absolute; top: 5px; left: 5px; background: #dc3545; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                    −${card.count}
+                                 </div>`;
+                        
+                        html += `<div style="padding: 5px; font-size: 0.75em; text-align: center; background: white;">
+                                    <div style="font-weight: 600; margin-bottom: 2px;">${card.name}</div>
+                                    <div style="color: #999; font-size: 0.9em;">${card.set} ${card.number}</div>
+                                 </div>`;
+                        
+                        html += `</div>`;
                     });
-                    html += '</ul>';
-                    html += '</div>';
+                    
+                    html += '</div></div>';
                 }
                 
+                // Cards coming in
                 if (cardsIn.length > 0) {
                     html += '<div>';
-                    html += '<h3 style="color: #28a745;">🟢 Karten die hinzukommen:</h3>';
-                    html += '<ul style="list-style: none; padding: 0;">';
+                    html += `<h3 style="color: #28a745; margin-bottom: 15px;">🟢 Karten die hinzukommen (${cardsIn.length} verschiedene):</h3>`;
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">';
+                    
                     cardsIn.forEach(card => {
-                        html += `<li style="padding: 5px; background: #e6ffe6; margin: 5px 0; border-radius: 5px;">
-                                    <strong>+${card.count}x</strong> ${card.name}
-                                 </li>`;
+                        const imageUrl = getCardImage(card.set, card.number, card.name);
+                        html += `<div style="position: relative; border: 2px solid #28a745; border-radius: 8px; overflow: hidden; background: #e6ffe6;">`;
+                        
+                        if (imageUrl) {
+                            html += `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.display='none'">`;
+                        } else {
+                            html += `<div style="width: 100%; aspect-ratio: 2.5/3.5; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">No Image</div>`;
+                        }
+                        
+                        html += `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                    +${card.count}
+                                 </div>`;
+                        
+                        html += `<div style="padding: 5px; font-size: 0.75em; text-align: center; background: white;">
+                                    <div style="font-weight: 600; margin-bottom: 2px;">${card.name}</div>
+                                    <div style="color: #999; font-size: 0.9em;">${card.set} ${card.number}</div>
+                                 </div>`;
+                        
+                        html += `</div>`;
                     });
-                    html += '</ul>';
-                    html += '</div>';
+                    
+                    html += '</div></div>';
                 }
             }
             

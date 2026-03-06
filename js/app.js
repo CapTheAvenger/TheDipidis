@@ -3866,6 +3866,13 @@ const BASE_PATH = './data/';
                 const totalDecksInArchetype = parseInt(card.total_decks_in_archetype || 1);
                 const avgCount = totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype).toFixed(2) : '0';
                 
+                // Calculate trend indicator
+                const allAvailableCards = window.currentCityLeagueDeckCards || [];
+                const trendData = calculateCardTrend(card.card_name, allAvailableCards);
+                const trendBadge = trendData.trend !== 'neutral' 
+                    ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
+                    : '';
+                
                 // Card image or placeholder
                 let imgHtml = '';
                 if (imageUrl && imageUrl.trim() !== '') {
@@ -3902,7 +3909,7 @@ const BASE_PATH = './data/';
                                     ${card.set_code || ''} ${card.set_number || ''}
                                 </div>
                                 <div style="color: #666; font-size: 0.85em;">
-                                    ${percentage.toFixed(2).replace('.', ',')}% | Ø ${avgCount}x
+                                    ${percentage.toFixed(2).replace('.', ',')}%${trendBadge} | Ø ${avgCount}x
                                 </div>
                             </div>
                             
@@ -8976,6 +8983,13 @@ const BASE_PATH = './data/';
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                     const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                     
+                    // Calculate trend indicator
+                    const allAvailableCards = window.currentCurrentMetaDeckCards || [];
+                    const trendData = calculateCardTrend(cardName, allAvailableCards);
+                    const trendBadge = trendData.trend !== 'neutral' 
+                        ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
+                        : '';
+                    
                     html += `
                         <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                             <div class="card-image-container" style="position: relative; width: 100%;">
@@ -8988,7 +9002,7 @@ const BASE_PATH = './data/';
                                     <div class="card-info-text">
                                         <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">${cardName}</div>
                                         <div style="color: #999; font-size: 0.52em; margin-bottom: 1px;">${setCode} ${setNumber}</div>
-                                        <div style="color: #666; font-size: 0.55em; margin-bottom: 1px;">${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
+                                        <div style="color: #666; font-size: 0.55em; margin-bottom: 1px;">${percentage}%${trendBadge} | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
                                     </div>
                                     <!-- Rarity Switcher & Actions (4 buttons: - ★ € +) -->
                                     <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">

@@ -2115,15 +2115,16 @@ const BASE_PATH = './data/';
         // ============================================================================
         // TREND CALCULATION - Calculate usage trends over time
         // ============================================================================
-        function calculateCardTrend(cardName, allCards) {
+        function calculateCardTrend(cardName, allCards, archetype = null) {
             /**
              * Calculate trend for a card by comparing recent vs older usage.
              * 
              * Strategy:
-             * 1. Group cards by tournament_date
-             * 2. Split into two time periods: Recent (last 7-14 days) vs Older (previous 7-14 days)
-             * 3. Calculate average percentage for each period
-             * 4. Return trend: UP (🟢), DOWN (🔴), or NEUTRAL (⚪)
+             * 1. Filter cards for specific archetype (if provided)
+             * 2. Group cards by tournament_date
+             * 3. Split into two time periods: Recent (last 7-14 days) vs Older (previous 7-14 days)
+             * 4. Calculate average percentage for each period
+             * 5. Return trend: UP (🟢), DOWN (🔴), or NEUTRAL (⚪)
              * 
              * Returns: { trend: 'up'|'down'|'neutral', delta: number, symbol: string, color: string }
              */
@@ -2132,8 +2133,14 @@ const BASE_PATH = './data/';
                 return { trend: 'neutral', delta: 0, symbol: '→', color: '#999' };
             }
             
-            // Find all entries for this card across all dates
-            const cardEntries = allCards.filter(c => c.card_name === cardName);
+            // Find all entries for this card (optionally filtered by archetype)
+            let cardEntries = allCards.filter(c => c.card_name === cardName);
+            
+            // If archetype is specified, only use entries for that archetype
+            if (archetype) {
+                cardEntries = cardEntries.filter(c => c.archetype === archetype);
+                console.log(`[Trend] Filtering for archetype "${archetype}": ${cardEntries.length} entries`);
+            }
             
             if (cardEntries.length === 0) {
                 console.log(`[Trend] No entries found for "${cardName}" - marking as NEW`);
@@ -2369,7 +2376,8 @@ const BASE_PATH = './data/';
                 
                 // Calculate trend indicator (use ALL city league data, not just filtered)
                 const allCityLeagueData = window.cityLeagueAnalysisData || [];
-                const trendData = calculateCardTrend(cardName, allCityLeagueData);
+                const currentArchetype = window.currentCityLeagueArchetype;
+                const trendData = calculateCardTrend(cardName, allCityLeagueData, currentArchetype);
                 const trendBadge = trendData.trend !== 'neutral' 
                     ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
                     : '';
@@ -3880,7 +3888,8 @@ const BASE_PATH = './data/';
                 
                 // Calculate trend indicator (use ALL city league data, not just filtered)
                 const allCityLeagueData = window.cityLeagueAnalysisData || [];
-                const trendData = calculateCardTrend(card.card_name, allCityLeagueData);
+                const cardArchetype = card.archetype || window.currentCityLeagueArchetype;
+                const trendData = calculateCardTrend(card.card_name, allCityLeagueData, cardArchetype);
                 const trendBadge = trendData.trend !== 'neutral' 
                     ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
                     : '';
@@ -9027,7 +9036,8 @@ const BASE_PATH = './data/';
                     
                     // Calculate trend indicator (use ALL current meta data, not just filtered)
                     const allCurrentMetaData = window.currentMetaAnalysisData || [];
-                    const trendData = calculateCardTrend(cardName, allCurrentMetaData);
+                    const currentArchetype = window.currentCurrentMetaArchetype;
+                    const trendData = calculateCardTrend(cardName, allCurrentMetaData, currentArchetype);
                     const trendBadge = trendData.trend !== 'neutral' 
                         ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
                         : '';

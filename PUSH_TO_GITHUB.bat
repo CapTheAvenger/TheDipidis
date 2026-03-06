@@ -52,35 +52,24 @@ if %ERRORLEVEL% NEQ 0 (
 )
 echo.
 
-echo [5/5] Push zu beiden Repositories...
+echo [5/5] Push zu GitHub...
 echo.
 
-echo Pushe zu HausiTCG (origin)...
-git push origin main
-if %ERRORLEVEL% NEQ 0 (
-    echo FEHLER: Push zu origin fehlgeschlagen!
-    pause
-    exit /b 1
-)
-echo ✓ Origin erfolgreich gepusht
-echo.
-
-echo Pushe zu TheDipidis (dipidis - LIVE SITE)...
+echo Pushe zu TheDipidis (LIVE SITE)...
 git push dipidis main
 if %ERRORLEVEL% NEQ 0 (
-    echo FEHLER: Push zu dipidis fehlgeschlagen!
+    echo FEHLER: Push fehlgeschlagen!
     pause
     exit /b 1
 )
-echo ✓ Dipidis erfolgreich gepusht
+echo ✓ Erfolgreich gepusht
 echo.
 
 echo =====================================
 echo   ✓ Push erfolgreich abgeschlossen!
 echo =====================================
 echo.
-echo Repository 1: https://github.com/CapTheAvenger/HausiTCG.git
-echo Repository 2: https://github.com/CapTheAvenger/TheDipidis.git (LIVE)
+echo Repository:   https://github.com/CapTheAvenger/TheDipidis.git
 echo Live-Seite:   https://captheavenger.github.io/TheDipidis/
 echo.
 

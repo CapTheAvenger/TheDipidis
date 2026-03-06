@@ -1621,12 +1621,16 @@ const BASE_PATH = './data/';
             
             // Calculate total decks across all tournaments
             // For each unique tournament date, get the total_decks_in_archetype value
+            // CRITICAL FIX: Only set if not already present (take first occurrence)
             const tournamentDecksMap = new Map();
             filteredCards.forEach(row => {
                 if (row.tournament_date) {
                     const date = row.tournament_date;
                     const decksInTournament = parseInt(row.total_decks_in_archetype || 0);
-                    tournamentDecksMap.set(date, decksInTournament);
+                    // Only add if date not yet tracked (avoid overwriting with same value multiple times)
+                    if (!tournamentDecksMap.has(date)) {
+                        tournamentDecksMap.set(date, decksInTournament);
+                    }
                 }
             });
             

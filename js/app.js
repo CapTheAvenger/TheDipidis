@@ -1798,8 +1798,9 @@ const BASE_PATH = './data/';
             
             console.log('Found cards (before deduplication):', deckCards.length);
             
-            // Aggregate cards stats if date filter is active
-            if (window.cityLeagueDateFilterActive && deckCards.length > 0) {
+            // Always aggregate cards stats (not just when date filter is active)
+            // This ensures deck_count is correctly summed across all tournaments
+            if (deckCards.length > 0) {
                 deckCards = aggregateCardStatsByDate(deckCards);
                 console.log('After aggregating by date:', deckCards.length, 'unique cards');
             }
@@ -1815,29 +1816,10 @@ const BASE_PATH = './data/';
             const totalCardsInDeck = deckCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
             const uniqueCards = deckCards.length;
             
-            // Get current deck count - depends on whether date filter is active
-            let decksCount = '-';
-            
-            if (window.cityLeagueDateFilterActive) {
-                // When date filter is active, use the aggregated total_decks_in_archetype
-                // This value was already calculated correctly in aggregateCardStatsByDate()
-                decksCount = deckCards[0]?.total_decks_in_archetype || '-';
-                console.log(`Using deck count from filtered/aggregated data: ${decksCount} decks`);
-            } else {
-                // No date filter - use total count from comparison data
-                const comparisonData = window.cityLeagueComparisonData || [];
-                const comparisonMatch = comparisonData.find(row => 
-                    row.archetype && row.archetype.toLowerCase() === archetype.toLowerCase()
-                );
-                if (comparisonMatch && comparisonMatch.new_count) {
-                    decksCount = comparisonMatch.new_count;
-                    console.log(`Using current deck count from comparison data: ${decksCount}`);
-                } else {
-                    // Fallback to analysis data if comparison not available
-                    decksCount = deckCards[0]?.total_decks_in_archetype || '-';
-                    console.log(`Fallback to analysis data deck count: ${decksCount}`);
-                }
-            }
+            // Get current deck count from aggregated data
+            // Since we now always aggregate, use total_decks_in_archetype from first card
+            let decksCount = deckCards[0]?.total_decks_in_archetype || '-';
+            console.log(`Using deck count from aggregated data: ${decksCount} decks`);
             
             // Calculate average placement from archetypes data
             const archetypesData = window.cityLeagueArchetypesData || [];

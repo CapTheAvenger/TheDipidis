@@ -132,7 +132,6 @@ FALLBACK_ACE_SPECS = {
     "poké pad",
     "premium power pro",
     "ultra ball",
-    "switch",
     "tool scrapper",
     "pokégear 3.0",
     "air balloon",

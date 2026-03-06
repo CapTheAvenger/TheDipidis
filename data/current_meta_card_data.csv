@@ -75,7 +75,7 @@ Meta Live;;Archaludon;Earthen Vessel;PRE 106;58;4;17;20;85,0;PRE;;106;Uncommon;I
 Meta Live;;Archaludon;Pal Pad;SVI 182;16;1;16;20;80,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Live;;Archaludon;Poké Pad;ASC 198;11;4;3;20;15,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
 Meta Live;;Archaludon;Super Rod;PAL 188;3;1;3;20;15,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Archaludon;Switch;MEG 130;5;2;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Archaludon;Switch;MEG 130;5;2;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Archaludon;Brilliant Blender;SSP 164;2;1;2;20;10,0;SSP;;164;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_164_R_EN_LG.png;Yes
 Meta Live;;Archaludon;Counter Catcher;PAR 160;2;1;2;20;10,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Archaludon;Scoop Up Cyclone;PRE 128;2;1;2;20;10,0;PRE;;128;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_128_R_EN_LG.png;Yes
@@ -212,7 +212,7 @@ Meta Live;;Charizard;Counter Catcher;PAR 160;10;2;8;20;40,0;PAR;;160;Uncommon;It
 Meta Live;;Charizard;Max Rod;PRE 116;4;1;4;20;20,0;PRE;;116;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_116_R_EN_LG.png;Yes
 Meta Live;;Charizard;Energy Retrieval;WHT 82;5;2;3;20;15,0;WHT;;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_082_R_EN_LG.png;No
 Meta Live;;Charizard;Pokégear 3.0;BLK 84;10;4;3;20;15,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
-Meta Live;;Charizard;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Charizard;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Charizard;Earthen Vessel;PRE 106;3;3;1;20;5,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Charizard;Jumbo Ice Cream;PFL 91;2;2;1;20;5,0;PFL;;91;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png;No
 Meta Live;;Charizard;Pal Pad;SVI 182;2;2;1;20;5,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
@@ -359,7 +359,7 @@ Meta Live;;Charizard Pidgeot;Nest Ball;PAF 84;5;3;3;18;16,67;PAF;;84;Uncommon;It
 Meta Live;;Charizard Pidgeot;Night Stretcher;ASC 196;2;1;2;18;11,11;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Charizard Pidgeot;Blowtorch;PFL 86;1;1;1;18;5,56;PFL;;86;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_086_R_EN_LG.png;No
 Meta Live;;Charizard Pidgeot;Prime Catcher;PRE 119;1;1;1;18;5,56;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
-Meta Live;;Charizard Pidgeot;Switch;MEG 130;1;1;1;18;5,56;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Charizard Pidgeot;Switch;MEG 130;1;1;1;18;5,56;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Charizard Pidgeot;Jet Energy;PAL 190;18;3;13;18;72,22;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Live;;Charizard Pidgeot;Mist Energy;TEF 161;19;2;12;18;66,67;TEF;;161;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_161_R_EN_LG.png;No
 Meta Live;;Charizard Pidgeot;Luminous Energy;PAL 191;5;3;2;18;11,11;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
@@ -434,7 +434,7 @@ Meta Live;;Chien-Pao Baxcalibur;Secret Box;TWM 163;6;1;6;20;30,0;TWM;;163;Ultra 
 Meta Live;;Chien-Pao Baxcalibur;Prime Catcher;PRE 119;5;1;5;20;25,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
 Meta Live;;Chien-Pao Baxcalibur;Earthen Vessel;PRE 106;6;3;3;20;15,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Chien-Pao Baxcalibur;Max Rod;PRE 116;3;1;3;20;15,0;PRE;;116;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_116_R_EN_LG.png;Yes
-Meta Live;;Chien-Pao Baxcalibur;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Chien-Pao Baxcalibur;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Chien-Pao Baxcalibur;Unfair Stamp;TWM 165;2;1;2;20;10,0;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
 Meta Live;;Chien-Pao Baxcalibur;Energy Retrieval;WHT 82;1;1;1;20;5,0;WHT;;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_082_R_EN_LG.png;No
 Meta Live;;Chien-Pao Baxcalibur;Poké Pad;ASC 198;2;2;1;20;5,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
@@ -494,7 +494,7 @@ Meta Live;;Conkeldurr;Tool Scrapper;ASC 212;3;1;3;20;15,0;ASC;;212;Common;Item;h
 Meta Live;;Conkeldurr;Redeemable Ticket;JTG 156;2;1;2;20;10,0;JTG;;156;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_156_R_EN_LG.png;No
 Meta Live;;Conkeldurr;Great Ball;PAL 183;4;4;1;20;5,0;PAL;;183;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_183_R_EN_LG.png;No
 Meta Live;;Conkeldurr;Poké Pad;ASC 198;3;3;1;20;5,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
-Meta Live;;Conkeldurr;Switch;MEG 130;3;3;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Conkeldurr;Switch;MEG 130;3;3;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Conkeldurr;Jet Energy;PAL 190;56;3;19;20;95,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Live;;Conkeldurr;Enriching Energy;SSP 191;18;1;18;20;90,0;SSP;;191;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_191_R_EN_LG.png;Yes
 Meta Live;;Conkeldurr;Mist Energy;TEF 161;2;2;1;20;5,0;TEF;;161;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_161_R_EN_LG.png;No
@@ -554,7 +554,7 @@ Meta Live;;Crustle;Energy Switch;MEG 115;3;1;3;20;15,0;MEG;;115;Common;Item;http
 Meta Live;;Crustle;Secret Box;TWM 163;3;1;3;20;15,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Crustle;Tool Scrapper;ASC 212;3;1;3;20;15,0;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Crustle;Ultra Ball;ASC 213;3;1;3;20;15,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
-Meta Live;;Crustle;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Crustle;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Crustle;Blowtorch;PFL 86;1;1;1;20;5,0;PFL;;86;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_086_R_EN_LG.png;No
 Meta Live;;Crustle;Pal Pad;SVI 182;1;1;1;20;5,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Live;;Crustle;Picnic Basket;SVI 184;1;1;1;20;5,0;SVI;;184;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_184_R_EN_LG.png;No
@@ -619,7 +619,7 @@ Meta Live;;Cynthia'S Garchomp;Premium Power Pro;ASC 199;45;4;17;18;94,44;ASC;;19
 Meta Live;;Cynthia'S Garchomp;Counter Catcher;PAR 160;16;2;14;18;77,78;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Cynthia'S Garchomp;Rare Candy;MEG 125;11;2;10;18;55,56;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
 Meta Live;;Cynthia'S Garchomp;Super Rod;PAL 188;11;2;10;18;55,56;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Cynthia'S Garchomp;Switch;MEG 130;6;1;6;18;33,33;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Cynthia'S Garchomp;Switch;MEG 130;6;1;6;18;33,33;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Cynthia'S Garchomp;Secret Box;TWM 163;5;1;5;18;27,78;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Cynthia'S Garchomp;Poké Pad;ASC 198;15;4;4;18;22,22;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
 Meta Live;;Cynthia'S Garchomp;Ultra Ball;ASC 213;4;1;4;18;22,22;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
@@ -707,7 +707,7 @@ Meta Live;;Dragapult;Poké Pad;ASC 198;19;4;6;20;30,0;ASC;;198;Common;Item;https
 Meta Live;;Dragapult;Rare Candy;MEG 125;9;2;6;20;30,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
 Meta Live;;Dragapult;Super Rod;PAL 188;6;1;6;20;30,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Dragapult;Unfair Stamp;TWM 165;4;1;4;20;20,0;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
-Meta Live;;Dragapult;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Dragapult;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Dragapult;Tera Orb;SSP 189;2;1;2;20;10,0;SSP;;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_189_R_EN_LG.png;No
 Meta Live;;Dragapult;Earthen Vessel;PRE 106;2;2;1;20;5,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Dragapult;Energy Search;SVI 172;1;1;1;20;5,0;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
@@ -909,7 +909,7 @@ Meta Live;;Festival Lead;Night Stretcher;ASC 196;13;2;12;20;60,0;ASC;;196;Common
 Meta Live;;Festival Lead;Super Rod;PAL 188;15;2;11;20;55,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Festival Lead;Precious Trolley;SSP 185;9;1;9;20;45,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
 Meta Live;;Festival Lead;Poké Pad;ASC 198;26;4;7;20;35,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
-Meta Live;;Festival Lead;Switch;MEG 130;7;1;7;20;35,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Festival Lead;Switch;MEG 130;7;1;7;20;35,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Festival Lead;Tool Scrapper;ASC 212;4;1;4;20;20,0;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Festival Lead;Sacred Ash;DRI 168;2;1;2;20;10,0;DRI;;168;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_168_R_EN_LG.png;No
 Meta Live;;Festival Lead;Ultra Ball;ASC 213;4;3;2;20;10,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
@@ -983,7 +983,7 @@ Meta Live;;Flareon Noctowl;Ultra Ball;ASC 213;47;4;18;19;94,74;ASC;;213;Common;I
 Meta Live;;Flareon Noctowl;Glass Trumpet;ASC 189;16;1;16;19;84,21;ASC;;189;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_189_R_EN_LG.png;No
 Meta Live;;Flareon Noctowl;Rare Candy;MEG 125;18;2;12;19;63,16;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
 Meta Live;;Flareon Noctowl;Super Rod;PAL 188;10;1;10;19;52,63;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Flareon Noctowl;Switch;MEG 130;9;1;9;19;47,37;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Flareon Noctowl;Switch;MEG 130;9;1;9;19;47,37;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Flareon Noctowl;Tera Orb;SSP 189;11;3;9;19;47,37;SSP;;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_189_R_EN_LG.png;No
 Meta Live;;Flareon Noctowl;Energy Switch;MEG 115;5;1;5;19;26,32;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Flareon Noctowl;Tool Scrapper;ASC 212;2;1;2;19;10,53;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
@@ -1052,7 +1052,7 @@ Meta Live;;Froslass Munkidori;Nest Ball;PAF 84;14;2;11;20;55,0;PAF;;84;Uncommon;
 Meta Live;;Froslass Munkidori;Poké Pad;ASC 198;25;4;9;20;45,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
 Meta Live;;Froslass Munkidori;Energy Search;SVI 172;5;1;5;20;25,0;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
 Meta Live;;Froslass Munkidori;Unfair Stamp;TWM 165;4;1;4;20;20,0;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
-Meta Live;;Froslass Munkidori;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Froslass Munkidori;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Froslass Munkidori;Bug Catching Set;PRE 102;4;4;1;20;5,0;PRE;;102;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_102_R_EN_LG.png;No
 Meta Live;;Froslass Munkidori;Energy Switch;MEG 115;2;2;1;20;5,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Froslass Munkidori;Enhanced Hammer;TWM 148;1;1;1;20;5,0;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
@@ -1212,7 +1212,7 @@ Meta Live;;Gholdengo;Energy Search Pro;SSP 176;5;1;5;17;29,41;SSP;;176;Ultra Rar
 Meta Live;;Gholdengo;Pokégear 3.0;BLK 84;6;2;5;17;29,41;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Gholdengo;Tool Scrapper;ASC 212;4;1;4;17;23,53;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Gholdengo;Prime Catcher;PRE 119;3;1;3;17;17,65;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
-Meta Live;;Gholdengo;Switch;MEG 130;4;2;3;17;17,65;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Gholdengo;Switch;MEG 130;4;2;3;17;17,65;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Gholdengo;Blowtorch;PFL 86;2;1;2;17;11,76;PFL;;86;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_086_R_EN_LG.png;No
 Meta Live;;Gholdengo;Premium Power Pro;ASC 199;2;1;2;17;11,76;ASC;;199;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_199_R_EN_LG.png;No
 Meta Live;;Gholdengo;Energy Retrieval;WHT 82;2;2;1;17;5,88;WHT;;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_082_R_EN_LG.png;No
@@ -1269,7 +1269,7 @@ Meta Live;;Gholdengo Joltik Box;Prime Catcher;PRE 119;6;1;6;19;31,58;PRE;;119;Ul
 Meta Live;;Gholdengo Joltik Box;Tool Scrapper;ASC 212;6;1;6;19;31,58;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Gholdengo Joltik Box;Super Rod;PAL 188;2;1;2;19;10,53;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Gholdengo Joltik Box;Pokémon Catcher;SVI 187;1;1;1;19;5,26;SVI;;187;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_187_R_EN_LG.png;No
-Meta Live;;Gholdengo Joltik Box;Switch;MEG 130;1;1;1;19;5,26;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Gholdengo Joltik Box;Switch;MEG 130;1;1;1;19;5,26;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Gholdengo Joltik Box;Levincia;JTG 150;34;2;19;19;100,0;JTG;;150;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_150_R_EN_LG.png;No
 Meta Live;;Gholdengo Joltik Box;Team Rocket's Watchtower;ASC 210;1;1;1;19;5,26;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No
 Meta Live;;Gholdengo Joltik Box;Arven;OBF 186;74;4;19;19;100,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
@@ -1363,7 +1363,7 @@ Meta Live;;Greninja;Rare Candy;MEG 125;59;4;19;19;100,0;MEG;;125;Common;Item;htt
 Meta Live;;Greninja;Ultra Ball;ASC 213;60;4;19;19;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Greninja;Counter Catcher;PAR 160;18;1;18;19;94,74;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Greninja;Super Rod;PAL 188;19;2;18;19;94,74;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Greninja;Switch;MEG 130;13;2;12;19;63,16;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Greninja;Switch;MEG 130;13;2;12;19;63,16;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Greninja;Nest Ball;PAF 84;15;4;10;19;52,63;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Greninja;Energy Search;SVI 172;6;1;6;19;31,58;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
 Meta Live;;Greninja;Earthen Vessel;PRE 106;1;1;1;19;5,26;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
@@ -1484,7 +1484,7 @@ Meta Live;;Ho-Oh Armarouge;Ultra Ball;ASC 213;70;4;19;19;100,0;ASC;;213;Common;I
 Meta Live;;Ho-Oh Armarouge;Energy Retrieval;WHT 82;16;2;15;19;78,95;WHT;;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_082_R_EN_LG.png;No
 Meta Live;;Ho-Oh Armarouge;Earthen Vessel;PRE 106;20;2;13;19;68,42;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Ho-Oh Armarouge;Super Rod;PAL 188;5;1;5;19;26,32;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Ho-Oh Armarouge;Switch;MEG 130;3;1;3;19;15,79;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Ho-Oh Armarouge;Switch;MEG 130;3;1;3;19;15,79;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Ho-Oh Armarouge;Precious Trolley;SSP 185;2;1;2;19;10,53;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
 Meta Live;;Ho-Oh Armarouge;Superior Energy Retrieval;PAL 189;2;1;2;19;10,53;PAL;;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_189_R_EN_LG.png;No
 Meta Live;;Ho-Oh Armarouge;Buddy-Buddy Poffin;ASC 184;3;3;1;19;5,26;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
@@ -1554,7 +1554,7 @@ Meta Live;;Hop'S Zacian;Earthen Vessel;PRE 106;19;2;15;20;75,0;PRE;;106;Uncommon
 Meta Live;;Hop'S Zacian;Energy Switch;MEG 115;20;2;13;20;65,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Precious Trolley;SSP 185;12;1;12;20;60,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
 Meta Live;;Hop'S Zacian;Pokégear 3.0;BLK 84;30;3;11;20;55,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
-Meta Live;;Hop'S Zacian;Switch;MEG 130;9;1;9;20;45,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Hop'S Zacian;Switch;MEG 130;9;1;9;20;45,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Counter Catcher;PAR 160;9;2;8;20;40,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Ultra Ball;ASC 213;18;3;8;20;40,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Hop'S Zacian;Tool Scrapper;ASC 212;6;1;6;20;30,0;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
@@ -1742,7 +1742,7 @@ Meta Live;;Hydreigon;Deduction Kit;SSP 171;4;4;1;20;5,0;SSP;;171;Uncommon;Item;h
 Meta Live;;Hydreigon;Jumbo Ice Cream;PFL 91;2;2;1;20;5,0;PFL;;91;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png;No
 Meta Live;;Hydreigon;Poké Pad;ASC 198;3;3;1;20;5,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
 Meta Live;;Hydreigon;Roto-Stick;PRE 127;2;2;1;20;5,0;PRE;;127;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_127_R_EN_LG.png;No
-Meta Live;;Hydreigon;Switch;MEG 130;1;1;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Hydreigon;Switch;MEG 130;1;1;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Hydreigon;Team Rocket's Venture Bomb;DRI 179;2;2;1;20;5,0;DRI;;179;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_179_R_EN_LG.png;No
 Meta Live;;Hydreigon;Neo Upper Energy;TEF 162;11;1;11;20;55,0;TEF;;162;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_162_R_EN_LG.png;Yes
 Meta Live;;Hydreigon;Jet Energy;PAL 190;7;2;5;20;25,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
@@ -1801,7 +1801,7 @@ Meta Live;;Iron Hands Magneton;Nest Ball;PAF 84;76;4;19;19;100,0;PAF;;84;Uncommo
 Meta Live;;Iron Hands Magneton;Prime Catcher;PRE 119;19;1;19;19;100,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
 Meta Live;;Iron Hands Magneton;Super Rod;PAL 188;21;2;19;19;100,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Iron Hands Magneton;Ultra Ball;ASC 213;76;4;19;19;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
-Meta Live;;Iron Hands Magneton;Switch;MEG 130;18;1;18;19;94,74;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Iron Hands Magneton;Switch;MEG 130;18;1;18;19;94,74;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Iron Hands Magneton;Night Stretcher;ASC 196;17;1;17;19;89,47;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Iron Hands Magneton;Counter Catcher;PAR 160;2;2;1;19;5,26;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Iron Hands Magneton;Pal Pad;SVI 182;1;1;1;19;5,26;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
@@ -1881,7 +1881,7 @@ Meta Live;;Iron Valiant;Psychic Energy;SVE 21;149;8;19;19;100,0;SVE;;21;Basic En
 Meta Live;;Iron Valiant;Nest Ball;PAF 84;70;4;19;19;100,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Iron Valiant;Night Stretcher;ASC 196;37;2;19;19;100,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Iron Valiant;Prime Catcher;PRE 119;19;1;19;19;100,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
-Meta Live;;Iron Valiant;Switch;MEG 130;75;4;19;19;100,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Iron Valiant;Switch;MEG 130;75;4;19;19;100,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Iron Valiant;Techno Radar;PRE 130;76;4;19;19;100,0;PRE;;130;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_130_R_EN_LG.png;No
 Meta Live;;Iron Valiant;Wondrous Patch;PFL 94;72;4;19;19;100,0;PFL;;94;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_094_R_EN_LG.png;No
 Meta Live;;Iron Valiant;Earthen Vessel;PRE 106;4;1;4;19;21,05;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
@@ -1936,7 +1936,7 @@ Meta Live;;Joltik Box;Ultra Ball;ASC 213;72;4;19;19;100,0;ASC;;213;Common;Item;h
 Meta Live;;Joltik Box;Super Rod;PAL 188;14;2;13;19;68,42;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Joltik Box;Energy Switch;MEG 115;12;2;11;19;57,89;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Joltik Box;Night Stretcher;ASC 196;5;1;5;19;26,32;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
-Meta Live;;Joltik Box;Switch;MEG 130;5;1;5;19;26,32;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Joltik Box;Switch;MEG 130;5;1;5;19;26,32;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Joltik Box;Tool Scrapper;ASC 212;5;1;5;19;26,32;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Joltik Box;Picnic Basket;SVI 184;1;1;1;19;5,26;SVI;;184;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_184_R_EN_LG.png;No
 Meta Live;;Joltik Box;Gravity Mountain;SSP 177;3;1;3;19;15,79;SSP;;177;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png;No
@@ -1991,7 +1991,7 @@ Meta Live;;Kangaskhan Bouffalant;Precious Trolley;SSP 185;18;1;18;19;94,74;SSP;;
 Meta Live;;Kangaskhan Bouffalant;Jumbo Ice Cream;PFL 91;64;4;17;19;89,47;PFL;;91;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png;No
 Meta Live;;Kangaskhan Bouffalant;Nest Ball;PAF 84;27;2;16;19;84,21;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Kangaskhan Bouffalant;Energy Switch;MEG 115;12;2;10;19;52,63;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
-Meta Live;;Kangaskhan Bouffalant;Switch;MEG 130;8;1;8;19;42,11;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Kangaskhan Bouffalant;Switch;MEG 130;8;1;8;19;42,11;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Kangaskhan Bouffalant;Ultra Ball;ASC 213;6;1;6;19;31,58;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Kangaskhan Bouffalant;Super Rod;PAL 188;4;1;4;19;21,05;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Kangaskhan Bouffalant;Counter Catcher;PAR 160;4;2;3;19;15,79;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
@@ -2047,7 +2047,7 @@ Meta Live;;Kangaskhan Forretress;Miracle Headset;SSP 183;5;1;5;19;26,32;SSP;;183
 Meta Live;;Kangaskhan Forretress;Secret Box;TWM 163;4;1;4;19;21,05;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Kangaskhan Forretress;Picnic Basket;SVI 184;1;1;1;19;5,26;SVI;;184;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_184_R_EN_LG.png;No
 Meta Live;;Kangaskhan Forretress;Redeemable Ticket;JTG 156;1;1;1;19;5,26;JTG;;156;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_156_R_EN_LG.png;No
-Meta Live;;Kangaskhan Forretress;Switch;MEG 130;1;1;1;19;5,26;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Kangaskhan Forretress;Switch;MEG 130;1;1;1;19;5,26;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Kangaskhan Forretress;Tera Orb;SSP 189;1;1;1;19;5,26;SSP;;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_189_R_EN_LG.png;No
 Meta Live;;Kangaskhan Forretress;Tool Scrapper;ASC 212;1;1;1;19;5,26;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Kangaskhan Forretress;Mist Energy;TEF 161;36;3;19;19;100,0;TEF;;161;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_161_R_EN_LG.png;No
@@ -2098,7 +2098,7 @@ Meta Live;;Lopunny Dusknoir;Nest Ball;PAF 84;67;4;20;20;100,0;PAF;;84;Uncommon;I
 Meta Live;;Lopunny Dusknoir;Rare Candy;MEG 125;76;4;20;20;100,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
 Meta Live;;Lopunny Dusknoir;Ultra Ball;ASC 213;68;4;20;20;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Lopunny Dusknoir;Night Stretcher;ASC 196;39;3;19;20;95,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
-Meta Live;;Lopunny Dusknoir;Switch;MEG 130;48;4;19;20;95,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Lopunny Dusknoir;Switch;MEG 130;48;4;19;20;95,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Lopunny Dusknoir;Counter Catcher;PAR 160;16;2;15;20;75,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Live;;Lopunny Dusknoir;Pokégear 3.0;BLK 84;9;3;4;20;20,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Lopunny Dusknoir;Prime Catcher;PRE 119;1;1;1;20;5,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
@@ -2139,7 +2139,7 @@ Meta Live;;Lucario Hariyama;Fighting Gong;ASC 187;76;4;19;19;100,0;ASC;;187;Unco
 Meta Live;;Lucario Hariyama;Night Stretcher;ASC 196;52;3;19;19;100,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Lucario Hariyama;Premium Power Pro;ASC 199;76;4;19;19;100,0;ASC;;199;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_199_R_EN_LG.png;No
 Meta Live;;Lucario Hariyama;Ultra Ball;ASC 213;55;4;19;19;100,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
-Meta Live;;Lucario Hariyama;Switch;MEG 130;18;2;13;19;68,42;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Lucario Hariyama;Switch;MEG 130;18;2;13;19;68,42;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Lucario Hariyama;Nest Ball;PAF 84;25;3;12;19;63,16;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Lucario Hariyama;Secret Box;TWM 163;8;1;8;19;42,11;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Lucario Hariyama;Poké Pad;ASC 198;11;4;3;19;15,79;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
@@ -2212,7 +2212,7 @@ Meta Live;;Manectric Eelektrik;Grass Energy;SVE 17;8;4;2;18;11,11;SVE;;17;Basic 
 Meta Live;;Manectric Eelektrik;Nest Ball;PAF 84;45;4;17;18;94,44;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Manectric Eelektrik;Ultra Ball;ASC 213;51;4;17;18;94,44;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Manectric Eelektrik;Electric Generator;PAF 79;48;4;15;18;83,33;PAF;;79;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_079_R_EN_LG.png;No
-Meta Live;;Manectric Eelektrik;Switch;MEG 130;23;2;15;18;83,33;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Manectric Eelektrik;Switch;MEG 130;23;2;15;18;83,33;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Manectric Eelektrik;Buddy-Buddy Poffin;ASC 184;16;3;9;18;50,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
 Meta Live;;Manectric Eelektrik;Night Stretcher;ASC 196;14;2;9;18;50,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Manectric Eelektrik;Super Rod;PAL 188;9;1;9;18;50,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
@@ -2310,7 +2310,7 @@ Meta Live;;Marnie'S Grimmsnarl;Enhanced Hammer;TWM 148;2;1;2;19;10,53;TWM;;148;U
 Meta Live;;Marnie'S Grimmsnarl;Energy Recycler;DRI 164;1;1;1;19;5,26;DRI;;164;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_164_R_EN_LG.png;No
 Meta Live;;Marnie'S Grimmsnarl;Pokégear 3.0;BLK 84;1;1;1;19;5,26;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Marnie'S Grimmsnarl;Prime Catcher;PRE 119;1;1;1;19;5,26;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
-Meta Live;;Marnie'S Grimmsnarl;Switch;MEG 130;1;1;1;19;5,26;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Marnie'S Grimmsnarl;Switch;MEG 130;1;1;1;19;5,26;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Marnie'S Grimmsnarl;Unfair Stamp;TWM 165;1;1;1;19;5,26;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
 Meta Live;;Marnie'S Grimmsnarl;Mist Energy;TEF 161;1;1;1;19;5,26;TEF;;161;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_161_R_EN_LG.png;No
 Meta Live;;Marnie'S Grimmsnarl;Spikemuth Gym;DRI 169;41;3;18;19;94,74;DRI;;169;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_169_R_EN_LG.png;No
@@ -2447,7 +2447,7 @@ Meta Live;;Mega Charizard X;Unfair Stamp;TWM 165;7;1;7;20;35,0;TWM;;165;Ultra Ra
 Meta Live;;Mega Charizard X;Precious Trolley;SSP 185;4;1;4;20;20,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
 Meta Live;;Mega Charizard X;Energy Recycler;DRI 164;5;3;3;20;15,0;DRI;;164;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_164_R_EN_LG.png;No
 Meta Live;;Mega Charizard X;Prime Catcher;PRE 119;3;1;3;20;15,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
-Meta Live;;Mega Charizard X;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Mega Charizard X;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Mega Charizard X;Blowtorch;PFL 86;2;1;2;20;10,0;PFL;;86;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_086_R_EN_LG.png;No
 Meta Live;;Mega Charizard X;Mega Signal;ASC 193;2;1;2;20;10,0;ASC;;193;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_193_R_EN_LG.png;No
 Meta Live;;Mega Charizard X;Poké Pad;ASC 198;7;4;2;20;10,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
@@ -2560,7 +2560,7 @@ Meta Live;;Mega Lopunny;Pokégear 3.0;BLK 84;21;4;8;20;40,0;BLK;;84;Uncommon;Ite
 Meta Live;;Mega Lopunny;Secret Box;TWM 163;8;1;8;20;40,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Mega Lopunny;Rare Candy;MEG 125;23;4;6;20;30,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
 Meta Live;;Mega Lopunny;Earthen Vessel;PRE 106;7;2;5;20;25,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
-Meta Live;;Mega Lopunny;Switch;MEG 130;11;3;5;20;25,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Mega Lopunny;Switch;MEG 130;11;3;5;20;25,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Mega Lopunny;Super Rod;PAL 188;4;1;4;20;20,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Mega Lopunny;Jumbo Ice Cream;PFL 91;10;4;3;20;15,0;PFL;;91;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png;No
 Meta Live;;Mega Lopunny;Mega Signal;ASC 193;3;2;2;20;10,0;ASC;;193;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_193_R_EN_LG.png;No
@@ -2658,7 +2658,7 @@ Meta Live;;Mega Lucario;Fighting Gong;ASC 187;72;4;20;20;100,0;ASC;;187;Uncommon
 Meta Live;;Mega Lucario;Night Stretcher;ASC 196;36;3;17;20;85,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Mega Lucario;Premium Power Pro;ASC 199;66;4;17;20;85,0;ASC;;199;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_199_R_EN_LG.png;No
 Meta Live;;Mega Lucario;Ultra Ball;ASC 213;47;4;17;20;85,0;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
-Meta Live;;Mega Lucario;Switch;MEG 130;21;3;13;20;65,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Mega Lucario;Switch;MEG 130;21;3;13;20;65,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Mega Lucario;Nest Ball;PAF 84;24;4;10;20;50,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Mega Lucario;Poké Pad;ASC 198;23;4;7;20;35,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
 Meta Live;;Mega Lucario;Earthen Vessel;PRE 106;9;2;6;20;30,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
@@ -2746,7 +2746,7 @@ Meta Live;;Mega Venusaur;Superior Energy Retrieval;PAL 189;2;1;2;20;10,0;PAL;;18
 Meta Live;;Mega Venusaur;Earthen Vessel;PRE 106;1;1;1;20;5,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Mega Venusaur;Redeemable Ticket;JTG 156;1;1;1;20;5,0;JTG;;156;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_156_R_EN_LG.png;No
 Meta Live;;Mega Venusaur;Secret Box;TWM 163;1;1;1;20;5,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
-Meta Live;;Mega Venusaur;Switch;MEG 130;1;1;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Mega Venusaur;Switch;MEG 130;1;1;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Mega Venusaur;Forest of Vitality;ASC 188;69;4;20;20;100,0;ASC;;188;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_188_R_EN_LG.png;No
 Meta Live;;Mega Venusaur;Battle Cage;PFL 85;3;3;1;20;5,0;PFL;;85;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_085_R_EN_LG.png;No
 Meta Live;;Mega Venusaur;Boss's Orders;ASC 183;41;3;20;20;100,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
@@ -2869,7 +2869,7 @@ Meta Live;;Ogerpon Meganium;Night Stretcher;ASC 196;19;3;12;20;60,0;ASC;;196;Com
 Meta Live;;Ogerpon Meganium;Pal Pad;SVI 182;12;1;12;20;60,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Live;;Ogerpon Meganium;Pokégear 3.0;BLK 84;15;2;8;20;40,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Ogerpon Meganium;Poké Pad;ASC 198;12;4;5;20;25,0;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
-Meta Live;;Ogerpon Meganium;Switch;MEG 130;5;1;5;20;25,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Ogerpon Meganium;Switch;MEG 130;5;1;5;20;25,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Ogerpon Meganium;Energy Retrieval;WHT 82;3;1;3;20;15,0;WHT;;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_082_R_EN_LG.png;No
 Meta Live;;Ogerpon Meganium;Earthen Vessel;PRE 106;4;2;2;20;10,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Ogerpon Meganium;Prime Catcher;PRE 119;2;1;2;20;10,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
@@ -2976,7 +2976,7 @@ Meta Live;;Other;Secret Box;TWM 163;6;1;6;20;30,0;TWM;;163;Ultra Rare;Item;https
 Meta Live;;Other;Pokégear 3.0;BLK 84;8;2;5;20;25,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
 Meta Live;;Other;Energy Switch;MEG 115;7;4;4;20;20,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Other;Miracle Headset;SSP 183;4;1;4;20;20,0;SSP;;183;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_183_R_EN_LG.png;Yes
-Meta Live;;Other;Switch;MEG 130;4;1;4;20;20,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Other;Switch;MEG 130;4;1;4;20;20,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Other;Team Rocket's Transceiver;ASC 209;16;4;4;20;20,0;ASC;;209;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_209_R_EN_LG.png;No
 Meta Live;;Other;Enhanced Hammer;TWM 148;3;1;3;20;15,0;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
 Meta Live;;Other;Roto-Stick;PRE 127;10;4;3;20;15,0;PRE;;127;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_127_R_EN_LG.png;No
@@ -3145,7 +3145,7 @@ Meta Live;;Raging Bolt;Night Stretcher;ASC 196;35;3;17;19;89,47;ASC;;196;Common;
 Meta Live;;Raging Bolt;Prime Catcher;PRE 119;17;1;17;19;89,47;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
 Meta Live;;Raging Bolt;Ultra Ball;ASC 213;53;4;17;19;89,47;ASC;;213;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_213_R_EN_LG.png;No
 Meta Live;;Raging Bolt;Fighting Gong;ASC 187;49;4;16;19;84,21;ASC;;187;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_187_R_EN_LG.png;No
-Meta Live;;Raging Bolt;Switch;MEG 130;19;2;10;19;52,63;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Raging Bolt;Switch;MEG 130;19;2;10;19;52,63;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Raging Bolt;Glass Trumpet;ASC 189;18;3;6;19;31,58;ASC;;189;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_189_R_EN_LG.png;No
 Meta Live;;Raging Bolt;Energy Search;SVI 172;4;1;4;19;21,05;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
 Meta Live;;Raging Bolt;Energy Retrieval;WHT 82;4;2;3;19;15,79;WHT;;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_082_R_EN_LG.png;No
@@ -3285,7 +3285,7 @@ Meta Live;;Roaring Moon;Enhanced Hammer;TWM 148;7;2;6;20;30,0;TWM;;148;Uncommon;
 Meta Live;;Roaring Moon;Super Rod;PAL 188;6;1;6;20;30,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Pokémon Catcher;SVI 187;14;4;5;20;25,0;SVI;;187;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_187_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Counter Catcher;PAR 160;5;2;3;20;15,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
-Meta Live;;Roaring Moon;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Roaring Moon;Switch;MEG 130;3;1;3;20;15,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Prime Catcher;PRE 119;2;1;2;20;10,0;PRE;;119;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_119_R_EN_LG.png;Yes
 Meta Live;;Roaring Moon;Buddy-Buddy Poffin;ASC 184;2;2;1;20;5,0;ASC;;184;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_184_R_EN_LG.png;No
 Meta Live;;Roaring Moon;Precious Trolley;SSP 185;1;1;1;20;5,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
@@ -3347,7 +3347,7 @@ Meta Live;;Rocket'S Mewtwo;Pokégear 3.0;BLK 84;2;1;2;20;10,0;BLK;;84;Uncommon;I
 Meta Live;;Rocket'S Mewtwo;Jumbo Ice Cream;PFL 91;1;1;1;20;5,0;PFL;;91;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_091_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Sacred Ash;DRI 168;1;1;1;20;5,0;DRI;;168;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_168_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Scramble Switch;SSP 186;1;1;1;20;5,0;SSP;;186;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_186_R_EN_LG.png;Yes
-Meta Live;;Rocket'S Mewtwo;Switch;MEG 130;1;1;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Rocket'S Mewtwo;Switch;MEG 130;1;1;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Tool Scrapper;ASC 212;1;1;1;20;5,0;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Team Rocket's Energy;ASC 217;80;4;20;20;100,0;ASC;;217;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_217_R_EN_LG.png;No
 Meta Live;;Rocket'S Mewtwo;Team Rocket's Factory;ASC 203;55;4;20;20;100,0;ASC;;203;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_203_R_EN_LG.png;No
@@ -3397,7 +3397,7 @@ Meta Live;;Seaking Festival Lead;Nest Ball;PAF 84;36;3;17;19;89,47;PAF;;84;Uncom
 Meta Live;;Seaking Festival Lead;Pal Pad;SVI 182;13;1;13;19;68,42;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Live;;Seaking Festival Lead;Bug Catching Set;PRE 102;4;2;2;19;10,53;PRE;;102;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_102_R_EN_LG.png;No
 Meta Live;;Seaking Festival Lead;Poké Pad;ASC 198;7;4;2;19;10,53;ASC;;198;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_198_R_EN_LG.png;No
-Meta Live;;Seaking Festival Lead;Switch;MEG 130;2;1;2;19;10,53;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Seaking Festival Lead;Switch;MEG 130;2;1;2;19;10,53;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Seaking Festival Lead;Earthen Vessel;PRE 106;1;1;1;19;5,26;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Seaking Festival Lead;Picnic Basket;SVI 184;1;1;1;19;5,26;SVI;;184;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_184_R_EN_LG.png;No
 Meta Live;;Seaking Festival Lead;Rare Candy;MEG 125;1;1;1;19;5,26;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
@@ -3520,7 +3520,7 @@ Meta Live;;Slaking;Sacred Ash;DRI 168;13;1;13;20;65,0;DRI;;168;Uncommon;Item;htt
 Meta Live;;Slaking;Nest Ball;PAF 84;9;3;7;20;35,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Slaking;Night Stretcher;ASC 196;8;2;7;20;35,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Live;;Slaking;Super Rod;PAL 188;2;1;2;20;10,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Slaking;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Slaking;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Slaking;Pal Pad;SVI 182;1;1;1;20;5,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Live;;Slaking;Jet Energy;PAL 190;69;4;20;20;100,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Live;;Slaking;Boomerang Energy;TWM 166;42;4;19;20;95,0;TWM;;166;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_166_R_EN_LG.png;No
@@ -3664,7 +3664,7 @@ Meta Live;;Tera Box;Counter Catcher;PAR 160;4;1;4;20;20,0;PAR;;160;Uncommon;Item
 Meta Live;;Tera Box;Tera Orb;SSP 189;3;1;3;20;15,0;SSP;;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_189_R_EN_LG.png;No
 Meta Live;;Tera Box;Glass Trumpet;ASC 189;2;1;2;20;10,0;ASC;;189;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_189_R_EN_LG.png;No
 Meta Live;;Tera Box;Rare Candy;MEG 125;2;1;2;20;10,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
-Meta Live;;Tera Box;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Tera Box;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Tera Box;Jet Energy;PAL 190;4;4;1;20;5,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Live;;Tera Box;Prism Energy;ASC 216;1;1;1;20;5,0;ASC;;216;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_216_R_EN_LG.png;No
 Meta Live;;Tera Box;Area Zero Underdepths;PRE 94;45;3;20;20;100,0;PRE;;94;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_094_R_EN_LG.png;No
@@ -3738,7 +3738,7 @@ Meta Live;;Terapagos Noctowl;Super Rod;PAL 188;6;2;5;20;25,0;PAL;;188;Common;Ite
 Meta Live;;Terapagos Noctowl;Energy Switch;MEG 115;6;2;4;20;20,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Live;;Terapagos Noctowl;Earthen Vessel;PRE 106;2;1;2;20;10,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Terapagos Noctowl;Pal Pad;SVI 182;2;1;2;20;10,0;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
-Meta Live;;Terapagos Noctowl;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Terapagos Noctowl;Switch;MEG 130;2;1;2;20;10,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Terapagos Noctowl;Scoop Up Cyclone;PRE 128;1;1;1;20;5,0;PRE;;128;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_128_R_EN_LG.png;Yes
 Meta Live;;Terapagos Noctowl;Tool Scrapper;ASC 212;1;1;1;20;5,0;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Live;;Terapagos Noctowl;Jet Energy;PAL 190;55;4;16;20;80,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
@@ -3850,7 +3850,7 @@ Meta Live;;Ursaluna Lunatone;Night Stretcher;ASC 196;70;4;20;20;100,0;ASC;;196;C
 Meta Live;;Ursaluna Lunatone;Nest Ball;PAF 84;41;4;19;20;95,0;PAF;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_084_R_EN_LG.png;No
 Meta Live;;Ursaluna Lunatone;Earthen Vessel;PRE 106;19;2;18;20;90,0;PRE;;106;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_106_R_EN_LG.png;No
 Meta Live;;Ursaluna Lunatone;Energy Switch;MEG 115;25;2;18;20;90,0;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
-Meta Live;;Ursaluna Lunatone;Switch;MEG 130;19;3;16;20;80,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Ursaluna Lunatone;Switch;MEG 130;19;3;16;20;80,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Ursaluna Lunatone;Energy Retrieval;WHT 82;29;4;15;20;75,0;WHT;;82;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_082_R_EN_LG.png;No
 Meta Live;;Ursaluna Lunatone;Secret Box;TWM 163;12;1;12;20;60,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Live;;Ursaluna Lunatone;Pokégear 3.0;BLK 84;15;3;10;20;50,0;BLK;;84;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/BLK/BLK_084_R_EN_LG.png;No
@@ -3931,7 +3931,7 @@ Meta Live;;Wugtrio Mill;Enhanced Hammer;TWM 148;1;1;1;20;5,0;TWM;;148;Uncommon;I
 Meta Live;;Wugtrio Mill;Precious Trolley;SSP 185;1;1;1;20;5,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
 Meta Live;;Wugtrio Mill;Strange Timepiece;MEG 128;2;2;1;20;5,0;MEG;;128;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_128_R_EN_LG.png;No
 Meta Live;;Wugtrio Mill;Super Rod;PAL 188;2;2;1;20;5,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Live;;Wugtrio Mill;Switch;MEG 130;3;3;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Live;;Wugtrio Mill;Switch;MEG 130;3;3;1;20;5,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Live;;Wugtrio Mill;Ignition Energy;WHT 86;80;4;20;20;100,0;WHT;;86;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_086_R_EN_LG.png;Yes
 Meta Live;;Wugtrio Mill;Reversal Energy;PAL 192;80;4;20;20;100,0;PAL;;192;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_192_R_EN_LG.png;No
 Meta Live;;Wugtrio Mill;Jet Energy;PAL 190;1;1;1;20;5,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
@@ -3994,7 +3994,7 @@ Meta Play!;;Alakazam Dudunsparce;Sacred Ash;DRI 168;4;1;4;35;11,43;DRI;;168;Unco
 Meta Play!;;Alakazam Dudunsparce;Pal Pad;SVI 182;3;1;3;35;8,57;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Play!;;Alakazam Dudunsparce;Super Rod;PAL 188;2;1;2;35;5,71;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Play!;;Alakazam Dudunsparce;Earthen Vessel;PAR 163;1;1;1;35;2,86;PAR;;163;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_163_R_EN_LG.png;No
-Meta Play!;;Alakazam Dudunsparce;Switch;MEG 130;1;1;1;35;2,86;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Alakazam Dudunsparce;Switch;MEG 130;1;1;1;35;2,86;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Alakazam Dudunsparce;Enriching Energy;SSP 191;34;1;34;35;97,14;SSP;;191;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_191_R_EN_LG.png;Yes
 Meta Play!;;Alakazam Dudunsparce;Jet Energy;PAL 190;24;1;24;35;68,57;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Play!;;Alakazam Dudunsparce;Ignition Energy;WHT 86;1;1;1;35;2,86;WHT;;86;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_086_R_EN_LG.png;Yes
@@ -4171,7 +4171,7 @@ Meta Play!;;Charizard Noctowl;Prime Catcher;TEF 157;101;1;101;139;72,66;TEF;;157
 Meta Play!;;Charizard Noctowl;Counter Catcher;PAR 160;45;1;45;139;32,37;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Play!;;Charizard Noctowl;Tera Orb;SSP 189;7;1;7;139;5,04;SSP;;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_189_R_EN_LG.png;No
 Meta Play!;;Charizard Noctowl;Unfair Stamp;TWM 165;7;1;7;139;5,04;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
-Meta Play!;;Charizard Noctowl;Switch;MEG 130;4;1;4;139;2,88;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Charizard Noctowl;Switch;MEG 130;4;1;4;139;2,88;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Charizard Noctowl;Earthen Vessel;PAR 163;1;1;1;139;0,72;PAR;;163;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_163_R_EN_LG.png;No
 Meta Play!;;Charizard Noctowl;Pal Pad;SVI 182;1;1;1;139;0,72;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Play!;;Charizard Noctowl;Jet Energy;PAL 190;225;2;127;139;91,37;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
@@ -4360,7 +4360,7 @@ Meta Play!;;Crustle Dri;Tool Scrapper;ASC 212;2;1;2;7;28,57;ASC;;212;Common;Item
 Meta Play!;;Crustle Dri;Picnic Basket;SVI 184;1;1;1;7;14,29;SVI;;184;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_184_R_EN_LG.png;No
 Meta Play!;;Crustle Dri;Prime Catcher;TEF 157;1;1;1;7;14,29;TEF;;157;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_157_R_EN_LG.png;Yes
 Meta Play!;;Crustle Dri;Secret Box;TWM 163;1;1;1;7;14,29;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
-Meta Play!;;Crustle Dri;Switch;MEG 130;1;1;1;7;14,29;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Crustle Dri;Switch;MEG 130;1;1;1;7;14,29;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Crustle Dri;Mist Energy;TEF 161;23;4;7;7;100,0;TEF;;161;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_161_R_EN_LG.png;No
 Meta Play!;;Crustle Dri;Jet Energy;PAL 190;6;1;6;7;85,71;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Play!;;Crustle Dri;Medical Energy;PAR 182;4;1;4;7;57,14;PAR;;182;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_182_R_EN_LG.png;No
@@ -4478,7 +4478,7 @@ Meta Play!;;Dragapult Charizard;Nest Ball;SVI 181;4;1;4;51;7,84;SVI;;181;Uncommo
 Meta Play!;;Dragapult Charizard;Prime Catcher;TEF 157;3;1;3;51;5,88;TEF;;157;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_157_R_EN_LG.png;Yes
 Meta Play!;;Dragapult Charizard;Energy Search;SVI 172;1;1;1;51;1,96;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
 Meta Play!;;Dragapult Charizard;Secret Box;TWM 163;1;1;1;51;1,96;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
-Meta Play!;;Dragapult Charizard;Switch;MEG 130;1;1;1;51;1,96;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Dragapult Charizard;Switch;MEG 130;1;1;1;51;1,96;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Dragapult Charizard;Luminous Energy;PAL 191;202;4;51;51;100,0;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
 Meta Play!;;Dragapult Charizard;Neo Upper Energy;TEF 162;1;1;1;51;1,96;TEF;;162;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_162_R_EN_LG.png;Yes
 Meta Play!;;Dragapult Charizard;Team Rocket's Watchtower;ASC 210;38;2;24;51;47,06;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No
@@ -4525,7 +4525,7 @@ Meta Play!;;Dragapult Dusknoir;Nest Ball;SVI 181;187;3;161;297;54,21;SVI;;181;Un
 Meta Play!;;Dragapult Dusknoir;Rare Candy;MEG 125;144;3;87;297;29,29;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
 Meta Play!;;Dragapult Dusknoir;Enhanced Hammer;TWM 148;2;1;2;297;0,67;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
 Meta Play!;;Dragapult Dusknoir;Earthen Vessel;PAR 163;1;1;1;297;0,34;PAR;;163;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_163_R_EN_LG.png;No
-Meta Play!;;Dragapult Dusknoir;Switch;MEG 130;2;2;1;297;0,34;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Dragapult Dusknoir;Switch;MEG 130;2;2;1;297;0,34;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Dragapult Dusknoir;Luminous Energy;PAL 191;832;4;296;297;99,66;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
 Meta Play!;;Dragapult Dusknoir;Neo Upper Energy;TEF 162;296;1;296;297;99,66;TEF;;162;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_162_R_EN_LG.png;Yes
 Meta Play!;;Dragapult Dusknoir;Jet Energy;PAL 190;1;1;1;297;0,34;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
@@ -4581,7 +4581,7 @@ Meta Play!;;Dragapult Ex;Earthen Vessel;PAR 163;2;2;1;7;14,29;PAR;;163;Uncommon;
 Meta Play!;;Dragapult Ex;Nest Ball;SVI 181;1;1;1;7;14,29;SVI;;181;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_181_R_EN_LG.png;No
 Meta Play!;;Dragapult Ex;Pokégear 3.0;SVI 186;2;2;1;7;14,29;SVI;;186;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_186_R_EN_LG.png;No
 Meta Play!;;Dragapult Ex;Precious Trolley;SSP 185;1;1;1;7;14,29;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
-Meta Play!;;Dragapult Ex;Switch;MEG 130;1;1;1;7;14,29;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Dragapult Ex;Switch;MEG 130;1;1;1;7;14,29;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Dragapult Ex;Luminous Energy;PAL 191;28;4;7;7;100,0;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
 Meta Play!;;Dragapult Ex;Neo Upper Energy;TEF 162;6;1;6;7;85,71;TEF;;162;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_162_R_EN_LG.png;Yes
 Meta Play!;;Dragapult Ex;Jamming Tower;TWM 153;5;1;5;7;71,43;TWM;;153;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_153_R_EN_LG.png;Yes
@@ -4662,7 +4662,7 @@ Meta Play!;;Festival Lead;Bug Catching Set;TWM 143;9;3;3;4;75,0;TWM;;143;Uncommo
 Meta Play!;;Festival Lead;Counter Catcher;PAR 160;3;1;3;4;75,0;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Play!;;Festival Lead;Night Stretcher;SFA 61;4;2;3;4;75,0;SFA;;61;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_061_R_EN_LG.png;No
 Meta Play!;;Festival Lead;Precious Trolley;SSP 185;3;1;3;4;75,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
-Meta Play!;;Festival Lead;Switch;MEG 130;3;1;3;4;75,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Festival Lead;Switch;MEG 130;3;1;3;4;75,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Festival Lead;Pokégear 3.0;SVI 186;5;3;2;4;50,0;SVI;;186;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_186_R_EN_LG.png;No
 Meta Play!;;Festival Lead;Super Rod;PAL 188;2;1;2;4;50,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Play!;;Festival Lead;Ultra Ball;MEG 131;5;3;2;4;50,0;MEG;;131;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_131_R_EN_LG.png;No
@@ -4718,7 +4718,7 @@ Meta Play!;;Flareon Noctowl;Glass Trumpet;SCR 135;20;1;20;22;90,91;SCR;;135;Unco
 Meta Play!;;Flareon Noctowl;Energy Switch;MEG 115;19;1;19;22;86,36;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Play!;;Flareon Noctowl;Tool Scrapper;WHT 85;4;1;4;22;18,18;WHT;;85;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_085_R_EN_LG.png;No
 Meta Play!;;Flareon Noctowl;Super Rod;PAL 188;3;1;3;22;13,64;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Play!;;Flareon Noctowl;Switch;MEG 130;2;1;2;22;9,09;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Flareon Noctowl;Switch;MEG 130;2;1;2;22;9,09;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Flareon Noctowl;Tera Orb;SSP 189;1;1;1;22;4,55;SSP;;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_189_R_EN_LG.png;No
 Meta Play!;;Flareon Noctowl;Jet Energy;PAL 190;54;3;21;22;95,45;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Play!;;Flareon Noctowl;Luminous Energy;PAL 191;1;1;1;22;4,55;PAL;;191;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_191_R_EN_LG.png;No
@@ -4787,7 +4787,7 @@ Meta Play!;;Froslass Munkidori;Pokégear 3.0;SVI 186;13;3;8;9;88,89;SVI;;186;Com
 Meta Play!;;Froslass Munkidori;Earthen Vessel;PAR 163;7;2;6;9;66,67;PAR;;163;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_163_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Secret Box;TWM 163;6;1;6;9;66,67;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Play!;;Froslass Munkidori;Super Rod;PAL 188;6;1;6;9;66,67;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Play!;;Froslass Munkidori;Switch;MEG 130;3;1;3;9;33,33;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Froslass Munkidori;Switch;MEG 130;3;1;3;9;33,33;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Crushing Hammer;SVI 168;3;2;2;9;22,22;SVI;;168;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_168_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Energy Search;SVI 172;2;1;2;9;22,22;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
 Meta Play!;;Froslass Munkidori;Energy Switch;MEG 115;2;1;2;9;22,22;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
@@ -4963,7 +4963,7 @@ Meta Play!;;Gholdengo Ex;Picnic Basket;SVI 184;1;1;1;7;14,29;SVI;;184;Uncommon;I
 Meta Play!;;Gholdengo Ex;Prime Catcher;TEF 157;1;1;1;7;14,29;TEF;;157;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_157_R_EN_LG.png;Yes
 Meta Play!;;Gholdengo Ex;Rare Candy;MEG 125;1;1;1;7;14,29;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
 Meta Play!;;Gholdengo Ex;Secret Box;TWM 163;1;1;1;7;14,29;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
-Meta Play!;;Gholdengo Ex;Switch;MEG 130;1;1;1;7;14,29;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Gholdengo Ex;Switch;MEG 130;1;1;1;7;14,29;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Gholdengo Ex;Tool Scrapper;WHT 85;1;1;1;7;14,29;WHT;;85;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_085_R_EN_LG.png;No
 Meta Play!;;Gholdengo Ex;Legacy Energy;TWM 167;1;1;1;7;14,29;TWM;;167;Ultra Rare;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_167_R_EN_LG.png;Yes
 Meta Play!;;Gholdengo Ex;Levincia;JTG 150;5;2;3;7;42,86;JTG;;150;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/JTG/JTG_150_R_EN_LG.png;No
@@ -5073,7 +5073,7 @@ Meta Play!;;Gholdengo Lunatone;Precious Trolley;SSP 185;18;1;18;337;5,34;SSP;;18
 Meta Play!;;Gholdengo Lunatone;Tool Scrapper;WHT 85;10;1;10;337;2,97;WHT;;85;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_085_R_EN_LG.png;No
 Meta Play!;;Gholdengo Lunatone;Pal Pad;SVI 182;7;1;7;337;2,08;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Play!;;Gholdengo Lunatone;Pokégear 3.0;SVI 186;18;3;7;337;2,08;SVI;;186;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_186_R_EN_LG.png;No
-Meta Play!;;Gholdengo Lunatone;Switch;MEG 130;4;1;4;337;1,19;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Gholdengo Lunatone;Switch;MEG 130;4;1;4;337;1,19;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Gholdengo Lunatone;Blowtorch;PFL 86;1;1;1;337;0,3;PFL;;86;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_086_R_EN_LG.png;No
 Meta Play!;;Gholdengo Lunatone;Letter of Encouragement;OBF 189;1;1;1;337;0,3;OBF;;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_189_R_EN_LG.png;No
 Meta Play!;;Gholdengo Lunatone;Unfair Stamp;TWM 165;1;1;1;337;0,3;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
@@ -5126,7 +5126,7 @@ Meta Play!;;Gholdengo Typhlosion;Superior Energy Retrieval;PAL 189;7;4;2;2;100,0
 Meta Play!;;Gholdengo Typhlosion;Ultra Ball;MEG 131;3;2;2;2;100,0;MEG;;131;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_131_R_EN_LG.png;No
 Meta Play!;;Gholdengo Typhlosion;Nest Ball;SVI 181;1;1;1;2;50,0;SVI;;181;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_181_R_EN_LG.png;No
 Meta Play!;;Gholdengo Typhlosion;Rare Candy;MEG 125;1;1;1;2;50,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
-Meta Play!;;Gholdengo Typhlosion;Switch;MEG 130;1;1;1;2;50,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Gholdengo Typhlosion;Switch;MEG 130;1;1;1;2;50,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Gholdengo Typhlosion;Arven;OBF 186;8;4;2;2;100,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
 Meta Play!;;Gholdengo Typhlosion;Boss's Orders;ASC 183;5;3;2;2;100,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
 Meta Play!;;Gholdengo Typhlosion;Ethan's Adventure;DRI 165;8;4;2;2;100,0;DRI;;165;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/DRI/DRI_165_R_EN_LG.png;No
@@ -5160,7 +5160,7 @@ Meta Play!;;Greninja Ex;Rare Candy;MEG 125;48;4;15;15;100,0;MEG;;125;Common;Item
 Meta Play!;;Greninja Ex;Ultra Ball;MEG 131;51;4;15;15;100,0;MEG;;131;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_131_R_EN_LG.png;No
 Meta Play!;;Greninja Ex;Night Stretcher;SFA 61;15;2;14;15;93,33;SFA;;61;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_061_R_EN_LG.png;No
 Meta Play!;;Greninja Ex;Super Rod;PAL 188;14;1;14;15;93,33;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Play!;;Greninja Ex;Switch;MEG 130;9;1;9;15;60,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Greninja Ex;Switch;MEG 130;9;1;9;15;60,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Greninja Ex;Nest Ball;SVI 181;4;1;4;15;26,67;SVI;;181;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_181_R_EN_LG.png;No
 Meta Play!;;Greninja Ex;Energy Search;SVI 172;2;1;2;15;13,33;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
 Meta Play!;;Greninja Ex;Enhanced Hammer;TWM 148;1;1;1;15;6,67;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
@@ -5217,7 +5217,7 @@ Meta Play!;;Grimmsnarl Froslass;Super Rod;PAL 188;69;1;69;105;65,71;PAL;;188;Com
 Meta Play!;;Grimmsnarl Froslass;Energy Switch;MEG 115;39;2;38;105;36,19;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Play!;;Grimmsnarl Froslass;Energy Search;SVI 172;31;1;31;105;29,52;SVI;;172;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_172_R_EN_LG.png;No
 Meta Play!;;Grimmsnarl Froslass;Earthen Vessel;PAR 163;5;1;5;105;4,76;PAR;;163;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_163_R_EN_LG.png;No
-Meta Play!;;Grimmsnarl Froslass;Switch;MEG 130;2;1;2;105;1,9;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Grimmsnarl Froslass;Switch;MEG 130;2;1;2;105;1,9;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Grimmsnarl Froslass;Enhanced Hammer;TWM 148;1;1;1;105;0,95;TWM;;148;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_148_R_EN_LG.png;No
 Meta Play!;;Grimmsnarl Froslass;Pokégear 3.0;SVI 186;1;1;1;105;0,95;SVI;;186;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_186_R_EN_LG.png;No
 Meta Play!;;Grimmsnarl Froslass;Tool Scrapper;WHT 85;1;1;1;105;0,95;WHT;;85;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/WHT/WHT_085_R_EN_LG.png;No
@@ -5297,7 +5297,7 @@ Meta Play!;;Iron Hands Magneton;Electric Generator;SVI 170;32;4;8;8;100,0;SVI;;1
 Meta Play!;;Iron Hands Magneton;Nest Ball;SVI 181;32;4;8;8;100,0;SVI;;181;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_181_R_EN_LG.png;No
 Meta Play!;;Iron Hands Magneton;Prime Catcher;TEF 157;8;1;8;8;100,0;TEF;;157;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_157_R_EN_LG.png;Yes
 Meta Play!;;Iron Hands Magneton;Super Rod;PAL 188;9;2;8;8;100,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Play!;;Iron Hands Magneton;Switch;MEG 130;8;1;8;8;100,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Iron Hands Magneton;Switch;MEG 130;8;1;8;8;100,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Iron Hands Magneton;Ultra Ball;MEG 131;32;4;8;8;100,0;MEG;;131;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_131_R_EN_LG.png;No
 Meta Play!;;Iron Hands Magneton;Night Stretcher;SFA 61;7;1;7;8;87,5;SFA;;61;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_061_R_EN_LG.png;No
 Meta Play!;;Iron Hands Magneton;Academy at Night;SFA 54;1;1;1;8;12,5;SFA;;54;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_054_R_EN_LG.png;No
@@ -5367,7 +5367,7 @@ Meta Play!;;Joltik Box;Super Rod;PAL 188;10;1;10;17;58,82;PAL;;188;Common;Item;h
 Meta Play!;;Joltik Box;Night Stretcher;SFA 61;9;1;9;17;52,94;SFA;;61;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_061_R_EN_LG.png;No
 Meta Play!;;Joltik Box;Energy Switch;MEG 115;6;1;6;17;35,29;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
 Meta Play!;;Joltik Box;Tool Scrapper;ASC 212;4;1;4;17;23,53;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
-Meta Play!;;Joltik Box;Switch;MEG 130;3;1;3;17;17,65;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Joltik Box;Switch;MEG 130;3;1;3;17;17,65;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Joltik Box;Electric Generator;SVI 170;2;2;1;17;5,88;SVI;;170;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_170_R_EN_LG.png;No
 Meta Play!;;Joltik Box;Picnic Basket;SVI 184;1;1;1;17;5,88;SVI;;184;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_184_R_EN_LG.png;No
 Meta Play!;;Joltik Box;Battle Cage;PFL 85;4;2;2;17;11,76;PFL;;85;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PFL/PFL_085_R_EN_LG.png;No
@@ -5420,7 +5420,7 @@ Meta Play!;;Kangaskhan Bouffalant;Nest Ball;SVI 181;45;3;26;27;96,3;SVI;;181;Unc
 Meta Play!;;Kangaskhan Bouffalant;Night Stretcher;SFA 61;45;2;26;27;96,3;SFA;;61;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_061_R_EN_LG.png;No
 Meta Play!;;Kangaskhan Bouffalant;Pokégear 3.0;SVI 186;85;4;24;27;88,89;SVI;;186;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_186_R_EN_LG.png;No
 Meta Play!;;Kangaskhan Bouffalant;Energy Switch;MEG 115;26;2;23;27;85,19;MEG;;115;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_115_R_EN_LG.png;No
-Meta Play!;;Kangaskhan Bouffalant;Switch;MEG 130;9;2;8;27;29,63;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Kangaskhan Bouffalant;Switch;MEG 130;9;2;8;27;29,63;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Kangaskhan Bouffalant;Super Rod;PAL 188;5;1;5;27;18,52;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
 Meta Play!;;Kangaskhan Bouffalant;Counter Catcher;PAR 160;4;2;3;27;11,11;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
 Meta Play!;;Kangaskhan Bouffalant;Ultra Ball;MEG 131;3;1;3;27;11,11;MEG;;131;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_131_R_EN_LG.png;No
@@ -5485,7 +5485,7 @@ Meta Play!;;Lopunny Dusknoir;Counter Catcher;PAR 160;16;2;13;13;100,0;PAR;;160;U
 Meta Play!;;Lopunny Dusknoir;Nest Ball;SVI 181;32;3;13;13;100,0;SVI;;181;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_181_R_EN_LG.png;No
 Meta Play!;;Lopunny Dusknoir;Night Stretcher;SFA 61;26;3;13;13;100,0;SFA;;61;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_061_R_EN_LG.png;No
 Meta Play!;;Lopunny Dusknoir;Rare Candy;MEG 125;52;4;13;13;100,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
-Meta Play!;;Lopunny Dusknoir;Switch;MEG 130;26;3;13;13;100,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Lopunny Dusknoir;Switch;MEG 130;26;3;13;13;100,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Lopunny Dusknoir;Ultra Ball;MEG 131;44;4;13;13;100,0;MEG;;131;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_131_R_EN_LG.png;No
 Meta Play!;;Lopunny Dusknoir;Prime Catcher;TEF 157;1;1;1;13;7,69;TEF;;157;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_157_R_EN_LG.png;Yes
 Meta Play!;;Lopunny Dusknoir;Scoop Up Cyclone;TWM 162;1;1;1;13;7,69;TWM;;162;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_162_R_EN_LG.png;Yes
@@ -5523,7 +5523,7 @@ Meta Play!;;Lucario Hariyama;Nest Ball;SVI 181;7;3;3;3;100,0;SVI;;181;Uncommon;I
 Meta Play!;;Lucario Hariyama;Night Stretcher;ASC 196;6;2;3;3;100,0;ASC;;196;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_196_R_EN_LG.png;No
 Meta Play!;;Lucario Hariyama;Premium Power Pro;MEG 124;12;4;3;3;100,0;MEG;;124;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_124_R_EN_LG.png;No
 Meta Play!;;Lucario Hariyama;Ultra Ball;MEG 131;8;3;3;3;100,0;MEG;;131;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_131_R_EN_LG.png;No
-Meta Play!;;Lucario Hariyama;Switch;MEG 130;3;2;2;3;66,67;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Lucario Hariyama;Switch;MEG 130;3;2;2;3;66,67;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Lucario Hariyama;Tool Scrapper;ASC 212;1;1;1;3;33,33;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Play!;;Lucario Hariyama;Reversal Energy;PAL 192;3;2;2;3;66,67;PAL;;192;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_192_R_EN_LG.png;No
 Meta Play!;;Lucario Hariyama;Gravity Mountain;SSP 177;3;2;2;3;66,67;SSP;;177;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_177_R_EN_LG.png;No
@@ -5557,7 +5557,7 @@ Meta Play!;;Manectric Eelektrik;Electric Generator;SVI 170;4;4;1;1;100,0;SVI;;17
 Meta Play!;;Manectric Eelektrik;Nest Ball;SVI 181;4;4;1;1;100,0;SVI;;181;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_181_R_EN_LG.png;No
 Meta Play!;;Manectric Eelektrik;Prime Catcher;TEF 157;1;1;1;1;100,0;TEF;;157;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_157_R_EN_LG.png;Yes
 Meta Play!;;Manectric Eelektrik;Super Rod;PAL 188;1;1;1;1;100,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Play!;;Manectric Eelektrik;Switch;MEG 130;1;1;1;1;100,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Manectric Eelektrik;Switch;MEG 130;1;1;1;1;100,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Manectric Eelektrik;Ultra Ball;MEG 131;4;4;1;1;100,0;MEG;;131;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_131_R_EN_LG.png;No
 Meta Play!;;Manectric Eelektrik;Boss's Orders;ASC 183;3;3;1;1;100,0;ASC;;183;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_183_R_EN_LG.png;No
 Meta Play!;;Manectric Eelektrik;Carmine;PRE 103;4;4;1;1;100,0;PRE;;103;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PRE/PRE_103_R_EN_LG.png;No
@@ -5874,7 +5874,7 @@ Meta Play!;;Raging Bolt Ogerpon;Counter Catcher;PAR 160;8;1;8;77;10,39;PAR;;160;
 Meta Play!;;Raging Bolt Ogerpon;Pal Pad;SVI 182;8;1;8;77;10,39;SVI;;182;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_182_R_EN_LG.png;No
 Meta Play!;;Raging Bolt Ogerpon;Pokégear 3.0;SVI 186;17;4;8;77;10,39;SVI;;186;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_186_R_EN_LG.png;No
 Meta Play!;;Raging Bolt Ogerpon;Unfair Stamp;TWM 165;6;1;6;77;7,79;TWM;;165;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_165_R_EN_LG.png;Yes
-Meta Play!;;Raging Bolt Ogerpon;Switch;MEG 130;4;1;4;77;5,19;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Raging Bolt Ogerpon;Switch;MEG 130;4;1;4;77;5,19;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Raging Bolt Ogerpon;Fighting Gong;MEG 116;12;4;3;77;3,9;MEG;;116;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_116_R_EN_LG.png;No
 Meta Play!;;Raging Bolt Ogerpon;Pokémon Catcher;SVI 187;6;4;2;77;2,6;SVI;;187;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SVI/SVI_187_R_EN_LG.png;No
 Meta Play!;;Raging Bolt Ogerpon;Super Rod;PAL 188;2;1;2;77;2,6;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
@@ -6154,7 +6154,7 @@ Meta Play!;;Tera Box;Super Rod;PAL 188;22;1;22;29;75,86;PAL;;188;Common;Item;htt
 Meta Play!;;Tera Box;Buddy-Buddy Poffin;TEF 144;16;1;16;29;55,17;TEF;;144;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TEF/TEF_144_R_EN_LG.png;No
 Meta Play!;;Tera Box;Tool Scrapper;ASC 212;7;1;7;29;24,14;ASC;;212;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_212_R_EN_LG.png;No
 Meta Play!;;Tera Box;Counter Catcher;PAR 160;6;1;6;29;20,69;PAR;;160;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAR/PAR_160_R_EN_LG.png;No
-Meta Play!;;Tera Box;Switch;MEG 130;5;1;5;29;17,24;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Tera Box;Switch;MEG 130;5;1;5;29;17,24;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Tera Box;Tera Orb;SSP 189;4;1;4;29;13,79;SSP;;189;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_189_R_EN_LG.png;No
 Meta Play!;;Tera Box;Glass Trumpet;SCR 135;3;1;3;29;10,34;SCR;;135;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SCR/SCR_135_R_EN_LG.png;No
 Meta Play!;;Tera Box;Rare Candy;MEG 125;1;1;1;29;3,45;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
@@ -6203,7 +6203,7 @@ Meta Play!;;Ursaluna Lunatone;Pokégear 3.0;SVI 186;2;2;1;2;50,0;SVI;;186;Common
 Meta Play!;;Ursaluna Lunatone;Precious Trolley;SSP 185;1;1;1;2;50,0;SSP;;185;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SSP/SSP_185_R_EN_LG.png;Yes
 Meta Play!;;Ursaluna Lunatone;Secret Box;TWM 163;1;1;1;2;50,0;TWM;;163;Ultra Rare;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/TWM/TWM_163_R_EN_LG.png;Yes
 Meta Play!;;Ursaluna Lunatone;Super Rod;PAL 188;1;1;1;2;50,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Play!;;Ursaluna Lunatone;Switch;MEG 130;1;1;1;2;50,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Ursaluna Lunatone;Switch;MEG 130;1;1;1;2;50,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Ursaluna Lunatone;Calamitous Snowy Mountain;PAL 174;7;4;2;2;100,0;PAL;;174;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_174_R_EN_LG.png;No
 Meta Play!;;Ursaluna Lunatone;Artazon;PAF 76;1;1;1;2;50,0;PAF;;76;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAF/PAF_076_R_EN_LG.png;No
 Meta Play!;;Ursaluna Lunatone;Arven;OBF 186;6;4;2;2;100,0;OBF;;186;Uncommon;Supporter;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/OBF/OBF_186_R_EN_LG.png;No
@@ -6250,7 +6250,7 @@ Meta Play!;;Yanmega Ex;Energy Recycler;DRI 164;1;1;1;2;50,0;DRI;;164;Uncommon;It
 Meta Play!;;Yanmega Ex;Night Stretcher;SFA 61;1;1;1;2;50,0;SFA;;61;Uncommon;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/SFA/SFA_061_R_EN_LG.png;No
 Meta Play!;;Yanmega Ex;Rare Candy;MEG 125;1;1;1;2;50,0;MEG;;125;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_125_R_EN_LG.png;No
 Meta Play!;;Yanmega Ex;Super Rod;PAL 188;2;2;1;2;50,0;PAL;;188;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_188_R_EN_LG.png;No
-Meta Play!;;Yanmega Ex;Switch;MEG 130;1;1;1;2;50,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;Yes
+Meta Play!;;Yanmega Ex;Switch;MEG 130;1;1;1;2;50,0;MEG;;130;Common;Item;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/MEG/MEG_130_R_EN_LG.png;No
 Meta Play!;;Yanmega Ex;Prism Energy;ASC 216;4;3;2;2;100,0;ASC;;216;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_216_R_EN_LG.png;No
 Meta Play!;;Yanmega Ex;Jet Energy;PAL 190;3;3;1;2;50,0;PAL;;190;Uncommon;Special Energy;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/PAL/PAL_190_R_EN_LG.png;No
 Meta Play!;;Yanmega Ex;Team Rocket's Watchtower;ASC 210;1;1;1;2;50,0;ASC;;210;Uncommon;Stadium;https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpci/ASC/ASC_210_R_EN_LG.png;No

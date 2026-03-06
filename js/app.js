@@ -2102,114 +2102,6 @@ const BASE_PATH = './data/';
         // ============================================================================
         // TREND CALCULATION - Calculate usage trends over time
         // ============================================================================
-        function calculateCardTrend(cardName, allCards, archetype = null) {
-            /**
-             * Calculate trend for a card by comparing recent vs older usage.
-             * 
-             * Strategy:
-             * 1. Filter cards for specific archetype (if provided)
-             * 2. Group cards by tournament_date
-             * 3. Split into two time periods: Recent (last 7-14 days) vs Older (previous 7-14 days)
-             * 4. Calculate average percentage for each period
-             * 5. Return trend: UP (🟢), DOWN (🔴), or NEUTRAL (⚪)
-             * 
-             * Returns: { trend: 'up'|'down'|'neutral', delta: number, symbol: string, color: string }
-             */
-            
-            if (!allCards || allCards.length === 0) {
-                return { trend: 'neutral', delta: 0, symbol: '→', color: '#999' };
-            }
-            
-            // Find all entries for this card (optionally filtered by archetype)
-            let cardEntries = allCards.filter(c => c.card_name === cardName);
-            
-            // If archetype is specified, only use entries for that archetype
-            if (archetype) {
-                cardEntries = cardEntries.filter(c => c.archetype === archetype);
-                console.log(`[Trend] Filtering for archetype "${archetype}": ${cardEntries.length} entries`);
-            }
-            
-            if (cardEntries.length === 0) {
-                console.log(`[Trend] No entries found for "${cardName}" - marking as NEW`);
-                return { trend: 'new', delta: 0, symbol: '★', color: '#ffc107' };
-            }
-            
-            console.log(`[Trend] Found ${cardEntries.length} entries for "${cardName}"`);
-            
-            // Parse dates and sort by date (newest first)
-            const entriesWithDates = cardEntries
-                .filter(c => c.tournament_date)
-                .map(c => {
-                    try {
-                        // Parse "DD MMM YY" format (e.g., "04 Mar 26")
-                        const date = new Date(c.tournament_date);
-                        return {
-                            ...c,
-                            dateObj: date,
-                            percentage: parseFloat((c.percentage_in_archetype || '0').toString().replace(',', '.'))
-                        };
-                    } catch (e) {
-                        return null;
-                    }
-                })
-                .filter(c => c !== null && !isNaN(c.dateObj.getTime()))
-                .sort((a, b) => b.dateObj - a.dateObj);  // Newest first
-            
-            console.log(`[Trend] ${entriesWithDates.length} entries with valid dates for "${cardName}"`);
-            
-            if (entriesWithDates.length < 2) {
-                // Need at least 2 data points to calculate trend
-                console.log(`[Trend] Not enough data points for "${cardName}" (need >= 2, have ${entriesWithDates.length}) - marking as NEW`);
-                return { trend: 'new', delta: 0, symbol: '★', color: '#ffc107' };
-            }
-            
-            // Split into recent (first half) vs older (second half)
-            const midPoint = Math.floor(entriesWithDates.length / 2);
-            const recentEntries = entriesWithDates.slice(0, midPoint);
-            const olderEntries = entriesWithDates.slice(midPoint);
-            
-            // Calculate average percentage for each period
-            const recentAvg = recentEntries.reduce((sum, e) => sum + e.percentage, 0) / recentEntries.length;
-            const olderAvg = olderEntries.reduce((sum, e) => sum + e.percentage, 0) / olderEntries.length;
-            
-            const delta = recentAvg - olderAvg;
-            
-            // Determine trend (threshold: ±2%)
-            const THRESHOLD = 2.0;
-            
-            if (delta > THRESHOLD) {
-                console.log(`[Trend] "${cardName}": UP trend (Δ=${delta.toFixed(1)}%, recent=${recentAvg.toFixed(1)}%, older=${olderAvg.toFixed(1)}%)`);
-                return { 
-                    trend: 'up', 
-                    delta: delta, 
-                    symbol: '↑', 
-                    color: '#28a745',
-                    recentAvg: recentAvg,
-                    olderAvg: olderAvg
-                };
-            } else if (delta < -THRESHOLD) {
-                console.log(`[Trend] "${cardName}": DOWN trend (Δ=${delta.toFixed(1)}%, recent=${recentAvg.toFixed(1)}%, older=${olderAvg.toFixed(1)}%)`);
-                return { 
-                    trend: 'down', 
-                    delta: delta, 
-                    symbol: '↓', 
-                    color: '#dc3545',
-                    recentAvg: recentAvg,
-                    olderAvg: olderAvg
-                };
-            } else {
-                console.log(`[Trend] "${cardName}": NEUTRAL (Δ=${delta.toFixed(1)}%, recent=${recentAvg.toFixed(1)}%, older=${olderAvg.toFixed(1)}%)`);
-                return { 
-                    trend: 'neutral', 
-                    delta: delta, 
-                    symbol: '→', 
-                    color: '#999',
-                    recentAvg: recentAvg,
-                    olderAvg: olderAvg
-                };
-            }
-        }
-        
         // Render function for grid view (compact view)
         function renderCityLeagueDeckGrid(cards) {
             console.log('🎨 renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
@@ -2362,14 +2254,6 @@ const BASE_PATH = './data/';
                 const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                 const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                 
-                // Calculate trend indicator (use ALL city league data, not just filtered)
-                const allCityLeagueData = window.cityLeagueAnalysisData || [];
-                const currentArchetype = window.currentCityLeagueArchetype;
-                const trendData = calculateCardTrend(cardName, allCityLeagueData, currentArchetype);
-                const trendBadge = trendData.trend !== 'neutral' 
-                    ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
-                    : '';
-                
                 html += `
                     <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                         <div class="card-image-container" style="position: relative; width: 100%;">
@@ -2379,9 +2263,6 @@ const BASE_PATH = './data/';
                             <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
                                 ${maxCount}
                             </div>
-                            
-                            <!-- Trend badge: Below Max Count (top-right, below red badge) -->
-                            ${trendData.trend !== 'neutral' ? `<div style="position: absolute; top: 30px; right: 5px; background: ${trendData.color}; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;" title="Trend: ${trendData.trend === 'new' ? 'Neue Karte' : (trendData.delta >= 0 ? '+' : '') + trendData.delta.toFixed(1) + '%'}">${trendData.symbol}</div>` : ''}
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
@@ -2396,7 +2277,7 @@ const BASE_PATH = './data/';
                                         ${setCode} ${setNumber}
                                     </div>
                                     <div style="color: #666; font-size: 0.55em; margin-bottom: 1px;">
-                                        ${percentage}%${trendBadge} | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)
+                                        ${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)
                                     </div>
                                     <div style="font-weight: 600; color: #333; font-size: 0.58em;">
                                         ${decksWithCard} / ${totalDecksInArchetype} Decks
@@ -3874,14 +3755,6 @@ const BASE_PATH = './data/';
                 const totalDecksInArchetype = parseInt(card.total_decks_in_archetype || 1);
                 const avgCount = totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype).toFixed(2) : '0';
                 
-                // Calculate trend indicator (use ALL city league data, not just filtered)
-                const allCityLeagueData = window.cityLeagueAnalysisData || [];
-                const cardArchetype = card.archetype || window.currentCityLeagueArchetype;
-                const trendData = calculateCardTrend(card.card_name, allCityLeagueData, cardArchetype);
-                const trendBadge = trendData.trend !== 'neutral' 
-                    ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
-                    : '';
-                
                 // Card image or placeholder
                 let imgHtml = '';
                 if (imageUrl && imageUrl.trim() !== '') {
@@ -3899,9 +3772,6 @@ const BASE_PATH = './data/';
                             <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
                                 ${maxCount}
                             </div>
-                            
-                            <!-- Trend badge: Below Max Count (top-right, below red badge) -->
-                            ${trendData.trend !== 'neutral' ? `<div style="position: absolute; top: 32px; right: 5px; background: ${trendData.color}; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;" title="Trend: ${trendData.trend === 'new' ? 'Neue Karte' : (trendData.delta >= 0 ? '+' : '') + trendData.delta.toFixed(1) + '%'}">${trendData.symbol}</div>` : ''}
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `
@@ -3921,7 +3791,7 @@ const BASE_PATH = './data/';
                                     ${card.set_code || ''} ${card.set_number || ''}
                                 </div>
                                 <div style="color: #666; font-size: 0.85em;">
-                                    ${percentage.toFixed(2).replace('.', ',')}%${trendBadge} | Ø ${avgCount}x
+                                    ${percentage.toFixed(2).replace('.', ',')}% | Ø ${avgCount}x
                                 </div>
                             </div>
                             
@@ -9022,20 +8892,11 @@ const BASE_PATH = './data/';
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                     const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                     
-                    // Calculate trend indicator (use ALL current meta data, not just filtered)
-                    const allCurrentMetaData = window.currentMetaAnalysisData || [];
-                    const currentArchetype = window.currentCurrentMetaArchetype;
-                    const trendData = calculateCardTrend(cardName, allCurrentMetaData, currentArchetype);
-                    const trendBadge = trendData.trend !== 'neutral' 
-                        ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
-                        : '';
-                    
                     html += `
                         <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                             <div class="card-image-container" style="position: relative; width: 100%;">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                                 <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${maxCount}</div>
-                                ${trendData.trend !== 'neutral' ? `<div style="position: absolute; top: 30px; right: 5px; background: ${trendData.color}; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.75em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;" title="Trend: ${trendData.trend === 'new' ? 'Neue Karte' : (trendData.delta >= 0 ? '+' : '') + trendData.delta.toFixed(1) + '%'}">${trendData.symbol}</div>` : ''}
                                 ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
                                 
                                 <!-- Card info section - Mobile Overlay -->
@@ -9043,7 +8904,7 @@ const BASE_PATH = './data/';
                                     <div class="card-info-text">
                                         <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">${cardName}</div>
                                         <div style="color: #999; font-size: 0.52em; margin-bottom: 1px;">${setCode} ${setNumber}</div>
-                                        <div style="color: #666; font-size: 0.55em; margin-bottom: 1px;">${percentage}%${trendBadge} | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
+                                        <div style="color: #666; font-size: 0.55em; margin-bottom: 1px;">${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
                                     </div>
                                     <!-- Rarity Switcher & Actions (4 buttons: - ★ € +) -->
                                     <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">

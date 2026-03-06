@@ -2930,13 +2930,28 @@ const BASE_PATH = './data/';
                 deckOrderKey = 'pastMetaDeckOrder';
             }
             
-            if (deck[deckKey] && deck[deckKey] > 0) {
-                deck[deckKey]--;
-                if (deck[deckKey] === 0) {
-                    delete deck[deckKey];
+            // CRITICAL FIX: Find the actual key in deck
+            // If deckKey is just "CardName" but deck has "CardName (SET NUM)", find it
+            let actualKey = deckKey;
+            if (!deck[deckKey] || deck[deckKey] <= 0) {
+                // Search for alternative keys (with set info)
+                for (const key in deck) {
+                    if (key === deckKey || key.startsWith(deckKey + ' (')) {
+                        if (deck[key] > 0) {
+                            actualKey = key;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if (deck[actualKey] && deck[actualKey] > 0) {
+                deck[actualKey]--;
+                if (deck[actualKey] === 0) {
+                    delete deck[actualKey];
                     // Remove from order tracking
                     if (window[deckOrderKey]) {
-                        const idx = window[deckOrderKey].indexOf(deckKey);
+                        const idx = window[deckOrderKey].indexOf(actualKey);
                         if (idx !== -1) {
                             window[deckOrderKey].splice(idx, 1);
                         }

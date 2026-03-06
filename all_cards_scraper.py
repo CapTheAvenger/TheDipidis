@@ -535,10 +535,11 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
                     # Strategy 0: Try to extract rarity from the header box (e.g., "Steam Siege (STS) #58 · Common")
                     try:
                         # Look for elements containing set/number/rarity info
-                        header_elements = driver.find_elements(By.CSS_SELECTOR, "h1, h2, h3, .card-info, [class*='title'], [class*='header']")
+                        header_elements = driver.find_elements(By.CSS_SELECTOR, "h1, h2, h3, .card-info, [class*='title'], [class*='header'], [class*='name']")
                         for elem in header_elements:
                             text = elem.get_attribute('textContent').strip()
-                            # Look for pattern like "Set (CODE) #NUM · Rarity"
+                            
+                            # Pattern 1: "Set (CODE) #NUM · Rarity"
                             if '·' in text and card['set'] in text and str(card['number']) in text:
                                 parts = text.split('·')
                                 if len(parts) >= 2:
@@ -547,6 +548,21 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
                                         card['rarity'] = rarity
                                         rarity_found = True
                                         break
+                            
+                            # Pattern 2: Look for rarity keywords anywhere in header with set/number
+                            # Common rarities: Common, Uncommon, Rare, Double Rare, Hyper Rare, etc.
+                            rarity_keywords = ['Common', 'Uncommon', 'Rare', 'Holo Rare', 'Ultra Rare', 
+                                             'Secret Rare', 'Double Rare', 'Hyper Rare', 'Special Illustration Rare',
+                                             'Illustration Rare', 'Promo', 'Amazing Rare', 'Rainbow Rare']
+                            
+                            if card['set'] in text and str(card['number']) in text:
+                                for rarity_keyword in rarity_keywords:
+                                    if rarity_keyword in text:
+                                        card['rarity'] = rarity_keyword
+                                        rarity_found = True
+                                        break
+                                if rarity_found:
+                                    break
                     except:
                         pass
                     

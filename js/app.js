@@ -8274,7 +8274,7 @@ const BASE_PATH = './data/';
             
             if (data && data.length > 0) {
                 window.currentMetaAnalysisData = data;
-                populateCurrentMetaDeckSelect(data);
+                await populateCurrentMetaDeckSelect(data);
                 setCurrentMetaFormatFilter('all'); // Set default filter
                 window.currentMetaAnalysisLoaded = true;
             } else {
@@ -8286,7 +8286,23 @@ const BASE_PATH = './data/';
         }
         
         // Populate deck select dropdown
-        function populateCurrentMetaDeckSelect(data) {
+        async function populateCurrentMetaDeckSelect(data) {
+            // Load comparison data for correct ranking
+            const comparisonData = await loadCSV('limitless_online_decks_comparison.csv');
+            const comparisonMap = new Map();
+            
+            if (comparisonData && comparisonData.length > 0) {
+                comparisonData.forEach(row => {
+                    if (row.deck_name && row.new_count) {
+                        comparisonMap.set(row.deck_name.toLowerCase(), {
+                            count: parseInt(row.new_count || 0),
+                            rank: parseInt(row.new_rank || 999)
+                        });
+                    }
+                });
+                console.log('Loaded comparison data for', comparisonMap.size, 'decks');
+            }
+            
             // Apply format filter to data BEFORE building archetype list
             let filteredData = data;
             if (currentMetaFormatFilter !== 'all') {
@@ -8301,9 +8317,15 @@ const BASE_PATH = './data/';
                 if (!archetype) return;
                 
                 if (!archetypeMap.has(archetype)) {
+                    // Use comparison data for deck count if available
+                    const comparisonInfo = comparisonMap.get(archetype.toLowerCase());
+                    const deckCount = comparisonInfo ? comparisonInfo.count : parseInt(row.total_decks_in_archetype || 0);
+                    const rank = comparisonInfo ? comparisonInfo.rank : 999;
+                    
                     archetypeMap.set(archetype, {
                         name: archetype,
-                        deckCount: parseInt(row.total_decks_in_archetype || 0),
+                        deckCount: deckCount,
+                        rank: rank,
                         limitlessCount: 0,
                         majorCount: 0
                     });
@@ -8329,8 +8351,13 @@ const BASE_PATH = './data/';
             const archetypeList = Array.from(archetypeMap.values());
             console.log('Found archetypes:', archetypeList.length);
             
-            // Sort by deck count descending
-            const sortedByMeta = [...archetypeList].sort((a, b) => b.deckCount - a.deckCount);
+            // Sort by rank first (lower rank = higher position), then by deck count descending
+            const sortedByMeta = [...archetypeList].sort((a, b) => {
+                if (a.rank !== b.rank) {
+                    return a.rank - b.rank; // Lower rank number = better position
+                }
+                return b.deckCount - a.deckCount; // Higher deck count = better
+            });
             const top10 = sortedByMeta.slice(0, 10);
             const rest = sortedByMeta.slice(10).sort((a, b) => a.name.localeCompare(b.name));
             
@@ -8393,7 +8420,7 @@ const BASE_PATH = './data/';
         }
         
         // Format filter functions
-        function setCurrentMetaFormatFilter(format) {
+        async function setCurrentMetaFormatFilter(format) {
             currentMetaFormatFilter = format;
             console.log('[Current Meta] Format filter set to:', format);
             
@@ -8425,7 +8452,7 @@ const BASE_PATH = './data/';
             const previouslySelected = currentMetaDeckSelect ? currentMetaDeckSelect.value : null;
             
             if (window.currentMetaAnalysisData) {
-                populateCurrentMetaDeckSelect(window.currentMetaAnalysisData);
+                await populateCurrentMetaDeckSelect(window.currentMetaAnalysisData);
             }
             
             // Check if previously selected archetype still exists in filtered list

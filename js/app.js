@@ -2136,8 +2136,11 @@ const BASE_PATH = './data/';
             const cardEntries = allCards.filter(c => c.card_name === cardName);
             
             if (cardEntries.length === 0) {
+                console.log(`[Trend] No entries found for "${cardName}"`);
                 return { trend: 'neutral', delta: 0, symbol: '→', color: '#999' };
             }
+            
+            console.log(`[Trend] Found ${cardEntries.length} entries for "${cardName}"`);
             
             // Parse dates and sort by date (newest first)
             const entriesWithDates = cardEntries
@@ -2158,8 +2161,11 @@ const BASE_PATH = './data/';
                 .filter(c => c !== null && !isNaN(c.dateObj.getTime()))
                 .sort((a, b) => b.dateObj - a.dateObj);  // Newest first
             
+            console.log(`[Trend] ${entriesWithDates.length} entries with valid dates for "${cardName}"`);
+            
             if (entriesWithDates.length < 2) {
                 // Need at least 2 data points to calculate trend
+                console.log(`[Trend] Not enough data points for "${cardName}" (need >= 2, have ${entriesWithDates.length})`);
                 return { trend: 'neutral', delta: 0, symbol: '→', color: '#999' };
             }
             
@@ -2178,6 +2184,7 @@ const BASE_PATH = './data/';
             const THRESHOLD = 2.0;
             
             if (delta > THRESHOLD) {
+                console.log(`[Trend] "${cardName}": UP trend (Δ=${delta.toFixed(1)}%, recent=${recentAvg.toFixed(1)}%, older=${olderAvg.toFixed(1)}%)`);
                 return { 
                     trend: 'up', 
                     delta: delta, 
@@ -2187,6 +2194,7 @@ const BASE_PATH = './data/';
                     olderAvg: olderAvg
                 };
             } else if (delta < -THRESHOLD) {
+                console.log(`[Trend] "${cardName}": DOWN trend (Δ=${delta.toFixed(1)}%, recent=${recentAvg.toFixed(1)}%, older=${olderAvg.toFixed(1)}%)`);
                 return { 
                     trend: 'down', 
                     delta: delta, 
@@ -2196,6 +2204,7 @@ const BASE_PATH = './data/';
                     olderAvg: olderAvg
                 };
             } else {
+                console.log(`[Trend] "${cardName}": NEUTRAL (Δ=${delta.toFixed(1)}%, recent=${recentAvg.toFixed(1)}%, older=${olderAvg.toFixed(1)}%)`);
                 return { 
                     trend: 'neutral', 
                     delta: delta, 
@@ -2358,9 +2367,9 @@ const BASE_PATH = './data/';
                 const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                 const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                 
-                // Calculate trend indicator
-                const allAvailableCards = window.currentCityLeagueDeckCards || [];
-                const trendData = calculateCardTrend(cardName, allAvailableCards);
+                // Calculate trend indicator (use ALL city league data, not just filtered)
+                const allCityLeagueData = window.cityLeagueAnalysisData || [];
+                const trendData = calculateCardTrend(cardName, allCityLeagueData);
                 const trendBadge = trendData.trend !== 'neutral' 
                     ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
                     : '';
@@ -3866,9 +3875,9 @@ const BASE_PATH = './data/';
                 const totalDecksInArchetype = parseInt(card.total_decks_in_archetype || 1);
                 const avgCount = totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype).toFixed(2) : '0';
                 
-                // Calculate trend indicator
-                const allAvailableCards = window.currentCityLeagueDeckCards || [];
-                const trendData = calculateCardTrend(card.card_name, allAvailableCards);
+                // Calculate trend indicator (use ALL city league data, not just filtered)
+                const allCityLeagueData = window.cityLeagueAnalysisData || [];
+                const trendData = calculateCardTrend(card.card_name, allCityLeagueData);
                 const trendBadge = trendData.trend !== 'neutral' 
                     ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
                     : '';
@@ -9010,9 +9019,9 @@ const BASE_PATH = './data/';
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                     const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                     
-                    // Calculate trend indicator
-                    const allAvailableCards = window.currentCurrentMetaDeckCards || [];
-                    const trendData = calculateCardTrend(cardName, allAvailableCards);
+                    // Calculate trend indicator (use ALL current meta data, not just filtered)
+                    const allCurrentMetaData = window.currentMetaAnalysisData || [];
+                    const trendData = calculateCardTrend(cardName, allCurrentMetaData);
                     const trendBadge = trendData.trend !== 'neutral' 
                         ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
                         : '';

@@ -45,6 +45,7 @@ data/archive/
 
 # Large HTML debug files
 data/debug_*.html
+data/*_local.html
 
 # Backup files
 *_backup.csv

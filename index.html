@@ -116,6 +116,19 @@
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
                                 <input type="text" id="cityLeagueOverviewSearch" placeholder="🔍 Karten suchen..." class="card-search-input" oninput="filterOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                                 
+                                <!-- Card Type Filter -->
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #f8f9fa;">
+                                    <button id="overviewTypeAll" onclick="setOverviewCardTypeFilter('all')" style="padding: 6px 10px; font-size: 0.85em; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 1; font-weight: bold;">🔵 All</button>
+                                    <button id="overviewTypePokemon" onclick="setOverviewCardTypeFilter('Pokemon')" style="padding: 6px 10px; font-size: 0.85em; background: #ffc107; color: #333; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟡 Pokémon</button>
+                                    <button id="overviewTypeSupporter" onclick="setOverviewCardTypeFilter('Supporter')" style="padding: 6px 10px; font-size: 0.85em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟢 Supporter</button>
+                                    <button id="overviewTypeItem" onclick="setOverviewCardTypeFilter('Item')" style="padding: 6px 10px; font-size: 0.85em; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟠 Item</button>
+                                    <button id="overviewTypeTool" onclick="setOverviewCardTypeFilter('Tool')" style="padding: 6px 10px; font-size: 0.85em; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟣 Tool</button>
+                                    <button id="overviewTypeStadium" onclick="setOverviewCardTypeFilter('Stadium')" style="padding: 6px 10px; font-size: 0.85em; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🔴 Stadium</button>
+                                    <button id="overviewTypeEnergy" onclick="setOverviewCardTypeFilter('Energy')" style="padding: 6px 10px; font-size: 0.85em; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">⚡ Energy</button>
+                                    <button id="overviewTypeSpecialEnergy" onclick="setOverviewCardTypeFilter('Special Energy')" style="padding: 6px 10px; font-size: 0.85em; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">💎 Spec. Energy</button>
+                                    <button id="overviewTypeAceSpec" onclick="setOverviewCardTypeFilter('Ace Spec')" style="padding: 6px 10px; font-size: 0.85em; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🌟 Ace Spec</button>
+                                </div>
+                                
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                     <button class="btn btn-success" onclick="setOverviewRarityMode('min')" id="overviewRarityMin" style="padding: 8px 14px; font-size: 0.9em; background: #28a745;">⬇️ Low Rarity</button>
                                     <button class="btn btn-danger" onclick="setOverviewRarityMode('max')" id="overviewRarityMax" style="padding: 8px 14px; font-size: 0.9em; background: #dc3545;">⬆️ Max Rarity</button>
@@ -693,7 +706,7 @@
         </div>
     </div>
     
-        <script src="js/app.js?v=20260306-9"></script>
+        <script src="js/app.js?v=20260306-13"></script>
     
     <!-- Image View Modal -->
     <div id="imageViewModal" class="image-view-modal" onclick="if(event.target === this) closeImageView()">
@@ -735,7 +748,7 @@
 
     <!-- Deck Compare Modal -->
     <div id="deckCompareModal" class="rarity-switcher-modal" onclick="if(event.target === this) closeDeckCompare()" style="z-index: 10000;">
-        <div class="rarity-switcher-modal-content" style="max-width: 900px; width: 95%;">
+        <div class="rarity-switcher-modal-content" style="max-width: 1400px; width: 95%; max-height: 90vh; overflow-y: auto;">
             <span class="rarity-switcher-close" onclick="closeDeckCompare()">✕</span>
             <h2>🔄 Deck Vergleich</h2>
             
@@ -755,6 +768,4 @@
         </div>
     </div>
 
-<script src="js/app.js?v=20260306-10"></script>
-</body>
-</html>
+    <script src="js/app.js?v=20260306-13"></script>

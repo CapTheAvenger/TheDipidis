@@ -2112,6 +2112,101 @@ const BASE_PATH = './data/';
             }
         }
         
+        // ============================================================================
+        // TREND CALCULATION - Calculate usage trends over time
+        // ============================================================================
+        function calculateCardTrend(cardName, allCards) {
+            /**
+             * Calculate trend for a card by comparing recent vs older usage.
+             * 
+             * Strategy:
+             * 1. Group cards by tournament_date
+             * 2. Split into two time periods: Recent (last 7-14 days) vs Older (previous 7-14 days)
+             * 3. Calculate average percentage for each period
+             * 4. Return trend: UP (🟢), DOWN (🔴), or NEUTRAL (⚪)
+             * 
+             * Returns: { trend: 'up'|'down'|'neutral', delta: number, symbol: string, color: string }
+             */
+            
+            if (!allCards || allCards.length === 0) {
+                return { trend: 'neutral', delta: 0, symbol: '→', color: '#999' };
+            }
+            
+            // Find all entries for this card across all dates
+            const cardEntries = allCards.filter(c => c.card_name === cardName);
+            
+            if (cardEntries.length === 0) {
+                return { trend: 'neutral', delta: 0, symbol: '→', color: '#999' };
+            }
+            
+            // Parse dates and sort by date (newest first)
+            const entriesWithDates = cardEntries
+                .filter(c => c.tournament_date)
+                .map(c => {
+                    try {
+                        // Parse "DD MMM YY" format (e.g., "04 Mar 26")
+                        const date = new Date(c.tournament_date);
+                        return {
+                            ...c,
+                            dateObj: date,
+                            percentage: parseFloat((c.percentage_in_archetype || '0').toString().replace(',', '.'))
+                        };
+                    } catch (e) {
+                        return null;
+                    }
+                })
+                .filter(c => c !== null && !isNaN(c.dateObj.getTime()))
+                .sort((a, b) => b.dateObj - a.dateObj);  // Newest first
+            
+            if (entriesWithDates.length < 2) {
+                // Need at least 2 data points to calculate trend
+                return { trend: 'neutral', delta: 0, symbol: '→', color: '#999' };
+            }
+            
+            // Split into recent (first half) vs older (second half)
+            const midPoint = Math.floor(entriesWithDates.length / 2);
+            const recentEntries = entriesWithDates.slice(0, midPoint);
+            const olderEntries = entriesWithDates.slice(midPoint);
+            
+            // Calculate average percentage for each period
+            const recentAvg = recentEntries.reduce((sum, e) => sum + e.percentage, 0) / recentEntries.length;
+            const olderAvg = olderEntries.reduce((sum, e) => sum + e.percentage, 0) / olderEntries.length;
+            
+            const delta = recentAvg - olderAvg;
+            
+            // Determine trend (threshold: ±2%)
+            const THRESHOLD = 2.0;
+            
+            if (delta > THRESHOLD) {
+                return { 
+                    trend: 'up', 
+                    delta: delta, 
+                    symbol: '↑', 
+                    color: '#28a745',
+                    recentAvg: recentAvg,
+                    olderAvg: olderAvg
+                };
+            } else if (delta < -THRESHOLD) {
+                return { 
+                    trend: 'down', 
+                    delta: delta, 
+                    symbol: '↓', 
+                    color: '#dc3545',
+                    recentAvg: recentAvg,
+                    olderAvg: olderAvg
+                };
+            } else {
+                return { 
+                    trend: 'neutral', 
+                    delta: delta, 
+                    symbol: '→', 
+                    color: '#999',
+                    recentAvg: recentAvg,
+                    olderAvg: olderAvg
+                };
+            }
+        }
+        
         // Render function for grid view (compact view)
         function renderCityLeagueDeckGrid(cards) {
             console.log('🎨 renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
@@ -2263,6 +2358,13 @@ const BASE_PATH = './data/';
                 const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                 const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                 
+                // Calculate trend indicator
+                const allAvailableCards = window.currentCityLeagueDeckCards || [];
+                const trendData = calculateCardTrend(cardName, allAvailableCards);
+                const trendBadge = trendData.trend !== 'neutral' 
+                    ? `<span style="color: ${trendData.color}; font-weight: bold; margin-left: 3px;" title="Trend: ${trendData.delta >= 0 ? '+' : ''}${trendData.delta.toFixed(1)}%">${trendData.symbol} ${Math.abs(trendData.delta).toFixed(1)}%</span>`
+                    : '';
+                
                 html += `
                     <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                         <div class="card-image-container" style="position: relative; width: 100%;">
@@ -2286,7 +2388,7 @@ const BASE_PATH = './data/';
                                         ${setCode} ${setNumber}
                                     </div>
                                     <div style="color: #666; font-size: 0.55em; margin-bottom: 1px;">
-                                        ${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)
+                                        ${percentage}%${trendBadge} | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)
                                     </div>
                                     <div style="font-weight: 600; color: #333; font-size: 0.58em;">
                                         ${decksWithCard} / ${totalDecksInArchetype} Decks

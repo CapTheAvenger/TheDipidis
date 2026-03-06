@@ -1,0 +1,87 @@
+name: Weekly Tournament Data Scrape
+
+on:
+  schedule:
+    # Jeden Dienstag um 06:00 UTC (07:00 MEZ / 08:00 MESZ)
+    - cron: '0 6 * * 2'
+  workflow_dispatch: # Ermöglicht manuelles Ausführen
+
+jobs:
+  scrape-tournaments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180 # 3 Stunden Timeout
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          repository: CapTheAvenger/TheDipidis
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml
+      
+      - name: Run City League Analysis Scraper
+        run: |
+          echo "================================"
+          echo "City League Analysis Scraper"
+          echo "================================"
+          python city_league_analysis_scraper.py
+        continue-on-error: true
+      
+      - name: Run City League Archetype Scraper
+        run: |
+          echo "================================"
+          echo "City League Archetype Scraper"
+          echo "================================"
+          python city_league_archetype_scraper.py
+        continue-on-error: true
+      
+      - name: Run Current Meta Scraper
+        run: |
+          echo "================================"
+          echo "Current Meta Scraper"
+          echo "================================"
+          python current_meta_analysis_scraper.py
+        continue-on-error: true
+      
+      - name: Run Limitless Online Scraper
+        run: |
+          echo "================================"
+          echo "Limitless Online Scraper"
+          echo "================================"
+          python limitless_online_scraper.py
+        continue-on-error: true
+      
+      - name: Update Card Data
+        run: |
+          python prepare_card_data.py
+      
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/*.csv data/*.json data/*.html data/*.js
+          git diff --staged --quiet || git commit -m "🤖 Automated weekly scrape - $(date +'%d.%m.%Y')"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-logs
+          path: |
+            *.log
+            data/debug_*.html
+          retention-days: 7

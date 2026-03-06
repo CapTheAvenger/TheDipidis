@@ -12,10 +12,7 @@ import re
 import time
 import json
 import os
-import sys
 import html
-import math
-from html.parser import HTMLParser
 from typing import List, Dict, Optional, Any, Set, Tuple
 
 # Import shared utilities
@@ -740,7 +737,11 @@ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[Lis
     
     # Regex patterns (same as extract_cards_from_page)
     heading_pattern = re.compile(r'<div[^>]*class="decklist-column-heading"[^>]*>\s*([^<]+?)\s*</div>', re.IGNORECASE)
-    card_pattern = re.compile(r'<div[^>]*class="decklist-card"[^>]*data-set="([A-Z0-9]*)"[^>]*data-number="(\d*)"[^>]*>.*?<span class="card-count">([0-9.]+)</span>\s*<span class="card-name">([^<]+)</span>', re.IGNORECASE | re.DOTALL)
+    # IMPROVED: Match decklist-card div first, then extract data-set and data-number separately (allows any attribute order)
+    card_div_pattern = re.compile(r'<div[^>]*class="decklist-card"[^>]*>(.*?)</div>', re.IGNORECASE | re.DOTALL)
+    data_set_pattern = re.compile(r'data-set="([A-Z0-9]*)"', re.IGNORECASE)
+    data_number_pattern = re.compile(r'data-number="(\d*)"', re.IGNORECASE)
+    count_name_pattern = re.compile(r'<span class="card-count">([0-9.]+)</span>\s*<span class="card-name">([^<]+)</span>', re.IGNORECASE | re.DOTALL)
 
     # Find all headings with their span (start/end ranges)
     headings: List[Dict[str, Any]] = []
@@ -765,12 +766,30 @@ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[Lis
         block = html_content[sec['start']:sec['end']]
         section_type = sec['type']
 
-        for match in card_pattern.findall(block):
+        # NEW APPROACH: Find all card divs first, then extract attributes from each
+        for card_div_match in card_div_pattern.finditer(block):
             try:
-                set_code_raw = match[0].upper() if match[0] else ""
-                card_number_raw = match[1] if match[1] else ""
-                count_str = match[2]
-                name = match[3].strip()
+                # Get the full div including opening tag
+                full_match_start = card_div_match.start()
+                full_match_end = card_div_match.end()
+                full_div = block[full_match_start:full_match_end]
+                div_content = card_div_match.group(1)  # Content inside <div>...</div>
+                
+                # Extract data-set from opening tag
+                set_match = data_set_pattern.search(full_div)
+                set_code_raw = set_match.group(1).upper() if set_match and set_match.group(1) else ""
+                
+                # Extract data-number from opening tag
+                number_match = data_number_pattern.search(full_div)
+                card_number_raw = number_match.group(1) if number_match and number_match.group(1) else ""
+                
+                # Extract count and name from div content
+                count_name_match = count_name_pattern.search(div_content)
+                if not count_name_match:
+                    continue  # Skip if we can't find count and name
+                
+                count_str = count_name_match.group(1)
+                name = count_name_match.group(2).strip()
 
                 # Decode HTML entities
                 name = html.unescape(name)
@@ -828,7 +847,7 @@ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[Lis
                         'needs_lookup': needs_lookup,
                         'is_ace_spec': 'Yes' if is_ace_spec else 'No'
                     })
-            except (ValueError, IndexError):
+            except (ValueError, IndexError, AttributeError) as e:
                 continue
 
     # Lookup missing Pokemon card info (skip for single deck scraping to save time)
@@ -973,7 +992,11 @@ def extract_cards_from_page(cards_url: str, card_db: CardDatabaseLookup, deck_na
     
     # Regex patterns
     heading_pattern = re.compile(r'<div[^>]*class="decklist-column-heading"[^>]*>\s*([^<]+?)\s*</div>', re.IGNORECASE)
-    card_pattern = re.compile(r'<div[^>]*class="decklist-card"[^>]*data-set="([A-Z0-9]*)"[^>]*data-number="(\d*)"[^>]*>.*?<span class="card-count">([0-9.]+)</span>\s*<span class="card-name">([^<]+)</span>', re.IGNORECASE | re.DOTALL)
+    # IMPROVED: Match decklist-card div first, then extract data-set and data-number separately (allows any attribute order)
+    card_div_pattern = re.compile(r'<div[^>]*class="decklist-card"[^>]*>(.*?)</div>', re.IGNORECASE | re.DOTALL)
+    data_set_pattern = re.compile(r'data-set="([A-Z0-9]*)"', re.IGNORECASE)
+    data_number_pattern = re.compile(r'data-number="(\d*)"', re.IGNORECASE)
+    count_name_pattern = re.compile(r'<span class="card-count">([0-9.]+)</span>\s*<span class="card-name">([^<]+)</span>', re.IGNORECASE | re.DOTALL)
 
     # Find all headings with their span (start/end ranges)
     headings: List[Dict[str, Any]] = []
@@ -999,12 +1022,30 @@ def extract_cards_from_page(cards_url: str, card_db: CardDatabaseLookup, deck_na
         block = html_content[sec['start']:sec['end']]
         section_type = sec['type']
 
-        for match in card_pattern.findall(block):
+        # NEW APPROACH: Find all card divs first, then extract attributes from each
+        for card_div_match in card_div_pattern.finditer(block):
             try:
-                set_code_raw = match[0].upper() if match[0] else ""
-                card_number_raw = match[1] if match[1] else ""
-                count_str = match[2]
-                name = match[3].strip()
+                # Get the full div including opening tag
+                full_match_start = card_div_match.start()
+                full_match_end = card_div_match.end()
+                full_div = block[full_match_start:full_match_end]
+                div_content = card_div_match.group(1)  # Content inside <div>...</div>
+                
+                # Extract data-set from opening tag
+                set_match = data_set_pattern.search(full_div)
+                set_code_raw = set_match.group(1).upper() if set_match and set_match.group(1) else ""
+                
+                # Extract data-number from opening tag
+                number_match = data_number_pattern.search(full_div)
+                card_number_raw = number_match.group(1) if number_match and number_match.group(1) else ""
+                
+                # Extract count and name from div content
+                count_name_match = count_name_pattern.search(div_content)
+                if not count_name_match:
+                    continue  # Skip if we can't find count and name
+                
+                count_str = count_name_match.group(1)
+                name = count_name_match.group(2).strip()
 
                 # Decode HTML entities (e.g., &#039; -> ')
                 name = html.unescape(name)
@@ -1075,7 +1116,7 @@ def extract_cards_from_page(cards_url: str, card_db: CardDatabaseLookup, deck_na
                         'needs_lookup': needs_lookup,
                         'is_ace_spec': 'Yes' if is_ace_spec else 'No'
                     })
-            except (ValueError, IndexError):
+            except (ValueError, IndexError, AttributeError) as e:
                 continue
 
     # Lookup missing card info - ONLY for Pokemon cards

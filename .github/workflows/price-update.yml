@@ -1,0 +1,68 @@
+name: Weekly Price Update
+
+on:
+  schedule:
+    # Jeden Montag um 06:00 UTC (07:00 MEZ / 08:00 MESZ)
+    - cron: '0 6 * * 1'
+  workflow_dispatch: # Ermöglicht manuelles Ausführen
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          repository: CapTheAvenger/TheDipidis
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+      
+      - name: Install ChromeDriver
+        uses: nanasess/setup-chromedriver@v2
+      
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium requests beautifulsoup4 lxml
+      
+      - name: Run Price Scraper
+        run: |
+          python card_price_scraper.py
+        env:
+          HEADLESS: 'true'
+      
+      - name: Update Card Data
+        run: |
+          python prepare_card_data.py
+      
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/price_data.csv data/all_cards_merged.* data/cardmarket_prices.csv
+          git diff --staged --quiet || git commit -m "🤖 Automated price update - $(date +'%d.%m.%Y')"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: price-scraper-logs
+          path: |
+            *.log
+            data/debug_*.html
+          retention-days: 7

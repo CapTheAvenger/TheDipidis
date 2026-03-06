@@ -33,6 +33,12 @@ desktop.ini
 scraper_output.txt
 scraper_test.txt
 *_debug.txt
+*.log
+scraper_*.log
+
+# Tracking files (optional - können auch committed werden für Sync)
+# data/*_scraped.json
+# data/*_scraped_pages.json
 
 # CSV archives (only keep current data)
 data/archive/
@@ -42,6 +48,17 @@ data/debug_*.html
 
 # Backup files
 *_backup.csv
+*_backup.json
+*_BACKUP_*.csv
+*_BACKUP_*.json
+*_PRE_RESET_*.csv
+*_PRE_RESET_*.json
+*_BOM_BUG_*.csv
+*_BOM_BUG_*.json
+*_OLD_*.csv
+*_OLD_*.json
+*_PARTIAL_*.json
+index_original_backup.html
 *_backup.json
 *_backup.html
 *_OLD*.html

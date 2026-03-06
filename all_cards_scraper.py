@@ -74,12 +74,12 @@ def save_scraped_pages(pages: set) -> None:
 
 def load_settings() -> Dict[str, object]:
     settings = DEFAULT_SETTINGS.copy()
-    app_dir = get_app_dir()
+    app_path = get_app_path()
     candidates = [
-        os.path.join(app_dir, "all_cards_scraper_settings.json"),
+        os.path.join(app_path, "all_cards_scraper_settings.json"),
         os.path.join(os.getcwd(), "all_cards_scraper_settings.json"),
-        os.path.join(app_dir, "..", "all_cards_scraper_settings.json"),  # Parent dir (if running from dist/)
-        os.path.join(app_dir, "data", "all_cards_scraper_settings.json")
+        os.path.join(app_path, "..", "all_cards_scraper_settings.json"),  # Parent dir (if running from dist/)
+        os.path.join(app_path, "data", "all_cards_scraper_settings.json")
     ]
 
     settings_path = None
@@ -454,7 +454,8 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
         for idx, card in enumerate(cards):
             try:
                 if not card.get('card_url'):
-                    # Skip cards without URL
+                    # Skip cards without URL - log warning
+                    print(f"      [WARNING] No URL for {card['name']} ({card['set']}-{card['number']}), skipping detail scrape")
                     continue
                 
                 # Browser restart every 1000 cards to prevent session timeout
@@ -531,19 +532,38 @@ def scrape_card_details(settings: Dict[str, object], cards: List[Dict[str, str]]
                 try:
                     rarity_found = False
                     
-                    # Strategy 1: Try .card-prints-current .prints-current-details span (most reliable)
+                    # Strategy 0: Try to extract rarity from the header box (e.g., "Steam Siege (STS) #58 · Common")
                     try:
-                        rarity_spans = driver.find_elements(By.CSS_SELECTOR, ".card-prints-current .prints-current-details span")
-                        if len(rarity_spans) >= 2:
-                            rarity_info = rarity_spans[1].get_attribute('textContent').strip()
-                            # Extract rarity from format like "· Double Rare"
-                            if '·' in rarity_info:
-                                rarity = rarity_info.split('·')[1].strip()
-                                if rarity:
-                                    card['rarity'] = rarity
-                                    rarity_found = True
+                        # Look for elements containing set/number/rarity info
+                        header_elements = driver.find_elements(By.CSS_SELECTOR, "h1, h2, h3, .card-info, [class*='title'], [class*='header']")
+                        for elem in header_elements:
+                            text = elem.get_attribute('textContent').strip()
+                            # Look for pattern like "Set (CODE) #NUM · Rarity"
+                            if '·' in text and card['set'] in text and str(card['number']) in text:
+                                parts = text.split('·')
+                                if len(parts) >= 2:
+                                    rarity = parts[-1].strip()
+                                    if rarity and rarity not in ['', '-', '—']:
+                                        card['rarity'] = rarity
+                                        rarity_found = True
+                                        break
                     except:
                         pass
+                    
+                    # Strategy 1: Try .card-prints-current .prints-current-details span (most reliable)
+                    if not rarity_found:
+                        try:
+                            rarity_spans = driver.find_elements(By.CSS_SELECTOR, ".card-prints-current .prints-current-details span")
+                            if len(rarity_spans) >= 2:
+                                rarity_info = rarity_spans[1].get_attribute('textContent').strip()
+                                # Extract rarity from format like "· Double Rare"
+                                if '·' in rarity_info:
+                                    rarity = rarity_info.split('·')[1].strip()
+                                    if rarity:
+                                        card['rarity'] = rarity
+                                        rarity_found = True
+                        except:
+                            pass
                     
                     # Strategy 2: Try the prints table rows (alternative method)
                     if not rarity_found:
@@ -744,8 +764,14 @@ try:
         for ic in incomplete_cards:
             # Try to build URL from card data
             if ic.get('name') and ic.get('set') and ic.get('number'):
-                # Build approximate URL (may not always work, but we'll handle errors)
-                card_name_slug = ic['name'].lower().replace(' ', '-').replace("'", '')
+                # Build approximate URL with improved slug generation
+                import re
+                card_name_slug = ic['name'].lower()
+                # Remove special characters but keep basic ones
+                card_name_slug = re.sub(r'[^a-z0-9\s-]', '', card_name_slug)  # Remove special chars
+                card_name_slug = card_name_slug.replace(' ', '-')  # Spaces to dashes
+                card_name_slug = re.sub(r'-+', '-', card_name_slug)  # Multiple dashes to single
+                card_name_slug = card_name_slug.strip('-')  # Remove leading/trailing dashes
                 ic['card_url'] = f"/cards/{ic['set'].upper()}/{ic['number']}/{card_name_slug}"
         all_cards = incomplete_cards + all_cards
         print(f"[All Cards Scraper] Total cards to detail-scrape: {len(all_cards)} ({len(incomplete_cards)} incomplete + {len(all_cards) - len(incomplete_cards)} new)")

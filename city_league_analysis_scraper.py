@@ -74,6 +74,7 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
             "end_date": "auto",
             "max_decklists_per_league": 16,
             "max_tournaments": 0,
+            "additional_tournament_ids": [],
             "request_timeout": 20,
             "max_retries": 2,
             "retry_delay": 1.0
@@ -82,7 +83,7 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "output_file": "city_league_analysis.csv",
     "append_mode": True,
     "delay_between_requests": 1.5,
-    "_comment": "Scrapes City League tournaments and extracts card data by archetype. append_mode=True keeps old tournament dates when adding new data."
+    "_comment": "Scrapes City League tournaments and extracts card data by archetype. additional_tournament_ids for special tournaments like Champions League 547. append_mode=True keeps old tournament dates when adding new data."
 }
 
 
@@ -95,7 +96,7 @@ def load_settings() -> Dict:
     
     if os.path.exists(settings_path):
         try:
-            with open(settings_path, 'r', encoding='utf-8') as f:
+            with open(settings_path, 'r', encoding='utf-8-sig') as f:
                 settings = json.load(f)
                 print(f"Settings loaded successfully")
                 for key, value in DEFAULT_SETTINGS.items():
@@ -181,19 +182,42 @@ def extract_cards_from_deck_html(deck_html: str, card_db: CardDatabaseLookup) ->
     )
     
     if pokemon_section:
-        pokemon_cards = re.findall(
-            r'<div[^>]+class="decklist-card"[^>]+data-set="([^"]+)"[^>]+data-number="([^"]+)"[^>]*>.*?'
-            r'<span class="card-count">([^<]+)</span>\s*<span class="card-name">([^<]+)</span>',
-            pokemon_section.group(1), re.DOTALL | re.IGNORECASE
-        )
+        # IMPROVED: More flexible pattern - extract each card div separately
+        pokemon_html = pokemon_section.group(1)
+        card_div_pattern = re.compile(r'<div[^>]*class="decklist-card"[^>]*>(.*?)</div>', re.DOTALL | re.IGNORECASE)
         
-        for set_code, set_number, count, card_name in pokemon_cards:
-            cards.append({
-                'name': card_name.strip(),
-                'count': int(float(count)),
-                'set_code': set_code.strip(),
-                'set_number': set_number.strip()
-            })
+        for card_match in card_div_pattern.finditer(pokemon_html):
+            try:
+                # Get full div including opening tag
+                div_start = card_match.start()
+                div_end = card_match.end()
+                full_div = pokemon_html[div_start:div_end]
+                div_content = card_match.group(1)
+                
+                # Extract data-set and data-number from opening tag (can be in any order)
+                set_match = re.search(r'data-set="([^"]+)"', full_div, re.IGNORECASE)
+                number_match = re.search(r'data-number="([^"]+)"', full_div, re.IGNORECASE)
+                
+                # Extract count and name from content
+                count_name_match = re.search(
+                    r'<span class="card-count">([^<]+)</span>\s*<span class="card-name">([^<]+)</span>',
+                    div_content, re.IGNORECASE
+                )
+                
+                if set_match and number_match and count_name_match:
+                    set_code = set_match.group(1).strip()
+                    set_number = number_match.group(1).strip()
+                    count = count_name_match.group(1).strip()
+                    card_name = count_name_match.group(2).strip()
+                    
+                    cards.append({
+                        'name': card_name,
+                        'count': int(float(count)),
+                        'set_code': set_code,
+                        'set_number': set_number
+                    })
+            except (ValueError, AttributeError):
+                continue
     
     # ========== TRAINER CARDS ==========
     trainer_section = re.search(

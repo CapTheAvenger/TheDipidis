@@ -535,13 +535,13 @@
                             </div>
                             <div class="cards-filter-options collapsed" id="metaFormatOptions">
                                 <label style="display: block; padding: 6px; cursor: pointer; border-radius: 4px;">
-                                    <input type="checkbox" value="total" checked> <strong>Total (Alle Karten)</strong>
+                                    <input type="checkbox" value="total" checked onchange="filterAndRenderCards()"> <strong>Total (Alle Karten)</strong>
                                 </label>
                                 <label style="display: block; padding: 6px; cursor: pointer; border-radius: 4px;">
-                                    <input type="checkbox" value="all_playables"> <strong>All Playables</strong>
+                                    <input type="checkbox" value="all_playables" onchange="filterAndRenderCards()"> <strong>All Playables</strong>
                                 </label>
                                 <label style="display: block; padding: 6px; cursor: pointer; border-radius: 4px;">
-                                    <input type="checkbox" value="city_league"> City League
+                                    <input type="checkbox" value="city_league" onchange="filterAndRenderCards()"> City League
                                 </label>
                                 <!-- Formats will be added dynamically -->
                             </div>
@@ -612,6 +612,34 @@
                             </div>
                         </div>
                         
+                        <!-- Main Pokemon Filter -->
+                        <div class="cards-filter-group">
+                            <div class="cards-filter-header collapsed" onclick="toggleCardFilter('mainPokemonFilterOptions')">
+                                <span>🐲 Haupt-Pokemon</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="cards-filter-options collapsed" id="mainPokemonFilterOptions">
+                                <input type="text" id="mainPokemonSearch" placeholder="Pokemon suchen..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterMainPokemonList()">
+                                <div id="mainPokemonList" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
+                                    <!-- Will be populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Archetype Filter -->
+                        <div class="cards-filter-group">
+                            <div class="cards-filter-header collapsed" onclick="toggleCardFilter('archetypeFilterOptions')">
+                                <span>🎯 Archetype</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="cards-filter-options collapsed" id="archetypeFilterOptions">
+                                <input type="text" id="archetypeSearch" placeholder="Archetype suchen..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterArchetypeList()">
+                                <div id="archetypeList" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
+                                    <!-- Will be populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Deck Coverage Filter -->
                         <div class="cards-filter-group">
                             <div class="cards-filter-header collapsed" onclick="toggleCardFilter('deckCoverageFilterOptions')">
@@ -632,6 +660,20 @@
                         <button onclick="resetCardFilters()" style="padding: 12px 24px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px;">
                             🔄 Filter zurücksetzen
                         </button>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-weight: 600; color: #555;">🔀 Sortierung:</label>
+                            <select id="cardSortOrder" onchange="filterAndRenderCards()" style="padding: 10px 15px; border: 2px solid #3498db; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; background: white;">
+                                <option value="set">Nach Set (Standard)</option>
+                                <option value="deck">Wie Deckübersicht</option>
+                                <option value="coverage">Nach Coverage</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-weight: 600; color: #555;">🖼️ Ansicht:</label>
+                            <button id="printViewToggle" onclick="togglePrintView()" style="padding: 10px 20px; border: 2px solid #9b59b6; background: #9b59b6; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s;">
+                                📦 Nur 1 Print (Low Rarity)
+                            </button>
+                        </div>
                         <div id="cardResultsInfo" style="flex: 1; padding: 12px; background: #ecf0f1; border-radius: 6px; text-align: center; font-weight: 600; font-size: 15px;">
                             Lädt Karten...
                         </div>
@@ -659,6 +701,12 @@
             </div>
             <div id="compactCardGrid" class="compact-card-grid"></div>
         </div>
+    </div>
+    
+    <!-- Fullscreen Card Modal -->
+    <div id="fullscreenCardModal" class="fullscreen-card-modal" onclick="closeFullscreenCard()">
+        <button class="fullscreen-close" onclick="event.stopPropagation(); closeFullscreenCard()">✕</button>
+        <img id="fullscreenCardImage" src="" alt="" onclick="event.stopPropagation()">
     </div>
     
     <!-- Single Card View Modal -->

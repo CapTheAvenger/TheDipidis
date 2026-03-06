@@ -105,7 +105,7 @@ def load_settings() -> Dict[str, Any]:
 
     if os.path.exists(settings_path):
         try:
-            with open(settings_path, "r", encoding="utf-8") as f:
+            with open(settings_path, "r", encoding="utf-8-sig") as f:  # utf-8-sig strips BOM
                 settings = json.load(f)
                 print("Settings loaded successfully", flush=True)
                 for key, value in DEFAULT_SETTINGS.items():
@@ -249,16 +249,27 @@ def scrape_limitless_online(settings: Dict[str, Any], card_db: CardDatabaseLooku
 
                     cards = []
 
+                    # IMPROVED: More flexible Pokemon extraction
                     pokemon_match = re.search(
-                        r'<div class="cards"><div class="heading">Pokémon[^<]*</div>(.*?)</div>',
+                        r'<div[^>]*class="heading"[^>]*>\s*Pokémon',
                         list_html,
-                        re.DOTALL | re.IGNORECASE
+                        re.IGNORECASE
                     )
 
                     if pokemon_match:
+                        # Find the pokemon section (from "Pokémon" heading to next heading or end)
+                        pokemon_start = pokemon_match.start()
+                        next_heading = re.search(r'<div[^>]*class="heading"[^>]*>\s*(?:Trainer|Energy)', list_html[pokemon_start+50:], re.IGNORECASE)
+                        pokemon_end = pokemon_start + 50 + next_heading.start() if next_heading else len(list_html)
+                        pokemon_section = list_html[pokemon_start:pokemon_end]
+                        
+                        # Extract pokemon cards with more flexible pattern
+                        # Matches: <a href=".../SET/NUM">COUNT CardName (SET NUM)</a>
+                        # Or: <a href=".../SET/NUM">COUNT CardName</a>
                         pokemon_links = re.findall(
-                            r'<a href="[^"]+/([A-Z0-9]+)/([0-9]+)"[^>]*>([0-9]+)\s+([^<(]+)\s*\([^)]+\)</a>',
-                            pokemon_match.group(1)
+                            r'<a\s+href="[^"]+/([A-Z0-9]+)/([0-9]+)"[^>]*>\s*([0-9]+)\s+([^<]+?)(?:\s*\([^)]*\))?\s*</a>',
+                            pokemon_section,
+                            re.IGNORECASE
                         )
                         for set_code, set_number, count, card_name in pokemon_links:
                             cards.append({
@@ -268,16 +279,24 @@ def scrape_limitless_online(settings: Dict[str, Any], card_db: CardDatabaseLooku
                                 "set_number": set_number.strip()
                             })
 
+                    # IMPROVED: More flexible Trainer extraction  
                     trainer_match = re.search(
-                        r'<div class="heading">Trainer[^<]*</div>(.*?)</div>',
+                        r'<div[^>]*class="heading"[^>]*>\s*Trainer',
                         list_html,
-                        re.DOTALL | re.IGNORECASE
+                        re.IGNORECASE
                     )
 
                     if trainer_match:
+                        # Find the trainer section
+                        trainer_start = trainer_match.start()
+                        next_heading = re.search(r'<div[^>]*class="heading"[^>]*>\s*Energy', list_html[trainer_start+50:], re.IGNORECASE)
+                        trainer_end = trainer_start + 50 + next_heading.start() if next_heading else len(list_html)
+                        trainer_section = list_html[trainer_start:trainer_end]
+                        
                         trainer_links = re.findall(
-                            r'<a href="[^"]+"[^>]*>([0-9]+)\s+([^<]+)</a>',
-                            trainer_match.group(1)
+                            r'<a\s+href="[^"]+"[^>]*>\s*([0-9]+)\s+([^<]+?)\s*</a>',
+                            trainer_section,
+                            re.IGNORECASE
                         )
                         for count, card_name in trainer_links:
                             card_name = card_name.strip()
@@ -290,16 +309,23 @@ def scrape_limitless_online(settings: Dict[str, Any], card_db: CardDatabaseLooku
                                     "set_number": latest_card.number
                                 })
 
+                    # IMPROVED: More flexible Energy extraction
                     energy_match = re.search(
-                        r'<div class="heading">Energy[^<]*</div>(.*?)</div>',
+                        r'<div[^>]*class="heading"[^>]*>\s*Energy',
                         list_html,
-                        re.DOTALL | re.IGNORECASE
+                        re.IGNORECASE
                     )
 
                     if energy_match:
+                        # Find the energy section (from "Energy" to end of deck area)
+                        energy_start = energy_match.start()
+                        # Energy is usually last, so take rest of content or until next major section
+                        energy_section = list_html[energy_start:energy_start+5000]  # Reasonable limit
+                        
                         energy_links = re.findall(
-                            r'<a href="[^"]+"[^>]*>([0-9]+)\s+([^<]+)</a>',
-                            energy_match.group(1)
+                            r'<a\s+href="[^"]+"[^>]*>\s*([0-9]+)\s+([^<]+?)\s*</a>',
+                            energy_section,
+                            re.IGNORECASE
                         )
                         for count, card_name in energy_links:
                             latest_card = card_db.get_latest_low_rarity_version(card_name)
@@ -402,22 +428,30 @@ def get_tournament_info(tournament_url: str) -> Dict[str, str]:
         title = re.sub(r'\s*\|\s*Limitless.*$', '', title)
         info['name'] = title
     
-    # Extract date (supports both ranges "November 21–23, 2025" and single dates "13th February 2026")
-    # Try date range first (with en-dash – or regular dash -)
-    date_match = re.search(r'(\w+\s+\d{1,2}[–-]\d{1,2},?\s+\d{4})', html)
-    if not date_match:
-        # Try single date format (with optional ordinal suffix)
-        date_match = re.search(r'(\d{1,2}(?:st|nd|rd|th)?\s+\w+\s+\d{4})', html)
+    # Extract date (supports various formats):
+    # - "November 21–23, 2025" (same month range)
+    # - "February 27–March 1, 2026" (cross-month range)
+    # - "13th February 2026" (single date)
+    date_match = None
     
+    # Try cross-month range first: "February 27–March 1, 2026"
+    date_match = re.search(r'(\w+\s+\d{1,2})(?:st|nd|rd|th)?[–-](?:\w+\s+)?\d{1,2}(?:st|nd|rd|th)?,?\s+(\d{4})', html)
     if date_match:
-        date_str = date_match.group(1)
-        # For ranges like "November 21–23, 2025", extract first date for filtering
-        # Remove the range end: "21–23" → "21"
-        date_str_cleaned = re.sub(r'(\d{1,2})[–-]\d{1,2}', r'\1', date_str)
-        # Remove ordinal suffixes (st, nd, rd, th) if present
-        date_str_cleaned = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_str_cleaned)
-        # Remove commas and strip whitespace
-        info['date'] = date_str_cleaned.replace(',', '').strip()
+        # Extract first month/day and year
+        date_str = f"{date_match.group(1)} {date_match.group(2)}"
+        info['date'] = date_str.strip()
+    else:
+        # Try same-month range: "November 21–23, 2025"
+        date_match = re.search(r'(\w+\s+\d{1,2})[–-]\d{1,2},?\s+(\d{4})', html)
+        if date_match:
+            date_str = f"{date_match.group(1)} {date_match.group(2)}"
+            info['date'] = date_str.strip()
+        else:
+            # Try single date: "13th February 2026"
+            date_match = re.search(r'(\d{1,2})(?:st|nd|rd|th)?\s+(\w+\s+\d{4})', html)
+            if date_match:
+                date_str = f"{date_match.group(1)} {date_match.group(2)}"
+                info['date'] = date_str.strip()
     
     # Detect format and meta
     is_jp_tournament = False

@@ -1,5 +1,5 @@
 // Pokemon TCG Set Order Mapping
-// Auto-generated from Limitless TCG on 2026-03-01 09:05
+// Auto-generated from Limitless TCG on 2026-03-05 20:32
 // Higher number = newer set
 
 const SET_ORDER = {

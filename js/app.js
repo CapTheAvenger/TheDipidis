@@ -5668,6 +5668,12 @@ const BASE_PATH = './data/';
             }
         }
         
+        // Pagination for Cards Tab
+        let currentCardsPage = 1;
+        const cardsPerPage = 300;
+        let showAllCards = false;
+        let showOnlyOnePrint = true; // Toggle for deduplication: true = only show 1 print per card (low rarity, newest)
+        
         async function loadCards() {
             const content = document.getElementById('cardsContent');
             content.innerHTML = '<div class="loading">Lädt Kartendatenbank...</div>';
@@ -5707,7 +5713,10 @@ const BASE_PATH = './data/';
                 
                 // Populate filters
                 await populateSetFilter(window.allCardsData);
-                populateMetaFormatFilter();
+                // populateMetaFormatFilter(); // Disabled - using populateMetaFilter() instead for more complete data
+                populateMainPokemonFilter();
+                populateArchetypeFilter();
+                populateMetaFilter();
                 
                 // Setup filter event listeners
                 setupCardFilters();
@@ -5723,7 +5732,8 @@ const BASE_PATH = './data/';
         }
         
         async function loadPlayableCards() {
-            window.playableCardsSet = new Set();
+            window.playableCardsSet = new Set(); // All playables (City League + Current Meta + Tournament)
+            window.cityLeagueCardsSet = new Set(); // Only City League cards
             
             try {
                 // Load City League Analysis CSV
@@ -5733,10 +5743,12 @@ const BASE_PATH = './data/';
                     const cityLeagueCards = parseCSV(cityLeagueText);
                     cityLeagueCards.forEach(card => {
                         if (card.card_name) {
-                            window.playableCardsSet.add(card.card_name.toLowerCase());
+                            const cardNameLower = card.card_name.toLowerCase();
+                            window.playableCardsSet.add(cardNameLower);
+                            window.cityLeagueCardsSet.add(cardNameLower); // Add to City League specific set
                         }
                     });
-                    console.log(`Loaded ${cityLeagueCards.length} playable cards from City League`);
+                    console.log(`Loaded ${cityLeagueCards.length} playable cards from City League, unique: ${window.cityLeagueCardsSet.size}`);
                 } catch (err) {
                     console.warn('Could not load City League playable cards:', err);
                 }
@@ -5771,15 +5783,74 @@ const BASE_PATH = './data/';
                     console.warn('Could not load Tournament JH playable cards:', err);
                 }
                 
-                console.log(`Total unique playable cards: ${window.playableCardsSet.size}`);
+                console.log(`Total unique playable cards (All Playables): ${window.playableCardsSet.size}`);
+                console.log(`City League only cards: ${window.cityLeagueCardsSet.size}`);
             } catch (error) {
                 console.error('Error loading playable cards:', error);
             }
         }
         
+        // Set release dates for temporal filtering (format: YYYY-MM-DD)
+        const SET_RELEASE_DATES = {
+            // 2026 Sets
+            'M3': '2026-03-01',
+            'ASC': '2026-02-21',
+            'PFL': '2026-01-24',  // Poké Pad is in this set
+            'MEG': '2025-12-20',
+            'MEE': '2025-12-20',
+            'MEP': '2025-12-01',
+            'BLK': '2025-11-15',
+            'WHT': '2025-11-15',
+            'DRI': '2025-10-25',
+            'JTG': '2025-09-13',
+            'PRE': '2025-01-17',
+            'SSP': '2024-11-08',
+            // 2024 Sets
+            'SCR': '2024-09-13',
+            'SFA': '2024-08-02',
+            'TWM': '2024-05-24',
+            'TEF': '2024-03-22',
+            'PAF': '2024-01-26',
+            // 2023 Sets
+            'PAR': '2023-11-03',
+            'MEW': '2023-09-22',
+            'OBF': '2023-08-11',
+            'PAL': '2023-06-09',
+            'SVI': '2023-03-31',
+            'SVE': '2023-03-31',
+            'SVP': '2023-03-01',
+            // 2022-2023 Sets
+            'CRZ': '2023-01-20',
+            'SIR': '2022-11-11',
+            'LOR': '2022-09-09',
+            'PGO': '2022-07-01',
+            'ASR': '2022-05-27',
+            'BRS': '2022-02-25',
+            // Older sets default to 2020
+            'DEFAULT': '2020-01-01'
+        };
+        window.SET_RELEASE_DATES = SET_RELEASE_DATES;
+        
+        // For temporal filtering: City League data often has NO tournament_date
+        // We'll treat City League as "current meta" (post-release for all cards)
+        // and only filter Tournament data by date
+        const CITY_LEAGUE_META_NAME = 'City League';
+        window.CITY_LEAGUE_META_NAME = CITY_LEAGUE_META_NAME;
+        
         async function loadDeckCoverageStats() {
-            window.cardDeckCoverageMap = new Map(); // Map<card_name, {decksWithCard: Set, totalDecks: number, percentage: number}>
-            const allArchetypeDecksMap = new Set(); // Track all unique decks across both sources
+            window.cardDeckCoverageMap = new Map(); // Map<card_name, {archetypesWithCard: Map, archetypes: Set, tournamentDates: Set}>
+            window.archetypeDeckCounts = new Map(); // Map<meta|archetype, {totalDecks: number, tournamentDates: Set}>
+            let totalDecksCount = 0;
+            
+            // Initialize new filter maps
+            window.mainPokemonCardsMap = new Map(); // Map<mainPokemon, Set<card_name>>
+            window.archetypeCardsMap = new Map(); // Map<archetype, Set<card_name>>
+            window.metaCardsMap = new Map(); // Map<meta, Set<card_name>>
+            window.allMainPokemons = new Set();
+            window.allArchetypes = new Set();
+            window.allMetas = new Set();
+            
+            const archetypeKeysSeen = new Set(); // Track which archetypes we've already counted (GLOBAL across sources)
             
             try {
                 // Load both City League and Tournament data for comprehensive coverage
@@ -5790,60 +5861,153 @@ const BASE_PATH = './data/';
                 
                 for (const source of dataSources) {
                     try {
+                        console.log(`[Deck Coverage] Attempting to load: ${source.file}`);
                         const response = await fetch(BASE_PATH + source.file);
+                        if (!response.ok) {
+                            console.error(`[Deck Coverage] Failed to fetch ${source.file}: ${response.status}`);
+                            continue;
+                        }
                         const text = await response.text();
                         const rows = parseCSV(text);
                         
+                        console.log(`[Deck Coverage] Parsed ${rows.length} rows from ${source.file}`);
+                        if (rows.length > 0) {
+                            console.log(`[Deck Coverage] First row structure:`, rows[0]);
+                        }
+                        
+                        let processedRows = 0;
+                        
                         rows.forEach(row => {
-                            if (!row.card_name || !row.archetype || !row.meta) return;
+                            if (!row.card_name || !row.archetype || !row.meta) {
+                                if (processedRows === 0) {
+                                    console.log(`[Deck Coverage] Skipping row - missing fields:`, { 
+                                        has_card_name: !!row.card_name, 
+                                        has_archetype: !!row.archetype, 
+                                        has_meta: !!row.meta,
+                                        meta_value: row.meta
+                                    });
+                                }
+                                return;
+                            }
+                            processedRows++;
                             
                             const cardName = row.card_name.toLowerCase();
                             const archetypeKey = `${row.meta}|${row.archetype}`;
+                            const tournamentDate = row.tournament_date || null; // e.g., "13th February 2026"
+                            
+                            // Extract the actual counts from CSV
+                            // deck_count = how many decks of this archetype play THIS CARD
+                            // total_decks_in_archetype = total number of decks in this archetype
+                            const deckCountWithThisCard = parseInt(row.deck_count) || 0;
+                            const totalDecksInArchetype = parseInt(row.total_decks_in_archetype) || deckCountWithThisCard;
+                            
+                            // Store total deck count for this archetype (only once per archetype)
+                            if (!archetypeKeysSeen.has(archetypeKey)) {
+                                archetypeKeysSeen.add(archetypeKey);
+                                window.archetypeDeckCounts.set(archetypeKey, {
+                                    totalDecks: totalDecksInArchetype,
+                                    tournamentDates: new Set()
+                                });
+                                totalDecksCount += totalDecksInArchetype;
+                            }
+                            
+                            // Track tournament dates for this archetype
+                            if (tournamentDate && window.archetypeDeckCounts.has(archetypeKey)) {
+                                window.archetypeDeckCounts.get(archetypeKey).tournamentDates.add(tournamentDate);
+                            }
                             
                             // Track which archetype-decks this card appears in
                             if (!window.cardDeckCoverageMap.has(cardName)) {
                                 window.cardDeckCoverageMap.set(cardName, {
-                                    decksWithCard: new Set(),
-                                    archetypes: new Set()
+                                    archetypesWithCard: new Map(), // Map<archetypeKey, {deckCount, tournamentDate, maxCount}>
+                                    archetypes: new Set(),
+                                    tournamentDates: new Set(), // All tournament dates where this card appeared
+                                    setCode: row.set_code || null, // Store set code for release date lookup
+                                    maxCountOverall: 0 // Track the overall maximum count across all archetypes
                                 });
                             }
                             
                             const cardStats = window.cardDeckCoverageMap.get(cardName);
-                            cardStats.decksWithCard.add(archetypeKey);
+                            // Store set code if not already set (use first occurrence)
+                            if (!cardStats.setCode && row.set_code) {
+                                cardStats.setCode = row.set_code;
+                            }
+                            // Track tournament dates
+                            if (tournamentDate) {
+                                cardStats.tournamentDates.add(tournamentDate);
+                            }
+                            
+                            // Track max_count (how many copies of this card are played in a single deck)
+                            const maxCountInDeck = parseInt(row.max_count) || 0;
+                            if (maxCountInDeck > cardStats.maxCountOverall) {
+                                cardStats.maxCountOverall = maxCountInDeck;
+                            }
+                            
+                            // Store how many decks of this archetype have THIS SPECIFIC CARD
+                            // Multiple prints of the same card might appear, use the MAXIMUM value
+                            // (because different prints of the same card are in the same decks)
+                            const currentEntry = cardStats.archetypesWithCard.get(archetypeKey);
+                            const currentCount = currentEntry ? currentEntry.deckCount : 0;
+                            if (deckCountWithThisCard > currentCount) {
+                                cardStats.archetypesWithCard.set(archetypeKey, {
+                                    deckCount: deckCountWithThisCard,
+                                    tournamentDate: tournamentDate,
+                                    maxCount: maxCountInDeck,
+                                    setCode: row.set_code || null
+                                });
+                            }
                             cardStats.archetypes.add(row.archetype);
                             
-                            // Track all unique decks across all sources
-                            allArchetypeDecksMap.add(archetypeKey);
+                            // NEW: Populate filter maps
+                            // Extract main Pokemon (first word of archetype)
+                            const mainPokemon = row.archetype.split(' ')[0].trim();
+                            if (mainPokemon) {
+                                window.allMainPokemons.add(mainPokemon);
+                                if (!window.mainPokemonCardsMap.has(mainPokemon)) {
+                                    window.mainPokemonCardsMap.set(mainPokemon, new Set());
+                                }
+                                window.mainPokemonCardsMap.get(mainPokemon).add(cardName);
+                            }
+                            
+                            // Track archetype
+                            window.allArchetypes.add(row.archetype);
+                            if (!window.archetypeCardsMap.has(row.archetype)) {
+                                window.archetypeCardsMap.set(row.archetype, new Set());
+                            }
+                            window.archetypeCardsMap.get(row.archetype).add(cardName);
+                            
+                            // Track meta
+                            if (processedRows <= 3) {
+                                console.log(`[Deck Coverage] Adding meta: "${row.meta}" for card: ${cardName}`);
+                            }
+                            window.allMetas.add(row.meta);
+                            if (!window.metaCardsMap.has(row.meta)) {
+                                window.metaCardsMap.set(row.meta, new Set());
+                            }
+                            window.metaCardsMap.get(row.meta).add(cardName);
                         });
                         
+                        console.log(`[Deck Coverage] Processed ${processedRows} rows from ${source.name}`);
                         console.log(`[Deck Coverage] Loaded from ${source.name}`);
                     } catch (err) {
-                        console.warn(`Could not load ${source.name} deck coverage:`, err);
+                        console.error(`[Deck Coverage] Error loading ${source.name} deck coverage:`, err);
                     }
                 }
                 
                 // Set total unique decks from all sources combined
-                window.totalUniqueDecks = allArchetypeDecksMap.size;
-                
-                // Calculate percentages
-                if (window.totalUniqueDecks > 0) {
-                    window.cardDeckCoverageMap.forEach((stats, cardName) => {
-                        stats.percentage = (stats.decksWithCard.size / window.totalUniqueDecks) * 100;
-                        stats.deckCount = stats.decksWithCard.size;
-                    });
-                }
+                window.totalUniqueDecks = totalDecksCount;
                 
                 console.log(`[Deck Coverage] Total unique decks: ${window.totalUniqueDecks}`);
                 console.log(`[Deck Coverage] Cards with coverage data: ${window.cardDeckCoverageMap.size}`);
+                console.log(`[Filter Data] Main Pokemons: ${window.allMainPokemons.size}, Archetypes: ${window.allArchetypes.size}, Metas: ${window.allMetas.size}`);
                 
-                // Log some examples
-                const sortedByPercentage = Array.from(window.cardDeckCoverageMap.entries())
-                    .sort((a, b) => b[1].percentage - a[1].percentage)
-                    .slice(0, 10);
-                console.log('[Deck Coverage] Top 10 cards by deck coverage:');
-                sortedByPercentage.forEach(([name, stats]) => {
-                    console.log(`  ${name}: ${stats.percentage.toFixed(1)}% (${stats.deckCount}/${window.totalUniqueDecks} decks)`);
-                });
+                // Log metas for debugging
+                console.log(`[Filter Data] Available Metas:`, Array.from(window.allMetas).sort());
+                if (window.metaCardsMap.size > 0) {
+                    window.metaCardsMap.forEach((cards, meta) => {
+                        console.log(`  Meta "${meta}": ${cards.size} unique cards`);
+                    });
+                }
                 
             } catch (error) {
                 console.error('Error loading deck coverage stats:', error);
@@ -5950,7 +6114,7 @@ const BASE_PATH = './data/';
                     label.style.padding = '6px';
                     label.style.cursor = 'pointer';
                     label.style.borderRadius = '4px';
-                    label.innerHTML = `<input type="checkbox" value="${format.code}"> ${format.name}`;
+                    label.innerHTML = `<input type="checkbox" value="meta:${format.code}" onchange="filterAndRenderCards()"> ${format.name}`;
                     container.appendChild(label);
                 });
                 console.log(`[Cards Tab] Populated ${window.cardFormatsData.formats.length} formats in filter`);
@@ -6015,6 +6179,167 @@ const BASE_PATH = './data/';
                     container.appendChild(label);
                 });
             }
+        }
+        
+        function populateMainPokemonFilter() {
+            const container = document.getElementById('mainPokemonList');
+            if (!container || !window.allMainPokemons) return;
+            
+            // Sort alphabetically
+            const sortedMainPokemons = Array.from(window.allMainPokemons).sort();
+            
+            // Store all items for search filtering
+            window.mainPokemonFilterItems = [];
+            
+            container.innerHTML = '';
+            sortedMainPokemons.forEach(pokemon => {
+                const label = document.createElement('label');
+                label.style.display = 'block';
+                label.style.padding = '6px';
+                label.style.cursor = 'pointer';
+                label.style.borderRadius = '4px';
+                label.innerHTML = `<input type="checkbox" value="${pokemon}" onchange="filterArchetypesByMainPokemon(); filterAndRenderCards()"> ${pokemon}`;
+                container.appendChild(label);
+                window.mainPokemonFilterItems.push({ element: label, name: pokemon.toLowerCase() });
+            });
+            
+            console.log(`[Cards Tab] Populated ${sortedMainPokemons.length} main pokemons`);
+        }
+        
+        function populateArchetypeFilter() {
+            const container = document.getElementById('archetypeList');
+            if (!container || !window.allArchetypes) return;
+            
+            // Sort alphabetically
+            const sortedArchetypes = Array.from(window.allArchetypes).sort();
+            
+            // Store all items for search filtering
+            window.archetypeFilterItems = [];
+            window.allArchetypeItems = []; // Store all archetypes for filtering
+            
+            container.innerHTML = '';
+            sortedArchetypes.forEach(archetype => {
+                const label = document.createElement('label');
+                label.style.display = 'block';
+                label.style.padding = '6px';
+                label.style.cursor = 'pointer';
+                label.style.borderRadius = '4px';
+                label.innerHTML = `<input type="checkbox" value="${archetype}" onchange="filterAndRenderCards()"> ${archetype}`;
+                container.appendChild(label);
+                const item = { element: label, name: archetype.toLowerCase(), archetype: archetype };
+                window.archetypeFilterItems.push(item);
+                window.allArchetypeItems.push(item);
+            });
+            
+            console.log(`[Cards Tab] Populated ${sortedArchetypes.length} archetypes`);
+        }
+        
+        function filterArchetypesByMainPokemon() {
+            if (!window.allArchetypeItems) return;
+            
+            // Get selected main pokemons
+            const selectedMainPokemons = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value.toLowerCase());
+            
+            // If no main pokemon selected, show all archetypes
+            if (selectedMainPokemons.length === 0) {
+                window.archetypeFilterItems = window.allArchetypeItems.slice();
+                window.allArchetypeItems.forEach(item => {
+                    item.element.style.display = 'block';
+                });
+                // Reset search filter
+                filterArchetypeList();
+                return;
+            }
+            
+            // Filter archetypes that contain any of the selected main pokemons
+            window.allArchetypeItems.forEach(item => {
+                const archetypeLower = item.name;
+                let matches = false;
+                
+                for (const mainPokemon of selectedMainPokemons) {
+                    if (archetypeLower.includes(mainPokemon)) {
+                        matches = true;
+                        break;
+                    }
+                }
+                
+                if (matches) {
+                    item.element.style.display = 'block';
+                } else {
+                    item.element.style.display = 'none';
+                    // Uncheck if hidden
+                    const checkbox = item.element.querySelector('input[type="checkbox"]');
+                    if (checkbox && checkbox.checked) {
+                        checkbox.checked = false;
+                    }
+                }
+            });
+            
+            // Update archetypeFilterItems to only include visible items for search
+            window.archetypeFilterItems = window.allArchetypeItems.filter(item => item.element.style.display !== 'none');
+            
+            // Apply current search filter
+            filterArchetypeList();
+            
+            console.log(`[Cards Tab] Filtered archetypes by main pokemon: ${selectedMainPokemons.join(', ')} - ${window.archetypeFilterItems.length} visible`);
+        }
+        
+        function populateMetaFilter() {
+            const container = document.getElementById('metaFormatOptions');
+            if (!container || !window.allMetas) return;
+            
+            // Sort by meta name (reverse chronological for date-based metas)
+            const sortedMetas = Array.from(window.allMetas).sort().reverse();
+            
+            // Add separator before metas
+            const separator = document.createElement('div');
+            separator.style.cssText = 'border-top: 2px solid #ddd; margin: 10px 0; padding-top: 10px;';
+            separator.innerHTML = '<strong style="display: block; padding: 6px; color: #555;">📅 Meta-Zeiträume:</strong>';
+            container.appendChild(separator);
+            
+            sortedMetas.forEach(meta => {
+                const label = document.createElement('label');
+                label.style.display = 'block';
+                label.style.padding = '6px';
+                label.style.cursor = 'pointer';
+                label.style.borderRadius = '4px';
+                label.innerHTML = `<input type="checkbox" value="meta:${meta}" onchange="filterAndRenderCards()"> ${meta}`;
+                container.appendChild(label);
+            });
+            
+            console.log(`[Cards Tab] Populated ${sortedMetas.length} metas in Meta/Format filter`);
+        }
+        
+        function filterMainPokemonList() {
+            if (!window.mainPokemonFilterItems) return;
+            
+            const searchInput = document.getElementById('mainPokemonSearch');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            window.mainPokemonFilterItems.forEach(item => {
+                if (searchTerm === '' || item.name.includes(searchTerm)) {
+                    item.element.style.display = 'block';
+                } else {
+                    item.element.style.display = 'none';
+                }
+            });
+        }
+        
+        function filterArchetypeList() {
+            // Get all archetype items (respecting main pokemon filter)
+            const itemsToFilter = window.archetypeFilterItems || [];
+            
+            const searchInput = document.getElementById('archetypeSearch');
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            // Filter within currently visible items (after main pokemon filter)
+            itemsToFilter.forEach(item => {
+                if (searchTerm === '' || item.name.includes(searchTerm)) {
+                    item.element.style.display = 'block';
+                } else {
+                    item.element.style.display = 'none';
+                }
+            });
         }
         
         function setupCardFilters() {
@@ -6120,13 +6445,34 @@ const BASE_PATH = './data/';
         }
         
         function resetCardFilters() {
-            // Clear search
+            // Card search
             const searchInput = document.getElementById('cardSearch');
             if (searchInput) searchInput.value = '';
             
+            // Main Pokemon search
+            const mainPokemonSearch = document.getElementById('mainPokemonSearch');
+            if (mainPokemonSearch) {
+                mainPokemonSearch.value = '';
+                filterMainPokemonList();
+            }
+            
+            // Archetype search
+            const archetypeSearch = document.getElementById('archetypeSearch');
+            if (archetypeSearch) {
+                archetypeSearch.value = '';
+                filterArchetypeList();
+            }
+            
             // Uncheck all checkboxes
-            const allCheckboxes = document.querySelectorAll('.cards-filter-options input[type="checkbox"]');
+            const allCheckboxes = document.querySelectorAll('.cards-filter-options input[type="checkbox"], #mainPokemonList input[type="checkbox"], #archetypeList input[type="checkbox"]');
             allCheckboxes.forEach(cb => cb.checked = false);
+            
+            // Reset archetype filter (show all archetypes again)
+            filterArchetypesByMainPokemon();
+            
+            // Reset pagination and show all mode
+            currentCardsPage = 1;
+            showAllCards = false;
             
             // Check "Total" by default
             const totalCheckbox = document.querySelector('#metaFormatOptions input[value="total"]');
@@ -6141,6 +6487,11 @@ const BASE_PATH = './data/';
                 return;
             }
             
+            // Reset to page 1 when filters change (unless showing all cards)
+            if (!showAllCards) {
+                currentCardsPage = 1;
+            }
+            
             const searchInput = document.getElementById('cardSearch');
             const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
             
@@ -6150,8 +6501,13 @@ const BASE_PATH = './data/';
             const selectedRarities = Array.from(document.querySelectorAll('#rarityFilterOptions input:checked')).map(cb => cb.value);
             const selectedCategories = Array.from(document.querySelectorAll('#categoryFilterOptions input:checked')).map(cb => cb.value);
             const selectedDeckCoverages = Array.from(document.querySelectorAll('#deckCoverageFilterOptions input:checked')).map(cb => parseFloat(cb.value));
+            const selectedMainPokemons = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value);
+            const selectedArchetypes = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
+            const selectedMetaFilters = Array.from(document.querySelectorAll('#metaFormatOptions input:checked')).filter(cb => cb.value.startsWith('meta:')).map(cb => cb.value.replace('meta:', ''));
             
-            console.log(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}, DeckCov: ${selectedDeckCoverages.length}`);
+            console.log(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}, DeckCov: ${selectedDeckCoverages.length}, MainPkm: ${selectedMainPokemons.length}, Archetypes: ${selectedArchetypes.length}, MetaFilters: ${selectedMetaFilters.length}`);
+            console.log(`[Filter Debug] Selected Meta Values:`, selectedMetas);
+            console.log(`[Filter Debug] Selected Meta Filters (meta: prefix):`, selectedMetaFilters);
             
             let passedFilters = 0;
             let failedSearch = 0;
@@ -6160,6 +6516,9 @@ const BASE_PATH = './data/';
             let failedRarity = 0;
             let failedCategory = 0;
             let failedDeckCoverage = 0;
+            let failedMainPokemon = 0;
+            let failedArchetype = 0;
+            let failedMetaFilter = 0;
             let failedValidation = 0;
             
             window.filteredCardsData = window.allCardsData.filter(card => {
@@ -6175,21 +6534,25 @@ const BASE_PATH = './data/';
                     return false;
                 }
                 
-                // Meta/Format filter
-                if (selectedMetas.length > 0) {
+                // Meta/Format filter (Total, All Playables, City League)
+                // NOTE: Meta-Zeiträume (meta:XXX) are handled later in "Meta Filter" section
+                const basicMetaFilters = selectedMetas.filter(m => !m.startsWith('meta:'));
+                if (basicMetaFilters.length > 0) {
                     let metaMatch = false;
+                    const cardNameLower = card.name.toLowerCase();
                     
-                    if (selectedMetas.includes('total')) {
+                    if (basicMetaFilters.includes('total')) {
                         metaMatch = true; // Show all cards
-                    } else if (selectedMetas.includes('all_playables') || selectedMetas.includes('city_league')) {
-                        // Both all_playables and city_league show only playable cards
-                        if (window.playableCardsSet && window.playableCardsSet.has(card.name.toLowerCase())) {
+                    } else if (basicMetaFilters.includes('all_playables')) {
+                        // All playables: City League + Current Meta + Tournament
+                        if (window.playableCardsSet && window.playableCardsSet.has(cardNameLower)) {
                             metaMatch = true;
                         }
-                    } else {
-                        // For now, allow all cards if a format is selected
-                        // TODO: Map sets to formats properly
-                        metaMatch = true;
+                    } else if (basicMetaFilters.includes('city_league')) {
+                        // City League only: Only cards from City League decks
+                        if (window.cityLeagueCardsSet && window.cityLeagueCardsSet.has(cardNameLower)) {
+                            metaMatch = true;
+                        }
                     }
                     
                     if (!metaMatch) {
@@ -6271,7 +6634,10 @@ const BASE_PATH = './data/';
                         return false;
                     }
                     
-                    const percentage = coverageStats.percentage || 0;
+                    // Calculate DYNAMIC coverage based on active filters
+                    const dynamicCoverage = calculateDynamicCoverage(card.name);
+                    const percentage = dynamicCoverage ? dynamicCoverage.percentage : 0;
+                    
                     let coverageMatch = false;
                     
                     // Check if card meets any of the selected coverage thresholds
@@ -6297,6 +6663,101 @@ const BASE_PATH = './data/';
                     }
                 }
                 
+                // NEW: Main Pokemon Filter - Show cards from decks with selected main pokemon
+                if (selectedMainPokemons.length > 0) {
+                    const cardNameLower = card.name.toLowerCase();
+                    let mainPokemonMatch = false;
+                    
+                    for (const mainPokemon of selectedMainPokemons) {
+                        if (window.mainPokemonCardsMap && window.mainPokemonCardsMap.has(mainPokemon)) {
+                            const cardsForMainPokemon = window.mainPokemonCardsMap.get(mainPokemon);
+                            if (cardsForMainPokemon.has(cardNameLower)) {
+                                mainPokemonMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!mainPokemonMatch) {
+                        failedMainPokemon++;
+                        return false;
+                    }
+                }
+                
+                // NEW: Archetype Filter - Show cards from selected archetypes
+                if (selectedArchetypes.length > 0) {
+                    const cardNameLower = card.name.toLowerCase();
+                    let archetypeMatch = false;
+                    
+                    for (const archetype of selectedArchetypes) {
+                        if (window.archetypeCardsMap && window.archetypeCardsMap.has(archetype)) {
+                            const cardsForArchetype = window.archetypeCardsMap.get(archetype);
+                            if (cardsForArchetype.has(cardNameLower)) {
+                                archetypeMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!archetypeMatch) {
+                        failedArchetype++;
+                        return false;
+                    }
+                }
+                
+                // NEW: Meta Filter - Show cards from selected metas (combined with archetype if both selected)
+                if (selectedMetaFilters.length > 0) {
+                    const cardNameLower = card.name.toLowerCase();
+                    let metaFilterMatch = false;
+                    
+                    // Debug log for first card only
+                    if (passedFilters === 0 && failedMetaFilter === 0) {
+                        console.log(`[Meta Filter Debug] Checking meta filters:`, selectedMetaFilters);
+                        console.log(`[Meta Filter Debug] Available metas in metaCardsMap:`, window.metaCardsMap ? Array.from(window.metaCardsMap.keys()) : 'metaCardsMap not loaded');
+                        if (window.metaCardsMap) {
+                            selectedMetaFilters.forEach(meta => {
+                                if (window.metaCardsMap.has(meta)) {
+                                    console.log(`  Meta "${meta}" found with ${window.metaCardsMap.get(meta).size} cards`);
+                                } else {
+                                    console.log(`  Meta "${meta}" NOT FOUND in metaCardsMap`);
+                                }
+                            });
+                        }
+                    }
+                    
+                    // If archetype is also selected, check intersection
+                    if (selectedArchetypes.length > 0) {
+                        // Card must be in the intersection of selected meta AND selected archetype
+                        for (const meta of selectedMetaFilters) {
+                            if (window.metaCardsMap && window.metaCardsMap.has(meta)) {
+                                const cardsForMeta = window.metaCardsMap.get(meta);
+                                if (cardsForMeta.has(cardNameLower)) {
+                                    // Card is in this meta - but we already checked archetype above
+                                    // So if we got here, card is in both archetype AND meta
+                                    metaFilterMatch = true;
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        // No archetype selected, just check meta
+                        for (const meta of selectedMetaFilters) {
+                            if (window.metaCardsMap && window.metaCardsMap.has(meta)) {
+                                const cardsForMeta = window.metaCardsMap.get(meta);
+                                if (cardsForMeta.has(cardNameLower)) {
+                                    metaFilterMatch = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (!metaFilterMatch) {
+                        failedMetaFilter++;
+                        return false;
+                    }
+                }
+                
                 passedFilters++;
                 return true;
             });
@@ -6310,8 +6771,374 @@ const BASE_PATH = './data/';
             console.log(`  - Failed rarity: ${failedRarity}`);
             console.log(`  - Failed category: ${failedCategory}`);
             console.log(`  - Failed deck coverage: ${failedDeckCoverage}`);
+            console.log(`  - Failed main pokemon: ${failedMainPokemon}`);
+            console.log(`  - Failed archetype: ${failedArchetype}`);
+            console.log(`  - Failed meta filter: ${failedMetaFilter}`);
             console.log(`[Cards Tab] Filtered ${window.filteredCardsData.length} cards from ${window.allCardsData.length} total`);
+            
+            // Deduplicate cards (same card name, different prints) - prefer print from coverage data
+            // Only deduplicate if showOnlyOnePrint is enabled
+            if (showOnlyOnePrint) {
+                deduplicateCardsForDisplay(window.filteredCardsData);
+            }
+            
+            // Apply sorting based on user selection
+            sortCardsDatabase(window.filteredCardsData);
+            
             renderCardDatabase(window.filteredCardsData);
+        }
+        
+        function togglePrintView() {
+            /**
+             * Toggle between showing all prints vs. only one print per card
+             */
+            showOnlyOnePrint = !showOnlyOnePrint;
+            
+            // Update button appearance
+            const toggleBtn = document.getElementById('printViewToggle');
+            if (toggleBtn) {
+                if (showOnlyOnePrint) {
+                    toggleBtn.textContent = '📦 Nur 1 Print (Low Rarity)';
+                    toggleBtn.style.background = '#9b59b6';
+                    toggleBtn.style.borderColor = '#9b59b6';
+                } else {
+                    toggleBtn.textContent = '📚 Alle Prints';
+                    toggleBtn.style.background = '#3498db';
+                    toggleBtn.style.borderColor = '#3498db';
+                }
+            }
+            
+            console.log(`[Print View] Toggled to: ${showOnlyOnePrint ? 'Only 1 Print' : 'All Prints'}`);
+            
+            // Re-render with new setting
+            filterAndRenderCards();
+        }
+        
+        function deduplicateCardsForDisplay(cards) {
+            /**
+             * Remove duplicate cards (same name, different prints)
+             * Prefer the print that appears most in the CURRENTLY FILTERED archetypes
+             * Otherwise prefer: newest set with lowest rarity
+             * Modifies the array in-place
+             */
+            const cardsByName = new Map();
+            
+            // Group cards by name
+            cards.forEach(card => {
+                const cardName = card.name.toLowerCase();
+                if (!cardsByName.has(cardName)) {
+                    cardsByName.set(cardName, []);
+                }
+                cardsByName.get(cardName).push(card);
+            });
+            
+            // Get active filters to determine which archetypes are relevant
+            const selectedMainPokemons = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value);
+            const selectedArchetypes = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
+            const selectedMetaFilters = Array.from(document.querySelectorAll('#metaFormatOptions input:checked')).filter(cb => cb.value.startsWith('meta:')).map(cb => cb.value.replace('meta:', ''));
+            
+            // For each card name, choose the best print
+            const selectedCards = [];
+            
+            cardsByName.forEach((prints, cardName) => {
+                if (prints.length === 1) {
+                    selectedCards.push(prints[0]);
+                    return;
+                }
+                
+                // Multiple prints exist - choose the best one based on FILTERED coverage data
+                const coverageData = window.cardDeckCoverageMap ? window.cardDeckCoverageMap.get(cardName) : null;
+                
+                if (coverageData && (selectedMainPokemons.length > 0 || selectedArchetypes.length > 0 || selectedMetaFilters.length > 0)) {
+                    // Calculate which set_code appears most in the FILTERED archetypes
+                    const setCodeCounts = new Map();
+                    
+                    if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
+                        console.log(`[Dedup Debug] ${cardName}: Active filters - MainPokemon: [${selectedMainPokemons.join(', ')}], Archetype: [${selectedArchetypes.join(', ')}], Meta: [${selectedMetaFilters.join(', ')}]`);
+                        console.log(`[Dedup Debug] ${cardName}: Has ${coverageData.archetypesWithCard.size} archetypes in coverage data`);
+                    }
+                    
+                    coverageData.archetypesWithCard.forEach((entry, archetypeKey) => {
+                        const [meta, archetype] = archetypeKey.split('|');
+                        const mainPokemon = archetype.split(' ')[0];
+                        
+                        // Check if this archetype matches active filters
+                        let matchesFilters = true;
+                        if (selectedMainPokemons.length > 0 && !selectedMainPokemons.includes(mainPokemon)) {
+                            matchesFilters = false;
+                        }
+                        if (selectedArchetypes.length > 0 && !selectedArchetypes.includes(archetype)) {
+                            matchesFilters = false;
+                        }
+                        if (selectedMetaFilters.length > 0 && !selectedMetaFilters.includes(meta)) {
+                            matchesFilters = false;
+                        }
+                        
+                        if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
+                            if (matchesFilters && entry.setCode) {
+                                console.log(`[Dedup Debug] ${cardName}: Matched archetype ${archetypeKey} with setCode ${entry.setCode}`);
+                            }
+                        }
+                        
+                        if (matchesFilters && entry.setCode) {
+                            const count = setCodeCounts.get(entry.setCode) || 0;
+                            const deckCount = typeof entry === 'number' ? entry : (entry.deckCount || 0);
+                            setCodeCounts.set(entry.setCode, count + deckCount);
+                        }
+                    });
+                    
+                    // Find the most common set_code in filtered archetypes
+                    if (setCodeCounts.size > 0) {
+                        let mostCommonSet = null;
+                        let highestCount = 0;
+                        setCodeCounts.forEach((count, setCode) => {
+                            if (count > highestCount) {
+                                highestCount = count;
+                                mostCommonSet = setCode;
+                            }
+                        });
+                        
+                        // Try to find print matching the most common set
+                        if (mostCommonSet) {
+                            const matchingPrint = prints.find(p => p.set === mostCommonSet);
+                            if (matchingPrint) {
+                                if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
+                                    console.log(`[Dedup Debug] ${cardName}: Selected ${mostCommonSet} print (most common in filtered archetypes)`);
+                                }
+                                selectedCards.push(matchingPrint);
+                                return;
+                            } else {
+                                if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
+                                    console.log(`[Dedup Debug] ${cardName}: Most common set ${mostCommonSet} but no matching print found. Available sets:`, prints.map(p => p.set));
+                                }
+                            }
+                        } else {
+                            if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
+                                console.log(`[Dedup Debug] ${cardName}: No most common set found (setCodeCounts empty)`);
+                            }
+                        }
+                    } else {
+                        if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
+                            console.log(`[Dedup Debug] ${cardName}: setCodeCounts.size = 0, no archetypes matched filters`);
+                        }
+                    }
+                } else {
+                    if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
+                        console.log(`[Dedup Debug] ${cardName}: No coverage data or no filters active (coverage: ${!!coverageData}, filters: ${selectedMainPokemons.length > 0 || selectedArchetypes.length > 0 || selectedMetaFilters.length > 0})`);
+                    }
+                }
+                
+                // No coverage data or no matching print - use standard priority
+                // Prefer: Common/Uncommon from newest set
+                const setOrder = {
+                    // 2026 Sets (newest first)
+                    'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
+                    'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
+                    // 2024-2025 Sets
+                    'SCR': 104, 'SFA': 103, 'TWM': 102, 'TEF': 101, 'PAF': 100, 'PAR': 99,
+                    'MEW': 98, 'OBF': 97, 'PAL': 96, 'SVI': 95, 'SVE': 94, 'SVP': 93,
+                    // 2023 Sets
+                    'CRZ': 92, 'SIR': 91, 'LOR': 90, 'PGO': 89,
+                    // 2022 Sets
+                    'ASR': 88, 'BRS': 87, 'FST': 86, 'CEL': 85, 'EVS': 84, 'CRE': 83,
+                    // 2021 Sets
+                    'BST': 82, 'TM': 81, 'SHF': 80, 'VIV': 79, 'CPA': 78,
+                    // 2020 Sets
+                    'DAA': 77, 'RCL': 76, 'SSH': 75, 'SP': 74, 'CEC': 73
+                };
+                
+                const rarityOrder = {
+                    'Common': 1,
+                    'Uncommon': 2,
+                    'Rare': 3,
+                    'Holo Rare': 4,
+                    'Ultra Rare': 5,
+                    'Secret Rare': 6,
+                    'Hyper Rare': 7,
+                    'Special Rare': 8,
+                    'Illustration Rare': 9,
+                    'Promo': 10
+                };
+                
+                // Sort prints by priority
+                const sortedPrints = prints.sort((a, b) => {
+                    const rarityA = rarityOrder[a.rarity] || 99;
+                    const rarityB = rarityOrder[b.rarity] || 99;
+                    
+                    // First priority: lowest rarity (Common/Uncommon preferred)
+                    if (rarityA !== rarityB) {
+                        return rarityA - rarityB;
+                    }
+                    
+                    // Second priority: newest set
+                    const setA = setOrder[a.set] || 0;
+                    const setB = setOrder[b.set] || 0;
+                    if (setA !== setB) {
+                        return setB - setA; // Higher number = newer
+                    }
+                    
+                    // Third priority: set number (lower first)
+                    const numA = parseInt((a.number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    const numB = parseInt((b.number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    return numA - numB;
+                });
+                
+                if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
+                    console.log(`[Dedup Debug] ${cardName}: Using fallback - selected ${sortedPrints[0].set} ${sortedPrints[0].rarity}`);
+                }
+                selectedCards.push(sortedPrints[0]);
+            });
+            
+            // Replace array content with deduplicated cards
+            cards.length = 0;
+            cards.push(...selectedCards);
+            
+            const uniqueCardNames = cardsByName.size;
+            const totalPrintsRemoved = uniqueCardNames - selectedCards.length;
+            console.log(`[Cards Tab] Deduplicated: ${uniqueCardNames} unique cards (removed ${totalPrintsRemoved} duplicate prints)`);
+        }
+        
+        function sortCardsDatabase(cards) {
+            /**
+             * Sort cards based on the selected sort order from dropdown
+             * Options: "set" (default), "deck" (like deck overview), "coverage"
+             */
+            const sortOrderSelect = document.getElementById('cardSortOrder');
+            const sortOrder = sortOrderSelect ? sortOrderSelect.value : 'set';
+            
+            console.log(`[Cards Tab] Sorting cards by: ${sortOrder}`);
+            
+            if (sortOrder === 'set') {
+                // Sort by SET CODE (alphabetically), then SET NUMBER (numerically)
+                cards.sort((a, b) => {
+                    const setCodeA = a.set || '';
+                    const setCodeB = b.set || '';
+                    
+                    // First by set code
+                    if (setCodeA !== setCodeB) {
+                        return setCodeA.localeCompare(setCodeB);
+                    }
+                    
+                    // Then by set number (extract numeric part)
+                    const setNumA = parseInt((a.number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    const setNumB = parseInt((b.number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    if (setNumA !== setNumB) {
+                        return setNumA - setNumB;
+                    }
+                    
+                    // Finally by name
+                    return (a.name || '').localeCompare(b.name || '');
+                });
+            } else if (sortOrder === 'deck') {
+                // Sort like deck overview: by type/element/evolution
+                // Use the existing sortCardsByType logic but adapted for allCardsData structure
+                
+                const elementOrder = {
+                    'G': 1,  // Grass
+                    'R': 2,  // Fire
+                    'W': 3,  // Water
+                    'L': 4,  // Lightning
+                    'P': 5,  // Psychic
+                    'F': 6,  // Fighting
+                    'D': 7,  // Darkness
+                    'M': 8,  // Metal
+                    'N': 9,  // Dragon
+                    'C': 10  // Colorless
+                };
+                
+                const typeOrder = {
+                    'Pokemon': 1,
+                    'Supporter': 2,
+                    'Item': 3,
+                    'Tool': 4,
+                    'Stadium': 5,
+                    'Special Energy': 6,
+                    'Energy': 7
+                };
+                
+                cards.sort((a, b) => {
+                    const typeA = a.type || '';
+                    const typeB = b.type || '';
+                    
+                    // Determine category
+                    const isPokemonA = /^[GRWLPFDMNCYDL]/.test(typeA) && !['Item', 'Supporter', 'Stadium', 'Tool', 'Energy'].some(t => typeA.includes(t));
+                    const isPokemonB = /^[GRWLPFDMNCYDL]/.test(typeB) && !['Item', 'Supporter', 'Stadium', 'Tool', 'Energy'].some(t => typeB.includes(t));
+                    
+                    let categoryA, categoryB;
+                    if (isPokemonA) {
+                        categoryA = 'Pokemon';
+                    } else if (typeA.includes('Supporter')) {
+                        categoryA = 'Supporter';
+                    } else if (typeA.includes('Tool')) {
+                        categoryA = 'Tool';
+                    } else if (typeA.includes('Item')) {
+                        categoryA = 'Item';
+                    } else if (typeA.includes('Stadium')) {
+                        categoryA = 'Stadium';
+                    } else if (typeA.includes('Special Energy')) {
+                        categoryA = 'Special Energy';
+                    } else if (typeA.includes('Energy')) {
+                        categoryA = 'Energy';
+                    } else {
+                        categoryA = 'Pokemon'; // Default
+                    }
+                    
+                    if (isPokemonB) {
+                        categoryB = 'Pokemon';
+                    } else if (typeB.includes('Supporter')) {
+                        categoryB = 'Supporter';
+                    } else if (typeB.includes('Tool')) {
+                        categoryB = 'Tool';
+                    } else if (typeB.includes('Item')) {
+                        categoryB = 'Item';
+                    } else if (typeB.includes('Stadium')) {
+                        categoryB = 'Stadium';
+                    } else if (typeB.includes('Special Energy')) {
+                        categoryB = 'Special Energy';
+                    } else if (typeB.includes('Energy')) {
+                        categoryB = 'Energy';
+                    } else {
+                        categoryB = 'Pokemon'; // Default
+                    }
+                    
+                    const orderA = typeOrder[categoryA] || 99;
+                    const orderB = typeOrder[categoryB] || 99;
+                    
+                    // Sort by category first
+                    if (orderA !== orderB) {
+                        return orderA - orderB;
+                    }
+                    
+                    // For Pokemon: sort by element
+                    if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
+                        const elementA = typeA.charAt(0);
+                        const elementB = typeB.charAt(0);
+                        const elemOrderA = elementOrder[elementA] || 99;
+                        const elemOrderB = elementOrder[elementB] || 99;
+                        
+                        if (elemOrderA !== elemOrderB) {
+                            return elemOrderA - elemOrderB;
+                        }
+                    }
+                    
+                    // Finally by name
+                    return (a.name || '').localeCompare(b.name || '');
+                });
+            } else if (sortOrder === 'coverage') {
+                // Sort by deck coverage (highest first)
+                cards.sort((a, b) => {
+                    const coverageA = calculateDynamicCoverage(a.name.toLowerCase()).percentage;
+                    const coverageB = calculateDynamicCoverage(b.name.toLowerCase()).percentage;
+                    
+                    // Sort by coverage descending
+                    if (coverageB !== coverageA) {
+                        return coverageB - coverageA;
+                    }
+                    
+                    // Then by name
+                    return (a.name || '').localeCompare(b.name || '');
+                });
+            }
         }
         
         function renderCardDatabase(cards) {
@@ -6324,12 +7151,31 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            resultsInfo.textContent = `${cards.length.toLocaleString()} Karten gefunden`;
+            // Calculate pagination
+            let cardsToShow, totalPages, startIndex, endIndex;
             
+            if (showAllCards) {
+                cardsToShow = cards;
+                totalPages = 1;
+                startIndex = 0;
+                endIndex = cards.length;
+                resultsInfo.textContent = `${cards.length.toLocaleString()} Karten gefunden (Alle angezeigt)`;
+            } else {
+                totalPages = Math.ceil(cards.length / cardsPerPage);
+                startIndex = (currentCardsPage - 1) * cardsPerPage;
+                endIndex = Math.min(startIndex + cardsPerPage, cards.length);
+                cardsToShow = cards.slice(startIndex, endIndex);
+                resultsInfo.textContent = `${cards.length.toLocaleString()} Karten gefunden (Seite ${currentCardsPage} von ${totalPages})`;
+            }
+            
+            // Create pagination controls
+            const paginationTop = createPaginationControls(cards.length, totalPages);
+            
+            // Create card grid
             const grid = document.createElement('div');
             grid.className = 'card-database-grid';
             
-            cards.forEach(card => {
+            cardsToShow.forEach(card => {
                 // Skip cards with missing essential data
                 if (!card.name || !card.image_url) {
                     return;
@@ -6340,8 +7186,168 @@ const BASE_PATH = './data/';
                 }
             });
             
+            // Create pagination controls for bottom
+            const paginationBottom = createPaginationControls(cards.length, totalPages);
+            
+            // Clear and add all elements
             content.innerHTML = '';
+            content.appendChild(paginationTop);
             content.appendChild(grid);
+            content.appendChild(paginationBottom);
+            
+            // Scroll to top of cards section
+            document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function createPaginationControls(totalCards, totalPages) {
+            const container = document.createElement('div');
+            container.style.cssText = 'display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 20px; flex-wrap: wrap;';
+            
+            // Left side: Copy button
+            const leftControls = document.createElement('div');
+            leftControls.style.cssText = 'display: flex; gap: 10px;';
+            
+            const copyBtn = document.createElement('button');
+            copyBtn.textContent = '📋 Kopieren';
+            copyBtn.title = 'Alle gefilterten Kartennamen in Zwischenablage kopieren';
+            copyBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #27ae60; background: white; color: #27ae60; border-radius: 8px; cursor: pointer; font-weight: 600;';
+            copyBtn.onclick = () => {
+                const cardNames = window.filteredCardsData.map(c => c.name).join('\n');
+                navigator.clipboard.writeText(cardNames).then(() => {
+                    copyBtn.textContent = '✅ Kopiert!';
+                    copyBtn.style.background = '#27ae60';
+                    copyBtn.style.color = 'white';
+                    setTimeout(() => {
+                        copyBtn.textContent = '📋 Kopieren';
+                        copyBtn.style.background = 'white';
+                        copyBtn.style.color = '#27ae60';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Copy failed:', err);
+                    alert('Kopieren fehlgeschlagen');
+                });
+            };
+            leftControls.appendChild(copyBtn);
+            
+            // Center: Pagination controls
+            const centerControls = document.createElement('div');
+            centerControls.style.cssText = 'display: flex; gap: 10px; align-items: center;';
+            
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '◄ Zurück';
+            prevBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; font-weight: 600;';
+            prevBtn.disabled = currentCardsPage === 1 || showAllCards;
+            if (prevBtn.disabled) {
+                prevBtn.style.opacity = '0.5';
+                prevBtn.style.cursor = 'not-allowed';
+            }
+            prevBtn.onclick = () => {
+                if (currentCardsPage > 1 && !showAllCards) {
+                    currentCardsPage--;
+                    renderCardDatabase(window.filteredCardsData);
+                }
+            };
+            
+            // Page numbers
+            const pageInfo = document.createElement('div');
+            pageInfo.style.cssText = 'display: flex; gap: 5px; align-items: center;';
+            
+            // Show first page, current page area, and last page
+            const pagesToShow = [];
+            
+            // Always show first page
+            pagesToShow.push(1);
+            
+            // Show pages around current page
+            const range = 2; // Show 2 pages before and after current
+            for (let i = Math.max(2, currentCardsPage - range); i <= Math.min(totalPages - 1, currentCardsPage + range); i++) {
+                if (!pagesToShow.includes(i)) {
+                    pagesToShow.push(i);
+                }
+            }
+            
+            // Always show last page
+            if (totalPages > 1 && !pagesToShow.includes(totalPages)) {
+                pagesToShow.push(totalPages);
+            }
+            
+            // Sort pages
+            pagesToShow.sort((a, b) => a - b);
+            
+            // Create page buttons with ellipsis
+            for (let i = 0; i < pagesToShow.length; i++) {
+                const page = pagesToShow[i];
+                
+                // Add ellipsis if there's a gap
+                if (i > 0 && page - pagesToShow[i-1] > 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.cssText = 'padding: 0 5px; color: #7f8c8d;';
+                    pageInfo.appendChild(ellipsis);
+                }
+                
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = page;
+                pageBtn.style.cssText = 'padding: 8px 12px; font-size: 14px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; min-width: 40px; font-weight: 600;';
+                
+                if (page === currentCardsPage) {
+                    pageBtn.style.background = '#3498db';
+                    pageBtn.style.color = 'white';
+                }
+                
+                pageBtn.onclick = () => {
+                    currentCardsPage = page;
+                    renderCardDatabase(window.filteredCardsData);
+                };
+                
+                pageInfo.appendChild(pageBtn);
+            }
+            
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Weiter ►';
+            nextBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; font-weight: 600;';
+            nextBtn.disabled = currentCardsPage === totalPages || showAllCards;
+            if (nextBtn.disabled) {
+                nextBtn.style.opacity = '0.5';
+                nextBtn.style.cursor = 'not-allowed';
+            }
+            nextBtn.onclick = () => {
+                if (currentCardsPage < totalPages && !showAllCards) {
+                    currentCardsPage++;
+                    renderCardDatabase(window.filteredCardsData);
+                }
+            };
+            
+            centerControls.appendChild(prevBtn);
+            if (!showAllCards) {
+                centerControls.appendChild(pageInfo);
+            }
+            centerControls.appendChild(nextBtn);
+            
+            // Right side: Show All / Show Paginated button
+            const rightControls = document.createElement('div');
+            rightControls.style.cssText = 'display: flex; gap: 10px;';
+            
+            const toggleShowAllBtn = document.createElement('button');
+            toggleShowAllBtn.textContent = showAllCards ? '📄 Seitenweise' : '📑 Alle anzeigen';
+            toggleShowAllBtn.title = showAllCards ? 'Zurück zur Seitenansicht' : 'Alle Karten auf einmal anzeigen';
+            toggleShowAllBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #9b59b6; background: white; color: #9b59b6; border-radius: 8px; cursor: pointer; font-weight: 600;';
+            toggleShowAllBtn.onclick = () => {
+                showAllCards = !showAllCards;
+                if (!showAllCards) {
+                    currentCardsPage = 1; // Reset to first page
+                }
+                renderCardDatabase(window.filteredCardsData);
+            };
+            rightControls.appendChild(toggleShowAllBtn);
+            
+            container.appendChild(leftControls);
+            container.appendChild(centerControls);
+            container.appendChild(rightControls);
+            
+            return container;
         }
         
         function createCardDatabaseItem(card) {
@@ -6376,38 +7382,43 @@ const BASE_PATH = './data/';
                 }
             }
             
-            // Deck Coverage display
+            // Calculate DYNAMIC Deck Coverage based on active filters
             let coverageDisplay = '';
-            if (window.cardDeckCoverageMap) {
-                const cardNameLower = card.name.toLowerCase();
-                const coverageStats = window.cardDeckCoverageMap.get(cardNameLower);
+            const coverageStats = calculateDynamicCoverage(card.name);
+            
+            if (coverageStats && coverageStats.totalDecks > 0) {
+                const percentage = coverageStats.percentage || 0;
+                const deckCount = coverageStats.deckCount || 0;
+                const archetypeCount = coverageStats.archetypeCount || 0;
                 
-                if (coverageStats && window.totalUniqueDecks) {
-                    const percentage = coverageStats.percentage || 0;
-                    const deckCount = coverageStats.deckCount || 0;
-                    const archetypeCount = coverageStats.archetypes.size || 0;
-                    
-                    let coverageColor = '#95a5a6'; // Gray for < 50%
-                    let coverageIcon = '📊';
-                    
-                    if (percentage >= 99.5) {
-                        coverageColor = '#e74c3c'; // Red for 100%
-                        coverageIcon = '💯';
-                    } else if (percentage >= 90) {
-                        coverageColor = '#e67e22'; // Orange for ≥90%
-                        coverageIcon = '🔥';
-                    } else if (percentage >= 70) {
-                        coverageColor = '#f39c12'; // Yellow for ≥70%
-                        coverageIcon = '⭐';
-                    } else if (percentage >= 50) {
-                        coverageColor = '#3498db'; // Blue for ≥50%
-                        coverageIcon = '📈';
-                    }
-                    
-                    coverageDisplay = `<div class="card-database-coverage" style="margin-top: 8px; padding: 8px; background: ${coverageColor}; color: white; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px;" title="${deckCount} Decks / ${archetypeCount} Archetypes">
-                        ${coverageIcon} ${percentage.toFixed(1)}% Deck Coverage
-                    </div>`;
+                // Get max count from cardDeckCoverageMap
+                const cardNameLower = card.name.toLowerCase();
+                const cardCoverageData = window.cardDeckCoverageMap ? window.cardDeckCoverageMap.get(cardNameLower) : null;
+                const maxCount = cardCoverageData ? (cardCoverageData.maxCountOverall || 0) : 0;
+                
+                let coverageColor = '#95a5a6'; // Gray for < 50%
+                let coverageIcon = '📊';
+                
+                if (percentage >= 99.5) {
+                    coverageColor = '#e74c3c'; // Red for 100%
+                    coverageIcon = '💯';
+                } else if (percentage >= 90) {
+                    coverageColor = '#e67e22'; // Orange for ≥90%
+                    coverageIcon = '🔥';
+                } else if (percentage >= 70) {
+                    coverageColor = '#f39c12'; // Yellow for ≥70%
+                    coverageIcon = '⭐';
+                } else if (percentage >= 50) {
+                    coverageColor = '#3498db'; // Blue for ≥50%
+                    coverageIcon = '📈';
                 }
+                
+                // Format the display with max count
+                const maxCountText = maxCount > 0 ? ` • Max: ${maxCount}x` : '';
+                
+                coverageDisplay = `<div class="card-database-coverage" style="margin-top: 8px; padding: 8px; background: ${coverageColor}; color: white; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px;" title="${deckCount} Decks / ${archetypeCount} Archetypes${maxCount > 0 ? ' • Max: ' + maxCount + 'x copies per deck' : ''}">
+                    ${coverageIcon} ${percentage.toFixed(1)}% Coverage${maxCountText}
+                </div>`;
             }
             
             item.innerHTML = `
@@ -6452,6 +7463,292 @@ const BASE_PATH = './data/';
             if (r.includes('shiny ultra')) return 'rarity-shiny-ultra';
             if (r.includes('promo')) return 'rarity-promo';
             return '';
+        }
+
+        function parseTournamentDate(dateStr) {
+            /**
+             * Parse tournament date string (e.g., "13th February 2026") to Date object
+             * Returns null if parsing fails
+             */
+            if (!dateStr || dateStr.trim() === '') return null;
+            
+            try {
+                // Remove ordinal suffixes (st, nd, rd, th)
+                const cleaned = dateStr.replace(/(\d+)(st|nd|rd|th)/, '$1');
+                const parsed = new Date(cleaned);
+                return isNaN(parsed.getTime()) ? null : parsed;
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        function getCardReleaseDate(cardStats) {
+            /**
+             * Get the release date of a card based on its set code
+             * Returns Date object or null if not determinable
+             */
+            if (!cardStats || !cardStats.setCode) {
+                // If no set code, try to find earliest tournament date
+                if (cardStats && cardStats.tournamentDates && cardStats.tournamentDates.size > 0) {
+                    const dates = Array.from(cardStats.tournamentDates)
+                        .map(d => parseTournamentDate(d))
+                        .filter(d => d !== null);
+                    if (dates.length > 0) {
+                        return new Date(Math.min(...dates));
+                    }
+                }
+                return null;
+            }
+            
+            const setCode = cardStats.setCode;
+            const releaseDateStr = window.SET_RELEASE_DATES[setCode] || window.SET_RELEASE_DATES['DEFAULT'];
+            return new Date(releaseDateStr);
+        }
+
+        function calculateDynamicCoverage(cardName) {
+            if (!window.cardDeckCoverageMap || !window.archetypeDeckCounts) {
+                return null;
+            }
+            
+            const cardNameLower = cardName.toLowerCase();
+            const cardStats = window.cardDeckCoverageMap.get(cardNameLower);
+            
+            if (!cardStats) {
+                return null;
+            }
+            
+            // Get card release date for temporal filtering
+            const cardReleaseDate = getCardReleaseDate(cardStats);
+            
+            // Get active filters
+            const selectedMainPokemons = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value);
+            const selectedArchetypes = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
+            const selectedMetaFilters = Array.from(document.querySelectorAll('#metaFormatOptions input:checked')).filter(cb => cb.value.startsWith('meta:')).map(cb => cb.value.replace('meta:', ''));
+            
+            // Get ALL actually existing archetype keys from the data
+            const allExistingArchetypeKeys = Array.from(window.archetypeDeckCounts.keys());
+            
+            let decksFilteredByDate = 0; // Track how many decks were filtered out by date
+            
+            // If no filters are active, use all decks from the global calculation
+            if (selectedMainPokemons.length === 0 && selectedArchetypes.length === 0 && selectedMetaFilters.length === 0) {
+                let totalDecksWithCard = 0;
+                cardStats.archetypesWithCard.forEach((entry, archetypeKey) => {
+                    const deckCount = typeof entry === 'number' ? entry : (entry.deckCount || 0);
+                    const tournamentDate = parseTournamentDate(entry.tournamentDate || null);
+                    const [meta, archetype] = archetypeKey.split('|');
+                    
+                    // Temporal filtering: Only filter if we have BOTH a card release date AND a tournament date
+                    // City League data often has NO tournament_date, so we treat it as "current meta"
+                    if (cardReleaseDate && tournamentDate) {
+                        if (tournamentDate < cardReleaseDate) {
+                            decksFilteredByDate++;
+                            return; // Skip this entry
+                        }
+                    }
+                    // If no tournament date (like City League), we DON'T filter - assume it's current
+                    
+                    totalDecksWithCard += deckCount;
+                });
+                
+                if (window.totalUniqueDecks) {
+                    const percentage = (totalDecksWithCard / window.totalUniqueDecks) * 100;
+                    return {
+                        percentage: percentage,
+                        deckCount: totalDecksWithCard,
+                        archetypeCount: cardStats.archetypes.size,
+                        totalDecks: window.totalUniqueDecks
+                    };
+                }
+                return null;
+            }
+            
+            // Filter archetype keys based on active filters
+            const filteredArchetypeKeys = allExistingArchetypeKeys.filter(archetypeKey => {
+                // archetypeKey format: "meta|archetype"
+                const [meta, archetype] = archetypeKey.split('|');
+                
+                // Check meta filter
+                if (selectedMetaFilters.length > 0) {
+                    if (!selectedMetaFilters.includes(meta)) {
+                        return false;
+                    }
+                }
+                
+                // Check archetype filter
+                if (selectedArchetypes.length > 0) {
+                    if (!selectedArchetypes.includes(archetype)) {
+                        return false;
+                    }
+                }
+                
+                // Check main pokemon filter
+                if (selectedMainPokemons.length > 0) {
+                    const mainPokemon = archetype.split(' ')[0].trim();
+                    if (!selectedMainPokemons.includes(mainPokemon)) {
+                        return false;
+                    }
+                    
+                    // IMPORTANT: When filtering by Main Pokemon, only count archetypes
+                    // that have AT LEAST ONE card matching the main pokemon name
+                    // This filters out incomplete data where the main pokemon cards weren't scraped
+                    const hasMainPokemonCard = Array.from(window.cardDeckCoverageMap.keys()).some(cardName => {
+                        const cardStats = window.cardDeckCoverageMap.get(cardName);
+                        // Check if this card name contains the main pokemon name
+                        // AND this archetype has this card
+                        return cardName.includes(mainPokemon.toLowerCase()) && 
+                               cardStats.archetypesWithCard.has(archetypeKey);
+                    });
+                    
+                    if (!hasMainPokemonCard) {
+                        if (cardNameLower === 'hawlucha' && archetypeKey.includes('Dragapult')) {
+                            console.log(`[Coverage Debug Hawlucha Filter] Excluding archetype ${archetypeKey} - no card with '${mainPokemon.toLowerCase()}' in name found`);
+                        }
+                        return false; // Skip archetypes with no main pokemon cards
+                    } else {
+                        if (cardNameLower === 'hawlucha' && archetypeKey.includes('Dragapult')) {
+                            console.log(`[Coverage Debug Hawlucha Filter] Including archetype ${archetypeKey} - has main pokemon card`);
+                        }
+                    }
+                }
+                
+                return true;
+            });
+            
+            if (filteredArchetypeKeys.length === 0) {
+                return null;
+            }
+            
+            if (cardNameLower === 'hawlucha') {
+                const dragapultKeys = filteredArchetypeKeys.filter(k => k.includes('Dragapult'));
+                console.log(`[Coverage Debug Hawlucha Filter] Filtered Dragapult Archetypes (${dragapultKeys.length}): ${dragapultKeys.slice(0, 5).join(', ')}${dragapultKeys.length > 5 ? ` ... and ${dragapultKeys.length - 5} more` : ''}`);
+                
+                const hawluchaKeys = Array.from(cardStats.archetypesWithCard.keys());
+                const hawluchaDragKeys = hawluchaKeys.filter(k => k.includes('Dragapult'));
+                console.log(`[Coverage Debug Hawlucha Filter] Hawlucha's Dragapult Archetypes (${hawluchaDragKeys.length}): ${hawluchaDragKeys.join(', ')}`);
+                
+                // Check which Hawlucha archetypes are NOT in filtered keys
+                const missingKeys = hawluchaKeys.filter(k => !filteredArchetypeKeys.includes(k) && k.includes('Dragapult'));
+                if (missingKeys.length > 0) {
+                    console.log(`[Coverage Debug Hawlucha Filter] Hawlucha archetypes MISSING from filtered list (${missingKeys.length}): ${missingKeys.join(', ')}`);
+                } else {
+                    console.log(`[Coverage Debug Hawlucha Filter] All Hawlucha Dragapult archetypes are in filtered list!`);
+                }
+            }
+            
+            // Count total decks in filtered archetypes
+            let totalFilteredDecks = 0;
+            filteredArchetypeKeys.forEach(archetypeKey => {
+                const archetypeData = window.archetypeDeckCounts.get(archetypeKey);
+                const deckCount = typeof archetypeData === 'number' ? archetypeData : (archetypeData.totalDecks || 0);
+                
+                // DON'T apply temporal filtering here - we want to count ALL decks in the archetype
+                // regardless of when the card was released. Temporal filtering is only for decksWithCard.
+                totalFilteredDecks += deckCount;
+            });
+            
+            // Count how many decks have this card
+            let decksWithCard = 0;
+            const matchingArchetypes = new Set();
+            
+            if (cardNameLower === 'hawlucha') {
+                console.log(`[Coverage Debug Hawlucha Count] Starting deck count. cardStats.archetypesWithCard has ${cardStats.archetypesWithCard.size} entries`);
+                const releaseDate = getCardReleaseDate(cardStats);
+                console.log(`[Coverage Debug Hawlucha Count] Card release date: ${releaseDate ? releaseDate.toISOString().split('T')[0] : 'NULL'}, setCode: ${cardStats.setCode}`);
+            }
+            
+            let hawluchaDebugInfo = [];
+            
+            cardStats.archetypesWithCard.forEach((entry, archetypeKey) => {
+                const isIncluded = filteredArchetypeKeys.includes(archetypeKey);
+                
+                if (cardNameLower === 'hawlucha' && archetypeKey.includes('Dragapult')) {
+                    const deckCount = typeof entry === 'number' ? entry : (entry.deckCount || 0);
+                    hawluchaDebugInfo.push(`${archetypeKey}:included=${isIncluded},deckCount=${deckCount}`);
+                }
+                
+                if (isIncluded) {
+                    const deckCount = typeof entry === 'number' ? entry : (entry.deckCount || 0);
+                    const tournamentDate = parseTournamentDate(entry.tournamentDate || null);
+                    
+                    // Get the release date for THIS specific entry's set code, not the global one
+                    const entrySetCode = (typeof entry === 'object' && entry.setCode) ? entry.setCode : cardStats.setCode;
+                    const entryReleaseDateStr = window.SET_RELEASE_DATES[entrySetCode] || window.SET_RELEASE_DATES['DEFAULT'];
+                    const entryReleaseDate = entrySetCode ? new Date(entryReleaseDateStr) : cardReleaseDate;
+                    
+                    if (cardNameLower === 'hawlucha') {
+                        console.log(`[Coverage Debug Hawlucha Count] → ${archetypeKey}: deckCount=${deckCount}, tournamentDate=${entry.tournamentDate || 'N/A'}, entrySetCode=${entrySetCode}, releaseDate=${entryReleaseDate ? entryReleaseDate.toISOString().split('T')[0] : 'NULL'}`);
+                    }
+                    
+                    // Temporal filtering: Use the entry's specific set code release date
+                    // Only filter if we have BOTH a card release date AND a tournament date
+                    // City League data often has NO tournament_date, so we treat it as "current meta"
+                    if (entryReleaseDate && tournamentDate) {
+                        if (tournamentDate < entryReleaseDate) {
+                            if (cardNameLower === 'hawlucha') {
+                                console.log(`[Coverage Debug Hawlucha Count] ✗ FILTERED OUT: ${archetypeKey} (tournament ${tournamentDate.toISOString().split('T')[0]} < release ${entryReleaseDate.toISOString().split('T')[0]})`);
+                            }
+                            return; // Skip this entry
+                        }
+                    }
+                    // If no tournament date, we DON'T filter - assume it's current
+                    
+                    decksWithCard += deckCount;
+                    // Extract archetype from archetypeKey (format: meta|archetype)
+                    const archetype = archetypeKey.split('|')[1];
+                    if (archetype) {
+                        matchingArchetypes.add(archetype);
+                    }
+                }
+            });
+            
+            if (cardNameLower === 'hawlucha' && hawluchaDebugInfo.length > 0) {
+                console.log(`[Coverage Debug Hawlucha Count] Dragapult archetypes checked: ${hawluchaDebugInfo.join(' | ')}`);
+            }
+            
+            const percentage = totalFilteredDecks > 0 ? (decksWithCard / totalFilteredDecks) * 100 : 0;
+            
+            if (cardNameLower === 'hawlucha') {
+                console.log(`[Coverage Debug Hawlucha] Final: ${decksWithCard}/${totalFilteredDecks} = ${percentage.toFixed(1)}%, matching archetypes: ${matchingArchetypes.size}, filtered keys: ${filteredArchetypeKeys.length}`);
+            }
+            
+            // Enhanced debug logging with temporal filtering info
+            if (cardNameLower.includes('dragapult') || cardNameLower.includes('poké pad') || cardNameLower.includes('poke pad')) {
+                let debugMsg = `[Coverage Debug] ${cardName}: ${decksWithCard}/${totalFilteredDecks} decks = ${percentage.toFixed(1)}% | Archetypes: ${matchingArchetypes.size}/${filteredArchetypeKeys.length}`;
+                
+                if (cardReleaseDate) {
+                    debugMsg += ` | Release: ${cardReleaseDate.toISOString().split('T')[0]}`;
+                }
+                if (decksFilteredByDate > 0) {
+                    debugMsg += ` | Filtered (before release): ${decksFilteredByDate}`;
+                }
+                
+                const samples = Array.from(cardStats.archetypesWithCard.keys()).filter(k => filteredArchetypeKeys.includes(k)).slice(0, 3).map(k => {
+                    const entry = cardStats.archetypesWithCard.get(k);
+                    const count = typeof entry === 'number' ? entry : (entry.deckCount || 0);
+                    const archetypeData = window.archetypeDeckCounts.get(k);
+                    const total = typeof archetypeData === 'number' ? archetypeData : (archetypeData.totalDecks || 0);
+                    const dateStr = entry.tournamentDate || 'N/A';
+                    return `${k}(${count}/${total}, ${dateStr})`;
+                }).join(', ');
+                
+                debugMsg += ` | Samples: ${samples}`;
+                
+                // Show which archetypes DON'T have this card
+                const archetypesWithoutCard = filteredArchetypeKeys.filter(k => !cardStats.archetypesWithCard.has(k));
+                if (archetypesWithoutCard.length > 0) {
+                    debugMsg += ` | Missing from: ${archetypesWithoutCard.slice(0, 3).join(', ')}`;
+                }
+                
+                console.log(debugMsg);
+            }
+            
+            return {
+                percentage: percentage,
+                deckCount: decksWithCard,
+                archetypeCount: matchingArchetypes.size,
+                totalDecks: totalFilteredDecks
+            };
         }
         
         function openRaritySwitcherFromDB(cardName, set, number) {
@@ -6716,6 +8013,36 @@ const BASE_PATH = './data/';
             const modal = document.getElementById('raritySwitcherModal');
             modal.classList.remove('show');
             currentRaritySwitcherCard = null;
+        }
+
+        function showImageView(imageUrl, cardName) {
+            const modal = document.getElementById('fullscreenCardModal');
+            const img = document.getElementById('fullscreenCardImage');
+            
+            if (!modal || !img) {
+                console.error('Fullscreen modal elements not found');
+                return;
+            }
+            
+            img.src = imageUrl;
+            img.alt = cardName;
+            modal.classList.add('active');
+            
+            // Close on ESC key
+            const escapeHandler = (e) => {
+                if (e.key === 'Escape') {
+                    closeFullscreenCard();
+                    document.removeEventListener('keydown', escapeHandler);
+                }
+            };
+            document.addEventListener('keydown', escapeHandler);
+        }
+
+        function closeFullscreenCard() {
+            const modal = document.getElementById('fullscreenCardModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
         }
 
         function openCardmarket(cardmarketUrl, cardName) {

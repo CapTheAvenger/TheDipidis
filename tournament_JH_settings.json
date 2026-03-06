@@ -1,17 +1,17 @@
-{
-    "max_tournaments": 20,
-    "delay_between_tournaments": 1,
-    "start_tournament_id": 391,
-    "output_file": "tournament_cards_data.csv",
-    "tournament_types": [
-        "Regional",
-        "Special Event",
-        "LAIC",
-        "EUIC",
-        "NAIC",
-        "Worlds",
-        "International"
-    ],
-    "append_mode": false,
-    "_comment": "Scrapes individual deck lists from all tournaments (Regional, Special Event, LAIC, EUIC, NAIC, Worlds, International). Scraper stoppt bei Tournament ID 391. max_tournaments=100 ensures we get ~87 matching tournaments after filtering. append_mode=false for full rebuild. WICHTIG: Scraping dauert deutlich länger (ca. 1-2 Minuten pro Turnier)."
+﻿{
+    "max_tournaments":  250,
+    "delay_between_tournaments":  0,
+    "start_tournament_id":  391,
+    "output_file":  "tournament_cards_data.csv",
+    "tournament_types":  [
+                             "Regional",
+                             "Special Event",
+                             "LAIC",
+                             "EUIC",
+                             "NAIC",
+                             "Worlds",
+                             "International"
+                         ],
+    "append_mode":  true,
+    "_comment":  "FULL RE-SCRAPE: append_mode=false will OVERWRITE existing data. Scrapes individual deck lists from all tournaments. max_tournaments=150 for complete coverage. delay=0 for speed (Limitless can handle it). WICHTIG: Scraping dauert deutlich länger (ca. 0.3-0.5 Minuten pro Turnier)."
 }

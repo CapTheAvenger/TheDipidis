@@ -157,7 +157,8 @@
                         <div id="cityLeagueMyDeckVisual" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🎴 Dein Deck</h3>
-                                <div style="display: flex; gap: 10px;">
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button class="btn btn-info" onclick="openDeckCompare('cityLeague')" style="background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('cityLeague')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('cityLeague')">🖼️ Grid View</button>
                                 </div>
@@ -356,7 +357,8 @@
                         <div id="currentMetaMyDeckVisual" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🎴 Dein Deck</h3>
-                                <div style="display: flex; gap: 10px;">
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button class="btn btn-info" onclick="openDeckCompare('currentMeta')" style="background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('currentMeta')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('currentMeta')">🖼️ Grid View</button>
                                 </div>
@@ -492,7 +494,8 @@
                         <div id="pastMetaMyDeckVisual" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🎴 Dein Deck</h3>
-                                <div style="display: flex; gap: 10px;">
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button class="btn btn-info" onclick="openDeckCompare('pastMeta')" style="background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('pastMeta')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('pastMeta')">🖼️ Grid View</button>
                                 </div>
@@ -690,7 +693,7 @@
         </div>
     </div>
     
-        <script src="js/app.js?v=20260306-3"></script>
+        <script src="js/app.js?v=20260306-4"></script>
     
     <!-- Image View Modal -->
     <div id="imageViewModal" class="image-view-modal" onclick="if(event.target === this) closeImageView()">
@@ -730,6 +733,28 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=20260306-3"></script>
+    <!-- Deck Compare Modal -->
+    <div id="deckCompareModal" class="rarity-switcher-modal" onclick="if(event.target === this) closeDeckCompare()" style="z-index: 10000;">
+        <div class="rarity-switcher-modal-content" style="max-width: 900px; width: 95%;">
+            <span class="rarity-switcher-close" onclick="closeDeckCompare()">✕</span>
+            <h2>🔄 Deck Vergleich</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <p style="color: #666; margin-bottom: 10px;">Füge deine alte Deckliste ein (Pokémon TCG Live Format):</p>
+                <textarea id="oldDeckListInput" placeholder="Pokémon: 16&#10;2 Lunatone ASC 105&#10;3 Solrock ASC 106&#10;...&#10;&#10;Trainer: 33&#10;...&#10;&#10;Energy: 11&#10;..." style="width: 100%; height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 0.9em;"></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn btn-primary" onclick="compareDeckLists()" style="flex: 1;">🔍 Vergleichen</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('oldDeckListInput').value = ''">🗑️ Clear</button>
+            </div>
+            
+            <div id="deckCompareResult" style="display: none;">
+                <!-- Result will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js?v=20260306-4"></script>
 </body>
 </html>

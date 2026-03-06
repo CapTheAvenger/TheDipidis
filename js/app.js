@@ -9365,3 +9365,135 @@ const BASE_PATH = './data/';
                 filterSelect.onchange = applyCurrentMetaFilter;
             }
         });
+
+        // ==================== DECK COMPARISON FEATURE ====================
+
+        let currentDeckSource = null;
+
+        function openDeckCompare(source) {
+            currentDeckSource = source;
+            document.getElementById('deckCompareModal').style.display = 'flex';
+            document.getElementById('oldDeckListInput').value = '';
+            document.getElementById('deckCompareResult').style.display = 'none';
+        }
+
+        function closeDeckCompare() {
+            document.getElementById('deckCompareModal').style.display = 'none';
+            currentDeckSource = null;
+        }
+
+        function parseDeckList(text) {
+            const deck = {};
+            const lines = text.split('\n');
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+                if (line.includes('Pokémon:') || line.includes('Trainer:') || line.includes('Energy:')) continue;
+                
+                // Format: "2 Lunatone ASC 105" or "2 Lunatone ASC 105 PH"
+                const match = line.match(/^(\d+)\s+(.+?)(?:\s+[A-Z]{2,}[\s\d]+.*)?$/);
+                if (match) {
+                    const count = parseInt(match[1]);
+                    let cardName = match[2].trim();
+                    
+                    // Remove set code and number from card name if still included
+                    cardName = cardName.replace(/\s+[A-Z]{2,}\s+\d+.*$/, '').trim();
+                    
+                    deck[cardName] = (deck[cardName] || 0) + count;
+                }
+            }
+            
+            return deck;
+        }
+
+        function compareDeckLists() {
+            const oldDeckText = document.getElementById('oldDeckListInput').value.trim();
+            
+            if (!oldDeckText) {
+                alert('⚠️ Bitte füge eine alte Deckliste ein!');
+                return;
+            }
+            
+            if (!currentDeckSource) {
+                alert('⚠️ Fehler: Keine Deck-Quelle ausgewählt!');
+                return;
+            }
+            
+            // Parse old deck
+            const oldDeck = parseDeckList(oldDeckText);
+            
+            // Get current deck
+            const currentDeck = {};
+            const deckMap = currentDeckSource === 'cityLeague' ? window.cityLeagueDeck :
+                           currentDeckSource === 'currentMeta' ? window.currentMetaDeck :
+                           window.pastMetaDeck;
+            
+            if (!deckMap) {
+                alert('⚠️ Fehler: Aktuelles Deck ist leer!');
+                return;
+            }
+            
+            // Convert current deck to card name -> count map
+            for (const [key, count] of Object.entries(deckMap)) {
+                const cardName = key.split('_SET_')[0];
+                currentDeck[cardName] = (currentDeck[cardName] || 0) + count;
+            }
+            
+            // Find cards removed (in old but not in new, or less in new)
+            const cardsOut = [];
+            for (const [cardName, oldCount] of Object.entries(oldDeck)) {
+                const newCount = currentDeck[cardName] || 0;
+                if (newCount < oldCount) {
+                    cardsOut.push({ name: cardName, count: oldCount - newCount });
+                }
+            }
+            
+            // Find cards added (in new but not in old, or more in new)
+            const cardsIn = [];
+            for (const [cardName, newCount] of Object.entries(currentDeck)) {
+                const oldCount = oldDeck[cardName] || 0;
+                if (newCount > oldCount) {
+                    cardsIn.push({ name: cardName, count: newCount - oldCount });
+                }
+            }
+            
+            // Generate result HTML
+            let html = '<div style="margin-top: 20px;">';
+            
+            if (cardsOut.length === 0 && cardsIn.length === 0) {
+                html += '<p style="text-align: center; color: #999;">✅ Die Decks sind identisch!</p>';
+            } else {
+                if (cardsOut.length > 0) {
+                    html += '<div style="margin-bottom: 20px;">';
+                    html += '<h3 style="color: #dc3545;">🔴 Karten die rausgehen:</h3>';
+                    html += '<ul style="list-style: none; padding: 0;">';
+                    cardsOut.forEach(card => {
+                        html += `<li style="padding: 5px; background: #ffe6e6; margin: 5px 0; border-radius: 5px;">
+                                    <strong>−${card.count}x</strong> ${card.name}
+                                 </li>`;
+                    });
+                    html += '</ul>';
+                    html += '</div>';
+                }
+                
+                if (cardsIn.length > 0) {
+                    html += '<div>';
+                    html += '<h3 style="color: #28a745;">🟢 Karten die hinzukommen:</h3>';
+                    html += '<ul style="list-style: none; padding: 0;">';
+                    cardsIn.forEach(card => {
+                        html += `<li style="padding: 5px; background: #e6ffe6; margin: 5px 0; border-radius: 5px;">
+                                    <strong>+${card.count}x</strong> ${card.name}
+                                 </li>`;
+                    });
+                    html += '</ul>';
+                    html += '</div>';
+                }
+            }
+            
+            html += '</div>';
+            
+            const resultDiv = document.getElementById('deckCompareResult');
+            resultDiv.innerHTML = html;
+            resultDiv.style.display = 'block';
+        }

@@ -1848,6 +1848,10 @@ const BASE_PATH = './data/';
                 ? (archetypeMatches.reduce((sum, row) => sum + parseInt(row.placement || 0), 0) / archetypeMatches.length).toFixed(2)
                 : '-';
             
+            // Store total decks count globally for use in card displays
+            window.currentCityLeagueTotalDecks = parseInt(decksCount) || 0;
+            console.log(`Stored global deck count: ${window.currentCityLeagueTotalDecks}`);
+            
             // Update stats
             document.getElementById('cityLeagueStatCards').textContent = `${uniqueCards} / ${totalCardsInDeck}`;
             document.getElementById('cityLeagueStatDecksUsed').textContent = decksCount;
@@ -2011,7 +2015,8 @@ const BASE_PATH = './data/';
                 
                 // Get deck statistics
                 const decksWithCard = parseInt(card.deck_count || 0);
-                const totalDecksInArchetype = parseInt(card.total_decks_in_archetype || 1);
+                // Use global total decks count instead of per-date total_decks_in_archetype
+                const totalDecksInArchetype = window.currentCityLeagueTotalDecks || parseInt(card.total_decks_in_archetype || 1);
                 const totalCount = parseInt(card.total_count || 0);
                 const avgCountOverall = totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype).toFixed(2) : '0.00';
                 const avgCountInUsedDecks = decksWithCard > 0 ? (totalCount / decksWithCard).toFixed(2) : '0.00';
@@ -2338,7 +2343,8 @@ const BASE_PATH = './data/';
                 
                 // Get deck statistics: how many decks use this card vs total decks in archetype
                 const decksWithCard = parseInt(card.deck_count || 0);  // Number of decks that contain this card
-                const totalDecksInArchetype = parseInt(card.total_decks_in_archetype || 1);
+                // Use global total decks count instead of per-date total_decks_in_archetype
+                const totalDecksInArchetype = window.currentCityLeagueTotalDecks || parseInt(card.total_decks_in_archetype || 1);
                 
                 // Get average count statistics
                 const totalCount = parseInt(card.total_count || 0);

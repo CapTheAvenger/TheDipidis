@@ -1,14 +1,14 @@
-# 🎴 HausiTCG - Pokemon TCG Analysis System
+# 🎴 TheDipidis - Pokemon TCG Analysis System
 
 Komplettes Pokemon TCG Scraping & Analysis System mit interaktiver Web-Oberfläche
 
 ## 🌐 Live Demo
-**GitHub Pages:** https://captheavenger.github.io/HausiTCG/
+**GitHub Pages:** https://captheavenger.github.io/TheDipidis/
 
 ## 📁 Projekt-Struktur
 
 ```
-HausiTCG/
+TheDipidis/
 ├── 🐍 Python Scraper (21 Scripts)
 │   ├── all_cards_scraper.py           # Alle Karten (Limitless TCG)
 │   ├── japanese_cards_scraper.py      # Japanische Karten
@@ -250,8 +250,8 @@ Alle Settings-Dateien im Root-Verzeichnis:
 
 ### Projekt klonen
 ```bash
-git clone https://github.com/CapTheAvenger/HausiTCG.git
-cd HausiTCG
+git clone https://github.com/CapTheAvenger/TheDipidis.git
+cd TheDipidis
 ```
 
 ### Virtual Environment
@@ -300,5 +300,5 @@ Dieses Projekt ist für den privaten Gebrauch. Alle Daten werden von öffentlich
 ---
 
 **Version:** 2.0  
-**Letztes Update:** Februar 2026  
-**Repository:** https://github.com/CapTheAvenger/HausiTCG
+**Letztes Update:** März 2026  
+**Repository:** https://github.com/CapTheAvenger/TheDipidis

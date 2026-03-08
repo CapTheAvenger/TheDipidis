@@ -9504,11 +9504,12 @@ const BASE_PATH = './data/';
             
             const currentDeck = [];
             for (const [key, count] of Object.entries(deckMap)) {
-                // Key format: "CardName_SET_SETCODE_NUMBER" or just "CardName"
-                const parts = key.split('_SET_');
-                if (parts.length === 2) {
-                    const cardName = parts[0];
-                    const [setCode, setNumber] = parts[1].split('_');
+                // Key format: "CardName (SET NUMBER)" or just "CardName"
+                const match = key.match(/^(.+?)\s+\(([A-Z0-9]+)\s+(\d+)\)$/);
+                if (match) {
+                    const cardName = match[1];
+                    const setCode = match[2];
+                    const setNumber = match[3];
                     currentDeck.push({
                         count: count,
                         name: cardName,

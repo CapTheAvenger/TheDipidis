@@ -9671,17 +9671,17 @@ const BASE_PATH = './data/';
                     return 'Tool';
                 }
                 
-                // 4. Check for Supporters (Trainer with 's or specific supporter names)
+                // 4. Check for Stadiums BEFORE Supporters (to catch "Team Rocket's Watchtower" etc.)
+                if (['Stadium', 'Tower', 'Watchtower', 'Path', 'Temple', 'Forest', 'Mountain', 
+                     'Beach', 'Town', 'Hall', 'Garden', 'Ruins', 'Lake', 'Crater'].some(t => name.includes(t))) {
+                    return 'Stadium';
+                }
+                
+                // 5. Check for Supporters (Trainer with 's or specific supporter names)
                 if (name.includes("'s ") || 
                     ['Professor', 'Arven', 'Iono', 'Judge', 'Cynthia', 'Marnie', 'Irida', 'Carmine', 
                      'Penny', 'Colress', 'Raihan', 'Tulip', 'Grusha', 'Larry', 'Kieran'].some(t => name.includes(t))) {
                     return 'Supporter';
-                }
-                
-                // 5. Check for Stadiums (specific patterns)
-                if (['Stadium', 'Tower', 'Watchtower', 'Path', 'Temple', 'Forest', 'Mountain', 
-                     'Beach', 'Town', 'Hall', 'Garden', 'Ruins', 'Lake', 'Crater'].some(t => name.includes(t))) {
-                    return 'Stadium';
                 }
                 
                 // 6. Check for Items (Trainer with specific keywords - NOT Tools)
@@ -9697,7 +9697,7 @@ const BASE_PATH = './data/';
                     return 'Pokémon';
                 }
                 
-                // 6. Default: If none of the above, assume it's a Pokémon
+                // 8. Default: If none of the above, assume it's a Pokémon
                 // (Since most single-word or simple names are Pokémon: Pikachu, Charizard, Riolu, etc.)
                 return 'Pokémon';
             }

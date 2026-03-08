@@ -9760,11 +9760,11 @@
                 html += `<div style="display: flex; justify-content: space-around; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                             <div style="text-align: center;">
                                 <div style="font-size: 2em; font-weight: bold; color: #dc3545;">−${totalRemoved}</div>
-                                <div style="color: #666;">Karten raus</div>
+                                <div style="color: #666;">Cards out</div>
                             </div>
                             <div style="text-align: center;">
                                 <div style="font-size: 2em; font-weight: bold; color: #28a745;">+${totalAdded}</div>
-                                <div style="color: #666;">Karten rein</div>
+                                <div style="color: #666;">Cards in</div>
                             </div>
                          </div>`;
                 

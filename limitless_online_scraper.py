@@ -1174,7 +1174,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             </div>
             <div class="stat-card">
                 <h3>🎴 Meta</h3>
-                <div class="value" style="font-size: 1.8em; margin: 10px 0;">SVI-PFL</div>
+                <div class="value" style="font-size: 1.8em; margin: 10px 0;">SVI-{settings.get('set', 'PFL')}</div>
                 <p style="font-size: 0.9em;">Current Format Legality</p>
             </div>
         </div>

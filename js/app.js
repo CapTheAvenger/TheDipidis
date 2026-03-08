@@ -9543,8 +9543,10 @@ const BASE_PATH = './data/';
             // Track which cards in current deck have been matched
             const currentDeckMatched = new Array(currentDeck.length).fill(false);
             
-            // Find cards that changed (removed or count decreased)
-            const cardsOut = [];
+            // Collect all card changes with old/new count
+            const changedCards = [];
+            
+            // Process old deck cards
             for (const oldCard of oldDeck) {
                 // Try to find matching card in current deck
                 let bestMatch = null;
@@ -9578,68 +9580,46 @@ const BASE_PATH = './data/';
                 if (bestMatch) {
                     // Card found in new deck
                     currentDeckMatched[bestMatchIndex] = true;
-                    const countDiff = oldCard.count - bestMatch.count;
-                    if (countDiff > 0) {
-                        // Count decreased
-                        cardsOut.push({
-                            name: oldCard.name,
-                            set: oldCard.set,
-                            number: oldCard.number,
-                            count: countDiff
+                    if (oldCard.count !== bestMatch.count) {
+                        // Count changed
+                        changedCards.push({
+                            name: bestMatch.name, // Use new deck's name/set for display
+                            set: bestMatch.set,
+                            number: bestMatch.number,
+                            oldCount: oldCard.count,
+                            newCount: bestMatch.count,
+                            changeType: bestMatch.count > oldCard.count ? 'increased' : 'decreased'
                         });
-                    } else if (countDiff < 0) {
-                        // Count increased (will be handled in cardsIn)
                     }
-                    // If countDiff === 0, card is same count (no change)
                 } else {
-                    // Card not found in new deck at all
-                    cardsOut.push({
+                    // Card not found in new deck = removed
+                    changedCards.push({
                         name: oldCard.name,
                         set: oldCard.set,
                         number: oldCard.number,
-                        count: oldCard.count
+                        oldCount: oldCard.count,
+                        newCount: 0,
+                        changeType: 'removed'
                     });
                 }
             }
             
-            // Find cards that were added or increased
-            const cardsIn = [];
+            // Find new cards (not matched in old deck)
             for (let i = 0; i < currentDeck.length; i++) {
-                const newCard = currentDeck[i];
-                
-                if (currentDeckMatched[i]) {
-                    // This card was already matched, check if count increased
-                    const oldCard = oldDeck.find(old => {
-                        if (old.set === newCard.set && old.number === newCard.number) return true;
-                        if (old.set && old.number && newCard.set && newCard.number &&
-                            areSameInternationalPrint(old.set, old.number, newCard.set, newCard.number)) return true;
-                        return false;
-                    });
-                    
-                    if (oldCard) {
-                        const countDiff = newCard.count - oldCard.count;
-                        if (countDiff > 0) {
-                            cardsIn.push({
-                                name: newCard.name,
-                                set: newCard.set,
-                                number: newCard.number,
-                                count: countDiff
-                            });
-                        }
-                    }
-                } else {
-                    // Card not matched = completely new
-                    cardsIn.push({
+                if (!currentDeckMatched[i]) {
+                    const newCard = currentDeck[i];
+                    changedCards.push({
                         name: newCard.name,
                         set: newCard.set,
                         number: newCard.number,
-                        count: newCard.count
+                        oldCount: 0,
+                        newCount: newCard.count,
+                        changeType: 'added'
                     });
                 }
             }
             
-            console.log('[deckCompare] Cards out:', cardsOut);
-            console.log('[deckCompare] Cards in:', cardsIn);
+            console.log('[deckCompare] Changed cards:', changedCards);
             
             // Get card images from database
             const allCardsDb = window.allCardsDatabase || [];
@@ -9667,88 +9647,73 @@ const BASE_PATH = './data/';
                 return null;
             }
             
-            // Generate result HTML with images
+            // Generate result HTML with all cards in one view
             let html = '<div style="margin-top: 20px;">';
             
-            if (cardsOut.length === 0 && cardsIn.length === 0) {
+            if (changedCards.length === 0) {
                 html += '<p style="text-align: center; color: #999; font-size: 1.2em;">✅ Die Decks sind identisch!</p>';
             } else {
                 // Summary
-                const totalOut = cardsOut.reduce((sum, c) => sum + c.count, 0);
-                const totalIn = cardsIn.reduce((sum, c) => sum + c.count, 0);
+                const totalRemoved = changedCards.filter(c => c.changeType === 'removed' || c.changeType === 'decreased')
+                    .reduce((sum, c) => sum + (c.changeType === 'removed' ? c.oldCount : c.oldCount - c.newCount), 0);
+                const totalAdded = changedCards.filter(c => c.changeType === 'added' || c.changeType === 'increased')
+                    .reduce((sum, c) => sum + (c.changeType === 'added' ? c.newCount : c.newCount - c.oldCount), 0);
                 
                 html += `<div style="display: flex; justify-content: space-around; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                             <div style="text-align: center;">
-                                <div style="font-size: 2em; font-weight: bold; color: #dc3545;">−${totalOut}</div>
+                                <div style="font-size: 2em; font-weight: bold; color: #dc3545;">−${totalRemoved}</div>
                                 <div style="color: #666;">Karten raus</div>
                             </div>
                             <div style="text-align: center;">
-                                <div style="font-size: 2em; font-weight: bold; color: #28a745;">+${totalIn}</div>
+                                <div style="font-size: 2em; font-weight: bold; color: #28a745;">+${totalAdded}</div>
                                 <div style="color: #666;">Karten rein</div>
                             </div>
                          </div>`;
                 
-                // Cards going out
-                if (cardsOut.length > 0) {
-                    html += '<div style="margin-bottom: 30px;">';
-                    html += `<h3 style="color: #dc3545; margin-bottom: 15px;">🔴 Karten die rausgehen (${cardsOut.length} verschiedene):</h3>`;
-                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">';
-                    
-                    cardsOut.forEach(card => {
-                        const imageUrl = getCardImage(card.set, card.number, card.name);
-                        html += `<div style="position: relative; border: 2px solid #dc3545; border-radius: 8px; overflow: hidden; background: #ffe6e6;">`;
-                        
-                        if (imageUrl) {
-                            html += `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.display='none'">`;
-                        } else {
-                            html += `<div style="width: 100%; aspect-ratio: 2.5/3.5; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">No Image</div>`;
-                        }
-                        
-                        html += `<div style="position: absolute; top: 5px; left: 5px; background: #dc3545; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                                    −${card.count}
-                                 </div>`;
-                        
-                        html += `<div style="padding: 5px; font-size: 0.75em; text-align: center; background: white;">
-                                    <div style="font-weight: 600; margin-bottom: 2px;">${card.name}</div>
-                                    <div style="color: #999; font-size: 0.9em;">${card.set} ${card.number}</div>
-                                 </div>`;
-                        
-                        html += `</div>`;
-                    });
-                    
-                    html += '</div></div>';
-                }
+                // All changed cards in one grid
+                html += `<h3 style="margin-bottom: 15px;">🔄 Alle Änderungen (${changedCards.length} Karten):</h3>`;
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">';
                 
-                // Cards coming in
-                if (cardsIn.length > 0) {
-                    html += '<div>';
-                    html += `<h3 style="color: #28a745; margin-bottom: 15px;">🟢 Karten die hinzukommen (${cardsIn.length} verschiedene):</h3>`;
-                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">';
+                changedCards.forEach(card => {
+                    const imageUrl = getCardImage(card.set, card.number, card.name);
                     
-                    cardsIn.forEach(card => {
-                        const imageUrl = getCardImage(card.set, card.number, card.name);
-                        html += `<div style="position: relative; border: 2px solid #28a745; border-radius: 8px; overflow: hidden; background: #e6ffe6;">`;
-                        
-                        if (imageUrl) {
-                            html += `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.display='none'">`;
-                        } else {
-                            html += `<div style="width: 100%; aspect-ratio: 2.5/3.5; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">No Image</div>`;
-                        }
-                        
-                        html += `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                                    +${card.count}
-                                 </div>`;
-                        
-                        html += `<div style="padding: 5px; font-size: 0.75em; text-align: center; background: white;">
-                                    <div style="font-weight: 600; margin-bottom: 2px;">${card.name}</div>
-                                    <div style="color: #999; font-size: 0.9em;">${card.set} ${card.number}</div>
-                                 </div>`;
-                        
-                        html += `</div>`;
-                    });
+                    // Determine badge style and text based on change type
+                    let badgeStyle, badgeText;
+                    if (card.changeType === 'added') {
+                        badgeStyle = 'background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000;';
+                        badgeText = `new → ${card.newCount}`;
+                    } else if (card.changeType === 'removed') {
+                        badgeStyle = 'background: #dc3545; color: white;';
+                        badgeText = `${card.oldCount} → out`;
+                    } else if (card.changeType === 'increased') {
+                        badgeStyle = 'background: #28a745; color: white;';
+                        badgeText = `${card.oldCount} → ${card.newCount}`;
+                    } else { // decreased
+                        badgeStyle = 'background: #dc3545; color: white;';
+                        badgeText = `${card.oldCount} → ${card.newCount}`;
+                    }
                     
-                    html += '</div></div>';
-                }
+                    html += `<div style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white;">`;
+                    
+                    if (imageUrl) {
+                        html += `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.display='none'">`;
+                    } else {
+                        html += `<div style="width: 100%; aspect-ratio: 2.5/3.5; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">No Image</div>`;
+                    }
+                    
+                    html += `<div style="position: absolute; top: 5px; left: 5px; ${badgeStyle} border-radius: 12px; padding: 4px 8px; font-weight: bold; font-size: 0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">
+                                ${badgeText}
+                             </div>`;
+                    
+                    html += `<div style="padding: 5px; font-size: 0.75em; text-align: center; background: white;">
+                                <div style="font-weight: 600; margin-bottom: 2px;">${card.name}</div>
+                                <div style="color: #999; font-size: 0.9em;">${card.set} ${card.number}</div>
+                             </div>`;
+                    
+                    html += `</div>`;
+                });
+                
+                html += '</div>';
             }
             
             html += '</div>';

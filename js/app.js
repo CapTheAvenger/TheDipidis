@@ -9543,10 +9543,10 @@ const BASE_PATH = './data/';
             // Track which cards in current deck have been matched
             const currentDeckMatched = new Array(currentDeck.length).fill(false);
             
-            // Collect all card changes with old/new count
-            const changedCards = [];
+            // Collect ALL cards to display (current deck + removed cards)
+            const allDisplayCards = [];
             
-            // Process old deck cards
+            // Process old deck cards to find matches and changes
             for (const oldCard of oldDeck) {
                 // Try to find matching card in current deck
                 let bestMatch = null;
@@ -9578,22 +9578,11 @@ const BASE_PATH = './data/';
                 }
                 
                 if (bestMatch) {
-                    // Card found in new deck
+                    // Card found in new deck - mark as matched
                     currentDeckMatched[bestMatchIndex] = true;
-                    if (oldCard.count !== bestMatch.count) {
-                        // Count changed
-                        changedCards.push({
-                            name: bestMatch.name, // Use new deck's name/set for display
-                            set: bestMatch.set,
-                            number: bestMatch.number,
-                            oldCount: oldCard.count,
-                            newCount: bestMatch.count,
-                            changeType: bestMatch.count > oldCard.count ? 'increased' : 'decreased'
-                        });
-                    }
                 } else {
-                    // Card not found in new deck = removed
-                    changedCards.push({
+                    // Card not found in new deck = removed (will be displayed)
+                    allDisplayCards.push({
                         name: oldCard.name,
                         set: oldCard.set,
                         number: oldCard.number,
@@ -9604,22 +9593,42 @@ const BASE_PATH = './data/';
                 }
             }
             
-            // Find new cards (not matched in old deck)
+            // Add ALL current deck cards (matched or new)
             for (let i = 0; i < currentDeck.length; i++) {
-                if (!currentDeckMatched[i]) {
-                    const newCard = currentDeck[i];
-                    changedCards.push({
-                        name: newCard.name,
-                        set: newCard.set,
-                        number: newCard.number,
-                        oldCount: 0,
-                        newCount: newCard.count,
-                        changeType: 'added'
-                    });
+                const newCard = currentDeck[i];
+                
+                // Find if this card existed in old deck
+                let oldCard = null;
+                for (const old of oldDeck) {
+                    if (old.set === newCard.set && old.number === newCard.number) {
+                        oldCard = old;
+                        break;
+                    }
+                    if (old.set && old.number && newCard.set && newCard.number &&
+                        areSameInternationalPrint(old.set, old.number, newCard.set, newCard.number)) {
+                        oldCard = old;
+                        break;
+                    }
                 }
+                
+                const oldCount = oldCard ? oldCard.count : 0;
+                let changeType;
+                if (oldCount === 0) changeType = 'added';
+                else if (oldCount === newCard.count) changeType = 'unchanged';
+                else if (newCard.count > oldCount) changeType = 'increased';
+                else changeType = 'decreased';
+                
+                allDisplayCards.push({
+                    name: newCard.name,
+                    set: newCard.set,
+                    number: newCard.number,
+                    oldCount: oldCount,
+                    newCount: newCard.count,
+                    changeType: changeType
+                });
             }
             
-            console.log('[deckCompare] Changed cards:', changedCards);
+            console.log('[deckCompare] All display cards:', allDisplayCards);
             
             // Get card images from database
             const allCardsDb = window.allCardsDatabase || [];
@@ -9647,16 +9656,57 @@ const BASE_PATH = './data/';
                 return null;
             }
             
+            // Helper function to determine card type for sorting
+            function getCardType(name) {
+                // Check if it's a basic energy
+                if (isBasicEnergy(name)) return 'Energy';
+                
+                // Check for special energies
+                if (name.includes('Energy') && !isBasicEnergy(name)) return 'Energy';
+                
+                // Check for Pokémon (contains 'ex', 'GX', 'V', or common Pokémon patterns)
+                const isPokemon = /\s(ex|GX|V|VMAX|VSTAR)$/i.test(name) || 
+                                 /^[A-Z]/.test(name) && !name.includes("'s ") && 
+                                 !['Ultra Ball', 'Poké Pad', 'Rare Candy', 'Switch', 'Boss', 'Arven', 'Professor'].some(t => name.includes(t));
+                
+                if (isPokemon) return 'Pokémon';
+                
+                // Check for Supporters (usually contains 's or specific supporter names)
+                if (name.includes("'s ") || 
+                    ['Professor', 'Boss', 'Arven', 'Iono', 'Judge', 'N', 'Cynthia', 'Marnie', 'Irida'].some(t => name.includes(t))) {
+                    return 'Supporter';
+                }
+                
+                // Check for Stadiums
+                if (['Stadium', 'Tower', 'Path', 'Temple', 'Forest', 'Mountain', 'Beach', 'Town'].some(t => name.includes(t))) {
+                    return 'Stadium';
+                }
+                
+                // Default to Item
+                return 'Item';
+            }
+            
+            // Sort cards by type
+            const typeOrder = {'Pokémon': 0, 'Supporter': 1, 'Item': 2, 'Stadium': 3, 'Energy': 4};
+            allDisplayCards.sort((a, b) => {
+                const typeA = getCardType(a.name);
+                const typeB = getCardType(b.name);
+                const orderDiff = typeOrder[typeA] - typeOrder[typeB];
+                if (orderDiff !== 0) return orderDiff;
+                // Within same type, sort by name
+                return a.name.localeCompare(b.name);
+            });
+            
             // Generate result HTML with all cards in one view
             let html = '<div style="margin-top: 20px;">';
             
-            if (changedCards.length === 0) {
+            if (allDisplayCards.length === 0) {
                 html += '<p style="text-align: center; color: #999; font-size: 1.2em;">✅ Die Decks sind identisch!</p>';
             } else {
                 // Summary
-                const totalRemoved = changedCards.filter(c => c.changeType === 'removed' || c.changeType === 'decreased')
+                const totalRemoved = allDisplayCards.filter(c => c.changeType === 'removed' || c.changeType === 'decreased')
                     .reduce((sum, c) => sum + (c.changeType === 'removed' ? c.oldCount : c.oldCount - c.newCount), 0);
-                const totalAdded = changedCards.filter(c => c.changeType === 'added' || c.changeType === 'increased')
+                const totalAdded = allDisplayCards.filter(c => c.changeType === 'added' || c.changeType === 'increased')
                     .reduce((sum, c) => sum + (c.changeType === 'added' ? c.newCount : c.newCount - c.oldCount), 0);
                 
                 html += `<div style="display: flex; justify-content: space-around; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
@@ -9670,50 +9720,75 @@ const BASE_PATH = './data/';
                             </div>
                          </div>`;
                 
-                // All changed cards in one grid
-                html += `<h3 style="margin-bottom: 15px;">🔄 Alle Änderungen (${changedCards.length} Karten):</h3>`;
-                html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">';
-                
-                changedCards.forEach(card => {
-                    const imageUrl = getCardImage(card.set, card.number, card.name);
-                    
-                    // Determine badge style and text based on change type
-                    let badgeStyle, badgeText;
-                    if (card.changeType === 'added') {
-                        badgeStyle = 'background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000;';
-                        badgeText = `new → ${card.newCount}`;
-                    } else if (card.changeType === 'removed') {
-                        badgeStyle = 'background: #dc3545; color: white;';
-                        badgeText = `${card.oldCount} → out`;
-                    } else if (card.changeType === 'increased') {
-                        badgeStyle = 'background: #28a745; color: white;';
-                        badgeText = `${card.oldCount} → ${card.newCount}`;
-                    } else { // decreased
-                        badgeStyle = 'background: #dc3545; color: white;';
-                        badgeText = `${card.oldCount} → ${card.newCount}`;
-                    }
-                    
-                    html += `<div style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white;">`;
-                    
-                    if (imageUrl) {
-                        html += `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.display='none'">`;
-                    } else {
-                        html += `<div style="width: 100%; aspect-ratio: 2.5/3.5; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">No Image</div>`;
-                    }
-                    
-                    html += `<div style="position: absolute; top: 5px; left: 5px; ${badgeStyle} border-radius: 12px; padding: 4px 8px; font-weight: bold; font-size: 0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">
-                                ${badgeText}
-                             </div>`;
-                    
-                    html += `<div style="padding: 5px; font-size: 0.75em; text-align: center; background: white;">
-                                <div style="font-weight: 600; margin-bottom: 2px;">${card.name}</div>
-                                <div style="color: #999; font-size: 0.9em;">${card.set} ${card.number}</div>
-                             </div>`;
-                    
-                    html += `</div>`;
+                // Group cards by type for display
+                const cardsByType = {};
+                allDisplayCards.forEach(card => {
+                    const type = getCardType(card.name);
+                    if (!cardsByType[type]) cardsByType[type] = [];
+                    cardsByType[type].push(card);
                 });
                 
-                html += '</div>';
+                // Display each type group
+                const typeIcons = {'Pokémon': '🎴', 'Supporter': '👤', 'Item': '⚙️', 'Stadium': '🏟️', 'Energy': '⚡'};
+                const orderedTypes = ['Pokémon', 'Supporter', 'Item', 'Stadium', 'Energy'];
+                
+                orderedTypes.forEach(type => {
+                    if (!cardsByType[type] || cardsByType[type].length === 0) return;
+                    
+                    html += `<h3 style="margin: 20px 0 15px 0; color: #333;">${typeIcons[type]} ${type} (${cardsByType[type].length} Karten)</h3>`;
+                    html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">';
+                    
+                    cardsByType[type].forEach(card => {
+                        const imageUrl = getCardImage(card.set, card.number, card.name);
+                        
+                        // Determine badge style and text based on change type
+                        let badgeHTML = '';
+                        if (card.changeType !== 'unchanged') {
+                            let badgeStyle, badgeText;
+                            if (card.changeType === 'added') {
+                                badgeStyle = 'background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000;';
+                                badgeText = `new → ${card.newCount}`;
+                            } else if (card.changeType === 'removed') {
+                                badgeStyle = 'background: #dc3545; color: white;';
+                                badgeText = `${card.oldCount} → out`;
+                            } else if (card.changeType === 'increased') {
+                                badgeStyle = 'background: #28a745; color: white;';
+                                badgeText = `${card.oldCount} → ${card.newCount}`;
+                            } else { // decreased
+                                badgeStyle = 'background: #dc3545; color: white;';
+                                badgeText = `${card.oldCount} → ${card.newCount}`;
+                            }
+                            
+                            badgeHTML = `<div style="position: absolute; top: 5px; left: 5px; ${badgeStyle} border-radius: 12px; padding: 4px 8px; font-weight: bold; font-size: 0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); white-space: nowrap;">
+                                            ${badgeText}
+                                         </div>`;
+                        } else {
+                            // Unchanged cards - show count in neutral badge
+                            badgeHTML = `<div style="position: absolute; top: 5px; left: 5px; background: #6c757d; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                            ${card.newCount}
+                                         </div>`;
+                        }
+                        
+                        html += `<div style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white;">`;
+                        
+                        if (imageUrl) {
+                            html += `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.display='none'">`;
+                        } else {
+                            html += `<div style="width: 100%; aspect-ratio: 2.5/3.5; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">No Image</div>`;
+                        }
+                        
+                        html += badgeHTML;
+                        
+                        html += `<div style="padding: 5px; font-size: 0.75em; text-align: center; background: white;">
+                                    <div style="font-weight: 600; margin-bottom: 2px;">${card.name}</div>
+                                    <div style="color: #999; font-size: 0.9em;">${card.set} ${card.number}</div>
+                                 </div>`;
+                        
+                        html += `</div>`;
+                    });
+                    
+                    html += '</div>'; // Close grid
+                });
             }
             
             html += '</div>';

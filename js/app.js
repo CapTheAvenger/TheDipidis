@@ -486,10 +486,10 @@ const BASE_PATH = './data/';
             const intPrintCards = printRefs.map(ref => {
                 const key = `${ref.set}-${ref.number}`;
                 return cardsBySetNumberMap[key];
-            }).filter(c => c && c.image_url && c.image_url.trim() !== ''); // Remove nulls and cards without images
+            }).filter(c => c); // Remove nulls only (keep cards even without images for matching purposes)
             
             console.log(`[getInternationalPrintsForCard] Found ${intPrintCards.length} international prints for ${baseCard.name} (${set} ${number}):`, 
-                intPrintCards.map(c => `${c.set} ${c.number} (${c.rarity || 'NO RARITY'})`).join(', ')
+                intPrintCards.map(c => `${c.set} ${c.number} (${c.rarity || 'NO RARITY'}) ${c.image_url ? '✓' : '✗'}`).join(', ')
             );
             
             return intPrintCards;
@@ -9417,10 +9417,21 @@ const BASE_PATH = './data/';
             
             // Get all international prints for card 1
             const prints1 = getInternationalPrintsForCard(set1, number1);
-            if (!prints1 || prints1.length === 0) return false;
             
             // Check if card 2 is in the international prints of card 1
-            return prints1.some(p => p.set === set2 && p.number === number2);
+            if (prints1 && prints1.length > 0) {
+                const match = prints1.some(p => p.set === set2 && p.number === number2);
+                if (match) return true;
+            }
+            
+            // Also check in reverse direction (card 2 -> card 1)
+            const prints2 = getInternationalPrintsForCard(set2, number2);
+            if (prints2 && prints2.length > 0) {
+                const match = prints2.some(p => p.set === set1 && p.number === number1);
+                if (match) return true;
+            }
+            
+            return false;
         }
 
         function compareDeckLists() {
@@ -9583,8 +9594,25 @@ const BASE_PATH = './data/';
             
             function getCardImage(set, number, name) {
                 if (!set || !number) return null;
-                const card = allCardsDb.find(c => c.set === set && c.number === number);
-                return card ? card.image_url : null;
+                
+                // Try exact match first
+                let card = allCardsDb.find(c => c.set === set && c.number === number);
+                if (card && card.image_url && card.image_url.trim() !== '') {
+                    return card.image_url;
+                }
+                
+                // If no image, try international prints
+                const intPrints = getInternationalPrintsForCard(set, number);
+                if (intPrints && intPrints.length > 0) {
+                    for (const print of intPrints) {
+                        if (print.image_url && print.image_url.trim() !== '') {
+                            console.log(`[deckCompare] Using international print image for ${name}: ${print.set} ${print.number} instead of ${set} ${number}`);
+                            return print.image_url;
+                        }
+                    }
+                }
+                
+                return null;
             }
             
             // Generate result HTML with images

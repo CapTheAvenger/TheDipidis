@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="de">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
@@ -14,8 +14,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎴 Pokemon TCG Analyse</h1>
-            <p>Dein Portal für Meta-Analysen und Deckbuilding</p>
+            <h1>🎴 Pokemon TCG Analysis</h1>
+            <p>Your Hub for Meta Analysis & Deckbuilding</p>
         </div>
         
         <div class="tabs-container">
@@ -26,6 +26,7 @@
                 <button class="tab-btn" onclick="switchTab('current-analysis')">📈 Current Meta Deck Analysis</button>
                 <button class="tab-btn" onclick="switchTab('past-meta')">🏆 Past Meta</button>
                 <button class="tab-btn" onclick="switchTab('cards')">🧰 Cards</button>
+                <button class="tab-btn" onclick="switchTab('tutorial')">📖 How to Use</button>
             </div>
             
             <!-- Tab 1: City League Meta -->
@@ -35,7 +36,7 @@
                         <h1>🇯🇵 City League Development</h1>
                     </div>
                     <div id="cityLeagueContent" style="padding: 30px; background: #ffffff;">
-                        <div style="text-align: center; padding: 40px; color: #999;">Lädt...</div>
+                        <div style="text-align: center; padding: 40px; color: #999;">Loading...</div>
                     </div>
                 </div>
             </div>
@@ -51,45 +52,45 @@
                     <div class="controls">
                         <div class="control-group" style="margin-bottom: 20px;">
                             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                                <label style="margin: 0;">📅 Turnier-Zeitraum Filter:</label>
-                                <button onclick="resetCityLeagueDateFilter()" style="padding: 8px 12px; font-size: 1.2em; background: #f0f0f0; color: #333; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; transition: all 0.2s; line-height: 1;" onmouseover="this.style.background='#e0e0e0'" onmouseout="this.style.background='#f0f0f0'" title="Alle Daten anzeigen">🔄</button>
+                                <label style="margin: 0;">📅 Tournament Period Filter:</label>
+                                <button onclick="resetCityLeagueDateFilter()" style="padding: 8px 12px; font-size: 1.2em; background: #f0f0f0; color: #333; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; transition: all 0.2s; line-height: 1;" onmouseover="this.style.background='#e0e0e0'" onmouseout="this.style.background='#f0f0f0'" title="Show All Data">🔄</button>
                             </div>
                             <div class="section-grid-container">
                                 <div>
-                                    <label for="cityLeagueDateFrom" style="font-size: 0.9em; color: #666; display: block; margin-bottom: 5px;">Von:</label>
+                                    <label for="cityLeagueDateFrom" style="font-size: 0.9em; color: #666; display: block; margin-bottom: 5px;">From:</label>
                                     <input type="date" id="cityLeagueDateFrom" onchange="applyCityLeagueDateFilter()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
                                 </div>
                                 <div>
-                                    <label for="cityLeagueDateTo" style="font-size: 0.9em; color: #666; display: block; margin-bottom: 5px;">Bis:</label>
+                                    <label for="cityLeagueDateTo" style="font-size: 0.9em; color: #666; display: block; margin-bottom: 5px;">To:</label>
                                     <input type="date" id="cityLeagueDateTo" onchange="applyCityLeagueDateFilter()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
                                 </div>
                             </div>
                         </div>
                         <div class="control-row">
                             <div class="control-group">
-                                <label for="cityLeagueDeckSearch">🔍 Deck suchen:</label>
-                                <input type="text" id="cityLeagueDeckSearch" placeholder="Deck-Name eingeben..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <label for="cityLeagueDeckSearch">🔍 Search Deck:</label>
+                                <input type="text" id="cityLeagueDeckSearch" placeholder="Enter deck name..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
                             </div>
                             <div class="control-group">
-                                <label for="cityLeagueDeckSelect">🎯 Deck Archetype wählen:</label>
+                                <label for="cityLeagueDeckSelect">🎯 Select Deck Archetype:</label>
                                 <select id="cityLeagueDeckSelect" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
-                                    <option value="">-- Bitte Deck auswählen --</option>
+                                    <option value="">-- Please Select Deck --</option>
                                 </select>
                             </div>
                             <div class="control-group">
-                                <label for="cityLeagueFilterSelect">🦂 Karten Filter:</label>
+                                <label for="cityLeagueFilterSelect">🦂 Card Filter:</label>
                                 <select id="cityLeagueFilterSelect">
-                                    <option value="all">Alle Karten</option>
-                                    <option value="90">Karten in >90% der Decks (Core)</option>
-                                    <option value="70">Karten in >70% der Decks</option>
-                                    <option value="50">Karten in >50% der Decks</option>
+                                    <option value="all">All Cards</option>
+                                    <option value="90">Cards in >90% of Decks (Core)</option>
+                                    <option value="70">Cards in >70% of Decks</option>
+                                    <option value="50">Cards in >50% of Decks</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     
                     <div class="stats-section" id="cityLeagueStatsSection" style="display: none;">
-                        <h2>📊 Deck Statistiken</h2>
+                        <h2>📊 Deck Statistics</h2>
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="label">Cards in Deck (Unique / Total)</div>
@@ -109,12 +110,12 @@
                     <div class="cards-section">
                         <div class="cards-header" style="display: block;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                                <h2 style="margin: 0;">🃏 Karten Übersicht (sortiert)</h2>
-                                <span style="font-size: 1em; color: #666;"><span id="cityLeagueCardCount">0 Karten</span><span id="cityLeagueCardCountSummary" style="margin-left: 8px; font-weight: normal;">/ 0 Total</span></span>
+                                <h2 style="margin: 0;">🃏 Card Overview (Sorted)</h2>
+                                <span style="font-size: 1em; color: #666;"><span id="cityLeagueCardCount">0 Cards</span><span id="cityLeagueCardCountSummary" style="margin-left: 8px; font-weight: normal;">/ 0 Total</span></span>
                             </div>
                             
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
-                                <input type="text" id="cityLeagueOverviewSearch" placeholder="🔍 Karten suchen..." class="card-search-input" oninput="filterOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                <input type="text" id="cityLeagueOverviewSearch" placeholder="🔍 Search cards..." class="card-search-input" oninput="filterOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                                 
                                 <!-- Card Type Filter -->
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #f8f9fa;">
@@ -132,7 +133,7 @@
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                     <button class="btn btn-success" onclick="setOverviewRarityMode('min')" id="overviewRarityMin" style="padding: 8px 14px; font-size: 0.9em; background: #28a745;">⬇️ Low Rarity</button>
                                     <button class="btn btn-danger" onclick="setOverviewRarityMode('max')" id="overviewRarityMax" style="padding: 8px 14px; font-size: 0.9em; background: #dc3545;">⬆️ Max Rarity</button>
-                                    <button class="btn btn-info" onclick="setOverviewRarityMode('all')" id="overviewRarityAll" style="padding: 8px 14px; font-size: 0.9em; background: #17a2b8;">🌍 Alle Prints</button>
+                                    <button class="btn btn-info" onclick="setOverviewRarityMode('all')" id="overviewRarityAll" style="padding: 8px 14px; font-size: 0.9em; background: #17a2b8;">🌍 All Prints</button>
                                 </div>
                                 
                                 <div style="display: flex; gap: 5px;">
@@ -163,29 +164,29 @@
                         </div>
                         
                         <div class="deck-summary">
-                            <h3>Aktuell: <span id="cityLeagueDeckCount" style="font-weight: bold;">0</span> / 60 Karten <span id="cityLeagueDeckCountUnique" style="font-weight: normal; font-size: 0.9em; color: #666;">(0 Unique)</span></h3>
+                            <h3>Current: <span id="cityLeagueDeckCount" style="font-weight: bold;">0</span> / 60 Cards <span id="cityLeagueDeckCountUnique" style="font-weight: normal; font-size: 0.9em; color: #666;">(0 Unique)</span></h3>
                         </div>
                         
-                        <!-- Mein Deck Übersicht -->
+                        <!-- My Deck Overview -->
                         <div id="cityLeagueMyDeckVisual" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                                <h3 style="margin: 0;">🎴 Dein Deck</h3>
+                                <h3 style="margin: 0;">🎴 Your Deck</h3>
                                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                     <button class="btn btn-info" onclick="openDeckCompare('cityLeague')" style="background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('cityLeague')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('cityLeague')">🖼️ Grid View</button>
                                 </div>
                             </div>
-                            <input type="text" id="cityLeagueDeckGridSearch" placeholder="🔍 Karten im Deck suchen..." class="card-search-input" oninput="filterDeckGrid('cityLeague')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <input type="text" id="cityLeagueDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input" oninput="filterDeckGrid('cityLeague')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div class="deck-grid" id="cityLeagueMyDeckGrid">
-                                <p style="text-align: center; color: #666; padding: 40px;">Erstelle ein Deck mit den Buttons oben oder füge Karten manuell hinzu...</p>
+                                <p style="text-align: center; color: #666; padding: 40px;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
                         </div>
                         
-                        <!-- Karten hinzufügen Bereich -->
+                        <!-- Add Card Section -->
                         <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                            <h3 style="margin-top: 0;">➕ Karte hinzufügen</h3>
-                            <input type="text" id="cityLeagueDeckCardSearch" placeholder="🔍 Kartennamen suchen..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <h3 style="margin-top: 0;">➕ Add Card</h3>
+                            <input type="text" id="cityLeagueDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div id="cityLeagueDeckSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;"></div>
                         </div>
                     </div>
@@ -199,7 +200,7 @@
                         <h1>🎮 Limitless Online Comparison</h1>
                     </div>
                     <div id="currentMetaContent" style="padding: 30px; background: #ffffff;">
-                        <div style="text-align: center; padding: 40px; color: #999;">Lädt...</div>
+                        <div style="text-align: center; padding: 40px; color: #999;">Loading...</div>
                     </div>
                 </div>
             </div>
@@ -214,7 +215,7 @@
                     
                     <div class="controls">
                         <div class="control-group" style="margin-bottom: 20px;">
-                            <label>🎮 Turnier-Format Filter:</label>
+                            <label>🎮 Tournament Format Filter:</label>
                             <div style="display: flex; gap: 15px; align-items: center;">
                                 <button onclick="setCurrentMetaFormatFilter('all')" id="currentMetaFilterAll" class="btn btn-primary" style="padding: 12px 20px; font-size: 0.95em;">📊 All</button>
                                 <button onclick="setCurrentMetaFormatFilter('live')" id="currentMetaFilterLive" class="btn btn-secondary" style="padding: 12px 20px; font-size: 0.95em;">� Limitless Decks</button>
@@ -224,29 +225,29 @@
                         </div>
                         <div class="control-row">
                             <div class="control-group">
-                                <label for="currentMetaDeckSearch">🔍 Deck suchen:</label>
-                                <input type="text" id="currentMetaDeckSearch" placeholder="Deck-Name eingeben..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <label for="currentMetaDeckSearch">🔍 Search Deck:</label>
+                                <input type="text" id="currentMetaDeckSearch" placeholder="Enter deck name..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
                             </div>
                             <div class="control-group">
-                                <label for="currentMetaDeckSelect">🎯 Deck Archetype wählen:</label>
+                                <label for="currentMetaDeckSelect">🎯 Select Deck Archetype:</label>
                                 <select id="currentMetaDeckSelect" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
-                                    <option value="">-- Bitte Deck auswählen --</option>
+                                    <option value="">-- Please Select Deck --</option>
                                 </select>
                             </div>
                             <div class="control-group">
-                                <label for="currentMetaFilterSelect">🦂 Karten Filter:</label>
+                                <label for="currentMetaFilterSelect">🦂 Card Filter:</label>
                                 <select id="currentMetaFilterSelect">
-                                    <option value="all">Alle Karten</option>
-                                    <option value="90">Karten in >90% der Decks (Core)</option>
-                                    <option value="70">Karten in >70% der Decks</option>
-                                    <option value="50">Karten in >50% der Decks</option>
+                                    <option value="all">All Cards</option>
+                                    <option value="90">Cards in >90% of Decks (Core)</option>
+                                    <option value="70">Cards in >70% of Decks</option>
+                                    <option value="50">Cards in >50% of Decks</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     
                     <div class="stats-section" id="currentMetaStatsSection" style="display: none;">
-                        <h2>📊 Deck Statistiken</h2>
+                        <h2>📊 Deck Statistics</h2>
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="label">Cards in Deck (Unique / Total)</div>
@@ -279,7 +280,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="currentMetaBestMatchups">
-                                        <tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfügbar</td></tr>
+                                        <tr><td colspan="3" style="text-align: center; padding: 20px;">No data available</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -295,7 +296,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="currentMetaWorstMatchups">
-                                        <tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfügbar</td></tr>
+                                        <tr><td colspan="3" style="text-align: center; padding: 20px;">No data available</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -322,17 +323,17 @@
                     <div class="cards-section">
                         <div class="cards-header" style="display: block;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                                <h2 style="margin: 0;">🃏 Karten Übersicht (sortiert)</h2>
-                                <span style="font-size: 1em; color: #666;"><span id="currentMetaCardCount">0 Karten</span><span id="currentMetaCardCountSummary" style="margin-left: 8px; font-weight: normal;">/ 0 Total</span></span>
+                                <h2 style="margin: 0;">🃏 Card Overview (Sorted)</h2>
+                                <span style="font-size: 1em; color: #666;"><span id="currentMetaCardCount">0 Cards</span><span id="currentMetaCardCountSummary" style="margin-left: 8px; font-weight: normal;">/ 0 Total</span></span>
                             </div>
                             
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
-                                <input type="text" id="currentMetaOverviewSearch" placeholder="🔍 Karten suchen..." class="card-search-input" oninput="filterCurrentMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                <input type="text" id="currentMetaOverviewSearch" placeholder="🔍 Search cards..." class="card-search-input" oninput="filterCurrentMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                                 
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                     <button class="btn btn-success" onclick="setCurrentMetaOverviewRarityMode('min')" id="currentMetaOverviewRarityMin" style="padding: 8px 14px; font-size: 0.9em; background: #28a745;">⬇️ Low Rarity</button>
                                     <button class="btn btn-danger" onclick="setCurrentMetaOverviewRarityMode('max')" id="currentMetaOverviewRarityMax" style="padding: 8px 14px; font-size: 0.9em; background: #dc3545;">⬆️ Max Rarity</button>
-                                    <button class="btn btn-info" onclick="setCurrentMetaOverviewRarityMode('all')" id="currentMetaOverviewRarityAll" style="padding: 8px 14px; font-size: 0.9em; background: #17a2b8;">🌍 Alle Prints</button>
+                                    <button class="btn btn-info" onclick="setCurrentMetaOverviewRarityMode('all')" id="currentMetaOverviewRarityAll" style="padding: 8px 14px; font-size: 0.9em; background: #17a2b8;">🌍 All Prints</button>
                                 </div>
                                 
                                 <div style="display: flex; gap: 5px;">
@@ -363,29 +364,29 @@
                         </div>
                         
                         <div class="deck-summary">
-                            <h3>Aktuell: <span id="currentMetaDeckCount" style="font-weight: bold;">0</span> / 60 Karten <span id="currentMetaDeckCountUnique" style="font-weight: normal; font-size: 0.9em; color: #666;">(0 Unique)</span></h3>
+                            <h3>Current: <span id="currentMetaDeckCount" style="font-weight: bold;">0</span> / 60 Cards <span id="currentMetaDeckCountUnique" style="font-weight: normal; font-size: 0.9em; color: #666;">(0 Unique)</span></h3>
                         </div>
                         
-                        <!-- Mein Deck Übersicht -->
+                        <!-- My Deck Overview -->
                         <div id="currentMetaMyDeckVisual" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                                <h3 style="margin: 0;">🎴 Dein Deck</h3>
+                                <h3 style="margin: 0;">🎴 Your Deck</h3>
                                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                     <button class="btn btn-info" onclick="openDeckCompare('currentMeta')" style="background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('currentMeta')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('currentMeta')">🖼️ Grid View</button>
                                 </div>
                             </div>
-                            <input type="text" id="currentMetaDeckGridSearch" placeholder="🔍 Karten im Deck suchen..." class="card-search-input" oninput="filterDeckGrid('currentMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <input type="text" id="currentMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input" oninput="filterDeckGrid('currentMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div class="deck-grid" id="currentMetaMyDeckGrid">
-                                <p style="text-align: center; color: #666; padding: 40px;">Erstelle ein Deck mit den Buttons oben oder füge Karten manuell hinzu...</p>
+                                <p style="text-align: center; color: #666; padding: 40px;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
                         </div>
                         
-                        <!-- Karten hinzufügen Bereich -->
+                        <!-- Add Card Section -->
                         <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                            <h3 style="margin-top: 0;">➕ Karte hinzufügen</h3>
-                            <input type="text" id="currentMetaDeckCardSearch" placeholder="🔍 Kartennamen suchen..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <h3 style="margin-top: 0;">➕ Add Card</h3>
+                            <input type="text" id="currentMetaDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div id="currentMetaDeckSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;"></div>
                         </div>
                     </div>
@@ -405,41 +406,41 @@
                             <div class="control-group">
                                 <label for="pastMetaFormatFilter">🎴 Meta/Format Filter:</label>
                                 <select id="pastMetaFormatFilter" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
-                                    <option value="all">-- Alle Formate --</option>
+                                    <option value="all">-- All Formats --</option>
                                 </select>
                             </div>
                             <div class="control-group">
-                                <label for="pastMetaTournamentFilter">🏆 Turnier Filter:</label>
+                                <label for="pastMetaTournamentFilter">🏆 Tournament Filter:</label>
                                 <select id="pastMetaTournamentFilter" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
-                                    <option value="all">-- Alle Turniere --</option>
+                                    <option value="all">-- All Tournaments --</option>
                                 </select>
                             </div>
                         </div>
                         <div class="control-row">
                             <div class="control-group">
-                                <label for="pastMetaDeckSearch">🔍 Deck suchen:</label>
-                                <input type="text" id="pastMetaDeckSearch" placeholder="Deck-Name eingeben..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <label for="pastMetaDeckSearch">🔍 Search Deck:</label>
+                                <input type="text" id="pastMetaDeckSearch" placeholder="Enter deck name..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
                             </div>
                             <div class="control-group">
-                                <label for="pastMetaDeckSelect">🎯 Deck Archetype wählen:</label>
+                                <label for="pastMetaDeckSelect">🎯 Select Deck Archetype:</label>
                                 <select id="pastMetaDeckSelect" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
-                                    <option value="">-- Bitte Deck auswählen --</option>
+                                    <option value="">-- Please Select Deck --</option>
                                 </select>
                             </div>
                             <div class="control-group">
-                                <label for="pastMetaFilterSelect">🦂 Karten Filter:</label>
+                                <label for="pastMetaFilterSelect">🦂 Card Filter:</label>
                                 <select id="pastMetaFilterSelect">
-                                    <option value="all">Alle Karten</option>
-                                    <option value="90">Karten in >90% der Decks (Core)</option>
-                                    <option value="70">Karten in >70% der Decks</option>
-                                    <option value="50">Karten in >50% der Decks</option>
+                                    <option value="all">All Cards</option>
+                                    <option value="90">Cards in >90% of Decks (Core)</option>
+                                    <option value="70">Cards in >70% of Decks</option>
+                                    <option value="50">Cards in >50% of Decks</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     
                     <div class="stats-section" id="pastMetaStatsSection" style="display: none;">
-                        <h2>📊 Deck Statistiken</h2>
+                        <h2>📊 Deck Statistics</h2>
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <div class="label">Cards in Deck (Unique / Total)</div>
@@ -459,17 +460,17 @@
                     <div class="cards-section">
                         <div class="cards-header" style="display: block;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                                <h2 style="margin: 0;">🃏 Karten Übersicht (sortiert)</h2>
-                                <span style="font-size: 1em; color: #666;"><span id="pastMetaCardCount">0 Karten</span><span id="pastMetaCardCountSummary" style="margin-left: 8px; font-weight: normal;">/ 0 Total</span></span>
+                                <h2 style="margin: 0;">🃏 Card Overview (Sorted)</h2>
+                                <span style="font-size: 1em; color: #666;"><span id="pastMetaCardCount">0 Cards</span><span id="pastMetaCardCountSummary" style="margin-left: 8px; font-weight: normal;">/ 0 Total</span></span>
                             </div>
                             
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
-                                <input type="text" id="pastMetaOverviewSearch" placeholder="🔍 Karten suchen..." class="card-search-input" oninput="filterPastMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                <input type="text" id="pastMetaOverviewSearch" placeholder="🔍 Search cards..." class="card-search-input" oninput="filterPastMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                                 
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                     <button class="btn btn-success" onclick="setPastMetaRarityMode('min')" id="pastMetaRarityMin" style="padding: 8px 14px; font-size: 0.9em; background: #28a745;">⬇️ Low Rarity</button>
                                     <button class="btn btn-danger" onclick="setPastMetaRarityMode('max')" id="pastMetaRarityMax" style="padding: 8px 14px; font-size: 0.9em; background: #dc3545;">⬆️ Max Rarity</button>
-                                    <button class="btn btn-info" onclick="setPastMetaRarityMode('all')" id="pastMetaRarityAll" style="padding: 8px 14px; font-size: 0.9em; background: #17a2b8;">🌍 Alle Prints</button>
+                                    <button class="btn btn-info" onclick="setPastMetaRarityMode('all')" id="pastMetaRarityAll" style="padding: 8px 14px; font-size: 0.9em; background: #17a2b8;">🌍 All Prints</button>
                                 </div>
                                 
                                 <div style="display: flex; gap: 5px;">
@@ -500,29 +501,29 @@
                         </div>
                         
                         <div class="deck-summary">
-                            <h3>Aktuell: <span id="pastMetaDeckCount" style="font-weight: bold;">0</span> / 60 Karten <span id="pastMetaDeckCountUnique" style="font-weight: normal; font-size: 0.9em; color: #666;">(0 Unique)</span></h3>
+                            <h3>Current: <span id="pastMetaDeckCount" style="font-weight: bold;">0</span> / 60 Cards <span id="pastMetaDeckCountUnique" style="font-weight: normal; font-size: 0.9em; color: #666;">(0 Unique)</span></h3>
                         </div>
                         
-                        <!-- Mein Deck Übersicht -->
+                        <!-- My Deck Overview -->
                         <div id="pastMetaMyDeckVisual" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                                <h3 style="margin: 0;">🎴 Dein Deck</h3>
+                                <h3 style="margin: 0;">🎴 Your Deck</h3>
                                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                     <button class="btn btn-info" onclick="openDeckCompare('pastMeta')" style="background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('pastMeta')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('pastMeta')">🖼️ Grid View</button>
                                 </div>
                             </div>
-                            <input type="text" id="pastMetaDeckGridSearch" placeholder="🔍 Karten im Deck suchen..." class="card-search-input" oninput="filterDeckGrid('pastMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <input type="text" id="pastMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input" oninput="filterDeckGrid('pastMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div class="deck-grid" id="pastMetaMyDeckGrid">
-                                <p style="text-align: center; color: #666; padding: 40px;">Erstelle ein Deck mit den Buttons oben oder füge Karten manuell hinzu...</p>
+                                <p style="text-align: center; color: #666; padding: 40px;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
                         </div>
                         
-                        <!-- Karten hinzufügen Bereich -->
+                        <!-- Add Card Section -->
                         <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                            <h3 style="margin-top: 0;">➕ Karte hinzufügen</h3>
-                            <input type="text" id="pastMetaDeckCardSearch" placeholder="🔍 Kartennamen suchen..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <h3 style="margin-top: 0;">➕ Add Card</h3>
+                            <input type="text" id="pastMetaDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div id="pastMetaDeckSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;"></div>
                         </div>
                     </div>
@@ -551,7 +552,7 @@
                             </div>
                             <div class="cards-filter-options collapsed" id="metaFormatOptions">
                                 <label style="display: block; padding: 6px; cursor: pointer; border-radius: 4px;">
-                                    <input type="checkbox" value="total" checked onchange="filterAndRenderCards()"> <strong>Total (Alle Karten)</strong>
+                                    <input type="checkbox" value="total" checked onchange="filterAndRenderCards()"> <strong>Total (All Cards)</strong>
                                 </label>
                                 <label style="display: block; padding: 6px; cursor: pointer; border-radius: 4px;">
                                     <input type="checkbox" value="all_playables" onchange="filterAndRenderCards()"> <strong>All Playables</strong>
@@ -608,7 +609,7 @@
                                 <span class="toggle-icon">▼</span>
                             </div>
                             <div class="cards-filter-options collapsed" id="categoryFilterOptions">
-                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="pokemon_all"> <strong>Pokémon (Alle)</strong></label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="pokemon_all"> <strong>Pokémon (All)</strong></label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="pokemon_grass"> 🌿 Grass Pokémon</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="pokemon_fire"> 🔥 Fire Pokémon</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="pokemon_water"> 💧 Water Pokémon</label>
@@ -663,7 +664,7 @@
                                 <span class="toggle-icon">▼</span>
                             </div>
                             <div class="cards-filter-options collapsed" id="deckCoverageFilterOptions">
-                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="100"> 💯 In 100% aller Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="100"> 💯 In 100% of all Decks</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="90"> 🔥 In ≥90% der Decks</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="70"> ⭐ In ≥70% der Decks</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="50"> 📈 In ≥50% der Decks</label>
@@ -674,13 +675,13 @@
                     <!-- Reset and Results -->
                     <div style="margin-top: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                         <button onclick="resetCardFilters()" style="padding: 12px 24px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px;">
-                            🔄 Filter zurücksetzen
+                            🔄 Reset Filter
                         </button>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <label style="font-weight: 600; color: #555;">🔀 Sortierung:</label>
                             <select id="cardSortOrder" onchange="filterAndRenderCards()" style="padding: 10px 15px; border: 2px solid #3498db; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; background: white;">
                                 <option value="set">Nach Set (Standard)</option>
-                                <option value="deck">Wie Deckübersicht</option>
+                                <option value="deck">Like Deck Overview</option>
                                 <option value="coverage">Nach Coverage</option>
                             </select>
                         </div>
@@ -691,28 +692,277 @@
                             </button>
                         </div>
                         <div id="cardResultsInfo" style="flex: 1; padding: 12px; background: #ecf0f1; border-radius: 6px; text-align: center; font-weight: 600; font-size: 15px;">
-                            Lädt Karten...
+                            Loading cards...
                         </div>
                     </div>
                 </div>
                 
                 <!-- Cards Grid -->
-                <div id="cardsContent" class="loading">Lädt Karten...</div>
+                <div id="cardsContent" class="loading">Loading cards...</div>
+            </div>
+            
+            <!-- Tab 7: How to Use Tutorial -->
+            <div id="tutorial" class="tab-content">
+                <div class="container">
+                    <div class="header">
+                        <h1>📖 How to Use This Website</h1>
+                        <p>Complete Guide to Pokemon TCG Analysis & Deck Building</p>
+                    </div>
+                    
+                    <div style="max-width: 1200px; margin: 0 auto; padding: 30px; background: white; border-radius: 10px;">
+                        
+                        <!-- Overview Section -->
+                        <section style="margin-bottom: 40px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🎯 Website Overview</h2>
+                            <p style="font-size: 1.1em; line-height: 1.8; color: #555;">
+                                This website provides comprehensive Pokemon TCG meta analysis, deck building tools, and tournament data. 
+                                Access Japanese City League results, international tournament data, and detailed card statistics to build competitive decks.
+                            </p>
+                        </section>
+                        
+                        <!-- Tab Explanations -->
+                        <section style="margin-bottom: 40px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📂 Available Tabs</h2>
+                            
+                            <div style="display: grid; gap: 20px;">
+                                <!-- City League Meta Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                                    <h3 style="color: #e74c3c; margin-top: 0;">🇯🇵 City League Meta</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> View meta development and archetype stats from Japanese City League tournaments</p>
+                                    <p style="line-height: 1.7;"><strong>What you see:</strong> Tournament date, archetype usage, placement statistics, meta share graphs</p>
+                                    <p style="line-height: 1.7;"><strong>Best for:</strong> Understanding the current Japanese meta trends and archetype popularity over time</p>
+                                </div>
+                                
+                                <!-- City League Deck Analysis Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #27ae60;">
+                                    <h3 style="color: #27ae60; margin-top: 0;">📊 City League Deck Analysis</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Analyze specific decks from Japanese City Leagues and build your own</p>
+                                    <p style="line-height: 1.7;"><strong>Features:</strong></p>
+                                    <ul style="line-height: 1.7;">
+                                        <li>🗓️ <strong>Date Filter:</strong> Filter tournaments by date range (From/To dates)</li>
+                                        <li>🔍 <strong>Deck Search:</strong> Type to find specific archetypes</li>
+                                        <li>🎯 <strong>Deck Selector:</strong> Choose from available decks</li>
+                                        <li>🦂 <strong>Card Filter:</strong> Show core cards (>90%), common (>70%), or all cards</li>
+                                        <li>📊 <strong>Statistics:</strong> View deck size, usage, average placement</li>
+                                        <li>🎴 <strong>Card Overview:</strong> See all cards with usage%, rarity options, type filters</li>
+                                        <li>🛠️ <strong>Deck Builder:</strong> Auto-generate or manually build decks, copy to clipboard</li>
+                                        <li>🔄 <strong>Deck Compare:</strong> Compare two decklists and see differences with visual badges</li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Current Meta Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #9b59b6;">
+                                    <h3 style="color: #9b59b6; margin-top: 0;">🎮 Current Meta</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Compare Limitless Online data with major tournament results</p>
+                                    <p style="line-height: 1.7;"><strong>What you see:</strong> Side-by-side archetype comparisons, win rates, meta share</p>
+                                    <p style="line-height: 1.7;"><strong>Best for:</strong> Understanding differences between online ladder and real tournaments</p>
+                                </div>
+                                
+                                <!-- Current Meta Deck Analysis Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #f39c12;">
+                                    <h3 style="color: #f39c12; margin-top: 0;">📈 Current Meta Deck Analysis</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Analyze current meta decks from Limitless Online and tournaments</p>
+                                    <p style="line-height: 1.7;"><strong>Special Features:</strong></p>
+                                    <ul style="line-height: 1.7;">
+                                        <li>🎮 <strong>Format Filter:</strong> View All / Limitless Decks only / Tournament Decks only</li>
+                                        <li>📊 <strong>Win Rate Stats:</strong> Total online tournament win rate</li>
+                                        <li>⚔️ <strong>Matchup Analysis:</strong> See best and worst matchups with win rates and game records</li>
+                                        <li>🔍 <strong>Opponent Search:</strong> Search specific matchups to analyze head-to-head data</li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Past Meta Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #e67e22;">
+                                    <h3 style="color: #e67e22; margin-top: 0;">🏆 Past Meta</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Analyze historical tournament winners and past format decklists</p>
+                                    <p style="line-height: 1.7;"><strong>Features:</strong> Format filter, tournament filter, deck analysis just like other tabs</p>
+                                    <p style="line-height: 1.7;"><strong>Best for:</strong> Learning from winning decks, understanding format evolution</p>
+                                </div>
+                                
+                                <!-- Cards Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #16a085;">
+                                    <h3 style="color: #16a085; margin-top: 0;">🧰 Cards</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Browse all available Pokemon TCG cards</p>
+                                    <p style="line-height: 1.7;"><strong>Features:</strong></p>
+                                    <ul style="line-height: 1.7;">
+                                        <li>🔍 <strong>Search:</strong> Find cards by name</li>
+                                        <li>🎴 <strong>Type Filter:</strong> Filter by Pokemon, Supporter, Item, Tool, Stadium, Energy, Ace Spec</li>
+                                        <li>🎯 <strong>Set Filter:</strong> Select specific card sets</li>
+                                        <li>💎 <strong>Rarity Filter:</strong> Filter by card rarity</li>
+                                        <li>📊 <strong>Sort:</strong> Organize cards by different criteria</li>
+                                        <li>🖼️ <strong>View Mode:</strong> Grid view with card images</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Deck Builder Guide -->
+                        <section style="margin-bottom: 40px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🛠️ Using the Deck Builder</h2>
+                            
+                            <h3 style="color: #555;">📋 Quick Start</h3>
+                            <ol style="line-height: 2; font-size: 1.05em;">
+                                <li><strong>Select a Deck:</strong> Use the deck selector dropdown to choose an archetype</li>
+                                <li><strong>View Cards:</strong> See Card Overview with all cards and their usage statistics</li>
+                                <li><strong>Auto-Generate:</strong> Click "Generate Low Rarity Deck" or "Generate Max Rarity Deck" for instant 60-card deck</li>
+                                <li><strong>Manual Building:</strong> Click on individual cards to add them (left click +1, right click +4)</li>
+                                <li><strong>Copy Deck:</strong> Click "Copy Deck" to get the complete decklist in Pokemon TCG Live format</li>
+                            </ol>
+                            
+                            <h3 style="color: #555; margin-top: 30px;">🎨 Card Display Modes</h3>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                                <p style="margin: 5px 0;"><strong>⬇️ Low Rarity:</strong> Shows cheapest version of each card (budget-friendly)</p>
+                                <p style="margin: 5px 0;"><strong>⬆️ Max Rarity:</strong> Shows highest rarity version (full art, secret rare, etc.)</p>
+                                <p style="margin: 5px 0;"><strong>🌍 All Prints:</strong> Shows all available versions of each card</p>
+                            </div>
+                            
+                            <h3 style="color: #555; margin-top: 30px;">🖼️ View Modes</h3>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                                <p style="margin: 5px 0;"><strong>Table View:</strong> Detailed list with card names, sets, usage%, and controls</p>
+                                <p style="margin: 5px 0;"><strong>Grid View:</strong> Visual card display with images for quick overview</p>
+                            </div>
+                            
+                            <h3 style="color: #555; margin-top: 30px;">🔄 Deck Compare Feature</h3>
+                            <p style="line-height: 1.8;">Compare your current deck with a previous version:</p>
+                            <ol style="line-height: 2; font-size: 1.05em;">
+                                <li>Build or generate a deck in "Your Deck" section</li>
+                                <li>Click "🔄 Compare Deck" button</li>
+                                <li>Paste your old decklist in Pokemon TCG Live format</li>
+                                <li>Click "Compare"</li>
+                                <li>See color-coded badges:
+                                    <ul>
+                                        <li><span style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); padding: 2px 8px; border-radius: 4px; color: #000;">🟡 Gold</span> = New cards added</li>
+                                        <li><span style="background: #28a745; padding: 2px 8px; border-radius: 4px; color: white;">🟢 Green</span> = Count increased</li>
+                                        <li><span style="background: #dc3545; padding: 2px 8px; border-radius: 4px; color: white;">🔴 Red</span> = Count decreased or removed</li>
+                                        <li><span style="background: #6c757d; padding: 2px 8px; border-radius: 4px; color: white;">⚫ Gray</span> = Unchanged</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                            <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin-top: 15px;">
+                                <strong>💡 Tips:</strong>
+                                <ul style="line-height: 1.8; margin: 10px 0;">
+                                    <li>Deck Compare supports international prints (e.g., MEG 76 matches ASC 112 for Riolu)</li>
+                                    <li>Basic Energies from different sets are recognized as the same card</li>
+                                    <li>Japanese set codes (M3, M2a, etc.) are fully supported</li>
+                                </ul>
+                            </div>
+                        </section>
+                        
+                        <!-- Card Type Guide -->
+                        <section style="margin-bottom: 40px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🃏 Card Type Categories</h2>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                                <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border: 2px solid #ffc107;">
+                                    <h4 style="margin-top: 0;">🎴 Pokémon</h4>
+                                    <p style="margin: 0; font-size: 0.95em;">Basic Pokemon, Evolution Pokemon, Pokemon ex, Pokemon V, etc.</p>
+                                </div>
+                                <div style="background: #d4edda; padding: 15px; border-radius: 6px; border: 2px solid #28a745;">
+                                    <h4 style="margin-top: 0;">👤 Supporter</h4>
+                                    <p style="margin: 0; font-size: 0.95em;">Trainer cards with Supporter subtype (Professor's Research, Boss's Orders, etc.)</p>
+                                </div>
+                                <div style="background: #f8d7da; padding: 15px; border-radius: 6px; border: 2px solid #dc3545;">
+                                    <h4 style="margin-top: 0;">⚙️ Item</h4>
+                                    <p style="margin: 0; font-size: 0.95em;">Trainer Items (Ultra Ball, Rare Candy, Nest Ball, etc.)</p>
+                                </div>
+                                <div style="background: #e7d4f5; padding: 15px; border-radius: 6px; border: 2px solid #6f42c1;">
+                                    <h4 style="margin-top: 0;">🔧 Tool</h4>
+                                    <p style="margin: 0; font-size: 0.95em;">Pokemon Tools attached to Pokemon (Air Balloon, Muscle Band, etc.)</p>
+                                </div>
+                                <div style="background: #f8d7da; padding: 15px; border-radius: 6px; border: 2px solid #fd7e14;">
+                                    <h4 style="margin-top: 0;">🏟️ Stadium</h4>
+                                    <p style="margin: 0; font-size: 0.95em;">Stadium cards (Collapsed Stadium, Beach Court, etc.)</p>
+                                </div>
+                                <div style="background: #d1ecf1; padding: 15px; border-radius: 6px; border: 2px solid #17a2b8;">
+                                    <h4 style="margin-top: 0;">⚡ Energy</h4>
+                                    <p style="margin: 0; font-size: 0.95em;">Basic Energy cards (Fire Energy, Water Energy, etc.)</p>
+                                </div>
+                                <div style="background: #d1ecf1; padding: 15px; border-radius: 6px; border: 2px solid #20c997;">
+                                    <h4 style="margin-top: 0;">💎 Special Energy</h4>
+                                    <p style="margin: 0; font-size: 0.95em;">Special Energy cards (Double Turbo Energy, Jet Energy, etc.)</p>
+                                </div>
+                                <div style="background: linear-gradient(135deg, #ffe0e0, #ffc0c0); padding: 15px; border-radius: 6px; border: 2px solid #c0392b;">
+                                    <h4 style="margin-top: 0;">⭐ Ace Spec</h4>
+                                    <p style="margin: 0; font-size: 0.95em;">Powerful one-per-deck cards (Computer Search, Master Ball, Maximum Belt, etc.)</p>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- Tips & Tricks -->
+                        <section style="margin-bottom: 40px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">💡 Tips & Tricks</h2>
+                            <div style="background: #e8f4fd; border-left: 4px solid #3498db; padding: 20px; border-radius: 6px;">
+                                <ul style="line-height: 2; font-size: 1.05em;">
+                                    <li>🎯 <strong>Use Date Filters:</strong> Focus on recent tournaments for current meta insights</li>
+                                    <li>📊 <strong>Check Usage %:</strong> Cards with >90% usage are core to the archetype</li>
+                                    <li>🔍 <strong>Search is Your Friend:</strong> Use search boxes to quickly find specific cards or decks</li>
+                                    <li>🌍 <strong>International Prints:</strong> The website recognizes international reprints automatically</li>
+                                    <li>💰 <strong>Budget Building:</strong> Use "Low Rarity" option for affordable deck versions</li>
+                                    <li>🎨 <strong>Grid View:</strong> Perfect for visual deck overview and spotting missing cards</li>
+                                    <li>📋 <strong>Copy Function:</strong> All deck copies use Pokemon TCG Live format for easy import</li>
+                                    <li>🔄 <strong>Compare Decks:</strong> Great for tracking deck evolution and understanding changes</li>
+                                </ul>
+                            </div>
+                        </section>
+                        
+                        <!-- FAQ -->
+                        <section style="margin-bottom: 20px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">❓ Frequently Asked Questions</h2>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: How often is the data updated?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Check the "Last Update" timestamp in the footer. Data is updated regularly when new tournaments occur.</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: Can I use this for deck building in Pokemon TCG Live?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Yes! All "Copy Deck" functions output decks in Pokemon TCG Live format. Just paste directly into the game.</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: What does "international prints" mean?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: The same card printed in different sets (e.g., Riolu MEG 76 = Riolu ASC 112). The website recognizes these automatically.</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: Why are Japanese cards (M3, M2a) shown?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Japanese sets often release months before international versions. These give early insight into upcoming cards and strategies.</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: How do I add cards to my deck manually?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: In the Card Overview section, left-click a card to add 1 copy, or right-click to add 4 copies. Cards appear in "Your Deck" section below.</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: What's the difference between "Low Rarity" and "Max Rarity"?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Low Rarity shows the cheapest printings (budget decks), Max Rarity shows premium versions (full arts, secret rares). Gameplay is identical.</p>
+                            </div>
+                        </section>
+                        
+                        <!-- Support Section -->
+                        <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; text-align: center;">
+                            <h2 style="color: white; margin-top: 0;">🎉 Ready to Build?</h2>
+                            <p style="font-size: 1.2em; margin-bottom: 20px;">Start by exploring the tabs above, choose a meta archetype, and build your competitive Pokemon TCG deck!</p>
+                            <p style="font-size: 0.95em; opacity: 0.9;">For best experience, start with the 🇯🇵 City League Meta tab to see current trends, then move to 📊 Deck Analysis to build your deck.</p>
+                        </section>
+                        
+                    </div>
+                </div>
             </div>
         </div>
         
         <div class="footer">
-            <p>📅 Letzte Aktualisierung: <span id="last-update">Loading...</span></p>
+            <p>📅 Last Update: <span id="last-update">Loading...</span></p>
         </div>
     </div>
     
-        <script src="js/app.js?v=20260308-14"></script>
+        <script src="js/app.js?v=20260308-15"></script>
     
     <!-- Image View Modal -->
     <div id="imageViewModal" class="image-view-modal" onclick="if(event.target === this) closeImageView()">
         <div class="image-view-content">
             <div class="image-view-header">
-                <h3>🎨 Deck Karten Übersicht</h3>
+                <h3>🎨 Deck Cards Overview</h3>
                 <button class="image-view-close" onclick="closeImageView()">✕</button>
             </div>
             <div id="compactCardGrid" class="compact-card-grid"></div>
@@ -740,7 +990,7 @@
             <h2 id="raritySwitcherTitle">Karte - Rarity Switcher</h2>
             
             <div id="rarityOptionsList" class="rarity-options-list">
-                <!-- Wird dynamisch gefüllt -->
+                <!-- Populated dynamically -->
             </div>
             
         </div>
@@ -753,7 +1003,7 @@
             <h2>🔄 Deck Vergleich</h2>
             
             <div style="margin-bottom: 20px;">
-                <p style="color: #666; margin-bottom: 10px;">Füge deine alte Deckliste ein (Pokémon TCG Live Format):</p>
+                <p style="color: #666; margin-bottom: 10px;">Paste your old decklist (Pokémon TCG Live Format):</p>
                 <textarea id="oldDeckListInput" placeholder="Pokémon: 16&#10;2 Lunatone ASC 105&#10;3 Solrock ASC 106&#10;...&#10;&#10;Trainer: 33&#10;...&#10;&#10;Energy: 11&#10;..." style="width: 100%; height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 0.9em;"></textarea>
             </div>
             

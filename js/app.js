@@ -1,4 +1,4 @@
-const BASE_PATH = './data/';
+﻿const BASE_PATH = './data/';
         
         // CRITICAL: Initialize deck objects immediately to prevent undefined errors
         window.cityLeagueDeck = window.cityLeagueDeck || {};
@@ -832,11 +832,11 @@ const BASE_PATH = './data/';
                     renderCityLeagueTable(tournamentCount, dateRange);
                     window.cityLeagueLoaded = true;
                 } else {
-                    content.innerHTML = '<div class="error">Fehler beim Laden der City League Meta Daten</div>';
+                    content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
                 }
             } catch (error) {
                 console.error('Error loading City League data:', error);
-                content.innerHTML = '<div class="error">Fehler beim Laden der City League Meta Daten</div>';
+                content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
             }
         }
         
@@ -1364,7 +1364,7 @@ const BASE_PATH = './data/';
             } else {
                 const tableContainer = document.getElementById('cityLeagueAnalysisTable');
                 if (tableContainer) {
-                    const errorMsg = data === null ? 'Fehler beim Laden der City League Analysis Daten' : 'Keine Daten gefunden';
+                    const errorMsg = data === null ? 'Error loading City League Analysis data' : 'No data found';
                     console.error(errorMsg);
                     tableContainer.innerHTML = `<div class="error">${errorMsg}</div>`;
                 }
@@ -2442,7 +2442,7 @@ const BASE_PATH = './data/';
             
             const cards = window.currentCityLeagueDeckCards;
             if (!cards || cards.length === 0) {
-                alert('❌ Bitte zuerst ein Deck auswählen!');
+                alert('❌ Please select a deck first!');
                 return;
             }
             
@@ -2648,10 +2648,10 @@ const BASE_PATH = './data/';
             
             // Copy to clipboard
             navigator.clipboard.writeText(output).then(() => {
-                alert('✅ Deck wurde in die Zwischenablage kopiert!');
+                alert('✅ Deck copied to clipboard!');
             }).catch(err => {
-                console.error('Fehler beim Kopieren:', err);
-                alert('❌ Fehler beim Kopieren in die Zwischenablage!');
+                console.error('Error copying:', err);
+                alert('❌ Error copying to clipboard!');
             });
         }
 
@@ -2960,7 +2960,7 @@ const BASE_PATH = './data/';
             
             const currentTotal = Object.values(deck).reduce((sum, count) => sum + count, 0);
             if (currentTotal >= 70) {
-                alert('Deck hat das Maximum erreicht (70 Karten)!');
+                alert('Deck has reached maximum (70 cards)!');
                 return;
             }
             
@@ -2986,13 +2986,13 @@ const BASE_PATH = './data/';
             
             // Check if card already has 4 copies (only applies to non-energy, non-ace-spec cards)
             if (!isBaseEnergy && !isAceSpecCard && deck[deckKey] >= 4) {
-                alert('Maximal 4 Kopien pro Karte!');
+                alert('Maximum 4 copies per card!');
                 return;
             }
             
             // Ace Spec cards can only have 1 copy in deck
             if (isAceSpecCard && deck[deckKey] >= 1) {
-                alert('Ace Spec Karten dürfen nur 1x im Deck sein!');
+                alert('Ace Spec cards may only be in deck once!');
                 return;
             }
             
@@ -3076,7 +3076,7 @@ const BASE_PATH = './data/';
         function clearDeck(source) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             
-            if (confirm('Möchtest du wirklich alle Karten aus dem Deck entfernen?')) {
+            if (confirm('Do you really want to remove all cards from the deck?')) {
                 if (source === 'cityLeague') {
                     window.cityLeagueDeck = {};
                     window.cityLeagueDeckOrder = [];
@@ -3928,7 +3928,7 @@ const BASE_PATH = './data/';
             }
             
             if (!deck || Object.keys(deck).length === 0) {
-                alert('Dein Deck ist leer!');
+                alert('Your deck is empty!');
                 return;
             }
             
@@ -4035,7 +4035,7 @@ const BASE_PATH = './data/';
                 copyPastMetaDeckOverview();
             } else {
                 console.log('[copyDeck] Unsupported source:', source);
-                alert('❌ Diese Funktion ist für diesen Tab nicht verfügbar!');
+                alert('❌ This function is not available for this tab!');
             }
         }
         
@@ -4083,7 +4083,7 @@ const BASE_PATH = './data/';
             }
             
             if (!cards || cards.length === 0) {
-                alert('Keine Karten zum Ergänzen!');
+                alert('No cards to add!');
                 return;
             }
             
@@ -4288,7 +4288,7 @@ const BASE_PATH = './data/';
             if (trainer.length > 0) summary += `Trainer:\n${trainer.join('\n')}\n\n`;
             if (energy.length > 0) summary += `Energy:\n${energy.join('\n')}`;
             
-            if (confirm(summary + '\n\nFortsetzung?')) {
+            if (confirm(summary + '\n\nContinue?')) {
                 // Add all cards to deck using PREFERRED versions (newest low-rarity)
                 cardsToAdd.forEach(card => {
                     // CRITICAL: Get preferred version for this card to match Grid View display
@@ -4683,7 +4683,7 @@ const BASE_PATH = './data/';
                     
                     console.log('✅ Current Meta data loaded successfully');
                 } else {
-                    currentMetaContent.innerHTML = '<div style="color: #e74c3c; padding: 20px;">Fehler beim Laden der Vergleichsdaten</div>';
+                    currentMetaContent.innerHTML = '<div style="color: #e74c3c; padding: 20px;">Error loading comparison data</div>';
                 }
                 
                 window.currentMetaLoaded = true;
@@ -4691,7 +4691,7 @@ const BASE_PATH = './data/';
                 console.error('Error loading Current Meta:', error);
                 currentMetaContent.innerHTML = `
                     <div style="color: #e74c3c; padding: 20px;">
-                        <strong>Fehler:</strong> Die Vergleichs-HTML konnte nicht geladen werden.
+                        <strong>Fehler:</strong> Could not load comparison HTML.
                         <br><small>${error.message}</small>
                     </div>
                 `;
@@ -5707,7 +5707,7 @@ const BASE_PATH = './data/';
             }
             
             if (!pastMetaCurrentCards || pastMetaCurrentCards.length === 0) {
-                alert('❌ Bitte zuerst ein Deck auswählen!');
+                alert('❌ Please select a deck first!');
                 return;
             }
             
@@ -5729,7 +5729,7 @@ const BASE_PATH = './data/';
         
         function copyPastMetaDeckOverview() {
             if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
-                alert('Keine Karten zum Kopieren vorhanden');
+                alert('No cards available to copy');
                 return;
             }
             
@@ -5741,10 +5741,10 @@ const BASE_PATH = './data/';
             });
             
             navigator.clipboard.writeText(deckText).then(() => {
-                alert('✅ Deck-Liste kopiert!');
+                alert('✅ Deck list copied!');
             }).catch(err => {
                 console.error('Failed to copy:', err);
-                alert('❌ Fehler beim Kopieren');
+                alert('❌ Error copying');
             });
         }
         
@@ -5868,7 +5868,7 @@ const BASE_PATH = './data/';
                 window.cardsLoaded = true;
             } catch (error) {
                 console.error('[Cards Tab] Error loading card database:', error);
-                content.innerHTML = '<div class="error">❌ Fehler beim Laden der Kartendatenbank</div>';
+                content.innerHTML = '<div class="error">❌ Error loading card database</div>';
             }
         }
         
@@ -7355,7 +7355,7 @@ const BASE_PATH = './data/';
             copyBtn.onclick = () => {
                 const cardNames = window.filteredCardsData.map(c => c.name).join('\n');
                 navigator.clipboard.writeText(cardNames).then(() => {
-                    copyBtn.textContent = '✅ Kopiert!';
+                    copyBtn.textContent = '✅ Copied!';
                     copyBtn.style.background = '#27ae60';
                     copyBtn.style.color = 'white';
                     setTimeout(() => {
@@ -9188,7 +9188,7 @@ const BASE_PATH = './data/';
             
             const cards = window.currentCurrentMetaDeckCards;
             if (!cards || cards.length === 0) {
-                alert('❌ Bitte zuerst ein Deck auswählen!');
+                alert('❌ Please select a deck first!');
                 return;
             }
             
@@ -9349,10 +9349,10 @@ const BASE_PATH = './data/';
             if (energy.length > 0) output += `Energy: ${energyCount}\n` + energy.join('\n');
             
             navigator.clipboard.writeText(output).then(() => {
-                alert('✅ Deck wurde in die Zwischenablage kopiert!');
+                alert('✅ Deck copied to clipboard!');
             }).catch(err => {
-                console.error('Fehler beim Kopieren:', err);
-                alert('❌ Fehler beim Kopieren in die Zwischenablage!');
+                console.error('Error copying:', err);
+                alert('❌ Error copying to clipboard!');
             });
         }
         
@@ -9384,7 +9384,7 @@ const BASE_PATH = './data/';
                     document.getElementById('deckCompareResult').style.display = 'none';
                 } catch (error) {
                     console.error('[Deck Compare] Failed to load database:', error);
-                    document.getElementById('deckCompareResult').innerHTML = '<div class="error">❌ Fehler beim Laden der Kartendatenbank</div>';
+                    document.getElementById('deckCompareResult').innerHTML = '<div class="error">❌ Error loading card database</div>';
                     return;
                 }
             }

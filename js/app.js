@@ -154,6 +154,8 @@
         let globalRarityPreference = 'min'; // Default: Show lowest rarity from newest set
         let overviewRarityMode = 'min'; // Current rarity mode for overview section (min, max, or all)
         let overviewCardTypeFilter = 'all'; // Current card type filter for overview section (all, Pokemon, Supporter, Item, Tool, Stadium, Energy, Special Energy, Ace Spec)
+        let currentMetaOverviewCardTypeFilter = 'all'; // Card type filter for Current Meta overview
+        let pastMetaOverviewCardTypeFilter = 'all'; // Card type filter for Past Meta overview
         
         // Ace Specs list - loaded from ace_specs.json
         let aceSpecsList = [];
@@ -1335,7 +1337,7 @@
                 resultsDiv.textContent = 'Keine Ergebnisse gefunden';
                 resultsDiv.style.color = '#e74c3c';
             } else {
-                resultsDiv.textContent = `${filtered.length} Ergebnis${filtered.length !== 1 ? 'se' : ''} gefunden`;
+                resultsDiv.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} found`;
                 resultsDiv.style.color = '#27ae60';
             }
         }
@@ -1885,7 +1887,7 @@
             document.getElementById('cityLeagueStatsSection').style.display = 'none';
             document.getElementById('cityLeagueDeckVisual').style.display = 'none';
             document.getElementById('cityLeagueDeckTableView').style.display = 'none';
-            document.getElementById('cityLeagueCardCount').textContent = '0 Karten';
+            document.getElementById('cityLeagueCardCount').textContent = '0 Cards';
             document.getElementById('cityLeagueCardCountSummary').textContent = '/ 0 Total';
             
             // Reset button text
@@ -2428,6 +2430,74 @@
             filterOverviewCards();
         }
         
+        function setCurrentMetaOverviewCardTypeFilter(type) {
+            currentMetaOverviewCardTypeFilter = type;
+            
+            // Update button styles
+            const buttons = {
+                'all': document.getElementById('currentMetaOverviewTypeAll'),
+                'Pokemon': document.getElementById('currentMetaOverviewTypePokemon'),
+                'Supporter': document.getElementById('currentMetaOverviewTypeSupporter'),
+                'Item': document.getElementById('currentMetaOverviewTypeItem'),
+                'Tool': document.getElementById('currentMetaOverviewTypeTool'),
+                'Stadium': document.getElementById('currentMetaOverviewTypeStadium'),
+                'Energy': document.getElementById('currentMetaOverviewTypeEnergy'),
+                'Special Energy': document.getElementById('currentMetaOverviewTypeSpecialEnergy'),
+                'Ace Spec': document.getElementById('currentMetaOverviewTypeAceSpec')
+            };
+            
+            // Reset all button styles
+            Object.values(buttons).forEach(btn => {
+                if (btn) {
+                    btn.style.opacity = '0.6';
+                    btn.style.fontWeight = 'normal';
+                }
+            });
+            
+            // Highlight active button
+            if (buttons[type]) {
+                buttons[type].style.opacity = '1';
+                buttons[type].style.fontWeight = 'bold';
+            }
+            
+            // Apply filter
+            filterCurrentMetaOverviewCards();
+        }
+        
+        function setPastMetaOverviewCardTypeFilter(type) {
+            pastMetaOverviewCardTypeFilter = type;
+            
+            // Update button styles
+            const buttons = {
+                'all': document.getElementById('pastMetaOverviewTypeAll'),
+                'Pokemon': document.getElementById('pastMetaOverviewTypePokemon'),
+                'Supporter': document.getElementById('pastMetaOverviewTypeSupporter'),
+                'Item': document.getElementById('pastMetaOverviewTypeItem'),
+                'Tool': document.getElementById('pastMetaOverviewTypeTool'),
+                'Stadium': document.getElementById('pastMetaOverviewTypeStadium'),
+                'Energy': document.getElementById('pastMetaOverviewTypeEnergy'),
+                'Special Energy': document.getElementById('pastMetaOverviewTypeSpecialEnergy'),
+                'Ace Spec': document.getElementById('pastMetaOverviewTypeAceSpec')
+            };
+            
+            // Reset all button styles
+            Object.values(buttons).forEach(btn => {
+                if (btn) {
+                    btn.style.opacity = '0.6';
+                    btn.style.fontWeight = 'normal';
+                }
+            });
+            
+            // Highlight active button
+            if (buttons[type]) {
+                buttons[type].style.opacity = '1';
+                buttons[type].style.fontWeight = 'bold';
+            }
+            
+            // Apply filter
+            filterPastMetaOverviewCards();
+        }
+        
         function toggleDeckGridView() {
             const gridViewContainer = document.getElementById('cityLeagueDeckVisual');
             const tableViewContainer = document.getElementById('cityLeagueDeckTableView');
@@ -2674,7 +2744,7 @@
             let html = '<table><thead><tr>';
             html += '<th class="col-image">Bild</th>';
             html += '<th>Cards in Deck</th>';
-            html += '<th>Kartenname</th>';
+            html += '<th>Card Name</th>';
             html += '<th>Set</th>';
             html += '<th>Nummer</th>';
             html += '<th>% in Archetype</th>';
@@ -2760,7 +2830,7 @@
             const summaryEl = document.getElementById('cityLeagueCardCountSummary');
             
             if (countEl) {
-                countEl.textContent = `${uniqueCount} Karten`;
+                countEl.textContent = `${uniqueCount} Cards`;
             }
             if (summaryEl) {
                 summaryEl.textContent = `/ ${filteredTotal} Total`;
@@ -3455,7 +3525,7 @@
             
             const gridContainer = document.getElementById(gridContainerId);
             if (gridContainer) {
-                gridContainer.innerHTML = html || '<p style="text-align: center; color: #666; padding: 40px;">Erstelle ein Deck mit den Buttons oben oder füge Karten manuell hinzu...</p>';
+                gridContainer.innerHTML = html || '<p style="text-align: center; color: #666; padding: 40px;">Create a deck using the buttons above or add cards manually...</p>';
             }
         }
         
@@ -4271,7 +4341,7 @@
             console.log('[autoComplete] Total cards to add:', currentTotal, 'in', cardsToAdd.length, 'unique entries');
             
             // Show summary grouped by type
-            let summary = `Auto-Complete wird ${currentTotal} Karten hinzufügen:\n\n`;
+            let summary = `Auto-Complete will add ${currentTotal} cards:\n\n`;
             let pokemon = [], trainer = [], energy = [];
             
             cardsToAdd.forEach(card => {
@@ -4368,7 +4438,7 @@
             // Debug logging
             if (allAvailableCards.length === 0) {
                 console.warn('[searchDeckCards] allCardsDatabase is empty or not loaded yet');
-                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">Kartendatenbank wird geladen...</div>';
+                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">Loading card database...</div>';
                 return;
             }
             
@@ -4389,7 +4459,7 @@
             console.log(`[searchDeckCards] Search term: "${searchTerm}", found ${uniqueNames.length} unique cards (${matchingCards.length} versions)`);
             
             if (uniqueNames.length === 0) {
-                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">Keine Karten gefunden</div>';
+                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No cards found</div>';
                 return;
             }
             
@@ -4616,7 +4686,7 @@
             try {
                 // Load the full HTML file
                 const response = await fetch(BASE_PATH + 'limitless_online_decks_comparison.html?t=' + Date.now());
-                if (!response.ok) throw new Error('HTML nicht gefunden');
+                if (!response.ok) throw new Error('HTML not found');
                 
                 const html = await response.text();
                 
@@ -5090,7 +5160,7 @@
             ]);
             
             if (!cardsData || cardsData.length === 0) {
-                const errorMsg = 'Keine Past Tournament Daten gefunden';
+                const errorMsg = 'No past tournament data found';
                 alert(errorMsg);
                 console.error(errorMsg);
                 return;
@@ -5376,7 +5446,7 @@
             if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
                 document.getElementById('pastMetaDeckTableView').style.display = 'none';
                 document.getElementById('pastMetaDeckVisual').style.display = 'none';
-                document.getElementById('pastMetaCardCount').textContent = '0 Karten';
+                document.getElementById('pastMetaCardCount').textContent = '0 Cards';
                 document.getElementById('pastMetaCardCountSummary').textContent = '/ 0 Total';
                 return;
             }
@@ -5395,7 +5465,7 @@
             
             // Update counts
             const totalCards = sortedCards.reduce((sum, c) => sum + (parseFloat(c.card_count) || 0), 0);
-            document.getElementById('pastMetaCardCount').textContent = `${sortedCards.length} Karten`;
+            document.getElementById('pastMetaCardCount').textContent = `${sortedCards.length} Cards`;
             document.getElementById('pastMetaCardCountSummary').textContent = `/ ${Math.round(totalCards)} Total`;
             
             // Render based on view mode
@@ -5413,7 +5483,7 @@
             const tableContainer = document.getElementById('pastMetaDeckTable');
             
             if (cards.length === 0) {
-                tableContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Keine Karten gefunden</p>';
+                tableContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No cards found</p>';
                 return;
             }
             
@@ -5449,16 +5519,19 @@
             const gridContainer = document.getElementById('pastMetaDeckGrid');
             
             if (cards.length === 0) {
-                gridContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Keine Karten gefunden</p>';
+                gridContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No cards found</p>';
                 return;
             }
+            
+            // Sort cards by type for better organization
+            const sortedCards = sortCardsByType([...cards]);
             
             // Get current deck to show deck counts
             const currentDeck = window.pastMetaDeck || {};
             
             let html = '';
             
-            cards.forEach(card => {
+            sortedCards.forEach(card => {
                 const cardFullName = card.full_card_name || card.card_name || 'Unknown Card';
                 const cardNameEscaped = cardFullName.replace(/'/g, "\\'");
                 const avgCount = parseFloat(card.card_count) || 0; // Average count across all decklists (e.g., 0.98)
@@ -5603,8 +5676,11 @@
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                     const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                     
+                    // Determine card type for filtering with database-based approach
+                    const filterCategory = getCardType(cardName, setCode, setNumber);
+                    
                     html += `
-                        <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
+                        <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                             <div class="card-image-container" style="position: relative; width: 100%;">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                                 
@@ -5659,14 +5735,32 @@
             if (!gridContainer) return;
             
             const cards = gridContainer.querySelectorAll('.card-item');
+            let visibleCount = 0;
+            
             cards.forEach(card => {
                 const cardName = card.getAttribute('data-card-name') || '';
-                if (searchTerm === '' || cardName.includes(searchTerm)) {
+                const cardType = card.getAttribute('data-card-type') || '';
+                
+                // Check search term filter
+                const matchesSearch = searchTerm === '' || cardName.includes(searchTerm);
+                
+                // Check card type filter
+                const matchesType = pastMetaOverviewCardTypeFilter === 'all' || cardType === pastMetaOverviewCardTypeFilter;
+                
+                // Show card only if it matches both filters
+                if (matchesSearch && matchesType) {
                     card.style.display = '';
+                    visibleCount++;
                 } else {
                     card.style.display = 'none';
                 }
             });
+            
+            // Update card count
+            const countElement = document.getElementById('pastMetaCardCount');
+            if (countElement) {
+                countElement.textContent = `${visibleCount} Cards`;
+            }
         }
         
         function setPastMetaRarityMode(mode) {
@@ -9024,8 +9118,11 @@
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                     const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                     
+                    // Determine card type for filtering with database-based approach
+                    const filterCategory = getCardType(cardName, setCode, setNumber);
+                    
                     html += `
-                        <div class="card-item" data-card-name="${cardName.toLowerCase()}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
+                        <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                             <div class="card-image-container" style="position: relative; width: 100%;">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                                 <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${maxCount}</div>
@@ -9168,10 +9265,32 @@
             if (!gridContainer) return;
             
             const cards = gridContainer.querySelectorAll('.card-item');
+            let visibleCount = 0;
+            
             cards.forEach(card => {
                 const cardName = card.getAttribute('data-card-name') || '';
-                card.style.display = (searchTerm === '' || cardName.includes(searchTerm)) ? '' : 'none';
+                const cardType = card.getAttribute('data-card-type') || '';
+                
+                // Check search term filter
+                const matchesSearch = searchTerm === '' || cardName.includes(searchTerm);
+                
+                // Check card type filter
+                const matchesType = currentMetaOverviewCardTypeFilter === 'all' || cardType === currentMetaOverviewCardTypeFilter;
+                
+                // Show card only if it matches both filters
+                if (matchesSearch && matchesType) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
             });
+            
+            // Update card count
+            const countElement = document.getElementById('currentMetaCardCount');
+            if (countElement) {
+                countElement.textContent = `${visibleCount} Cards`;
+            }
         }
         
         function toggleCurrentMetaDeckGridView() {

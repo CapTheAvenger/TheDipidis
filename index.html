@@ -143,12 +143,12 @@
                             </div>
                         </div>
                         
-                        <!-- Karten Tabellen-Ansicht (Standard) -->
+                        <!-- Card Table View (Default) -->
                         <div class="deck-table-view" id="cityLeagueDeckTableView" style="display: none;">
                             <div id="cityLeagueDeckTable"></div>
                         </div>
                         
-                        <!-- Karten Grid-Ansicht (Kompakt) -->
+                        <!-- Card Grid View (Compact) -->
                         <div class="deck-visual" id="cityLeagueDeckVisual" style="display: none;">
                             <div class="deck-grid" id="cityLeagueDeckGrid"></div>
                         </div>
@@ -330,6 +330,19 @@
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
                                 <input type="text" id="currentMetaOverviewSearch" placeholder="🔍 Search cards..." class="card-search-input" oninput="filterCurrentMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                                 
+                                <!-- Card Type Filter -->
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #f8f9fa;">
+                                    <button id="currentMetaOverviewTypeAll" onclick="setCurrentMetaOverviewCardTypeFilter('all')" style="padding: 6px 10px; font-size: 0.85em; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 1; font-weight: bold;">🔵 All</button>
+                                    <button id="currentMetaOverviewTypePokemon" onclick="setCurrentMetaOverviewCardTypeFilter('Pokemon')" style="padding: 6px 10px; font-size: 0.85em; background: #ffc107; color: #333; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟡 Pokémon</button>
+                                    <button id="currentMetaOverviewTypeSupporter" onclick="setCurrentMetaOverviewCardTypeFilter('Supporter')" style="padding: 6px 10px; font-size: 0.85em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟢 Supporter</button>
+                                    <button id="currentMetaOverviewTypeItem" onclick="setCurrentMetaOverviewCardTypeFilter('Item')" style="padding: 6px 10px; font-size: 0.85em; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟠 Item</button>
+                                    <button id="currentMetaOverviewTypeTool" onclick="setCurrentMetaOverviewCardTypeFilter('Tool')" style="padding: 6px 10px; font-size: 0.85em; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟣 Tool</button>
+                                    <button id="currentMetaOverviewTypeStadium" onclick="setCurrentMetaOverviewCardTypeFilter('Stadium')" style="padding: 6px 10px; font-size: 0.85em; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🔴 Stadium</button>
+                                    <button id="currentMetaOverviewTypeEnergy" onclick="setCurrentMetaOverviewCardTypeFilter('Energy')" style="padding: 6px 10px; font-size: 0.85em; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">⚡ Energy</button>
+                                    <button id="currentMetaOverviewTypeSpecialEnergy" onclick="setCurrentMetaOverviewCardTypeFilter('Special Energy')" style="padding: 6px 10px; font-size: 0.85em; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">💎 Spec. Energy</button>
+                                    <button id="currentMetaOverviewTypeAceSpec" onclick="setCurrentMetaOverviewCardTypeFilter('Ace Spec')" style="padding: 6px 10px; font-size: 0.85em; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🌟 Ace Spec</button>
+                                </div>
+                                
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                     <button class="btn btn-success" onclick="setCurrentMetaOverviewRarityMode('min')" id="currentMetaOverviewRarityMin" style="padding: 8px 14px; font-size: 0.9em; background: #28a745;">⬇️ Low Rarity</button>
                                     <button class="btn btn-danger" onclick="setCurrentMetaOverviewRarityMode('max')" id="currentMetaOverviewRarityMax" style="padding: 8px 14px; font-size: 0.9em; background: #dc3545;">⬆️ Max Rarity</button>
@@ -343,12 +356,12 @@
                             </div>
                         </div>
                         
-                        <!-- Karten Tabellen-Ansicht (Standard) -->
+                        <!-- Card Table View (Default) -->
                         <div class="deck-table-view" id="currentMetaDeckTableView" style="display: none;">
                             <div id="currentMetaDeckTable"></div>
                         </div>
                         
-                        <!-- Karten Grid-Ansicht (Kompakt) -->
+                        <!-- Card Grid View (Compact) -->
                         <div class="deck-visual" id="currentMetaDeckVisual" style="display: none;">
                             <div class="deck-grid" id="currentMetaDeckGrid"></div>
                         </div>
@@ -467,6 +480,19 @@
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
                                 <input type="text" id="pastMetaOverviewSearch" placeholder="🔍 Search cards..." class="card-search-input" oninput="filterPastMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                                 
+                                <!-- Card Type Filter -->
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #f8f9fa;">
+                                    <button id="pastMetaOverviewTypeAll" onclick="setPastMetaOverviewCardTypeFilter('all')" style="padding: 6px 10px; font-size: 0.85em; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 1; font-weight: bold;">🔵 All</button>
+                                    <button id="pastMetaOverviewTypePokemon" onclick="setPastMetaOverviewCardTypeFilter('Pokemon')" style="padding: 6px 10px; font-size: 0.85em; background: #ffc107; color: #333; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟡 Pokémon</button>
+                                    <button id="pastMetaOverviewTypeSupporter" onclick="setPastMetaOverviewCardTypeFilter('Supporter')" style="padding: 6px 10px; font-size: 0.85em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟢 Supporter</button>
+                                    <button id="pastMetaOverviewTypeItem" onclick="setPastMetaOverviewCardTypeFilter('Item')" style="padding: 6px 10px; font-size: 0.85em; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟠 Item</button>
+                                    <button id="pastMetaOverviewTypeTool" onclick="setPastMetaOverviewCardTypeFilter('Tool')" style="padding: 6px 10px; font-size: 0.85em; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟣 Tool</button>
+                                    <button id="pastMetaOverviewTypeStadium" onclick="setPastMetaOverviewCardTypeFilter('Stadium')" style="padding: 6px 10px; font-size: 0.85em; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🔴 Stadium</button>
+                                    <button id="pastMetaOverviewTypeEnergy" onclick="setPastMetaOverviewCardTypeFilter('Energy')" style="padding: 6px 10px; font-size: 0.85em; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">⚡ Energy</button>
+                                    <button id="pastMetaOverviewTypeSpecialEnergy" onclick="setPastMetaOverviewCardTypeFilter('Special Energy')" style="padding: 6px 10px; font-size: 0.85em; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">💎 Spec. Energy</button>
+                                    <button id="pastMetaOverviewTypeAceSpec" onclick="setPastMetaOverviewCardTypeFilter('Ace Spec')" style="padding: 6px 10px; font-size: 0.85em; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🌟 Ace Spec</button>
+                                </div>
+                                
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                     <button class="btn btn-success" onclick="setPastMetaRarityMode('min')" id="pastMetaRarityMin" style="padding: 8px 14px; font-size: 0.9em; background: #28a745;">⬇️ Low Rarity</button>
                                     <button class="btn btn-danger" onclick="setPastMetaRarityMode('max')" id="pastMetaRarityMax" style="padding: 8px 14px; font-size: 0.9em; background: #dc3545;">⬆️ Max Rarity</button>
@@ -480,12 +506,12 @@
                             </div>
                         </div>
                         
-                        <!-- Karten Tabellen-Ansicht (Standard) -->
+                        <!-- Card Table View (Default) -->
                         <div class="deck-table-view" id="pastMetaDeckTableView" style="display: none;">
                             <div id="pastMetaDeckTable"></div>
                         </div>
                         
-                        <!-- Karten Grid-Ansicht (Kompakt) -->
+                        <!-- Card Grid View (Compact) -->
                         <div class="deck-visual" id="pastMetaDeckVisual" style="display: none;">
                             <div class="deck-grid" id="pastMetaDeckGrid"></div>
                         </div>
@@ -538,8 +564,8 @@
                 <div class="cards-filter-section" style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <!-- Search with Autocomplete -->
                     <div style="margin-bottom: 20px; position: relative;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px;">🔍 Kartenname suchen</label>
-                        <input type="text" id="cardSearch" placeholder="z.B. Charizard, Pikachu..." autocomplete="off" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px;">🔍 Search card name</label>
+                        <input type="text" id="cardSearch" placeholder="e.g. Charizard, Pikachu..." autocomplete="off" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 16px;">
                         <div id="cardSearchAutocomplete" class="cards-autocomplete-dropdown" style="display: none;"></div>
                     </div>
                     
@@ -605,7 +631,7 @@
                         <!-- Category Filter -->
                         <div class="cards-filter-group">
                             <div class="cards-filter-header collapsed" onclick="toggleCardFilter('categoryFilterOptions')">
-                                <span>🎴 Kategorie</span>
+                                <span>🎴 Category</span>
                                 <span class="toggle-icon">▼</span>
                             </div>
                             <div class="cards-filter-options collapsed" id="categoryFilterOptions">
@@ -632,11 +658,11 @@
                         <!-- Main Pokemon Filter -->
                         <div class="cards-filter-group">
                             <div class="cards-filter-header collapsed" onclick="toggleCardFilter('mainPokemonFilterOptions')">
-                                <span>🐲 Haupt-Pokemon</span>
+                                <span>🐲 Main Pokemon</span>
                                 <span class="toggle-icon">▼</span>
                             </div>
                             <div class="cards-filter-options collapsed" id="mainPokemonFilterOptions">
-                                <input type="text" id="mainPokemonSearch" placeholder="Pokemon suchen..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterMainPokemonList()">
+                                <input type="text" id="mainPokemonSearch" placeholder="Search Pokemon..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterMainPokemonList()">
                                 <div id="mainPokemonList" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
                                     <!-- Will be populated dynamically -->
                                 </div>
@@ -650,7 +676,7 @@
                                 <span class="toggle-icon">▼</span>
                             </div>
                             <div class="cards-filter-options collapsed" id="archetypeFilterOptions">
-                                <input type="text" id="archetypeSearch" placeholder="Archetype suchen..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterArchetypeList()">
+                                <input type="text" id="archetypeSearch" placeholder="Search archetype..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterArchetypeList()">
                                 <div id="archetypeList" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
                                     <!-- Will be populated dynamically -->
                                 </div>
@@ -665,9 +691,9 @@
                             </div>
                             <div class="cards-filter-options collapsed" id="deckCoverageFilterOptions">
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="100"> 💯 In 100% of all Decks</label>
-                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="90"> 🔥 In ≥90% der Decks</label>
-                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="70"> ⭐ In ≥70% der Decks</label>
-                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="50"> 📈 In ≥50% der Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="90"> 🔥 In ≥90% of Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="70"> ⭐ In ≥70% of Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="50"> 📈 In ≥50% of Decks</label>
                             </div>
                         </div>
                     </div>
@@ -675,20 +701,20 @@
                     <!-- Reset and Results -->
                     <div style="margin-top: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                         <button onclick="resetCardFilters()" style="padding: 12px 24px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 15px;">
-                            🔄 Reset Filter
+                            🔄 Reset Filters
                         </button>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <label style="font-weight: 600; color: #555;">🔀 Sortierung:</label>
+                            <label style="font-weight: 600; color: #555;">🔀 Sort Order:</label>
                             <select id="cardSortOrder" onchange="filterAndRenderCards()" style="padding: 10px 15px; border: 2px solid #3498db; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; background: white;">
-                                <option value="set">Nach Set (Standard)</option>
+                                <option value="set">By Set (Default)</option>
                                 <option value="deck">Like Deck Overview</option>
-                                <option value="coverage">Nach Coverage</option>
+                                <option value="coverage">By Coverage</option>
                             </select>
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <label style="font-weight: 600; color: #555;">🖼️ Ansicht:</label>
+                            <label style="font-weight: 600; color: #555;">🖼️ View Mode:</label>
                             <button id="printViewToggle" onclick="togglePrintView()" style="padding: 10px 20px; border: 2px solid #9b59b6; background: #9b59b6; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s;">
-                                📦 Nur 1 Print (Low Rarity)
+                                📦 Only 1 Print (Low Rarity)
                             </button>
                         </div>
                         <div id="cardResultsInfo" style="flex: 1; padding: 12px; background: #ecf0f1; border-radius: 6px; text-align: center; font-weight: 600; font-size: 15px;">
@@ -956,7 +982,7 @@
         </div>
     </div>
     
-        <script src="js/app.js?v=20260309-01"></script>
+        <script src="js/app.js?v=20260309-02"></script>
     
     <!-- Image View Modal -->
     <div id="imageViewModal" class="image-view-modal" onclick="if(event.target === this) closeImageView()">
@@ -1018,4 +1044,4 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=20260308-14"></script>
+    <script src="js/app.js?v=20260309-02"></script>

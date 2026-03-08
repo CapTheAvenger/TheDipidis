@@ -1894,16 +1894,38 @@ const BASE_PATH = './data/';
         }
         
         // Helper function to fix Japanese card image URLs
-        function fixJapaneseCardImageUrl(url, setCode) {
+        function fixJapaneseCardImageUrl(url, setCode, cardName = '') {
             if (!url) return url;
             
-            // M3 set cards need URL correction for Japanese versions
-            // English: tpci/M3/M3_046_R_EN_LG.png (with leading zero)
-            // Japanese: tpc/M3/M3_46_R_JP_LG.png (without leading zero)
+            // M3 set cards: Use pokemonproxies.com (English translation), fallback to Limitless Japanese
             const isM3Set = setCode === 'M3' || url.includes('/M3/');
-            const hasEnInUrl = url.includes('_EN_');
             
-            if (isM3Set && hasEnInUrl) {
+            if (isM3Set && cardName) {
+                // Extract card number from URL (e.g., M3_046 or M3_46)
+                const numberMatch = url.match(/M3_0*(\d+)_/);
+                if (numberMatch) {
+                    const cardNumber = numberMatch[1].padStart(3, '0'); // 46 → 046
+                    
+                    // Normalize card name for pokemonproxies.com URL
+                    // "Mega Zygarde ex" → "Mega_Zygarde_ex"
+                    // "N's Zorua" → "Ns_Zorua"
+                    const normalizedName = cardName
+                        .replace(/'/g, '')           // Remove apostrophes
+                        .replace(/\./g, '')          // Remove periods
+                        .replace(/[éè]/g, 'e')       // Normalize accents
+                        .replace(/[àâ]/g, 'a')
+                        .replace(/\s+/g, '_')        // Spaces → underscores
+                        .replace(/__+/g, '_');       // Remove double underscores
+                    
+                    // Try pokemonproxies.com (English translation)
+                    const proxyUrl = `https://pokemonproxies.com/images/cards/sets/Munikis_Zero/3a-${cardNumber}-${normalizedName}.png`;
+                    console.log(`🎴 M3 Card → pokemonproxies.com: ${cardName} → ${proxyUrl}`);
+                    return proxyUrl;
+                }
+            }
+            
+            // Fallback: Use Limitless Japanese version for M3
+            if (isM3Set && url.includes('_EN_')) {
                 const originalUrl = url;
                 
                 // Replace tpci with tpc
@@ -1915,7 +1937,7 @@ const BASE_PATH = './data/';
                 // Remove leading zeros from card number (M3_046 → M3_46)
                 url = url.replace(/\/M3_0+(\d+)_/g, '/M3_$1_');
                 
-                console.log(`M3 URL corrected: ${originalUrl} → ${url}`);
+                console.log(`🎴 M3 Card → Limitless JP fallback: ${originalUrl} → ${url}`);
             }
             
             return url;
@@ -1997,7 +2019,7 @@ const BASE_PATH = './data/';
                     };
                 }
                 
-                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', displayCard.set_code);
+                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', displayCard.set_code, cardName);
                 const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                 const maxCount = parseInt(card.max_count) || card.max_count || '?';
                 const cardNameEscaped = cardName.replace(/'/g, "\\'");
@@ -2212,7 +2234,7 @@ const BASE_PATH = './data/';
                     const setCode = displayCard.set_code || '';
                     const setNumber = displayCard.set_number || '';
                 
-                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', setCode);
+                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', setCode, cardName);
                 const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                 const maxCount = parseInt(card.max_count) || card.max_count || '?';
                 
@@ -3382,7 +3404,7 @@ const BASE_PATH = './data/';
                 } else {
                     imageUrl = buildCardImageUrl(setCode, setNumber, card.rarity || 'C');
                 }
-                imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode);
+                imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode, card.card_name);
                 
                 const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                 const count = card.deck_count_in_selected || 1;
@@ -3813,7 +3835,7 @@ const BASE_PATH = './data/';
             if (!overviewContainer) return;
             
             const gridHtml = sortedCards.map(card => {
-                const imageUrl = fixJapaneseCardImageUrl(card.image_url || '', card.set_code);
+                const imageUrl = fixJapaneseCardImageUrl(card.image_url || '', card.set_code, card.card_name);
                 // Konvertiere Komma zu Punkt für parseFloat (CSV verwendet Komma als Dezimaltrennzeichen)
                 const percentageStr = (card.percentage_in_archetype || '0').toString().replace(',', '.');
                 let percentage = parseFloat(percentageStr);
@@ -3964,7 +3986,7 @@ const BASE_PATH = './data/';
             
             // Build grid HTML
             grid.innerHTML = sortedCards.map(card => {
-                const imageUrl = fixJapaneseCardImageUrl(card.image_url || '', card.set_code);
+                const imageUrl = fixJapaneseCardImageUrl(card.image_url || '', card.set_code, card.card_name);
                 const count = card.deck_count_in_selected || 1;
                 const cardName = card.card_name || '';
                 const cardNameEscaped = (cardName || '').replace(/'/g, "\\'");
@@ -4443,7 +4465,7 @@ const BASE_PATH = './data/';
                 // Use image_url from database if available and valid, otherwise try to build it
                 const hasValidImageUrl = card.image_url && card.image_url.trim() !== '' && card.image_url.startsWith('http');
                 let imageUrl = hasValidImageUrl ? card.image_url : buildCardImageUrl(setCode, setNumber, rarityFull);
-                imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode);
+                imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode, cardName);
                 const cardNameEscaped = cardName.replace(/'/g, "\\'");
                 
                 html += `
@@ -5510,7 +5532,7 @@ const BASE_PATH = './data/';
                     const setCode = displayCard.set_code || '';
                     const setNumber = displayCard.set_number || '';
                     
-                    const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', setCode) || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22280%22%3E%3Crect width=%22200%22 height=%22280%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2218%22%3ENo Image%3C/text%3E%3C/svg%3E';
+                    const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', setCode, cardName) || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22280%22%3E%3Crect width=%22200%22 height=%22280%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2218%22%3ENo Image%3C/text%3E%3C/svg%3E';
                     
                     // Check if card is in deck builder
                     let deckCount = 0;
@@ -8928,7 +8950,7 @@ const BASE_PATH = './data/';
                     } else if (displayCard.image_url) {
                         imageUrl = displayCard.image_url;
                     }
-                    imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode);
+                    imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode, cardName);
                     const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                     const maxCount = parseInt(card.max_count) || card.max_count || '?';
                     
@@ -9058,7 +9080,7 @@ const BASE_PATH = './data/';
                     };
                 }
                 
-                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', displayCard.set_code);
+                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', displayCard.set_code, cardName);
                 const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                 const maxCount = parseInt(card.max_count) || card.max_count || '?';
                 const cardNameEscaped = cardName.replace(/'/g, "\\'");

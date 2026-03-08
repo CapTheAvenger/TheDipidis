@@ -4857,6 +4857,23 @@ const BASE_PATH = './data/';
         // Patch Meta stat card with tournament statistics
         async function patchMetaStats() {
             try {
+                // Load format from settings
+                let currentFormat = 'SVI-PFL'; // Default fallback
+                try {
+                    const settingsResponse = await fetch(BASE_PATH + 'current_meta_analysis_settings.json?t=' + Date.now());
+                    if (settingsResponse.ok) {
+                        const settings = await settingsResponse.json();
+                        const formatFilter = settings?.sources?.limitless_online?.format_filter;
+                        if (formatFilter) {
+                            // formatFilter is just the set code (e.g., "ASC"), prefix with "SVI-"
+                            currentFormat = `SVI-${formatFilter}`;
+                            console.log(`📋 Loaded format from settings: ${currentFormat}`);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not load current_meta_analysis_settings.json:', e);
+                }
+                
                 // Load Limitless meta statistics from JSON file
                 let metaStats = { tournaments: 0, players: 0, matches: 0 };
                 try {
@@ -4868,15 +4885,15 @@ const BASE_PATH = './data/';
                     console.warn('Could not load limitless_meta_stats.json:', e);
                 }
                 
-                // Load tournament overview data - filter by SVI-PFL format only
+                // Load tournament overview data - filter by current format
                 const tournamentData = await loadCSV('tournament_cards_data_overview.csv');
                 let majorTournaments = 0;
                 let totalPlayers = 0;
                 
                 if (tournamentData && tournamentData.length > 0) {
-                    const svipflTournaments = tournamentData.filter(row => row.format === 'SVI-PFL');
-                    majorTournaments = svipflTournaments.length;
-                    totalPlayers = svipflTournaments.reduce((sum, row) => {
+                    const formatTournaments = tournamentData.filter(row => row.format === currentFormat);
+                    majorTournaments = formatTournaments.length;
+                    totalPlayers = formatTournaments.reduce((sum, row) => {
                         return sum + (parseInt(row.players, 10) || 0);
                     }, 0);
                 }
@@ -4886,6 +4903,13 @@ const BASE_PATH = './data/';
                 statCards.forEach(card => {
                     const h3 = card.querySelector('h3');
                     if (h3 && h3.textContent.includes('Meta')) {
+                        // Update format display
+                        const valueDiv = card.querySelector('.value');
+                        if (valueDiv) {
+                            valueDiv.textContent = currentFormat;
+                            console.log(`✅ Format updated to: ${currentFormat}`);
+                        }
+                        
                         // Add tournament stats below the current format
                         const existingP = card.querySelector('p');
                         if (existingP && existingP.textContent.includes('Current Format')) {
@@ -4907,7 +4931,7 @@ const BASE_PATH = './data/';
                             onlineStats: metaStats,
                             majorTournaments,
                             totalPlayers,
-                            format: 'SVI-PFL'
+                            format: currentFormat
                         });
                     }
                 });

@@ -9657,8 +9657,41 @@ const BASE_PATH = './data/';
             }
             
             // Helper function to determine card type for sorting
-            function getCardType(name) {
-                // 1. Check if it's energy (most specific)
+            function getCardType(name, set, number) {
+                // Try to get card from database first
+                if (set && number && cardsBySetNumberMap) {
+                    const key = `${set}-${number}`;
+                    const dbCard = cardsBySetNumberMap[key];
+                    
+                    if (dbCard && dbCard.type) {
+                        const dbType = dbCard.type;
+                        
+                        // Map database type to display category
+                        // Energy types
+                        if (dbType === 'Basic Energy' || dbType === 'Special Energy') {
+                            return 'Energy';
+                        }
+                        
+                        // Trainer types - exact match
+                        if (dbType === 'Supporter') return 'Supporter';
+                        if (dbType === 'Stadium') return 'Stadium';
+                        
+                        // Item and Tool - check for Ace Spec first
+                        if (dbType === 'Item' || dbType === 'Tool' || dbType === 'Item/Technical Machine') {
+                            if (isAceSpec(name)) return 'Ace Spec';
+                            if (dbType === 'Tool' || dbType === 'Item/Technical Machine') return 'Tool';
+                            return 'Item';
+                        }
+                        
+                        // Pokémon types (any type starting with element: G Basic, R Stage 1, W Stage 2, etc.)
+                        return 'Pokémon';
+                    }
+                }
+                
+                // FALLBACK: If card not in database, use name-based detection
+                console.warn(`[getCardType] Card not found in database: ${name} (${set} ${number}), using fallback detection`);
+                
+                // 1. Check if it's energy
                 if (isBasicEnergy(name)) return 'Energy';
                 if (name.includes('Energy')) return 'Energy';
                 
@@ -9671,20 +9704,20 @@ const BASE_PATH = './data/';
                     return 'Tool';
                 }
                 
-                // 4. Check for Stadiums BEFORE Supporters (to catch "Team Rocket's Watchtower" etc.)
+                // 4. Check for Stadiums
                 if (['Stadium', 'Tower', 'Watchtower', 'Path', 'Temple', 'Forest', 'Mountain', 
                      'Beach', 'Town', 'Hall', 'Garden', 'Ruins', 'Lake', 'Crater'].some(t => name.includes(t))) {
                     return 'Stadium';
                 }
                 
-                // 5. Check for Supporters (Trainer with 's or specific supporter names)
+                // 5. Check for Supporters
                 if (name.includes("'s ") || 
                     ['Professor', 'Arven', 'Iono', 'Judge', 'Cynthia', 'Marnie', 'Irida', 'Carmine', 
                      'Penny', 'Colress', 'Raihan', 'Tulip', 'Grusha', 'Larry', 'Kieran'].some(t => name.includes(t))) {
                     return 'Supporter';
                 }
                 
-                // 6. Check for Items (Trainer with specific keywords - NOT Tools)
+                // 6. Check for Items
                 if (['Ball', 'Pad', 'Rod', 'Cart', 'Poffin', 'Nest', 'Candy', 'Switch',
                      'Stretcher', 'Letter', 'Bike', 'Scooter', 'Scoop', 'Gong', 'Device', 
                      'Container', 'Scrapper', 'Deck', 'Doll', 'Fossil', 'Potion', 'Mail',
@@ -9692,21 +9725,20 @@ const BASE_PATH = './data/';
                     return 'Item';
                 }
                 
-                // 7. Check for Pokémon (contains ex, GX, V, VMAX, VSTAR at end of name)
+                // 7. Check for Pokémon with ex/GX/V suffix
                 if (/\s(ex|GX|V|VMAX|VSTAR|BREAK)$/i.test(name)) {
                     return 'Pokémon';
                 }
                 
-                // 8. Default: If none of the above, assume it's a Pokémon
-                // (Since most single-word or simple names are Pokémon: Pikachu, Charizard, Riolu, etc.)
+                // 8. Default: assume Pokémon
                 return 'Pokémon';
             }
             
             // Sort cards by type
             const typeOrder = {'Pokémon': 0, 'Supporter': 1, 'Ace Spec': 2, 'Item': 3, 'Tool': 4, 'Stadium': 5, 'Energy': 6};
             allDisplayCards.sort((a, b) => {
-                const typeA = getCardType(a.name);
-                const typeB = getCardType(b.name);
+                const typeA = getCardType(a.name, a.set, a.number);
+                const typeB = getCardType(b.name, b.set, b.number);
                 const orderDiff = typeOrder[typeA] - typeOrder[typeB];
                 if (orderDiff !== 0) return orderDiff;
                 // Within same type, sort by name
@@ -9739,7 +9771,7 @@ const BASE_PATH = './data/';
                 // Group cards by type for display
                 const cardsByType = {};
                 allDisplayCards.forEach(card => {
-                    const type = getCardType(card.name);
+                    const type = getCardType(card.name, card.set, card.number);
                     if (!cardsByType[type]) cardsByType[type] = [];
                     cardsByType[type].push(card);
                 });

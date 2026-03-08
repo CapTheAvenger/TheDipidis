@@ -9662,29 +9662,37 @@ const BASE_PATH = './data/';
                 if (isBasicEnergy(name)) return 'Energy';
                 if (name.includes('Energy')) return 'Energy';
                 
-                // 2. Check for Supporters (Trainer with 's or specific supporter names)
+                // 2. Check for Ace Spec (special items - highest priority)
+                if (isAceSpec(name)) return 'Ace Spec';
+                
+                // 3. Check for Tools (Pokémon Tools attached to Pokémon)
+                if (['Balloon', 'Belt', 'Cape', 'Charm', 'Band', 'Guard', 'Helmet', 
+                     'Glasses', 'Shard', 'Stone'].some(t => name.includes(t))) {
+                    return 'Tool';
+                }
+                
+                // 4. Check for Supporters (Trainer with 's or specific supporter names)
                 if (name.includes("'s ") || 
                     ['Professor', 'Arven', 'Iono', 'Judge', 'Cynthia', 'Marnie', 'Irida', 'Carmine', 
                      'Penny', 'Colress', 'Raihan', 'Tulip', 'Grusha', 'Larry', 'Kieran'].some(t => name.includes(t))) {
                     return 'Supporter';
                 }
                 
-                // 3. Check for Stadiums (specific patterns)
+                // 5. Check for Stadiums (specific patterns)
                 if (['Stadium', 'Tower', 'Watchtower', 'Path', 'Temple', 'Forest', 'Mountain', 
                      'Beach', 'Town', 'Hall', 'Garden', 'Ruins', 'Lake', 'Crater'].some(t => name.includes(t))) {
                     return 'Stadium';
                 }
                 
-                // 4. Check for Items (Trainer with specific keywords)
-                if (['Ball', 'Belt', 'Pad', 'Rod', 'Cart', 'Poffin', 'Nest', 'Candy', 'Tool', 'Switch',
-                     'Stretcher', 'Letter', 'Bike', 'Scooter', 'Scoop', 'Cape', 'Charm', 'Band',
-                     'Gong', 'Glasses', 'Helmet', 'Device', 'Container', 'Balloon', 'Scrapper',
-                     'Deck', 'Doll', 'Fossil', 'Shard', 'Stone', 'Potion', 'Guard', 'Mail',
-                     'Premium Power Pro', 'Escape Rope', 'Max Elixir', 'Choice Belt'].some(t => name.includes(t))) {
+                // 6. Check for Items (Trainer with specific keywords - NOT Tools)
+                if (['Ball', 'Pad', 'Rod', 'Cart', 'Poffin', 'Nest', 'Candy', 'Switch',
+                     'Stretcher', 'Letter', 'Bike', 'Scooter', 'Scoop', 'Gong', 'Device', 
+                     'Container', 'Scrapper', 'Deck', 'Doll', 'Fossil', 'Potion', 'Mail',
+                     'Premium Power Pro', 'Escape Rope', 'Max Elixir'].some(t => name.includes(t))) {
                     return 'Item';
                 }
                 
-                // 5. Check for Pokémon (contains ex, GX, V, VMAX, VSTAR at end of name)
+                // 7. Check for Pokémon (contains ex, GX, V, VMAX, VSTAR at end of name)
                 if (/\s(ex|GX|V|VMAX|VSTAR|BREAK)$/i.test(name)) {
                     return 'Pokémon';
                 }
@@ -9695,7 +9703,7 @@ const BASE_PATH = './data/';
             }
             
             // Sort cards by type
-            const typeOrder = {'Pokémon': 0, 'Supporter': 1, 'Item': 2, 'Stadium': 3, 'Energy': 4};
+            const typeOrder = {'Pokémon': 0, 'Supporter': 1, 'Ace Spec': 2, 'Item': 3, 'Tool': 4, 'Stadium': 5, 'Energy': 6};
             allDisplayCards.sort((a, b) => {
                 const typeA = getCardType(a.name);
                 const typeB = getCardType(b.name);
@@ -9737,8 +9745,8 @@ const BASE_PATH = './data/';
                 });
                 
                 // Display each type group
-                const typeIcons = {'Pokémon': '🎴', 'Supporter': '👤', 'Item': '⚙️', 'Stadium': '🏟️', 'Energy': '⚡'};
-                const orderedTypes = ['Pokémon', 'Supporter', 'Item', 'Stadium', 'Energy'];
+                const typeIcons = {'Pokémon': '🎴', 'Supporter': '👤', 'Ace Spec': '⭐', 'Item': '⚙️', 'Tool': '🔧', 'Stadium': '🏟️', 'Energy': '⚡'};
+                const orderedTypes = ['Pokémon', 'Supporter', 'Ace Spec', 'Item', 'Tool', 'Stadium', 'Energy'];
                 
                 orderedTypes.forEach(type => {
                     if (!cardsByType[type] || cardsByType[type].length === 0) return;

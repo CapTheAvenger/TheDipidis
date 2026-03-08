@@ -9368,8 +9368,27 @@ const BASE_PATH = './data/';
 
         let currentDeckSource = null;
 
-        function openDeckCompare(source) {
+        async function openDeckCompare(source) {
             currentDeckSource = source;
+            
+            // Ensure cards database is loaded before allowing comparison
+            if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
+                console.log('[Deck Compare] Loading cards database...');
+                document.getElementById('deckCompareModal').style.display = 'flex';
+                document.getElementById('deckCompareResult').innerHTML = '<div class="loading">⏳ Lade Kartendatenbank...</div>';
+                document.getElementById('deckCompareResult').style.display = 'block';
+                
+                try {
+                    await loadAllCardsDatabase();
+                    console.log('[Deck Compare] ✅ Database loaded successfully');
+                    document.getElementById('deckCompareResult').style.display = 'none';
+                } catch (error) {
+                    console.error('[Deck Compare] Failed to load database:', error);
+                    document.getElementById('deckCompareResult').innerHTML = '<div class="error">❌ Fehler beim Laden der Kartendatenbank</div>';
+                    return;
+                }
+            }
+            
             document.getElementById('deckCompareModal').style.display = 'flex';
             document.getElementById('oldDeckListInput').value = '';
             document.getElementById('deckCompareResult').style.display = 'none';
@@ -9415,22 +9434,35 @@ const BASE_PATH = './data/';
         function areSameInternationalPrint(set1, number1, set2, number2) {
             if (set1 === set2 && number1 === number2) return true;
             
+            // Check if cards database is loaded
+            if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
+                console.warn('[areSameInternationalPrint] cardsBySetNumberMap not loaded yet!');
+                return false;
+            }
+            
             // Get all international prints for card 1
             const prints1 = getInternationalPrintsForCard(set1, number1);
             
             // Check if card 2 is in the international prints of card 1
             if (prints1 && prints1.length > 0) {
                 const match = prints1.some(p => p.set === set2 && p.number === number2);
-                if (match) return true;
+                if (match) {
+                    console.log(`[areSameInternationalPrint] ✓ Match found: ${set1} ${number1} ↔ ${set2} ${number2}`);
+                    return true;
+                }
             }
             
             // Also check in reverse direction (card 2 -> card 1)
             const prints2 = getInternationalPrintsForCard(set2, number2);
             if (prints2 && prints2.length > 0) {
                 const match = prints2.some(p => p.set === set1 && p.number === number1);
-                if (match) return true;
+                if (match) {
+                    console.log(`[areSameInternationalPrint] ✓ Match found (reverse): ${set1} ${number1} ↔ ${set2} ${number2}`);
+                    return true;
+                }
             }
             
+            console.log(`[areSameInternationalPrint] ✗ No match: ${set1} ${number1} vs ${set2} ${number2}`);
             return false;
         }
 
@@ -9446,6 +9478,15 @@ const BASE_PATH = './data/';
                 alert('⚠️ Fehler: Keine Deck-Quelle ausgewählt!');
                 return;
             }
+            
+            // Check if card database is loaded
+            if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
+                console.error('[deckCompare] ERROR: cardsBySetNumberMap not loaded!');
+                alert('⚠️ Fehler: Kartendatenbank noch nicht geladen! Bitte warte einen Moment und versuche es erneut.');
+                return;
+            }
+            
+            console.log(`[deckCompare] cardsBySetNumberMap loaded: ${Object.keys(cardsBySetNumberMap).length} cards`);
             
             // Parse old deck (from text input)
             const oldDeck = parseDeckList(oldDeckText);

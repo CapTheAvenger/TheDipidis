@@ -4860,7 +4860,7 @@ const BASE_PATH = './data/';
                 // Load format from settings
                 let currentFormat = 'SVI-PFL'; // Default fallback
                 try {
-                    const settingsResponse = await fetch(BASE_PATH + 'current_meta_analysis_settings.json?t=' + Date.now());
+                    const settingsResponse = await fetch('./current_meta_analysis_settings.json?t=' + Date.now());
                     if (settingsResponse.ok) {
                         const settings = await settingsResponse.json();
                         const formatFilter = settings?.sources?.limitless_online?.format_filter;

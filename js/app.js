@@ -9408,9 +9408,9 @@ const BASE_PATH = './data/';
                 if (!line) continue;
                 if (line.includes('Pokémon:') || line.includes('Trainer:') || line.includes('Energy:')) continue;
                 
-                // Format: "2 Lunatone ASC 105" or "2 Lunatone ASC 105 PH"
-                // Extract: count, card name, set code, set number
-                const match = line.match(/^(\d+)\s+(.+?)\s+([A-Z]{2,})\s+(\d+)/);
+                // Format: "2 Lunatone ASC 105" or "2 Lunatone ASC 105 PH" or "1 Meowth ex M3 61"
+                // Extract: count, card name, set code (including Japanese sets like M3, M2a), set number
+                const match = line.match(/^(\d+)\s+(.+?)\s+([A-Z][A-Z0-9]*[a-z]*)\s+(\d+)/);
                 if (match) {
                     const count = parseInt(match[1]);
                     const cardName = match[2].trim();

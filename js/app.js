@@ -9440,6 +9440,16 @@ const BASE_PATH = './data/';
                 return false;
             }
             
+            // SPECIAL CASE: Basic Energies are always the same card regardless of set
+            const card1 = cardsBySetNumberMap[`${set1}-${number1}`];
+            const card2 = cardsBySetNumberMap[`${set2}-${number2}`];
+            if (card1 && card2 && isBasicEnergy(card1.name) && isBasicEnergy(card2.name)) {
+                if (card1.name === card2.name) {
+                    console.log(`[areSameInternationalPrint] ✓ Basic Energy match: ${set1} ${number1} ↔ ${set2} ${number2} (${card1.name})`);
+                    return true;
+                }
+            }
+            
             // Get all international prints for card 1
             const prints1 = getInternationalPrintsForCard(set1, number1);
             

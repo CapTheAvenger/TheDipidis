@@ -9658,32 +9658,40 @@ const BASE_PATH = './data/';
             
             // Helper function to determine card type for sorting
             function getCardType(name) {
-                // Check if it's a basic energy
+                // 1. Check if it's energy (most specific)
                 if (isBasicEnergy(name)) return 'Energy';
+                if (name.includes('Energy')) return 'Energy';
                 
-                // Check for special energies
-                if (name.includes('Energy') && !isBasicEnergy(name)) return 'Energy';
-                
-                // Check for Pokémon (contains 'ex', 'GX', 'V', or common Pokémon patterns)
-                const isPokemon = /\s(ex|GX|V|VMAX|VSTAR)$/i.test(name) || 
-                                 /^[A-Z]/.test(name) && !name.includes("'s ") && 
-                                 !['Ultra Ball', 'Poké Pad', 'Rare Candy', 'Switch', 'Boss', 'Arven', 'Professor'].some(t => name.includes(t));
-                
-                if (isPokemon) return 'Pokémon';
-                
-                // Check for Supporters (usually contains 's or specific supporter names)
+                // 2. Check for Supporters (Trainer with 's or specific supporter names)
                 if (name.includes("'s ") || 
-                    ['Professor', 'Boss', 'Arven', 'Iono', 'Judge', 'N', 'Cynthia', 'Marnie', 'Irida'].some(t => name.includes(t))) {
+                    ['Professor', 'Arven', 'Iono', 'Judge', 'Cynthia', 'Marnie', 'Irida', 'Carmine', 
+                     'Penny', 'Colress', 'Raihan', 'Tulip', 'Grusha', 'Larry', 'Kieran'].some(t => name.includes(t))) {
                     return 'Supporter';
                 }
                 
-                // Check for Stadiums
-                if (['Stadium', 'Tower', 'Path', 'Temple', 'Forest', 'Mountain', 'Beach', 'Town'].some(t => name.includes(t))) {
+                // 3. Check for Stadiums (specific patterns)
+                if (['Stadium', 'Tower', 'Watchtower', 'Path', 'Temple', 'Forest', 'Mountain', 
+                     'Beach', 'Town', 'Hall', 'Garden', 'Ruins', 'Lake', 'Crater'].some(t => name.includes(t))) {
                     return 'Stadium';
                 }
                 
-                // Default to Item
-                return 'Item';
+                // 4. Check for Items (Trainer with specific keywords)
+                if (['Ball', 'Belt', 'Pad', 'Rod', 'Cart', 'Poffin', 'Nest', 'Candy', 'Tool', 'Switch',
+                     'Stretcher', 'Letter', 'Bike', 'Scooter', 'Scoop', 'Cape', 'Charm', 'Band',
+                     'Gong', 'Glasses', 'Helmet', 'Device', 'Container', 'Balloon', 'Scrapper',
+                     'Deck', 'Doll', 'Fossil', 'Shard', 'Stone', 'Potion', 'Guard', 'Mail',
+                     'Premium Power Pro', 'Escape Rope', 'Max Elixir', 'Choice Belt'].some(t => name.includes(t))) {
+                    return 'Item';
+                }
+                
+                // 5. Check for Pokémon (contains ex, GX, V, VMAX, VSTAR at end of name)
+                if (/\s(ex|GX|V|VMAX|VSTAR|BREAK)$/i.test(name)) {
+                    return 'Pokémon';
+                }
+                
+                // 6. Default: If none of the above, assume it's a Pokémon
+                // (Since most single-word or simple names are Pokémon: Pikachu, Charizard, Riolu, etc.)
+                return 'Pokémon';
             }
             
             // Sort cards by type

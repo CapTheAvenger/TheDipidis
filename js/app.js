@@ -4595,31 +4595,41 @@
                         optimalCount = 0; // Skip energy types not used in this archetype
                     }
                 }
-                // 4-of Territory: Core staples
-                // Professional standard: 4 copies for avgCount ≥3.5 and share ≥80%
-                // Examples: Professor's Research, Iono, Ultra Ball, Nest Ball
-                else if (avgCount >= 3.5 && sharePercent >= 80) {
-                    optimalCount = 4;
+                // ═══════════════════════════════════════════════
+                // IMPROVED CONSISTENCY THRESHOLDS V2
+                // ═══════════════════════════════════════════════
+                
+                // 4-of Territory: Ultra-reliable staples
+                // NEW: Evolution lines (Riolu 100% @ 3.25x) and core consistency
+                else if (avgCount >= 3.0 && sharePercent >= 90) {
+                    optimalCount = 4;  // Ultra-reliable: Nearly universal + high count
                 }
-                // 3-of Territory: Very reliable consistency
-                // Professional standard: 3 copies for avgCount ≥2.5 and share ≥70%
-                // Examples: Pokégear 3.0, draw Pokémon lines, Rare Candy
+                else if (avgCount >= 3.5 && sharePercent >= 80) {
+                    optimalCount = 4;  // Core staples: Very high count + good share
+                }
+                // 3-of Territory: Very strong consistency
+                // NEW: Judge (96.6% @ 2.40x) should be 3x, not 2x!
+                else if (avgCount >= 2.2 && sharePercent >= 90) {
+                    optimalCount = 3;  // Very high share + solid count
+                }
                 else if (avgCount >= 2.5 && sharePercent >= 70) {
-                    optimalCount = 3;
+                    optimalCount = 3;  // Good reliability standard
+                }
+                // POLARIZATION DETECTION: Skip specialized cards
+                // NEW: Carmine (55.6% @ 2.78x) = Low share + High avg = Specialized decks only
+                // These cards are "all or nothing" - either the deck needs 3x or doesn't need it at all
+                else if (sharePercent < 70 && avgCount >= 2.5) {
+                    optimalCount = 0;  // Skip polarized cards - not universal to archetype
+                    console.log(`[autoCompleteConsistency] ⚠️ POLARIZED: ${card.card_name} (${sharePercent.toFixed(1)}% @ ${avgCount.toFixed(2)}x) - Specialized card, skipping`);
                 }
                 // 2-of Territory: Solid includes
-                // Standard: 2 copies for avgCount ≥1.8
-                // OR high reliability case: avgCount ≥1.3 AND share ≥85% (User's example!)
-                // Examples: Boss's Orders (2-4), Stadium cards (2-3), support Pokémon
                 else if (avgCount >= 1.8) {
                     optimalCount = 2;
                 } else if (avgCount >= 1.3 && sharePercent >= 85) {
-                    // THIS IS THE USER'S EXAMPLE: 93% @ 1.3x → Should be 2 copies!
-                    optimalCount = 2;
+                    optimalCount = 2;  // High reliability case
                 }
                 // 1-of Territory: Tech choices
-                // Standard: 1 copy for avgCount ≥1.0 and share ≥50%
-                // Examples: Forest Seal Stone (1-2), tech Pokémon, situational tools
+                // Example: Wally's Compassion (64.1% @ 1.61x) - Recovery/Utility cards
                 else if (avgCount >= 1.0 && sharePercent >= 50) {
                     optimalCount = 1;
                 }

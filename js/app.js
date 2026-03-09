@@ -1039,7 +1039,7 @@
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
                             <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Zur Analyse von ${d.archetype}">${d.archetype}</td>
-                            <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #7f8c8d; font-size: 0.9em;">(${countChangeText})</span></td>
+                            <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #555; font-size: 0.9em; font-weight: 600;">(${countChangeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: #27ae60; font-weight: bold;">(−${improvement.toFixed(2)})</span></td>
                         </tr>`;
                 });
@@ -1068,7 +1068,7 @@
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
                             <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Zur Analyse von ${d.archetype}">${d.archetype}</td>
-                            <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #7f8c8d; font-size: 0.9em;">(${countChangeText})</span></td>
+                            <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #555; font-size: 0.9em; font-weight: 600;">(${countChangeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: #e74c3c; font-weight: bold;">(+${decline.toFixed(2)})</span></td>
                         </tr>`;
                 });
@@ -1090,7 +1090,7 @@
                             <input type="text" id="cityLeagueSearchFilter" placeholder="Suche z.B.: draga, luca" 
                                 style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #3498db; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                                 oninput="filterCityLeagueTable()">
-                            <div id="cityLeagueSearchResults" style="margin-top: 8px; font-size: 14px; color: #7f8c8d;"></div>
+                            <div id="cityLeagueSearchResults" style="margin-top: 8px; font-size: 14px; color: #555; font-weight: 500;"></div>
                         </div>
                         <div id="cityLeagueFullTable"></div>
                     </div>
@@ -1098,7 +1098,7 @@
                     <!-- Grouped by Main Pokemon -->
                     <div style="flex: 1; min-width: 350px;">
                         <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🎯 Archetype Combined (Top 20)</h2>
-                        <div style="margin-bottom: 15px; padding: 12px; background: #ecf0f1; border-radius: 5px; font-size: 0.9em; color: #7f8c8d;">
+                        <div style="margin-bottom: 15px; padding: 12px; background: #ecf0f1; border-radius: 5px; font-size: 0.9em; color: #333; font-weight: 500;">
                             Kumulierte Zahlen aller Varianten eines Haupt-Pokemons (z.B. alle "dragapult *" Decks)
                         </div>
                         <div id="cityLeagueCombinedTable"></div>
@@ -1223,7 +1223,7 @@
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
                             <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;">${displayName}</td>
-                            <td style="padding: 8px 4px; text-align: center; color: #7f8c8d; font-size: 0.85em;">${d.variant_count}</td>
+                            <td style="padding: 8px 4px; text-align: center; color: #555; font-size: 0.85em; font-weight: 600;">${d.variant_count}</td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
                         </tr>`;
@@ -1259,7 +1259,7 @@
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background=''" title="${d.variants.join(', ')}">
                             <td style="padding: 12px; font-weight: bold;">${displayName}</td>
-                            <td style="padding: 12px; text-align: center; color: #7f8c8d;">${d.variant_count}</td>
+                            <td style="padding: 12px; text-align: center; color: #555; font-weight: 600;">${d.variant_count}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-size: 0.9em;">(${changeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.9em;">(${placementText})</span></td>
                         </tr>`;
@@ -2137,26 +2137,26 @@
                         <!-- Card Info -->
                         <div style="flex-grow: 1; min-width: 0;">
                             <h3 style="margin: 0 0 8px 0; font-size: 1.2em; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${cardName}</h3>
-                            <div style="color: #666; font-size: 0.9em; margin-bottom: 10px;">${setCode} ${setNumber}</div>
+                            <div style="color: #333; font-size: 0.9em; margin-bottom: 10px; font-weight: 600;">${setCode} ${setNumber}</div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
                                 <div>
-                                    <span style="color: #999; font-size: 0.85em;">Nutzungs Share:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Nutzungs Share:</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${percentage}%</span>
-                                </div>
+                                  </div>
                                 <div>
-                                    <span style="color: #999; font-size: 0.85em;">Ø in genutzten Decks:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø in genutzten Decks:</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${avgCountInUsedDecks}x</span>
                                 </div>
                                 <div>
-                                    <span style="color: #999; font-size: 0.85em;">Ø durch alle Decks:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø durch alle Decks:</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${avgCountOverall}x</span>
                                 </div>
                                 <div>
-                                    <span style="color: #999; font-size: 0.85em;">Deck Count:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Deck Count:</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${decksWithCard}/${totalDecksInArchetype} (${percentage}%)</span>
                                 </div>
                                 <div>
-                                    <span style="color: #999; font-size: 0.85em;">Max Count:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Max Count:</span>
                                     <span style="font-weight: 600; color: #dc3545; margin-left: 5px; font-size: 0.95em;">${maxCount}</span>
                                 </div>
                             </div>
@@ -2402,10 +2402,10 @@
                                     <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">
                                         ${cardName}
                                     </div>
-                                    <div style="color: #999; font-size: 0.52em; margin-bottom: 1px;">
+                                    <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">
                                         ${setCode} ${setNumber}
                                     </div>
-                                    <div style="color: #666; font-size: 0.55em; margin-bottom: 1px;">
+                                    <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">
                                         ${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)
                                     </div>
                                     <div style="font-weight: 600; color: #333; font-size: 0.58em;">
@@ -2806,7 +2806,7 @@
             }
             if (!data || data.length === 0) {
                 console.warn('No data to render');
-                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Bitte wähle ein Deck aus...</p>';
+                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #444; font-weight: 500;">Bitte wähle ein Deck aus...</p>';
                 return;
             }
 
@@ -3597,7 +3597,7 @@
             
             const gridContainer = document.getElementById(gridContainerId);
             if (gridContainer) {
-                gridContainer.innerHTML = html || '<p style="text-align: center; color: #666; padding: 40px;">Create a deck using the buttons above or add cards manually...</p>';
+                gridContainer.innerHTML = html || '<p style="text-align: center; color: #444; padding: 40px; font-weight: 500;">Create a deck using the buttons above or add cards manually...</p>';
             }
         }
         
@@ -4036,10 +4036,10 @@
                                 <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 3px; color: #333; font-size: 0.9em;">
                                     ${card.card_name}
                                 </div>
-                                <div style="color: #999; font-size: 0.75em; margin-bottom: 3px;">
+                                <div style="color: #333; font-size: 0.75em; margin-bottom: 3px; font-weight: 600;">
                                     ${card.set_code || ''} ${card.set_number || ''}
                                 </div>
-                                <div style="color: #666; font-size: 0.85em;">
+                                <div style="color: #333; font-size: 0.85em; font-weight: 600;">
                                     ${percentage.toFixed(2).replace('.', ',')}% | Ø ${avgCount}x
                                 </div>
                             </div>
@@ -5376,7 +5376,7 @@
             const countSpan = document.getElementById(countId);
             
             if (!metaCardData[source] || metaCardData[source].length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px; grid-column: 1 / -1;">No cards loaded. Click "Load Meta Analysis" button.</p>';
+                grid.innerHTML = '<p style="text-align: center; color: #444; padding: 40px; grid-column: 1 / -1; font-weight: 500;">No cards loaded. Click "Load Meta Analysis" button.</p>';
                 countSpan.textContent = '0 Cards';
                 return;
             }
@@ -5456,7 +5456,7 @@
             countSpan.textContent = `${cards.length} Cards`;
             
             if (cards.length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: #999; padding: 40px; grid-column: 1 / -1;">No cards match current filters</p>';
+                grid.innerHTML = '<p style="text-align: center; color: #444; padding: 40px; grid-column: 1 / -1; font-weight: 500;">No cards match current filters</p>';
                 return;
             }
             
@@ -5492,13 +5492,13 @@
                                 <div class="card-info-text" style="margin-bottom: 6px;">
                                     <div style="font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${card.card_name}</div>
                                     <div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% | Ø ${card.avgCount.toFixed(2)}x</div>
-                                    <div style="color: #aaa; font-size: 0.9em;">(${card.avgCountWhenUsed.toFixed(2)}x when used)</div>
+                                    <div style="color: #555; font-size: 0.9em; font-weight: 500;">(${card.avgCountWhenUsed.toFixed(2)}x when used)</div>
                                 </div>
                                 
-                                <!-- Action Buttons: - | DECK | + -->
+                                <!-- Action Buttons: - | ★ | + -->
                                 <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 3px;">
                                     <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'" title="Remove from deck">−</button>
-                                    <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 11px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,123,255,0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,123,255,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,123,255,0.3)'" title="Add to deck">DECK</button>
+                                    <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#e0a800'" onmouseout="this.style.background='#ffc107'" title="Switch rarity/print">★</button>
                                     <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" style="background: #28a745; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'" title="Add to deck">+</button>
                                 </div>
                             </div>
@@ -5653,7 +5653,7 @@
             // Debug logging
             if (allAvailableCards.length === 0) {
                 console.warn('[searchDeckCards] allCardsDatabase is empty or not loaded yet');
-                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">Loading card database...</div>';
+                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #444; font-weight: 500;">Loading card database...</div>';
                 return;
             }
             
@@ -5674,7 +5674,7 @@
             console.log(`[searchDeckCards] Search term: "${searchTerm}", found ${uniqueNames.length} unique cards (${matchingCards.length} versions)`);
             
             if (uniqueNames.length === 0) {
-                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No cards found</div>';
+                resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #444; font-weight: 500;">No cards found</div>';
                 return;
             }
             
@@ -5699,7 +5699,7 @@
                         </div>
                         <div style="flex: 1; min-width: 0;">
                             <div style="font-weight: 600; color: #333; font-size: 0.9em; line-height: 1.2; white-space: normal; word-break: break-word;">${cardName}</div>
-                            <div style="font-size: 0.75em; color: #999;">${versionsCount} Version${versionsCount > 1 ? 'en' : ''}</div>
+                            <div style="font-size: 0.75em; color: #444; font-weight: 500;">${versionsCount} Version${versionsCount > 1 ? 'en' : ''}</div>
                         </div>
                         ${currentCount > 0 ? `<div style="background: #28a745; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.75em; font-weight: bold; flex-shrink: 0;">${currentCount}x</div>` : ''}
                     </div>
@@ -5734,7 +5734,7 @@
             html += `<div style="font-weight: bold; color: #333;">🎴 ${cardName}</div>`;
             html += `<button onclick="window.selectedCardName=null; searchDeckCards('${source}');" style="background: #6c757d; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.85em;">← Zurück</button>`;
             html += '</div>';
-            html += `<div style="font-size: 0.85em; color: #666; margin-top: 8px;">${versions.length} Versionen | ${totalCount}x im Deck</div>`;
+            html += `<div style="font-size: 0.85em; color: #333; margin-top: 8px; font-weight: 600;">${versions.length} Versionen | ${totalCount}x im Deck</div>`;
             html += '</div>';
             
             // Add card versions directly - they will be grid items in the parent grid
@@ -5765,7 +5765,7 @@
                         ${versionCount > 0 ? `<div style="position: absolute; top: 4px; left: 4px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75em; font-weight: bold; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${versionCount}</div>` : ''}
                         <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="position: absolute; top: 4px; right: 4px; background: #28a745; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 10; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='#218838';" onmouseout="this.style.transform='scale(1)'; this.style.background='#28a745';" title="Zum Deck hinzufügen">+</button>
                         <div style="padding: 8px; background: white; border-top: 1px solid #f0f0f0;">
-                            <div style="font-size: 0.7em; color: #666; font-weight: 600;">${setCode} ${setNumber}</div>
+                            <div style="font-size: 0.7em; color: #333; font-weight: 600;">${setCode} ${setNumber}</div>
                         </div>
                     </div>
                 `;
@@ -6097,11 +6097,11 @@
                 
                 // Generate HTML for display
                 const top3ByCountHtml = decksByCount
-                    .map(d => `<span style="color: #3498db;">${d.name}</span> (${d.count.toLocaleString()})`)
+                    .map(d => `<span style="color: white; font-weight: 600;">${d.name}</span> (${d.count.toLocaleString()})`)
                     .join('<br>');
                 
                 const top3ByWinRateHtml = decksByWinRate
-                    .map(d => `<span style="color: #27ae60;">${d.name}</span> (${d.winRate.toFixed(1)}%)`)
+                    .map(d => `<span style="color: white; font-weight: 600;">${d.name}</span> (${d.winRate.toFixed(1)}%)`)
                     .join('<br>');
                 
                 // Find and update the Archetype Overview stat card
@@ -6200,11 +6200,11 @@
                         if (existingP && existingP.textContent.includes('Current Format')) {
                             // Add new stats
                             const statsHtml = `
-                                <p style="font-size: 0.85em; color: #7f8c8d; margin: 15px 0 5px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                                <p style="font-size: 0.85em; color: #555; margin: 15px 0 5px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-weight: 500;">
                                     <strong style="color: #3498db;">📊 Online Meta:</strong><br>
                                     <span style="font-size: 0.95em;">${metaStats.tournaments.toLocaleString()} tournaments · ${metaStats.players.toLocaleString()} players · ${metaStats.matches.toLocaleString()} matches</span>
                                 </p>
-                                <p style="font-size: 0.85em; color: #7f8c8d; margin: 5px 0 0 0;">
+                                <p style="font-size: 0.85em; color: #555; margin: 5px 0 0 0; font-weight: 500;">
                                     <strong style="color: #27ae60;">🏆 Major Tournaments:</strong><br>
                                     <span style="font-size: 0.95em;">${majorTournaments} tournaments · ${totalPlayers.toLocaleString()} players</span>
                                 </p>
@@ -6698,7 +6698,7 @@
             const tableContainer = document.getElementById('pastMetaDeckTable');
             
             if (cards.length === 0) {
-                tableContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No cards found</p>';
+                tableContainer.innerHTML = '<p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">No cards found</p>';
                 return;
             }
             
@@ -6734,7 +6734,7 @@
             const gridContainer = document.getElementById('pastMetaDeckGrid');
             
             if (cards.length === 0) {
-                gridContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No cards found</p>';
+                gridContainer.innerHTML = '<p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">No cards found</p>';
                 return;
             }
             
@@ -6913,10 +6913,10 @@
                                         <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">
                                             ${cardName}
                                         </div>
-                                        <div style="color: #999; font-size: 0.52em; margin-bottom: 1px;">
+                                        <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">
                                             ${setCode} ${setNumber}
                                         </div>
-                                        <div style="color: #666; font-size: 0.55em; margin-bottom: 1px;">
+                                        <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">
                                             ${percentage}% | Ø ${avgInUsingDecks}x (${avgCount.toFixed(2)}x)
                                         </div>
                                         <div style="font-weight: 600; color: #333; font-size: 0.58em;">
@@ -8596,7 +8596,7 @@
             const resultsInfo = document.getElementById('cardResultsInfo');
             
             if (cards.length === 0) {
-                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #7f8c8d;"><h2>🔍 Keine Karten gefunden</h2><p>Versuche andere Filter-Einstellungen</p></div>';
+                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #444;"><h2>🔍 Keine Karten gefunden</h2><p style="font-weight: 500;">Versuche andere Filter-Einstellungen</p></div>';
                 resultsInfo.textContent = '0 Karten gefunden';
                 return;
             }
@@ -8733,7 +8733,7 @@
                 if (i > 0 && page - pagesToShow[i-1] > 1) {
                     const ellipsis = document.createElement('span');
                     ellipsis.textContent = '...';
-                    ellipsis.style.cssText = 'padding: 0 5px; color: #7f8c8d;';
+                    ellipsis.style.cssText = 'padding: 0 5px; color: #555; font-weight: 500;';
                     pageInfo.appendChild(ellipsis);
                 }
                 
@@ -9397,7 +9397,7 @@
                     ${imageHtml}
                     <div class="rarity-option-info">
                         <div><strong>${version.set} ${version.number}</strong></div>
-                        <div style="font-size: 11px; color: #999;">Rarity: ${version.rarity || 'N/A'}</div>
+                        <div style="font-size: 11px; color: #444; font-weight: 500;">Rarity: ${version.rarity || 'N/A'}</div>
                     </div>
                     <div class="rarity-badge" style="background-color: ${rarityBadgeColor};">
                         ${version.rarity || 'Unknown'}
@@ -10077,7 +10077,7 @@
                     total_games: data.total_games
                 }));
             } else {
-                dropdown.innerHTML = '<div style="padding: 10px; color: #999;">Keine Opponents verfügbar</div>';
+                dropdown.innerHTML = '<div style="padding: 10px; color: #444; font-weight: 500;">Keine Opponents verfügbar</div>';
                 window.currentMetaDeckMatchups = [];
             }
             
@@ -10129,22 +10129,22 @@
                     <h4 style="margin-top: 0; color: #2c3e50;">📊 Matchup: vs ${opponent}</h4>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 10px;">
                         <div>
-                            <strong style="color: #666;">Win Rate:</strong><br>
+                            <strong style="color: #333;">Win Rate:</strong><br>
                             <span style="font-size: 1.5em; color: #3498db;">${winRate}</span>
                         </div>
                         <div>
-                            <strong style="color: #666;">Record:</strong><br>
+                            <strong style="color: #333;">Record:</strong><br>
                             <span style="font-size: 1.2em; color: #2c3e50;">${record}</span>
                         </div>
                         <div>
-                            <strong style="color: #666;">Total Games:</strong><br>
+                            <strong style="color: #333;">Total Games:</strong><br>
                             <span style="font-size: 1.5em; color: #2c3e50;">${totalGames}</span>
                         </div>
                     </div>
                 `;
                 detailsEl.style.display = 'block';
             } else {
-                detailsEl.innerHTML = '<p style="color: #999; text-align: center;">Keine Matchup-Daten gefunden</p>';
+                detailsEl.innerHTML = '<p style="color: #444; text-align: center; font-weight: 500;">Keine Matchup-Daten gefunden</p>';
                 detailsEl.style.display = 'block';
             }
         }
@@ -10439,8 +10439,8 @@
                                 <div class="card-info-bottom" style="padding: 5px; background: white; font-size: 0.7em; text-align: center; min-height: 48px; display: flex; flex-direction: column; justify-content: space-between;">
                                     <div class="card-info-text">
                                         <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">${cardName}</div>
-                                        <div style="color: #999; font-size: 0.52em; margin-bottom: 1px;">${setCode} ${setNumber}</div>
-                                        <div style="color: #666; font-size: 0.55em; margin-bottom: 1px;">${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
+                                        <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">${setCode} ${setNumber}</div>
+                                        <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
                                     </div>
                                     <!-- Rarity Switcher & Actions (4 buttons: - ★ € +) -->
                                     <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">
@@ -10542,13 +10542,13 @@
                         </div>
                         <div style="flex-grow: 1; min-width: 0;">
                             <h3 style="margin: 0 0 8px 0; font-size: 1.2em; color: #333;">${cardName}</h3>
-                            <div style="color: #666; font-size: 0.9em; margin-bottom: 10px;">${setCode} ${setNumber}</div>
+                            <div style="color: #333; font-size: 0.9em; margin-bottom: 10px; font-weight: 600;">${setCode} ${setNumber}</div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
-                                <div><span style="color: #999; font-size: 0.85em;">Nutzungs Share:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${percentage}%</span></div>
-                                <div><span style="color: #999; font-size: 0.85em;">Ø in genutzten Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountInUsedDecks}x</span></div>
-                                <div><span style="color: #999; font-size: 0.85em;">Ø durch alle Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountOverall}x</span></div>
-                                <div><span style="color: #999; font-size: 0.85em;">Deck Count:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${decksWithCard} / ${totalDecksInArchetype} Decks</span></div>
-                                <div><span style="color: #999; font-size: 0.85em;">Max Count:</span> <span style="font-weight: 600; color: #dc3545; margin-left: 5px;">${maxCount}</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Nutzungs Share:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${percentage}%</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø in genutzten Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountInUsedDecks}x</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø durch alle Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountOverall}x</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Deck Count:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${decksWithCard} / ${totalDecksInArchetype} Decks</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Max Count:</span> <span style="font-weight: 600; color: #dc3545; margin-left: 5px;">${maxCount}</span></div>
                             </div>
                         </div>
                         <div style="flex-shrink: 0;">
@@ -11109,7 +11109,7 @@
             let html = '<div style="margin-top: 20px;">';
             
             if (allDisplayCards.length === 0) {
-                html += '<p style="text-align: center; color: #999; font-size: 1.2em;">✅ Die Decks sind identisch!</p>';
+                html += '<p style="text-align: center; color: #444; font-size: 1.2em; font-weight: 600;">✅ Die Decks sind identisch!</p>';
             } else {
                 // Summary
                 const totalRemoved = allDisplayCards.filter(c => c.changeType === 'removed' || c.changeType === 'decreased')
@@ -11120,11 +11120,11 @@
                 html += `<div style="display: flex; justify-content: space-around; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                             <div style="text-align: center;">
                                 <div style="font-size: 2em; font-weight: bold; color: #dc3545;">−${totalRemoved}</div>
-                                <div style="color: #666;">Cards out</div>
+                                <div style="color: #333; font-weight: 600;">Cards out</div>
                             </div>
                             <div style="text-align: center;">
                                 <div style="font-size: 2em; font-weight: bold; color: #28a745;">+${totalAdded}</div>
-                                <div style="color: #666;">Cards in</div>
+                                <div style="color: #333; font-weight: 600;">Cards in</div>
                             </div>
                          </div>`;
                 
@@ -11182,14 +11182,14 @@
                         if (imageUrl) {
                             html += `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.display='none'">`;
                         } else {
-                            html += `<div style="width: 100%; aspect-ratio: 2.5/3.5; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">No Image</div>`;
+                            html += `<div style="width: 100%; aspect-ratio: 2.5/3.5; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #444;">No Image</div>`;
                         }
                         
                         html += badgeHTML;
                         
                         html += `<div style="padding: 5px; font-size: 0.75em; text-align: center; background: white;">
                                     <div style="font-weight: 600; margin-bottom: 2px;">${card.name}</div>
-                                    <div style="color: #999; font-size: 0.9em;">${card.set} ${card.number}</div>
+                                    <div style="color: #333; font-size: 0.9em; font-weight: 600;">${card.set} ${card.number}</div>
                                  </div>`;
                         
                         html += `</div>`;

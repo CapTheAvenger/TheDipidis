@@ -5465,17 +5465,41 @@
                 
                 // Create JSON string for archetypes (escape properly for HTML attribute)
                 const archetypesJson = JSON.stringify(card.archetypes || []).replace(/"/g, '&quot;');
+                const cardNameEscaped = card.card_name.replace(/'/g, "\\'");
+                
+                // Check if card is in deck
+                const currentDeck = source === 'cityLeague' ? window.cityLeagueDeck : 
+                                   source === 'currentMeta' ? window.currentMetaDeck : 
+                                   window.pastMetaDeck;
+                const deckKey = `${card.card_name} (${card.set_code} ${card.set_number})`;
+                const deckCount = (currentDeck && currentDeck[deckKey]) ? currentDeck[deckKey] : 
+                                 (currentDeck && currentDeck[card.card_name]) ? currentDeck[card.card_name] : 0;
                 
                 return `
-                    <div class="card-item" style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s;" 
-                         onmouseover="this.style.transform='scale(1.05)'; showMetaCardTooltip(event, '${card.card_name.replace(/'/g, "\\'")}', '${archetypesJson}')" 
-                         onmouseout="this.style.transform='scale(1)'; hideMetaCardTooltip()" 
-                         onclick="addCardToDeck('${source}', '${card.card_name.replace(/'/g, "\\'")}', '${card.set_code}', '${card.set_number}')">
-                        <img src="${imageUrl}" alt="${card.card_name}" style="width: 100%; height: auto; display: block;" onerror="this.onerror=null; this.src='${fallbackUrl}'">
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color: white; padding: 8px 6px; font-size: 0.75em; line-height: 1.3;">
-                            <div style="font-weight: bold;">${card.card_name}</div>
-                            <div style="color: #ffd700;">${card.metaShare.toFixed(1)}% | Ø ${card.avgCount.toFixed(2)}x</div>
-                            <div style="color: #aaa; font-size: 0.9em;">(${card.avgCountWhenUsed.toFixed(2)}x when used)</div>
+                    <div class="card-item" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; background: white;">
+                        <div class="card-image-container" style="position: relative; width: 100%;">
+                            <img src="${imageUrl}" alt="${card.card_name}" loading="lazy" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.onerror=null; this.src='${fallbackUrl}'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');"
+                                 onmouseover="showMetaCardTooltip(event, '${cardNameEscaped}', '${archetypesJson}')" 
+                                 onmouseout="hideMetaCardTooltip()">
+                            
+                            <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
+                            ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
+                            
+                            <!-- Card info section -->
+                            <div class="card-info-bottom" style="padding: 6px; background: white; font-size: 0.75em; text-align: center;">
+                                <div class="card-info-text" style="margin-bottom: 6px;">
+                                    <div style="font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${card.card_name}</div>
+                                    <div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% | Ø ${card.avgCount.toFixed(2)}x</div>
+                                    <div style="color: #aaa; font-size: 0.9em;">(${card.avgCountWhenUsed.toFixed(2)}x when used)</div>
+                                </div>
+                                
+                                <!-- Action Buttons: - | DECK | + -->
+                                <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 3px;">
+                                    <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'" title="Remove from deck">−</button>
+                                    <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 11px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,123,255,0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,123,255,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,123,255,0.3)'" title="Add to deck">DECK</button>
+                                    <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" style="background: #28a745; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'" title="Add to deck">+</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;

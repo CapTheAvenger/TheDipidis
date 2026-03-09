@@ -5034,8 +5034,23 @@
                 cards = cards.filter(c => c.card_name.toLowerCase().includes(term));
             }
             
-            // Apply minimum 30% share filter (always active for meta analysis)
-            cards = cards.filter(c => c.metaShare >= 30);
+            // Apply minimum share filter (card type specific, always active)
+            cards = cards.filter(c => {
+                const category = getCardTypeCategory(c.type);
+                
+                // Basic Energy: Never show (remove completely)
+                if (c.type === 'Energy') {
+                    return false;
+                }
+                
+                // Pokemon: Only show if >40% meta share
+                if (category === 'Pokemon') {
+                    return c.metaShare >= 40;
+                }
+                
+                // Trainer (Supporter, Item, Tool, Stadium) and Special Energy: Show if >30%
+                return c.metaShare >= 30;
+            });
             
             // Sort
             if (filter.sortBy === 'share') {

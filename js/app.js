@@ -4092,6 +4092,20 @@
             }
             
             modal.classList.add('show');
+            
+            // Close on ESC key
+            const escapeHandler = (e) => {
+                if (e.key === 'Escape') {
+                    closeImageView();
+                    document.removeEventListener('keydown', escapeHandler);
+                }
+            };
+            document.addEventListener('keydown', escapeHandler);
+        }
+        
+        function closeImageView() {
+            const modal = document.getElementById('imageViewModal');
+            modal.classList.remove('show');
         }
         
         function copyDeck(source) {
@@ -4121,6 +4135,15 @@
             }
             
             modal.classList.add('show');
+            
+            // Close on ESC key
+            const escapeHandler = (e) => {
+                if (e.key === 'Escape') {
+                    closeSingleCard();
+                    document.removeEventListener('keydown', escapeHandler);
+                }
+            };
+            document.addEventListener('keydown', escapeHandler);
         }
         
         function closeSingleCard() {
@@ -8002,7 +8025,7 @@
 
         function openRaritySwitcher(cardName, deckKey) {
             if (!window.allCardsDatabase) {
-                alert('Karten-Datenbank noch nicht geladen...');
+                alert('Card database not loaded yet...');
                 return;
             }
 
@@ -8249,6 +8272,16 @@
             modal.classList.remove('show');
             currentRaritySwitcherCard = null;
         }
+        
+        // Add ESC key handler for Rarity Switcher
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('raritySwitcherModal');
+                if (modal && modal.classList.contains('show')) {
+                    closeRaritySwitcher();
+                }
+            }
+        });
 
         function showImageView(imageUrl, cardName) {
             const modal = document.getElementById('fullscreenCardModal');
@@ -9494,7 +9527,7 @@
             if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
                 console.log('[Deck Compare] Loading cards database...');
                 document.getElementById('deckCompareModal').style.display = 'flex';
-                document.getElementById('deckCompareResult').innerHTML = '<div class="loading">⏳ Lade Kartendatenbank...</div>';
+                document.getElementById('deckCompareResult').innerHTML = '<div class="loading">⏳ Loading card database...</div>';
                 document.getElementById('deckCompareResult').style.display = 'block';
                 
                 try {
@@ -9517,6 +9550,16 @@
             document.getElementById('deckCompareModal').style.display = 'none';
             currentDeckSource = null;
         }
+        
+        // Add ESC key handler for Deck Compare
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('deckCompareModal');
+                if (modal && modal.style.display === 'flex') {
+                    closeDeckCompare();
+                }
+            }
+        });
 
         function parseDeckList(text) {
             const deck = [];

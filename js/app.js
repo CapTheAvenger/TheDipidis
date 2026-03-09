@@ -4813,27 +4813,34 @@
             grid.innerHTML = '<p style="text-align: center; padding: 40px; grid-column: 1 / -1;">Loading top 10 archetypes...</p>';
             
             try {
-                // Load archetype data
+                // Load card analysis data (already aggregated per archetype)
                 const timestamp = new Date().getTime();
-                const csvFile = source === 'cityLeague' ? 'city_league_archetypes.csv' : 'current_meta_archetypes.csv';
+                const csvFile = source === 'cityLeague' ? 'city_league_analysis.csv' : 'current_meta_card_data.csv';
                 const response = await fetch(`${BASE_PATH}${csvFile}?t=${timestamp}`);
                 
-                if (!response.ok) throw new Error('Failed to load archetype data');
+                if (!response.ok) throw new Error('Failed to load card analysis data');
                 
                 const text = await response.text();
                 const allData = parseCSV(text);
                 
-                // Group by archetype and count decks
-                const archetypeDecks = {};
+                console.log('[loadMetaCardAnalysis] Loaded', allData.length, 'card entries from CSV');
+                
+                // Group by archetype and get deck counts
+                const archetypeData = {};
                 allData.forEach(row => {
                     const arch = row.archetype || 'Unknown';
-                    if (!archetypeDecks[arch]) archetypeDecks[arch] = [];
-                    archetypeDecks[arch].push(row);
+                    if (!archetypeData[arch]) {
+                        archetypeData[arch] = {
+                            name: arch,
+                            deckCount: parseInt(row.total_decks_in_archetype) || 0,
+                            cards: []
+                        };
+                    }
+                    archetypeData[arch].cards.push(row);
                 });
                 
                 // Get Top 10 archetypes by deck count
-                const archetypeList = Object.entries(archetypeDecks)
-                    .map(([name, decks]) => ({ name, deckCount: decks.length, decks }))
+                const archetypeList = Object.values(archetypeData)
                     .sort((a, b) => b.deckCount - a.deckCount)
                     .slice(0, 10);
                 
@@ -4846,9 +4853,12 @@
                 archetypeList.forEach(archetype => {
                     totalDecksInTop10 += archetype.deckCount;
                     
-                    archetype.decks.forEach(row => {
+                    archetype.cards.forEach(row => {
                         const cardName = row.card_name;
                         if (!cardName) return;
+                        
+                        const deckCount = parseInt(row.deck_count) || 0;
+                        const totalCount = parseInt(row.total_count) || 0;
                         
                         if (!cardMap[cardName]) {
                             cardMap[cardName] = {
@@ -4857,22 +4867,26 @@
                                 set_number: row.set_number,
                                 type: row.type || row.card_type,
                                 rarity: row.rarity,
-                                decksWithCard: new Set(),
-                                totalCopies: 0
+                                image_url: row.image_url,
+                                totalDecksWithCard: 0,  // Total decks across all Top 10 archetypes
+                                totalCopies: 0           // Total card copies across all Top 10 archetypes
                             };
                         }
                         
-                        cardMap[cardName].decksWithCard.add(`${archetype.name}_${row.tournament_id || row.deck_id}`);
-                        cardMap[cardName].totalCopies += parseInt(row.count || 1);
+                        // Aggregate across archetypes
+                        cardMap[cardName].totalDecksWithCard += deckCount;
+                        cardMap[cardName].totalCopies += totalCount;
                     });
                 });
+                
+                console.log('[loadMetaCardAnalysis] Total decks in Top 10:', totalDecksInTop10);
                 
                 // Calculate meta-wide share% and avg count
                 const metaCards = Object.values(cardMap).map(card => ({
                     ...card,
-                    metaShare: (card.decksWithCard.size / totalDecksInTop10) * 100,
-                    avgCount: card.totalCopies / totalDecksInTop10,
-                    avgCountWhenUsed: card.totalCopies / card.decksWithCard.size
+                    metaShare: totalDecksInTop10 > 0 ? (card.totalDecksWithCard / totalDecksInTop10) * 100 : 0,
+                    avgCount: totalDecksInTop10 > 0 ? card.totalCopies / totalDecksInTop10 : 0,
+                    avgCountWhenUsed: card.totalDecksWithCard > 0 ? card.totalCopies / card.totalDecksWithCard : 0
                 }));
                 
                 metaCardData[source] = metaCards;
@@ -4942,8 +4956,7 @@
             
             // Render cards (similar to card overview grid)
             grid.innerHTML = cards.map(card => {
-                const imageUrl = getCardImageUrl(card.set_code, card.set_number, card.card_name, card.rarity);
-                const category = getCardTypeCategory(card.type);
+                const imageUrl = card.image_url || `https://via.placeholder.com/245x342?text=${encodeURIComponent(card.card_name)}`;
                 
                 return `
                     <div class="card-item" style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="addCardToDeck('${source}', '${card.card_name.replace(/'/g, "\\'")}', '${card.set_code}', '${card.set_number}')">

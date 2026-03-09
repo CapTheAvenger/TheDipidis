@@ -652,7 +652,12 @@
                     const numB = parseInt((b.number || '0').toString().replace(/[^\d]/g, '')) || 0;
                     return numA - numB;
                 });
-                const selected = globalPref === 'max' ? sorted[sorted.length - 1] : sorted[0];
+                
+                // CRITICAL FIX: Filter out NO RARITY cards (priority 999) before selecting
+                // These cards have invalid/missing rarity data and often broken image URLs
+                const validSorted = sorted.filter(v => getRarityPriority(v.rarity, v.set) < 999);
+                const finalList = validSorted.length > 0 ? validSorted : sorted; // Fallback if all are NO RARITY
+                const selected = globalPref === 'max' ? finalList[finalList.length - 1] : finalList[0];
                 
                 // DEBUG: Log all versions and their priorities
                 console.log(`[getPreferredVersionForCard] All versions for "${cardName}":`, 
@@ -680,7 +685,11 @@
                     const priorityB = getRarityPriority(b.rarity, b.set);
                     return priorityA - priorityB;
                 });
-                return pref.mode === 'max' ? sorted[sorted.length - 1] : sorted[0];
+                
+                // CRITICAL FIX: Filter out NO RARITY cards (priority 999) before selecting
+                const validSorted = sorted.filter(v => getRarityPriority(v.rarity, v.set) < 999);
+                const finalList = validSorted.length > 0 ? validSorted : sorted;
+                return pref.mode === 'max' ? finalList[finalList.length - 1] : finalList[0];
             }
 
             return null;

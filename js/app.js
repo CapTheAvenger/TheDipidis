@@ -4723,15 +4723,18 @@
                     optimalCount = 4;  // Core staples: Very high count + good share
                 }
                 // 3-of Territory: Very strong consistency
-                // Example: Judge (96.6% @ 2.40x) should be 3x, not 2x!
-                else if (avgCount >= 2.2 && sharePercent >= 90) {
-                    optimalCount = 3;  // Very high share + solid count
+                // ADJUSTED: Raised threshold from 2.2 to 2.4 (closer to 3 than 2)
+                // Example: Judge (96.6% @ 2.40x) should be 3x
+                // Counter-example: Makuhita (100% @ 2.23x) should be 2x (closer to 2 than 3)
+                else if (avgCount >= 2.4 && sharePercent >= 90) {
+                    optimalCount = 3;  // Very high share + solid count (>=2.4 is closer to 3)
                 }
-                else if (avgCount >= 2.5 && sharePercent >= 70) {
+                else if (avgCount >= 2.6 && sharePercent >= 70) {
                     optimalCount = 3;  // Good reliability standard
                 }
                 // 2-of Territory: Solid includes
-                else if (avgCount >= 1.8) {
+                // ADJUSTED: Lowered threshold from 1.8 to 1.6 (captures 2.23x properly)
+                else if (avgCount >= 1.6) {
                     optimalCount = 2;
                 } else if (avgCount >= 1.3 && sharePercent >= 85) {
                     optimalCount = 2;  // High reliability case
@@ -4746,6 +4749,18 @@
                 else if (sharePercent >= 70 && avgCount >= 0.7) {
                     optimalCount = 1;  // High-share tech: Important for meta
                     console.log(`[autoCompleteConsistency] 🎯 HIGH-SHARE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCount.toFixed(2)}x avg) - Meta-relevant inclusion`);
+                }
+                // MODERATE-SHARE TECH CARDS: Trainer cards with 20-70% share (Stadium/Item/Supporter tech)
+                // Example: Team Rocket's Watchtower (26.4% @ 0.39x) - Meta tech
+                else if (sharePercent >= 20 && sharePercent < 70 && avgCount >= 0.3) {
+                    const cardType = (card.type || '').toLowerCase();
+                    // Only include Trainer cards as tech (not Pokemon with low share)
+                    if (cardType.includes('stadium') || cardType.includes('item') || cardType.includes('supporter') || cardType.includes('tool')) {
+                        optimalCount = 1;  // Moderate-share tech: Situational but useful
+                        console.log(`[autoCompleteConsistency] 🔧 MODERATE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCount.toFixed(2)}x avg) - Trainer tech inclusion`);
+                    } else {
+                        optimalCount = 0;  // Skip Pokemon with moderate share (too inconsistent)
+                    }
                 }
                 // Skip: Too unreliable
                 else {

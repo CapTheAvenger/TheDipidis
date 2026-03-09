@@ -2,8 +2,8 @@ name: Weekly Tournament Data Scrape
 
 on:
   schedule:
-    # Jeden Dienstag um 06:00 UTC (07:00 MEZ / 08:00 MESZ)
-    - cron: '0 6 * * 2'
+    # Jeden Dienstag um 01:00 UTC (02:00 MEZ / 03:00 MESZ) - läuft nachts für morgendliche Daten
+    - cron: '0 1 * * 2'
   workflow_dispatch: # Ermöglicht manuelles Ausführen
 
 jobs:
@@ -60,6 +60,22 @@ jobs:
           echo "Limitless Online Scraper"
           echo "================================"
           python limitless_online_scraper.py
+        continue-on-error: true
+      
+      - name: Run Tournament JH Scraper
+        run: |
+          echo "================================"
+          echo "Tournament JH Scraper"
+          echo "================================"
+          python tournament_scraper_JH.py
+        continue-on-error: true
+      
+      - name: Run Set List Scraper
+        run: |
+          echo "================================"
+          echo "Set List Scraper (SET_ORDER Update)"
+          echo "================================"
+          python set_list_scraper.py
         continue-on-error: true
       
       - name: Update Card Data

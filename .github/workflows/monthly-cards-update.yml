@@ -1,14 +1,15 @@
-name: Weekly Price Update
+name: Monthly Card Database Update
 
 on:
   schedule:
-    # Jeden Montag um 01:00 UTC (02:00 MEZ / 03:00 MESZ) - läuft nachts für morgendliche Preise
-    - cron: '0 1 * * 1'
+    # Jeden 1. des Monats um 01:00 UTC (02:00 MEZ / 03:00 MESZ) - läuft nachts
+    - cron: '0 1 1 * *'
   workflow_dispatch: # Ermöglicht manuelles Ausführen
 
 jobs:
-  update-prices:
+  update-card-database:
     runs-on: ubuntu-latest
+    timeout-minutes: 240 # 4 Stunden Timeout für große Card Database
     
     steps:
       - name: Checkout Repository
@@ -37,9 +38,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Run Price Scraper
+      - name: Run Japanese Cards Scraper
         run: |
-          python card_price_scraper.py
+          echo "================================"
+          echo "Japanese Cards Scraper (Latest 4 Sets)"
+          echo "================================"
+          python japanese_cards_scraper.py
+        continue-on-error: true
+        env:
+          HEADLESS: 'true'
+      
+      - name: Run All Cards Scraper
+        run: |
+          echo "================================"
+          echo "All Cards Database Scraper"
+          echo "================================"
+          python all_cards_scraper.py
+        continue-on-error: true
         env:
           HEADLESS: 'true'
       
@@ -51,8 +66,8 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add data/price_data.csv data/all_cards_merged.* data/cardmarket_prices.csv
-          git diff --staged --quiet || git commit -m "🤖 Automated price update - $(date +'%d.%m.%Y')"
+          git add data/*.csv data/*.json data/*.html data/*.js
+          git diff --staged --quiet || git commit -m "🤖 Automated monthly card database update - $(date +'%d.%m.%Y')"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -61,7 +76,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: price-scraper-logs
+          name: card-database-logs
           path: |
             *.log
             data/debug_*.html

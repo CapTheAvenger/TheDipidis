@@ -1,5 +1,41 @@
 ﻿const BASE_PATH = './data/';
         
+        // Global PokemonProxies M3 mapping
+        let pokemonProxiesM3Map = new Map(); // card_number -> image_url
+        
+        // Load PokemonProxies M3 mapping
+        async function loadPokemonProxiesMapping() {
+            try {
+                const response = await fetch(`${BASE_PATH}pokemonproxies_m3_mapping.csv`);
+                if (!response.ok) {
+                    console.log('[PokemonProxies] Mapping file not found, using Japanese fallback');
+                    return;
+                }
+                
+                const text = await response.text();
+                const lines = text.split('\n').slice(1); // Skip header
+                
+                lines.forEach(line => {
+                    if (!line.trim()) return;
+                    const parts = line.split(',');
+                    if (parts.length >= 3) {
+                        const cardNumber = parts[0].trim();
+                        const imageUrl = parts[2].trim();
+                        if (cardNumber && imageUrl) {
+                            pokemonProxiesM3Map.set(cardNumber, imageUrl);
+                        }
+                    }
+                });
+                
+                console.log(`[PokemonProxies] Loaded ${pokemonProxiesM3Map.size} M3 card URLs`);
+            } catch (error) {
+                console.log('[PokemonProxies] Failed to load mapping:', error);
+            }
+        }
+        
+        // Load mapping on startup
+        loadPokemonProxiesMapping();
+        
         // CRITICAL: Initialize deck objects immediately to prevent undefined errors
         window.cityLeagueDeck = window.cityLeagueDeck || {};
         window.cityLeagueDeckOrder = window.cityLeagueDeckOrder || [];
@@ -1932,13 +1968,29 @@
         };
         
         // Helper function to fix Japanese card image URLs
-        function fixJapaneseCardImageUrl(url, setCode, cardName = '') {
+        function fixJapaneseCardImageUrl(url, setCode, cardName = '', cardNumber = '') {
             if (!url) return url;
             
-            // M3 set cards: Use Limitless Japanese directly (pokemonproxies uses unpredictable hashed filenames)
+            // M3 set cards: Try PokemonProxies first, fallback to Limitless Japanese
             const isM3Set = setCode === 'M3' || url.includes('/M3/');
             
             if (isM3Set) {
+                // Extract card number if not provided
+                if (!cardNumber && url) {
+                    const numberMatch = url.match(/M3_0*(\d+)_/);
+                    if (numberMatch) {
+                        cardNumber = numberMatch[1].padStart(3, '0'); // 46 → 046
+                    }
+                }
+                
+                // Try PokemonProxies mapping first
+                if (cardNumber && pokemonProxiesM3Map.has(cardNumber)) {
+                    const proxyUrl = pokemonProxiesM3Map.get(cardNumber);
+                    console.log(`🎴 M3 Card → PokemonProxies: ${cardNumber} → ${proxyUrl}`);
+                    return proxyUrl;
+                }
+                
+                // Fallback: Limitless Japanese
                 const originalUrl = url;
                 
                 // Replace tpci with tpc
@@ -1950,7 +2002,7 @@
                 // Remove leading zeros from card number (M3_046 → M3_46)
                 url = url.replace(/\/M3_0+(\d+)_/g, '/M3_$1_');
                 
-                console.log(`🎴 M3 Card → Limitless JP (pokemonproxies has hashed URLs): ${originalUrl} → ${url}`);
+                console.log(`🎴 M3 Card → Limitless JP fallback: ${originalUrl} → ${url}`);
             }
             
             return url;
@@ -2032,7 +2084,7 @@
                     };
                 }
                 
-                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', displayCard.set_code, cardName);
+                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', displayCard.set_code, cardName, displayCard.set_number);
                 const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                 const maxCount = parseInt(card.max_count) || card.max_count || '?';
                 const cardNameEscaped = cardName.replace(/'/g, "\\'");
@@ -2247,7 +2299,7 @@
                     const setCode = displayCard.set_code || '';
                     const setNumber = displayCard.set_number || '';
                 
-                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', setCode, cardName);
+                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', setCode, cardName, setNumber);
                 const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                 const maxCount = parseInt(card.max_count) || card.max_count || '?';
                 
@@ -3485,7 +3537,7 @@
                 } else {
                     imageUrl = buildCardImageUrl(setCode, setNumber, card.rarity || 'C');
                 }
-                imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode, card.card_name);
+                imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode, card.card_name, card.set_number);
                 
                 const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                 const count = card.deck_count_in_selected || 1;
@@ -3916,7 +3968,7 @@
             if (!overviewContainer) return;
             
             const gridHtml = sortedCards.map(card => {
-                const imageUrl = fixJapaneseCardImageUrl(card.image_url || '', card.set_code, card.card_name);
+                const imageUrl = fixJapaneseCardImageUrl(card.image_url || '', card.set_code, card.card_name, card.set_number);
                 // Konvertiere Komma zu Punkt für parseFloat (CSV verwendet Komma als Dezimaltrennzeichen)
                 const percentageStr = (card.percentage_in_archetype || '0').toString().replace(',', '.');
                 let percentage = parseFloat(percentageStr);
@@ -4067,7 +4119,7 @@
             
             // Build grid HTML
             grid.innerHTML = sortedCards.map(card => {
-                const imageUrl = fixJapaneseCardImageUrl(card.image_url || '', card.set_code, card.card_name);
+                const imageUrl = fixJapaneseCardImageUrl(card.image_url || '', card.set_code, card.card_name, card.set_number);
                 const count = card.deck_count_in_selected || 1;
                 const cardName = card.card_name || '';
                 const cardNameEscaped = (cardName || '').replace(/'/g, "\\'");
@@ -5202,7 +5254,7 @@
                 // Use image_url from database if available and valid, otherwise try to build it
                 const hasValidImageUrl = card.image_url && card.image_url.trim() !== '' && card.image_url.startsWith('http');
                 let imageUrl = hasValidImageUrl ? card.image_url : buildCardImageUrl(setCode, setNumber, rarityFull);
-                imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode, cardName);
+                imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode, cardName, setNumber);
                 const cardNameEscaped = cardName.replace(/'/g, "\\'");
                 
                 html += `
@@ -9823,7 +9875,7 @@
                     } else if (displayCard.image_url) {
                         imageUrl = displayCard.image_url;
                     }
-                    imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode, cardName);
+                    imageUrl = fixJapaneseCardImageUrl(imageUrl, setCode, cardName, setNumber);
                     const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                     const maxCount = parseInt(card.max_count) || card.max_count || '?';
                     
@@ -9956,7 +10008,7 @@
                     };
                 }
                 
-                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', displayCard.set_code, cardName);
+                const imageUrl = fixJapaneseCardImageUrl(displayCard.image_url || '', displayCard.set_code, cardName, displayCard.set_number);
                 const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                 const maxCount = parseInt(card.max_count) || card.max_count || '?';
                 const cardNameEscaped = cardName.replace(/'/g, "\\'");

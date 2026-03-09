@@ -4825,20 +4825,20 @@
                 
                 console.log('[loadMetaCardAnalysis] Loaded', allData.length, 'card entries from CSV');
                 
-                // Group by archetype (summing across all tournament_dates) and aggregate cards
+                // Group by archetype and aggregate cards (handling duplicate total_decks_in_archetype)
                 const archetypeData = {};
                 allData.forEach(row => {
                     const arch = row.archetype || 'Unknown';
                     if (!archetypeData[arch]) {
                         archetypeData[arch] = {
                             name: arch,
-                            totalDecks: 0,
+                            totalDecks: parseInt(row.total_decks_in_archetype) || 0,  // Set once, not summed
                             cards: {}  // cardName -> { deckCount, totalCount, ... }
                         };
                     }
                     
-                    // Sum deck counts across all tournament dates for this archetype
-                    archetypeData[arch].totalDecks += parseInt(row.total_decks_in_archetype) || 0;
+                    // total_decks_in_archetype is already the total for the archetype across all tournaments
+                    // No need to sum it - it's the same value for all tournament_dates
                     
                     // Aggregate cards by card_name (across all tournament dates)
                     const cardName = row.card_name;
@@ -4852,13 +4852,20 @@
                             type: row.type || row.card_type,
                             rarity: row.rarity,
                             image_url: row.image_url,
-                            deckCount: 0,
-                            totalCount: 0
+                            deckCount: parseInt(row.deck_count) || 0,      // Set once (max)
+                            totalCount: parseInt(row.total_count) || 0      // Set once (max)
                         };
+                    } else {
+                        // Take maximum values (since total_decks_in_archetype is constant, these should be too)
+                        archetypeData[arch].cards[cardName].deckCount = Math.max(
+                            archetypeData[arch].cards[cardName].deckCount,
+                            parseInt(row.deck_count) || 0
+                        );
+                        archetypeData[arch].cards[cardName].totalCount = Math.max(
+                            archetypeData[arch].cards[cardName].totalCount,
+                            parseInt(row.total_count) || 0
+                        );
                     }
-                    
-                    archetypeData[arch].cards[cardName].deckCount += parseInt(row.deck_count) || 0;
-                    archetypeData[arch].cards[cardName].totalCount += parseInt(row.total_count) || 0;
                 });
                 
                 // Get Top 10 archetypes by total deck count (across all dates)

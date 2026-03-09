@@ -885,6 +885,8 @@
                                         <li>📊 <strong>Win Rate Stats:</strong> Total online tournament win rate</li>
                                         <li>⚔️ <strong>Matchup Analysis:</strong> See best and worst matchups with win rates and game records</li>
                                         <li>🔍 <strong>Opponent Search:</strong> Search specific matchups to analyze head-to-head data</li>
+                                        <li>🌍 <strong>Meta Card Analysis:</strong> See most played cards across Top 10 meta decks with direct deck-building buttons</li>
+                                        <li>🎯 <strong>Max Consistency Mode:</strong> Auto-generate decks with optimal card counts based on tournament data</li>
                                     </ul>
                                 </div>
                                 
@@ -911,7 +913,67 @@
                                     </ul>
                                 </div>
                             </div>
+                        </secMeta Card Analysis Guide -->
+                        <section style="margin-bottom: 40px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🌍 Meta Card Analysis</h2>
+                            <p style="line-height: 1.8; font-size: 1.05em;">
+                                The <strong>Meta Card Analysis</strong> feature shows you which cards are most popular across the Top 10 archetypes in the meta. 
+                                This helps you understand meta-defining cards and build versatile decks.
+                            </p>
+                            
+                            <h3 style="color: #555; margin-top: 20px;">How to Use</h3>
+                            <ol style="line-height: 2; font-size: 1.05em;">
+                                <li>Click <strong>"🔄 Load Meta Analysis"</strong> button to aggregate cards from Top 10 archetypes</li>
+                                <li>Use <strong>filters</strong> to narrow down cards:
+                                    <ul style="margin-top: 10px;">
+                                        <li><strong>Meta Share:</strong> >90% (Core), >70% (Common), >50% (Frequent)</li>
+                                        <li><strong>Card Type:</strong> � Auto Generate Modes</h3>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                                <p style="margin: 5px 0;"><strong>⬇️ Generate Low Rarity Deck:</strong> Creates a complete 60-card deck using cheapest card versions (budget-friendly)</p>
+                                <p style="margin: 5px 0;"><strong>⬆️ Generate Max Rarity Deck:</strong> Creates deck using highest rarity versions (full art, secret rare, etc.)</p>
+                                <p style="margin: 5px 0;"><strong>🎯 Auto Generate (Max Consistency):</strong> <span style="color: #6f42c1; font-weight: bold;">RECOMMENDED</span> - Uses smart algorithm to determine optimal card counts based on tournament data. Features include:
+                                    <ul style="margin-top: 8px; margin-left: 20px;">
+                                        <li>Smart rounding: 3.07x average → 4 copies, 3.00x → 3 copies</li>
+                                        <li>Data-driven decisions based on actual tournament usage</li>
+                                        <li>Respects deck-building rules (max 4 copies, special limits for ACE SPECs)</li>
+                                        <li>Automatically fills deck to 60 cards with most consistent choices</li>
+                                    </ul>
+                                </p>
+                            </div>
+                            
+                            <h3 style="color: #555; margin-top: 30px;">�Trainer, Pokémon, Energy</li>
+                                        <li><strong>Sort:</strong> By Type, Meta Share %, or Average Count</li>
+                                    </ul>
+                                </li>
+                                <li>Each card shows:
+                                    <ul style="margin-top: 10px;">
+                                        <li>📊 <strong>Meta Share %:</strong> In how many of the Top 10 archetypes this card appears</li>
+                                        <li>🔢 <strong>Avg Count:</strong> Average number of copies played</li>
+                                        <li>🎯 <strong>Max Consistency:</strong> Recommended optimal count (based on smart rounding)</li>
+                                        <li>💚 <strong>Deck Badge:</strong> Shows current count in your deck (green badge, top-left)</li>
+                                    </ul>
+                                </li>
+                                <li>Use <strong>Action Buttons</strong> to build your deck:
+                                    <ul style="margin-top: 10px;">
+                                        <li><strong>−</strong> (Red): Remove 1 copy from deck</li>
+                                        <li><strong>DECK</strong> (Blue): Add optimal count to deck instantly</li>
+                                        <li><strong>+</strong> (Green): Add 1 copy to deck</li>
+                                    </ul>
+                                </li>
+                                <li>Hover over card for <strong>archetype breakdown</strong> tooltip</li>
+                            </ol>
+                            
+                            <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin-top: 15px;">
+                                <strong>💡 Pro Tip:</strong>
+                                <ul style="line-height: 1.8; margin: 10px 0;">
+                                    <li>Cards with >90% meta share are usually format staples (Ultra Ball, Boss's Orders, etc.)</li>
+                                    <li>The DECK button uses smart rounding: 3.07x average → 4 copies, 3.00x → 3 copies</li>
+                                    <li>Meta Card Analysis spans multiple archetypes, so you see which cards are universally strong</li>
+                                </ul>
+                            </div>
                         </section>
+                        
+                        <!-- tion>
                         
                         <!-- Deck Builder Guide -->
                         <section style="margin-bottom: 40px;">
@@ -921,8 +983,9 @@
                             <ol style="line-height: 2; font-size: 1.05em;">
                                 <li><strong>Select a Deck:</strong> Use the deck selector dropdown to choose an archetype</li>
                                 <li><strong>View Cards:</strong> See Card Overview with all cards and their usage statistics</li>
-                                <li><strong>Auto-Generate:</strong> Click "Generate Low Rarity Deck" or "Generate Max Rarity Deck" for instant 60-card deck</li>
+                                <li><strong>Auto-Generate:</strong> Click "🎯 Auto Generate (Max Consistency)" for optimal 60-card deck with smart card counts</li>
                                 <li><strong>Manual Building:</strong> Click on individual cards to add them (left click +1, right click +4)</li>
+                                <li><strong>Meta Analysis:</strong> Load "Meta Card Analysis" to see most played cards across Top 10 archetypes</li>
                                 <li><strong>Copy Deck:</strong> Click "Copy Deck" to get the complete decklist in Pokemon TCG Live format</li>
                             </ol>
                             
@@ -949,12 +1012,15 @@
                                 <li>See color-coded badges:
                                     <ul>
                                         <li><span style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); padding: 2px 8px; border-radius: 4px; color: #000;">🟡 Gold</span> = New cards added</li>
-                                        <li><span style="background: #28a745; padding: 2px 8px; border-radius: 4px; color: white;">🟢 Green</span> = Count increased</li>
-                                        <li><span style="background: #dc3545; padding: 2px 8px; border-radius: 4px; color: white;">🔴 Red</span> = Count decreased or removed</li>
-                                        <li><span style="background: #6c757d; padding: 2px 8px; border-radius: 4px; color: white;">⚫ Gray</span> = Unchanged</li>
-                                    </ul>
-                                </li>
-                            </ol>
+                                        🌍 <strong>Meta Card Analysis:</strong> Load this to see format-defining cards across all top archetypes</li>
+                                    <li>🎯 <strong>Max Consistency Mode:</strong> Best auto-generate option - uses smart rounding for optimal counts</li>
+                                    <li>🔍 <strong>Search is Your Friend:</strong> Use search boxes to quickly find specific cards or decks</li>
+                                    <li>🌍 <strong>International Prints:</strong> The website recognizes international reprints automatically</li>
+                                    <li>💰 <strong>Budget Building:</strong> Use "Low Rarity" option for affordable deck versions</li>
+                                    <li>🎨 <strong>Grid View:</strong> Perfect for visual deck overview and spotting missing cards</li>
+                                    <li>📋 <strong>Copy Function:</strong> All deck copies use Pokemon TCG Live format for easy import</li>
+                                    <li>🔄 <strong>Compare Decks:</strong> Great for tracking deck evolution and understanding changes</li>
+                                    <li>🖱️ <strong>Action Buttons:</strong> Use −/DECK/+ buttons on Meta Cards for quick deck building
                             <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin-top: 15px;">
                                 <strong>💡 Tips:</strong>
                                 <ul style="line-height: 1.8; margin: 10px 0;">
@@ -982,7 +1048,17 @@
                                     <p style="margin: 0; font-size: 0.95em;">Trainer Items (Ultra Ball, Rare Candy, Nest Ball, etc.)</p>
                                 </div>
                                 <div style="background: #e7d4f5; padding: 15px; border-radius: 6px; border: 2px solid #6f42c1;">
-                                    <h4 style="margin-top: 0;">🔧 Tool</h4>
+                                    <h4 style="margin-top: 0;">🔧 Tool</h4>In Meta Card Analysis, use the −/DECK/+ buttons for precise control.</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: What is "Max Consistency" mode?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Max Consistency uses smart rounding to determine optimal card counts. For example, if a card averages 3.07 copies across decks, it recommends 4 copies (not 3), ensuring you're building with real tournament-tested numbers.</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: What does the green badge on Meta Cards mean?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: The green badge (top-left of card image) shows how many copies of that card are currently in your deck. It only appears when you have at least 1 copy
                                     <p style="margin: 0; font-size: 0.95em;">Pokemon Tools attached to Pokemon (Air Balloon, Muscle Band, etc.)</p>
                                 </div>
                                 <div style="background: #f8d7da; padding: 15px; border-radius: 6px; border: 2px solid #fd7e14;">
@@ -1123,7 +1199,7 @@
             </div>
             
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button class="btn btn-primary" onclick="compareDeckLists()" style="flex: 1;">🔍 Compare</button>
+                <button class="btn btn-8rimary" onclick="compareDeckLists()" style="flex: 1;">🔍 Compare</button>
                 <button class="btn btn-secondary" onclick="document.getElementById('oldDeckListInput').value = ''">🗑️ Clear</button>
             </div>
             

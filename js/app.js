@@ -5000,10 +5000,11 @@
             // Render cards (similar to card overview grid)
             grid.innerHTML = cards.map(card => {
                 const imageUrl = card.image_url || `https://via.placeholder.com/245x342?text=${encodeURIComponent(card.card_name)}`;
+                const fallbackUrl = `https://via.placeholder.com/245x342?text=${encodeURIComponent(card.card_name)}`;
                 
                 return `
                     <div class="card-item" style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="addCardToDeck('${source}', '${card.card_name.replace(/'/g, "\\'")}', '${card.set_code}', '${card.set_number}')">
-                        <img src="${imageUrl}" alt="${card.card_name}" style="width: 100%; height: auto; display: block;" onerror="this.src='https://via.placeholder.com/245x342?text=${encodeURIComponent(card.card_name)}'">
+                        <img src="${imageUrl}" alt="${card.card_name}" style="width: 100%; height: auto; display: block;" onerror="this.onerror=null; this.src='${fallbackUrl}'">
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color: white; padding: 8px 6px; font-size: 0.75em; line-height: 1.3;">
                             <div style="font-weight: bold;">${card.card_name}</div>
                             <div style="color: #ffd700;">${card.metaShare.toFixed(1)}% | Ø ${card.avgCount.toFixed(2)}x</div>

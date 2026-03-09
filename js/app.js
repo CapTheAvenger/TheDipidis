@@ -4910,86 +4910,101 @@
                 
                 console.log('[loadMetaCardAnalysis] Loaded', allAnalysisData.length, 'card entries from analysis CSV');
                 
-                // Get latest date for each Top 10 archetype
-                const latestDatePerArchetype = {};
-                allAnalysisData.forEach(row => {
+                // Filter to only Top 10 archetypes
+                const top10AnalysisData = allAnalysisData.filter(row => {
                     const arch = (row.archetype || '').toLowerCase();
-                    const date = row.tournament_date;
-                    if (top10Names.has(arch)) {
-                        if (!latestDatePerArchetype[arch] || date > latestDatePerArchetype[arch]) {
-                            latestDatePerArchetype[arch] = date;
-                        }
-                    }
+                    return top10Names.has(arch);
                 });
                 
-                // Filter to only cards from Top 10 archetypes at their latest snapshot
-                const top10CardsData = allAnalysisData.filter(row => {
-                    const arch = (row.archetype || '').toLowerCase();
-                    const date = row.tournament_date;
-                    return top10Names.has(arch) && date === latestDatePerArchetype[arch];
-                });
+                console.log('[loadMetaCardAnalysis] Filtered to', top10AnalysisData.length, 'card entries from Top 10');
                 
-                console.log('[loadMetaCardAnalysis] Filtered to', top10CardsData.length, 'card entries from Top 10 latest snapshots');
-                
-                // Build map of archetype -> deckCount
+                // Build map of archetype -> deckCount from comparison data
                 const archetypeMap = {};
                 top10Archetypes.forEach(arch => {
                     archetypeMap[arch.name.toLowerCase()] = arch.deckCount;
                 });
                 
-                // Aggregate cards across Top 10
-                const cardMap = {};
+                // Aggregate cards: Calculate average percentage per archetype, then multiply by total deck count
+                const cardArchetypeMap = {}; // card -> archetype -> {percentages[], dates[]}
                 
-                top10CardsData.forEach(row => {
+                top10AnalysisData.forEach(row => {
                     const cardName = row.card_name;
-                    const archetype = (row.archetype || '').toLowerCase();
+                    const archetype = row.archetype;
+                    const archetypeLower = (archetype || '').toLowerCase();
+                    const percentage = parseFloat((row.percentage_in_archetype || '0').replace(',', '.'));
                     
-                    if (!cardName) return;
+                    if (!cardName || !archetype) return;
                     
-                    if (!cardMap[cardName]) {
-                        cardMap[cardName] = {
+                    if (!cardArchetypeMap[cardName]) {
+                        cardArchetypeMap[cardName] = {
                             card_name: cardName,
                             set_code: row.set_code,
                             set_number: row.set_number,
                             type: row.type || row.card_type,
                             rarity: row.rarity,
                             image_url: row.image_url,
-                            totalDecksWithCard: 0,
-                            totalCopies: 0,
-                            archetypes: []
+                            byArchetype: {}
                         };
                     }
                     
-                    const deckCountInArchetype = parseInt(row.deck_count) || 0;
-                    const totalCountInArchetype = parseInt(row.total_count) || 0;
-                    const archetypeDeckCount = archetypeMap[archetype] || 0;
+                    if (!cardArchetypeMap[cardName].byArchetype[archetypeLower]) {
+                        cardArchetypeMap[cardName].byArchetype[archetypeLower] = {
+                            name: archetype,
+                            percentages: [],
+                            deckCount: archetypeMap[archetypeLower] || 0
+                        };
+                    }
                     
-                    cardMap[cardName].totalDecksWithCard += deckCountInArchetype;
-                    cardMap[cardName].totalCopies += totalCountInArchetype;
-                    
-                    // Track archetype usage
-                    cardMap[cardName].archetypes.push({
-                        name: row.archetype,
-                        deckCount: deckCountInArchetype,
-                        totalDecks: archetypeDeckCount,
-                        percentage: archetypeDeckCount > 0 ? (deckCountInArchetype / archetypeDeckCount * 100).toFixed(1) : '0.0'
-                    });
+                    cardArchetypeMap[cardName].byArchetype[archetypeLower].percentages.push(percentage);
                 });
                 
-                // Calculate meta-wide share% and avg count
-                const metaCards = Object.values(cardMap).map(card => ({
-                    ...card,
-                    metaShare: totalDecksInTop10 > 0 ? (card.totalDecksWithCard / totalDecksInTop10) * 100 : 0,
-                    avgCount: totalDecksInTop10 > 0 ? card.totalCopies / totalDecksInTop10 : 0,
-                    avgCountWhenUsed: card.totalDecksWithCard > 0 ? card.totalCopies / card.totalDecksWithCard : 0
-                }));
+                console.log('[loadMetaCardAnalysis] Aggregated', Object.keys(cardArchetypeMap).length, 'unique cards');
+                
+                // Calculate meta-wide stats
+                const metaCards = Object.values(cardArchetypeMap).map(cardData => {
+                    let totalDecksWithCard = 0;
+                    let totalCopies = 0;
+                    const archetypes = [];
+                    
+                    // For each archetype this card appears in
+                    Object.values(cardData.byArchetype).forEach(archData => {
+                        // Average percentage across all tournament dates
+                        const avgPercentage = archData.percentages.reduce((sum, p) => sum + p, 0) / archData.percentages.length;
+                        
+                        // Estimated decks with this card = avgPercentage × total archetype deck count
+                        const estimatedDecks = (avgPercentage / 100) * archData.deckCount;
+                        
+                        totalDecksWithCard += estimatedDecks;
+                        
+                        archetypes.push({
+                            name: archData.name,
+                            deckCount: Math.round(estimatedDecks),
+                            totalDecks: archData.deckCount,
+                            percentage: avgPercentage.toFixed(1)
+                        });
+                    });
+                    
+                    return {
+                        card_name: cardData.card_name,
+                        set_code: cardData.set_code,
+                        set_number: cardData.set_number,
+                        type: cardData.type,
+                        rarity: cardData.rarity,
+                        image_url: cardData.image_url,
+                        totalDecksWithCard: Math.round(totalDecksWithCard),
+                        metaShare: totalDecksInTop10 > 0 ? (totalDecksWithCard / totalDecksInTop10) * 100 : 0,
+                        avgCount: 0, // Not calculated with this approach
+                        avgCountWhenUsed: 0,
+                        archetypes: archetypes
+                    };
+                });
                 
                 // Debug: Log a sample card
-                const sampleCard = metaCards.find(c => c.card_name.includes('Fezandipiti') || c.card_name.includes('Boss'));
+                const sampleCard = metaCards.find(c => c.card_name.includes('Boss'));
                 if (sampleCard) {
                     console.log('[loadMetaCardAnalysis] Sample card:', sampleCard.card_name);
                     console.log('  → metaShare:', sampleCard.metaShare.toFixed(2) + '%', `(${sampleCard.totalDecksWithCard} decks / ${totalDecksInTop10} total)`);
-                    console.log('  → archetypes:', sampleCard.archetypes.map(a => a.name).slice(0, 3));
+                    console.log('  → archetypes:', sampleCard.archetypes.slice(0, 3).map(a => `${a.name} (${a.percentage}%)`));
                 }
                 
                 metaCardData[source] = metaCards;
@@ -5063,7 +5078,7 @@
             
             console.log(`[renderMetaCards] After filters: ${cards.length} cards remaining (from ${metaCardData[source].length} total)`);
             if (cards.length > 0) {
-                console.log(`[renderMetaCards] Sample card shares:`, cards.slice(0, 5).map(c => `${c.card_name}: ${c.metaShare.toFixed(1)}%`));
+                console.log(`[renderMetaCards] Top 5 cards by meta share:`, cards.slice(0, 5).map(c => `${c.card_name}: ${c.metaShare.toFixed(1)}%`));
             }
             
             // Sort

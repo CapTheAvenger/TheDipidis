@@ -4825,57 +4825,76 @@
                 
                 console.log('[loadMetaCardAnalysis] Loaded', allData.length, 'card entries from CSV');
                 
-                // Group by archetype and get deck counts
+                // Group by archetype (summing across all tournament_dates) and aggregate cards
                 const archetypeData = {};
                 allData.forEach(row => {
                     const arch = row.archetype || 'Unknown';
                     if (!archetypeData[arch]) {
                         archetypeData[arch] = {
                             name: arch,
-                            deckCount: parseInt(row.total_decks_in_archetype) || 0,
-                            cards: []
+                            totalDecks: 0,
+                            cards: {}  // cardName -> { deckCount, totalCount, ... }
                         };
                     }
-                    archetypeData[arch].cards.push(row);
+                    
+                    // Sum deck counts across all tournament dates for this archetype
+                    archetypeData[arch].totalDecks += parseInt(row.total_decks_in_archetype) || 0;
+                    
+                    // Aggregate cards by card_name (across all tournament dates)
+                    const cardName = row.card_name;
+                    if (!cardName) return;
+                    
+                    if (!archetypeData[arch].cards[cardName]) {
+                        archetypeData[arch].cards[cardName] = {
+                            card_name: cardName,
+                            set_code: row.set_code,
+                            set_number: row.set_number,
+                            type: row.type || row.card_type,
+                            rarity: row.rarity,
+                            image_url: row.image_url,
+                            deckCount: 0,
+                            totalCount: 0
+                        };
+                    }
+                    
+                    archetypeData[arch].cards[cardName].deckCount += parseInt(row.deck_count) || 0;
+                    archetypeData[arch].cards[cardName].totalCount += parseInt(row.total_count) || 0;
                 });
                 
-                // Get Top 10 archetypes by deck count
+                // Get Top 10 archetypes by total deck count (across all dates)
                 const archetypeList = Object.values(archetypeData)
-                    .sort((a, b) => b.deckCount - a.deckCount)
+                    .sort((a, b) => b.totalDecks - a.totalDecks)
                     .slice(0, 10);
                 
-                console.log('[loadMetaCardAnalysis] Top 10 archetypes:', archetypeList.map(a => `${a.name} (${a.deckCount} decks)`));
+                console.log('[loadMetaCardAnalysis] Top 10 archetypes:', archetypeList.map(a => `${a.name} (${a.totalDecks} decks)`));
                 
-                // Aggregate all cards from Top 10
+                // Aggregate all cards from Top 10 archetypes
                 const cardMap = {};
                 let totalDecksInTop10 = 0;
                 
                 archetypeList.forEach(archetype => {
-                    totalDecksInTop10 += archetype.deckCount;
+                    totalDecksInTop10 += archetype.totalDecks;
                     
-                    archetype.cards.forEach(row => {
-                        const cardName = row.card_name;
-                        if (!cardName) return;
-                        
-                        const deckCount = parseInt(row.deck_count) || 0;
-                        const totalCount = parseInt(row.total_count) || 0;
+                    // Iterate over cards in this archetype
+                    Object.values(archetype.cards).forEach(card => {
+                        const cardName = card.card_name;
                         
                         if (!cardMap[cardName]) {
                             cardMap[cardName] = {
                                 card_name: cardName,
-                                set_code: row.set_code,
-                                set_number: row.set_number,
-                                type: row.type || row.card_type,
-                                rarity: row.rarity,
-                                image_url: row.image_url,
-                                totalDecksWithCard: 0,  // Total decks across all Top 10 archetypes
-                                totalCopies: 0           // Total card copies across all Top 10 archetypes
+                                set_code: card.set_code,
+                                set_number: card.set_number,
+                                type: card.type,
+                                rarity: card.rarity,
+                                image_url: card.image_url,
+                                totalDecksWithCard: 0,
+                                totalCopies: 0
                             };
                         }
                         
-                        // Aggregate across archetypes
-                        cardMap[cardName].totalDecksWithCard += deckCount;
-                        cardMap[cardName].totalCopies += totalCount;
+                        // Aggregate across top 10 archetypes
+                        cardMap[cardName].totalDecksWithCard += card.deckCount;
+                        cardMap[cardName].totalCopies += card.totalCount;
                     });
                 });
                 

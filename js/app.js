@@ -4932,6 +4932,8 @@
                     const archetype = row.archetype;
                     const archetypeLower = (archetype || '').toLowerCase();
                     const percentage = parseFloat((row.percentage_in_archetype || '0').replace(',', '.'));
+                    const deckCount = parseInt(row.deck_count) || 0;
+                    const totalCount = parseInt(row.total_count) || 0;
                     
                     if (!cardName || !archetype) return;
                     
@@ -4951,11 +4953,15 @@
                         cardArchetypeMap[cardName].byArchetype[archetypeLower] = {
                             name: archetype,
                             percentages: [],
+                            totalCounts: [],
+                            deckCounts: [],
                             deckCount: archetypeMap[archetypeLower] || 0
                         };
                     }
                     
                     cardArchetypeMap[cardName].byArchetype[archetypeLower].percentages.push(percentage);
+                    cardArchetypeMap[cardName].byArchetype[archetypeLower].totalCounts.push(totalCount);
+                    cardArchetypeMap[cardName].byArchetype[archetypeLower].deckCounts.push(deckCount);
                 });
                 
                 console.log('[loadMetaCardAnalysis] Aggregated', Object.keys(cardArchetypeMap).length, 'unique cards');
@@ -4974,7 +4980,14 @@
                         // Estimated decks with this card = avgPercentage × total archetype deck count
                         const estimatedDecks = (avgPercentage / 100) * archData.deckCount;
                         
+                        // Calculate average copies per deck when used (total_count / deck_count per date, then average)
+                        const avgCopiesPerDeckWhenUsed = archData.totalCounts.reduce((sum, tc, i) => {
+                            const dc = archData.deckCounts[i];
+                            return sum + (dc > 0 ? tc / dc : 0);
+                        }, 0) / archData.totalCounts.length;
+                        
                         totalDecksWithCard += estimatedDecks;
+                        totalCopies += estimatedDecks * avgCopiesPerDeckWhenUsed;
                         
                         archetypes.push({
                             name: archData.name,
@@ -4993,8 +5006,8 @@
                         image_url: cardData.image_url,
                         totalDecksWithCard: Math.round(totalDecksWithCard),
                         metaShare: totalDecksInTop10 > 0 ? (totalDecksWithCard / totalDecksInTop10) * 100 : 0,
-                        avgCount: 0, // Not calculated with this approach
-                        avgCountWhenUsed: 0,
+                        avgCount: totalDecksInTop10 > 0 ? totalCopies / totalDecksInTop10 : 0,
+                        avgCountWhenUsed: totalDecksWithCard > 0 ? totalCopies / totalDecksWithCard : 0,
                         archetypes: archetypes
                     };
                 });

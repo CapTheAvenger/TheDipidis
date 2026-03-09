@@ -54,6 +54,13 @@ def scrape_pokemonproxies_m3():
         print("[Scraper] Waiting for cards to load...")
         time.sleep(SETTINGS['page_delay_seconds'])
         
+        # Scroll page to trigger lazy loading
+        print("[Scraper] Scrolling page to trigger lazy loading...")
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(2.0)
+        driver.execute_script("window.scrollTo(0, 0);")
+        time.sleep(1.0)
+        
         # Try to find card images
         # The site uses <img> tags with src="/assets/..."
         print("[Scraper] Searching for card images...")
@@ -63,10 +70,17 @@ def scrape_pokemonproxies_m3():
         
         print(f"[Scraper] Found {len(img_elements)} total images on page")
         
+        # DEBUG: Print first 10 src attributes to see what we're getting
+        print("\n[DEBUG] First 10 image src attributes:")
+        for i, img in enumerate(img_elements[:10]):
+            src = img.get_attribute('src') or img.get_attribute('data-src') or 'NO SRC'
+            print(f"  {i+1}. {src[:100]}")
+        print()
+        
         # Filter for M3 card images (they have pattern: 3a-XXX-CardName-HASH.png)
         for img in img_elements:
             try:
-                src = img.get_attribute('src')
+                src = img.get_attribute('src') or img.get_attribute('data-src') or ''
                 alt = img.get_attribute('alt') or ''
                 
                 if not src:

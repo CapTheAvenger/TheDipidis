@@ -4437,6 +4437,330 @@
             }
         }
         
+        /**
+         * Auto-Complete with Max Consistency Algorithm
+         * Based on Justin Basil's Professional Deck Building Guide:
+         * - Deck Skeleton: 20 Pokémon, 30 Trainer, 10 Energy (±3 deviation normal)
+         * - Opening Hand Probabilities: 4x = 40%, 3x = 32%, 2x = 22%, 1x = 12%
+         * - Consistency Score = (Share %) × (Avg Count) × (Reliability Factor)
+         * - Smart Copy Counts based on usage patterns and probability math
+         */
+        function autoCompleteConsistency(source, rarityMode) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+            
+            // Clear specific rarity preferences before generating
+            rarityPreferences = {};
+            saveRarityPreferences();
+            
+            // Set global rarity preference
+            if (rarityMode) {
+                globalRarityPreference = rarityMode;
+            }
+            
+            let cardsKey, cards;
+            if (source === 'cityLeague') {
+                cardsKey = 'currentCityLeagueDeckCards';
+                cards = window[cardsKey];
+            } else if (source === 'currentMeta') {
+                cardsKey = 'currentCurrentMetaDeckCards';
+                cards = window[cardsKey];
+            } else if (source === 'pastMeta') {
+                cards = pastMetaCurrentCards;
+            }
+            
+            if (!cards || cards.length === 0) {
+                alert('No cards to add!');
+                return;
+            }
+            
+            console.log('[autoCompleteConsistency] 🎯 Starting CONSISTENCY-based deck generation');
+            console.log('[autoCompleteConsistency] Total available cards:', cards.length);
+            
+            // Clear existing deck
+            console.log('[autoCompleteConsistency] 🗑️ Clearing existing deck...');
+            if (source === 'cityLeague') {
+                window.cityLeagueDeck = {};
+                window.cityLeagueDeckOrder = [];
+                saveCityLeagueDeck();
+            } else if (source === 'currentMeta') {
+                window.currentMetaDeck = {};
+                window.currentMetaDeckOrder = [];
+                saveCurrentMetaDeck();
+            } else if (source === 'pastMeta') {
+                window.pastMetaDeck = {};
+                window.pastMetaDeckOrder = [];
+                savePastMetaDeck();
+            }
+            
+            // Get current archetype
+            let currentArchetype;
+            if (source === 'cityLeague') {
+                currentArchetype = window.currentCityLeagueArchetype;
+            } else if (source === 'currentMeta') {
+                currentArchetype = window.currentCurrentMetaArchetype;
+            } else if (source === 'pastMeta') {
+                currentArchetype = window.pastMetaCurrentArchetype;
+            }
+            console.log('[autoCompleteConsistency] Building consistency deck for:', currentArchetype);
+            
+            // Get deck reference
+            let deck;
+            if (source === 'cityLeague') {
+                deck = window.cityLeagueDeck;
+            } else if (source === 'currentMeta') {
+                deck = window.currentMetaDeck;
+            } else if (source === 'pastMeta') {
+                deck = window.pastMetaDeck;
+            }
+            let currentTotal = 0;
+            
+            // Basic Energy identification
+            const isBaseEnergy = (card) => {
+                const type = (card.type || card.card_type || '').toLowerCase();
+                return type === 'energy' && (card.card_name || '').match(/^(Fire|Water|Grass|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon|Colorless|Neutral)\s+Energy$/i);
+            };
+            
+            // Step 1: Aggregate cards by card_name
+            const uniqueCards = {};
+            for (const card of cards) {
+                const cardName = card.card_name;
+                
+                if (!uniqueCards[cardName]) {
+                    uniqueCards[cardName] = {
+                        ...card,
+                        deck_count: parseInt(card.deck_count || 0),
+                        total_count: parseFloat(card.total_count || 0)
+                    };
+                } else {
+                    uniqueCards[cardName].deck_count += parseInt(card.deck_count || 0);
+                    uniqueCards[cardName].total_count += parseFloat(card.total_count || 0);
+                }
+            }
+            
+            // Recalculate percentage for aggregated data
+            for (const cardName in uniqueCards) {
+                const card = uniqueCards[cardName];
+                const totalDecks = parseFloat(card.total_decks_in_archetype || 1);
+                const deckCount = card.deck_count;
+                card.percentage_in_archetype = ((deckCount / totalDecks) * 100).toFixed(2).replace('.', ',');
+            }
+            
+            let deckCards = Object.values(uniqueCards);
+            console.log('[autoCompleteConsistency] After aggregation:', deckCards.length, 'unique cards');
+            
+            // Step 2: Calculate CONSISTENCY SCORE for each card
+            // Formula: (Share % / 100) × Avg Count × Reliability Factor × 100
+            deckCards.forEach(card => {
+                const sharePercent = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
+                const totalCount = parseFloat(card.total_count) || 1;
+                const totalDecks = parseFloat(card.total_decks_in_archetype) || 1;
+                const avgCount = totalCount / totalDecks;
+                
+                // RELIABILITY FACTOR (based on Justin Basil standards):
+                // - High share (≥90%) + consistent count (≥1.5) = 1.5x multiplier
+                // - Good share (≥70%) = 1.2x multiplier
+                // - Medium share (≥50%) = 1.0x multiplier
+                // - Low share (<50%) = 0.8x multiplier
+                let reliabilityFactor;
+                if (sharePercent >= 90 && avgCount >= 1.5) {
+                    reliabilityFactor = 1.5;
+                } else if (sharePercent >= 70) {
+                    reliabilityFactor = 1.2;
+                } else if (sharePercent >= 50) {
+                    reliabilityFactor = 1.0;
+                } else {
+                    reliabilityFactor = 0.8;
+                }
+                
+                card.avgCount = avgCount;
+                card.sharePercent = sharePercent;
+                card.consistencyScore = (sharePercent / 100) * avgCount * reliabilityFactor * 100;
+                
+                // DETERMINE OPTIMAL COPY COUNT (based on professional standards)
+                // Reference: Justin Basil Guide + Opening Hand Probability Math
+                // 4 copies = ~40% opening hand (Core staples: Prof Research, Ultra Ball)
+                // 3 copies = ~32% opening hand (Important consistency)
+                // 2 copies = ~22% opening hand (Solid includes)
+                // 1 copy = ~12% opening hand (Tech choices)
+                
+                let optimalCount;
+                
+                // Base Energy - special handling (can exceed 4)
+                if (isBaseEnergy(card)) {
+                    optimalCount = Math.max(1, Math.round(avgCount));
+                }
+                // 4-of Territory: Core staples
+                // Professional standard: 4 copies for avgCount ≥3.5 and share ≥80%
+                // Examples: Professor's Research, Iono, Ultra Ball, Nest Ball
+                else if (avgCount >= 3.5 && sharePercent >= 80) {
+                    optimalCount = 4;
+                }
+                // 3-of Territory: Very reliable consistency
+                // Professional standard: 3 copies for avgCount ≥2.5 and share ≥70%
+                // Examples: Pokégear 3.0, draw Pokémon lines, Rare Candy
+                else if (avgCount >= 2.5 && sharePercent >= 70) {
+                    optimalCount = 3;
+                }
+                // 2-of Territory: Solid includes
+                // Standard: 2 copies for avgCount ≥1.8
+                // OR high reliability case: avgCount ≥1.3 AND share ≥85% (User's example!)
+                // Examples: Boss's Orders (2-4), Stadium cards (2-3), support Pokémon
+                else if (avgCount >= 1.8) {
+                    optimalCount = 2;
+                } else if (avgCount >= 1.3 && sharePercent >= 85) {
+                    // THIS IS THE USER'S EXAMPLE: 93% @ 1.3x → Should be 2 copies!
+                    optimalCount = 2;
+                }
+                // 1-of Territory: Tech choices
+                // Standard: 1 copy for avgCount ≥1.0 and share ≥50%
+                // Examples: Forest Seal Stone (1-2), tech Pokémon, situational tools
+                else if (avgCount >= 1.0 && sharePercent >= 50) {
+                    optimalCount = 1;
+                }
+                // Skip: Too unreliable
+                else {
+                    optimalCount = 0;
+                }
+                
+                card.optimalCount = optimalCount;
+            });
+            
+            // Step 3: Sort by CONSISTENCY SCORE (highest probability of success)
+            deckCards.sort((a, b) => b.consistencyScore - a.consistencyScore);
+            
+            console.log('[autoCompleteConsistency] 🎲 Top 10 consistency scores:');
+            deckCards.slice(0, 10).forEach((card, i) => {
+                console.log(`  ${i+1}. ${card.card_name}: Score ${card.consistencyScore.toFixed(1)} (${card.sharePercent.toFixed(1)}% @ ${card.avgCount.toFixed(1)}x avg) → ${card.optimalCount}x optimal`);
+            });
+            
+            let cardsToAdd = [];
+            const addedNames = new Set(Object.keys(deck).filter(name => deck[name] > 0));
+            
+            // Step 4: Add Ace Spec first (max 1x - TCG rule)
+            const aceSpecCards = deckCards.filter(card => isAceSpec(card));
+            aceSpecCards.sort((a, b) => b.consistencyScore - a.consistencyScore);
+            
+            let bestAceSpec = null;
+            if (aceSpecCards.length > 0) {
+                bestAceSpec = aceSpecCards[0];
+                console.log('[autoCompleteConsistency] 🌟 ACE SPEC:', bestAceSpec.card_name, 
+                    `(Score: ${bestAceSpec.consistencyScore.toFixed(1)}, ${bestAceSpec.sharePercent.toFixed(1)}% @ ${bestAceSpec.avgCount.toFixed(1)}x)`);
+                
+                if (!addedNames.has(bestAceSpec.card_name)) {
+                    cardsToAdd.push({ ...bestAceSpec, addCount: 1 });
+                    addedNames.add(bestAceSpec.card_name);
+                    currentTotal += 1;
+                }
+            }
+            
+            // Step 5: Build deck from highest consistency score downwards
+            console.log('[autoCompleteConsistency] 📊 Building optimal consistency deck...');
+            
+            for (const card of deckCards) {
+                if (currentTotal >= 60) break;
+                
+                const cardName = card.card_name;
+                
+                // Skip if already added
+                if (addedNames.has(cardName)) continue;
+                
+                // Skip Ace Spec cards (already handled)
+                if (isAceSpec(card)) continue;
+                
+                // Use optimal count determined by consistency algorithm
+                let addCount = card.optimalCount;
+                
+                // Don't exceed deck limit
+                addCount = Math.min(addCount, 60 - currentTotal);
+                
+                if (addCount > 0) {
+                    cardsToAdd.push({ ...card, addCount: addCount });
+                    addedNames.add(cardName);
+                    currentTotal += addCount;
+                    
+                    // Opening hand probability for this count
+                    const openingHandProb = addCount === 4 ? '~40%' : 
+                                           addCount === 3 ? '~32%' : 
+                                           addCount === 2 ? '~22%' : '~12%';
+                    
+                    console.log(`[autoCompleteConsistency] ➕ ${addCount}x ${cardName} (Score: ${card.consistencyScore.toFixed(1)}, ${card.sharePercent.toFixed(1)}% @ ${card.avgCount.toFixed(1)}x, Opening Hand: ${openingHandProb}) - Total: ${currentTotal}/60`);
+                }
+            }
+            
+            console.log('[autoCompleteConsistency] ✅ Consistency-optimized deck complete:', currentTotal, 'cards');
+            
+            // Show summary grouped by type
+            let summary = `🎯 MAX CONSISTENCY Deck (${currentTotal} cards):\n`;
+            summary += `Based on Professional Deck Building Guide\n\n`;
+            
+            let pokemon = [], trainer = [], energy = [];
+            
+            cardsToAdd.forEach(card => {
+                const cardType = card.type || card.card_type || '';
+                const category = getCardTypeCategory(cardType);
+                const openingHandProb = card.addCount === 4 ? '~40%' : 
+                                       card.addCount === 3 ? '~32%' : 
+                                       card.addCount === 2 ? '~22%' : '~12%';
+                const line = `${card.addCount}x ${card.card_name} (${card.sharePercent.toFixed(0)}% decks, ${openingHandProb} in opening hand)`;
+                
+                if (category === 'Pokemon') pokemon.push(line);
+                else if (category === 'Energy') energy.push(line);
+                else trainer.push(line);
+            });
+            
+            if (pokemon.length > 0) summary += `Pokémon (${pokemon.reduce((sum, p) => sum + parseInt(p.split('x')[0]), 0)}):\n${pokemon.join('\n')}\n\n`;
+            if (trainer.length > 0) summary += `Trainer (${trainer.reduce((sum, t) => sum + parseInt(t.split('x')[0]), 0)}):\n${trainer.join('\n')}\n\n`;
+            if (energy.length > 0) summary += `Energy (${energy.reduce((sum, e) => sum + parseInt(e.split('x')[0]), 0)}):\n${energy.join('\n')}\n\n`;
+            
+            summary += `━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            summary += `Consistency Formula: (Share % × Avg Count × Reliability)\n`;
+            summary += `Copy Counts: 4x = Core (40% opening), 3x = Reliable (32%), 2x = Solid (22%), 1x = Tech (12%)\n\n`;
+            summary += `Continue?`;
+            
+            if (confirm(summary)) {
+                // Add all cards to deck
+                cardsToAdd.forEach(card => {
+                    const originalSetCode = card.set_code || '';
+                    const originalSetNumber = card.set_number || '';
+                    const preferredVersion = getPreferredVersionForCard(card.card_name, originalSetCode, originalSetNumber);
+                    
+                    let setCode, setNumber;
+                    if (preferredVersion) {
+                        setCode = preferredVersion.set;
+                        setNumber = preferredVersion.number;
+                    } else {
+                        setCode = originalSetCode;
+                        setNumber = originalSetNumber;
+                    }
+                    
+                    for (let i = 0; i < card.addCount; i++) {
+                        addCardToDeck(source, card.card_name, setCode, setNumber);
+                    }
+                });
+                
+                console.log('[autoCompleteConsistency] ✅ Consistency deck completed with rarity mode:', globalRarityPreference);
+                
+                // Show the deck grid
+                renderMyDeckGrid(source);
+                
+                // Refresh overview grid
+                if (source === 'cityLeague') {
+                    applyCityLeagueFilter();
+                } else if (source === 'currentMeta') {
+                    applyCurrentMetaFilter();
+                }
+                
+                // Save deck
+                if (source === 'cityLeague') {
+                    saveCityLeagueDeck();
+                } else if (source === 'currentMeta') {
+                    saveCurrentMetaDeck();
+                } else if (source === 'pastMeta') {
+                    savePastMetaDeck();
+                }
+            }
+        }
+        
         function searchDeckCards(source = 'cityLeague') {
             const searchInputId = source === 'cityLeague' ? 'cityLeagueDeckCardSearch' : 
                                   source === 'currentMeta' ? 'currentMetaDeckCardSearch' : 

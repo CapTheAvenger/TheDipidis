@@ -57,11 +57,11 @@
                             </div>
                             <div class="section-grid-container">
                                 <div>
-                                    <label for="cityLeagueDateFrom" style="font-size: 0.9em; color: #666; display: block; margin-bottom: 5px;">From:</label>
+                                    <label for="cityLeagueDateFrom" style="font-size: 0.95em; color: #333; font-weight: 600; display: block; margin-bottom: 5px;">From:</label>
                                     <input type="date" id="cityLeagueDateFrom" onchange="applyCityLeagueDateFilter()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
                                 </div>
                                 <div>
-                                    <label for="cityLeagueDateTo" style="font-size: 0.9em; color: #666; display: block; margin-bottom: 5px;">To:</label>
+                                    <label for="cityLeagueDateTo" style="font-size: 0.95em; color: #333; font-weight: 600; display: block; margin-bottom: 5px;">To:</label>
                                     <input type="date" id="cityLeagueDateTo" onchange="applyCityLeagueDateFilter()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
                                 </div>
                             </div>
@@ -111,7 +111,7 @@
                         <div class="cards-header" style="display: block;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h2 style="margin: 0;">🃏 Card Overview</h2>
-                                <span style="font-size: 1em; color: #666;"><span id="cityLeagueCardCount">0 Cards</span><span id="cityLeagueCardCountSummary" style="margin-left: 8px; font-weight: normal;">/ 0 Total</span></span>
+                                <span style="font-size: 1.05em; color: #333; font-weight: 600;"><span id="cityLeagueCardCount">0 Cards</span><span id="cityLeagueCardCountSummary" style="margin-left: 8px; font-weight: 500;">/ 0 Total</span></span>
                             </div>
                             
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
@@ -165,7 +165,7 @@
                         </div>
                         
                         <div class="deck-summary">
-                            <h3>Current: <span id="cityLeagueDeckCount" style="font-weight: bold;">0</span> / 60 Cards <span id="cityLeagueDeckCountUnique" style="font-weight: normal; font-size: 0.9em; color: #666;">(0 Unique)</span></h3>
+                            <h3>Current: <span id="cityLeagueDeckCount" style="font-weight: bold;">0</span> / 60 Cards <span id="cityLeagueDeckCountUnique" style="font-weight: 500; font-size: 0.95em; color: #444;">(0 Unique)</span></h3>
                         </div>
                         
                         <!-- My Deck Overview -->
@@ -195,7 +195,7 @@
                         <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border: 2px solid #dee2e6;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🌍 Meta Card Analysis (Top 10 Archetypes)</h3>
-                                <span style="font-size: 0.9em; color: #666;"><span id="cityLeagueMetaCardCount">0 Cards</span></span>
+                                <span style="font-size: 1em; color: #333; font-weight: 600;"><span id="cityLeagueMetaCardCount">0 Cards</span></span>
                             </div>
                             
                             <!-- Filters -->
@@ -265,7 +265,7 @@
                                 <button onclick="setCurrentMetaFormatFilter('all')" id="currentMetaFilterAll" class="btn btn-primary" style="padding: 12px 20px; font-size: 0.95em;">📊 All</button>
                                 <button onclick="setCurrentMetaFormatFilter('live')" id="currentMetaFilterLive" class="btn btn-secondary" style="padding: 12px 20px; font-size: 0.95em;">� Limitless Decks</button>
                                 <button onclick="setCurrentMetaFormatFilter('play')" id="currentMetaFilterPlay" class="btn btn-secondary" style="padding: 12px 20px; font-size: 0.95em;">🏆 Major Tournament Decks</button>
-                                <span id="currentMetaFilterStatus" style="margin-left: 15px; color: #666; font-weight: 500;"></span>
+                                <span id="currentMetaFilterStatus" style="margin-left: 15px; color: #333; font-weight: 600;"></span>
                             </div>
                         </div>
                         <div class="control-row">
@@ -369,7 +369,7 @@
                         <div class="cards-header" style="display: block;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h2 style="margin: 0;">🃏 Card Overview</h2>
-                                <span style="font-size: 1em; color: #666;"><span id="currentMetaCardCount">0 Cards</span><span id="currentMetaCardCountSummary" style="margin-left: 8px; font-weight: normal;">/ 0 Total</span></span>
+                                <span style="font-size: 1.05em; color: #333; font-weight: 600;"><span id="currentMetaCardCount">0 Cards</span><span id="currentMetaCardCountSummary" style="margin-left: 8px; font-weight: 500;">/ 0 Total</span></span>
                             </div>
                             
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
@@ -423,7 +423,7 @@
                         </div>
                         
                         <div class="deck-summary">
-                            <h3>Current: <span id="currentMetaDeckCount" style="font-weight: bold;">0</span> / 60 Cards <span id="currentMetaDeckCountUnique" style="font-weight: normal; font-size: 0.9em; color: #666;">(0 Unique)</span></h3>
+                            <h3>Current: <span id="currentMetaDeckCount" style="font-weight: bold;">0</span> / 60 Cards <span id="currentMetaDeckCountUnique" style="font-weight: 500; font-size: 0.95em; color: #444;">(0 Unique)</span></h3>
                         </div>
                         
                         <!-- My Deck Overview -->
@@ -438,7 +438,7 @@
                             </div>
                             <input type="text" id="currentMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input" oninput="filterDeckGrid('currentMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div class="deck-grid" id="currentMetaMyDeckGrid">
-                                <p style="text-align: center; color: #666; padding: 40px;">Create a deck using the buttons above or add cards manually...</p>
+                                <p style="text-align: center; color: #555; padding: 40px; font-size: 1.05em; font-weight: 500;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
                         </div>
                         
@@ -453,7 +453,7 @@
                         <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border: 2px solid #dee2e6;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🌍 Meta Card Analysis (Top 10 Archetypes)</h3>
-                                <span style="font-size: 0.9em; color: #666;"><span id="currentMetaMetaCardCount">0 Cards</span></span>
+                                <span style="font-size: 1em; color: #333; font-weight: 600;"><span id="currentMetaMetaCardCount">0 Cards</span></span>
                             </div>
                             
                             <!-- Filters -->
@@ -485,7 +485,7 @@
                             <input type="text" id="currentMetaMetaSearch" placeholder="🔍 Search cards in meta..." class="card-search-input" oninput="filterMetaCards('currentMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             
                             <div id="currentMetaMetaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; padding: 10px; background: #fff; border-radius: 6px;">
-                                <p style="text-align: center; color: #666; padding: 40px; grid-column: 1 / -1;">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
+                                <p style="text-align: center; color: #555; padding: 40px; grid-column: 1 / -1; font-size: 1.05em; font-weight: 500;">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
                             </div>
                             
                             <div style="margin-top: 15px; text-align: center;">
@@ -564,7 +564,7 @@
                         <div class="cards-header" style="display: block;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h2 style="margin: 0;">🃏 Card Overview</h2>
-                                <span style="font-size: 1em; color: #666;"><span id="pastMetaCardCount">0 Cards</span><span id="pastMetaCardCountSummary" style="margin-left: 8px; font-weight: normal;">/ 0 Total</span></span>
+                                <span style="font-size: 1.05em; color: #333; font-weight: 600;"><span id="pastMetaCardCount">0 Cards</span><span id="pastMetaCardCountSummary" style="margin-left: 8px; font-weight: 500;">/ 0 Total</span></span>
                             </div>
                             
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
@@ -618,7 +618,7 @@
                         </div>
                         
                         <div class="deck-summary">
-                            <h3>Current: <span id="pastMetaDeckCount" style="font-weight: bold;">0</span> / 60 Cards <span id="pastMetaDeckCountUnique" style="font-weight: normal; font-size: 0.9em; color: #666;">(0 Unique)</span></h3>
+                            <h3>Current: <span id="pastMetaDeckCount" style="font-weight: bold;">0</span> / 60 Cards <span id="pastMetaDeckCountUnique" style="font-weight: 500; font-size: 0.95em; color: #444;">(0 Unique)</span></h3>
                         </div>
                         
                         <!-- My Deck Overview -->
@@ -633,7 +633,7 @@
                             </div>
                             <input type="text" id="pastMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input" oninput="filterDeckGrid('pastMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div class="deck-grid" id="pastMetaMyDeckGrid">
-                                <p style="text-align: center; color: #666; padding: 40px;">Create a deck using the buttons above or add cards manually...</p>
+                                <p style="text-align: center; color: #555; padding: 40px; font-size: 1.05em; font-weight: 500;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
                         </div>
                         
@@ -1194,7 +1194,7 @@
             <h2>🔄 Deck Compare</h2>
             
             <div style="margin-bottom: 20px;">
-                <p style="color: #666; margin-bottom: 10px;">Paste your old decklist (Pokémon TCG Live Format):</p>
+                <p style="color: #333; margin-bottom: 10px; font-weight: 600; font-size: 1.05em;">Paste your old decklist (Pokémon TCG Live Format):</p>
                 <textarea id="oldDeckListInput" placeholder="Pokémon: 16&#10;2 Lunatone ASC 105&#10;3 Solrock ASC 106&#10;...&#10;&#10;Trainer: 33&#10;...&#10;&#10;Energy: 11&#10;..." style="width: 100%; height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 0.9em;"></textarea>
             </div>
             
@@ -1209,4 +1209,6 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=20260309-37"></script>
+    <script src="js/app.js?v=20260309-39"></script>
+</body>
+</html>

@@ -2153,7 +2153,7 @@
                                 </div>
                                 <div>
                                     <span style="color: #999; font-size: 0.85em;">Deck Count:</span>
-                                    <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${decksWithCard} / ${totalDecksInArchetype} Decks</span>
+                                    <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${decksWithCard}/${totalDecksInArchetype} (${percentage}%)</span>
                                 </div>
                                 <div>
                                     <span style="color: #999; font-size: 0.85em;">Max Count:</span>
@@ -2409,7 +2409,7 @@
                                         ${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)
                                     </div>
                                     <div style="font-weight: 600; color: #333; font-size: 0.58em;">
-                                        ${decksWithCard} / ${totalDecksInArchetype} Decks
+                                        ${decksWithCard}/${totalDecksInArchetype} (${percentage}%)
                                     </div>
                                 </div>
                                 

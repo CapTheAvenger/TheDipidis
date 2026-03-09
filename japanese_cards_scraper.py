@@ -267,8 +267,14 @@ def scrape_japanese_cards_list() -> List[Dict[str, str]]:
 def filter_latest_sets(cards: List[Dict[str, str]]) -> Tuple[List[Dict[str, str]], Set[str]]:
     """
     Keep only cards from the N most recent Japanese sets (N from settings).
+    Promo sets are ALWAYS kept regardless of age.
     Returns filtered cards and the set codes of the latest sets.
     """
+    # Define promo sets that should ALWAYS be kept (not subject to latest sets filtering)
+    PROMO_SETS = ['MEP', 'SVP', 'SP', 'SMP', 'XYP', 'BWP', 'HSP', 'DPP', 'NP', 'WP', 
+                  'POP', 'SWSH', 'SWSHP', 'PR-SW', 'PR-SM', 'PR-XY', 'PR-BLW', 'PR-HS', 'PR-DP',
+                  'MP']  # MP = Mythical and Legendary Dream Holo Collection
+    
     # Get unique sets and their "first appearance" index (lower index = newer)
     set_first_appearance = {}
     for idx, card in enumerate(cards):
@@ -276,23 +282,33 @@ def filter_latest_sets(cards: List[Dict[str, str]]) -> Tuple[List[Dict[str, str]
         if set_code not in set_first_appearance:
             set_first_appearance[set_code] = idx
     
-    # Sort sets by first appearance (index) - lower index means appeared first = newer
-    sorted_sets = sorted(set_first_appearance.items(), key=lambda x: x[1])
+    # Separate promo sets from regular sets
+    promo_sets_found = {s for s in set_first_appearance.keys() if s in PROMO_SETS}
+    regular_sets = [(s, idx) for s, idx in set_first_appearance.items() if s not in PROMO_SETS]
     
-    # Get the N most recent sets from settings
+    # Sort regular sets by first appearance (index) - lower index means appeared first = newer
+    sorted_regular_sets = sorted(regular_sets, key=lambda x: x[1])
+    
+    # Get the N most recent regular sets from settings
     keep_count = SETTINGS['keep_latest_sets']
-    latest_sets = {set_code for set_code, _ in sorted_sets[:keep_count]}
+    latest_regular_sets = {set_code for set_code, _ in sorted_regular_sets[:keep_count]}
+    
+    # Combine latest regular sets with ALL promo sets
+    latest_sets = latest_regular_sets | promo_sets_found
     
     print(f"\n[Japanese Scraper] Detected {len(set_first_appearance)} different sets total")
-    print(f"[Japanese Scraper] Keeping only the {keep_count} most recent sets:")
-    for set_code, idx in sorted_sets[:keep_count]:
+    print(f"[Japanese Scraper] Keeping {keep_count} most recent regular sets + {len(promo_sets_found)} promo sets:")
+    for set_code, idx in sorted_regular_sets[:keep_count]:
         count = sum(1 for c in cards if c['set'] == set_code)
-        print(f"[Japanese Scraper]   - {set_code}: {count} cards")
+        print(f"[Japanese Scraper]   - {set_code}: {count} cards (regular)")
+    for promo_set in sorted(promo_sets_found):
+        count = sum(1 for c in cards if c['set'] == promo_set)
+        print(f"[Japanese Scraper]   - {promo_set}: {count} cards (PROMO - always kept)")
     
     # Filter cards
     filtered_cards = [c for c in cards if c['set'] in latest_sets]
     
-    print(f"\n[Japanese Scraper] ✓ Filtered to {len(filtered_cards)} cards from {keep_count} latest sets")
+    print(f"\n[Japanese Scraper] ✓ Filtered to {len(filtered_cards)} cards from {len(latest_sets)} sets")
     return filtered_cards, latest_sets
 
 
@@ -352,7 +368,8 @@ def scrape_card_details(cards: List[Dict[str, str]]) -> List[Dict[str, str]]:
                 
                 # For Promo sets: If rarity is empty, set it to "Promo"
                 PROMO_SETS = ['MEP', 'SVP', 'SP', 'SMP', 'XYP', 'BWP', 'HSP', 'DPP', 'NP', 'WP', 
-                              'POP', 'SWSH', 'SWSHP', 'PR-SW', 'PR-SM', 'PR-XY', 'PR-BLW', 'PR-HS', 'PR-DP']
+                              'POP', 'SWSH', 'SWSHP', 'PR-SW', 'PR-SM', 'PR-XY', 'PR-BLW', 'PR-HS', 'PR-DP',
+                              'MP']  # MP = Mythical and Legendary Dream Holo Collection
                 if card['set'] in PROMO_SETS and not card.get('rarity'):
                     card['rarity'] = 'Promo'
                 

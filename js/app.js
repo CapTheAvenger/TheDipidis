@@ -1979,8 +1979,13 @@
                 if (!cardNumber && url) {
                     const numberMatch = url.match(/M3_0*(\d+)_/);
                     if (numberMatch) {
-                        cardNumber = numberMatch[1].padStart(3, '0'); // 46 → 046
+                        cardNumber = numberMatch[1]; // 46 or 046
                     }
+                }
+                
+                // CRITICAL: Always pad to 3 digits to match CSV keys (75 → 075)
+                if (cardNumber) {
+                    cardNumber = cardNumber.toString().padStart(3, '0');
                 }
                 
                 // Try PokemonProxies mapping first

@@ -1908,35 +1908,10 @@
         function fixJapaneseCardImageUrl(url, setCode, cardName = '') {
             if (!url) return url;
             
-            // M3 set cards: Use pokemonproxies.com (English translation), fallback to Limitless Japanese
+            // M3 set cards: Use Limitless Japanese (reliable), NOT pokemonproxies (unreliable)
             const isM3Set = setCode === 'M3' || url.includes('/M3/');
             
-            if (isM3Set && cardName) {
-                // Extract card number from URL (e.g., M3_046 or M3_46)
-                const numberMatch = url.match(/M3_0*(\d+)_/);
-                if (numberMatch) {
-                    const cardNumber = numberMatch[1].padStart(3, '0'); // 46 → 046
-                    
-                    // Normalize card name for pokemonproxies.com URL
-                    // "Mega Zygarde ex" → "Mega_Zygarde_ex"
-                    // "N's Zorua" → "Ns_Zorua"
-                    const normalizedName = cardName
-                        .replace(/'/g, '')           // Remove apostrophes
-                        .replace(/\./g, '')          // Remove periods
-                        .replace(/[éè]/g, 'e')       // Normalize accents
-                        .replace(/[àâ]/g, 'a')
-                        .replace(/\s+/g, '_')        // Spaces → underscores
-                        .replace(/__+/g, '_');       // Remove double underscores
-                    
-                    // Try pokemonproxies.com (English translation)
-                    const proxyUrl = `https://pokemonproxies.com/images/cards/sets/Munikis_Zero/3a-${cardNumber}-${normalizedName}.png`;
-                    console.log(`🎴 M3 Card → pokemonproxies.com: ${cardName} → ${proxyUrl}`);
-                    return proxyUrl;
-                }
-            }
-            
-            // Fallback: Use Limitless Japanese version for M3
-            if (isM3Set && url.includes('_EN_')) {
+            if (isM3Set) {
                 const originalUrl = url;
                 
                 // Replace tpci with tpc
@@ -1948,7 +1923,7 @@
                 // Remove leading zeros from card number (M3_046 → M3_46)
                 url = url.replace(/\/M3_0+(\d+)_/g, '/M3_$1_');
                 
-                console.log(`🎴 M3 Card → Limitless JP fallback: ${originalUrl} → ${url}`);
+                console.log(`🎴 M3 Card → Limitless JP: ${originalUrl} → ${url}`);
             }
             
             return url;

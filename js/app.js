@@ -4934,6 +4934,10 @@
                 
                 console.log('[loadMetaCardAnalysis] Top 10 archetypes:', archetypeList.map(a => `${a.name} (${a.totalDecks} decks)`));
                 
+                // Create a Set of Top 10 archetype names for filtering
+                const top10ArchetypeNames = new Set(archetypeList.map(a => a.name));
+                console.log('[loadMetaCardAnalysis] Top 10 names:', Array.from(top10ArchetypeNames));
+                
                 // Aggregate all cards from Top 10 archetypes
                 const cardMap = {};
                 let totalDecksInTop10 = 0;
@@ -4963,13 +4967,15 @@
                         cardMap[cardName].totalDecksWithCard += card.deckCount;
                         cardMap[cardName].totalCopies += card.totalCount;
                         
-                        // Track which archetypes use this card
-                        cardMap[cardName].archetypes.push({
-                            name: archetype.name,
-                            deckCount: card.deckCount,
-                            totalDecks: archetype.totalDecks,
-                            percentage: archetype.totalDecks > 0 ? (card.deckCount / archetype.totalDecks * 100).toFixed(1) : '0.0'
-                        });
+                        // Track which archetypes use this card (ONLY if in Top 10)
+                        if (top10ArchetypeNames.has(archetype.name)) {
+                            cardMap[cardName].archetypes.push({
+                                name: archetype.name,
+                                deckCount: card.deckCount,
+                                totalDecks: archetype.totalDecks,
+                                percentage: archetype.totalDecks > 0 ? (card.deckCount / archetype.totalDecks * 100).toFixed(1) : '0.0'
+                            });
+                        }
                     });
                 });
                 
@@ -4982,6 +4988,12 @@
                     avgCount: totalDecksInTop10 > 0 ? card.totalCopies / totalDecksInTop10 : 0,
                     avgCountWhenUsed: card.totalDecksWithCard > 0 ? card.totalCopies / card.totalDecksWithCard : 0
                 }));
+                
+                // Debug: Log archetypes for a sample card
+                const sampleCard = metaCards.find(c => c.card_name.includes('Fezandipiti'));
+                if (sampleCard) {
+                    console.log('[loadMetaCardAnalysis] Sample card archetypes:', sampleCard.card_name, '→', sampleCard.archetypes.map(a => a.name));
+                }
                 
                 metaCardData[source] = metaCards;
                 console.log('[loadMetaCardAnalysis] Loaded', metaCards.length, 'unique cards from Top 10 archetypes');

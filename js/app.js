@@ -4801,8 +4801,8 @@
         };
         
         let metaCardFilter = {
-            cityLeague: { shareThreshold: 'all', cardType: 'all', sortBy: 'share', searchTerm: '' },
-            currentMeta: { shareThreshold: 'all', cardType: 'all', sortBy: 'share', searchTerm: '' }
+            cityLeague: { shareThreshold: 'all', cardType: 'all', sortBy: 'type', searchTerm: '' },
+            currentMeta: { shareThreshold: 'all', cardType: 'all', sortBy: 'type', searchTerm: '' }
         };
         
         async function loadMetaCardAnalysis(source) {
@@ -4959,11 +4959,28 @@
                 cards = cards.filter(c => c.card_name.toLowerCase().includes(term));
             }
             
+            // Apply minimum 30% share filter (always active for meta analysis)
+            cards = cards.filter(c => c.metaShare >= 30);
+            
             // Sort
             if (filter.sortBy === 'share') {
                 cards.sort((a, b) => b.metaShare - a.metaShare);
             } else if (filter.sortBy === 'avgCount') {
                 cards.sort((a, b) => b.avgCount - a.avgCount);
+            } else if (filter.sortBy === 'type') {
+                // Sort by card type category (Pokemon, Supporter, Item, Tool, Stadium, Energy)
+                const typeOrder = { 'Pokemon': 0, 'Supporter': 1, 'Item': 2, 'Tool': 3, 'Stadium': 4, 'Special Energy': 5, 'Energy': 6 };
+                cards.sort((a, b) => {
+                    const catA = getCardTypeCategory(a.type);
+                    const catB = getCardTypeCategory(b.type);
+                    const orderA = typeOrder[catA] !== undefined ? typeOrder[catA] : 99;
+                    const orderB = typeOrder[catB] !== undefined ? typeOrder[catB] : 99;
+                    
+                    if (orderA !== orderB) return orderA - orderB;
+                    
+                    // Within same category, sort by share% descending
+                    return b.metaShare - a.metaShare;
+                });
             }
             
             countSpan.textContent = `${cards.length} Cards`;
@@ -5026,6 +5043,15 @@
         
         function sortMetaCards(source, sortBy) {
             metaCardFilter[source].sortBy = sortBy;
+            
+            // Update button styles - find all sort buttons for this source
+            const buttons = document.querySelectorAll(`button[onclick*="sortMetaCards('${source}'"]`);
+            buttons.forEach(btn => {
+                const isActive = btn.getAttribute('onclick').includes(`'${sortBy}'`);
+                btn.style.fontWeight = isActive ? 'bold' : 'normal';
+                btn.style.opacity = isActive ? '1' : '0.7';
+            });
+            
             renderMetaCards(source);
         }
         

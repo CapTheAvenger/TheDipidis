@@ -4554,7 +4554,13 @@
                 const sharePercent = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
                 const totalCount = parseFloat(card.total_count) || 1;
                 const totalDecks = parseFloat(card.total_decks_in_archetype) || 1;
+                const deckCount = parseInt(card.deck_count) || 1;
+                
+                // TWO IMPORTANT METRICS:
+                // 1. avgCount = Average across ALL decks (including those without the card)
+                // 2. avgCountWhenUsed = Average only in decks that USE the card
                 const avgCount = totalCount / totalDecks;
+                const avgCountWhenUsed = totalCount / deckCount;
                 
                 // RELIABILITY FACTOR (based on Justin Basil standards):
                 // - High share (≥90%) + consistent count (≥1.5) = 1.5x multiplier
@@ -4573,6 +4579,7 @@
                 }
                 
                 card.avgCount = avgCount;
+                card.avgCountWhenUsed = avgCountWhenUsed;
                 card.sharePercent = sharePercent;
                 card.consistencyScore = (sharePercent / 100) * avgCount * reliabilityFactor * 100;
                 
@@ -4596,11 +4603,18 @@
                     }
                 }
                 // ═══════════════════════════════════════════════
-                // IMPROVED CONSISTENCY THRESHOLDS V2
+                // IMPROVED CONSISTENCY THRESHOLDS V3
                 // ═══════════════════════════════════════════════
                 
+                // POLARIZATION DETECTION FIRST: Skip specialized cards
+                // Use avgCountWhenUsed to detect "all or nothing" cards
+                // Example: Carmine (55.6% @ 2.78x when used) = Low share + High per-deck = Specialized
+                else if (sharePercent < 70 && avgCountWhenUsed >= 2.5) {
+                    optimalCount = 0;  // Skip polarized cards - not universal to archetype
+                    console.log(`[autoCompleteConsistency] ⚠️ POLARIZED: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used) - Specialized card, skipping`);
+                }
                 // 4-of Territory: Ultra-reliable staples
-                // NEW: Evolution lines (Riolu 100% @ 3.25x) and core consistency
+                // Example: Riolu (100% @ 3.25x), Evolution lines, core consistency
                 else if (avgCount >= 3.0 && sharePercent >= 90) {
                     optimalCount = 4;  // Ultra-reliable: Nearly universal + high count
                 }
@@ -4608,19 +4622,12 @@
                     optimalCount = 4;  // Core staples: Very high count + good share
                 }
                 // 3-of Territory: Very strong consistency
-                // NEW: Judge (96.6% @ 2.40x) should be 3x, not 2x!
+                // Example: Judge (96.6% @ 2.40x) should be 3x, not 2x!
                 else if (avgCount >= 2.2 && sharePercent >= 90) {
                     optimalCount = 3;  // Very high share + solid count
                 }
                 else if (avgCount >= 2.5 && sharePercent >= 70) {
                     optimalCount = 3;  // Good reliability standard
-                }
-                // POLARIZATION DETECTION: Skip specialized cards
-                // NEW: Carmine (55.6% @ 2.78x) = Low share + High avg = Specialized decks only
-                // These cards are "all or nothing" - either the deck needs 3x or doesn't need it at all
-                else if (sharePercent < 70 && avgCount >= 2.5) {
-                    optimalCount = 0;  // Skip polarized cards - not universal to archetype
-                    console.log(`[autoCompleteConsistency] ⚠️ POLARIZED: ${card.card_name} (${sharePercent.toFixed(1)}% @ ${avgCount.toFixed(2)}x) - Specialized card, skipping`);
                 }
                 // 2-of Territory: Solid includes
                 else if (avgCount >= 1.8) {
@@ -4633,10 +4640,17 @@
                 else if (avgCount >= 1.0 && sharePercent >= 50) {
                     optimalCount = 1;
                 }
+                // HIGH-SHARE TECH CARDS: Include cards with >70% share even if low avgCount
+                // Example: Gravity Mountain (75.8% @ 0.85x) - Meta-relevant tech
+                else if (sharePercent >= 70 && avgCount >= 0.7) {
+                    optimalCount = 1;  // High-share tech: Important for meta
+                    console.log(`[autoCompleteConsistency] 🎯 HIGH-SHARE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCount.toFixed(2)}x avg) - Meta-relevant inclusion`);
+                }
                 // Skip: Too unreliable
                 else {
                     optimalCount = 0;
                 }
+
                 
                 card.optimalCount = optimalCount;
             });

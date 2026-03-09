@@ -1408,6 +1408,10 @@
                 window.cityLeagueComparisonData = comparisonData;
                 populateCityLeagueDeckSelect(data, comparisonData);
                 window.cityLeagueAnalysisLoaded = true;
+                
+                // Load meta card analysis for consistency calculations
+                console.log('Loading meta card analysis for consistency...');
+                loadMetaCardAnalysis('cityLeague');
             } else {
                 const tableContainer = document.getElementById('cityLeagueAnalysisTable');
                 if (tableContainer) {
@@ -4501,9 +4505,22 @@
          * Based on Justin Basil's Professional Deck Building Guide:
          * - Deck Skeleton: 20 Pokémon, 30 Trainer, 10 Energy (±3 deviation normal)
          * - Opening Hand Probabilities: 4x = 40%, 3x = 32%, 2x = 22%, 1x = 12%
-         * - Consistency Score = (Share %) × (Avg Count) × (Reliability Factor)
+         * - Consistency Score = (Share %) × (Avg Count) × (Reliability Factor) × (Meta Relevance Factor)
+         * - Meta Relevance: Cards with high meta-share are prioritized (tech cards against meta)
          * - Smart Copy Counts based on usage patterns and probability math
          */
+        
+        // Helper: Get meta share for a card (if meta analysis is loaded)
+        function getMetaShareForCard(cardName, source) {
+            const metaData = source === 'cityLeague' ? metaCardData.cityLeague : 
+                           source === 'currentMeta' ? metaCardData.currentMeta : null;
+            
+            if (!metaData || metaData.length === 0) return 0;
+            
+            const metaCard = metaData.find(c => c.card_name === cardName);
+            return metaCard ? metaCard.metaShare : 0;
+        }
+        
         function autoCompleteConsistency(source, rarityMode) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             
@@ -4608,7 +4625,7 @@
             console.log('[autoCompleteConsistency] After aggregation:', deckCards.length, 'unique cards');
             
             // Step 2: Calculate CONSISTENCY SCORE for each card
-            // Formula: (Share % / 100) × Avg Count × Reliability Factor × 100
+            // Formula: (Share % / 100) × Avg Count × Reliability Factor × Meta Relevance Factor × 100
             deckCards.forEach(card => {
                 const sharePercent = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
                 const totalCount = parseFloat(card.total_count) || 1;
@@ -4637,10 +4654,35 @@
                     reliabilityFactor = 0.8;
                 }
                 
+                // META RELEVANCE FACTOR (NEW):
+                // Cards with high meta-share are more important (tech cards against meta)
+                // - Meta share ≥70%: 1.3x (very meta-relevant, many decks use/tech against)
+                // - Meta share ≥50%: 1.15x (meta-relevant)
+                // - Meta share ≥30%: 1.0x (moderate)
+                // - Meta share <30%: 0.9x (less relevant)
+                const metaShare = getMetaShareForCard(card.card_name, source);
+                let metaRelevanceFactor = 1.0;
+                if (metaShare >= 70) {
+                    metaRelevanceFactor = 1.3;
+                } else if (metaShare >= 50) {
+                    metaRelevanceFactor = 1.15;
+                } else if (metaShare >= 30) {
+                    metaRelevanceFactor = 1.0;
+                } else if (metaShare > 0) {
+                    metaRelevanceFactor = 0.9;
+                }
+                
                 card.avgCount = avgCount;
                 card.avgCountWhenUsed = avgCountWhenUsed;
                 card.sharePercent = sharePercent;
-                card.consistencyScore = (sharePercent / 100) * avgCount * reliabilityFactor * 100;
+                card.metaShare = metaShare;
+                card.metaRelevanceFactor = metaRelevanceFactor;
+                card.consistencyScore = (sharePercent / 100) * avgCount * reliabilityFactor * metaRelevanceFactor * 100;
+                
+                // Log high meta-relevance cards
+                if (metaRelevanceFactor > 1.0 && sharePercent >= 50) {
+                    console.log(`[autoCompleteConsistency] 🌐 META-RELEVANT: ${card.card_name} (Archetype: ${sharePercent.toFixed(1)}%, Meta: ${metaShare.toFixed(1)}%) → ${metaRelevanceFactor}x boost`);
+                }
                 
                 // DETERMINE OPTIMAL COPY COUNT (based on professional standards)
                 // Reference: Justin Basil Guide + Opening Hand Probability Math
@@ -4719,7 +4761,8 @@
             
             console.log('[autoCompleteConsistency] 🎲 Top 10 consistency scores:');
             deckCards.slice(0, 10).forEach((card, i) => {
-                console.log(`  ${i+1}. ${card.card_name}: Score ${card.consistencyScore.toFixed(1)} (${card.sharePercent.toFixed(1)}% @ ${card.avgCount.toFixed(1)}x avg) → ${card.optimalCount}x optimal`);
+                const metaInfo = card.metaShare > 0 ? ` | Meta: ${card.metaShare.toFixed(1)}% (${card.metaRelevanceFactor}x)` : '';
+                console.log(`  ${i+1}. ${card.card_name}: Score ${card.consistencyScore.toFixed(1)} (Arch: ${card.sharePercent.toFixed(1)}% @ ${card.avgCount.toFixed(1)}x${metaInfo}) → ${card.optimalCount}x optimal`);
             });
             
             let cardsToAdd = [];
@@ -4732,8 +4775,9 @@
             let bestAceSpec = null;
             if (aceSpecCards.length > 0) {
                 bestAceSpec = aceSpecCards[0];
+                const metaInfo = bestAceSpec.metaShare > 0 ? `, Meta: ${bestAceSpec.metaShare.toFixed(1)}%` : '';
                 console.log('[autoCompleteConsistency] 🌟 ACE SPEC:', bestAceSpec.card_name, 
-                    `(Score: ${bestAceSpec.consistencyScore.toFixed(1)}, ${bestAceSpec.sharePercent.toFixed(1)}% @ ${bestAceSpec.avgCount.toFixed(1)}x)`);
+                    `(Score: ${bestAceSpec.consistencyScore.toFixed(1)}, Arch: ${bestAceSpec.sharePercent.toFixed(1)}% @ ${bestAceSpec.avgCount.toFixed(1)}x${metaInfo})`);
                 
                 if (!addedNames.has(bestAceSpec.card_name)) {
                     cardsToAdd.push({ ...bestAceSpec, addCount: 1 });
@@ -9248,6 +9292,10 @@
                 await populateCurrentMetaDeckSelect(data);
                 setCurrentMetaFormatFilter('all'); // Set default filter
                 window.currentMetaAnalysisLoaded = true;
+                
+                // Load meta card analysis for consistency calculations
+                console.log('Loading meta card analysis for consistency...');
+                loadMetaCardAnalysis('currentMeta');
             } else {
                 const content = document.getElementById('currentMetaDeckSelect');
                 if (content) {

@@ -4704,55 +4704,71 @@
                     }
                 }
                 // ═══════════════════════════════════════════════
-                // IMPROVED CONSISTENCY THRESHOLDS V3
+                // IMPROVED CONSISTENCY THRESHOLDS V4 - DATA FIRST
                 // ═══════════════════════════════════════════════
+                // Philosophy: Respect the archetype data, don't inflate numbers
+                // - 3.0x average → 3 copies (not 4)
+                // - 1.8x average → 2 copies (rounds to 2)
+                // - 2.0x average → 2 copies (exact match)
+                // Only add cards that appear meaningfully in the archetype
                 
-                // POLARIZATION DETECTION FIRST: Skip specialized cards
-                // Use avgCountWhenUsed to detect "all or nothing" cards
-                // Example: Carmine (55.6% @ 2.78x when used) = Low share + High per-deck = Specialized
-                else if (sharePercent < 70 && avgCountWhenUsed >= 2.5) {
-                    optimalCount = 0;  // Skip polarized cards - not universal to archetype
-                    console.log(`[autoCompleteConsistency] ⚠️ POLARIZED: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used) - Specialized card, skipping`);
+                // POLARIZATION DETECTION (STRICT): Only skip truly specialized cards
+                // Stricter thresholds to avoid filtering good tech cards
+                // Example of TRUE polarization: Carmine (55% @ 2.78x when used) = specialized variant
+                // Counter-example: Petrel (67% @ 1.8x) = good tech card, NOT polarized
+                else if (sharePercent < 60 && avgCountWhenUsed >= 2.8) {
+                    optimalCount = 0;  // True polarization: <60% share but 2.8+ when used
+                    console.log(`[autoCompleteConsistency] ⚠️ POLARIZED: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used) - Specialized variant, skipping`);
                 }
-                // 4-of Territory: Ultra-reliable staples
-                // Example: Riolu (100% @ 3.25x), Evolution lines, core consistency
-                else if (avgCount >= 3.0 && sharePercent >= 90) {
-                    optimalCount = 4;  // Ultra-reliable: Nearly universal + high count
+                // 4-of Territory: Only ultra-reliable staples (3.3+ average)
+                // Conservative threshold - don't inflate 3.0x to 4x
+                // Example: Riolu (100% @ 3.25x) might still be 3x, Rare Candy (100% @ 3.5x) = 4x
+                else if (avgCount >= 3.4 && sharePercent >= 90) {
+                    optimalCount = 4;  // Ultra-reliable: Nearly universal + high count (raised from 3.0 to 3.4)
                 }
-                else if (avgCount >= 3.5 && sharePercent >= 80) {
-                    optimalCount = 4;  // Core staples: Very high count + good share
+                else if (avgCount >= 3.6 && sharePercent >= 80) {
+                    optimalCount = 4;  // Core staples: Very high count + good share (raised from 3.5 to 3.6)
                 }
-                // 3-of Territory: Very strong consistency
-                // ADJUSTED: Raised threshold from 2.2 to 2.4 (closer to 3 than 2)
-                // Example: Judge (96.6% @ 2.40x) should be 3x
-                // Counter-example: Makuhita (100% @ 2.23x) should be 2x (closer to 2 than 3)
+                // 3-of Territory: Strong consistency (2.4-3.3 range)
+                // Respects data - 3.0x average stays at 3x, doesn't inflate
+                // Example: Roselia (3.0x) → 3 copies, Judge (2.4x @ 96.6%) → 3 copies
                 else if (avgCount >= 2.4 && sharePercent >= 90) {
-                    optimalCount = 3;  // Very high share + solid count (>=2.4 is closer to 3)
+                    optimalCount = 3;  // Very high share + solid count
                 }
                 else if (avgCount >= 2.6 && sharePercent >= 70) {
                     optimalCount = 3;  // Good reliability standard
                 }
-                // 2-of Territory: Solid includes
-                // ADJUSTED: Lowered threshold from 1.8 to 1.6 (captures 2.23x properly)
-                else if (avgCount >= 1.6) {
-                    optimalCount = 2;
-                } else if (avgCount >= 1.3 && sharePercent >= 85) {
+                // Explicit handling for 3.0-3.3 range: Stay at 3x (data-respecting)
+                else if (avgCount >= 3.0 && avgCount < 3.4 && sharePercent >= 60) {
+                    optimalCount = 3;  // Don't inflate to 4x - respect the 3.0 average
+                    console.log(`[autoCompleteConsistency] 📊 DATA-DRIVEN: ${card.card_name} (${sharePercent.toFixed(1)}% @ ${avgCount.toFixed(2)}x) → 3x (respecting average, not inflating to 4x)`);
+                }
+                // 2-of Territory: Solid includes (1.5-2.9 range)
+                // Lowered threshold to catch 1.8x and 2.0x properly
+                // Example: Petrel (67% @ 1.8x), Rock Fighting Energy (66% @ 2.0x), Makuhita (100% @ 2.23x)
+                else if (avgCount >= 1.5 && sharePercent >= 50) {
+                    optimalCount = 2;  // Data-driven: 1.5+ rounds to 2 (was 1.6)
+                }
+                else if (avgCount >= 1.3 && sharePercent >= 85) {
                     optimalCount = 2;  // High reliability case
                 }
-                // 1-of Territory: Tech choices
-                // Example: Wally's Compassion (64.1% @ 1.61x) - Recovery/Utility cards
-                else if (avgCount >= 1.0 && sharePercent >= 50) {
-                    optimalCount = 1;
+                // 1-of Territory: Tech choices and utility cards
+                // Cards that appear but not in high numbers
+                else if (avgCount >= 0.8 && sharePercent >= 60) {
+                    optimalCount = 1;  // Decent share tech cards
+                }
+                else if (avgCount >= 1.0 && sharePercent >= 40) {
+                    optimalCount = 1;  // Moderate share but present in archetype
                 }
                 // HIGH-SHARE TECH CARDS: Include cards with >70% share even if low avgCount
                 // Example: Gravity Mountain (75.8% @ 0.85x) - Meta-relevant tech
-                else if (sharePercent >= 70 && avgCount >= 0.7) {
+                else if (sharePercent >= 70 && avgCount >= 0.6) {
                     optimalCount = 1;  // High-share tech: Important for meta
                     console.log(`[autoCompleteConsistency] 🎯 HIGH-SHARE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCount.toFixed(2)}x avg) - Meta-relevant inclusion`);
                 }
-                // MODERATE-SHARE TECH CARDS: Trainer cards with 20-70% share (Stadium/Item/Supporter tech)
+                // MODERATE-SHARE TECH CARDS: Trainer cards with 25-70% share (Stadium/Item/Supporter tech)
                 // Example: Team Rocket's Watchtower (26.4% @ 0.39x) - Meta tech
-                else if (sharePercent >= 20 && sharePercent < 70 && avgCount >= 0.3) {
+                else if (sharePercent >= 25 && sharePercent < 70 && avgCount >= 0.3) {
                     const cardType = (card.type || '').toLowerCase();
                     // Only include Trainer cards as tech (not Pokemon with low share)
                     if (cardType.includes('stadium') || cardType.includes('item') || cardType.includes('supporter') || cardType.includes('tool')) {
@@ -4762,7 +4778,7 @@
                         optimalCount = 0;  // Skip Pokemon with moderate share (too inconsistent)
                     }
                 }
-                // Skip: Too unreliable
+                // Skip: Too unreliable or not present in archetype
                 else {
                     optimalCount = 0;
                 }

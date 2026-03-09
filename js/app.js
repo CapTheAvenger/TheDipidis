@@ -4954,13 +4954,22 @@
                                 rarity: card.rarity,
                                 image_url: card.image_url,
                                 totalDecksWithCard: 0,
-                                totalCopies: 0
+                                totalCopies: 0,
+                                archetypes: []  // Store which archetypes use this card
                             };
                         }
                         
                         // Aggregate across top 10 archetypes
                         cardMap[cardName].totalDecksWithCard += card.deckCount;
                         cardMap[cardName].totalCopies += card.totalCount;
+                        
+                        // Track which archetypes use this card
+                        cardMap[cardName].archetypes.push({
+                            name: archetype.name,
+                            deckCount: card.deckCount,
+                            totalDecks: archetype.totalDecks,
+                            percentage: archetype.totalDecks > 0 ? (card.deckCount / archetype.totalDecks * 100).toFixed(1) : '0.0'
+                        });
                     });
                 });
                 
@@ -5061,8 +5070,14 @@
                 const imageUrl = card.image_url || `https://via.placeholder.com/245x342?text=${encodeURIComponent(card.card_name)}`;
                 const fallbackUrl = `https://via.placeholder.com/245x342?text=${encodeURIComponent(card.card_name)}`;
                 
+                // Create JSON string for archetypes (escape properly for HTML attribute)
+                const archetypesJson = JSON.stringify(card.archetypes || []).replace(/"/g, '&quot;');
+                
                 return `
-                    <div class="card-item" style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="addCardToDeck('${source}', '${card.card_name.replace(/'/g, "\\'")}', '${card.set_code}', '${card.set_number}')">
+                    <div class="card-item" style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s;" 
+                         onmouseover="this.style.transform='scale(1.05)'; showMetaCardTooltip(event, '${card.card_name.replace(/'/g, "\\'")}', '${archetypesJson}')" 
+                         onmouseout="this.style.transform='scale(1)'; hideMetaCardTooltip()" 
+                         onclick="addCardToDeck('${source}', '${card.card_name.replace(/'/g, "\\'")}', '${card.set_code}', '${card.set_number}')">
                         <img src="${imageUrl}" alt="${card.card_name}" style="width: 100%; height: auto; display: block;" onerror="this.onerror=null; this.src='${fallbackUrl}'">
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color: white; padding: 8px 6px; font-size: 0.75em; line-height: 1.3;">
                             <div style="font-weight: bold;">${card.card_name}</div>
@@ -5127,6 +5142,63 @@
             const input = document.getElementById(inputId);
             metaCardFilter[source].searchTerm = input.value;
             renderMetaCards(source);
+        }
+        
+        // Tooltip for Meta Card Analysis - show archetypes
+        let metaCardTooltip = null;
+        
+        function showMetaCardTooltip(event, cardName, archetypesJson) {
+            // Parse archetypes from JSON string
+            const archetypes = JSON.parse(archetypesJson.replace(/&quot;/g, '"'));
+            
+            if (!archetypes || archetypes.length === 0) return;
+            
+            // Create tooltip if it doesn't exist
+            if (!metaCardTooltip) {
+                metaCardTooltip = document.createElement('div');
+                metaCardTooltip.id = 'metaCardTooltip';
+                metaCardTooltip.style.cssText = `
+                    position: fixed;
+                    background: rgba(0, 0, 0, 0.95);
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    font-size: 0.85em;
+                    z-index: 10000;
+                    pointer-events: none;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    max-width: 300px;
+                    border: 1px solid rgba(255,255,255,0.2);
+                `;
+                document.body.appendChild(metaCardTooltip);
+            }
+            
+            // Build tooltip content
+            const title = `<div style="font-weight: bold; margin-bottom: 8px; color: #ffd700; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 6px;">${cardName}</div>`;
+            const archetypeItems = archetypes
+                .sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage))
+                .map(a => `
+                    <div style="padding: 4px 0; display: flex; justify-content: space-between; gap: 15px;">
+                        <span style="color: #ddd;">${a.name}</span>
+                        <span style="color: #ffd700; font-weight: bold;">${a.percentage}%</span>
+                    </div>
+                `).join('');
+            
+            metaCardTooltip.innerHTML = title + '<div style="font-size: 0.9em; color: #aaa; margin-bottom: 6px;">Used in archetypes:</div>' + archetypeItems;
+            metaCardTooltip.style.display = 'block';
+            
+            // Position tooltip near mouse
+            const x = event.clientX + 15;
+            const y = event.clientY + 15;
+            
+            metaCardTooltip.style.left = `${x}px`;
+            metaCardTooltip.style.top = `${y}px`;
+        }
+        
+        function hideMetaCardTooltip() {
+            if (metaCardTooltip) {
+                metaCardTooltip.style.display = 'none';
+            }
         }
         
         function searchDeckCards(source = 'cityLeague') {

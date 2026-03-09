@@ -4791,6 +4791,219 @@
             }
         }
         
+        // ═══════════════════════════════════════════════════════════════
+        // META CARD ANALYSIS (Cross-Archetype Analysis)
+        // ═══════════════════════════════════════════════════════════════
+        
+        let metaCardData = {
+            cityLeague: [],
+            currentMeta: []
+        };
+        
+        let metaCardFilter = {
+            cityLeague: { shareThreshold: 'all', cardType: 'all', sortBy: 'share', searchTerm: '' },
+            currentMeta: { shareThreshold: 'all', cardType: 'all', sortBy: 'share', searchTerm: '' }
+        };
+        
+        async function loadMetaCardAnalysis(source) {
+            console.log('[loadMetaCardAnalysis] Loading meta analysis for:', source);
+            
+            const gridId = source === 'cityLeague' ? 'cityLeagueMetaGrid' : 'currentMetaMetaGrid';
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '<p style="text-align: center; padding: 40px; grid-column: 1 / -1;">Loading top 10 archetypes...</p>';
+            
+            try {
+                // Load archetype data
+                const timestamp = new Date().getTime();
+                const csvFile = source === 'cityLeague' ? 'city_league_archetypes.csv' : 'current_meta_archetypes.csv';
+                const response = await fetch(`${BASE_PATH}${csvFile}?t=${timestamp}`);
+                
+                if (!response.ok) throw new Error('Failed to load archetype data');
+                
+                const text = await response.text();
+                const allData = parseCSV(text);
+                
+                // Group by archetype and count decks
+                const archetypeDecks = {};
+                allData.forEach(row => {
+                    const arch = row.archetype || 'Unknown';
+                    if (!archetypeDecks[arch]) archetypeDecks[arch] = [];
+                    archetypeDecks[arch].push(row);
+                });
+                
+                // Get Top 10 archetypes by deck count
+                const archetypeList = Object.entries(archetypeDecks)
+                    .map(([name, decks]) => ({ name, deckCount: decks.length, decks }))
+                    .sort((a, b) => b.deckCount - a.deckCount)
+                    .slice(0, 10);
+                
+                console.log('[loadMetaCardAnalysis] Top 10 archetypes:', archetypeList.map(a => `${a.name} (${a.deckCount} decks)`));
+                
+                // Aggregate all cards from Top 10
+                const cardMap = {};
+                let totalDecksInTop10 = 0;
+                
+                archetypeList.forEach(archetype => {
+                    totalDecksInTop10 += archetype.deckCount;
+                    
+                    archetype.decks.forEach(row => {
+                        const cardName = row.card_name;
+                        if (!cardName) return;
+                        
+                        if (!cardMap[cardName]) {
+                            cardMap[cardName] = {
+                                card_name: cardName,
+                                set_code: row.set_code,
+                                set_number: row.set_number,
+                                type: row.type || row.card_type,
+                                rarity: row.rarity,
+                                decksWithCard: new Set(),
+                                totalCopies: 0
+                            };
+                        }
+                        
+                        cardMap[cardName].decksWithCard.add(`${archetype.name}_${row.tournament_id || row.deck_id}`);
+                        cardMap[cardName].totalCopies += parseInt(row.count || 1);
+                    });
+                });
+                
+                // Calculate meta-wide share% and avg count
+                const metaCards = Object.values(cardMap).map(card => ({
+                    ...card,
+                    metaShare: (card.decksWithCard.size / totalDecksInTop10) * 100,
+                    avgCount: card.totalCopies / totalDecksInTop10,
+                    avgCountWhenUsed: card.totalCopies / card.decksWithCard.size
+                }));
+                
+                metaCardData[source] = metaCards;
+                console.log('[loadMetaCardAnalysis] Loaded', metaCards.length, 'unique cards from Top 10 archetypes');
+                
+                renderMetaCards(source);
+                
+            } catch (error) {
+                console.error('[loadMetaCardAnalysis] Error:', error);
+                grid.innerHTML = '<p style="text-align: center; color: #dc3545; padding: 40px; grid-column: 1 / -1;">❌ Error loading meta analysis</p>';
+            }
+        }
+        
+        function renderMetaCards(source) {
+            const gridId = source === 'cityLeague' ? 'cityLeagueMetaGrid' : 'currentMetaMetaGrid';
+            const countId = source === 'cityLeague' ? 'cityLeagueMetaCardCount' : 'currentMetaMetaCardCount';
+            const grid = document.getElementById(gridId);
+            const countSpan = document.getElementById(countId);
+            
+            if (!metaCardData[source] || metaCardData[source].length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px; grid-column: 1 / -1;">No cards loaded. Click "Load Meta Analysis" button.</p>';
+                countSpan.textContent = '0 Cards';
+                return;
+            }
+            
+            const filter = metaCardFilter[source];
+            let cards = [...metaCardData[source]];
+            
+            // Apply share threshold filter
+            if (filter.shareThreshold !== 'all') {
+                cards = cards.filter(c => c.metaShare >= filter.shareThreshold);
+            }
+            
+            // Apply card type filter
+            if (filter.cardType !== 'all') {
+                if (filter.cardType === 'Trainer') {
+                    cards = cards.filter(c => {
+                        const type = (c.type || '').toLowerCase();
+                        return type.includes('supporter') || type.includes('item') || type.includes('tool') || type.includes('stadium');
+                    });
+                } else if (filter.cardType === 'Pokemon') {
+                    cards = cards.filter(c => getCardTypeCategory(c.type) === 'Pokemon');
+                } else if (filter.cardType === 'Energy') {
+                    cards = cards.filter(c => getCardTypeCategory(c.type) === 'Energy');
+                }
+            }
+            
+            // Apply search filter
+            if (filter.searchTerm) {
+                const term = filter.searchTerm.toLowerCase();
+                cards = cards.filter(c => c.card_name.toLowerCase().includes(term));
+            }
+            
+            // Sort
+            if (filter.sortBy === 'share') {
+                cards.sort((a, b) => b.metaShare - a.metaShare);
+            } else if (filter.sortBy === 'avgCount') {
+                cards.sort((a, b) => b.avgCount - a.avgCount);
+            }
+            
+            countSpan.textContent = `${cards.length} Cards`;
+            
+            if (cards.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #999; padding: 40px; grid-column: 1 / -1;">No cards match current filters</p>';
+                return;
+            }
+            
+            // Render cards (similar to card overview grid)
+            grid.innerHTML = cards.map(card => {
+                const imageUrl = getCardImageUrl(card.set_code, card.set_number, card.card_name, card.rarity);
+                const category = getCardTypeCategory(card.type);
+                
+                return `
+                    <div class="card-item" style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="addCardToDeck('${source}', '${card.card_name.replace(/'/g, "\\'")}', '${card.set_code}', '${card.set_number}')">
+                        <img src="${imageUrl}" alt="${card.card_name}" style="width: 100%; height: auto; display: block;" onerror="this.src='https://via.placeholder.com/245x342?text=${encodeURIComponent(card.card_name)}'">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color: white; padding: 8px 6px; font-size: 0.75em; line-height: 1.3;">
+                            <div style="font-weight: bold;">${card.card_name}</div>
+                            <div style="color: #ffd700;">${card.metaShare.toFixed(1)}% | Ø ${card.avgCount.toFixed(2)}x</div>
+                            <div style="color: #aaa; font-size: 0.9em;">(${card.avgCountWhenUsed.toFixed(2)}x when used)</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function setMetaShareFilter(source, threshold) {
+            metaCardFilter[source].shareThreshold = threshold;
+            
+            // Update button styles
+            const prefix = source === 'cityLeague' ? 'cityLeagueMetaShare' : 'currentMetaMetaShare';
+            ['All', '90', '70', '50'].forEach(t => {
+                const btn = document.getElementById(prefix + t);
+                if (btn) {
+                    const isActive = (t === 'All' && threshold === 'all') || (t === String(threshold));
+                    btn.style.opacity = isActive ? '1' : '0.6';
+                    btn.style.fontWeight = isActive ? 'bold' : 'normal';
+                }
+            });
+            
+            renderMetaCards(source);
+        }
+        
+        function setMetaCardTypeFilter(source, type) {
+            metaCardFilter[source].cardType = type;
+            
+            // Update button styles
+            const prefix = source === 'cityLeague' ? 'cityLeagueMetaType' : 'currentMetaMetaType';
+            ['All', 'Trainer', 'Pokemon', 'Energy'].forEach(t => {
+                const btn = document.getElementById(prefix + t);
+                if (btn) {
+                    const isActive = (t.toLowerCase() === type.toLowerCase());
+                    btn.style.opacity = isActive ? '1' : '0.6';
+                    btn.style.fontWeight = isActive ? 'bold' : 'normal';
+                }
+            });
+            
+            renderMetaCards(source);
+        }
+        
+        function sortMetaCards(source, sortBy) {
+            metaCardFilter[source].sortBy = sortBy;
+            renderMetaCards(source);
+        }
+        
+        function filterMetaCards(source) {
+            const inputId = source === 'cityLeague' ? 'cityLeagueMetaSearch' : 'currentMetaMetaSearch';
+            const input = document.getElementById(inputId);
+            metaCardFilter[source].searchTerm = input.value;
+            renderMetaCards(source);
+        }
+        
         function searchDeckCards(source = 'cityLeague') {
             const searchInputId = source === 'cityLeague' ? 'cityLeagueDeckCardSearch' : 
                                   source === 'currentMeta' ? 'currentMetaDeckCardSearch' : 

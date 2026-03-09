@@ -190,6 +190,49 @@
                             <input type="text" id="cityLeagueDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div id="cityLeagueDeckSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;"></div>
                         </div>
+                        
+                        <!-- Meta Card Analysis (Cross-Archetype) -->
+                        <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border: 2px solid #dee2e6;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <h3 style="margin: 0;">🌍 Meta Card Analysis (Top 10 Archetypes)</h3>
+                                <span style="font-size: 0.9em; color: #666;"><span id="cityLeagueMetaCardCount">0 Cards</span></span>
+                            </div>
+                            
+                            <!-- Filters -->
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                                <!-- Meta Share Filter -->
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #fff;">
+                                    <button id="cityLeagueMetaShareAll" onclick="setMetaShareFilter('cityLeague', 'all')" style="padding: 6px 12px; font-size: 0.85em; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 All</button>
+                                    <button id="cityLeagueMetaShare90" onclick="setMetaShareFilter('cityLeague', 90)" style="padding: 6px 12px; font-size: 0.85em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🔥 >90%</button>
+                                    <button id="cityLeagueMetaShare70" onclick="setMetaShareFilter('cityLeague', 70)" style="padding: 6px 12px; font-size: 0.85em; background: #ffc107; color: #333; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">⚡ >70%</button>
+                                    <button id="cityLeagueMetaShare50" onclick="setMetaShareFilter('cityLeague', 50)" style="padding: 6px 12px; font-size: 0.85em; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">💧 >50%</button>
+                                </div>
+                                
+                                <!-- Card Type Filter -->
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #fff;">
+                                    <button id="cityLeagueMetaTypeAll" onclick="setMetaCardTypeFilter('cityLeague', 'all')" style="padding: 6px 10px; font-size: 0.85em; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">🔵 All</button>
+                                    <button id="cityLeagueMetaTypeTrainer" onclick="setMetaCardTypeFilter('cityLeague', 'Trainer')" style="padding: 6px 10px; font-size: 0.85em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🎴 Trainer</button>
+                                    <button id="cityLeagueMetaTypePokemon" onclick="setMetaCardTypeFilter('cityLeague', 'Pokemon')" style="padding: 6px 10px; font-size: 0.85em; background: #ffc107; color: #333; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟡 Pokémon</button>
+                                    <button id="cityLeagueMetaTypeEnergy" onclick="setMetaCardTypeFilter('cityLeague', 'Energy')" style="padding: 6px 10px; font-size: 0.85em; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">⚡ Energy</button>
+                                </div>
+                                
+                                <!-- Sort Options -->
+                                <div style="display: flex; gap: 5px;">
+                                    <button onclick="sortMetaCards('cityLeague', 'share')" style="padding: 8px 14px; font-size: 0.9em; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">📈 Sort by Share%</button>
+                                    <button onclick="sortMetaCards('cityLeague', 'avgCount')" style="padding: 8px 14px; font-size: 0.9em; background: #6f42c1; color: white; border: none; border-radius: 6px; cursor: pointer;">🔢 Sort by Avg Count</button>
+                                </div>
+                            </div>
+                            
+                            <input type="text" id="cityLeagueMetaSearch" placeholder="🔍 Search cards in meta..." class="card-search-input" oninput="filterMetaCards('cityLeague')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            
+                            <div id="cityLeagueMetaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; max-height: 600px; overflow-y: auto; padding: 10px; background: #fff; border-radius: 6px;">
+                                <p style="text-align: center; color: #666; padding: 40px; grid-column: 1 / -1;">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
+                            </div>
+                            
+                            <div style="margin-top: 15px; text-align: center;">
+                                <button onclick="loadMetaCardAnalysis('cityLeague')" style="padding: 12px 24px; font-size: 1em; background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">🔄 Load Meta Analysis</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -403,6 +446,49 @@
                             <h3 style="margin-top: 0;">➕ Add Card</h3>
                             <input type="text" id="currentMetaDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             <div id="currentMetaDeckSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;"></div>
+                        </div>
+                        
+                        <!-- Meta Card Analysis (Cross-Archetype) -->
+                        <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border: 2px solid #dee2e6;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <h3 style="margin: 0;">🌍 Meta Card Analysis (Top 10 Archetypes)</h3>
+                                <span style="font-size: 0.9em; color: #666;"><span id="currentMetaMetaCardCount">0 Cards</span></span>
+                            </div>
+                            
+                            <!-- Filters -->
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+                                <!-- Meta Share Filter -->
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #fff;">
+                                    <button id="currentMetaMetaShareAll" onclick="setMetaShareFilter('currentMeta', 'all')" style="padding: 6px 12px; font-size: 0.85em; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📊 All</button>
+                                    <button id="currentMetaMetaShare90" onclick="setMetaShareFilter('currentMeta', 90)" style="padding: 6px 12px; font-size: 0.85em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🔥 >90%</button>
+                                    <button id="currentMetaMetaShare70" onclick="setMetaShareFilter('currentMeta', 70)" style="padding: 6px 12px; font-size: 0.85em; background: #ffc107; color: #333; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">⚡ >70%</button>
+                                    <button id="currentMetaMetaShare50" onclick="setMetaShareFilter('currentMeta', 50)" style="padding: 6px 12px; font-size: 0.85em; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">💧 >50%</button>
+                                </div>
+                                
+                                <!-- Card Type Filter -->
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #fff;">
+                                    <button id="currentMetaMetaTypeAll" onclick="setMetaCardTypeFilter('currentMeta', 'all')" style="padding: 6px 10px; font-size: 0.85em; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">🔵 All</button>
+                                    <button id="currentMetaMetaTypeTrainer" onclick="setMetaCardTypeFilter('currentMeta', 'Trainer')" style="padding: 6px 10px; font-size: 0.85em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🎴 Trainer</button>
+                                    <button id="currentMetaMetaTypePokemon" onclick="setMetaCardTypeFilter('currentMeta', 'Pokemon')" style="padding: 6px 10px; font-size: 0.85em; background: #ffc107; color: #333; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🟡 Pokémon</button>
+                                    <button id="currentMetaMetaTypeEnergy" onclick="setMetaCardTypeFilter('currentMeta', 'Energy')" style="padding: 6px 10px; font-size: 0.85em; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">⚡ Energy</button>
+                                </div>
+                                
+                                <!-- Sort Options -->
+                                <div style="display: flex; gap: 5px;">
+                                    <button onclick="sortMetaCards('currentMeta', 'share')" style="padding: 8px 14px; font-size: 0.9em; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">📈 Sort by Share%</button>
+                                    <button onclick="sortMetaCards('currentMeta', 'avgCount')" style="padding: 8px 14px; font-size: 0.9em; background: #6f42c1; color: white; border: none; border-radius: 6px; cursor: pointer;">🔢 Sort by Avg Count</button>
+                                </div>
+                            </div>
+                            
+                            <input type="text" id="currentMetaMetaSearch" placeholder="🔍 Search cards in meta..." class="card-search-input" oninput="filterMetaCards('currentMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            
+                            <div id="currentMetaMetaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; max-height: 600px; overflow-y: auto; padding: 10px; background: #fff; border-radius: 6px;">
+                                <p style="text-align: center; color: #666; padding: 40px; grid-column: 1 / -1;">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
+                            </div>
+                            
+                            <div style="margin-top: 15px; text-align: center;">
+                                <button onclick="loadMetaCardAnalysis('currentMeta')" style="padding: 12px 24px; font-size: 1em; background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">🔄 Load Meta Analysis</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1045,4 +1131,4 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=20260309-11"></script>
+    <script src="js/app.js?v=20260309-12"></script>

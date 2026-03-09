@@ -5212,7 +5212,9 @@
                 const timestamp = new Date().getTime();
                 
                 // Load comparison data (has correct unique deck counts per archetype)
-                const comparisonFile = source === 'cityLeague' ? 'city_league_archetypes_comparison.csv' : 'current_meta_comparison.csv';
+                const comparisonFile = source === 'cityLeague' ? 'city_league_archetypes_comparison.csv' : 'limitless_online_decks_comparison.csv';
+                const archetypeField = source === 'cityLeague' ? 'archetype' : 'deck_name'; // City League uses 'archetype', Current Meta uses 'deck_name'
+                
                 const comparisonResponse = await fetch(`${BASE_PATH}${comparisonFile}?t=${timestamp}`);
                 if (!comparisonResponse.ok) throw new Error('Failed to load comparison data');
                 const comparisonText = await comparisonResponse.text();
@@ -5222,9 +5224,9 @@
                 
                 // Get Top 10 archetypes by new_count (unique deck count)
                 const top10Archetypes = comparisonData
-                    .filter(row => row.archetype && row.new_count)
+                    .filter(row => row[archetypeField] && row.new_count)
                     .map(row => ({
-                        name: row.archetype,
+                        name: row[archetypeField],
                         deckCount: parseInt(row.new_count) || 0
                     }))
                     .sort((a, b) => b.deckCount - a.deckCount)

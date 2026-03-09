@@ -1935,29 +1935,22 @@
         function fixJapaneseCardImageUrl(url, setCode, cardName = '') {
             if (!url) return url;
             
-            // M3 set cards: Try pokemonproxies.com (English), with JS fallback to Limitless Japanese
+            // M3 set cards: Use Limitless Japanese directly (pokemonproxies uses unpredictable hashed filenames)
             const isM3Set = setCode === 'M3' || url.includes('/M3/');
             
-            if (isM3Set && cardName) {
-                // Extract card number from URL (e.g., M3_046 or M3_46)
-                const numberMatch = url.match(/M3_0*(\d+)_/);
-                if (numberMatch) {
-                    const cardNumber = numberMatch[1].padStart(3, '0'); // 46 → 046
-                    
-                    // Normalize card name for pokemonproxies.com URL
-                    const normalizedName = cardName
-                        .replace(/'/g, '')           // Remove apostrophes
-                        .replace(/\./g, '')          // Remove periods
-                        .replace(/[éè]/g, 'e')       // Normalize accents
-                        .replace(/[àâ]/g, 'a')
-                        .replace(/\s+/g, '_')        // Spaces → underscaces
-                        .replace(/__+/g, '_');       // Remove double underscores
-                    
-                    // Try pokemonproxies.com (English translation)
-                    const proxyUrl = `https://pokemonproxies.com/images/cards/sets/Munikis_Zero/3a-${cardNumber}-${normalizedName}.png`;
-                    console.log(`🎴 M3 Card → pokemonproxies.com: ${cardName} → ${proxyUrl}`);
-                    return proxyUrl;
-                }
+            if (isM3Set) {
+                const originalUrl = url;
+                
+                // Replace tpci with tpc
+                url = url.replace('/tpci/', '/tpc/');
+                
+                // Replace EN with JP
+                url = url.replace(/_EN_/g, '_JP_');
+                
+                // Remove leading zeros from card number (M3_046 → M3_46)
+                url = url.replace(/\/M3_0+(\d+)_/g, '/M3_$1_');
+                
+                console.log(`🎴 M3 Card → Limitless JP (pokemonproxies has hashed URLs): ${originalUrl} → ${url}`);
             }
             
             return url;
@@ -2332,7 +2325,7 @@
                 html += `
                     <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                         <div class="card-image-container" style="position: relative; width: 100%;">
-                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="${setCode === 'M3' ? `handleM3ImageError(this, '${setCode}', '${setNumber}')` : `this.style.opacity='0.3'`}" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
+                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                             
                             <!-- Red badge: Max Count (top-right) -->
                             <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
@@ -6356,7 +6349,7 @@
                     html += `
                         <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                             <div class="card-image-container" style="position: relative; width: 100%;">
-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="${setCode === 'M3' ? `handleM3ImageError(this, '${setCode}', '${setNumber}')` : `this.style.opacity='0.3'`}" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                                 
                                 <!-- Red badge: Average Count (top-right) -->
                                 <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
@@ -9886,7 +9879,7 @@
                     html += `
                         <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
                             <div class="card-image-container" style="position: relative; width: 100%;">
-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="${setCode === 'M3' ? `handleM3ImageError(this, '${setCode}', '${setNumber}')` : `this.style.opacity='0.3'`}" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="this.style.opacity='0.3'" onclick="event.stopPropagation(); showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                                 <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${maxCount}</div>
                                 ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
                                 
@@ -9992,7 +9985,7 @@
                 html += `
                     <div class="card-table-row" data-card-name="${cardName.toLowerCase()}" style="display: flex; align-items: center; background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); gap: 20px;">
                         <div style="flex-shrink: 0; position: relative; width: 120px;">
-                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; border-radius: 6px; cursor: zoom-in; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="${setCode === 'M3' ? `handleM3ImageError(this, '${setCode}', '${setNumber}')` : `this.style.opacity='0.3'`}" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}');">
+                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; border-radius: 6px; cursor: zoom-in; aspect-ratio: 2.5/3.5; object-fit: cover;" onerror="this.style.opacity='0.3'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}');">
                             ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85em; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${deckCount}</div>` : ''}
                         </div>
                         <div style="flex-grow: 1; min-width: 0;">

@@ -4587,7 +4587,13 @@
                 
                 // Base Energy - special handling (can exceed 4)
                 if (isBaseEnergy(card)) {
-                    optimalCount = Math.max(1, Math.round(avgCount));
+                    // BUGFIX: Only include Basic Energy that actually appears in this archetype
+                    // Don't add random energy types that aren't used (e.g. Psychic in Fighting deck)
+                    if (sharePercent > 0 && avgCount >= 0.5) {
+                        optimalCount = Math.max(1, Math.round(avgCount));
+                    } else {
+                        optimalCount = 0; // Skip energy types not used in this archetype
+                    }
                 }
                 // 4-of Territory: Core staples
                 // Professional standard: 4 copies for avgCount ≥3.5 and share ≥80%

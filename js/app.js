@@ -4884,55 +4884,56 @@
                 
                 console.log('[loadMetaCardAnalysis] Loaded', allData.length, 'card entries from CSV');
                 
-                // Find the most recent tournament_date (latest data snapshot)
-                const dates = [...new Set(allData.map(row => row.tournament_date))].sort((a, b) => {
-                    // Sort dates in descending order (newest first)
-                    const dateA = new Date(a);
-                    const dateB = new Date(b);
-                    return dateB - dateA;
-                });
-                const latestDate = dates[0];
-                
-                console.log('[loadMetaCardAnalysis] Using latest date:', latestDate, '(from', dates.length, 'total dates)');
-                
-                // Filter to only the latest date (most recent snapshot)
-                const latestData = allData.filter(row => row.tournament_date === latestDate);
-                console.log('[loadMetaCardAnalysis] Filtered to', latestData.length, 'card entries for latest date');
-                
-                // Group by archetype for the latest date
+                // ⚠️ CRITICAL CHANGE: Aggregate across ALL dates (not just latest)
+                // Group by archetype ACROSS ALL DATES to match the main table's Top 10
                 const archetypeData = {};
-                latestData.forEach(row => {
+                
+                allData.forEach(row => {
                     const arch = row.archetype || 'Unknown';
+                    const cardName = row.card_name;
+                    
+                    if (!cardName) return;
+                    
                     if (!archetypeData[arch]) {
                         archetypeData[arch] = {
                             name: arch,
-                            totalDecks: parseInt(row.total_decks_in_archetype) || 0,
+                            totalDecks: 0,
                             cards: {}
                         };
                     }
                     
-                    const cardName = row.card_name;
-                    if (!cardName) return;
+                    // Accumulate deck counts across all dates
+                    const deckCount = parseInt(row.deck_count) || 0;
+                    archetypeData[arch].totalDecks += deckCount;
                     
-                    // For latest date, each card should appear only once per archetype
-                    archetypeData[arch].cards[cardName] = {
-                        card_name: cardName,
-                        set_code: row.set_code,
-                        set_number: row.set_number,
-                        type: row.type || row.card_type,
-                        rarity: row.rarity,
-                        image_url: row.image_url,
-                        deckCount: parseInt(row.deck_count) || 0,
-                        totalCount: parseInt(row.total_count) || 0
-                    };
+                    // Accumulate cards across all dates
+                    if (!archetypeData[arch].cards[cardName]) {
+                        archetypeData[arch].cards[cardName] = {
+                            card_name: cardName,
+                            set_code: row.set_code,
+                            set_number: row.set_number,
+                            type: row.type || row.card_type,
+                            rarity: row.rarity,
+                            image_url: row.image_url,
+                            deckCount: 0,
+                            totalCount: 0
+                        };
+                    }
+                    
+                    archetypeData[arch].cards[cardName].deckCount += deckCount;
+                    archetypeData[arch].cards[cardName].totalCount += parseInt(row.total_count) || 0;
                 });
                 
-                // Get Top 10 archetypes by total deck count (across all dates)
+                console.log('[loadMetaCardAnalysis] Aggregated', Object.keys(archetypeData).length, 'archetypes across all dates');
+                
+                console.log('[loadMetaCardAnalysis] Aggregated', Object.keys(archetypeData).length, 'archetypes across all dates');
+                
+                // Get Top 10 archetypes by total deck count (across ALL dates)
                 const archetypeList = Object.values(archetypeData)
                     .sort((a, b) => b.totalDecks - a.totalDecks)
                     .slice(0, 10);
                 
-                console.log('[loadMetaCardAnalysis] Top 10 archetypes:', archetypeList.map(a => `${a.name} (${a.totalDecks} decks)`));
+                console.log('[loadMetaCardAnalysis] Top 10 archetypes (ALL dates):', archetypeList.map(a => `${a.name} (${a.totalDecks} decks)`));
                 
                 // Create a Set of Top 10 archetype names for filtering
                 const top10ArchetypeNames = new Set(archetypeList.map(a => a.name));

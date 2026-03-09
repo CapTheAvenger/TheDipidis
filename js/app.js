@@ -4720,28 +4720,30 @@
                     optimalCount = 0;  // True polarization: <60% share but 2.8+ when used
                     console.log(`[autoCompleteConsistency] ⚠️ POLARIZED: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used) - Specialized variant, skipping`);
                 }
-                // 4-of Territory: Only ultra-reliable staples (3.3+ average)
-                // Conservative threshold - don't inflate 3.0x to 4x
-                // Example: Riolu (100% @ 3.25x) might still be 3x, Rare Candy (100% @ 3.5x) = 4x
-                else if (avgCount >= 3.4 && sharePercent >= 90) {
-                    optimalCount = 4;  // Ultra-reliable: Nearly universal + high count (raised from 3.0 to 3.4)
+                // 4-of Territory: High consistency cards (smart rounding)
+                // Use Math.ceil() for values clearly above 3.0 (3.05+)
+                // But keep exactly 3.0 at 3x (no inflation for perfect 3.0)
+                // Example: Roselia (3.07x) → ceil(3.07) = 4x ✅
+                // Example: Power Weight (3.00x) → stays 3x ✅
+                else if (avgCount > 3.05 && sharePercent >= 70) {
+                    optimalCount = Math.ceil(avgCount);  // 3.07 → 4, 3.5 → 4
+                    optimalCount = Math.min(optimalCount, 4);  // Cap at 4 for non-energy
                 }
-                else if (avgCount >= 3.6 && sharePercent >= 80) {
-                    optimalCount = 4;  // Core staples: Very high count + good share (raised from 3.5 to 3.6)
+                else if (avgCount >= 3.5 && sharePercent >= 60) {
+                    optimalCount = 4;  // Very high count even with moderate share
                 }
-                // 3-of Territory: Strong consistency (2.4-3.3 range)
-                // Respects data - 3.0x average stays at 3x, doesn't inflate
-                // Example: Roselia (3.0x) → 3 copies, Judge (2.4x @ 96.6%) → 3 copies
-                else if (avgCount >= 2.4 && sharePercent >= 90) {
-                    optimalCount = 3;  // Very high share + solid count
+                // 3-of Territory: Strong consistency (2.4-3.05 range)
+                // Exactly 3.0 stays at 3x (no inflation)
+                // Example: Power Weight (3.00x) → 3x, Judge (2.4x @ 96.6%) → 3x
+                else if (avgCount >= 2.4 && avgCount <= 3.05 && sharePercent >= 90) {
+                    optimalCount = 3;  // Very high share + solid count (up to 3.05)
                 }
-                else if (avgCount >= 2.6 && sharePercent >= 70) {
-                    optimalCount = 3;  // Good reliability standard
+                else if (avgCount >= 2.6 && avgCount <= 3.05 && sharePercent >= 70) {
+                    optimalCount = 3;  // Good reliability standard (up to 3.05)
                 }
-                // Explicit handling for 3.0-3.3 range: Stay at 3x (data-respecting)
-                else if (avgCount >= 3.0 && avgCount < 3.4 && sharePercent >= 60) {
-                    optimalCount = 3;  // Don't inflate to 4x - respect the 3.0 average
-                    console.log(`[autoCompleteConsistency] 📊 DATA-DRIVEN: ${card.card_name} (${sharePercent.toFixed(1)}% @ ${avgCount.toFixed(2)}x) → 3x (respecting average, not inflating to 4x)`);
+                else if (avgCount >= 3.0 && avgCount <= 3.05 && sharePercent >= 60) {
+                    optimalCount = 3;  // Exactly 3.0 - respect the data, don't inflate
+                    console.log(`[autoCompleteConsistency] 📊 DATA-DRIVEN: ${card.card_name} (${sharePercent.toFixed(1)}% @ ${avgCount.toFixed(2)}x) → 3x (exactly 3.0, no inflation)`);
                 }
                 // 2-of Territory: Solid includes (1.5-2.9 range)
                 // Lowered threshold to catch 1.8x and 2.0x properly

@@ -4994,6 +4994,7 @@
                 const sampleCard = metaCards.find(c => c.card_name.includes('Fezandipiti'));
                 if (sampleCard) {
                     console.log('[loadMetaCardAnalysis] Sample card archetypes:', sampleCard.card_name, '→', sampleCard.archetypes.map(a => a.name));
+                    console.log('[loadMetaCardAnalysis] Sample card metaShare:', sampleCard.card_name, '→', sampleCard.metaShare.toFixed(2) + '%', `(${sampleCard.totalDecksWithCard} decks / ${totalDecksInTop10} total)`);
                 }
                 
                 metaCardData[source] = metaCards;
@@ -5048,6 +5049,8 @@
             }
             
             // Apply minimum share filter (card type specific, always active)
+            // NOTE: These thresholds are MUCH lower than intended because we aggregate
+            // deck counts across ALL tournament dates (66k+ decks instead of ~500)
             cards = cards.filter(c => {
                 const category = getCardTypeCategory(c.type);
                 
@@ -5056,14 +5059,21 @@
                     return false;
                 }
                 
-                // Pokemon: Only show if >40% meta share
+                // Pokemon: Only show if >1% meta share
+                // (In practice, this means the card appears in 660+ deck-entries across all dates)
                 if (category === 'Pokemon') {
-                    return c.metaShare >= 40;
+                    return c.metaShare >= 1;
                 }
                 
-                // Trainer (Supporter, Item, Tool, Stadium) and Special Energy: Show if >30%
-                return c.metaShare >= 30;
+                // Trainer and Special Energy: Show if >0.5%
+                // (In practice, this means 330+ deck-entries across all dates)
+                return c.metaShare >= 0.5;
             });
+            
+            console.log(`[renderMetaCards] After filters: ${cards.length} cards remaining (from ${metaCardData[source].length} total)`);
+            if (cards.length > 0) {
+                console.log(`[renderMetaCards] Sample card shares:`, cards.slice(0, 5).map(c => `${c.card_name}: ${c.metaShare.toFixed(1)}%`));
+            }
             
             // Sort
             if (filter.sortBy === 'share') {

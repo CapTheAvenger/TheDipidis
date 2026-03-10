@@ -1,6 +1,8 @@
 {
-  "delay_seconds": 0.5,
-  "headless": true,
+  "delay_seconds": 2.0,
+  "headless": false,
   "batch_size": 100,
-  "skip_cards_with_prices": false
+  "skip_cards_with_prices": false,
+  "only_update_sets": [],
+  "_comment": "FULL UPDATE - Scrapes ALL cards with visible browser for stability"
 }

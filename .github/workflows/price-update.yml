@@ -1,4 +1,4 @@
-name: Weekly Price Update
+name: Weekly Price Update (META - Current Sets)
 
 on:
   schedule:
@@ -37,11 +37,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Run Price Scraper
+      - name: Prepare META Settings
+        run: |
+          cp card_price_scraper_settings_meta.json card_price_scraper_settings.json
+      
+      - name: Run Price Scraper (META - Current Sets Only)
         run: |
           python card_price_scraper.py
         env:
           HEADLESS: 'true'
+        timeout-minutes: 120
       
       - name: Update Card Data
         run: |

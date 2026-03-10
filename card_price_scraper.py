@@ -25,17 +25,19 @@ try:
     from selenium import webdriver
     from selenium.webdriver.common.by import By
     from selenium.webdriver.chrome.options import Options
+    from selenium_stealth import stealth
     SELENIUM_AVAILABLE = True
 except ImportError:
     SELENIUM_AVAILABLE = False
-    print("WARNING: Selenium not available. Install with: pip install selenium")
+    print("WARNING: Selenium not available. Install with: pip install selenium selenium-stealth")
 
 # Default settings
 DEFAULT_SETTINGS: Dict[str, object] = {
     "delay_seconds": 0.5,
     "headless": True,
     "batch_size": 100,
-    "skip_cards_with_prices": True
+    "skip_cards_with_prices": True,
+    "only_update_sets": []  # Empty = all sets, or list like ["TWM", "SFA", "SCR", "SSP", "PRE", "SVP"]
 }
 
 def get_app_dir() -> str:
@@ -139,21 +141,50 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
     print(f"\n[Price Scraper] Starting browser...")
     chrome_options = Options()
     if settings.get("headless", True):
-        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option('useAutomationExtension', False)
     
     driver = webdriver.Chrome(options=chrome_options)
+    
+    # Apply stealth settings to bypass Cloudflare
+    stealth(driver,
+            languages=["en-US", "en"],
+            vendor="Google Inc.",
+            platform="Win32",
+            webgl_vendor="Intel Inc.",
+            renderer="Intel Iris OpenGL Engine",
+            fix_hairline=True,
+            )
     
     results = []
     skip_existing = bool(settings.get("skip_cards_with_prices", True))
     delay = float(settings.get("delay_seconds", 0.5))
+    only_update_sets = settings.get("only_update_sets", [])
     
     try:
         for idx, card in enumerate(cards):
             card_key = f"{card['set']}_{card['number']}"
+            
+            # Filter by set if only_update_sets is specified
+            if only_update_sets and len(only_update_sets) > 0:
+                if card['set'] not in only_update_sets:
+                    # Keep existing price if available, otherwise skip
+                    if card_key in existing_prices:
+                        results.append({
+                            'name': card['name'],
+                            'set': card['set'],
+                            'number': card['number'],
+                            'eur_price': existing_prices[card_key]['eur_price'],
+                            'cardmarket_url': card['cardmarket_url'],
+                            'last_updated': existing_prices[card_key]['last_updated']
+                        })
+                    continue
             
             # Skip if price already exists
             if skip_existing and card_key in existing_prices:
@@ -215,7 +246,7 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                 if cardmarket_url_final:
                     try:
                         driver.get(cardmarket_url_final)
-                        time.sleep(1.5)
+                        time.sleep(8)  # Longer wait for Cloudflare to pass
                         
                         # Strategy 1: Find "7-days average price" label and get the next dd element
                         # HTML structure: <dt>7-days average price</dt> <dd><span>3,23 €</span></dd>
@@ -232,7 +263,22 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                         except:
                             pass
                         
-                        # Fallback Strategy 2: If no 7-day average found, try "From" price (cheapest available)
+                        # Fallback Strategy 2: Try 30-days average if 7-day not found
+                        if not eur_price:
+                            try:
+                                dt_elements = driver.find_elements(By.TAG_NAME, "dt")
+                                for dt in dt_elements:
+                                    if "30-days average" in dt.text or "30-day average" in dt.text:
+                                        dd_element = dt.find_element(By.XPATH, "following-sibling::dd[1]")
+                                        text = dd_element.text.strip()
+                                        if '€' in text:
+                                            eur_price = text
+                                            print(f"   ✓ CM 30-day avg: {eur_price}")
+                                            break
+                            except:
+                                pass
+                        
+                        # Fallback Strategy 3: "From" price but ONLY if it's in EUR (not GBP/USD)
                         if not eur_price:
                             try:
                                 dt_elements = driver.find_elements(By.TAG_NAME, "dt")
@@ -240,29 +286,18 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                                     if "From" in dt.text:
                                         dd_element = dt.find_element(By.XPATH, "following-sibling::dd[1]")
                                         text = dd_element.text.strip()
-                                        if '€' in text:
+                                        # Only accept if it's EUR (€), not GBP (£) or USD ($)
+                                        if '€' in text and '£' not in text and '$' not in text:
                                             eur_price = text
                                             print(f"   ✓ CM From: {eur_price}")
                                             break
                             except:
                                 pass
                         
-                        # Fallback Strategy 3: Any price element (last resort)
-                        if not eur_price:
-                            try:
-                                price_elems = driver.find_elements(By.CSS_SELECTOR, "dd.col-6, dd.col-xl-7")
-                                for elem in price_elems:
-                                    text = elem.text.strip()
-                                    if '€' in text and any(c.isdigit() for c in text):
-                                        eur_price = text
-                                        print(f"   ✓ CM: {eur_price}")
-                                        break
-                            except:
-                                pass
+                        # If we got a valid Cardmarket price, we're done - skip Limitless fallback
                         
-                        # Silent fail - Cardmarket often blocks, this is expected
                     except Exception:
-                        pass
+                        pass  # Silent fail, will try Limitless backup next
                 
                 # Step 3: Use Limitless backup price if CardMarket failed
                 if not eur_price and limitless_price_backup:
@@ -325,15 +360,29 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                     except:
                         pass
                     
-                    # Recreate browser
+                    # Recreate browser with stealth
                     chrome_options = Options()
                     if settings.get("headless", True):
-                        chrome_options.add_argument("--headless")
+                        chrome_options.add_argument("--headless=new")
                     chrome_options.add_argument("--no-sandbox")
                     chrome_options.add_argument("--disable-dev-shm-usage")
                     chrome_options.add_argument("--disable-gpu")
                     chrome_options.add_argument("--window-size=1920,1080")
+                    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+                    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+                    chrome_options.add_experimental_option('useAutomationExtension', False)
+                    
                     driver = webdriver.Chrome(options=chrome_options)
+                    
+                    # Apply stealth settings
+                    stealth(driver,
+                            languages=["en-US", "en"],
+                            vendor="Google Inc.",
+                            platform="Win32",
+                            webgl_vendor="Intel Inc.",
+                            renderer="Intel Iris OpenGL Engine",
+                            fix_hairline=True,
+                            )
                     
                     print(f"[Price Scraper] Browser restarted, continuing...")
                     time.sleep(2)

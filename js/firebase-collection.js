@@ -798,7 +798,13 @@ function sortCardsByTypeSimple(cards) {
   };
   
   const typeOrder = {
-    'Pokemon': 1, 'Supporter': 2, 'Item': 3, 'Tool': 4, 'Stadium': 5, 'Special Energy': 6, 'Energy': 7
+    'Pokemon': 1,
+    'Supporter': 2,
+    'Item': 3,
+    'Tool': 4,
+    'Stadium': 5,
+    'Special Energy': 6,
+    'Energy': 7
   };
   
   return cards.sort((a, b) => {
@@ -811,27 +817,25 @@ function sortCardsByTypeSimple(cards) {
     const orderA = typeOrder[categoryA] || 99;
     const orderB = typeOrder[categoryB] || 99;
     
-    // Sort by main category (Pokemon, Supporter, etc.)
+    // FIRST: Sort by main category (Pokemon, Supporter, etc.)
     if (orderA !== orderB) {
       return orderA - orderB;
     }
     
-    // For Pokemon: sort by element, then set number, then name
+    // For Pokemon: sort by element first, then by percentage
     if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
       const elementA = cardTypeA.charAt(0);
       const elementB = cardTypeB.charAt(0);
-      const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');
-      const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');
       
       const elemOrderA = elementOrder[elementA] || 99;
       const elemOrderB = elementOrder[elementB] || 99;
       
-      // Different element
+      // Different element: sort by element order
       if (elemOrderA !== elemOrderB) {
         return elemOrderA - elemOrderB;
       }
       
-      // Same element: sort by set code
+      // Same element: sort by set code, then set number, then name
       const setCodeA = a.set || a.set_code || '';
       const setCodeB = b.set || b.set_code || '';
       
@@ -839,29 +843,18 @@ function sortCardsByTypeSimple(cards) {
         return setCodeA.localeCompare(setCodeB);
       }
       
-      // Same set: sort by set number
       const setNumA = parseInt(((a.number || a.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
       const setNumB = parseInt(((b.number || b.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
       if (setNumA !== setNumB) {
         return setNumA - setNumB;
       }
       
-      // Same set+number: sort by name
       const nameA = a.card_name || a.name || '';
       const nameB = b.card_name || b.name || '';
-      const nameCompare = nameA.localeCompare(nameB);
-      if (nameCompare !== 0) {
-        return nameCompare;
-      }
-      
-      // Same name: sort by evolution stage
-      const evolOrderA = evolutionOrder[evolutionA] || 99;
-      const evolOrderB = evolutionOrder[evolutionB] || 99;
-      
-      return evolOrderA - evolOrderB;
+      return nameA.localeCompare(nameB);
     }
     
-    // For non-Pokemon: sort by set number then name
+    // For non-Pokemon cards: sort by set number then name
     const setNumA = parseInt(((a.number || a.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
     const setNumB = parseInt(((b.number || b.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
     if (setNumA !== setNumB) {

@@ -13,7 +13,7 @@
 
 // Firebase project config
 const firebaseConfig = {
-  apiKey: "AIzaSyAXNGtQuqRkU361JqcuQxeluqQLXBjEyQ",
+  apiKey: "AIzaSyB01FCHS3wUow7VoGzTQJpqmNNZTyAIOGw",
   authDomain: "thedipidis.firebaseapp.com",
   projectId: "thedipidis",
   storageBucket: "thedipidis.firebasestorage.app",

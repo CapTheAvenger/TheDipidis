@@ -104,8 +104,10 @@ async function loadUserProfile(userId) {
 
 // Create new user profile
 async function createUserProfile(userId) {
+  const user = auth.currentUser;
   const newProfile = {
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    displayName: user?.displayName || 'Anonymous',
     collection: [],
     decks: [],
     wishlist: [],
@@ -115,8 +117,13 @@ async function createUserProfile(userId) {
     }
   };
   
-  await db.collection('users').doc(userId).set(newProfile);
-  window.userProfile = newProfile;
+  try {
+    await db.collection('users').doc(userId).set(newProfile);
+    window.userProfile = newProfile;
+    updateProfileUI(newProfile);
+  } catch (error) {
+    console.error('Error creating profile:', error);
+  }
 }
 
 // Load user's card collection

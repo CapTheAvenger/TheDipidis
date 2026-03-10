@@ -13,9 +13,9 @@ async function addToCollection(cardId) {
   }
   
   try {
-    await db.collection('users').doc(user.uid).update({
+    await db.collection('users').doc(user.uid).set({
       collection: firebase.firestore.FieldValue.arrayUnion(cardId)
-    });
+    }, { merge: true });
     
     window.userCollection.add(cardId);
     updateCardUI(cardId);
@@ -37,9 +37,9 @@ async function removeFromCollection(cardId) {
   if (!user) return;
   
   try {
-    await db.collection('users').doc(user.uid).update({
+    await db.collection('users').doc(user.uid).set({
       collection: firebase.firestore.FieldValue.arrayRemove(cardId)
-    });
+    }, { merge: true });
     
     window.userCollection.delete(cardId);
     updateCardUI(cardId);
@@ -73,9 +73,9 @@ async function addToWishlist(cardId) {
   }
   
   try {
-    await db.collection('users').doc(user.uid).update({
+    await db.collection('users').doc(user.uid).set({
       wishlist: firebase.firestore.FieldValue.arrayUnion(cardId)
-    });
+    }, { merge: true });
     
     if (!window.userWishlist) {
       window.userWishlist = new Set();
@@ -99,9 +99,9 @@ async function removeFromWishlist(cardId) {
   if (!user) return;
   
   try {
-    await db.collection('users').doc(user.uid).update({
+    await db.collection('users').doc(user.uid).set({
       wishlist: firebase.firestore.FieldValue.arrayRemove(cardId)
-    });
+    }, { merge: true });
     
     window.userWishlist.delete(cardId);
     showNotification('Removed from wishlist', 'success');
@@ -145,13 +145,23 @@ async function saveDisplayName() {
   }
   
   try {
-    await db.collection('users').doc(user.uid).update({
+    // Use set with merge to create document if it doesn't exist
+    await db.collection('users').doc(user.uid).set({
       displayName: displayName,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    }, { merge: true });
+    
+    // Update local profile
+    if (window.userProfile) {
+      window.userProfile.displayName = displayName;
+    }
     
     // Update UI
-    document.getElementById('profile-user-name').textContent = displayName;
+    const nameEl = document.getElementById('profile-user-name');
+    if (nameEl) {
+      nameEl.textContent = displayName;
+    }
+    
     showNotification('Name updated!', 'success');
   } catch (error) {
     console.error('Error updating name:', error);

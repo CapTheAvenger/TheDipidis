@@ -1195,8 +1195,8 @@
                         <!-- User Stats -->
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
                             <div class="stat-card">
-                                <h3>📧 Email</h3>
-                                <p id="profile-user-email">-</p>
+                                <h3>� Name</h3>
+                                <p id="profile-user-name" style="font-size: 18px; font-weight: 600;">-</p>
                             </div>
                             <div class="stat-card">
                                 <h3>🎴 Cards Owned</h3>
@@ -1259,27 +1259,20 @@
                         <div id="profile-settings" class="profile-tab-content" style="display: none;">
                             <h2>⚙️ Settings</h2>
                             <div style="max-width: 600px;">
-                                <div style="margin-bottom: 20px;">
-                                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Currency</label>
-                                    <select id="settings-currency" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
-                                        <option value="EUR">EUR (€)</option>
-                                        <option value="USD">USD ($)</option>
-                                        <option value="GBP">GBP (£)</option>
-                                    </select>
-                                </div>
-                                
                                 <div style="margin-bottom: 30px;">
-                                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Language</label>
-                                    <select id="settings-language" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
-                                        <option value="en">English</option>
-                                        <option value="de">Deutsch</option>
-                                        <option value="jp">日本語</option>
-                                    </select>
+                                    <label style="display: block; font-weight: bold; margin-bottom: 5px;">Display Name</label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="text" id="settings-display-name" placeholder="Enter your name" maxlength="50" style="padding: 10px; border: 2px solid #ddd; border-radius: 6px; flex: 1; font-size: 16px;">
+                                        <button onclick="saveDisplayName()" style="background: #4CAF50; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; white-space: nowrap;">
+                                            💾 Save
+                                        </button>
+                                    </div>
+                                    <p style="color: #666; font-size: 13px; margin-top: 5px;">This name will be displayed in your profile</p>
                                 </div>
                                 
                                 <div style="padding-top: 20px; border-top: 1px solid #e0e0e0;">
-                                    <button onclick="signOut()" style="background: #f44336; color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-size: 16px;">
-                                        Sign Out
+                                    <button onclick="signOut()" style="background: #f44336; color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600;">
+                                        🚪 Sign Out
                                     </button>
                                 </div>
                             </div>

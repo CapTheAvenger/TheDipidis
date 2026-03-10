@@ -20,6 +20,11 @@ async function addToCollection(cardId) {
     window.userCollection.add(cardId);
     updateCardUI(cardId);
     showNotification('Added to collection!', 'success');
+    
+    // Re-render cards to show green checkmark
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+      renderCardDatabase(window.filteredCardsData);
+    }
   } catch (error) {
     console.error('Error adding to collection:', error);
     showNotification('Error updating collection', 'error');
@@ -39,6 +44,11 @@ async function removeFromCollection(cardId) {
     window.userCollection.delete(cardId);
     updateCardUI(cardId);
     showNotification('Removed from collection', 'success');
+    
+    // Re-render cards to remove green checkmark
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+      renderCardDatabase(window.filteredCardsData);
+    }
   } catch (error) {
     console.error('Error removing from collection:', error);
     showNotification('Error updating collection', 'error');
@@ -67,7 +77,16 @@ async function addToWishlist(cardId) {
       wishlist: firebase.firestore.FieldValue.arrayUnion(cardId)
     });
     
+    if (!window.userWishlist) {
+      window.userWishlist = new Set();
+    }
+    window.userWishlist.add(cardId);
     showNotification('Added to wishlist!', 'success');
+    
+    // Re-render cards to update wishlist button
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+      renderCardDatabase(window.filteredCardsData);
+    }
   } catch (error) {
     console.error('Error adding to wishlist:', error);
     showNotification('Error updating wishlist', 'error');
@@ -84,9 +103,59 @@ async function removeFromWishlist(cardId) {
       wishlist: firebase.firestore.FieldValue.arrayRemove(cardId)
     });
     
+    window.userWishlist.delete(cardId);
     showNotification('Removed from wishlist', 'success');
+    
+    // Re-render cards to update wishlist button
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+      renderCardDatabase(window.filteredCardsData);
+    }
   } catch (error) {
     console.error('Error removing from wishlist:', error);
+  }
+}
+
+// Toggle wishlist
+async function toggleWishlist(cardId) {
+  if (!window.userWishlist) {
+    window.userWishlist = new Set();
+  }
+  
+  if (window.userWishlist.has(cardId)) {
+    await removeFromWishlist(cardId);
+  } else {
+    await addToWishlist(cardId);
+  }
+}
+
+// Save display name
+async function saveDisplayName() {
+  const user = auth.currentUser;
+  if (!user) {
+    showNotification('Please sign in to update your profile', 'error');
+    return;
+  }
+  
+  const nameInput = document.getElementById('settings-display-name');
+  const displayName = nameInput.value.trim();
+  
+  if (!displayName) {
+    showNotification('Please enter a name', 'error');
+    return;
+  }
+  
+  try {
+    await db.collection('users').doc(user.uid).update({
+      displayName: displayName,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Update UI
+    document.getElementById('profile-user-name').textContent = displayName;
+    showNotification('Name updated!', 'success');
+  } catch (error) {
+    console.error('Error updating name:', error);
+    showNotification('Error updating name', 'error');
   }
 }
 
@@ -208,6 +277,29 @@ function updateCollectionUI() {
 
 // Update profile UI
 function updateProfileUI(profile) {
+  // Update profile name
+  const nameEl = document.getElementById('profile-user-name');
+  if (nameEl) {
+    nameEl.textContent = profile.displayName || 'Anonymous';
+  }
+  
+  // Update settings input
+  const nameInput = document.getElementById('settings-display-name');
+  if (nameInput) {
+    nameInput.value = profile.displayName || '';
+  }
+  
+  // Update collection stats
+  const cardsCount = document.getElementById('profile-cards-count');
+  if (cardsCount) {
+    cardsCount.textContent = (profile.collection || []).length;
+  }
+  
+  const decksCount = document.getElementById('profile-decks-count');
+  if (decksCount) {
+    decksCount.textContent = window.userDecks?.length || 0;
+  }
+  
   const profileEl = document.getElementById('user-profile-data');
   if (profileEl) {
     profileEl.innerHTML = `
@@ -250,4 +342,26 @@ function formatDate(timestamp) {
     month: 'short', 
     day: 'numeric' 
   });
+}
+
+// Switch profile tabs
+function switchProfileTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.profile-tab-content').forEach(tab => {
+    tab.style.display = 'none';
+  });
+  
+  // Remove active class from all buttons
+  document.querySelectorAll('.profile-tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Show selected tab
+  const selectedTab = document.getElementById('profile-' + tabName);
+  if (selectedTab) {
+    selectedTab.style.display = 'block';
+  }
+  
+  // Add active class to selected button
+  event.target.classList.add('active');
 }

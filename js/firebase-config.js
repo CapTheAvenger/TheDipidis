@@ -42,25 +42,44 @@ auth.onAuthStateChanged((user) => {
 
 // User sign-in handler
 function onUserSignedIn(user) {
-  // Update UI
-  document.getElementById('auth-container')?.classList.add('hidden');
-  document.getElementById('user-profile')?.classList.remove('hidden');
+  // Update UI - show profile content, hide auth prompt
+  const authPrompt = document.getElementById('profile-auth-prompt');
+  const profileContent = document.getElementById('profile-content');
+  if (authPrompt) authPrompt.style.display = 'none';
+  if (profileContent) profileContent.style.display = 'block';
+  
+  // Update user button
+  const userBtn = document.querySelector('.user-btn');
+  if (userBtn) {
+    userBtn.textContent = '👤 Profile';
+    userBtn.onclick = () => openTab('profile');
+  }
+  
+  // Initialize collections
+  window.userCollection = new Set();
+  window.userWishlist = new Set();
   
   // Load user data
   loadUserProfile(user.uid);
   loadUserCollection(user.uid);
   loadUserDecks(user.uid);
-  
-  // Show user info
-  const userEmail = document.getElementById('user-email');
-  if (userEmail) userEmail.textContent = user.email;
+  loadUserWishlist(user.uid);
 }
 
 // User sign-out handler
 function onUserSignedOut() {
-  // Update UI
-  document.getElementById('auth-container')?.classList.remove('hidden');
-  document.getElementById('user-profile')?.classList.add('hidden');
+  // Update UI - show auth prompt, hide profile content
+  const authPrompt = document.getElementById('profile-auth-prompt');
+  const profileContent = document.getElementById('profile-content');
+  if (authPrompt) authPrompt.style.display = 'block';
+  if (profileContent) profileContent.style.display = 'none';
+  
+  // Update user button
+  const userBtn = document.querySelector('.user-btn');
+  if (userBtn) {
+    userBtn.innerHTML = '<img src="images/pokeball-icon.png" alt="" style="width: 20px; height: 20px; margin-right: 5px; vertical-align: middle;">Sign In';
+    userBtn.onclick = () => showAuthModal('signin');
+  }
   
   // Clear user data
   clearUserData();
@@ -111,6 +130,19 @@ async function loadUserCollection(userId) {
     }
   } catch (error) {
     console.error('Error loading collection:', error);
+  }
+}
+
+// Load user's wishlist
+async function loadUserWishlist(userId) {
+  try {
+    const doc = await db.collection('users').doc(userId).get();
+    if (doc.exists) {
+      const wishlist = doc.data().wishlist || [];
+      window.userWishlist = new Set(wishlist);
+    }
+  } catch (error) {
+    console.error('Error loading wishlist:', error);
   }
 }
 

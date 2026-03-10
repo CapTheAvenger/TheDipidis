@@ -8913,6 +8913,7 @@
             
             const item = document.createElement('div');
             item.className = 'card-database-item';
+            item.setAttribute('data-card-id', card.name); // For collection tracking
             
             const rarityClass = getRarityClass(card.rarity);
             
@@ -8925,6 +8926,10 @@
             const displayType = card.type || 'Unknown';
             const displayRarity = card.rarity || 'Unknown';
             const displayCardMarketUrl = card.cardmarket_url || '#';
+            
+            // Check if user owns this card
+            const userOwnsCard = window.userCollection && window.userCollection.has(card.name);
+            const userWantsCard = window.userWishlist && window.userWishlist.has(card.name);
             
             // Format price button
             let priceButton = '';
@@ -8977,7 +8982,18 @@
             }
             
             item.innerHTML = `
-                <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
+                <div style="position: relative;">
+                    <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
+                    ${userOwnsCard ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">✓</div>' : ''}
+                    <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
+                        <button onclick="toggleCollection('${escapedName}')" style="background: ${userOwnsCard ? '#4CAF50' : '#fff'}; color: ${userOwnsCard ? '#fff' : '#000'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userOwnsCard ? 'Remove from collection' : 'Add to collection'}">
+                            ${userOwnsCard ? '✓' : '+'}
+                        </button>
+                        <button onclick="toggleWishlist('${escapedName}')" style="background: ${userWantsCard ? '#FF9800' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid #FF9800; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
+                            ⭐
+                        </button>
+                    </div>
+                </div>
                 <div class="card-database-info">
                     <div class="card-database-name">${displayName}</div>
                     <div class="card-database-meta">

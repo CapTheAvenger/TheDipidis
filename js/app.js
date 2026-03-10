@@ -4608,7 +4608,6 @@
                 
                 // 🚀 PERFORMANCE: Update display ONCE at the end (not 60 times!)
                 updateDeckDisplay(source);
-                }
             }
         }
         

@@ -173,27 +173,56 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                 print(f"[Price Scraper] Progress: {idx+1}/{len(cards)} cards...")
             
             try:
-                # Strategy: Prefer Cardmarket direct scraping (original source), fallback to Limitless
+                # Strategy: Get CardMarket URL from Limitless, then scrape price directly from CardMarket
+                # This gives us the most up-to-date 7-day average price
                 if not card.get('name') or not card.get('set') or not card.get('number'):
                     continue
                 
                 eur_price = ''
                 cardmarket_url_final = card.get('cardmarket_url', '')
                 
-                # Try Cardmarket first (if URL available) - Get 7-days average price
+                # Step 1: Get CardMarket URL from Limitless (if we don't have it yet)
+                limitless_price_backup = ''
+                if not cardmarket_url_final:
+                    try:
+                        # Build Limitless URL
+                        if card.get('card_url'):
+                            if card['card_url'].startswith('/'):
+                                url = f"https://limitlesstcg.com{card['card_url']}"
+                            else:
+                                url = card['card_url']
+                        else:
+                            url = f"https://limitlesstcg.com/cards/{card['set']}/{card['number']}"
+                        
+                        driver.get(url)
+                        time.sleep(0.8)
+                        
+                        # Extract CardMarket URL AND price from the table
+                        try:
+                            table = driver.find_element(By.CSS_SELECTOR, "table.card-prints-versions")
+                            current_row = table.find_element(By.CSS_SELECTOR, "tr.current")
+                            eur_link = current_row.find_element(By.CSS_SELECTOR, "a.card-price.eur")
+                            cardmarket_url_final = eur_link.get_attribute('href') or ''
+                            limitless_price_backup = eur_link.text.strip()  # Save as backup
+                            if cardmarket_url_final:
+                                print(f"   → Found CM URL from Limitless (backup price: {limitless_price_backup})")
+                        except:
+                            pass
+                    except:
+                        pass
+                
+                # Step 2: Scrape current price directly from CardMarket (7-days average)
                 if cardmarket_url_final:
                     try:
                         driver.get(cardmarket_url_final)
-                        time.sleep(1.5)  # Reduced delay
+                        time.sleep(1.5)
                         
                         # Strategy 1: Find "7-days average price" label and get the next dd element
                         # HTML structure: <dt>7-days average price</dt> <dd><span>3,23 €</span></dd>
                         try:
-                            # Find all dt elements (labels)
                             dt_elements = driver.find_elements(By.TAG_NAME, "dt")
                             for dt in dt_elements:
                                 if "7-days average" in dt.text or "7-day average" in dt.text:
-                                    # Found the label, now get the next sibling dd element
                                     dd_element = dt.find_element(By.XPATH, "following-sibling::dd[1]")
                                     text = dd_element.text.strip()
                                     if '€' in text:
@@ -233,52 +262,39 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                         
                         # Silent fail - Cardmarket often blocks, this is expected
                     except Exception:
-                        pass  # Silent - try Limitless instead
+                        pass
                 
-                # Fallback: Try Limitless if Cardmarket failed or no URL
-                if not eur_price:
+                # Step 3: Use Limitless backup price if CardMarket failed
+                if not eur_price and limitless_price_backup:
+                    eur_price = limitless_price_backup
+                    print(f"   ✓ LT backup: {eur_price}")
+                
+                # Step 4: Last resort - try Limitless directly (only if we haven't been there yet)
+                if not eur_price and not limitless_price_backup:
                     try:
-                        # Build URL (try to use card_url from database if available)
+                        # Build URL
                         if card.get('card_url'):
                             if card['card_url'].startswith('/'):
                                 url = f"https://limitlesstcg.com{card['card_url']}"
                             else:
                                 url = card['card_url']
                         else:
-                            # Build URL manually (format: /cards/SET/NUM)
                             url = f"https://limitlesstcg.com/cards/{card['set']}/{card['number']}"
                         
                         driver.get(url)
-                        time.sleep(1.5)  # Reduced delay
-                        
-                        # Find the table with prices
-                        cardmarket_url_from_page = ''
+                        time.sleep(0.8)
                         
                         try:
-                            # Find the current card row (class="current")
                             table = driver.find_element(By.CSS_SELECTOR, "table.card-prints-versions")
                             current_row = table.find_element(By.CSS_SELECTOR, "tr.current")
-                            
-                            # Extract EUR price from third column
                             eur_link = current_row.find_element(By.CSS_SELECTOR, "a.card-price.eur")
                             eur_price = eur_link.text.strip()
-                            cardmarket_url_from_page = eur_link.get_attribute('href') or ''
-                            
+                            cardmarket_url_final = eur_link.get_attribute('href') or cardmarket_url_final
                             print(f"   ✓ LT: {eur_price}")
-                            
-                            # Update Cardmarket URL if we got a new one from Limitless
-                            if cardmarket_url_from_page and not cardmarket_url_final:
-                                cardmarket_url_final = cardmarket_url_from_page
-                        except Exception as e:
-                            error_str = str(e).lower()
-                            # Only log if it's NOT a common "no price table" case
-                            if 'no such element' not in error_str or 'card-prints-versions' not in error_str:
-                                # Real error - log it
-                                print(f"   ⚠ Error: {str(e).split('Stacktrace')[0].strip()[:60]}")
-                            # Silent fail for "no price table" - many cards don't have prices
-                    
+                        except:
+                            pass  # No price available
                     except Exception:
-                        pass  # Silent - no price available
+                        pass  # Silent
                 
                 # Store result (even if price is empty - we track all attempts)
                 results.append({

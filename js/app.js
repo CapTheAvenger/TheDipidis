@@ -4590,29 +4590,24 @@
                         console.log(`[autoComplete] No preferred version for ${card.card_name}, using original: ${setCode} ${setNumber}`);
                     }
                     
+                    // 🚀 PERFORMANCE: Use batch add (no display updates per card)
                     for (let i = 0; i < card.addCount; i++) {
-                        addCardToDeck(source, card.card_name, setCode, setNumber);
+                        addCardToDeckBatch(source, card.card_name, setCode, setNumber);
                     }
                 });
                 console.log('[autoComplete] Deck completed with rarity mode:', globalRarityPreference);
-                
-                // Show the deck grid with images
-                renderMyDeckGrid(source);
-                
-                // CRITICAL: Also refresh the Overview Grid to show updated badges
-                // Use the filter functions to preserve active filters (e.g., >90% cards)
-                if (source === 'cityLeague') {
-                    applyCityLeagueFilter();
-                } else if (source === 'currentMeta') {
-                    applyCurrentMetaFilter();
-                }
-                console.log('[autoComplete] Overview Grid refreshed to show updated deck badges (with active filters preserved)');
                 
                 // Save deck to localStorage
                 if (source === 'cityLeague') {
                     saveCityLeagueDeck();
                 } else if (source === 'currentMeta') {
                     saveCurrentMetaDeck();
+                } else if (source === 'pastMeta') {
+                    savePastMetaDeck();
+                }
+                
+                // 🚀 PERFORMANCE: Update display ONCE at the end (not 60 times!)
+                updateDeckDisplay(source);
                 }
             }
         }

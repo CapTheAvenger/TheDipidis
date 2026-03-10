@@ -93,7 +93,7 @@ const BASE_PATH = './data/';
         
         // Navigate to City League Analysis with pre-selected deck
         function navigateToAnalysisWithDeck(archetypeName) {
-            console.log('?? Navigating to analysis with deck:', archetypeName);
+            console.log('🔍 Navigating to analysis with deck:', archetypeName);
             
             // Switch to City League Analysis tab
             switchTab('city-league-analysis');
@@ -118,9 +118,9 @@ const BASE_PATH = './data/';
                         // Trigger change event to load the deck
                         const event = new Event('change', { bubbles: true });
                         select.dispatchEvent(event);
-                        console.log('? Deck selected:', matchingOption.value);
+                        console.log('✅ Deck selected:', matchingOption.value);
                     } else {
-                        console.warn('?? Deck not found in dropdown:', archetypeName);
+                        console.warn('⚠️ Deck not found in dropdown:', archetypeName);
                     }
                 } else if (attempts < maxAttempts) {
                     // Retry after 100ms
@@ -214,12 +214,12 @@ const BASE_PATH = './data/';
                     cardsByNameMap = buildCardsByNameMap(allCardsDatabase);
                     window.cardsByNameMap = cardsByNameMap;
                     cardsBySetNumberMap = buildCardsBySetNumberMap(allCardsDatabase); // Build index for fast lookup
-                    console.log(`? Loaded ${allCardsDatabase.length} cards from all_cards_merged.json (with prices)`);
-                    console.log(`?? Karten mit mehreren Versionen:`, Object.keys(cardsByNameMap).filter(k => cardsByNameMap[k].length > 1).length);
+                    console.log(`✅ Loaded ${allCardsDatabase.length} cards from all_cards_merged.json (with prices)`);
+                    console.log(`📊 Karten mit mehreren Versionen:`, Object.keys(cardsByNameMap).filter(k => cardsByNameMap[k].length > 1).length);
                     
                     // Count cards with prices
                     const cardsWithPrices = allCardsDatabase.filter(c => c.eur_price).length;
-                    console.log(`?? Karten mit Preisen: ${cardsWithPrices} (${Math.round(100*cardsWithPrices/allCardsDatabase.length)}%)`);
+                    console.log(`💰 Karten mit Preisen: ${cardsWithPrices} (${Math.round(100*cardsWithPrices/allCardsDatabase.length)}%)`);
                     
                     // Initialisiere Suche wenn sie existiert
                     const searchInput = document.getElementById('cityLeagueDeckCardSearch');
@@ -608,7 +608,7 @@ const BASE_PATH = './data/';
                     );
                     
                     if (correctSVEVersion) {
-                        console.log(`?? Basic Energy "${cardName}": Using SVE ${correctSVEVersion.number} ?`);
+                        console.log(`⚡ Basic Energy "${cardName}": Using SVE ${correctSVEVersion.number} ⚡`);
                         return correctSVEVersion;
                     }
                 }
@@ -616,7 +616,7 @@ const BASE_PATH = './data/';
                 // Fallback: If specific SVE number not found, use any SVE version
                 const sveVersions = versions.filter(v => v.set === 'SVE');
                 if (sveVersions.length > 0) {
-                    console.log(`?? Basic Energy "${cardName}": Using fallback SVE ${sveVersions[0].number}`);
+                    console.log(`⚡ Basic Energy "${cardName}": Using fallback SVE ${sveVersions[0].number}`);
                     return sveVersions[0];
                 }
             }
@@ -952,7 +952,7 @@ const BASE_PATH = './data/';
             let html = `
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">?? Archetype Overview</h3>
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">📊 Archetype Overview</h3>
                         <div style="font-size: 2.5em; font-weight: bold; margin: 10px 0;">${totalArchetypes}</div>
                         <div style="font-size: 0.85em; opacity: 0.9; margin-top: 15px; text-align: left;">
                             <strong>Top 3 by Count:</strong><br>
@@ -963,15 +963,15 @@ const BASE_PATH = './data/';
                         </div>
                     </div>
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">?? Top 10 Changes</h3>
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">🔝 Top 10 Changes</h3>
                         <div style="font-size: 0.85em; opacity: 0.9; margin-top: 10px; text-align: left;">
-                            ${entries.length > 0 ? `<strong style="color: #7fff7f;">? Entries:</strong><br>${entries.map(arch => `${arch}`).join('<br>')}<br><br>` : ''}
-                            ${exits.length > 0 ? `<strong style="color: #ff6b6b;">? Exits:</strong><br>${exits.map(arch => `${arch}`).join('<br>')}<br>` : ''}
+                            ${entries.length > 0 ? `<strong style="color: #7fff7f;">➕ Entries:</strong><br>${entries.map(arch => `${arch}`).join('<br>')}<br><br>` : ''}
+                            ${exits.length > 0 ? `<strong style="color: #ff6b6b;">➖ Exits:</strong><br>${exits.map(arch => `${arch}`).join('<br>')}<br>` : ''}
                             ${entries.length === 0 && exits.length === 0 ? 'No changes in top 10' : ''}
                         </div>
                     </div>
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">?? Datenquelle</h3>
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">📁 Datenquelle</h3>
                         <div style="font-size: 0.85em; opacity: 0.9; margin-top: 10px;">
                             <strong>Zeitraum:</strong><br>${dateRange || 'N/A'}<br><br>
                             <strong>Turniere:</strong><br>${tournamentCount || 0}
@@ -983,7 +983,7 @@ const BASE_PATH = './data/';
             if (decreased.length > 0) {
                 html += `
                     <div style="margin-bottom: 40px;">
-                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">?? Popularity Decreases</h2>
+                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📉 Popularity Decreases</h2>
                         <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <thead>
                                 <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
@@ -1050,7 +1050,7 @@ const BASE_PATH = './data/';
                 // Performance Decliners
                 html += `
                     <div style="flex: 1; min-width: 300px;">
-                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">?? Performance Decliners (Worse Avg Placement)</h2>
+                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📉 Performance Decliners (Worse Avg Placement)</h2>
                         <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <thead>
                                 <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
@@ -1085,7 +1085,7 @@ const BASE_PATH = './data/';
                 <div style="display: flex; gap: 20px; margin-bottom: 40px; flex-wrap: wrap;">
                     <!-- Full Comparison Table (Detailed) -->
                     <div style="flex: 1; min-width: 350px;">
-                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">?? Full Comparison Table (Top 30)</h2>
+                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📋 Full Comparison Table (Top 30)</h2>
                         <div style="margin-bottom: 15px;">
                             <input type="text" id="cityLeagueSearchFilter" placeholder="Suche z.B.: draga, luca" 
                                 style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #3498db; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
@@ -1097,7 +1097,7 @@ const BASE_PATH = './data/';
                     
                     <!-- Grouped by Main Pokemon -->
                     <div style="flex: 1; min-width: 350px;">
-                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">?? Archetype Combined (Top 20)</h2>
+                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📚 Archetype Combined (Top 20)</h2>
                         <div style="margin-bottom: 15px; padding: 12px; background: #ecf0f1; border-radius: 5px; font-size: 0.9em; color: #333; font-weight: 500;">
                             Kumulierte Zahlen aller Varianten eines Haupt-Pokemons (z.B. alle "dragapult *" Decks)
                         </div>
@@ -1106,8 +1106,8 @@ const BASE_PATH = './data/';
                 </div>
                 
                 <div style="background: #ecf0f1; padding: 15px; border-radius: 5px; margin-top: 30px; text-align: center;">
-                    <span style="display: inline-block; margin: 0 15px; font-weight: bold;">?? Generated: ${generatedDate}</span>
-                    <span style="display: inline-block; margin: 0 15px; font-weight: bold;">?? Total Archetypes Tracked: ${totalArchetypes}</span>
+                    <span style="display: inline-block; margin: 0 15px; font-weight: bold;">📅 Generated: ${generatedDate}</span>
+                    <span style="display: inline-block; margin: 0 15px; font-weight: bold;">📋 Total Archetypes Tracked: ${totalArchetypes}</span>
                 </div>`;
             
             content.innerHTML = html;
@@ -1466,7 +1466,7 @@ const BASE_PATH = './data/';
             // Add top 10 meta decks
             if (top10.length > 0) {
                 const topGroup = document.createElement('optgroup');
-                topGroup.label = '?? Top 10 Meta Decks';
+                topGroup.label = '🏆 Top 10 Meta Decks';
                 top10.forEach(archetype => {
                     const option = document.createElement('option');
                     option.value = archetype.name;
@@ -1479,7 +1479,7 @@ const BASE_PATH = './data/';
             // Add remaining decks alphabetically
             if (rest.length > 0) {
                 const restGroup = document.createElement('optgroup');
-                restGroup.label = '?? Weitere Decks (A-Z)';
+                restGroup.label = '🎴 Weitere Decks (A-Z)';
                 rest.forEach(archetype => {
                     const option = document.createElement('option');
                     option.value = archetype.name;
@@ -1923,7 +1923,7 @@ const BASE_PATH = './data/';
             
             // Reset button text to show list view option
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
-            gridButtons.forEach(btn => btn.textContent = '?? List View');
+            gridButtons.forEach(btn => btn.textContent = '📋 List View');
             
             // Apply current filter (this will update counts and re-filter if needed)
             applyCityLeagueFilter();
@@ -1941,7 +1941,7 @@ const BASE_PATH = './data/';
             
             // Reset button text
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
-            gridButtons.forEach(btn => btn.textContent = '?? List View');
+            gridButtons.forEach(btn => btn.textContent = '📋 List View');
         }
         
         // Helper function to get Limitless Japanese fallback URL for M3 cards
@@ -1963,7 +1963,7 @@ const BASE_PATH = './data/';
             // Try Limitless Japanese fallback
             const fallbackUrl = getM3JapaneseFallbackUrl(setCode, cardNumber);
             if (fallbackUrl) {
-                console.log(`?? M3 Image Error ? Trying Limitless JP fallback: ${fallbackUrl}`);
+                console.log(`🎴 M3 Image Error → Trying Limitless JP fallback: ${fallbackUrl}`);
                 img.setAttribute('data-fallback-tried', 'true');
                 img.src = fallbackUrl;
             } else {
@@ -1995,7 +1995,7 @@ const BASE_PATH = './data/';
                 // Try PokemonProxies mapping first
                 if (cardNumber && pokemonProxiesM3Map.has(cardNumber)) {
                     const proxyUrl = pokemonProxiesM3Map.get(cardNumber);
-                    console.log(`?? M3 Card ? PokemonProxies: ${cardNumber} ? ${proxyUrl}`);
+                    console.log(`🎴 M3 Card → PokemonProxies: ${cardNumber} → ${proxyUrl}`);
                     return proxyUrl;
                 }
                 

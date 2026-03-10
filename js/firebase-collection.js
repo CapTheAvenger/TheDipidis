@@ -692,6 +692,7 @@ function updateDecksUI() {
         // Check if owned
         const cardId = `${cardName}|${setCode}|${setNumber}`;
         const isOwned = window.userCollection && window.userCollection.has(cardId);
+        const isWishlisted = window.userWishlist && window.userWishlist.has(cardId);
         const ownedBadge = isOwned ? 
           '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
         
@@ -712,16 +713,19 @@ function updateDecksUI() {
             
             <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.75); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 3;">${count}</div>
             
-            <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; z-index: 3;">
+            <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; z-index: 3;">
               <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" 
-                      style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 24px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center;" 
+                      style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="Switch rarity/print">★</button>
               <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" 
-                      style="background: ${priceBackground}; color: white; height: 24px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 9px; font-weight: bold; padding: 0 4px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
+                      style="background: ${priceBackground}; color: white; height: 22px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
                       title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
               <button onclick="event.stopPropagation(); toggleCollection('${cardId}')" 
-                      style="background: ${isOwned ? '#27ae60' : '#95a5a6'}; color: white; border: none; border-radius: 3px; height: 24px; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center;" 
+                      style="background: ${isOwned ? '#27ae60' : '#95a5a6'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: 13px; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="${isOwned ? 'Remove from collection' : 'Add to collection'}">${isOwned ? '✓' : '+'}</button>
+              <button onclick="event.stopPropagation(); toggleWishlist('${cardId}')" 
+                      style="background: ${isWishlisted ? '#FF9800' : '#bdc3c7'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">❤</button>
             </div>
           </div>
         `;

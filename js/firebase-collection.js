@@ -180,10 +180,12 @@ async function saveCurrentDeckToProfile(source) {
   
   try {
     // Prepare deck data
+    // Note: deck is saved with exact prints in format "CardName (SET NUMBER)", 
+    // preserving the specific print versions selected by the user
     const deckData = {
       name: deckName.trim(),
       archetype: archetype || 'Custom',
-      cards: deck,
+      cards: deck, // Exact prints: "CardName (SET NUMBER)" format
       totalCards: totalCards,
       source: source,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -714,7 +716,7 @@ function updateDecksUI() {
           </div>
         </div>
         <div id="${deckId}" style="display: none; padding: 15px; background: #f8f9fa;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
             ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
           </div>
           <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px; font-size: 0.85em; color: #7f8c8d;">

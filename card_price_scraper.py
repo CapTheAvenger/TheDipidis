@@ -180,34 +180,54 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                 eur_price = ''
                 cardmarket_url_final = card.get('cardmarket_url', '')
                 
-                # Try Cardmarket first (if URL available)
+                # Try Cardmarket first (if URL available) - Get 7-days average price
                 if cardmarket_url_final:
                     try:
                         driver.get(cardmarket_url_final)
                         time.sleep(1.5)  # Reduced delay
                         
-                        # Try multiple robust selectors for Cardmarket price
+                        # Strategy 1: Find "7-days average price" label and get the next dd element
+                        # HTML structure: <dt>7-days average price</dt> <dd><span>3,23 €</span></dd>
                         try:
-                            # Strategy 1: Find all dd elements with price pattern
-                            price_elems = driver.find_elements(By.CSS_SELECTOR, "dd.col-6, dd.col-xl-7, dd[class*='col']")
-                            for elem in price_elems:
-                                text = elem.text.strip()
-                                # Match price pattern: digits, comma/dot, digits, €
-                                if '€' in text and any(c.isdigit() for c in text):
-                                    eur_price = text
-                                    print(f"   ✓ CM: {eur_price}")
-                                    break
+                            # Find all dt elements (labels)
+                            dt_elements = driver.find_elements(By.TAG_NAME, "dt")
+                            for dt in dt_elements:
+                                if "7-days average" in dt.text or "7-day average" in dt.text:
+                                    # Found the label, now get the next sibling dd element
+                                    dd_element = dt.find_element(By.XPATH, "following-sibling::dd[1]")
+                                    text = dd_element.text.strip()
+                                    if '€' in text:
+                                        eur_price = text
+                                        print(f"   ✓ CM 7-day avg: {eur_price}")
+                                        break
                         except:
                             pass
                         
+                        # Fallback Strategy 2: If no 7-day average found, try "From" price (cheapest available)
                         if not eur_price:
-                            # Strategy 2: Try span.price or similar
                             try:
-                                price_elem = driver.find_element(By.CSS_SELECTOR, "span.price, .price-container, [class*='price']")
-                                text = price_elem.text.strip()
-                                if '€' in text:
-                                    eur_price = text
-                                    print(f"   ✓ CM: {eur_price}")
+                                dt_elements = driver.find_elements(By.TAG_NAME, "dt")
+                                for dt in dt_elements:
+                                    if "From" in dt.text:
+                                        dd_element = dt.find_element(By.XPATH, "following-sibling::dd[1]")
+                                        text = dd_element.text.strip()
+                                        if '€' in text:
+                                            eur_price = text
+                                            print(f"   ✓ CM From: {eur_price}")
+                                            break
+                            except:
+                                pass
+                        
+                        # Fallback Strategy 3: Any price element (last resort)
+                        if not eur_price:
+                            try:
+                                price_elems = driver.find_elements(By.CSS_SELECTOR, "dd.col-6, dd.col-xl-7")
+                                for elem in price_elems:
+                                    text = elem.text.strip()
+                                    if '€' in text and any(c.isdigit() for c in text):
+                                        eur_price = text
+                                        print(f"   ✓ CM: {eur_price}")
+                                        break
                             except:
                                 pass
                         

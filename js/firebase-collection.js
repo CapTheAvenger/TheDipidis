@@ -605,23 +605,26 @@ function updateDecksUI() {
         let setNumber = '';
         let cardName = deckKey;
         
-        // Parse "CardName (SET NUMBER)" format
+        // Parse "CardName (SET NUMBER)" format - EXACT print saved in deck
         const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
         if (setMatch) {
           cardName = setMatch[1];
           setCode = setMatch[2];
           setNumber = setMatch[3];
           
-          // Fast lookup using cardsBySetNumberMap
+          // Fast lookup using cardsBySetNumberMap - EXACT print lookup
           if (window.cardsBySetNumberMap) {
             const key = `${setCode}-${setNumber}`;
             cardData = window.cardsBySetNumberMap[key];
+            
+            if (!cardData) {
+              console.warn(`[My Decks] Card not found in database: ${deckKey}`);
+            }
           }
-        }
-        
-        // Fallback: search by name in allCardsDatabase
-        if (!cardData) {
-          cardData = window.allCardsDatabase.find(c => c.name === cardName);
+        } else {
+          // Legacy format without set info - try name lookup
+          console.warn(`[My Decks] Old deck format detected: ${deckKey}`);
+          cardData = window.allCardsDatabase?.find(c => c.name === cardName);
           if (cardData) {
             setCode = cardData.set;
             setNumber = cardData.number;
@@ -634,9 +637,14 @@ function updateDecksUI() {
             deck_count: count,
             deck_key: deckKey,
             card_name: cardData.name,
+            // IMPORTANT: Use set/number from deck_key (exact print saved), not from cardData
             set_code: setCode,
-            set_number: setNumber
+            set_number: setNumber,
+            set: setCode,
+            number: setNumber
           });
+        } else {
+          console.error(`[My Decks] Failed to load card: ${deckKey}`);
         }
       }
       
@@ -728,26 +736,103 @@ function updateDecksUI() {
   }).join('');
 }
 
-// Helper: Simple card type sorting
+// Helper: Card type sorting (same as Deck Builder)
+function getCardTypeCategory(cardType) {
+  if (!cardType) return 'Pokemon';
+  if (cardType.charAt(0).match(/[GRWLPFDMNC]/)) return 'Pokemon';
+  if (cardType === 'Supporter') return 'Supporter';
+  if (cardType === 'Item') return 'Item';
+  if (cardType === 'Tool') return 'Tool';
+  if (cardType === 'Stadium') return 'Stadium';
+  if (cardType === 'Special Energy') return 'Special Energy';
+  if (cardType === 'Energy') return 'Energy';
+  if (cardType === 'Trainer') return 'Item';
+  return 'Pokemon';
+}
+
 function sortCardsByTypeSimple(cards) {
+  const elementOrder = {
+    'G': 1, 'R': 2, 'W': 3, 'L': 4, 'P': 5, 'F': 6, 'D': 7, 'M': 8, 'N': 9, 'C': 10
+  };
+  
+  const evolutionOrder = {
+    'Basic': 1, 'Stage1': 2, 'Stage2': 3
+  };
+  
   const typeOrder = {
-    'Pokémon': 0,
-    'Supporter': 1,
-    'Ace Spec': 2,
-    'Item': 3,
-    'Tool': 4,
-    'Stadium': 5,
-    'Energy': 6
+    'Pokemon': 1, 'Supporter': 2, 'Item': 3, 'Tool': 4, 'Stadium': 5, 'Special Energy': 6, 'Energy': 7
   };
   
   return cards.sort((a, b) => {
-    const typeA = a.type || a.card_type || 'Unknown';
-    const typeB = b.type || b.card_type || 'Unknown';
-    const orderA = typeOrder[typeA] !== undefined ? typeOrder[typeA] : 999;
-    const orderB = typeOrder[typeB] !== undefined ? typeOrder[typeB] : 999;
+    const cardTypeA = a.type || a.card_type || '';
+    const cardTypeB = b.type || b.card_type || '';
     
-    if (orderA !== orderB) return orderA - orderB;
-    return (a.name || a.card_name || '').localeCompare(b.name || b.card_name || '');
+    const categoryA = getCardTypeCategory(cardTypeA);
+    const categoryB = getCardTypeCategory(cardTypeB);
+    
+    const orderA = typeOrder[categoryA] || 99;
+    const orderB = typeOrder[categoryB] || 99;
+    
+    // Sort by main category (Pokemon, Supporter, etc.)
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    
+    // For Pokemon: sort by element, then set number, then name
+    if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
+      const elementA = cardTypeA.charAt(0);
+      const elementB = cardTypeB.charAt(0);
+      const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');
+      const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');
+      
+      const elemOrderA = elementOrder[elementA] || 99;
+      const elemOrderB = elementOrder[elementB] || 99;
+      
+      // Different element
+      if (elemOrderA !== elemOrderB) {
+        return elemOrderA - elemOrderB;
+      }
+      
+      // Same element: sort by set code
+      const setCodeA = a.set || a.set_code || '';
+      const setCodeB = b.set || b.set_code || '';
+      
+      if (setCodeA !== setCodeB) {
+        return setCodeA.localeCompare(setCodeB);
+      }
+      
+      // Same set: sort by set number
+      const setNumA = parseInt(((a.number || a.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
+      const setNumB = parseInt(((b.number || b.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
+      if (setNumA !== setNumB) {
+        return setNumA - setNumB;
+      }
+      
+      // Same set+number: sort by name
+      const nameA = a.card_name || a.name || '';
+      const nameB = b.card_name || b.name || '';
+      const nameCompare = nameA.localeCompare(nameB);
+      if (nameCompare !== 0) {
+        return nameCompare;
+      }
+      
+      // Same name: sort by evolution stage
+      const evolOrderA = evolutionOrder[evolutionA] || 99;
+      const evolOrderB = evolutionOrder[evolutionB] || 99;
+      
+      return evolOrderA - evolOrderB;
+    }
+    
+    // For non-Pokemon: sort by set number then name
+    const setNumA = parseInt(((a.number || a.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
+    const setNumB = parseInt(((b.number || b.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
+    if (setNumA !== setNumB) {
+      return setNumA - setNumB;
+    }
+    
+    const nameA = a.card_name || a.name || '';
+    const nameB = b.card_name || b.name || '';
+    return nameA.localeCompare(nameB);
   });
 }
 

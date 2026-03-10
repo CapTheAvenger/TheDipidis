@@ -748,35 +748,6 @@ function sortCardsByTypeSimple(cards) {
     return (a.name || a.card_name || '').localeCompare(b.name || b.card_name || '');
   });
 }
-    
-    return `
-      <div style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 10px;">
-        <div onclick="toggleDeckCollapse('${deckId}')" style="padding: 15px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-          <div style="flex: 1;">
-            <h3 style="margin: 0 0 5px 0; font-size: 1.1em; font-weight: 600;">${deck.name}</h3>
-            <div style="font-size: 0.85em; opacity: 0.9;">
-              ${deck.archetype || 'Custom'} • ${totalCards} Cards (${uniqueCards} Unique)
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <button onclick="event.stopPropagation(); deleteDeck('${deck.id}')" style="padding: 6px 12px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='rgba(231, 76, 60, 0.9)'" title="Delete deck">
-              🗑️
-            </button>
-            <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg);">▼</div>
-          </div>
-        </div>
-        <div id="${deckId}" style="display: none; padding: 15px; background: #f8f9fa;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
-            ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
-          </div>
-          <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px; font-size: 0.85em; color: #7f8c8d;">
-            Saved: ${formatDate(deck.createdAt)}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
 
 // Toggle deck collapse
 function toggleDeckCollapse(deckId) {
@@ -824,5 +795,7 @@ function switchProfileTab(tabName) {
   }
   
   // Add active class to selected button
-  event.target.classList.add('active');
-}
+  const activeBtn = document.querySelector(`.profile-tab-btn[onclick*="${tabName}"]`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+  }

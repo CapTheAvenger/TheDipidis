@@ -612,22 +612,33 @@ function updateDecksUI() {
           setCode = setMatch[2];
           setNumber = setMatch[3];
           
-          // Fast lookup using cardsBySetNumberMap - EXACT print lookup
+          // METHOD 1: Fast lookup using cardsBySetNumberMap (preferred)
           if (window.cardsBySetNumberMap) {
             const key = `${setCode}-${setNumber}`;
             cardData = window.cardsBySetNumberMap[key];
-            
-            if (!cardData) {
-              console.warn(`[My Decks] Card not found in database: ${deckKey}`);
-            }
+          }
+          
+          // METHOD 2: Fallback - search allCardsDatabase by set+number (still exact print!)
+          if (!cardData && window.allCardsDatabase) {
+            cardData = window.allCardsDatabase.find(c => 
+              c.set === setCode && c.number === setNumber
+            );
+          }
+          
+          // METHOD 3: Last resort - search by name only (loses exact print info)
+          if (!cardData && window.allCardsDatabase) {
+            console.warn(`[My Decks] Could not find exact print ${deckKey}, using any print of ${cardName}`);
+            cardData = window.allCardsDatabase.find(c => c.name === cardName);
           }
         } else {
           // Legacy format without set info - try name lookup
           console.warn(`[My Decks] Old deck format detected: ${deckKey}`);
-          cardData = window.allCardsDatabase?.find(c => c.name === cardName);
-          if (cardData) {
-            setCode = cardData.set;
-            setNumber = cardData.number;
+          if (window.allCardsDatabase) {
+            cardData = window.allCardsDatabase.find(c => c.name === cardName);
+            if (cardData) {
+              setCode = cardData.set;
+              setNumber = cardData.number;
+            }
           }
         }
         
@@ -637,14 +648,14 @@ function updateDecksUI() {
             deck_count: count,
             deck_key: deckKey,
             card_name: cardData.name,
-            // IMPORTANT: Use set/number from deck_key (exact print saved), not from cardData
-            set_code: setCode,
-            set_number: setNumber,
-            set: setCode,
-            number: setNumber
+            // IMPORTANT: Use set/number from deck_key (exact print saved), not from cardData fallback
+            set_code: setCode || cardData.set,
+            set_number: setNumber || cardData.number,
+            set: setCode || cardData.set,
+            number: setNumber || cardData.number
           });
         } else {
-          console.error(`[My Decks] Failed to load card: ${deckKey}`);
+          console.error(`[My Decks] Failed to load card: ${deckKey} - not found in database`);
         }
       }
       

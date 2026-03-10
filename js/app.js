@@ -10951,6 +10951,28 @@
                 }
             }
             
+            // Load saved decks into dropdown
+            const savedDeckSelect = document.getElementById('savedDeckSelect');
+            if (savedDeckSelect) {
+                savedDeckSelect.innerHTML = '<option value="">-- Select a saved deck --</option>';
+                
+                if (window.userDecks && window.userDecks.length > 0) {
+                    window.userDecks.forEach(deck => {
+                        const totalCards = deck.totalCards || Object.values(deck.cards || {}).reduce((sum, count) => sum + count, 0);
+                        const option = document.createElement('option');
+                        option.value = deck.id;
+                        option.textContent = `${deck.name} (${totalCards} cards - ${deck.archetype || 'Custom'})`;
+                        savedDeckSelect.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = '-- No saved decks available --';
+                    option.disabled = true;
+                    savedDeckSelect.appendChild(option);
+                }
+            }
+            
             document.getElementById('deckCompareModal').style.display = 'flex';
             document.getElementById('oldDeckListInput').value = '';
             document.getElementById('deckCompareResult').style.display = 'none';
@@ -10959,6 +10981,309 @@
         function closeDeckCompare() {
             document.getElementById('deckCompareModal').style.display = 'none';
             currentDeckSource = null;
+        }
+        
+        // Compare with own saved deck
+        async function compareWithSavedDeck() {
+            const savedDeckSelect = document.getElementById('savedDeckSelect');
+            const selectedDeckId = savedDeckSelect.value;
+            
+            if (!selectedDeckId) {
+                alert('⚠️ Bitte wähle ein gespeichertes Deck aus!');
+                return;
+            }
+            
+            if (!currentDeckSource) {
+                alert('⚠️ Fehler: Keine Deck-Quelle ausgewählt!');
+                return;
+            }
+            
+            // Check if card database is loaded
+            if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
+                console.error('[compareWithSavedDeck] ERROR: cardsBySetNumberMap not loaded!');
+                alert('⚠️ Fehler: Kartendatenbank noch nicht geladen! Bitte warte einen Moment und versuche es erneut.');
+                return;
+            }
+            
+            // Get selected saved deck
+            const savedDeck = window.userDecks.find(d => d.id === selectedDeckId);
+            if (!savedDeck) {
+                alert('⚠️ Fehler: Gespeichertes Deck nicht gefunden!');
+                return;
+            }
+            
+            console.log('[compareWithSavedDeck] Comparing with saved deck:', savedDeck.name);
+            
+            // Convert saved deck to "old deck" format (same as parseDeckList output)
+            const oldDeck = [];
+            for (const [cardName, count] of Object.entries(savedDeck.cards || {})) {
+                // Find card in database to get set and number
+                const card = window.allCardsDatabase.find(c => c.name === cardName);
+                if (card) {
+                    oldDeck.push({
+                        count: count,
+                        name: card.name,
+                        set: card.set,
+                        number: card.number,
+                        key: `${card.set}-${card.number}`
+                    });
+                } else {
+                    // Card not found in database, just use name
+                    oldDeck.push({
+                        count: count,
+                        name: cardName,
+                        set: null,
+                        number: null,
+                        key: cardName
+                    });
+                }
+            }
+            
+            console.log('[compareWithSavedDeck] Old deck (saved) parsed:', oldDeck);
+            
+            // Get current deck and convert to same format
+            const deckMap = currentDeckSource === 'cityLeague' ? window.cityLeagueDeck :
+                           currentDeckSource === 'currentMeta' ? window.currentMetaDeck :
+                           window.pastMetaDeck;
+            
+            if (!deckMap || Object.keys(deckMap).length === 0) {
+                alert('⚠️ Fehler: Aktuelles Deck ist leer!');
+                return;
+            }
+            
+            const currentDeck = [];
+            for (const [key, count] of Object.entries(deckMap)) {
+                // Key format: "CardName (SET NUMBER)" or just "CardName"
+                const match = key.match(/^(.+?)\s+\(([A-Z0-9]+)\s+(\d+)\)$/);
+                if (match) {
+                    const cardName = match[1];
+                    const setCode = match[2];
+                    const setNumber = match[3];
+                    currentDeck.push({
+                        count: count,
+                        name: cardName,
+                        set: setCode,
+                        number: setNumber,
+                        key: `${setCode}-${setNumber}`
+                    });
+                } else {
+                    // No set info available, just use card name
+                    currentDeck.push({
+                        count: count,
+                        name: key,
+                        set: null,
+                        number: null,
+                        key: key
+                    });
+                }
+            }
+            console.log('[compareWithSavedDeck] Current deck parsed:', currentDeck);
+            
+            // Perform comparison using the same logic as compareDeckLists
+            performDeckComparison(oldDeck, currentDeck, savedDeck.name);
+        }
+        
+        // Common comparison logic (extracted from compareDeckLists)
+        function performDeckComparison(oldDeck, currentDeck, oldDeckName = 'Old Deck') {
+            // Track which cards in current deck have been matched
+            const currentDeckMatched = new Array(currentDeck.length).fill(false);
+            
+            // Collect ALL cards to display (current deck + removed cards)
+            const allDisplayCards = [];
+            
+            // Process old deck cards to find matches and changes
+            for (const oldCard of oldDeck) {
+                // Try to find matching card in current deck
+                let bestMatch = null;
+                let bestMatchIndex = -1;
+                
+                // First: Try exact match (same set + number)
+                for (let i = 0; i < currentDeck.length; i++) {
+                    if (currentDeckMatched[i]) continue;
+                    const newCard = currentDeck[i];
+                    if (oldCard.set === newCard.set && oldCard.number === newCard.number) {
+                        bestMatch = newCard;
+                        bestMatchIndex = i;
+                        break;
+                    }
+                }
+                
+                // Second: Try international print match
+                if (!bestMatch && oldCard.set && oldCard.number) {
+                    for (let i = 0; i < currentDeck.length; i++) {
+                        if (currentDeckMatched[i]) continue;
+                        const newCard = currentDeck[i];
+                        if (newCard.set && newCard.number && 
+                            areSameInternationalPrint(oldCard.set, oldCard.number, newCard.set, newCard.number)) {
+                            bestMatch = newCard;
+                            bestMatchIndex = i;
+                            break;
+                        }
+                    }
+                }
+                
+                if (bestMatch) {
+                    // Card found in new deck - mark as matched
+                    currentDeckMatched[bestMatchIndex] = true;
+                } else {
+                    // Card not found in new deck = removed (will be displayed)
+                    allDisplayCards.push({
+                        name: oldCard.name,
+                        set: oldCard.set,
+                        number: oldCard.number,
+                        oldCount: oldCard.count,
+                        newCount: 0,
+                        changeType: 'removed'
+                    });
+                }
+            }
+            
+            // Add ALL current deck cards (matched or new)
+            for (let i = 0; i < currentDeck.length; i++) {
+                const newCard = currentDeck[i];
+                
+                // Find if this card existed in old deck
+                let oldCard = null;
+                for (const old of oldDeck) {
+                    if (old.set === newCard.set && old.number === newCard.number) {
+                        oldCard = old;
+                        break;
+                    }
+                    // Also check international prints
+                    if (!oldCard && old.set && old.number && newCard.set && newCard.number &&
+                        areSameInternationalPrint(old.set, old.number, newCard.set, newCard.number)) {
+                        oldCard = old;
+                        break;
+                    }
+                }
+                
+                if (oldCard) {
+                    // Card existed in old deck
+                    if (oldCard.count !== newCard.count) {
+                        // Count changed
+                        allDisplayCards.push({
+                            name: newCard.name,
+                            set: newCard.set,
+                            number: newCard.number,
+                            oldCount: oldCard.count,
+                            newCount: newCard.count,
+                            changeType: 'changed'
+                        });
+                    } else {
+                        // No change
+                        allDisplayCards.push({
+                            name: newCard.name,
+                            set: newCard.set,
+                            number: newCard.number,
+                            oldCount: oldCard.count,
+                            newCount: newCard.count,
+                            changeType: 'unchanged'
+                        });
+                    }
+                } else if (!currentDeckMatched[i]) {
+                    // New card (not matched by old deck)
+                    allDisplayCards.push({
+                        name: newCard.name,
+                        set: newCard.set,
+                        number: newCard.number,
+                        oldCount: 0,
+                        newCount: newCard.count,
+                        changeType: 'new'
+                    });
+                }
+            }
+            
+            // Sort by change type, then by card name
+            allDisplayCards.sort((a, b) => {
+                const typeOrder = { 'removed': 1, 'new': 2, 'changed': 3, 'unchanged': 4 };
+                if (typeOrder[a.changeType] !== typeOrder[b.changeType]) {
+                    return typeOrder[a.changeType] - typeOrder[b.changeType];
+                }
+                return a.name.localeCompare(b.name);
+            });
+            
+            // Display results
+            displayComparisonResults(allDisplayCards, oldDeckName);
+        }
+        
+        // Display comparison results
+        function displayComparisonResults(allDisplayCards, oldDeckName) {
+            const resultDiv = document.getElementById('deckCompareResult');
+            resultDiv.style.display = 'block';
+            
+            // Count statistics
+            const removed = allDisplayCards.filter(c => c.changeType === 'removed');
+            const added = allDisplayCards.filter(c => c.changeType === 'new');
+            const changed = allDisplayCards.filter(c => c.changeType === 'changed');
+            const unchanged = allDisplayCards.filter(c => c.changeType === 'unchanged');
+            
+            let html = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; color: white;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 1.3em;">📊 Comparison Results: ${oldDeckName} vs Current Deck</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold;">${removed.length}</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">❌ Removed</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold;">${added.length}</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">✅ Added</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold;">${changed.length}</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">🔄 Changed</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold;">${unchanged.length}</div>
+                            <div style="font-size: 0.9em; opacity: 0.9;">✓ Unchanged</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Display cards grouped by change type
+            const groups = [
+                { type: 'removed', title: '❌ Removed Cards', color: '#e74c3c', cards: removed },
+                { type: 'new', title: '✅ Added Cards', color: '#27ae60', cards: added },
+                { type: 'changed', title: '🔄 Changed Count', color: '#f39c12', cards: changed },
+                { type: 'unchanged', title: '✓ Unchanged Cards', color: '#95a5a6', cards: unchanged }
+            ];
+            
+            groups.forEach(group => {
+                if (group.cards.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="background: ${group.color}; color: white; padding: 10px 15px; border-radius: 6px; margin: 0 0 10px 0;">${group.title} (${group.cards.length})</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                    `;
+                    
+                    group.cards.forEach(card => {
+                        const countDisplay = group.type === 'removed' ? `${card.oldCount} → 0` :
+                                           group.type === 'new' ? `0 → ${card.newCount}` :
+                                           group.type === 'changed' ? `${card.oldCount} → ${card.newCount}` :
+                                           `${card.newCount}`;
+                        
+                        const cardData = cardsBySetNumberMap[`${card.set}-${card.number}`];
+                        const imageUrl = cardData ? cardData.image_url : '';
+                        
+                        html += `
+                            <div style="background: white; border: 2px solid ${group.color}; border-radius: 8px; padding: 10px; text-align: center;">
+                                ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; border-radius: 6px; margin-bottom: 8px;">` : ''}
+                                <div style="font-weight: 600; font-size: 0.9em; margin-bottom: 4px;">${card.name}</div>
+                                <div style="font-size: 0.8em; color: #666; margin-bottom: 4px;">${card.set} ${card.number}</div>
+                                <div style="font-size: 1.1em; font-weight: bold; color: ${group.color};">${countDisplay}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            resultDiv.innerHTML = html;
         }
         
         // Add ESC key handler for Deck Compare
@@ -11112,17 +11437,9 @@
             }
             console.log('[deckCompare] Current deck parsed:', currentDeck);
             
-            // Track which cards in current deck have been matched
-            const currentDeckMatched = new Array(currentDeck.length).fill(false);
-            
-            // Collect ALL cards to display (current deck + removed cards)
-            const allDisplayCards = [];
-            
-            // Process old deck cards to find matches and changes
-            for (const oldCard of oldDeck) {
-                // Try to find matching card in current deck
-                let bestMatch = null;
-                let bestMatchIndex = -1;
+            // Use common comparison logic
+            performDeckComparison(oldDeck, currentDeck, 'Manual Decklist');
+        }
                 
                 // First: Try exact match (same set + number)
                 for (let i = 0; i < currentDeck.length; i++) {

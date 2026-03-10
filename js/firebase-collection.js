@@ -302,73 +302,21 @@ async function deleteDeck(deckId) {
   }
 }
 
-// Load deck from profile to deck builder
-async function loadDeckFromProfile(deckId) {
+// Load deck from profile for comparison (removed old loadDeckFromProfile function)
+async function loadSavedDeckForComparison(deckId) {
   if (!window.userDecks) {
     showNotification('No decks loaded', 'error');
-    return;
+    return null;
   }
   
   const deck = window.userDecks.find(d => d.id === deckId);
   if (!deck) {
     showNotification('Deck not found', 'error');
-    return;
+    return null;
   }
   
-  // Ask user which tab to load into
-  const targetTab = prompt('Load into which tab?\n\n1 = City League Meta\n2 = Current Meta\n3 = Past Meta\n\nEnter 1, 2, or 3:', '1');
-  
-  if (!targetTab) return; // User cancelled
-  
-  let source;
-  if (targetTab === '1') {
-    source = 'cityLeague';
-  } else if (targetTab === '2') {
-    source = 'currentMeta';
-  } else if (targetTab === '3') {
-    source = 'pastMeta';
-  } else {
-    showNotification('Invalid tab selection', 'error');
-    return;
-  }
-  
-  // Load deck into selected tab
-  if (source === 'cityLeague') {
-    window.cityLeagueDeck = { ...deck.cards };
-    window.cityLeagueDeckOrder = Object.keys(deck.cards);
-    window.currentCityLeagueArchetype = deck.archetype;
-    if (typeof updateDeckDisplay === 'function') {
-      updateDeckDisplay('cityLeague');
-    }
-    // Switch to City League tab
-    if (typeof openTab === 'function') {
-      openTab('cityLeague');
-    }
-  } else if (source === 'currentMeta') {
-    window.currentMetaDeck = { ...deck.cards };
-    window.currentMetaDeckOrder = Object.keys(deck.cards);
-    window.currentCurrentMetaArchetype = deck.archetype;
-    if (typeof updateDeckDisplay === 'function') {
-      updateDeckDisplay('currentMeta');
-    }
-    // Switch to Current Meta tab
-    if (typeof openTab === 'function') {
-      openTab('currentMeta');
-    }
-  } else if (source === 'pastMeta') {
-    window.pastMetaDeck = { ...deck.cards };
-    window.pastMetaDeckOrder = Object.keys(deck.cards);
-    window.pastMetaCurrentArchetype = deck.archetype;
-    if (typeof updateDeckDisplay === 'function') {
-      updateDeckDisplay('pastMeta');
-    }
-    // Switch to Past Meta tab
-    if (typeof openTab === 'function') {
-      openTab('pastMeta');
-    }
-  }
-  
-  showNotification(`Deck "${deck.name}" loaded into ${source === 'cityLeague' ? 'City League' : source === 'currentMeta' ? 'Current Meta' : 'Past Meta'}!`, 'success');
+  // Return deck cards for comparison
+  return deck.cards || {};
 }
 
 // Get collection statistics
@@ -605,33 +553,83 @@ function updateDecksUI() {
     return;
   }
   
-  decksGrid.innerHTML = window.userDecks.map(deck => {
+  // Get all cards database for displaying cards
+  const allCards = window.allCardsDatabase || [];
+  
+  decksGrid.innerHTML = window.userDecks.map((deck, deckIndex) => {
     const totalCards = deck.totalCards || Object.values(deck.cards || {}).reduce((sum, count) => sum + count, 0);
     const uniqueCards = Object.keys(deck.cards || {}).length;
+    const deckId = `saved-deck-${deckIndex}`;
+    
+    // Build card grid HTML
+    let cardsHtml = '';
+    if (deck.cards && Object.keys(deck.cards).length > 0) {
+      Object.entries(deck.cards).forEach(([cardName, count]) => {
+        // Find card in database
+        const card = allCards.find(c => c.name === cardName);
+        if (card) {
+          const cardId = `${card.name}|${card.set}|${card.number}`;
+          const isOwned = window.userCollection && window.userCollection.has(cardId);
+          const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #27ae60; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 1;">✓</div>' : '';
+          const cardNameEscaped = cardName.replace(/'/g, "\\'");
+          
+          cardsHtml += `
+            <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              ${ownedBadge}
+              <img src="${card.image_url}" alt="${card.name}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${card.image_url}', '${card.name}')">
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 8px 5px 5px; display: flex; gap: 4px; align-items: center;">
+                <div style="flex: 1; color: white; font-weight: bold; font-size: 14px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">×${count}</div>
+                <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; width: 24px; height: 24px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center;" title="Switch rarity/print">★</button>
+              </div>
+            </div>
+          `;
+        }
+      });
+    }
     
     return `
-      <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;">
-        <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2em;">${deck.name}</h3>
-        <p style="color: #7f8c8d; margin: 5px 0; font-size: 0.9em;">
-          <strong>Archetype:</strong> ${deck.archetype || 'Custom'}
-        </p>
-        <p style="color: #34495e; margin: 10px 0; font-weight: 600;">
-          🎴 ${totalCards} Cards (${uniqueCards} Unique)
-        </p>
-        <p style="color: #95a5a6; margin: 5px 0; font-size: 0.85em;">
-          Saved: ${formatDate(deck.createdAt)}
-        </p>
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-          <button onclick="loadDeckFromProfile('${deck.id}')" style="flex: 1; padding: 10px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='#3498db'">
-            📥 Load
-          </button>
-          <button onclick="deleteDeck('${deck.id}')" style="flex: 1; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e74c3c'">
-            🗑️ Delete
-          </button>
+      <div style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 10px;">
+        <div onclick="toggleDeckCollapse('${deckId}')" style="padding: 15px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+          <div style="flex: 1;">
+            <h3 style="margin: 0 0 5px 0; font-size: 1.1em; font-weight: 600;">${deck.name}</h3>
+            <div style="font-size: 0.85em; opacity: 0.9;">
+              ${deck.archetype || 'Custom'} • ${totalCards} Cards (${uniqueCards} Unique)
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button onclick="event.stopPropagation(); deleteDeck('${deck.id}')" style="padding: 6px 12px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='rgba(231, 76, 60, 0.9)'" title="Delete deck">
+              🗑️
+            </button>
+            <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg);">▼</div>
+          </div>
+        </div>
+        <div id="${deckId}" style="display: none; padding: 15px; background: #f8f9fa;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;">
+            ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
+          </div>
+          <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px; font-size: 0.85em; color: #7f8c8d;">
+            Saved: ${formatDate(deck.createdAt)}
+          </div>
         </div>
       </div>
     `;
   }).join('');
+}
+
+// Toggle deck collapse
+function toggleDeckCollapse(deckId) {
+  const deckContent = document.getElementById(deckId);
+  const arrow = document.getElementById(`${deckId}-arrow`);
+  
+  if (deckContent && arrow) {
+    if (deckContent.style.display === 'none') {
+      deckContent.style.display = 'block';
+      arrow.style.transform = 'rotate(180deg)';
+    } else {
+      deckContent.style.display = 'none';
+      arrow.style.transform = 'rotate(0deg)';
+    }
+  }
 }
 
 // Format date helper

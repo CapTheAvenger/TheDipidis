@@ -356,7 +356,7 @@ const BASE_PATH = './data/';
         
         let proxyServerAvailable = null;  // null = not checked, true/false = checked
         const PROXY_URL = 'http://localhost:8001';
-        const livePriceCache = new Map();  // Cache f�r Live-Preise
+        const livePriceCache = new Map();  // Cache fuer Live-Preise
         
         async function checkProxyServer() {
             if (proxyServerAvailable !== null) {
@@ -1314,7 +1314,7 @@ const BASE_PATH = './data/';
                 
                 tableHTML += `</tbody></table>`;
             } else {
-                // Desktop: Kompakte Version mit �nderungen in Klammern
+                // Desktop: Kompakte Version mit Aenderungen in Klammern
                 tableHTML = `
                 <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                     <thead>
@@ -1461,7 +1461,7 @@ const BASE_PATH = './data/';
             if (!select) return;
             
             // Clear and repopulate
-            select.innerHTML = '<option value="">-- Bitte Deck ausw�hlen --</option>';
+            select.innerHTML = '<option value="">-- Bitte Deck auswählen --</option>';
             
             // Add top 10 meta decks
             if (top10.length > 0) {
@@ -1608,7 +1608,7 @@ const BASE_PATH = './data/';
             const monthMap = {
                 'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
                 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12',
-                'Januar': '01', 'Februar': '02', 'M�rz': '03', 'April': '04', 'Mai': '05', 'Juni': '06',
+                'Januar': '01', 'Februar': '02', 'Maerz': '03', 'April': '04', 'Mai': '05', 'Juni': '06',
                 'Juli': '07', 'August': '08', 'September': '09', 'Oktober': '10', 'November': '11', 'Dezember': '12'
             };
             
@@ -2144,11 +2144,11 @@ const BASE_PATH = './data/';
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${percentage}%</span>
                                   </div>
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">� in genutzten Decks:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø in genutzten Decks:</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${avgCountInUsedDecks}x</span>
                                 </div>
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">� durch alle Decks:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø durch alle Decks:</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${avgCountOverall}x</span>
                                 </div>
                                 <div>
@@ -2232,7 +2232,7 @@ const BASE_PATH = './data/';
             const gridContainer = document.getElementById('cityLeagueDeckGrid');
             if (!gridContainer) return;
             
-            // Use the same sorting logic as "Karten �bersicht (sortiert)"
+            // Use the same sorting logic as "Karten Uebersicht (sortiert)"
             const sortedCards = sortCardsByType([...cards]);
             
             // Get current deck to show deck counts
@@ -2373,7 +2373,7 @@ const BASE_PATH = './data/';
                         console.log(`[Price Lookup] ? No price found for ${cardName} (${setCode} ${setNumber})`);
                     }
                 }
-                const priceDisplay = eurPrice || '0,00�';
+                const priceDisplay = eurPrice || '0,00€';
                 const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                 const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                 
@@ -2406,14 +2406,14 @@ const BASE_PATH = './data/';
                                         ${setCode} ${setNumber}
                                     </div>
                                     <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">
-                                        ${percentage}% | � ${avgCountInUsedDecks}x (${avgCountOverall}x)
+                                        ${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)
                                     </div>
                                     <div style="font-weight: 600; color: #333; font-size: 0.58em;">
                                         ${decksWithCard}/${totalDecksInArchetype} (${percentage}%)
                                     </div>
                                 </div>
                                 
-                                <!-- Rarity Switcher & Actions (4 buttons: - ? � +) -->
+                                <!-- Rarity Switcher & Actions (4 buttons: - ? Ø +) -->
                                 <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">
                                     <button onclick="event.stopPropagation(); removeCardFromDeck('cityLeague', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Remove from deck">-</button>
                                     <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">?</button>
@@ -2617,7 +2617,7 @@ const BASE_PATH = './data/';
             
             // If no deck AND no archetype cards, show error
             if (!hasDeck && allCards.length === 0) {
-                alert('? Keine Karten zum Kopieren!\n\nBitte w�hle zuerst einen Archetyp aus.');
+                alert('? Keine Karten zum Kopieren!\n\nBitte wähle zuerst einen Archetyp aus.');
                 return;
             }
             
@@ -2774,7 +2774,7 @@ const BASE_PATH = './data/';
             let output = '';
             
             if (pokemon.length > 0) {
-                output += `Pok�mon: ${pokemonCount}\n`;
+                output += `Pokémon: ${pokemonCount}\n`;
                 output += pokemon.join('\n') + '\n\n';
             }
             
@@ -2806,11 +2806,11 @@ const BASE_PATH = './data/';
             }
             if (!data || data.length === 0) {
                 console.warn('No data to render');
-                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #444; font-weight: 500;">Bitte w�hle ein Deck aus...</p>';
+                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #444; font-weight: 500;">Bitte wähle ein Deck aus...</p>';
                 return;
             }
 
-            // Use the same sorting logic as "Karten �bersicht (sortiert)"
+            // Use the same sorting logic as "Karten Uebersicht (sortiert)"
             const sortedData = sortCardsByType([...data]);
             
             let html = '<table><thead><tr>';
@@ -3681,7 +3681,7 @@ const BASE_PATH = './data/';
                         cardmarketUrl = priceCard.cardmarket_url || '';
                     }
                 }
-                const priceDisplay = eurPrice || '0,00�';
+                const priceDisplay = eurPrice || '0,00€';
                 const priceClass = eurPrice ? 'btn-cardmarket' : 'btn-cardmarket no-price';
                 const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                 const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
@@ -3706,13 +3706,13 @@ const BASE_PATH = './data/';
                         <div class="card-max-count">${count}</div>
                         
                         <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: white; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap; z-index: 2;">
-                            ${percentage}% | � ${avgCount}x
+                            ${percentage}% | Ø ${avgCount}x
                         </div>
                         
                         <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 3px; z-index: 3; align-items: stretch;">
                             <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">-</button>
                             <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center;">?</button>
-                            <button class="${priceClass}" onclick="openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 20px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" title="${eurPrice ? 'Auf Cardmarket kaufen: ' + eurPrice : 'Preis nicht verf�gbar'}">${priceDisplay}</button>
+                            <button class="${priceClass}" onclick="openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 20px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" title="${eurPrice ? 'Auf Cardmarket kaufen: ' + eurPrice : 'Preis nicht verfuegbar'}">${priceDisplay}</button>
                             <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">+</button>
                         </div>
                     </div>
@@ -3994,7 +3994,7 @@ const BASE_PATH = './data/';
         
         function deduplicateCards(cards) {
             /**
-             * F�r jede Karte (gleicher Name) nur die neueste low-rarity Version behalten
+             * Fuer jede Karte (gleicher Name) nur die neueste low-rarity Version behalten
              */
             const setOrder = {
                 // 2026 Sets (newest first, based on pokemon_sets_mapping.csv)
@@ -4043,14 +4043,14 @@ const BASE_PATH = './data/';
                     // Bevorzuge: 1. Low Rarity (Common/Uncommon), 2. Neuestes Set
                     if (newRarityPriority < existingRarityPriority) {
                         // Niedrigere Rarity gewinnt - aber behalte aggregierte Daten
-                        // Nur �berschreiben wenn neue Werte nicht leer sind
+                        // Nur ueberschreiben wenn neue Werte nicht leer sind
                         if (card.image_url) existing.image_url = card.image_url;
                         if (card.set_code) existing.set_code = card.set_code;
                         if (card.rarity) existing.rarity = card.rarity;
                         if (card.set_number) existing.set_number = card.set_number;
                     } else if (newRarityPriority === existingRarityPriority && newSetPriority > existingSetPriority) {
                         // Gleiche Rarity, aber neueres Set - behalte aggregierte Daten
-                        // Nur �berschreiben wenn neue Werte nicht leer sind
+                        // Nur ueberschreiben wenn neue Werte nicht leer sind
                         if (card.image_url) existing.image_url = card.image_url;
                         if (card.set_code) existing.set_code = card.set_code;
                         if (card.rarity) existing.rarity = card.rarity;
@@ -4107,7 +4107,7 @@ const BASE_PATH = './data/';
             
             const gridHtml = sortedCards.map(card => {
                 const imageUrl = fixJapaneseCardImageUrl(card.image_url || '', card.set_code, card.card_name, card.set_number);
-                // Konvertiere Komma zu Punkt f�r parseFloat (CSV verwendet Komma als Dezimaltrennzeichen)
+                // Konvertiere Komma zu Punkt fuer parseFloat (CSV verwendet Komma als Dezimaltrennzeichen)
                 const percentageStr = (card.percentage_in_archetype || '0').toString().replace(',', '.');
                 let percentage = parseFloat(percentageStr);
                 const maxCount = parseInt(card.max_count) || card.max_count || '-';
@@ -4169,7 +4169,7 @@ const BASE_PATH = './data/';
                                     ${card.set_code || ''} ${card.set_number || ''}
                                 </div>
                                 <div style="color: #333; font-size: 0.85em; font-weight: 600;">
-                                    ${percentage.toFixed(2).replace('.', ',')}% | � ${avgCount}x
+                                    ${percentage.toFixed(2).replace('.', ',')}% | Ø ${avgCount}x
                                 </div>
                             </div>
                             
@@ -4425,7 +4425,7 @@ const BASE_PATH = './data/';
             }
             let currentTotal = 0; // Start from 0 since we just cleared the deck
             
-            // Basis Energien Identifikation - d�rfen �fter als 4x sein
+            // Basis Energien Identifikation - duerfen oefter als 4x sein
             const isBaseEnergy = (card) => {
                 const type = (card.type || card.card_type || '').toLowerCase();
                 return type === 'energy' && (card.card_name || '').match(/^(Fire|Water|Grass|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon|Colorless|Neutral)\s+Energy$/i);
@@ -4578,7 +4578,7 @@ const BASE_PATH = './data/';
                 else trainer.push(line);
             });
             
-            if (pokemon.length > 0) summary += `Pok�mon:\n${pokemon.join('\n')}\n\n`;
+            if (pokemon.length > 0) summary += `Pokémon:\n${pokemon.join('\n')}\n\n`;
             if (trainer.length > 0) summary += `Trainer:\n${trainer.join('\n')}\n\n`;
             if (energy.length > 0) summary += `Energy:\n${energy.join('\n')}`;
             
@@ -4626,9 +4626,9 @@ const BASE_PATH = './data/';
         /**
          * Auto-Complete with Max Consistency Algorithm
          * Based on Justin Basil's Professional Deck Building Guide:
-         * - Deck Skeleton: 20 Pok�mon, 30 Trainer, 10 Energy (�3 deviation normal)
+         * - Deck Skeleton: 20 Pokemon, 30 Trainer, 10 Energy (+-3 deviation normal)
          * - Opening Hand Probabilities: 4x = 40%, 3x = 32%, 2x = 22%, 1x = 12%
-         * - Consistency Score = (Share %) � (Avg Count) � (Reliability Factor) � (Meta Relevance Factor)
+         * - Consistency Score = (Share %) * (Avg Count) * (Reliability Factor) * (Meta Relevance Factor)
          * - Meta Relevance: Cards with high meta-share are prioritized (tech cards against meta)
          * - Smart Copy Counts based on usage patterns and probability math
          */
@@ -4748,7 +4748,7 @@ const BASE_PATH = './data/';
             console.log('[autoCompleteConsistency] After aggregation:', deckCards.length, 'unique cards');
             
             // Step 2: Calculate CONSISTENCY SCORE for each card
-            // Formula: (Share % / 100) � Avg Count � Reliability Factor � Meta Relevance Factor � 100
+            // Formula: (Share % / 100) * Avg Count * Reliability Factor * Meta Relevance Factor * 100
             deckCards.forEach(card => {
                 const sharePercent = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
                 const totalCount = parseFloat(card.total_count) || 1;
@@ -5260,9 +5260,9 @@ const BASE_PATH = './data/';
             
             summary += `???????????????????????????\n`;
             summary += `? NEW: Evolution Line Optimization\n`;
-            summary += `� Archetype Data: 75% Weight (Core Identity)\n`;
-            summary += `� Meta Data: 25% Weight (Tech Choices)\n`;
-            summary += `� Optimal Ratios: 3x Stage 2 = 3-4x Basic\n\n`;
+            summary += `* Archetype Data: 75% Weight (Core Identity)\n`;
+            summary += `* Meta Data: 25% Weight (Tech Choices)\n`;
+            summary += `* Optimal Ratios: 3x Stage 2 = 3-4x Basic\n\n`;
             summary += `Continue?`;
             
             if (confirm(summary)) {
@@ -5432,7 +5432,7 @@ const BASE_PATH = './data/';
                         // Average percentage across all tournament dates
                         const avgPercentage = archData.percentages.reduce((sum, p) => sum + p, 0) / archData.percentages.length;
                         
-                        // Estimated decks with this card = avgPercentage � total archetype deck count
+                        // Estimated decks with this card = avgPercentage * total archetype deck count
                         const estimatedDecks = (avgPercentage / 100) * archData.deckCount;
                         
                         // Calculate average copies per deck when used (total_count / deck_count per date, then average)
@@ -5608,7 +5608,7 @@ const BASE_PATH = './data/';
                             <div class="card-info-bottom" style="padding: 6px; background: white; font-size: 0.75em; text-align: center;">
                                 <div class="card-info-text" style="margin-bottom: 6px;">
                                     <div style="font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${card.card_name}</div>
-                                    <div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% | � ${card.avgCount.toFixed(2)}x</div>
+                                    <div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% | Ø ${card.avgCount.toFixed(2)}x</div>
                                     <div style="color: #555; font-size: 0.9em; font-weight: 500;">(${card.avgCountWhenUsed.toFixed(2)}x when used)</div>
                                 </div>
                                 
@@ -5849,7 +5849,7 @@ const BASE_PATH = './data/';
             let html = '<div style="grid-column: 1 / -1; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px;">';
             html += `<div style="display: flex; justify-content: space-between; align-items: center;">`;
             html += `<div style="font-weight: bold; color: #333;">?? ${cardName}</div>`;
-            html += `<button onclick="window.selectedCardName=null; searchDeckCards('${source}');" style="background: #6c757d; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.85em;">? Zur�ck</button>`;
+            html += `<button onclick="window.selectedCardName=null; searchDeckCards('${source}');" style="background: #6c757d; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.85em;">? Zurück</button>`;
             html += '</div>';
             html += `<div style="font-size: 0.85em; color: #333; margin-top: 8px; font-weight: 600;">${versions.length} Versionen | ${totalCount}x im Deck</div>`;
             html += '</div>';
@@ -5880,7 +5880,7 @@ const BASE_PATH = './data/';
                             </div>
                         </div>
                         ${versionCount > 0 ? `<div style="position: absolute; top: 4px; left: 4px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75em; font-weight: bold; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${versionCount}</div>` : ''}
-                        <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="position: absolute; top: 4px; right: 4px; background: #28a745; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 10; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='#218838';" onmouseout="this.style.transform='scale(1)'; this.style.background='#28a745';" title="Zum Deck hinzuf�gen">+</button>
+                        <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="position: absolute; top: 4px; right: 4px; background: #28a745; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 10; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='#218838';" onmouseout="this.style.transform='scale(1)'; this.style.background='#28a745';" title="Zum Deck hinzufügen">+</button>
                         <div style="padding: 8px; background: white; border-top: 1px solid #f0f0f0;">
                             <div style="font-size: 0.7em; color: #333; font-weight: 600;">${setCode} ${setNumber}</div>
                         </div>
@@ -6319,11 +6319,11 @@ const BASE_PATH = './data/';
                             const statsHtml = `
                                 <p style="font-size: 0.85em; color: #555; margin: 15px 0 5px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-weight: 500;">
                                     <strong style="color: #3498db;">?? Online Meta:</strong><br>
-                                    <span style="font-size: 0.95em;">${metaStats.tournaments.toLocaleString()} tournaments � ${metaStats.players.toLocaleString()} players � ${metaStats.matches.toLocaleString()} matches</span>
+                                    <span style="font-size: 0.95em;">${metaStats.tournaments.toLocaleString()} tournaments · ${metaStats.players.toLocaleString()} players · ${metaStats.matches.toLocaleString()} matches</span>
                                 </p>
                                 <p style="font-size: 0.85em; color: #555; margin: 5px 0 0 0; font-weight: 500;">
                                     <strong style="color: #27ae60;">?? Major Tournaments:</strong><br>
-                                    <span style="font-size: 0.95em;">${majorTournaments} tournaments � ${totalPlayers.toLocaleString()} players</span>
+                                    <span style="font-size: 0.95em;">${majorTournaments} tournaments · ${totalPlayers.toLocaleString()} players</span>
                                 </p>
                             `;
                             existingP.insertAdjacentHTML('afterend', statsHtml);
@@ -6599,8 +6599,8 @@ const BASE_PATH = './data/';
             // Rebuild tournament filter dropdown
             tournamentSelect.innerHTML = '<option value="all">-- Alle Turniere --</option>';
             tournaments.forEach(tournament => {
-                // Clean tournament name: remove " � Limitless" / " - Limitless"
-                let cleanName = tournament.tournament_name.replace(/\s*[�-]\s*Limitless\s*$/i, '');
+                // Clean tournament name: remove " - Limitless"
+                let cleanName = tournament.tournament_name.replace(/\s*[-|•]\s*Limitless\s*$/i, '');
                 tournamentSelect.innerHTML += `<option value="${tournament.tournament_id}">${cleanName}</option>`;
             });
             
@@ -6644,7 +6644,7 @@ const BASE_PATH = './data/';
             
             // Populate deck select dropdown
             const deckSelect = document.getElementById('pastMetaDeckSelect');
-            deckSelect.innerHTML = '<option value="">-- Bitte Deck ausw�hlen --</option>';
+            deckSelect.innerHTML = '<option value="">-- Bitte Deck auswählen --</option>';
             
             archetypes.forEach(entry => {
                 const tournamentCount = entry.tournaments.length;
@@ -6695,7 +6695,7 @@ const BASE_PATH = './data/';
                 totalDecklists += (deck.decklist_count || 0);
                 
                 // Track tournament names for stats display
-                const cleanTournamentName = (deck.tournament_name || '').replace(/\s*[�-]\s*Limitless\s*$/i, '');
+                const cleanTournamentName = (deck.tournament_name || '').replace(/\s*[-|•]\s*Limitless\s*$/i, '');
                 if (!tournamentNames.includes(cleanTournamentName)) {
                     tournamentNames.push(cleanTournamentName);
                 }
@@ -7004,7 +7004,7 @@ const BASE_PATH = './data/';
                             cardmarketUrl = priceCard.cardmarket_url || '';
                         }
                     }
-                    const priceDisplay = eurPrice || '0,00�';
+                    const priceDisplay = eurPrice || '0,00€';
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                     const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                     
@@ -7034,14 +7034,14 @@ const BASE_PATH = './data/';
                                             ${setCode} ${setNumber}
                                         </div>
                                         <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">
-                                            ${percentage}% | � ${avgInUsingDecks}x (${avgCount.toFixed(2)}x)
+                                            ${percentage}% | Ø ${avgInUsingDecks}x (${avgCount.toFixed(2)}x)
                                         </div>
                                         <div style="font-weight: 600; color: #333; font-size: 0.58em;">
                                             ${deckCount} / ${decklistCount} Decks
                                         </div>
                                     </div>
                                     
-                                    <!-- Action buttons (4 buttons: - ? � +) -->
+                                    <!-- Action buttons (4 buttons: - ? Ø +) -->
                                     <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">
                                         <button onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Remove from deck">-</button>
                                         <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">?</button>
@@ -7243,7 +7243,7 @@ const BASE_PATH = './data/';
         
         async function loadCards() {
             const content = document.getElementById('cardsContent');
-            content.innerHTML = '<div class="loading">L�dt Kartendatenbank...</div>';
+            content.innerHTML = '<div class="loading">Lädt Kartendatenbank...</div>';
             
             try {
                 // Ensure set mapping is loaded (for English sets)
@@ -7362,7 +7362,7 @@ const BASE_PATH = './data/';
             // 2026 Sets
             'M3': '2026-03-01',
             'ASC': '2026-02-21',
-            'PFL': '2026-01-24',  // Pok� Pad is in this set
+            'PFL': '2026-01-24',  // Pok Pad is in this set
             'MEG': '2025-12-20',
             'MEE': '2025-12-20',
             'MEP': '2025-12-01',
@@ -7861,7 +7861,7 @@ const BASE_PATH = './data/';
             // Add separator before metas
             const separator = document.createElement('div');
             separator.style.cssText = 'border-top: 2px solid #ddd; margin: 10px 0; padding-top: 10px;';
-            separator.innerHTML = '<strong style="display: block; padding: 6px; color: #555;">?? Meta-Zeitr�ume:</strong>';
+            separator.innerHTML = '<strong style="display: block; padding: 6px; color: #555;">?? Meta-Zeiträume:</strong>';
             container.appendChild(separator);
             
             sortedMetas.forEach(meta => {
@@ -7985,7 +7985,7 @@ const BASE_PATH = './data/';
                         <img src="${card.image_url}" alt="${card.name}" loading="lazy">
                         <div class="cards-autocomplete-item-info">
                             <div class="cards-autocomplete-item-name">${card.name}</div>
-                            <div class="cards-autocomplete-item-meta">${card.set} ${card.number} � ${card.type || 'Unknown'}</div>
+                            <div class="cards-autocomplete-item-meta">${card.set} ${card.number} · ${card.type || 'Unknown'}</div>
                         </div>
                         <div class="cards-autocomplete-count">${versions} version${versions > 1 ? 's' : ''}</div>
                     </div>
@@ -8102,7 +8102,7 @@ const BASE_PATH = './data/';
                 }
                 
                 // Meta/Format filter (Total, All Playables, City League)
-                // NOTE: Meta-Zeitr�ume (meta:XXX) are handled later in "Meta Filter" section
+                // NOTE: Meta-Zeiträume (meta:XXX) are handled later in "Meta Filter" section
                 const basicMetaFilters = selectedMetas.filter(m => !m.startsWith('meta:'));
                 if (basicMetaFilters.length > 0) {
                     let metaMatch = false;
@@ -8802,7 +8802,7 @@ const BASE_PATH = './data/';
             
             // Previous button
             const prevBtn = document.createElement('button');
-            prevBtn.textContent = '? Zur�ck';
+            prevBtn.textContent = '? Zurück';
             prevBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; font-weight: 600;';
             prevBtn.disabled = currentCardsPage === 1 || showAllCards;
             if (prevBtn.disabled) {
@@ -8899,7 +8899,7 @@ const BASE_PATH = './data/';
             
             const toggleShowAllBtn = document.createElement('button');
             toggleShowAllBtn.textContent = showAllCards ? '?? Seitenweise' : '?? Alle anzeigen';
-            toggleShowAllBtn.title = showAllCards ? 'Zur�ck zur Seitenansicht' : 'Alle Karten auf einmal anzeigen';
+            toggleShowAllBtn.title = showAllCards ? 'Zurück zur Seitenansicht' : 'Alle Karten auf einmal anzeigen';
             toggleShowAllBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #9b59b6; background: white; color: #9b59b6; border-radius: 8px; cursor: pointer; font-weight: 600;';
             toggleShowAllBtn.onclick = () => {
                 showAllCards = !showAllCards;
@@ -8952,7 +8952,7 @@ const BASE_PATH = './data/';
                 const price = parseFloat(card.eur_price.replace(',', '.'));
                 if (!isNaN(price)) {
                     priceButton = `<a href="${displayCardMarketUrl}" target="_blank" class="card-database-price-btn" style="display: block; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; text-decoration: none; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View on CardMarket">
-                        ?? ${price.toFixed(2).replace('.', ',')} �
+                        Ø ${price.toFixed(2).replace('.', ',')} €
                     </a>`;
                 }
             }
@@ -8989,9 +8989,9 @@ const BASE_PATH = './data/';
                 }
                 
                 // Format the display with max count
-                const maxCountText = maxCount > 0 ? ` � Max: ${maxCount}x` : '';
+                const maxCountText = maxCount > 0 ? ` · Max: ${maxCount}x` : '';
                 
-                coverageDisplay = `<div class="card-database-coverage" style="margin-top: 8px; padding: 8px; background: ${coverageColor}; color: white; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px;" title="${deckCount} Decks / ${archetypeCount} Archetypes${maxCount > 0 ? ' � Max: ' + maxCount + 'x copies per deck' : ''}">
+                coverageDisplay = `<div class="card-database-coverage" style="margin-top: 8px; padding: 8px; background: ${coverageColor}; color: white; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px;" title="${deckCount} Decks / ${archetypeCount} Archetypes${maxCount > 0 ? ' · Max: ' + maxCount + 'x copies per deck' : ''}">
                     ${coverageIcon} ${percentage.toFixed(1)}% Coverage${maxCountText}
                 </div>`;
             }
@@ -9299,7 +9299,7 @@ const BASE_PATH = './data/';
             }
             
             // Enhanced debug logging with temporal filtering info
-            if (cardNameLower.includes('dragapult') || cardNameLower.includes('pok� pad') || cardNameLower.includes('poke pad')) {
+            if (cardNameLower.includes('dragapult') || cardNameLower.includes('poke pad') || cardNameLower.includes('poke pad')) {
                 let debugMsg = `[Coverage Debug] ${cardName}: ${decksWithCard}/${totalFilteredDecks} decks = ${percentage.toFixed(1)}% | Archetypes: ${matchingArchetypes.size}/${filteredArchetypeKeys.length}`;
                 
                 if (cardReleaseDate) {
@@ -9450,7 +9450,7 @@ const BASE_PATH = './data/';
                     versions = currentCard ? [currentCard] : [];
                     console.warn(`[Pokemon Card] No international_prints data available, showing only current version`);
                     if (versions.length === 1 && currentCard) {
-                        alert(`?? International Print Daten f�r diese Karte noch nicht verf�gbar.\n\nBitte All Cards Scraper neu laufen lassen mit international_prints Support.`);
+                        alert(`?? International Print Daten fuer diese Karte noch nicht verfuegbar.\n\nBitte All Cards Scraper neu laufen lassen mit international_prints Support.`);
                     }
                 }
             } else {
@@ -9501,7 +9501,7 @@ const BASE_PATH = './data/';
             }
             
             if (versions.length === 0) {
-                alert(`Keine vollst�ndigen Versionen f�r "${actualCardName}" gefunden.\n\nM�gliche Gr�nde:\n- Karte nicht vollst�ndig in Datenbank (fehlt Rarity/Image URL/Int. Prints)\n- All Cards Scraper muss noch Daten erg�nzen\n- Nur japanische Sets verf�gbar\n\nGesuchter Name: "${actualCardName}"\n\nTipp: Warte bis All Cards Scraper fertig ist.`);
+                alert(`Keine vollstaendigen Versionen fuer "${actualCardName}" gefunden.\n\nMoegliche Gruende:\n- Karte nicht vollstaendig in Datenbank (fehlt Rarity/Image URL/Int. Prints)\n- All Cards Scraper muss noch Daten ergaenzen\n- Nur japanische Sets verfuegbar\n\nGesuchter Name: "${actualCardName}"\n\nTipp: Warte bis All Cards Scraper fertig ist.`);
                 console.error(`[openRaritySwitcher] No complete versions found for "${actualCardName}".`);
                 return;
             }
@@ -9648,7 +9648,7 @@ const BASE_PATH = './data/';
 
         function openCardmarket(cardmarketUrl, cardName) {
             if (!cardmarketUrl || cardmarketUrl.trim() === '') {
-                alert(`? Cardmarket Link nicht verf�gbar f�r ${cardName}\n\nM�gliche Gr�nde:\n- Price Scraper noch nicht gelaufen\n- Karte hat keine Cardmarket Daten\n\nBitte RUN_PRICE_SCRAPER.bat ausf�hren.`);
+                alert(`? Cardmarket Link nicht verfuegbar fuer ${cardName}\n\nMoegliche Gruende:\n- Price Scraper noch nicht gelaufen\n- Karte hat keine Cardmarket Daten\n\nBitte RUN_PRICE_SCRAPER.bat ausfuehren.`);
                 return;
             }
             
@@ -9842,7 +9842,7 @@ const BASE_PATH = './data/';
             const select = document.getElementById('currentMetaDeckSelect');
             if (!select) return;
             
-            select.innerHTML = '<option value="">-- Bitte Deck ausw�hlen --</option>';
+            select.innerHTML = '<option value="">-- Bitte Deck auswählen --</option>';
             
             if (top10.length > 0) {
                 const optgroup = document.createElement('optgroup');
@@ -9994,7 +9994,7 @@ const BASE_PATH = './data/';
             }
             
             if (deckCards.length === 0) {
-                alert(`Keine Daten f�r ${archetype} mit Filter "${currentMetaFormatFilter}" gefunden!`);
+                alert(`Keine Daten fuer ${archetype} mit Filter "${currentMetaFormatFilter}" gefunden!`);
                 clearCurrentMetaDeckView();
                 return;
             }
@@ -10178,9 +10178,9 @@ const BASE_PATH = './data/';
                 bestRows.forEach(row => {
                     bestHtml += row.outerHTML;
                 });
-                bestTable.innerHTML = bestHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verf�gbar</td></tr>';
+                bestTable.innerHTML = bestHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfuegbar</td></tr>';
             } else {
-                bestTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verf�gbar</td></tr>';
+                bestTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfuegbar</td></tr>';
             }
             
             if (worstTbody) {
@@ -10190,9 +10190,9 @@ const BASE_PATH = './data/';
                 worstRows.forEach(row => {
                     worstHtml += row.outerHTML;
                 });
-                worstTable.innerHTML = worstHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verf�gbar</td></tr>';
+                worstTable.innerHTML = worstHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfuegbar</td></tr>';
             } else {
-                worstTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verf�gbar</td></tr>';
+                worstTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfuegbar</td></tr>';
             }
             
             // Populate opponent dropdown from window.matchupData (for search feature)
@@ -10218,7 +10218,7 @@ const BASE_PATH = './data/';
                     total_games: data.total_games
                 }));
             } else {
-                dropdown.innerHTML = '<div style="padding: 10px; color: #444; font-weight: 500;">Keine Opponents verf�gbar</div>';
+                dropdown.innerHTML = '<div style="padding: 10px; color: #444; font-weight: 500;">Keine Opponents verfuegbar</div>';
                 window.currentMetaDeckMatchups = [];
             }
             
@@ -10399,8 +10399,8 @@ const BASE_PATH = './data/';
                         return 'Item';
                     }
                     
-                    // Pok�mon types (any type starting with element: G Basic, R Stage 1, W Stage 2, etc.)
-                    return 'Pok�mon';
+                    // Pokemon types (any type starting with element: G Basic, R Stage 1, W Stage 2, etc.)
+                    return 'Pokemon';
                 }
             }
             
@@ -10414,7 +10414,7 @@ const BASE_PATH = './data/';
             // 2. Check for Ace Spec (special items - highest priority)
             if (isAceSpec(name)) return 'Ace Spec';
             
-            // 3. Check for Tools (Pok�mon Tools attached to Pok�mon)
+            // 3. Check for Tools (Pokemon Tools attached to Pokemon)
             if (['Balloon', 'Belt', 'Cape', 'Charm', 'Band', 'Guard', 'Helmet', 
                  'Glasses', 'Shard', 'Stone'].some(t => name.includes(t))) {
                 return 'Tool';
@@ -10441,13 +10441,13 @@ const BASE_PATH = './data/';
                 return 'Item';
             }
             
-            // 7. Check for Pok�mon with ex/GX/V suffix
+            // 7. Check for Pokemon with ex/GX/V suffix
             if (/\s(ex|GX|V|VMAX|VSTAR|BREAK)$/i.test(name)) {
-                return 'Pok�mon';
+                return 'Pokemon';
             }
             
-            // 8. Default: assume Pok�mon
-            return 'Pok�mon';
+            // 8. Default: assume Pokemon
+            return 'Pokemon';
         }
         
         // Render grid view
@@ -10562,7 +10562,7 @@ const BASE_PATH = './data/';
                             cardmarketUrl = priceCard.cardmarket_url || '';
                         }
                     }
-                    const priceDisplay = eurPrice || '0,00�';
+                    const priceDisplay = eurPrice || '0,00€';
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                     const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
                     
@@ -10581,9 +10581,9 @@ const BASE_PATH = './data/';
                                     <div class="card-info-text">
                                         <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">${cardName}</div>
                                         <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">${setCode} ${setNumber}</div>
-                                        <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">${percentage}% | � ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
+                                        <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
                                     </div>
-                                    <!-- Rarity Switcher & Actions (4 buttons: - ? � +) -->
+                                    <!-- Rarity Switcher & Actions (4 buttons: - ? Ø +) -->
                                     <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">
                                         <button onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">-</button>
                                         <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;">?</button>
@@ -10686,8 +10686,8 @@ const BASE_PATH = './data/';
                             <div style="color: #333; font-size: 0.9em; margin-bottom: 10px; font-weight: 600;">${setCode} ${setNumber}</div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
                                 <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Nutzungs Share:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${percentage}%</span></div>
-                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">� in genutzten Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountInUsedDecks}x</span></div>
-                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">� durch alle Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountOverall}x</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø in genutzten Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountInUsedDecks}x</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø durch alle Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountOverall}x</span></div>
                                 <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Deck Count:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${decksWithCard} / ${totalDecksInArchetype} Decks</span></div>
                                 <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Max Count:</span> <span style="font-weight: 600; color: #dc3545; margin-left: 5px;">${maxCount}</span></div>
                             </div>
@@ -10783,7 +10783,7 @@ const BASE_PATH = './data/';
             const allCardsFromDb = window.allCardsDatabase || [];
             
             if (!hasDeck && allCards.length === 0) {
-                alert('? Keine Karten zum Kopieren!\n\nBitte w�hle zuerst einen Archetyp aus.');
+                alert('? Keine Karten zum Kopieren!\n\nBitte wähle zuerst einen Archetyp aus.');
                 return;
             }
             
@@ -10911,7 +10911,7 @@ const BASE_PATH = './data/';
             });
             
             let output = '';
-            if (pokemon.length > 0) output += `Pok�mon: ${pokemonCount}\n` + pokemon.join('\n') + '\n\n';
+            if (pokemon.length > 0) output += `Pokémon: ${pokemonCount}\n` + pokemon.join('\n') + '\n\n';
             if (trainer.length > 0) output += `Trainer: ${trainerCount}\n` + trainer.join('\n') + '\n\n';
             if (energy.length > 0) output += `Energy: ${energyCount}\n` + energy.join('\n');
             
@@ -10994,12 +10994,12 @@ const BASE_PATH = './data/';
             const selectedDeckId = savedDeckSelect.value;
             
             if (!selectedDeckId) {
-                alert('?? Bitte w�hle ein gespeichertes Deck aus!');
+                alert('?? Bitte wähle ein gespeichertes Deck aus!');
                 return;
             }
             
             if (!currentDeckSource) {
-                alert('?? Fehler: Keine Deck-Quelle ausgew�hlt!');
+                alert('?? Fehler: Keine Deck-Quelle ausgewaehlt!');
                 return;
             }
             
@@ -11312,7 +11312,7 @@ const BASE_PATH = './data/';
             for (let line of lines) {
                 line = line.trim();
                 if (!line) continue;
-                if (line.includes('Pok�mon:') || line.includes('Trainer:') || line.includes('Energy:')) continue;
+                if (line.includes('Pokémon:') || line.includes('Trainer:') || line.includes('Energy:')) continue;
                 
                 // Format: "2 Lunatone ASC 105" or "2 Lunatone ASC 105 PH" or "1 Meowth ex M3 61"
                 // Extract: count, card name, set code (including Japanese sets like M3, M2a), set number
@@ -11386,12 +11386,12 @@ const BASE_PATH = './data/';
             const oldDeckText = document.getElementById('oldDeckListInput').value.trim();
             
             if (!oldDeckText) {
-                alert('?? Bitte f�ge eine alte Deckliste ein!');
+                alert('?? Bitte fuege eine alte Deckliste ein!');
                 return;
             }
             
             if (!currentDeckSource) {
-                alert('?? Fehler: Keine Deck-Quelle ausgew�hlt!');
+                alert('?? Fehler: Keine Deck-Quelle ausgewaehlt!');
                 return;
             }
             

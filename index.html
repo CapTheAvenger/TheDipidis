@@ -939,10 +939,82 @@
                                         <li>🖼️ <strong>View Mode:</strong> Grid view with card images</li>
                                     </ul>
                                 </div>
+                                
+                                <!-- Profile Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #3498db;">
+                                    <h3 style="color: #3498db; margin-top: 0;">👤 Profile</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Manage your personal Pokemon TCG collection and decks</p>
+                                    <p style="line-height: 1.7;"><strong>Sub-tabs:</strong> My Collection, My Decks, Wishlist, Settings</p>
+                                </div>
+                                
+                                <!-- How to Use Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #2ecc71;">
+                                    <h3 style="color: #2ecc71; margin-top: 0;">📖 How to Use</h3>
+                                    <p style="line-height: 1.7;"><strong>This guide!</strong> Complete documentation for all features</p>
+                                </div>
                             </div>
-                        </secMeta Card Analysis Guide -->
+                        </section>
+                        
+                        <!-- My Collection & Wishlist Guide -->
                         <section style="margin-bottom: 40px;">
-                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🌍 Meta Card Analysis</h2>
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">💾 My Collection & Wishlist</h2>
+                            <p style="line-height: 1.8; font-size: 1.05em;">
+                                Keep track of cards you own and want to buy. Both sections include powerful search filters to find exactly what you're looking for.
+                            </p>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 5px; line-height: 1.8;">
+                                <p><strong>🔍 Search Features:</strong></p>
+                                <ul>
+                                    <li>Search by <strong>card name</strong> (e.g., "Pikachu", "Charizard")</li>
+                                    <li>Search by <strong>set code</strong> (e.g., "ASC", "MEG", "SVE")</li>
+                                    <li>Search by <strong>card number</strong> (e.g., "001", "50", "200")</li>
+                                    <li>Real-time filtering as you type</li>
+                                    <li>Result counter shows "X of Y cards"</li>
+                                </ul>
+                                <p><strong>💰 Collection & Wishlist Features:</strong></p>
+                                <ul>
+                                    <li>View <strong>card prices</strong> from Cardmarket</li>
+                                    <li>Click cards to view full image in lightbox</li>
+                                    <li>Red × button to remove cards</li>
+                                    <li>Set name and number displayed under each card</li>
+                                </ul>
+                            </div>
+                        </section>
+                        
+                        <!-- My Decks Guide -->
+                        <section style="margin-bottom: 40px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🎮 My Decks</h2>
+                            <p style="line-height: 1.8; font-size: 1.05em;">
+                                Save decks you build in the Deck Builder from any analysis tab. Access them from your profile and manage them easily.
+                            </p>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 5px; line-height: 1.8;">
+                                <p><strong>💾 Saving Decks:</strong></p>
+                                <ul>
+                                    <li>Click "💾 Save to My Decks" in Deck Builder</li>
+                                    <li>Give your deck a name (archetype name shows by default)</li>
+                                    <li>Deck is synced across all devices (via Firebase)</li>
+                                    <li>Exact print versions are preserved (set code + number saved)</li>
+                                </ul>
+                                <p style="margin-top: 15px;"><strong>⚡ Card Action Buttons:</strong></p>
+                                <ul>
+                                    <li>★ <strong>Rarity/Print:</strong> Switch to different print versions of the same card</li>
+                                    <li>💰 <strong>Price/Cardmarket:</strong> See current price, click to buy (orange = has price)</li>
+                                    <li>✓ <strong>Collection:</strong> Toggle if you own this card (green when owned)</li>
+                                    <li>❤️ <strong>Wishlist:</strong> Toggle if you want this card (orange when wishlisted), NEW!</li>
+                                </ul>
+                                <p style="margin-top: 15px;"><strong>🔄 Deck Comparison:</strong></p>
+                                <ul>
+                                    <li>Click "🔀 Compare with My Decks" in Deck Builder</li>
+                                    <li>Select a saved deck to compare</li>
+                                    <li>See cards that are Removed, Added, Changed, or Unchanged</li>
+                                    <li>Visual color-coded display of differences</li>
+                                    <li>Helps you track changes between versions</li>
+                                </ul>
+                            </div>
+                        </section>
+                        
+                        <!-- Deck Features Guide -->
+                        <section style="margin-bottom: 40px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🛠️ Deck Building Features</h2>
                             <p style="line-height: 1.8; font-size: 1.05em;">
                                 The <strong>Meta Card Analysis</strong> feature shows you which cards are most popular across the Top 10 archetypes in the meta. 
                                 This helps you understand meta-defining cards and build versatile decks.
@@ -1234,7 +1306,16 @@
                         <!-- Collection Tab -->
                         <div id="profile-collection" class="profile-tab-content active">
                             <h2>🎴 My Collection</h2>
-                            <p style="color: #666; margin-bottom: 20px;">Cards you own are marked with a green checkmark throughout the site</p>
+                            <p style="color: #666; margin-bottom: 15px;">Cards you own are marked with a green checkmark throughout the site</p>
+                            
+                            <!-- Collection Search -->
+                            <div style="margin-bottom: 15px;">
+                                <input type="text" id="collection-search" placeholder="🔍 Search by card name, set, or number..." 
+                                    style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #667eea; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
+                                    oninput="filterCollection()">
+                                <div id="collection-search-results" style="margin-top: 8px; font-size: 14px; color: #555; font-weight: 500;"></div>
+                            </div>
+                            
                             <div id="collection-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
                                 <p style="color: #999;">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>
                             </div>
@@ -1252,7 +1333,16 @@
                         <!-- Wishlist Tab -->
                         <div id="profile-wishlist" class="profile-tab-content" style="display: none;">
                             <h2>⭐ Wishlist</h2>
-                            <p style="color: #666; margin-bottom: 20px;">Cards you want to get</p>
+                            <p style="color: #666; margin-bottom: 15px;">Cards you want to get</p>
+                            
+                            <!-- Wishlist Search -->
+                            <div style="margin-bottom: 15px;">
+                                <input type="text" id="wishlist-search" placeholder="🔍 Search by card name, set, or number..." 
+                                    style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #FF9800; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
+                                    oninput="filterWishlist()">
+                                <div id="wishlist-search-results" style="margin-top: 8px; font-size: 14px; color: #555; font-weight: 500;"></div>
+                            </div>
+                            
                             <div id="wishlist-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
                                 <p style="color: #999;">No cards in wishlist yet</p>
                             </div>
@@ -1448,12 +1538,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <!-- Firebase Configuration & Auth -->
-    <script src="js/firebase-collection.js?v=20260310-v7"></script>
+    <script src="js/firebase-collection.js?v=20260310-v8"></script>
     <script src="js/firebase-config.js?v=20260310-v3"></script>
     <script src="js/firebase-auth.js?v=20260310-v3"></script>
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     
     <!-- Main App -->
-    <script src="js/app.js?v=20260310-v7"></script>
+    <script src="js/app.js?v=20260310-v8"></script>
 </body>
 </html>

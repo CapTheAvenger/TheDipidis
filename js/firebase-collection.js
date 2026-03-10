@@ -370,7 +370,7 @@ function updateCardUI(cardId) {
 }
 
 // Update collection UI
-function updateCollectionUI() {
+function updateCollectionUI(searchFilter = '') {
   // Update all card elements
   if (window.userCollection) {
     window.userCollection.forEach(cardId => {
@@ -386,6 +386,8 @@ function updateCollectionUI() {
     
     // Build collection display
     const collectionHtml = [];
+    let totalCards = 0;
+    let matchingCards = 0;
     
     window.userCollection.forEach(cardId => {
       // cardId format: "Card Name|SET|NUMBER"
@@ -399,6 +401,22 @@ function updateCollectionUI() {
       );
       
       if (card && card.image_url) {
+        totalCards++;
+        
+        // Apply search filter
+        if (searchFilter) {
+          const searchLower = searchFilter.toLowerCase();
+          const matchesName = card.name.toLowerCase().includes(searchLower);
+          const matchesSet = cardSet.toLowerCase().includes(searchLower);
+          const matchesNumber = cardNumber.toLowerCase().includes(searchLower);
+          
+          if (!matchesName && !matchesSet && !matchesNumber) {
+            return; // Skip this card
+          }
+        }
+        
+        matchingCards++;
+        
         const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
         const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
         
@@ -418,8 +436,18 @@ function updateCollectionUI() {
       }
     });
     
+    // Update search results display
+    const searchResults = document.getElementById('collection-search-results');
+    if (searchResults && searchFilter) {
+      searchResults.textContent = `Showing ${matchingCards} of ${totalCards} cards`;
+    } else if (searchResults) {
+      searchResults.textContent = '';
+    }
+    
     if (collectionHtml.length > 0) {
       collectionGrid.innerHTML = collectionHtml.join('');
+    } else if (searchFilter) {
+      collectionGrid.innerHTML = '<p style="color: #999;">No cards found matching your search.</p>';
     } else {
       collectionGrid.innerHTML = '<p style="color: #999;">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>';
     }
@@ -445,17 +473,21 @@ function updateCollectionUI() {
 }
 
 // Update wishlist UI
-function updateWishlistUI() {
+function updateWishlistUI(searchFilter = '') {
   const wishlistGrid = document.getElementById('wishlist-grid');
   if (!wishlistGrid) return;
   
   if (!window.userWishlist || window.userWishlist.size === 0) {
     wishlistGrid.innerHTML = '<p style="color: #999;">No cards in wishlist yet</p>';
+    const searchResults = document.getElementById('wishlist-search-results');
+    if (searchResults) searchResults.textContent = '';
     return;
   }
   
   const allCards = window.allCardsDatabase || [];
   const wishlistHtml = [];
+  let totalCards = 0;
+  let matchingCards = 0;
   
   window.userWishlist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
@@ -467,6 +499,22 @@ function updateWishlistUI() {
     );
     
     if (card && card.image_url) {
+      totalCards++;
+      
+      // Apply search filter
+      if (searchFilter) {
+        const searchLower = searchFilter.toLowerCase();
+        const matchesName = card.name.toLowerCase().includes(searchLower);
+        const matchesSet = cardSet.toLowerCase().includes(searchLower);
+        const matchesNumber = cardNumber.toLowerCase().includes(searchLower);
+        
+        if (!matchesName && !matchesSet && !matchesNumber) {
+          return; // Skip this card
+        }
+      }
+      
+      matchingCards++;
+      
       const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
       
@@ -486,8 +534,18 @@ function updateWishlistUI() {
     }
   });
   
+  // Update search results display
+  const searchResults = document.getElementById('wishlist-search-results');
+  if (searchResults && searchFilter) {
+    searchResults.textContent = `Showing ${matchingCards} of ${totalCards} cards`;
+  } else if (searchResults) {
+    searchResults.textContent = '';
+  }
+  
   if (wishlistHtml.length > 0) {
     wishlistGrid.innerHTML = wishlistHtml.join('');
+  } else if (searchFilter) {
+    wishlistGrid.innerHTML = '<p style="color: #999;">No cards found matching your search.</p>';
   } else {
     wishlistGrid.innerHTML = '<p style="color: #999;">No cards in wishlist yet</p>';
   }
@@ -935,3 +993,20 @@ function switchProfileTab(tabName) {
   if (activeBtn) {
     activeBtn.classList.add('active');
   }}
+// Filter collection by search term
+function filterCollection() {
+  const searchInput = document.getElementById('collection-search');
+  if (!searchInput) return;
+  
+  const searchTerm = searchInput.value.trim();
+  updateCollectionUI(searchTerm);
+}
+
+// Filter wishlist by search term
+function filterWishlist() {
+  const searchInput = document.getElementById('wishlist-search');
+  if (!searchInput) return;
+  
+  const searchTerm = searchInput.value.trim();
+  updateWishlistUI(searchTerm);
+}

@@ -9444,15 +9444,15 @@
             
             // Filter to only show cards with COMPLETE data
             // Special handling: Pokemon cards found via international_prints are trusted (Limitless data is reliable)
-            // For Trainer/Energy (name-based matching), apply strict filter to avoid showing incomplete reprints
+            // For Trainer/Energy (name-based matching), apply lighter filter - we only need rarity + image_url
             const beforeCompleteFilter = versions.length;
             if (!isPokemonCard) {
-                // TRAINER/ENERGY: Strict filter - must have rarity, image_url, and international_prints
+                // TRAINER/ENERGY: Basic filter - must have rarity and image_url
+                // Note: international_prints not required for Trainer/Energy (all same name = functionally identical)
                 versions = versions.filter(version => {
                     const hasRarity = version.rarity && version.rarity.trim() !== '';
                     const hasImageUrl = version.image_url && version.image_url.trim() !== '';
-                    const hasIntPrints = version.international_prints && version.international_prints.trim() !== '';
-                    return hasRarity && hasImageUrl && hasIntPrints;
+                    return hasRarity && hasImageUrl;
                 });
                 if (beforeCompleteFilter > versions.length) {
                     console.log(`[Trainer/Energy Filter] Filtered out ${beforeCompleteFilter - versions.length} incomplete cards`);

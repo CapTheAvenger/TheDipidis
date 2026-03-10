@@ -147,6 +147,11 @@ async function loadUserWishlist(userId) {
     if (doc.exists) {
       const wishlist = doc.data().wishlist || [];
       window.userWishlist = new Set(wishlist);
+      
+      // Update wishlist UI if function exists
+      if (typeof updateWishlistUI === 'function') {
+        updateWishlistUI();
+      }
     }
   } catch (error) {
     console.error('Error loading wishlist:', error);

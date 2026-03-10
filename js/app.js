@@ -3692,9 +3692,16 @@
                 const totalDecksInArchetype = parseInt(baseCardData.total_decks_in_archetype || 1);
                 const avgCount = totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype).toFixed(2) : '0.00';
                 
+                // Check if user owns this card (specific print)
+                const cardId = `${card.card_name}|${setCode}|${setNumber}`;
+                const isOwned = window.userCollection && window.userCollection.has(cardId);
+                const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
+                
                 html += `
                     <div class="deck-card" style="position: relative;" title="${card.card_name} (${count}x) - ${percentage}%">
                         <img src="${imageUrl}" alt="${card.card_name}" loading="lazy" style="cursor: zoom-in;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22245%22 height=%22342%22%3E%3Crect fill=%22%23667eea%22 width=%22245%22 height=%22342%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22%3EKeine Bild%3C/text%3E%3C/svg%3E'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}')">
+                        
+                        ${ownedBadge}
                         
                         <div class="card-max-count">${count}</div>
                         
@@ -8913,7 +8920,6 @@
             
             const item = document.createElement('div');
             item.className = 'card-database-item';
-            item.setAttribute('data-card-id', card.name); // For collection tracking
             
             const rarityClass = getRarityClass(card.rarity);
             
@@ -8927,9 +8933,13 @@
             const displayRarity = card.rarity || 'Unknown';
             const displayCardMarketUrl = card.cardmarket_url || '#';
             
-            // Check if user owns this card
-            const userOwnsCard = window.userCollection && window.userCollection.has(card.name);
-            const userWantsCard = window.userWishlist && window.userWishlist.has(card.name);
+            // Create unique card ID: name|set|number (tracks SPECIFIC print, not just card name)
+            const cardId = `${card.name}|${displaySet}|${displayNumber}`;
+            item.setAttribute('data-card-id', cardId);
+            
+            // Check if user owns THIS SPECIFIC PRINT
+            const userOwnsCard = window.userCollection && window.userCollection.has(cardId);
+            const userWantsCard = window.userWishlist && window.userWishlist.has(cardId);
             
             // Format price button
             let priceButton = '';
@@ -8986,10 +8996,10 @@
                     <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
                     ${userOwnsCard ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">✓</div>' : ''}
                     <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
-                        <button onclick="toggleCollection('${escapedName}')" style="background: ${userOwnsCard ? '#4CAF50' : '#fff'}; color: ${userOwnsCard ? '#fff' : '#000'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userOwnsCard ? 'Remove from collection' : 'Add to collection'}">
+                        <button onclick="toggleCollection('${cardId}')" style="background: ${userOwnsCard ? '#4CAF50' : '#fff'}; color: ${userOwnsCard ? '#fff' : '#000'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userOwnsCard ? 'Remove from collection' : 'Add to collection'}">
                             ${userOwnsCard ? '✓' : '+'}
                         </button>
-                        <button onclick="toggleWishlist('${escapedName}')" style="background: ${userWantsCard ? '#FF9800' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid #FF9800; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
+                        <button onclick="toggleWishlist('${cardId}')" style="background: ${userWantsCard ? '#FF9800' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid #FF9800; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
                             ⭐
                         </button>
                     </div>

@@ -21,6 +21,9 @@ async function addToCollection(cardId) {
     updateCardUI(cardId);
     showNotification('Added to collection!', 'success');
     
+    // Update collection display and stats
+    updateCollectionUI();
+    
     // Re-render cards to show green checkmark
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
       renderCardDatabase(window.filteredCardsData);
@@ -44,6 +47,9 @@ async function removeFromCollection(cardId) {
     window.userCollection.delete(cardId);
     updateCardUI(cardId);
     showNotification('Removed from collection', 'success');
+    
+    // Update collection display and stats
+    updateCollectionUI();
     
     // Re-render cards to remove green checkmark
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
@@ -83,6 +89,9 @@ async function addToWishlist(cardId) {
     window.userWishlist.add(cardId);
     showNotification('Added to wishlist!', 'success');
     
+    // Update wishlist display
+    updateWishlistUI();
+    
     // Re-render cards to update wishlist button
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
       renderCardDatabase(window.filteredCardsData);
@@ -105,6 +114,9 @@ async function removeFromWishlist(cardId) {
     
     window.userWishlist.delete(cardId);
     showNotification('Removed from wishlist', 'success');
+    
+    // Update wishlist display
+    updateWishlistUI();
     
     // Re-render cards to update wishlist button
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
@@ -362,12 +374,27 @@ async function loadDeckFromProfile(deckId) {
 // Get collection statistics
 function getCollectionStats() {
   const collection = window.userCollection || new Set();
+  const allCards = window.allCardsDatabase || [];
   
-  // Calculate total value (requires price data)
   let totalValue = 0;
   let cardCount = collection.size;
   
-  // TODO: Calculate based on actual card prices from price_data.csv
+  // Calculate total value based on actual card prices
+  collection.forEach(cardId => {
+    const [cardName, cardSet, cardNumber] = cardId.split('|');
+    const card = allCards.find(c => 
+      c.name === cardName && 
+      c.set === cardSet && 
+      c.number === cardNumber
+    );
+    
+    if (card && card.eur_price) {
+      const price = parseFloat(card.eur_price.replace(',', '.'));
+      if (!isNaN(price)) {
+        totalValue += price;
+      }
+    }
+  });
   
   return {
     cardCount,
@@ -401,6 +428,55 @@ function updateCollectionUI() {
     });
   }
   
+  // Update collection grid in profile
+  const collectionGrid = document.getElementById('collection-grid');
+  if (collectionGrid && window.userCollection && window.userCollection.size > 0) {
+    // Get all cards database
+    const allCards = window.allCardsDatabase || [];
+    
+    // Build collection display
+    const collectionHtml = [];
+    
+    window.userCollection.forEach(cardId => {
+      // cardId format: "Card Name|SET|NUMBER"
+      const [cardName, cardSet, cardNumber] = cardId.split('|');
+      
+      // Find card in database
+      const card = allCards.find(c => 
+        c.name === cardName && 
+        c.set === cardSet && 
+        c.number === cardNumber
+      );
+      
+      if (card && card.image_url) {
+        const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+        const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
+        
+        collectionHtml.push(`
+          <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+            <img src="${card.image_url}" alt="${card.name}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${card.image_url}', '${card.name}')">
+            <button onclick="removeFromCollection('${cardId}')" style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" title="Remove from collection">
+              ×
+            </button>
+            <div style="padding: 8px; background: white;">
+              <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${card.name}</div>
+              <div style="font-size: 0.75em; color: #666;">${cardSet} ${cardNumber}</div>
+              <div style="font-size: 0.8em; color: #27ae60; font-weight: 600; margin-top: 4px;">💰 ${priceDisplay}</div>
+            </div>
+          </div>
+        `);
+      }
+    });
+    
+    if (collectionHtml.length > 0) {
+      collectionGrid.innerHTML = collectionHtml.join('');
+    } else {
+      collectionGrid.innerHTML = '<p style="color: #999;">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>';
+    }
+  } else if (collectionGrid) {
+    collectionGrid.innerHTML = '<p style="color: #999;">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>';
+  }
+  
   // Update stats
   const stats = getCollectionStats();
   const statsEl = document.getElementById('collection-stats');
@@ -418,6 +494,55 @@ function updateCollectionUI() {
   }
 }
 
+// Update wishlist UI
+function updateWishlistUI() {
+  const wishlistGrid = document.getElementById('wishlist-grid');
+  if (!wishlistGrid) return;
+  
+  if (!window.userWishlist || window.userWishlist.size === 0) {
+    wishlistGrid.innerHTML = '<p style="color: #999;">No cards in wishlist yet</p>';
+    return;
+  }
+  
+  const allCards = window.allCardsDatabase || [];
+  const wishlistHtml = [];
+  
+  window.userWishlist.forEach(cardId => {
+    const [cardName, cardSet, cardNumber] = cardId.split('|');
+    
+    const card = allCards.find(c => 
+      c.name === cardName && 
+      c.set === cardSet && 
+      c.number === cardNumber
+    );
+    
+    if (card && card.image_url) {
+      const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+      const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
+      
+      wishlistHtml.push(`
+        <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+          <img src="${card.image_url}" alt="${card.name}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${card.image_url}', '${card.name}')">
+          <button onclick="removeFromWishlist('${cardId}')" style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" title="Remove from wishlist">
+            ×
+          </button>
+          <div style="padding: 8px; background: white;">
+            <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${card.name}</div>
+            <div style="font-size: 0.75em; color: #666;">${cardSet} ${cardNumber}</div>
+            <div style="font-size: 0.8em; color: #27ae60; font-weight: 600; margin-top: 4px;">💰 ${priceDisplay}</div>
+          </div>
+        </div>
+      `);
+    }
+  });
+  
+  if (wishlistHtml.length > 0) {
+    wishlistGrid.innerHTML = wishlistHtml.join('');
+  } else {
+    wishlistGrid.innerHTML = '<p style="color: #999;">No cards in wishlist yet</p>';
+  }
+}
+
 // Update profile UI
 function updateProfileUI(profile) {
   // Update profile name
@@ -432,10 +557,18 @@ function updateProfileUI(profile) {
     nameInput.value = profile.displayName || '';
   }
   
+  // Calculate collection stats
+  const stats = getCollectionStats();
+  
   // Update collection stats
   const cardsCount = document.getElementById('profile-cards-count');
   if (cardsCount) {
-    cardsCount.textContent = (profile.collection || []).length;
+    cardsCount.textContent = stats.cardCount;
+  }
+  
+  const collectionValue = document.getElementById('profile-collection-value');
+  if (collectionValue) {
+    collectionValue.textContent = `${stats.totalValue.toFixed(2)}€`;
   }
   
   const decksCount = document.getElementById('profile-decks-count');
@@ -449,7 +582,7 @@ function updateProfileUI(profile) {
       <div class="profile-info">
         <p><strong>Email:</strong> ${auth.currentUser.email}</p>
         <p><strong>Member since:</strong> ${formatDate(profile.createdAt)}</p>
-        <p><strong>Cards:</strong> ${(profile.collection || []).length}</p>
+        <p><strong>Cards:</strong> ${stats.cardCount}</p>
         <p><strong>Decks:</strong> ${window.userDecks.length}</p>
       </div>
     `;

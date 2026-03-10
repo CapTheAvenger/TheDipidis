@@ -553,8 +553,35 @@ function updateDecksUI() {
     return;
   }
   
-  // Get all cards database for displaying cards
+  // Check if card database is loaded
   const allCards = window.allCardsDatabase || [];
+  if (allCards.length === 0) {
+    console.warn('[updateDecksUI] Card database not loaded yet. Showing decks without card images.');
+    decksGrid.innerHTML = `
+      <div style="background: #fff8dc; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+        <p style="margin: 0; color: #856404;">⏳ Loading card database... Deck cards will appear once loaded.</p>
+      </div>
+      ${window.userDecks.map(deck => {
+        const totalCards = deck.totalCards || Object.values(deck.cards || {}).reduce((sum, count) => sum + count, 0);
+        const uniqueCards = Object.keys(deck.cards || {}).length;
+        return `
+          <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px;">
+            <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2em;">${deck.name}</h3>
+            <p style="color: #7f8c8d; margin: 5px 0; font-size: 0.9em;">
+              <strong>Archetype:</strong> ${deck.archetype || 'Custom'}
+            </p>
+            <p style="color: #34495e; margin: 10px 0; font-weight: 600;">
+              🎴 ${totalCards} Cards (${uniqueCards} Unique)
+            </p>
+            <button onclick="deleteDeck('${deck.id}')" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+              🗑️ Delete
+            </button>
+          </div>
+        `;
+      }).join('')}
+    `;
+    return;
+  }
   
   decksGrid.innerHTML = window.userDecks.map((deck, deckIndex) => {
     const totalCards = deck.totalCards || Object.values(deck.cards || {}).reduce((sum, count) => sum + count, 0);
@@ -564,27 +591,51 @@ function updateDecksUI() {
     // Build card grid HTML
     let cardsHtml = '';
     if (deck.cards && Object.keys(deck.cards).length > 0) {
+      console.log(`[updateDecksUI] Building deck "${deck.name}" with ${uniqueCards} unique cards`);
+      console.log('[updateDecksUI] allCardsDatabase loaded:', !!allCards, 'length:', allCards.length);
+      
       Object.entries(deck.cards).forEach(([cardName, count]) => {
-        // Find card in database
-        const card = allCards.find(c => c.name === cardName);
+        // Find card in database (case-insensitive, trimmed)
+        const normalizedName = cardName.trim().toLowerCase();
+        const card = allCards.find(c => c.name.trim().toLowerCase() === normalizedName);
+        
         if (card) {
           const cardId = `${card.name}|${card.set}|${card.number}`;
           const isOwned = window.userCollection && window.userCollection.has(cardId);
           const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #27ae60; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 1;">✓</div>' : '';
           const cardNameEscaped = cardName.replace(/'/g, "\\'");
+          const imageUrl = card.image_url || `https://via.placeholder.com/245x342/667eea/ffffff?text=${encodeURIComponent(card.name)}`;
           
           cardsHtml += `
             <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
               ${ownedBadge}
-              <img src="${card.image_url}" alt="${card.name}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${card.image_url}', '${card.name}')">
+              <img src="${imageUrl}" alt="${card.name}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${imageUrl}', '${card.name}')" onerror="this.src='https://via.placeholder.com/245x342/667eea/ffffff?text=${encodeURIComponent(card.name)}'">
               <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 8px 5px 5px; display: flex; gap: 4px; align-items: center;">
                 <div style="flex: 1; color: white; font-weight: bold; font-size: 14px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">×${count}</div>
                 <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; width: 24px; height: 24px; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center;" title="Switch rarity/print">★</button>
               </div>
             </div>
           `;
+        } else {
+          console.warn(`[updateDecksUI] Card not found in database: "${cardName}"`);
+          // Show placeholder for missing cards
+          const cardNameEscaped = cardName.replace(/'/g, "\\'");
+          cardsHtml += `
+            <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: #f8f9fa;">
+              <div style="width: 100%; aspect-ratio: 245/342; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; text-align: center;">
+                <div style="font-size: 24px; margin-bottom: 10px;">🎴</div>
+                <div style="font-size: 12px; font-weight: 600; color: #666; word-break: break-word;">${cardName}</div>
+                <div style="font-size: 10px; color: #999; margin-top: 5px;">Not in database</div>
+              </div>
+              <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 8px 5px 5px;">
+                <div style="color: white; font-weight: bold; font-size: 14px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">×${count}</div>
+              </div>
+            </div>
+          `;
         }
       });
+      
+      console.log(`[updateDecksUI] Generated ${cardsHtml.length > 0 ? 'cards' : 'no cards'} for deck "${deck.name}"`);
     }
     
     return `

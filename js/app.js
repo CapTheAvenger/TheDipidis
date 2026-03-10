@@ -3768,6 +3768,13 @@ const BASE_PATH = './data/';
              */
             if (!cardType) return 'Pokemon';
             
+            // IMPORTANT FIX: Check for Energy BEFORE element letter check
+            // This fixes "Basic Energy" being sorted as Pokemon instead of Energy
+            const typeLower = cardType.toLowerCase();
+            if (typeLower.includes('energy')) return 'Energy';
+            if (cardType === 'Special Energy') return 'Special Energy';
+            if (cardType === 'Energy') return 'Energy';
+            
             // Check if it's a Pokemon (type starts with element letter)
             if (cardType.charAt(0).match(/[GRWLPFDMNC]/)) {
                 return 'Pokemon';
@@ -3778,8 +3785,6 @@ const BASE_PATH = './data/';
             if (cardType === 'Item') return 'Item';
             if (cardType === 'Tool') return 'Tool';
             if (cardType === 'Stadium') return 'Stadium';
-            if (cardType === 'Special Energy') return 'Special Energy';
-            if (cardType === 'Energy') return 'Energy';
             if (cardType === 'Trainer') return 'Item';
             
             // Fallback to Pokemon

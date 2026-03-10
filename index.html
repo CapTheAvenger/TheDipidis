@@ -23,12 +23,16 @@
                 <div id="user-menu">
                     <!-- Not signed in -->
                     <button id="signin-btn" class="user-btn" onclick="showAuthModal('signin')" style="display: none;">
-                        👤 Sign In
+                        <img src="images/pokeball-icon.png" alt="Sign In" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+                        Sign In
                     </button>
                     <!-- Signed in -->
                     <div id="user-info" class="user-info" style="display: none;">
                         <span id="user-email-display" style="margin-right: 10px; color: #666;"></span>
-                        <button class="user-btn" onclick="switchTab('profile')">👤 Profile</button>
+                        <button class="user-btn" onclick="switchTab('profile')">
+                            <img src="images/pokeball-icon.png" alt="Profile" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
+                            Profile
+                        </button>
                     </div>
                 </div>
             </div>
@@ -42,7 +46,10 @@
                 <button class="tab-btn" onclick="switchTab('current-analysis')">📈 Current Meta Deck Analysis</button>
                 <button class="tab-btn" onclick="switchTab('past-meta')">🏆 Past Meta</button>
                 <button class="tab-btn" onclick="switchTab('cards')">🧰 Cards</button>
-                <button class="tab-btn" onclick="switchTab('profile')">👤 Profile</button>
+                <button class="tab-btn" onclick="switchTab('profile')">
+                    <img src="images/pokeball-icon.png" alt="Profile" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;">
+                    Profile
+                </button>
                 <button class="tab-btn" onclick="switchTab('tutorial')">📖 How to Use</button>
             </div>
             
@@ -1164,13 +1171,16 @@
             <div id="profile" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>👤 User Profile</h1>
+                        <h1>
+                            <img src="images/pokeball-icon.png" alt="" style="width: 32px; height: 32px; margin-right: 10px; vertical-align: middle;">
+                            User Profile
+                        </h1>
                         <p>Manage your collection, decks, and settings</p>
                     </div>
                     
                     <!-- Not signed in -->
                     <div id="profile-auth-prompt" style="text-align: center; padding: 60px 20px; display: none;">
-                        <div style="font-size: 80px; margin-bottom: 20px;">👤</div>
+                        <img src="images/pokeball-icon.png" alt="" style="width: 120px; height: 120px; margin-bottom: 20px;">
                         <h2 style="margin-bottom: 20px;">Sign in to unlock all features</h2>
                         <p style="color: #666; margin-bottom: 30px; font-size: 1.1em;">
                             Track your card collection, save custom decks, and sync across devices
@@ -1291,7 +1301,10 @@
             
             <!-- Sign In Form -->
             <div id="signin-form-container">
-                <h2 style="margin-bottom: 20px;">👤 Sign In</h2>
+                <h2 style="margin-bottom: 20px;">
+                    <img src="images/pokeball-icon.png" alt="" style="width: 28px; height: 28px; margin-right: 10px; vertical-align: middle;">
+                    Sign In
+                </h2>
                 <form id="sign-in-form" style="margin-bottom: 20px;">
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; margin-bottom: 5px; font-weight: 500;">Email</label>
@@ -1329,7 +1342,10 @@
             
             <!-- Sign Up Form -->
             <div id="signup-form-container" style="display: none;">
-                <h2 style="margin-bottom: 20px;">📝 Create Account</h2>
+                <h2 style="margin-bottom: 20px;">
+                    <img src="images/pokeball-icon.png" alt="" style="width: 28px; height: 28px; margin-right: 10px; vertical-align: middle;">
+                    Create Account
+                </h2>
                 <form id="sign-up-form" style="margin-bottom: 20px;">
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; margin-bottom: 5px; font-weight: 500;">Email</label>

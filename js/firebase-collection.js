@@ -749,15 +749,27 @@ function updateDecksUI() {
 
 // Helper: Card type sorting (same as Deck Builder)
 function getCardTypeCategory(cardType) {
-  if (!cardType) return 'Pokemon';
-  if (cardType.charAt(0).match(/[GRWLPFDMNC]/)) return 'Pokemon';
+  if (!cardType) return 'Energy'; // Empty type = Basic Energy
+  
+  const typeLower = cardType.toLowerCase();
+  
+  // Check Energy FIRST (before element check)
+  if (typeLower.includes('energy')) return 'Energy';
+  if (cardType === 'Energy') return 'Energy';
+  if (cardType === 'Special Energy') return 'Special Energy';
+  
+  // Check Trainer types
   if (cardType === 'Supporter') return 'Supporter';
   if (cardType === 'Item') return 'Item';
   if (cardType === 'Tool') return 'Tool';
   if (cardType === 'Stadium') return 'Stadium';
-  if (cardType === 'Special Energy') return 'Special Energy';
-  if (cardType === 'Energy') return 'Energy';
   if (cardType === 'Trainer') return 'Item';
+  
+  // Check if it's a Pokemon (type starts with element letter + stage)
+  // Examples: GBasic, RStage1, WStage2, PVMax, FStage1, etc.
+  if (cardType.charAt(0).match(/[GRWLPFDMNC]/)) return 'Pokemon';
+  
+  // Default to Pokemon
   return 'Pokemon';
 }
 

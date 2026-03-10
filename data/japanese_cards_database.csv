@@ -1,4 +1,87 @@
 name,set,number,type,rarity,image_url
+Weedle,M4,1,G Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_1_R_JP_LG.png
+Kakuna,M4,2,G Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_2_R_JP_LG.png
+Beedrill ex,M4,3,G Stage 2,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_3_R_JP_LG.png
+Carnivine,M4,4,G Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_4_R_JP_LG.png
+Chespin,M4,5,G Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_5_R_JP_LG.png
+Quilladin,M4,6,G Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_6_R_JP_LG.png
+Chesnaught,M4,7,G Stage 2,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_7_R_JP_LG.png
+Vulpix,M4,8,R Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_8_R_JP_LG.png
+Ninetales,M4,9,R Stage 1,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_9_R_JP_LG.png
+Ho-Oh,M4,10,R Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_10_R_JP_LG.png
+Fennekin,M4,11,R Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_11_R_JP_LG.png
+Braixen,M4,12,R Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_12_R_JP_LG.png
+Delphox,M4,13,R Stage 2,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_13_R_JP_LG.png
+Litleo,M4,14,R Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_14_R_JP_LG.png
+Mega Pyroar ex,M4,15,R Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_15_R_JP_LG.png
+Remoraid,M4,16,W Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_16_R_JP_LG.png
+Octillery,M4,17,W Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_17_R_JP_LG.png
+Delibird,M4,18,W Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_18_R_JP_LG.png
+Keldeo,M4,19,W Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_19_R_JP_LG.png
+Froakie,M4,20,W Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_20_R_JP_LG.png
+Frogadier,M4,21,W Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_21_R_JP_LG.png
+Mega Greninja ex,M4,22,W Stage 2,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_22_R_JP_LG.png
+Bergmite,M4,23,W Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_23_R_JP_LG.png
+Avalugg,M4,24,W Stage 1,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_24_R_JP_LG.png
+Wimpod,M4,25,W Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_25_R_JP_LG.png
+Golisopod,M4,26,W Stage 1,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_26_R_JP_LG.png
+Mareep,M4,27,L Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_27_R_JP_LG.png
+Flaaffy,M4,28,L Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_28_R_JP_LG.png
+Ampharos,M4,29,L Stage 2,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_29_R_JP_LG.png
+Emolga,M4,30,L Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_30_R_JP_LG.png
+Deoxys,M4,31,P Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_31_R_JP_LG.png
+Deoxys,M4,32,P Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_32_R_JP_LG.png
+Deoxys,M4,33,P Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_33_R_JP_LG.png
+Deoxys,M4,34,P Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_34_R_JP_LG.png
+Mega Florges ex,M4,35,P Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_35_R_JP_LG.png
+Espurr,M4,36,P Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_36_R_JP_LG.png
+Meowstic,M4,37,P Stage 1,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_37_R_JP_LG.png
+Phantump,M4,38,P Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_38_R_JP_LG.png
+Trevenant,M4,39,P Stage 1,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_39_R_JP_LG.png
+Pumpkaboo,M4,40,P Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_40_R_JP_LG.png
+Gourgeist ex,M4,41,P Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_41_R_JP_LG.png
+Xerneas,M4,42,P Basic,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_42_R_JP_LG.png
+Sudowoodo,M4,43,F Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_43_R_JP_LG.png
+Phanpy,M4,44,F Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_44_R_JP_LG.png
+Donphan,M4,45,F Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_45_R_JP_LG.png
+Baltoy,M4,46,F Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_46_R_JP_LG.png
+Claydol,M4,47,F Stage 1,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_47_R_JP_LG.png
+Zubat,M4,48,D Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_48_R_JP_LG.png
+Golbat,M4,49,D Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_49_R_JP_LG.png
+Crobat,M4,50,D Stage 2,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_50_R_JP_LG.png
+Qwilfish,M4,51,D Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_51_R_JP_LG.png
+Stunky,M4,52,D Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_52_R_JP_LG.png
+Skuntank,M4,53,D Stage 1,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_53_R_JP_LG.png
+Trubbish,M4,54,D Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_54_R_JP_LG.png
+Garbodor,M4,55,D Stage 1,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_55_R_JP_LG.png
+Skrelp,M4,56,D Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_56_R_JP_LG.png
+Beldum,M4,57,M Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_57_R_JP_LG.png
+Metang,M4,58,M Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_58_R_JP_LG.png
+Metagross,M4,59,M Stage 2,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_59_R_JP_LG.png
+Ferroseed,M4,60,M Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_60_R_JP_LG.png
+Ferrothorn,M4,61,M Stage 1,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_61_R_JP_LG.png
+Cobalion ex,M4,62,M Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_62_R_JP_LG.png
+Mega Dragalge ex,M4,63,N Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_63_R_JP_LG.png
+Goomy,M4,64,N Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_64_R_JP_LG.png
+Sliggoo,M4,65,N Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_65_R_JP_LG.png
+Goodra,M4,66,N Stage 2,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_66_R_JP_LG.png
+Tauros,M4,67,C Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_67_R_JP_LG.png
+Patrat,M4,68,C Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_68_R_JP_LG.png
+Watchog,M4,69,C Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_69_R_JP_LG.png
+Minccino,M4,70,C Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_70_R_JP_LG.png
+Cinccino ex,M4,71,C Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_71_R_JP_LG.png
+Special Red Card,M4,72,Item,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_72_R_JP_LG.png
+Big Catch Net,M4,73,Item,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_73_R_JP_LG.png
+Book of Transformation,M4,74,Item,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_74_R_JP_LG.png
+AZ's Tranquility,M4,75,Supporter,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_75_R_JP_LG.png
+Philippe,M4,76,Supporter,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_76_R_JP_LG.png
+Roxie's Performance,M4,77,Supporter,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_77_R_JP_LG.png
+Emma,M4,78,Supporter,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_78_R_JP_LG.png
+Ange Floette,M4,79,Stadium,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_79_R_JP_LG.png
+Prism Tower,M4,80,Stadium,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_80_R_JP_LG.png
+Nitro Fire Energy,M4,81,Special Energy,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_81_R_JP_LG.png
+Bubble Water Energy,M4,82,Special Energy,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_82_R_JP_LG.png
+Magnet Steel Energy,M4,83,Special Energy,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M4/M4_83_R_JP_LG.png
 Spinarak,M3,1,G Basic,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_1_R_JP_LG.png
 Ariados,M3,2,G Stage 1,Common,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_2_R_JP_LG.png
 Shaymin,M3,3,G Basic,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_3_R_JP_LG.png
@@ -79,6 +162,42 @@ Lumiose City,M3,77,Stadium,Uncommon,https://limitlesstcg.nyc3.cdn.digitaloceansp
 Growth Grass Energy,M3,78,Special Energy,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_78_R_JP_LG.png
 Telepath Psychic Energy,M3,79,Special Energy,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_79_R_JP_LG.png
 Rock Fighting Energy,M3,80,Special Energy,Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_80_R_JP_LG.png
+Spewpa,M3,81,G Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_81_R_JP_LG.png
+Rowlet,M3,82,G Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_82_R_JP_LG.png
+Talonflame,M3,83,R Stage 2,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_83_R_JP_LG.png
+Aurorus,M3,84,W Stage 2,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_84_R_JP_LG.png
+Dedenne,M3,85,L Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_85_R_JP_LG.png
+Clefairy,M3,86,P Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_86_R_JP_LG.png
+Espurr,M3,87,P Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_87_R_JP_LG.png
+Probopass,M3,88,F Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_88_R_JP_LG.png
+Tyrunt,M3,89,F Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_89_R_JP_LG.png
+Drapion,M3,90,D Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_90_R_JP_LG.png
+Doublade,M3,91,M Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_91_R_JP_LG.png
+Raticate,M3,92,C Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_92_R_JP_LG.png
+Decidueye ex,M3,93,G Stage 2,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_93_R_JP_LG.png
+Salazzle ex,M3,94,R Stage 1,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_94_R_JP_LG.png
+Mega Starmie ex,M3,95,W Stage 1,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_95_R_JP_LG.png
+Mega Clefable ex,M3,96,P Stage 1,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_96_R_JP_LG.png
+Mega Zygarde ex,M3,97,F Basic,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_97_R_JP_LG.png
+Yveltal ex,M3,98,D Basic,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_98_R_JP_LG.png
+Mega Skarmory ex,M3,99,M Basic,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_99_R_JP_LG.png
+Meowth ex,M3,100,C Basic,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_100_R_JP_LG.png
+Sacred Ash,M3,102,Item,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_102_R_JP_LG.png
+Poké Pad,M3,103,Item,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_103_R_JP_LG.png
+Wonder Patch,M3,104,Item,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_104_R_JP_LG.png
+Tarragon,M3,105,Supporter,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_105_R_JP_LG.png
+Naveen,M3,106,Supporter,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_106_R_JP_LG.png
+Rosa's Encouragement,M3,107,Supporter,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_107_R_JP_LG.png
+Jacinthe,M3,108,Supporter,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_108_R_JP_LG.png
+Forest of Vitality,M3,109,Stadium,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_109_R_JP_LG.png
+Lumiose City,M3,110,Stadium,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_110_R_JP_LG.png
+Mega Starmie ex,M3,111,W Stage 1,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_111_R_JP_LG.png
+Mega Clefable ex,M3,112,P Stage 1,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_112_R_JP_LG.png
+Mega Zygarde ex,M3,113,F Basic,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_113_R_JP_LG.png
+Meowth ex,M3,114,C Basic,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_114_R_JP_LG.png
+Rosa's Encouragement,M3,115,Supporter,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_115_R_JP_LG.png
+Jacinthe,M3,116,Supporter,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_116_R_JP_LG.png
+Mega Zygarde ex,M3,117,F Basic,Ultra Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M3/M3_117_R_JP_LG.png
 Erika's Oddish,MC,1,G Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/MC/MC_1_R_JP_LG.png
 Erika's Gloom,MC,2,G Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/MC/MC_2_R_JP_LG.png
 Erika's Vileplume ex,MC,3,G Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/MC/MC_3_R_JP_LG.png
@@ -865,252 +984,3 @@ Waitress,MP1,20,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/
 Urbain,MP1,21,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/MP1/MP1_21_R_JP_LG.png
 Judge,MP1,22,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/MP1/MP1_22_R_JP_LG.png
 Lillie's Determination,MP1,23,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/MP1/MP1_23_R_JP_LG.png
-Ethan's Pinsir,M2a,1,G Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_1_R_JP_LG.png
-Yanma,M2a,2,G Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_2_R_JP_LG.png
-Yanmega ex,M2a,3,G Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_3_R_JP_LG.png
-Wurmple,M2a,4,G Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_4_R_JP_LG.png
-Silcoon,M2a,5,G Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_5_R_JP_LG.png
-Beautifly,M2a,6,G Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_6_R_JP_LG.png
-Cascoon,M2a,7,G Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_7_R_JP_LG.png
-Dustox,M2a,8,G Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_8_R_JP_LG.png
-Cynthia's Roselia,M2a,9,G Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_9_R_JP_LG.png
-Cynthia's Roserade,M2a,10,G Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_10_R_JP_LG.png
-Budew,M2a,11,G Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_11_R_JP_LG.png
-Shaymin,M2a,12,G Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_12_R_JP_LG.png
-Dwebble,M2a,13,G Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_13_R_JP_LG.png
-Crustle,M2a,14,G Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_14_R_JP_LG.png
-Team Rocket's Tarountula,M2a,15,G Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_15_R_JP_LG.png
-Team Rocket's Spidops,M2a,16,G Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_16_R_JP_LG.png
-Teal Mask Ogerpon ex,M2a,17,G Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_17_R_JP_LG.png
-Ethan's Slugma,M2a,18,R Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_18_R_JP_LG.png
-Ethan's Magcargo,M2a,19,R Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_19_R_JP_LG.png
-Entei,M2a,20,R Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_20_R_JP_LG.png
-Ethan's Ho-Oh ex,M2a,21,R Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_21_R_JP_LG.png
-Numel,M2a,22,R Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_22_R_JP_LG.png
-Camerupt,M2a,23,R Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_23_R_JP_LG.png
-Tepig,M2a,24,R Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_24_R_JP_LG.png
-Pignite,M2a,25,R Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_25_R_JP_LG.png
-Emboar,M2a,26,R Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_26_R_JP_LG.png
-N's Darumaka,M2a,27,R Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_27_R_JP_LG.png
-N's Darmanitan,M2a,28,R Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_28_R_JP_LG.png
-Reshiram ex,M2a,29,R Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_29_R_JP_LG.png
-Charcadet,M2a,30,R Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_30_R_JP_LG.png
-Ceruledge ex,M2a,31,R Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_31_R_JP_LG.png
-Psyduck,M2a,32,W Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_32_R_JP_LG.png
-Golduck,M2a,33,W Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_33_R_JP_LG.png
-Team Rocket's Articuno,M2a,34,W Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_34_R_JP_LG.png
-Snorunt,M2a,35,W Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_35_R_JP_LG.png
-Mega Froslass ex,M2a,36,W Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_36_R_JP_LG.png
-N's Vanillite,M2a,37,W Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_37_R_JP_LG.png
-N's Vanillish,M2a,38,W Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_38_R_JP_LG.png
-N's Vanilluxe,M2a,39,W Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_39_R_JP_LG.png
-Snom,M2a,40,W Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_40_R_JP_LG.png
-Frosmoth,M2a,41,W Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_41_R_JP_LG.png
-Glastrier,M2a,42,W Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_42_R_JP_LG.png
-Chien-Pao,M2a,43,W Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_43_R_JP_LG.png
-Pikachu ex,M2a,44,L Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_44_R_JP_LG.png
-Magnemite,M2a,45,L Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_45_R_JP_LG.png
-Magneton,M2a,46,L Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_46_R_JP_LG.png
-Tynamo,M2a,47,L Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_47_R_JP_LG.png
-Eelektrik,M2a,48,L Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_48_R_JP_LG.png
-Mega Eelektross ex,M2a,49,L Stage 2,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_49_R_JP_LG.png
-Stunfisk,M2a,50,L Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_50_R_JP_LG.png
-Zekrom ex,M2a,51,L Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_51_R_JP_LG.png
-Helioptile,M2a,52,L Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_52_R_JP_LG.png
-Heliolisk,M2a,53,L Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_53_R_JP_LG.png
-Tapu Koko,M2a,54,L Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_54_R_JP_LG.png
-Zeraora,M2a,55,L Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_55_R_JP_LG.png
-Iono's Tadbulb,M2a,56,L Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_56_R_JP_LG.png
-Iono's Bellibolt ex,M2a,57,L Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_57_R_JP_LG.png
-Iono's Wattrel,M2a,58,L Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_58_R_JP_LG.png
-Iono's Kilowattrel,M2a,59,L Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_59_R_JP_LG.png
-Lillie's Clefairy ex,M2a,60,P Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_60_R_JP_LG.png
-Team Rocket's Exeggcute,M2a,61,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_61_R_JP_LG.png
-Team Rocket's Exeggutor,M2a,62,P Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_62_R_JP_LG.png
-Team Rocket's Mewtwo ex,M2a,63,P Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_63_R_JP_LG.png
-Togepi,M2a,64,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_64_R_JP_LG.png
-Togetic,M2a,65,P Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_65_R_JP_LG.png
-Togekiss,M2a,66,P Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_66_R_JP_LG.png
-Misdreavus,M2a,67,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_67_R_JP_LG.png
-Mismagius,M2a,68,P Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_68_R_JP_LG.png
-Ralts,M2a,69,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_69_R_JP_LG.png
-Kirlia,M2a,70,P Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_70_R_JP_LG.png
-Mega Gardevoir ex,M2a,71,P Stage 2,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_71_R_JP_LG.png
-Duskull,M2a,72,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_72_R_JP_LG.png
-Dusclops,M2a,73,P Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_73_R_JP_LG.png
-Dusknoir,M2a,74,P Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_74_R_JP_LG.png
-Latias ex,M2a,75,P Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_75_R_JP_LG.png
-Rotom,M2a,76,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_76_R_JP_LG.png
-Hop's Phantump,M2a,77,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_77_R_JP_LG.png
-Hop's Trevenant,M2a,78,P Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_78_R_JP_LG.png
-Team Rocket's Mimikyu,M2a,79,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_79_R_JP_LG.png
-Spectrier,M2a,80,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_80_R_JP_LG.png
-Munkidori,M2a,81,P Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_81_R_JP_LG.png
-Team Rocket's Diglett,M2a,82,F Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_82_R_JP_LG.png
-Team Rocket's Dugtrio,M2a,83,F Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_83_R_JP_LG.png
-Meditite,M2a,84,F Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_84_R_JP_LG.png
-Medicham,M2a,85,F Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_85_R_JP_LG.png
-Lunatone,M2a,86,F Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_86_R_JP_LG.png
-Solrock,M2a,87,F Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_87_R_JP_LG.png
-Cynthia's Gible,M2a,88,F Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_88_R_JP_LG.png
-Cynthia's Gabite,M2a,89,F Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_89_R_JP_LG.png
-Cynthia's Garchomp ex,M2a,90,F Stage 2,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_90_R_JP_LG.png
-Riolu,M2a,91,F Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_91_R_JP_LG.png
-Mega Lucario ex,M2a,92,F Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_92_R_JP_LG.png
-Pancham,M2a,93,F Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_93_R_JP_LG.png
-Mega Hawlucha ex,M2a,94,F Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_94_R_JP_LG.png
-Rolycoly,M2a,95,F Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_95_R_JP_LG.png
-Carkol,M2a,96,F Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_96_R_JP_LG.png
-Coalossal,M2a,97,F Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_97_R_JP_LG.png
-Okidogi,M2a,98,F Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_98_R_JP_LG.png
-Team Rocket's Zubat,M2a,99,D Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_99_R_JP_LG.png
-Team Rocket's Golbat,M2a,100,D Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_100_R_JP_LG.png
-Team Rocket's Crobat ex,M2a,101,D Stage 2,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_101_R_JP_LG.png
-Team Rocket's Murkrow,M2a,102,D Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_102_R_JP_LG.png
-Team Rocket's Honchkrow,M2a,103,D Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_103_R_JP_LG.png
-Team Rocket's Sneasel,M2a,104,D Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_104_R_JP_LG.png
-Galarian Zigzagoon,M2a,105,D Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_105_R_JP_LG.png
-Galarian Linoone,M2a,106,D Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_106_R_JP_LG.png
-Galarian Obstagoon,M2a,107,D Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_107_R_JP_LG.png
-Cynthia's Spiritomb,M2a,108,D Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_108_R_JP_LG.png
-Scraggy,M2a,109,D Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_109_R_JP_LG.png
-Mega Scrafty ex,M2a,110,D Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_110_R_JP_LG.png
-N's Zorua,M2a,111,D Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_111_R_JP_LG.png
-N's Zoroark ex,M2a,112,D Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_112_R_JP_LG.png
-Pangoro,M2a,113,D Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_113_R_JP_LG.png
-Fezandipiti ex,M2a,114,D Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_114_R_JP_LG.png
-Pecharunt,M2a,115,D Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_115_R_JP_LG.png
-Pawniard,M2a,116,M Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_116_R_JP_LG.png
-Bisharp,M2a,117,M Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_117_R_JP_LG.png
-Kingambit,M2a,118,M Stage 2,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_118_R_JP_LG.png
-Genesect ex,M2a,119,M Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_119_R_JP_LG.png
-Magearna,M2a,120,M Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_120_R_JP_LG.png
-Duraludon,M2a,121,M Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_121_R_JP_LG.png
-Archaludon ex,M2a,122,M Stage 1,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_122_R_JP_LG.png
-Hop's Zacian ex,M2a,123,M Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_123_R_JP_LG.png
-Dratini,M2a,124,N Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_124_R_JP_LG.png
-Dragonair,M2a,125,N Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_125_R_JP_LG.png
-Mega Dragonite ex,M2a,126,N Stage 2,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_126_R_JP_LG.png
-Rayquaza,M2a,127,N Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_127_R_JP_LG.png
-N's Reshiram,M2a,128,N Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_128_R_JP_LG.png
-N's Zekrom,M2a,129,N Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_129_R_JP_LG.png
-Noibat,M2a,130,N Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_130_R_JP_LG.png
-Noivern,M2a,131,N Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_131_R_JP_LG.png
-Dreepy,M2a,132,N Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_132_R_JP_LG.png
-Drakloak,M2a,133,N Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_133_R_JP_LG.png
-Dragapult ex,M2a,134,N Stage 2,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_134_R_JP_LG.png
-Tatsugiri,M2a,135,N Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_135_R_JP_LG.png
-Hop's Snorlax,M2a,136,C Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_136_R_JP_LG.png
-Hoothoot,M2a,137,C Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_137_R_JP_LG.png
-Noctowl,M2a,138,C Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_138_R_JP_LG.png
-Fan Rotom,M2a,139,C Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_139_R_JP_LG.png
-Bouffalant,M2a,140,C Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_140_R_JP_LG.png
-Hop's Wooloo,M2a,141,C Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_141_R_JP_LG.png
-Hop's Dubwool,M2a,142,C Stage 1,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_142_R_JP_LG.png
-Hop's Cramorant,M2a,143,C Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_143_R_JP_LG.png
-Terapagos,M2a,144,C Basic,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_144_R_JP_LG.png
-Terapagos ex,M2a,145,C Basic,Double Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_145_R_JP_LG.png
-N's PP Up,M2a,146,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_146_R_JP_LG.png
-Enhanced Hammer,M2a,148,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_148_R_JP_LG.png
-Glass Trumpet,M2a,149,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_149_R_JP_LG.png
-Sacred Ash,M2a,150,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_150_R_JP_LG.png
-Tool Scrapper,M2a,151,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_151_R_JP_LG.png
-Tera Orb,M2a,152,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_152_R_JP_LG.png
-Buddy-Buddy Poffin,M2a,153,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_153_R_JP_LG.png
-Premium Power Pro,M2a,154,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_154_R_JP_LG.png
-Fight Gong,M2a,155,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_155_R_JP_LG.png
-Hop's Bag,M2a,156,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_156_R_JP_LG.png
-Bug Catching Set,M2a,157,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_157_R_JP_LG.png
-Mega Signal,M2a,158,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_158_R_JP_LG.png
-Nightly Stretcher,M2a,159,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_159_R_JP_LG.png
-Team Rocket's Receiver,M2a,160,Item,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_160_R_JP_LG.png
-Counter Gain,M2a,161,Tool,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_161_R_JP_LG.png
-Cynthia's Power Weight,M2a,162,Tool,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_162_R_JP_LG.png
-Light Ball,M2a,163,Tool,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_163_R_JP_LG.png
-Thick Scales,M2a,164,Tool,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_164_R_JP_LG.png
-Balloon,M2a,165,Tool,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_165_R_JP_LG.png
-Brave Bangle,M2a,166,Tool,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_166_R_JP_LG.png
-Hop's Choice Band,M2a,167,Tool,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_167_R_JP_LG.png
-Iris's Fighting Spirit,M2a,168,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_168_R_JP_LG.png
-Acerola's Mischief,M2a,169,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_169_R_JP_LG.png
-Canari,M2a,170,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_170_R_JP_LG.png
-Surfer,M2a,171,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_171_R_JP_LG.png
-Hilda,M2a,172,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_172_R_JP_LG.png
-Anthea & Concordia,M2a,173,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_173_R_JP_LG.png
-Ethan's Adventure,M2a,174,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_174_R_JP_LG.png
-Lillie's Determination,M2a,175,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_175_R_JP_LG.png
-Team Rocket's Ariana,M2a,176,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_176_R_JP_LG.png
-Team Rocket's Archer,M2a,177,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_177_R_JP_LG.png
-Team Rocket's Giovanni,M2a,178,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_178_R_JP_LG.png
-Team Rocket's Petrel,M2a,179,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_179_R_JP_LG.png
-Team Rocket's Proton,M2a,180,Supporter,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_180_R_JP_LG.png
-N's Castle,M2a,181,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_181_R_JP_LG.png
-Forest of Vitality,M2a,182,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_182_R_JP_LG.png
-Gravity Mountain,M2a,183,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_183_R_JP_LG.png
-Area Zero Underdepths,M2a,184,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_184_R_JP_LG.png
-Levincia,M2a,185,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_185_R_JP_LG.png
-Postwick,M2a,186,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_186_R_JP_LG.png
-Mystery Garden,M2a,187,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_187_R_JP_LG.png
-Night Mine,M2a,188,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_188_R_JP_LG.png
-Team Rocket's Watchtower,M2a,189,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_189_R_JP_LG.png
-Team Rocket's Factory,M2a,190,Stadium,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_190_R_JP_LG.png
-Ignition Energy,M2a,191,Special Energy,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_191_R_JP_LG.png
-Prism Energy,M2a,192,Special Energy,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_192_R_JP_LG.png
-Team Rocket's Energy,M2a,193,Special Energy,,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_193_R_JP_LG.png
-Beautifly,M2a,194,G Stage 2,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_194_R_JP_LG.png
-Dustox,M2a,195,G Stage 2,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_195_R_JP_LG.png
-Budew,M2a,196,G Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_196_R_JP_LG.png
-Ethan's Magcargo,M2a,197,R Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_197_R_JP_LG.png
-Numel,M2a,198,R Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_198_R_JP_LG.png
-Psyduck,M2a,199,W Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_199_R_JP_LG.png
-Snorunt,M2a,200,W Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_200_R_JP_LG.png
-Heliolisk,M2a,201,L Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_201_R_JP_LG.png
-Misdreavus,M2a,202,P Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_202_R_JP_LG.png
-Togekiss,M2a,203,P Stage 2,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_203_R_JP_LG.png
-Hop's Trevenant,M2a,204,P Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_204_R_JP_LG.png
-Team Rocket's Mimikyu,M2a,205,P Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_205_R_JP_LG.png
-Team Rocket's Dugtrio,M2a,206,F Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_206_R_JP_LG.png
-Medicham,M2a,207,F Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_207_R_JP_LG.png
-Cynthia's Spiritomb,M2a,208,D Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_208_R_JP_LG.png
-Galarian Obstagoon,M2a,209,D Stage 2,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_209_R_JP_LG.png
-N's Zekrom,M2a,210,N Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_210_R_JP_LG.png
-Dreepy,M2a,211,N Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_211_R_JP_LG.png
-Drakloak,M2a,212,N Stage 1,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_212_R_JP_LG.png
-Fan Rotom,M2a,213,C Basic,Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_213_R_JP_LG.png
-N's PP Up,M2a,214,Item,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_214_R_JP_LG.png
-Glass Trumpet,M2a,215,Item,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_215_R_JP_LG.png
-Ultra Ball,M2a,216,Item,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_216_R_JP_LG.png
-Team Rocket's Receiver,M2a,217,Item,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_217_R_JP_LG.png
-Counter Gain,M2a,218,Tool,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_218_R_JP_LG.png
-Canari,M2a,219,Supporter,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_219_R_JP_LG.png
-Black Belt's Training,M2a,220,Supporter,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_220_R_JP_LG.png
-Anthea & Concordia,M2a,221,Supporter,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_221_R_JP_LG.png
-Jamming Tower,M2a,222,Stadium,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_222_R_JP_LG.png
-Mega Charizard X ex,M2a,223,R Stage 2,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_223_R_JP_LG.png
-Mega Froslass ex,M2a,224,W Stage 1,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_224_R_JP_LG.png
-Mega Eelektross ex,M2a,225,L Stage 2,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_225_R_JP_LG.png
-Mega Gardevoir ex,M2a,226,P Stage 2,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_226_R_JP_LG.png
-Mega Diancie ex,M2a,227,P Basic,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_227_R_JP_LG.png
-Mega Lucario ex,M2a,228,F Stage 1,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_228_R_JP_LG.png
-Mega Hawlucha ex,M2a,229,F Basic,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_229_R_JP_LG.png
-Mega Gengar ex,M2a,230,D Stage 2,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_230_R_JP_LG.png
-Mega Scrafty ex,M2a,231,D Stage 1,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_231_R_JP_LG.png
-Mega Dragonite ex,M2a,232,N Stage 2,Secret Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_232_R_JP_LG.png
-Mega Froslass ex,M2a,233,W Stage 1,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_233_R_JP_LG.png
-Pikachu ex,M2a,234,L Basic,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_234_R_JP_LG.png
-Mega Eelektross ex,M2a,235,L Stage 2,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_235_R_JP_LG.png
-Iono's Bellibolt ex,M2a,236,L Stage 1,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_236_R_JP_LG.png
-Team Rocket's Mewtwo ex,M2a,237,P Basic,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_237_R_JP_LG.png
-Mega Diancie ex,M2a,238,P Basic,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_238_R_JP_LG.png
-Mega Hawlucha ex,M2a,239,F Basic,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_239_R_JP_LG.png
-Mega Gengar ex,M2a,240,D Stage 2,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_240_R_JP_LG.png
-Mega Scrafty ex,M2a,241,D Stage 1,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_241_R_JP_LG.png
-N's Zoroark ex,M2a,242,D Stage 1,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_242_R_JP_LG.png
-Marnie's Grimmsnarl ex,M2a,243,D Stage 2,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_243_R_JP_LG.png
-Fezandipiti ex,M2a,244,D Basic,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_244_R_JP_LG.png
-Steven's Metagross ex,M2a,245,M Stage 2,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_245_R_JP_LG.png
-Mega Dragonite ex,M2a,246,N Stage 2,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_246_R_JP_LG.png
-Iris's Fighting Spirit,M2a,247,Supporter,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_247_R_JP_LG.png
-Canari,M2a,248,Supporter,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_248_R_JP_LG.png
-Surfer,M2a,249,Supporter,Special Art Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_249_R_JP_LG.png
-Mega Dragonite ex,M2a,250,N Stage 2,Ultra Rare,https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/M2a/M2a_250_R_JP_LG.png

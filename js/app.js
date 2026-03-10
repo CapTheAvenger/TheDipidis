@@ -11020,26 +11020,30 @@ const BASE_PATH = './data/';
             console.log('[compareWithSavedDeck] Comparing with saved deck:', savedDeck.name);
             
             // Convert saved deck to "old deck" format (same as parseDeckList output)
+            // Deck format: "CardName (SET NUMBER)" with exact prints preserved
             const oldDeck = [];
-            for (const [cardName, count] of Object.entries(savedDeck.cards || {})) {
-                // Find card in database to get set and number
-                const card = window.allCardsDatabase.find(c => c.name === cardName);
-                if (card) {
-                    oldDeck.push({
-                        count: count,
-                        name: card.name,
-                        set: card.set,
-                        number: card.number,
-                        key: `${card.set}-${card.number}`
-                    });
-                } else {
-                    // Card not found in database, just use name
+            for (const [deckKey, count] of Object.entries(savedDeck.cards || {})) {
+                // Key format: "CardName (SET NUMBER)" or just "CardName"
+                const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+(\d+)\)$/);
+                if (match) {
+                    const cardName = match[1];
+                    const setCode = match[2];
+                    const setNumber = match[3];
                     oldDeck.push({
                         count: count,
                         name: cardName,
+                        set: setCode,
+                        number: setNumber,
+                        key: `${setCode}-${setNumber}`
+                    });
+                } else {
+                    // No set info available (old format or plain name), just use card name
+                    oldDeck.push({
+                        count: count,
+                        name: deckKey,
                         set: null,
                         number: null,
-                        key: cardName
+                        key: deckKey
                     });
                 }
             }

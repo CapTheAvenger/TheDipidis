@@ -9,7 +9,7 @@ on:
 jobs:
   update-card-database:
     runs-on: ubuntu-latest
-    timeout-minutes: 240 # 4 Stunden Timeout für große Card Database
+    timeout-minutes: 240 # 4 hours timeout for large card database
     
     steps:
       - name: Checkout Repository

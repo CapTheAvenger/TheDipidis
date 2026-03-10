@@ -659,6 +659,16 @@ function updateDecksUI() {
         }
       }
       
+      // Debug: Log card types to find Energy sorting issue
+      console.log('[My Decks] Card types in deck:');
+      deckCards.forEach(card => {
+        const cardType = card.type || card.card_type || '';
+        const category = getCardTypeCategory(cardType);
+        if (category === 'Energy' || cardType.toLowerCase().includes('energy')) {
+          console.log(`  ${card.name}: type="${cardType}" → category="${category}"`);
+        }
+      });
+      
       // Sort cards by type (same as Deck Builder)
       const sortedCards = sortCardsByTypeSimple(deckCards);
       
@@ -749,27 +759,32 @@ function updateDecksUI() {
 
 // Helper: Card type sorting (same as Deck Builder)
 function getCardTypeCategory(cardType) {
-  if (!cardType) return 'Energy'; // Empty type = Basic Energy
+  /**
+   * Determines the category of a card based on the type field
+   * type format: "GBasic", "WBasic", "PStage1", "PStage2", "Supporter", "Item", "Tool", "Stadium", "Special Energy", "Energy"
+   */
+  if (!cardType) return 'Pokemon';
   
+  // IMPORTANT FIX: Check for Energy BEFORE element letter check
+  // This fixes "Basic Fighting Energy" being sorted as Pokemon instead of Energy
   const typeLower = cardType.toLowerCase();
-  
-  // Check Energy FIRST (before element check)
   if (typeLower.includes('energy')) return 'Energy';
-  if (cardType === 'Energy') return 'Energy';
   if (cardType === 'Special Energy') return 'Special Energy';
+  if (cardType === 'Energy') return 'Energy';
   
-  // Check Trainer types
+  // Check if it's a Pokemon (type starts with element letter)
+  if (cardType.charAt(0).match(/[GRWLPFDMNC]/)) {
+    return 'Pokemon';
+  }
+  
+  // Check exact matches for trainer types
   if (cardType === 'Supporter') return 'Supporter';
   if (cardType === 'Item') return 'Item';
   if (cardType === 'Tool') return 'Tool';
   if (cardType === 'Stadium') return 'Stadium';
   if (cardType === 'Trainer') return 'Item';
   
-  // Check if it's a Pokemon (type starts with element letter + stage)
-  // Examples: GBasic, RStage1, WStage2, PVMax, FStage1, etc.
-  if (cardType.charAt(0).match(/[GRWLPFDMNC]/)) return 'Pokemon';
-  
-  // Default to Pokemon
+  // Fallback to Pokemon
   return 'Pokemon';
 }
 

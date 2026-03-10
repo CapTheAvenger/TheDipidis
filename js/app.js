@@ -9437,9 +9437,14 @@
             }
             
             // Filter to English sets only if we have the set mapping
-            if (window.englishSetCodes && window.englishSetCodes.size > 0) {
+            // CRITICAL: Skip this filter for Pokemon cards with international_prints
+            // Limitless already validates these sets - we trust their data even if not in formats.json
+            if (!isPokemonCard && window.englishSetCodes && window.englishSetCodes.size > 0) {
+                const beforeEnglishFilter = versions.length;
                 versions = versions.filter(version => window.englishSetCodes.has(version.set));
-                console.log(`[openRaritySwitcher] After English filter: ${versions.length} versions`);
+                console.log(`[openRaritySwitcher] English filter: ${beforeEnglishFilter} → ${versions.length} versions (Trainer/Energy only)`);
+            } else if (isPokemonCard) {
+                console.log(`[openRaritySwitcher] Skipping English filter for Pokemon cards (trust international_prints from Limitless)`);
             }
             
             // Filter to only show cards with COMPLETE data

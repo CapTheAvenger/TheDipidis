@@ -3027,6 +3027,123 @@
         window.pastMetaCurrentArchetype = null;
         console.log('[Init] Starting with empty deck (localStorage cleared on page load)');
         
+        // ═══════════════════════════════════════════════════════════════
+        // BATCH ADD FUNCTION - For Auto-Generate Performance
+        // ═══════════════════════════════════════════════════════════════
+        // This version adds cards WITHOUT triggering display updates
+        // Use this for bulk operations, then call updateDeckDisplay() once at the end
+        
+        function addCardToDeckBatch(source, cardName, setCode, setNumber) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return false;
+            
+            let deck, deckOrderKey;
+            if (source === 'cityLeague') {
+                deck = window.cityLeagueDeck;
+                deckOrderKey = 'cityLeagueDeckOrder';
+            } else if (source === 'currentMeta') {
+                deck = window.currentMetaDeck;
+                deckOrderKey = 'currentMetaDeckOrder';
+            } else if (source === 'pastMeta') {
+                deck = window.pastMetaDeck;
+                deckOrderKey = 'pastMetaDeckOrder';
+            }
+            
+            // Initialize deck order array if not exists
+            if (!window[deckOrderKey]) {
+                window[deckOrderKey] = [];
+            }
+
+            // When auto-generating, save version preference
+            if (setCode && setNumber) {
+                setRarityPreference(cardName, {
+                    mode: 'specific',
+                    set: setCode,
+                    number: setNumber
+                });
+            }
+            
+            let deckKey = (setCode && setNumber) ? `${cardName} (${setCode} ${setNumber})` : cardName;
+            
+            // Check if there's already an entry for this card
+            let existingKey = null;
+            if (deck[deckKey]) {
+                existingKey = deckKey;
+            } else if (deck[cardName]) {
+                existingKey = cardName;
+            } else {
+                for (const key in deck) {
+                    if (key === cardName || key.startsWith(cardName + ' (')) {
+                        existingKey = key;
+                        break;
+                    }
+                }
+            }
+            
+            // Migrate key if needed
+            if (existingKey && existingKey !== deckKey && setCode && setNumber) {
+                deck[deckKey] = deck[existingKey];
+                delete deck[existingKey];
+                if (window[deckOrderKey]) {
+                    const oldKeyIndex = window[deckOrderKey].indexOf(existingKey);
+                    if (oldKeyIndex !== -1) {
+                        window[deckOrderKey][oldKeyIndex] = deckKey;
+                    }
+                }
+            } else if (existingKey) {
+                deckKey = existingKey;
+            }
+            
+            if (!deck[deckKey]) {
+                deck[deckKey] = 0;
+            }
+            
+            const currentTotal = Object.values(deck).reduce((sum, count) => sum + count, 0);
+            if (currentTotal >= 70) {
+                return false; // Silent fail for batch operations
+            }
+            
+            // Check card limits
+            let cardsKey, cards;
+            if (source === 'cityLeague') {
+                cardsKey = 'currentCityLeagueDeckCards';
+                cards = window[cardsKey] || [];
+            } else if (source === 'currentMeta') {
+                cardsKey = 'currentCurrentMetaDeckCards';
+                cards = window[cardsKey] || [];
+            } else if (source === 'pastMeta') {
+                cards = pastMetaFilteredCards || [];
+            }
+            const allCardsDb = window.allCardsDatabase || [];
+            let cardData = cards.find(c => (c.card_name || c.full_card_name) === cardName);
+            if (!cardData && setCode && setNumber) {
+                cardData = allCardsDb.find(c => c.name === cardName && c.set === setCode && c.number === setNumber);
+            }
+            const isBaseEnergy = cardData && (cardData.type || cardData.card_type || '').toLowerCase() === 'energy' && 
+                                (cardName || '').match(/^(Fire|Water|Grass|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon|Colorless|Neutral)\s+Energy$/i);
+            const isAceSpecCard = isAceSpec(cardName);
+            
+            // Check limits (silent fail for batch)
+            if (!isBaseEnergy && !isAceSpecCard && deck[deckKey] >= 4) {
+                return false;
+            }
+            if (isAceSpecCard && deck[deckKey] >= 1) {
+                return false;
+            }
+            
+            deck[deckKey]++;
+            
+            // Track insertion order
+            if (!window[deckOrderKey].includes(deckKey)) {
+                window[deckOrderKey].push(deckKey);
+            }
+            
+            return true; // Success
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // SINGLE ADD FUNCTION - For Manual Card Addition
+        // ═══════════════════════════════════════════════════════════════
+        
         function addCardToDeck(source, cardName, setCode, setNumber) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             
@@ -5158,24 +5275,15 @@
                         setNumber = originalSetNumber;
                     }
                     
+                    // 🚀 PERFORMANCE: Use batch add (no display updates per card)
                     for (let i = 0; i < card.addCount; i++) {
-                        addCardToDeck(source, card.card_name, setCode, setNumber);
+                        addCardToDeckBatch(source, card.card_name, setCode, setNumber);
                     }
                 });
                 
                 console.log('[autoCompleteConsistency] ✅ Consistency deck completed with rarity mode:', globalRarityPreference);
                 
-                // Show the deck grid
-                renderMyDeckGrid(source);
-                
-                // Refresh overview grid
-                if (source === 'cityLeague') {
-                    applyCityLeagueFilter();
-                } else if (source === 'currentMeta') {
-                    applyCurrentMetaFilter();
-                }
-                
-                // Save deck
+                // Save deck ONCE at the end
                 if (source === 'cityLeague') {
                     saveCityLeagueDeck();
                 } else if (source === 'currentMeta') {
@@ -5183,6 +5291,9 @@
                 } else if (source === 'pastMeta') {
                     savePastMetaDeck();
                 }
+                
+                // 🚀 PERFORMANCE: Update display ONCE at the end (not 60 times!)
+                updateDeckDisplay(source)
             }
         }
         

@@ -2,9 +2,9 @@ name: Weekly Price Update
 
 on:
   schedule:
-    # Jeden Montag um 01:00 UTC (02:00 MEZ / 03:00 MESZ) - läuft nachts für morgendliche Preise
+    # Every Monday at 01:00 UTC (02:00 CET / 03:00 CEST) - runs at night for fresh morning prices
     - cron: '0 1 * * 1'
-  workflow_dispatch: # Ermöglicht manuelles Ausführen
+  workflow_dispatch: # Allows manual execution
 
 jobs:
   update-prices:

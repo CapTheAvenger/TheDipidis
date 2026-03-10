@@ -2,9 +2,9 @@ name: Weekly Tournament Data Scrape
 
 on:
   schedule:
-    # Jeden Dienstag um 01:00 UTC (02:00 MEZ / 03:00 MESZ) - läuft nachts für morgendliche Daten
+    # Every Tuesday at 01:00 UTC (02:00 CET / 03:00 CEST) - runs at night for fresh morning data
     - cron: '0 1 * * 2'
-  workflow_dispatch: # Ermöglicht manuelles Ausführen
+  workflow_dispatch: # Allows manual execution
 
 jobs:
   scrape-tournaments:

@@ -835,7 +835,14 @@ function sortCardsByTypeSimple(cards) {
         return elemOrderA - elemOrderB;
       }
       
-      // Same element: sort by set code, then set number, then name
+      // Same element: sort by percentage (highest first), then by set code/number
+      const percA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
+      const percB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
+      
+      if (percA !== percB) {
+        return percB - percA;
+      }
+      
       const setCodeA = a.set || a.set_code || '';
       const setCodeB = b.set || b.set_code || '';
       
@@ -854,7 +861,14 @@ function sortCardsByTypeSimple(cards) {
       return nameA.localeCompare(nameB);
     }
     
-    // For non-Pokemon cards: sort by set number then name
+    // For non-Pokemon cards: Sort by PERCENTAGE (highest first), then set number, then name
+    const percA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
+    const percB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
+    
+    if (percA !== percB) {
+      return percB - percA;
+    }
+    
     const setNumA = parseInt(((a.number || a.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
     const setNumB = parseInt(((b.number || b.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
     if (setNumA !== setNumB) {

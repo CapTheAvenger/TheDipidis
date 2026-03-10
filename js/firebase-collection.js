@@ -798,4 +798,4 @@ function switchProfileTab(tabName) {
   const activeBtn = document.querySelector(`.profile-tab-btn[onclick*="${tabName}"]`);
   if (activeBtn) {
     activeBtn.classList.add('active');
-  }
+  }}

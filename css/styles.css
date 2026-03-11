@@ -3290,3 +3290,27 @@
         right: 10px;
     }
 }
+/* --- Filter Boxen (Cards Tab) max-width auf grossen Bildschirmen --- */
+.filter-section-main > div:nth-child(2) {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Deck Builder Listenansicht auf Handys --- */
+@media (max-width: 768px) {
+    .deck-table-view td {
+        padding: 8px 4px;
+        font-size: 13px;
+    }
+
+    .builder-controls .btn {
+        font-size: 12px;
+        padding: 8px;
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    .builder-controls {
+        flex-direction: column;
+    }
+}

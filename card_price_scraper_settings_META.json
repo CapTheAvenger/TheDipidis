@@ -1,11 +1,12 @@
 {
-  "delay_seconds": 1.5,
+  "delay_seconds": 1.0,
+  "cardmarket_wait_seconds": 5,
   "headless": true,
   "batch_size": 100,
   "skip_cards_with_prices": false,
+  "max_runtime_minutes": 320,
   "only_update_sets": [
-    "TWM", "SFA", "SCR", "SSP", "PRE", "JTG", "DRI", "WHT", "BLK", 
+    "TWM", "SFA", "SCR", "SSP", "PRE", "JTG", "DRI", "WHT", "BLK",
     "MEE", "MEG", "PFL", "ASC", "SVP", "MEP", "SP"
   ],
-  "_comment": "META UPDATE - Only updates cards from TWM (Twilight Masquerade) onwards + Promos. Use this for weekly updates."
-}
+  "_comment": "META UPDATE - Only updates cards from TWM (Twilight Masquerade) onwards + Promos. Reduced delays to fit within GitHub Actions 6h limit. max_runtime_minutes stops gracefully at 5h 20m."

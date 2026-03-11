@@ -1825,6 +1825,19 @@
     }
     .pt-hand-wrapper:hover .pt-hand-disc-btn { display: flex; }
 
+    /* ── VSTAR & GX Marker ── */
+    .pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 50px; height: 22px; border-radius: 4px; font-weight: 900; font-size: 10px; cursor: pointer; border: 2px solid; transition: all 0.2s; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
+    .pt-marker-vstar { background: linear-gradient(135deg, #fff, #a8e6cf); color: #000; border-color: #fff; }
+    .pt-marker-gx { background: linear-gradient(135deg, #333, #000); color: #fff; border-color: #00bcd4; text-shadow: none; }
+    .pt-marker.used { opacity: 0.3; filter: grayscale(1); transform: scale(0.95); box-shadow: none !important; }
+
+    /* ── Action Log Panel ── */
+    #ptActionLogPanel { position: absolute; right: 15px; top: 70px; width: 280px; height: 350px; background: rgba(0, 0, 0, 0.85); border: 2px solid #3B4CCA; border-radius: 8px; color: #fff; font-family: monospace; font-size: 12px; padding: 10px; overflow-y: auto; z-index: 10000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .pt-log-entry { margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; }
+    .pt-log-p1 { color: #a8e6cf; }
+    .pt-log-p2 { color: #ff8b94; }
+    .pt-log-neutral { color: #ffcb05; }
+
     /* ── MOBILE RESPONSIVENESS FÜR DEN PLAYTESTER ── */
     @media (max-width: 768px) {
         .pt-toolbar {
@@ -1858,7 +1871,7 @@
     </style>
 
     <!-- ═══════════════════════════════════════════════════
-         GOLDFISHING PLAYTESTER — 2-PLAYER SANDBOX
+         GOLDFISHING PLAYTESTER — 2-PLAYER SANDBOX (v3 Ultimate)
     ═══════════════════════════════════════════════════ -->
     <div id="playtesterModal"
          style="display:none; position:fixed; top:0; left:0; right:0; bottom:0;
@@ -1866,23 +1879,93 @@
                 background: radial-gradient(circle at center, #1b6b38 0%, #0d381c 100%);
                 font-family: 'Nunito', sans-serif;">
 
+        <!-- Action Log Panel -->
+        <div id="ptActionLogPanel"></div>
+
+        <!-- Hotkey Modal -->
+        <div id="ptHotkeyModal" style="display:none;position:fixed;top:50%;left:50%;
+             transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e;
+             border:2px solid #3B4CCA;border-radius:12px;padding:24px;color:#fff;
+             font-family:monospace;font-size:13px;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="margin:0;color:#FFCB05;">⌨️ Hotkeys</h3>
+                <button class="pt-btn pt-danger" onclick="document.getElementById('ptHotkeyModal').style.display='none'">✕</button>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+                <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>D</b></td><td style="padding:4px 8px;">+1 Karte ziehen</td></tr>
+                <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>S</b></td><td style="padding:4px 8px;">Deck mischen</td></tr>
+                <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>C</b></td><td style="padding:4px 8px;">Münze werfen</td></tr>
+                <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>P</b></td><td style="padding:4px 8px;">Zug weitergeben</td></tr>
+                <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>F</b></td><td style="padding:4px 8px;">Board flippen</td></tr>
+                <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>`</b></td><td style="padding:4px 8px;">Action Log ein/aus</td></tr>
+                <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>/</b></td><td style="padding:4px 8px;">Befehlszeile öffnen</td></tr>
+                <tr><td colspan="2" style="padding-top:12px;color:#888;font-size:11px;">Befehle: /draw N &nbsp;/mill N &nbsp;/top N &nbsp;/coin N &nbsp;/dice</td></tr>
+            </table>
+        </div>
+
+        <!-- Card Viewer Modal -->
+        <div id="ptCardViewer" style="display:none;position:fixed;top:50%;left:50%;
+             transform:translate(-50%,-50%);z-index:20000;background:rgba(0,0,0,0.95);
+             border:2px solid #3B4CCA;border-radius:12px;padding:16px;
+             text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.9);"
+             onclick="document.getElementById('ptCardViewer').style.display='none'">
+            <img id="ptCardViewerImg" src="" style="max-width:300px;max-height:420px;border-radius:8px;display:block;margin:0 auto;">
+            <div id="ptCardViewerName" style="color:#fff;margin-top:10px;font-weight:700;"></div>
+            <div style="color:#888;font-size:11px;margin-top:4px;">Klicken zum Schließen</div>
+        </div>
+
+        <!-- Top Deck Control Modal -->
+        <div id="ptTopCardsModal" style="display:none;position:fixed;top:50%;left:50%;
+             transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e;
+             border:2px solid #FFCB05;border-radius:12px;padding:20px;
+             min-width:360px;max-width:90vw;max-height:80vh;overflow-y:auto;
+             box-shadow:0 10px 30px rgba(0,0,0,0.9);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <h3 style="margin:0;color:#FFCB05;">🔭 Top Deck Control</h3>
+                <button class="pt-btn pt-danger" onclick="ptCloseTopCards()">✕</button>
+            </div>
+            <div id="ptTopCardsContent" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+                <button class="pt-btn" onclick="ptConfirmTopOrder()">✅ Reihenfolge bestätigen</button>
+                <button class="pt-btn" style="background:#666;" onclick="ptCloseTopCards()">Abbrechen</button>
+            </div>
+        </div>
+
         <!-- Header toolbar -->
         <div class="pt-toolbar" style="padding:10px 14px; display:flex;
                     justify-content:space-between; align-items:center; flex-wrap:nowrap;
-                    gap:10px; flex-shrink:0; overflow-x:auto;">
-            <div style="display:flex; align-items:center; gap:15px; flex-shrink:0;">
+                    gap:10px; flex-shrink:0; overflow-x:auto; position:relative;">
+            <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
                 <span style="color:#fff; font-size:1.1em; font-weight:800; letter-spacing: 0.5px;">⚔️ 2-Player Sandbox</span>
                 <span id="ptMessage" style="color:#FFCB05; font-weight:700; font-size:0.9em; min-width:80px;"></span>
             </div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="pt-btn" onclick="ptDraw1()">+1 Ziehen</button>
-                <button class="pt-btn" onclick="ptOpenDeckSearch()">🔍 Deck suchen</button>
-                <button class="pt-btn" onclick="ptShuffle()">🔀 Mischen</button>
-                <button class="pt-btn" onclick="ptFlipCoin()">🪙 Münze</button>
-                <button class="pt-btn" onclick="ptPassTurn()" style="background:#27ae60; border-color:#2ecc71;">⏭️ Pass Turn</button>
-                <button class="pt-btn" id="flip-board-btn" onclick="ptFlipBoard()">🔄 Flip Board</button>
-                <button class="pt-btn" onclick="ptNewGame()">🔄 Neustart</button>
-                <button class="pt-btn pt-danger" onclick="closePlaytester()">🚪 Exit</button>
+            <!-- VSTAR / GX Markers -->
+            <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+                <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')" title="VSTAR Power">VSTAR</button>
+                <button id="ptGxMarker"    class="pt-marker pt-marker-gx"    onclick="ptToggleMarker('gx')"    title="GX Attacke">GX</button>
+            </div>
+            <!-- Command Input -->
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                <input id="ptCommandInput" type="text" placeholder="/draw 3  /mill 2  /top 5  /coin 3  /dice"
+                       style="background:rgba(0,0,0,0.5);border:1px solid #3B4CCA;border-radius:6px;
+                              color:#fff;padding:5px 10px;font-size:12px;width:220px;
+                              outline:none;font-family:monospace;"
+                       onkeydown="if(event.key==='Enter'){ptRunCommand();}"
+                       onclick="event.stopPropagation()">
+                <button class="pt-btn" onclick="ptRunCommand()">▶</button>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="pt-btn" onclick="ptDraw1()">D +1</button>
+                <button class="pt-btn" onclick="ptOpenTopCards(5)">🔭 Top</button>
+                <button class="pt-btn" onclick="ptOpenDeckSearch()">🔍 Suche</button>
+                <button class="pt-btn" onclick="ptShuffle()">🔀</button>
+                <button class="pt-btn" onclick="ptFlipCoin()">🪙</button>
+                <button class="pt-btn" onclick="ptPassTurn()" style="background:#27ae60; border-color:#2ecc71;">⏭️ Pass</button>
+                <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip</button>
+                <button class="pt-btn" onclick="ptNewGame()">♻️ Neu</button>
+                <button class="pt-btn" onclick="ptToggleLog()" title="Action Log (&grave;)">📋 Log</button>
+                <button class="pt-btn" onclick="document.getElementById('ptHotkeyModal').style.display='flex'" title="Hotkeys">⌨️</button>
+                <button class="pt-btn pt-danger" onclick="closePlaytester()">🚪</button>
             </div>
         </div>
 
@@ -1899,6 +1982,10 @@
                             <div id="ptPrizeZone-p2" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; max-width: 130px;"></div>
                         </div>
                         <div style="display:flex; gap:12px; align-items:flex-start;">
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label">Lost Zone (<span id="ptLostCount-p2">0</span>)</div>
+                                <div id="ptLostPile-p2" style="width:40px;height:56px;border:1px dashed #9b59b6;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;" onclick="ptOpenLost('p2')" title="Lost Zone anzeigen">🌀</div>
+                            </div>
                             <div style="text-align:center;">
                                 <div class="pt-zone-label">Ablage (<span id="ptDiscardCount-p2">0</span>)</div>
                                 <div id="ptDiscardPile-p2"></div>
@@ -1952,6 +2039,10 @@
                         </div>
                         <div style="display:flex; gap:12px; align-items:flex-start;">
                             <div style="text-align:center;">
+                                <div class="pt-zone-label">Lost Zone (<span id="ptLostCount-p1">0</span>)</div>
+                                <div id="ptLostPile-p1" style="width:40px;height:56px;border:1px dashed #9b59b6;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;" onclick="ptOpenLost('p1')" title="Lost Zone anzeigen">🌀</div>
+                            </div>
+                            <div style="text-align:center;">
                                 <div class="pt-zone-label">Ablage (<span id="ptDiscardCount-p1">0</span>)</div>
                                 <div id="ptDiscardPile-p1"></div>
                             </div>
@@ -1987,8 +2078,11 @@
          onclick="if(event.target===this)document.getElementById('ptDeckSearchModal').style.display='none'">
         <div style="background:#2a2a2a;border-radius:12px;padding:20px;max-width:90vw;width:800px;max-height:85vh;overflow-y:auto;border:2px solid #3B4CCA;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;">
-                <h3 style="color:#fff;margin:0;">🔍 Deck durchsuchen &ndash; Klicken = auf die Hand</h3>
-                <button class="pt-btn pt-danger" onclick="document.getElementById('ptDeckSearchModal').style.display='none'">✕</button>
+                <h3 style="color:#fff;margin:0;">🔍 Deck durchsuchen</h3>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <span style="color:#aaa;font-size:12px;">Klicken = Hand &nbsp;|&nbsp; Rechtsklick = Lost Zone</span>
+                    <button class="pt-btn pt-danger" onclick="document.getElementById('ptDeckSearchModal').style.display='none'">✕</button>
+                </div>
             </div>
             <div id="ptDeckSearchGrid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;"></div>
         </div>
@@ -2003,10 +2097,26 @@
         <div style="background:#2a2a2a;border-radius:12px;padding:20px;
                     max-width:90vw;max-height:85vh;overflow-y:auto;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;">
-                <h3 style="color:#fff;margin:0;">🗑️ Ablagestapel – Klicken = auf die Hand nehmen</h3>
+                <h3 style="color:#fff;margin:0;">🗑️ Ablagestapel &ndash; Klicken = Hand &nbsp;|&nbsp; Rechtsklick = Lost Zone</h3>
                 <button class="pt-btn pt-danger" onclick="ptCloseDiscardModal()">✕</button>
             </div>
             <div id="ptDiscardGrid" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
+        </div>
+    </div>
+
+    <!-- Lost Zone viewer -->
+    <div id="ptLostModal"
+         style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+                z-index:16000;background:rgba(0,0,0,0.85);
+                align-items:center;justify-content:center;"
+         onclick="if(event.target===this)ptCloseLostModal()">
+        <div style="background:#1a0a2e;border-radius:12px;padding:20px;border:2px solid #9b59b6;
+                    max-width:90vw;max-height:85vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;">
+                <h3 style="color:#9b59b6;margin:0;">🌀 Lost Zone – Karten hier sind permanent entfernt</h3>
+                <button class="pt-btn pt-danger" onclick="ptCloseLostModal()">✕</button>
+            </div>
+            <div id="ptLostGrid" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
         </div>
     </div>
 
@@ -2048,6 +2158,6 @@
     <!-- Main App -->
     <script src="js/app.js?v=20260311-v11"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260311-v2"></script>
+    <script src="js/playtester.js?v=20260311-v3"></script>
 </body>
 </html>

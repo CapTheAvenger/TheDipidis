@@ -8996,6 +8996,8 @@ const BASE_PATH = './data/';
             // Create unique card ID: name|set|number (tracks SPECIFIC print, not just card name)
             const cardId = `${card.name}|${displaySet}|${displayNumber}`;
             item.setAttribute('data-card-id', cardId);
+            // Escape single quotes for safe use inside onclick='...' JS string literals
+            const safeCardId = cardId.replace(/'/g, "\\'");
             
             // Check if user owns THIS SPECIFIC PRINT
             const userOwnsCard = window.userCollection && window.userCollection.has(cardId);
@@ -9056,10 +9058,10 @@ const BASE_PATH = './data/';
                     <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
                     ${userOwnsCard ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">?</div>' : ''}
                     <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
-                        <button onclick="toggleCollection('${cardId}')" style="background: ${userOwnsCard ? '#4CAF50' : '#fff'}; color: ${userOwnsCard ? '#fff' : '#000'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userOwnsCard ? 'Remove from collection' : 'Add to collection'}">
+                        <button onclick="toggleCollection('${safeCardId}')" style="background: ${userOwnsCard ? '#4CAF50' : '#fff'}; color: ${userOwnsCard ? '#fff' : '#000'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userOwnsCard ? 'Remove from collection' : 'Add to collection'}">
                             ${userOwnsCard ? '&#10003;' : '+'}
                         </button>
-                        <button onclick="toggleWishlist('${cardId}')" style="background: ${userWantsCard ? '#FF9800' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid #FF9800; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
+                        <button onclick="toggleWishlist('${safeCardId}')" style="background: ${userWantsCard ? '#FF9800' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid #FF9800; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
                             ${userWantsCard ? '&#9829;' : '&#9825;'}
                         </button>
                     </div>

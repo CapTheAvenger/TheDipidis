@@ -18,10 +18,11 @@ let ptField = {
 // Speichert Schaden fuer jede Zone (z.B. ptDamage['active'] = 30)
 let ptDamage = { active: 0, bench0: 0, bench1: 0, bench2: 0, bench3: 0, bench4: 0 };
 
-// Speichert Status-Effekte (nur fuer 'active' relevant)
+// Speichert Status-Effekte (NUR fuer 'active' relevant)
 let ptStatus = { active: [] };
 
 let ptSelectedCardIndex = null;
+let ptDragSourceZone = null; // Zone von der ein Feld-Drag startet
 let isBoardFlipped = false;
 let _ptMsgTimer = null;
 
@@ -86,6 +87,7 @@ function ptNewGame() {
     ptDamage  = { active: 0, bench0: 0, bench1: 0, bench2: 0, bench3: 0, bench4: 0 };
     ptStatus  = { active: [] };
     ptSelectedCardIndex = null;
+    ptDragSourceZone = null;
     isBoardFlipped = false;
 
     const board   = document.getElementById('playtester-board');
@@ -175,6 +177,35 @@ function ptClickZone(zoneId) {
     ptRenderField();
 }
 
+function moveZoneToZone(sourceZone, targetZone) {
+    if (sourceZone === targetZone) return;
+
+    if (ptField[targetZone].length > 0) {
+        // Beide Zonen belegt -> tauschen (Schaden bleibt erhalten, Status faellt weg wenn Active beteiligt)
+        const tempCards = [...ptField[targetZone]];
+        const tempDmg   = ptDamage[targetZone];
+        ptField[targetZone]  = [...ptField[sourceZone]];
+        ptDamage[targetZone] = ptDamage[sourceZone];
+        ptField[sourceZone]  = tempCards;
+        ptDamage[sourceZone] = tempDmg;
+        ptShowMessage('Zonen getauscht!');
+    } else {
+        // Zielzone leer -> verschieben
+        ptField[targetZone]  = [...ptField[sourceZone]];
+        ptDamage[targetZone] = ptDamage[sourceZone];
+        ptField[sourceZone]  = [];
+        ptDamage[sourceZone] = 0;
+        ptShowMessage('Karte verschoben.');
+    }
+
+    // Rueckzug / Wechsel heilt alle Status-Zustande (TCG-Regel)
+    if (sourceZone === 'active' || targetZone === 'active') {
+        ptStatus.active = [];
+    }
+
+    ptRenderField();
+}
+
 // --- SCHADEN & STATUS ---
 
 function addDamage(zoneId, amount, event) {
@@ -191,6 +222,7 @@ function clearDamage(zoneId, event) {
 
 function toggleStatus(zoneId, statusType, event) {
     event.stopPropagation();
+    if (zoneId !== 'active') return;
     if (!ptStatus.active) ptStatus.active = [];
     const idx = ptStatus.active.indexOf(statusType);
     if (idx > -1) {
@@ -198,26 +230,6 @@ function toggleStatus(zoneId, statusType, event) {
     } else {
         ptStatus.active.push(statusType);
     }
-    ptRenderField();
-}
-
-function ptSwapZones(benchZone, event) {
-    event.stopPropagation();
-    if (ptField.active.length === 0) {
-        ptShowMessage('Kein aktives Pokémon zum Rückzug!');
-        return;
-    }
-    if (ptField[benchZone].length === 0) {
-        ptShowMessage('Keine Karte auf dieser Bank-Position!');
-        return;
-    }
-    // Swap stacks (Pokémon + alle Attachments)
-    [ptField.active, ptField[benchZone]] = [ptField[benchZone], ptField.active];
-    // Swap damage counters (Schaden bleibt erhalten!)
-    [ptDamage.active, ptDamage[benchZone]] = [ptDamage[benchZone], ptDamage.active];
-    // Rückzug heilt alle Spezial-Zustände (TCG-Regel)
-    ptStatus.active = [];
-    ptShowMessage('Rückzug! Status-Zustände geheilt, Schaden bleibt.');
     ptRenderField();
 }
 
@@ -253,35 +265,57 @@ function discardTopCard(zoneId, event) {
 
 function setupDragAndDrop() {
     const zones = ['ptActiveZone', 'ptBench0', 'ptBench1', 'ptBench2', 'ptBench3', 'ptBench4'];
-    zones.forEach(zoneId => {
-        const element = document.getElementById(zoneId);
+    zones.forEach(zoneElementId => {
+        const element = document.getElementById(zoneElementId);
         if (!element) return;
+
         element.addEventListener('dragover', (e) => {
             e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
             element.querySelector('.pt-empty-slot')?.classList.add('pt-drop-target');
+            if (element.querySelector('.pt-field-card')) {
+                element.style.outline = '2px dashed #ffe600';
+            }
         });
+
         element.addEventListener('dragleave', () => {
             element.querySelector('.pt-empty-slot')?.classList.remove('pt-drop-target');
+            element.style.outline = 'none';
         });
+
         element.addEventListener('drop', (e) => {
             e.preventDefault();
             element.querySelector('.pt-empty-slot')?.classList.remove('pt-drop-target');
-            const data = e.dataTransfer.getData('text/plain');
-            if (data !== '') {
-                ptSelectedCardIndex = parseInt(data);
-                // 'ptActiveZone' -> 'active', 'ptBench0' -> 'bench0'
-                const targetZone = zoneId.replace('pt', '').replace('Zone', '').toLowerCase();
+            element.style.outline = 'none';
+
+            // Zone name: 'ptActiveZone' -> 'active', 'ptBench0' -> 'bench0'
+            const targetZone = zoneElementId.replace('pt', '').replace('Zone', '').toLowerCase();
+            const sourceZone = e.dataTransfer.getData('sourceZone');
+            const handIndex  = e.dataTransfer.getData('text/plain');
+
+            if (sourceZone && sourceZone !== targetZone) {
+                moveZoneToZone(sourceZone, targetZone);
+            } else if (handIndex !== '') {
+                ptSelectedCardIndex = parseInt(handIndex);
                 ptClickZone(targetZone);
             }
         });
     });
 }
 
-function ptDragStart(event, index) {
+function ptDragStartHand(event, index) {
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/plain', String(index));
+    event.dataTransfer.setData('sourceZone', ''); // kein Feld-Source
     ptSelectedCardIndex = index;
     ptRenderHand();
+}
+
+function ptDragStartField(event, zoneId) {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('sourceZone', zoneId);
+    event.dataTransfer.setData('text/plain', '');
+    ptDragSourceZone = zoneId;
 }
 
 // --- RENDER FUNKTIONEN ---
@@ -388,7 +422,7 @@ function ptRenderHand() {
         const wrapper = document.createElement('div');
         wrapper.className = 'pt-hand-wrapper';
         wrapper.draggable = true;
-        wrapper.ondragstart = e => ptDragStart(e, i);
+        wrapper.ondragstart = e => ptDragStartHand(e, i);
 
         const img = document.createElement('img');
         img.src       = card.imageUrl || 'images/card-back.png';
@@ -409,7 +443,7 @@ function ptRenderHand() {
         zone.appendChild(wrapper);
     });
 
-    // Drop target at end of hand row (return field card to hand via drag)
+    // Drop-Zone am Ende der Hand (Feld-Karte in die Hand ziehen)
     const dropEnd = document.createElement('div');
     dropEnd.className     = 'pt-empty-slot';
     dropEnd.style.cssText = 'min-width:68px;height:98px;flex-shrink:0;font-size:10px;';
@@ -460,7 +494,7 @@ function generateZoneHTML(zoneId, labelText) {
     const width  = zoneId === 'active' ? 102 : 82;
     const height = Math.round(width * 1.38);
 
-    // Empty zone
+    // Leere Zone
     if (cards.length === 0) {
         const isTarget = ptSelectedCardIndex !== null;
         return `<div class="pt-empty-slot${isTarget ? ' pt-drop-target' : ''}"
@@ -470,14 +504,19 @@ function generateZoneHTML(zoneId, labelText) {
                      onclick="ptClickZone('${zoneId}')">${labelText}</div>`;
     }
 
-    // Zone with cards — stack with offset
+    // Zone mit Karten — draggable fuer Feld-zu-Feld Drag
     let html = `<div style="position:relative;width:${width}px;cursor:pointer;min-height:${height}px;"
+                     draggable="true"
+                     ondragstart="ptDragStartField(event,'${zoneId}')"
                      ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';"
-                     ondrop="event.preventDefault();ptClickZone('${zoneId}')"
-                     onclick="ptClickZone('${zoneId}')">`,
-        statusButtons = '',
-        statusIconsHTML = '';
+                     ondrop="event.preventDefault();
+                             var src=event.dataTransfer.getData('sourceZone');
+                             var hi=event.dataTransfer.getData('text/plain');
+                             if(src&&src!=='${zoneId}'){moveZoneToZone(src,'${zoneId}');}
+                             else if(hi!==''){ptSelectedCardIndex=parseInt(hi);ptClickZone('${zoneId}');}"
+                     onclick="ptClickZone('${zoneId}')">`;
 
+    // Karten versetzt zeichnen
     cards.forEach((card, index) => {
         const offsetTop = index * 18;
         html += `<img src="${card.imageUrl || 'images/card-back.png'}"
@@ -489,7 +528,9 @@ function generateZoneHTML(zoneId, labelText) {
                       title="${card.name}">`;
     });
 
-    // Status-Buttons NUR fuer das aktive Pokémon
+    // Status-Menü NUR fuer das Aktive Pokémon
+    let statusButtons = '';
+    let statusIconsHTML = '';
     if (zoneId === 'active') {
         const cs        = ptStatus.active || [];
         const poisoned  = cs.includes('poisoned')  ? ' red' : '';
@@ -517,13 +558,7 @@ function generateZoneHTML(zoneId, labelText) {
         }
     }
 
-    // Tauschen-Button NUR fuer Bank-Zonen (Rückzug)
-    let swapButton = '';
-    if (zoneId !== 'active') {
-        swapButton = `<button class="pt-action-btn" style="background:#2980b9;"
-            onclick="ptSwapZones('${zoneId}',event)" title="Mit Aktivem tauschen (Rückzug)">↔️</button>`;
-    }
-
+    // Hover-Menü
     html += `
         <div class="pt-field-actions" style="z-index:100;flex-direction:column;">
             ${statusButtons}
@@ -531,7 +566,6 @@ function generateZoneHTML(zoneId, labelText) {
                 <button class="pt-action-btn" onclick="addDamage('${zoneId}',10,event)">+10</button>
                 <button class="pt-action-btn" onclick="addDamage('${zoneId}',50,event)">+50</button>
                 <button class="pt-action-btn" onclick="clearDamage('${zoneId}',event)">0</button>
-                ${swapButton}
                 <button class="pt-action-btn" onclick="returnToHand('${zoneId}',event)" title="Auf Hand">↩</button>
                 <button class="pt-action-btn red" onclick="discardTopCard('${zoneId}',event)" title="Ablegen">🗑</button>
             </div>

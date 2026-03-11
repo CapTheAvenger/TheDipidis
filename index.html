@@ -1771,6 +1771,7 @@
                 <button class="pt-btn" onclick="ptShuffle()">🔀 Mischen</button>
                 <button class="pt-btn" onclick="ptFlipCoin()">🪙 Münze</button>
                 <button class="pt-btn" onclick="ptNewGame()">🔄 Neu starten</button>
+                <button class="pt-btn" id="flip-board-btn" onclick="ptFlipBoard(this)">🔄 Flip Board</button>
                 <button class="pt-btn pt-danger" onclick="closePlaytester()">✕ Schließen</button>
             </div>
         </div>
@@ -1798,7 +1799,7 @@
             </div>
 
             <!-- Field row: Active + Bench -->
-            <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;flex-shrink:0;">
+            <div id="playtester-board" style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;flex-shrink:0;transition:transform 0.4s ease;transform-origin:center center;">
                 <div>
                     <div class="pt-zone-label">Aktives Pokémon</div>
                     <div id="ptActiveZone"></div>

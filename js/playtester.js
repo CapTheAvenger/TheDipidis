@@ -434,6 +434,22 @@ function ptRecoverDiscard(idx) {
     ptCloseDiscardModal();
 }
 
+// --- BOARD FLIP ---
+
+let isBoardFlipped = false;
+
+function ptFlipBoard(btn) {
+    const board = document.getElementById('playtester-board');
+    if (!board) return;
+    isBoardFlipped = !isBoardFlipped;
+    board.style.transform = isBoardFlipped ? 'rotate(180deg)' : 'rotate(0deg)';
+    btn.innerText = isBoardFlipped ? '🔄 Reset Board' : '🔄 Flip Board';
+    ptShowMessage(isBoardFlipped ? 'Spieler 2 Perspektive!' : 'Spielfeld zurückgesetzt');
+}
+
+// Alias so that hand-crafted HTML can call ptClickZone() too
+function ptClickZone(zoneId) { ptClickField(zoneId); }
+
 // --- MESSAGES ---
 
 function ptShowMessage(msg) {

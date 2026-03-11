@@ -59,10 +59,12 @@ function openPlaytester(source) {
                        window.allCardsDatabase.find(c => c.name === cardName);
             if (cd && cd.image_url) imageUrl = cd.image_url;
         }
+        const cardType = cd ? (cd.type || cd.card_type || '') : '';
         for (let i = 0; i < count; i++) {
             ptDeck.push({
                 name: cardName,
                 imageUrl,
+                cardType,
                 ptId: 'card_' + Math.random().toString(36).substr(2, 9)
             });
         }
@@ -160,7 +162,7 @@ function ptPassTurn() {
     ptRenderField();
     ptDraw1();
     if (messages.length > 0) {
-        ptShowMessage(messages.join(' | ') + ' — Zug vorbei!');
+        ptShowMessage(messages.join(' | ') + ' ï¿½ Zug vorbei!');
     }
 }
 
@@ -504,7 +506,7 @@ function generateZoneHTML(zoneId, labelText) {
                      onclick="ptClickZone('${zoneId}')">${labelText}</div>`;
     }
 
-    // Zone mit Karten — draggable fuer Feld-zu-Feld Drag
+    // Zone mit Karten ï¿½ draggable fuer Feld-zu-Feld Drag
     let html = `<div style="position:relative;width:${width}px;cursor:pointer;min-height:${height}px;"
                      draggable="true"
                      ondragstart="ptDragStartField(event,'${zoneId}')"
@@ -516,19 +518,28 @@ function generateZoneHTML(zoneId, labelText) {
                              else if(hi!==''){ptSelectedCardIndex=parseInt(hi);ptClickZone('${zoneId}');}"
                      onclick="ptClickZone('${zoneId}')">`;
 
-    // Karten versetzt zeichnen
+    // Karten zeichnen: Index 0 = vollstÃ¤ndiges PokÃ©mon, Index 1+ = Attachment-Icons
     cards.forEach((card, index) => {
-        const offsetTop = index * 18;
-        html += `<img src="${card.imageUrl || 'https://images.pokemontcg.io/card-back.png'}"
-                      class="pt-field-card"
-                      style="position:${index === 0 ? 'relative' : 'absolute'};
-                             top:${offsetTop}px;left:0;z-index:${index};
-                             width:${width}px;border-radius:7px;display:block;"
-                      onerror="this.src='https://images.pokemontcg.io/card-back.png'"
-                      title="${card.name}">`;
+        if (index === 0) {
+            html += `<img src="${card.imageUrl || 'https://images.pokemontcg.io/card-back.png'}"
+                          class="pt-field-card"
+                          style="position:relative;top:0;left:0;z-index:1;
+                                 width:${width}px;border-radius:7px;display:block;"
+                          onerror="this.src='https://images.pokemontcg.io/card-back.png'"
+                          title="${card.name}">`;
+        } else {
+            const isEnergy = (card.cardType || '').toLowerCase().includes('energy');
+            const attachClass = isEnergy ? 'pt-attachment-energy' : 'pt-attachment-tool';
+            const bottomOffset = 8 + (index - 1) * 24;
+            html += `<img src="${card.imageUrl || 'https://images.pokemontcg.io/card-back.png'}"
+                          class="${attachClass}"
+                          style="bottom:${bottomOffset}px;"
+                          onerror="this.src='https://images.pokemontcg.io/card-back.png'"
+                          title="${card.name}">`;
+        }
     });
 
-    // Status-Menü NUR fuer das Aktive Pokémon
+    // Status-Menï¿½ NUR fuer das Aktive Pokï¿½mon
     let statusButtons = '';
     let statusIconsHTML = '';
     if (zoneId === 'active') {
@@ -558,7 +569,7 @@ function generateZoneHTML(zoneId, labelText) {
         }
     }
 
-    // Hover-Menü
+    // Hover-Menï¿½
     html += `
         <div class="pt-field-actions" style="z-index:100;flex-direction:column;">
             ${statusButtons}

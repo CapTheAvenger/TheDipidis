@@ -1,3 +1,6 @@
+/* --- POKÉMON THEME UPGRADE --- */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap');
+
 * {
             margin: 0;
             padding: 0;
@@ -7,8 +10,9 @@
         html { scroll-behavior: smooth; }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50 10a40 40 0 1 1 0 80 40 40 0 0 1 0-80zm0 8a32 32 0 1 0 0 64 32 32 0 0 0 0-64zm0 24a8 8 0 1 1 0 16 8 8 0 0 1 0-16z" fill="rgba(0,0,0,0.03)"/></svg>');
             min-height: 100vh;
             min-height: -webkit-fill-available;
             padding: 20px;
@@ -26,6 +30,10 @@
             color: white;
             margin-bottom: 30px;
             padding: 30px 20px;
+            background: linear-gradient(135deg, #E3350D 0%, #A82508 100%);
+            border-bottom: 5px solid #222224;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border-radius: 12px;
         }
         
         .header h1 {
@@ -694,12 +702,15 @@
         }
 
         .btn-primary {
-            background: #667eea;
+            background: #3B4CCA; /* Pokémon Blau */
             color: white;
+            border: 2px solid #283593;
         }
 
         .btn-primary:hover {
-            background: #5568d3;
+            background: #FFCB05; /* Pokémon Gelb */
+            color: #222;
+            border-color: #C7A008;
         }
 
         .btn-warning {

@@ -1342,6 +1342,53 @@
             }
         }
 
+        /* --- Basis für alle Pop-ups (mobile-friendly) --- */
+        .auth-modal-content,
+        .rarity-switcher-modal-content,
+        .single-card-modal-content,
+        .image-view-content {
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            margin: 5vh auto;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        /* Auth modal overlay */
+        .auth-modal {
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            overflow: auto;
+        }
+        .auth-modal-content {
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .auth-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+        .auth-modal-close:hover { color: #e74c3c; }
+
+        /* Deck Compare darf breiter sein */
+        #deckCompareModal .rarity-switcher-modal-content {
+            max-width: 1200px;
+        }
+
         /* Image View Modal */
         .image-view-modal {
             display: none;
@@ -1365,6 +1412,8 @@
             padding: 30px;
             width: 95%;
             max-width: 1400px;
+            max-height: 90vh;
+            overflow-y: auto;
             border-radius: 15px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }

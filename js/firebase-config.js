@@ -6,25 +6,24 @@
  * This file is NEVER overwritten by CI — all logic lives here safely.
  */
 
-// Use real credentials (injected by CI) or placeholders for local dev
-const firebaseConfig = window.FIREBASE_CREDS || {
-  apiKey: "PLACEHOLDER_API_KEY",
-  authDomain: "PLACEHOLDER_AUTHDOMAIN",
-  projectId: "PLACEHOLDER_PROJECT_ID",
-  storageBucket: "PLACEHOLDER_BUCKET",
-  messagingSenderId: "PLACEHOLDER_SENDER_ID",
-  appId: "PLACEHOLDER_APP_ID",
-  measurementId: "PLACEHOLDER_MEASUREMENT_ID"
-};
-
-// Initialize Firebase (only once)
+// Initialize Firebase (only once).
+// Credentials come from firebase-credentials.js (window.FIREBASE_CREDS).
+// Avoid declaring `const firebaseConfig` — the credentials file (written by
+// GitHub Actions secret) may already declare it, causing a SyntaxError.
 if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(window.FIREBASE_CREDS || {
+    apiKey: "PLACEHOLDER_API_KEY",
+    authDomain: "PLACEHOLDER_AUTHDOMAIN",
+    projectId: "PLACEHOLDER_PROJECT_ID",
+    storageBucket: "PLACEHOLDER_BUCKET",
+    messagingSenderId: "PLACEHOLDER_SENDER_ID",
+    appId: "PLACEHOLDER_APP_ID",
+    measurementId: "PLACEHOLDER_MEASUREMENT_ID"
+  });
 }
 
-// Auth state observer — onUserSignedIn/onUserSignedOut are defined in
-// firebase-globals.js which loads immediately after this file.
-firebase.auth().onAuthStateChanged((user) => {
+// Auth state observer — handlers are defined in firebase-globals.js.
+firebase.auth().onAuthStateChanged(function(user) {
   if (user) {
     console.log('✓ User signed in:', user.email);
     if (typeof onUserSignedIn === 'function') onUserSignedIn(user);

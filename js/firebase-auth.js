@@ -6,7 +6,7 @@
 // Sign up with email and password
 async function signUp(email, password) {
   try {
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
     console.log('✓ User created:', userCredential.user.email);
     showNotification('Account created successfully!', 'success');
     return userCredential.user;
@@ -20,7 +20,7 @@ async function signUp(email, password) {
 // Sign in with email and password
 async function signIn(email, password) {
   try {
-    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
     console.log('✓ User signed in:', userCredential.user.email);
     showNotification('Signed in successfully!', 'success');
     return userCredential.user;
@@ -35,7 +35,7 @@ async function signIn(email, password) {
 async function signInWithGoogle() {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
+    const result = await firebase.auth().signInWithPopup(provider);
     console.log('✓ User signed in with Google:', result.user.email);
     showNotification('Signed in with Google!', 'success');
     return result.user;
@@ -49,7 +49,7 @@ async function signInWithGoogle() {
 // Sign out
 async function signOut() {
   try {
-    await auth.signOut();
+    await firebase.auth().signOut();
     console.log('✓ User signed out');
     showNotification('Signed out successfully!', 'success');
   } catch (error) {
@@ -61,7 +61,7 @@ async function signOut() {
 // Reset password
 async function resetPassword(email) {
   try {
-    await auth.sendPasswordResetEmail(email);
+    await firebase.auth().sendPasswordResetEmail(email);
     showNotification('Password reset email sent!', 'success');
   } catch (error) {
     console.error('Password reset error:', error);

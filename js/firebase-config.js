@@ -34,6 +34,8 @@ firebase.initializeApp(firebaseConfig);
 // Initialize services
 const auth = firebase.auth();
 const db = firebase.firestore();
+window.auth = auth;
+window.db = db;
 
 // Auth state observer
 auth.onAuthStateChanged((user) => {

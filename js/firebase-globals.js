@@ -1,35 +1,35 @@
 /**
  * Firebase Globals
  * ================
- * This file runs AFTER firebase-config.js (which is entirely replaced by a
- * GitHub secret on every deploy). All functions defined here OVERRIDE whatever
- * stale version the secret may have injected, ensuring the latest code always runs.
+ * Runs after firebase-config.js. Exposes auth/db as globals and defines all
+ * Firebase-related logic functions. This file is NEVER overwritten by CI.
  *
- * auth.onAuthStateChanged is set up in the secret's firebase-config.js and calls
- * onUserSignedIn/onUserSignedOut by name at runtime → it picks up the definitions
- * below because they execute before any auth event fires.
+ * Script load order:
+ *   firebase-credentials.js  → sets window.FIREBASE_CREDS
+ *   firebase-collection.js   → collection/wishlist CRUD
+ *   firebase-config.js       → initializeApp + onAuthStateChanged
+ *   firebase-globals.js      → this file (window.auth, window.db, all handlers)
+ *   firebase-auth.js         → signIn/signUp/signOut helpers
  */
 
-// Re-expose auth and db as globals (secret may not do window.auth = ...)
 window.auth = firebase.auth();
 window.db   = firebase.firestore();
 
-// Safe defaults
-if (!window.userDecks)     window.userDecks     = [];
-if (!window.userCollection) window.userCollection = new Set();
-if (!window.userWishlist)   window.userWishlist   = new Set();
+if (!window.userDecks)      window.userDecks      = [];
+if (!window.userCollection) window.userCollection  = new Set();
+if (!window.userWishlist)   window.userWishlist    = new Set();
 
 // ---------------------------------------------------------------------------
-// Auth state handlers  (override any version injected by secret)
+// Auth state handlers
 // ---------------------------------------------------------------------------
 
-onUserSignedIn = function(user) {
-  const authPrompt    = document.getElementById('profile-auth-prompt');
+function onUserSignedIn(user) {
+  const authPrompt     = document.getElementById('profile-auth-prompt');
   const profileContent = document.getElementById('profile-content');
-  if (authPrompt)     authPrompt.style.display    = 'none';
-  if (profileContent) profileContent.style.display = 'block';
+  if (authPrompt)     authPrompt.style.display     = 'none';
+  if (profileContent) profileContent.style.display  = 'block';
 
-  // Immediately populate from Auth data (no Firestore needed)
+  // Show name/email immediately from Auth (no Firestore round-trip needed)
   const nameEl = document.getElementById('profile-user-name');
   if (nameEl) nameEl.textContent = user.displayName || user.email || 'User';
 
@@ -47,13 +47,13 @@ onUserSignedIn = function(user) {
   loadUserCollection(user.uid);
   loadUserDecks(user.uid);
   loadUserWishlist(user.uid);
-};
+}
 
-onUserSignedOut = function() {
-  const authPrompt    = document.getElementById('profile-auth-prompt');
+function onUserSignedOut() {
+  const authPrompt     = document.getElementById('profile-auth-prompt');
   const profileContent = document.getElementById('profile-content');
-  if (authPrompt)     authPrompt.style.display    = 'block';
-  if (profileContent) profileContent.style.display = 'none';
+  if (authPrompt)     authPrompt.style.display     = 'block';
+  if (profileContent) profileContent.style.display  = 'none';
 
   const userBtn = document.querySelector('.user-btn');
   if (userBtn) {
@@ -61,13 +61,13 @@ onUserSignedOut = function() {
     userBtn.onclick = () => showAuthModal('signin');
   }
   clearUserData();
-};
+}
 
 // ---------------------------------------------------------------------------
-// Firestore data loaders  (override any version injected by secret)
+// Firestore data loaders
 // ---------------------------------------------------------------------------
 
-loadUserProfile = async function(userId) {
+async function loadUserProfile(userId) {
   try {
     const doc = await window.db.collection('users').doc(userId).get();
     if (doc.exists) {
@@ -79,15 +79,14 @@ loadUserProfile = async function(userId) {
     }
   } catch (error) {
     console.error('Error loading profile:', error);
-    // Firestore unavailable — show what we have from Auth
     const user = window.auth.currentUser;
     if (user && typeof updateProfileUI === 'function') {
       updateProfileUI({ displayName: user.displayName || user.email || 'User', createdAt: null });
     }
   }
-};
+}
 
-createUserProfile = async function(userId) {
+async function createUserProfile(userId) {
   const user = window.auth.currentUser;
   const newProfile = {
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -99,16 +98,14 @@ createUserProfile = async function(userId) {
   };
   try {
     await window.db.collection('users').doc(userId).set(newProfile);
-    window.userProfile = newProfile;
-    if (typeof updateProfileUI === 'function') updateProfileUI(newProfile);
   } catch (error) {
     console.error('Error creating profile:', error);
-    window.userProfile = newProfile;
-    if (typeof updateProfileUI === 'function') updateProfileUI(newProfile);
   }
-};
+  window.userProfile = newProfile;
+  if (typeof updateProfileUI === 'function') updateProfileUI(newProfile);
+}
 
-loadUserCollection = async function(userId) {
+async function loadUserCollection(userId) {
   try {
     const doc = await window.db.collection('users').doc(userId).get();
     if (doc.exists) {
@@ -118,9 +115,9 @@ loadUserCollection = async function(userId) {
   } catch (error) {
     console.error('Error loading collection:', error);
   }
-};
+}
 
-loadUserWishlist = async function(userId) {
+async function loadUserWishlist(userId) {
   try {
     const doc = await window.db.collection('users').doc(userId).get();
     if (doc.exists) {
@@ -130,9 +127,9 @@ loadUserWishlist = async function(userId) {
   } catch (error) {
     console.error('Error loading wishlist:', error);
   }
-};
+}
 
-loadUserDecks = async function(userId) {
+async function loadUserDecks(userId) {
   try {
     const snapshot = await window.db.collection('users').doc(userId).collection('decks').get();
     window.userDecks = [];
@@ -141,11 +138,11 @@ loadUserDecks = async function(userId) {
   } catch (error) {
     console.error('Error loading decks:', error);
   }
-};
+}
 
-clearUserData = function() {
+function clearUserData() {
   window.userProfile    = null;
   window.userCollection = new Set();
   window.userWishlist   = new Set();
   window.userDecks      = [];
-};
+}

@@ -27,12 +27,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Inject Firebase Config from Secret
+      - name: Inject Firebase Credentials from Secret
         env:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
         run: |
-          echo "$FIREBASE_CONFIG" > js/firebase-config.js
-          echo "✓ Firebase config injected from secret"
+          echo "$FIREBASE_CONFIG" > js/firebase-credentials.js
+          echo "✓ Firebase credentials injected from secret"
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5

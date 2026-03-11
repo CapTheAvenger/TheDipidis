@@ -683,7 +683,7 @@
                 <h1>🧰 Card Database</h1>
                 
                 <!-- Filter Section -->
-                <div class="cards-filter-section" style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="cards-filter-section filter-section-main">
                     <!-- Search with Autocomplete -->
                     <div style="margin-bottom: 20px; position: relative;">
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px;">🔍 Search card name</label>
@@ -729,7 +729,7 @@
                                 <span>💎 Rarity</span>
                                 <span class="toggle-icon">▼</span>
                             </div>
-                            <div class="cards-filter-options collapsed" id="rarityFilterOptions" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
+                            <div class="cards-filter-options collapsed filter-dropdown-content" id="rarityFilterOptions">
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="Common"> Common</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="Uncommon"> Uncommon</label>
                                 <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="Rare"> Rare</label>
@@ -785,7 +785,7 @@
                             </div>
                             <div class="cards-filter-options collapsed" id="mainPokemonFilterOptions">
                                 <input type="text" id="mainPokemonSearch" placeholder="Search Pokemon..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterMainPokemonList()">
-                                <div id="mainPokemonList" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
+                                <div id="mainPokemonList" class="filter-dropdown-content">
                                     <!-- Will be populated dynamically -->
                                 </div>
                             </div>
@@ -799,7 +799,7 @@
                             </div>
                             <div class="cards-filter-options collapsed" id="archetypeFilterOptions">
                                 <input type="text" id="archetypeSearch" placeholder="Search archetype..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterArchetypeList()">
-                                <div id="archetypeList" style="max-height: 250px; overflow-y: auto; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; background: #fafafa;">
+                                <div id="archetypeList" class="filter-dropdown-content">
                                     <!-- Will be populated dynamically -->
                                 </div>
                             </div>
@@ -1138,19 +1138,19 @@
                         <section style="margin-bottom: 40px;">
                             <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🃏 Card Type Categories</h2>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                                <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border: 2px solid #ffc107;">
+                                <div class="type-card type-card-pokemon">
                                     <h4 style="margin-top: 0;">🎴 Pokémon</h4>
                                     <p style="margin: 0; font-size: 0.95em;">Basic Pokemon, Evolution Pokemon, Pokemon ex, Pokemon V, etc.</p>
                                 </div>
-                                <div style="background: #d4edda; padding: 15px; border-radius: 6px; border: 2px solid #28a745;">
+                                <div class="type-card type-card-supporter">
                                     <h4 style="margin-top: 0;">👤 Supporter</h4>
                                     <p style="margin: 0; font-size: 0.95em;">Trainer cards with Supporter subtype (Professor's Research, Boss's Orders, etc.)</p>
                                 </div>
-                                <div style="background: #f8d7da; padding: 15px; border-radius: 6px; border: 2px solid #dc3545;">
+                                <div class="type-card type-card-item">
                                     <h4 style="margin-top: 0;">⚙️ Item</h4>
                                     <p style="margin: 0; font-size: 0.95em;">Trainer Items (Ultra Ball, Rare Candy, Nest Ball, etc.)</p>
                                 </div>
-                                <div style="background: #e7d4f5; padding: 15px; border-radius: 6px; border: 2px solid #6f42c1;">
+                                <div class="type-card type-card-tool">
                                     <h4 style="margin-top: 0;">🔧 Tool</h4>In Meta Card Analysis, use the −/DECK/+ buttons for precise control.</p>
                             </div>
                             
@@ -1164,19 +1164,19 @@
                                 <p style="margin-left: 20px; line-height: 1.7;">A: The green badge (top-left of card image) shows how many copies of that card are currently in your deck. It only appears when you have at least 1 copy
                                     <p style="margin: 0; font-size: 0.95em;">Pokemon Tools attached to Pokemon (Air Balloon, Muscle Band, etc.)</p>
                                 </div>
-                                <div style="background: #f8d7da; padding: 15px; border-radius: 6px; border: 2px solid #fd7e14;">
+                                <div class="type-card type-card-stadium">
                                     <h4 style="margin-top: 0;">🏟️ Stadium</h4>
                                     <p style="margin: 0; font-size: 0.95em;">Stadium cards (Collapsed Stadium, Beach Court, etc.)</p>
                                 </div>
-                                <div style="background: #d1ecf1; padding: 15px; border-radius: 6px; border: 2px solid #17a2b8;">
+                                <div class="type-card type-card-energy">
                                     <h4 style="margin-top: 0;">⚡ Energy</h4>
                                     <p style="margin: 0; font-size: 0.95em;">Basic Energy cards (Fire Energy, Water Energy, etc.)</p>
                                 </div>
-                                <div style="background: #d1ecf1; padding: 15px; border-radius: 6px; border: 2px solid #20c997;">
+                                <div class="type-card type-card-special-energy">
                                     <h4 style="margin-top: 0;">💎 Special Energy</h4>
                                     <p style="margin: 0; font-size: 0.95em;">Special Energy cards (Double Turbo Energy, Jet Energy, etc.)</p>
                                 </div>
-                                <div style="background: linear-gradient(135deg, #ffe0e0, #ffc0c0); padding: 15px; border-radius: 6px; border: 2px solid #c0392b;">
+                                <div class="type-card type-card-ace-spec">
                                     <h4 style="margin-top: 0;">⭐ Ace Spec</h4>
                                     <p style="margin: 0; font-size: 0.95em;">Powerful one-per-deck cards (Computer Search, Master Ball, Maximum Belt, etc.)</p>
                                 </div>
@@ -1396,15 +1396,13 @@
                     Sign In
                 </h2>
                 <form id="sign-in-form" style="margin-bottom: 20px;">
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Email</label>
-                        <input type="email" id="signin-email" required 
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    <div class="auth-input-group">
+                        <label>Email</label>
+                        <input type="email" id="signin-email" required class="auth-input-field">
                     </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Password</label>
-                        <input type="password" id="signin-password" required 
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    <div class="auth-input-group" style="margin-bottom: 20px;">
+                        <label>Password</label>
+                        <input type="password" id="signin-password" required class="auth-input-field">
                     </div>
                     <button type="submit" class="auth-btn auth-btn-primary">Sign In</button>
                 </form>
@@ -1437,21 +1435,18 @@
                     Create Account
                 </h2>
                 <form id="sign-up-form" style="margin-bottom: 20px;">
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Email</label>
-                        <input type="email" id="signup-email" required 
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    <div class="auth-input-group">
+                        <label>Email</label>
+                        <input type="email" id="signup-email" required class="auth-input-field">
                     </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Password</label>
-                        <input type="password" id="signup-password" required minlength="6"
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    <div class="auth-input-group">
+                        <label>Password</label>
+                        <input type="password" id="signup-password" required minlength="6" class="auth-input-field">
                         <small style="color: #666;">Minimum 6 characters</small>
                     </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Confirm Password</label>
-                        <input type="password" id="signup-password-confirm" required 
-                               style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    <div class="auth-input-group" style="margin-bottom: 20px;">
+                        <label>Confirm Password</label>
+                        <input type="password" id="signup-password-confirm" required class="auth-input-field">
                     </div>
                     <button type="submit" class="auth-btn auth-btn-primary">Create Account</button>
                 </form>

@@ -170,6 +170,61 @@
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             font-weight: 600;
         }
+
+        /* --- Filter section main (Cards tab) --- */
+        .filter-section-main {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- Scrollable filter dropdowns --- */
+        .filter-dropdown-content {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        /* --- Card Type tiles (Tutorial) --- */
+        .type-card {
+            padding: 15px;
+            border-radius: 6px;
+            border-width: 2px;
+            border-style: solid;
+        }
+        .type-card h4 { margin-top: 0; }
+        .type-card p  { margin: 0; font-size: 0.95em; }
+        .type-card-pokemon        { background: #fff3cd; border-color: #ffc107; }
+        .type-card-supporter      { background: #d4edda; border-color: #28a745; }
+        .type-card-item           { background: #f8d7da; border-color: #dc3545; }
+        .type-card-tool           { background: #e7d4f5; border-color: #6f42c1; }
+        .type-card-stadium        { background: #f8d7da; border-color: #fd7e14; }
+        .type-card-energy         { background: #d1ecf1; border-color: #17a2b8; }
+        .type-card-special-energy { background: #d1ecf1; border-color: #20c997; }
+        .type-card-ace-spec       { background: linear-gradient(135deg, #ffe0e0, #ffc0c0); border-color: #c0392b; }
+
+        /* --- Auth modal inputs --- */
+        .auth-input-group {
+            margin-bottom: 15px;
+        }
+        .auth-input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .auth-input-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
         
         .tab-btn.active {
             background: white;

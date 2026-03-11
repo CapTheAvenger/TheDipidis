@@ -454,6 +454,13 @@ function updateCollectionUI(searchFilter = '') {
   } else if (collectionGrid) {
     collectionGrid.innerHTML = '<p style="color: #999;">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>';
   }
+
+  // Update tab counter
+  const tabCount = document.getElementById('tab-count-collection');
+  if (tabCount) {
+    const n = window.userCollection ? window.userCollection.size : 0;
+    tabCount.textContent = n > 0 ? `(${n})` : '';
+  }
   
   // Update stats
   const stats = getCollectionStats();
@@ -473,51 +480,77 @@ function updateCollectionUI(searchFilter = '') {
 }
 
 // Update wishlist UI
-function updateWishlistUI(searchFilter = '') {
+function updateWishlistUI(searchFilter = '', setFilter = '') {
   const wishlistGrid = document.getElementById('wishlist-grid');
   if (!wishlistGrid) return;
-  
+
+  // Update tab counter (always reflects total size)
+  const tabCount = document.getElementById('tab-count-wishlist');
+  if (tabCount) {
+    const n = window.userWishlist ? window.userWishlist.size : 0;
+    tabCount.textContent = n > 0 ? `(${n})` : '';
+  }
+
   if (!window.userWishlist || window.userWishlist.size === 0) {
     wishlistGrid.innerHTML = '<p style="color: #999;">No cards in wishlist yet</p>';
     const searchResults = document.getElementById('wishlist-search-results');
     if (searchResults) searchResults.textContent = '';
     return;
   }
-  
+
   const allCards = window.allCardsDatabase || [];
+
+  // Populate set dropdown from current wishlist cards (once per call)
+  const setDropdown = document.getElementById('wishlist-set-filter');
+  if (setDropdown) {
+    const setsInWishlist = new Set();
+    window.userWishlist.forEach(cardId => {
+      const [, cardSet] = cardId.split('|');
+      if (cardSet) setsInWishlist.add(cardSet);
+    });
+    const currentVal = setDropdown.value;
+    setDropdown.innerHTML = '<option value="">📦 All Sets</option>';
+    [...setsInWishlist].sort().forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      if (s === currentVal) opt.selected = true;
+      setDropdown.appendChild(opt);
+    });
+  }
+
   const wishlistHtml = [];
   let totalCards = 0;
   let matchingCards = 0;
-  
+
   window.userWishlist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
-    
-    const card = allCards.find(c => 
-      c.name === cardName && 
-      c.set === cardSet && 
+
+    const card = allCards.find(c =>
+      c.name === cardName &&
+      c.set === cardSet &&
       c.number === cardNumber
     );
-    
+
     if (card && card.image_url) {
       totalCards++;
-      
+
+      // Apply set filter
+      if (setFilter && cardSet !== setFilter) return;
+
       // Apply search filter
       if (searchFilter) {
         const searchLower = searchFilter.toLowerCase();
-        const matchesName = card.name.toLowerCase().includes(searchLower);
-        const matchesSet = cardSet.toLowerCase().includes(searchLower);
-        const matchesNumber = cardNumber.toLowerCase().includes(searchLower);
-        
-        if (!matchesName && !matchesSet && !matchesNumber) {
-          return; // Skip this card
-        }
+        if (!card.name.toLowerCase().includes(searchLower) &&
+            !cardSet.toLowerCase().includes(searchLower) &&
+            !cardNumber.toLowerCase().includes(searchLower)) return;
       }
-      
+
       matchingCards++;
-      
+
       const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
-      
+
       wishlistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
           <img src="${card.image_url}" alt="${card.name}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${card.image_url}', '${card.name}')">
@@ -533,19 +566,18 @@ function updateWishlistUI(searchFilter = '') {
       `);
     }
   });
-  
-  // Update search results display
+
+  // Update search results info
   const searchResults = document.getElementById('wishlist-search-results');
-  if (searchResults && searchFilter) {
-    searchResults.textContent = `Showing ${matchingCards} of ${totalCards} cards`;
-  } else if (searchResults) {
-    searchResults.textContent = '';
+  if (searchResults) {
+    const isFiltered = searchFilter || setFilter;
+    searchResults.textContent = isFiltered ? `Showing ${matchingCards} of ${totalCards} cards` : '';
   }
-  
+
   if (wishlistHtml.length > 0) {
     wishlistGrid.innerHTML = wishlistHtml.join('');
-  } else if (searchFilter) {
-    wishlistGrid.innerHTML = '<p style="color: #999;">No cards found matching your search.</p>';
+  } else if (searchFilter || setFilter) {
+    wishlistGrid.innerHTML = '<p style="color: #999;">No cards found matching your filters.</p>';
   } else {
     wishlistGrid.innerHTML = '<p style="color: #999;">No cards in wishlist yet</p>';
   }
@@ -608,6 +640,13 @@ function updateDecksUI() {
     decksCount.textContent = window.userDecks?.length || 0;
   }
   
+  // Update tab counter
+  const tabCountDecks = document.getElementById('tab-count-decks');
+  if (tabCountDecks) {
+    const n = window.userDecks ? window.userDecks.length : 0;
+    tabCountDecks.textContent = n > 0 ? `(${n})` : '';
+  }
+
   if (!window.userDecks || window.userDecks.length === 0) {
     decksGrid.innerHTML = '<p style="color: #999;">No saved decks yet. Build a deck and save it to see it here!</p>';
     return;
@@ -1078,11 +1117,11 @@ function filterCollection() {
   updateCollectionUI(searchTerm);
 }
 
-// Filter wishlist by search term
+// Filter wishlist by search term and/or set
 function filterWishlist() {
   const searchInput = document.getElementById('wishlist-search');
-  if (!searchInput) return;
-  
-  const searchTerm = searchInput.value.trim();
-  updateWishlistUI(searchTerm);
+  const setInput = document.getElementById('wishlist-set-filter');
+  const searchTerm = searchInput ? searchInput.value.trim() : '';
+  const setTerm = setInput ? setInput.value : '';
+  updateWishlistUI(searchTerm, setTerm);
 }

@@ -1315,13 +1315,13 @@
                         <!-- Tabs for Profile sections -->
                         <div style="border-bottom: 2px solid #e0e0e0; margin-bottom: 20px;">
                             <button class="profile-tab-btn active" onclick="switchProfileTab('collection')">
-                                🎴 My Collection
+                                🎴 My Collection <span id="tab-count-collection" style="font-size:0.8em;opacity:0.75;"></span>
                             </button>
                             <button class="profile-tab-btn" onclick="switchProfileTab('decks')">
-                                🎮 My Decks
+                                🎮 My Decks <span id="tab-count-decks" style="font-size:0.8em;opacity:0.75;"></span>
                             </button>
                             <button class="profile-tab-btn" onclick="switchProfileTab('wishlist')">
-                                ⭐ Wishlist
+                                ⭐ Wishlist <span id="tab-count-wishlist" style="font-size:0.8em;opacity:0.75;"></span>
                             </button>
                             <button class="profile-tab-btn" onclick="switchProfileTab('settings')">
                                 ⚙️ Settings
@@ -1360,13 +1360,17 @@
                             <h2>⭐ Wishlist</h2>
                             <p style="color: #666; margin-bottom: 15px;">Cards you want to get</p>
                             
-                            <!-- Wishlist Search -->
-                            <div style="margin-bottom: 15px;">
-                                <input type="text" id="wishlist-search" placeholder="🔍 Search by card name, set, or number..." 
-                                    style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #FF9800; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
+                            <!-- Wishlist Search & Filter -->
+                            <div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                                <input type="text" id="wishlist-search" placeholder="🔍 Search by card name..." 
+                                    style="flex: 1; min-width: 200px; padding: 12px; font-size: 16px; border: 2px solid #FF9800; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                                     oninput="filterWishlist()">
-                                <div id="wishlist-search-results" style="margin-top: 8px; font-size: 14px; color: #555; font-weight: 500;"></div>
+                                <select id="wishlist-set-filter" onchange="filterWishlist()"
+                                    style="padding: 12px; font-size: 15px; border: 2px solid #FF9800; border-radius: 8px; background: white; cursor: pointer; min-width: 160px;">
+                                    <option value="">📦 All Sets</option>
+                                </select>
                             </div>
+                            <div id="wishlist-search-results" style="margin-bottom: 8px; font-size: 14px; color: #555; font-weight: 500;"></div>
                             
                             <div id="wishlist-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
                                 <p style="color: #999;">No cards in wishlist yet</p>

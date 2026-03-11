@@ -82,22 +82,22 @@
                             <div class="section-grid-container">
                                 <div>
                                     <label for="cityLeagueDateFrom" style="font-size: 0.95em; color: #333; font-weight: 600; display: block; margin-bottom: 5px;">From:</label>
-                                    <input type="date" id="cityLeagueDateFrom" onchange="applyCityLeagueDateFilter()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                    <input type="date" id="cityLeagueDateFrom" onchange="applyCityLeagueDateFilter()" class="control-input">
                                 </div>
                                 <div>
                                     <label for="cityLeagueDateTo" style="font-size: 0.95em; color: #333; font-weight: 600; display: block; margin-bottom: 5px;">To:</label>
-                                    <input type="date" id="cityLeagueDateTo" onchange="applyCityLeagueDateFilter()" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                    <input type="date" id="cityLeagueDateTo" onchange="applyCityLeagueDateFilter()" class="control-input">
                                 </div>
                             </div>
                         </div>
                         <div class="control-row">
                             <div class="control-group">
                                 <label for="cityLeagueDeckSearch">🔍 Search Deck:</label>
-                                <input type="text" id="cityLeagueDeckSearch" placeholder="Enter deck name..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <input type="text" id="cityLeagueDeckSearch" placeholder="Enter deck name..." class="control-input">
                             </div>
                             <div class="control-group">
                                 <label for="cityLeagueDeckSelect">🎯 Select Deck Archetype:</label>
-                                <select id="cityLeagueDeckSelect" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <select id="cityLeagueDeckSelect" autocomplete="off" class="control-input">
                                     <option value="">-- Please Select Deck --</option>
                                 </select>
                             </div>
@@ -183,8 +183,8 @@
                         <h2>🛠️ Deck Builder</h2>
                         <div class="builder-controls">
                             <button class="btn btn-secondary" onclick="clearDeck('cityLeague')">🗑️ Clear</button>
-                            <button class="btn btn-success" onclick="autoComplete('cityLeague', 'min')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">⬇️ Generate Low Rarity Deck</button>
-                            <button class="btn btn-success" onclick="autoComplete('cityLeague', 'max')" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">⬆️ Generate Max Rarity Deck</button>
+                            <button class="btn btn-success btn-gen-low" onclick="autoComplete('cityLeague', 'min')">⬇️ Generate Low Rarity Deck</button>
+                            <button class="btn btn-success btn-gen-max" onclick="autoComplete('cityLeague', 'max')">⬆️ Generate Max Rarity Deck</button>
                             <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('cityLeague', 'min')">🎯 Auto Generate (Max Consistency)</button>
                         </div>
                         
@@ -193,27 +193,27 @@
                         </div>
                         
                         <!-- My Deck Overview -->
-                        <div id="cityLeagueMyDeckVisual" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                        <div id="cityLeagueMyDeckVisual" class="section-panel">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🎴 Your Deck</h3>
                                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                    <button class="btn btn-success" onclick="saveCurrentDeckToProfile('cityLeague')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); font-weight: 600;">💾 Save to My Decks</button>
+                                    <button class="btn btn-success btn-save-deck" onclick="saveCurrentDeckToProfile('cityLeague')">💾 Save to My Decks</button>
                                     <button class="btn btn-info btn-gradient-compare" onclick="openDeckCompare('cityLeague')">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('cityLeague')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('cityLeague')">🖼️ Grid View</button>
                                 </div>
                             </div>
-                            <input type="text" id="cityLeagueDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input" oninput="filterDeckGrid('cityLeague')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <input type="text" id="cityLeagueDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input deck-card-search" oninput="filterDeckGrid('cityLeague')">
                             <div class="deck-grid" id="cityLeagueMyDeckGrid">
                                 <p style="text-align: center; color: #666; padding: 40px;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
                         </div>
                         
                         <!-- Add Card Section -->
-                        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                        <div class="section-panel">
                             <h3 style="margin-top: 0;">➕ Add Card</h3>
-                            <input type="text" id="cityLeagueDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
-                            <div id="cityLeagueDeckSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;"></div>
+                            <input type="text" id="cityLeagueDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input deck-card-search">
+                            <div id="cityLeagueDeckSearchResults" class="card-grid"></div>
                         </div>
                         
                         <!-- Meta Card Analysis (Cross-Archetype) -->
@@ -251,7 +251,7 @@
                             
                             <input type="text" id="cityLeagueMetaSearch" placeholder="🔍 Search cards in meta..." class="card-search-input" oninput="filterMetaCards('cityLeague')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             
-                            <div id="cityLeagueMetaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; padding: 10px; background: #fff; border-radius: 6px;">
+                            <div id="cityLeagueMetaGrid" class="meta-card-grid">
                                 <p style="text-align: center; color: #666; padding: 40px; grid-column: 1 / -1;">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
                             </div>
                             
@@ -296,11 +296,11 @@
                         <div class="control-row">
                             <div class="control-group">
                                 <label for="currentMetaDeckSearch">🔍 Search Deck:</label>
-                                <input type="text" id="currentMetaDeckSearch" placeholder="Enter deck name..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <input type="text" id="currentMetaDeckSearch" placeholder="Enter deck name..." class="control-input">
                             </div>
                             <div class="control-group">
                                 <label for="currentMetaDeckSelect">🎯 Select Deck Archetype:</label>
-                                <select id="currentMetaDeckSelect" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <select id="currentMetaDeckSelect" autocomplete="off" class="control-input">
                                     <option value="">-- Please Select Deck --</option>
                                 </select>
                             </div>
@@ -446,8 +446,8 @@
                         <h2>🛠️ Deck Builder</h2>
                         <div class="builder-controls">
                             <button class="btn btn-secondary" onclick="clearDeck('currentMeta')">🗑️ Clear</button>
-                            <button class="btn btn-success" onclick="autoComplete('currentMeta', 'min')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">⬇️ Generate Low Rarity Deck</button>
-                            <button class="btn btn-success" onclick="autoComplete('currentMeta', 'max')" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">⬆️ Generate Max Rarity Deck</button>
+                            <button class="btn btn-success btn-gen-low" onclick="autoComplete('currentMeta', 'min')">⬇️ Generate Low Rarity Deck</button>
+                            <button class="btn btn-success btn-gen-max" onclick="autoComplete('currentMeta', 'max')">⬆️ Generate Max Rarity Deck</button>
                             <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('currentMeta', 'min')">🎯 Auto Generate (Max Consistency)</button>
                         </div>
                         
@@ -456,27 +456,27 @@
                         </div>
                         
                         <!-- My Deck Overview -->
-                        <div id="currentMetaMyDeckVisual" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                        <div id="currentMetaMyDeckVisual" class="section-panel">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🎴 Your Deck</h3>
                                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                    <button class="btn btn-success" onclick="saveCurrentDeckToProfile('currentMeta')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); font-weight: 600;">💾 Save to My Decks</button>
+                                    <button class="btn btn-success btn-save-deck" onclick="saveCurrentDeckToProfile('currentMeta')">💾 Save to My Decks</button>
                                     <button class="btn btn-info btn-gradient-compare" onclick="openDeckCompare('currentMeta')">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('currentMeta')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('currentMeta')">🖼️ Grid View</button>
                                 </div>
                             </div>
-                            <input type="text" id="currentMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input" oninput="filterDeckGrid('currentMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <input type="text" id="currentMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input deck-card-search" oninput="filterDeckGrid('currentMeta')">
                             <div class="deck-grid" id="currentMetaMyDeckGrid">
                                 <p style="text-align: center; color: #555; padding: 40px; font-size: 1.05em; font-weight: 500;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
                         </div>
                         
                         <!-- Add Card Section -->
-                        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                        <div class="section-panel">
                             <h3 style="margin-top: 0;">➕ Add Card</h3>
-                            <input type="text" id="currentMetaDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
-                            <div id="currentMetaDeckSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;"></div>
+                            <input type="text" id="currentMetaDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input deck-card-search">
+                            <div id="currentMetaDeckSearchResults" class="card-grid"></div>
                         </div>
                         
                         <!-- Meta Card Analysis (Cross-Archetype) -->
@@ -514,7 +514,7 @@
                             
                             <input type="text" id="currentMetaMetaSearch" placeholder="🔍 Search cards in meta..." class="card-search-input" oninput="filterMetaCards('currentMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                             
-                            <div id="currentMetaMetaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; padding: 10px; background: #fff; border-radius: 6px;">
+                            <div id="currentMetaMetaGrid" class="meta-card-grid">
                                 <p style="text-align: center; color: #555; padding: 40px; grid-column: 1 / -1; font-size: 1.05em; font-weight: 500;">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
                             </div>
                             
@@ -538,13 +538,13 @@
                         <div class="control-row">
                             <div class="control-group">
                                 <label for="pastMetaFormatFilter">🎴 Meta/Format Filter:</label>
-                                <select id="pastMetaFormatFilter" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <select id="pastMetaFormatFilter" autocomplete="off" class="control-input">
                                     <option value="all">-- All Formats --</option>
                                 </select>
                             </div>
                             <div class="control-group">
                                 <label for="pastMetaTournamentFilter">🏆 Tournament Filter:</label>
-                                <select id="pastMetaTournamentFilter" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <select id="pastMetaTournamentFilter" autocomplete="off" class="control-input">
                                     <option value="all">-- All Tournaments --</option>
                                 </select>
                             </div>
@@ -552,11 +552,11 @@
                         <div class="control-row">
                             <div class="control-group">
                                 <label for="pastMetaDeckSearch">🔍 Search Deck:</label>
-                                <input type="text" id="pastMetaDeckSearch" placeholder="Enter deck name..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <input type="text" id="pastMetaDeckSearch" placeholder="Enter deck name..." class="control-input">
                             </div>
                             <div class="control-group">
                                 <label for="pastMetaDeckSelect">🎯 Select Deck Archetype:</label>
-                                <select id="pastMetaDeckSelect" autocomplete="off" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;">
+                                <select id="pastMetaDeckSelect" autocomplete="off" class="control-input">
                                     <option value="">-- Please Select Deck --</option>
                                 </select>
                             </div>
@@ -642,8 +642,8 @@
                         <h2>🛠️ Deck Builder</h2>
                         <div class="builder-controls">
                             <button class="btn btn-secondary" onclick="clearDeck('pastMeta')">🗑️ Clear</button>
-                            <button class="btn btn-success" onclick="autoComplete('pastMeta', 'min')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">⬇️ Generate Low Rarity Deck</button>
-                            <button class="btn btn-success" onclick="autoComplete('pastMeta', 'max')" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">⬆️ Generate Max Rarity Deck</button>
+                            <button class="btn btn-success btn-gen-low" onclick="autoComplete('pastMeta', 'min')">⬇️ Generate Low Rarity Deck</button>
+                            <button class="btn btn-success btn-gen-max" onclick="autoComplete('pastMeta', 'max')">⬆️ Generate Max Rarity Deck</button>
                             <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('pastMeta', 'min')">🎯 Auto Generate (Max Consistency)</button>
                         </div>
                         
@@ -652,27 +652,27 @@
                         </div>
                         
                         <!-- My Deck Overview -->
-                        <div id="pastMetaMyDeckVisual" style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                        <div id="pastMetaMyDeckVisual" class="section-panel">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🎴 Your Deck</h3>
                                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                    <button class="btn btn-success" onclick="saveCurrentDeckToProfile('pastMeta')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); font-weight: 600;">💾 Save to My Decks</button>
+                                    <button class="btn btn-success btn-save-deck" onclick="saveCurrentDeckToProfile('pastMeta')">💾 Save to My Decks</button>
                                     <button class="btn btn-info btn-gradient-compare" onclick="openDeckCompare('pastMeta')">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('pastMeta')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('pastMeta')">🖼️ Grid View</button>
                                 </div>
                             </div>
-                            <input type="text" id="pastMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input" oninput="filterDeckGrid('pastMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <input type="text" id="pastMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input deck-card-search" oninput="filterDeckGrid('pastMeta')">
                             <div class="deck-grid" id="pastMetaMyDeckGrid">
                                 <p style="text-align: center; color: #555; padding: 40px; font-size: 1.05em; font-weight: 500;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
                         </div>
                         
                         <!-- Add Card Section -->
-                        <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                        <div class="section-panel">
                             <h3 style="margin-top: 0;">➕ Add Card</h3>
-                            <input type="text" id="pastMetaDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
-                            <div id="pastMetaDeckSearchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;"></div>
+                            <input type="text" id="pastMetaDeckCardSearch" placeholder="🔍 Search card name..." class="card-search-input deck-card-search">
+                            <div id="pastMetaDeckSearchResults" class="card-grid"></div>
                         </div>
                     </div>
                 </div>

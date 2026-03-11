@@ -109,6 +109,67 @@
         .btn-gradient-compare {
             background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
         }
+
+        /* Form control inputs (deck search, date picker, dropdown) */
+        .control-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* Deck builder card search inputs */
+        .deck-card-search {
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        /* Card result grid (deck search results) */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        /* Meta card analysis grid */
+        .meta-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 6px;
+        }
+
+        /* Section panel (My Deck Visual, Add Card, etc.) */
+        .section-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        /* Generate Low Rarity deck button */
+        .btn-gen-low {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        /* Generate Max Rarity deck button */
+        .btn-gen-max {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        }
+
+        /* Save deck to profile button */
+        .btn-save-deck {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            font-weight: 600;
+        }
         
         .tab-btn.active {
             background: white;

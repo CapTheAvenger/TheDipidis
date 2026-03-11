@@ -15,7 +15,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <h1>🎴 Pokemon TCG Analysis</h1>
                     <p>Your Hub for Meta Analysis & Deckbuilding</p>
@@ -341,7 +341,8 @@
                         <div class="matchups-grid-container">
                             <div>
                                 <h4 style="color: #27ae60;">✅ Best Matchups</h4>
-                                <table style="box-shadow: none; width: 100%;">
+                                <div style="overflow-x: auto; width: 100%;">
+                                <table style="box-shadow: none; width: 100%; min-width: 400px;">
                                     <thead>
                                         <tr style="background: #d4edda;">
                                             <th style="background: #27ae60; text-align: left; padding: 12px 8px; width: 35%; vertical-align: middle;">Opponent</th>
@@ -353,11 +354,13 @@
                                         <tr><td colspan="3" style="text-align: center; padding: 20px;">No data available</td></tr>
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                             
                             <div>
                                 <h4 style="color: #e74c3c;">❌ Worst Matchups</h4>
-                                <table style="box-shadow: none; width: 100%;">
+                                <div style="overflow-x: auto; width: 100%;">
+                                <table style="box-shadow: none; width: 100%; min-width: 400px;">
                                     <thead>
                                         <tr style="background: #f8d7da;">
                                             <th style="background: #e74c3c; text-align: left; padding: 12px 8px; width: 35%; vertical-align: middle;">Opponent</th>
@@ -369,6 +372,7 @@
                                         <tr><td colspan="3" style="text-align: center; padding: 20px;">No data available</td></tr>
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                         </div>
                         

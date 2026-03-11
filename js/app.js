@@ -985,10 +985,10 @@ const BASE_PATH = './data/';
                         </div>
                     </div>
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">📁 Datenquelle</h3>
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">📁 Data Source</h3>
                         <div style="font-size: 0.85em; opacity: 0.9; margin-top: 10px;">
-                            <strong>Zeitraum:</strong><br>${dateRange || 'N/A'}<br><br>
-                            <strong>Turniere:</strong><br>${tournamentCount || 0}
+                            <strong>Period:</strong><br>${dateRange || 'N/A'}<br><br>
+                            <strong>Tournaments:</strong><br>${tournamentCount || 0}
                         </div>
                     </div>
                 </div>`;
@@ -1016,7 +1016,7 @@ const BASE_PATH = './data/';
                     const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Zur Analyse von ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
                             <td style="padding: 12px; text-align: center;">${d.old_count}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count}</td>
                             <td style="padding: 12px; text-align: center; color: #e74c3c; font-weight: bold;">${change}</td>
@@ -1052,7 +1052,7 @@ const BASE_PATH = './data/';
                     const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Zur Analyse von ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #555; font-size: 0.9em; font-weight: 600;">(${countChangeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: #27ae60; font-weight: bold;">(-${improvement.toFixed(2)})</span></td>
                         </tr>`;
@@ -1081,7 +1081,7 @@ const BASE_PATH = './data/';
                     const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Zur Analyse von ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #555; font-size: 0.9em; font-weight: 600;">(${countChangeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: #e74c3c; font-weight: bold;">(+${decline.toFixed(2)})</span></td>
                         </tr>`;
@@ -1101,7 +1101,7 @@ const BASE_PATH = './data/';
                     <div style="flex: 1; min-width: 350px;">
                         <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📋 Full Comparison Table (Top 30)</h2>
                         <div style="margin-bottom: 15px;">
-                            <input type="text" id="cityLeagueSearchFilter" placeholder="Suche z.B.: draga, luca" 
+                            <input type="text" id="cityLeagueSearchFilter" placeholder="Search e.g.: draga, luca" 
                                 style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #3498db; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                                 oninput="filterCityLeagueTable()">
                             <div id="cityLeagueSearchResults" style="margin-top: 8px; font-size: 14px; color: #555; font-weight: 500;"></div>
@@ -1320,7 +1320,7 @@ const BASE_PATH = './data/';
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Zur Analyse von ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
                         </tr>`;
@@ -1352,7 +1352,7 @@ const BASE_PATH = './data/';
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Zur Analyse von ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-size: 0.9em;">(${changeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.9em;">(${placementText})</span></td>
                         </tr>`;
@@ -1393,7 +1393,7 @@ const BASE_PATH = './data/';
             
             // Update results info
             if (filtered.length === 0) {
-                resultsDiv.textContent = 'Keine Ergebnisse gefunden';
+                resultsDiv.textContent = 'No results found';
                 resultsDiv.style.color = '#e74c3c';
             } else {
                 resultsDiv.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} found`;
@@ -1475,7 +1475,7 @@ const BASE_PATH = './data/';
             if (!select) return;
             
             // Clear and repopulate
-            select.innerHTML = '<option value="">-- Bitte Deck auswählen --</option>';
+            select.innerHTML = '<option value="">-- Select a Deck --</option>';
             
             // Add top 10 meta decks
             if (top10.length > 0) {
@@ -1493,7 +1493,7 @@ const BASE_PATH = './data/';
             // Add remaining decks alphabetically
             if (rest.length > 0) {
                 const restGroup = document.createElement('optgroup');
-                restGroup.label = '🎴 Weitere Decks (A-Z)';
+                restGroup.label = '🎴 All Other Decks (A-Z)';
                 rest.forEach(archetype => {
                     const option = document.createElement('option');
                     option.value = archetype.name;
@@ -1585,16 +1585,16 @@ const BASE_PATH = './data/';
             const dateTo = document.getElementById('cityLeagueDateTo').value;
             
             if (dateFrom && dateTo) {
-                statusEl.textContent = `Gefiltert: ${formatDate(dateFrom)} bis ${formatDate(dateTo)}`;
+                statusEl.textContent = `Filtered: ${formatDate(dateFrom)} to ${formatDate(dateTo)}`;
                 statusEl.style.color = 'rgba(255,255,255,1)';
             } else if (dateFrom) {
-                statusEl.textContent = `Gefiltert: Ab ${formatDate(dateFrom)}`;
+                statusEl.textContent = `Filtered: From ${formatDate(dateFrom)}`;
                 statusEl.style.color = 'rgba(255,255,255,1)';
             } else if (dateTo) {
-                statusEl.textContent = `Gefiltert: Bis ${formatDate(dateTo)}`;
+                statusEl.textContent = `Filtered: Until ${formatDate(dateTo)}`;
                 statusEl.style.color = 'rgba(255,255,255,1)';
             } else {
-                statusEl.textContent = 'Alle Turniere werden angezeigt';
+                statusEl.textContent = 'Showing all tournaments';
                 statusEl.style.color = 'rgba(255,255,255,0.8)';
             }
         }
@@ -2154,15 +2154,15 @@ const BASE_PATH = './data/';
                             <div style="color: #333; font-size: 0.9em; margin-bottom: 10px; font-weight: 600;">${setCode} ${setNumber}</div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Nutzungs Share:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Usage Share:</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${percentage}%</span>
                                   </div>
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø in genutzten Decks:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø avg. (used decks):</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${avgCountInUsedDecks}x</span>
                                 </div>
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø durch alle Decks:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø avg. (all decks):</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${avgCountOverall}x</span>
                                 </div>
                                 <div>
@@ -2631,7 +2631,7 @@ const BASE_PATH = './data/';
             
             // If no deck AND no archetype cards, show error
             if (!hasDeck && allCards.length === 0) {
-                alert('? Keine Karten zum Kopieren!\n\nBitte wähle zuerst einen Archetyp aus.');
+                alert('⚠️ No cards to copy!\n\nPlease select an archetype first.');
                 return;
             }
             
@@ -2820,7 +2820,7 @@ const BASE_PATH = './data/';
             }
             if (!data || data.length === 0) {
                 console.warn('No data to render');
-                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #444; font-weight: 500;">Bitte wähle ein Deck aus...</p>';
+                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #444; font-weight: 500;">Please select a deck...</p>';
                 return;
             }
 
@@ -2828,14 +2828,14 @@ const BASE_PATH = './data/';
             const sortedData = sortCardsByType([...data]);
             
             let html = '<table><thead><tr>';
-            html += '<th class="col-image">Bild</th>';
+            html += '<th class="col-image">Image</th>';
             html += '<th>Cards in Deck</th>';
             html += '<th>Card Name</th>';
             html += '<th>Set</th>';
-            html += '<th>Nummer</th>';
+            html += '<th>Number</th>';
             html += '<th>% in Archetype</th>';
             html += '<th>Deck Count</th>';
-            html += '<th>Aktion</th>';
+            html += '<th>Action</th>';
             html += '</tr></thead><tbody>';
 
             sortedData.forEach(row => {
@@ -3713,7 +3713,7 @@ const BASE_PATH = './data/';
                 
                 html += `
                     <div class="deck-card" style="position: relative;" title="${card.card_name} (${count}x) - ${percentage}%">
-                        <img src="${imageUrl}" alt="${card.card_name}" loading="lazy" style="cursor: zoom-in;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22245%22 height=%22342%22%3E%3Crect fill=%22%23667eea%22 width=%22245%22 height=%22342%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22%3EKeine Bild%3C/text%3E%3C/svg%3E'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}')">
+                        <img src="${imageUrl}" alt="${card.card_name}" loading="lazy" style="cursor: zoom-in;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22245%22 height=%22342%22%3E%3Crect fill=%22%23667eea%22 width=%22245%22 height=%22342%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}')">
                         
                         ${ownedBadge}
                         
@@ -5863,7 +5863,7 @@ const BASE_PATH = './data/';
             let html = '<div style="grid-column: 1 / -1; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px;">';
             html += `<div style="display: flex; justify-content: space-between; align-items: center;">`;
             html += `<div style="font-weight: bold; color: #333;">?? ${cardName}</div>`;
-            html += `<button onclick="window.selectedCardName=null; searchDeckCards('${source}');" style="background: #6c757d; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.85em;">? Zurück</button>`;
+            html += `<button onclick="window.selectedCardName=null; searchDeckCards('${source}');" style="background: #6c757d; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.85em;">← Back</button>`;
             html += '</div>';
             html += `<div style="font-size: 0.85em; color: #333; margin-top: 8px; font-weight: 600;">${versions.length} Versionen | ${totalCount}x im Deck</div>`;
             html += '</div>';
@@ -5894,7 +5894,7 @@ const BASE_PATH = './data/';
                             </div>
                         </div>
                         ${versionCount > 0 ? `<div style="position: absolute; top: 4px; left: 4px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75em; font-weight: bold; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${versionCount}</div>` : ''}
-                        <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="position: absolute; top: 4px; right: 4px; background: #28a745; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 10; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='#218838';" onmouseout="this.style.transform='scale(1)'; this.style.background='#28a745';" title="Zum Deck hinzufügen">+</button>
+                        <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="position: absolute; top: 4px; right: 4px; background: #28a745; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 10; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='#218838';" onmouseout="this.style.transform='scale(1)'; this.style.background='#28a745';" title="Add to Deck">+</button>
                         <div style="padding: 8px; background: white; border-top: 1px solid #f0f0f0;">
                             <div style="font-size: 0.7em; color: #333; font-weight: 600;">${setCode} ${setNumber}</div>
                         </div>
@@ -6107,7 +6107,7 @@ const BASE_PATH = './data/';
                 console.error('Error loading Current Meta:', error);
                 currentMetaContent.innerHTML = `
                     <div style="color: #e74c3c; padding: 20px;">
-                        <strong>Fehler:</strong> Could not load comparison HTML.
+                        <strong>Error:</strong> Could not load comparison HTML.
                         <br><small>${error.message}</small>
                     </div>
                 `;
@@ -6611,7 +6611,7 @@ const BASE_PATH = './data/';
                 });
             
             // Rebuild tournament filter dropdown
-            tournamentSelect.innerHTML = '<option value="all">-- Alle Turniere --</option>';
+            tournamentSelect.innerHTML = '<option value="all">-- All Tournaments --</option>';
             tournaments.forEach(tournament => {
                 // Clean tournament name: remove " - Limitless"
                 let cleanName = tournament.tournament_name.replace(/\s*[-|•]\s*Limitless\s*$/i, '');
@@ -6658,12 +6658,12 @@ const BASE_PATH = './data/';
             
             // Populate deck select dropdown
             const deckSelect = document.getElementById('pastMetaDeckSelect');
-            deckSelect.innerHTML = '<option value="">-- Bitte Deck auswählen --</option>';
+            deckSelect.innerHTML = '<option value="">-- Select a Deck --</option>';
             
             archetypes.forEach(entry => {
                 const tournamentCount = entry.tournaments.length;
                 const displayName = tournamentCount > 1 
-                    ? `${entry.archetype} (${tournamentCount} Turniere)`
+                    ? `${entry.archetype} (${tournamentCount} Tournaments)`
                     : entry.archetype;
                 deckSelect.innerHTML += `<option value="${entry.archetype}">${displayName}</option>`;
             });
@@ -6757,7 +6757,7 @@ const BASE_PATH = './data/';
                 const cleanName = tournamentNames[0];
                 document.getElementById('pastMetaStatTournament').textContent = `${cleanName} (${totalDecklists} decklists)`;
             } else {
-                document.getElementById('pastMetaStatTournament').textContent = `${matchingDecks.length} Turniere (${totalDecklists} total decklists)`;
+                document.getElementById('pastMetaStatTournament').textContent = `${matchingDecks.length} Tournaments (${totalDecklists} total decklists)`;
             }
             
             document.getElementById('pastMetaStatFormat').textContent = pastMetaCurrentDeck.format;
@@ -7257,7 +7257,7 @@ const BASE_PATH = './data/';
         
         async function loadCards() {
             const content = document.getElementById('cardsContent');
-            content.innerHTML = '<div class="loading">Lädt Kartendatenbank...</div>';
+            content.innerHTML = '<div class="loading">Loading card database...</div>';
             
             try {
                 // Ensure set mapping is loaded (for English sets)
@@ -8740,8 +8740,8 @@ const BASE_PATH = './data/';
             const resultsInfo = document.getElementById('cardResultsInfo');
             
             if (cards.length === 0) {
-                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #444;"><h2>?? Keine Karten gefunden</h2><p style="font-weight: 500;">Versuche andere Filter-Einstellungen</p></div>';
-                resultsInfo.textContent = '0 Karten gefunden';
+                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #444;"><h2>No Cards Found</h2><p style="font-weight: 500;">Try adjusting your filter settings</p></div>';
+                resultsInfo.textContent = '0 cards found';
                 return;
             }
             
@@ -8753,13 +8753,13 @@ const BASE_PATH = './data/';
                 totalPages = 1;
                 startIndex = 0;
                 endIndex = cards.length;
-                resultsInfo.textContent = `${cards.length.toLocaleString()} Karten gefunden (Alle angezeigt)`;
+                resultsInfo.textContent = `${cards.length.toLocaleString()} cards found (all shown)`;
             } else {
                 totalPages = Math.ceil(cards.length / cardsPerPage);
                 startIndex = (currentCardsPage - 1) * cardsPerPage;
                 endIndex = Math.min(startIndex + cardsPerPage, cards.length);
                 cardsToShow = cards.slice(startIndex, endIndex);
-                resultsInfo.textContent = `${cards.length.toLocaleString()} Karten gefunden (Seite ${currentCardsPage} von ${totalPages})`;
+                resultsInfo.textContent = `${cards.length.toLocaleString()} cards found (page ${currentCardsPage} of ${totalPages})`;
             }
             
             // Create pagination controls
@@ -8802,23 +8802,23 @@ const BASE_PATH = './data/';
             leftControls.style.cssText = 'display: flex; gap: 10px;';
             
             const copyBtn = document.createElement('button');
-            copyBtn.textContent = '?? Kopieren';
-            copyBtn.title = 'Alle gefilterten Kartennamen in Zwischenablage kopieren';
+            copyBtn.textContent = '📋 Copy Names';
+            copyBtn.title = 'Copy all filtered card names to clipboard';
             copyBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #27ae60; background: white; color: #27ae60; border-radius: 8px; cursor: pointer; font-weight: 600;';
             copyBtn.onclick = () => {
                 const cardNames = window.filteredCardsData.map(c => c.name).join('\n');
                 navigator.clipboard.writeText(cardNames).then(() => {
-                    copyBtn.textContent = '? Copied!';
+                    copyBtn.textContent = '✅ Copied!';
                     copyBtn.style.background = '#27ae60';
                     copyBtn.style.color = 'white';
                     setTimeout(() => {
-                        copyBtn.textContent = '?? Kopieren';
+                        copyBtn.textContent = '📋 Copy Names';
                         copyBtn.style.background = 'white';
                         copyBtn.style.color = '#27ae60';
                     }, 2000);
                 }).catch(err => {
                     console.error('Copy failed:', err);
-                    alert('Kopieren fehlgeschlagen');
+                    alert('Copy failed');
                 });
             };
             leftControls.appendChild(copyBtn);
@@ -8829,7 +8829,7 @@ const BASE_PATH = './data/';
             
             // Previous button
             const prevBtn = document.createElement('button');
-            prevBtn.textContent = '? Zurück';
+            prevBtn.textContent = '← Previous';
             prevBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; font-weight: 600;';
             prevBtn.disabled = currentCardsPage === 1 || showAllCards;
             if (prevBtn.disabled) {
@@ -8925,8 +8925,8 @@ const BASE_PATH = './data/';
             rightControls.style.cssText = 'display: flex; gap: 10px;';
             
             const toggleShowAllBtn = document.createElement('button');
-            toggleShowAllBtn.textContent = showAllCards ? '?? Seitenweise' : '?? Alle anzeigen';
-            toggleShowAllBtn.title = showAllCards ? 'Zurück zur Seitenansicht' : 'Alle Karten auf einmal anzeigen';
+            toggleShowAllBtn.textContent = showAllCards ? '📄 Paginated' : '📋 Show All';
+            toggleShowAllBtn.title = showAllCards ? 'Switch back to paginated view' : 'Show all cards at once';
             toggleShowAllBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #9b59b6; background: white; color: #9b59b6; border-radius: 8px; cursor: pointer; font-weight: 600;';
             toggleShowAllBtn.onclick = () => {
                 showAllCards = !showAllCards;
@@ -9477,7 +9477,7 @@ const BASE_PATH = './data/';
                     versions = currentCard ? [currentCard] : [];
                     console.warn(`[Pokemon Card] No international_prints data available, showing only current version`);
                     if (versions.length === 1 && currentCard) {
-                        alert(`?? International Print Daten fuer diese Karte noch nicht verfuegbar.\n\nBitte All Cards Scraper neu laufen lassen mit international_prints Support.`);
+                        alert(`⚠️ International print data not yet available for this card.\n\nPlease re-run the All Cards Scraper with international_prints support.`);
                     }
                 }
             } else {
@@ -9528,7 +9528,7 @@ const BASE_PATH = './data/';
             }
             
             if (versions.length === 0) {
-                alert(`Keine vollstaendigen Versionen fuer "${actualCardName}" gefunden.\n\nMoegliche Gruende:\n- Karte nicht vollstaendig in Datenbank (fehlt Rarity/Image URL/Int. Prints)\n- All Cards Scraper muss noch Daten ergaenzen\n- Nur japanische Sets verfuegbar\n\nGesuchter Name: "${actualCardName}"\n\nTipp: Warte bis All Cards Scraper fertig ist.`);
+                alert(`No complete versions found for "${actualCardName}".\n\nPossible reasons:\n- Card not fully indexed (missing Rarity/Image URL/Int. Prints)\n- All Cards Scraper has not finished yet\n- Only Japanese sets available\n\nSearched name: "${actualCardName}"\n\nTip: Wait for the All Cards Scraper to finish.`);
                 console.error(`[openRaritySwitcher] No complete versions found for "${actualCardName}".`);
                 return;
             }
@@ -9675,7 +9675,7 @@ const BASE_PATH = './data/';
 
         function openCardmarket(cardmarketUrl, cardName) {
             if (!cardmarketUrl || cardmarketUrl.trim() === '') {
-                alert(`? Cardmarket Link nicht verfuegbar fuer ${cardName}\n\nMoegliche Gruende:\n- Price Scraper noch nicht gelaufen\n- Karte hat keine Cardmarket Daten\n\nBitte RUN_PRICE_SCRAPER.bat ausfuehren.`);
+                alert(`⚠️ Cardmarket link not available for ${cardName}\n\nPossible reasons:\n- Price Scraper has not been run yet\n- Card has no Cardmarket data\n\nPlease run RUN_PRICE_SCRAPER.bat.`);
                 return;
             }
             
@@ -9869,11 +9869,11 @@ const BASE_PATH = './data/';
             const select = document.getElementById('currentMetaDeckSelect');
             if (!select) return;
             
-            select.innerHTML = '<option value="">-- Bitte Deck auswählen --</option>';
+            select.innerHTML = '<option value="">-- Select a Deck --</option>';
             
             if (top10.length > 0) {
                 const optgroup = document.createElement('optgroup');
-                optgroup.label = '?? Top 10 Meta Decks';
+                optgroup.label = '🏆 Top 10 Meta Decks';
                 top10.forEach(deck => {
                     const option = document.createElement('option');
                     option.value = deck.name;
@@ -9885,7 +9885,7 @@ const BASE_PATH = './data/';
             
             if (rest.length > 0) {
                 const optgroup = document.createElement('optgroup');
-                optgroup.label = '?? Alle Decks';
+                optgroup.label = '🎴 All Other Decks';
                 rest.forEach(deck => {
                     const option = document.createElement('option');
                     option.value = deck.name;
@@ -9945,11 +9945,11 @@ const BASE_PATH = './data/';
             const statusEl = document.getElementById('currentMetaFilterStatus');
             if (statusEl) {
                 const labels = {
-                    'all': 'Alle Turniere',
-                    'live': 'Nur Limitless Decks',
-                    'play': 'Nur Major Tournament Decks'
+                    'all': 'All Tournaments',
+                    'live': 'Limitless Decks Only',
+                    'play': 'Major Tournament Decks Only'
                 };
-                statusEl.textContent = `Filter aktiv: ${labels[format]}`;
+                statusEl.textContent = `Active filter: ${labels[format]}`;
             }
             
             // Refresh dropdown list to show only archetypes matching the filter
@@ -10021,7 +10021,7 @@ const BASE_PATH = './data/';
             }
             
             if (deckCards.length === 0) {
-                alert(`Keine Daten fuer ${archetype} mit Filter "${currentMetaFormatFilter}" gefunden!`);
+                alert(`No data found for ${archetype} with filter "${currentMetaFormatFilter}"!`);
                 clearCurrentMetaDeckView();
                 return;
             }
@@ -10312,7 +10312,7 @@ const BASE_PATH = './data/';
                 `;
                 detailsEl.style.display = 'block';
             } else {
-                detailsEl.innerHTML = '<p style="color: #444; text-align: center; font-weight: 500;">Keine Matchup-Daten gefunden</p>';
+                detailsEl.innerHTML = '<p style="color: #444; text-align: center; font-weight: 500;">No matchup data found</p>';
                 detailsEl.style.display = 'block';
             }
         }
@@ -10712,9 +10712,9 @@ const BASE_PATH = './data/';
                             <h3 style="margin: 0 0 8px 0; font-size: 1.2em; color: #333;">${cardName}</h3>
                             <div style="color: #333; font-size: 0.9em; margin-bottom: 10px; font-weight: 600;">${setCode} ${setNumber}</div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
-                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Nutzungs Share:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${percentage}%</span></div>
-                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø in genutzten Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountInUsedDecks}x</span></div>
-                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø durch alle Decks:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountOverall}x</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Usage Share:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${percentage}%</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø avg. (used decks):</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountInUsedDecks}x</span></div>
+                                <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø avg. (all decks):</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${avgCountOverall}x</span></div>
                                 <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Deck Count:</span> <span style="font-weight: 600; color: #333; margin-left: 5px;">${decksWithCard} / ${totalDecksInArchetype} Decks</span></div>
                                 <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Max Count:</span> <span style="font-weight: 600; color: #dc3545; margin-left: 5px;">${maxCount}</span></div>
                             </div>
@@ -10810,7 +10810,7 @@ const BASE_PATH = './data/';
             const allCardsFromDb = window.allCardsDatabase || [];
             
             if (!hasDeck && allCards.length === 0) {
-                alert('? Keine Karten zum Kopieren!\n\nBitte wähle zuerst einen Archetyp aus.');
+                alert('⚠️ No cards to copy!\n\nPlease select an archetype first.');
                 return;
             }
             
@@ -11021,26 +11021,26 @@ const BASE_PATH = './data/';
             const selectedDeckId = savedDeckSelect.value;
             
             if (!selectedDeckId) {
-                alert('?? Bitte wähle ein gespeichertes Deck aus!');
+                alert('⚠️ Please select a saved deck!');
                 return;
             }
             
             if (!currentDeckSource) {
-                alert('?? Fehler: Keine Deck-Quelle ausgewaehlt!');
+                alert('⚠️ Error: No deck source selected!');
                 return;
             }
             
             // Check if card database is loaded
             if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
                 console.error('[compareWithSavedDeck] ERROR: cardsBySetNumberMap not loaded!');
-                alert('?? Fehler: Kartendatenbank noch nicht geladen! Bitte warte einen Moment und versuche es erneut.');
+                alert('⚠️ Error: Card database not loaded yet. Please wait a moment and try again.');
                 return;
             }
             
             // Get selected saved deck
             const savedDeck = window.userDecks.find(d => d.id === selectedDeckId);
             if (!savedDeck) {
-                alert('?? Fehler: Gespeichertes Deck nicht gefunden!');
+                alert('⚠️ Error: Saved deck not found!');
                 return;
             }
             
@@ -11083,7 +11083,7 @@ const BASE_PATH = './data/';
                            window.pastMetaDeck;
             
             if (!deckMap || Object.keys(deckMap).length === 0) {
-                alert('?? Fehler: Aktuelles Deck ist leer!');
+                alert('⚠️ Error: Current deck is empty!');
                 return;
             }
             
@@ -11413,19 +11413,19 @@ const BASE_PATH = './data/';
             const oldDeckText = document.getElementById('oldDeckListInput').value.trim();
             
             if (!oldDeckText) {
-                alert('?? Bitte fuege eine alte Deckliste ein!');
+                alert('⚠️ Please paste an old deck list first!');
                 return;
             }
             
             if (!currentDeckSource) {
-                alert('?? Fehler: Keine Deck-Quelle ausgewaehlt!');
+                alert('⚠️ Error: No deck source selected!');
                 return;
             }
             
             // Check if card database is loaded
             if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
                 console.error('[deckCompare] ERROR: cardsBySetNumberMap not loaded!');
-                alert('?? Fehler: Kartendatenbank noch nicht geladen! Bitte warte einen Moment und versuche es erneut.');
+                alert('⚠️ Error: Card database not loaded yet. Please wait a moment and try again.');
                 return;
             }
             
@@ -11441,7 +11441,7 @@ const BASE_PATH = './data/';
                            window.pastMetaDeck;
             
             if (!deckMap || Object.keys(deckMap).length === 0) {
-                alert('?? Fehler: Aktuelles Deck ist leer!');
+                alert('⚠️ Error: Current deck is empty!');
                 return;
             }
             

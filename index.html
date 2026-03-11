@@ -186,6 +186,7 @@
                             <button class="btn btn-success btn-gen-low" onclick="autoComplete('cityLeague', 'min')">⬇️ Generate Low Rarity Deck</button>
                             <button class="btn btn-success btn-gen-max" onclick="autoComplete('cityLeague', 'max')">⬆️ Generate Max Rarity Deck</button>
                             <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('cityLeague', 'min')">🎯 Auto Generate (Max Consistency)</button>
+                            <button class="btn btn-warning" onclick="openDrawSimulator('cityLeague')" style="font-weight: 600;">🎲 Test Draw</button>
                         </div>
                         
                         <div class="deck-summary">
@@ -449,6 +450,7 @@
                             <button class="btn btn-success btn-gen-low" onclick="autoComplete('currentMeta', 'min')">⬇️ Generate Low Rarity Deck</button>
                             <button class="btn btn-success btn-gen-max" onclick="autoComplete('currentMeta', 'max')">⬆️ Generate Max Rarity Deck</button>
                             <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('currentMeta', 'min')">🎯 Auto Generate (Max Consistency)</button>
+                            <button class="btn btn-warning" onclick="openDrawSimulator('currentMeta')" style="font-weight: 600;">🎲 Test Draw</button>
                         </div>
                         
                         <div class="deck-summary">
@@ -645,6 +647,7 @@
                             <button class="btn btn-success btn-gen-low" onclick="autoComplete('pastMeta', 'min')">⬇️ Generate Low Rarity Deck</button>
                             <button class="btn btn-success btn-gen-max" onclick="autoComplete('pastMeta', 'max')">⬆️ Generate Max Rarity Deck</button>
                             <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('pastMeta', 'min')">🎯 Auto Generate (Max Consistency)</button>
+                            <button class="btn btn-warning" onclick="openDrawSimulator('pastMeta')" style="font-weight: 600;">🎲 Test Draw</button>
                         </div>
                         
                         <div class="deck-summary">
@@ -1531,6 +1534,28 @@
         </div>
     </div>
 
+    <!-- Draw Simulator Modal -->
+    <div id="drawSimulatorModal" class="rarity-switcher-modal" onclick="if(event.target === this) closeDrawSimulator()" style="z-index: 10000; display: none;">
+        <div class="rarity-switcher-modal-content" style="max-width: 900px; background: #f8f9fa;">
+            <span class="rarity-switcher-close" onclick="closeDrawSimulator()">✕</span>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <h2 style="margin: 0;">🎲 Starthand Simulator</h2>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="drawExtraCard()">+1 Karte ziehen</button>
+                    <button class="btn btn-warning" onclick="drawNewHand()">🔄 Neues Blatt (Mulligan)</button>
+                </div>
+            </div>
+
+            <div id="simulatorHandGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; min-height: 160px; padding: 15px; background: white; border-radius: 8px; border: 2px dashed #ccc;">
+            </div>
+
+            <div style="margin-top: 15px; text-align: right; color: #666; font-size: 0.9em;">
+                Karten im Deck: <span id="simulatorDeckCount">0</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK (v9 compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -1544,5 +1569,6 @@
     
     <!-- Main App -->
     <script src="js/app.js?v=20260311-v11"></script>
+    <script src="js/draw-simulator.js?v=20260311-v1"></script>
 </body>
 </html>

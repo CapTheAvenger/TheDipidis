@@ -166,9 +166,22 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
     skip_existing = bool(settings.get("skip_cards_with_prices", True))
     delay = float(settings.get("delay_seconds", 0.5))
     only_update_sets = settings.get("only_update_sets", [])
+    cardmarket_wait = float(settings.get("cardmarket_wait_seconds", 8))
+    max_runtime_minutes = settings.get("max_runtime_minutes", None)
+    scrape_start = time.time()
     
     try:
         for idx, card in enumerate(cards):
+            
+            # Graceful time-limit check: stop cleanly before GitHub Actions kills the job
+            if max_runtime_minutes:
+                elapsed_min = (time.time() - scrape_start) / 60
+                if elapsed_min >= max_runtime_minutes:
+                    print(f"[Price Scraper] Time limit of {max_runtime_minutes} min reached ({elapsed_min:.1f} min elapsed). Saving progress and exiting cleanly...")
+                    save_prices(results, csv_path)
+                    print(f"[Price Scraper] Graceful stop: {len(results)} prices saved.")
+                    return results
+            
             card_key = f"{card['set']}_{card['number']}"
             
             # Filter by set if only_update_sets is specified
@@ -246,7 +259,7 @@ def scrape_prices(cards: List[Dict[str, str]], settings: Dict[str, object],
                 if cardmarket_url_final:
                     try:
                         driver.get(cardmarket_url_final)
-                        time.sleep(8)  # Longer wait for Cloudflare to pass
+                        time.sleep(cardmarket_wait)  # Wait for Cloudflare to pass (configurable via cardmarket_wait_seconds)
                         
                         # Strategy 1: Find "7-days average price" label and get the next dd element
                         # HTML structure: <dt>7-days average price</dt> <dd><span>3,23 €</span></dd>

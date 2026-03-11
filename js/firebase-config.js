@@ -9,17 +9,23 @@
  * 4. Copy the config object and replace the values below
  * 5. Enable Authentication: Email/Password + Google
  * 6. Enable Firestore Database
+ * 
+ * DEPLOYMENT NOTE:
+ * This file contains placeholder values. The real config is injected
+ * at deployment time via the FIREBASE_CONFIG GitHub Secret.
+ * For local development, replace the PLACEHOLDER_* values with your
+ * actual Firebase credentials from the Firebase Console.
  */
 
 // Firebase project config
 const firebaseConfig = {
-  apiKey: "AIzaSyB01FCHS3wUow7VoGzTQJpqmNNZTyAIOGw",
-  authDomain: "thedipidis.firebaseapp.com",
-  projectId: "thedipidis",
-  storageBucket: "thedipidis.firebasestorage.app",
-  messagingSenderId: "539389580350",
-  appId: "1:539389580350:web:222066a94502f357b2d6f",
-  measurementId: "G-VZXJS2P315"
+  apiKey: "PLACEHOLDER_API_KEY",
+  authDomain: "PLACEHOLDER_AUTHDOMAIN",
+  projectId: "PLACEHOLDER_PROJECT_ID",
+  storageBucket: "PLACEHOLDER_BUCKET",
+  messagingSenderId: "PLACEHOLDER_SENDER_ID",
+  appId: "PLACEHOLDER_APP_ID",
+  measurementId: "PLACEHOLDER_MEASUREMENT_ID"
 };
 
 // Initialize Firebase

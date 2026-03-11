@@ -46,7 +46,7 @@ jobs:
           python card_price_scraper.py
         env:
           HEADLESS: 'true'
-        timeout-minutes: 120
+        timeout-minutes: 340
       
       - name: Update Card Data
         run: |

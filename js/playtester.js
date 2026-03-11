@@ -49,17 +49,19 @@ function openPlaytester(source) {
         if (!count || count <= 0) continue;
         let cardName = deckKey;
         let imageUrl = 'https://images.pokemontcg.io/card-back.png';
+        let cardType = '';
         const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
         if (m) {
             cardName = m[1];
             const cd = (typeof _simFindCard === 'function') ? _simFindCard(m[2], m[3]) : null;
             if (cd && cd.image_url) imageUrl = cd.image_url;
+            if (cd) cardType = cd.type || cd.card_type || '';
         } else {
             const cd = window.allCardsDatabase &&
                        window.allCardsDatabase.find(c => c.name === cardName);
             if (cd && cd.image_url) imageUrl = cd.image_url;
+            if (cd) cardType = cd.type || cd.card_type || '';
         }
-        const cardType = cd ? (cd.type || cd.card_type || '') : '';
         for (let i = 0; i < count; i++) {
             ptDeck.push({
                 name: cardName,

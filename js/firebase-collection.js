@@ -588,10 +588,10 @@ function updateProfileUI(profile) {
   if (profileEl) {
     profileEl.innerHTML = `
       <div class="profile-info">
-        <p><strong>Email:</strong> ${auth.currentUser.email}</p>
+        <p><strong>Email:</strong> ${auth.currentUser?.email || ''}</p>
         <p><strong>Member since:</strong> ${formatDate(profile.createdAt)}</p>
         <p><strong>Cards:</strong> ${stats.cardCount}</p>
-        <p><strong>Decks:</strong> ${window.userDecks.length}</p>
+        <p><strong>Decks:</strong> ${window.userDecks?.length || 0}</p>
       </div>
     `;
   }

@@ -66,6 +66,7 @@ function onUserSignedIn(user) {
   // Initialize collections
   window.userCollection = new Set();
   window.userWishlist = new Set();
+  window.userDecks = [];
   
   // Load user data
   loadUserProfile(user.uid);

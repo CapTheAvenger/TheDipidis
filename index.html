@@ -1592,7 +1592,6 @@
         letter-spacing: 0.5px;
         transition: all 0.2s ease;
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        transition: background 0.15s;
         white-space: nowrap;
         font-family: inherit;
     }
@@ -1643,8 +1642,8 @@
     }
 
     /* ── Active zone: slightly bigger card ── */
-    #ptActiveZone .pt-empty-slot,
-    #ptActiveZone .pt-field-card { width: 102px; }
+    #ptActiveZone-p1 .pt-empty-slot, #ptActiveZone-p1 .pt-field-card,
+    #ptActiveZone-p2 .pt-empty-slot, #ptActiveZone-p2 .pt-field-card { width: 102px; }
 
     /* ── Field cards ── */
     .pt-field-card {
@@ -1663,14 +1662,14 @@
     /* ── Attachments (Energien & Tools als Icons) ── */
     .pt-attachment-energy {
         position: absolute;
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         border: 2px solid #fff;
         box-shadow: -2px 2px 5px rgba(0,0,0,0.6);
         object-fit: cover;
         object-position: center 25%;
-        left: -12px;
+        left: -15px;
         z-index: 15;
         transition: transform 0.2s;
     }
@@ -1680,14 +1679,14 @@
     }
     .pt-attachment-tool {
         position: absolute;
-        width: 28px;
-        height: 38px;
+        width: 32px;
+        height: 42px;
         border-radius: 4px;
         border: 2px solid #fff;
         box-shadow: -2px 2px 5px rgba(0,0,0,0.6);
         object-fit: cover;
         object-position: center 10%;
-        left: -12px;
+        left: -15px;
         z-index: 14;
         transition: transform 0.2s;
     }
@@ -1703,13 +1702,13 @@
         background: radial-gradient(circle at top left, #ff6b6b, #c0392b);
         color: #fff;
         border-radius: 50%;
-        width: 32px; height: 32px;
+        width: 34px; height: 34px;
         display: flex; align-items: center; justify-content: center;
-        font-size: 13px; font-weight: 900;
+        font-size: 14px; font-weight: 900;
         border: 2px solid #fff;
         box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         pointer-events: none;
-        z-index: 3;
+        z-index: 20;
     }
 
     /* ── Field action buttons (show on hover) ── */
@@ -1761,7 +1760,7 @@
 
     /* ── Prize cards ── */
     .pt-prize-card {
-        width: 50px;
+        width: 45px;
         border-radius: 4px;
         cursor: pointer;
         display: block;
@@ -1769,25 +1768,16 @@
         box-shadow: 1px 1px 4px rgba(0,0,0,0.5);
     }
     .pt-prize-card:hover { transform: scale(1.15) translateY(-5px); border: 2px solid #ffcb05; }
-    .pt-prize-take-btn {
-        position: absolute;
-        bottom: 3px; right: 3px;
-        background: rgba(0,0,0,0.72);
-        color: #fff;
-        border: none; border-radius: 3px;
-        font-size: 10px; padding: 1px 3px;
-        cursor: pointer; line-height: 1.3;
-        display: none;
-    }
-    div:hover > .pt-prize-take-btn { display: block; }
 
     /* ── Hand zone ── */
     .pt-hand-zone {
-        background: rgba(0,0,0,0.4);
-        border-top: 3px solid #ffcb05;
+        background: rgba(0,0,0,0.8);
+        border-top: 4px solid #3B4CCA;
         padding: 10px 12px;
         flex-shrink: 0;
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.6);
+        border-radius: 12px 12px 0 0;
+        margin: 0 10px;
     }
     .pt-hand-wrapper {
         position: relative;
@@ -1826,10 +1816,10 @@
     .pt-hand-wrapper:hover .pt-hand-disc-btn { display: flex; }
 
     /* ── VSTAR & GX Marker ── */
-    .pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 50px; height: 22px; border-radius: 4px; font-weight: 900; font-size: 10px; cursor: pointer; border: 2px solid; transition: all 0.2s; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
+    .pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 45px; height: 20px; border-radius: 4px; font-weight: 900; font-size: 10px; cursor: pointer; border: 2px solid; transition: all 0.2s; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
     .pt-marker-vstar { background: linear-gradient(135deg, #fff, #a8e6cf); color: #000; border-color: #fff; }
     .pt-marker-gx { background: linear-gradient(135deg, #333, #000); color: #fff; border-color: #00bcd4; text-shadow: none; }
-    .pt-marker.used { opacity: 0.3; filter: grayscale(1); transform: scale(0.95); box-shadow: none !important; }
+    .pt-marker.used { opacity: 0.3; filter: grayscale(1); transform: scale(0.95); }
 
     /* ── Action Log Panel ── */
     #ptActionLogPanel { position: absolute; right: 15px; top: 70px; width: 280px; height: 350px; background: rgba(0, 0, 0, 0.85); border: 2px solid #3B4CCA; border-radius: 8px; color: #fff; font-family: monospace; font-size: 12px; padding: 10px; overflow-y: auto; z-index: 10000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
@@ -1851,22 +1841,22 @@
             font-size: 8px !important;
             border-width: 1px !important;
         }
-        #ptActiveZone .pt-empty-slot,
-        #ptActiveZone .pt-field-card {
+        #ptActiveZone-p1 .pt-empty-slot, #ptActiveZone-p1 .pt-field-card,
+        #ptActiveZone-p2 .pt-empty-slot, #ptActiveZone-p2 .pt-field-card {
             width: 60px !important;
             height: 84px !important;
         }
         .pt-deck-pile { width: 40px; height: 56px; font-size: 14px; }
         .pt-prize-card { width: 30px; }
-        #ptPrizeZone { grid-template-columns: repeat(3, 1fr) !important; max-width: 100px !important; }
+        #ptPrizeZone-p1, #ptPrizeZone-p2 { grid-template-columns: repeat(3, 1fr) !important; max-width: 100px !important; }
         #playtester-board { gap: 10px !important; }
         .pt-zone-label { font-size: 8px; margin-bottom: 2px; letter-spacing: 0; }
         .pt-field-actions { bottom: -35px; gap: 1px; padding: 2px; }
         .pt-action-btn { padding: 4px; font-size: 10px; }
-        .pt-damage-badge { width: 20px; height: 20px; font-size: 9px; top: -5px; right: -5px; }
+        .pt-damage-badge { width: 22px; height: 22px; font-size: 10px; top: -8px; right: -8px; }
         .pt-hand-card { width: 60px; }
-        .pt-attachment-energy { width: 20px !important; height: 20px !important; left: -8px !important; }
-        .pt-attachment-tool { width: 20px !important; height: 28px !important; left: -8px !important; }
+        .pt-attachment-energy { width: 22px !important; height: 22px !important; left: -10px !important; }
+        .pt-attachment-tool { width: 22px !important; height: 28px !important; left: -10px !important; }
     }
     </style>
 
@@ -1880,7 +1870,7 @@
                 font-family: 'Nunito', sans-serif;">
 
         <!-- Action Log Panel -->
-        <div id="ptActionLogPanel"></div>
+        <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
 
         <!-- Hotkey Modal -->
         <div id="ptHotkeyModal" style="display:none;position:fixed;top:50%;left:50%;
@@ -1924,10 +1914,11 @@
                 <h3 style="margin:0;color:#FFCB05;">🔭 Top Deck Control</h3>
                 <button class="pt-btn pt-danger" onclick="ptCloseTopCards()">✕</button>
             </div>
-            <div id="ptTopCardsContent" style="display:flex;flex-direction:column;gap:8px;"></div>
-            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
-                <button class="pt-btn" onclick="ptConfirmTopOrder()">✅ Reihenfolge bestätigen</button>
-                <button class="pt-btn" style="background:#666;" onclick="ptCloseTopCards()">Abbrechen</button>
+            <div id="ptTopCardsContent">
+                <div id="ptTopCardsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;"></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+                <button class="pt-btn" onclick="ptCloseTopCards()">Fertig</button>
             </div>
         </div>
 
@@ -1948,7 +1939,7 @@
             <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
                 <input id="ptCommandInput" type="text" placeholder="/draw 3  /mill 2  /top 5  /coin 3  /dice"
                        style="background:rgba(0,0,0,0.5);border:1px solid #3B4CCA;border-radius:6px;
-                              color:#fff;padding:5px 10px;font-size:12px;width:220px;
+                              color:#fff;padding:5px 10px;font-size:12px;width:140px;
                               outline:none;font-family:monospace;"
                        onkeydown="if(event.key==='Enter'){ptRunCommand();}"
                        onclick="event.stopPropagation()">
@@ -1984,7 +1975,7 @@
                         <div style="display:flex; gap:12px; align-items:flex-start;">
                             <div style="text-align:center;">
                                 <div class="pt-zone-label">Lost Zone (<span id="ptLostCount-p2">0</span>)</div>
-                                <div id="ptLostPile-p2" style="width:40px;height:56px;border:1px dashed #9b59b6;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;" onclick="ptOpenLost('p2')" title="Lost Zone anzeigen">🌀</div>
+                                <div id="ptLostPile-p2" style="width:40px;height:56px;border:1px dashed #9b59b6;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;" onclick="ptOpenLostZone('p2')" title="Lost Zone anzeigen">🌀</div>
                             </div>
                             <div style="text-align:center;">
                                 <div class="pt-zone-label">Ablage (<span id="ptDiscardCount-p2">0</span>)</div>
@@ -2040,7 +2031,7 @@
                         <div style="display:flex; gap:12px; align-items:flex-start;">
                             <div style="text-align:center;">
                                 <div class="pt-zone-label">Lost Zone (<span id="ptLostCount-p1">0</span>)</div>
-                                <div id="ptLostPile-p1" style="width:40px;height:56px;border:1px dashed #9b59b6;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;" onclick="ptOpenLost('p1')" title="Lost Zone anzeigen">🌀</div>
+                                <div id="ptLostPile-p1" style="width:40px;height:56px;border:1px dashed #9b59b6;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;" onclick="ptOpenLostZone('p1')" title="Lost Zone anzeigen">🌀</div>
                             </div>
                             <div style="text-align:center;">
                                 <div class="pt-zone-label">Ablage (<span id="ptDiscardCount-p1">0</span>)</div>
@@ -2097,28 +2088,13 @@
         <div style="background:#2a2a2a;border-radius:12px;padding:20px;
                     max-width:90vw;max-height:85vh;overflow-y:auto;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;">
-                <h3 style="color:#fff;margin:0;">🗑️ Ablagestapel &ndash; Klicken = Hand &nbsp;|&nbsp; Rechtsklick = Lost Zone</h3>
+                <h3 id="ptDiscardModalTitle" style="color:#fff;margin:0;">🗑️ Ablagestapel &ndash; Klicken = Hand &nbsp;|&nbsp; Rechtsklick = Lost Zone</h3>
                 <button class="pt-btn pt-danger" onclick="ptCloseDiscardModal()">✕</button>
             </div>
             <div id="ptDiscardGrid" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
         </div>
     </div>
 
-    <!-- Lost Zone viewer -->
-    <div id="ptLostModal"
-         style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;
-                z-index:16000;background:rgba(0,0,0,0.85);
-                align-items:center;justify-content:center;"
-         onclick="if(event.target===this)ptCloseLostModal()">
-        <div style="background:#1a0a2e;border-radius:12px;padding:20px;border:2px solid #9b59b6;
-                    max-width:90vw;max-height:85vh;overflow-y:auto;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;">
-                <h3 style="color:#9b59b6;margin:0;">🌀 Lost Zone – Karten hier sind permanent entfernt</h3>
-                <button class="pt-btn pt-danger" onclick="ptCloseLostModal()">✕</button>
-            </div>
-            <div id="ptLostGrid" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
-        </div>
-    </div>
 
     <!-- Draw Simulator Modal -->
     <div id="drawSimulatorModal" class="rarity-switcher-modal" onclick="if(event.target === this) closeDrawSimulator()" style="z-index: 10000; display: none;">
@@ -2158,6 +2134,6 @@
     <!-- Main App -->
     <script src="js/app.js?v=20260311-v11"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260311-v3"></script>
+    <script src="js/playtester.js?v=20260420-v4"></script>
 </body>
 </html>

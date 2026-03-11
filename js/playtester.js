@@ -38,11 +38,12 @@ function ptLog(msg, player) {
 }
 
 function ptRefreshLog() {
-    const panel = document.getElementById('ptActionLogPanel');
-    if (!panel) return;
-    panel.innerHTML = ptActionLog.map(e =>
+    const content = document.getElementById('ptActionLogContent');
+    if (!content) return;
+    content.innerHTML = ptActionLog.map(e =>
         `<div class="pt-log-entry pt-log-${e.player}"><span style="opacity:0.6;font-size:10px;">${e.time}</span> ${e.msg}</div>`
     ).join('');
+    content.scrollTop = 0;
 }
 
 function ptToggleLog() {
@@ -342,7 +343,7 @@ function ptOpenTopCards(n) {
 }
 
 function ptRenderTopCards() {
-    const container = document.getElementById('ptTopCardsContent');
+    const container = document.getElementById('ptTopCardsGrid');
     if (!container) return;
     container.innerHTML = '';
     ptLookingAt.forEach((card, idx) => {
@@ -562,30 +563,37 @@ function toggleStatus(player, statusType, event) {
 
 // --- LOST ZONE ---
 
-function ptOpenLost(player) {
-    const grid = document.getElementById('ptLostGrid');
-    if (!grid) return;
+function ptOpenLostZone(player) {
     const lz = ptState[player].lostzone || [];
     if (lz.length === 0) { ptShowMessage('Lost Zone ist leer.'); return; }
-    grid.innerHTML = lz.map((card) => {
+    const title = document.getElementById('ptDiscardModalTitle');
+    if (title) title.textContent = `\uD83C\uDF00 Lost Zone (${player.toUpperCase()}) \u2013 Klick=Hand nehmen`;
+    const grid = document.getElementById('ptDiscardGrid');
+    if (!grid) return;
+    grid.innerHTML = lz.map((card, index) => {
         const safeImg  = (card.imageUrl || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         const safeName = (card.name     || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        return `<div style="position:relative;cursor:pointer;" title="${card.name}"
-                     onclick="ptViewCard('${safeImg}','${safeName}')">
+        return `<div style="position:relative;cursor:pointer;" title="${card.name}">
             <img src="${card.imageUrl || 'https://images.pokemontcg.io/card-back.png'}"
                  style="width:82px;border-radius:6px;display:block;"
-                 onerror="this.src='https://images.pokemontcg.io/card-back.png'">
-            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);
+                 onerror="this.src='https://images.pokemontcg.io/card-back.png'"
+                 onclick="ptTakeFromLostZone('${player}', ${index})"
+                 ondblclick="ptViewCard('${safeImg}','${safeName}')">
+            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(80,0,80,0.8);
                         color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;
                         overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${card.name}</div>
         </div>`;
     }).join('');
-    document.getElementById('ptLostModal').style.display = 'flex';
+    document.getElementById('ptDiscardModal').style.display = 'flex';
 }
 
-function ptCloseLostModal() {
-    const m = document.getElementById('ptLostModal');
-    if (m) m.style.display = 'none';
+function ptTakeFromLostZone(player, index) {
+    const card = ptState[player].lostzone.splice(index, 1)[0];
+    ptState[ptCurrentPlayer].hand.push(card);
+    ptCloseDiscardModal();
+    ptLog(`${ptCurrentPlayer.toUpperCase()} nimmt "${card.name}" aus Lost Zone.`, ptCurrentPlayer);
+    ptShowMessage('Aus Lost Zone geholt.');
+    ptRenderAll();
 }
 
 // --- DRAG & DROP ---
@@ -739,6 +747,8 @@ function ptTakePrize(player, index) {
 }
 
 function ptOpenDiscard(player) {
+    const title = document.getElementById('ptDiscardModalTitle');
+    if (title) title.textContent = `\uD83D\uDDD1\uFE0F Ablage (${player.toUpperCase()}) \u2013 Klick=Hand | Rechtsklick=Lost Zone`;
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
     if (ptState[player].discard.length === 0) { ptShowMessage('Ablage ist leer.'); return; }

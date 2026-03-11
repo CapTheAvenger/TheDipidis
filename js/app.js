@@ -3433,7 +3433,35 @@ const BASE_PATH = './data/';
                 }
             }
             if (uniqueEl) uniqueEl.textContent = `(${unique} Unique)`;
-            
+
+            // --- Price calculation ---
+            let priceElId;
+            if (source === 'cityLeague')  priceElId = 'cityLeagueDeckPrice';
+            else if (source === 'currentMeta') priceElId = 'currentMetaDeckPrice';
+            else if (source === 'pastMeta')    priceElId = 'pastMetaDeckPrice';
+            const priceEl = document.getElementById(priceElId);
+            if (priceEl) {
+                let totalPrice = 0;
+                for (const [deckKey, count] of Object.entries(deck)) {
+                    if (!count || count <= 0) continue;
+                    let cardData = null;
+                    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                    if (setMatch) {
+                        const key = `${setMatch[2]}-${setMatch[3]}`;
+                        if (window.cardsBySetNumberMap) cardData = window.cardsBySetNumberMap[key];
+                        if (!cardData && window.allCardsDatabase)
+                            cardData = window.allCardsDatabase.find(c => c.set === setMatch[2] && c.number === setMatch[3]);
+                    } else if (window.allCardsDatabase) {
+                        cardData = window.allCardsDatabase.find(c => c.name === deckKey);
+                    }
+                    if (cardData && cardData.eur_price && cardData.eur_price !== '' && cardData.eur_price !== 'N/A') {
+                        const p = parseFloat(String(cardData.eur_price).replace(',', '.'));
+                        if (!isNaN(p)) totalPrice += p * count;
+                    }
+                }
+                priceEl.textContent = totalPrice.toFixed(2) + ' \u20ac';
+            }
+
             // Add visual warning to deck container if over 60 cards
             let deckVisualId;
             if (source === 'cityLeague') {

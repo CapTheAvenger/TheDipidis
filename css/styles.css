@@ -56,7 +56,12 @@
             overflow-x: auto;
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tab-navigation::-webkit-scrollbar {
+            display: none;
         }
         
         .tab-btn {
@@ -76,6 +81,33 @@
         
         .tab-btn:hover {
             background: rgba(255,255,255,0.3);
+        }
+
+        /* Reusable gradient buttons */
+        .btn-gradient-primary {
+            padding: 12px 24px;
+            font-size: 1em;
+            background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .btn-gradient-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-gradient-auto {
+            background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%);
+            font-weight: 600;
+        }
+
+        .btn-gradient-compare {
+            background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
         }
         
         .tab-btn.active {

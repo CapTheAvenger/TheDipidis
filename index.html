@@ -185,7 +185,7 @@
                             <button class="btn btn-secondary" onclick="clearDeck('cityLeague')">🗑️ Clear</button>
                             <button class="btn btn-success" onclick="autoComplete('cityLeague', 'min')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">⬇️ Generate Low Rarity Deck</button>
                             <button class="btn btn-success" onclick="autoComplete('cityLeague', 'max')" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">⬆️ Generate Max Rarity Deck</button>
-                            <button class="btn btn-success" onclick="autoCompleteConsistency('cityLeague', 'min')" style="background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%); font-weight: 600;">🎯 Auto Generate (Max Consistency)</button>
+                            <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('cityLeague', 'min')">🎯 Auto Generate (Max Consistency)</button>
                         </div>
                         
                         <div class="deck-summary">
@@ -198,7 +198,7 @@
                                 <h3 style="margin: 0;">🎴 Your Deck</h3>
                                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                     <button class="btn btn-success" onclick="saveCurrentDeckToProfile('cityLeague')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); font-weight: 600;">💾 Save to My Decks</button>
-                                    <button class="btn btn-info" onclick="openDeckCompare('cityLeague')" style="background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);">🔄 Compare Deck</button>
+                                    <button class="btn btn-info btn-gradient-compare" onclick="openDeckCompare('cityLeague')">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('cityLeague')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('cityLeague')">🖼️ Grid View</button>
                                 </div>
@@ -256,7 +256,7 @@
                             </div>
                             
                             <div style="margin-top: 15px; text-align: center;">
-                                <button onclick="loadMetaCardAnalysis('cityLeague')" style="padding: 12px 24px; font-size: 1em; background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">🔄 Load Meta Analysis</button>
+                                <button class="btn-gradient-primary" onclick="loadMetaCardAnalysis('cityLeague')">🔄 Load Meta Analysis</button>
                             </div>
                         </div>
                     </div>
@@ -448,7 +448,7 @@
                             <button class="btn btn-secondary" onclick="clearDeck('currentMeta')">🗑️ Clear</button>
                             <button class="btn btn-success" onclick="autoComplete('currentMeta', 'min')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">⬇️ Generate Low Rarity Deck</button>
                             <button class="btn btn-success" onclick="autoComplete('currentMeta', 'max')" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">⬆️ Generate Max Rarity Deck</button>
-                            <button class="btn btn-success" onclick="autoCompleteConsistency('currentMeta', 'min')" style="background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%); font-weight: 600;">🎯 Auto Generate (Max Consistency)</button>
+                            <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('currentMeta', 'min')">🎯 Auto Generate (Max Consistency)</button>
                         </div>
                         
                         <div class="deck-summary">
@@ -461,7 +461,7 @@
                                 <h3 style="margin: 0;">🎴 Your Deck</h3>
                                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                     <button class="btn btn-success" onclick="saveCurrentDeckToProfile('currentMeta')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); font-weight: 600;">💾 Save to My Decks</button>
-                                    <button class="btn btn-info" onclick="openDeckCompare('currentMeta')" style="background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);">🔄 Compare Deck</button>
+                                    <button class="btn btn-info btn-gradient-compare" onclick="openDeckCompare('currentMeta')">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('currentMeta')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('currentMeta')">🖼️ Grid View</button>
                                 </div>
@@ -519,7 +519,7 @@
                             </div>
                             
                             <div style="margin-top: 15px; text-align: center;">
-                                <button onclick="loadMetaCardAnalysis('currentMeta')" style="padding: 12px 24px; font-size: 1em; background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">🔄 Load Meta Analysis</button>
+                                <button class="btn-gradient-primary" onclick="loadMetaCardAnalysis('currentMeta')">🔄 Load Meta Analysis</button>
                             </div>
                         </div>
                     </div>
@@ -644,7 +644,7 @@
                             <button class="btn btn-secondary" onclick="clearDeck('pastMeta')">🗑️ Clear</button>
                             <button class="btn btn-success" onclick="autoComplete('pastMeta', 'min')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">⬇️ Generate Low Rarity Deck</button>
                             <button class="btn btn-success" onclick="autoComplete('pastMeta', 'max')" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">⬆️ Generate Max Rarity Deck</button>
-                            <button class="btn btn-success" onclick="autoCompleteConsistency('pastMeta', 'min')" style="background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%); font-weight: 600;">🎯 Auto Generate (Max Consistency)</button>
+                            <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('pastMeta', 'min')">🎯 Auto Generate (Max Consistency)</button>
                         </div>
                         
                         <div class="deck-summary">
@@ -657,7 +657,7 @@
                                 <h3 style="margin: 0;">🎴 Your Deck</h3>
                                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                     <button class="btn btn-success" onclick="saveCurrentDeckToProfile('pastMeta')" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); font-weight: 600;">💾 Save to My Decks</button>
-                                    <button class="btn btn-info" onclick="openDeckCompare('pastMeta')" style="background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);">🔄 Compare Deck</button>
+                                    <button class="btn btn-info btn-gradient-compare" onclick="openDeckCompare('pastMeta')">🔄 Compare Deck</button>
                                     <button class="btn btn-primary" onclick="copyDeck('pastMeta')">📋 Copy Deck</button>
                                     <button class="btn btn-warning" onclick="generateDeckGrid('pastMeta')">🖼️ Grid View</button>
                                 </div>

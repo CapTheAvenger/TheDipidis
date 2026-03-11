@@ -189,7 +189,7 @@ function clearDamage(zoneId, event) {
     ptRenderField();
 }
 
-function toggleStatus(statusType, event) {
+function toggleStatus(zoneId, statusType, event) {
     event.stopPropagation();
     if (!ptStatus.active) ptStatus.active = [];
     const idx = ptStatus.active.indexOf(statusType);
@@ -198,6 +198,26 @@ function toggleStatus(statusType, event) {
     } else {
         ptStatus.active.push(statusType);
     }
+    ptRenderField();
+}
+
+function ptSwapZones(benchZone, event) {
+    event.stopPropagation();
+    if (ptField.active.length === 0) {
+        ptShowMessage('Kein aktives Pokémon zum Rückzug!');
+        return;
+    }
+    if (ptField[benchZone].length === 0) {
+        ptShowMessage('Keine Karte auf dieser Bank-Position!');
+        return;
+    }
+    // Swap stacks (Pokémon + alle Attachments)
+    [ptField.active, ptField[benchZone]] = [ptField[benchZone], ptField.active];
+    // Swap damage counters (Schaden bleibt erhalten!)
+    [ptDamage.active, ptDamage[benchZone]] = [ptDamage[benchZone], ptDamage.active];
+    // Rückzug heilt alle Spezial-Zustände (TCG-Regel)
+    ptStatus.active = [];
+    ptShowMessage('Rückzug! Status-Zustände geheilt, Schaden bleibt.');
     ptRenderField();
 }
 
@@ -436,13 +456,13 @@ function ptRenderField() {
 }
 
 function generateZoneHTML(zoneId, labelText) {
-    const cards    = ptField[zoneId];
-    const isTarget = ptSelectedCardIndex !== null;
-    const width    = zoneId === 'active' ? 102 : 82;
-    const height   = Math.round(width * 1.38);
+    const cards  = ptField[zoneId];
+    const width  = zoneId === 'active' ? 102 : 82;
+    const height = Math.round(width * 1.38);
 
     // Empty zone
     if (cards.length === 0) {
+        const isTarget = ptSelectedCardIndex !== null;
         return `<div class="pt-empty-slot${isTarget ? ' pt-drop-target' : ''}"
                      style="width:${width}px;height:${height}px;"
                      ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';"
@@ -450,11 +470,13 @@ function generateZoneHTML(zoneId, labelText) {
                      onclick="ptClickZone('${zoneId}')">${labelText}</div>`;
     }
 
-    // Zone with cards
+    // Zone with cards — stack with offset
     let html = `<div style="position:relative;width:${width}px;cursor:pointer;min-height:${height}px;"
                      ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';"
                      ondrop="event.preventDefault();ptClickZone('${zoneId}')"
-                     onclick="ptClickZone('${zoneId}')">`;
+                     onclick="ptClickZone('${zoneId}')">`,
+        statusButtons = '',
+        statusIconsHTML = '';
 
     cards.forEach((card, index) => {
         const offsetTop = index * 18;
@@ -467,37 +489,58 @@ function generateZoneHTML(zoneId, labelText) {
                       title="${card.name}">`;
     });
 
-    // Status buttons — only for active zone
-    let statusButtons = '';
+    // Status-Buttons NUR fuer das aktive Pokémon
     if (zoneId === 'active') {
-        const isPoisoned = ptStatus.active && ptStatus.active.includes('poisoned') ? ' red' : '';
-        const isBurned   = ptStatus.active && ptStatus.active.includes('burned')   ? ' red' : '';
+        const cs        = ptStatus.active || [];
+        const poisoned  = cs.includes('poisoned')  ? ' red' : '';
+        const burned    = cs.includes('burned')    ? ' red' : '';
+        const asleep    = cs.includes('asleep')    ? ' red' : '';
+        const paralyzed = cs.includes('paralyzed') ? ' red' : '';
+        const confused  = cs.includes('confused')  ? ' red' : '';
         statusButtons = `
-            <button class="pt-action-btn${isPoisoned}" onclick="toggleStatus('poisoned',event)" title="Vergiftet">☠️</button>
-            <button class="pt-action-btn${isBurned}"   onclick="toggleStatus('burned',event)"   title="Verbrannt">🔥</button>`;
+            <div style="display:flex;gap:2px;justify-content:center;margin-bottom:2px;flex-wrap:wrap;">
+                <button class="pt-action-btn${poisoned}"  onclick="toggleStatus('active','poisoned',event)"  title="Vergiftet">☠️</button>
+                <button class="pt-action-btn${burned}"    onclick="toggleStatus('active','burned',event)"    title="Verbrannt">🔥</button>
+                <button class="pt-action-btn${asleep}"    onclick="toggleStatus('active','asleep',event)"    title="Schlaf">💤</button>
+                <button class="pt-action-btn${paralyzed}" onclick="toggleStatus('active','paralyzed',event)" title="Paralyse">⚡</button>
+                <button class="pt-action-btn${confused}"  onclick="toggleStatus('active','confused',event)"  title="Verwirrt">💫</button>
+            </div>`;
+        if (cs.length > 0) {
+            const icons = (cs.includes('poisoned') ? '☠️' : '') +
+                          (cs.includes('burned')    ? '🔥' : '') +
+                          (cs.includes('asleep')    ? '💤' : '') +
+                          (cs.includes('paralyzed') ? '⚡' : '') +
+                          (cs.includes('confused')  ? '💫' : '');
+            statusIconsHTML = `<div style="position:absolute;bottom:-5px;left:5px;
+                background:rgba(0,0,0,0.8);color:#fff;padding:2px 5px;
+                border-radius:4px;font-size:12px;z-index:99;">${icons}</div>`;
+        }
+    }
+
+    // Tauschen-Button NUR fuer Bank-Zonen (Rückzug)
+    let swapButton = '';
+    if (zoneId !== 'active') {
+        swapButton = `<button class="pt-action-btn" style="background:#2980b9;"
+            onclick="ptSwapZones('${zoneId}',event)" title="Mit Aktivem tauschen (Rückzug)">↔️</button>`;
     }
 
     html += `
-        <div class="pt-field-actions" style="z-index:100;">
-            <button class="pt-action-btn" onclick="addDamage('${zoneId}',10,event)">+10</button>
-            <button class="pt-action-btn" onclick="addDamage('${zoneId}',50,event)">+50</button>
-            <button class="pt-action-btn" onclick="clearDamage('${zoneId}',event)">0</button>
+        <div class="pt-field-actions" style="z-index:100;flex-direction:column;">
             ${statusButtons}
-            <button class="pt-action-btn" onclick="returnToHand('${zoneId}',event)" title="Auf Hand">↩</button>
-            <button class="pt-action-btn red" onclick="discardTopCard('${zoneId}',event)" title="Ablegen">🗑</button>
+            <div style="display:flex;gap:2px;justify-content:center;flex-wrap:wrap;">
+                <button class="pt-action-btn" onclick="addDamage('${zoneId}',10,event)">+10</button>
+                <button class="pt-action-btn" onclick="addDamage('${zoneId}',50,event)">+50</button>
+                <button class="pt-action-btn" onclick="clearDamage('${zoneId}',event)">0</button>
+                ${swapButton}
+                <button class="pt-action-btn" onclick="returnToHand('${zoneId}',event)" title="Auf Hand">↩</button>
+                <button class="pt-action-btn red" onclick="discardTopCard('${zoneId}',event)" title="Ablegen">🗑</button>
+            </div>
         </div>`;
 
-    // Damage badge
+    html += statusIconsHTML;
+
     if (ptDamage[zoneId] > 0) {
         html += `<div class="pt-damage-badge">${ptDamage[zoneId]}</div>`;
-    }
-
-    // Status badge (active zone)
-    if (zoneId === 'active' && ptStatus.active && ptStatus.active.length > 0) {
-        const icons = ptStatus.active.map(s => s === 'poisoned' ? '☠️' : '🔥').join('');
-        html += `<div style="position:absolute;top:3px;left:3px;background:rgba(0,0,0,0.75);
-                             color:#fff;font-size:10px;padding:1px 5px;border-radius:4px;
-                             border:1px solid rgba(255,255,255,0.3);z-index:50;">${icons}</div>`;
     }
 
     html += '</div>';

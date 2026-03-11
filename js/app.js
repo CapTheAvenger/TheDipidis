@@ -7364,7 +7364,7 @@ const BASE_PATH = './data/';
                 
                 // Load Current Meta Analysis CSV
                 try {
-                    const currentMetaResponse = await fetch(BASE_PATH + 'current_meta_analysis.csv');
+                    const currentMetaResponse = await fetch(BASE_PATH + 'current_meta_card_data.csv');
                     const currentMetaText = await currentMetaResponse.text();
                     const currentMetaCards = parseCSV(currentMetaText);
                     currentMetaCards.forEach(card => {

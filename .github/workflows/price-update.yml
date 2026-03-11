@@ -39,7 +39,7 @@ jobs:
       
       - name: Prepare META Settings
         run: |
-          cp card_price_scraper_settings_meta.json card_price_scraper_settings.json
+          cp card_price_scraper_settings_META.json card_price_scraper_settings.json
       
       - name: Run Price Scraper (META - Current Sets Only)
         run: |

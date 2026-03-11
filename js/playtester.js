@@ -1,22 +1,29 @@
-// =============================================================
-// GOLDFISHING PLAYTESTER — js/playtester.js
-// Single-player "sandbox" table to test your deck's opening
-// turns without needing an opponent.
-// =============================================================
+﻿/**
+ * ============================================================================
+ * GOLDFISHING PLAYTESTER (SANDBOX) — js/playtester.js
+ * ============================================================================
+ */
 
-'use strict';
+// --- STATE VARIABLES ---
+let ptDeck    = [];
+let ptHand    = [];
+let ptDiscard = [];
+let ptPrizes  = [];
 
-// ── State ────────────────────────────────────────────────────
-let _ptDeck     = [];
-let _ptHand     = [];
-let _ptActive   = null;                           // {card, damage, attached:[]}
-let _ptBench    = [null, null, null, null, null]; // [{card, damage, attached[]} | null]
-let _ptDiscard  = [];
-let _ptPrizes   = [];                             // [{card, revealed}]
-let _ptSelected = null;                           // {source:'hand'|'active'|'bench', index}
-let _ptDragSrc  = null;                           // same shape, for HTML5 drag
+// Each zone is an array: [pokémon, attached1, attached2, ...]
+let ptField = {
+    active: [],
+    bench0: [], bench1: [], bench2: [], bench3: [], bench4: []
+};
 
-// ── Open / Close ─────────────────────────────────────────────
+let ptDamage = {};   // ptId → number
+let ptStatus = {};   // ptId → 'poison'|'burn'|'asleep'|'paralyzed'|'confused'
+
+let ptSelectedCardIndex = null;  // index into ptHand, or null
+let _ptMsgTimer = null;
+
+// --- INITIALIZATION ---
+
 function openPlaytester(source) {
     const deckObj = source === 'cityLeague'  ? (window.cityLeagueDeck  || {})
                   : source === 'currentMeta' ? (window.currentMetaDeck || {})
@@ -28,9 +35,13 @@ function openPlaytester(source) {
         alert('Dein Deck ist leer! Füge erst Karten hinzu.');
         return;
     }
+    if (totalCards < 60) {
+        if (!confirm(`Dein Deck hat nur ${totalCards}/60 Karten. Trotzdem starten?`)) return;
+    }
 
-    // Flatten deck  (_simFindCard is defined in draw-simulator.js)
-    _ptDeck = [];
+    // Flatten {deckKey: count} → [{name, imageUrl, ptId}, ...]
+    // Reuses _simFindCard() from draw-simulator.js
+    ptDeck = [];
     for (const [deckKey, count] of Object.entries(deckObj)) {
         if (!count || count <= 0) continue;
         let cardName = deckKey;
@@ -45,203 +56,358 @@ function openPlaytester(source) {
                        window.allCardsDatabase.find(c => c.name === cardName);
             if (cd && cd.image_url) imageUrl = cd.image_url;
         }
-        for (let i = 0; i < count; i++) _ptDeck.push({ name: cardName, imageUrl });
+        for (let i = 0; i < count; i++) {
+            ptDeck.push({
+                name: cardName,
+                imageUrl,
+                ptId: 'card_' + Math.random().toString(36).substr(2, 9)
+            });
+        }
     }
 
-    const modal = document.getElementById('playtesterModal');
-    if (modal) modal.style.display = 'flex';
-    _ptSetup();
+    document.getElementById('playtesterModal').style.display = 'flex';
+    ptNewGame();
 }
 
 function closePlaytester() {
-    const modal = document.getElementById('playtesterModal');
-    if (modal) modal.style.display = 'none';
-    _ptSelected = null;
-    _ptDragSrc  = null;
+    if (confirm('Playtester wirklich verlassen?')) {
+        document.getElementById('playtesterModal').style.display = 'none';
+    }
 }
 
-// ── Setup (new game) ─────────────────────────────────────────
-function _ptSetup() {
-    _ptActive   = null;
-    _ptBench    = [null, null, null, null, null];
-    _ptHand     = [];
-    _ptDiscard  = [];
-    _ptSelected = null;
-    _ptDragSrc  = null;
-
-    _shuffleFisherYates(_ptDeck);              // reuses helper from draw-simulator.js
-    _ptPrizes = _ptDeck.splice(0, 6).map(c => ({ card: c, revealed: false }));
-    _ptHand   = _ptDeck.splice(0, 7);
-
-    _ptShowMsg('🃏 Spiel gestartet! Klicke eine Handkarte an, dann eine Zone zum Platzieren.');
-    _ptRender();
-}
-
-// ── Actions ───────────────────────────────────────────────────
 function ptNewGame() {
-    if (!confirm('Neues Spiel starten? Der aktuelle Spielstand geht verloren.')) return;
-    const all = [
-        ..._ptDeck,
-        ..._ptHand,
-        ...(_ptActive ? [_ptActive.card, ..._ptActive.attached] : []),
-        ..._ptBench.flatMap(s => s ? [s.card, ...s.attached] : []),
-        ..._ptDiscard,
-        ..._ptPrizes.map(p => p.card),
-    ];
-    _ptDeck = all;
-    _ptSetup();
+    ptHand    = [];
+    ptDiscard = [];
+    ptPrizes  = [];
+    ptField   = { active: [], bench0: [], bench1: [], bench2: [], bench3: [], bench4: [] };
+    ptDamage  = {};
+    ptStatus  = {};
+    ptSelectedCardIndex = null;
+
+    ptShuffle();
+
+    for (let i = 0; i < 7; i++) { if (ptDeck.length > 0) ptHand.push(ptDeck.pop()); }
+    for (let i = 0; i < 6; i++) { if (ptDeck.length > 0) ptPrizes.push(ptDeck.pop()); }
+
+    ptShowMessage('Neues Spiel gestartet. Lege dein aktives Pokémon!');
+    ptRenderAll();
+}
+
+// --- ACTIONS ---
+
+function ptShuffle() {
+    for (let i = ptDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ptDeck[i], ptDeck[j]] = [ptDeck[j], ptDeck[i]];
+    }
+    ptShowMessage('Deck gemischt!');
+    ptRenderDeck();
 }
 
 function ptDraw1() {
-    if (_ptDeck.length === 0) { _ptShowMsg('⚠️ Deck ist leer!'); return; }
-    _ptHand.push(_ptDeck.shift());
-    _ptRender();
-}
-
-function ptShuffle() {
-    _shuffleFisherYates(_ptDeck);
-    _ptShowMsg('🔀 Deck gemischt!');
-    _ptRender();
+    if (ptDeck.length > 0) {
+        ptHand.push(ptDeck.pop());
+        ptRenderHand();
+        ptRenderDeck();
+    } else {
+        ptShowMessage('Keine Karten mehr im Deck!');
+    }
 }
 
 function ptFlipCoin() {
-    _ptShowMsg(Math.random() < 0.5 ? '🌟 KOPF!' : '💀 ZAHL!');
+    const result = Math.random() >= 0.5 ? '🌟 KOPF!' : '💀 ZAHL!';
+    ptShowMessage('Münzwurf: ' + result);
 }
 
-let _ptMsgTimer = null;
-function _ptShowMsg(txt) {
-    const el = document.getElementById('ptMessage');
-    if (!el) return;
-    el.textContent = txt;
-    clearTimeout(_ptMsgTimer);
-    _ptMsgTimer = setTimeout(() => { if (el) el.textContent = ''; }, 2800);
+// --- RENDER ---
+
+function ptRenderAll() {
+    ptRenderDeck();
+    ptRenderHand();
+    ptRenderPrizes();
+    ptRenderDiscard();
+    ptRenderField();
 }
 
-// ── Selection & Click-to-Place ────────────────────────────────
-function ptSelectHand(index) {
-    if (_ptSelected && _ptSelected.source === 'hand' && _ptSelected.index === index) {
-        _ptSelected = null;   // deselect on second click
+function ptRenderDeck() {
+    const el = document.getElementById('ptDeckCount');
+    if (el) el.innerText = ptDeck.length;
+}
+
+function ptRenderDiscard() {
+    const el = document.getElementById('ptDiscardCount');
+    if (el) el.innerText = ptDiscard.length;
+    const pile = document.getElementById('ptDiscardPile');
+    if (!pile) return;
+    if (ptDiscard.length > 0) {
+        const top = ptDiscard[ptDiscard.length - 1];
+        pile.innerHTML = `<img src="${top.imageUrl}" alt="${top.name}"
+            style="width:62px;border-radius:7px;cursor:pointer;display:block;
+                   transition:transform 0.15s;border:2px solid rgba(255,255,255,0.25);"
+            onmouseover="this.style.transform='scale(1.07)'"
+            onmouseout="this.style.transform=''"
+            onclick="ptShowDiscard()"
+            onerror="this.src='images/card-back.png'"
+            title="Ablage ansehen (${ptDiscard.length} Karten)">`;
     } else {
-        _ptSelected = { source: 'hand', index };
+        pile.innerHTML = `<div class="pt-empty-slot"
+            style="width:62px;height:87px;font-size:10px;cursor:pointer;"
+            onclick="ptShowDiscard()">Ablage</div>`;
     }
-    _ptRender();
 }
 
-/** Unified zone click handler:
- *  - If something is selected → place/attach it here
- *  - If nothing selected + zone has card → select that card (to move it) */
-function ptClickZone(zone, idx) {
-    if (_ptSelected) {
-        ptPlaceSelected(zone, idx);
-    } else {
-        const hasCard = (zone === 'active' && _ptActive) ||
-                        (zone === 'bench'  && _ptBench[idx]);
-        if (hasCard) {
-            _ptSelected = { source: zone, index: idx };
-            _ptRender();
+function ptRenderPrizes() {
+    const zone = document.getElementById('ptPrizeZone');
+    if (!zone) return;
+    zone.innerHTML = ptPrizes.map((card, i) => `
+        <div style="position:relative;display:inline-block;">
+            <img src="images/card-back.png" class="pt-prize-card"
+                 title="Preiskarte nehmen (${i + 1})"
+                 onclick="ptTakePrize(${i})"
+                 onerror="this.src='images/card-back.png'">
+            <button class="pt-prize-take-btn" onclick="ptTakePrize(${i})" title="Auf Hand nehmen">↩</button>
+        </div>`
+    ).join('');
+}
+
+function ptTakePrize(index) {
+    const card = ptPrizes.splice(index, 1)[0];
+    ptHand.push(card);
+    ptShowMessage('Preiskarte gezogen!');
+    ptRenderPrizes();
+    ptRenderHand();
+}
+
+function ptRenderHand() {
+    const zone = document.getElementById('ptHandZone');
+    const cnt  = document.getElementById('ptHandCount');
+    if (!zone) return;
+    if (cnt) cnt.textContent = ptHand.length;
+    zone.innerHTML = '';
+
+    ptHand.forEach((card, i) => {
+        const sel = i === ptSelectedCardIndex;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'pt-hand-wrapper';
+        wrapper.draggable = true;
+        wrapper.ondragstart = e => {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', 'hand_' + i);
+            ptSelectedCardIndex = i;
+        };
+
+        const img = document.createElement('img');
+        img.src       = card.imageUrl;
+        img.alt       = card.name;
+        img.title     = card.name;
+        img.className = 'pt-hand-card' + (sel ? ' pt-card-selected' : '');
+        img.onerror   = function () { this.src = 'images/card-back.png'; };
+        img.onclick   = () => ptSelectHandCard(i);
+
+        const discBtn = document.createElement('button');
+        discBtn.className = 'pt-hand-disc-btn';
+        discBtn.title     = 'Ablegen';
+        discBtn.innerHTML = '🗑️';
+        discBtn.onclick   = e => ptDiscardFromHand(i, e);
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(discBtn);
+        zone.appendChild(wrapper);
+    });
+
+    // Return-to-hand drop target at end of row
+    const dropEnd = document.createElement('div');
+    dropEnd.className     = 'pt-empty-slot';
+    dropEnd.style.cssText = 'min-width:68px;height:98px;flex-shrink:0;font-size:10px;';
+    dropEnd.textContent   = '+ Hand';
+    dropEnd.ondragover    = e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+    dropEnd.ondrop        = e => { e.preventDefault(); _ptReturnSelectedToHand(); };
+    dropEnd.onclick       = () => { if (ptSelectedCardIndex !== null) _ptReturnSelectedToHand(); };
+    zone.appendChild(dropEnd);
+}
+
+function ptSelectHandCard(index) {
+    ptSelectedCardIndex = (ptSelectedCardIndex === index) ? null : index;
+    ptRenderHand();
+    ptRenderField();   // refresh drop-target highlights on zones
+}
+
+function ptDiscardFromHand(index, event) {
+    event.stopPropagation();
+    const card = ptHand.splice(index, 1)[0];
+    ptDiscard.push(card);
+    ptSelectedCardIndex = null;
+    ptRenderHand();
+    ptRenderDiscard();
+}
+
+function _ptReturnSelectedToHand() {
+    ptSelectedCardIndex = null;
+    ptRenderHand();
+    ptRenderField();
+}
+
+// --- FIELD RENDERING ---
+
+function ptRenderField() {
+    const activeZone = document.getElementById('ptActiveZone');
+    if (activeZone) {
+        activeZone.innerHTML = ptField.active.length > 0
+            ? _ptFieldStackHTML(ptField.active, 'active')
+            : _ptEmptySlotHTML('active', 'Aktiv', 102);
+    }
+    for (let i = 0; i < 5; i++) {
+        const el  = document.getElementById('ptBench' + i);
+        const key = 'bench' + i;
+        if (!el) continue;
+        el.innerHTML = ptField[key].length > 0
+            ? _ptFieldStackHTML(ptField[key], key)
+            : _ptEmptySlotHTML(key, 'Bank ' + (i + 1), 82);
+    }
+}
+
+function _ptFieldStackHTML(stack, zone) {
+    const pokemon  = stack[0];
+    const attached = stack.slice(1);
+    const dmg      = ptDamage[pokemon.ptId] || 0;
+    const status   = ptStatus[pokemon.ptId]  || null;
+    const width    = zone === 'active' ? 102 : 82;
+
+    const dmgBadge = dmg > 0
+        ? `<div class="pt-damage-badge">${dmg}</div>` : '';
+    const statusBadge = status
+        ? `<div style="position:absolute;top:3px;left:3px;background:rgba(0,0,0,0.75);
+                       color:#fff;font-size:9px;padding:1px 4px;border-radius:3px;
+                       border:1px solid rgba(255,255,255,0.3);">${status.toUpperCase()}</div>` : '';
+
+    const energyRow = attached.length > 0 ? `
+        <div style="display:flex;flex-wrap:wrap;gap:2px;padding:3px 4px;
+                    background:rgba(0,0,0,0.4);border-radius:0 0 7px 7px;">
+            ${attached.map((a, ei) => `
+                <img src="${a.imageUrl}" alt="${a.name}"
+                     title="${a.name} — klicken zum Entfernen"
+                     style="width:22px;height:22px;border-radius:50%;object-fit:cover;
+                            cursor:pointer;border:1px solid rgba(255,255,255,0.4);"
+                     onclick="ptRemoveAttached('${zone}',${ei + 1},event)"
+                     onerror="this.src='images/card-back.png'">
+            `).join('')}
+        </div>` : '';
+
+    const imgRadius = attached.length > 0 ? '7px 7px 0 0' : '7px';
+
+    return `
+        <div class="pt-field-card" style="width:${width}px;"
+             draggable="true"
+             ondragstart="event.dataTransfer.effectAllowed='move';
+                          event.dataTransfer.setData('text/plain','field_${zone}');"
+             ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';"
+             ondrop="ptDropToField('${zone}',event)"
+             onclick="ptClickField('${zone}')">
+            <img src="${pokemon.imageUrl}" alt="${pokemon.name}"
+                 style="width:100%;border-radius:${imgRadius};display:block;"
+                 onerror="this.src='images/card-back.png'">
+            ${dmgBadge}
+            ${statusBadge}
+            ${energyRow}
+            <div class="pt-field-actions">
+                <button class="pt-action-btn" onclick="ptAddDmg('${zone}',10,event)">+10</button>
+                <button class="pt-action-btn" onclick="ptAddDmg('${zone}',-10,event)">-10</button>
+                <button class="pt-action-btn" onclick="ptSetStatus('${zone}',event)">💤</button>
+                <button class="pt-action-btn" onclick="ptReturnToHand('${zone}',event)" title="Auf Hand">↩</button>
+                <button class="pt-action-btn red" onclick="ptSendToDiscard('${zone}',event)" title="Ablegen">🗑</button>
+            </div>
+        </div>`;
+}
+
+function _ptEmptySlotHTML(zone, label, width) {
+    const isTarget = ptSelectedCardIndex !== null;
+    return `<div class="pt-empty-slot${isTarget ? ' pt-drop-target' : ''}"
+                 style="width:${width}px;height:${Math.round(width * 1.38)}px;"
+                 ondragover="event.preventDefault();event.dataTransfer.dropEffect='move';"
+                 ondrop="ptDropToField('${zone}',event)"
+                 onclick="ptClickField('${zone}')">${label}</div>`;
+}
+
+function ptClickField(zone) {
+    if (ptSelectedCardIndex === null) return;
+    const card = ptHand.splice(ptSelectedCardIndex, 1)[0];
+    ptSelectedCardIndex = null;
+    ptField[zone].push(card);
+    ptRenderHand();
+    ptRenderField();
+}
+
+function ptDropToField(zone, event) {
+    event.preventDefault();
+    const data = event.dataTransfer.getData('text/plain');
+    if (data.startsWith('hand_')) {
+        const idx = parseInt(data.split('_')[1], 10);
+        if (!isNaN(idx) && idx >= 0 && idx < ptHand.length) {
+            ptSelectedCardIndex = idx;
+            ptClickField(zone);
         }
     }
 }
 
-function ptPlaceSelected(targetZone, targetIdx) {
-    if (!_ptSelected) return;
-    const { source, index } = _ptSelected;
-    _ptSelected = null;
+// --- FIELD CARD ACTIONS ---
 
-    // Extract card from its current location
-    let card = null;
-    if (source === 'hand') {
-        if (index < 0 || index >= _ptHand.length) { _ptRender(); return; }
-        card = _ptHand.splice(index, 1)[0];
-    } else if (source === 'active') {
-        if (!_ptActive) { _ptRender(); return; }
-        card = _ptActive.card;
-        _ptActive = null;
-    } else if (source === 'bench') {
-        if (!_ptBench[index]) { _ptRender(); return; }
-        card = _ptBench[index].card;
-        _ptBench[index] = null;
-    }
-    if (!card) { _ptRender(); return; }
-
-    // Place into target
-    if (targetZone === 'active') {
-        if (_ptActive) _ptActive.attached.push(card);          // occupied → attach
-        else           _ptActive = { card, damage: 0, attached: [] };
-    } else if (targetZone === 'bench') {
-        if (_ptBench[targetIdx]) _ptBench[targetIdx].attached.push(card);  // attach
-        else                     _ptBench[targetIdx] = { card, damage: 0, attached: [] };
-    } else if (targetZone === 'discard') {
-        _ptDiscard.push(card);
-    } else {   // 'hand' / fallback
-        _ptHand.push(card);
-    }
-    _ptRender();
+function ptAddDmg(zone, amount, event) {
+    event.stopPropagation();
+    if (ptField[zone].length === 0) return;
+    const id = ptField[zone][0].ptId;
+    ptDamage[id] = Math.max(0, (ptDamage[id] || 0) + amount);
+    ptRenderField();
 }
 
-// ── Field card quick-actions ──────────────────────────────────
-function ptReturnToHand(zone, idx, e) {
-    e && e.stopPropagation();
-    if (zone === 'active' && _ptActive)  { _ptHand.push(_ptActive.card); _ptActive = null; }
-    else if (zone === 'bench' && _ptBench[idx]) { _ptHand.push(_ptBench[idx].card); _ptBench[idx] = null; }
-    _ptSelected = null;
-    _ptRender();
+const _ptStatusCycle = ['', 'poison', 'burn', 'asleep', 'paralyzed', 'confused'];
+function ptSetStatus(zone, event) {
+    event.stopPropagation();
+    if (ptField[zone].length === 0) return;
+    const id  = ptField[zone][0].ptId;
+    const cur = ptStatus[id] || '';
+    const idx = _ptStatusCycle.indexOf(cur);
+    ptStatus[id] = _ptStatusCycle[(idx + 1) % _ptStatusCycle.length];
+    ptShowMessage(ptStatus[id]
+        ? zone.toUpperCase() + ' ist jetzt: ' + ptStatus[id].toUpperCase()
+        : 'Status entfernt');
+    ptRenderField();
 }
 
-function ptSendToDiscard(zone, idx, e) {
-    e && e.stopPropagation();
-    if (zone === 'active' && _ptActive)  { _ptDiscard.push(_ptActive.card); _ptActive = null; }
-    else if (zone === 'bench' && _ptBench[idx]) { _ptDiscard.push(_ptBench[idx].card); _ptBench[idx] = null; }
-    else if (zone === 'hand') { const c = _ptHand.splice(idx, 1)[0]; if (c) _ptDiscard.push(c); }
-    _ptSelected = null;
-    _ptRender();
+function ptReturnToHand(zone, event) {
+    event.stopPropagation();
+    if (ptField[zone].length === 0) return;
+    ptHand.push(...ptField[zone].splice(0));
+    ptSelectedCardIndex = null;
+    ptRenderHand();
+    ptRenderField();
 }
 
-function ptAddDamage(zone, idx, amount, e) {
-    e && e.stopPropagation();
-    if (zone === 'active' && _ptActive)
-        _ptActive.damage = Math.max(0, (_ptActive.damage || 0) + amount);
-    else if (zone === 'bench' && _ptBench[idx])
-        _ptBench[idx].damage = Math.max(0, (_ptBench[idx].damage || 0) + amount);
-    _ptRender();
+function ptSendToDiscard(zone, event) {
+    event.stopPropagation();
+    if (ptField[zone].length === 0) return;
+    ptDiscard.push(...ptField[zone].splice(0));
+    ptSelectedCardIndex = null;
+    ptRenderField();
+    ptRenderDiscard();
 }
 
-function ptRemoveAttached(zone, pokIdx, enIdx, e) {
-    e && e.stopPropagation();
-    let arr;
-    if (zone === 'active' && _ptActive)            arr = _ptActive.attached;
-    else if (zone === 'bench' && _ptBench[pokIdx]) arr = _ptBench[pokIdx].attached;
-    if (arr) _ptHand.push(arr.splice(enIdx, 1)[0]);
-    _ptRender();
+function ptRemoveAttached(zone, stackIdx, event) {
+    event.stopPropagation();
+    const card = ptField[zone].splice(stackIdx, 1)[0];
+    if (card) ptHand.push(card);
+    ptRenderHand();
+    ptRenderField();
 }
 
-function ptDiscardHandCard(idx, e) {
-    e && e.stopPropagation();
-    const c = _ptHand.splice(idx, 1)[0];
-    if (c) _ptDiscard.push(c);
-    if (_ptSelected && _ptSelected.source === 'hand') _ptSelected = null;
-    _ptRender();
-}
+// --- DISCARD VIEWER ---
 
-// ── Prize cards ───────────────────────────────────────────────
-function ptFlipPrize(idx) {
-    _ptPrizes[idx].revealed = !_ptPrizes[idx].revealed;
-    _ptRenderPrizes();
-}
-
-function ptTakePrize(idx) {
-    const p = _ptPrizes.splice(idx, 1)[0];
-    if (p) _ptHand.push(p.card);
-    _ptRender();
-}
-
-// ── Discard viewer ────────────────────────────────────────────
 function ptShowDiscard() {
-    if (_ptDiscard.length === 0) return;
     const modal = document.getElementById('ptDiscardModal');
     const grid  = document.getElementById('ptDiscardGrid');
     if (!modal || !grid) return;
-    grid.innerHTML = _ptDiscard.map((c, i) => `
+    if (ptDiscard.length === 0) return;
+    grid.innerHTML = ptDiscard.map((c, i) => `
         <div style="position:relative;cursor:pointer;" title="${c.name} — Klicken für Hand">
             <img src="${c.imageUrl}" alt="${c.name}"
                  style="width:82px;border-radius:6px;display:block;"
@@ -261,191 +427,21 @@ function ptCloseDiscardModal() {
 }
 
 function ptRecoverDiscard(idx) {
-    const c = _ptDiscard.splice(idx, 1)[0];
-    if (c) _ptHand.push(c);
-    _ptRender();
+    const c = ptDiscard.splice(idx, 1)[0];
+    if (c) ptHand.push(c);
+    ptRenderHand();
+    ptRenderDiscard();
     ptCloseDiscardModal();
 }
 
-// ── HTML5 Drag & Drop ─────────────────────────────────────────
-function ptDragStart(e, source, idx) {
-    _ptDragSrc = { source, index: idx };
-    e.dataTransfer.effectAllowed = 'move';
-}
+// --- MESSAGES ---
 
-function ptDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-}
-
-function ptDrop(e, zone, idx) {
-    e.preventDefault();
-    if (!_ptDragSrc) return;
-    _ptSelected = _ptDragSrc;
-    _ptDragSrc  = null;
-    ptPlaceSelected(zone, idx);
-}
-
-// ── Render helpers ────────────────────────────────────────────
-function _ptRender() {
-    _ptRenderTopBar();
-    _ptRenderPrizes();
-    _ptRenderActive();
-    _ptRenderBench();
-    _ptRenderDiscard();
-    _ptRenderHand();
-}
-
-function _ptRenderTopBar() {
-    const dc = document.getElementById('ptDeckCount');
-    if (dc) dc.textContent = _ptDeck.length;
-}
-
-function _ptRenderPrizes() {
-    const z = document.getElementById('ptPrizeZone');
-    if (!z) return;
-    z.innerHTML = _ptPrizes.map((p, i) => `
-        <div style="position:relative;display:inline-block;">
-            <img src="${p.revealed ? p.card.imageUrl : 'images/card-back.png'}"
-                 class="pt-prize-card"
-                 alt="${p.revealed ? p.card.name : 'Preis ' + (i + 1)}"
-                 onerror="this.src='images/card-back.png'"
-                 onclick="ptFlipPrize(${i})"
-                 title="${p.revealed ? p.card.name : 'Klicken zum Aufdecken'}">
-            <button class="pt-prize-take-btn" onclick="ptTakePrize(${i})" title="Auf Hand nehmen">↩</button>
-        </div>`
-    ).join('');
-}
-
-function _ptRenderDiscard() {
-    const cnt  = document.getElementById('ptDiscardCount');
-    if (cnt) cnt.textContent = _ptDiscard.length;
-    const pile = document.getElementById('ptDiscardPile');
-    if (!pile) return;
-    if (_ptDiscard.length > 0) {
-        const top = _ptDiscard[_ptDiscard.length - 1];
-        pile.innerHTML = `<img src="${top.imageUrl}" alt="Ablage"
-            style="width:62px;border-radius:7px;cursor:pointer;display:block;
-                   transition:transform 0.15s;border:2px solid rgba(255,255,255,0.25);"
-            onmouseover="this.style.transform='scale(1.07)'"
-            onmouseout="this.style.transform=''"
-            onclick="ptShowDiscard()"
-            onerror="this.src='images/card-back.png'"
-            title="Ablage ansehen (${_ptDiscard.length} Karten)">`;
-    } else {
-        pile.innerHTML = '<div class="pt-empty-slot" style="width:62px;height:87px;font-size:10px;">Ablage</div>';
-    }
-}
-
-function _ptFieldSlotHTML(slot, zone, idx) {
-    const sel       = _ptSelected && _ptSelected.source === zone && _ptSelected.index === idx;
-    const dmgBadge  = slot.damage > 0
-        ? `<div class="pt-damage-badge">${slot.damage}</div>` : '';
-    const hasEnergy = slot.attached.length > 0;
-    const energyRow = hasEnergy
-        ? `<div style="display:flex;flex-wrap:wrap;gap:2px;padding:3px 4px;
-                       background:rgba(0,0,0,0.4);border-radius:0 0 7px 7px;">
-            ${slot.attached.map((a, ei) => `
-                <img src="${a.imageUrl}" alt="${a.name}"
-                     title="${a.name} (klicken zum Entfernen)"
-                     style="width:22px;height:22px;border-radius:50%;
-                            object-fit:cover;cursor:pointer;border:1px solid rgba(255,255,255,0.4);"
-                     onclick="ptRemoveAttached('${zone}',${idx},${ei},event)"
-                     onerror="this.src='images/card-back.png'">`
-            ).join('')}
-           </div>` : '';
-
-    const imgRadius = hasEnergy ? '7px 7px 0 0' : '7px';
-
-    return `
-        <div class="pt-field-card${sel ? ' pt-card-selected' : ''}"
-             draggable="true"
-             ondragstart="ptDragStart(event,'${zone}',${idx})"
-             onclick="ptClickZone('${zone}',${idx})"
-             ondragover="ptDragOver(event)"
-             ondrop="ptDrop(event,'${zone}',${idx})">
-            <img src="${slot.card.imageUrl}" alt="${slot.card.name}"
-                 style="width:100%;border-radius:${imgRadius};display:block;"
-                 onerror="this.src='images/card-back.png'">
-            ${dmgBadge}
-            ${energyRow}
-            <div class="pt-field-actions">
-                <button class="pt-action-btn" onclick="ptAddDamage('${zone}',${idx},10,event)">+10</button>
-                <button class="pt-action-btn" onclick="ptAddDamage('${zone}',${idx},-10,event)">-10</button>
-                <button class="pt-action-btn" onclick="ptReturnToHand('${zone}',${idx},event)" title="Auf Hand">↩</button>
-                <button class="pt-action-btn red" onclick="ptSendToDiscard('${zone}',${idx},event)" title="Ablegen">🗑</button>
-            </div>
-        </div>`;
-}
-
-function _ptEmptySlotHTML(zone, idx, label) {
-    const isTarget = _ptSelected !== null;
-    return `<div class="pt-empty-slot${isTarget ? ' pt-drop-target' : ''}"
-                 onclick="ptClickZone('${zone}',${idx})"
-                 ondragover="ptDragOver(event)"
-                 ondrop="ptDrop(event,'${zone}',${idx})">${label}</div>`;
-}
-
-function _ptRenderActive() {
-    const z = document.getElementById('ptActiveZone');
-    if (!z) return;
-    z.innerHTML = _ptActive
-        ? _ptFieldSlotHTML(_ptActive, 'active', 0)
-        : _ptEmptySlotHTML('active', 0, 'Aktiv');
-}
-
-function _ptRenderBench() {
-    for (let i = 0; i < 5; i++) {
-        const z = document.getElementById(`ptBench${i}`);
-        if (!z) continue;
-        z.innerHTML = _ptBench[i]
-            ? _ptFieldSlotHTML(_ptBench[i], 'bench', i)
-            : _ptEmptySlotHTML('bench', i, `Bank ${i + 1}`);
-    }
-}
-
-function _ptRenderHand() {
-    const zone = document.getElementById('ptHandZone');
-    const cnt  = document.getElementById('ptHandCount');
-    if (!zone) return;
-    if (cnt) cnt.textContent = _ptHand.length;
-
-    zone.innerHTML = '';
-
-    _ptHand.forEach((card, i) => {
-        const sel = _ptSelected && _ptSelected.source === 'hand' && _ptSelected.index === i;
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'pt-hand-wrapper';
-        wrapper.draggable = true;
-        wrapper.ondragstart = e => ptDragStart(e, 'hand', i);
-
-        const img = document.createElement('img');
-        img.src       = card.imageUrl;
-        img.alt       = card.name;
-        img.title     = card.name;
-        img.className = 'pt-hand-card' + (sel ? ' pt-card-selected' : '');
-        img.onerror   = function () { this.src = 'images/card-back.png'; };
-        img.onclick   = () => ptSelectHand(i);
-
-        const discBtn = document.createElement('button');
-        discBtn.className = 'pt-hand-disc-btn';
-        discBtn.title     = 'Ablegen';
-        discBtn.innerHTML = '🗑';
-        discBtn.onclick   = e => ptDiscardHandCard(i, e);
-
-        wrapper.appendChild(img);
-        wrapper.appendChild(discBtn);
-        zone.appendChild(wrapper);
-    });
-
-    // Return-to-hand drop target at end of hand row
-    const dropEnd = document.createElement('div');
-    dropEnd.className   = 'pt-empty-slot';
-    dropEnd.style.cssText = 'min-width:68px;height:98px;flex-shrink:0;font-size:10px;';
-    dropEnd.textContent = '+ Hand';
-    dropEnd.ondragover  = ptDragOver;
-    dropEnd.ondrop      = e => ptDrop(e, 'hand', -1);
-    dropEnd.onclick     = () => ptPlaceSelected('hand', -1);
-    zone.appendChild(dropEnd);
+function ptShowMessage(msg) {
+    const el = document.getElementById('ptMessage');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.opacity = '0';
+    setTimeout(() => { if (el) el.style.opacity = '1'; }, 50);
+    clearTimeout(_ptMsgTimer);
+    _ptMsgTimer = setTimeout(() => { if (el) el.textContent = ''; }, 3000);
 }

@@ -1858,7 +1858,7 @@
     </style>
 
     <!-- ═══════════════════════════════════════════════════
-         GOLDFISHING PLAYTESTER — full-screen modal
+         GOLDFISHING PLAYTESTER — 2-PLAYER SANDBOX
     ═══════════════════════════════════════════════════ -->
     <div id="playtesterModal"
          style="display:none; position:fixed; top:0; left:0; right:0; bottom:0;
@@ -1870,16 +1870,17 @@
         <div class="pt-toolbar" style="padding:10px 14px; display:flex;
                     justify-content:space-between; align-items:center; flex-wrap:nowrap;
                     gap:10px; flex-shrink:0; overflow-x:auto;">
-            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
-                <span style="color:#fff; font-size:1.1em; font-weight:800; letter-spacing: 0.5px;">⚔️ Sandbox</span>
+            <div style="display:flex; align-items:center; gap:15px; flex-shrink:0;">
+                <span style="color:#fff; font-size:1.1em; font-weight:800; letter-spacing: 0.5px;">⚔️ 2-Player Sandbox</span>
                 <span id="ptMessage" style="color:#FFCB05; font-weight:700; font-size:0.9em; min-width:80px;"></span>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <button class="pt-btn" onclick="ptDraw1()">+1 Ziehen</button>
+                <button class="pt-btn" onclick="ptOpenDeckSearch()">🔍 Deck suchen</button>
                 <button class="pt-btn" onclick="ptShuffle()">🔀 Mischen</button>
                 <button class="pt-btn" onclick="ptFlipCoin()">🪙 Münze</button>
                 <button class="pt-btn" onclick="ptPassTurn()" style="background:#27ae60; border-color:#2ecc71;">⏭️ Pass Turn</button>
-                <button class="pt-btn" id="flip-board-btn" onclick="ptFlipBoard(this)">🔄 Flip Board</button>
+                <button class="pt-btn" id="flip-board-btn" onclick="ptFlipBoard()">🔄 Flip Board</button>
                 <button class="pt-btn" onclick="ptNewGame()">🔄 Neustart</button>
                 <button class="pt-btn pt-danger" onclick="closePlaytester()">🚪 Exit</button>
             </div>
@@ -1888,40 +1889,76 @@
         <!-- Scrollable field area -->
         <div style="flex:1; overflow:auto; padding: 15px; display:flex; flex-direction:column; justify-content: center; min-height:0;">
 
-            <div id="playtester-board" style="display: flex; flex-direction: column; gap: 20px; max-width: 800px; margin: 0 auto; width: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center center;">
+            <div id="playtester-board" style="display: flex; flex-direction: column; gap: 20px; max-width: 900px; margin: 0 auto; width: 100%; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center center;">
 
-                <!-- Top row: Prizes | Discard | Deck -->
-                <div style="display:flex; justify-content: space-between; align-items:flex-start; width: 100%;">
-                    <div>
-                        <div class="pt-zone-label">Preise</div>
-                        <div id="ptPrizeZone" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; max-width: 130px;"></div>
+                <!-- PLAYER 2 AREA (rotated 180°) -->
+                <div id="p2-area" style="transform: rotate(180deg); display: flex; flex-direction: column; gap: 12px; background: rgba(0,0,0,0.1); padding: 12px; border-radius: 12px; border: 1px solid rgba(227,53,13,0.3);">
+                    <div style="display:flex; justify-content: space-between; align-items:flex-start; width: 100%;">
+                        <div>
+                            <div class="pt-zone-label">P2 Preise</div>
+                            <div id="ptPrizeZone-p2" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; max-width: 130px;"></div>
+                        </div>
+                        <div style="display:flex; gap:12px; align-items:flex-start;">
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label">Ablage (<span id="ptDiscardCount-p2">0</span>)</div>
+                                <div id="ptDiscardPile-p2"></div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
+                                <div class="pt-deck-pile" onclick="ptDraw1('p2')" title="P2: 1 Karte ziehen">🂠</div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:15px;">
-                        <div style="text-align:center;">
-                            <div class="pt-zone-label">Ablage (<span id="ptDiscardCount">0</span>)</div>
-                            <div id="ptDiscardPile"></div>
+                    <div>
+                        <div class="pt-zone-label" style="text-align:center;">P2 Bank</div>
+                        <div style="display:flex; justify-content:center; gap:8px; flex-wrap:nowrap; min-height:120px; align-items:flex-start; padding-top:10px;">
+                            <div id="ptBench0-p2"></div><div id="ptBench1-p2"></div><div id="ptBench2-p2"></div><div id="ptBench3-p2"></div><div id="ptBench4-p2"></div>
                         </div>
-                        <div style="text-align:center;">
-                            <div class="pt-zone-label">Deck (<span id="ptDeckCount">0</span>)</div>
-                            <div class="pt-deck-pile" onclick="ptDraw1()" title="Klicken = 1 Karte ziehen">🂠</div>
-                        </div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="pt-zone-label" style="color:#FFCB05;">P2 Aktives Pokémon</div>
+                        <div id="ptActiveZone-p2" style="display:inline-block;"></div>
                     </div>
                 </div>
 
-                <!-- Field: Active + Bench -->
-                <div style="display:flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; background: rgba(0,0,0,0.15); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-                    <div style="text-align: center;">
-                        <div class="pt-zone-label" style="color: #FFCB05;">Aktives Pokémon</div>
-                        <div id="ptActiveZone"></div>
+                <!-- NEUTRAL MIDDLE ZONE -->
+                <div style="display:flex; justify-content:center; gap:40px; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; align-items:flex-start;">
+                    <div style="text-align:center;">
+                        <div class="pt-zone-label" style="color:#a8e6cf;">🏟️ Stadion</div>
+                        <div id="ptStadiumZone"></div>
                     </div>
-                    <div style="width: 100%;">
-                        <div class="pt-zone-label" style="text-align: center;">Bank</div>
-                        <div style="display:flex; justify-content: center; gap:8px; flex-wrap: nowrap;">
-                            <div id="ptBench0"></div>
-                            <div id="ptBench1"></div>
-                            <div id="ptBench2"></div>
-                            <div id="ptBench3"></div>
-                            <div id="ptBench4"></div>
+                    <div style="text-align:center;">
+                        <div class="pt-zone-label" style="color:#a8e6cf;">⚡ Gespielte Karte</div>
+                        <div id="ptPlayZone"></div>
+                    </div>
+                </div>
+
+                <!-- PLAYER 1 AREA -->
+                <div id="p1-area" style="display: flex; flex-direction: column; gap: 12px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; border: 1px solid rgba(59,76,202,0.4); box-shadow: 0 0 15px rgba(0,0,0,0.3);">
+                    <div style="text-align:center;">
+                        <div class="pt-zone-label" style="color:#FFCB05;">P1 Aktives Pokémon</div>
+                        <div id="ptActiveZone-p1" style="display:inline-block;"></div>
+                    </div>
+                    <div>
+                        <div class="pt-zone-label" style="text-align:center;">P1 Bank</div>
+                        <div style="display:flex; justify-content:center; gap:8px; flex-wrap:nowrap; min-height:120px; align-items:flex-start; padding-top:10px;">
+                            <div id="ptBench0-p1"></div><div id="ptBench1-p1"></div><div id="ptBench2-p1"></div><div id="ptBench3-p1"></div><div id="ptBench4-p1"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                        <div>
+                            <div class="pt-zone-label">P1 Preise</div>
+                            <div id="ptPrizeZone-p1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; max-width: 130px;"></div>
+                        </div>
+                        <div style="display:flex; gap:12px; align-items:flex-start;">
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label">Ablage (<span id="ptDiscardCount-p1">0</span>)</div>
+                                <div id="ptDiscardPile-p1"></div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
+                                <div class="pt-deck-pile" onclick="ptDraw1('p1')" title="P1: 1 Karte ziehen">🂠</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1930,17 +1967,32 @@
         </div><!-- /field area -->
 
         <!-- Hand (pinned to bottom) -->
-        <div class="pt-hand-zone" style="border-radius: 12px 12px 0 0; margin: 0 10px; background: rgba(0,0,0,0.6); box-shadow: 0 -4px 15px rgba(0,0,0,0.4);">
+        <div class="pt-hand-zone" style="border-radius: 12px 12px 0 0; margin: 0 10px; background: rgba(0,0,0,0.8); border-top: 4px solid #3B4CCA; box-shadow: 0 -4px 15px rgba(0,0,0,0.6);">
             <div class="pt-zone-label" style="margin-bottom:7px; color: white;">
-                Dein Blatt (<span id="ptHandCount">0</span>) —
+                Hand (<span id="ptHandCount">0</span>) —
                 <span style="font-size:10px; text-transform:none; opacity:0.8; font-weight: 400;">
-                    Klicken → Wählen (Gelb) → Feld anklicken. Oder Karte aufs Feld ziehen.
+                    Spieler <span id="activePlayerIndicator">1</span> ist dran.
                 </span>
             </div>
             <div id="ptHandZone" style="display:flex; gap:10px; overflow-x:auto; padding: 10px 5px; align-items:flex-end; -webkit-overflow-scrolling: touch;"></div>
         </div>
 
     </div><!-- /playtesterModal -->
+
+    <!-- Deck Search Modal -->
+    <div id="ptDeckSearchModal"
+         style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+                z-index:16000;background:rgba(0,0,0,0.85);
+                align-items:center;justify-content:center;"
+         onclick="if(event.target===this)document.getElementById('ptDeckSearchModal').style.display='none'">
+        <div style="background:#2a2a2a;border-radius:12px;padding:20px;max-width:90vw;width:800px;max-height:85vh;overflow-y:auto;border:2px solid #3B4CCA;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;">
+                <h3 style="color:#fff;margin:0;">🔍 Deck durchsuchen &ndash; Klicken = auf die Hand</h3>
+                <button class="pt-btn pt-danger" onclick="document.getElementById('ptDeckSearchModal').style.display='none'">✕</button>
+            </div>
+            <div id="ptDeckSearchGrid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;"></div>
+        </div>
+    </div>
 
     <!-- Discard pile viewer -->
     <div id="ptDiscardModal"
@@ -1996,6 +2048,6 @@
     <!-- Main App -->
     <script src="js/app.js?v=20260311-v11"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260311-v1"></script>
+    <script src="js/playtester.js?v=20260311-v2"></script>
 </body>
 </html>

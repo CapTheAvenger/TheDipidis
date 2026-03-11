@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ============================================================================
  * GOLDFISHING PLAYTESTER (SANDBOX) - FINAL
  * ============================================================================
@@ -48,7 +48,7 @@ function openPlaytester(source) {
     for (const [deckKey, count] of Object.entries(deckObj)) {
         if (!count || count <= 0) continue;
         let cardName = deckKey;
-        let imageUrl = 'images/card-back.png';
+        let imageUrl = 'https://images.pokemontcg.io/card-back.png';
         const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
         if (m) {
             cardName = m[1];
@@ -93,7 +93,7 @@ function ptNewGame() {
     const board   = document.getElementById('playtester-board');
     const flipBtn = document.getElementById('flip-board-btn');
     if (board)   board.style.transform = 'rotate(0deg)';
-    if (flipBtn) flipBtn.innerText = '🔄 Flip Board';
+    if (flipBtn) flipBtn.innerText = '?? Flip Board';
 
     ptShuffle();
 
@@ -127,7 +127,7 @@ function ptDraw1() {
 }
 
 function ptFlipCoin() {
-    const result = Math.random() >= 0.5 ? '🌟 KOPF!' : '💀 ZAHL!';
+    const result = Math.random() >= 0.5 ? '?? KOPF!' : '?? ZAHL!';
     ptShowMessage('Muenzwurf: ' + result);
 }
 
@@ -136,12 +136,12 @@ function ptFlipBoard(btnElement) {
     if (!board) return;
     if (isBoardFlipped) {
         board.style.transform = 'rotate(0deg)';
-        btnElement.innerText = '🔄 Flip Board';
+        btnElement.innerText = '?? Flip Board';
         isBoardFlipped = false;
         ptShowMessage('Deine Perspektive');
     } else {
         board.style.transform = 'rotate(180deg)';
-        btnElement.innerText = '🔄 Reset Board';
+        btnElement.innerText = '?? Reset Board';
         isBoardFlipped = true;
         ptShowMessage('Gegnerische Perspektive');
     }
@@ -151,16 +151,16 @@ function ptPassTurn() {
     const messages = [];
     if (ptStatus.active && ptStatus.active.includes('poisoned')) {
         ptDamage.active += 10;
-        messages.push('☠️ Gift: +10');
+        messages.push('?? Gift: +10');
     }
     if (ptStatus.active && ptStatus.active.includes('burned')) {
         ptDamage.active += 20;
-        messages.push('🔥 Verbrennung: +20');
+        messages.push('?? Verbrennung: +20');
     }
     ptRenderField();
     ptDraw1();
     if (messages.length > 0) {
-        ptShowMessage(messages.join(' | ') + ' — Zug vorbei!');
+        ptShowMessage(messages.join(' | ') + ' � Zug vorbei!');
     }
 }
 
@@ -338,10 +338,10 @@ function ptRenderPrizes() {
     if (!zone) return;
     zone.innerHTML = ptPrizes.map((card, i) => `
         <div style="position:relative;display:inline-block;">
-            <img src="images/card-back.png" class="pt-prize-card"
+            <img src="https://images.pokemontcg.io/card-back.png" class="pt-prize-card"
                  title="Preiskarte nehmen (${i + 1})"
                  onclick="ptTakePrize(${i})"
-                 onerror="this.src='images/card-back.png'">
+                 onerror="this.src='https://images.pokemontcg.io/card-back.png'">
         </div>`
     ).join('');
 }
@@ -367,7 +367,7 @@ function ptRenderDiscard() {
             onmouseover="this.style.transform='scale(1.07)'"
             onmouseout="this.style.transform=''"
             onclick="ptShowDiscard()"
-            onerror="this.src='images/card-back.png'"
+            onerror="this.src='https://images.pokemontcg.io/card-back.png'"
             title="Ablage ansehen (${ptDiscard.length} Karten)">`;
     } else {
         pile.innerHTML = `<div class="pt-empty-slot"
@@ -385,7 +385,7 @@ function ptShowDiscard() {
         <div style="position:relative;cursor:pointer;" title="${c.name}">
             <img src="${c.imageUrl}" alt="${c.name}"
                  style="width:82px;border-radius:6px;display:block;"
-                 onerror="this.src='images/card-back.png'"
+                 onerror="this.src='https://images.pokemontcg.io/card-back.png'"
                  onclick="ptTakeFromDiscard(${i})">
             <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);
                         color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;
@@ -425,17 +425,17 @@ function ptRenderHand() {
         wrapper.ondragstart = e => ptDragStartHand(e, i);
 
         const img = document.createElement('img');
-        img.src       = card.imageUrl || 'images/card-back.png';
+        img.src       = card.imageUrl || 'https://images.pokemontcg.io/card-back.png';
         img.alt       = card.name;
         img.title     = card.name;
         img.className = 'pt-hand-card' + (sel ? ' pt-card-selected' : '');
-        img.onerror   = function () { this.src = 'images/card-back.png'; };
+        img.onerror   = function () { this.src = 'https://images.pokemontcg.io/card-back.png'; };
         img.onclick   = () => ptSelectHandCard(i);
 
         const discBtn = document.createElement('button');
         discBtn.className = 'pt-hand-disc-btn';
         discBtn.title     = 'Ablegen';
-        discBtn.innerHTML = '🗑️';
+        discBtn.innerHTML = '???';
         discBtn.onclick   = e => ptDiscardFromHand(i, e);
 
         wrapper.appendChild(img);
@@ -504,7 +504,7 @@ function generateZoneHTML(zoneId, labelText) {
                      onclick="ptClickZone('${zoneId}')">${labelText}</div>`;
     }
 
-    // Zone mit Karten — draggable fuer Feld-zu-Feld Drag
+    // Zone mit Karten � draggable fuer Feld-zu-Feld Drag
     let html = `<div style="position:relative;width:${width}px;cursor:pointer;min-height:${height}px;"
                      draggable="true"
                      ondragstart="ptDragStartField(event,'${zoneId}')"
@@ -519,16 +519,16 @@ function generateZoneHTML(zoneId, labelText) {
     // Karten versetzt zeichnen
     cards.forEach((card, index) => {
         const offsetTop = index * 18;
-        html += `<img src="${card.imageUrl || 'images/card-back.png'}"
+        html += `<img src="${card.imageUrl || 'https://images.pokemontcg.io/card-back.png'}"
                       class="pt-field-card"
                       style="position:${index === 0 ? 'relative' : 'absolute'};
                              top:${offsetTop}px;left:0;z-index:${index};
                              width:${width}px;border-radius:7px;display:block;"
-                      onerror="this.src='images/card-back.png'"
+                      onerror="this.src='https://images.pokemontcg.io/card-back.png'"
                       title="${card.name}">`;
     });
 
-    // Status-Menü NUR fuer das Aktive Pokémon
+    // Status-Men� NUR fuer das Aktive Pok�mon
     let statusButtons = '';
     let statusIconsHTML = '';
     if (zoneId === 'active') {
@@ -540,25 +540,25 @@ function generateZoneHTML(zoneId, labelText) {
         const confused  = cs.includes('confused')  ? ' red' : '';
         statusButtons = `
             <div style="display:flex;gap:2px;justify-content:center;margin-bottom:2px;flex-wrap:wrap;">
-                <button class="pt-action-btn${poisoned}"  onclick="toggleStatus('active','poisoned',event)"  title="Vergiftet">☠️</button>
-                <button class="pt-action-btn${burned}"    onclick="toggleStatus('active','burned',event)"    title="Verbrannt">🔥</button>
-                <button class="pt-action-btn${asleep}"    onclick="toggleStatus('active','asleep',event)"    title="Schlaf">💤</button>
-                <button class="pt-action-btn${paralyzed}" onclick="toggleStatus('active','paralyzed',event)" title="Paralyse">⚡</button>
-                <button class="pt-action-btn${confused}"  onclick="toggleStatus('active','confused',event)"  title="Verwirrt">💫</button>
+                <button class="pt-action-btn${poisoned}"  onclick="toggleStatus('active','poisoned',event)"  title="Vergiftet">??</button>
+                <button class="pt-action-btn${burned}"    onclick="toggleStatus('active','burned',event)"    title="Verbrannt">??</button>
+                <button class="pt-action-btn${asleep}"    onclick="toggleStatus('active','asleep',event)"    title="Schlaf">??</button>
+                <button class="pt-action-btn${paralyzed}" onclick="toggleStatus('active','paralyzed',event)" title="Paralyse">?</button>
+                <button class="pt-action-btn${confused}"  onclick="toggleStatus('active','confused',event)"  title="Verwirrt">??</button>
             </div>`;
         if (cs.length > 0) {
-            const icons = (cs.includes('poisoned') ? '☠️' : '') +
-                          (cs.includes('burned')    ? '🔥' : '') +
-                          (cs.includes('asleep')    ? '💤' : '') +
-                          (cs.includes('paralyzed') ? '⚡' : '') +
-                          (cs.includes('confused')  ? '💫' : '');
+            const icons = (cs.includes('poisoned') ? '??' : '') +
+                          (cs.includes('burned')    ? '??' : '') +
+                          (cs.includes('asleep')    ? '??' : '') +
+                          (cs.includes('paralyzed') ? '?' : '') +
+                          (cs.includes('confused')  ? '??' : '');
             statusIconsHTML = `<div style="position:absolute;bottom:-5px;left:5px;
                 background:rgba(0,0,0,0.8);color:#fff;padding:2px 5px;
                 border-radius:4px;font-size:12px;z-index:99;">${icons}</div>`;
         }
     }
 
-    // Hover-Menü
+    // Hover-Men�
     html += `
         <div class="pt-field-actions" style="z-index:100;flex-direction:column;">
             ${statusButtons}
@@ -566,8 +566,8 @@ function generateZoneHTML(zoneId, labelText) {
                 <button class="pt-action-btn" onclick="addDamage('${zoneId}',10,event)">+10</button>
                 <button class="pt-action-btn" onclick="addDamage('${zoneId}',50,event)">+50</button>
                 <button class="pt-action-btn" onclick="clearDamage('${zoneId}',event)">0</button>
-                <button class="pt-action-btn" onclick="returnToHand('${zoneId}',event)" title="Auf Hand">↩</button>
-                <button class="pt-action-btn red" onclick="discardTopCard('${zoneId}',event)" title="Ablegen">🗑</button>
+                <button class="pt-action-btn" onclick="returnToHand('${zoneId}',event)" title="Auf Hand">?</button>
+                <button class="pt-action-btn red" onclick="discardTopCard('${zoneId}',event)" title="Ablegen">??</button>
             </div>
         </div>`;
 

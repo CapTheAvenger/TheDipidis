@@ -1563,32 +1563,57 @@
          GOLDFISHING PLAYTESTER — styles
     ═══════════════════════════════════════════════════ -->
     <style>
+    /* ── Pokémon Theme Schrift & Basis ── */
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+    #playtesterModal {
+        font-family: 'Nunito', sans-serif !important;
+        background: radial-gradient(circle at top, #27ae60 0%, #145a32 100%) !important;
+    }
+
+    /* ── Playtester Toolbar (Pokémon Blau) ── */
+    .pt-toolbar {
+        background: linear-gradient(90deg, #1b3b8c 0%, #2a52be 100%);
+        border-bottom: 4px solid #ffcb05;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
     /* ── Playtester buttons ── */
     .pt-btn {
-        background: rgba(255,255,255,0.15);
-        color: #fff;
-        border: 1px solid rgba(255,255,255,0.35);
-        border-radius: 7px;
-        padding: 6px 13px;
+        background: rgba(255,255,255,0.9);
+        color: #1b3b8c;
+        border: 2px solid #ffcb05;
+        border-radius: 20px;
+        padding: 8px 16px;
         cursor: pointer;
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         transition: background 0.15s;
         white-space: nowrap;
         font-family: inherit;
     }
-    .pt-btn:hover { background: rgba(255,255,255,0.28); }
-    .pt-btn.pt-danger { background: rgba(200,50,50,0.5); border-color: rgba(200,50,50,0.7); }
-    .pt-btn.pt-danger:hover { background: rgba(200,50,50,0.75); }
+    .pt-btn:hover {
+        background: #ffcb05;
+        color: #000;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .pt-btn.pt-danger { background: #e74c3c; color: white; border-color: #c0392b; }
+    .pt-btn.pt-danger:hover { background: #c0392b; }
 
     /* ── Zone labels ── */
     .pt-zone-label {
-        color: rgba(255,255,255,0.6);
-        font-size: 10px;
+        color: rgba(255,255,255,0.9);
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 700;
-        margin-bottom: 5px;
+        letter-spacing: 1.5px;
+        font-weight: 900;
+        margin-bottom: 6px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
     }
 
     /* ── Empty / drop slots ── */
@@ -1611,9 +1636,10 @@
     }
     .pt-empty-slot.pt-drop-target,
     .pt-empty-slot:hover {
-        border-color: rgba(255,220,0,0.8);
-        background: rgba(255,220,0,0.08);
-        color: rgba(255,220,0,0.9);
+        border-color: #ffcb05;
+        background: rgba(255, 203, 5, 0.15);
+        color: #ffcb05;
+        box-shadow: 0 0 15px rgba(255, 203, 5, 0.4);
     }
 
     /* ── Active zone: slightly bigger card ── */
@@ -1625,25 +1651,27 @@
         position: relative;
         width: 82px;
         cursor: pointer;
-        border-radius: 8px;
-        transition: transform 0.15s;
+        border-radius: 4px;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
         user-select: none;
         flex-shrink: 0;
     }
-    .pt-field-card:hover { transform: scale(1.06); z-index: 2; }
-    .pt-card-selected { outline: 3px solid #ffe600; outline-offset: 2px; border-radius: 8px; }
+    .pt-field-card:hover { transform: scale(1.08); z-index: 2; }
+    .pt-card-selected { outline: 3px solid #ffcb05; outline-offset: 2px; box-shadow: 0 0 20px #ffcb05; }
 
     /* ── Damage badge ── */
     .pt-damage-badge {
         position: absolute;
-        top: -9px; right: -9px;
-        background: #e74c3c;
+        top: -12px; right: -12px;
+        background: radial-gradient(circle at top left, #ff6b6b, #c0392b);
         color: #fff;
         border-radius: 50%;
-        width: 26px; height: 26px;
+        width: 32px; height: 32px;
         display: flex; align-items: center; justify-content: center;
-        font-size: 10px; font-weight: 700;
+        font-size: 13px; font-weight: 900;
         border: 2px solid #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         pointer-events: none;
         z-index: 3;
     }
@@ -1651,53 +1679,60 @@
     /* ── Field action buttons (show on hover) ── */
     .pt-field-actions {
         position: absolute;
-        bottom: -30px;
+        bottom: -35px;
         left: 50%;
         transform: translateX(-50%);
         display: none;
-        gap: 2px;
+        gap: 3px;
         z-index: 10;
         white-space: nowrap;
+        background: rgba(0,0,0,0.85);
+        padding: 4px;
+        border-radius: 6px;
+        border: 1px solid #444;
     }
     .pt-field-card:hover .pt-field-actions { display: flex; }
     .pt-action-btn {
-        background: rgba(0,0,0,0.82);
+        background: #333;
         color: #fff;
-        border: none;
+        border: 1px solid #555;
         border-radius: 4px;
-        padding: 2px 5px;
-        font-size: 10px;
+        padding: 3px 6px;
+        font-size: 11px;
+        font-weight: bold;
         cursor: pointer;
         line-height: 1.4;
         font-family: inherit;
     }
-    .pt-action-btn.red { background: rgba(200,40,40,0.9); }
-    .pt-action-btn:hover { background: rgba(60,60,60,0.95); }
+    .pt-action-btn.red { background: #e74c3c; border-color: #c0392b; }
+    .pt-action-btn:hover { background: #555; }
+    .pt-action-btn.red:hover { background: #c0392b; }
 
     /* ── Deck pile visual ── */
     .pt-deck-pile {
         width: 62px; height: 87px;
-        border-radius: 7px;
+        border-radius: 4px;
         cursor: pointer;
-        background: linear-gradient(135deg, #1a1a6e, #3a1a6e);
+        background: repeating-linear-gradient(45deg, #1b3b8c, #1b3b8c 10px, #2a52be 10px, #2a52be 20px);
         display: flex; align-items: center; justify-content: center;
         font-size: 26px;
-        border: 2px solid rgba(255,255,255,0.28);
-        transition: transform 0.15s, border-color 0.15s;
+        border: 2px solid rgba(255,255,255,0.5);
+        box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+        transition: transform 0.15s;
         user-select: none;
     }
-    .pt-deck-pile:hover { transform: scale(1.07); border-color: rgba(255,220,0,0.8); }
+    .pt-deck-pile:hover { transform: scale(1.05); border-color: #ffcb05; }
 
     /* ── Prize cards ── */
     .pt-prize-card {
         width: 50px;
-        border-radius: 5px;
+        border-radius: 4px;
         cursor: pointer;
         display: block;
         transition: transform 0.15s;
-        border: 2px solid rgba(255,255,255,0.22);
+        box-shadow: 1px 1px 4px rgba(0,0,0,0.5);
     }
-    .pt-prize-card:hover { transform: scale(1.14); }
+    .pt-prize-card:hover { transform: scale(1.15) translateY(-5px); border: 2px solid #ffcb05; }
     .pt-prize-take-btn {
         position: absolute;
         bottom: 3px; right: 3px;
@@ -1712,10 +1747,11 @@
 
     /* ── Hand zone ── */
     .pt-hand-zone {
-        background: rgba(0,0,0,0.28);
-        border-radius: 10px;
+        background: rgba(0,0,0,0.4);
+        border-top: 3px solid #ffcb05;
         padding: 10px 12px;
         flex-shrink: 0;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
     }
     .pt-hand-wrapper {
         position: relative;
@@ -1724,16 +1760,19 @@
     }
     .pt-hand-card {
         width: 74px;
-        border-radius: 6px;
+        border-radius: 4px;
         cursor: pointer;
         display: block;
-        transition: transform 0.15s;
+        transition: transform 0.2s;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
     }
-    .pt-hand-card:hover { transform: translateY(-10px); }
+    .pt-hand-card:hover { transform: translateY(-15px) scale(1.1); z-index: 5; position: relative; }
     .pt-hand-card.pt-card-selected {
-        outline: 3px solid #ffe600;
+        outline: 3px solid #ffcb05;
         outline-offset: 2px;
-        transform: translateY(-12px);
+        transform: translateY(-20px) scale(1.1);
+        z-index: 6;
+        position: relative;
     }
     .pt-hand-disc-btn {
         position: absolute;
@@ -1752,24 +1791,31 @@
 
     /* ── MOBILE RESPONSIVENESS FÜR DEN PLAYTESTER ── */
     @media (max-width: 768px) {
+        .pt-toolbar {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 8px 10px;
+        }
         .pt-empty-slot, .pt-field-card {
-            width: 55px !important;
-            height: 77px !important;
+            width: 50px !important;
+            height: 70px !important;
             font-size: 8px !important;
-            border-radius: 4px !important;
+            border-width: 1px !important;
         }
         #ptActiveZone .pt-empty-slot,
         #ptActiveZone .pt-field-card {
-            width: 68px !important;
-            height: 95px !important;
+            width: 60px !important;
+            height: 84px !important;
         }
-        .pt-deck-pile { width: 45px; height: 63px; font-size: 16px; }
-        .pt-prize-card { width: 35px; }
-        #playtester-board { gap: 8px !important; }
-        .pt-zone-label { font-size: 8px; margin-bottom: 2px; }
-        .pt-field-actions { bottom: -45px; }
-        .pt-action-btn { padding: 4px 6px; font-size: 11px; }
+        .pt-deck-pile { width: 40px; height: 56px; font-size: 14px; }
+        .pt-prize-card { width: 30px; }
+        #ptPrizeZone { grid-template-columns: repeat(3, 1fr) !important; max-width: 100px !important; }
+        #playtester-board { gap: 10px !important; }
+        .pt-zone-label { font-size: 8px; margin-bottom: 2px; letter-spacing: 0; }
+        .pt-field-actions { bottom: -35px; gap: 1px; padding: 2px; }
+        .pt-action-btn { padding: 4px; font-size: 10px; }
         .pt-damage-badge { width: 20px; height: 20px; font-size: 9px; top: -5px; right: -5px; }
+        .pt-hand-card { width: 60px; }
     }
     </style>
 
@@ -1783,9 +1829,9 @@
                 font-family: 'Nunito', sans-serif;">
 
         <!-- Header toolbar -->
-        <div style="background: rgba(0,0,0,0.7); padding: 10px 15px; display: flex;
-                    justify-content: space-between; align-items: center; flex-wrap: wrap;
-                    gap: 10px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        <div class="pt-toolbar" style="padding:10px 14px; display:flex;
+                    justify-content:space-between; align-items:center; flex-wrap:nowrap;
+                    gap:10px; flex-shrink:0; overflow-x:auto;">
             <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
                 <span style="color:#fff; font-size:1.1em; font-weight:800; letter-spacing: 0.5px;">⚔️ Sandbox</span>
                 <span id="ptMessage" style="color:#FFCB05; font-weight:700; font-size:0.9em; min-width:80px;"></span>

@@ -570,6 +570,20 @@ const BASE_PATH = './data/';
                     console.log(`[getPreferredVersionForCard] ${fallbackReason} for ${cardName} (${originalSet} ${originalNumber}), using ALL ${versions.length} versions`);
                 } else {
                     console.log(`[getPreferredVersionForCard] Using international prints for ${cardName} (${originalSet} ${originalNumber})`);
+                    // If the original card is from a non-English set, prefer English versions only
+                    // This prevents Japanese cards from being selected as the preferred version
+                    if (window.englishSetCodes && window.englishSetCodes.size > 0 && 
+                        originalSet && !window.englishSetCodes.has(originalSet)) {
+                        const englishVersions = versions.filter(v => window.englishSetCodes.has(v.set));
+                        if (englishVersions.length > 0) {
+                            versions = englishVersions;
+                            console.log(`[getPreferredVersionForCard] Filtered to ${versions.length} English versions for non-English original (${originalSet})`);
+                        } else {
+                            // No English int prints found, fall back to English by name
+                            versions = getEnglishCardVersions(cardName);
+                            console.log(`[getPreferredVersionForCard] No English int prints for ${cardName} (${originalSet}), falling back to name lookup: ${versions.length} versions`);
+                        }
+                    }
                 }
             } else {
                 versions = getEnglishCardVersions(cardName);
@@ -8095,10 +8109,23 @@ const BASE_PATH = './data/';
                     return false;
                 }
                 
-                // Search filter
-                if (searchTerm && !card.name.toLowerCase().includes(searchTerm)) {
-                    failedSearch++;
-                    return false;
+                // Search filter - supports name, set+number (e.g. "SFA 12" or "SFA12")
+                if (searchTerm) {
+                    const setNumMatch = searchTerm.match(/^([a-z][a-z0-9]*)[-\s]?(\w+)$/i);
+                    const isSetNumSearch = setNumMatch &&
+                        setNumMatch[1].length >= 2 && setNumMatch[1].length <= 6 &&
+                        /\d/.test(setNumMatch[2]);
+                    if (isSetNumSearch) {
+                        const searchSet = setNumMatch[1].toUpperCase();
+                        const searchNum = setNumMatch[2];
+                        if ((card.set || '').toUpperCase() !== searchSet || String(card.number || '') !== searchNum) {
+                            failedSearch++;
+                            return false;
+                        }
+                    } else if (!card.name.toLowerCase().includes(searchTerm)) {
+                        failedSearch++;
+                        return false;
+                    }
                 }
                 
                 // Meta/Format filter (Total, All Playables, City League)

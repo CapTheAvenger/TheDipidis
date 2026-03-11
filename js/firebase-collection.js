@@ -800,6 +800,9 @@ function updateDecksUI() {
             </div>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
+            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(52, 152, 219, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='rgba(52, 152, 219, 0.9)'" title="Copy deck list">
+              📋
+            </button>
             <button onclick="event.stopPropagation(); deleteDeck('${deck.id}')" style="padding: 6px 12px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='rgba(231, 76, 60, 0.9)'" title="Delete deck">
               🗑️
             </button>
@@ -817,6 +820,79 @@ function updateDecksUI() {
       </div>
     `;
   }).join('');
+}
+
+// Copy a saved deck to clipboard in Pokémon TCG Live format
+function copyMyDeck(deckIndex) {
+  const deck = window.userDecks && window.userDecks[deckIndex];
+  if (!deck || !deck.cards) {
+    alert('Deck not found!');
+    return;
+  }
+
+  const pokemon = [];
+  const trainer = [];
+  const energy = [];
+
+  for (const [deckKey, count] of Object.entries(deck.cards)) {
+    if (!count || count <= 0) continue;
+
+    // Parse "CardName (SET NUMBER)" or just "CardName"
+    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+    let cardName = deckKey;
+    let setCode = '';
+    let setNumber = '';
+
+    if (setMatch) {
+      cardName = setMatch[1];
+      setCode = setMatch[2];
+      setNumber = setMatch[3];
+    } else {
+      // Fallback: look up set info from database
+      const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
+      if (cardData) {
+        setCode = cardData.set || '';
+        setNumber = cardData.number || '';
+      }
+    }
+
+    const line = setCode && setNumber
+      ? `${count} ${cardName} ${setCode} ${setNumber}`
+      : `${count} ${cardName}`;
+
+    // Determine category by looking up type in allCardsDatabase
+    let category = 'trainer';
+    const cardData = window.allCardsDatabase && (
+      (setCode && setNumber)
+        ? window.allCardsDatabase.find(c => c.name === cardName && c.set === setCode && c.number === setNumber)
+        : window.allCardsDatabase.find(c => c.name === cardName)
+    );
+
+    if (cardData) {
+      const cat = getCardTypeCategory(cardData.type || '');
+      if (cat === 'Pokemon') category = 'pokemon';
+      else if (cat === 'Energy' || cat === 'Special Energy') category = 'energy';
+    } else {
+      // Heuristic: basic energies by name
+      if (/Energy$/.test(cardName)) category = 'energy';
+    }
+
+    if (category === 'pokemon') pokemon.push(line);
+    else if (category === 'energy') energy.push(line);
+    else trainer.push(line);
+  }
+
+  let output = '';
+  if (pokemon.length > 0) output += `Pokémon: ${pokemon.length}\n${pokemon.join('\n')}\n\n`;
+  if (trainer.length > 0) output += `Trainer: ${trainer.length}\n${trainer.join('\n')}\n\n`;
+  if (energy.length > 0) output += `Energy: ${energy.length}\n${energy.join('\n')}`;
+  output = output.trim();
+
+  navigator.clipboard.writeText(output).then(() => {
+    alert('✅ Deck copied to clipboard!');
+  }).catch(() => {
+    alert('❌ Error copying to clipboard!');
+  });
 }
 
 // Helper: Card type sorting (same as Deck Builder)

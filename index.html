@@ -8,24 +8,34 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     <link rel="icon" href="data:,">
-    <title>Pokemon TCG Analysis</title>
-        <link rel="stylesheet" href="css/styles.css">
-        <link rel="stylesheet" href="css/auth-styles.css">
+    <title>Pokémon TCG Analysis</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/auth-styles.css">
 
     <style id="pokeball-menu-styles">
+        /* Grundschrift für die gesamte Seite */
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f2f5;
+            color: #2c3e50;
+        }
+
         .pokeball-wrapper { position: relative; z-index: 1000; }
 
         .pokeball-btn {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: #fff; border: 4px solid #222; position: relative;
-            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            width: 55px; height: 55px; border-radius: 50%;
+            background: #fff; border: 4px solid #2c3e50; position: relative;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             overflow: hidden; flex-shrink: 0;
         }
-        .pokeball-btn:hover { transform: scale(1.08) rotate(15deg); }
+        .pokeball-btn:hover { transform: scale(1.1) rotate(15deg); }
         .pokeball-top {
             position: absolute; top: 0; left: 0; right: 0; height: 50%;
-            background: #e3350d; border-bottom: 4px solid #222; transition: transform 0.4s;
+            background: #E3350D; border-bottom: 4px solid #2c3e50; transition: transform 0.4s;
         }
         .pokeball-bottom {
             position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
@@ -33,13 +43,13 @@
         }
         .pokeball-center {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 18px; height: 18px; background: #fff; border: 4px solid #222;
+            width: 16px; height: 16px; background: #fff; border: 4px solid #2c3e50;
             border-radius: 50%; z-index: 2; transition: all 0.4s;
         }
         .pokeball-btn.open { transform: scale(1.1); }
-        .pokeball-btn.open .pokeball-top  { transform: translateY(-8px); }
-        .pokeball-btn.open .pokeball-bottom { transform: translateY(8px); }
-        .pokeball-btn.open .pokeball-center { width: 22px; height: 22px; background: #58e870; box-shadow: 0 0 15px #58e870; }
+        .pokeball-btn.open .pokeball-top  { transform: translateY(-6px); }
+        .pokeball-btn.open .pokeball-bottom { transform: translateY(6px); }
+        .pokeball-btn.open .pokeball-center { width: 20px; height: 20px; background: #2ecc71; box-shadow: 0 0 12px #2ecc71; }
 
         .main-menu-dropdown {
             position: absolute;
@@ -47,13 +57,13 @@
             left: 0;
             background: #fff;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
             width: 280px;
             z-index: 10001;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 3px solid #222;
+            border: 3px solid #2c3e50;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px) scale(0.98);
@@ -64,23 +74,25 @@
         }
         .main-menu-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
         .menu-header {
-            background: #e3350d; color: white; padding: 12px; font-weight: 900;
-            text-align: center; font-size: 16px; letter-spacing: 1px; border-bottom: 3px solid #222;
+            background: #E3350D; color: white; padding: 12px; font-weight: 900;
+            text-align: center; font-size: 16px; letter-spacing: 1.5px; border-bottom: 3px solid #2c3e50;
+            text-transform: uppercase;
         }
         .menu-item {
             padding: 12px 18px; text-align: left; border: none; background: none;
-            font-size: 15px; font-weight: 700; color: #444;
+            font-size: 15px; font-weight: 700; color: #2c3e50;
             border-bottom: 1px solid #f0f0f0; cursor: pointer;
             transition: all 0.2s; display: flex; align-items: center; width: 100%;
+            font-family: 'Nunito', sans-serif;
         }
         .menu-item:last-child { border-bottom: none; }
         .menu-item:hover { background: #f8f9fa; color: #3B4CCA; padding-left: 26px; }
-        .menu-item.active { background: #f0f4f8; color: #3B4CCA; border-left: 4px solid #e3350d; }
+        .menu-item.active { background: #f0f4f8; color: #3B4CCA; border-left: 5px solid #E3350D; }
 
         .current-tab-badge {
-            font-size: 0.45em; background: #e3350d; color: white; padding: 5px 11px;
-            border-radius: 20px; font-weight: 800; letter-spacing: 0.5px;
-            box-shadow: 0 2px 5px rgba(227,53,13,0.4); text-transform: uppercase;
+            font-size: 0.5em; background: #3B4CCA; color: #FFCB05; padding: 5px 12px;
+            border-radius: 20px; font-weight: 900; letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(59,76,202,0.4); text-transform: uppercase;
             border: 2px solid #fff; white-space: nowrap; vertical-align: middle; margin-left: 12px;
         }
 
@@ -88,57 +100,64 @@
         .tab-navigation { display: none !important; }
 
         @media (max-width: 768px) {
-            .pokeball-btn { width: 50px; height: 50px; }
+            .pokeball-btn { width: 45px; height: 45px; }
             .main-menu-dropdown { width: 260px; }
+            .header h1 { font-size: 1.4em !important; }
         }
+
+        /* Pokémon-Style Farb-Überschreibungen */
+        .btn-primary { background-color: #3B4CCA !important; border-color: #2a52be !important; }
+        .btn-primary:hover { background-color: #2a52be !important; }
+        .btn-success { background-color: #27ae60 !important; border-color: #2ecc71 !important; }
+        .btn-success:hover { background-color: #2ecc71 !important; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div class="header" style="background: white; padding: 15px 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e1e8ed;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
 
                 <div style="display: flex; align-items: center; gap: 20px;">
                     <!-- Pokeball Menu Trigger -->
                     <div class="pokeball-wrapper">
-                        <div id="mainMenuTrigger" class="pokeball-btn" onclick="toggleMainMenu()">
+                        <div id="mainMenuTrigger" class="pokeball-btn" onclick="toggleMainMenu()" title="Menü öffnen">
                             <div class="pokeball-top"></div>
                             <div class="pokeball-bottom"></div>
                             <div class="pokeball-center"></div>
                         </div>
                         <div id="mainMenuDropdown" class="main-menu-dropdown">
-                            <div class="menu-header">MENU</div>
+                            <div class="menu-header">Hauptmenü</div>
                             <button id="menu-btn-city-league"          class="menu-item active" onclick="switchTabAndUpdateMenu('city-league')">🇯🇵 City League Meta</button>
-                            <button id="menu-btn-city-league-analysis" class="menu-item"        onclick="switchTabAndUpdateMenu('city-league-analysis')">📊 City League Deck Analysis</button>
-                            <button id="menu-btn-current-meta"         class="menu-item"        onclick="switchTabAndUpdateMenu('current-meta')">🎮 Current Meta</button>
-                            <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')">📈 Current Meta Deck Analysis</button>
-                            <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')">🏆 Past Meta</button>
-                            <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')">🧰 Cards</button>
-                            <button id="menu-btn-sandbox"              class="menu-item"        onclick="switchTabAndUpdateMenu('sandbox')">⚔️ Playtester</button>
-                            <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')">👤 Profile</button>
-                            <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')">📖 How to Use</button>
+                            <button id="menu-btn-city-league-analysis" class="menu-item"        onclick="switchTabAndUpdateMenu('city-league-analysis')">📊 Deck Analyse (Japan)</button>
+                            <button id="menu-btn-current-meta"         class="menu-item"        onclick="switchTabAndUpdateMenu('current-meta')">🎮 Current Meta (Global)</button>
+                            <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')">📈 Deck Analyse (Global)</button>
+                            <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')">🏆 Historische Meta</button>
+                            <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')">🧰 Karten-Datenbank</button>
+                            <button id="menu-btn-sandbox"              class="menu-item"        onclick="switchTabAndUpdateMenu('sandbox')">⚔️ Playtester Sandbox</button>
+                            <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')">👤 Mein Profil / Decks</button>
+                            <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')">📖 Anleitung</button>
                         </div>
                     </div>
 
                     <div>
-                        <h1 style="margin: 0;">
-                            🎴 Pokemon TCG Analysis
+                        <h1 style="margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 1.8em; font-weight: 900; color: #2c3e50;">
+                            🎴 Pokémon TCG Hub
                             <span id="current-tab-title" class="current-tab-badge">🇯🇵 City League Meta</span>
                         </h1>
-                        <p style="margin: 5px 0 0 0;">Your Hub for Meta Analysis &amp; Deckbuilding</p>
+                        <p style="margin: 5px 0 0 0; color: #7f8c8d; font-weight: 600; font-size: 0.95em;">Dein Portal für Meta Analyse &amp; Deckbuilding</p>
                     </div>
                 </div>
 
                 <div id="user-menu">
-                    <button id="signin-btn" class="user-btn" onclick="showAuthModal('signin')" style="display: none;">
-                        <img src="images/pokeball-icon.png" alt="Sign In" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
-                        Sign In
+                    <button id="signin-btn" class="user-btn" onclick="showAuthModal('signin')" style="display: none; background: #f8f9fa; border: 2px solid #ddd; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer;">
+                        <img src="images/pokeball-icon.png" alt="Sign In" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
+                        Einloggen
                     </button>
-                    <div id="user-info" class="user-info" style="display: none;">
-                        <span id="user-email-display" style="margin-right: 10px; color: #666;"></span>
-                        <button class="user-btn" onclick="switchTabAndUpdateMenu('profile')">
-                            <img src="images/pokeball-icon.png" alt="Profile" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
-                            Profile
+                    <div id="user-info" class="user-info" style="display: none; align-items: center; gap: 15px;">
+                        <span id="user-email-display" style="color: #7f8c8d; font-weight: 600; font-size: 0.9em;"></span>
+                        <button class="user-btn" onclick="switchTabAndUpdateMenu('profile')" style="background: #e8f4fd; color: #3B4CCA; border: 2px solid #3B4CCA; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+                            <img src="images/pokeball-icon.png" alt="Profil" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
+                            Profil
                         </button>
                     </div>
                 </div>
@@ -984,38 +1003,48 @@
 
             <!-- Tab: Sandbox Playtester -->
             <div id="sandbox" class="tab-content">
-                <div class="container">
-                    <div class="header">
-                        <h1>⚔️ Sandbox Playtester</h1>
-                        <p>Importiere Decks für 2 Spieler und starte den Simulator</p>
+                <div class="container" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h1 style="font-size: 2.5em; color: #3B4CCA; margin-bottom: 10px;">⚔️ Battle Sandbox</h1>
+                        <p style="font-size: 1.1em; color: #7f8c8d; font-weight: 600;">Importiere Decks für 2 Spieler und starte das Match.</p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 40px;">
 
-                        <div style="background: rgba(59,76,202,0.1); padding: 20px; border-radius: 12px; border: 2px solid #3B4CCA;">
-                            <h3 style="margin-top: 0; color: #3B4CCA;">🔵 Spieler 1 Deck</h3>
-                            <textarea id="sandboxImportP1" placeholder="Pokémon TCG Live Deck-Code hier einfügen...&#10;Z.B.&#10;Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-family: monospace; font-size: 12px; resize: vertical; margin-bottom: 10px; box-sizing: border-box;"></textarea>
+                        <div style="background: #f8f9fa; padding: 25px; border-radius: 16px; border: 3px solid #3B4CCA; box-shadow: 0 5px 15px rgba(59,76,202,0.15); position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: #3B4CCA;"></div>
+                            <h2 style="margin-top: 0; color: #3B4CCA; display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 20px; height: 20px; background: #3B4CCA; border-radius: 50%;"></div> Spieler 1
+                            </h2>
+                            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">Pokémon TCG Live Deck-Code hier einfügen:</p>
+                            <textarea id="sandboxImportP1" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 180px; padding: 15px; border-radius: 8px; border: 2px solid #e1e8ed; font-family: monospace; font-size: 13px; resize: vertical; margin-bottom: 15px; box-sizing: border-box; background: #fff;"></textarea>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span id="sandboxStatusP1" style="font-size: 12px; font-weight: bold; color: #555;">0 / 60 Karten geladen</span>
-                                <button class="btn btn-primary" onclick="parseSandboxDeck('p1')">Importieren</button>
+                                <span id="sandboxStatusP1" style="font-size: 13px; font-weight: 800; color: #7f8c8d; background: #eee; padding: 4px 10px; border-radius: 12px;">Wartet auf Eingabe...</span>
+                                <button class="btn" onclick="parseSandboxDeck('p1')" style="background: #3B4CCA; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Lade Deck</button>
                             </div>
                         </div>
 
-                        <div style="background: rgba(227,53,13,0.1); padding: 20px; border-radius: 12px; border: 2px solid #E3350D;">
-                            <h3 style="margin-top: 0; color: #E3350D;">🔴 Spieler 2 Deck</h3>
-                            <textarea id="sandboxImportP2" placeholder="Pokémon TCG Live Deck-Code hier einfügen...&#10;Z.B.&#10;Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-family: monospace; font-size: 12px; resize: vertical; margin-bottom: 10px; box-sizing: border-box;"></textarea>
+                        <div style="background: #f8f9fa; padding: 25px; border-radius: 16px; border: 3px solid #E3350D; box-shadow: 0 5px 15px rgba(227,53,13,0.15); position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: #E3350D;"></div>
+                            <h2 style="margin-top: 0; color: #E3350D; display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 20px; height: 20px; background: #E3350D; border-radius: 50%;"></div> Spieler 2
+                            </h2>
+                            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">Pokémon TCG Live Deck-Code hier einfügen:</p>
+                            <textarea id="sandboxImportP2" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 180px; padding: 15px; border-radius: 8px; border: 2px solid #e1e8ed; font-family: monospace; font-size: 13px; resize: vertical; margin-bottom: 15px; box-sizing: border-box; background: #fff;"></textarea>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span id="sandboxStatusP2" style="font-size: 12px; font-weight: bold; color: #555;">0 / 60 Karten geladen</span>
-                                <button class="btn btn-primary" onclick="parseSandboxDeck('p2')" style="background: #e74c3c;">Importieren</button>
+                                <span id="sandboxStatusP2" style="font-size: 13px; font-weight: 800; color: #7f8c8d; background: #eee; padding: 4px 10px; border-radius: 12px;">Wartet auf Eingabe...</span>
+                                <button class="btn" onclick="parseSandboxDeck('p2')" style="background: #E3350D; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Lade Deck</button>
                             </div>
                         </div>
 
                     </div>
 
-                    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 1px solid #ddd;">
-                        <p style="color: #666; margin-bottom: 15px;">Du kannst auch nur Spieler 1 importieren, um alleine zu testen (Goldfishing). Spieler 2 spiegelt dann das gleiche Deck.</p>
-                        <button class="btn btn-success" style="font-size: 20px; padding: 15px 40px; border-radius: 30px; font-weight: 900; background: linear-gradient(135deg, #27ae60 0%, #145a32 100%); border: none; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); color: white; cursor: pointer;" onclick="startStandalonePlaytester()">
-                            ⚔️ START SIMULATOR
+                    <div style="text-align: center; padding: 30px; background: linear-gradient(to bottom, #ffffff, #f0f4f8); border-radius: 16px; border: 2px dashed #b3d9ff;">
+                        <p style="color: #555; font-size: 1.1em; font-weight: 600; margin-bottom: 20px;">
+                            💡 Tipp: Wenn du nur bei Spieler 1 ein Deck einfügst, wird es für Spieler 2 automatisch kopiert (Mirror-Match).
+                        </p>
+                        <button class="btn" style="font-size: 24px; padding: 20px 60px; border-radius: 50px; font-weight: 900; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); border: 3px solid #fff; box-shadow: 0 8px 25px rgba(39, 174, 96, 0.5); color: white; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="startStandalonePlaytester()">
+                            🚀 SIMULATOR STARTEN
                         </button>
                     </div>
 
@@ -1851,8 +1880,10 @@
             const activeBtn = document.getElementById('menu-btn-' + tabId);
             if (activeBtn) {
                 activeBtn.classList.add('active');
+                // Extrahiere Text ohne Emojis für sauberen Badge
+                let text = activeBtn.innerText.replace(/[\u{1F300}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
                 const badge = document.getElementById('current-tab-title');
-                if (badge) badge.innerHTML = activeBtn.innerHTML;
+                if (badge) badge.innerText = text || activeBtn.innerText.trim();
             }
 
             document.getElementById('mainMenuDropdown').classList.remove('show');
@@ -2071,6 +2102,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260311-v11"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v8"></script>
+    <script src="js/playtester.js?v=20260312-v9"></script>
 </body>
 </html>

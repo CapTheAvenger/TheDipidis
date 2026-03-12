@@ -57,9 +57,9 @@ function openPlaytester(source) {
                   : source === 'pastMeta'    ? (window.pastMetaDeck    || {})
                   : {};
     const totalCards = Object.values(deckObj).reduce((s, c) => s + c, 0);
-    if (totalCards === 0) { alert('Dein Deck ist leer! Füge erst Karten hinzu.'); return; }
+    if (totalCards === 0) { alert('Your deck is empty! Add some cards first.'); return; }
     if (totalCards < 60) {
-        if (!confirm(`Dein Deck hat nur ${totalCards}/60 Karten. Trotzdem starten?`)) return;
+        if (!confirm(`Your deck only has ${totalCards}/60 cards. Start anyway?`)) return;
     }
 
     const baseCards = [];
@@ -194,7 +194,7 @@ function startStandalonePlaytester() {
     const p2Count = standaloneDecks.p2.reduce((s, c) => s + c.count, 0);
 
     if (p1Count === 0 && p2Count === 0) {
-        alert('Bitte importiere mindestens ein Deck für Spieler 1!');
+        alert('Please import at least one deck for Player 1!');
         return;
     }
 
@@ -253,7 +253,7 @@ function ptNewGame() {
     const handZone = document.querySelector('.pt-hand-zone');
     if (handZone) handZone.style.borderTopColor = '#3B4CCA';
 
-    ptLog('Neues Spiel gestartet! Nutze ⌨️ für Hotkeys.');
+    ptLog('New game started! Use ⌨️ for hotkeys.');
     ptRenderAll();
 }
 
@@ -289,10 +289,10 @@ function ptToggleMarker(type) {
     let p = ptCurrentPlayer;
     if(type === 'vstar') {
         ptState[p].vstarUsed = !ptState[p].vstarUsed;
-        ptLog(`VSTAR Power ${ptState[p].vstarUsed ? 'eingesetzt' : 'zurückgesetzt'}.`);
+        ptLog(`VSTAR Power ${ptState[p].vstarUsed ? 'used' : 'reset'}.`);
     } else {
         ptState[p].gxUsed = !ptState[p].gxUsed;
-        ptLog(`GX Attacke ${ptState[p].gxUsed ? 'eingesetzt' : 'zurückgesetzt'}.`);
+        ptLog(`GX Attack ${ptState[p].gxUsed ? 'used' : 'reset'}.`);
     }
     ptRenderAll();
 }
@@ -338,24 +338,24 @@ function ptRunCommand(playerOverride) {
     if (action === 'draw' || action === 'd') {
         let drawn = 0;
         for (let i = 0; i < n; i++) if (ptState[p].deck.length > 0) { ptState[p].hand.push(ptState[p].deck.pop()); drawn++; }
-        ptLog(`${drawn} Karte(n) gezogen.`);
+        ptLog(`Drew ${drawn} card(s).`);
         ptRenderAll();
     } else if (action === 'mill' || action === 'm') {
         let milled = 0;
         for (let i = 0; i < n; i++) if (ptState[p].deck.length > 0) { ptState[p].discard.push(ptState[p].deck.pop()); milled++; }
-        ptLog(`${milled} Karte(n) vom Deck in die Ablage gemillt.`);
+        ptLog(`Milled ${milled} card(s) to discard.`);
         ptRenderAll();
     } else if (action === 'top' || action === 't') {
         ptOpenTopCards(n);
     } else if (action === 'coin') {
         let heads = 0;
         for (let i = 0; i < n; i++) if (Math.random() >= 0.5) heads++;
-        ptLog(`🪙 ${n} Münze(n): ${heads}x KOPF.`);
+        ptLog(`🪙 ${n} coin(s): ${heads}x HEADS.`);
     } else if (action === 'dice') {
         const roll = Math.floor(Math.random() * 6) + 1;
-        ptLog(`🎲 Würfelwurf: ${roll}`);
+        ptLog(`🎲 Dice roll: ${roll}`);
     } else {
-        ptShowMessage('Unbekannt! Teste: /draw 3, /top 5, /mill 2');
+        ptShowMessage('Unknown! Try: /draw 3, /top 5, /mill 2');
     }
 }
 
@@ -364,9 +364,9 @@ function ptRunCommand(playerOverride) {
 function ptOpenTopCards(num) {
     const p    = ptCurrentPlayer;
     const take = Math.min(num || 5, ptState[p].deck.length);
-    if (take === 0) { ptShowMessage('Deck ist leer!'); return; }
+    if (take === 0) { ptShowMessage('Deck is empty!'); return; }
     ptLookingAt = ptState[p].deck.splice(ptState[p].deck.length - take, take).reverse();
-    ptLog(`Schaut sich die obersten ${take} Karten an.`);
+    ptLog(`Looking at the top ${take} card(s).`);
     ptRenderTopCards();
     document.getElementById('ptTopCardsModal').style.display = 'flex';
 }
@@ -386,8 +386,8 @@ function ptRenderTopCards() {
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
                 <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'hand')">⬆️ Hand</button>
                 <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'lost')">🌌 Lost</button>
-                <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'bottom')">⏬ Unten</button>
-                <button class="pt-action-btn red" onclick="ptRouteTopCard(${i},'discard')">🗑️ Ablage</button>
+                <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'bottom')">⏬ Bottom</button>
+                <button class="pt-action-btn red" onclick="ptRouteTopCard(${i},'discard')">🗑️ Discard</button>
             </div>
         </div>`;
     }).join('');
@@ -397,10 +397,10 @@ function ptRouteTopCard(index, destination) {
     const p    = ptCurrentPlayer;
     const card = ptLookingAt.splice(index, 1)[0];
     if (!card) return;
-    if (destination === 'hand')         { ptState[p].hand.push(card);     ptLog(`Nimmt "${card.name}" auf die Hand.`); }
-    else if (destination === 'bottom')  { ptState[p].deck.unshift(card);  ptLog(`Legt "${card.name}" unters Deck.`); }
-    else if (destination === 'discard') { ptState[p].discard.push(card);  ptLog(`Wirft "${card.name}" in die Ablage.`); }
-    else if (destination === 'lost')    { ptState[p].lostzone.push(card); ptLog(`Schickt "${card.name}" in die Lost Zone.`); }
+    if (destination === 'hand')         { ptState[p].hand.push(card);     ptLog(`Took "${card.name}" to hand.`); }
+    else if (destination === 'bottom')  { ptState[p].deck.unshift(card);  ptLog(`Put "${card.name}" on the bottom of the deck.`); }
+    else if (destination === 'discard') { ptState[p].discard.push(card);  ptLog(`Discarded "${card.name}".`); }
+    else if (destination === 'lost')    { ptState[p].lostzone.push(card); ptLog(`Sent "${card.name}" to the Lost Zone.`); }
     if (ptLookingAt.length === 0) {
         ptCloseTopCards();
     } else {
@@ -422,9 +422,9 @@ function ptDraw1(playerOverride = null) {
     if (ptState[p].deck.length > 0) {
         ptState[p].hand.push(ptState[p].deck.pop());
         ptRenderAll();
-        ptLog('Zieht eine Karte.');
+        ptLog('Drew a card.');
     } else {
-        ptShowMessage('Deck ist leer!');
+        ptShowMessage('Deck is empty!');
     }
 }
 
@@ -434,13 +434,13 @@ function ptShuffle() {
         const j = Math.floor(Math.random() * (i + 1));
         [deck[i], deck[j]] = [deck[j], deck[i]];
     }
-    ptLog('Deck gemischt!');
+    ptLog('Deck shuffled!');
     ptRenderAll();
 }
 
 function ptFlipCoin() {
-    const result = Math.random() >= 0.5 ? 'KOPF!' : 'ZAHL!';
-    ptLog(`🪙 Münzwurf: ${result}`);
+    const result = Math.random() >= 0.5 ? 'HEADS!' : 'TAILS!';
+    ptLog(`🪙 Coin flip: ${result}`);
 }
 
 function ptFlipBoard() {
@@ -455,14 +455,14 @@ function ptFlipBoard() {
         ptCurrentPlayer = 'p2';
         if (ind)      ind.innerText = '2';
         if (handZone) handZone.style.borderTopColor = '#E3350D';
-        ptLog('Zug an Spieler 2 gegeben.');
+        ptLog('Turn passed to Player 2.');
     } else {
         board.style.transform      = 'rotate(0deg)';
         if (neutralZone) neutralZone.style.transform = 'rotate(0deg)';
         ptCurrentPlayer = 'p1';
         if (ind)      ind.innerText = '1';
         if (handZone) handZone.style.borderTopColor = '#3B4CCA';
-        ptLog('Zug an Spieler 1 gegeben.');
+        ptLog('Turn passed to Player 1.');
     }
     const vBtn = document.getElementById('ptVstarMarker');
     const gBtn = document.getElementById('ptGxMarker');
@@ -478,9 +478,9 @@ function ptPassTurn() {
     if (ptState[p].status.includes('burned'))   dmg += 20;
     if (dmg > 0) {
         ptState[p].damage.active += dmg;
-        ptLog(`Status-Schaden: +${dmg} DMG.`);
+        ptLog(`Status damage: +${dmg} DMG.`);
     }
-    ptLog('Beendet den Zug.');
+    ptLog('Turn ended.');
     ptFlipBoard();
     ptDraw1();
 }
@@ -526,10 +526,10 @@ function ptRouteFromDeck(cardId, destination) {
         const card = ptState[p].deck.splice(idx, 1)[0];
         if (destination === 'hand') {
             ptState[p].hand.push(card);
-            ptLog(`Sucht "${card.name}" auf die Hand.`);
+            ptLog(`Searched "${card.name}" to hand.`);
         } else {
             ptState[p].lostzone.push(card);
-            ptLog(`Schickt "${card.name}" aus dem Deck in die Lost Zone.`);
+            ptLog(`Sent "${card.name}" from deck to Lost Zone.`);
         }
         // Refresh the grid so the taken card disappears — modal stays open
         _ptRefreshDeckSearchGrid();
@@ -539,7 +539,7 @@ function ptRouteFromDeck(cardId, destination) {
 
 function ptCloseDeckSearch() {
     document.getElementById('ptDeckSearchModal').style.display = 'none';
-    ptShuffle(); // Deck mischen erst wenn der Spieler fertig gesucht hat
+    ptShuffle(); // Shuffle deck after player finishes searching
 }
 
 // --- ZONE INTERACTION ---
@@ -551,14 +551,14 @@ function ptClickZone(player, zoneId) {
 
     if (zoneId === 'playzone') {
         ptState.playZone.push(card);
-        ptLog(`Spielt Item/Supporter: "${card.name}".`);
+        ptLog(`Played Item/Supporter: "${card.name}".`);
     } else if (zoneId === 'stadium') {
         if (ptState.stadium.length > 0) ptState[ptCurrentPlayer].discard.push(ptState.stadium.pop());
         ptState.stadium.push(card);
-        ptLog(`Spielt Stadion: "${card.name}".`);
+        ptLog(`Played Stadium: "${card.name}".`);
     } else {
         ptState[player].field[zoneId].push(card);
-        ptLog(`Legt "${card.name}" auf ${player} ${zoneId}.`);
+        ptLog(`Placed "${card.name}" on ${player} ${zoneId}.`);
     }
     ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1);
     ptSelectedCardIndex = null;
@@ -586,13 +586,13 @@ function moveZoneToZone(sourceId, targetId) {
         ptState[tgt.player].damage[tgt.zone] = ptState[src.player].damage[src.zone];
         ptState[src.player].field[src.zone]  = tCards;
         ptState[src.player].damage[src.zone] = tDmg;
-        ptLog(`Tauscht Positionen: ${src.zone} ↔ ${tgt.zone}`);
+        ptLog(`Swapped positions: ${src.zone} ↔ ${tgt.zone}`);
     } else {
         ptState[tgt.player].field[tgt.zone]  = [...ptState[src.player].field[src.zone]];
         ptState[tgt.player].damage[tgt.zone] = ptState[src.player].damage[src.zone];
         ptState[src.player].field[src.zone]  = [];
         ptState[src.player].damage[src.zone] = 0;
-        ptLog(`Verschiebt Pokémon nach ${tgt.zone}.`);
+        ptLog(`Moved Pokémon to ${tgt.zone}.`);
     }
     if (src.zone === 'active') ptState[src.player].status = [];
     if (tgt.zone === 'active') ptState[tgt.player].status = [];
@@ -656,7 +656,7 @@ function ptSwapZones(player, benchZone, event) {
     ptState[player].field[benchZone]  = tmpCards;
     ptState[player].damage[benchZone] = tmpDmg;
     ptState[player].status = [];
-    ptLog('Rückzug!');
+    ptLog('Retreat!');
     ptRenderAll();
 }
 
@@ -669,7 +669,7 @@ function returnToHand(player, zoneId, event) {
     if (zoneArr.length > 0) {
         const c = zoneArr.pop();
         ptState[ptCurrentPlayer].hand.push(c);
-        ptLog(`Nimmt "${c.name}" auf die Hand.`);
+        ptLog(`Took "${c.name}" to hand.`);
         if (!isNeutral && zoneArr.length === 0) {
             ptState[player].damage[zoneId] = 0;
             if (zoneId === 'active') ptState[player].status = [];
@@ -685,7 +685,7 @@ function discardTopCard(player, zoneId, event) {
     if (zoneArr.length > 0) {
         const c = zoneArr.pop();
         ptState[ptCurrentPlayer].discard.push(c);
-        ptLog(`Wirft "${c.name}" in die Ablage.`);
+        ptLog(`Discarded "${c.name}".`);
         if (!isNeutral && zoneArr.length === 0) {
             ptState[player].damage[zoneId] = 0;
             if (zoneId === 'active') ptState[player].status = [];
@@ -701,7 +701,7 @@ function moveToLostZone(player, zoneId, event) {
     if (zoneArr.length > 0) {
         const c = zoneArr.pop();
         ptState[ptCurrentPlayer].lostzone.push(c);
-        ptLog(`Schickt "${c.name}" in die Lost Zone.`);
+        ptLog(`Sent "${c.name}" to the Lost Zone.`);
         if (!isNeutral && zoneArr.length === 0) {
             ptState[player].damage[zoneId] = 0;
             if (zoneId === 'active') ptState[player].status = [];
@@ -713,14 +713,14 @@ function moveToLostZone(player, zoneId, event) {
 function addDamage(player, zoneId, amount, event) {
     if (event) event.stopPropagation();
     ptState[player].damage[zoneId] = Math.max(0, (ptState[player].damage[zoneId] || 0) + amount);
-    ptLog(`+${amount} Schaden auf ${zoneId}.`);
+    ptLog(`+${amount} damage on ${zoneId}.`);
     ptRenderAll();
 }
 
 function clearDamage(player, zoneId, event) {
     if (event) event.stopPropagation();
     ptState[player].damage[zoneId] = 0;
-    ptLog(`Pokémon auf ${zoneId} geheilt.`);
+    ptLog(`Pokémon on ${zoneId} healed.`);
     ptRenderAll();
 }
 
@@ -729,7 +729,7 @@ function toggleStatus(player, statusType, event) {
     const idx = ptState[player].status.indexOf(statusType);
     if (idx > -1) ptState[player].status.splice(idx, 1);
     else ptState[player].status.push(statusType);
-    ptLog(`Status "${statusType}" aktualisiert.`);
+    ptLog(`Status "${statusType}" updated.`);
     ptRenderAll();
 }
 
@@ -737,10 +737,10 @@ function toggleStatus(player, statusType, event) {
 
 function ptOpenDiscard(player) {
     const title = document.getElementById('ptDiscardModalTitle');
-    if (title) title.textContent = `🗑️ Ablage (${player.toUpperCase()}) – Klick=Hand | Rechtsklick=Lost Zone`;
+    if (title) title.textContent = `🗑️ Discard (${player.toUpperCase()}) – Click=Hand | Right-click=Lost Zone`;
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
-    if (ptState[player].discard.length === 0) { ptShowMessage('Ablage ist leer.'); return; }
+    if (ptState[player].discard.length === 0) { ptShowMessage('Discard pile is empty.'); return; }
     grid.innerHTML = ptState[player].discard.map((c, i) => {
         const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         const safeName = (c.name     || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -760,9 +760,9 @@ function ptOpenDiscard(player) {
 
 function ptOpenLostZone(player) {
     const lz = ptState[player].lostzone || [];
-    if (lz.length === 0) { ptShowMessage('Lost Zone ist leer.'); return; }
+    if (lz.length === 0) { ptShowMessage('Lost Zone is empty.'); return; }
     const title = document.getElementById('ptDiscardModalTitle');
-    if (title) title.textContent = `🌌 Lost Zone (${player.toUpperCase()}) – Klick = Hand zurückholen`;
+    if (title) title.textContent = `🌌 Lost Zone (${player.toUpperCase()}) – Click = Return to hand`;
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
     grid.innerHTML = lz.map((c, i) => {
@@ -784,10 +784,10 @@ function ptRouteFromDiscard(player, index, destination) {
     const c = ptState[player].discard.splice(index, 1)[0];
     if (destination === 'hand') {
         ptState[ptCurrentPlayer].hand.push(c);
-        ptLog(`Holt "${c.name}" aus der Ablage auf die Hand.`);
+        ptLog(`Returned "${c.name}" from discard to hand.`);
     } else {
         ptState[ptCurrentPlayer].lostzone.push(c);
-        ptLog(`Schickt "${c.name}" aus der Ablage in die Lost Zone.`);
+        ptLog(`Sent "${c.name}" from discard to Lost Zone.`);
     }
     ptCloseDiscardModal();
     ptRenderAll();
@@ -797,7 +797,7 @@ function ptTakeFromLostZone(player, index) {
     const c = ptState[player].lostzone.splice(index, 1)[0];
     ptState[ptCurrentPlayer].hand.push(c);
     ptCloseDiscardModal();
-    ptLog(`Holt "${c.name}" aus der Lost Zone zurück.`);
+    ptLog(`Retrieved "${c.name}" from Lost Zone to hand.`);
     ptRenderAll();
 }
 
@@ -840,10 +840,10 @@ function ptRenderAll() {
                 const top = ptState[p].discard[ptState[p].discard.length - 1];
                 pileEl.innerHTML = `<img src="${top.imageUrl || CARD_BACK_URL}" class="pt-field-card"
                     style="width:62px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'"
-                    onclick="ptOpenDiscard('${p}')" title="Ablage – ${ptState[p].discard.length} Karten">`;
+                    onclick="ptOpenDiscard('${p}')" title="Discard – ${ptState[p].discard.length} cards">`;
             } else {
                 pileEl.innerHTML = `<div class="pt-empty-slot" style="width:62px;height:87px;font-size:10px;cursor:pointer;"
-                    onclick="ptOpenDiscard('${p}')">Ablage</div>`;
+                    onclick="ptOpenDiscard('${p}')">Discard</div>`;
             }
         }
 
@@ -854,7 +854,7 @@ function ptRenderAll() {
                 lostPileEl.innerHTML = `<img src="${top.imageUrl || CARD_BACK_URL}" class="pt-field-card"
                     style="width:40px;cursor:pointer;filter:grayscale(0.6);"
                     onerror="this.src='${CARD_BACK_URL}'"
-                    onclick="ptOpenLostZone('${p}')" title="Lost Zone – ${ptState[p].lostzone.length} Karten">`;
+                    onclick="ptOpenLostZone('${p}')" title="Lost Zone – ${ptState[p].lostzone.length} cards">`;
             } else {
                 lostPileEl.innerHTML = `<div class="pt-empty-slot" style="font-size:16px;" onclick="ptOpenLostZone('${p}')">🌀</div>`;
             }
@@ -864,7 +864,7 @@ function ptRenderAll() {
         if (prizeEl) {
             prizeEl.innerHTML = ptState[p].prizes.map((c, i) =>
                 `<img src="${CARD_BACK_URL}" class="pt-prize-card"
-                      title="Preiskarte nehmen" onclick="ptTakePrize('${p}', ${i})">`
+                      title="Take prize card" onclick="ptTakePrize('${p}', ${i})">`
             ).join('');
         }
 
@@ -872,12 +872,12 @@ function ptRenderAll() {
         if (activeEl) activeEl.innerHTML = generateZoneHTML(p, 'active', 'Active', `ptActiveZone-${p}`);
         for (let i = 0; i < 5; i++) {
             const benchEl = document.getElementById(`ptBench${i}-${p}`);
-            if (benchEl) benchEl.innerHTML = generateZoneHTML(p, `bench${i}`, `Bank ${i + 1}`, `ptBench${i}-${p}`);
+            if (benchEl) benchEl.innerHTML = generateZoneHTML(p, `bench${i}`, `Bench ${i + 1}`, `ptBench${i}-${p}`);
         }
     });
 
     const stadiumEl = document.getElementById('ptStadiumZone');
-    if (stadiumEl) stadiumEl.innerHTML = generateNeutralZone('stadium', 'Stadion');
+    if (stadiumEl) stadiumEl.innerHTML = generateNeutralZone('stadium', 'Stadium');
     const playEl = document.getElementById('ptPlayZone');
     if (playEl) playEl.innerHTML = generateNeutralZone('playzone', 'Drop');
 
@@ -908,7 +908,7 @@ function ptRenderHand() {
         const discBtn = document.createElement('button');
         discBtn.className = 'pt-hand-disc-btn';
         discBtn.innerHTML = '🗑️';
-        discBtn.title     = 'Ablegen';
+        discBtn.title     = 'Discard';
         discBtn.onclick   = e => ptDiscardFromHand(i, e);
 
         wrapper.appendChild(img);
@@ -927,14 +927,14 @@ function ptDiscardFromHand(index, event) {
     const card = ptState[ptCurrentPlayer].hand.splice(index, 1)[0];
     ptState[ptCurrentPlayer].discard.push(card);
     ptSelectedCardIndex = null;
-    ptLog(`Legt "${card.name}" von Hand auf Ablage.`);
+    ptLog(`Discarded "${card.name}" from hand.`);
     ptRenderAll();
 }
 
 function ptTakePrize(player, index) {
     const card = ptState[player].prizes.splice(index, 1)[0];
     ptState[ptCurrentPlayer].hand.push(card);
-    ptLog('Nimmt Preiskarte.');
+    ptLog('Took a prize card.');
     ptRenderAll();
 }
 
@@ -1030,7 +1030,7 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     }
 
     const retreatBtn = (zoneId !== 'active')
-        ? `<button class="pt-action-btn" onclick="ptSwapZones('${player}','${zoneId}',event)" title="Rückzug">🔄</button>`
+        ? `<button class="pt-action-btn" onclick="ptSwapZones('${player}','${zoneId}',event)" title="Retreat">🔄</button>`
         : '';
 
     html += `

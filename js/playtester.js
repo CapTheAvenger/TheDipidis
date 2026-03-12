@@ -921,6 +921,7 @@ function ptClickZone(player, zoneId) {
     if (ptSelectedCardIndex === null) return;
     const card = ptState[ptCurrentPlayer].hand[ptSelectedCardIndex];
     if (!card) return;
+    ptSaveState();
 
     if (zoneId === 'playzone') {
         ptState.playZone.push(card);
@@ -1115,7 +1116,8 @@ function ptDragStartHand(event, index) {
         setTimeout(() => wrapper.classList.add('dragging'), 0);
         wrapper.addEventListener('dragend', () => wrapper.classList.remove('dragging'), { once: true });
     }
-    ptRenderHand();
+    // NOTE: do NOT call ptRenderHand() here — it destroys the dragged element
+    // mid-flight and immediately cancels the drag in all browsers.
 }
 
 function ptDragStartField(event, elementId) {

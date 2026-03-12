@@ -4887,7 +4887,9 @@ const BASE_PATH = './data/';
                 if (isBaseEnergy(card)) {
                     // Use avgCountWhenUsed so energy count isn't diluted by decks that
                     // use a different energy type (e.g. 70% play 6x Fire Energy, 30% play 0)
-                    if (sharePercent > 0 && avgCountWhenUsed >= 0.5) {
+                    // Minimum 3% share: prevents fringe energy types (0.3% Darkness Energy) from
+                    // wasting deck slots — a real-world fix for the "1-copy rubbish energy" bug
+                    if (sharePercent >= 3 && avgCountWhenUsed >= 0.5) {
                         optimalCount = Math.max(1, Math.round(avgCountWhenUsed));
                     } else {
                         optimalCount = 0; // Skip energy types not used in this archetype
@@ -4946,7 +4948,7 @@ const BASE_PATH = './data/';
                     console.log(`[autoCompleteConsistency] ?? HIGH-SHARE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used)`);
                 }
                 // Moderate-share trainer tech
-                else if (sharePercent >= 25 && sharePercent < 70 && avgCountWhenUsed >= 0.3) {
+                else if (sharePercent >= 25 && sharePercent < 70 && avgCountWhenUsed >= 0.5) {
                     const cardType = (card.type || '').toLowerCase();
                     if (cardType.includes('stadium') || cardType.includes('item') || cardType.includes('supporter') || cardType.includes('tool')) {
                         optimalCount = 1;
@@ -4981,47 +4983,51 @@ const BASE_PATH = './data/';
                 
                 if (isBaseEnergy(card)) {
                     energyCards.push(card);
-                } else if (cardType.includes('pokemon')) {
+                } else if (cardType.includes('pokemon') || cardType.includes('pokémon')) {
                     // Detect evolution families by card name patterns
                     // Examples: "Cynthia's Roselia", "Cynthia's Roserade", "Dragapult ex", "Drakloak", "Dreepy"
                     let familyName = null;
-                    
+
+                    // Canonical name: strip "M " prefix (XY-era Mega Evolution cards, e.g. "M Lucario-EX" → "Lucario-EX")
+                    // This ensures Mega forms are grouped with their base evolution family below
+                    const canonicalName = cardName.replace(/^M\s+(?=[A-Z])/, '');
+
                     // Pattern 1: "Prefix's Name" (Cynthia's Roselia/Roserade, Team Rocket's Ekans/Arbok)
                     const possessiveMatch = cardName.match(/^(.+)'s\s+([A-Z][a-z]+)/);
                     if (possessiveMatch) {
                         const baseName = possessiveMatch[2].replace(/\s+(ex|BREAK|V|VMAX|VSTAR|GX)$/i, '');
                         familyName = `${possessiveMatch[1]}'s ${baseName}`;
-                    }  
-                    // Pattern 2: Common evolution families (add more as needed)
-                    else if (cardName.match(/^(Dreepy|Drakloak|Dragapult)/i)) {
+                    }
+                    // Pattern 2: Common evolution families — uses canonicalName to also handle M X-EX Mega forms
+                    else if (canonicalName.match(/^(Dreepy|Drakloak|Dragapult)/i)) {
                         familyName = 'Dragapult Line';
-                    } else if (cardName.match(/^(Gible|Gabite|Garchomp)/i)) {
+                    } else if (canonicalName.match(/^(Gible|Gabite|Garchomp)/i)) {
                         familyName = 'Garchomp Line';
-                    } else if (cardName.match(/^(Duskull|Dusclops|Dusknoir)/i)) {
+                    } else if (canonicalName.match(/^(Duskull|Dusclops|Dusknoir)/i)) {
                         familyName = 'Dusknoir Line';
-                    } else if (cardName.match(/^(Riolu|Lucario)/i)) {
+                    } else if (canonicalName.match(/^(Riolu|Lucario)/i)) {
                         familyName = 'Lucario Line';
-                    } else if (cardName.match(/^(Makuhita|Hariyama)/i)) {
+                    } else if (canonicalName.match(/^(Makuhita|Hariyama)/i)) {
                         familyName = 'Hariyama Line';
-                    } else if (cardName.match(/^(Budew|Roselia|Roserade)/i)) {
+                    } else if (canonicalName.match(/^(Budew|Roselia|Roserade)/i)) {
                         familyName = 'Roserade Line';
-                    } else if (cardName.match(/^(Ekans|Arbok)/i)) {
+                    } else if (canonicalName.match(/^(Ekans|Arbok)/i)) {
                         familyName = 'Arbok Line';
-                    } else if (cardName.match(/^(Ralts|Kirlia|Gardevoir|Gallade)/i)) {
+                    } else if (canonicalName.match(/^(Ralts|Kirlia|Gardevoir|Gallade)/i)) {
                         familyName = 'Gardevoir Line';
-                    } else if (cardName.match(/^(Charmander|Charmeleon|Charizard)/i)) {
+                    } else if (canonicalName.match(/^(Charmander|Charmeleon|Charizard)/i)) {
                         familyName = 'Charizard Line';
-                    } else if (cardName.match(/^(Squirtle|Wartortle|Blastoise)/i)) {
+                    } else if (canonicalName.match(/^(Squirtle|Wartortle|Blastoise)/i)) {
                         familyName = 'Blastoise Line';
-                    } else if (cardName.match(/^(Bulbasaur|Ivysaur|Venusaur)/i)) {
+                    } else if (canonicalName.match(/^(Bulbasaur|Ivysaur|Venusaur)/i)) {
                         familyName = 'Venusaur Line';
-                    } else if (cardName.match(/^(Eevee|Vaporeon|Jolteon|Flareon|Espeon|Umbreon|Leafeon|Glaceon|Sylveon)/i)) {
+                    } else if (canonicalName.match(/^(Eevee|Vaporeon|Jolteon|Flareon|Espeon|Umbreon|Leafeon|Glaceon|Sylveon)/i)) {
                         familyName = 'Eeveelution Line';
                     }
                     // Pattern 3: Same base name with suffixes (Pikachu, Pikachu ex, Pikachu V)
-                    // Only group cards that are clearly the same Pokemon (has suffix)
-                    else if (cardName.match(/\s+(ex|BREAK|V|VMAX|VSTAR|GX|-EX|-GX)$/i)) {
-                        const baseName = cardName.replace(/\s+(ex|BREAK|V|VMAX|VSTAR|GX|-EX|-GX)$/i, '');
+                    // canonicalName also handles "M X-EX" → grouped with "X" / "X-EX" family
+                    else if (canonicalName.match(/\s+(ex|BREAK|V|VMAX|VSTAR|GX|-EX|-GX)$/i)) {
+                        const baseName = canonicalName.replace(/\s+(ex|BREAK|V|VMAX|VSTAR|GX|-EX|-GX)$/i, '');
                         familyName = baseName + ' Line';
                     }
                     
@@ -5043,7 +5049,10 @@ const BASE_PATH = './data/';
             // Helper: Detect evolution stage (0 = Basic, 1 = Stage 1, 2 = Stage 2/ex/V)
             function getEvolutionStage(cardName) {
                 const lower = cardName.toLowerCase();
-                
+
+                // Mega Evolution cards (XY era: "M Lucario-EX", or "Mega Lucario" naming)
+                if (lower.match(/^m\s+[a-z]/) || lower.match(/^mega\s+/)) return 2;
+
                 // Stage 2 / Powered forms (ex, V, VMAX, VSTAR, GX, etc.)
                 if (lower.match(/\s+(ex|vmax|vstar|gx|break)\b/)) return 2;
                 
@@ -5217,10 +5226,13 @@ const BASE_PATH = './data/';
             const techTrainers = trainerCards
                 .filter(card => card.sharePercent < 85)
                 .sort((a, b) => {
-                    // Weighted score for tech cards: Archetype focus (75%) + Meta relevance (25%)
-                    // This prioritizes archetype-specific tech while considering meta usefulness
-                    const weightedScoreA = (a.consistencyScore * 0.75) + ((a.metaShare || 0) * (a.avgCount || 0) * 0.25);
-                    const weightedScoreB = (b.consistencyScore * 0.75) + ((b.metaShare || 0) * (b.avgCount || 0) * 0.25);
+                    // Weighted score: Archetype focus (75%) + Meta relevance (25%, use avgCountWhenUsed for accuracy)
+                    // Global bonus: cards played in 10%+ of archetype AND present in 50%+ of all meta decks
+                    // are genuine meta staples (e.g. Buddy-Buddy Poffin 78%) and get a strong priority pull
+                    const globalBonusA = (a.sharePercent > 10 && (a.metaShare || 0) > 50) ? (a.metaShare || 0) * 0.5 : 0;
+                    const globalBonusB = (b.sharePercent > 10 && (b.metaShare || 0) > 50) ? (b.metaShare || 0) * 0.5 : 0;
+                    const weightedScoreA = (a.consistencyScore * 0.75) + ((a.metaShare || 0) * (a.avgCountWhenUsed || 0) * 0.25) + globalBonusA;
+                    const weightedScoreB = (b.consistencyScore * 0.75) + ((b.metaShare || 0) * (b.avgCountWhenUsed || 0) * 0.25) + globalBonusB;
                     return weightedScoreB - weightedScoreA;
                 });
             

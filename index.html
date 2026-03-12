@@ -110,6 +110,41 @@
         .btn-primary:hover { background-color: #2a52be !important; }
         .btn-success { background-color: #27ae60 !important; border-color: #2ecc71 !important; }
         .btn-success:hover { background-color: #2ecc71 !important; }
+
+        /* ── MODERN BUTTONS & ACTION BARS ── */
+        .action-bar {
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+            background: #f8f9fa; padding: 12px 16px; border-radius: 8px;
+            border: 1px solid #e1e8ed; margin-bottom: 15px;
+        }
+        .action-bar.transparent { background: transparent; border: none; padding: 0; }
+        .action-group-label {
+            font-weight: 800; color: #7f8c8d; font-size: 0.85em;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .action-divider { width: 2px; height: 24px; background: #e1e8ed; margin: 0 5px; flex-shrink: 0; }
+        .btn-modern {
+            background: white; border: 1px solid #ccd6dd; color: #2c3e50;
+            font-weight: 700; padding: 8px 14px; border-radius: 6px;
+            cursor: pointer; transition: all 0.2s ease; display: inline-flex;
+            align-items: center; gap: 6px; font-size: 0.9em; font-family: 'Nunito', sans-serif;
+        }
+        .btn-modern:hover { background: #f1f5f9; border-color: #aab8c2; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-modern.primary { background: #3B4CCA; color: white; border-color: #2a52be; }
+        .btn-modern.primary:hover { background: #2a52be; color: white; }
+        .btn-modern.success { background: #27ae60; color: white; border-color: #219653; }
+        .btn-modern.success:hover { background: #219653; color: white; }
+        .btn-modern.danger { color: #e74c3c; border-color: #fbc4c4; background: #fffafb; }
+        .btn-modern.danger:hover { background: #e74c3c; color: white; border-color: #e74c3c; }
+        .btn-toggle-group { display: flex; background: #fff; border: 1px solid #ccd6dd; border-radius: 6px; overflow: hidden; }
+        .btn-toggle-item {
+            background: transparent; border: none; border-right: 1px solid #ccd6dd;
+            padding: 8px 14px; font-weight: 700; color: #555; cursor: pointer; font-size: 0.85em;
+            transition: 0.2s; font-family: 'Nunito', sans-serif;
+        }
+        .btn-toggle-item:last-child { border-right: none; }
+        .btn-toggle-item:hover { background: #f8f9fa; }
+        .btn-toggle-item.btn-success, .btn-toggle-item.active { background: #3B4CCA !important; color: white !important; }
     </style>
 </head>
 <body>
@@ -282,16 +317,16 @@
                                     <button id="overviewTypeAceSpec" onclick="setOverviewCardTypeFilter('Ace Spec')" style="padding: 6px 10px; font-size: 0.85em; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🌟 Ace Spec</button>
                                 </div>
                                 
-                                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                    <button class="btn btn-success" onclick="setOverviewRarityMode('min')" id="overviewRarityMin" style="padding: 8px 14px; font-size: 0.9em; background: #28a745;">⬇️ Low Rarity</button>
-                                    <button class="btn btn-danger" onclick="setOverviewRarityMode('max')" id="overviewRarityMax" style="padding: 8px 14px; font-size: 0.9em; background: #dc3545;">⬆️ Max Rarity</button>
-                                    <button class="btn btn-info" onclick="setOverviewRarityMode('all')" id="overviewRarityAll" style="padding: 8px 14px; font-size: 0.9em; background: #17a2b8;">🌍 All Prints</button>
+                                <div class="btn-toggle-group">
+                                    <button class="btn-toggle-item btn-success" onclick="setOverviewRarityMode('min')" id="overviewRarityMin">⬇️ Low Rarity</button>
+                                    <button class="btn-toggle-item" onclick="setOverviewRarityMode('max')" id="overviewRarityMax">⬆️ Max Rarity</button>
+                                    <button class="btn-toggle-item" onclick="setOverviewRarityMode('all')" id="overviewRarityAll">🌍 All Prints</button>
                                 </div>
                                 
-                                <div style="display: flex; gap: 5px;">
-                                    <button class="btn btn-primary" onclick="copyDeckOverview()" style="padding: 8px 16px; font-size: 0.9em;">📋 Copy</button>
-                                    <button class="btn btn-warning" onclick="toggleDeckGridView()" style="padding: 8px 16px; font-size: 0.9em;">🖼️ Grid View</button>
-                                </div>
+                                <div class="action-divider"></div>
+                                
+                                <button class="btn-modern" onclick="copyDeckOverview()">📋 Copy</button>
+                                <button class="btn-modern" onclick="toggleDeckGridView()">🖼️ Grid</button>
                             </div>
                         </div>
                         
@@ -309,13 +344,19 @@
                     <!-- Deck Builder -->
                     <div class="deck-builder">
                         <h2>🛠️ Deck Builder</h2>
-                        <div class="builder-controls">
-                            <button class="btn btn-secondary" onclick="clearDeck('cityLeague')">🗑️ Clear</button>
-                            <button class="btn btn-success btn-gen-low" onclick="autoComplete('cityLeague', 'min')">⬇️ Generate Low Rarity Deck</button>
-                            <button class="btn btn-success btn-gen-max" onclick="autoComplete('cityLeague', 'max')">⬆️ Generate Max Rarity Deck</button>
-                            <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('cityLeague', 'min')">🎯 Auto Generate (Max Consistency)</button>
-                            <button class="btn btn-warning" onclick="openDrawSimulator('cityLeague')" style="font-weight: 600;">🎲 Test Draw</button>
-                            <button class="btn" onclick="openPlaytesterSetup('cityLeague')" style="font-weight:600;background:#2d8a4e;color:white;border-color:#2d8a4e;">🃏 Playtesting</button>
+                        <div class="action-bar">
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span class="action-group-label">🪄 Generate:</span>
+                                <button class="btn-modern" onclick="autoComplete('cityLeague', 'min')" title="Fill deck with lowest rarity cards">⬇️ Low</button>
+                                <button class="btn-modern" onclick="autoComplete('cityLeague', 'max')" title="Fill deck with highest rarity cards">⬆️ Max</button>
+                                <button class="btn-modern primary" onclick="autoCompleteConsistency('cityLeague', 'min')" title="Uses tournament data for optimal card counts">🎯 Consistency</button>
+                            </div>
+                            <div class="action-divider"></div>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn-modern" onclick="openDrawSimulator('cityLeague')">🎲 Test Draw</button>
+                                <button class="btn-modern success" onclick="openPlaytesterSetup('cityLeague')">🃏 Playtest</button>
+                                <button class="btn-modern danger" onclick="clearDeck('cityLeague')" style="margin-left: 5px;">🗑️ Clear</button>
+                            </div>
                         </div>
                         
                         <div class="deck-summary" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; background: #e8f4fd; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin-bottom: 20px;">
@@ -323,8 +364,8 @@
                                 Deck: <span id="cityLeagueDeckCount" style="font-weight: bold; color: #3498db;">0</span> / 60 Cards
                                 <span id="cityLeagueDeckCountUnique" style="font-weight: 500; font-size: 0.85em; color: #666; margin-left: 8px;">(0 Unique)</span>
                             </h3>
-                            <div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 8px 16px; border-radius: 8px; font-size: 1.1em; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                💰 Est. Value: <span id="cityLeagueDeckPrice">0.00 €</span>
+                            <div style="background: white; border: 2px solid #2ecc71; color: #27ae60; padding: 6px 14px; border-radius: 6px; font-size: 1.1em; font-weight: 800;">
+                                💰 <span id="cityLeagueDeckPrice">0.00 €</span>
                             </div>
                         </div>
                         
@@ -332,11 +373,11 @@
                         <div id="cityLeagueMyDeckVisual" class="section-panel">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🎴 Your Deck</h3>
-                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                    <button class="btn btn-success btn-save-deck" onclick="saveCurrentDeckToProfile('cityLeague')">💾 Save to My Decks</button>
-                                    <button class="btn btn-info btn-gradient-compare" onclick="openDeckCompare('cityLeague')">🔄 Compare Deck</button>
-                                    <button class="btn btn-primary" onclick="copyDeck('cityLeague')">📋 Copy Deck</button>
-                                    <button class="btn btn-warning" onclick="generateDeckGrid('cityLeague')">🖼️ Grid View</button>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button class="btn-modern success" onclick="saveCurrentDeckToProfile('cityLeague')">💾 Save</button>
+                                    <button class="btn-modern" onclick="openDeckCompare('cityLeague')">🔄 Compare</button>
+                                    <button class="btn-modern" onclick="copyDeck('cityLeague')">📋 Copy</button>
+                                    <button class="btn-modern" onclick="generateDeckGrid('cityLeague')">🖼️ Grid</button>
                                 </div>
                             </div>
                             <input type="text" id="cityLeagueDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input deck-card-search" oninput="filterDeckGrid('cityLeague')">
@@ -553,16 +594,16 @@
                                     <button id="currentMetaOverviewTypeAceSpec" onclick="setCurrentMetaOverviewCardTypeFilter('Ace Spec')" style="padding: 6px 10px; font-size: 0.85em; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🌟 Ace Spec</button>
                                 </div>
                                 
-                                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                    <button class="btn btn-success" onclick="setCurrentMetaOverviewRarityMode('min')" id="currentMetaOverviewRarityMin" style="padding: 8px 14px; font-size: 0.9em; background: #28a745;">⬇️ Low Rarity</button>
-                                    <button class="btn btn-danger" onclick="setCurrentMetaOverviewRarityMode('max')" id="currentMetaOverviewRarityMax" style="padding: 8px 14px; font-size: 0.9em; background: #dc3545;">⬆️ Max Rarity</button>
-                                    <button class="btn btn-info" onclick="setCurrentMetaOverviewRarityMode('all')" id="currentMetaOverviewRarityAll" style="padding: 8px 14px; font-size: 0.9em; background: #17a2b8;">🌍 All Prints</button>
+                                <div class="btn-toggle-group">
+                                    <button class="btn-toggle-item btn-success" onclick="setCurrentMetaOverviewRarityMode('min')" id="currentMetaOverviewRarityMin">⬇️ Low Rarity</button>
+                                    <button class="btn-toggle-item" onclick="setCurrentMetaOverviewRarityMode('max')" id="currentMetaOverviewRarityMax">⬆️ Max Rarity</button>
+                                    <button class="btn-toggle-item" onclick="setCurrentMetaOverviewRarityMode('all')" id="currentMetaOverviewRarityAll">🌍 All Prints</button>
                                 </div>
                                 
-                                <div style="display: flex; gap: 5px;">
-                                    <button class="btn btn-primary" onclick="copyCurrentMetaDeckOverview()" style="padding: 8px 16px; font-size: 0.9em;">📋 Copy</button>
-                                    <button class="btn btn-warning" onclick="toggleCurrentMetaDeckGridView()" style="padding: 8px 16px; font-size: 0.9em;">🖼️ Grid View</button>
-                                </div>
+                                <div class="action-divider"></div>
+                                
+                                <button class="btn-modern" onclick="copyCurrentMetaDeckOverview()">📋 Copy</button>
+                                <button class="btn-modern" onclick="toggleCurrentMetaDeckGridView()">🖼️ Grid</button>
                             </div>
                         </div>
                         
@@ -580,13 +621,19 @@
                     <!-- Deck Builder -->
                     <div class="deck-builder">
                         <h2>🛠️ Deck Builder</h2>
-                        <div class="builder-controls">
-                            <button class="btn btn-secondary" onclick="clearDeck('currentMeta')">🗑️ Clear</button>
-                            <button class="btn btn-success btn-gen-low" onclick="autoComplete('currentMeta', 'min')">⬇️ Generate Low Rarity Deck</button>
-                            <button class="btn btn-success btn-gen-max" onclick="autoComplete('currentMeta', 'max')">⬆️ Generate Max Rarity Deck</button>
-                            <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('currentMeta', 'min')">🎯 Auto Generate (Max Consistency)</button>
-                            <button class="btn btn-warning" onclick="openDrawSimulator('currentMeta')" style="font-weight: 600;">🎲 Test Draw</button>
-                            <button class="btn" onclick="openPlaytesterSetup('currentMeta')" style="font-weight:600;background:#2d8a4e;color:white;border-color:#2d8a4e;">🃏 Playtesting</button>
+                        <div class="action-bar">
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span class="action-group-label">🪄 Generate:</span>
+                                <button class="btn-modern" onclick="autoComplete('currentMeta', 'min')" title="Fill deck with lowest rarity cards">⬇️ Low</button>
+                                <button class="btn-modern" onclick="autoComplete('currentMeta', 'max')" title="Fill deck with highest rarity cards">⬆️ Max</button>
+                                <button class="btn-modern primary" onclick="autoCompleteConsistency('currentMeta', 'min')" title="Uses tournament data for optimal card counts">🎯 Consistency</button>
+                            </div>
+                            <div class="action-divider"></div>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn-modern" onclick="openDrawSimulator('currentMeta')">🎲 Test Draw</button>
+                                <button class="btn-modern success" onclick="openPlaytesterSetup('currentMeta')">🃏 Playtest</button>
+                                <button class="btn-modern danger" onclick="clearDeck('currentMeta')" style="margin-left: 5px;">🗑️ Clear</button>
+                            </div>
                         </div>
                         
                         <div class="deck-summary" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; background: #e8f4fd; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin-bottom: 20px;">
@@ -594,8 +641,8 @@
                                 Deck: <span id="currentMetaDeckCount" style="font-weight: bold; color: #3498db;">0</span> / 60 Cards
                                 <span id="currentMetaDeckCountUnique" style="font-weight: 500; font-size: 0.85em; color: #666; margin-left: 8px;">(0 Unique)</span>
                             </h3>
-                            <div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 8px 16px; border-radius: 8px; font-size: 1.1em; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                💰 Est. Value: <span id="currentMetaDeckPrice">0.00 €</span>
+                            <div style="background: white; border: 2px solid #2ecc71; color: #27ae60; padding: 6px 14px; border-radius: 6px; font-size: 1.1em; font-weight: 800;">
+                                💰 <span id="currentMetaDeckPrice">0.00 €</span>
                             </div>
                         </div>
                         
@@ -603,11 +650,11 @@
                         <div id="currentMetaMyDeckVisual" class="section-panel">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🎴 Your Deck</h3>
-                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                    <button class="btn btn-success btn-save-deck" onclick="saveCurrentDeckToProfile('currentMeta')">💾 Save to My Decks</button>
-                                    <button class="btn btn-info btn-gradient-compare" onclick="openDeckCompare('currentMeta')">🔄 Compare Deck</button>
-                                    <button class="btn btn-primary" onclick="copyDeck('currentMeta')">📋 Copy Deck</button>
-                                    <button class="btn btn-warning" onclick="generateDeckGrid('currentMeta')">🖼️ Grid View</button>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button class="btn-modern success" onclick="saveCurrentDeckToProfile('currentMeta')">💾 Save</button>
+                                    <button class="btn-modern" onclick="openDeckCompare('currentMeta')">🔄 Compare</button>
+                                    <button class="btn-modern" onclick="copyDeck('currentMeta')">📋 Copy</button>
+                                    <button class="btn-modern" onclick="generateDeckGrid('currentMeta')">🖼️ Grid</button>
                                 </div>
                             </div>
                             <input type="text" id="currentMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input deck-card-search" oninput="filterDeckGrid('currentMeta')">
@@ -757,16 +804,16 @@
                                     <button id="pastMetaOverviewTypeAceSpec" onclick="setPastMetaOverviewCardTypeFilter('Ace Spec')" style="padding: 6px 10px; font-size: 0.85em; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; border: none; border-radius: 4px; cursor: pointer; opacity: 0.6;">🌟 Ace Spec</button>
                                 </div>
                                 
-                                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                    <button class="btn btn-success" onclick="setPastMetaRarityMode('min')" id="pastMetaRarityMin" style="padding: 8px 14px; font-size: 0.9em; background: #28a745;">⬇️ Low Rarity</button>
-                                    <button class="btn btn-danger" onclick="setPastMetaRarityMode('max')" id="pastMetaRarityMax" style="padding: 8px 14px; font-size: 0.9em; background: #dc3545;">⬆️ Max Rarity</button>
-                                    <button class="btn btn-info" onclick="setPastMetaRarityMode('all')" id="pastMetaRarityAll" style="padding: 8px 14px; font-size: 0.9em; background: #17a2b8;">🌍 All Prints</button>
+                                <div class="btn-toggle-group">
+                                    <button class="btn-toggle-item btn-success" onclick="setPastMetaRarityMode('min')" id="pastMetaRarityMin">⬇️ Low Rarity</button>
+                                    <button class="btn-toggle-item" onclick="setPastMetaRarityMode('max')" id="pastMetaRarityMax">⬆️ Max Rarity</button>
+                                    <button class="btn-toggle-item" onclick="setPastMetaRarityMode('all')" id="pastMetaRarityAll">🌍 All Prints</button>
                                 </div>
                                 
-                                <div style="display: flex; gap: 5px;">
-                                    <button class="btn btn-primary" onclick="copyPastMetaDeckOverview()" style="padding: 8px 16px; font-size: 0.9em;">📋 Copy</button>
-                                    <button class="btn btn-warning" onclick="togglePastMetaDeckGridView()" style="padding: 8px 16px; font-size: 0.9em;">🖼️ Grid View</button>
-                                </div>
+                                <div class="action-divider"></div>
+                                
+                                <button class="btn-modern" onclick="copyPastMetaDeckOverview()">📋 Copy</button>
+                                <button class="btn-modern" onclick="togglePastMetaDeckGridView()">🖼️ Grid</button>
                             </div>
                         </div>
                         
@@ -784,13 +831,19 @@
                     <!-- Deck Builder -->
                     <div class="deck-builder">
                         <h2>🛠️ Deck Builder</h2>
-                        <div class="builder-controls">
-                            <button class="btn btn-secondary" onclick="clearDeck('pastMeta')">🗑️ Clear</button>
-                            <button class="btn btn-success btn-gen-low" onclick="autoComplete('pastMeta', 'min')">⬇️ Generate Low Rarity Deck</button>
-                            <button class="btn btn-success btn-gen-max" onclick="autoComplete('pastMeta', 'max')">⬆️ Generate Max Rarity Deck</button>
-                            <button class="btn btn-success btn-gradient-auto" onclick="autoCompleteConsistency('pastMeta', 'min')">🎯 Auto Generate (Max Consistency)</button>
-                            <button class="btn btn-warning" onclick="openDrawSimulator('pastMeta')" style="font-weight: 600;">🎲 Test Draw</button>
-                            <button class="btn" onclick="openPlaytesterSetup('pastMeta')" style="font-weight:600;background:#2d8a4e;color:white;border-color:#2d8a4e;">🃏 Playtesting</button>
+                        <div class="action-bar">
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span class="action-group-label">🪄 Generate:</span>
+                                <button class="btn-modern" onclick="autoComplete('pastMeta', 'min')" title="Fill deck with lowest rarity cards">⬇️ Low</button>
+                                <button class="btn-modern" onclick="autoComplete('pastMeta', 'max')" title="Fill deck with highest rarity cards">⬆️ Max</button>
+                                <button class="btn-modern primary" onclick="autoCompleteConsistency('pastMeta', 'min')" title="Uses tournament data for optimal card counts">🎯 Consistency</button>
+                            </div>
+                            <div class="action-divider"></div>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn-modern" onclick="openDrawSimulator('pastMeta')">🎲 Test Draw</button>
+                                <button class="btn-modern success" onclick="openPlaytesterSetup('pastMeta')">🃏 Playtest</button>
+                                <button class="btn-modern danger" onclick="clearDeck('pastMeta')" style="margin-left: 5px;">🗑️ Clear</button>
+                            </div>
                         </div>
                         
                         <div class="deck-summary" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; background: #e8f4fd; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin-bottom: 20px;">
@@ -798,8 +851,8 @@
                                 Deck: <span id="pastMetaDeckCount" style="font-weight: bold; color: #3498db;">0</span> / 60 Cards
                                 <span id="pastMetaDeckCountUnique" style="font-weight: 500; font-size: 0.85em; color: #666; margin-left: 8px;">(0 Unique)</span>
                             </h3>
-                            <div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 8px 16px; border-radius: 8px; font-size: 1.1em; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                💰 Est. Value: <span id="pastMetaDeckPrice">0.00 €</span>
+                            <div style="background: white; border: 2px solid #2ecc71; color: #27ae60; padding: 6px 14px; border-radius: 6px; font-size: 1.1em; font-weight: 800;">
+                                💰 <span id="pastMetaDeckPrice">0.00 €</span>
                             </div>
                         </div>
                         
@@ -807,11 +860,11 @@
                         <div id="pastMetaMyDeckVisual" class="section-panel">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="margin: 0;">🎴 Your Deck</h3>
-                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                    <button class="btn btn-success btn-save-deck" onclick="saveCurrentDeckToProfile('pastMeta')">💾 Save to My Decks</button>
-                                    <button class="btn btn-info btn-gradient-compare" onclick="openDeckCompare('pastMeta')">🔄 Compare Deck</button>
-                                    <button class="btn btn-primary" onclick="copyDeck('pastMeta')">📋 Copy Deck</button>
-                                    <button class="btn btn-warning" onclick="generateDeckGrid('pastMeta')">🖼️ Grid View</button>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button class="btn-modern success" onclick="saveCurrentDeckToProfile('pastMeta')">💾 Save</button>
+                                    <button class="btn-modern" onclick="openDeckCompare('pastMeta')">🔄 Compare</button>
+                                    <button class="btn-modern" onclick="copyDeck('pastMeta')">📋 Copy</button>
+                                    <button class="btn-modern" onclick="generateDeckGrid('pastMeta')">🖼️ Grid</button>
                                 </div>
                             </div>
                             <input type="text" id="pastMetaDeckGridSearch" placeholder="🔍 Search cards in deck..." class="card-search-input deck-card-search" oninput="filterDeckGrid('pastMeta')">

@@ -538,7 +538,7 @@ const BASE_PATH = './data/';
             const basicEnergyNames = [
                 'Fire Energy', 'Water Energy', 'Grass Energy', 'Lightning Energy',
                 'Psychic Energy', 'Fighting Energy', 'Darkness Energy', 'Metal Energy',
-                'Fairy Energy', 'Dragon Energy'
+                'Fairy Energy', 'Dragon Energy', 'Colorless Energy'
             ];
             return basicEnergyNames.includes(cardName);
         }
@@ -3132,8 +3132,7 @@ const BASE_PATH = './data/';
             if (!cardData && setCode && setNumber) {
                 cardData = allCardsDb.find(c => c.name === cardName && c.set === setCode && c.number === setNumber);
             }
-            const isBaseEnergy = cardData && (cardData.type || cardData.card_type || '').toLowerCase() === 'energy' && 
-                                (cardName || '').match(/^(Fire|Water|Grass|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon|Colorless|Neutral)\s+Energy$/i);
+            const isBaseEnergy = isBasicEnergy(cardName);
             const isAceSpecCard = isAceSpec(cardName);
             
             // Check limits (silent fail for batch)
@@ -3253,8 +3252,7 @@ const BASE_PATH = './data/';
             if (!cardData && setCode && setNumber) {
                 cardData = allCardsDb.find(c => c.name === cardName && c.set === setCode && c.number === setNumber);
             }
-            const isBaseEnergy = cardData && (cardData.type || cardData.card_type || '').toLowerCase() === 'energy' && 
-                                (cardName || '').match(/^(Fire|Water|Grass|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon|Colorless|Neutral)\s+Energy$/i);
+            const isBaseEnergy = isBasicEnergy(cardName);
             const isAceSpecCard = isAceSpec(cardName);
             
             // Check if card already has 4 copies (only applies to non-energy, non-ace-spec cards)

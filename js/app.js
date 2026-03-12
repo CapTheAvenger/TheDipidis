@@ -4867,7 +4867,9 @@ const BASE_PATH = './data/';
                 card.sharePercent = sharePercent;
                 card.metaShare = metaShare;
                 card.metaRelevanceFactor = metaRelevanceFactor;
-                card.consistencyScore = (sharePercent / 100) * avgCount * reliabilityFactor * metaRelevanceFactor * 100;
+                // Use avgCountWhenUsed in the score so Phase sort order reflects actual usage,
+                // not the diluted global average that includes 0s from non-users
+                card.consistencyScore = (sharePercent / 100) * avgCountWhenUsed * reliabilityFactor * metaRelevanceFactor * 100;
                 
                 // Log high meta-relevance cards
                 if (metaRelevanceFactor > 1.0 && sharePercent >= 50) {

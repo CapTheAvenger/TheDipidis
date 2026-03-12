@@ -338,6 +338,27 @@
             cursor: pointer; padding: 4px 0; transition: background 0.15s;
         }
         .pt-stepper-action:hover { background: #2a52be; }
+
+        /* ── Micro-UX: Tactile click feedback ─────────────────────────────── */
+        .btn-modern:active, .pt-btn:active, .pt-stepper-btn:active, .pt-stepper-action:active {
+            transform: scale(0.95) translateY(0);
+            box-shadow: none;
+        }
+        .btn[onclick^="start"]:active {
+            transform: scale(0.98) !important;
+        }
+
+        /* ── Micro-UX: Custom scrollbars ───────────────────────────────────── */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(59,76,202,0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(59,76,202,0.8); }
+
+        /* ── Micro-UX: No accidental text selection on interactive elements ─ */
+        .pt-stepper-group, .pt-bottom-input, .pt-zone-label {
+            user-select: none;
+            -webkit-user-select: none;
+        }
     </style>
 </head>
 <body>

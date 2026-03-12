@@ -14,6 +14,7 @@ let ptLookingAt = [];
 let ptLookingAtIsBottom = false;
 let ptLookingAtPlayer = 'p1';
 let _ptMsgTimer = null;
+let ptActiveBuffs = { p1: 0, p2: 0 };
 
 // --- STATE HISTORY (UNDO) ---
 let ptStateHistory = [];
@@ -771,6 +772,23 @@ function ptGlobalIono() {
     ptRenderAll();
 }
 
+// --- DMG BUFF COUNTER (Muscle Band, Choice Belt, etc.) ---
+
+function ptAddDmgBuff(player, amount) {
+    const el = document.getElementById(`ptActiveModifier-${player}`);
+    if (!el) return;
+    if (amount === 0) {
+        ptActiveBuffs[player] = 0;
+        el.style.display = 'none';
+        ptLog(`DMG Buff für ${player} zurückgesetzt.`);
+    } else {
+        ptActiveBuffs[player] += amount;
+        el.style.display = 'block';
+        el.innerText = `+${ptActiveBuffs[player]}`;
+        ptLog(`💪 DMG Buff ${player}: +${ptActiveBuffs[player]} gesamt.`);
+    }
+}
+
 function ptFlipCoin() {
     const result = Math.random() >= 0.5 ? 'HEADS!' : 'TAILS!';
     ptLog(`🪙 Coin flip: ${result}`);
@@ -1055,12 +1073,22 @@ function ptDragStartHand(event, index) {
     event.dataTransfer.setData('text/plain', String(index));
     event.dataTransfer.setData('sourceZone', '');
     ptSelectedCardIndex = index;
+    const wrapper = event.target.closest('.pt-hand-wrapper');
+    if (wrapper) {
+        setTimeout(() => wrapper.classList.add('dragging'), 0);
+        wrapper.addEventListener('dragend', () => wrapper.classList.remove('dragging'), { once: true });
+    }
     ptRenderHand();
 }
 
 function ptDragStartField(event, elementId) {
     event.dataTransfer.setData('sourceZone', elementId);
     event.dataTransfer.setData('text/plain', '');
+    const card = event.target.closest('.pt-field-card');
+    if (card) {
+        setTimeout(() => card.classList.add('dragging'), 0);
+        card.addEventListener('dragend', () => card.classList.remove('dragging'), { once: true });
+    }
 }
 
 // Returns the .pt-hand-wrapper element that the dragged card should be inserted BEFORE,

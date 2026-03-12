@@ -17,6 +17,7 @@ let _ptMsgTimer = null;
 
 // Globale Speicher für importierte Sandbox-Decks
 let standaloneDecks = { p1: [], p2: [] };
+let currentPlaytestSource = '';
 
 function getInitialPlayerState() {
     return {
@@ -225,6 +226,52 @@ function startStandalonePlaytester() {
     setupDragAndDrop();
     setupHotkeys();
 }
+
+// --- Playtester Setup Modal ---
+function openPlaytesterSetup(source) {
+    currentPlaytestSource = source;
+    document.getElementById('playtesterOpponentDeck').value = '';
+    document.getElementById('playtesterSetupModal').style.display = 'flex';
+}
+
+function closePlaytesterSetup() {
+    document.getElementById('playtesterSetupModal').style.display = 'none';
+}
+
+function startPlaytesterWithMirror() {
+    closePlaytesterSetup();
+    openPlaytester(currentPlaytestSource);
+}
+
+function startPlaytesterWithOpponent() {
+    const opponentString = document.getElementById('playtesterOpponentDeck').value.trim();
+    if (!opponentString) {
+        alert('Bitte füge ein Deck für den Gegner ein oder wähle "Mirror Match".');
+        return;
+    }
+    closePlaytesterSetup();
+    const deckStringP1 = getExportStringFromBuilder(currentPlaytestSource);
+    document.getElementById('sandboxImportP1').value = deckStringP1;
+    document.getElementById('sandboxImportP2').value = opponentString;
+    parseSandboxDeck('p1');
+    parseSandboxDeck('p2');
+    startStandalonePlaytester();
+}
+
+function getExportStringFromBuilder(type) {
+    const deckObj = type === 'cityLeague'  ? (window.cityLeagueDeck  || {})
+                  : type === 'currentMeta' ? (window.currentMetaDeck || {})
+                  : type === 'pastMeta'    ? (window.pastMetaDeck    || {})
+                  : {};
+    const lines = [];
+    for (const [deckKey, count] of Object.entries(deckObj)) {
+        if (!count || count <= 0) continue;
+        const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+        lines.push(m ? `${count} ${m[1]} ${m[2]} ${m[3]}` : `${count} ${deckKey}`);
+    }
+    return lines.join('\n');
+}
+// --- End Playtester Setup Modal ---
 
 function ptNewGame() {
     ['p1', 'p2'].forEach(p => {

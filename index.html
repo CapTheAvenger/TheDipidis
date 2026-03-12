@@ -1006,7 +1006,7 @@
                 <div class="container" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                     <div style="text-align: center; margin-bottom: 30px;">
                         <h1 style="font-size: 2.5em; color: #3B4CCA; margin-bottom: 10px;">⚔️ Battle Sandbox</h1>
-                        <p style="font-size: 1.1em; color: #7f8c8d; font-weight: 600;">Importiere Decks für 2 Spieler und starte das Match.</p>
+                        <p style="font-size: 1.1em; color: #7f8c8d; font-weight: 600;">Import decks for 2 players and start the match.</p>
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 40px;">
@@ -1014,26 +1014,26 @@
                         <div style="background: #f8f9fa; padding: 25px; border-radius: 16px; border: 3px solid #3B4CCA; box-shadow: 0 5px 15px rgba(59,76,202,0.15); position: relative; overflow: hidden;">
                             <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: #3B4CCA;"></div>
                             <h2 style="margin-top: 0; color: #3B4CCA; display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 20px; height: 20px; background: #3B4CCA; border-radius: 50%;"></div> Spieler 1
+                                <div style="width: 20px; height: 20px; background: #3B4CCA; border-radius: 50%;"></div> Player 1
                             </h2>
-                            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">Pokémon TCG Live Deck-Code hier einfügen:</p>
+                            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">Paste your Pokémon TCG Live deck code here:</p>
                             <textarea id="sandboxImportP1" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 180px; padding: 15px; border-radius: 8px; border: 2px solid #e1e8ed; font-family: monospace; font-size: 13px; resize: vertical; margin-bottom: 15px; box-sizing: border-box; background: #fff;"></textarea>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span id="sandboxStatusP1" style="font-size: 13px; font-weight: 800; color: #7f8c8d; background: #eee; padding: 4px 10px; border-radius: 12px;">Wartet auf Eingabe...</span>
-                                <button class="btn" onclick="parseSandboxDeck('p1')" style="background: #3B4CCA; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Lade Deck</button>
+                                <span id="sandboxStatusP1" style="font-size: 13px; font-weight: 800; color: #7f8c8d; background: #eee; padding: 4px 10px; border-radius: 12px;">Waiting for input...</span>
+                                <button class="btn" onclick="parseSandboxDeck('p1')" style="background: #3B4CCA; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Load Deck</button>
                             </div>
                         </div>
 
                         <div style="background: #f8f9fa; padding: 25px; border-radius: 16px; border: 3px solid #E3350D; box-shadow: 0 5px 15px rgba(227,53,13,0.15); position: relative; overflow: hidden;">
                             <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: #E3350D;"></div>
                             <h2 style="margin-top: 0; color: #E3350D; display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 20px; height: 20px; background: #E3350D; border-radius: 50%;"></div> Spieler 2
+                                <div style="width: 20px; height: 20px; background: #E3350D; border-radius: 50%;"></div> Player 2
                             </h2>
-                            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">Pokémon TCG Live Deck-Code hier einfügen:</p>
+                            <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">Paste your Pokémon TCG Live deck code here:</p>
                             <textarea id="sandboxImportP2" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 180px; padding: 15px; border-radius: 8px; border: 2px solid #e1e8ed; font-family: monospace; font-size: 13px; resize: vertical; margin-bottom: 15px; box-sizing: border-box; background: #fff;"></textarea>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span id="sandboxStatusP2" style="font-size: 13px; font-weight: 800; color: #7f8c8d; background: #eee; padding: 4px 10px; border-radius: 12px;">Wartet auf Eingabe...</span>
-                                <button class="btn" onclick="parseSandboxDeck('p2')" style="background: #E3350D; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Lade Deck</button>
+                                <span id="sandboxStatusP2" style="font-size: 13px; font-weight: 800; color: #7f8c8d; background: #eee; padding: 4px 10px; border-radius: 12px;">Waiting for input...</span>
+                                <button class="btn" onclick="parseSandboxDeck('p2')" style="background: #E3350D; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Load Deck</button>
                             </div>
                         </div>
 
@@ -1041,10 +1041,10 @@
 
                     <div style="text-align: center; padding: 30px; background: linear-gradient(to bottom, #ffffff, #f0f4f8); border-radius: 16px; border: 2px dashed #b3d9ff;">
                         <p style="color: #555; font-size: 1.1em; font-weight: 600; margin-bottom: 20px;">
-                            💡 Tipp: Wenn du nur bei Spieler 1 ein Deck einfügst, wird es für Spieler 2 automatisch kopiert (Mirror-Match).
+                            💡 Tip: If you only import a deck for Player 1, it will automatically be copied for Player 2 (Mirror Match).
                         </p>
                         <button class="btn" style="font-size: 24px; padding: 20px 60px; border-radius: 50px; font-weight: 900; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); border: 3px solid #fff; box-shadow: 0 8px 25px rgba(39, 174, 96, 0.5); color: white; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="startStandalonePlaytester()">
-                            🚀 SIMULATOR STARTEN
+                            🚀 START SIMULATOR
                         </button>
                     </div>
 
@@ -2102,6 +2102,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260311-v11"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v9"></script>
+    <script src="js/playtester.js?v=20260312-v10"></script>
 </body>
 </html>

@@ -118,38 +118,46 @@ async function parseSandboxDeck(player) {
     const rawText  = inputEl.value;
 
     if (!rawText.trim()) {
-        statusEl.innerText = 'Bitte Deck-Code einfügen!';
+        statusEl.innerText = 'Please paste a deck code first!';
         statusEl.style.color = 'red';
         return;
     }
 
-    statusEl.innerText = 'Lade Karten-Daten...';
+    statusEl.innerText = 'Loading card data...';
     statusEl.style.color = '#007bff';
 
-    // TCG Live Format: "4 Pikachu SVI 001" oder "4 Pikachu SVI 001 PH"
+    // TCG Live format: "4 Pikachu SVI 001" or "4 Pikachu SVI 001 PH"
     const lineRegex = /^(\d+)\s+(.+?)\s+([A-Za-z0-9-]+)\s+(\d+[A-Za-z]?)(?:\s+.*)?$/;
     const lines = rawText.split('\n');
-    const parsedDeck = [];
-    let totalCards = 0;
 
+    // Collect all valid lines first
+    const entries = [];
     for (let line of lines) {
         line = line.trim();
         const match = line.match(lineRegex);
         if (!match) continue;
+        entries.push({
+            count:     parseInt(match[1]),
+            name:      match[2],
+            ptcgoCode: match[3],
+            number:    match[4]
+        });
+    }
 
-        const count      = parseInt(match[1]);
-        const name       = match[2];
-        const ptcgoCode  = match[3];
-        const number     = match[4];
+    if (entries.length === 0) {
+        statusEl.innerText = 'No valid deck format detected.';
+        statusEl.style.color = 'red';
+        return;
+    }
 
-        // Basis-Energien haben keine stabilen Set-Codes in der API – nach Name suchen
+    // Fire all API calls in parallel
+    const results = await Promise.all(entries.map(async ({ count, name, ptcgoCode, number }) => {
         const q = name.includes('Energy') && !name.includes('Special')
             ? `name:"${name}"`
             : `set.ptcgoCode:"${ptcgoCode}" number:"${number}"`;
 
         let imageUrl = CARD_BACK_URL;
         let cardType = '';
-
         try {
             const response = await fetch(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&select=id,name,supertype,images`);
             const data = await response.json();
@@ -158,20 +166,19 @@ async function parseSandboxDeck(player) {
                 cardType = data.data[0].supertype || '';
             }
         } catch (e) {
-            console.warn(`[Sandbox] Konnte ${name} nicht laden:`, e);
+            console.warn(`[Sandbox] Could not load ${name}:`, e);
         }
+        return { name, count, imageUrl, cardType };
+    }));
 
-        parsedDeck.push({ name, count, imageUrl, cardType });
-        totalCards += count;
-    }
-
-    standaloneDecks[player] = parsedDeck;
+    standaloneDecks[player] = results;
+    const totalCards = results.reduce((s, c) => s + c.count, 0);
 
     if (totalCards > 0) {
-        statusEl.innerText = `${totalCards} / 60 Karten geladen ✅`;
+        statusEl.innerText = `${totalCards} / 60 cards loaded ✅`;
         statusEl.style.color = 'green';
     } else {
-        statusEl.innerText = 'Kein gültiges Format erkannt.';
+        statusEl.innerText = 'No valid cards found.';
         statusEl.style.color = 'red';
     }
 }

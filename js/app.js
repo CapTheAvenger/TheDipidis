@@ -8033,6 +8033,20 @@ const BASE_PATH = './data/';
                     cb.addEventListener('change', filterAndRenderCards);
                 });
             });
+            
+            // Coverage radio buttons: clicking an already-selected radio deselects it
+            document.querySelectorAll('#deckCoverageFilterOptions input[type="radio"]').forEach(radio => {
+                radio.addEventListener('click', function() {
+                    if (this.dataset.wasChecked === 'true') {
+                        this.checked = false;
+                        this.dataset.wasChecked = 'false';
+                        filterAndRenderCards();
+                    } else {
+                        document.querySelectorAll('#deckCoverageFilterOptions input[type="radio"]').forEach(r => r.dataset.wasChecked = 'false');
+                        this.dataset.wasChecked = 'true';
+                    }
+                });
+            });
         }
         
         function showCardAutocomplete(searchTerm) {
@@ -8122,9 +8136,10 @@ const BASE_PATH = './data/';
                 filterArchetypeList();
             }
             
-            // Uncheck all checkboxes
+            // Uncheck all checkboxes and coverage radios
             const allCheckboxes = document.querySelectorAll('.cards-filter-options input[type="checkbox"], #mainPokemonList input[type="checkbox"], #archetypeList input[type="checkbox"]');
             allCheckboxes.forEach(cb => cb.checked = false);
+            document.querySelectorAll('#deckCoverageFilterOptions input[type="radio"]').forEach(r => r.checked = false);
             
             // Reset archetype filter (show all archetypes again)
             filterArchetypesByMainPokemon();

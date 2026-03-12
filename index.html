@@ -1017,10 +1017,10 @@
                                 <span class="toggle-icon">▼</span>
                             </div>
                             <div class="cards-filter-options collapsed" id="deckCoverageFilterOptions">
-                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="100"> 💯 In 100% of all Decks</label>
-                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="90"> 🔥 In ≥90% of Decks</label>
-                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="70"> ⭐ In ≥70% of Decks</label>
-                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="checkbox" value="50"> 📈 In ≥50% of Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="radio" name="coverage" value="100" onchange="filterAndRenderCards()"> 💯 In 100% of all Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="radio" name="coverage" value="90" onchange="filterAndRenderCards()"> 🔥 In ≥90% of Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="radio" name="coverage" value="70" onchange="filterAndRenderCards()"> ⭐ In ≥70% of Decks</label>
+                                <label style="display: block; padding: 6px; cursor: pointer;"><input type="radio" name="coverage" value="50" onchange="filterAndRenderCards()"> 📈 In ≥50% of Decks</label>
                             </div>
                         </div>
                     </div>

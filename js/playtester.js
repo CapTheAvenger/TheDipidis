@@ -112,7 +112,7 @@ function closePlaytester() {
 // SANDBOX: DECK IMPORT AUS TCG LIVE FORMAT
 // ============================================================================
 
-async function parseSandboxDeck(player) {
+function parseSandboxDeck(player) {
     const inputEl  = document.getElementById(player === 'p1' ? 'sandboxImportP1' : 'sandboxImportP2');
     const statusEl = document.getElementById(player === 'p1' ? 'sandboxStatusP1' : 'sandboxStatusP2');
     const rawText  = inputEl.value;
@@ -150,26 +150,32 @@ async function parseSandboxDeck(player) {
         return;
     }
 
-    // Fire all API calls in parallel
-    const results = await Promise.all(entries.map(async ({ count, name, ptcgoCode, number }) => {
-        const q = name.includes('Energy') && !name.includes('Special')
-            ? `name:"${name}"`
-            : `set.ptcgoCode:"${ptcgoCode}" number:"${number}"`;
-
+    // Look up all cards from local database (no external API = no CORS issues)
+    const results = entries.map(({ count, name, ptcgoCode, number }) => {
         let imageUrl = CARD_BACK_URL;
         let cardType = '';
-        try {
-            const response = await fetch(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&select=id,name,supertype,images`);
-            const data = await response.json();
-            if (data.data && data.data.length > 0) {
-                imageUrl = data.data[0].images.small;
-                cardType = data.data[0].supertype || '';
-            }
-        } catch (e) {
-            console.warn(`[Sandbox] Could not load ${name}:`, e);
+
+        // Try exact set+number lookup first
+        const db = window.cardsBySetNumberMap || {};
+        const key = `${ptcgoCode}-${number}`;
+        let found = db[key];
+
+        // Fallback: name lookup from cardsByNameMap
+        if (!found) {
+            const byName = window.cardsByNameMap || {};
+            const versions = byName[name] || [];
+            found = versions.find(v => v.image_url) || versions[0] || null;
         }
+
+        if (found) {
+            imageUrl = found.image_url || CARD_BACK_URL;
+            cardType = found.card_type || found.supertype || '';
+        } else {
+            console.warn(`[Sandbox] No local data for ${name} (${ptcgoCode} ${number})`);
+        }
+
         return { name, count, imageUrl, cardType };
-    }));
+    });
 
     standaloneDecks[player] = results;
     const totalCards = results.reduce((s, c) => s + c.count, 0);

@@ -103,7 +103,7 @@ function openPlaytester(source) {
 }
 
 function closePlaytester() {
-    if (confirm('Playtester wirklich verlassen? Der Spielfortschritt geht verloren.')) {
+    if (confirm('Really quit the playtester? All progress will be lost.')) {
         document.getElementById('playtesterModal').style.display = 'none';
     }
 }
@@ -444,21 +444,22 @@ function ptFlipCoin() {
 }
 
 function ptFlipBoard() {
-    const board      = document.getElementById('playtester-board');
-    const neutralZone = document.getElementById('ptNeutralZone');
-    const handZone   = document.querySelector('.pt-hand-zone');
-    const ind        = document.getElementById('activePlayerIndicator');
+    const board         = document.getElementById('playtester-board');
+    const stadiumWrapper = document.getElementById('ptStadiumWrapper');
+    const handZone      = document.querySelector('.pt-hand-zone');
+    const ind           = document.getElementById('activePlayerIndicator');
     if (!board) return;
     if (ptCurrentPlayer === 'p1') {
-        board.style.transform      = 'rotate(180deg)';
-        if (neutralZone) neutralZone.style.transform = 'rotate(180deg)';
+        board.style.transform = 'rotate(180deg)';
+        // Counter-rotate stadium so it stays upright for P2
+        if (stadiumWrapper) stadiumWrapper.style.transform = 'translateY(-50%) rotate(180deg)';
         ptCurrentPlayer = 'p2';
         if (ind)      ind.innerText = '2';
         if (handZone) handZone.style.borderTopColor = '#E3350D';
         ptLog('Turn passed to Player 2.');
     } else {
-        board.style.transform      = 'rotate(0deg)';
-        if (neutralZone) neutralZone.style.transform = 'rotate(0deg)';
+        board.style.transform = 'rotate(0deg)';
+        if (stadiumWrapper) stadiumWrapper.style.transform = 'translateY(-50%) rotate(0deg)';
         ptCurrentPlayer = 'p1';
         if (ind)      ind.innerText = '1';
         if (handZone) handZone.style.borderTopColor = '#3B4CCA';
@@ -879,7 +880,7 @@ function ptRenderAll() {
     const stadiumEl = document.getElementById('ptStadiumZone');
     if (stadiumEl) stadiumEl.innerHTML = generateNeutralZone('stadium', 'Stadium');
     const playEl = document.getElementById('ptPlayZone');
-    if (playEl) playEl.innerHTML = generateNeutralZone('playzone', 'Drop');
+    if (playEl) playEl.innerHTML = generateNeutralZone('playzone', 'Drop', 136);
 
     ptRenderHand();
 }
@@ -940,20 +941,21 @@ function ptTakePrize(player, index) {
 
 // --- NEUTRAL ZONE RENDER ---
 
-function generateNeutralZone(zoneId, labelText) {
+function generateNeutralZone(zoneId, labelText, width = 82) {
+    const height = Math.round(width * 1.38);
     const cards = zoneId === 'stadium' ? ptState.stadium : ptState.playZone;
     if (cards.length === 0) {
         const isTarget = ptSelectedCardIndex !== null;
         return `<div class="pt-empty-slot${isTarget ? ' pt-drop-target' : ''}"
-                     style="width:82px;height:114px;"
+                     style="width:${width}px;height:${height}px;"
                      onclick="ptClickZone('${ptCurrentPlayer}','${zoneId}')">${labelText}</div>`;
     }
     const card = cards[cards.length - 1];
     const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    return `<div style="position:relative;width:82px;cursor:pointer;"
+    return `<div style="position:relative;width:${width}px;cursor:pointer;"
                  onclick="ptClickZone('${ptCurrentPlayer}','${zoneId}')">
         <img src="${card.imageUrl || CARD_BACK_URL}" class="pt-field-card"
-             style="width:82px;border-radius:7px;display:block;"
+             style="width:${width}px;border-radius:7px;display:block;"
              onerror="this.src='${CARD_BACK_URL}'"
              ondblclick="ptViewCard(event,'${safeImg}')" title="${card.name}">
         <div class="pt-field-actions" style="z-index:100;bottom:-28px;">

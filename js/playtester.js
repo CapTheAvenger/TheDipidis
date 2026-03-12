@@ -18,7 +18,7 @@ let ptActiveBuffs = { p1: 0, p2: 0 };
 
 // ── Game-start phase state ──────────────────────────────────────────────
 let ptStartPhase = false;   // true while coin-flip / active-selection is running
-let ptStartChoices = { p1: null, p2: null };  // selected active card index per player
+let ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };  // selected active/bench card indices per player
 
 // ── Card Zoom / Search panel state ─────────────────────────────────────
 let ptZoomPanelOpen = false;
@@ -403,7 +403,7 @@ function ptNewGame() {
     ptCurrentPlayer  = 'p1';
     ptActionLog      = [];
     ptStartPhase     = true;
-    ptStartChoices   = { p1: null, p2: null };
+    ptStartChoices   = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
 
     const logContent = document.getElementById('ptActionLogContent');
     if (logContent) logContent.innerHTML = '';
@@ -421,42 +421,54 @@ function ptNewGame() {
 
 // ── Start Phase: coin flip → hand display → active selection ─────────────
 
+// Helpers to detect Basic Pokémon (not Energy, not Trainer)
+function _ptIsBasic(card) {
+    const t = (card.cardType || card.supertype || '').toLowerCase();
+    return t.includes('pok') || (t === '' && !t.includes('energy') && !t.includes('trainer'));
+}
+function _ptHasBasic(player) {
+    return ptState[player].hand.some(_ptIsBasic);
+}
+
 function ptOpenStartPhase() {
+    // Always reset state so Restart starts fresh at coin-flip screen
+    const modal = document.getElementById('ptStartPhaseModal');
+    if (modal) { delete modal.dataset.coinDone; delete modal.dataset.firstPlayer; }
     ptRenderStartPhaseModal();
-    document.getElementById('ptStartPhaseModal').style.display = 'flex';
+    if (modal) modal.style.display = 'flex';
 }
 
 function ptRenderStartPhaseModal() {
     const modal = document.getElementById('ptStartPhaseModal');
     if (!modal) return;
 
-    // Step 1 — coin flip result (if not yet done)
-    const coinResult = modal.dataset.coinDone;
+    const coinResult  = modal.dataset.coinDone;
     const firstPlayer = modal.dataset.firstPlayer || '';
 
-    let html = `<div style="background:#1a1a2e;border:2px solid #3B4CCA;border-radius:14px;padding:24px;width:min(98vw,900px);max-height:90vh;overflow-y:auto;color:#fff;">`;
+    let html = `<div style="background:#1a1a2e;border:2px solid #3B4CCA;border-radius:14px;padding:24px;width:min(98vw,960px);max-height:92vh;overflow-y:auto;color:#fff;">`;
 
     if (!coinResult) {
-        // Coin flip screen
         html += `
         <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🪙 Who Goes First?</h2>
         <p style="text-align:center;color:#ccc;margin-bottom:24px;">Flip a coin to decide which player takes the first turn.</p>
         <div style="display:flex;justify-content:center;margin-bottom:16px;">
-            <button onclick="ptDoStartCoinFlip()" style="font-size:2em;padding:16px 40px;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 16px rgba(243,156,18,0.5);transition:transform .15s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">🪙 Flip Coin!</button>
+            <button onclick="ptDoStartCoinFlip()"
+                style="font-size:2em;padding:16px 40px;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 16px rgba(243,156,18,0.5);transition:transform .15s;"
+                onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">🪙 Flip Coin!</button>
         </div>`;
     } else {
-        // Hands + active selection
-        const fp = firstPlayer;
-        const sp = fp === 'p1' ? 'p2' : 'p1';
         html += `
-        <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🃏 Choose Your Active Pokémon</h2>
-        <p style="text-align:center;color:#ccc;margin-bottom:8px;">🪙 <strong>${fp.toUpperCase()}</strong> goes first! Both players choose their Active Pokémon — click a card to select it.</p>
+        <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🃏 Setup Phase</h2>
+        <p style="text-align:center;color:#ccc;margin-bottom:8px;">🪙 <strong>${firstPlayer.toUpperCase()}</strong> goes first! Choose your Active &amp; Bench Pokémon, then press <strong>Let's Battle!</strong></p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
             ${ptRenderStartHandHTML('p1')}
             ${ptRenderStartHandHTML('p2')}
         </div>
         <div style="text-align:center;margin-bottom:10px;">
-            <button onclick="ptConfirmStartActives()" style="font-size:1.1em;padding:12px 40px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(39,174,96,0.4);" id="ptStartBtn" disabled>🚀 Start Game!</button>
+            <button onclick="ptConfirmStartActives()" id="ptStartBtn"
+                style="font-size:1.1em;padding:13px 44px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(39,174,96,0.4);">
+                👊 Let's Battle!
+            </button>
             <p id="ptStartHint" style="color:#f1c40f;font-size:12px;margin-top:6px;">Both players must select an Active Pokémon</p>
         </div>`;
     }
@@ -468,41 +480,105 @@ function ptRenderStartPhaseModal() {
 function ptRenderStartHandHTML(player) {
     const label = player === 'p1' ? '🔵 Player 1' : '🔴 Player 2';
     const borderColor = player === 'p1' ? '#3B4CCA' : '#E3350D';
-    const selected = ptStartChoices[player];
+    const activeIdx  = ptStartChoices[player]?.active ?? null;
+    const benchIdxs  = ptStartChoices[player]?.bench ?? [];
+    const hasBasic   = _ptHasBasic(player);
+
     let cardsHTML = ptState[player].hand.map((card, i) => {
-        const isSelected = selected === i;
-        const sel = isSelected ? 'outline:3px solid #FFCB05;transform:scale(1.08);box-shadow:0 0 12px #FFCB05;' : '';
-        return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;" onclick="ptSelectStartActive('${player}',${i})">
-            <img src="${card.imageUrl || CARD_BACK_URL}" style="width:70px;border-radius:6px;${sel}transition:transform .15s;" onerror="this.src='${CARD_BACK_URL}'" title="${card.name}">
-            <span style="font-size:8px;max-width:70px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#ddd;">${card.name}</span>
+        const isActive   = activeIdx === i;
+        const isBenched  = benchIdxs.includes(i);
+        const isBasic    = _ptIsBasic(card);
+        let outline = '';
+        let badge   = '';
+        if (isActive)  { outline = 'outline:3px solid #FFCB05;box-shadow:0 0 12px #FFCB05;'; badge = `<div style="position:absolute;top:-4px;left:-4px;background:#FFCB05;color:#000;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;">ACTIVE</div>`; }
+        if (isBenched) { outline = 'outline:3px solid #27ae60;box-shadow:0 0 10px #27ae60;'; badge = `<div style="position:absolute;top:-4px;left:-4px;background:#27ae60;color:#fff;font-size:8px;font-weight:900;padding:1px 4px;border-radius:3px;">BENCH</div>`; }
+        const dimmed = !isBasic ? 'opacity:0.45;' : '';
+        const title = isBasic ? card.name : card.name + ' (not a Basic)';
+        return `<div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;">
+            ${badge}
+            <img src="${card.imageUrl || CARD_BACK_URL}" title="${title}"
+                style="width:70px;border-radius:6px;${outline}${dimmed}cursor:${isBasic?'pointer':'not-allowed'};transition:transform .12s;"
+                onerror="this.src='${CARD_BACK_URL}'"
+                onclick="${isBasic ? `ptStartCardClick('${player}',${i})` : ''}"
+                ondblclick="ptStartZoomCard('${(card.imageUrl||CARD_BACK_URL).replace(/'/g,"\\'")}','${card.name.replace(/'/g,"\\'")}')"
+            >
+            <span style="font-size:8px;max-width:72px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:${isBasic?'#ddd':'#666'};">${card.name}</span>
         </div>`;
     }).join('');
-    const mulBtnStyle = `margin-top:8px;padding:5px 14px;background:#8e44ad;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;`;
+
+    const noBasicWarn = !hasBasic
+        ? `<div style="background:#e74c3c;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;margin-bottom:8px;text-align:center;">⚠️ No Basic Pokémon! Do a Mulligan.</div>` : '';
+
+    const statusMsg = activeIdx !== null
+        ? `✅ Active: <strong>${ptState[player].hand[activeIdx]?.name||'?'}</strong>${benchIdxs.length ? ` &nbsp;|&nbsp; Bench: ${benchIdxs.length}` : ''}`
+        : `<span style="color:#f1c40f;">⬆️ Click a Basic to set as Active</span>`;
+
+    const mulBtnStyle = `padding:5px 14px;background:#8e44ad;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;`;
+    const clrBtnStyle = `padding:5px 14px;background:rgba(255,255,255,0.1);color:#fff;border:1px solid #555;border-radius:6px;cursor:pointer;font-size:11px;`;
+
     return `<div style="border:2px solid ${borderColor};border-radius:10px;padding:14px;">
-        <div style="font-weight:900;margin-bottom:10px;font-size:1em;color:${borderColor};">${label}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:90px;">${cardsHTML}</div>
-        <div style="text-align:center;">
-            <button onclick="ptStartMulligan('${player}')" style="${mulBtnStyle}">🃏 Mulligan</button>
+        <div style="font-weight:900;margin-bottom:8px;font-size:1em;color:${borderColor};display:flex;justify-content:space-between;align-items:center;">
+            <span>${label}</span>
+            <span style="font-size:10px;font-weight:400;color:#aaa;">Dbl-click any card to zoom</span>
         </div>
-        <div style="margin-top:6px;text-align:center;font-size:11px;color:#a8e6cf;">${selected !== null ? '✅ Selected: <strong>' + ptState[player].hand[selected].name + '</strong>' : '⬆️ Click a card to set as Active'}</div>
+        ${noBasicWarn}
+        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:90px;margin-bottom:8px;">${cardsHTML}</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            <button onclick="ptStartMulligan('${player}')" style="${mulBtnStyle}">🃏 Mulligan</button>
+            <button onclick="ptStartClearBench('${player}')" style="${clrBtnStyle}">Clear Bench</button>
+        </div>
+        <div style="margin-top:7px;text-align:center;font-size:11px;color:#a8e6cf;">${statusMsg}</div>
     </div>`;
 }
 
-function ptSelectStartActive(player, index) {
-    ptStartChoices[player] = index;
+function ptStartCardClick(player, index) {
+    const choices = ptStartChoices[player] || { active: null, bench: [] };
+    if (choices.active === null) {
+        // First basic clicked → set as Active
+        choices.active = index;
+    } else if (choices.active === index) {
+        // Click active again → deselect
+        choices.active = null;
+    } else if (choices.bench.includes(index)) {
+        // Click benched card → remove from bench
+        choices.bench = choices.bench.filter(i => i !== index);
+    } else if (choices.bench.length < 5) {
+        // Bench this card (max 5)
+        choices.bench.push(index);
+    } else {
+        ptShowMessage('Bench full (max 5)!');
+        return;
+    }
+    ptStartChoices[player] = choices;
     ptUpdateStartBtn();
-    const modal = document.getElementById('ptStartPhaseModal');
-    if (!modal) return;
-    // Re-render just the hand grids (keep rest intact)
     ptRenderStartPhaseModal();
+}
+
+function ptStartClearBench(player) {
+    if (ptStartChoices[player]) ptStartChoices[player].bench = [];
+    ptRenderStartPhaseModal();
+}
+
+function ptStartZoomCard(url, name) {
+    // Open the zoom panel with this card loaded
+    if (!ptZoomPanelOpen) {
+        ptZoomPanelOpen = true;
+        const panel = document.getElementById('ptZoomPanel');
+        if (panel) panel.style.transform = 'translateX(0)';
+        ptRenderZoomPanel();
+    }
+    ptZoomViewCard(url, name);
 }
 
 function ptUpdateStartBtn() {
     const btn  = document.getElementById('ptStartBtn');
     const hint = document.getElementById('ptStartHint');
     if (!btn) return;
-    const ready = ptStartChoices.p1 !== null && ptStartChoices.p2 !== null;
+    const p1ok = ptStartChoices.p1?.active !== null && ptStartChoices.p1?.active !== undefined;
+    const p2ok = ptStartChoices.p2?.active !== null && ptStartChoices.p2?.active !== undefined;
+    const ready = p1ok && p2ok;
     btn.disabled = !ready;
+    btn.style.opacity = ready ? '1' : '0.45';
     if (hint) hint.style.display = ready ? 'none' : 'block';
 }
 
@@ -515,7 +591,7 @@ function ptStartMulligan(player) {
         [deck[i], deck[j]] = [deck[j], deck[i]];
     }
     for (let i = 0; i < 7; i++) if (deck.length > 0) ptState[player].hand.push(deck.pop());
-    ptStartChoices[player] = null;
+    ptStartChoices[player] = { active: null, bench: [] };
     ptLog(`🃏 ${player.toUpperCase()} mulligan — new 7-card hand.`);
     ptRenderStartPhaseModal();
 }
@@ -536,23 +612,38 @@ function ptDoStartCoinFlip() {
 }
 
 function ptConfirmStartActives() {
-    if (ptStartChoices.p1 === null || ptStartChoices.p2 === null) return;
-    // Move chosen card from hand to active zone for each player
+    const p1choices = ptStartChoices.p1 || {};
+    const p2choices = ptStartChoices.p2 || {};
+    if (p1choices.active === null || p1choices.active === undefined) return;
+    if (p2choices.active === null || p2choices.active === undefined) return;
+
     ['p1', 'p2'].forEach(p => {
-        const idx  = ptStartChoices[p];
-        const card = ptState[p].hand.splice(idx, 1)[0];
-        ptState[p].field.active.push(card);
+        const choices = ptStartChoices[p];
+        // All selected indices (active first, then bench) sorted descending so splice doesn't shift
+        const allIdxs = [choices.active, ...(choices.bench || [])].sort((a, b) => b - a);
+        const cards   = {};
+        allIdxs.forEach(i => { cards[i] = ptState[p].hand.splice(i, 1)[0]; });
+        // Place active
+        ptState[p].field.active.push(cards[choices.active]);
+        // Place bench cards
+        (choices.bench || []).forEach((origIdx, slot) => {
+            ptState[p].field['bench' + slot].push(cards[origIdx]);
+        });
     });
+
     // NOW deal 6 prize cards for each player
     ['p1', 'p2'].forEach(p => {
         for (let i = 0; i < 6; i++) {
             if (ptState[p].deck.length > 0) ptState[p].prizes.push(ptState[p].deck.pop());
         }
     });
+
     ptStartPhase   = false;
-    ptStartChoices = { p1: null, p2: null };
-    document.getElementById('ptStartPhaseModal').style.display = 'none';
-    ptLog('✅ Game started! Prizes dealt. Good luck!');
+    ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
+    const fpModal = document.getElementById('ptStartPhaseModal');
+    const fp = fpModal?.dataset?.firstPlayer || ptCurrentPlayer;
+    if (fpModal) fpModal.style.display = 'none';
+    ptLog(`✅ Game started! ${fp.toUpperCase()} goes first. Prizes dealt. Good luck!`);
     ptRenderAll();
 }
 
@@ -563,14 +654,13 @@ function ptToggleZoomPanel() {
     const panel = document.getElementById('ptZoomPanel');
     if (!panel) return;
     panel.style.transform = ptZoomPanelOpen ? 'translateX(0)' : 'translateX(100%)';
-    ptRenderZoomPanel();
+    if (ptZoomPanelOpen) ptRenderZoomPanel();
 }
 
 function ptRenderZoomPanel(filter) {
     const grid = document.getElementById('ptZoomPanelGrid');
     if (!grid) return;
-    filter = (filter || document.getElementById('ptZoomSearch')?.value || '').toLowerCase().trim();
-    // Collect all cards across both players' hands, fields, decks, discards, lostzone, prizes
+    filter = (filter !== undefined ? filter : (document.getElementById('ptZoomSearch')?.value || '')).toLowerCase().trim();
     const all = [];
     ['p1', 'p2'].forEach(p => {
         const st = ptState[p];
@@ -582,24 +672,34 @@ function ptRenderZoomPanel(filter) {
             if (!filter || (c.name||'').toLowerCase().includes(filter)) all.push(c);
         }));
     });
-    // De-dupe by name for display (show unique artworks)
+    // De-dupe by name
     const seen = new Set();
     const unique = all.filter(c => { if (seen.has(c.name)) return false; seen.add(c.name); return true; });
     grid.innerHTML = unique.map(c => {
         const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
         const safeName = (c.name || '').replace(/'/g, "\\'");
         return `<div style="cursor:pointer;text-align:center;" onclick="ptZoomViewCard('${safeImg}','${safeName}')" title="${c.name}">
-            <img src="${c.imageUrl||CARD_BACK_URL}" style="width:86px;border-radius:6px;display:block;" onerror="this.src='${CARD_BACK_URL}'">
+            <img src="${c.imageUrl||CARD_BACK_URL}" style="width:86px;border-radius:6px;display:block;transition:transform .12s;" onerror="this.src='${CARD_BACK_URL}'" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
             <div style="color:#ccc;font-size:8px;margin-top:2px;max-width:86px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name||''}</div>
         </div>`;
     }).join('');
 }
 
 function ptZoomViewCard(url, name) {
+    // If panel is closed, open it first
+    if (!ptZoomPanelOpen) {
+        ptZoomPanelOpen = true;
+        const panel = document.getElementById('ptZoomPanel');
+        if (panel) panel.style.transform = 'translateX(0)';
+        ptRenderZoomPanel();
+    }
     const img = document.getElementById('ptZoomBigImg');
     const lbl = document.getElementById('ptZoomBigName');
-    if (img) img.src = url;
+    if (img) { img.src = url; img.style.display = 'block'; }
     if (lbl) lbl.textContent = name;
+    // Scroll the panel to top so big card is visible
+    const panel = document.getElementById('ptZoomPanel');
+    if (panel) panel.querySelector('[style*="overflow-y:auto"]')?.scrollTo(0, 0);
 }
 
 function ptZoomClose() {
@@ -1710,13 +1810,16 @@ function generateNeutralZone(zoneId, labelText, width = 82) {
                      onclick="ptClickZone('${ptCurrentPlayer}','${zoneId}')">${labelText}</div>`;
     }
     const card = cards[cards.length - 1];
-    const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const safeImg  = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const safeName = (card.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     return `<div style="position:relative;width:${width}px;cursor:pointer;"
                  onclick="ptClickZone('${ptCurrentPlayer}','${zoneId}')">
         <img src="${card.imageUrl || CARD_BACK_URL}" class="pt-field-card"
              style="width:${width}px;border-radius:7px;display:block;"
              onerror="this.src='${CARD_BACK_URL}'"
-             ondblclick="ptViewCard(event,'${safeImg}')" title="${card.name}">
+             ondblclick="ptViewCard(event,'${safeImg}')"
+             oncontextmenu="event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${safeName}')"
+             title="${card.name} (right-click to zoom)">
         <div class="pt-field-actions" style="z-index:100;bottom:-28px;">
             <button class="pt-action-btn" onclick="returnToHand('${ptCurrentPlayer}','${zoneId}',event)">⬆️</button>
             <button class="pt-action-btn" onclick="moveToLostZone('${ptCurrentPlayer}','${zoneId}',event)">🌌</button>
@@ -1746,7 +1849,9 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     let toolCount   = 0;
 
     cards.forEach((card, index) => {
-        const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const safeImg  = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const safeName = (card.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const zoomCtx  = `event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${safeName}')`;
         if (index === 0) {
             const isPokemon = !(card.cardType || '').toLowerCase().includes('energy') &&
                               !(card.cardType || '').toLowerCase().includes('trainer');
@@ -1754,7 +1859,9 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
             html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-field-card"
                           style="position:relative;z-index:10;width:${width}px;border-radius:7px;display:block;"
                           onerror="this.src='${CARD_BACK_URL}'"
-                          ondblclick="ptViewCard(event,'${safeImg}')" title="${card.name}">`;
+                          ondblclick="ptViewCard(event,'${safeImg}')"
+                          oncontextmenu="${zoomCtx}"
+                          title="${card.name} (right-click to zoom)">`;
             if (isPokemon) {
                 html += `<div id="${abilityMarkerId}" class="pt-ability-marker" title="Ability used toggle"
                               onclick="event.stopPropagation(); this.classList.toggle('used');">A</div>`;
@@ -1765,13 +1872,17 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                 html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-attachment-tool"
                               style="bottom:${30 + toolCount * 10}px;"
                               onerror="this.src='${CARD_BACK_URL}'"
-                              ondblclick="ptViewCard(event,'${safeImg}')" title="${card.name}">`;
+                              ondblclick="ptViewCard(event,'${safeImg}')"
+                              oncontextmenu="${zoomCtx}"
+                              title="${card.name} (right-click to zoom)">`;
                 toolCount++;
             } else {
                 html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-attachment-energy"
                               style="bottom:${8 + energyCount * 24}px;"
                               onerror="this.src='${CARD_BACK_URL}'"
-                              ondblclick="ptViewCard(event,'${safeImg}')" title="${card.name}">`;
+                              ondblclick="ptViewCard(event,'${safeImg}')"
+                              oncontextmenu="${zoomCtx}"
+                              title="${card.name} (right-click to zoom)">`;
                 energyCount++;
             }
         }

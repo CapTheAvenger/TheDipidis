@@ -361,7 +361,7 @@ function ptRenderTopCards() {
     const grid = document.getElementById('ptTopCardsGrid');
     if (!grid) return;
     grid.innerHTML = ptLookingAt.map((c, i) => {
-        const safeImg = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, \"\\'\");
+        const safeImg = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         return `
         <div style="display:flex;flex-direction:column;gap:5px;background:rgba(255,255,255,0.1);padding:10px;border-radius:8px;">
             <img src="${c.imageUrl || CARD_BACK_URL}" class="pt-field-card"
@@ -725,8 +725,8 @@ function ptOpenDiscard(player) {
     if (!grid) return;
     if (ptState[player].discard.length === 0) { ptShowMessage('Ablage ist leer.'); return; }
     grid.innerHTML = ptState[player].discard.map((c, i) => {
-        const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, \"\\'\");
-        const safeName = (c.name     || '').replace(/\\/g, '\\\\').replace(/'/g, \"\\'\");
+        const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const safeName = (c.name     || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         return `<div style="position:relative;cursor:pointer;" title="${c.name}">
             <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;"
                  onerror="this.src='${CARD_BACK_URL}'"
@@ -749,7 +749,7 @@ function ptOpenLostZone(player) {
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
     grid.innerHTML = lz.map((c, i) => {
-        const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, \"\\'\");
+        const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         return `<div style="position:relative;cursor:pointer;" title="${c.name}">
             <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;filter:grayscale(0.6);"
                  onerror="this.src='${CARD_BACK_URL}'"
@@ -932,7 +932,7 @@ function generateNeutralZone(zoneId, labelText) {
                      onclick="ptClickZone('${ptCurrentPlayer}','${zoneId}')">${labelText}</div>`;
     }
     const card = cards[cards.length - 1];
-    const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, \"\\'\");
+    const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     return `<div style="position:relative;width:82px;cursor:pointer;"
                  onclick="ptClickZone('${ptCurrentPlayer}','${zoneId}')">
         <img src="${card.imageUrl || CARD_BACK_URL}" class="pt-field-card"
@@ -968,7 +968,7 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     let toolCount   = 0;
 
     cards.forEach((card, index) => {
-        const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, \"\\'\");
+        const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         if (index === 0) {
             html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-field-card"
                           style="position:relative;z-index:10;width:${width}px;border-radius:7px;display:block;"

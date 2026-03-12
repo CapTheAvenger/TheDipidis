@@ -403,6 +403,7 @@ function ptNewGame() {
     if (ind) ind.innerText = '1';
     const handZone = document.querySelector('.pt-hand-zone');
     if (handZone) handZone.style.borderTopColor = '#3B4CCA';
+    ptUpdateAreaPointerEvents();
 
     ptLog('New game started! Use ⌨️ for hotkeys.');
     ptRenderAll();
@@ -622,6 +623,16 @@ function ptCloseTopCards() {
 
 // --- BASIC ACTIONS & BOARD FLIP ---
 
+// Ensure only the ACTIVE player's area captures pointer events.
+// P1-area is later in the DOM (higher z-order) and would otherwise swallow all
+// clicks/drops that belong to P2's zones when it's P2's turn.
+function ptUpdateAreaPointerEvents() {
+    const p1Inner = document.querySelector('#p1-area > div');
+    const p2Inner = document.querySelector('#p2-area > div');
+    if (p1Inner) p1Inner.style.pointerEvents = ptCurrentPlayer === 'p1' ? 'auto' : 'none';
+    if (p2Inner) p2Inner.style.pointerEvents = ptCurrentPlayer === 'p2' ? 'auto' : 'none';
+}
+
 function ptDraw1(playerOverride = null) {
     let p = playerOverride || ptCurrentPlayer;
     if (ptState[p].deck.length > 0) {
@@ -817,6 +828,7 @@ function ptFlipBoard() {
     const flipping = ptCurrentPlayer === 'p1';
     board.classList.toggle('flipped', flipping);
     ptCurrentPlayer = flipping ? 'p2' : 'p1';
+    ptUpdateAreaPointerEvents();
     if (ind)      ind.innerText     = flipping ? '2' : '1';
     if (handZone) handZone.style.borderTopColor = flipping ? '#E3350D' : '#3B4CCA';
     ptLog(flipping ? 'Turn passed to Player 2.' : 'Turn passed to Player 1.');
@@ -1038,6 +1050,16 @@ function ptHandleDrop(event, targetZone) {
         else if (targetZone === 'p2-active')    ptClickZone('p2', 'active');
         else if (targetZone === 'p1-bench')     ptClickZone('p1', _ptFirstFreeBench('p1'));
         else if (targetZone === 'p2-bench')     ptClickZone('p2', _ptFirstFreeBench('p2'));
+        else if (targetZone === 'p1-bench0') ptClickZone('p1', 'bench0');
+        else if (targetZone === 'p1-bench1') ptClickZone('p1', 'bench1');
+        else if (targetZone === 'p1-bench2') ptClickZone('p1', 'bench2');
+        else if (targetZone === 'p1-bench3') ptClickZone('p1', 'bench3');
+        else if (targetZone === 'p1-bench4') ptClickZone('p1', 'bench4');
+        else if (targetZone === 'p2-bench0') ptClickZone('p2', 'bench0');
+        else if (targetZone === 'p2-bench1') ptClickZone('p2', 'bench1');
+        else if (targetZone === 'p2-bench2') ptClickZone('p2', 'bench2');
+        else if (targetZone === 'p2-bench3') ptClickZone('p2', 'bench3');
+        else if (targetZone === 'p2-bench4') ptClickZone('p2', 'bench4');
         else if (targetZone === 'p1-discard') {
             const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
             if (c) { ptState['p1'].discard.push(c); ptLog(`Discarded "${c.name}".`); }

@@ -42,12 +42,25 @@
         .pokeball-btn.open .pokeball-center { width: 22px; height: 22px; background: #58e870; box-shadow: 0 0 15px #58e870; }
 
         .main-menu-dropdown {
-            position: absolute; top: 75px; left: 0; background: #fff; border-radius: 16px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3); width: 300px; z-index: 9999;
-            display: flex; flex-direction: column; overflow: hidden; border: 3px solid #222;
-            opacity: 0; visibility: hidden; transform: translateY(-20px) scale(0.95);
+            position: absolute;
+            top: 70px;
+            left: 0;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            width: 280px;
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 3px solid #222;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px) scale(0.98);
             transform-origin: top left;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: calc(100vh - 90px);
+            overflow-y: auto;
         }
         .main-menu-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
         .menu-header {

@@ -5232,6 +5232,38 @@ const BASE_PATH = './data/';
                 }
             });
             
+            // PHASE 4: Fill remaining slots (if deck < 60)
+            if (currentTotal < 60) {
+                console.log(`[autoCompleteConsistency] ?? PHASE 4: Filling ${60 - currentTotal} remaining slot(s)...`);
+                
+                // First try: bump up count of highest-scoring already-included cards (under 4-cap, non-ACE SPEC)
+                const bumpCandidates = cardsToAdd
+                    .filter(c => c.phase !== 0 && !isAceSpec(c) && c.addCount < 4)
+                    .sort((a, b) => b.consistencyScore - a.consistencyScore);
+                
+                for (const candidate of bumpCandidates) {
+                    if (currentTotal >= 60) break;
+                    candidate.addCount += 1;
+                    currentTotal += 1;
+                    console.log(`[autoCompleteConsistency]   ? +1x ${candidate.card_name} (count bump to ${candidate.addCount}x) - Total: ${currentTotal}/60`);
+                }
+                
+                // Second try: add best unused cards from pool that have archetype presence
+                if (currentTotal < 60) {
+                    const unusedCandidates = deckCards
+                        .filter(c => !addedNames.has(c.card_name) && c.sharePercent > 0 && c.optimalCount > 0)
+                        .sort((a, b) => b.consistencyScore - a.consistencyScore);
+                    
+                    for (const card of unusedCandidates) {
+                        if (currentTotal >= 60) break;
+                        cardsToAdd.push({ ...card, addCount: 1, phase: 4 });
+                        addedNames.add(card.card_name);
+                        currentTotal += 1;
+                        console.log(`[autoCompleteConsistency]   ? 1x ${card.card_name} (${card.sharePercent.toFixed(1)}% share, pool fill) - Total: ${currentTotal}/60`);
+                    }
+                }
+            }
+            
             console.log('[autoCompleteConsistency] ? Consistency-optimized deck complete:', currentTotal, 'cards');
             
             // Show summary grouped by phase and type

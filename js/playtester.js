@@ -16,6 +16,13 @@ let ptLookingAtPlayer = 'p1';
 let _ptMsgTimer = null;
 let ptActiveBuffs = { p1: 0, p2: 0 };
 
+// ── Game-start phase state ──────────────────────────────────────────────
+let ptStartPhase = false;   // true while coin-flip / active-selection is running
+let ptStartChoices = { p1: null, p2: null };  // selected active card index per player
+
+// ── Card Zoom / Search panel state ─────────────────────────────────────
+let ptZoomPanelOpen = false;
+
 // --- STATE HISTORY (UNDO) ---
 let ptStateHistory = [];
 const PT_MAX_HISTORY = 20;
@@ -382,18 +389,21 @@ function ptNewGame() {
         Object.keys(ptState[p].field).forEach(z => allCards.push(...ptState[p].field[z]));
         ptState[p] = getInitialPlayerState();
         ptState[p].deck = allCards;
+        // Shuffle
         for (let i = ptState[p].deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [ptState[p].deck[i], ptState[p].deck[j]] = [ptState[p].deck[j], ptState[p].deck[i]];
         }
+        // Deal 7-card start hand (NO prizes yet — dealt after active is chosen)
         for (let i = 0; i < 7; i++) if (ptState[p].deck.length > 0) ptState[p].hand.push(ptState[p].deck.pop());
-        for (let i = 0; i < 6; i++) if (ptState[p].deck.length > 0) ptState[p].prizes.push(ptState[p].deck.pop());
     });
 
     ptState.stadium  = [];
     ptState.playZone = [];
     ptCurrentPlayer  = 'p1';
     ptActionLog      = [];
+    ptStartPhase     = true;
+    ptStartChoices   = { p1: null, p2: null };
 
     const logContent = document.getElementById('ptActionLogContent');
     if (logContent) logContent.innerHTML = '';
@@ -405,8 +415,197 @@ function ptNewGame() {
     if (handZone) handZone.style.borderTopColor = '#3B4CCA';
     ptUpdateAreaPointerEvents();
 
-    ptLog('New game started! Use ⌨️ for hotkeys.');
     ptRenderAll();
+    ptOpenStartPhase();
+}
+
+// ── Start Phase: coin flip → hand display → active selection ─────────────
+
+function ptOpenStartPhase() {
+    ptRenderStartPhaseModal();
+    document.getElementById('ptStartPhaseModal').style.display = 'flex';
+}
+
+function ptRenderStartPhaseModal() {
+    const modal = document.getElementById('ptStartPhaseModal');
+    if (!modal) return;
+
+    // Step 1 — coin flip result (if not yet done)
+    const coinResult = modal.dataset.coinDone;
+    const firstPlayer = modal.dataset.firstPlayer || '';
+
+    let html = `<div style="background:#1a1a2e;border:2px solid #3B4CCA;border-radius:14px;padding:24px;width:min(98vw,900px);max-height:90vh;overflow-y:auto;color:#fff;">`;
+
+    if (!coinResult) {
+        // Coin flip screen
+        html += `
+        <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🪙 Who Goes First?</h2>
+        <p style="text-align:center;color:#ccc;margin-bottom:24px;">Flip a coin to decide which player takes the first turn.</p>
+        <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <button onclick="ptDoStartCoinFlip()" style="font-size:2em;padding:16px 40px;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 16px rgba(243,156,18,0.5);transition:transform .15s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">🪙 Flip Coin!</button>
+        </div>`;
+    } else {
+        // Hands + active selection
+        const fp = firstPlayer;
+        const sp = fp === 'p1' ? 'p2' : 'p1';
+        html += `
+        <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🃏 Choose Your Active Pokémon</h2>
+        <p style="text-align:center;color:#ccc;margin-bottom:8px;">🪙 <strong>${fp.toUpperCase()}</strong> goes first! Both players choose their Active Pokémon — click a card to select it.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+            ${ptRenderStartHandHTML('p1')}
+            ${ptRenderStartHandHTML('p2')}
+        </div>
+        <div style="text-align:center;margin-bottom:10px;">
+            <button onclick="ptConfirmStartActives()" style="font-size:1.1em;padding:12px 40px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(39,174,96,0.4);" id="ptStartBtn" disabled>🚀 Start Game!</button>
+            <p id="ptStartHint" style="color:#f1c40f;font-size:12px;margin-top:6px;">Both players must select an Active Pokémon</p>
+        </div>`;
+    }
+    html += `</div>`;
+    modal.innerHTML = html;
+    ptUpdateStartBtn();
+}
+
+function ptRenderStartHandHTML(player) {
+    const label = player === 'p1' ? '🔵 Player 1' : '🔴 Player 2';
+    const borderColor = player === 'p1' ? '#3B4CCA' : '#E3350D';
+    const selected = ptStartChoices[player];
+    let cardsHTML = ptState[player].hand.map((card, i) => {
+        const isSelected = selected === i;
+        const sel = isSelected ? 'outline:3px solid #FFCB05;transform:scale(1.08);box-shadow:0 0 12px #FFCB05;' : '';
+        return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;" onclick="ptSelectStartActive('${player}',${i})">
+            <img src="${card.imageUrl || CARD_BACK_URL}" style="width:70px;border-radius:6px;${sel}transition:transform .15s;" onerror="this.src='${CARD_BACK_URL}'" title="${card.name}">
+            <span style="font-size:8px;max-width:70px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#ddd;">${card.name}</span>
+        </div>`;
+    }).join('');
+    const mulBtnStyle = `margin-top:8px;padding:5px 14px;background:#8e44ad;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;`;
+    return `<div style="border:2px solid ${borderColor};border-radius:10px;padding:14px;">
+        <div style="font-weight:900;margin-bottom:10px;font-size:1em;color:${borderColor};">${label}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:90px;">${cardsHTML}</div>
+        <div style="text-align:center;">
+            <button onclick="ptStartMulligan('${player}')" style="${mulBtnStyle}">🃏 Mulligan</button>
+        </div>
+        <div style="margin-top:6px;text-align:center;font-size:11px;color:#a8e6cf;">${selected !== null ? '✅ Selected: <strong>' + ptState[player].hand[selected].name + '</strong>' : '⬆️ Click a card to set as Active'}</div>
+    </div>`;
+}
+
+function ptSelectStartActive(player, index) {
+    ptStartChoices[player] = index;
+    ptUpdateStartBtn();
+    const modal = document.getElementById('ptStartPhaseModal');
+    if (!modal) return;
+    // Re-render just the hand grids (keep rest intact)
+    ptRenderStartPhaseModal();
+}
+
+function ptUpdateStartBtn() {
+    const btn  = document.getElementById('ptStartBtn');
+    const hint = document.getElementById('ptStartHint');
+    if (!btn) return;
+    const ready = ptStartChoices.p1 !== null && ptStartChoices.p2 !== null;
+    btn.disabled = !ready;
+    if (hint) hint.style.display = ready ? 'none' : 'block';
+}
+
+function ptStartMulligan(player) {
+    ptState[player].deck.push(...ptState[player].hand);
+    ptState[player].hand = [];
+    const deck = ptState[player].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    for (let i = 0; i < 7; i++) if (deck.length > 0) ptState[player].hand.push(deck.pop());
+    ptStartChoices[player] = null;
+    ptLog(`🃏 ${player.toUpperCase()} mulligan — new 7-card hand.`);
+    ptRenderStartPhaseModal();
+}
+
+function ptDoStartCoinFlip() {
+    const result = Math.random() >= 0.5 ? 'p1' : 'p2';
+    const modal = document.getElementById('ptStartPhaseModal');
+    if (!modal) return;
+    modal.dataset.coinDone = '1';
+    modal.dataset.firstPlayer = result;
+    ptCurrentPlayer = result;
+    const ind = document.getElementById('activePlayerIndicator');
+    if (ind) ind.innerText = result === 'p1' ? '1' : '2';
+    const handZone = document.querySelector('.pt-hand-zone');
+    if (handZone) handZone.style.borderTopColor = result === 'p1' ? '#3B4CCA' : '#E3350D';
+    ptLog(`🪙 Coin flip: ${result.toUpperCase()} goes first!`);
+    ptRenderStartPhaseModal();
+}
+
+function ptConfirmStartActives() {
+    if (ptStartChoices.p1 === null || ptStartChoices.p2 === null) return;
+    // Move chosen card from hand to active zone for each player
+    ['p1', 'p2'].forEach(p => {
+        const idx  = ptStartChoices[p];
+        const card = ptState[p].hand.splice(idx, 1)[0];
+        ptState[p].field.active.push(card);
+    });
+    // NOW deal 6 prize cards for each player
+    ['p1', 'p2'].forEach(p => {
+        for (let i = 0; i < 6; i++) {
+            if (ptState[p].deck.length > 0) ptState[p].prizes.push(ptState[p].deck.pop());
+        }
+    });
+    ptStartPhase   = false;
+    ptStartChoices = { p1: null, p2: null };
+    document.getElementById('ptStartPhaseModal').style.display = 'none';
+    ptLog('✅ Game started! Prizes dealt. Good luck!');
+    ptRenderAll();
+}
+
+// ── Card Zoom / Search Side Panel ──────────────────────────────────────────
+
+function ptToggleZoomPanel() {
+    ptZoomPanelOpen = !ptZoomPanelOpen;
+    const panel = document.getElementById('ptZoomPanel');
+    if (!panel) return;
+    panel.style.transform = ptZoomPanelOpen ? 'translateX(0)' : 'translateX(100%)';
+    ptRenderZoomPanel();
+}
+
+function ptRenderZoomPanel(filter) {
+    const grid = document.getElementById('ptZoomPanelGrid');
+    if (!grid) return;
+    filter = (filter || document.getElementById('ptZoomSearch')?.value || '').toLowerCase().trim();
+    // Collect all cards across both players' hands, fields, decks, discards, lostzone, prizes
+    const all = [];
+    ['p1', 'p2'].forEach(p => {
+        const st = ptState[p];
+        if (!st) return;
+        [...st.hand, ...st.deck, ...st.discard, ...(st.lostzone||[]), ...st.prizes].forEach(c => {
+            if (!filter || (c.name||'').toLowerCase().includes(filter)) all.push(c);
+        });
+        Object.values(st.field || {}).forEach(zone => zone.forEach(c => {
+            if (!filter || (c.name||'').toLowerCase().includes(filter)) all.push(c);
+        }));
+    });
+    // De-dupe by name for display (show unique artworks)
+    const seen = new Set();
+    const unique = all.filter(c => { if (seen.has(c.name)) return false; seen.add(c.name); return true; });
+    grid.innerHTML = unique.map(c => {
+        const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
+        const safeName = (c.name || '').replace(/'/g, "\\'");
+        return `<div style="cursor:pointer;text-align:center;" onclick="ptZoomViewCard('${safeImg}','${safeName}')" title="${c.name}">
+            <img src="${c.imageUrl||CARD_BACK_URL}" style="width:86px;border-radius:6px;display:block;" onerror="this.src='${CARD_BACK_URL}'">
+            <div style="color:#ccc;font-size:8px;margin-top:2px;max-width:86px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name||''}</div>
+        </div>`;
+    }).join('');
+}
+
+function ptZoomViewCard(url, name) {
+    const img = document.getElementById('ptZoomBigImg');
+    const lbl = document.getElementById('ptZoomBigName');
+    if (img) img.src = url;
+    if (lbl) lbl.textContent = name;
+}
+
+function ptZoomClose() {
+    ptZoomPanelOpen = false;
+    const panel = document.getElementById('ptZoomPanel');
+    if (panel) panel.style.transform = 'translateX(100%)';
 }
 
 // --- STEPPER HELPER ---
@@ -1238,6 +1437,59 @@ function toggleStatus(player, statusType, event) {
     else ptState[player].status.push(statusType);
     ptLog(`Status "${statusType}" updated.`);
     ptRenderAll();
+}
+
+// --- OPPONENT DAMAGE PANEL (accessible regardless of active player) ---
+
+function ptOpenOpponentPanel() {
+    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+    ptRenderOpponentPanel(opp);
+    document.getElementById('ptOppPanel').style.display = 'flex';
+}
+
+function ptRenderOpponentPanel(opp) {
+    const el = document.getElementById('ptOppPanelContent');
+    if (!el) return;
+    const zones = ['active', 'bench0', 'bench1', 'bench2', 'bench3', 'bench4'];
+    let html = '';
+    zones.forEach(zoneId => {
+        const cards = ptState[opp].field[zoneId];
+        if (cards.length === 0) return;
+        const card  = cards[0];
+        const dmg   = ptState[opp].damage[zoneId] || 0;
+        const stat  = ptState[opp].status;
+        const label = zoneId === 'active' ? '⭐ Active' : ('Bench ' + zoneId.slice(-1));
+        const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
+        const sSel = t => stat.includes(t) ? 'background:#e74c3c;color:#fff;' : 'background:rgba(255,255,255,0.1);color:#fff;';
+        const statusBtns = zoneId === 'active' ? `
+            <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">
+                <button onclick="toggleStatus('${opp}','poisoned');ptRenderOpponentPanel('${opp}')" style="${sSel('poisoned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Vergiftet">☠️</button>
+                <button onclick="toggleStatus('${opp}','burned');ptRenderOpponentPanel('${opp}')" style="${sSel('burned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verbrannt">🔥</button>
+                <button onclick="toggleStatus('${opp}','asleep');ptRenderOpponentPanel('${opp}')" style="${sSel('asleep')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Schlaf">💤</button>
+                <button onclick="toggleStatus('${opp}','paralyzed');ptRenderOpponentPanel('${opp}')" style="${sSel('paralyzed')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Paralyse">⚡</button>
+                <button onclick="toggleStatus('${opp}','confused');ptRenderOpponentPanel('${opp}')" style="${sSel('confused')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verwirrt">💫</button>
+            </div>` : '';
+        html += `<div style="background:rgba(255,255,255,0.07);border-radius:8px;padding:10px;margin-bottom:10px;">
+            <div style="display:flex;gap:10px;align-items:center;">
+                <img src="${safeImg}" style="width:64px;border-radius:6px;cursor:pointer;flex-shrink:0;" onerror="this.src='${CARD_BACK_URL}'" onclick="ptZoomViewCard('${safeImg}','${card.name}')">
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:12px;margin-bottom:5px;color:#FFCB05;">${label}: ${card.name}</div>
+                    <div style="font-size:13px;font-weight:700;color:#ff6b6b;margin-bottom:6px;">💥 ${dmg} dmg</div>
+                    ${statusBtns}
+                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                        <button onclick="addDamage('${opp}','${zoneId}',10);ptRenderOpponentPanel('${opp}')" style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+10</button>
+                        <button onclick="addDamage('${opp}','${zoneId}',20);ptRenderOpponentPanel('${opp}')" style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+20</button>
+                        <button onclick="addDamage('${opp}','${zoneId}',30);ptRenderOpponentPanel('${opp}')" style="background:#e67e22;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+30</button>
+                        <button onclick="addDamage('${opp}','${zoneId}',50);ptRenderOpponentPanel('${opp}')" style="background:#c0392b;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;">+50</button>
+                        <button onclick="addDamage('${opp}','${zoneId}',100);ptRenderOpponentPanel('${opp}')" style="background:#922b21;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;">+100</button>
+                        <button onclick="clearDamage('${opp}','${zoneId}');ptRenderOpponentPanel('${opp}')" style="background:#2ecc71;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">Heal</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    });
+    if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">Opponent has no Pokémon in play.</div>';
+    el.innerHTML = html;
 }
 
 // --- DISCARD / LOST ZONE MODALS ---

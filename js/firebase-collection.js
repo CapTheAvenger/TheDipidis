@@ -861,26 +861,6 @@ function updateDecksUI() {
   }).join('');
 }
 
-// Convert a saved deck to PTCG Live export string
-function deckToExportString(deckIndex) {
-  const deck = window.userDecks && window.userDecks[deckIndex];
-  if (!deck || !deck.cards) return '';
-  const lines = [];
-  for (const [deckKey, count] of Object.entries(deck.cards)) {
-    if (!count || count <= 0) continue;
-    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-    let cardName = deckKey, setCode = '', setNumber = '';
-    if (setMatch) {
-      cardName = setMatch[1]; setCode = setMatch[2]; setNumber = setMatch[3];
-    } else {
-      const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
-      if (cardData) { setCode = cardData.set || ''; setNumber = cardData.number || ''; }
-    }
-    lines.push(setCode && setNumber ? `${count} ${cardName} ${setCode} ${setNumber}` : `${count} ${cardName}`);
-  }
-  return lines.join('\n');
-}
-
 // Open modal to pick 2 decks for playtest
 function openMyDecksPlaytest() {
   const modal = document.getElementById('myDecksPlaytestModal');
@@ -904,19 +884,42 @@ function closeMyDecksPlaytest() {
 function startMyDecksPlaytest() {
   const p1Idx = parseInt(document.getElementById('myDeckSelectP1').value);
   const p2Idx = parseInt(document.getElementById('myDeckSelectP2').value);
-  const p1Str = deckToExportString(p1Idx);
-  const p2Str = deckToExportString(p2Idx);
-  if (!p1Str) { alert('Could not load Player 1 deck!'); return; }
-  if (!p2Str) { alert('Could not load Player 2 deck!'); return; }
-  // Feed strings into sandbox import fields (playtester reads from these)
-  const ta1 = document.getElementById('sandboxImportP1');
-  const ta2 = document.getElementById('sandboxImportP2');
-  if (ta1) ta1.value = p1Str;
-  if (ta2) ta2.value = p2Str;
-  if (typeof parseSandboxDeckToExactPrints === 'function') {
-    parseSandboxDeckToExactPrints(p1Str, 'p1');
-    parseSandboxDeckToExactPrints(p2Str, 'p2');
+  const deck1 = window.userDecks && window.userDecks[p1Idx];
+  const deck2 = window.userDecks && window.userDecks[p2Idx];
+  if (!deck1 || !deck1.cards) { alert('Could not load Player 1 deck!'); return; }
+  if (!deck2 || !deck2.cards) { alert('Could not load Player 2 deck!'); return; }
+  if (typeof standaloneDecks === 'undefined') { alert('Playtester not loaded yet!'); return; }
+
+  // Regex handles all number formats: 183, TG01, GG01, 001/198, PA-01, etc.
+  const keyRx = /^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9/a-z-]+)\)$/;
+  const backUrl = typeof CARD_BACK_URL !== 'undefined' ? CARD_BACK_URL : '';
+
+  function buildDeck(deckObj) {
+    const result = [];
+    for (const [deckKey, count] of Object.entries(deckObj)) {
+      if (!count || count <= 0) continue;
+      let cardName = deckKey, imageUrl = backUrl, cardType = '', setCode = '', number = '';
+      const m = deckKey.match(keyRx);
+      if (m) {
+        cardName = m[1]; setCode = m[2]; number = m[3];
+        // Direct exact-print lookup — same as _simFindCard in draw-simulator.js
+        let cd = null;
+        if (window.cardsBySetNumberMap) cd = window.cardsBySetNumberMap[`${setCode}-${number}`] || null;
+        if (!cd && window.allCardsDatabase) cd = window.allCardsDatabase.find(c => c.set === setCode && c.number === number) || null;
+        if (!cd && window.allCardsDatabase) cd = window.allCardsDatabase.find(c => c.name === cardName) || null;
+        if (cd) { imageUrl = cd.image_url || backUrl; cardType = cd.card_type || cd.type || ''; }
+      } else {
+        const cd = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
+        if (cd) { imageUrl = cd.image_url || backUrl; cardType = cd.card_type || cd.type || ''; setCode = cd.set || ''; number = cd.number || ''; }
+      }
+      result.push({ name: cardName, imageUrl, cardType, setCode, number, count });
+    }
+    return result;
   }
+
+  standaloneDecks.p1 = buildDeck(deck1.cards);
+  standaloneDecks.p2 = buildDeck(deck2.cards);
+
   closeMyDecksPlaytest();
   if (typeof startStandalonePlaytester === 'function') startStandalonePlaytester();
 }

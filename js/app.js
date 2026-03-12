@@ -4885,92 +4885,76 @@ const BASE_PATH = './data/';
                 
                 // Base Energy - special handling (can exceed 4)
                 if (isBaseEnergy(card)) {
-                    // BUGFIX: Only include Basic Energy that actually appears in this archetype
-                    // Don't add random energy types that aren't used (e.g. Psychic in Fighting deck)
-                    if (sharePercent > 0 && avgCount >= 0.5) {
-                        optimalCount = Math.max(1, Math.round(avgCount));
+                    // Use avgCountWhenUsed so energy count isn't diluted by decks that
+                    // use a different energy type (e.g. 70% play 6x Fire Energy, 30% play 0)
+                    if (sharePercent > 0 && avgCountWhenUsed >= 0.5) {
+                        optimalCount = Math.max(1, Math.round(avgCountWhenUsed));
                     } else {
                         optimalCount = 0; // Skip energy types not used in this archetype
                     }
                 }
                 // -----------------------------------------------
-                // IMPROVED CONSISTENCY THRESHOLDS V4 - DATA FIRST
+                // CONSISTENCY THRESHOLDS V5 - avgCountWhenUsed
                 // -----------------------------------------------
-                // Philosophy: Respect the archetype data, don't inflate numbers
-                // - 3.0x average ? 3 copies (not 4)
-                // - 1.8x average ? 2 copies (rounds to 2)
-                // - 2.0x average ? 2 copies (exact match)
-                // Only add cards that appear meaningfully in the archetype
-                
-                // POLARIZATION DETECTION (STRICT): Only skip truly specialized cards
-                // Stricter thresholds to avoid filtering good tech cards
-                // Example of TRUE polarization: Carmine (55% @ 2.78x when used) = specialized variant
-                // Counter-example: Petrel (67% @ 1.8x) = good tech card, NOT polarized
+                // KEY FIX: Use avgCountWhenUsed (avg in decks that PLAY this card)
+                // instead of avgCount (global average including 0s).
+                // Example: 50% play 4x Night Stretcher, 50% play 0x
+                //   avgCount = 2.0  → old code: adds 2x  ← WRONG
+                //   avgCountWhenUsed = 4.0 → new code: adds 4x or 0x via polarization
+
+                // POLARIZATION DETECTION: If <60% include it but avg when used >= 2.8,
+                // it's a variant choice (e.g. Carmine vs Iono). Skip it.
                 else if (sharePercent < 60 && avgCountWhenUsed >= 2.8) {
-                    optimalCount = 0;  // True polarization: <60% share but 2.8+ when used
+                    optimalCount = 0;
                     console.log(`[autoCompleteConsistency] ?? POLARIZED: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used) - Specialized variant, skipping`);
                 }
-                // 4-of Territory: High consistency cards (smart rounding)
-                // Use Math.ceil() for values clearly above 3.0 (3.05+)
-                // But keep exactly 3.0 at 3x (no inflation for perfect 3.0)
-                // Example: Roselia (3.07x) ? ceil(3.07) = 4x ?
-                // Example: Power Weight (3.00x) ? stays 3x ?
-                else if (avgCount > 3.05 && sharePercent >= 70) {
-                    optimalCount = Math.ceil(avgCount);  // 3.07 ? 4, 3.5 ? 4
-                    optimalCount = Math.min(optimalCount, 4);  // Cap at 4 for non-energy
+                // 4-of Territory
+                else if (avgCountWhenUsed > 3.05 && sharePercent >= 70) {
+                    optimalCount = Math.min(Math.ceil(avgCountWhenUsed), 4);
                 }
-                else if (avgCount >= 3.5 && sharePercent >= 60) {
-                    optimalCount = 4;  // Very high count even with moderate share
+                else if (avgCountWhenUsed >= 3.5 && sharePercent >= 60) {
+                    optimalCount = 4;
                 }
-                // 3-of Territory: Strong consistency (2.4-3.05 range)
-                // Exactly 3.0 stays at 3x (no inflation)
-                // Example: Power Weight (3.00x) ? 3x, Judge (2.4x @ 96.6%) ? 3x
-                else if (avgCount >= 2.4 && avgCount <= 3.05 && sharePercent >= 90) {
-                    optimalCount = 3;  // Very high share + solid count (up to 3.05)
+                // 3-of Territory
+                else if (avgCountWhenUsed >= 2.4 && avgCountWhenUsed <= 3.05 && sharePercent >= 90) {
+                    optimalCount = 3;
                 }
-                else if (avgCount >= 2.6 && avgCount <= 3.05 && sharePercent >= 70) {
-                    optimalCount = 3;  // Good reliability standard (up to 3.05)
+                else if (avgCountWhenUsed >= 2.6 && avgCountWhenUsed <= 3.05 && sharePercent >= 70) {
+                    optimalCount = 3;
                 }
-                else if (avgCount >= 3.0 && avgCount <= 3.05 && sharePercent >= 60) {
-                    optimalCount = 3;  // Exactly 3.0 - respect the data, don't inflate
-                    console.log(`[autoCompleteConsistency] ?? DATA-DRIVEN: ${card.card_name} (${sharePercent.toFixed(1)}% @ ${avgCount.toFixed(2)}x) ? 3x (exactly 3.0, no inflation)`);
+                else if (avgCountWhenUsed >= 3.0 && avgCountWhenUsed <= 3.05 && sharePercent >= 60) {
+                    optimalCount = 3;
+                    console.log(`[autoCompleteConsistency] ?? DATA-DRIVEN: ${card.card_name} (${sharePercent.toFixed(1)}% @ ${avgCountWhenUsed.toFixed(2)}x when used) ? 3x`);
                 }
-                // 2-of Territory: Solid includes (1.5-2.9 range)
-                // Lowered threshold to catch 1.8x and 2.0x properly
-                // Example: Petrel (67% @ 1.8x), Rock Fighting Energy (66% @ 2.0x), Makuhita (100% @ 2.23x)
-                else if (avgCount >= 1.5 && sharePercent >= 50) {
-                    optimalCount = 2;  // Data-driven: 1.5+ rounds to 2 (was 1.6)
+                // 2-of Territory
+                else if (avgCountWhenUsed >= 1.5 && sharePercent >= 50) {
+                    optimalCount = 2;
                 }
-                else if (avgCount >= 1.3 && sharePercent >= 85) {
-                    optimalCount = 2;  // High reliability case
+                else if (avgCountWhenUsed >= 1.3 && sharePercent >= 85) {
+                    optimalCount = 2;
                 }
-                // 1-of Territory: Tech choices and utility cards
-                // Cards that appear but not in high numbers
-                else if (avgCount >= 0.8 && sharePercent >= 60) {
-                    optimalCount = 1;  // Decent share tech cards
+                // 1-of Territory
+                else if (avgCountWhenUsed >= 0.8 && sharePercent >= 60) {
+                    optimalCount = 1;
                 }
-                else if (avgCount >= 1.0 && sharePercent >= 40) {
-                    optimalCount = 1;  // Moderate share but present in archetype
+                else if (avgCountWhenUsed >= 1.0 && sharePercent >= 40) {
+                    optimalCount = 1;
                 }
-                // HIGH-SHARE TECH CARDS: Include cards with >70% share even if low avgCount
-                // Example: Gravity Mountain (75.8% @ 0.85x) - Meta-relevant tech
-                else if (sharePercent >= 70 && avgCount >= 0.6) {
-                    optimalCount = 1;  // High-share tech: Important for meta
-                    console.log(`[autoCompleteConsistency] ?? HIGH-SHARE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCount.toFixed(2)}x avg) - Meta-relevant inclusion`);
+                // High-share tech (present in many decks but low copies — e.g. Boss's Orders 1x)
+                else if (sharePercent >= 70 && avgCountWhenUsed >= 0.6) {
+                    optimalCount = 1;
+                    console.log(`[autoCompleteConsistency] ?? HIGH-SHARE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used)`);
                 }
-                // MODERATE-SHARE TECH CARDS: Trainer cards with 25-70% share (Stadium/Item/Supporter tech)
-                // Example: Team Rocket's Watchtower (26.4% @ 0.39x) - Meta tech
-                else if (sharePercent >= 25 && sharePercent < 70 && avgCount >= 0.3) {
+                // Moderate-share trainer tech
+                else if (sharePercent >= 25 && sharePercent < 70 && avgCountWhenUsed >= 0.3) {
                     const cardType = (card.type || '').toLowerCase();
-                    // Only include Trainer cards as tech (not Pokemon with low share)
                     if (cardType.includes('stadium') || cardType.includes('item') || cardType.includes('supporter') || cardType.includes('tool')) {
-                        optimalCount = 1;  // Moderate-share tech: Situational but useful
-                        console.log(`[autoCompleteConsistency] ?? MODERATE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCount.toFixed(2)}x avg) - Trainer tech inclusion`);
+                        optimalCount = 1;
+                        console.log(`[autoCompleteConsistency] ?? MODERATE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used)`);
                     } else {
-                        optimalCount = 0;  // Skip Pokemon with moderate share (too inconsistent)
+                        optimalCount = 0;
                     }
                 }
-                // Skip: Too unreliable or not present in archetype
                 else {
                     optimalCount = 0;
                 }
@@ -5289,6 +5273,58 @@ const BASE_PATH = './data/';
                 }
             }
             
+            // -------------------------------------------------------------------
+            // RARE CANDY GUARANTEE: Stage 2 decks need at least 3x Rare Candy
+            // -------------------------------------------------------------------
+            const hasStage2InDeck = cardsToAdd.some(c => getEvolutionStage(c.card_name) === 2);
+            if (hasStage2InDeck) {
+                const RARE_CANDY_NAME = 'Rare Candy';
+                const existingCandy = cardsToAdd.find(c => c.card_name === RARE_CANDY_NAME);
+                const CANDY_MIN = 3;
+                if (existingCandy) {
+                    if (existingCandy.addCount < CANDY_MIN) {
+                        const bump = CANDY_MIN - existingCandy.addCount;
+                        // Only bump if there's room (or steal from lowest-priority Phase 3/4 card)
+                        if (currentTotal + bump <= 60) {
+                            existingCandy.addCount = CANDY_MIN;
+                            currentTotal += bump;
+                            console.log(`[autoCompleteConsistency] ?? RARE CANDY GUARANTEE: bumped to ${CANDY_MIN}x (Stage 2 in deck) - Total: ${currentTotal}/60`);
+                        } else {
+                            // Remove lowest-scoring Phase 3/4 non-essential cards to make room
+                            let freed = 0;
+                            const lowPriority = cardsToAdd
+                                .filter(c => (c.phase === 3 || c.phase === 4) && c.card_name !== RARE_CANDY_NAME)
+                                .sort((a, b) => a.consistencyScore - b.consistencyScore);
+                            for (const lp of lowPriority) {
+                                if (freed >= bump) break;
+                                const remove = Math.min(lp.addCount, bump - freed);
+                                lp.addCount -= remove;
+                                currentTotal -= remove;
+                                freed += remove;
+                                if (lp.addCount === 0) {
+                                    cardsToAdd.splice(cardsToAdd.indexOf(lp), 1);
+                                    addedNames.delete(lp.card_name);
+                                }
+                                console.log(`[autoCompleteConsistency]   ?? Freed ${remove}x ${lp.card_name} for Rare Candy`);
+                            }
+                            existingCandy.addCount = Math.min(CANDY_MIN, existingCandy.addCount + freed);
+                            currentTotal += freed;
+                            console.log(`[autoCompleteConsistency] ?? RARE CANDY GUARANTEE: adjusted to ${existingCandy.addCount}x - Total: ${currentTotal}/60`);
+                        }
+                    }
+                } else {
+                    // Rare Candy not in deck yet — pull from deckCards pool
+                    const candyCard = deckCards.find(c => c.card_name === RARE_CANDY_NAME);
+                    if (candyCard && currentTotal < 60) {
+                        const addAmt = Math.min(CANDY_MIN, 60 - currentTotal);
+                        cardsToAdd.push({ ...candyCard, addCount: addAmt, phase: 2 });
+                        addedNames.add(RARE_CANDY_NAME);
+                        currentTotal += addAmt;
+                        console.log(`[autoCompleteConsistency] ?? RARE CANDY GUARANTEE: added ${addAmt}x (Stage 2 in deck, was missing) - Total: ${currentTotal}/60`);
+                    }
+                }
+            }
+
             console.log('[autoCompleteConsistency] ? Consistency-optimized deck complete:', currentTotal, 'cards');
             
             // Show summary grouped by phase and type

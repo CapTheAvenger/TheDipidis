@@ -7531,6 +7531,10 @@ const BASE_PATH = './data/';
                             processedRows++;
                             
                             const cardName = row.card_name.toLowerCase();
+                            
+                            // Skip basic energies from coverage tracking
+                            if (isBasicEnergy(row.card_name)) return;
+                            
                             const archetypeKey = `${row.meta}|${row.archetype}`;
                             const tournamentDate = row.tournament_date || null; // e.g., "13th February 2026"
                             
@@ -7933,7 +7937,7 @@ const BASE_PATH = './data/';
             // Add separator before metas
             const separator = document.createElement('div');
             separator.style.cssText = 'border-top: 2px solid #ddd; margin: 10px 0; padding-top: 10px;';
-            separator.innerHTML = '<strong style="display: block; padding: 6px; color: #555;">?? Meta-Zeiträume:</strong>';
+            separator.innerHTML = '<strong style="display: block; padding: 6px; color: #555;">🗓️ Tournament Formats:</strong>';
             container.appendChild(separator);
             
             sortedMetas.forEach(meta => {
@@ -8450,11 +8454,11 @@ const BASE_PATH = './data/';
             const toggleBtn = document.getElementById('printViewToggle');
             if (toggleBtn) {
                 if (showOnlyOnePrint) {
-                    toggleBtn.textContent = '?? Nur 1 Print (Low Rarity)';
+                    toggleBtn.textContent = '📦 1 Print per Card (Budget)';
                     toggleBtn.style.background = '#9b59b6';
                     toggleBtn.style.borderColor = '#9b59b6';
                 } else {
-                    toggleBtn.textContent = '?? Alle Prints';
+                    toggleBtn.textContent = '🖼️ All Prints';
                     toggleBtn.style.background = '#3498db';
                     toggleBtn.style.borderColor = '#3498db';
                 }
@@ -8958,7 +8962,7 @@ const BASE_PATH = './data/';
             
             // Next button
             const nextBtn = document.createElement('button');
-            nextBtn.textContent = 'Weiter ?';
+            nextBtn.textContent = 'Next →';
             nextBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; font-weight: 600;';
             nextBtn.disabled = currentCardsPage === totalPages || showAllCards;
             if (nextBtn.disabled) {

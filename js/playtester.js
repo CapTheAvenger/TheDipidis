@@ -727,13 +727,14 @@ function ptHandAction(type) {
     ptRenderAll();
 }
 
-// --- GLOBAL TWO-PLAYER ACTIONS (Iono / Judge / Marnie / Roxanne) ---
+// --- GLOBAL TWO-PLAYER ACTIONS ---
 
-function ptGlobalShuffleAndDraw() {
+// JUDGE: beide mischen ihre Hand INS Deck, shufflen das ganze Deck, ziehen X von oben
+function ptGlobalJudge() {
     ptSaveState();
-    const amtP1 = parseInt(document.getElementById('ptIonoDrawP1')?.value) ?? parseInt(document.getElementById('ptHandDrawAmt')?.value) ?? 6;
-    const amtP2 = parseInt(document.getElementById('ptIonoDrawP2')?.value) ?? parseInt(document.getElementById('ptHandDrawAmt')?.value) ?? 6;
-    [['p1', amtP1], ['p2', amtP2]].forEach(([p, amt]) => {
+    const drawP1 = parseInt(document.getElementById('ptJudgeDrawP1')?.value) || 0;
+    const drawP2 = parseInt(document.getElementById('ptJudgeDrawP2')?.value) || 0;
+    [['p1', drawP1], ['p2', drawP2]].forEach(([p, amt]) => {
         ptState[p].deck.push(...ptState[p].hand);
         ptState[p].hand = [];
         const deck = ptState[p].deck;
@@ -743,20 +744,30 @@ function ptGlobalShuffleAndDraw() {
         }
         for (let i = 0; i < amt; i++) if (deck.length > 0) ptState[p].hand.push(deck.pop());
     });
-    ptLog(`🔄 Iono/Judge: P1 draws ${amtP1}, P2 draws ${amtP2}.`);
+    ptLog(`⚖️ Judge: Beide mischen ins Deck. P1 zieht ${drawP1}, P2 zieht ${drawP2}.`);
     ptRenderAll();
 }
 
-function ptGlobalBottomAndDraw() {
+// IONO: beide mischen nur ihre eigene Hand, legen sie UNTER das Deck, ziehen X von oben (ohne Deck zu mischen)
+function ptGlobalIono() {
     ptSaveState();
-    const amtP1 = parseInt(document.getElementById('ptIonoDrawP1')?.value) ?? parseInt(document.getElementById('ptHandDrawAmt')?.value) ?? 6;
-    const amtP2 = parseInt(document.getElementById('ptIonoDrawP2')?.value) ?? parseInt(document.getElementById('ptHandDrawAmt')?.value) ?? 6;
-    [['p1', amtP1], ['p2', amtP2]].forEach(([p, amt]) => {
-        ptState[p].deck.unshift(...ptState[p].hand);
-        ptState[p].hand = [];
+    const drawP1 = parseInt(document.getElementById('ptIonoDrawP1')?.value) || 0;
+    const drawP2 = parseInt(document.getElementById('ptIonoDrawP2')?.value) || 0;
+    [['p1', drawP1], ['p2', drawP2]].forEach(([p, amt]) => {
+        if (ptState[p].hand.length > 0) {
+            // Nur die Handkarten mischen, nicht das Deck
+            const handCards = [...ptState[p].hand];
+            for (let i = handCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [handCards[i], handCards[j]] = [handCards[j], handCards[i]];
+            }
+            // Unter das Deck legen (Anfang des Arrays = unterste Karte)
+            ptState[p].deck.unshift(...handCards);
+            ptState[p].hand = [];
+        }
         for (let i = 0; i < amt; i++) if (ptState[p].deck.length > 0) ptState[p].hand.push(ptState[p].deck.pop());
     });
-    ptLog(`⬇️ Marnie/Roxanne: P1 draws ${amtP1}, P2 draws ${amtP2}.`);
+    ptLog(`⚡ Iono: Hände gemischt unter das Deck. P1 zieht ${drawP1}, P2 zieht ${drawP2}.`);
     ptRenderAll();
 }
 

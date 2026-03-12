@@ -192,8 +192,20 @@
 
         .pt-attachment-energy { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; object-position: center 25%; left: -8px; z-index: 15; transition: transform 0.2s; }
         .pt-attachment-energy:hover { transform: scale(2) translateX(5px); z-index: 50; }
-        .pt-attachment-tool { position: absolute; width: 22px; height: 28px; border-radius: 4px; border: 2px solid #fff; object-fit: cover; object-position: center 10%; left: -8px; z-index: 14; transition: transform 0.2s; }
-        .pt-attachment-tool:hover { transform: scale(2) translateX(5px); z-index: 50; }
+        .pt-attachment-tool { position: absolute; width: 22px; height: 28px; border-radius: 4px; border: 2px solid #fff; object-fit: cover; object-position: center 10%; left: -12px; top: 50%; transform: translateY(-50%); z-index: 14; transition: transform 0.2s; }
+        .pt-attachment-tool:hover { transform: translateY(-50%) scale(2) translateX(8px); z-index: 50; }
+
+        /* Ability Used Marker */
+        .pt-ability-marker {
+            position: absolute; bottom: -6px; left: -6px;
+            width: 18px; height: 18px;
+            background: #f1c40f; border: 1px solid #fff; border-radius: 50%;
+            color: #000; font-weight: 900; font-size: 10px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 20; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: all 0.2s; user-select: none;
+        }
+        .pt-ability-marker.used { background: #555; color: #999; opacity: 0.6; filter: grayscale(1); box-shadow: none; }
         .pt-damage-badge { position: absolute; top: -8px; right: -8px; background: radial-gradient(circle at top left, #ff6b6b, #c0392b); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; border: 2px solid #fff; pointer-events: none; z-index: 20; }
 
         .pt-field-actions { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); display: none; gap: 2px; z-index: 100; background: rgba(0,0,0,0.9); padding: 4px; border-radius: 6px; border: 1px solid #444; flex-direction: column; }
@@ -1951,6 +1963,15 @@
 
             <div id="playtester-board" class="pt-arena">
 
+                <!-- ── LEGEND (top-left, always upright) ── -->
+                <div class="static-element" style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.78);border:1px solid rgba(255,203,5,0.4);border-radius:8px;padding:8px 10px;color:#fff;font-size:9px;z-index:5;pointer-events:none;backdrop-filter:blur(2px);line-height:1.6;">
+                    <div style="font-weight:900;color:#FFCB05;margin-bottom:5px;font-size:10px;letter-spacing:0.5px;">&#128218; LEGEND</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;"><div style="width:12px;height:12px;background:#ff6b6b;border-radius:50%;border:1px solid #fff;flex-shrink:0;"></div>Damage &mdash; +10/+50 or click badge ÷0</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;"><div style="width:12px;height:12px;background:#f1c40f;border-radius:50%;border:1px solid #fff;color:#000;font-weight:900;font-size:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">A</div>Ability toggle (yellow = ready)</div>
+                    <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;"><div style="width:9px;height:14px;background:#ccc;border-radius:2px;border:1px solid #fff;flex-shrink:0;"></div>Tool &mdash; left-side overlay</div>
+                    <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:10px;">&#129302;</span>Drag &amp; drop to any zone</div>
+                </div>
+
                 <!-- ── CENTER: Stadium (right) + Action Buttons (left) — always stay upright ── -->
                 <div style="position: absolute; top: 50%; right: 22%; transform: translate(50%, -50%); z-index: 5;">
                     <div class="static-element" style="background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center;">
@@ -2135,15 +2156,21 @@
                     Hand (<span id="ptHandCount">0</span>) &mdash; Player <span id="activePlayerIndicator">1</span>
                 </div>
 
-                <div style="display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
+                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px; background:#e67e22; border-color:#d35400; color:white;" onclick="ptUndo()" title="Undo last action">↩️ Undo</button>
+                    <span style="color: rgba(255,255,255,0.25); font-size: 14px; margin: 0 2px;">|</span>
                     <span style="color: #ccc; font-size: 10px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Draw:</span>
                     <input type="number" id="ptHandDrawAmt" value="6" style="width: 35px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; border-radius: 4px; text-align: center; font-size: 12px; padding: 2px; outline: none;">
-                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px;" onclick="ptHandAction('shuffle_deck')">🔀 Shuffle to Deck + Draw</button>
-                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px;" onclick="ptHandAction('shuffle_bottom')">⬇️ To Bottom + Draw</button>
+                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px;" onclick="ptHandAction('shuffle_deck')">&#128256; Shuffle to Deck + Draw</button>
+                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px;" onclick="ptHandAction('shuffle_bottom')">&#11015;&#65039; To Bottom + Draw</button>
                     <span style="color: rgba(255,255,255,0.25); font-size: 14px; margin: 0 2px;">|</span>
-                    <span style="color: #ccc; font-size: 10px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Both:</span>
-                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px; background:#7d3c98; border-color:#9b59b6; color:white;" onclick="ptGlobalShuffleAndDraw()" title="Both players shuffle hand into deck and draw N cards">🔄 Iono / Judge</button>
-                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px; background:#1a252f; border-color:#34495e; color:white;" onclick="ptGlobalBottomAndDraw()" title="Both players put hand on bottom and draw N cards">⬇️ Marnie / Roxanne</button>
+                    <span style="color: #9b59b6; font-size: 10px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Iono/Rox:</span>
+                    <span style="color: #7fb3ff; font-size: 9px;">P1:</span>
+                    <input type="number" id="ptIonoDrawP1" value="6" min="0" max="20" style="width: 28px; background: #3B4CCA; color: #fff; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;">
+                    <span style="color: #ff8b8b; font-size: 9px;">P2:</span>
+                    <input type="number" id="ptIonoDrawP2" value="6" min="0" max="20" style="width: 28px; background: #E3350D; color: #fff; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;">
+                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px; background:#7d3c98; border-color:#9b59b6; color:white;" onclick="ptGlobalShuffleAndDraw()" title="Both shuffle hand into deck and draw">&#128260; Iono / Judge</button>
+                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px; background:#1a252f; border-color:#34495e; color:white;" onclick="ptGlobalBottomAndDraw()" title="Both put hand on bottom and draw">&#11015;&#65039; Marnie / Roxanne</button>
                     <span style="color: rgba(255,255,255,0.25); font-size: 14px; margin: 0 2px;">|</span>
                     <span style="color: #ccc; font-size: 10px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Cmd:</span>
                     <input type="text" id="ptCommandInput-p1" class="pt-cmd-input" placeholder="/draw 3, /iono 6…" style="width: 130px;" onkeydown="if(event.key==='Enter'){ptRunCommand();event.preventDefault();}"
@@ -2255,6 +2282,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v13"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v23"></script>
+    <script src="js/playtester.js?v=20260312-v24"></script>
 </body>
 </html>

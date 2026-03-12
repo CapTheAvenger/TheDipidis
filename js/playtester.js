@@ -15,6 +15,24 @@ let ptLookingAtIsBottom = false;
 let ptLookingAtPlayer = 'p1';
 let _ptMsgTimer = null;
 
+// --- STATE HISTORY (UNDO) ---
+let ptStateHistory = [];
+const PT_MAX_HISTORY = 20;
+
+function ptSaveState() {
+    try {
+        ptStateHistory.push(JSON.parse(JSON.stringify(ptState)));
+        if (ptStateHistory.length > PT_MAX_HISTORY) ptStateHistory.shift();
+    } catch(e) { /* ignore serialisation errors for non-critical state */ }
+}
+
+function ptUndo() {
+    if (ptStateHistory.length === 0) { ptShowMessage('Nothing to undo.'); return; }
+    ptState = ptStateHistory.pop();
+    ptRenderAll();
+    ptLog('↩️ Undone.');
+}
+
 // Globale Speicher für importierte Sandbox-Decks
 let standaloneDecks = { p1: [], p2: [] };
 let currentPlaytestSource = '';
@@ -689,6 +707,7 @@ function ptLookCards(player, position, amount) {
 }
 
 function ptHandAction(type) {
+    ptSaveState();
     const p   = ptCurrentPlayer;
     const amt = parseInt(document.getElementById('ptHandDrawAmt')?.value || 1);
     const _shuffle = deck => { for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; } };
@@ -711,8 +730,10 @@ function ptHandAction(type) {
 // --- GLOBAL TWO-PLAYER ACTIONS (Iono / Judge / Marnie / Roxanne) ---
 
 function ptGlobalShuffleAndDraw() {
-    const amt = parseInt(document.getElementById('ptHandDrawAmt')?.value) || 6;
-    ['p1', 'p2'].forEach(p => {
+    ptSaveState();
+    const amtP1 = parseInt(document.getElementById('ptIonoDrawP1')?.value) ?? parseInt(document.getElementById('ptHandDrawAmt')?.value) ?? 6;
+    const amtP2 = parseInt(document.getElementById('ptIonoDrawP2')?.value) ?? parseInt(document.getElementById('ptHandDrawAmt')?.value) ?? 6;
+    [['p1', amtP1], ['p2', amtP2]].forEach(([p, amt]) => {
         ptState[p].deck.push(...ptState[p].hand);
         ptState[p].hand = [];
         const deck = ptState[p].deck;
@@ -722,18 +743,20 @@ function ptGlobalShuffleAndDraw() {
         }
         for (let i = 0; i < amt; i++) if (deck.length > 0) ptState[p].hand.push(deck.pop());
     });
-    ptLog(`🔄 Iono/Judge: Both players shuffled hand into deck and drew ${amt} card(s).`);
+    ptLog(`🔄 Iono/Judge: P1 draws ${amtP1}, P2 draws ${amtP2}.`);
     ptRenderAll();
 }
 
 function ptGlobalBottomAndDraw() {
-    const amt = parseInt(document.getElementById('ptHandDrawAmt')?.value) || 6;
-    ['p1', 'p2'].forEach(p => {
+    ptSaveState();
+    const amtP1 = parseInt(document.getElementById('ptIonoDrawP1')?.value) ?? parseInt(document.getElementById('ptHandDrawAmt')?.value) ?? 6;
+    const amtP2 = parseInt(document.getElementById('ptIonoDrawP2')?.value) ?? parseInt(document.getElementById('ptHandDrawAmt')?.value) ?? 6;
+    [['p1', amtP1], ['p2', amtP2]].forEach(([p, amt]) => {
         ptState[p].deck.unshift(...ptState[p].hand);
         ptState[p].hand = [];
         for (let i = 0; i < amt; i++) if (ptState[p].deck.length > 0) ptState[p].hand.push(ptState[p].deck.pop());
     });
-    ptLog(`⬇️ Marnie/Roxanne: Both players put hand on bottom and drew ${amt} card(s).`);
+    ptLog(`⬇️ Marnie/Roxanne: P1 draws ${amtP1}, P2 draws ${amtP2}.`);
     ptRenderAll();
 }
 
@@ -928,6 +951,7 @@ function ptHandleDragLeave(event) {
 function ptHandleDrop(event, targetZone) {
     event.preventDefault();
     event.stopPropagation();
+    ptSaveState();
     const dropEl = event.target.closest('.pt-dropzone');
     if (dropEl) dropEl.classList.remove('drag-over');
 
@@ -1385,10 +1409,17 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     cards.forEach((card, index) => {
         const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         if (index === 0) {
+            const isPokemon = !(card.cardType || '').toLowerCase().includes('energy') &&
+                              !(card.cardType || '').toLowerCase().includes('trainer');
+            const abilityMarkerId = `ptAbility_${elementId}`;
             html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-field-card"
                           style="position:relative;z-index:10;width:${width}px;border-radius:7px;display:block;"
                           onerror="this.src='${CARD_BACK_URL}'"
                           ondblclick="ptViewCard(event,'${safeImg}')" title="${card.name}">`;
+            if (isPokemon) {
+                html += `<div id="${abilityMarkerId}" class="pt-ability-marker" title="Ability used toggle"
+                              onclick="event.stopPropagation(); this.classList.toggle('used');">A</div>`;
+            }
         } else {
             const isEnergy = (card.cardType || '').toLowerCase().includes('energy') || (card.supertype || '') === 'Energy';
             if (!isEnergy) {

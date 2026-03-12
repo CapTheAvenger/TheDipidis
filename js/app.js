@@ -4814,613 +4814,102 @@ const BASE_PATH = './data/';
             let deckCards = Object.values(uniqueCards);
             console.log('[autoCompleteConsistency] After aggregation:', deckCards.length, 'unique cards');
             
-            // Step 2: Calculate CONSISTENCY SCORE for each card
-            // Formula: (Share % / 100) * Avg Count * Reliability Factor * Meta Relevance Factor * 100
+            // Step 2: Compute per-card statistics
             deckCards.forEach(card => {
                 const sharePercent = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
                 const totalCount = parseFloat(card.total_count) || 1;
-                const totalDecks = parseFloat(card.total_decks_in_archetype) || 1;
                 const deckCount = parseInt(card.deck_count) || 1;
-                
-                // TWO IMPORTANT METRICS:
-                // 1. avgCount = Average across ALL decks (including those without the card)
-                // 2. avgCountWhenUsed = Average only in decks that USE the card
-                const avgCount = totalCount / totalDecks;
                 const avgCountWhenUsed = totalCount / deckCount;
-                
-                // RELIABILITY FACTOR (based on Justin Basil standards):
-                // - High share (=90%) + consistent count (=1.5) = 1.5x multiplier
-                // - Good share (=70%) = 1.2x multiplier
-                // - Medium share (=50%) = 1.0x multiplier
-                // - Low share (<50%) = 0.8x multiplier
-                let reliabilityFactor;
-                if (sharePercent >= 90 && avgCount >= 1.5) {
-                    reliabilityFactor = 1.5;
-                } else if (sharePercent >= 70) {
-                    reliabilityFactor = 1.2;
-                } else if (sharePercent >= 50) {
-                    reliabilityFactor = 1.0;
-                } else {
-                    reliabilityFactor = 0.8;
-                }
-                
-                // META RELEVANCE FACTOR (NEW):
-                // Cards with high meta-share are more important (tech cards against meta)
-                // - Meta share =70%: 1.3x (very meta-relevant, many decks use/tech against)
-                // - Meta share =50%: 1.15x (meta-relevant)
-                // - Meta share =30%: 1.0x (moderate)
-                // - Meta share <30%: 0.9x (less relevant)
                 const metaShare = getMetaShareForCard(card.card_name, source);
-                let metaRelevanceFactor = 1.0;
-                if (metaShare >= 70) {
-                    metaRelevanceFactor = 1.3;
-                } else if (metaShare >= 50) {
-                    metaRelevanceFactor = 1.15;
-                } else if (metaShare >= 30) {
-                    metaRelevanceFactor = 1.0;
-                } else if (metaShare > 0) {
-                    metaRelevanceFactor = 0.9;
-                }
-                
-                card.avgCount = avgCount;
-                card.avgCountWhenUsed = avgCountWhenUsed;
                 card.sharePercent = sharePercent;
+                card.avgCountWhenUsed = avgCountWhenUsed;
                 card.metaShare = metaShare;
-                card.metaRelevanceFactor = metaRelevanceFactor;
-                // Use avgCountWhenUsed in the score so Phase sort order reflects actual usage,
-                // not the diluted global average that includes 0s from non-users
-                card.consistencyScore = (sharePercent / 100) * avgCountWhenUsed * reliabilityFactor * metaRelevanceFactor * 100;
-                
-                // Log high meta-relevance cards
-                if (metaRelevanceFactor > 1.0 && sharePercent >= 50) {
-                    console.log(`[autoCompleteConsistency] ?? META-RELEVANT: ${card.card_name} (Archetype: ${sharePercent.toFixed(1)}%, Meta: ${metaShare.toFixed(1)}%) ? ${metaRelevanceFactor}x boost`);
-                }
-                
-                // DETERMINE OPTIMAL COPY COUNT (based on professional standards)
-                // Reference: Justin Basil Guide + Opening Hand Probability Math
-                // 4 copies = ~40% opening hand (Core staples: Prof Research, Ultra Ball)
-                // 3 copies = ~32% opening hand (Important consistency)
-                // 2 copies = ~22% opening hand (Solid includes)
-                // 1 copy = ~12% opening hand (Tech choices)
-                
-                let optimalCount;
-                
-                // Base Energy - special handling (can exceed 4)
-                if (isBaseEnergy(card)) {
-                    // Use avgCountWhenUsed so energy count isn't diluted by decks that
-                    // use a different energy type (e.g. 70% play 6x Fire Energy, 30% play 0)
-                    // Minimum 3% share: prevents fringe energy types (0.3% Darkness Energy) from
-                    // wasting deck slots — a real-world fix for the "1-copy rubbish energy" bug
-                    if (sharePercent >= 3 && avgCountWhenUsed >= 0.5) {
-                        optimalCount = Math.max(1, Math.round(avgCountWhenUsed));
-                    } else {
-                        optimalCount = 0; // Skip energy types not used in this archetype
-                    }
-                }
-                // -----------------------------------------------
-                // CONSISTENCY THRESHOLDS V5 - avgCountWhenUsed
-                // -----------------------------------------------
-                // KEY FIX: Use avgCountWhenUsed (avg in decks that PLAY this card)
-                // instead of avgCount (global average including 0s).
-                // Example: 50% play 4x Night Stretcher, 50% play 0x
-                //   avgCount = 2.0  → old code: adds 2x  ← WRONG
-                //   avgCountWhenUsed = 4.0 → new code: adds 4x or 0x via polarization
-
-                // POLARIZATION DETECTION: If <60% include it but avg when used >= 2.8,
-                // it's a variant choice (e.g. Carmine vs Iono). Skip it.
-                else if (sharePercent < 60 && avgCountWhenUsed >= 2.8) {
-                    optimalCount = 0;
-                    console.log(`[autoCompleteConsistency] ?? POLARIZED: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used) - Specialized variant, skipping`);
-                }
-                // 4-of Territory
-                else if (avgCountWhenUsed > 3.05 && sharePercent >= 70) {
-                    optimalCount = Math.min(Math.ceil(avgCountWhenUsed), 4);
-                }
-                else if (avgCountWhenUsed >= 3.5 && sharePercent >= 60) {
-                    optimalCount = 4;
-                }
-                // 3-of Territory
-                else if (avgCountWhenUsed >= 2.4 && avgCountWhenUsed <= 3.05 && sharePercent >= 90) {
-                    optimalCount = 3;
-                }
-                else if (avgCountWhenUsed >= 2.6 && avgCountWhenUsed <= 3.05 && sharePercent >= 70) {
-                    optimalCount = 3;
-                }
-                else if (avgCountWhenUsed >= 3.0 && avgCountWhenUsed <= 3.05 && sharePercent >= 60) {
-                    optimalCount = 3;
-                    console.log(`[autoCompleteConsistency] ?? DATA-DRIVEN: ${card.card_name} (${sharePercent.toFixed(1)}% @ ${avgCountWhenUsed.toFixed(2)}x when used) ? 3x`);
-                }
-                // 2-of Territory
-                else if (avgCountWhenUsed >= 1.5 && sharePercent >= 50) {
-                    optimalCount = 2;
-                }
-                else if (avgCountWhenUsed >= 1.3 && sharePercent >= 85) {
-                    optimalCount = 2;
-                }
-                // 1-of Territory
-                else if (avgCountWhenUsed >= 0.8 && sharePercent >= 60) {
-                    optimalCount = 1;
-                }
-                else if (avgCountWhenUsed >= 1.0 && sharePercent >= 40) {
-                    optimalCount = 1;
-                }
-                // High-share tech (present in many decks but low copies — e.g. Boss's Orders 1x)
-                else if (sharePercent >= 70 && avgCountWhenUsed >= 0.6) {
-                    optimalCount = 1;
-                    console.log(`[autoCompleteConsistency] ?? HIGH-SHARE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used)`);
-                }
-                // Moderate-share trainer tech
-                else if (sharePercent >= 25 && sharePercent < 70 && avgCountWhenUsed >= 0.5) {
-                    const cardType = (card.type || '').toLowerCase();
-                    if (cardType.includes('stadium') || cardType.includes('item') || cardType.includes('supporter') || cardType.includes('tool')) {
-                        optimalCount = 1;
-                        console.log(`[autoCompleteConsistency] ?? MODERATE TECH: ${card.card_name} (${sharePercent.toFixed(1)}% share, ${avgCountWhenUsed.toFixed(2)}x when used)`);
-                    } else {
-                        optimalCount = 0;
-                    }
-                }
-                else {
-                    optimalCount = 0;
-                }
-
-                
-                card.optimalCount = optimalCount;
+                // Score: archetype share dominates; meta share breaks ties
+                card.score = sharePercent + (metaShare * 0.1);
             });
-            
-            // -------------------------------------------------------------------
-            // STEP 3: EVOLUTION LINE DETECTION & OPTIMIZATION
-            // -------------------------------------------------------------------
-            // Problem: Old algorithm added 4x Roselia + 3x Roserade = 7 cards for one line
-            // Solution: Detect evolution lines and optimize ratios (3 Stage 2 needs max 3-4 Basic)
-            
-            const evolutionLines = {};
-            const standalonePokemons = [];
-            const trainerCards = [];
-            const energyCards = [];
-            
-            // Categorize cards
-            deckCards.forEach(card => {
-                const cardType = (card.type || card.card_type || '').toLowerCase();
-                const cardName = card.card_name;
-                
-                if (isBaseEnergy(card)) {
-                    energyCards.push(card);
-                } else if (cardType.includes('pokemon') || cardType.includes('pokémon')) {
-                    // Detect evolution families by card name patterns
-                    // Examples: "Cynthia's Roselia", "Cynthia's Roserade", "Dragapult ex", "Drakloak", "Dreepy"
-                    let familyName = null;
 
-                    // Canonical name: strip "M " prefix (XY-era Mega Evolution cards, e.g. "M Lucario-EX" → "Lucario-EX")
-                    // This ensures Mega forms are grouped with their base evolution family below
-                    const canonicalName = cardName.replace(/^M\s+(?=[A-Z])/, '');
+            // Step 3: STRICT 5% CUTOFF -- ignore cards used in <5% of archetype decks
+            // This eliminates noise like a 3.5% Darkness Energy that nobody actually plays
+            let filtered = deckCards.filter(card => card.sharePercent >= 5);
 
-                    // Pattern 1: "Prefix's Name" (Cynthia's Roselia/Roserade, Team Rocket's Ekans/Arbok)
-                    const possessiveMatch = cardName.match(/^(.+)'s\s+([A-Z][a-z]+)/);
-                    if (possessiveMatch) {
-                        const baseName = possessiveMatch[2].replace(/\s+(ex|BREAK|V|VMAX|VSTAR|GX)$/i, '');
-                        familyName = `${possessiveMatch[1]}'s ${baseName}`;
-                    }
-                    // Pattern 2: Common evolution families — uses canonicalName to also handle M X-EX Mega forms
-                    else if (canonicalName.match(/^(Dreepy|Drakloak|Dragapult)/i)) {
-                        familyName = 'Dragapult Line';
-                    } else if (canonicalName.match(/^(Gible|Gabite|Garchomp)/i)) {
-                        familyName = 'Garchomp Line';
-                    } else if (canonicalName.match(/^(Duskull|Dusclops|Dusknoir)/i)) {
-                        familyName = 'Dusknoir Line';
-                    } else if (canonicalName.match(/^(Riolu|Lucario)/i)) {
-                        familyName = 'Lucario Line';
-                    } else if (canonicalName.match(/^(Makuhita|Hariyama)/i)) {
-                        familyName = 'Hariyama Line';
-                    } else if (canonicalName.match(/^(Budew|Roselia|Roserade)/i)) {
-                        familyName = 'Roserade Line';
-                    } else if (canonicalName.match(/^(Ekans|Arbok)/i)) {
-                        familyName = 'Arbok Line';
-                    } else if (canonicalName.match(/^(Ralts|Kirlia|Gardevoir|Gallade)/i)) {
-                        familyName = 'Gardevoir Line';
-                    } else if (canonicalName.match(/^(Charmander|Charmeleon|Charizard)/i)) {
-                        familyName = 'Charizard Line';
-                    } else if (canonicalName.match(/^(Squirtle|Wartortle|Blastoise)/i)) {
-                        familyName = 'Blastoise Line';
-                    } else if (canonicalName.match(/^(Bulbasaur|Ivysaur|Venusaur)/i)) {
-                        familyName = 'Venusaur Line';
-                    } else if (canonicalName.match(/^(Eevee|Vaporeon|Jolteon|Flareon|Espeon|Umbreon|Leafeon|Glaceon|Sylveon)/i)) {
-                        familyName = 'Eeveelution Line';
-                    }
-                    // Pattern 3: Same base name with suffixes (Pikachu, Pikachu ex, Pikachu V)
-                    // canonicalName also handles "M X-EX" → grouped with "X" / "X-EX" family
-                    else if (canonicalName.match(/\s+(ex|BREAK|V|VMAX|VSTAR|GX|-EX|-GX)$/i)) {
-                        const baseName = canonicalName.replace(/\s+(ex|BREAK|V|VMAX|VSTAR|GX|-EX|-GX)$/i, '');
-                        familyName = baseName + ' Line';
-                    }
-                    
-                    if (familyName) {
-                        if (!evolutionLines[familyName]) {
-                            evolutionLines[familyName] = [];
-                        }
-                        evolutionLines[familyName].push(card);
-                    } else {
-                        standalonePokemons.push(card);
-                    }
-                } else {
-                    trainerCards.push(card);
-                }
+            // Step 4: Target count = Math.round(avgCountWhenUsed) -- pure data, no heuristics
+            filtered.forEach(card => {
+                let count = Math.round(card.avgCountWhenUsed);
+                // Staple guarantee: if >50% of decks play it, include at least 1
+                if (count === 0 && card.sharePercent >= 50) count = 1;
+                // ACE SPEC rule: max 1 per deck
+                if (isAceSpec(card)) count = Math.min(count, 1);
+                card.targetCount = count;
             });
-            
-            console.log('[autoCompleteConsistency] ?? Detected', Object.keys(evolutionLines).length, 'evolution lines');
-            
-            // Helper: Detect evolution stage (0 = Basic, 1 = Stage 1, 2 = Stage 2/ex/V)
-            function getEvolutionStage(cardName) {
-                const lower = cardName.toLowerCase();
+            filtered = filtered.filter(card => card.targetCount > 0);
 
-                // Mega Evolution cards (XY era: "M Lucario-EX", or "Mega Lucario" naming)
-                if (lower.match(/^m\s+[a-z]/) || lower.match(/^mega\s+/)) return 2;
+            // Step 5: Sort by score -- highest archetype share first
+            filtered.sort((a, b) => b.score - a.score);
+            console.log(`[autoCompleteConsistency] ${filtered.length} eligible cards after 5% cutoff`);
 
-                // Stage 2 / Powered forms (ex, V, VMAX, VSTAR, GX, etc.)
-                if (lower.match(/\s+(ex|vmax|vstar|gx|break)\b/)) return 2;
-                
-                // Common Stage 2 Pokemon (final evolutions)
-                if (lower.match(/^(garchomp|roserade|dragapult|dusknoir|hariyama|charizard|blastoise|venusaur|gardevoir|gallade|arbok)/)) return 2;
-                
-                // Common Stage 1 Pokemon (middle evolutions)
-                if (lower.match(/^(gabite|drakloak|dusclops|charmeleon|wartortle|ivysaur|kirlia|roselia|maractus)/)) return 1;
-                
-                // Special case: V cards without VMAX (usually high-powered Basic)
-                if (lower.match(/\s+v\b/) && !lower.match(/vmax|vstar/)) return 1.5; // Treat as Stage 1.5
-                
-                // Default: Basic Pokemon
-                return 0;
-            }
-            
-            // Optimize evolution line ratios
-            Object.keys(evolutionLines).forEach(lineName => {
-                const line = evolutionLines[lineName];
-                
-                // Sort by evolution stage (Basic ? Stage 1 ? Stage 2)
-                line.sort((a, b) => {
-                    const aStage = getEvolutionStage(a.card_name);
-                    const bStage = getEvolutionStage(b.card_name);
-                    return aStage - bStage;
-                });
-                
-                // Find highest evolution count (Stage 2 or V/VMAX/ex)
-                const topCard = line[line.length - 1];
-                const topStage = getEvolutionStage(topCard.card_name);
-                const topCount = Math.min(topCard.optimalCount, 4);
-                
-                console.log(`[autoCompleteConsistency] ?? ${lineName}: ${topCount}x ${topCard.card_name} (Stage ${topStage})`);
-                
-                // Adjust lower stages to match top evolution count
-                // Rule: For Nx Top Evolution, optimal is N to N+1 for lower stages
-                for (let i = 0; i < line.length - 1; i++) {
-                    const lowerCard = line[i];
-                    const lowerStage = getEvolutionStage(lowerCard.card_name);
-                    const originalCount = lowerCard.optimalCount;
-                    
-                    // Cap lower stages: max = topCount + 1
-                    // Exception: If it's a Basic and we have a 3-stage line, can go +1 more
-                    let maxAllowed = topCount + 1;
-                    if (lowerStage === 0 && line.length >= 3) {
-                        maxAllowed = topCount + 1; // Basics can have 1 extra
-                    }
-                    
-                    const cappedCount = Math.min(originalCount, maxAllowed);
-                    
-                    if (cappedCount < originalCount) {
-                        console.log(`[autoCompleteConsistency]   ?? ${lowerCard.card_name}: ${originalCount}x ? ${cappedCount}x (capped to ${topCount}x top evolution + 1)`);
-                        lowerCard.optimalCount = cappedCount;
-                        lowerCard.lineAdjusted = true;
-                    }
-                }
-            });
-            
-            // -------------------------------------------------------------------
-            // STEP 4: THREE-PHASE DECK BUILDING
-            // -------------------------------------------------------------------
-            // Phase 1: Pokemon Evolution Lines (Core Identity)
-            // Phase 2: Essential Trainers (=85% Share in Archetype = Core)
-            // Phase 3: Tech Cards (Meta-relevant additions, <85% Share)
-            
+            // Step 6: Fill deck to 60 in score order
             let cardsToAdd = [];
-            const addedNames = new Set(Object.keys(deck).filter(name => deck[name] > 0));
-            
-            // PHASE 0: Add Ace Spec first (max 1x - TCG rule)
-            const aceSpecCards = deckCards.filter(card => isAceSpec(card));
-            aceSpecCards.sort((a, b) => b.consistencyScore - a.consistencyScore);
-            
-            let bestAceSpec = null;
-            if (aceSpecCards.length > 0) {
-                bestAceSpec = aceSpecCards[0];
-                const metaInfo = bestAceSpec.metaShare > 0 ? `, Meta: ${bestAceSpec.metaShare.toFixed(1)}%` : '';
-                console.log('[autoCompleteConsistency] ?? ACE SPEC:', bestAceSpec.card_name, 
-                    `(Score: ${bestAceSpec.consistencyScore.toFixed(1)}, Arch: ${bestAceSpec.sharePercent.toFixed(1)}% @ ${bestAceSpec.avgCount.toFixed(1)}x${metaInfo})`);
-                
-                if (!addedNames.has(bestAceSpec.card_name)) {
-                    cardsToAdd.push({ ...bestAceSpec, addCount: 1, phase: 0 });
-                    addedNames.add(bestAceSpec.card_name);
-                    currentTotal += 1;
+            let aceSpecAdded = false;
+            for (const card of filtered) {
+                if (currentTotal >= 60) break;
+                if (isAceSpec(card)) {
+                    if (aceSpecAdded) continue;
+                    aceSpecAdded = true;
                 }
+                const amountToAdd = Math.min(card.targetCount, 60 - currentTotal);
+                cardsToAdd.push({ ...card, addCount: amountToAdd });
+                currentTotal += amountToAdd;
+                console.log(`[autoCompleteConsistency]   + ${amountToAdd}x ${card.card_name} (Arch: ${card.sharePercent.toFixed(1)}% @ ${card.avgCountWhenUsed.toFixed(2)}x) -- Total: ${currentTotal}/60`);
             }
-            
-            // PHASE 1: Pokemon Evolution Lines - Core identity of the deck
-            console.log('[autoCompleteConsistency] ?? PHASE 1: Building Pokemon Evolution Lines...');
-            
-            Object.keys(evolutionLines).forEach(lineName => {
-                const line = evolutionLines[lineName];
-                
-                line.forEach(card => {
-                    if (currentTotal >= 60) return;
-                    if (addedNames.has(card.card_name)) return;
-                    
-                    let addCount = card.optimalCount;
-                    addCount = Math.min(addCount, 60 - currentTotal);
-                    
-                    if (addCount > 0) {
-                        cardsToAdd.push({ ...card, addCount: addCount, phase: 1 });
-                        addedNames.add(card.card_name);
-                        currentTotal += addCount;
-                        
-                        const adjusted = card.lineAdjusted ? ' [Line Optimized]' : '';
-                        console.log(`[autoCompleteConsistency]   ? ${addCount}x ${card.card_name} (${card.sharePercent.toFixed(1)}% @ ${card.avgCount.toFixed(1)}x)${adjusted} - Total: ${currentTotal}/60`);
-                    }
-                });
-            });
-            
-            // Add standalone Pokemon (not in evolution lines)
-            standalonePokemons.forEach(card => {
-                if (currentTotal >= 60) return;
-                if (addedNames.has(card.card_name)) return;
-                
-                let addCount = card.optimalCount;
-                addCount = Math.min(addCount, 60 - currentTotal);
-                
-                if (addCount > 0) {
-                    cardsToAdd.push({ ...card, addCount: addCount, phase: 1 });
-                    addedNames.add(card.card_name);
-                    currentTotal += addCount;
-                    console.log(`[autoCompleteConsistency]   ? ${addCount}x ${card.card_name} (${card.sharePercent.toFixed(1)}% @ ${card.avgCount.toFixed(1)}x) - Total: ${currentTotal}/60`);
-                }
-            });
-            
-            // PHASE 2: Essential Trainers - Core consistency cards (=85% Share)
-            console.log('[autoCompleteConsistency] ?? PHASE 2: Adding Essential Trainers (=85% Archetype Share)...');
-            
-            const essentialTrainers = trainerCards
-                .filter(card => card.sharePercent >= 85)
-                .sort((a, b) => b.consistencyScore - a.consistencyScore);
-            
-            essentialTrainers.forEach(card => {
-                if (currentTotal >= 60) return;
-                if (addedNames.has(card.card_name)) return;
-                
-                let addCount = card.optimalCount;
-                addCount = Math.min(addCount, 60 - currentTotal);
-                
-                if (addCount > 0) {
-                    cardsToAdd.push({ ...card, addCount: addCount, phase: 2 });
-                    addedNames.add(card.card_name);
-                    currentTotal += addCount;
-                    console.log(`[autoCompleteConsistency]   ? ${addCount}x ${card.card_name} (${card.sharePercent.toFixed(1)}% @ ${card.avgCount.toFixed(1)}x) - Total: ${currentTotal}/60`);
-                }
-            });
-            
-            // Add Energy cards
-            console.log('[autoCompleteConsistency] ? Adding Energy Cards...');
-            energyCards.sort((a, b) => b.consistencyScore - a.consistencyScore);
-            
-            energyCards.forEach(card => {
-                if (currentTotal >= 60) return;
-                if (addedNames.has(card.card_name)) return;
-                
-                let addCount = card.optimalCount;
-                addCount = Math.min(addCount, 60 - currentTotal);
-                
-                if (addCount > 0) {
-                    cardsToAdd.push({ ...card, addCount: addCount, phase: 2 });
-                    addedNames.add(card.card_name);
-                    currentTotal += addCount;
-                    console.log(`[autoCompleteConsistency]   ? ${addCount}x ${card.card_name} (${card.sharePercent.toFixed(1)}% @ ${card.avgCount.toFixed(1)}x) - Total: ${currentTotal}/60`);
-                }
-            });
-            
-            // PHASE 3: Tech Cards - Meta-relevant additions (<85% Share but useful)
-            console.log('[autoCompleteConsistency] ?? PHASE 3: Adding Tech Cards (<85% Share, Meta-relevant)...');
-            
-            const techTrainers = trainerCards
-                .filter(card => card.sharePercent < 85)
-                .sort((a, b) => {
-                    // Weighted score: Archetype focus (75%) + Meta relevance (25%, use avgCountWhenUsed for accuracy)
-                    // Global bonus: cards played in 10%+ of archetype AND present in 50%+ of all meta decks
-                    // are genuine meta staples (e.g. Buddy-Buddy Poffin 78%) and get a strong priority pull
-                    const globalBonusA = (a.sharePercent > 10 && (a.metaShare || 0) > 50) ? (a.metaShare || 0) * 0.5 : 0;
-                    const globalBonusB = (b.sharePercent > 10 && (b.metaShare || 0) > 50) ? (b.metaShare || 0) * 0.5 : 0;
-                    const weightedScoreA = (a.consistencyScore * 0.75) + ((a.metaShare || 0) * (a.avgCountWhenUsed || 0) * 0.25) + globalBonusA;
-                    const weightedScoreB = (b.consistencyScore * 0.75) + ((b.metaShare || 0) * (b.avgCountWhenUsed || 0) * 0.25) + globalBonusB;
-                    return weightedScoreB - weightedScoreA;
-                });
-            
-            techTrainers.forEach(card => {
-                if (currentTotal >= 60) return;
-                if (addedNames.has(card.card_name)) return;
-                
-                let addCount = card.optimalCount;
-                addCount = Math.min(addCount, 60 - currentTotal);
-                
-                if (addCount > 0) {
-                    const metaInfo = card.metaShare > 0 ? ` | Meta: ${card.metaShare.toFixed(1)}%` : '';
-                    const weightedScore = (card.consistencyScore * 0.75) + ((card.metaShare || 0) * (card.avgCount || 0) * 0.25);
-                    cardsToAdd.push({ ...card, addCount: addCount, phase: 3 });
-                    addedNames.add(card.card_name);
-                    currentTotal += addCount;
-                    console.log(`[autoCompleteConsistency]   ? ${addCount}x ${card.card_name} (Arch: ${card.sharePercent.toFixed(1)}%${metaInfo} | Weighted: ${weightedScore.toFixed(1)}) - Total: ${currentTotal}/60`);
-                }
-            });
-            
-            // PHASE 4: Fill remaining slots (if deck < 60)
-            if (currentTotal < 60) {
-                console.log(`[autoCompleteConsistency] ?? PHASE 4: Filling ${60 - currentTotal} remaining slot(s)...`);
-                
-                // First try: bump up count of highest-scoring already-included cards (under 4-cap, non-ACE SPEC)
-                const bumpCandidates = cardsToAdd
-                    .filter(c => c.phase !== 0 && !isAceSpec(c) && c.addCount < 4)
-                    .sort((a, b) => b.consistencyScore - a.consistencyScore);
-                
-                for (const candidate of bumpCandidates) {
-                    if (currentTotal >= 60) break;
-                    candidate.addCount += 1;
-                    currentTotal += 1;
-                    console.log(`[autoCompleteConsistency]   ? +1x ${candidate.card_name} (count bump to ${candidate.addCount}x) - Total: ${currentTotal}/60`);
-                }
-                
-                // Second try: add best unused cards from pool that have archetype presence
-                if (currentTotal < 60) {
-                    const unusedCandidates = deckCards
-                        .filter(c => !addedNames.has(c.card_name) && c.sharePercent > 0 && c.optimalCount > 0)
-                        .sort((a, b) => b.consistencyScore - a.consistencyScore);
-                    
-                    for (const card of unusedCandidates) {
-                        if (currentTotal >= 60) break;
-                        cardsToAdd.push({ ...card, addCount: 1, phase: 4 });
-                        addedNames.add(card.card_name);
-                        currentTotal += 1;
-                        console.log(`[autoCompleteConsistency]   ? 1x ${card.card_name} (${card.sharePercent.toFixed(1)}% share, pool fill) - Total: ${currentTotal}/60`);
-                    }
-                }
-            }
-            
-            // -------------------------------------------------------------------
-            // RARE CANDY GUARANTEE: Stage 2 decks need at least 3x Rare Candy
-            // -------------------------------------------------------------------
-            const hasStage2InDeck = cardsToAdd.some(c => getEvolutionStage(c.card_name) === 2);
-            if (hasStage2InDeck) {
-                const RARE_CANDY_NAME = 'Rare Candy';
-                const existingCandy = cardsToAdd.find(c => c.card_name === RARE_CANDY_NAME);
+
+            // Step 7: Rare Candy guarantee for Stage 2 decks (ex / VMAX / GX)
+            const hasStage2ex = cardsToAdd.some(c => /\s+(ex|vmax|vstar|gx|break)\b/i.test(c.card_name));
+            if (hasStage2ex) {
                 const CANDY_MIN = 3;
-                if (existingCandy) {
-                    if (existingCandy.addCount < CANDY_MIN) {
-                        const bump = CANDY_MIN - existingCandy.addCount;
-                        // Only bump if there's room (or steal from lowest-priority Phase 3/4 card)
-                        if (currentTotal + bump <= 60) {
-                            existingCandy.addCount = CANDY_MIN;
-                            currentTotal += bump;
-                            console.log(`[autoCompleteConsistency] ?? RARE CANDY GUARANTEE: bumped to ${CANDY_MIN}x (Stage 2 in deck) - Total: ${currentTotal}/60`);
-                        } else {
-                            // Remove lowest-scoring Phase 3/4 non-essential cards to make room
-                            let freed = 0;
-                            const lowPriority = cardsToAdd
-                                .filter(c => (c.phase === 3 || c.phase === 4) && c.card_name !== RARE_CANDY_NAME)
-                                .sort((a, b) => a.consistencyScore - b.consistencyScore);
-                            for (const lp of lowPriority) {
-                                if (freed >= bump) break;
-                                const remove = Math.min(lp.addCount, bump - freed);
-                                lp.addCount -= remove;
-                                currentTotal -= remove;
-                                freed += remove;
-                                if (lp.addCount === 0) {
-                                    cardsToAdd.splice(cardsToAdd.indexOf(lp), 1);
-                                    addedNames.delete(lp.card_name);
-                                }
-                                console.log(`[autoCompleteConsistency]   ?? Freed ${remove}x ${lp.card_name} for Rare Candy`);
-                            }
-                            existingCandy.addCount = Math.min(CANDY_MIN, existingCandy.addCount + freed);
-                            currentTotal += freed;
-                            console.log(`[autoCompleteConsistency] ?? RARE CANDY GUARANTEE: adjusted to ${existingCandy.addCount}x - Total: ${currentTotal}/60`);
-                        }
-                    }
-                } else {
-                    // Rare Candy not in deck yet — pull from deckCards pool
-                    const candyCard = deckCards.find(c => c.card_name === RARE_CANDY_NAME);
-                    if (candyCard && currentTotal < 60) {
-                        const addAmt = Math.min(CANDY_MIN, 60 - currentTotal);
-                        cardsToAdd.push({ ...candyCard, addCount: addAmt, phase: 2 });
-                        addedNames.add(RARE_CANDY_NAME);
-                        currentTotal += addAmt;
-                        console.log(`[autoCompleteConsistency] ?? RARE CANDY GUARANTEE: added ${addAmt}x (Stage 2 in deck, was missing) - Total: ${currentTotal}/60`);
+                const candyEntry = cardsToAdd.find(c => c.card_name === 'Rare Candy');
+                if (candyEntry && candyEntry.addCount < CANDY_MIN) {
+                    const bump = CANDY_MIN - candyEntry.addCount;
+                    if (currentTotal + bump <= 60) {
+                        candyEntry.addCount = CANDY_MIN;
+                        currentTotal += bump;
+                        console.log(`[autoCompleteConsistency] Rare Candy bumped to ${CANDY_MIN}x (Stage 2 deck) -- Total: ${currentTotal}/60`);
                     }
                 }
             }
 
-            console.log('[autoCompleteConsistency] ? Consistency-optimized deck complete:', currentTotal, 'cards');
-            
-            // Show summary grouped by phase and type
-            let summary = `?? MAX CONSISTENCY Deck (${currentTotal} cards):\n`;
-            summary += `Built with Evolution Line Optimization\n\n`;
-            
-            // Group by phase
-            const phase1Cards = cardsToAdd.filter(c => c.phase === 1);
-            const phase2Cards = cardsToAdd.filter(c => c.phase === 2);
-            const phase3Cards = cardsToAdd.filter(c => c.phase === 3);
-            const aceSpec = cardsToAdd.filter(c => c.phase === 0);
-            
-            // Helper to group cards by type
-            const groupByType = (cards) => {
-                let pokemon = [], trainer = [], energy = [];
-                cards.forEach(card => {
-                    const cardType = card.type || card.card_type || '';
-                    const category = getCardTypeCategory(cardType);
-                    const adjusted = card.lineAdjusted ? ' [Optimized]' : '';
-                    const line = `${card.addCount}x ${card.card_name} (${card.sharePercent.toFixed(0)}% in archetype)${adjusted}`;
-                    
-                    if (category === 'Pokemon') pokemon.push(line);
-                    else if (category === 'Energy') energy.push(line);
-                    else trainer.push(line);
-                });
-                return { pokemon, trainer, energy };
-            };
-            
-            // Ace Spec
-            if (aceSpec.length > 0) {
-                summary += `? ACE SPEC:\n`;
-                aceSpec.forEach(card => {
-                    summary += `1x ${card.card_name} (${card.sharePercent.toFixed(0)}% in archetype)\n`;
-                });
-                summary += `\n`;
-            }
-            
-            // Phase 1: Pokemon Lines
-            if (phase1Cards.length > 0) {
-                const { pokemon, trainer, energy } = groupByType(phase1Cards);
-                if (pokemon.length > 0) {
-                    summary += `?? CORE POKEMON LINES (${pokemon.reduce((sum, p) => sum + parseInt(p.split('x')[0]), 0)} cards):\n`;
-                    summary += `${pokemon.join('\n')}\n\n`;
+            // Step 8: Fallback fill -- reach 60 with the dominant Basic Energy
+            if (currentTotal < 60) {
+                const spaceLeft = 60 - currentTotal;
+                const primaryEnergy = filtered
+                    .filter(c => isBaseEnergy(c))
+                    .sort((a, b) => b.sharePercent - a.sharePercent)[0];
+                if (primaryEnergy) {
+                    const existing = cardsToAdd.find(c => c.card_name === primaryEnergy.card_name);
+                    if (existing) {
+                        existing.addCount += spaceLeft;
+                    } else {
+                        cardsToAdd.push({ ...primaryEnergy, addCount: spaceLeft });
+                    }
+                    currentTotal += spaceLeft;
+                    console.log(`[autoCompleteConsistency] Fallback: +${spaceLeft}x ${primaryEnergy.card_name} -- Total: ${currentTotal}/60`);
                 }
             }
-            
-            // Phase 2: Essential Trainers & Energy
-            if (phase2Cards.length > 0) {
-                const { pokemon, trainer, energy } = groupByType(phase2Cards);
-                if (trainer.length > 0) {
-                    summary += `?? ESSENTIAL TRAINERS (=85% Share, ${trainer.reduce((sum, t) => sum + parseInt(t.split('x')[0]), 0)} cards):\n`;
-                    summary += `${trainer.join('\n')}\n\n`;
-                }
-                if (energy.length > 0) {
-                    summary += `? ENERGY (${energy.reduce((sum, e) => sum + parseInt(e.split('x')[0]), 0)} cards):\n`;
-                    summary += `${energy.join('\n')}\n\n`;
-                }
-            }
-            
-            // Phase 3: Tech Cards
-            if (phase3Cards.length > 0) {
-                const { pokemon, trainer, energy } = groupByType(phase3Cards);
-                if (trainer.length > 0) {
-                    summary += `?? TECH CARDS (<85% Share, ${trainer.reduce((sum, t) => sum + parseInt(t.split('x')[0]), 0)} cards):\n`;
-                    summary += `${trainer.join('\n')}\n\n`;
-                }
-            }
-            
-            summary += `???????????????????????????\n`;
-            summary += `? NEW: Evolution Line Optimization\n`;
-            summary += `* Archetype Data: 75% Weight (Core Identity)\n`;
-            summary += `* Meta Data: 25% Weight (Tech Choices)\n`;
-            summary += `* Optimal Ratios: 3x Stage 2 = 3-4x Basic\n\n`;
-            summary += `Continue?`;
-            
+
+            console.log(`[autoCompleteConsistency] Deck complete: ${currentTotal}/60`);
+
+            // Build confirm summary
+            let summary = `MAX CONSISTENCY Deck (${currentTotal} cards):\n`;
+            summary += `Algorithm: Math.round(avgCountWhenUsed), 5% cutoff, no phase heuristics\n\n`;
+            cardsToAdd.forEach(c => {
+                summary += `${c.addCount}x ${c.card_name} (${c.sharePercent.toFixed(0)}% archetype)\n`;
+            });
+            summary += `\nContinue?`;
+
             if (confirm(summary)) {
-                // Add all cards to deck
                 cardsToAdd.forEach(card => {
                     const originalSetCode = card.set_code || '';
                     const originalSetNumber = card.set_number || '';
                     const preferredVersion = getPreferredVersionForCard(card.card_name, originalSetCode, originalSetNumber);
-                    
                     let setCode, setNumber;
                     if (preferredVersion) {
                         setCode = preferredVersion.set;
@@ -5429,16 +4918,13 @@ const BASE_PATH = './data/';
                         setCode = originalSetCode;
                         setNumber = originalSetNumber;
                     }
-                    
-                    // ?? PERFORMANCE: Use batch add (no display updates per card)
                     for (let i = 0; i < card.addCount; i++) {
                         addCardToDeckBatch(source, card.card_name, setCode, setNumber);
                     }
                 });
-                
-                console.log('[autoCompleteConsistency] ? Consistency deck completed with rarity mode:', globalRarityPreference);
-                
-                // Save deck ONCE at the end
+
+                console.log('[autoCompleteConsistency] Consistency deck completed with rarity mode:', globalRarityPreference);
+
                 if (source === 'cityLeague') {
                     saveCityLeagueDeck();
                 } else if (source === 'currentMeta') {
@@ -5446,9 +4932,8 @@ const BASE_PATH = './data/';
                 } else if (source === 'pastMeta') {
                     savePastMetaDeck();
                 }
-                
-                // ?? PERFORMANCE: Update display ONCE at the end (not 60 times!)
-                updateDeckDisplay(source)
+
+                updateDeckDisplay(source);
             }
         }
         

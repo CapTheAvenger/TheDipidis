@@ -773,20 +773,35 @@ function ptGlobalIono() {
 }
 
 // --- DMG BUFF COUNTER (Muscle Band, Choice Belt, etc.) ---
-
-function ptAddDmgBuff(player, amount) {
-    const el = document.getElementById(`ptActiveModifier-${player}`);
-    if (!el) return;
-    if (amount === 0) {
-        ptActiveBuffs[player] = 0;
-        el.style.display = 'none';
-        ptLog(`DMG Buff für ${player} zurückgesetzt.`);
-    } else {
-        ptActiveBuffs[player] += amount;
-        el.style.display = 'block';
-        el.innerText = `+${ptActiveBuffs[player]}`;
-        ptLog(`💪 DMG Buff ${player}: +${ptActiveBuffs[player]} gesamt.`);
+// Works directly on the DOM element; accumulates +amount per L-click, resets on R-click.
+function ptToggleDmgMod(element, amount) {
+    if (element.classList.contains('active') && amount > 0) {
+        amount += parseInt(element.innerText.replace('+', '')) || 0;
     }
+    if (amount === 0) {
+        element.classList.remove('active');
+        element.innerText = '+0';
+        ptLog('DMG Buff zurückgesetzt.');
+    } else {
+        element.classList.add('active');
+        element.innerText = '+' + amount;
+        ptLog(`💪 DMG Buff: +${amount} gesamt.`);
+    }
+}
+
+// --- MULLIGAN ---
+function ptMulligan(player) {
+    ptSaveState();
+    ptState[player].deck.push(...ptState[player].hand);
+    ptState[player].hand = [];
+    const deck = ptState[player].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    for (let i = 0; i < 7; i++) if (deck.length > 0) ptState[player].hand.push(deck.pop());
+    ptLog(`🃏 ${player} nimmt einen Mulligan — 7 neue Karten.`);
+    ptRenderAll();
 }
 
 function ptFlipCoin() {

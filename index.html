@@ -210,14 +210,14 @@
         .pt-stadium-marker { top: -8px; right: -8px; border-color: #3498db; color: #3498db; }
         .pt-ability-marker.used  { background: #f1c40f; color: #000; border-color: #fff; box-shadow: 0 0 10px #f1c40f; }
         .pt-stadium-marker.used  { background: #3498db; color: #fff; border-color: #fff; box-shadow: 0 0 10px #3498db; }
-        /* DMG Buff Counter */
+        /* DMG Buff Counter — hollow default, orange+glowing when .active */
         .pt-dmg-modifier {
-            position: absolute; top: -8px; left: -8px;
-            background: #e67e22; color: #fff; border: 2px solid #fff;
-            border-radius: 4px; padding: 2px 4px; font-weight: 900; font-size: 11px;
-            cursor: pointer; z-index: 20; user-select: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            position: absolute; top: -6px; left: -6px;
+            background: rgba(0,0,0,0.7); color: #e67e22; border: 2px solid #e67e22;
+            border-radius: 4px; padding: 1px 4px; font-weight: 900; font-size: 10px;
+            cursor: pointer; z-index: 20; user-select: none; transition: all 0.2s;
         }
+        .pt-dmg-modifier.active { background: #e67e22; color: #fff; border-color: #fff; box-shadow: 0 0 8px #e67e22; }
         /* Drag ghost fix: dragged card becomes transparent and non-blocking */
         .pt-field-card.dragging, .pt-hand-card.dragging { opacity: 0.5; pointer-events: none; }
         .pt-damage-badge { position: absolute; top: -8px; right: -8px; background: radial-gradient(circle at top left, #ff6b6b, #c0392b); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; border: 2px solid #fff; pointer-events: none; z-index: 20; }
@@ -1960,10 +1960,7 @@
                 <span id="ptMessage" style="color:#FFCB05; font-weight:700; font-size:0.9em; min-width:80px; margin-left: 10px;"></span>
             </div>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="pt-btn" onclick="ptDraw1()">D +1</button>
-                <button class="pt-btn" onclick="ptOpenTopCards(5)">🔭 Top 5</button>
-                <button class="pt-btn" onclick="ptOpenDeckSearch()">🔍 Deck</button>
-                <button class="pt-btn" onclick="ptShuffle()">🔀 Shuffle</button>
+                <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip Board</button>
                 <button class="pt-btn" onclick="ptNewGame()">♻️ Restart</button>
                 <button class="pt-btn" onclick="ptToggleLog()">📋 Log</button>
                 <button class="pt-btn pt-danger" onclick="closePlaytester()">🚪 Quit</button>
@@ -2003,9 +2000,7 @@
 
                 <div style="position: absolute; top: 50%; left: 22%; transform: translate(-50%, -50%); z-index: 5;">
                     <div class="static-element" style="display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.55); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
-                        <button class="pt-btn" onclick="ptFlipCoin()">🪙 Coin</button>
                         <button class="pt-btn" onclick="ptPassTurn()" style="background:#27ae60; color:white; border-color:#2ecc71;">⏭️ End Turn</button>
-                        <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip</button>
                         <div style="display:flex; gap:4px; justify-content:center; margin-top:2px;">
                             <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')">VSTAR</button>
                             <button id="ptGxMarker"    class="pt-marker pt-marker-gx"    onclick="ptToggleMarker('gx')">GX</button>
@@ -2074,7 +2069,7 @@
                                 <div id="ptActiveZone-p2" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-active')"
                                      style="min-height: 105px; min-width: 75px;"></div>
-                                <div id="ptActiveModifier-p2" class="pt-dmg-modifier" style="display:none;" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptAddDmgBuff('p2', 10)" oncontextmenu="ptAddDmgBuff('p2', 0); return false;">+0</div>
+                                <div id="ptActiveModifier-p2" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
                                     <button class="pt-status-marker" title="Item Lock" onclick="this.classList.toggle('active')">🚫</button>
                                     <button class="pt-status-marker" title="No Tools"  onclick="this.classList.toggle('active')">🔧</button>
@@ -2145,7 +2140,7 @@
                                 <div id="ptActiveZone-p1" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-active')"
                                      style="min-height: 105px; min-width: 75px;"></div>
-                                <div id="ptActiveModifier-p1" class="pt-dmg-modifier" style="display:none;" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptAddDmgBuff('p1', 10)" oncontextmenu="ptAddDmgBuff('p1', 0); return false;">+0</div>
+                                <div id="ptActiveModifier-p1" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
                                     <button class="pt-status-marker" title="Item Lock" onclick="this.classList.toggle('active')">🚫</button>
                                     <button class="pt-status-marker" title="No Tools"  onclick="this.classList.toggle('active')">🔧</button>
@@ -2170,6 +2165,8 @@
                 <div style="display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
 
                     <button class="pt-btn" style="padding: 4px 8px; background:#e67e22; color:white; border-color:#d35400;" onclick="ptUndo()" title="Letzte Aktion rückgängig machen">↩️ Undo</button>
+
+                        <button class="pt-btn" style="padding: 4px 8px; background:#8e44ad; color:white; border-color:#9b59b6;" onclick="ptMulligan(ptCurrentPlayer)" title="Hand ins Deck, 7 neue ziehen">🃏 Mulligan</button>
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
                     <span style="color: #ccc; font-size: 10px; font-weight: bold;">Self:</span>
@@ -2303,6 +2300,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v13"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v26"></script>
+    <script src="js/playtester.js?v=20260312-v27"></script>
 </body>
 </html>

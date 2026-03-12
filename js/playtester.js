@@ -511,8 +511,29 @@ function ptRunCommand(playerOverride) {
         ptRenderAll();
     } else if (action === 'shuffle' || action === 'sh') {
         ptShuffleDeck(p);
+    } else if (action === 'attach') {
+        // /attach [active|bench0-4]  — attach first energy from hand to a field slot
+        const slotArg   = parts[1] || 'active';
+        const validZones = ['active', 'bench0', 'bench1', 'bench2', 'bench3', 'bench4'];
+        const zone       = validZones.includes(slotArg) ? slotArg : 'active';
+        if (ptState[p].field[zone].length === 0) {
+            ptShowMessage(`No Pokémon in ${zone}!`);
+            return;
+        }
+        const energyIdx = ptState[p].hand.findIndex(c =>
+            (c.cardType || '').toLowerCase().includes('energy') ||
+            (c.supertype || '').toLowerCase() === 'energy'
+        );
+        if (energyIdx === -1) {
+            ptShowMessage('No Energy card in hand!');
+            return;
+        }
+        const [energyCard] = ptState[p].hand.splice(energyIdx, 1);
+        ptState[p].field[zone].push(energyCard);
+        ptLog(`⚡ Attached "${energyCard.name}" to ${p} ${zone}.`);
+        ptRenderAll();
     } else {
-        ptShowMessage('Unknown! Try: /draw 3  /iono 6  /roxanne 2  /top 5  /mill 2');
+        ptShowMessage('Unknown! Try: /draw 3  /iono 6  /roxanne 2  /top 5  /mill 2  /attach active');
     }
 }
 

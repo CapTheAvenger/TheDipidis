@@ -300,6 +300,44 @@
 
         .pt-dropzone { transition: background 0.15s, border-color 0.15s; }
         .pt-dropzone.drag-over { background: rgba(255,203,5,0.2) !important; border-color: #ffcb05 !important; box-shadow: 0 0 12px rgba(255,203,5,0.4); }
+
+        /* ── UX FIX: Hide browser number-input spinners (Chrome/Safari + Firefox) ── */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        /* Better-readable bottom-bar inputs (Judge / Iono) */
+        .pt-bottom-input {
+            width: 28px; background: #fff; color: #000;
+            border: 2px solid transparent; border-radius: 4px;
+            text-align: center; font-size: 13px; font-weight: 900;
+            padding: 2px; outline: none;
+        }
+        .pt-bottom-input.blue-border { border-color: #3B4CCA; }
+        .pt-bottom-input.red-border  { border-color: #E3350D; }
+
+        /* ── Stepper groups (Draw / Top / Bot deck controls) ── */
+        .pt-stepper-group {
+            display: flex; background: #222; border: 1px solid #555;
+            border-radius: 6px; overflow: hidden; margin-bottom: 4px;
+        }
+        .pt-stepper-group:last-child { margin-bottom: 0; }
+        .pt-stepper-btn {
+            background: #333; color: #fff; border: none; width: 22px;
+            font-weight: bold; cursor: pointer; font-size: 12px; transition: background 0.15s;
+        }
+        .pt-stepper-btn:hover { background: #555; }
+        .pt-stepper-val {
+            width: 20px; text-align: center; color: #ffcb05;
+            font-size: 11px; font-weight: bold; font-family: monospace;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .pt-stepper-action {
+            flex: 1; background: #1b3b8c; color: #fff; border: none;
+            border-left: 1px solid #555; font-size: 10px; font-weight: 700;
+            cursor: pointer; padding: 4px 0; transition: background 0.15s;
+        }
+        .pt-stepper-action:hover { background: #2a52be; }
     </style>
 </head>
 <body>
@@ -2037,19 +2075,25 @@
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDrawCards('p2', 1)">&#127136;</div>
                                 <div class="pt-deck-controls">
-                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:2px;" onclick="ptOpenDeckSearch('p2')">🔍 Search</button>
-                                    <button class="pt-btn-small" style="width:100%;" onclick="ptShuffleDeck('p2')">🔀 Shuffle</button>
-                                    <div class="pt-deck-controls-row">
-                                        <input type="number" id="p2-draw-amt" class="pt-cmd-input-small" value="1" min="1" max="60">
-                                        <button class="pt-btn-small" onclick="ptDrawCards('p2', +document.getElementById('p2-draw-amt').value)">Draw</button>
+                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p2')">🔍 Search</button>
+                                    <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p2')">🔀 Shuffle</button>
+                                    <div class="pt-stepper-group">
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p2-draw-val',-1)">-</button>
+                                        <span id="p2-draw-val" class="pt-stepper-val">1</span>
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p2-draw-val',1)">+</button>
+                                        <button class="pt-stepper-action" onclick="ptDrawCards('p2',parseInt(document.getElementById('p2-draw-val').innerText))">DRAW</button>
                                     </div>
-                                    <div class="pt-deck-controls-row">
-                                        <input type="number" id="p2-top-amt" class="pt-cmd-input-small" value="5" min="1" max="60">
-                                        <button class="pt-btn-small" onclick="ptLookCards('p2','top',+document.getElementById('p2-top-amt').value)">Top</button>
+                                    <div class="pt-stepper-group">
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p2-top-val',-1)">-</button>
+                                        <span id="p2-top-val" class="pt-stepper-val">5</span>
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p2-top-val',1)">+</button>
+                                        <button class="pt-stepper-action" onclick="ptLookCards('p2','top',parseInt(document.getElementById('p2-top-val').innerText))">TOP</button>
                                     </div>
-                                    <div class="pt-deck-controls-row">
-                                        <input type="number" id="p2-bot-amt" class="pt-cmd-input-small" value="1" min="1" max="60">
-                                        <button class="pt-btn-small" onclick="ptLookCards('p2','bottom',+document.getElementById('p2-bot-amt').value)">Bot</button>
+                                    <div class="pt-stepper-group">
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p2-bot-val',-1)">-</button>
+                                        <span id="p2-bot-val" class="pt-stepper-val">1</span>
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p2-bot-val',1)">+</button>
+                                        <button class="pt-stepper-action" onclick="ptLookCards('p2','bottom',parseInt(document.getElementById('p2-bot-val').innerText))">BOT</button>
                                     </div>
                                 </div>
                             </div>
@@ -2081,7 +2125,7 @@
                         </div>
 
                         <!-- P2 Active -->
-                        <div style="position: absolute; bottom: 170px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
+                        <div style="position: absolute; bottom: 135px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
                             <div class="pt-zone-label" style="color:#FFCB05;">P2 Active</div>
                             <div style="position: relative; display: inline-block;">
                                 <div id="ptActiveZone-p2" class="pt-dropzone"
@@ -2112,19 +2156,25 @@
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDrawCards('p1', 1)">&#127136;</div>
                                 <div class="pt-deck-controls">
-                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:2px;" onclick="ptOpenDeckSearch('p1')">🔍 Search</button>
-                                    <button class="pt-btn-small" style="width:100%;" onclick="ptShuffleDeck('p1')">🔀 Shuffle</button>
-                                    <div class="pt-deck-controls-row">
-                                        <input type="number" id="p1-draw-amt" class="pt-cmd-input-small" value="1" min="1" max="60">
-                                        <button class="pt-btn-small" onclick="ptDrawCards('p1', +document.getElementById('p1-draw-amt').value)">Draw</button>
+                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p1')">🔍 Search</button>
+                                    <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p1')">🔀 Shuffle</button>
+                                    <div class="pt-stepper-group">
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p1-draw-val',-1)">-</button>
+                                        <span id="p1-draw-val" class="pt-stepper-val">1</span>
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p1-draw-val',1)">+</button>
+                                        <button class="pt-stepper-action" onclick="ptDrawCards('p1',parseInt(document.getElementById('p1-draw-val').innerText))">DRAW</button>
                                     </div>
-                                    <div class="pt-deck-controls-row">
-                                        <input type="number" id="p1-top-amt" class="pt-cmd-input-small" value="5" min="1" max="60">
-                                        <button class="pt-btn-small" onclick="ptLookCards('p1','top',+document.getElementById('p1-top-amt').value)">Top</button>
+                                    <div class="pt-stepper-group">
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p1-top-val',-1)">-</button>
+                                        <span id="p1-top-val" class="pt-stepper-val">5</span>
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p1-top-val',1)">+</button>
+                                        <button class="pt-stepper-action" onclick="ptLookCards('p1','top',parseInt(document.getElementById('p1-top-val').innerText))">TOP</button>
                                     </div>
-                                    <div class="pt-deck-controls-row">
-                                        <input type="number" id="p1-bot-amt" class="pt-cmd-input-small" value="1" min="1" max="60">
-                                        <button class="pt-btn-small" onclick="ptLookCards('p1','bottom',+document.getElementById('p1-bot-amt').value)">Bot</button>
+                                    <div class="pt-stepper-group">
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p1-bot-val',-1)">-</button>
+                                        <span id="p1-bot-val" class="pt-stepper-val">1</span>
+                                        <button class="pt-stepper-btn" onclick="updateStepper('p1-bot-val',1)">+</button>
+                                        <button class="pt-stepper-action" onclick="ptLookCards('p1','bottom',parseInt(document.getElementById('p1-bot-val').innerText))">BOT</button>
                                     </div>
                                 </div>
                             </div>
@@ -2156,7 +2206,7 @@
                         </div>
 
                         <!-- P1 Active -->
-                        <div style="position: absolute; bottom: 170px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
+                        <div style="position: absolute; bottom: 135px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
                             <div class="pt-zone-label" style="color:#FFCB05;">P1 Active</div>
                             <div style="position: relative; display: inline-block;">
                                 <div id="ptActiveZone-p1" class="pt-dropzone"
@@ -2199,16 +2249,16 @@
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
                     <span style="color: #2ecc71; font-size: 10px; font-weight: bold; margin-left: 2px;">Judge:</span>
-                    <input type="number" id="ptJudgeDrawP1" value="4" min="0" max="20" style="width: 24px; background: #3B4CCA; color: white; border: 1px solid #fff; border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;" title="Draw P1">
+                    <input type="number" id="ptJudgeDrawP1" value="4" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1">
                     <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#27ae60; color:white; border-color:#2ecc71;" onclick="ptGlobalJudge()" title="Beide mischen Hand INS Deck und ziehen X">⚖️</button>
-                    <input type="number" id="ptJudgeDrawP2" value="4" min="0" max="20" style="width: 24px; background: #E3350D; color: white; border: 1px solid #fff; border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;" title="Draw P2">
+                    <input type="number" id="ptJudgeDrawP2" value="4" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2">
 
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
                     <span style="color: #f1c40f; font-size: 10px; font-weight: bold; margin-left: 2px;">Iono:</span>
-                    <input type="number" id="ptIonoDrawP1" value="6" min="0" max="20" style="width: 24px; background: #3B4CCA; color: white; border: 1px solid #fff; border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;" title="Draw P1">
+                    <input type="number" id="ptIonoDrawP1" value="6" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1">
                     <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#f39c12; color:white; border-color:#e67e22;" onclick="ptGlobalIono()" title="Beide legen Hand UNTER das Deck und ziehen X">⚡</button>
-                    <input type="number" id="ptIonoDrawP2" value="6" min="0" max="20" style="width: 24px; background: #E3350D; color: white; border: 1px solid #fff; border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;" title="Draw P2">
+                    <input type="number" id="ptIonoDrawP2" value="6" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2">
 
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
@@ -2322,6 +2372,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v17"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v32"></script>
+    <script src="js/playtester.js?v=20260312-v33"></script>
 </body>
 </html>

@@ -409,7 +409,15 @@ function ptNewGame() {
     ptRenderAll();
 }
 
-// --- HOTKEYS ---
+// --- STEPPER HELPER ---
+function updateStepper(id, change) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let val = parseInt(el.innerText) + change;
+    if (val < 1) val = 1;
+    if (val > 60) val = 60;
+    el.innerText = val;
+}
 
 // --- HOTKEYS ---
 function setupHotkeys() {

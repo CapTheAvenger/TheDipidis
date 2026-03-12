@@ -11,6 +11,8 @@ let ptCurrentPlayer = 'p1';
 let ptSelectedCardIndex = null;
 let ptActionLog = [];
 let ptLookingAt = [];
+let ptLookingAtIsBottom = false;
+let ptLookingAtPlayer = 'p1';
 let _ptMsgTimer = null;
 
 // Globale Speicher für importierte Sandbox-Decks
@@ -247,7 +249,7 @@ function ptNewGame() {
     const logContent = document.getElementById('ptActionLogContent');
     if (logContent) logContent.innerHTML = '';
     const board    = document.getElementById('playtester-board');
-    if (board) board.style.transform = 'rotate(0deg)';
+    if (board) board.classList.remove('flipped');
     const ind = document.getElementById('activePlayerIndicator');
     if (ind) ind.innerText = '1';
     const handZone = document.querySelector('.pt-hand-zone');
@@ -363,6 +365,8 @@ function ptRunCommand(playerOverride) {
 
 function ptOpenTopCards(num) {
     const p    = ptCurrentPlayer;
+    ptLookingAtPlayer     = p;
+    ptLookingAtIsBottom   = false;
     const take = Math.min(num || 5, ptState[p].deck.length);
     if (take === 0) { ptShowMessage('Deck is empty!'); return; }
     ptLookingAt = ptState[p].deck.splice(ptState[p].deck.length - take, take).reverse();
@@ -394,7 +398,7 @@ function ptRenderTopCards() {
 }
 
 function ptRouteTopCard(index, destination) {
-    const p    = ptCurrentPlayer;
+    const p    = ptLookingAtPlayer || ptCurrentPlayer;
     const card = ptLookingAt.splice(index, 1)[0];
     if (!card) return;
     if (destination === 'hand')         { ptState[p].hand.push(card);     ptLog(`Took "${card.name}" to hand.`); }
@@ -410,7 +414,13 @@ function ptRouteTopCard(index, destination) {
 }
 
 function ptCloseTopCards() {
-    while (ptLookingAt.length > 0) ptState[ptCurrentPlayer].deck.push(ptLookingAt.pop());
+    const p = ptLookingAtPlayer || ptCurrentPlayer;
+    if (ptLookingAtIsBottom) {
+        ptState[p].deck.splice(0, 0, ...ptLookingAt);
+    } else {
+        while (ptLookingAt.length > 0) ptState[p].deck.push(ptLookingAt.pop());
+    }
+    ptLookingAt = [];
     document.getElementById('ptTopCardsModal').style.display = 'none';
     ptRenderAll();
 }
@@ -438,33 +448,82 @@ function ptShuffle() {
     ptRenderAll();
 }
 
+// --- NEW HELPER FUNCTIONS ---
+
+function ptDrawCards(player, amount) {
+    const p = player || ptCurrentPlayer;
+    let drawn = 0;
+    for (let i = 0; i < amount; i++) {
+        if (ptState[p].deck.length > 0) { ptState[p].hand.push(ptState[p].deck.pop()); drawn++; }
+    }
+    if (drawn > 0) { ptLog(`Drew ${drawn} card(s) [${p}].`); ptRenderAll(); }
+    else ptShowMessage('Deck is empty!');
+}
+
+function ptShuffleDeck(player) {
+    const p    = player || ptCurrentPlayer;
+    const deck = ptState[p].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    ptLog(`Deck shuffled [${p}]!`);
+    ptRenderAll();
+}
+
+function ptLookCards(player, position, amount) {
+    const p = player || ptCurrentPlayer;
+    ptLookingAtPlayer   = p;
+    ptLookingAtIsBottom = (position === 'bottom');
+    const deck = ptState[p].deck;
+    const take = Math.min(amount || 5, deck.length);
+    if (take === 0) { ptShowMessage('Deck is empty!'); return; }
+    if (ptLookingAtIsBottom) {
+        ptLookingAt = deck.splice(0, take);
+    } else {
+        ptLookingAt = deck.splice(deck.length - take, take).reverse();
+    }
+    ptLog(`Looking at the ${position} ${take} card(s) [${p}].`);
+    ptRenderTopCards();
+    document.getElementById('ptTopCardsModal').style.display = 'flex';
+}
+
+function ptHandAction(type) {
+    const p   = ptCurrentPlayer;
+    const amt = parseInt(document.getElementById('ptHandDrawAmt')?.value || 1);
+    const _shuffle = deck => { for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; } };
+    const _draw = (n) => { let d = 0; for (let i = 0; i < n; i++) if (ptState[p].deck.length > 0) { ptState[p].hand.push(ptState[p].deck.pop()); d++; } return d; };
+    if (type === 'shuffle_deck') {
+        ptState[p].deck.push(...ptState[p].hand);
+        ptState[p].hand = [];
+        _shuffle(ptState[p].deck);
+        const drew = _draw(amt);
+        ptLog(`Shuffled hand into deck, drew ${drew} card(s).`);
+    } else if (type === 'shuffle_bottom') {
+        ptState[p].deck.unshift(...ptState[p].hand);
+        ptState[p].hand = [];
+        const drew = _draw(amt);
+        ptLog(`Moved hand to bottom of deck, drew ${drew} card(s).`);
+    }
+    ptRenderAll();
+}
+
 function ptFlipCoin() {
     const result = Math.random() >= 0.5 ? 'HEADS!' : 'TAILS!';
     ptLog(`🪙 Coin flip: ${result}`);
 }
 
 function ptFlipBoard() {
-    const board         = document.getElementById('playtester-board');
-    const stadiumWrapper = document.getElementById('ptStadiumWrapper');
-    const handZone      = document.querySelector('.pt-hand-zone');
-    const ind           = document.getElementById('activePlayerIndicator');
+    const board    = document.getElementById('playtester-board');
+    const handZone = document.querySelector('.pt-hand-zone');
+    const ind      = document.getElementById('activePlayerIndicator');
     if (!board) return;
-    if (ptCurrentPlayer === 'p1') {
-        board.style.transform = 'rotate(180deg)';
-        // Counter-rotate stadium so it stays upright for P2
-        if (stadiumWrapper) stadiumWrapper.style.transform = 'translateY(-50%) rotate(180deg)';
-        ptCurrentPlayer = 'p2';
-        if (ind)      ind.innerText = '2';
-        if (handZone) handZone.style.borderTopColor = '#E3350D';
-        ptLog('Turn passed to Player 2.');
-    } else {
-        board.style.transform = 'rotate(0deg)';
-        if (stadiumWrapper) stadiumWrapper.style.transform = 'translateY(-50%) rotate(0deg)';
-        ptCurrentPlayer = 'p1';
-        if (ind)      ind.innerText = '1';
-        if (handZone) handZone.style.borderTopColor = '#3B4CCA';
-        ptLog('Turn passed to Player 1.');
-    }
+    const flipping = ptCurrentPlayer === 'p1';
+    board.classList.toggle('flipped', flipping);
+    ptCurrentPlayer = flipping ? 'p2' : 'p1';
+    if (ind)      ind.innerText     = flipping ? '2' : '1';
+    if (handZone) handZone.style.borderTopColor = flipping ? '#E3350D' : '#3B4CCA';
+    ptLog(flipping ? 'Turn passed to Player 2.' : 'Turn passed to Player 1.');
     const vBtn = document.getElementById('ptVstarMarker');
     const gBtn = document.getElementById('ptGxMarker');
     if (vBtn) vBtn.classList.toggle('used', !!(ptState[ptCurrentPlayer] && ptState[ptCurrentPlayer].vstarUsed));
@@ -603,34 +662,83 @@ function moveZoneToZone(sourceId, targetId) {
 // --- DRAG & DROP ---
 
 function setupDragAndDrop() {
-    if (document._ptDragOver)    document.removeEventListener('dragover',  document._ptDragOver);
-    if (document._ptDropHandler) document.removeEventListener('drop',      document._ptDropHandler);
-
-    document._ptDragOver = e => e.preventDefault();
-    document._ptDropHandler = function(e) {
-        e.preventDefault();
-        const sourceZone = e.dataTransfer.getData('sourceZone');
-        const handIndex  = e.dataTransfer.getData('text/plain');
-        const targetEl   = e.target.closest('[id^="ptActiveZone-"],[id^="ptBench"],[id="ptStadiumZone"],[id="ptPlayZone"]');
-        if (!targetEl) return;
-        const targetId = targetEl.id;
-
-        if (sourceZone) { moveZoneToZone(sourceZone, targetId); return; }
-
-        if (handIndex !== '') {
-            ptSelectedCardIndex = parseInt(handIndex);
-            if (targetId === 'ptStadiumZone')           ptClickZone(ptCurrentPlayer, 'stadium');
-            else if (targetId === 'ptPlayZone')         ptClickZone(ptCurrentPlayer, 'playzone');
-            else if (targetId.startsWith('ptActiveZone-')) ptClickZone(targetId.endsWith('p1') ? 'p1' : 'p2', 'active');
-            else if (targetId.startsWith('ptBench')) {
-                const player = targetId.endsWith('-p1') ? 'p1' : 'p2';
-                const zone   = 'bench' + targetId.match(/ptBench(\d)/)[1];
-                ptClickZone(player, zone);
-            }
-        }
+    // Highlight drop zones on dragover
+    if (document._ptDragEnterHandler) document.removeEventListener('dragenter', document._ptDragEnterHandler);
+    if (document._ptDragLeaveHandler) document.removeEventListener('dragleave',  document._ptDragLeaveHandler);
+    document._ptDragEnterHandler = e => {
+        const zone = e.target.closest('.pt-dropzone');
+        if (zone) zone.classList.add('drag-over');
     };
-    document.addEventListener('dragover', document._ptDragOver);
-    document.addEventListener('drop',     document._ptDropHandler);
+    document._ptDragLeaveHandler = e => {
+        const zone = e.target.closest('.pt-dropzone');
+        if (zone && !zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+    };
+    document.addEventListener('dragenter', document._ptDragEnterHandler);
+    document.addEventListener('dragleave',  document._ptDragLeaveHandler);
+}
+
+function ptHandleDrop(event, targetZone) {
+    event.preventDefault();
+    event.stopPropagation();
+    const dropEl = event.target.closest('.pt-dropzone');
+    if (dropEl) dropEl.classList.remove('drag-over');
+
+    const sourceZone = event.dataTransfer.getData('sourceZone');
+    const handIndex  = event.dataTransfer.getData('text/plain');
+
+    if (sourceZone) {
+        // Field-to-field drag
+        const idMap = {
+            'p1-active':  'ptActiveZone-p1', 'p2-active':  'ptActiveZone-p2',
+            'p1-bench0':  'ptBench0-p1',     'p2-bench0':  'ptBench0-p2',
+            'p1-bench1':  'ptBench1-p1',     'p2-bench1':  'ptBench1-p2',
+            'p1-bench2':  'ptBench2-p1',     'p2-bench2':  'ptBench2-p2',
+            'p1-bench3':  'ptBench3-p1',     'p2-bench3':  'ptBench3-p2',
+            'p1-bench4':  'ptBench4-p1',     'p2-bench4':  'ptBench4-p2',
+        };
+        let targetId = idMap[targetZone];
+        if (!targetId && (targetZone === 'p1-bench' || targetZone === 'p2-bench')) {
+            const bp   = targetZone === 'p1-bench' ? 'p1' : 'p2';
+            const slot = _ptFirstFreeBench(bp);
+            targetId   = 'ptBench' + slot.slice(-1) + '-' + bp;
+        }
+        if (targetId) moveZoneToZone(sourceZone, targetId); 
+        return;
+    }
+
+    if (handIndex !== '') {
+        ptSelectedCardIndex = parseInt(handIndex);
+        if (targetZone === 'stadium')           ptClickZone(ptCurrentPlayer, 'stadium');
+        else if (targetZone === 'playzone')     ptClickZone(ptCurrentPlayer, 'playzone');
+        else if (targetZone === 'p1-active')    ptClickZone('p1', 'active');
+        else if (targetZone === 'p2-active')    ptClickZone('p2', 'active');
+        else if (targetZone === 'p1-bench')     ptClickZone('p1', _ptFirstFreeBench('p1'));
+        else if (targetZone === 'p2-bench')     ptClickZone('p2', _ptFirstFreeBench('p2'));
+        else if (targetZone === 'p1-discard') {
+            const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
+            if (c) { ptState['p1'].discard.push(c); ptLog(`Discarded "${c.name}".`); }
+            ptSelectedCardIndex = null; ptRenderAll();
+        } else if (targetZone === 'p2-discard') {
+            const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
+            if (c) { ptState['p2'].discard.push(c); ptLog(`Discarded "${c.name}".`); }
+            ptSelectedCardIndex = null; ptRenderAll();
+        } else if (targetZone === 'p1-lost') {
+            const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
+            if (c) { ptState['p1'].lostzone.push(c); ptLog(`Sent "${c.name}" to Lost Zone.`); }
+            ptSelectedCardIndex = null; ptRenderAll();
+        } else if (targetZone === 'p2-lost') {
+            const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
+            if (c) { ptState['p2'].lostzone.push(c); ptLog(`Sent "${c.name}" to Lost Zone.`); }
+            ptSelectedCardIndex = null; ptRenderAll();
+        }
+    }
+}
+
+function _ptFirstFreeBench(player) {
+    for (let i = 0; i < 5; i++) {
+        if (ptState[player].field['bench' + i].length === 0) return 'bench' + i;
+    }
+    return 'bench0'; // fallback: slot 0
 }
 
 function ptDragStartHand(event, index) {

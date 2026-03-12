@@ -1830,6 +1830,44 @@
     .pt-log-p1 { color: #a8e6cf; }
     .pt-log-p2 { color: #ff8b94; }
     .pt-log-neutral { color: #ffcb05; }
+
+    /* ── NEW v17 STYLES ── */
+    /* Static elements counter-rotate when board flips */
+    .pt-arena.flipped { transform: rotate(180deg); }
+    .pt-arena.flipped .static-element { transform: rotate(180deg); }
+
+    /* Deck Controls Panel (sits next to deck pile) */
+    .pt-deck-controls {
+        position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
+        background: rgba(0,0,0,0.88); border: 2px solid #2a52be; border-radius: 8px;
+        padding: 8px; display: flex; flex-direction: column; gap: 5px; width: 145px;
+        z-index: 20; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    }
+    .pt-deck-controls-row { display: flex; gap: 4px; align-items: center; }
+    .pt-cmd-input-small {
+        width: 38px; background: #222; color: #fff; border: 1px solid #555;
+        border-radius: 4px; text-align: center; font-size: 11px; font-family: monospace;
+        padding: 3px 2px;
+    }
+    .pt-btn-small {
+        flex: 1; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px;
+        font-size: 10px; font-weight: 700; cursor: pointer; padding: 3px 4px; transition: 0.15s;
+        font-family: inherit;
+    }
+    .pt-btn-small:hover { background: #2a52be; border-color: #3B4CCA; }
+
+    /* Status Markers (Item Lock, No Tool) */
+    .pt-status-marker {
+        width: 26px; height: 26px; border-radius: 50%; background: #333; border: 2px solid #555;
+        display: flex; align-items: center; justify-content: center; font-size: 11px;
+        cursor: pointer; transition: all 0.2s; filter: grayscale(1); opacity: 0.45;
+        line-height: 1;
+    }
+    .pt-status-marker.active { filter: grayscale(0); opacity: 1; border-color: #e74c3c; background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.6); }
+
+    /* Drag & Drop highlight */
+    .pt-dropzone { transition: background 0.15s, border-color 0.15s; }
+    .pt-dropzone.drag-over { background: rgba(255,203,5,0.2) !important; border-color: #ffcb05 !important; box-shadow: 0 0 12px rgba(255,203,5,0.4); }
     </style>
 
     <script>window.CARD_BACK_URL = "https://images.pokemontcg.io/card-back.png";</script>
@@ -1877,10 +1915,6 @@
                 <span style="color:#fff; font-size:1.1em; font-weight:900; letter-spacing: 1px;">⚔️ ARENA</span>
                 <span id="ptMessage" style="color:#FFCB05; font-weight:700; font-size:0.9em; min-width:80px; margin-left: 10px;"></span>
             </div>
-            <div style="display:flex;gap:4px;align-items:center;">
-                <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')">VSTAR</button>
-                <button id="ptGxMarker"    class="pt-marker pt-marker-gx"    onclick="ptToggleMarker('gx')">GX</button>
-            </div>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
                 <button class="pt-btn" onclick="ptDraw1()">D +1</button>
                 <button class="pt-btn" onclick="ptOpenTopCards(5)">🔭 Top 5</button>
@@ -1899,103 +1933,162 @@
 
             <div id="playtester-board" class="pt-arena">
 
-                <!-- P2 Discard + Deck (top-left, rotated) -->
-                <div style="position: absolute; top: 15px; left: 15px; display: flex; gap: 10px; transform: rotate(180deg);">
-                    <div style="text-align:center;">
-                        <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p2">0</span>)</div>
-                        <div id="ptDiscardPile-p2"></div>
-                    </div>
-                    <div style="text-align:center;">
-                        <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
-                        <div class="pt-deck-pile" onclick="ptDraw1('p2')">&#127136;</div>
+                <!-- ── CENTER: Stadium (right) + Action Buttons (left) — always stay upright ── -->
+                <div style="position: absolute; top: 50%; right: 22%; transform: translate(50%, -50%); z-index: 5;">
+                    <div class="static-element" style="background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center;">
+                        <div class="pt-zone-label" style="color:#a8e6cf; margin-bottom: 6px;">🏟️ Stadium</div>
+                        <div id="ptStadiumZone" class="pt-empty-slot pt-dropzone"
+                             ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'stadium')"
+                             style="width:82px;height:114px;"></div>
                     </div>
                 </div>
 
-                <!-- P2 Lost Zone (left side, rotated) -->
-                <div style="position: absolute; top: 130px; left: 15px; text-align: center; transform: rotate(180deg);">
-                    <div class="pt-zone-label" style="color:#d136c1;">Lost P2 (<span id="ptLostCount-p2">0</span>)</div>
-                    <div id="ptLostPile-p2" class="pt-empty-slot" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);" onclick="ptOpenLostZone('p2')">&#127744;</div>
-                </div>
-
-                <!-- P2 Bench (top-centre, rotated) -->
-                <div style="position: absolute; top: 15px; left: 50%; transform: translateX(-50%) rotate(180deg); text-align: center;">
-                    <div class="pt-zone-label">P2 Bench</div>
-                    <div style="display:flex; justify-content:center; gap:5px;">
-                        <div id="ptBench0-p2"></div><div id="ptBench1-p2"></div><div id="ptBench2-p2"></div><div id="ptBench3-p2"></div><div id="ptBench4-p2"></div>
+                <div style="position: absolute; top: 50%; left: 22%; transform: translate(-50%, -50%); z-index: 5;">
+                    <div class="static-element" style="display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.55); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                        <button class="pt-btn" onclick="ptFlipCoin()">🪙 Coin</button>
+                        <button class="pt-btn" onclick="ptPassTurn()" style="background:#27ae60; color:white; border-color:#2ecc71;">⏭️ End Turn</button>
+                        <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip</button>
+                        <div style="display:flex; gap:4px; justify-content:center; margin-top:2px;">
+                            <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')">VSTAR</button>
+                            <button id="ptGxMarker"    class="pt-marker pt-marker-gx"    onclick="ptToggleMarker('gx')">GX</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- P2 Active (upper-centre, rotated) -->
-                <div style="position: absolute; top: 130px; left: 50%; transform: translateX(-50%) rotate(180deg); text-align: center; z-index: 10;">
-                    <div class="pt-zone-label" style="color:#FFCB05;">P2 Active</div>
-                    <div id="ptActiveZone-p2" style="min-height: 105px;"></div>
-                </div>
+                <!-- ── P2 AREA (rotated 180° so P2 sees their side correctly) ── -->
+                <div id="p2-area" style="position: absolute; inset: 0; pointer-events: none;">
+                    <div style="pointer-events: auto; width: 100%; height: 100%; position: relative; transform: rotate(180deg);">
 
-                <!-- P2 Command input (rotated, right of active) -->
-                <div style="position: absolute; top: 130px; left: 50%; transform: translateX(75px) rotate(180deg);">
-                    <div class="pt-zone-label">⚡ Command (P2)</div>
-                    <div style="display:flex; gap:4px;">
-                        <input id="ptCommandInput-p2" type="text" placeholder="/draw 3" class="pt-cmd-input" onkeydown="if(event.key==='Enter') ptRunCommand('p2')" onclick="event.stopPropagation()">
-                        <button class="pt-btn" style="padding: 4px 8px;" onclick="ptRunCommand('p2')">▶</button>
+                        <!-- P2 Left column: Lost Zone / Deck (with controls) / Discard -->
+                        <div style="position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label" style="color:#d136c1;">Lost P2 (<span id="ptLostCount-p2">0</span>)</div>
+                                <div id="ptLostPile-p2" class="pt-empty-slot pt-dropzone" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);"
+                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p2-lost')" onclick="ptOpenLostZone('p2')">&#127744;</div>
+                            </div>
+                            <div style="text-align:center; position: relative;">
+                                <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
+                                <div class="pt-deck-pile" onclick="ptDrawCards('p2', 1)">&#127136;</div>
+                                <div class="pt-deck-controls">
+                                    <button class="pt-btn-small" style="width:100%;" onclick="ptShuffleDeck('p2')">🔀 Shuffle</button>
+                                    <div class="pt-deck-controls-row">
+                                        <input type="number" id="p2-draw-amt" class="pt-cmd-input-small" value="1" min="1" max="60">
+                                        <button class="pt-btn-small" onclick="ptDrawCards('p2', +document.getElementById('p2-draw-amt').value)">Draw</button>
+                                    </div>
+                                    <div class="pt-deck-controls-row">
+                                        <input type="number" id="p2-top-amt" class="pt-cmd-input-small" value="5" min="1" max="60">
+                                        <button class="pt-btn-small" onclick="ptLookCards('p2','top',+document.getElementById('p2-top-amt').value)">Top</button>
+                                    </div>
+                                    <div class="pt-deck-controls-row">
+                                        <input type="number" id="p2-bot-amt" class="pt-cmd-input-small" value="1" min="1" max="60">
+                                        <button class="pt-btn-small" onclick="ptLookCards('p2','bottom',+document.getElementById('p2-bot-amt').value)">Bot</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p2">0</span>)</div>
+                                <div id="ptDiscardPile-p2" class="pt-dropzone"
+                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p2-discard')"></div>
+                            </div>
+                        </div>
+
+                        <!-- P2 Prizes (top-right from P2's view) -->
+                        <div style="position: absolute; bottom: 20px; left: 20px; text-align: center;">
+                            <div class="pt-zone-label">P2 Prizes</div>
+                            <div id="ptPrizeZone-p2" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; width: 94px;"></div>
+                        </div>
+
+                        <!-- P2 Bench -->
+                        <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); text-align: center;">
+                            <div class="pt-zone-label">P2 Bench</div>
+                            <div style="display:flex; justify-content:center; gap:5px;" class="pt-dropzone"
+                                 ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p2-bench')">
+                                <div id="ptBench0-p2"></div><div id="ptBench1-p2"></div><div id="ptBench2-p2"></div><div id="ptBench3-p2"></div><div id="ptBench4-p2"></div>
+                            </div>
+                        </div>
+
+                        <!-- P2 Active -->
+                        <div style="position: absolute; bottom: 170px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
+                            <div class="pt-zone-label" style="color:#FFCB05;">P2 Active</div>
+                            <div style="position: relative; display: inline-block;">
+                                <div id="ptActiveZone-p2" class="pt-dropzone"
+                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p2-active')"
+                                     style="min-height: 105px; min-width: 75px;"></div>
+                                <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
+                                    <button class="pt-status-marker" title="Item Lock" onclick="this.classList.toggle('active')">🚫</button>
+                                    <button class="pt-status-marker" title="No Tools"  onclick="this.classList.toggle('active')">🔧</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- P2 Prizes (top-right, rotated) -->
-                <div style="position: absolute; top: 15px; right: 15px; text-align: center; transform: rotate(180deg);">
-                    <div class="pt-zone-label">P2 Prizes</div>
-                    <div id="ptPrizeZone-p2" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; width: 94px;"></div>
-                </div>
+                <!-- ── P1 AREA (normal orientation) ── -->
+                <div id="p1-area" style="position: absolute; inset: 0; pointer-events: none;">
+                    <div style="pointer-events: auto; width: 100%; height: 100%; position: relative;">
 
-                <!-- Stadium (centre-left, counter-rotates when board flips) -->
-                <div id="ptStadiumWrapper" style="position: absolute; top: 50%; left: 15px; transform: translateY(-50%); text-align: center; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); z-index: 5;">
-                    <div class="pt-zone-label" style="color:#a8e6cf;">🏟️ Stadium</div>
-                    <div id="ptStadiumZone"></div>
-                </div>
+                        <!-- P1 Right column: Lost Zone / Deck (with controls) / Discard -->
+                        <div style="position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label" style="color:#d136c1;">Lost P1 (<span id="ptLostCount-p1">0</span>)</div>
+                                <div id="ptLostPile-p1" class="pt-empty-slot pt-dropzone" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);"
+                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p1-lost')" onclick="ptOpenLostZone('p1')">&#127744;</div>
+                            </div>
+                            <div style="text-align:center; position: relative;">
+                                <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
+                                <div class="pt-deck-pile" onclick="ptDrawCards('p1', 1)">&#127136;</div>
+                                <div class="pt-deck-controls">
+                                    <button class="pt-btn-small" style="width:100%;" onclick="ptShuffleDeck('p1')">🔀 Shuffle</button>
+                                    <div class="pt-deck-controls-row">
+                                        <input type="number" id="p1-draw-amt" class="pt-cmd-input-small" value="1" min="1" max="60">
+                                        <button class="pt-btn-small" onclick="ptDrawCards('p1', +document.getElementById('p1-draw-amt').value)">Draw</button>
+                                    </div>
+                                    <div class="pt-deck-controls-row">
+                                        <input type="number" id="p1-top-amt" class="pt-cmd-input-small" value="5" min="1" max="60">
+                                        <button class="pt-btn-small" onclick="ptLookCards('p1','top',+document.getElementById('p1-top-amt').value)">Top</button>
+                                    </div>
+                                    <div class="pt-deck-controls-row">
+                                        <input type="number" id="p1-bot-amt" class="pt-cmd-input-small" value="1" min="1" max="60">
+                                        <button class="pt-btn-small" onclick="ptLookCards('p1','bottom',+document.getElementById('p1-bot-amt').value)">Bot</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p1">0</span>)</div>
+                                <div id="ptDiscardPile-p1" class="pt-dropzone"
+                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p1-discard')"></div>
+                            </div>
+                        </div>
 
-                <!-- P1 Discard + Deck (bottom-right) -->
-                <div style="position: absolute; bottom: 15px; right: 15px; display: flex; gap: 10px;">
-                    <div style="text-align:center;">
-                        <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p1">0</span>)</div>
-                        <div id="ptDiscardPile-p1"></div>
-                    </div>
-                    <div style="text-align:center;">
-                        <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
-                        <div class="pt-deck-pile" onclick="ptDraw1('p1')">&#127136;</div>
-                    </div>
-                </div>
+                        <!-- P1 Prizes -->
+                        <div style="position: absolute; bottom: 20px; left: 20px; text-align: center;">
+                            <div class="pt-zone-label">P1 Prizes</div>
+                            <div id="ptPrizeZone-p1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; width: 94px;"></div>
+                        </div>
 
-                <!-- P1 Lost Zone (right side) -->
-                <div style="position: absolute; bottom: 130px; right: 15px; text-align: center;">
-                    <div class="pt-zone-label" style="color:#d136c1;">Lost P1 (<span id="ptLostCount-p1">0</span>)</div>
-                    <div id="ptLostPile-p1" class="pt-empty-slot" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);" onclick="ptOpenLostZone('p1')">&#127744;</div>
-                </div>
+                        <!-- P1 Bench -->
+                        <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); text-align: center;">
+                            <div class="pt-zone-label">P1 Bench</div>
+                            <div style="display:flex; justify-content:center; gap:5px;" class="pt-dropzone"
+                                 ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p1-bench')">
+                                <div id="ptBench0-p1"></div><div id="ptBench1-p1"></div><div id="ptBench2-p1"></div><div id="ptBench3-p1"></div><div id="ptBench4-p1"></div>
+                            </div>
+                        </div>
 
-                <!-- P1 Prizes (bottom-left) -->
-                <div style="position: absolute; bottom: 15px; left: 15px; text-align: center;">
-                    <div class="pt-zone-label">P1 Prizes</div>
-                    <div id="ptPrizeZone-p1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; width: 94px;"></div>
-                </div>
+                        <!-- P1 Active -->
+                        <div style="position: absolute; bottom: 170px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
+                            <div class="pt-zone-label" style="color:#FFCB05;">P1 Active</div>
+                            <div style="position: relative; display: inline-block;">
+                                <div id="ptActiveZone-p1" class="pt-dropzone"
+                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p1-active')"
+                                     style="min-height: 105px; min-width: 75px;"></div>
+                                <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
+                                    <button class="pt-status-marker" title="Item Lock" onclick="this.classList.toggle('active')">🚫</button>
+                                    <button class="pt-status-marker" title="No Tools"  onclick="this.classList.toggle('active')">🔧</button>
+                                </div>
+                            </div>
+                        </div>
 
-                <!-- P1 Bench (bottom-centre) -->
-                <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); text-align: center;">
-                    <div class="pt-zone-label">P1 Bench</div>
-                    <div style="display:flex; justify-content:center; gap:5px;">
-                        <div id="ptBench0-p1"></div><div id="ptBench1-p1"></div><div id="ptBench2-p1"></div><div id="ptBench3-p1"></div><div id="ptBench4-p1"></div>
-                    </div>
-                </div>
-
-                <!-- P1 Active (lower-centre) -->
-                <div style="position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
-                    <div class="pt-zone-label" style="color:#FFCB05;">P1 Active</div>
-                    <div id="ptActiveZone-p1" style="min-height: 105px;"></div>
-                </div>
-
-                <!-- P1 Command input (right of active) -->
-                <div style="position: absolute; bottom: 130px; left: 50%; transform: translateX(75px);">
-                    <div class="pt-zone-label">⚡ Command (P1)</div>
-                    <div style="display:flex; gap:4px;">
-                        <input id="ptCommandInput-p1" type="text" placeholder="/draw 3" class="pt-cmd-input" onkeydown="if(event.key==='Enter') ptRunCommand('p1')" onclick="event.stopPropagation()">
-                        <button class="pt-btn" style="padding: 4px 8px;" onclick="ptRunCommand('p1')">▶</button>
                     </div>
                 </div>
 
@@ -2004,7 +2097,9 @@
             <!-- Played Card — side panel outside the mat -->
             <div style="display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 12px; border: 2px dashed #ffcb05; box-shadow: 0 5px 20px rgba(0,0,0,0.5); min-width: 180px; align-self: stretch; justify-content: center;">
                 <div class="pt-zone-label" style="color:#FFCB05; font-size: 13px; margin-bottom: 15px; text-shadow: none;">⚡ Played Card</div>
-                <div id="ptPlayZone" style="width: 140px; height: 195px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05);">
+                <div id="ptPlayZone" class="pt-dropzone"
+                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'playzone')"
+                     style="width: 136px; height: 188px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05);">
                     <span style="color: rgba(255,255,255,0.4); font-size: 11px; text-align: center; padding: 10px;">Play Supporter/Item<br>Here</span>
                 </div>
             </div>
@@ -2012,8 +2107,15 @@
         </div>
 
         <div class="pt-hand-zone">
-            <div class="pt-zone-label" style="margin-bottom:2px; color: white;">
-                Hand (<span id="ptHandCount">0</span>) &mdash; Player <span id="activePlayerIndicator">1</span>. Right-click for details.
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px; flex-wrap:wrap;">
+                <div class="pt-zone-label" style="color: white; margin:0;">
+                    Hand (<span id="ptHandCount">0</span>) &mdash; Player <span id="activePlayerIndicator">1</span>. Right-click for details.
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-left:auto;">
+                    <input type="number" id="ptHandDrawAmt" class="pt-cmd-input-small" value="1" min="1" max="60" style="width:48px;">
+                    <button class="pt-btn-small" onclick="ptHandAction('shuffle_deck')">🔀 Shuffle to Deck + Draw</button>
+                    <button class="pt-btn-small" onclick="ptHandAction('shuffle_bottom')">⬇️ To Bottom + Draw</button>
+                </div>
             </div>
             <div id="ptHandZone" style="display:flex; gap:6px; overflow-x:auto; padding: 4px 5px 6px 5px; align-items:flex-end;"></div>
         </div>
@@ -2086,6 +2188,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260311-v12"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v16"></script>
+    <script src="js/playtester.js?v=20260312-v17"></script>
 </body>
 </html>

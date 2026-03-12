@@ -6,6 +6,9 @@ on:
     - cron: '0 1 * * 2'
   workflow_dispatch: # Allows manual execution
 
+permissions:
+  contents: write
+
 jobs:
   scrape-tournaments:
     runs-on: ubuntu-latest

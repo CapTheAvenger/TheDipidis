@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="css/auth-styles.css">
 
     <style id="pokeball-menu-styles">
-        /* Grundschrift für die gesamte Seite */
+        /* Base font for the entire page */
         body {
             font-family: 'Nunito', sans-serif;
             background-color: #f0f2f5;
@@ -105,7 +105,7 @@
             .header h1 { font-size: 1.4em !important; }
         }
 
-        /* Pokémon-Style Farb-Überschreibungen */
+        /* Pokémon-style color overrides */
         .btn-primary { background-color: #3B4CCA !important; border-color: #2a52be !important; }
         .btn-primary:hover { background-color: #2a52be !important; }
         .btn-success { background-color: #27ae60 !important; border-color: #2ecc71 !important; }
@@ -120,22 +120,22 @@
                 <div style="display: flex; align-items: center; gap: 20px;">
                     <!-- Pokeball Menu Trigger -->
                     <div class="pokeball-wrapper">
-                        <div id="mainMenuTrigger" class="pokeball-btn" onclick="toggleMainMenu()" title="Menü öffnen">
+                        <div id="mainMenuTrigger" class="pokeball-btn" onclick="toggleMainMenu()" title="Open Menu">
                             <div class="pokeball-top"></div>
                             <div class="pokeball-bottom"></div>
                             <div class="pokeball-center"></div>
                         </div>
                         <div id="mainMenuDropdown" class="main-menu-dropdown">
-                            <div class="menu-header">Hauptmenü</div>
+                            <div class="menu-header">Main Menu</div>
                             <button id="menu-btn-city-league"          class="menu-item active" onclick="switchTabAndUpdateMenu('city-league')">🇯🇵 City League Meta</button>
-                            <button id="menu-btn-city-league-analysis" class="menu-item"        onclick="switchTabAndUpdateMenu('city-league-analysis')">📊 Deck Analyse (Japan)</button>
+                            <button id="menu-btn-city-league-analysis" class="menu-item"        onclick="switchTabAndUpdateMenu('city-league-analysis')">📊 Deck Analysis (Japan)</button>
                             <button id="menu-btn-current-meta"         class="menu-item"        onclick="switchTabAndUpdateMenu('current-meta')">🎮 Current Meta (Global)</button>
-                            <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')">📈 Deck Analyse (Global)</button>
-                            <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')">🏆 Historische Meta</button>
-                            <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')">🧰 Karten-Datenbank</button>
+                            <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')">📈 Deck Analysis (Global)</button>
+                            <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')">🏆 Past Meta</button>
+                            <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')">🧰 Card Database</button>
                             <button id="menu-btn-sandbox"              class="menu-item"        onclick="switchTabAndUpdateMenu('sandbox')">⚔️ Playtester Sandbox</button>
-                            <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')">👤 Mein Profil / Decks</button>
-                            <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')">📖 Anleitung</button>
+                            <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')">👤 My Profile</button>
+                            <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')">📖 How to Use</button>
                         </div>
                     </div>
 
@@ -144,20 +144,20 @@
                             🎴 Pokémon TCG Hub
                             <span id="current-tab-title" class="current-tab-badge">🇯🇵 City League Meta</span>
                         </h1>
-                        <p style="margin: 5px 0 0 0; color: #7f8c8d; font-weight: 600; font-size: 0.95em;">Dein Portal für Meta Analyse &amp; Deckbuilding</p>
+                        <p style="margin: 5px 0 0 0; color: #7f8c8d; font-weight: 600; font-size: 0.95em;">Your Portal for Meta Analysis &amp; Deck Building</p>
                     </div>
                 </div>
 
                 <div id="user-menu">
                     <button id="signin-btn" class="user-btn" onclick="showAuthModal('signin')" style="display: none; background: #f8f9fa; border: 2px solid #ddd; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer;">
                         <img src="images/pokeball-icon.png" alt="Sign In" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
-                        Einloggen
+                        Sign In
                     </button>
                     <div id="user-info" class="user-info" style="display: none; align-items: center; gap: 15px;">
                         <span id="user-email-display" style="color: #7f8c8d; font-weight: 600; font-size: 0.9em;"></span>
                         <button class="user-btn" onclick="switchTabAndUpdateMenu('profile')" style="background: #e8f4fd; color: #3B4CCA; border: 2px solid #3B4CCA; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
-                            <img src="images/pokeball-icon.png" alt="Profil" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
-                            Profil
+                            <img src="images/pokeball-icon.png" alt="My Profile" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
+                            My Profile
                         </button>
                     </div>
                 </div>
@@ -320,7 +320,7 @@
                         
                         <div class="deck-summary" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; background: #e8f4fd; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin-bottom: 20px;">
                             <h3 style="margin: 0; color: #2c3e50;">
-                                Current: <span id="cityLeagueDeckCount" style="font-weight: bold; color: #3498db;">0</span> / 60 Cards
+                                Deck: <span id="cityLeagueDeckCount" style="font-weight: bold; color: #3498db;">0</span> / 60 Cards
                                 <span id="cityLeagueDeckCountUnique" style="font-weight: 500; font-size: 0.85em; color: #666; margin-left: 8px;">(0 Unique)</span>
                             </h3>
                             <div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 8px 16px; border-radius: 8px; font-size: 1.1em; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -591,7 +591,7 @@
                         
                         <div class="deck-summary" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; background: #e8f4fd; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin-bottom: 20px;">
                             <h3 style="margin: 0; color: #2c3e50;">
-                                Current: <span id="currentMetaDeckCount" style="font-weight: bold; color: #3498db;">0</span> / 60 Cards
+                                Deck: <span id="currentMetaDeckCount" style="font-weight: bold; color: #3498db;">0</span> / 60 Cards
                                 <span id="currentMetaDeckCountUnique" style="font-weight: 500; font-size: 0.85em; color: #666; margin-left: 8px;">(0 Unique)</span>
                             </h3>
                             <div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 8px 16px; border-radius: 8px; font-size: 1.1em; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -795,7 +795,7 @@
                         
                         <div class="deck-summary" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; background: #e8f4fd; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin-bottom: 20px;">
                             <h3 style="margin: 0; color: #2c3e50;">
-                                Current: <span id="pastMetaDeckCount" style="font-weight: bold; color: #3498db;">0</span> / 60 Cards
+                                Deck: <span id="pastMetaDeckCount" style="font-weight: bold; color: #3498db;">0</span> / 60 Cards
                                 <span id="pastMetaDeckCountUnique" style="font-weight: 500; font-size: 0.85em; color: #666; margin-left: 8px;">(0 Unique)</span>
                             </h3>
                             <div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 8px 16px; border-radius: 8px; font-size: 1.1em; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -1773,7 +1773,7 @@
         border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none;
     }
 
-    /* ── KARTEN GRÖßEN (Perfekt für Non-Scroll) ── */
+    /* ── CARD SIZES (optimised for non-scroll layout) ── */
     .pt-empty-slot { width: 58px; height: 81px; border: 2px dashed rgba(255,255,255,0.28); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.32); font-size: 9px; cursor: pointer; transition: all 0.2s; text-align: center; user-select: none; box-sizing: border-box; flex-shrink: 0; background: rgba(0,0,0,0.15); position: relative; z-index: 2; }
     .pt-empty-slot.pt-drop-target, .pt-empty-slot:hover { border-color: #ffcb05; background: rgba(255, 203, 5, 0.15); color: #ffcb05; box-shadow: 0 0 10px rgba(255,203,5,0.3); }
     .pt-field-card { position: relative; width: 58px; cursor: pointer; border-radius: 4px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 2px 2px 6px rgba(0,0,0,0.4); user-select: none; flex-shrink: 0; z-index: 2; }
@@ -1784,7 +1784,7 @@
     #ptActiveZone-p1 .pt-empty-slot, #ptActiveZone-p1 .pt-field-card,
     #ptActiveZone-p2 .pt-empty-slot, #ptActiveZone-p2 .pt-field-card { width: 75px; height: 105px; }
 
-    /* Befehlszeile im Spielfeld */
+    /* Command input on the game field */
     .pt-cmd-input { background: rgba(0,0,0,0.7); border: 2px solid #3B4CCA; border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 11px; width: 110px; outline: none; font-family: monospace; transition: all 0.2s; position: relative; z-index: 5; }
     .pt-cmd-input:focus { border-color: #ffcb05; box-shadow: 0 0 10px rgba(255,203,5,0.5); }
 
@@ -1801,13 +1801,13 @@
     .pt-action-btn.red { background: #e74c3c; border-color: #c0392b; }
     .pt-action-btn:hover { background: #555; }
 
-    /* Deck, Ablage, Preise */
+    /* Deck pile, discard pile, prizes */
     .pt-deck-pile { width: 45px; height: 63px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; background: repeating-linear-gradient(45deg, #1b3b8c, #1b3b8c 6px, #2a52be 6px, #2a52be 12px); border: 2px solid rgba(255,255,255,0.5); user-select: none; position: relative; z-index: 2;}
     .pt-deck-pile:hover { transform: scale(1.05); border-color: #ffcb05; }
     .pt-prize-card { width: 28px; border-radius: 4px; cursor: pointer; display: block; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); transition: transform 0.15s; position: relative; z-index: 2;}
     .pt-prize-card:hover { transform: scale(1.15) translateY(-5px); border: 2px solid #ffcb05; z-index: 10;}
 
-    /* Zeilen-Container */
+    /* Row containers */
     .pt-player-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 2; }
     .pt-side-panel { display: flex; gap: 8px; align-items: flex-end; width: 140px; }
 
@@ -1885,7 +1885,7 @@
             const activeBtn = document.getElementById('menu-btn-' + tabId);
             if (activeBtn) {
                 activeBtn.classList.add('active');
-                // Extrahiere Text ohne Emojis für sauberen Badge
+                // Strip emoji characters for clean badge text
                 let text = activeBtn.innerText.replace(/[\u{1F300}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
                 const badge = document.getElementById('current-tab-title');
                 if (badge) badge.innerText = text || activeBtn.innerText.trim();
@@ -2192,18 +2192,18 @@
             <span class="rarity-switcher-close" onclick="closePlaytesterSetup()">✕</span>
             <h2 style="margin-top: 0; color: #3B4CCA; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">⚔️ Playtester Setup</h2>
             <p style="margin-bottom: 15px; color: #555; font-size: 1.05em;">
-                Dein aktuelles Deck <strong>(Player 1)</strong> ist bereit. Was soll <strong>Player 2</strong> spielen?
+                Your current deck <strong>(Player 1)</strong> is ready. What should <strong>Player 2</strong> play?
             </p>
             <div style="margin-bottom: 20px;">
-                <label style="display:block; font-weight:bold; margin-bottom:8px; color: #2c3e50;">Gegnerisches Deck (PTCG Live Format):</label>
-                <textarea id="playtesterOpponentDeck" placeholder="Füge hier die Deckliste für Spieler 2 ein (z.B. von Limitless)..." style="width: 100%; height: 180px; padding: 12px; border: 2px solid #b3d9ff; border-radius: 8px; font-family: monospace; font-size: 12px; resize: vertical; box-sizing: border-box;"></textarea>
+                <label style="display:block; font-weight:bold; margin-bottom:8px; color: #2c3e50;">Opponent's Deck (PTCG Live Format):</label>
+                <textarea id="playtesterOpponentDeck" placeholder="Paste Player 2's deck list here (e.g. from Limitless)..." style="width: 100%; height: 180px; padding: 12px; border: 2px solid #b3d9ff; border-radius: 8px; font-family: monospace; font-size: 12px; resize: vertical; box-sizing: border-box;"></textarea>
             </div>
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 <button class="btn" onclick="startPlaytesterWithMirror()" style="flex: 1; background: #e1e8ed; color: #2c3e50; font-weight: bold; border: 2px solid #ccd6dd; padding: 12px; border-radius: 8px; cursor: pointer;">
-                    🪞 Mirror Match (Gleiches Deck)
+                    🪞 Mirror Match (Same Deck)
                 </button>
                 <button class="btn" onclick="startPlaytesterWithOpponent()" style="flex: 1; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; font-weight: bold; border: none; box-shadow: 0 4px 10px rgba(39,174,96,0.3); padding: 12px; border-radius: 8px; cursor: pointer;">
-                    🚀 Start vs. Gegner
+                    🚀 Start vs. Opponent
                 </button>
             </div>
         </div>

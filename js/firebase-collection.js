@@ -861,6 +861,66 @@ function updateDecksUI() {
   }).join('');
 }
 
+// Convert a saved deck to PTCG Live export string
+function deckToExportString(deckIndex) {
+  const deck = window.userDecks && window.userDecks[deckIndex];
+  if (!deck || !deck.cards) return '';
+  const lines = [];
+  for (const [deckKey, count] of Object.entries(deck.cards)) {
+    if (!count || count <= 0) continue;
+    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+    let cardName = deckKey, setCode = '', setNumber = '';
+    if (setMatch) {
+      cardName = setMatch[1]; setCode = setMatch[2]; setNumber = setMatch[3];
+    } else {
+      const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
+      if (cardData) { setCode = cardData.set || ''; setNumber = cardData.number || ''; }
+    }
+    lines.push(setCode && setNumber ? `${count} ${cardName} ${setCode} ${setNumber}` : `${count} ${cardName}`);
+  }
+  return lines.join('\n');
+}
+
+// Open modal to pick 2 decks for playtest
+function openMyDecksPlaytest() {
+  const modal = document.getElementById('myDecksPlaytestModal');
+  if (!modal) return;
+  const decks = window.userDecks || [];
+  if (decks.length === 0) { alert('No saved decks yet!'); return; }
+  ['myDeckSelectP1', 'myDeckSelectP2'].forEach((selId, idx) => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    sel.innerHTML = decks.map((d, i) => `<option value="${i}">${d.name || 'Deck ' + (i+1)}</option>`).join('');
+    if (idx === 1 && decks.length > 1) sel.value = '1';
+  });
+  modal.style.display = 'flex';
+}
+
+function closeMyDecksPlaytest() {
+  const modal = document.getElementById('myDecksPlaytestModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function startMyDecksPlaytest() {
+  const p1Idx = parseInt(document.getElementById('myDeckSelectP1').value);
+  const p2Idx = parseInt(document.getElementById('myDeckSelectP2').value);
+  const p1Str = deckToExportString(p1Idx);
+  const p2Str = deckToExportString(p2Idx);
+  if (!p1Str) { alert('Could not load Player 1 deck!'); return; }
+  if (!p2Str) { alert('Could not load Player 2 deck!'); return; }
+  // Feed strings into sandbox import fields (playtester reads from these)
+  const ta1 = document.getElementById('sandboxImportP1');
+  const ta2 = document.getElementById('sandboxImportP2');
+  if (ta1) ta1.value = p1Str;
+  if (ta2) ta2.value = p2Str;
+  if (typeof parseSandboxDeckToExactPrints === 'function') {
+    parseSandboxDeckToExactPrints(p1Str, 'p1');
+    parseSandboxDeckToExactPrints(p2Str, 'p2');
+  }
+  closeMyDecksPlaytest();
+  if (typeof startStandalonePlaytester === 'function') startStandalonePlaytester();
+}
+
 // Copy a saved deck to clipboard in Pokémon TCG Live format
 function copyMyDeck(deckIndex) {
   const deck = window.userDecks && window.userDecks[deckIndex];

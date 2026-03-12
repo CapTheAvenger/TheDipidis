@@ -1758,9 +1758,12 @@
                         
                         <!-- Decks Tab -->
                         <div id="profile-decks" class="profile-tab-content" style="display: none;">
-                            <h2>🎮 My Decks</h2>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
+                                <h2 style="margin: 0;">🎮 My Decks</h2>
+                                <button onclick="openMyDecksPlaytest()" style="background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 3px 10px rgba(39,174,96,0.35); transition: transform 0.15s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">⚔️ Playtest</button>
+                            </div>
                             <p style="color: #666; margin-bottom: 20px;">Your saved decks are synced across all devices</p>
-                            <div id="decks-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                            <div id="decks-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                                 <p style="color: #999;">No saved decks yet. Build a deck and save it to see it here!</p>
                             </div>
                         </div>
@@ -2338,6 +2341,27 @@
         </div>
     </div>
 
+    <!-- My Decks Playtest Modal -->
+    <div id="myDecksPlaytestModal" class="rarity-switcher-modal" onclick="if(event.target===this)closeMyDecksPlaytest()" style="z-index: 20000; display: none;">
+        <div class="rarity-switcher-modal-content" style="max-width: 500px; background: #f8f9fa;">
+            <span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()">✕</span>
+            <h2 style="margin-top: 0; color: #27ae60; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">⚔️ Playtest – My Decks</h2>
+            <p style="color: #555; margin-bottom: 20px;">Choose a deck for each player, then start the match!</p>
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #3B4CCA;">Player 1 🔵</label>
+                <select id="myDeckSelectP1" style="width: 100%; padding: 10px 12px; border: 2px solid #3B4CCA; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
+            </div>
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;">Player 2 🔴</label>
+                <select id="myDeckSelectP2" style="width: 100%; padding: 10px 12px; border: 2px solid #E3350D; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="closeMyDecksPlaytest()" style="flex:1; padding:12px; background:#e1e8ed; color:#2c3e50; font-weight:700; border:2px solid #ccd6dd; border-radius:8px; cursor:pointer; font-size:14px;">Cancel</button>
+                <button onclick="startMyDecksPlaytest()" style="flex:2; padding:12px; background:linear-gradient(135deg,#27ae60 0%,#1e8449 100%); color:white; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-size:14px; box-shadow:0 4px 10px rgba(39,174,96,0.3);">🚀 Start Playtest</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Playtester Setup Modal -->
     <div id="playtesterSetupModal" class="rarity-switcher-modal" onclick="if(event.target === this) closePlaytesterSetup()" style="z-index: 20000; display: none;">
         <div class="rarity-switcher-modal-content" style="max-width: 600px; background: #f8f9fa;">
@@ -2365,7 +2389,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-credentials.js?v=20260311-v2"></script>
-    <script src="js/firebase-collection.js?v=20260311-v11"></script>
+    <script src="js/firebase-collection.js?v=20260311-v12"></script>
     <script src="js/firebase-config.js?v=20260311-v5"></script>
     <script src="js/firebase-globals.js?v=20260311-v2"></script>
     <script src="js/firebase-auth.js?v=20260311-v4"></script>

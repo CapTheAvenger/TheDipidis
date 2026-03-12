@@ -220,6 +220,15 @@
         .pt-dmg-modifier.active { background: #e67e22; color: #fff; border-color: #fff; box-shadow: 0 0 8px #e67e22; }
         /* Drag ghost fix: dragged card becomes transparent and non-blocking */
         .pt-field-card.dragging, .pt-hand-card.dragging { opacity: 0.5; pointer-events: none; }
+
+        /* Limitless-Style Legend — static, always visible */
+        .pt-legend-box {
+            position: absolute; top: 12px; left: 12px;
+            background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px 12px;
+            color: #ddd; font-size: 10px; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; gap: 5px; user-select: none; pointer-events: none;
+        }
+        .pt-legend-item { display: flex; align-items: center; gap: 8px; line-height: 1.3; }
         .pt-damage-badge { position: absolute; top: -8px; right: -8px; background: radial-gradient(circle at top left, #ff6b6b, #c0392b); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; border: 2px solid #fff; pointer-events: none; z-index: 20; }
 
         .pt-field-actions { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); display: none; gap: 2px; z-index: 100; background: rgba(0,0,0,0.9); padding: 4px; border-radius: 6px; border: 1px solid #444; flex-direction: column; }
@@ -1971,17 +1980,30 @@
 
             <div id="playtester-board" class="pt-arena">
 
-                <!-- ── LEGEND (hover ? button, top-left) ── -->
-                <div class="static-element" style="position:absolute; top:12px; left:12px; z-index:50;">
-                    <div style="background:rgba(255,203,5,0.9); color:#000; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.5);" onmouseenter="document.getElementById('ptLegendBox').style.display='block'" onmouseleave="document.getElementById('ptLegendBox').style.display='none'">?</div>
-                    <div id="ptLegendBox" style="display:none; position:absolute; top:30px; left:0; background:rgba(0,0,0,0.85); border:1px solid rgba(255,203,5,0.4); border-radius:8px; padding:12px; color:#fff; font-size:11px; width:220px; backdrop-filter:blur(4px); line-height:1.7; z-index:100;">
-                        <div style="color:#FFCB05; font-weight:900; margin-bottom:8px;">&#128218; CONTROLS</div>
-                        <div style="margin-bottom:4px;"><b>L-Klick Karte:</b> +10 DMG</div>
-                        <div style="margin-bottom:4px;"><b>R-Klick Karte:</b> Men&uuml; / Details</div>
-                        <div style="margin-bottom:4px;"><span style="color:#f1c40f; border:1px solid #f1c40f; border-radius:50%; padding:0 3px; font-size:10px;">A</span> <b>Ability:</b> Klick = benutzt</div>
-                        <div style="margin-bottom:4px;"><span style="color:#3498db; border:1px solid #3498db; border-radius:50%; padding:0 3px; font-size:10px;">S</span> <b>Stadium:</b> Klick = benutzt</div>
-                        <div style="margin-bottom:4px;"><span style="background:#e67e22; padding:1px 4px; border-radius:3px; font-size:10px;">+10</span> <b>DMG Buff:</b> L-Klick +10 / R-Klick reset</div>
-                        <div><b>Drag &amp; Drop:</b> Karten frei bewegen</div>
+                <!-- ── LEGEND (static, Limitless-style) ── -->
+                <div class="static-element pt-legend-box">
+                    <div style="color:#FFCB05; font-weight:900; margin-bottom:2px; font-size:11px; display:flex; align-items:center; gap:4px;">
+                        <span>📖</span> LEGEND
+                    </div>
+                    <div class="pt-legend-item">
+                        <div style="width:12px; height:12px; background:#ff6b6b; border-radius:50%; border:1px solid #fff; flex-shrink:0;"></div>
+                        <span>Damage &mdash; +10/+50 or click badge ÷0</span>
+                    </div>
+                    <div class="pt-legend-item">
+                        <div style="width:14px; height:14px; background:transparent; border:1px solid #f1c40f; color:#f1c40f; border-radius:50%; font-weight:900; font-size:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">A</div>
+                        <span>Ability toggle (gelb = benutzt)</span>
+                    </div>
+                    <div class="pt-legend-item">
+                        <div style="width:8px; height:13px; background:#ccc; border-radius:2px; border:1px solid #fff; flex-shrink:0;"></div>
+                        <span>Tool &mdash; linke Seite der Karte</span>
+                    </div>
+                    <div class="pt-legend-item">
+                        <div style="width:14px; height:14px; background:rgba(0,0,0,0.6); border:2px solid #e67e22; border-radius:3px; font-size:7px; font-weight:900; color:#e67e22; display:flex; align-items:center; justify-content:center; flex-shrink:0;">+0</div>
+                        <span>DMG Buff — L-Klick +10, R-Klick reset</span>
+                    </div>
+                    <div class="pt-legend-item">
+                        <span style="font-size:12px;">🚀</span>
+                        <span>Drag &amp; drop in jede Zone</span>
                     </div>
                 </div>
 
@@ -2000,6 +2022,7 @@
 
                 <div style="position: absolute; top: 50%; left: 22%; transform: translate(-50%, -50%); z-index: 5;">
                     <div class="static-element" style="display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.55); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                        <button class="pt-btn" onclick="ptFlipCoin()">🪙 Coin</button>
                         <button class="pt-btn" onclick="ptPassTurn()" style="background:#27ae60; color:white; border-color:#2ecc71;">⏭️ End Turn</button>
                         <div style="display:flex; gap:4px; justify-content:center; margin-top:2px;">
                             <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')">VSTAR</button>
@@ -2300,6 +2323,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v13"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v27"></script>
+    <script src="js/playtester.js?v=20260312-v28"></script>
 </body>
 </html>

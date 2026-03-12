@@ -1303,7 +1303,7 @@
                 <div class="container">
                     <div class="header">
                         <h1>📖 How to Use This Website</h1>
-                        <p>Complete Guide to Pokemon TCG Analysis & Deck Building</p>
+                        <p>Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v36 (March 2026)</p>
                     </div>
                     
                     <div style="max-width: 1200px; margin: 0 auto; padding: 30px; background: white; border-radius: 10px;">
@@ -1312,9 +1312,12 @@
                         <section style="margin-bottom: 40px;">
                             <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🎯 Website Overview</h2>
                             <p style="font-size: 1.1em; line-height: 1.8; color: #555;">
-                                This website provides comprehensive Pokemon TCG meta analysis, deck building tools, and tournament data. 
-                                Access Japanese City League results, international tournament data, and detailed card statistics to build competitive decks.
+                                This website provides comprehensive Pokémon TCG meta analysis, deck building tools, a full card database, a collection tracker, and a fully-featured playtest simulator. 
+                                Access Japanese City League results, international tournament data, and detailed card statistics to build competitive decks — and test them directly in your browser.
                             </p>
+                            <div style="background: #fef9e7; border-left: 4px solid #f39c12; padding: 12px 16px; border-radius: 6px; margin-top: 12px;">
+                                <strong>🆕 New this week:</strong> Playtester now loads directly from <strong>My Decks</strong> via the ⚔️ Playtest button. Stepper controls in the playtester. Auto-Complete deck algorithm fully rewritten (v18). All broken ★ symbols fixed across every tab.
+                            </div>
                         </section>
                         
                         <!-- Tab Explanations -->
@@ -1327,7 +1330,8 @@
                                     <h3 style="color: #e74c3c; margin-top: 0;">🇯🇵 City League Meta</h3>
                                     <p style="line-height: 1.7;"><strong>Purpose:</strong> View meta development and archetype stats from Japanese City League tournaments</p>
                                     <p style="line-height: 1.7;"><strong>What you see:</strong> Tournament date, archetype usage, placement statistics, meta share graphs</p>
-                                    <p style="line-height: 1.7;"><strong>Best for:</strong> Understanding the current Japanese meta trends and archetype popularity over time</p>
+                                    <p style="line-height: 1.7;"><strong>Best for:</strong> Understanding current Japanese meta trends and archetype popularity over time</p>
+                                    <p style="line-height: 1.7;"><strong>🃏 Playtest button:</strong> Click "Playtest" in the Deck Builder to launch the playtester pre-loaded with this archetype</p>
                                 </div>
                                 
                                 <!-- City League Deck Analysis Tab -->
@@ -1338,12 +1342,12 @@
                                     <ul style="line-height: 1.7;">
                                         <li>🗓️ <strong>Date Filter:</strong> Filter tournaments by date range (From/To dates)</li>
                                         <li>🔍 <strong>Deck Search:</strong> Type to find specific archetypes</li>
-                                        <li>🎯 <strong>Deck Selector:</strong> Choose from available decks</li>
-                                        <li>🦂 <strong>Card Filter:</strong> Show core cards (>90%), common (>70%), or all cards</li>
-                                        <li>📊 <strong>Statistics:</strong> View deck size, usage, average placement</li>
-                                        <li>🎴 <strong>Card Overview:</strong> See all cards with usage%, rarity options, type filters</li>
-                                        <li>🛠️ <strong>Deck Builder:</strong> Auto-generate or manually build decks, copy to clipboard</li>
-                                        <li>🔄 <strong>Deck Compare:</strong> Compare two decklists and see differences with visual badges</li>
+                                        <li>🦂 <strong>Card Filter:</strong> Show core cards (&gt;90%), common (&gt;70%), or all cards</li>
+                                        <li>📊 <strong>Statistics:</strong> Deck size, usage, average placement</li>
+                                        <li>🎴 <strong>Card Overview:</strong> All cards with usage%, rarity options, type filters</li>
+                                        <li>🛠️ <strong>Deck Builder:</strong> +/− buttons, Auto-Generate (Max Consistency), copy to clipboard</li>
+                                        <li>🔄 <strong>Deck Compare:</strong> Compare two decklists with visual color-coded diff</li>
+                                        <li>⭐ <strong>Rarity Switcher (★):</strong> Click the yellow ★ button on any card to switch print versions</li>
                                     </ul>
                                 </div>
                                 
@@ -1361,12 +1365,12 @@
                                     <p style="line-height: 1.7;"><strong>Purpose:</strong> Analyze current meta decks from Limitless Online and tournaments</p>
                                     <p style="line-height: 1.7;"><strong>Special Features:</strong></p>
                                     <ul style="line-height: 1.7;">
-                                        <li>🎮 <strong>Format Filter:</strong> View All / Limitless Decks only / Tournament Decks only</li>
+                                        <li>🎮 <strong>Format Filter:</strong> All / Limitless only / Tournament only</li>
                                         <li>📊 <strong>Win Rate Stats:</strong> Total online tournament win rate</li>
-                                        <li>⚔️ <strong>Matchup Analysis:</strong> See best and worst matchups with win rates and game records</li>
-                                        <li>🔍 <strong>Opponent Search:</strong> Search specific matchups to analyze head-to-head data</li>
-                                        <li>🌍 <strong>Meta Card Analysis:</strong> See most played cards across Top 10 meta decks with direct deck-building buttons</li>
+                                        <li>⚔️ <strong>Matchup Analysis:</strong> Best/worst matchups with win rates and game records</li>
+                                        <li>🌍 <strong>Meta Card Analysis:</strong> Most played cards across Top 10 meta decks with deck-building buttons</li>
                                         <li>🎯 <strong>Max Consistency Mode:</strong> Auto-generate decks with optimal card counts based on tournament data</li>
+                                        <li>★ <strong>Rarity Switcher:</strong> Click the yellow ★ on any card to switch prints</li>
                                     </ul>
                                 </div>
                                 
@@ -1380,54 +1384,84 @@
                                 
                                 <!-- Cards Tab -->
                                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #16a085;">
-                                    <h3 style="color: #16a085; margin-top: 0;">🧰 Cards</h3>
-                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Browse all available Pokemon TCG cards</p>
+                                    <h3 style="color: #16a085; margin-top: 0;">🧰 Card Database</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Browse all available Pokémon TCG cards with prices and set info</p>
                                     <p style="line-height: 1.7;"><strong>Features:</strong></p>
                                     <ul style="line-height: 1.7;">
-                                        <li>🔍 <strong>Search:</strong> Find cards by name</li>
-                                        <li>🎴 <strong>Type Filter:</strong> Filter by Pokemon, Supporter, Item, Tool, Stadium, Energy, Ace Spec</li>
+                                        <li>🔍 <strong>Search:</strong> Find cards by name, set code, or number</li>
+                                        <li>🎴 <strong>Type Filter:</strong> Pokémon, Supporter, Item, Tool, Stadium, Energy, Ace Spec</li>
                                         <li>🎯 <strong>Set Filter:</strong> Select specific card sets</li>
                                         <li>💎 <strong>Rarity Filter:</strong> Filter by card rarity</li>
-                                        <li>📊 <strong>Sort:</strong> Organize cards by different criteria</li>
-                                        <li>🖼️ <strong>View Mode:</strong> Grid view with card images</li>
+                                        <li>📊 <strong>Sort:</strong> Pokédex order, name, set, price, rarity</li>
+                                        <li>🖼️ <strong>Lightbox:</strong> Click any card for full-size preview</li>
+                                        <li>★ <strong>Rarity Switcher:</strong> Click the yellow ★ button to see all available prints</li>
+                                        <li>✓ / ❤️ <strong>Collection &amp; Wishlist buttons</strong> on every card</li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Playtester Sandbox Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #3B4CCA;">
+                                    <h3 style="color: #3B4CCA; margin-top: 0;">⚔️ Playtester Sandbox</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Simulate real Pokémon TCG games directly in your browser — 2-player board, full hand/field/discard mechanics</p>
+                                    <p style="line-height: 1.7;"><strong>How to load decks:</strong></p>
+                                    <ul style="line-height: 1.7;">
+                                        <li>📋 <strong>Paste &amp; Load:</strong> Paste a Pokémon TCG Live export for each player and click 📥 Load Deck</li>
+                                        <li>🃏 <strong>From Deck Analysis:</strong> Click the "🃏 Playtest" button in any Deck Builder tab to pre-load the current archetype</li>
+                                        <li>🎮 <strong>From My Decks:</strong> Go to Profile → My Decks, click the ⚔️ Playtest button, select 2 saved decks — loads instantly with exact saved prints</li>
+                                    </ul>
+                                    <p style="line-height: 1.7;"><strong>In-game controls:</strong></p>
+                                    <ul style="line-height: 1.7;">
+                                        <li>🖱️ <strong>Drag &amp; Drop:</strong> Move cards from hand → field, bench → active, discard pile, etc.</li>
+                                        <li>🔢 <strong>Stepper controls:</strong> ＋/－ buttons for damage counters, prize cards, energy counts</li>
+                                        <li>🔄 <strong>Shuffle/Draw:</strong> Shuffle deck, draw 7 (new game), draw extra card</li>
+                                        <li>⚡ <strong>/attach command:</strong> Type "/attach" to attach energy from hand to any field zone</li>
+                                        <li>💊 <strong>Damage Modifier:</strong> Always-visible buff counter for damage calculation</li>
+                                        <li>🔀 <strong>Judge/Iono:</strong> Separate buttons for exact hand-size mechanics</li>
+                                        <li>↩️ <strong>Undo:</strong> Revert the last board action</li>
+                                        <li>🏟️ <strong>Stadium:</strong> S-marker on field, auto-removed when new stadium played</li>
+                                        <li>🪙 <strong>Coin Flip:</strong> Heads/Tails in the center panel</li>
+                                        <li>📋 <strong>Legend (? button):</strong> Show/hide the full hotkey and zone reference</li>
                                     </ul>
                                 </div>
                                 
                                 <!-- Profile Tab -->
                                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #3498db;">
-                                    <h3 style="color: #3498db; margin-top: 0;">👤 Profile</h3>
-                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Manage your personal Pokemon TCG collection and decks</p>
-                                    <p style="line-height: 1.7;"><strong>Sub-tabs:</strong> My Collection, My Decks, Wishlist, Settings</p>
+                                    <h3 style="color: #3498db; margin-top: 0;">👤 My Profile</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Manage your personal Pokémon TCG collection, saved decks, and wishlist — synced across all devices via Firebase</p>
+                                    <p style="line-height: 1.7;"><strong>Sub-tabs:</strong></p>
+                                    <ul style="line-height: 1.7;">
+                                        <li>🗂️ <strong>My Collection:</strong> Cards you own — searchable by name, set, number</li>
+                                        <li>🎮 <strong>My Decks:</strong> All saved decks in a single-column layout with full card previews. Each deck entry shows the complete 60-card list with prices, rarity options, and collection badges. New: <strong>⚔️ Playtest button</strong> at the top lets you pick any 2 saved decks and launch them in the playtester instantly.</li>
+                                        <li>❤️ <strong>Wishlist:</strong> Cards you want to acquire</li>
+                                        <li>⚙️ <strong>Settings:</strong> Account management</li>
+                                    </ul>
                                 </div>
                                 
                                 <!-- How to Use Tab -->
                                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #2ecc71;">
                                     <h3 style="color: #2ecc71; margin-top: 0;">📖 How to Use</h3>
-                                    <p style="line-height: 1.7;"><strong>This guide!</strong> Complete documentation for all features</p>
+                                    <p style="line-height: 1.7;"><strong>This guide!</strong> Complete documentation for all features — updated to v36</p>
                                 </div>
                             </div>
                         </section>
                         
                         <!-- My Collection & Wishlist Guide -->
                         <section style="margin-bottom: 40px;">
-                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">💾 My Collection & Wishlist</h2>
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">💾 My Collection &amp; Wishlist</h2>
                             <p style="line-height: 1.8; font-size: 1.05em;">
-                                Keep track of cards you own and want to buy. Both sections include powerful search filters to find exactly what you're looking for.
+                                Keep track of cards you own and want to buy. Both sections are searchable and synced to your account.
                             </p>
                             <div style="background: #ecf0f1; padding: 15px; border-radius: 5px; line-height: 1.8;">
                                 <p><strong>🔍 Search Features:</strong></p>
                                 <ul>
-                                    <li>Search by <strong>card name</strong> (e.g., "Pikachu", "Charizard")</li>
-                                    <li>Search by <strong>set code</strong> (e.g., "ASC", "MEG", "SVE")</li>
-                                    <li>Search by <strong>card number</strong> (e.g., "001", "50", "200")</li>
-                                    <li>Real-time filtering as you type</li>
-                                    <li>Result counter shows "X of Y cards"</li>
+                                    <li>Search by <strong>card name</strong>, <strong>set code</strong>, or <strong>card number</strong></li>
+                                    <li>Real-time filtering — result counter shows "X of Y cards"</li>
                                 </ul>
-                                <p><strong>💰 Collection & Wishlist Features:</strong></p>
+                                <p><strong>💰 Card Actions:</strong></p>
                                 <ul>
-                                    <li>View <strong>card prices</strong> from Cardmarket</li>
-                                    <li>Click cards to view full image in lightbox</li>
-                                    <li>Red × button to remove cards</li>
+                                    <li>View <strong>Cardmarket price</strong> — click the price button to open in Cardmarket</li>
+                                    <li>Click card image for full-size lightbox preview</li>
+                                    <li>Red × to remove from collection / wishlist</li>
                                     <li>Set name and number displayed under each card</li>
                                 </ul>
                             </div>
@@ -1437,131 +1471,121 @@
                         <section style="margin-bottom: 40px;">
                             <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🎮 My Decks</h2>
                             <p style="line-height: 1.8; font-size: 1.05em;">
-                                Save decks you build in the Deck Builder from any analysis tab. Access them from your profile and manage them easily.
+                                Save decks from any Deck Builder tab. Stored in Firebase — available on all devices.
                             </p>
                             <div style="background: #ecf0f1; padding: 15px; border-radius: 5px; line-height: 1.8;">
                                 <p><strong>💾 Saving Decks:</strong></p>
                                 <ul>
-                                    <li>Click "💾 Save to My Decks" in Deck Builder</li>
-                                    <li>Give your deck a name (archetype name shows by default)</li>
-                                    <li>Deck is synced across all devices (via Firebase)</li>
-                                    <li>Exact print versions are preserved (set code + number saved)</li>
+                                    <li>Click "💾 Save to My Decks" in any Deck Builder</li>
+                                    <li>Name your deck (archetype name is pre-filled)</li>
+                                    <li>Exact print versions are saved (set code + number)</li>
+                                    <li>Synced across all logged-in devices</li>
                                 </ul>
-                                <p style="margin-top: 15px;"><strong>⚡ Card Action Buttons:</strong></p>
+                                <p style="margin-top: 15px;"><strong>⚔️ Playtest from My Decks (NEW):</strong></p>
                                 <ul>
-                                    <li>★ <strong>Rarity/Print:</strong> Switch to different print versions of the same card</li>
-                                    <li>💰 <strong>Price/Cardmarket:</strong> See current price, click to buy (orange = has price)</li>
-                                    <li>✓ <strong>Collection:</strong> Toggle if you own this card (green when owned)</li>
-                                    <li>❤️ <strong>Wishlist:</strong> Toggle if you want this card (orange when wishlisted), NEW!</li>
+                                    <li>Click the <strong>⚔️ Playtest</strong> button in the My Decks header</li>
+                                    <li>Select a deck for Player 1 and Player 2 from dropdown menus</li>
+                                    <li>Click 🚀 Start Playtest — both decks load with exact saved prints (TG01, GG01, full arts all work correctly)</li>
+                                </ul>
+                                <p style="margin-top: 15px;"><strong>⭐ Card Action Buttons on each card:</strong></p>
+                                <ul>
+                                    <li>★ <strong>Rarity/Print (yellow):</strong> Switch to a different print of the same card</li>
+                                    <li>💰 <strong>Price (orange/grey):</strong> Current Cardmarket price — click to open listing</li>
+                                    <li>✓ <strong>Collection (green):</strong> Mark as owned / unowned</li>
+                                    <li>❤️ <strong>Wishlist (orange):</strong> Add to / remove from wishlist</li>
                                 </ul>
                                 <p style="margin-top: 15px;"><strong>🔄 Deck Comparison:</strong></p>
                                 <ul>
-                                    <li>Click "🔀 Compare with My Decks" in Deck Builder</li>
-                                    <li>Select a saved deck to compare</li>
-                                    <li>See cards that are Removed, Added, Changed, or Unchanged</li>
-                                    <li>Visual color-coded display of differences</li>
-                                    <li>Helps you track changes between versions</li>
+                                    <li>Click "🔀 Compare with My Decks" in the Deck Builder</li>
+                                    <li>Select a saved deck — color-coded diff shows Removed / Added / Unchanged cards</li>
                                 </ul>
                             </div>
                         </section>
                         
-                        <!-- Deck Features Guide -->
+                        <!-- Deck Building Features -->
                         <section style="margin-bottom: 40px;">
-                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🛠️ Deck Building Features</h2>
-                            <p style="line-height: 1.8; font-size: 1.05em;">
-                                The <strong>Meta Card Analysis</strong> feature shows you which cards are most popular across the Top 10 archetypes in the meta. 
-                                This helps you understand meta-defining cards and build versatile decks.
-                            </p>
-                            
-                            <h3 style="color: #555; margin-top: 20px;">How to Use</h3>
-                            <ol style="line-height: 2; font-size: 1.05em;">
-                                <li>Click <strong>"🔄 Load Meta Analysis"</strong> button to aggregate cards from Top 10 archetypes</li>
-                                <li>Use <strong>filters</strong> to narrow down cards:
-                                    <ul style="margin-top: 10px;">
-                                        <li><strong>Meta Share:</strong> &gt;90% (Core), &gt;70% (Common), &gt;50% (Frequent)</li>
-                                        <li><strong>Card Type:</strong> Trainer, Pokémon, Energy</li>
-                                        <li><strong>Sort:</strong> By Type, Meta Share %, or Average Count</li>
-                                    </ul>
-                                </li>
-                                <li>Each card shows:
-                                    <ul style="margin-top: 10px;">
-                                        <li>📊 <strong>Meta Share %:</strong> In how many of the Top 10 archetypes this card appears</li>
-                                        <li>🔢 <strong>Avg Count:</strong> Average number of copies played</li>
-                                        <li>🎯 <strong>Max Consistency:</strong> Recommended optimal count (based on smart rounding)</li>
-                                        <li>💚 <strong>Deck Badge:</strong> Shows current count in your deck (green badge, top-left)</li>
-                                    </ul>
-                                </li>
-                                <li>Use <strong>Action Buttons</strong> to build your deck:
-                                    <ul style="margin-top: 10px;">
-                                        <li><strong>−</strong> (Red): Remove 1 copy from deck</li>
-                                        <li><strong>DECK</strong> (Blue): Add optimal count to deck instantly</li>
-                                        <li><strong>+</strong> (Green): Add 1 copy to deck</li>
-                                    </ul>
-                                </li>
-                                <li>Hover over card for <strong>archetype breakdown</strong> tooltip</li>
-                            </ol>
-                            
-                            <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin-top: 15px;">
-                                <strong>💡 Pro Tip:</strong>
-                                <ul style="line-height: 1.8; margin: 10px 0;">
-                                    <li>Cards with >90% meta share are usually format staples (Ultra Ball, Boss's Orders, etc.)</li>
-                                    <li>The DECK button uses smart rounding: 3.07x average → 4 copies, 3.00x → 3 copies</li>
-                                    <li>Meta Card Analysis spans multiple archetypes, so you see which cards are universally strong</li>
-                                </ul>
-                            </div>
-                        </section>
-                        
-                        <!-- tion>
-                        
-                        <!-- Deck Builder Guide -->
-                        <section style="margin-bottom: 40px;">
-                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🛠️ Using the Deck Builder</h2>
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">🛠️ Deck Building — Full Guide</h2>
                             
                             <h3 style="color: #555;">📋 Quick Start</h3>
                             <ol style="line-height: 2; font-size: 1.05em;">
-                                <li><strong>Select a Deck:</strong> Use the deck selector dropdown to choose an archetype</li>
-                                <li><strong>View Cards:</strong> See Card Overview with all cards and their usage statistics</li>
-                                <li><strong>Auto-Generate:</strong> Click "🎯 Auto Generate (Max Consistency)" for optimal 60-card deck with smart card counts</li>
-                                <li><strong>Manual Building:</strong> Click on individual cards to add them (left click +1, right click +4)</li>
-                                <li><strong>Meta Analysis:</strong> Load "Meta Card Analysis" to see most played cards across Top 10 archetypes</li>
-                                <li><strong>Copy Deck:</strong> Click "Copy Deck" to get the complete decklist in Pokemon TCG Live format</li>
+                                <li><strong>Select a Deck</strong> from the dropdown</li>
+                                <li><strong>View Cards</strong> in the Card Overview with usage statistics</li>
+                                <li><strong>Auto-Generate:</strong> Click "🎯 Auto Generate (Max Consistency)" for a tournament-tested 60-card deck</li>
+                                <li><strong>Manual Building:</strong> Left-click a card to add 1 copy, right-click to add 4</li>
+                                <li><strong>Meta Analysis:</strong> Load "Meta Card Analysis" to see the most played cards across the Top 10 archetypes</li>
+                                <li><strong>Copy Deck:</strong> Click "Copy Deck" for Pokémon TCG Live format</li>
                             </ol>
                             
-                            <h3 style="color: #555; margin-top: 30px;">🎨 Card Display Modes</h3>
-                            <div style="background: #ecf0f1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                                <p style="margin: 5px 0;"><strong>⬇️ Low Rarity:</strong> Shows cheapest version of each card (budget-friendly)</p>
-                                <p style="margin: 5px 0;"><strong>⬆️ Max Rarity:</strong> Shows highest rarity version (full art, secret rare, etc.)</p>
-                                <p style="margin: 5px 0;"><strong>🌍 All Prints:</strong> Shows all available versions of each card</p>
-                            </div>
-                            
-                            <h3 style="color: #555; margin-top: 30px;">🖼️ View Modes</h3>
-                            <div style="background: #ecf0f1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                                <p style="margin: 5px 0;"><strong>Table View:</strong> Detailed list with card names, sets, usage%, and controls</p>
-                                <p style="margin: 5px 0;"><strong>Grid View:</strong> Visual card display with images for quick overview</p>
-                            </div>
-                            
-                            <h3 style="color: #555; margin-top: 30px;">🔄 Deck Compare Feature</h3>
-                            <p style="line-height: 1.8;">Compare your current deck with a previous version:</p>
-                            <ol style="line-height: 2; font-size: 1.05em;">
-                                <li>Build or generate a deck in "Your Deck" section</li>
-                                <li>Click "🔄 Compare Deck" button</li>
-                                <li>Paste your old decklist in Pokemon TCG Live format</li>
-                                <li>Click "Compare"</li>
-                                <li>See color-coded badges:
-                                    <ul>
-                                        <li><span style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); padding: 2px 8px; border-radius: 4px; color: #000;">🟡 Gold</span> = New cards added</li>
-                                        <li><span style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); padding: 2px 8px; border-radius: 4px; color: #fff;">🔴 Red</span> = Cards removed</li>
-                                        <li><span style="background: linear-gradient(135deg, #a8e6cf 0%, #55efc4 100%); padding: 2px 8px; border-radius: 4px; color: #000;">🟢 Green</span> = Unchanged cards</li>
-                                    </ul>
-                                </li>
-                            </ol>
-                            <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin-top: 15px;">
-                                <strong>💡 Tips:</strong>
-                                <ul style="line-height: 1.8; margin: 10px 0;">
-                                    <li>Deck Compare supports international prints (e.g., MEG 76 matches ASC 112 for Riolu)</li>
-                                    <li>Basic Energies from different sets are recognized as the same card</li>
-                                    <li>Japanese set codes (M3, M2a, etc.) are fully supported</li>
+                            <h3 style="color: #555; margin-top: 25px;">🎯 Max Consistency Algorithm (v18)</h3>
+                            <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                                <p style="margin: 0 0 8px 0;">The auto-generate algorithm was completely rewritten in v18 for better accuracy:</p>
+                                <ul style="line-height: 1.8; margin: 0;">
+                                    <li><strong>5% meta-share cutoff:</strong> Cards appearing in &lt;5% of decks are ignored (no false positives)</li>
+                                    <li><strong>Smart rounding:</strong> Uses <em>avgCountWhenUsed</em> (average among decks that actually include the card, not all decks) — so e.g. 3.07× → rounds to 3, not 4</li>
+                                    <li><strong>Rare Candy guarantee:</strong> Stage 2 evolution lines always include Rare Candy</li>
+                                    <li><strong>Ace Spec slot:</strong> 1 Ace Spec added automatically based on data</li>
+                                    <li><strong>Fallback fill:</strong> Remaining slots filled with highest-priority cards to always reach 60</li>
                                 </ul>
+                            </div>
+                            
+                            <h3 style="color: #555; margin-top: 25px;">🎨 Rarity Display Modes</h3>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                                <p style="margin: 5px 0;"><strong>⬇️ Low Rarity:</strong> Cheapest print of each card (budget-friendly builds)</p>
+                                <p style="margin: 5px 0;"><strong>⬆️ Max Rarity:</strong> Highest rarity version (full art, secret rare, etc.)</p>
+                                <p style="margin: 5px 0;"><strong>🌍 All Prints:</strong> All available versions side by side</p>
+                            </div>
+                            
+                            <h3 style="color: #555; margin-top: 25px;">⭐ Rarity Switcher (★)</h3>
+                            <p style="line-height: 1.8;">Every card in Card Overview, Deck Builder grid, and My Decks has a <strong>yellow ★ button</strong>. Click it to open a modal showing all available prints of that card — regular, reverse holo, full art, trainer gallery, promo, etc. Click any print to swap it in your deck/collection.</p>
+                            
+                            <h3 style="color: #555; margin-top: 25px;">🔄 Deck Compare Feature</h3>
+                            <p style="line-height: 1.8;">Compare your current deck with any saved deck or previous version:</p>
+                            <ol style="line-height: 2;">
+                                <li>Build or generate a deck in "Your Deck" section</li>
+                                <li>Click "🔀 Compare Deck"</li>
+                                <li>Paste an old list in Pokémon TCG Live format, or choose a My Deck</li>
+                                <li>Color-coded badges: <span style="background: #FFD700; padding: 2px 8px; border-radius: 4px; color: #000;">Gold = Added</span> &nbsp; <span style="background: #ee5a24; padding: 2px 8px; border-radius: 4px; color: #fff;">Red = Removed</span> &nbsp; <span style="background: #55efc4; padding: 2px 8px; border-radius: 4px; color: #000;">Green = Unchanged</span></li>
+                            </ol>
+                        </section>
+                        
+                        <!-- Playtester Guide -->
+                        <section style="margin-bottom: 40px;">
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">⚔️ Playtester — Complete Guide</h2>
+                            <p style="line-height: 1.8; font-size: 1.05em;">The Playtester Sandbox simulates a real 2-player Pokémon TCG game in your browser. Load any two decklists and goldfishing practice, test matchups, or study lines.</p>
+                            
+                            <h3 style="color: #555; margin-top: 20px;">Loading Decks</h3>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 6px; line-height: 1.8; margin-bottom: 15px;">
+                                <p><strong>Method 1 — Paste &amp; Load</strong></p>
+                                <p style="margin-left: 15px;">Go to ⚔️ Playtester Sandbox tab → paste a Pokémon TCG Live decklist into the P1 and P2 boxes → click 📥 Load Deck → click Start. Exact prints are resolved by set+number (TG01, GG01, promo numbers all work).</p>
+                                <p><strong>Method 2 — From Deck Builder (any tab)</strong></p>
+                                <p style="margin-left: 15px;">Click the <strong>🃏 Playtest</strong> button in any Deck Builder. A setup modal appears — paste the opponent's deck or skip (mirror match). Click Start.</p>
+                                <p><strong>Method 3 — From My Decks (NEW)</strong></p>
+                                <p style="margin-left: 15px;">Go to Profile → My Decks → click <strong>⚔️ Playtest</strong> header button → pick Player 1 deck &amp; Player 2 deck from dropdowns → 🚀 Start Playtest. Loads instantly with all exact prints preserved.</p>
+                            </div>
+                            
+                            <h3 style="color: #555; margin-top: 20px;">Board Zones</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 15px;">
+                                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 3px solid #3B4CCA;"><strong>Active (135px wide)</strong><br><small>Your attacking Pokémon. Drag from bench or hand.</small></div>
+                                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 3px solid #27ae60;"><strong>Bench (5 slots)</strong><br><small>Drag Pokémon from hand to bench. Drag bench ↔ active to swap.</small></div>
+                                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 3px solid #e74c3c;"><strong>Discard</strong><br><small>Click to view discards. Drag to move cards here.</small></div>
+                                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 3px solid #f39c12;"><strong>Prize Cards</strong><br><small>6 face-down prizes. Click to take a prize. Stepper shows count.</small></div>
+                                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 3px solid #9b59b6;"><strong>Stadium</strong><br><small>S-marker shown on card. Drag to discard or replace with new stadium.</small></div>
+                                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 3px solid #16a085;"><strong>Hand</strong><br><small>Drawn cards. Drag to field. Click to zoom.</small></div>
+                            </div>
+                            
+                            <h3 style="color: #555; margin-top: 20px;">Toolbar Buttons &amp; Controls</h3>
+                            <div style="background: #ecf0f1; padding: 15px; border-radius: 6px; line-height: 1.9;">
+                                <p style="margin: 0;"><strong>🔄 New Game</strong> — Shuffle &amp; deal fresh 7-card hands, reset prizes</p>
+                                <p style="margin: 0;"><strong>🃏 Draw</strong> — Draw 1 card from deck</p>
+                                <p style="margin: 0;"><strong>🔀 Shuffle</strong> — Shuffle your deck</p>
+                                <p style="margin: 0;"><strong>⚡ /attach</strong> — Type in the input box to attach energy from hand to a field zone</p>
+                                <p style="margin: 0;"><strong>👨‍⚖️ Judge / 📻 Iono</strong> — Shuffle hand into deck, draw X cards (separate mechanics)</p>
+                                <p style="margin: 0;"><strong>↩️ Undo</strong> — Revert the last board state change</p>
+                                <p style="margin: 0;"><strong>🔢 Stepper ＋/－</strong> — Adjust damage counters, energy, prize count with precise controls</p>
+                                <p style="margin: 0;"><strong>💊 Damage Modifier</strong> — Always-visible buff counter (e.g., +30 damage from Choice Belt)</p>
+                                <p style="margin: 0;"><strong>🪙 Coin</strong> — Flip for Heads/Tails in the center panel</p>
+                                <p style="margin: 0;"><strong>📋 ? Legend</strong> — Toggle zone reference overlay</p>
+                                <p style="margin: 0;"><strong>🚪 Quit</strong> — Close playtester (confirms before closing)</p>
                             </div>
                         </section>
                         
@@ -1571,52 +1595,53 @@
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
                                 <div class="type-card type-card-pokemon">
                                     <h4 style="margin-top: 0;">🎴 Pokémon</h4>
-                                    <p style="margin: 0; font-size: 0.95em;">Basic Pokemon, Evolution Pokemon, Pokemon ex, Pokemon V, etc.</p>
+                                    <p style="margin: 0; font-size: 0.95em;">Basic, Evolution, Pokémon ex, Pokémon V, VMAX, VSTAR, etc.</p>
                                 </div>
                                 <div class="type-card type-card-supporter">
                                     <h4 style="margin-top: 0;">👤 Supporter</h4>
-                                    <p style="margin: 0; font-size: 0.95em;">Trainer cards with Supporter subtype (Professor's Research, Boss's Orders, etc.)</p>
+                                    <p style="margin: 0; font-size: 0.95em;">Professor's Research, Boss's Orders, Iono, Cynthia's Ambition, etc.</p>
                                 </div>
                                 <div class="type-card type-card-item">
                                     <h4 style="margin-top: 0;">⚙️ Item</h4>
-                                    <p style="margin: 0; font-size: 0.95em;">Trainer Items (Ultra Ball, Rare Candy, Nest Ball, etc.)</p>
+                                    <p style="margin: 0; font-size: 0.95em;">Ultra Ball, Rare Candy, Nest Ball, Pokégear, etc.</p>
                                 </div>
                                 <div class="type-card type-card-tool">
                                     <h4 style="margin-top: 0;">🔧 Tool</h4>
-                                    <p style="margin: 0; font-size: 0.95em;">Pokemon Tools attached to Pokemon (Air Balloon, Muscle Band, etc.)</p>
+                                    <p style="margin: 0; font-size: 0.95em;">Pokémon Tools attached to Pokémon (Air Balloon, Choice Belt, etc.)</p>
                                 </div>
                                 <div class="type-card type-card-stadium">
                                     <h4 style="margin-top: 0;">🏟️ Stadium</h4>
-                                    <p style="margin: 0; font-size: 0.95em;">Stadium cards (Collapsed Stadium, Beach Court, etc.)</p>
+                                    <p style="margin: 0; font-size: 0.95em;">Collapsed Stadium, Beach Court, Lost City, etc.</p>
                                 </div>
                                 <div class="type-card type-card-energy">
                                     <h4 style="margin-top: 0;">⚡ Energy</h4>
-                                    <p style="margin: 0; font-size: 0.95em;">Basic Energy cards (Fire Energy, Water Energy, etc.)</p>
+                                    <p style="margin: 0; font-size: 0.95em;">Basic Energy cards (Fire, Water, Psychic, etc.)</p>
                                 </div>
                                 <div class="type-card type-card-special-energy">
                                     <h4 style="margin-top: 0;">💎 Special Energy</h4>
-                                    <p style="margin: 0; font-size: 0.95em;">Special Energy cards (Double Turbo Energy, Jet Energy, etc.)</p>
+                                    <p style="margin: 0; font-size: 0.95em;">Double Turbo, Jet Energy, Luminous Energy, etc.</p>
                                 </div>
                                 <div class="type-card type-card-ace-spec">
                                     <h4 style="margin-top: 0;">⭐ Ace Spec</h4>
-                                    <p style="margin: 0; font-size: 0.95em;">Powerful one-per-deck cards (Computer Search, Master Ball, Maximum Belt, etc.)</p>
+                                    <p style="margin: 0; font-size: 0.95em;">One-per-deck powerhouses (Master Ball, Maximum Belt, Unfair Stamp, etc.)</p>
                                 </div>
                             </div>
                         </section>
                         
                         <!-- Tips & Tricks -->
                         <section style="margin-bottom: 40px;">
-                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">💡 Tips & Tricks</h2>
+                            <h2 style="color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">💡 Tips &amp; Tricks</h2>
                             <div style="background: #e8f4fd; border-left: 4px solid #3498db; padding: 20px; border-radius: 6px;">
                                 <ul style="line-height: 2; font-size: 1.05em;">
                                     <li>🎯 <strong>Use Date Filters:</strong> Focus on recent tournaments for current meta insights</li>
-                                    <li>📊 <strong>Check Usage %:</strong> Cards with >90% usage are core to the archetype</li>
-                                    <li>🔍 <strong>Search is Your Friend:</strong> Use search boxes to quickly find specific cards or decks</li>
-                                    <li>🌍 <strong>International Prints:</strong> The website recognizes international reprints automatically</li>
-                                    <li>💰 <strong>Budget Building:</strong> Use "Low Rarity" option for affordable deck versions</li>
+                                    <li>📊 <strong>Check Usage %:</strong> Cards with &gt;90% usage are core to the archetype</li>
+                                    <li>💰 <strong>Budget Building:</strong> Use "⬇️ Low Rarity" for affordable deck versions</li>
                                     <li>🎨 <strong>Grid View:</strong> Perfect for visual deck overview and spotting missing cards</li>
-                                    <li>📋 <strong>Copy Function:</strong> All deck copies use Pokemon TCG Live format for easy import</li>
-                                    <li>🔄 <strong>Compare Decks:</strong> Great for tracking deck evolution and understanding changes</li>
+                                    <li>📋 <strong>Copy Function:</strong> All deck copies use Pokémon TCG Live format for easy import</li>
+                                    <li>🔄 <strong>Compare Decks:</strong> Great for tracking deck evolution between sessions</li>
+                                    <li>⚔️ <strong>Goldfish Practice:</strong> Load the same deck for both players to practice your own opening lines</li>
+                                    <li>★ <strong>Rarity Switcher:</strong> The yellow ★ is on every card everywhere — use it to swap to your preferred print without rebuilding the deck</li>
+                                    <li>🎮 <strong>My Decks Playtest:</strong> Save every deck you build — the ⚔️ Playtest button makes it trivial to run any 2 saved decks against each other in seconds</li>
                                 </ul>
                             </div>
                         </section>
@@ -1627,52 +1652,51 @@
                             
                             <div style="margin-bottom: 15px;">
                                 <h4 style="color: #555; margin-bottom: 5px;">Q: How often is the data updated?</h4>
-                                <p style="margin-left: 20px; line-height: 1.7;">A: Check the "Last Update" timestamp in the footer. Data is updated regularly when new tournaments occur.</p>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Check the "Last Update" timestamp in the footer. Data is updated regularly as new tournaments occur.</p>
                             </div>
                             
                             <div style="margin-bottom: 15px;">
-                                <h4 style="color: #555; margin-bottom: 5px;">Q: Can I use this for deck building in Pokemon TCG Live?</h4>
-                                <p style="margin-left: 20px; line-height: 1.7;">A: Yes! All "Copy Deck" functions output decks in Pokemon TCG Live format. Just paste directly into the game.</p>
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: Can I use this for deck building in Pokémon TCG Live?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Yes! All "Copy Deck" functions output decks in Pokémon TCG Live format. Paste directly into the game.</p>
                             </div>
                             
                             <div style="margin-bottom: 15px;">
                                 <h4 style="color: #555; margin-bottom: 5px;">Q: What does "international prints" mean?</h4>
-                                <p style="margin-left: 20px; line-height: 1.7;">A: The same card printed in different sets (e.g., Riolu MEG 76 = Riolu ASC 112). The website recognizes these automatically.</p>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: The same card printed in different sets (e.g., Riolu MEG 76 = Riolu ASC 112). The website recognizes these automatically across all tabs.</p>
                             </div>
                             
                             <div style="margin-bottom: 15px;">
                                 <h4 style="color: #555; margin-bottom: 5px;">Q: Why are Japanese cards (M3, M2a) shown?</h4>
-                                <p style="margin-left: 20px; line-height: 1.7;">A: Japanese sets often release months before international versions. These give early insight into upcoming cards and strategies.</p>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Japanese sets release months before international versions. They give early insight into upcoming cards and strategies.</p>
                             </div>
                             
                             <div style="margin-bottom: 15px;">
-                                <h4 style="color: #555; margin-bottom: 5px;">Q: How do I add cards to my deck manually?</h4>
-                                <p style="margin-left: 20px; line-height: 1.7;">A: In the Card Overview section, left-click a card to add 1 copy, or right-click to add 4 copies. Cards appear in "Your Deck" section below.</p>
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: My Rarity Switcher showed a "?" instead of ★ before — is that fixed?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Yes, fixed in v36. All broken symbol characters (Rarity Switcher ★, owned ✓ badge, Ace Spec ★ column) are now correctly displayed across every tab.</p>
                             </div>
                             
                             <div style="margin-bottom: 15px;">
-                                <h4 style="color: #555; margin-bottom: 5px;">Q: What's the difference between "Low Rarity" and "Max Rarity"?</h4>
-                                <p style="margin-left: 20px; line-height: 1.7;">A: Low Rarity shows the cheapest printings (budget decks), Max Rarity shows premium versions (full arts, secret rares). Gameplay is identical.</p>
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: The Playtester loaded wrong card arts from My Decks — is that fixed?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Yes, fixed in v35. The new direct lookup bypasses the string roundtrip, so cards with Trainer Gallery numbers (TG01), Gallery Gold (GG01), full arts, and promos all resolve to the exact saved print.</p>
                             </div>
                             
                             <div style="margin-bottom: 15px;">
-                                <h4 style="color: #555; margin-bottom: 5px;">Q: What is "Max Consistency" mode?</h4>
-                                <p style="margin-left: 20px; line-height: 1.7;">A: Max Consistency uses smart rounding to determine optimal card counts. For example, if a card averages 3.07 copies across decks, it recommends 4 copies (not 3), ensuring you're building with real tournament-tested numbers.</p>
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: What is "Max Consistency" Auto-Generate?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: The v18 algorithm looks at every deck using a card, calculates the average count among those decks (not all decks), then rounds to the nearest integer. A 5% meta-share cutoff prevents fringe cards from being included. The result is a tournament-realistic 60-card deck.</p>
                             </div>
                             
                             <div style="margin-bottom: 15px;">
-                                <h4 style="color: #555; margin-bottom: 5px;">Q: What does the green badge on Meta Cards mean?</h4>
-                                <p style="margin-left: 20px; line-height: 1.7;">A: The green badge (top-left of card image) shows how many copies of that card are currently in your deck. It only appears when you have at least 1 copy in your deck.</p>
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: Do my decks and collection sync between desktop and mobile?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: Yes, as long as you're signed in with the same account. Firebase syncs everything in real-time.</p>
                             </div>
                         </section>
                         
                         <!-- Support Section -->
                         <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; text-align: center;">
-                            <h2 style="color: white; margin-top: 0;">🎉 Ready to Build?</h2>
-                            <p style="font-size: 1.2em; margin-bottom: 20px;">Start by exploring the tabs above, choose a meta archetype, and build your competitive Pokemon TCG deck!</p>
-                            <p style="font-size: 0.95em; opacity: 0.9;">For best experience, start with the 🇯🇵 City League Meta tab to see current trends, then move to 📊 Deck Analysis to build your deck.</p>
+                            <h2 style="color: white; margin-top: 0;">🎉 Ready to Build &amp; Battle?</h2>
+                            <p style="font-size: 1.2em; margin-bottom: 20px;">Explore the meta, build your deck, save it to My Decks — then test it with the ⚔️ Playtester in one click!</p>
+                            <p style="font-size: 0.95em; opacity: 0.9;">Start with 🇯🇵 City League Meta to see trends → 📊 Deck Analysis to build → 👤 My Decks to save → ⚔️ Playtest to practice.</p>
                         </section>
-                        
                     </div>
                 </div>
             </div>

@@ -324,7 +324,8 @@ function setupHotkeys() {
             case '`': ptToggleLog(); break;
             case '/':
                 e.preventDefault();
-                let input = document.getElementById('ptCommandInput-' + ptCurrentPlayer);
+                let input = document.getElementById('ptCommandInput-' + ptCurrentPlayer)
+                         || document.getElementById('ptCommandInput-p1');
                 if(input) input.focus();
                 break;
         }
@@ -372,7 +373,8 @@ function ptViewCard(arg1, arg2) {
 
 function ptRunCommand(playerOverride) {
     let p = playerOverride || ptCurrentPlayer;
-    let input = document.getElementById('ptCommandInput-' + p);
+    let input = document.getElementById('ptCommandInput-' + p)
+             || document.getElementById('ptCommandInput-p1');
     if(!input) return;
 
     let cmd = input.value.trim().toLowerCase();
@@ -403,8 +405,31 @@ function ptRunCommand(playerOverride) {
     } else if (action === 'dice') {
         const roll = Math.floor(Math.random() * 6) + 1;
         ptLog(`🎲 Dice roll: ${roll}`);
+    } else if (action === 'iono' || action === 'judge') {
+        ['p1', 'p2'].forEach(pp => {
+            ptState[pp].deck.push(...ptState[pp].hand);
+            ptState[pp].hand = [];
+            const deck = ptState[pp].deck;
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            for (let i = 0; i < n; i++) if (deck.length > 0) ptState[pp].hand.push(deck.pop());
+        });
+        ptLog(`🔄 Iono/Judge: Both players drew ${n} card(s).`);
+        ptRenderAll();
+    } else if (action === 'roxanne' || action === 'marnie') {
+        ['p1', 'p2'].forEach(pp => {
+            ptState[pp].deck.unshift(...ptState[pp].hand);
+            ptState[pp].hand = [];
+            for (let i = 0; i < n; i++) if (ptState[pp].deck.length > 0) ptState[pp].hand.push(ptState[pp].deck.pop());
+        });
+        ptLog(`⬇️ Marnie/Roxanne: Both players drew ${n} card(s).`);
+        ptRenderAll();
+    } else if (action === 'shuffle' || action === 'sh') {
+        ptShuffleDeck(p);
     } else {
-        ptShowMessage('Unknown! Try: /draw 3, /top 5, /mill 2');
+        ptShowMessage('Unknown! Try: /draw 3  /iono 6  /roxanne 2  /top 5  /mill 2');
     }
 }
 
@@ -576,6 +601,35 @@ function ptHandAction(type) {
         const drew = _draw(amt);
         ptLog(`Moved hand to bottom of deck, drew ${drew} card(s).`);
     }
+    ptRenderAll();
+}
+
+// --- GLOBAL TWO-PLAYER ACTIONS (Iono / Judge / Marnie / Roxanne) ---
+
+function ptGlobalShuffleAndDraw() {
+    const amt = parseInt(document.getElementById('ptHandDrawAmt')?.value) || 6;
+    ['p1', 'p2'].forEach(p => {
+        ptState[p].deck.push(...ptState[p].hand);
+        ptState[p].hand = [];
+        const deck = ptState[p].deck;
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        for (let i = 0; i < amt; i++) if (deck.length > 0) ptState[p].hand.push(deck.pop());
+    });
+    ptLog(`🔄 Iono/Judge: Both players shuffled hand into deck and drew ${amt} card(s).`);
+    ptRenderAll();
+}
+
+function ptGlobalBottomAndDraw() {
+    const amt = parseInt(document.getElementById('ptHandDrawAmt')?.value) || 6;
+    ['p1', 'p2'].forEach(p => {
+        ptState[p].deck.unshift(...ptState[p].hand);
+        ptState[p].hand = [];
+        for (let i = 0; i < amt; i++) if (ptState[p].deck.length > 0) ptState[p].hand.push(ptState[p].deck.pop());
+    });
+    ptLog(`⬇️ Marnie/Roxanne: Both players put hand on bottom and drew ${amt} card(s).`);
     ptRenderAll();
 }
 
@@ -814,6 +868,24 @@ function ptHandleDrop(event, targetZone) {
             const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
             if (c) { ptState['p2'].lostzone.push(c); ptLog(`Sent "${c.name}" to Lost Zone.`); }
             ptSelectedCardIndex = null; ptRenderAll();
+        } else if (targetZone === 'hand') {
+            // Hand-to-hand reorder: move card to the position indicated by mouse X
+            const srcIdx = parseInt(handIndex);
+            if (!isNaN(srcIdx)) {
+                const hand      = ptState[ptCurrentPlayer].hand;
+                const handEl    = document.getElementById('ptHandZone');
+                const afterEl   = handEl ? getDragAfterElement(handEl, event.clientX) : null;
+                const wrappers  = handEl ? [...handEl.querySelectorAll('.pt-hand-wrapper')] : [];
+                let targetIdx   = afterEl ? wrappers.indexOf(afterEl) : hand.length;
+                if (targetIdx === -1) targetIdx = hand.length;
+                if (targetIdx !== srcIdx) {
+                    const [card] = hand.splice(srcIdx, 1);
+                    const insertAt = targetIdx > srcIdx ? targetIdx - 1 : targetIdx;
+                    hand.splice(insertAt, 0, card);
+                }
+                ptSelectedCardIndex = null;
+                ptRenderAll();
+            }
         }
     }
 }
@@ -836,6 +908,20 @@ function ptDragStartHand(event, index) {
 function ptDragStartField(event, elementId) {
     event.dataTransfer.setData('sourceZone', elementId);
     event.dataTransfer.setData('text/plain', '');
+}
+
+// Returns the .pt-hand-wrapper element that the dragged card should be inserted BEFORE,
+// based on the mouse X position. Returns null if the card should go at the very end.
+function getDragAfterElement(container, x) {
+    const draggables = [...container.querySelectorAll('.pt-hand-wrapper:not(.dragging)')];
+    return draggables.reduce((closest, child) => {
+        const box    = child.getBoundingClientRect();
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset, element: child };
+        }
+        return closest;
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 // --- RETREAT ---

@@ -448,6 +448,30 @@ function ptShuffle() {
     ptRenderAll();
 }
 
+// --- PRIZE REDRAW ---
+
+function ptRedrawPrizes(player) {
+    const p = player || ptCurrentPlayer;
+    const count = ptState[p].prizes.length;
+    if (count === 0) { ptShowMessage('No prize cards to redraw!'); return; }
+    if (!confirm(`Shuffle ${count} prize card(s) back into ${p.toUpperCase()}'s deck and re-deal?`)) return;
+    // Return prizes to deck
+    ptState[p].deck.push(...ptState[p].prizes);
+    ptState[p].prizes = [];
+    // Shuffle
+    const deck = ptState[p].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    // Re-deal same number of prizes
+    for (let i = 0; i < count; i++) {
+        if (deck.length > 0) ptState[p].prizes.push(deck.pop());
+    }
+    ptLog(`${p.toUpperCase()} redealt ${count} prize card(s).`);
+    ptRenderAll();
+}
+
 // --- NEW HELPER FUNCTIONS ---
 
 function ptDrawCards(player, amount) {
@@ -547,11 +571,14 @@ function ptPassTurn() {
 
 // --- DECK SEARCH ---
 
+let _ptDeckSearchPlayer = null;
+
 function _ptRefreshDeckSearchGrid() {
     const grid = document.getElementById('ptDeckSearchGrid');
     if (!grid) return;
+    const p = _ptDeckSearchPlayer || ptCurrentPlayer;
     grid.innerHTML = '';
-    [...ptState[ptCurrentPlayer].deck].sort((a, b) => a.name.localeCompare(b.name)).forEach(card => {
+    [...ptState[p].deck].sort((a, b) => a.name.localeCompare(b.name)).forEach(card => {
         const wrap = document.createElement('div');
         wrap.style.cssText = 'position:relative;cursor:pointer;';
         wrap.title = card.name;
@@ -574,13 +601,14 @@ function _ptRefreshDeckSearchGrid() {
     });
 }
 
-function ptOpenDeckSearch() {
+function ptOpenDeckSearch(player) {
+    _ptDeckSearchPlayer = player || ptCurrentPlayer;
     _ptRefreshDeckSearchGrid();
     document.getElementById('ptDeckSearchModal').style.display = 'flex';
 }
 
 function ptRouteFromDeck(cardId, destination) {
-    const p   = ptCurrentPlayer;
+    const p   = _ptDeckSearchPlayer || ptCurrentPlayer;
     const idx = ptState[p].deck.findIndex(c => c.ptId === cardId);
     if (idx > -1) {
         const card = ptState[p].deck.splice(idx, 1)[0];
@@ -599,7 +627,8 @@ function ptRouteFromDeck(cardId, destination) {
 
 function ptCloseDeckSearch() {
     document.getElementById('ptDeckSearchModal').style.display = 'none';
-    ptShuffle(); // Shuffle deck after player finishes searching
+    ptShuffleDeck(_ptDeckSearchPlayer || ptCurrentPlayer); // Shuffle deck after player finishes searching
+    _ptDeckSearchPlayer = null;
 }
 
 // --- ZONE INTERACTION ---

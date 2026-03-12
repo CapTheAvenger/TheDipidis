@@ -1855,13 +1855,13 @@
         <div style="display:flex;gap:8px;margin-top:14px;justify-content:center;"><button class="pt-btn" onclick="ptCloseTopCards()">Fertig (Rest aufs Deck)</button></div>
     </div>
 
-    <div id="ptDeckSearchModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.85); align-items:center;justify-content:center;" onclick="if(event.target===this)document.getElementById('ptDeckSearchModal').style.display='none'">
+    <div id="ptDeckSearchModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.85); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDeckSearch()">
         <div style="background:#2a2a2a;border-radius:12px;padding:20px;max-width:90vw;width:800px;max-height:85vh;overflow-y:auto;border:2px solid #3B4CCA;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;">
                 <h3 style="color:#fff;margin:0;">&#128269; Deck durchsuchen</h3>
                 <div style="display:flex;gap:8px;align-items:center;">
                     <span style="color:#aaa;font-size:12px;">Klicken = Hand &nbsp;|&nbsp; Rechtsklick = Lost Zone</span>
-                    <button class="pt-btn pt-danger" onclick="document.getElementById('ptDeckSearchModal').style.display='none'">&#x2715;</button>
+                    <button class="pt-btn pt-danger" onclick="ptCloseDeckSearch()">&#x2715;</button>
                 </div>
             </div>
             <div id="ptDeckSearchGrid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;"></div>

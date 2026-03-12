@@ -364,12 +364,11 @@ function ptPassTurn() {
 
 // --- DECK SEARCH ---
 
-function ptOpenDeckSearch() {
-    const deck = ptState[ptCurrentPlayer].deck;
+function _ptRefreshDeckSearchGrid() {
     const grid = document.getElementById('ptDeckSearchGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    [...deck].sort((a, b) => a.name.localeCompare(b.name)).forEach(card => {
+    [...ptState[ptCurrentPlayer].deck].sort((a, b) => a.name.localeCompare(b.name)).forEach(card => {
         const wrap = document.createElement('div');
         wrap.style.cssText = 'position:relative;cursor:pointer;';
         wrap.title = card.name;
@@ -390,6 +389,10 @@ function ptOpenDeckSearch() {
         wrap.appendChild(lbl);
         grid.appendChild(wrap);
     });
+}
+
+function ptOpenDeckSearch() {
+    _ptRefreshDeckSearchGrid();
     document.getElementById('ptDeckSearchModal').style.display = 'flex';
 }
 
@@ -405,9 +408,15 @@ function ptRouteFromDeck(cardId, destination) {
             ptState[p].lostzone.push(card);
             ptLog(`Schickt "${card.name}" aus dem Deck in die Lost Zone.`);
         }
-        ptShuffle();
-        document.getElementById('ptDeckSearchModal').style.display = 'none';
+        // Refresh the grid so the taken card disappears — modal stays open
+        _ptRefreshDeckSearchGrid();
+        ptRenderAll();
     }
+}
+
+function ptCloseDeckSearch() {
+    document.getElementById('ptDeckSearchModal').style.display = 'none';
+    ptShuffle(); // Deck mischen erst wenn der Spieler fertig gesucht hat
 }
 
 // --- ZONE INTERACTION ---

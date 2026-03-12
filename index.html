@@ -11,30 +11,125 @@
     <title>Pokemon TCG Analysis</title>
         <link rel="stylesheet" href="css/styles.css">
         <link rel="stylesheet" href="css/auth-styles.css">
+
+    <style id="pokeball-menu-styles">
+        .pokeball-wrapper { position: relative; z-index: 1000; }
+
+        .pokeball-btn {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #fff; border: 4px solid #222; position: relative;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden; flex-shrink: 0;
+        }
+        .pokeball-btn:hover { transform: scale(1.08) rotate(15deg); }
+        .pokeball-top {
+            position: absolute; top: 0; left: 0; right: 0; height: 50%;
+            background: #e3350d; border-bottom: 4px solid #222; transition: transform 0.4s;
+        }
+        .pokeball-bottom {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+            background: #fff; transition: transform 0.4s;
+        }
+        .pokeball-center {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 18px; height: 18px; background: #fff; border: 4px solid #222;
+            border-radius: 50%; z-index: 2; transition: all 0.4s;
+        }
+        .pokeball-btn.open { transform: scale(1.1); }
+        .pokeball-btn.open .pokeball-top  { transform: translateY(-8px); }
+        .pokeball-btn.open .pokeball-bottom { transform: translateY(8px); }
+        .pokeball-btn.open .pokeball-center { width: 22px; height: 22px; background: #58e870; box-shadow: 0 0 15px #58e870; }
+
+        .main-menu-dropdown {
+            position: absolute; top: 75px; left: 0; background: #fff; border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3); width: 300px; z-index: 9999;
+            display: flex; flex-direction: column; overflow: hidden; border: 3px solid #222;
+            opacity: 0; visibility: hidden; transform: translateY(-20px) scale(0.95);
+            transform-origin: top left;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .main-menu-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .menu-header {
+            background: #e3350d; color: white; padding: 12px; font-weight: 900;
+            text-align: center; font-size: 16px; letter-spacing: 1px; border-bottom: 3px solid #222;
+        }
+        .menu-item {
+            padding: 12px 18px; text-align: left; border: none; background: none;
+            font-size: 15px; font-weight: 700; color: #444;
+            border-bottom: 1px solid #f0f0f0; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; width: 100%;
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:hover { background: #f8f9fa; color: #3B4CCA; padding-left: 26px; }
+        .menu-item.active { background: #f0f4f8; color: #3B4CCA; border-left: 4px solid #e3350d; }
+
+        .current-tab-badge {
+            font-size: 0.45em; background: #e3350d; color: white; padding: 5px 11px;
+            border-radius: 20px; font-weight: 800; letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(227,53,13,0.4); text-transform: uppercase;
+            border: 2px solid #fff; white-space: nowrap; vertical-align: middle; margin-left: 12px;
+        }
+
+        /* Hide old navigation bar */
+        .tab-navigation { display: none !important; }
+
+        @media (max-width: 768px) {
+            .pokeball-btn { width: 50px; height: 50px; }
+            .main-menu-dropdown { width: 260px; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <h1>🎴 Pokemon TCG Analysis</h1>
-                    <p>Your Hub for Meta Analysis & Deckbuilding</p>
+
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <!-- Pokeball Menu Trigger -->
+                    <div class="pokeball-wrapper">
+                        <div id="mainMenuTrigger" class="pokeball-btn" onclick="toggleMainMenu()">
+                            <div class="pokeball-top"></div>
+                            <div class="pokeball-bottom"></div>
+                            <div class="pokeball-center"></div>
+                        </div>
+                        <div id="mainMenuDropdown" class="main-menu-dropdown">
+                            <div class="menu-header">MENU</div>
+                            <button id="menu-btn-city-league"          class="menu-item active" onclick="switchTabAndUpdateMenu('city-league')">🇯🇵 City League Meta</button>
+                            <button id="menu-btn-city-league-analysis" class="menu-item"        onclick="switchTabAndUpdateMenu('city-league-analysis')">📊 City League Deck Analysis</button>
+                            <button id="menu-btn-current-meta"         class="menu-item"        onclick="switchTabAndUpdateMenu('current-meta')">🎮 Current Meta</button>
+                            <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')">📈 Current Meta Deck Analysis</button>
+                            <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')">🏆 Past Meta</button>
+                            <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')">🧰 Cards</button>
+                            <button id="menu-btn-sandbox"              class="menu-item"        onclick="switchTabAndUpdateMenu('sandbox')">⚔️ Playtester</button>
+                            <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')">👤 Profile</button>
+                            <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')">📖 How to Use</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h1 style="margin: 0;">
+                            🎴 Pokemon TCG Analysis
+                            <span id="current-tab-title" class="current-tab-badge">🇯🇵 City League Meta</span>
+                        </h1>
+                        <p style="margin: 5px 0 0 0;">Your Hub for Meta Analysis &amp; Deckbuilding</p>
+                    </div>
                 </div>
+
                 <div id="user-menu">
-                    <!-- Not signed in -->
                     <button id="signin-btn" class="user-btn" onclick="showAuthModal('signin')" style="display: none;">
                         <img src="images/pokeball-icon.png" alt="Sign In" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
                         Sign In
                     </button>
-                    <!-- Signed in -->
                     <div id="user-info" class="user-info" style="display: none;">
                         <span id="user-email-display" style="margin-right: 10px; color: #666;"></span>
-                        <button class="user-btn" onclick="switchTab('profile')">
+                        <button class="user-btn" onclick="switchTabAndUpdateMenu('profile')">
                             <img src="images/pokeball-icon.png" alt="Profile" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">
                             Profile
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
         
@@ -1730,6 +1825,39 @@
 
     <script>window.CARD_BACK_URL = "https://images.pokemontcg.io/card-back.png";</script>
 
+    <script>
+        function toggleMainMenu() {
+            document.getElementById('mainMenuDropdown').classList.toggle('show');
+            document.getElementById('mainMenuTrigger').classList.toggle('open');
+        }
+
+        function switchTabAndUpdateMenu(tabId) {
+            if (typeof switchTab === 'function') switchTab(tabId);
+
+            document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('menu-btn-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                const badge = document.getElementById('current-tab-title');
+                if (badge) badge.innerHTML = activeBtn.innerHTML;
+            }
+
+            document.getElementById('mainMenuDropdown').classList.remove('show');
+            document.getElementById('mainMenuTrigger').classList.remove('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu    = document.getElementById('mainMenuDropdown');
+            const trigger = document.getElementById('mainMenuTrigger');
+            if (menu && trigger && menu.classList.contains('show')) {
+                if (!menu.contains(e.target) && !trigger.contains(e.target)) {
+                    menu.classList.remove('show');
+                    trigger.classList.remove('open');
+                }
+            }
+        });
+    </script>
+
     <div id="playtesterModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:15000; flex-direction:column; background: radial-gradient(circle at center, #1b6b38 0%, #0d381c 100%); font-family: 'Nunito', sans-serif;">
 
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
@@ -1930,6 +2058,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260311-v11"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v7"></script>
+    <script src="js/playtester.js?v=20260312-v8"></script>
 </body>
 </html>

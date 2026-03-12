@@ -533,14 +533,26 @@ const BASE_PATH = './data/';
             return intPrintCards;
         }
 
+        // Normalize card names for matching: lowercase, remove parenthetical suffixes, unify apostrophes
+        function normalizeCardName(name) {
+            if (!name) return '';
+            return name
+                .replace(/\([^)]*\)/g, '')  // remove (Ghetsis), (PAL), etc.
+                .replace(/\[[^\]]*\]/g, '') // remove [anything]
+                .replace(/[\u2019\u2018\u201B\u0060\u00B4]/g, "'") // unify curly/smart apostrophes
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toLowerCase();
+        }
+
         // Check if card is a basic energy (Fire, Water, Grass, etc.)
         function isBasicEnergy(cardName) {
             const basicEnergyNames = [
-                'Fire Energy', 'Water Energy', 'Grass Energy', 'Lightning Energy',
-                'Psychic Energy', 'Fighting Energy', 'Darkness Energy', 'Metal Energy',
-                'Fairy Energy', 'Dragon Energy', 'Colorless Energy'
+                'fire energy', 'water energy', 'grass energy', 'lightning energy',
+                'psychic energy', 'fighting energy', 'darkness energy', 'metal energy',
+                'fairy energy', 'dragon energy', 'colorless energy'
             ];
-            return basicEnergyNames.includes(cardName);
+            return basicEnergyNames.includes(normalizeCardName(cardName));
         }
 
         function getPreferredVersionForCard(cardName, originalSet = null, originalNumber = null) {
@@ -7530,7 +7542,7 @@ const BASE_PATH = './data/';
                             }
                             processedRows++;
                             
-                            const cardName = row.card_name.toLowerCase();
+                            const cardName = normalizeCardName(row.card_name);
                             
                             // Skip basic energies from coverage tracking
                             if (isBasicEnergy(row.card_name)) return;
@@ -8281,7 +8293,7 @@ const BASE_PATH = './data/';
                 
                 // Deck Coverage filter
                 if (selectedDeckCoverages.length > 0 && window.cardDeckCoverageMap) {
-                    const cardNameLower = card.name.toLowerCase();
+                    const cardNameLower = normalizeCardName(card.name);
                     const coverageStats = window.cardDeckCoverageMap.get(cardNameLower);
                     
                     if (!coverageStats) {
@@ -9058,25 +9070,25 @@ const BASE_PATH = './data/';
                 const archetypeCount = coverageStats.archetypeCount || 0;
                 
                 // Get max count from cardDeckCoverageMap
-                const cardNameLower = card.name.toLowerCase();
-                const cardCoverageData = window.cardDeckCoverageMap ? window.cardDeckCoverageMap.get(cardNameLower) : null;
+                const cardNameNorm = normalizeCardName(card.name);
+                const cardCoverageData = window.cardDeckCoverageMap ? window.cardDeckCoverageMap.get(cardNameNorm) : null;
                 const maxCount = cardCoverageData ? (cardCoverageData.maxCountOverall || 0) : 0;
                 
                 let coverageColor = '#95a5a6'; // Gray for < 50%
-                let coverageIcon = '??';
+                let coverageIcon = '\u{1F4CA}'; // bar chart
                 
                 if (percentage >= 99.5) {
                     coverageColor = '#e74c3c'; // Red for 100%
-                    coverageIcon = '??';
+                    coverageIcon = '\uD83D\uDD25'; // fire
                 } else if (percentage >= 90) {
-                    coverageColor = '#e67e22'; // Orange for =90%
-                    coverageIcon = '??';
+                    coverageColor = '#e67e22'; // Orange for >=90%
+                    coverageIcon = '\u26A1'; // lightning
                 } else if (percentage >= 70) {
-                    coverageColor = '#f39c12'; // Yellow for =70%
-                    coverageIcon = '?';
+                    coverageColor = '#f39c12'; // Yellow for >=70%
+                    coverageIcon = '\u2B50'; // star
                 } else if (percentage >= 50) {
-                    coverageColor = '#3498db'; // Blue for =50%
-                    coverageIcon = '??';
+                    coverageColor = '#3498db'; // Blue for >=50%
+                    coverageIcon = '\u{1F4CA}'; // bar chart
                 }
                 
                 // Format the display with max count
@@ -9090,7 +9102,7 @@ const BASE_PATH = './data/';
             item.innerHTML = `
                 <div style="position: relative;">
                     <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
-                    ${userOwnsCard ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">?</div>' : ''}
+                    ${userOwnsCard ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">&#10003;</div>' : ''}
                     <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
                         <button onclick="toggleCollection('${safeCardId}')" style="background: ${userOwnsCard ? '#4CAF50' : '#fff'}; color: ${userOwnsCard ? '#fff' : '#000'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userOwnsCard ? 'Remove from collection' : 'Add to collection'}">
                             ${userOwnsCard ? '&#10003;' : '+'}
@@ -9187,7 +9199,7 @@ const BASE_PATH = './data/';
                 return null;
             }
             
-            const cardNameLower = cardName.toLowerCase();
+            const cardNameLower = normalizeCardName(cardName);
             const cardStats = window.cardDeckCoverageMap.get(cardNameLower);
             
             if (!cardStats) {

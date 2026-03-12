@@ -7603,18 +7603,18 @@ const BASE_PATH = './data/';
                             }
                             
                             // Store how many decks of this archetype have THIS SPECIFIC CARD
-                            // Multiple prints of the same card might appear, use the MAXIMUM value
-                            // (because different prints of the same card are in the same decks)
+                            // Multiple prints of the same card (e.g. PAL 172 + BRS 132 of Boss's Orders)
+                            // are SUM-merged so the coverage reflects ALL decks playing ANY print.
+                            // Cap at totalDecksInArchetype to prevent exceeding 100%.
                             const currentEntry = cardStats.archetypesWithCard.get(archetypeKey);
                             const currentCount = currentEntry ? currentEntry.deckCount : 0;
-                            if (deckCountWithThisCard > currentCount) {
-                                cardStats.archetypesWithCard.set(archetypeKey, {
-                                    deckCount: deckCountWithThisCard,
-                                    tournamentDate: tournamentDate,
-                                    maxCount: maxCountInDeck,
-                                    setCode: row.set_code || null
-                                });
-                            }
+                            const combinedCount = Math.min(totalDecksInArchetype, currentCount + deckCountWithThisCard);
+                            cardStats.archetypesWithCard.set(archetypeKey, {
+                                deckCount: combinedCount,
+                                tournamentDate: tournamentDate || (currentEntry ? currentEntry.tournamentDate : null),
+                                maxCount: Math.max(maxCountInDeck, currentEntry ? currentEntry.maxCount : 0),
+                                setCode: row.set_code || (currentEntry ? currentEntry.setCode : null)
+                            });
                             cardStats.archetypes.add(row.archetype);
                             
                             // NEW: Populate filter maps

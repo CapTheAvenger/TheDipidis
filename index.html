@@ -1749,29 +1749,28 @@
     .pt-btn.pt-danger { background: #e74c3c; color: white; border-color: #c0392b; }
     .pt-zone-label { color: rgba(255,255,255,0.9); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
 
-    /* ── BATTLE MAT ARENA ── */
+    /* ── BATTLE MAT ARENA (Optimised for 13") ── */
     .pt-arena {
-        position: relative; width: 100%; height: 100%; max-width: 950px; max-height: 850px;
+        position: relative;
+        width: 100%; height: 100%; max-width: 900px; min-height: 600px;
         background:
-            /* Edge vignette for depth */
             radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%),
-            /* Felt weave texture — two diagonal cross-hatch layers */
             repeating-linear-gradient( 55deg, rgba(255,255,255,0.013) 0px, rgba(255,255,255,0.013) 1px, transparent 1px, transparent 9px),
             repeating-linear-gradient(-55deg, rgba(255,255,255,0.013) 0px, rgba(255,255,255,0.013) 1px, transparent 1px, transparent 9px),
-            /* Base mat color */
             linear-gradient(165deg, #1c7d34 0%, #145a26 45%, #0b3818 100%);
         border: 4px solid rgba(255,255,255,0.18); border-radius: 20px;
-        display: flex; flex-direction: column; justify-content: space-between; padding: 15px; box-sizing: border-box;
+        box-sizing: border-box;
         transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center center;
         box-shadow: inset 0 0 80px rgba(0,0,0,0.35), 0 10px 40px rgba(0,0,0,0.7);
+        flex-shrink: 0;
     }
     .pt-arena::before {
-        content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 4px;
-        background: rgba(255,255,255,0.3); transform: translateY(-50%); z-index: 0; pointer-events: none;
+        content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px;
+        background: rgba(255,255,255,0.2); transform: translateY(-50%); z-index: 0; pointer-events: none;
     }
     .pt-arena::after {
-        content: ''; position: absolute; top: 50%; left: 50%; width: 160px; height: 160px;
-        border: 4px solid rgba(255,255,255,0.3); border-radius: 50%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none;
+        content: ''; position: absolute; top: 50%; left: 50%; width: 140px; height: 140px;
+        border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none;
     }
 
     /* ── KARTEN GRÖßEN (Perfekt für Non-Scroll) ── */
@@ -1896,124 +1895,120 @@
             </div>
         </div>
 
-        <div style="flex:1; display:flex; justify-content:center; align-items:stretch; padding: 15px; overflow:hidden; box-sizing:border-box;">
+        <div style="flex:1; display:flex; justify-content:center; align-items:center; gap: 20px; padding: 15px; overflow-x: auto; overflow-y: hidden; box-sizing:border-box;">
 
             <div id="playtester-board" class="pt-arena">
 
-                <div id="p2-area" style="transform: rotate(180deg); display: flex; flex-direction: column; gap: 6px; z-index: 1;">
-                    <div class="pt-player-row">
-                        <div class="pt-side-panel" style="justify-content: flex-start;">
-                            <div style="text-align:center;">
-                                <div class="pt-zone-label">P2 Prizes</div>
-                                <div id="ptPrizeZone-p2" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:2px; width: 88px;"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="pt-zone-label" style="text-align:center;">P2 Bench</div>
-                            <div style="display:flex; justify-content:center; gap:5px; flex-wrap:nowrap;">
-                                <div id="ptBench0-p2"></div><div id="ptBench1-p2"></div><div id="ptBench2-p2"></div><div id="ptBench3-p2"></div><div id="ptBench4-p2"></div>
-                            </div>
-                        </div>
-
-                        <div class="pt-side-panel" style="justify-content: flex-end;">
-                            <div style="text-align:center;">
-                                <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p2">0</span>)</div>
-                                <div id="ptDiscardPile-p2"></div>
-                            </div>
-                            <div style="text-align:center;">
-                                <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
-                                <div class="pt-deck-pile" onclick="ptDraw1('p2')">&#127136;</div>
-                            </div>
-                        </div>
+                <!-- P2 Discard + Deck (top-left, rotated) -->
+                <div style="position: absolute; top: 15px; left: 15px; display: flex; gap: 10px; transform: rotate(180deg);">
+                    <div style="text-align:center;">
+                        <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p2">0</span>)</div>
+                        <div id="ptDiscardPile-p2"></div>
                     </div>
-
-                    <div style="display: flex; justify-content: center; align-items: flex-end; gap: 25px; margin-top: 5px; position: relative; z-index: 5;">
-                        <div style="width: 150px;"></div>
-                        <div style="text-align:center;">
-                            <div class="pt-zone-label" style="color:#FFCB05; font-size: 11px;">P2 Active Pokémon</div>
-                            <div id="ptActiveZone-p2" style="display:inline-block; min-height: 105px;"></div>
-                        </div>
-                        <div style="width: 150px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
-                            <div class="pt-zone-label">⚡ Command (P2)</div>
-                            <div style="display:flex; gap:4px;">
-                                <input id="ptCommandInput-p2" type="text" placeholder="/draw 3" class="pt-cmd-input" onkeydown="if(event.key==='Enter') ptRunCommand('p2')" onclick="event.stopPropagation()">
-                                <button class="pt-btn" style="padding: 4px 8px; border-radius: 6px;" onclick="ptRunCommand('p2')">▶</button>
-                            </div>
-                        </div>
+                    <div style="text-align:center;">
+                        <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
+                        <div class="pt-deck-pile" onclick="ptDraw1('p2')">&#127136;</div>
                     </div>
                 </div>
 
-                <div id="ptNeutralZone" style="display: flex; justify-content: space-between; align-items: center; z-index: 2; padding: 0 10px; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);">
-
-                    <div style="text-align: center;">
-                        <div class="pt-zone-label" style="color:#d136c1;">Lost P2 (<span id="ptLostCount-p2">0</span>)</div>
-                        <div id="ptLostPile-p2" style="width:58px;height:81px;border:2px dashed #9b59b6;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;background:rgba(0,0,0,0.4);" onclick="ptOpenLostZone('p2')">&#127744;</div>
-                    </div>
-
-                    <div style="display: flex; gap: 20px; background: rgba(0,0,0,0.6); padding: 8px 20px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.15); box-shadow: 0 0 20px rgba(0,0,0,0.5);">
-                        <div style="text-align:center;">
-                            <div class="pt-zone-label" style="color:#a8e6cf;">🏟️ Stadium</div>
-                            <div id="ptStadiumZone"></div>
-                        </div>
-                        <div style="text-align:center;">
-                            <div class="pt-zone-label" style="color:#a8e6cf;">⚡ Played Card</div>
-                            <div id="ptPlayZone"></div>
-                        </div>
-                    </div>
-
-                    <div style="text-align: center;">
-                        <div class="pt-zone-label" style="color:#d136c1;">Lost P1 (<span id="ptLostCount-p1">0</span>)</div>
-                        <div id="ptLostPile-p1" style="width:58px;height:81px;border:2px dashed #9b59b6;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;background:rgba(0,0,0,0.4);" onclick="ptOpenLostZone('p1')">&#127744;</div>
-                    </div>
-
+                <!-- P2 Lost Zone (left side, rotated) -->
+                <div style="position: absolute; top: 130px; left: 15px; text-align: center; transform: rotate(180deg);">
+                    <div class="pt-zone-label" style="color:#d136c1;">Lost P2 (<span id="ptLostCount-p2">0</span>)</div>
+                    <div id="ptLostPile-p2" class="pt-empty-slot" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);" onclick="ptOpenLostZone('p2')">&#127744;</div>
                 </div>
 
-                <div id="p1-area" style="display: flex; flex-direction: column; gap: 6px; z-index: 1;">
-                    <div style="display: flex; justify-content: center; align-items: flex-end; gap: 25px; margin-bottom: 5px; position: relative; z-index: 5;">
-                        <div style="width: 150px;"></div>
-                        <div style="text-align:center;">
-                            <div class="pt-zone-label" style="color:#FFCB05; font-size: 11px;">P1 Active Pokémon</div>
-                            <div id="ptActiveZone-p1" style="display:inline-block; min-height: 105px;"></div>
-                        </div>
-                        <div style="width: 150px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
-                            <div class="pt-zone-label">⚡ Command (P1)</div>
-                            <div style="display:flex; gap:4px;">
-                                <input id="ptCommandInput-p1" type="text" placeholder="/draw 3" class="pt-cmd-input" onkeydown="if(event.key==='Enter') ptRunCommand('p1')" onclick="event.stopPropagation()">
-                                <button class="pt-btn" style="padding: 4px 8px; border-radius: 6px;" onclick="ptRunCommand('p1')">▶</button>
-                            </div>
-                        </div>
+                <!-- P2 Bench (top-centre, rotated) -->
+                <div style="position: absolute; top: 15px; left: 50%; transform: translateX(-50%) rotate(180deg); text-align: center;">
+                    <div class="pt-zone-label">P2 Bench</div>
+                    <div style="display:flex; justify-content:center; gap:5px;">
+                        <div id="ptBench0-p2"></div><div id="ptBench1-p2"></div><div id="ptBench2-p2"></div><div id="ptBench3-p2"></div><div id="ptBench4-p2"></div>
                     </div>
+                </div>
 
-                    <div class="pt-player-row">
-                        <div class="pt-side-panel" style="justify-content: flex-start;">
-                            <div style="text-align:center;">
-                                <div class="pt-zone-label">P1 Prizes</div>
-                                <div id="ptPrizeZone-p1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:2px; width: 88px;"></div>
-                            </div>
-                        </div>
+                <!-- P2 Active (upper-centre, rotated) -->
+                <div style="position: absolute; top: 130px; left: 50%; transform: translateX(-50%) rotate(180deg); text-align: center; z-index: 10;">
+                    <div class="pt-zone-label" style="color:#FFCB05;">P2 Active</div>
+                    <div id="ptActiveZone-p2" style="min-height: 105px;"></div>
+                </div>
 
-                        <div>
-                            <div class="pt-zone-label" style="text-align:center;">P1 Bench</div>
-                            <div style="display:flex; justify-content:center; gap:5px; flex-wrap:nowrap;">
-                                <div id="ptBench0-p1"></div><div id="ptBench1-p1"></div><div id="ptBench2-p1"></div><div id="ptBench3-p1"></div><div id="ptBench4-p1"></div>
-                            </div>
-                        </div>
+                <!-- P2 Command input (rotated, right of active) -->
+                <div style="position: absolute; top: 130px; left: 50%; transform: translateX(75px) rotate(180deg);">
+                    <div class="pt-zone-label">⚡ Command (P2)</div>
+                    <div style="display:flex; gap:4px;">
+                        <input id="ptCommandInput-p2" type="text" placeholder="/draw 3" class="pt-cmd-input" onkeydown="if(event.key==='Enter') ptRunCommand('p2')" onclick="event.stopPropagation()">
+                        <button class="pt-btn" style="padding: 4px 8px;" onclick="ptRunCommand('p2')">▶</button>
+                    </div>
+                </div>
 
-                        <div class="pt-side-panel" style="justify-content: flex-end;">
-                            <div style="text-align:center;">
-                                <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p1">0</span>)</div>
-                                <div id="ptDiscardPile-p1"></div>
-                            </div>
-                            <div style="text-align:center;">
-                                <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
-                                <div class="pt-deck-pile" onclick="ptDraw1('p1')">&#127136;</div>
-                            </div>
-                        </div>
+                <!-- P2 Prizes (top-right, rotated) -->
+                <div style="position: absolute; top: 15px; right: 15px; text-align: center; transform: rotate(180deg);">
+                    <div class="pt-zone-label">P2 Prizes</div>
+                    <div id="ptPrizeZone-p2" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; width: 94px;"></div>
+                </div>
+
+                <!-- Stadium (centre-left) -->
+                <div style="position: absolute; top: 50%; left: 15px; transform: translateY(-50%); text-align: center; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); z-index: 5;">
+                    <div class="pt-zone-label" style="color:#a8e6cf;">🏟️ Stadium</div>
+                    <div id="ptStadiumZone"></div>
+                </div>
+
+                <!-- P1 Discard + Deck (bottom-right) -->
+                <div style="position: absolute; bottom: 15px; right: 15px; display: flex; gap: 10px;">
+                    <div style="text-align:center;">
+                        <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p1">0</span>)</div>
+                        <div id="ptDiscardPile-p1"></div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
+                        <div class="pt-deck-pile" onclick="ptDraw1('p1')">&#127136;</div>
+                    </div>
+                </div>
+
+                <!-- P1 Lost Zone (right side) -->
+                <div style="position: absolute; bottom: 130px; right: 15px; text-align: center;">
+                    <div class="pt-zone-label" style="color:#d136c1;">Lost P1 (<span id="ptLostCount-p1">0</span>)</div>
+                    <div id="ptLostPile-p1" class="pt-empty-slot" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);" onclick="ptOpenLostZone('p1')">&#127744;</div>
+                </div>
+
+                <!-- P1 Prizes (bottom-left) -->
+                <div style="position: absolute; bottom: 15px; left: 15px; text-align: center;">
+                    <div class="pt-zone-label">P1 Prizes</div>
+                    <div id="ptPrizeZone-p1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; width: 94px;"></div>
+                </div>
+
+                <!-- P1 Bench (bottom-centre) -->
+                <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); text-align: center;">
+                    <div class="pt-zone-label">P1 Bench</div>
+                    <div style="display:flex; justify-content:center; gap:5px;">
+                        <div id="ptBench0-p1"></div><div id="ptBench1-p1"></div><div id="ptBench2-p1"></div><div id="ptBench3-p1"></div><div id="ptBench4-p1"></div>
+                    </div>
+                </div>
+
+                <!-- P1 Active (lower-centre) -->
+                <div style="position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
+                    <div class="pt-zone-label" style="color:#FFCB05;">P1 Active</div>
+                    <div id="ptActiveZone-p1" style="min-height: 105px;"></div>
+                </div>
+
+                <!-- P1 Command input (right of active) -->
+                <div style="position: absolute; bottom: 130px; left: 50%; transform: translateX(75px);">
+                    <div class="pt-zone-label">⚡ Command (P1)</div>
+                    <div style="display:flex; gap:4px;">
+                        <input id="ptCommandInput-p1" type="text" placeholder="/draw 3" class="pt-cmd-input" onkeydown="if(event.key==='Enter') ptRunCommand('p1')" onclick="event.stopPropagation()">
+                        <button class="pt-btn" style="padding: 4px 8px;" onclick="ptRunCommand('p1')">▶</button>
                     </div>
                 </div>
 
             </div>
+
+            <!-- Played Card — side panel outside the mat -->
+            <div style="display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 12px; border: 2px dashed #ffcb05; box-shadow: 0 5px 20px rgba(0,0,0,0.5); min-width: 180px; align-self: stretch; justify-content: center;">
+                <div class="pt-zone-label" style="color:#FFCB05; font-size: 13px; margin-bottom: 15px; text-shadow: none;">⚡ Played Card</div>
+                <div id="ptPlayZone" style="width: 140px; height: 195px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05);">
+                    <span style="color: rgba(255,255,255,0.4); font-size: 11px; text-align: center; padding: 10px;">Play Supporter/Item<br>Here</span>
+                </div>
+            </div>
+
         </div>
 
         <div class="pt-hand-zone">
@@ -2091,6 +2086,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260311-v12"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v14"></script>
+    <script src="js/playtester.js?v=20260312-v15"></script>
 </body>
 </html>

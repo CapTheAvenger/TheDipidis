@@ -145,6 +145,122 @@
         .btn-toggle-item:last-child { border-right: none; }
         .btn-toggle-item:hover { background: #f8f9fa; }
         .btn-toggle-item.btn-success, .btn-toggle-item.active { background: #3B4CCA !important; color: white !important; }
+
+        /* ── GOLDFISHING PLAYTESTER ── */
+        #playtesterModal { font-family: 'Nunito', sans-serif !important; background: #0d2a18 !important; overflow: hidden !important; }
+
+        .pt-toolbar { background: linear-gradient(90deg, #1b3b8c 0%, #2a52be 100%); border-bottom: 3px solid #ffcb05; box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 100; }
+        .pt-btn { background: rgba(255,255,255,0.9); color: #1b3b8c; border: 2px solid #ffcb05; border-radius: 20px; padding: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space: nowrap; transition: all 0.15s ease; font-family: inherit; }
+        .pt-btn:hover { background: #ffcb05; color: #000; transform: translateY(-2px); }
+        .pt-btn.pt-danger { background: #e74c3c; color: white; border-color: #c0392b; }
+        .pt-zone-label { color: rgba(255,255,255,0.9); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+
+        .pt-arena {
+            position: relative;
+            width: 100%; height: 100%; max-width: 900px; min-height: 600px;
+            background:
+                radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%),
+                repeating-linear-gradient( 55deg, rgba(255,255,255,0.013) 0px, rgba(255,255,255,0.013) 1px, transparent 1px, transparent 9px),
+                repeating-linear-gradient(-55deg, rgba(255,255,255,0.013) 0px, rgba(255,255,255,0.013) 1px, transparent 1px, transparent 9px),
+                linear-gradient(165deg, #1c7d34 0%, #145a26 45%, #0b3818 100%);
+            border: 4px solid rgba(255,255,255,0.18); border-radius: 20px;
+            box-sizing: border-box;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center center;
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.35), 0 10px 40px rgba(0,0,0,0.7);
+            flex-shrink: 0;
+        }
+        .pt-arena::before {
+            content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px;
+            background: rgba(255,255,255,0.2); transform: translateY(-50%); z-index: 0; pointer-events: none;
+        }
+        .pt-arena::after {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 140px; height: 140px;
+            border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none;
+        }
+
+        .pt-empty-slot { width: 58px; height: 81px; border: 2px dashed rgba(255,255,255,0.28); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.32); font-size: 9px; cursor: pointer; transition: all 0.2s; text-align: center; user-select: none; box-sizing: border-box; flex-shrink: 0; background: rgba(0,0,0,0.15); position: relative; z-index: 2; }
+        .pt-empty-slot.pt-drop-target, .pt-empty-slot:hover { border-color: #ffcb05; background: rgba(255, 203, 5, 0.15); color: #ffcb05; box-shadow: 0 0 10px rgba(255,203,5,0.3); }
+        .pt-field-card { position: relative; width: 58px; cursor: pointer; border-radius: 4px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 2px 2px 6px rgba(0,0,0,0.4); user-select: none; flex-shrink: 0; z-index: 2; }
+        .pt-field-card:hover { transform: scale(1.2); z-index: 10; }
+        .pt-card-selected { outline: 3px solid #ffcb05; outline-offset: 2px; box-shadow: 0 0 15px #ffcb05; }
+
+        #ptActiveZone-p1 .pt-empty-slot, #ptActiveZone-p1 .pt-field-card,
+        #ptActiveZone-p2 .pt-empty-slot, #ptActiveZone-p2 .pt-field-card { width: 75px; height: 105px; }
+
+        .pt-cmd-input { background: rgba(0,0,0,0.7); border: 2px solid #3B4CCA; border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 11px; width: 110px; outline: none; font-family: monospace; transition: all 0.2s; position: relative; z-index: 5; }
+        .pt-cmd-input:focus { border-color: #ffcb05; box-shadow: 0 0 10px rgba(255,203,5,0.5); }
+
+        .pt-attachment-energy { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; object-position: center 25%; left: -8px; z-index: 15; transition: transform 0.2s; }
+        .pt-attachment-energy:hover { transform: scale(2) translateX(5px); z-index: 50; }
+        .pt-attachment-tool { position: absolute; width: 22px; height: 28px; border-radius: 4px; border: 2px solid #fff; object-fit: cover; object-position: center 10%; left: -8px; z-index: 14; transition: transform 0.2s; }
+        .pt-attachment-tool:hover { transform: scale(2) translateX(5px); z-index: 50; }
+        .pt-damage-badge { position: absolute; top: -8px; right: -8px; background: radial-gradient(circle at top left, #ff6b6b, #c0392b); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; border: 2px solid #fff; pointer-events: none; z-index: 20; }
+
+        .pt-field-actions { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); display: none; gap: 2px; z-index: 100; background: rgba(0,0,0,0.9); padding: 4px; border-radius: 6px; border: 1px solid #444; flex-direction: column; }
+        .pt-field-card:hover ~ .pt-field-actions, .pt-field-actions:hover { display: flex; }
+        .pt-action-btn { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 2px 5px; font-size: 9px; font-weight: bold; cursor: pointer; }
+        .pt-action-btn.red { background: #e74c3c; border-color: #c0392b; }
+        .pt-action-btn:hover { background: #555; }
+
+        .pt-deck-pile { width: 45px; height: 63px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; background: repeating-linear-gradient(45deg, #1b3b8c, #1b3b8c 6px, #2a52be 6px, #2a52be 12px); border: 2px solid rgba(255,255,255,0.5); user-select: none; position: relative; z-index: 2;}
+        .pt-deck-pile:hover { transform: scale(1.05); border-color: #ffcb05; }
+        .pt-prize-card { width: 28px; border-radius: 4px; cursor: pointer; display: block; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); transition: transform 0.15s; position: relative; z-index: 2;}
+        .pt-prize-card:hover { transform: scale(1.15) translateY(-5px); border: 2px solid #ffcb05; z-index: 10;}
+
+        .pt-player-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 2; }
+        .pt-side-panel { display: flex; gap: 8px; align-items: flex-end; width: 140px; }
+
+        .pt-hand-zone { background: rgba(0,0,0,0.9); border-top: 3px solid #3B4CCA; padding: 6px 15px; flex-shrink: 0; margin: 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); z-index: 100;}
+        .pt-hand-wrapper { position: relative; display: inline-block; flex-shrink: 0; }
+        .pt-hand-card { width: 62px; border-radius: 4px; cursor: pointer; display: block; transition: transform 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
+        .pt-hand-card:hover { transform: translateY(-15px) scale(1.2); z-index: 5; position: relative; }
+        .pt-hand-card.pt-card-selected { outline: 3px solid #ffcb05; transform: translateY(-20px) scale(1.2); z-index: 6; }
+        .pt-hand-disc-btn { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 4px; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+        .pt-hand-wrapper:hover .pt-hand-disc-btn { display: flex; }
+
+        .pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 18px; border-radius: 4px; font-weight: 900; font-size: 9px; cursor: pointer; border: 2px solid; transition: all 0.2s; }
+        .pt-marker-vstar { background: linear-gradient(135deg, #fff, #a8e6cf); color: #000; border-color: #fff; }
+        .pt-marker-gx { background: linear-gradient(135deg, #333, #000); color: #fff; border-color: #00bcd4; }
+        .pt-marker.used { opacity: 0.3; filter: grayscale(1); transform: scale(0.95); }
+
+        #ptActionLogPanel { position: absolute; right: 15px; top: 60px; width: 240px; height: 280px; background: rgba(0, 0, 0, 0.85); border: 2px solid #3B4CCA; border-radius: 8px; color: #fff; font-family: monospace; font-size: 11px; padding: 10px; overflow-y: auto; z-index: 10000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .pt-log-entry { margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; }
+        .pt-log-p1 { color: #a8e6cf; }
+        .pt-log-p2 { color: #ff8b94; }
+        .pt-log-neutral { color: #ffcb05; }
+
+        .pt-arena.flipped { transform: rotate(180deg); }
+        .pt-arena.flipped .static-element { transform: rotate(180deg); }
+
+        .pt-deck-controls {
+            position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
+            background: rgba(0,0,0,0.88); border: 2px solid #2a52be; border-radius: 8px;
+            padding: 8px; display: flex; flex-direction: column; gap: 5px; width: 145px;
+            z-index: 20; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+        .pt-deck-controls-row { display: flex; gap: 4px; align-items: center; }
+        .pt-cmd-input-small {
+            width: 38px; background: #222; color: #fff; border: 1px solid #555;
+            border-radius: 4px; text-align: center; font-size: 11px; font-family: monospace;
+            padding: 3px 2px;
+        }
+        .pt-btn-small {
+            flex: 1; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px;
+            font-size: 10px; font-weight: 700; cursor: pointer; padding: 3px 4px; transition: 0.15s;
+            font-family: inherit;
+        }
+        .pt-btn-small:hover { background: #2a52be; border-color: #3B4CCA; }
+
+        .pt-status-marker {
+            width: 26px; height: 26px; border-radius: 50%; background: #333; border: 2px solid #555;
+            display: flex; align-items: center; justify-content: center; font-size: 11px;
+            cursor: pointer; transition: all 0.2s; filter: grayscale(1); opacity: 0.45;
+            line-height: 1;
+        }
+        .pt-status-marker.active { filter: grayscale(0); opacity: 1; border-color: #e74c3c; background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.6); }
+
+        .pt-dropzone { transition: background 0.15s, border-color 0.15s; }
+        .pt-dropzone.drag-over { background: rgba(255,203,5,0.2) !important; border-color: #ffcb05 !important; box-shadow: 0 0 12px rgba(255,203,5,0.4); }
     </style>
 </head>
 <body>
@@ -1073,7 +1189,7 @@
                             <textarea id="sandboxImportP1" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 180px; padding: 15px; border-radius: 8px; border: 2px solid #e1e8ed; font-family: monospace; font-size: 13px; resize: vertical; margin-bottom: 15px; box-sizing: border-box; background: #fff;"></textarea>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span id="sandboxStatusP1" style="font-size: 13px; font-weight: 800; color: #7f8c8d; background: #eee; padding: 4px 10px; border-radius: 12px;">Waiting for input...</span>
-                                <button class="btn" onclick="parseSandboxDeck('p1')" style="background: #3B4CCA; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Load Deck</button>
+                                <button class="btn" onclick="parseSandboxDeckToExactPrints(document.getElementById('sandboxImportP1').value, 'p1')" style="background: #3B4CCA; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Load Deck</button>
                             </div>
                         </div>
 
@@ -1086,7 +1202,7 @@
                             <textarea id="sandboxImportP2" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 180px; padding: 15px; border-radius: 8px; border: 2px solid #e1e8ed; font-family: monospace; font-size: 13px; resize: vertical; margin-bottom: 15px; box-sizing: border-box; background: #fff;"></textarea>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span id="sandboxStatusP2" style="font-size: 13px; font-weight: 800; color: #7f8c8d; background: #eee; padding: 4px 10px; border-radius: 12px;">Waiting for input...</span>
-                                <button class="btn" onclick="parseSandboxDeck('p2')" style="background: #E3350D; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Load Deck</button>
+                                <button class="btn" onclick="parseSandboxDeckToExactPrints(document.getElementById('sandboxImportP2').value, 'p2')" style="background: #E3350D; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 800; cursor: pointer;">📥 Load Deck</button>
                             </div>
                         </div>
 
@@ -1772,139 +1888,6 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════
-         GOLDFISHING PLAYTESTER — styles
-    ═══════════════════════════════════════════════════ -->
-    <style>
-    #playtesterModal { font-family: 'Nunito', sans-serif !important; background: #0d2a18 !important; overflow: hidden !important; }
-
-    .pt-toolbar { background: linear-gradient(90deg, #1b3b8c 0%, #2a52be 100%); border-bottom: 3px solid #ffcb05; box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 100; }
-    .pt-btn { background: rgba(255,255,255,0.9); color: #1b3b8c; border: 2px solid #ffcb05; border-radius: 20px; padding: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space: nowrap; transition: all 0.15s ease; font-family: inherit; }
-    .pt-btn:hover { background: #ffcb05; color: #000; transform: translateY(-2px); }
-    .pt-btn.pt-danger { background: #e74c3c; color: white; border-color: #c0392b; }
-    .pt-zone-label { color: rgba(255,255,255,0.9); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
-
-    /* ── BATTLE MAT ARENA (Optimised for 13") ── */
-    .pt-arena {
-        position: relative;
-        width: 100%; height: 100%; max-width: 900px; min-height: 600px;
-        background:
-            radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%),
-            repeating-linear-gradient( 55deg, rgba(255,255,255,0.013) 0px, rgba(255,255,255,0.013) 1px, transparent 1px, transparent 9px),
-            repeating-linear-gradient(-55deg, rgba(255,255,255,0.013) 0px, rgba(255,255,255,0.013) 1px, transparent 1px, transparent 9px),
-            linear-gradient(165deg, #1c7d34 0%, #145a26 45%, #0b3818 100%);
-        border: 4px solid rgba(255,255,255,0.18); border-radius: 20px;
-        box-sizing: border-box;
-        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center center;
-        box-shadow: inset 0 0 80px rgba(0,0,0,0.35), 0 10px 40px rgba(0,0,0,0.7);
-        flex-shrink: 0;
-    }
-    .pt-arena::before {
-        content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px;
-        background: rgba(255,255,255,0.2); transform: translateY(-50%); z-index: 0; pointer-events: none;
-    }
-    .pt-arena::after {
-        content: ''; position: absolute; top: 50%; left: 50%; width: 140px; height: 140px;
-        border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none;
-    }
-
-    /* ── CARD SIZES (optimised for non-scroll layout) ── */
-    .pt-empty-slot { width: 58px; height: 81px; border: 2px dashed rgba(255,255,255,0.28); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.32); font-size: 9px; cursor: pointer; transition: all 0.2s; text-align: center; user-select: none; box-sizing: border-box; flex-shrink: 0; background: rgba(0,0,0,0.15); position: relative; z-index: 2; }
-    .pt-empty-slot.pt-drop-target, .pt-empty-slot:hover { border-color: #ffcb05; background: rgba(255, 203, 5, 0.15); color: #ffcb05; box-shadow: 0 0 10px rgba(255,203,5,0.3); }
-    .pt-field-card { position: relative; width: 58px; cursor: pointer; border-radius: 4px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 2px 2px 6px rgba(0,0,0,0.4); user-select: none; flex-shrink: 0; z-index: 2; }
-    .pt-field-card:hover { transform: scale(1.2); z-index: 10; }
-    .pt-card-selected { outline: 3px solid #ffcb05; outline-offset: 2px; box-shadow: 0 0 15px #ffcb05; }
-
-    /* Active zone minimal größer */
-    #ptActiveZone-p1 .pt-empty-slot, #ptActiveZone-p1 .pt-field-card,
-    #ptActiveZone-p2 .pt-empty-slot, #ptActiveZone-p2 .pt-field-card { width: 75px; height: 105px; }
-
-    /* Command input on the game field */
-    .pt-cmd-input { background: rgba(0,0,0,0.7); border: 2px solid #3B4CCA; border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 11px; width: 110px; outline: none; font-family: monospace; transition: all 0.2s; position: relative; z-index: 5; }
-    .pt-cmd-input:focus { border-color: #ffcb05; box-shadow: 0 0 10px rgba(255,203,5,0.5); }
-
-    /* Attachments & Badges */
-    .pt-attachment-energy { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; object-position: center 25%; left: -8px; z-index: 15; transition: transform 0.2s; }
-    .pt-attachment-energy:hover { transform: scale(2) translateX(5px); z-index: 50; }
-    .pt-attachment-tool { position: absolute; width: 22px; height: 28px; border-radius: 4px; border: 2px solid #fff; object-fit: cover; object-position: center 10%; left: -8px; z-index: 14; transition: transform 0.2s; }
-    .pt-attachment-tool:hover { transform: scale(2) translateX(5px); z-index: 50; }
-    .pt-damage-badge { position: absolute; top: -8px; right: -8px; background: radial-gradient(circle at top left, #ff6b6b, #c0392b); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; border: 2px solid #fff; pointer-events: none; z-index: 20; }
-
-    .pt-field-actions { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); display: none; gap: 2px; z-index: 100; background: rgba(0,0,0,0.9); padding: 4px; border-radius: 6px; border: 1px solid #444; flex-direction: column; }
-    .pt-field-card:hover ~ .pt-field-actions, .pt-field-actions:hover { display: flex; }
-    .pt-action-btn { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 2px 5px; font-size: 9px; font-weight: bold; cursor: pointer; }
-    .pt-action-btn.red { background: #e74c3c; border-color: #c0392b; }
-    .pt-action-btn:hover { background: #555; }
-
-    /* Deck pile, discard pile, prizes */
-    .pt-deck-pile { width: 45px; height: 63px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; background: repeating-linear-gradient(45deg, #1b3b8c, #1b3b8c 6px, #2a52be 6px, #2a52be 12px); border: 2px solid rgba(255,255,255,0.5); user-select: none; position: relative; z-index: 2;}
-    .pt-deck-pile:hover { transform: scale(1.05); border-color: #ffcb05; }
-    .pt-prize-card { width: 28px; border-radius: 4px; cursor: pointer; display: block; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); transition: transform 0.15s; position: relative; z-index: 2;}
-    .pt-prize-card:hover { transform: scale(1.15) translateY(-5px); border: 2px solid #ffcb05; z-index: 10;}
-
-    /* Row containers */
-    .pt-player-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 2; }
-    .pt-side-panel { display: flex; gap: 8px; align-items: flex-end; width: 140px; }
-
-    /* Hand zone */
-    .pt-hand-zone { background: rgba(0,0,0,0.9); border-top: 3px solid #3B4CCA; padding: 6px 15px; flex-shrink: 0; margin: 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); z-index: 100;}
-    .pt-hand-wrapper { position: relative; display: inline-block; flex-shrink: 0; }
-    .pt-hand-card { width: 62px; border-radius: 4px; cursor: pointer; display: block; transition: transform 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
-    .pt-hand-card:hover { transform: translateY(-15px) scale(1.2); z-index: 5; position: relative; }
-    .pt-hand-card.pt-card-selected { outline: 3px solid #ffcb05; transform: translateY(-20px) scale(1.2); z-index: 6; }
-    .pt-hand-disc-btn { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 4px; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
-    .pt-hand-wrapper:hover .pt-hand-disc-btn { display: flex; }
-
-    .pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 18px; border-radius: 4px; font-weight: 900; font-size: 9px; cursor: pointer; border: 2px solid; transition: all 0.2s; }
-    .pt-marker-vstar { background: linear-gradient(135deg, #fff, #a8e6cf); color: #000; border-color: #fff; }
-    .pt-marker-gx { background: linear-gradient(135deg, #333, #000); color: #fff; border-color: #00bcd4; }
-    .pt-marker.used { opacity: 0.3; filter: grayscale(1); transform: scale(0.95); }
-
-    #ptActionLogPanel { position: absolute; right: 15px; top: 60px; width: 240px; height: 280px; background: rgba(0, 0, 0, 0.85); border: 2px solid #3B4CCA; border-radius: 8px; color: #fff; font-family: monospace; font-size: 11px; padding: 10px; overflow-y: auto; z-index: 10000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-    .pt-log-entry { margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; }
-    .pt-log-p1 { color: #a8e6cf; }
-    .pt-log-p2 { color: #ff8b94; }
-    .pt-log-neutral { color: #ffcb05; }
-
-    /* ── NEW v17 STYLES ── */
-    /* Static elements counter-rotate when board flips */
-    .pt-arena.flipped { transform: rotate(180deg); }
-    .pt-arena.flipped .static-element { transform: rotate(180deg); }
-
-    /* Deck Controls Panel (sits next to deck pile) */
-    .pt-deck-controls {
-        position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
-        background: rgba(0,0,0,0.88); border: 2px solid #2a52be; border-radius: 8px;
-        padding: 8px; display: flex; flex-direction: column; gap: 5px; width: 145px;
-        z-index: 20; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-    }
-    .pt-deck-controls-row { display: flex; gap: 4px; align-items: center; }
-    .pt-cmd-input-small {
-        width: 38px; background: #222; color: #fff; border: 1px solid #555;
-        border-radius: 4px; text-align: center; font-size: 11px; font-family: monospace;
-        padding: 3px 2px;
-    }
-    .pt-btn-small {
-        flex: 1; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px;
-        font-size: 10px; font-weight: 700; cursor: pointer; padding: 3px 4px; transition: 0.15s;
-        font-family: inherit;
-    }
-    .pt-btn-small:hover { background: #2a52be; border-color: #3B4CCA; }
-
-    /* Status Markers (Item Lock, No Tool) */
-    .pt-status-marker {
-        width: 26px; height: 26px; border-radius: 50%; background: #333; border: 2px solid #555;
-        display: flex; align-items: center; justify-content: center; font-size: 11px;
-        cursor: pointer; transition: all 0.2s; filter: grayscale(1); opacity: 0.45;
-        line-height: 1;
-    }
-    .pt-status-marker.active { filter: grayscale(0); opacity: 1; border-color: #e74c3c; background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.6); }
-
-    /* Drag & Drop highlight */
-    .pt-dropzone { transition: background 0.15s, border-color 0.15s; }
-    .pt-dropzone.drag-over { background: rgba(255,203,5,0.2) !important; border-color: #ffcb05 !important; box-shadow: 0 0 12px rgba(255,203,5,0.4); }
-    </style>
-
     <script>window.CARD_BACK_URL = "https://images.pokemontcg.io/card-back.png";</script>
 
     <script>
@@ -1973,7 +1956,7 @@
                     <div class="static-element" style="background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center;">
                         <div class="pt-zone-label" style="color:#a8e6cf; margin-bottom: 6px;">🏟️ Stadium</div>
                         <div id="ptStadiumZone" class="pt-empty-slot pt-dropzone"
-                             ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'stadium')"
+                             ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'stadium')"
                              style="width:82px;height:114px;"></div>
                     </div>
                 </div>
@@ -1999,7 +1982,7 @@
                             <div style="text-align:center;">
                                 <div class="pt-zone-label" style="color:#d136c1;">Lost P2 (<span id="ptLostCount-p2">0</span>)</div>
                                 <div id="ptLostPile-p2" class="pt-empty-slot pt-dropzone" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);"
-                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p2-lost')" onclick="ptOpenLostZone('p2')">&#127744;</div>
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-lost')" onclick="ptOpenLostZone('p2')">&#127744;</div>
                             </div>
                             <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
@@ -2024,7 +2007,7 @@
                             <div style="text-align:center;">
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p2">0</span>)</div>
                                 <div id="ptDiscardPile-p2" class="pt-dropzone"
-                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p2-discard')"></div>
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-discard')"></div>
                             </div>
                         </div>
 
@@ -2039,7 +2022,7 @@
                         <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); text-align: center;">
                             <div class="pt-zone-label">P2 Bench</div>
                             <div style="display:flex; justify-content:center; gap:5px;" class="pt-dropzone"
-                                 ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p2-bench')">
+                                 ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-bench')">
                                 <div id="ptBench0-p2"></div><div id="ptBench1-p2"></div><div id="ptBench2-p2"></div><div id="ptBench3-p2"></div><div id="ptBench4-p2"></div>
                             </div>
                         </div>
@@ -2049,7 +2032,7 @@
                             <div class="pt-zone-label" style="color:#FFCB05;">P2 Active</div>
                             <div style="position: relative; display: inline-block;">
                                 <div id="ptActiveZone-p2" class="pt-dropzone"
-                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p2-active')"
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-active')"
                                      style="min-height: 105px; min-width: 75px;"></div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
                                     <button class="pt-status-marker" title="Item Lock" onclick="this.classList.toggle('active')">🚫</button>
@@ -2069,7 +2052,7 @@
                             <div style="text-align:center;">
                                 <div class="pt-zone-label" style="color:#d136c1;">Lost P1 (<span id="ptLostCount-p1">0</span>)</div>
                                 <div id="ptLostPile-p1" class="pt-empty-slot pt-dropzone" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);"
-                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p1-lost')" onclick="ptOpenLostZone('p1')">&#127744;</div>
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-lost')" onclick="ptOpenLostZone('p1')">&#127744;</div>
                             </div>
                             <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
@@ -2094,7 +2077,7 @@
                             <div style="text-align:center;">
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p1">0</span>)</div>
                                 <div id="ptDiscardPile-p1" class="pt-dropzone"
-                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p1-discard')"></div>
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-discard')"></div>
                             </div>
                         </div>
 
@@ -2109,7 +2092,7 @@
                         <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); text-align: center;">
                             <div class="pt-zone-label">P1 Bench</div>
                             <div style="display:flex; justify-content:center; gap:5px;" class="pt-dropzone"
-                                 ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p1-bench')">
+                                 ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-bench')">
                                 <div id="ptBench0-p1"></div><div id="ptBench1-p1"></div><div id="ptBench2-p1"></div><div id="ptBench3-p1"></div><div id="ptBench4-p1"></div>
                             </div>
                         </div>
@@ -2119,7 +2102,7 @@
                             <div class="pt-zone-label" style="color:#FFCB05;">P1 Active</div>
                             <div style="position: relative; display: inline-block;">
                                 <div id="ptActiveZone-p1" class="pt-dropzone"
-                                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'p1-active')"
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-active')"
                                      style="min-height: 105px; min-width: 75px;"></div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
                                     <button class="pt-status-marker" title="Item Lock" onclick="this.classList.toggle('active')">🚫</button>
@@ -2137,7 +2120,7 @@
             <div style="display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 12px; border: 2px dashed #ffcb05; box-shadow: 0 5px 20px rgba(0,0,0,0.5); min-width: 180px; align-self: stretch; justify-content: center;">
                 <div class="pt-zone-label" style="color:#FFCB05; font-size: 13px; margin-bottom: 15px; text-shadow: none;">⚡ Played Card</div>
                 <div id="ptPlayZone" class="pt-dropzone"
-                     ondragover="event.preventDefault()" ondrop="ptHandleDrop(event,'playzone')"
+                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'playzone')"
                      style="width: 136px; height: 188px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05);">
                     <span style="color: rgba(255,255,255,0.4); font-size: 11px; text-align: center; padding: 10px;">Play Supporter/Item<br>Here</span>
                 </div>
@@ -2169,7 +2152,7 @@
 
             </div>
 
-            <div id="ptHandZone" class="pt-dropzone" style="display:flex; justify-content: center; gap:6px; overflow-x:auto; padding: 4px 5px 6px 5px; min-height: 90px; align-items:flex-end;" ondragover="event.preventDefault()" ondrop="ptHandleDrop(event, 'hand')"></div>
+            <div id="ptHandZone" class="pt-dropzone" style="display:flex; justify-content: center; gap:6px; overflow-x:auto; padding: 4px 5px 6px 5px; min-height: 90px; align-items:flex-end;" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event, 'hand')"></div>
         </div>
 
     </div>
@@ -2271,6 +2254,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v13"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v21"></script>
+    <script src="js/playtester.js?v=20260312-v22"></script>
 </body>
 </html>

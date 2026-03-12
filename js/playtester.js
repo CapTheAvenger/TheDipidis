@@ -115,6 +115,89 @@ function closePlaytester() {
 // SANDBOX: DECK IMPORT AUS TCG LIVE FORMAT
 // ============================================================================
 
+// High-fidelity import: exact set+number lookup first, name fallback second.
+// Guarantees the right art/print ends up in the simulator.
+function parseSandboxDeckToExactPrints(textInput, player) {
+    const statusEl = document.getElementById(player === 'p1' ? 'sandboxStatusP1' : 'sandboxStatusP2');
+    if (!textInput || !textInput.trim()) {
+        if (statusEl) { statusEl.innerText = 'Please paste a deck code first!'; statusEl.style.color = 'red'; }
+        return;
+    }
+    if (statusEl) { statusEl.innerText = 'Loading...'; statusEl.style.color = '#007bff'; }
+
+    const lineRegex = /^(\d+)\s+(.+?)\s+([A-Za-z0-9-]+)\s+(\d+[A-Za-z]?)(?:\s+.*)?$/;
+    let newDeck = [];
+    let notFound = [];
+
+    textInput.split('\n').forEach(rawLine => {
+        const line = rawLine.trim();
+        const match = line.match(lineRegex);
+        if (!match) return;
+
+        const count    = parseInt(match[1]);
+        const name     = match[2].trim();
+        const setCode  = match[3].toUpperCase();
+        const number   = match[4].toUpperCase();
+
+        let imageUrl = CARD_BACK_URL;
+        let cardType = '';
+        let found    = null;
+
+        // 1st priority: exact set+number via the pre-built lookup map (O(1))
+        const db    = window.cardsBySetNumberMap || {};
+        const key   = `${setCode}-${number}`;
+        found = db[key] || null;
+
+        // 2nd priority: fallback to the name map (drops parentheticals like "(Ghetsis)")
+        if (!found) {
+            const byName     = window.cardsByNameMap || {};
+            const cleanName  = name.split('(')[0].trim();
+            const versions   = byName[cleanName] || byName[name] || [];
+            found = versions.find(v => v.image_url) || versions[0] || null;
+        }
+
+        // 3rd priority: scan full allCardsDatabase by name substring
+        if (!found && window.allCardsDatabase) {
+            const q = name.split('(')[0].trim().toLowerCase();
+            found = window.allCardsDatabase.find(c =>
+                (c.name || '').toLowerCase() === q &&
+                (c.set_code || c.set || '').toUpperCase() === setCode
+            ) || window.allCardsDatabase.find(c => (c.name || '').toLowerCase() === q) || null;
+        }
+
+        if (found) {
+            imageUrl = found.image_url || CARD_BACK_URL;
+            cardType = found.card_type || found.supertype || found.type || '';
+        } else {
+            notFound.push(`${name} ${setCode} ${number}`);
+        }
+
+        for (let i = 0; i < count; i++) {
+            newDeck.push({ name, imageUrl, cardType, setCode, number,
+                           ptId: player + '_' + Math.random().toString(36).substr(2, 9) });
+        }
+    });
+
+    standaloneDecks[player] = newDeck.map(c => ({ ...c, count: 1 }));
+
+    // Also push directly into ptState if the modal is already open
+    if (ptState[player]) {
+        ptState[player].deck = newDeck.map(c => ({ ...c }));
+    }
+
+    const total = newDeck.length;
+    if (statusEl) {
+        if (total > 0) {
+            statusEl.innerText = `${total}/60 cards loaded ✅` + (notFound.length ? ` (${notFound.length} missing)` : '');
+            statusEl.style.color = notFound.length ? '#e67e22' : 'green';
+        } else {
+            statusEl.innerText = 'No valid cards found.';
+            statusEl.style.color = 'red';
+        }
+    }
+    if (notFound.length) console.warn('[Playtester] Missing cards:', notFound);
+}
+
 function parseSandboxDeck(player) {
     const inputEl  = document.getElementById(player === 'p1' ? 'sandboxImportP1' : 'sandboxImportP2');
     const statusEl = document.getElementById(player === 'p1' ? 'sandboxStatusP1' : 'sandboxStatusP2');
@@ -253,8 +336,8 @@ function startPlaytesterWithOpponent() {
     const deckStringP1 = getExportStringFromBuilder(currentPlaytestSource);
     document.getElementById('sandboxImportP1').value = deckStringP1;
     document.getElementById('sandboxImportP2').value = opponentString;
-    parseSandboxDeck('p1');
-    parseSandboxDeck('p2');
+    parseSandboxDeckToExactPrints(deckStringP1, 'p1');
+    parseSandboxDeckToExactPrints(opponentString, 'p2');
     startStandalonePlaytester();
 }
 
@@ -805,6 +888,20 @@ function setupDragAndDrop() {
     };
     document.addEventListener('dragenter', document._ptDragEnterHandler);
     document.addEventListener('dragleave',  document._ptDragLeaveHandler);
+}
+
+// Named event handler functions used in HTML ondragover/ondragleave attributes.
+// Using named functions instead of inlining event.preventDefault() gives us a
+// single place to extend logic (e.g. visual feedback) without touching the HTML.
+function ptHandleDragOver(event) {
+    event.preventDefault();
+    const zone = event.currentTarget;
+    if (zone) zone.classList.add('drag-over');
+}
+
+function ptHandleDragLeave(event) {
+    const zone = event.currentTarget;
+    if (zone && !zone.contains(event.relatedTarget)) zone.classList.remove('drag-over');
 }
 
 function ptHandleDrop(event, targetZone) {

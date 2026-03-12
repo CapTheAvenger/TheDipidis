@@ -1400,6 +1400,7 @@ function ptRenderHand() {
         img.src       = card.imageUrl || CARD_BACK_URL;
         img.className = 'pt-hand-card' + (i === ptSelectedCardIndex ? ' pt-card-selected' : '');
         img.title     = card.name;
+        img.draggable = false; // prevent native img drag — wrapper handles drag
         img.onerror   = function() { this.src = CARD_BACK_URL; };
         img.onclick   = () => ptSelectHandCard(i);
         img.ondblclick = () => ptViewCard(card.imageUrl, card.name);

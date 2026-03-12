@@ -185,6 +185,7 @@ const BASE_PATH = './data/';
         let allCardsDatabase = [];
         let cardsByNameMap = {};
         let cardsBySetNumberMap = {}; // Index for fast card lookup by set+number
+        let pokedexNumbers = {}; // name (lowercase) → National Pokédex number
         let englishSetCodes = null;
         let rarityPreferences = {};
         let globalRarityPreference = 'min'; // Default: Show lowest rarity from newest set
@@ -202,6 +203,20 @@ const BASE_PATH = './data/';
             const normalized = cardName.toLowerCase().trim();
             return aceSpecsList.includes(normalized);
         }
+        async function loadPokedexNumbers() {
+            try {
+                const ts = new Date().getTime();
+                const resp = await fetch(`./data/pokemon_dex_numbers.json?t=${ts}`);
+                if (resp.ok) {
+                    pokedexNumbers = await resp.json();
+                    window.pokedexNumbers = pokedexNumbers;
+                    console.log(`✅ Loaded ${Object.keys(pokedexNumbers).length} Pokédex entries`);
+                }
+            } catch (e) {
+                console.warn('Could not load pokemon_dex_numbers.json', e);
+            }
+        }
+
         async function loadAllCardsDatabase() {
             try {
                 const timestamp = new Date().getTime();
@@ -8826,6 +8841,55 @@ const BASE_PATH = './data/';
                     // Then by name
                     return (a.name || '').localeCompare(b.name || '');
                 });
+            } else if (sortOrder === 'pokedex') {
+                // Sort by National Pokédex number
+                // Non-Pokémon cards (Supporter/Item/Stadium/Tool/Energy) sort to the end
+                const NON_POKEMON = new Set(['supporter','item','stadium','tool','special energy','energy']);
+
+                function getBasePokemonName(cardName) {
+                    let n = (cardName || '').toLowerCase().trim();
+                    // Strip possessive trainer prefix: "erika's ", "team rocket's ", etc.
+                    const possMatch = n.match(/^[^']+\'s\s+(.+)$/);
+                    if (possMatch) n = possMatch[1];
+                    // Strip variant/form prefixes that map to same species
+                    n = n.replace(/^(mega|alolan|galarian|hisuian|paldean|primal|shadow|dark|light|ancient|future|origin|blade|shield|hero of many battles )\s+/, '');
+                    // Strip common card type suffixes (order matters: longest first)
+                    n = n.replace(/\s+(vstar|vmax|vunion|v-union|ex|gx|v\b|lv\.x|legend|sp|lvl\.\s*x|breaking|star|prime|restored|radiant|ancient|future)$/i, '').trim();
+                    // Strip leftover trailing suffixes like " ex" again in case of double
+                    n = n.replace(/\s+ex$/i, '').trim();
+                    return n;
+                }
+
+                function getDexNumber(card) {
+                    const typeLower = (card.type || '').toLowerCase();
+                    // Check if it's a non-Pokémon card type
+                    if (NON_POKEMON.has(typeLower) || typeLower.includes('supporter') ||
+                        typeLower.includes('item') || typeLower.includes('stadium') ||
+                        typeLower.includes('tool') || typeLower.includes('energy')) {
+                        return Infinity;
+                    }
+                    const base = getBasePokemonName(card.name);
+                    // Try exact match first
+                    if (pokedexNumbers[base] !== undefined) return pokedexNumbers[base];
+                    // Try with hyphen instead of space
+                    const hyphened = base.replace(/\s+/g, '-');
+                    if (pokedexNumbers[hyphened] !== undefined) return pokedexNumbers[hyphened];
+                    // Try stripping form suffixes like " (origin)", " (blade)"
+                    const stripped = base.replace(/\s*\(.*\)\s*$/, '').trim();
+                    if (pokedexNumbers[stripped] !== undefined) return pokedexNumbers[stripped];
+                    // Not found — keep Pokémon cards together after known entries
+                    return 9000 + (card.name || '').codePointAt(0);
+                }
+
+                cards.sort((a, b) => {
+                    const dexA = getDexNumber(a);
+                    const dexB = getDexNumber(b);
+                    if (dexA !== dexB) return dexA - dexB;
+                    // Same species: sort by name (handles forms) then by set
+                    const nameComp = (a.name || '').localeCompare(b.name || '');
+                    if (nameComp !== 0) return nameComp;
+                    return (a.set || '').localeCompare(b.set || '');
+                });
             }
         }
         
@@ -9823,6 +9887,7 @@ const BASE_PATH = './data/';
             
             // Load all cards database for deck builder
             loadAllCardsDatabase();
+            loadPokedexNumbers();
             loadAceSpecsList();
             loadSetMapping();
             loadRarityPreferences();

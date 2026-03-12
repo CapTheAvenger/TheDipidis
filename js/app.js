@@ -7394,9 +7394,11 @@ const BASE_PATH = './data/';
                     const cityLeagueCards = parseCSV(cityLeagueText);
                     cityLeagueCards.forEach(card => {
                         if (card.card_name) {
-                            const cardNameLower = card.card_name.toLowerCase();
-                            window.playableCardsSet.add(cardNameLower);
-                            window.cityLeagueCardsSet.add(cardNameLower); // Add to City League specific set
+                            const cardNameNorm = normalizeCardName(card.card_name);
+                            if (cardNameNorm) {
+                                window.playableCardsSet.add(cardNameNorm);
+                                window.cityLeagueCardsSet.add(cardNameNorm);
+                            }
                         }
                     });
                     console.log(`Loaded ${cityLeagueCards.length} playable cards from City League, unique: ${window.cityLeagueCardsSet.size}`);
@@ -7411,7 +7413,8 @@ const BASE_PATH = './data/';
                     const currentMetaCards = parseCSV(currentMetaText);
                     currentMetaCards.forEach(card => {
                         if (card.card_name) {
-                            window.playableCardsSet.add(card.card_name.toLowerCase());
+                            const cardNameNorm = normalizeCardName(card.card_name);
+                            if (cardNameNorm) window.playableCardsSet.add(cardNameNorm);
                         }
                     });
                     console.log(`Loaded ${currentMetaCards.length} playable cards from Current Meta`);
@@ -7426,7 +7429,8 @@ const BASE_PATH = './data/';
                     const tournamentCards = parseCSV(tournamentText);
                     tournamentCards.forEach(card => {
                         if (card.card_name) {
-                            window.playableCardsSet.add(card.card_name.toLowerCase());
+                            const cardNameNorm = normalizeCardName(card.card_name);
+                            if (cardNameNorm) window.playableCardsSet.add(cardNameNorm);
                         }
                     });
                     console.log(`Loaded ${tournamentCards.length} playable cards from Tournament JH`);
@@ -8207,18 +8211,18 @@ const BASE_PATH = './data/';
                 const basicMetaFilters = selectedMetas.filter(m => !m.startsWith('meta:'));
                 if (basicMetaFilters.length > 0) {
                     let metaMatch = false;
-                    const cardNameLower = card.name.toLowerCase();
+                    const cardNameNorm = normalizeCardName(card.name);
                     
                     if (basicMetaFilters.includes('total')) {
                         metaMatch = true; // Show all cards
                     } else if (basicMetaFilters.includes('all_playables')) {
                         // All playables: City League + Current Meta + Tournament
-                        if (window.playableCardsSet && window.playableCardsSet.has(cardNameLower)) {
+                        if (window.playableCardsSet && window.playableCardsSet.has(cardNameNorm)) {
                             metaMatch = true;
                         }
                     } else if (basicMetaFilters.includes('city_league')) {
                         // City League only: Only cards from City League decks
-                        if (window.cityLeagueCardsSet && window.cityLeagueCardsSet.has(cardNameLower)) {
+                        if (window.cityLeagueCardsSet && window.cityLeagueCardsSet.has(cardNameNorm)) {
                             metaMatch = true;
                         }
                     }
@@ -8293,18 +8297,19 @@ const BASE_PATH = './data/';
                 
                 // Deck Coverage filter
                 if (selectedDeckCoverages.length > 0 && window.cardDeckCoverageMap) {
-                    const cardNameLower = normalizeCardName(card.name);
-                    const coverageStats = window.cardDeckCoverageMap.get(cardNameLower);
-                    
+                    // Multi-strategy name lookup: normalizeCardName first, then plain lowercase as fallback
+                    let coverageStats = window.cardDeckCoverageMap.get(normalizeCardName(card.name));
                     if (!coverageStats) {
-                        // Card has no deck coverage data
-                        failedDeckCoverage++;
-                        return false;
+                        coverageStats = window.cardDeckCoverageMap.get(card.name.toLowerCase());
                     }
                     
                     // Calculate DYNAMIC coverage based on active filters
-                    const dynamicCoverage = calculateDynamicCoverage(card.name);
-                    const percentage = dynamicCoverage ? dynamicCoverage.percentage : 0;
+                    // If no coverage entry found, percentage stays 0 and will fail the threshold
+                    let percentage = 0;
+                    if (coverageStats) {
+                        const dynamicCoverage = calculateDynamicCoverage(card.name);
+                        percentage = dynamicCoverage ? dynamicCoverage.percentage : 0;
+                    }
                     
                     let coverageMatch = false;
                     
@@ -8333,13 +8338,13 @@ const BASE_PATH = './data/';
                 
                 // NEW: Main Pokemon Filter - Show cards from decks with selected main pokemon
                 if (selectedMainPokemons.length > 0) {
-                    const cardNameLower = card.name.toLowerCase();
+                    const cardNameNorm = normalizeCardName(card.name);
                     let mainPokemonMatch = false;
                     
                     for (const mainPokemon of selectedMainPokemons) {
                         if (window.mainPokemonCardsMap && window.mainPokemonCardsMap.has(mainPokemon)) {
                             const cardsForMainPokemon = window.mainPokemonCardsMap.get(mainPokemon);
-                            if (cardsForMainPokemon.has(cardNameLower)) {
+                            if (cardsForMainPokemon.has(cardNameNorm)) {
                                 mainPokemonMatch = true;
                                 break;
                             }
@@ -8354,13 +8359,13 @@ const BASE_PATH = './data/';
                 
                 // NEW: Archetype Filter - Show cards from selected archetypes
                 if (selectedArchetypes.length > 0) {
-                    const cardNameLower = card.name.toLowerCase();
+                    const cardNameNorm = normalizeCardName(card.name);
                     let archetypeMatch = false;
                     
                     for (const archetype of selectedArchetypes) {
                         if (window.archetypeCardsMap && window.archetypeCardsMap.has(archetype)) {
                             const cardsForArchetype = window.archetypeCardsMap.get(archetype);
-                            if (cardsForArchetype.has(cardNameLower)) {
+                            if (cardsForArchetype.has(cardNameNorm)) {
                                 archetypeMatch = true;
                                 break;
                             }
@@ -8375,7 +8380,7 @@ const BASE_PATH = './data/';
                 
                 // NEW: Meta Filter - Show cards from selected metas (combined with archetype if both selected)
                 if (selectedMetaFilters.length > 0) {
-                    const cardNameLower = card.name.toLowerCase();
+                    const cardNameNorm = normalizeCardName(card.name);
                     let metaFilterMatch = false;
                     
                     // Debug log for first card only
@@ -8399,7 +8404,7 @@ const BASE_PATH = './data/';
                         for (const meta of selectedMetaFilters) {
                             if (window.metaCardsMap && window.metaCardsMap.has(meta)) {
                                 const cardsForMeta = window.metaCardsMap.get(meta);
-                                if (cardsForMeta.has(cardNameLower)) {
+                                if (cardsForMeta.has(cardNameNorm)) {
                                     // Card is in this meta - but we already checked archetype above
                                     // So if we got here, card is in both archetype AND meta
                                     metaFilterMatch = true;
@@ -8412,7 +8417,7 @@ const BASE_PATH = './data/';
                         for (const meta of selectedMetaFilters) {
                             if (window.metaCardsMap && window.metaCardsMap.has(meta)) {
                                 const cardsForMeta = window.metaCardsMap.get(meta);
-                                if (cardsForMeta.has(cardNameLower)) {
+                                if (cardsForMeta.has(cardNameNorm)) {
                                     metaFilterMatch = true;
                                     break;
                                 }

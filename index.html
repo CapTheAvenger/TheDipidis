@@ -46,6 +46,7 @@
                 <button class="tab-btn" onclick="switchTab('current-analysis')">📈 Current Meta Deck Analysis</button>
                 <button class="tab-btn" onclick="switchTab('past-meta')">🏆 Past Meta</button>
                 <button class="tab-btn" onclick="switchTab('cards')">🧰 Cards</button>
+                <button class="tab-btn" onclick="switchTab('sandbox')">⚔️ Playtester</button>
                 <button class="tab-btn" onclick="switchTab('profile')">
                     <img src="images/pokeball-icon.png" alt="Profile" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;">
                     Profile
@@ -872,7 +873,47 @@
                 <!-- Cards Grid -->
                 <div id="cardsContent" class="loading">Loading cards...</div>
             </div>
-            
+
+            <!-- Tab: Sandbox Playtester -->
+            <div id="sandbox" class="tab-content">
+                <div class="container">
+                    <div class="header">
+                        <h1>⚔️ Sandbox Playtester</h1>
+                        <p>Importiere Decks für 2 Spieler und starte den Simulator</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+
+                        <div style="background: rgba(59,76,202,0.1); padding: 20px; border-radius: 12px; border: 2px solid #3B4CCA;">
+                            <h3 style="margin-top: 0; color: #3B4CCA;">🔵 Spieler 1 Deck</h3>
+                            <textarea id="sandboxImportP1" placeholder="Pokémon TCG Live Deck-Code hier einfügen...&#10;Z.B.&#10;Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-family: monospace; font-size: 12px; resize: vertical; margin-bottom: 10px; box-sizing: border-box;"></textarea>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span id="sandboxStatusP1" style="font-size: 12px; font-weight: bold; color: #555;">0 / 60 Karten geladen</span>
+                                <button class="btn btn-primary" onclick="parseSandboxDeck('p1')">Importieren</button>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(227,53,13,0.1); padding: 20px; border-radius: 12px; border: 2px solid #E3350D;">
+                            <h3 style="margin-top: 0; color: #E3350D;">🔴 Spieler 2 Deck</h3>
+                            <textarea id="sandboxImportP2" placeholder="Pokémon TCG Live Deck-Code hier einfügen...&#10;Z.B.&#10;Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-family: monospace; font-size: 12px; resize: vertical; margin-bottom: 10px; box-sizing: border-box;"></textarea>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span id="sandboxStatusP2" style="font-size: 12px; font-weight: bold; color: #555;">0 / 60 Karten geladen</span>
+                                <button class="btn btn-primary" onclick="parseSandboxDeck('p2')" style="background: #e74c3c;">Importieren</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 1px solid #ddd;">
+                        <p style="color: #666; margin-bottom: 15px;">Du kannst auch nur Spieler 1 importieren, um alleine zu testen (Goldfishing). Spieler 2 spiegelt dann das gleiche Deck.</p>
+                        <button class="btn btn-success" style="font-size: 20px; padding: 15px 40px; border-radius: 30px; font-weight: 900; background: linear-gradient(135deg, #27ae60 0%, #145a32 100%); border: none; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); color: white; cursor: pointer;" onclick="startStandalonePlaytester()">
+                            ⚔️ START SIMULATOR
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
             <!-- Tab 7: How to Use Tutorial -->
             <div id="tutorial" class="tab-content">
                 <div class="container">
@@ -1889,6 +1930,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260311-v11"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v6"></script>
+    <script src="js/playtester.js?v=20260312-v7"></script>
 </body>
 </html>

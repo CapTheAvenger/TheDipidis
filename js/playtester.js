@@ -13,6 +13,9 @@ let ptActionLog = [];
 let ptLookingAt = [];
 let _ptMsgTimer = null;
 
+// Globale Speicher für importierte Sandbox-Decks
+let standaloneDecks = { p1: [], p2: [] };
+
 function getInitialPlayerState() {
     return {
         deck: [], hand: [], discard: [], lostzone: [], prizes: [],
@@ -103,6 +106,109 @@ function closePlaytester() {
     if (confirm('Playtester wirklich verlassen? Der Spielfortschritt geht verloren.')) {
         document.getElementById('playtesterModal').style.display = 'none';
     }
+}
+
+// ============================================================================
+// SANDBOX: DECK IMPORT AUS TCG LIVE FORMAT
+// ============================================================================
+
+async function parseSandboxDeck(player) {
+    const inputEl  = document.getElementById(player === 'p1' ? 'sandboxImportP1' : 'sandboxImportP2');
+    const statusEl = document.getElementById(player === 'p1' ? 'sandboxStatusP1' : 'sandboxStatusP2');
+    const rawText  = inputEl.value;
+
+    if (!rawText.trim()) {
+        statusEl.innerText = 'Bitte Deck-Code einfügen!';
+        statusEl.style.color = 'red';
+        return;
+    }
+
+    statusEl.innerText = 'Lade Karten-Daten...';
+    statusEl.style.color = '#007bff';
+
+    // TCG Live Format: "4 Pikachu SVI 001" oder "4 Pikachu SVI 001 PH"
+    const lineRegex = /^(\d+)\s+(.+?)\s+([A-Za-z0-9-]+)\s+(\d+[A-Za-z]?)(?:\s+.*)?$/;
+    const lines = rawText.split('\n');
+    const parsedDeck = [];
+    let totalCards = 0;
+
+    for (let line of lines) {
+        line = line.trim();
+        const match = line.match(lineRegex);
+        if (!match) continue;
+
+        const count      = parseInt(match[1]);
+        const name       = match[2];
+        const ptcgoCode  = match[3];
+        const number     = match[4];
+
+        // Basis-Energien haben keine stabilen Set-Codes in der API – nach Name suchen
+        const q = name.includes('Energy') && !name.includes('Special')
+            ? `name:"${name}"`
+            : `set.ptcgoCode:"${ptcgoCode}" number:"${number}"`;
+
+        let imageUrl = CARD_BACK_URL;
+        let cardType = '';
+
+        try {
+            const response = await fetch(`https://api.pokemontcg.io/v2/cards?q=${encodeURIComponent(q)}&select=id,name,supertype,images`);
+            const data = await response.json();
+            if (data.data && data.data.length > 0) {
+                imageUrl = data.data[0].images.small;
+                cardType = data.data[0].supertype || '';
+            }
+        } catch (e) {
+            console.warn(`[Sandbox] Konnte ${name} nicht laden:`, e);
+        }
+
+        parsedDeck.push({ name, count, imageUrl, cardType });
+        totalCards += count;
+    }
+
+    standaloneDecks[player] = parsedDeck;
+
+    if (totalCards > 0) {
+        statusEl.innerText = `${totalCards} / 60 Karten geladen ✅`;
+        statusEl.style.color = 'green';
+    } else {
+        statusEl.innerText = 'Kein gültiges Format erkannt.';
+        statusEl.style.color = 'red';
+    }
+}
+
+function startStandalonePlaytester() {
+    const p1Count = standaloneDecks.p1.reduce((s, c) => s + c.count, 0);
+    const p2Count = standaloneDecks.p2.reduce((s, c) => s + c.count, 0);
+
+    if (p1Count === 0 && p2Count === 0) {
+        alert('Bitte importiere mindestens ein Deck für Spieler 1!');
+        return;
+    }
+
+    ptState.p1   = getInitialPlayerState();
+    ptState.p2   = getInitialPlayerState();
+    ptState.stadium  = [];
+    ptState.playZone = [];
+    ptActionLog      = [];
+    ptCurrentPlayer  = 'p1';
+
+    // Deck P1 befüllen
+    standaloneDecks.p1.forEach(card => {
+        for (let i = 0; i < card.count; i++)
+            ptState.p1.deck.push({ ...card, ptId: 'p1_' + Math.random().toString(36).substr(2, 9) });
+    });
+
+    // Deck P2: eigenes Deck oder Mirror von P1
+    const p2Source = p2Count > 0 ? standaloneDecks.p2 : standaloneDecks.p1;
+    p2Source.forEach(card => {
+        for (let i = 0; i < card.count; i++)
+            ptState.p2.deck.push({ ...card, ptId: 'p2_' + Math.random().toString(36).substr(2, 9) });
+    });
+
+    document.getElementById('playtesterModal').style.display = 'flex';
+    ptNewGame();
+    setupDragAndDrop();
+    setupHotkeys();
 }
 
 function ptNewGame() {

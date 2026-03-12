@@ -259,13 +259,14 @@ function ptNewGame() {
 
 // --- HOTKEYS ---
 
+// --- HOTKEYS ---
 function setupHotkeys() {
     if (document._ptHotkeyListener) document.removeEventListener('keydown', document._ptHotkeyListener);
     document._ptHotkeyListener = function(e) {
         const modal = document.getElementById('playtesterModal');
         if (!modal || modal.style.display === 'none') return;
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        switch (e.key.toLowerCase()) {
+        switch(e.key.toLowerCase()) {
             case 'd': ptDraw1(); break;
             case 's': ptShuffle(); break;
             case 'c': ptFlipCoin(); break;
@@ -274,8 +275,8 @@ function setupHotkeys() {
             case '`': ptToggleLog(); break;
             case '/':
                 e.preventDefault();
-                const inp = document.getElementById('ptCommandInput');
-                if (inp) inp.focus();
+                let input = document.getElementById('ptCommandInput-' + ptCurrentPlayer);
+                if(input) input.focus();
                 break;
         }
     };
@@ -285,8 +286,8 @@ function setupHotkeys() {
 // --- VSTAR & GX MARKERS ---
 
 function ptToggleMarker(type) {
-    const p = ptCurrentPlayer;
-    if (type === 'vstar') {
+    let p = ptCurrentPlayer;
+    if(type === 'vstar') {
         ptState[p].vstarUsed = !ptState[p].vstarUsed;
         ptLog(`VSTAR Power ${ptState[p].vstarUsed ? 'eingesetzt' : 'zurückgesetzt'}.`);
     } else {
@@ -318,39 +319,39 @@ function ptViewCard(arg1, arg2) {
     viewer.style.display = 'flex';
 }
 
-// --- COMMAND INPUT ---
+// --- COMMAND INPUT (Spielerspezifisch) ---
 
-function ptRunCommand() {
-    const inp = document.getElementById('ptCommandInput');
-    if (!inp) return;
-    const raw = inp.value.trim();
-    inp.value = '';
-    inp.blur();
-    if (!raw) return;
+function ptRunCommand(playerOverride) {
+    let p = playerOverride || ptCurrentPlayer;
+    let input = document.getElementById('ptCommandInput-' + p);
+    if(!input) return;
 
-    const parts = raw.replace(/^\//, '').split(/\s+/);
-    const cmd = parts[0].toLowerCase();
-    const n   = parseInt(parts[1]) || 1;
-    const p   = ptCurrentPlayer;
+    let cmd = input.value.trim().toLowerCase();
+    input.value = '';
+    input.blur();
+    if(!cmd) return;
 
-    if (cmd === 'draw' || cmd === 'd') {
+    const parts = cmd.replace(/^\//, '').split(/\s+/);
+    const action = parts[0];
+    const n = parseInt(parts[1]) || 1;
+
+    if (action === 'draw' || action === 'd') {
         let drawn = 0;
         for (let i = 0; i < n; i++) if (ptState[p].deck.length > 0) { ptState[p].hand.push(ptState[p].deck.pop()); drawn++; }
         ptLog(`${drawn} Karte(n) gezogen.`);
         ptRenderAll();
-    } else if (cmd === 'mill' || cmd === 'm') {
+    } else if (action === 'mill' || action === 'm') {
         let milled = 0;
         for (let i = 0; i < n; i++) if (ptState[p].deck.length > 0) { ptState[p].discard.push(ptState[p].deck.pop()); milled++; }
-        ptLog(`${milled} Karte(n) gemillt.`);
+        ptLog(`${milled} Karte(n) vom Deck in die Ablage gemillt.`);
         ptRenderAll();
-    } else if (cmd === 'top' || cmd === 't') {
+    } else if (action === 'top' || action === 't') {
         ptOpenTopCards(n);
-    } else if (cmd === 'coin') {
-        let results = [];
-        for (let i = 0; i < n; i++) results.push(Math.random() >= 0.5 ? 'KOPF' : 'ZAHL');
-        const heads = results.filter(r => r === 'KOPF').length;
-        ptLog(`🪙 ${n}x Münze: ${heads}x KOPF.`);
-    } else if (cmd === 'dice') {
+    } else if (action === 'coin') {
+        let heads = 0;
+        for (let i = 0; i < n; i++) if (Math.random() >= 0.5) heads++;
+        ptLog(`🪙 ${n} Münze(n): ${heads}x KOPF.`);
+    } else if (action === 'dice') {
         const roll = Math.floor(Math.random() * 6) + 1;
         ptLog(`🎲 Würfelwurf: ${roll}`);
     } else {
@@ -414,10 +415,10 @@ function ptCloseTopCards() {
     ptRenderAll();
 }
 
-// --- BASIC ACTIONS ---
+// --- BASIC ACTIONS & BOARD FLIP ---
 
-function ptDraw1(playerOverride) {
-    const p = playerOverride || ptCurrentPlayer;
+function ptDraw1(playerOverride = null) {
+    let p = playerOverride || ptCurrentPlayer;
     if (ptState[p].deck.length > 0) {
         ptState[p].hand.push(ptState[p].deck.pop());
         ptRenderAll();
@@ -443,22 +444,25 @@ function ptFlipCoin() {
 }
 
 function ptFlipBoard() {
-    const board    = document.getElementById('playtester-board');
-    const handZone = document.querySelector('.pt-hand-zone');
-    const ind      = document.getElementById('activePlayerIndicator');
+    const board      = document.getElementById('playtester-board');
+    const neutralZone = document.getElementById('ptNeutralZone');
+    const handZone   = document.querySelector('.pt-hand-zone');
+    const ind        = document.getElementById('activePlayerIndicator');
     if (!board) return;
     if (ptCurrentPlayer === 'p1') {
-        board.style.transform = 'rotate(180deg)';
+        board.style.transform      = 'rotate(180deg)';
+        if (neutralZone) neutralZone.style.transform = 'rotate(180deg)';
         ptCurrentPlayer = 'p2';
         if (ind)      ind.innerText = '2';
         if (handZone) handZone.style.borderTopColor = '#E3350D';
-        ptLog('Board gedreht. P2 ist dran.');
+        ptLog('Zug an Spieler 2 gegeben.');
     } else {
-        board.style.transform = 'rotate(0deg)';
+        board.style.transform      = 'rotate(0deg)';
+        if (neutralZone) neutralZone.style.transform = 'rotate(0deg)';
         ptCurrentPlayer = 'p1';
         if (ind)      ind.innerText = '1';
         if (handZone) handZone.style.borderTopColor = '#3B4CCA';
-        ptLog('Board gedreht. P1 ist dran.');
+        ptLog('Zug an Spieler 1 gegeben.');
     }
     const vBtn = document.getElementById('ptVstarMarker');
     const gBtn = document.getElementById('ptGxMarker');

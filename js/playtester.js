@@ -731,7 +731,15 @@ function ptHandleDrop(event, targetZone) {
             const slot = _ptFirstFreeBench(bp);
             targetId   = 'ptBench' + slot.slice(-1) + '-' + bp;
         }
-        if (targetId) moveZoneToZone(sourceZone, targetId); 
+        if (targetId) moveZoneToZone(sourceZone, targetId);
+        else if (targetZone === 'hand') {
+            // sourceZone is an element ID like "ptActiveZone-p1" or "ptBench2-p1"
+            const m = sourceZone.match(/^pt(ActiveZone|Bench\d)-(p\d)$/i);
+            if (m) {
+                const zoneId = m[1].toLowerCase().replace('activezone', 'active');
+                returnToHand(m[2], zoneId);
+            }
+        }
         return;
     }
 

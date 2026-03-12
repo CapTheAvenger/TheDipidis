@@ -2111,17 +2111,22 @@
         </div>
 
         <div class="pt-hand-zone">
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px; flex-wrap:wrap;">
-                <div class="pt-zone-label" style="color: white; margin:0;">
-                    Hand (<span id="ptHandCount">0</span>) &mdash; Player <span id="activePlayerIndicator">1</span>. Right-click for details.
+            <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 6px; gap: 25px;">
+
+                <div class="pt-zone-label" style="margin: 0; color: white;">
+                    Hand (<span id="ptHandCount">0</span>) &mdash; Player <span id="activePlayerIndicator">1</span>
                 </div>
-                <div style="display:flex; align-items:center; gap:6px; margin-left:auto;">
-                    <input type="number" id="ptHandDrawAmt" class="pt-cmd-input-small" value="1" min="1" max="60" style="width:48px;">
-                    <button class="pt-btn-small" onclick="ptHandAction('shuffle_deck')">🔀 Shuffle to Deck + Draw</button>
-                    <button class="pt-btn-small" onclick="ptHandAction('shuffle_bottom')">⬇️ To Bottom + Draw</button>
+
+                <div style="display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                    <span style="color: #ccc; font-size: 10px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Draw:</span>
+                    <input type="number" id="ptHandDrawAmt" value="6" style="width: 35px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; border-radius: 4px; text-align: center; font-size: 12px; padding: 2px; outline: none;">
+                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px;" onclick="ptHandAction('shuffle_deck')">🔀 Shuffle to Deck + Draw</button>
+                    <button class="pt-btn" style="padding: 4px 10px; font-size: 10px;" onclick="ptHandAction('shuffle_bottom')">⬇️ To Bottom + Draw</button>
                 </div>
+
             </div>
-            <div id="ptHandZone" style="display:flex; gap:6px; overflow-x:auto; padding: 4px 5px 6px 5px; align-items:flex-end;"></div>
+
+            <div id="ptHandZone" class="pt-dropzone" style="display:flex; gap:6px; overflow-x:auto; padding: 4px 5px 6px 5px; min-height: 90px; align-items:flex-end;" ondragover="event.preventDefault()" ondrop="ptHandleDrop(event, 'hand')"></div>
         </div>
 
     </div>
@@ -2192,6 +2197,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v13"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260312-v18"></script>
+    <script src="js/playtester.js?v=20260312-v19"></script>
 </body>
 </html>

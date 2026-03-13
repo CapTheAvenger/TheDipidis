@@ -1700,7 +1700,12 @@ function ptRenderOpponentPanel(opp, tab) {
         zones.forEach(zoneId => {
             const cards = ptState[opp].field[zoneId];
             if (cards.length === 0) return;
-            const card  = cards[0];
+            // Show highest evolution (last non-energy/non-tool card in stack)
+            const topPokemon = [...cards].reverse().find(c => {
+                const ct = (c.cardType || '').toLowerCase();
+                return !ct.includes('energy') && !ct.includes('trainer') && ct !== 'tool';
+            }) || cards[0];
+            const card  = topPokemon;
             const dmg   = ptState[opp].damage[zoneId] || 0;
             const stat  = ptState[opp].status;
             const label = zoneId === 'active' ? '⭐ Active' : ('Bank ' + (parseInt(zoneId.slice(-1)) + 1));

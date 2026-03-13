@@ -647,6 +647,8 @@ function ptConfirmStartActives() {
     if (fpModal) fpModal.style.display = 'none';
     ptLog(`✅ Spiel gestartet! P1 geht zuerst. Preiskarten verteilt. Viel Spaß!`);
     ptRenderAll();
+    // P1 draws first card at game start
+    ptDraw1('p1');
 }
 
 // ── Card Zoom / Search Side Panel ──────────────────────────────────────────

@@ -1718,8 +1718,13 @@ function ptRenderOpponentPanel(opp, tab) {
             html += `<div style="background:${isFocus ? 'rgba(231,76,60,0.18)' : 'rgba(255,255,255,0.05)'};border:${isFocus ? '2px solid #e74c3c' : '1px solid rgba(255,255,255,0.08)'};border-radius:10px;padding:12px;margin-bottom:10px;">
                 <div style="font-weight:700;font-size:11px;color:#FFCB05;margin-bottom:8px;">${label}</div>
                 <div style="display:flex;gap:10px;align-items:flex-start;">
-                    <img src="${safeImg}" style="width:80px;border-radius:7px;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.5);"
-                         onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${safeImg}','${card.name}')" title="Klick zum Vergrößern">
+                    <div style="position:relative;flex-shrink:0;"
+                         onmouseenter="ptOpenCardMenu(event,'${opp}','${zoneId}')"
+                         onmouseleave="ptScheduleMenuClose()">
+                        <img src="${safeImg}" style="width:80px;border-radius:7px;cursor:pointer;display:block;box-shadow:0 2px 8px rgba(0,0,0,0.5);"
+                             onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${safeImg}','${card.name}')" title="Klick zum Vergrößern">
+                        ${cards.length > 1 ? `<div onclick="event.stopPropagation();ptOpenZoneStack('${opp}','${zoneId}')" title="Alle ${cards.length} Karten" style="position:absolute;bottom:6px;left:2px;background:rgba(0,0,0,0.78);color:#fff;font-size:9px;font-weight:900;border-radius:4px;padding:2px 5px;cursor:pointer;line-height:1;">\ud83c\udccf ${cards.length}</div>` : ''}
+                    </div>
                     <div style="flex:1;">
                         <div style="font-weight:700;font-size:12px;margin-bottom:4px;">${card.name}</div>
                         <div style="font-size:16px;font-weight:900;color:#ff6b6b;margin-bottom:6px;">💥 ${dmg} Schaden</div>
@@ -2079,9 +2084,9 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                       title="${card.name} (right-click to zoom)">`;
     });
 
-    // 3. Render Energies — horizontal fan at bottom edge of the Pokémon card
+    // 3. Render Energies — horizontal fan near bottom of the Pokémon card (inside)
     if (energyCards.length > 0) {
-        html += `<div style="position:absolute;bottom:4px;left:0;width:100%;display:flex;justify-content:center;gap:2px;z-index:30;">`;
+        html += `<div style="position:absolute;bottom:14px;left:0;width:100%;display:flex;justify-content:center;gap:2px;z-index:30;">`;
         energyCards.forEach(card => {
             const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
             const zoomCtx = `event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${card.name.replace(/'/g, "\\'")}')`;
@@ -2118,7 +2123,7 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     if (cards.length > 1) {
         html += `<div onclick="event.stopPropagation();ptOpenZoneStack('${player}','${zoneId}')"
                      title="Alle ${cards.length} Karten ansehen"
-                     style="position:absolute;top:2px;left:2px;z-index:50;background:rgba(0,0,0,0.78);color:#fff;font-size:9px;font-weight:900;border-radius:4px;padding:2px 5px;cursor:pointer;pointer-events:auto;line-height:1;">🃏 ${cards.length}</div>`;
+                     style="position:absolute;bottom:38px;left:2px;z-index:50;background:rgba(0,0,0,0.78);color:#fff;font-size:9px;font-weight:900;border-radius:4px;padding:2px 5px;cursor:pointer;pointer-events:auto;line-height:1;">🃏 ${cards.length}</div>`;
     }
 
     html += '</div>';
@@ -2215,7 +2220,7 @@ function ptOpenZoneStack(player, zoneId) {
         return `<div style="position:relative;cursor:pointer;text-align:center;" title="${c.name}">
             <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;"
                  onerror="this.src='${CARD_BACK_URL}'"
-                 ondblclick="ptViewCard(event,'${safeImg}')">
+                 onclick="ptViewCard(event,'${safeImg}')">
             <div style="position:absolute;top:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#FFCB05;font-size:8px;font-weight:700;padding:2px 3px;border-radius:6px 6px 0 0;">${badge}</div>
             <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
         </div>`;

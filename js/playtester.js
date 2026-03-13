@@ -1877,27 +1877,31 @@ function ptRenderAll() {
 
         const pileEl = document.getElementById(`ptDiscardPile-${p}`);
         if (pileEl) {
+            const isOpp = p !== ptCurrentPlayer;
+            const discardClick = isOpp ? `ptOpenOpponentPanel('discard');event.stopPropagation()` : `ptOpenDiscard('${p}');event.stopPropagation()`;
             if (ptState[p].discard.length > 0) {
                 const top = ptState[p].discard[ptState[p].discard.length - 1];
                 pileEl.innerHTML = `<img src="${top.imageUrl || CARD_BACK_URL}" class="pt-field-card"
                     style="width:62px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'"
-                    onclick="ptOpenDiscard('${p}')" title="Discard – ${ptState[p].discard.length} cards">`;
+                    onclick="${discardClick}" title="Discard – ${ptState[p].discard.length} Karten (klicken zum Öffnen)">`;
             } else {
                 pileEl.innerHTML = `<div class="pt-empty-slot" style="width:62px;height:87px;font-size:10px;cursor:pointer;"
-                    onclick="ptOpenDiscard('${p}')">Discard</div>`;
+                    onclick="${discardClick}">Discard</div>`;
             }
         }
 
         const lostPileEl = document.getElementById(`ptLostPile-${p}`);
         if (lostPileEl) {
+            const isOpp = p !== ptCurrentPlayer;
+            const lostClick = isOpp ? `ptOpenOpponentPanel('lostzone');event.stopPropagation()` : `ptOpenLostZone('${p}');event.stopPropagation()`;
             if (ptState[p].lostzone.length > 0) {
                 const top = ptState[p].lostzone[ptState[p].lostzone.length - 1];
                 lostPileEl.innerHTML = `<img src="${top.imageUrl || CARD_BACK_URL}" class="pt-field-card"
                     style="width:40px;cursor:pointer;filter:grayscale(0.6);"
                     onerror="this.src='${CARD_BACK_URL}'"
-                    onclick="ptOpenLostZone('${p}')" title="Lost Zone – ${ptState[p].lostzone.length} cards">`;
+                    onclick="${lostClick}" title="Lost Zone – ${ptState[p].lostzone.length} Karten (klicken zum Öffnen)">`;
             } else {
-                lostPileEl.innerHTML = `<div class="pt-empty-slot" style="font-size:16px;" onclick="ptOpenLostZone('${p}')">🌀</div>`;
+                lostPileEl.innerHTML = `<div class="pt-empty-slot" style="font-size:16px;cursor:pointer;" onclick="${lostClick}">🌀</div>`;
             }
         }
 

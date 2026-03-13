@@ -2123,7 +2123,7 @@
                             <div style="text-align:center;">
                                 <div class="pt-zone-label" style="color:#d136c1;">Lost P2 (<span id="ptLostCount-p2">0</span>)</div>
                                 <div id="ptLostPile-p2" class="pt-empty-slot pt-dropzone" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);"
-                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-lost')" onclick="ptOpenLostZone('p2')">&#127744;</div>
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-lost')" onclick="ptOpenOpponentPanel('lostzone')">&#127744;</div>
                             </div>
                             <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
@@ -2157,7 +2157,7 @@
                             <div style="text-align:center;">
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p2">0</span>)</div>
                                 <div id="ptDiscardPile-p2" class="pt-dropzone"
-                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-discard')"></div>
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-discard')" onclick="ptOpenOpponentPanel('discard')"></div>
                             </div>
                         </div>
 
@@ -2241,7 +2241,7 @@
                             <div style="text-align:center;">
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p1">0</span>)</div>
                                 <div id="ptDiscardPile-p1" class="pt-dropzone"
-                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-discard')"></div>
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-discard')" onclick="ptOpenDiscard('p1')"></div>
                             </div>
                         </div>
 
@@ -2499,6 +2499,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v19"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260313-v47"></script>
+    <script src="js/playtester.js?v=20260313-v48"></script>
 </body>
 </html>

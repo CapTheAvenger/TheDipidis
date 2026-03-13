@@ -2046,8 +2046,8 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                           style="position:relative;z-index:10;width:${width}px;border-radius:7px;display:block;"
                           onerror="this.src='${CARD_BACK_URL}'"
                           ondblclick="ptViewCard(event,'${safeImg}')"
-                          oncontextmenu="${zoomCtx}"
-                          title="${card.name} (right-click to zoom)">`;
+                          oncontextmenu="ptOpenCardMenu(event,'${player}','${zoneId}')"
+                          title="${card.name} (Rechtsklick = Menü | Doppelklick = Zoom)">`;
             if (isPokemon) {
                 html += `<div id="${abilityMarkerId}" class="pt-ability-marker" title="Ability used toggle"
                               onclick="event.stopPropagation(); this.classList.toggle('used');">A</div>`;
@@ -2116,9 +2116,78 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     const dmg = ptState[player].damage[zoneId];
     if (dmg > 0) html += `<div class="pt-damage-badge"
         onclick="addDamage('${player}','${zoneId}',event.shiftKey?-10:10,event)"
-        oncontextmenu="addDamage('${player}','${zoneId}',50,event);return false;"
-        title="Klick +10 | Shift+Klick −10 | Rechtsklick +50"
-        style="cursor:pointer;">${dmg}</div>`;
+        oncontextmenu="ptOpenCardMenu(event,'${player}','${zoneId}')"
+        title="Klick +10 | Shift+Klick −10 | Rechtsklick = Menü"
+        style="cursor:pointer; pointer-events:auto;">${dmg}</div>`;
     html += '</div>';
     return html;
+}
+
+// --- CARD CONTEXT MENU ---
+
+let ptActiveMenuPlayer = null;
+let ptActiveMenuZoneId = null;
+
+function ptOpenCardMenu(event, player, zoneId) {
+    event.preventDefault();
+    event.stopPropagation();
+    ptActiveMenuPlayer = player;
+    ptActiveMenuZoneId = zoneId;
+    const menu = document.getElementById('ptCardContextMenu');
+    if (!menu) return;
+    menu.style.display   = 'flex';
+    menu.style.position  = 'fixed';
+    menu.style.left      = event.clientX + 'px';
+    menu.style.top       = event.clientY + 'px';
+    menu.style.transform = 'translate(-50%, 4px)';
+}
+
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('ptCardContextMenu');
+    if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) {
+        menu.style.display = 'none';
+    }
+});
+
+document.addEventListener('contextmenu', function(e) {
+    const menu = document.getElementById('ptCardContextMenu');
+    if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) {
+        menu.style.display = 'none';
+    }
+});
+
+function ptMenuAction(type, value) {
+    const menu = document.getElementById('ptCardContextMenu');
+    if (menu) menu.style.display = 'none';
+    if (!ptActiveMenuPlayer || !ptActiveMenuZoneId) return;
+    const player = ptActiveMenuPlayer;
+    const zoneId = ptActiveMenuZoneId;
+    if (type === 'damage') {
+        if (value === 0) clearDamage(player, zoneId, null);
+        else             addDamage(player, zoneId, value, null);
+    } else if (type === 'status') {
+        const map = { poison:'poisoned', burn:'burned', asleep:'asleep', paralyzed:'paralyzed', confused:'confused' };
+        toggleStatus(player, map[value] || value, null);
+    } else if (type === 'utility') {
+        if      (value === 'hand')    returnToHand(player, zoneId, null);
+        else if (value === 'deck')    ptShuffleIntoDeck(player, zoneId);
+        else if (value === 'discard') discardTopCard(player, zoneId, null);
+    }
+}
+
+function ptShuffleIntoDeck(player, zoneId) {
+    const isNeutral = (zoneId === 'playzone' || zoneId === 'stadium');
+    const zoneArr = isNeutral ? (zoneId === 'stadium' ? ptState.stadium : ptState.playZone) : ptState[player].field[zoneId];
+    if (zoneArr.length > 0) {
+        const c = zoneArr.pop();
+        const deck = ptState[player].deck;
+        const pos = Math.floor(Math.random() * (deck.length + 1));
+        deck.splice(pos, 0, c);
+        ptLog(`Shuffled "${c.name}" into ${player.toUpperCase()}'s deck.`);
+        if (!isNeutral && zoneArr.length === 0) {
+            ptState[player].damage[zoneId] = 0;
+            if (zoneId === 'active') ptState[player].status = [];
+        }
+        ptRenderAll();
+    }
 }

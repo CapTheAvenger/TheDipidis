@@ -424,16 +424,23 @@ function ptNewGame() {
 // Helpers to detect Basic Pokémon (not Energy, not Trainer)
 function _ptIsBasic(card) {
     const t = (card.cardType || card.supertype || '').toLowerCase();
-    return t.includes('pok') || (t === '' && !t.includes('energy') && !t.includes('trainer'));
+    if (t.includes('energy') || t.includes('trainer')) return false;
+    // Treat anything with 'pokémon' in type, OR with no type info (many deck cards have no supertype), as Basic
+    return true;
 }
 function _ptHasBasic(player) {
     return ptState[player].hand.some(_ptIsBasic);
 }
 
 function ptOpenStartPhase() {
-    // Always reset state so Restart starts fresh at coin-flip screen
+    // P1 always goes first — skip coin flip, go straight to hand selection
     const modal = document.getElementById('ptStartPhaseModal');
     if (modal) { delete modal.dataset.coinDone; delete modal.dataset.firstPlayer; }
+    ptCurrentPlayer = 'p1';
+    const ind = document.getElementById('activePlayerIndicator');
+    if (ind) ind.innerText = '1';
+    const handZone = document.querySelector('.pt-hand-zone');
+    if (handZone) handZone.style.borderTopColor = '#3B4CCA';
     ptRenderStartPhaseModal();
     if (modal) modal.style.display = 'flex';
 }
@@ -442,24 +449,10 @@ function ptRenderStartPhaseModal() {
     const modal = document.getElementById('ptStartPhaseModal');
     if (!modal) return;
 
-    const coinResult  = modal.dataset.coinDone;
-    const firstPlayer = modal.dataset.firstPlayer || '';
-
     let html = `<div style="background:#1a1a2e;border:2px solid #3B4CCA;border-radius:14px;padding:24px;width:min(98vw,960px);max-height:92vh;overflow-y:auto;color:#fff;">`;
-
-    if (!coinResult) {
-        html += `
-        <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🪙 Who Goes First?</h2>
-        <p style="text-align:center;color:#ccc;margin-bottom:24px;">Flip a coin to decide which player takes the first turn.</p>
-        <div style="display:flex;justify-content:center;margin-bottom:16px;">
-            <button onclick="ptDoStartCoinFlip()"
-                style="font-size:2em;padding:16px 40px;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 16px rgba(243,156,18,0.5);transition:transform .15s;"
-                onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">🪙 Flip Coin!</button>
-        </div>`;
-    } else {
-        html += `
+    html += `
         <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🃏 Setup Phase</h2>
-        <p style="text-align:center;color:#ccc;margin-bottom:8px;">🪙 <strong>${firstPlayer.toUpperCase()}</strong> goes first! Choose your Active &amp; Bench Pokémon, then press <strong>Let's Battle!</strong></p>
+        <p style="text-align:center;color:#ccc;margin-bottom:8px;">🔵 <strong>P1</strong> geht zuerst. Wähle dein Aktives &amp; Bank-Pokémon, dann auf <strong>Let's Battle!</strong></p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
             ${ptRenderStartHandHTML('p1')}
             ${ptRenderStartHandHTML('p2')}
@@ -469,9 +462,8 @@ function ptRenderStartPhaseModal() {
                 style="font-size:1.1em;padding:13px 44px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(39,174,96,0.4);">
                 👊 Let's Battle!
             </button>
-            <p id="ptStartHint" style="color:#f1c40f;font-size:12px;margin-top:6px;">Both players must select an Active Pokémon</p>
+            <p id="ptStartHint" style="color:#f1c40f;font-size:12px;margin-top:6px;">Beide Spieler müssen ein Aktives Pokémon wählen</p>
         </div>`;
-    }
     html += `</div>`;
     modal.innerHTML = html;
     ptUpdateStartBtn();
@@ -641,9 +633,8 @@ function ptConfirmStartActives() {
     ptStartPhase   = false;
     ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
     const fpModal = document.getElementById('ptStartPhaseModal');
-    const fp = fpModal?.dataset?.firstPlayer || ptCurrentPlayer;
     if (fpModal) fpModal.style.display = 'none';
-    ptLog(`✅ Game started! ${fp.toUpperCase()} goes first. Prizes dealt. Good luck!`);
+    ptLog(`✅ Spiel gestartet! P1 geht zuerst. Preiskarten verteilt. Viel Spaß!`);
     ptRenderAll();
 }
 

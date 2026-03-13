@@ -2031,94 +2031,89 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     let html = `<div style="position:relative;width:${width}px;cursor:pointer;min-height:${height}px;"
                      onclick="ptClickZone('${player}','${zoneId}')"
                      draggable="true" ondragstart="ptDragStartField(event,'${elementId}')">`;
-    let energyCount = 0;
-    let toolCount   = 0;
 
-    cards.forEach((card, index) => {
-        const safeImg  = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        const safeName = (card.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        const zoomCtx  = `event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${safeName}')`;
-        if (index === 0) {
-            const isPokemon = !(card.cardType || '').toLowerCase().includes('energy') &&
-                              !(card.cardType || '').toLowerCase().includes('trainer');
-            const abilityMarkerId = `ptAbility_${elementId}`;
-            html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-field-card"
-                          style="position:relative;z-index:10;width:${width}px;border-radius:7px;display:block;"
-                          onerror="this.src='${CARD_BACK_URL}'"
-                          ondblclick="ptViewCard(event,'${safeImg}')"
-                          oncontextmenu="ptOpenCardMenu(event,'${player}','${zoneId}')"
-                          title="${card.name} (Rechtsklick = Menü | Doppelklick = Zoom)">`;
-            if (isPokemon) {
-                html += `<div id="${abilityMarkerId}" class="pt-ability-marker" title="Ability used toggle"
-                              onclick="event.stopPropagation(); this.classList.toggle('used');">A</div>`;
-            }
+    let energyCards  = [];
+    let toolCards    = [];
+    let pokemonCards = [];
+
+    // Sort cards into categories
+    cards.forEach(card => {
+        const ct = (card.cardType || card.supertype || '').toLowerCase();
+        if (ct.includes('energy')) {
+            energyCards.push(card);
+        } else if (ct.includes('trainer') || ct === 'tool') {
+            toolCards.push(card);
         } else {
-            const isEnergy = (card.cardType || '').toLowerCase().includes('energy') || (card.supertype || '') === 'Energy';
-            if (!isEnergy) {
-                html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-attachment-tool"
-                              style="bottom:${30 + toolCount * 10}px;"
-                              onerror="this.src='${CARD_BACK_URL}'"
-                              ondblclick="ptViewCard(event,'${safeImg}')"
-                              oncontextmenu="${zoomCtx}"
-                              title="${card.name} (right-click to zoom)">`;
-                toolCount++;
-            } else {
-                html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-attachment-energy"
-                              style="bottom:${8 + energyCount * 24}px;"
-                              onerror="this.src='${CARD_BACK_URL}'"
-                              ondblclick="ptViewCard(event,'${safeImg}')"
-                              oncontextmenu="${zoomCtx}"
-                              title="${card.name} (right-click to zoom)">`;
-                energyCount++;
-            }
+            pokemonCards.push(card);
         }
     });
 
-    let statusBtns = '';
-    let statusIconsHTML = '';
+    // 1. Render Pokémon — evolutions stacked exactly on top of each other
+    const abilityMarkerId = `ptAbility_${elementId}`;
+    pokemonCards.forEach((card, index) => {
+        const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-field-card"
+                      style="position:absolute;top:0;left:0;z-index:${10 + index};width:${width}px;border-radius:7px;display:block;"
+                      onerror="this.src='${CARD_BACK_URL}'"
+                      ondblclick="ptViewCard(event,'${safeImg}')"
+                      oncontextmenu="ptOpenCardMenu(event,'${player}','${zoneId}')"
+                      title="${card.name} (Rechtsklick = Menü | Doppelklick = Zoom)">`;
+        // Ability marker only on the top-most (last) Pokémon
+        if (index === pokemonCards.length - 1) {
+            html += `<div id="${abilityMarkerId}" class="pt-ability-marker" title="Ability used toggle"
+                          style="z-index:${11 + index};position:absolute;bottom:-6px;right:-6px;"
+                          onclick="event.stopPropagation();this.classList.toggle('used');">A</div>`;
+        }
+    });
+
+    // 2. Render Tools — stacked at left edge
+    toolCards.forEach((card, index) => {
+        const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const zoomCtx = `event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${card.name.replace(/'/g, "\\'")}')`;
+        html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-attachment-tool"
+                      style="position:absolute;left:-12px;bottom:${30 + index * 10}px;z-index:20;width:22px;height:28px;border-radius:4px;border:2px solid #fff;object-fit:cover;object-position:center 10%;"
+                      onerror="this.src='${CARD_BACK_URL}'"
+                      ondblclick="ptViewCard(event,'${safeImg}')"
+                      oncontextmenu="${zoomCtx}"
+                      title="${card.name} (right-click to zoom)">`;
+    });
+
+    // 3. Render Energies — horizontal fan below the Pokémon
+    if (energyCards.length > 0) {
+        html += `<div style="position:absolute;bottom:-18px;left:0;width:100%;display:flex;justify-content:center;gap:2px;z-index:30;">`;
+        energyCards.forEach(card => {
+            const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const zoomCtx = `event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${card.name.replace(/'/g, "\\'")}')`;
+            html += `<img src="${card.imageUrl || CARD_BACK_URL}" class="pt-attachment-energy"
+                          style="position:relative;left:auto;width:20px;height:20px;border-radius:50%;border:2px solid #fff;object-fit:cover;object-position:center 25%;"
+                          onerror="this.src='${CARD_BACK_URL}'"
+                          ondblclick="ptViewCard(event,'${safeImg}')"
+                          oncontextmenu="${zoomCtx}"
+                          title="${card.name} (right-click to zoom)">`;
+        });
+        html += `</div>`;
+    }
+
+    // Status icon display for active zone
     if (zoneId === 'active') {
         const stat = ptState[player].status;
-        const s = t => stat.includes(t) ? ' red' : '';
-        statusBtns = `
-            <div style="display:flex;gap:2px;justify-content:center;margin-bottom:2px;flex-wrap:wrap;">
-                <button class="pt-action-btn${s('poisoned')}"  onclick="toggleStatus('${player}','poisoned',event)"  title="Vergiftet">☠️</button>
-                <button class="pt-action-btn${s('burned')}"    onclick="toggleStatus('${player}','burned',event)"    title="Verbrannt">🔥</button>
-                <button class="pt-action-btn${s('asleep')}"    onclick="toggleStatus('${player}','asleep',event)"    title="Schlaf">💤</button>
-                <button class="pt-action-btn${s('paralyzed')}" onclick="toggleStatus('${player}','paralyzed',event)" title="Paralyse">⚡</button>
-                <button class="pt-action-btn${s('confused')}"  onclick="toggleStatus('${player}','confused',event)"  title="Verwirrt">💫</button>
-            </div>`;
         if (stat.length > 0) {
-            statusIconsHTML = `<div style="position:absolute;bottom:-10px;right:5px;
+            html += `<div style="position:absolute;bottom:-10px;right:5px;
                 background:rgba(0,0,0,0.8);color:#fff;padding:2px 5px;
                 border-radius:4px;font-size:11px;z-index:99;">${stat.join(' ')}</div>`;
         }
     }
 
-    const retreatBtn = (zoneId !== 'active')
-        ? `<button class="pt-action-btn" onclick="ptSwapZones('${player}','${zoneId}',event)" title="Retreat">🔄</button>`
-        : '';
-
-    html += `
-        <div class="pt-field-actions" style="z-index:100;flex-direction:column;">
-            ${statusBtns}
-            <div style="display:flex;gap:2px;justify-content:center;flex-wrap:wrap;">
-                <button class="pt-action-btn" onclick="addDamage('${player}','${zoneId}',10,event)">+10</button>
-                <button class="pt-action-btn" onclick="addDamage('${player}','${zoneId}',50,event)">+50</button>
-                <button class="pt-action-btn" onclick="clearDamage('${player}','${zoneId}',event)">0</button>
-                ${retreatBtn}
-                <button class="pt-action-btn" onclick="moveToLostZone('${player}','${zoneId}',event)">🌌</button>
-                <button class="pt-action-btn" onclick="returnToHand('${player}','${zoneId}',event)">⬆️</button>
-                <button class="pt-action-btn red" onclick="discardTopCard('${player}','${zoneId}',event)">🗑️</button>
-            </div>
-        </div>`;
-
-    html += statusIconsHTML;
+    // Damage badge — click OR right-click opens context menu
     const dmg = ptState[player].damage[zoneId];
-    if (dmg > 0) html += `<div class="pt-damage-badge"
-        onclick="addDamage('${player}','${zoneId}',event.shiftKey?-10:10,event)"
-        oncontextmenu="ptOpenCardMenu(event,'${player}','${zoneId}')"
-        title="Klick +10 | Shift+Klick −10 | Rechtsklick = Menü"
-        style="cursor:pointer; pointer-events:auto;">${dmg}</div>`;
+    if (dmg > 0) {
+        html += `<div class="pt-damage-badge"
+            onclick="ptOpenCardMenu(event,'${player}','${zoneId}')"
+            oncontextmenu="ptOpenCardMenu(event,'${player}','${zoneId}')"
+            title="Klick/Rechtsklick für Schadens-Menü"
+            style="z-index:40;cursor:pointer;pointer-events:auto;">${dmg}</div>`;
+    }
+
     html += '</div>';
     return html;
 }
@@ -2135,10 +2130,21 @@ function ptOpenCardMenu(event, player, zoneId) {
     ptActiveMenuZoneId = zoneId;
     const menu = document.getElementById('ptCardContextMenu');
     if (!menu) return;
-    menu.style.display   = 'flex';
-    menu.style.position  = 'fixed';
-    menu.style.left      = event.clientX + 'px';
-    menu.style.top       = event.clientY + 'px';
+
+    menu.style.display  = 'flex';
+    menu.style.position = 'fixed';
+
+    // Bounds-check so menu never clips off screen
+    const menuWidth  = 76;
+    const menuHeight = 230;
+    let posX = event.clientX;
+    let posY = event.clientY;
+    if (posX + menuWidth / 2 > window.innerWidth)  posX = window.innerWidth  - menuWidth  / 2 - 10;
+    if (posX - menuWidth / 2 < 0)                  posX = menuWidth  / 2 + 10;
+    if (posY + menuHeight    > window.innerHeight)  posY = window.innerHeight - menuHeight - 10;
+
+    menu.style.left      = posX + 'px';
+    menu.style.top       = posY + 'px';
     menu.style.transform = 'translate(-50%, 4px)';
 }
 
@@ -2179,12 +2185,18 @@ function ptShuffleIntoDeck(player, zoneId) {
     const isNeutral = (zoneId === 'playzone' || zoneId === 'stadium');
     const zoneArr = isNeutral ? (zoneId === 'stadium' ? ptState.stadium : ptState.playZone) : ptState[player].field[zoneId];
     if (zoneArr.length > 0) {
-        const c = zoneArr.pop();
+        // Move ALL cards from zone into deck
+        while (zoneArr.length > 0) {
+            ptState[player].deck.push(zoneArr.pop());
+        }
+        // Shuffle the deck
         const deck = ptState[player].deck;
-        const pos = Math.floor(Math.random() * (deck.length + 1));
-        deck.splice(pos, 0, c);
-        ptLog(`Shuffled "${c.name}" into ${player.toUpperCase()}'s deck.`);
-        if (!isNeutral && zoneArr.length === 0) {
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        ptLog(`Shuffled cards from ${zoneId} into ${player.toUpperCase()}'s deck.`);
+        if (!isNeutral) {
             ptState[player].damage[zoneId] = 0;
             if (zoneId === 'active') ptState[player].status = [];
         }

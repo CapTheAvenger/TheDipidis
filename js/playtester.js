@@ -421,11 +421,13 @@ function ptNewGame() {
 
 // ── Start Phase: coin flip → hand display → active selection ─────────────
 
-// Helpers to detect Basic Pokémon (not Energy, not Trainer)
+// Helpers to detect Basic Pokémon (not Energy, not Trainer subtype)
 function _ptIsBasic(card) {
     const t = (card.cardType || card.supertype || '').toLowerCase();
-    if (t.includes('energy') || t.includes('trainer')) return false;
-    // Treat anything with 'pokémon' in type, OR with no type info (many deck cards have no supertype), as Basic
+    // Explicit non-Pokémon types
+    if (t === 'supporter' || t === 'item' || t === 'tool' || t === 'stadium') return false;
+    if (t.includes('energy')) return false;
+    // Everything else = Pokémon (e.g. 'G Basic', 'N Stage 1', '' for unknown)
     return true;
 }
 function _ptHasBasic(player) {
@@ -1156,19 +1158,16 @@ let _ptDeckSearchPlayer = null;
 let _ptDeckSearchSort   = 'deck'; // 'deck' | 'type'
 
 function _ptDeckCardSortOrder(card) {
-    // Returns sort priority for TCG-standard type order
+    // Actual DB type values: 'G Basic', 'N Stage 1', 'Supporter', 'Item', 'Tool', 'Stadium', 'Special Energy', 'Basic Energy'
     const t = (card.cardType || card.supertype || '').toLowerCase();
-    const n = (card.name || '').toLowerCase();
-    // Detect Pokémon: not trainer, not energy
-    if (!t.includes('trainer') && !t.includes('energy')) return 0; // Pokémon
-    if (t.includes('supporter'))                          return 1;
-    if (t.includes('item'))                               return 2;
-    if (t.includes('tool'))                               return 3;
-    if (t.includes('stadium'))                            return 4;
-    // Energy variants
-    if (t.includes('special') || n.includes('special'))  return 5; // Special Energy
-    if (t.includes('energy'))                             return 6; // Basic Energy
-    return 7; // fallback (generic Trainer)
+    if (t === 'supporter')                              return 1;
+    if (t === 'item')                                   return 2;
+    if (t === 'tool')                                   return 3;
+    if (t === 'stadium')                                return 4;
+    if (t === 'special energy')                         return 5;
+    if (t === 'basic energy' || t.includes('energy'))   return 6;
+    // Pokémon: 'X Basic', 'X Stage 1', 'X Stage 2', or empty = treat as Pokémon
+    return 0;
 }
 
 function _ptSetDeckSort(sort) {

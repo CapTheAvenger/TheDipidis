@@ -1718,13 +1718,8 @@ function ptRenderOpponentPanel(opp, tab) {
             html += `<div style="background:${isFocus ? 'rgba(231,76,60,0.18)' : 'rgba(255,255,255,0.05)'};border:${isFocus ? '2px solid #e74c3c' : '1px solid rgba(255,255,255,0.08)'};border-radius:10px;padding:12px;margin-bottom:10px;">
                 <div style="font-weight:700;font-size:11px;color:#FFCB05;margin-bottom:8px;">${label}</div>
                 <div style="display:flex;gap:10px;align-items:flex-start;">
-                    <div style="position:relative;flex-shrink:0;"
-                         onmouseenter="ptOpenCardMenu(event,'${opp}','${zoneId}')"
-                         onmouseleave="ptScheduleMenuClose()">
-                        <img src="${safeImg}" style="width:80px;border-radius:7px;cursor:pointer;display:block;box-shadow:0 2px 8px rgba(0,0,0,0.5);"
-                             onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${safeImg}','${card.name}')" title="Klick zum Vergrößern">
-                        ${cards.length > 1 ? `<div onclick="event.stopPropagation();ptOpenZoneStack('${opp}','${zoneId}')" title="Alle ${cards.length} Karten" style="position:absolute;bottom:6px;left:2px;background:rgba(0,0,0,0.78);color:#fff;font-size:9px;font-weight:900;border-radius:4px;padding:2px 5px;cursor:pointer;line-height:1;">\ud83c\udccf ${cards.length}</div>` : ''}
-                    </div>
+                    <img src="${safeImg}" style="width:80px;border-radius:7px;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.5);"
+                         onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${safeImg}','${card.name}')" title="Klick zum Vergrößern">
                     <div style="flex:1;">
                         <div style="font-weight:700;font-size:12px;margin-bottom:4px;">${card.name}</div>
                         <div style="font-size:16px;font-weight:900;color:#ff6b6b;margin-bottom:6px;">💥 ${dmg} Schaden</div>

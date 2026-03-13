@@ -2067,8 +2067,6 @@
                 <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip Board</button>
                 <button class="pt-btn" onclick="ptNewGame()">♻️ Restart</button>
                 <button class="pt-btn" onclick="ptToggleLog()">📋 Log</button>
-                <button class="pt-btn" onclick="ptOpenOpponentPanel()" style="background:#c0392b;color:#fff;border-color:#e74c3c;" title="Schaden &amp; Status beim Gegner setzen">⚔️ Opp. DMG</button>
-                <button class="pt-btn" onclick="ptToggleZoomPanel()" style="background:#2c3e50;color:#fff;border-color:#34495e;" title="Karte zoomen / suchen">🔍 Zoom</button>
                 <button class="pt-btn pt-danger" onclick="closePlaytester()">🚪 Quit</button>
             </div>
         </div>
@@ -2081,10 +2079,10 @@
                 padding:8px 10px; color:#ddd; font-size:9px; box-shadow:0 4px 12px rgba(0,0,0,0.8);
                 display:flex; flex-direction:column; gap:4px; user-select:none; pointer-events:none; width:155px;">
                 <div style="color:#FFCB05; font-weight:900; font-size:10px; display:flex; align-items:center; gap:4px; margin-bottom:1px;">📖 LEGEND</div>
-                <div class="pt-legend-item"><div style="width:12px; height:12px; background:#ff6b6b; border-radius:50%; border:1px solid #fff; flex-shrink:0;"></div><span>Damage — +10 / +50 / ÷0</span></div>
+                <div class="pt-legend-item"><div style="width:12px; height:12px; background:#ff6b6b; border-radius:50%; border:1px solid #fff; flex-shrink:0;"></div><span>DMG: Klick +10 | Rechts +50 | Shift -10</span></div>
                 <div class="pt-legend-item"><div style="width:14px; height:14px; background:transparent; border:1px solid #f1c40f; color:#f1c40f; border-radius:50%; font-weight:900; font-size:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">A</div><span>Ability (gelb = used)</span></div>
                 <div class="pt-legend-item"><div style="width:8px; height:13px; background:#ccc; border-radius:2px; border:1px solid #fff; flex-shrink:0;"></div><span>Tool — linke Seite</span></div>
-                <div class="pt-legend-item"><div style="width:14px; height:14px; background:rgba(0,0,0,0.6); border:2px solid #e67e22; border-radius:3px; font-size:7px; font-weight:900; color:#e67e22; display:flex; align-items:center; justify-content:center; flex-shrink:0;">+0</div><span>DMG Buff L / R-Reset</span></div>
+                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">🤚</span><span>Auf Hand: In "Hand"-Zone ziehen</span></div>
                 <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">🚀</span><span>Drag &amp; Drop</span></div>
             </div>
 
@@ -2111,6 +2109,14 @@
                             <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')">VSTAR</button>
                             <button id="ptGxMarker"    class="pt-marker pt-marker-gx"    onclick="ptToggleMarker('gx')">GX</button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ── CENTER: Floating action buttons ── -->
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(75px, -50%); z-index: 50;">
+                    <div class="static-element" style="display: flex; flex-direction: column; gap: 12px;">
+                        <button class="pt-btn" onclick="ptOpenOpponentPanel()" style="background:#c0392b;color:#fff;border-color:#e74c3c; padding: 10px 16px; font-size: 13px; box-shadow: 0 6px 15px rgba(0,0,0,0.7);" title="Schaden &amp; Status beim Gegner setzen">⚔️ Opp. View</button>
+                        <button class="pt-btn" onclick="ptToggleZoomPanel()" style="background:#2c3e50;color:#fff;border-color:#34495e; padding: 10px 16px; font-size: 13px; box-shadow: 0 6px 15px rgba(0,0,0,0.7);" title="Karte zoomen / suchen">🔍 Zoom</button>
                     </div>
                 </div>
 
@@ -2499,6 +2505,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v19"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260313-v48"></script>
+    <script src="js/playtester.js?v=20260313-v49"></script>
 </body>
 </html>

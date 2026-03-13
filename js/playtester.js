@@ -2114,7 +2114,11 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
 
     html += statusIconsHTML;
     const dmg = ptState[player].damage[zoneId];
-    if (dmg > 0) html += `<div class="pt-damage-badge">${dmg}</div>`;
+    if (dmg > 0) html += `<div class="pt-damage-badge"
+        onclick="addDamage('${player}','${zoneId}',event.shiftKey?-10:10,event)"
+        oncontextmenu="addDamage('${player}','${zoneId}',50,event);return false;"
+        title="Klick +10 | Shift+Klick −10 | Rechtsklick +50"
+        style="cursor:pointer;">${dmg}</div>`;
     html += '</div>';
     return html;
 }

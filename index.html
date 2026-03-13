@@ -364,16 +364,18 @@
             -webkit-user-select: none;
         }
 
-        /* ── NEW: CARD CONTEXT MENU (OVERLAY) ── */
+        /* ── CARD CONTEXT MENU (HOVER OVERLAY) ── */
         .pt-card-context-menu {
             display: none; position: fixed; z-index: 25000; flex-direction: column;
-            background: rgba(20, 20, 20, 0.95); border: 2px solid #555; border-radius: 12px;
-            padding: 8px; gap: 6px; width: 68px; box-shadow: 0 8px 25px rgba(0,0,0,0.8);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 15, 15, 0.97); border: 1.5px solid #444; border-radius: 10px;
+            padding: 6px; gap: 5px; width: 174px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.85); backdrop-filter: blur(6px);
         }
+        .pt-menu-row { display: flex; gap: 3px; justify-content: center; }
+        .pt-menu-sep { height: 1px; background: #444; width: 100%; }
         .pt-menu-btn {
-            width: 100%; background: #333; color: white; border: 1px solid #555;
-            border-radius: 6px; padding: 6px 0; font-size: 13px; font-weight: 900;
+            flex: 1; min-width: 0; background: #333; color: white; border: 1px solid #555;
+            border-radius: 5px; padding: 5px 3px; font-size: 12px; font-weight: 900;
             cursor: pointer; transition: all 0.15s; display: flex; justify-content: center; align-items: center;
             font-family: inherit;
         }
@@ -385,7 +387,7 @@
         .pt-menu-btn.blue { background: #2980b9; border-color: #3498db; }
         .pt-menu-btn.blue:hover { background: #3498db; }
         .pt-status-btn {
-            width: 22px; height: 22px; border-radius: 50%; font-size: 12px; display: flex;
+            width: 24px; height: 24px; border-radius: 50%; font-size: 13px; display: flex;
             align-items: center; justify-content: center; background: #222; border: 1px solid #555;
             cursor: pointer; user-select: none; transition: transform 0.15s;
         }
@@ -2522,23 +2524,28 @@
         </div>
     </div>
 
-    <div id="ptCardContextMenu" class="pt-card-context-menu" oncontextmenu="return false;">
-        <div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:2px;">
-            <div class="pt-status-btn" title="Poison" onclick="ptMenuAction('status','poison')">☠️</div>
-            <div class="pt-status-btn" title="Burn" onclick="ptMenuAction('status','burn')">🔥</div>
-            <div class="pt-status-btn" title="Asleep" onclick="ptMenuAction('status','asleep')">💤</div>
+    <div id="ptCardContextMenu" class="pt-card-context-menu" oncontextmenu="return false;"
+         onmouseenter="ptCancelMenuClose()" onmouseleave="ptScheduleMenuClose()">
+        <div class="pt-menu-row">
+            <div class="pt-status-btn" title="Poison"    onclick="ptMenuAction('status','poison')">☠️</div>
+            <div class="pt-status-btn" title="Burn"      onclick="ptMenuAction('status','burn')">🔥</div>
+            <div class="pt-status-btn" title="Asleep"    onclick="ptMenuAction('status','asleep')">💤</div>
             <div class="pt-status-btn" title="Paralyzed" onclick="ptMenuAction('status','paralyzed')">⚡</div>
-            <div class="pt-status-btn" title="Confused" onclick="ptMenuAction('status','confused')">💫</div>
+            <div class="pt-status-btn" title="Confused"  onclick="ptMenuAction('status','confused')">💫</div>
         </div>
-        <div style="height:1px; background:#555; width:100%; margin:2px 0;"></div>
-        <button class="pt-menu-btn" onclick="ptMenuAction('damage',10)">+10</button>
-        <button class="pt-menu-btn" onclick="ptMenuAction('damage',50)">+50</button>
-        <button class="pt-menu-btn green" onclick="ptMenuAction('damage',-10)" title="Heilen 10">-10</button>
-        <button class="pt-menu-btn" onclick="ptMenuAction('damage',0)">0</button>
-        <div style="height:1px; background:#555; width:100%; margin:2px 0;"></div>
-        <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','hand')" title="Auf die Hand">✋</button>
-        <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','deck')" title="Ins Deck mischen">🔄</button>
-        <button class="pt-menu-btn red" onclick="ptMenuAction('utility','discard')" title="Ablagestapel">🗑️</button>
+        <div class="pt-menu-sep"></div>
+        <div class="pt-menu-row">
+            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',10)"  title="+10 Schaden">+10</button>
+            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',50)"  title="+50 Schaden">+50</button>
+            <button class="pt-menu-btn green" onclick="ptMenuAction('damage',-10)" title="Heilen 10">-10</button>
+            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',0)"   title="Voll heilen">0</button>
+        </div>
+        <div class="pt-menu-sep"></div>
+        <div class="pt-menu-row">
+            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','hand')"    title="Auf die Hand">✋</button>
+            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','deck')"    title="Ins Deck mischen">🔄</button>
+            <button class="pt-menu-btn red"  onclick="ptMenuAction('utility','discard')" title="Ablagestapel">🗑️</button>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -2552,6 +2559,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v19"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260313-v51"></script>
+    <script src="js/playtester.js?v=20260313-v52"></script>
 </body>
 </html>

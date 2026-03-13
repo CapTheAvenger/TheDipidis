@@ -2030,7 +2030,9 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
 
     let html = `<div style="position:relative;width:${width}px;cursor:pointer;min-height:${height}px;"
                      onclick="ptClickZone('${player}','${zoneId}')"
-                     draggable="true" ondragstart="ptDragStartField(event,'${elementId}')">`;
+                     onmouseenter="ptOpenCardMenu(event,'${player}','${zoneId}')"
+                     onmouseleave="ptScheduleMenuClose()"
+                     draggable="true" ondragstart="ptDragStartField(event,'${elementId}')">` ;
 
     let energyCards  = [];
     let toolCards    = [];
@@ -2056,8 +2058,7 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                       style="position:absolute;top:0;left:0;z-index:${10 + index};width:${width}px;border-radius:7px;display:block;"
                       onerror="this.src='${CARD_BACK_URL}'"
                       ondblclick="ptViewCard(event,'${safeImg}')"
-                      oncontextmenu="ptOpenCardMenu(event,'${player}','${zoneId}')"
-                      title="${card.name} (Rechtsklick = Menü | Doppelklick = Zoom)">`;
+                      title="${card.name} (Doppelklick = Zoom)">`;
         // Ability marker only on the top-most (last) Pokémon
         if (index === pokemonCards.length - 1) {
             html += `<div id="${abilityMarkerId}" class="pt-ability-marker" title="Ability used toggle"
@@ -2104,13 +2105,12 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
         }
     }
 
-    // Damage badge — click OR right-click opens context menu
+    // Damage badge — click +10 / shift+click −10
     const dmg = ptState[player].damage[zoneId];
     if (dmg > 0) {
         html += `<div class="pt-damage-badge"
-            onclick="ptOpenCardMenu(event,'${player}','${zoneId}')"
-            oncontextmenu="ptOpenCardMenu(event,'${player}','${zoneId}')"
-            title="Klick/Rechtsklick für Schadens-Menü"
+            onclick="addDamage('${player}','${zoneId}',event.shiftKey?-10:10,event)"
+            title="Klick +10 | Shift+Klick −10"
             style="z-index:40;cursor:pointer;pointer-events:auto;">${dmg}</div>`;
     }
 
@@ -2123,39 +2123,50 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
 let ptActiveMenuPlayer = null;
 let ptActiveMenuZoneId = null;
 
+let _ptMenuHideTimer = null;
+
+function ptScheduleMenuClose() {
+    clearTimeout(_ptMenuHideTimer);
+    _ptMenuHideTimer = setTimeout(() => {
+        const menu = document.getElementById('ptCardContextMenu');
+        if (menu) menu.style.display = 'none';
+        _ptMenuHideTimer = null;
+    }, 200);
+}
+
+function ptCancelMenuClose() {
+    clearTimeout(_ptMenuHideTimer);
+    _ptMenuHideTimer = null;
+}
+
 function ptOpenCardMenu(event, player, zoneId) {
-    event.preventDefault();
-    event.stopPropagation();
+    ptCancelMenuClose();
     ptActiveMenuPlayer = player;
     ptActiveMenuZoneId = zoneId;
     const menu = document.getElementById('ptCardContextMenu');
     if (!menu) return;
 
-    menu.style.display  = 'flex';
-    menu.style.position = 'fixed';
+    // Position menu centered above the hovered zone
+    const rect      = event.currentTarget.getBoundingClientRect();
+    const menuWidth = 178;
+    const menuHeight = 112;
+    let posX = rect.left + rect.width / 2;
+    let posY = rect.top - menuHeight - 8;
 
-    // Bounds-check so menu never clips off screen
-    const menuWidth  = 76;
-    const menuHeight = 230;
-    let posX = event.clientX;
-    let posY = event.clientY;
-    if (posX + menuWidth / 2 > window.innerWidth)  posX = window.innerWidth  - menuWidth  / 2 - 10;
-    if (posX - menuWidth / 2 < 0)                  posX = menuWidth  / 2 + 10;
-    if (posY + menuHeight    > window.innerHeight)  posY = window.innerHeight - menuHeight - 10;
+    // Not enough space above → show below
+    if (posY < 6) posY = rect.bottom + 8;
+    // Horizontal bounds
+    if (posX + menuWidth / 2 > window.innerWidth) posX = window.innerWidth - menuWidth / 2 - 6;
+    if (posX - menuWidth / 2 < 6)                 posX = menuWidth / 2 + 6;
 
+    menu.style.display   = 'flex';
+    menu.style.position  = 'fixed';
     menu.style.left      = posX + 'px';
     menu.style.top       = posY + 'px';
-    menu.style.transform = 'translate(-50%, 4px)';
+    menu.style.transform = 'translateX(-50%)';
 }
 
 document.addEventListener('click', function(e) {
-    const menu = document.getElementById('ptCardContextMenu');
-    if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) {
-        menu.style.display = 'none';
-    }
-});
-
-document.addEventListener('contextmenu', function(e) {
     const menu = document.getElementById('ptCardContextMenu');
     if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) {
         menu.style.display = 'none';

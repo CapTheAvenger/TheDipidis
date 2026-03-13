@@ -1168,10 +1168,8 @@ function ptPassTurn() {
 }
 
 function ptOpenAttackView() {
-    const myActive  = ptState[ptCurrentPlayer].field.active;
-    const opp       = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
-    const oppActive = ptState[opp].field.active;
-    // Find highest evolution Pokémon in stack
+    const myActive = ptState[ptCurrentPlayer].field.active;
+    const opp      = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
     const _topPoke = cards => {
         if (!cards || cards.length === 0) return null;
         return [...cards].reverse().find(c => {
@@ -1179,16 +1177,13 @@ function ptOpenAttackView() {
             return !ct.includes('energy') && !ct.includes('trainer') && ct !== 'tool';
         }) || cards[0];
     };
-    const myCard  = _topPoke(myActive);
-    const oppCard = _topPoke(oppActive);
-    const myImg   = document.getElementById('ptAttackMyImg');
-    const myName  = document.getElementById('ptAttackMyName');
-    const oppImg  = document.getElementById('ptAttackOppImg');
-    const oppName = document.getElementById('ptAttackOppName');
-    if (myImg)  myImg.src  = myCard  ? (myCard.imageUrl  || CARD_BACK_URL) : CARD_BACK_URL;
-    if (myName) myName.textContent  = myCard  ? (myCard.name  || '') : '(leer)';
-    if (oppImg) oppImg.src = oppCard ? (oppCard.imageUrl || CARD_BACK_URL) : CARD_BACK_URL;
-    if (oppName) oppName.textContent = oppCard ? (oppCard.name || '') : '(leer)';
+    const myCard = _topPoke(myActive);
+    const myImg  = document.getElementById('ptAttackMyImg');
+    const myName = document.getElementById('ptAttackMyName');
+    if (myImg)  myImg.src           = myCard ? (myCard.imageUrl || CARD_BACK_URL) : CARD_BACK_URL;
+    if (myName) myName.textContent  = myCard ? (myCard.name || '') : '(leer)';
+    // Render opp field into the attack modal's dedicated container
+    ptRenderOpponentPanel(opp, 'field', 'ptAttackOppContent');
     const modal = document.getElementById('ptAttackModal');
     if (modal) modal.style.display = 'flex';
 }
@@ -1709,8 +1704,8 @@ function ptOppSwitchTab(tab) {
     ptRenderOpponentPanel(opp, tab);
 }
 
-function ptRenderOpponentPanel(opp, tab) {
-    const el = document.getElementById('ptOppPanelContent');
+function ptRenderOpponentPanel(opp, tab, containerId) {
+    const el = document.getElementById(containerId || 'ptOppPanelContent');
     if (!el) return;
     tab = tab || _ptOppTab || 'field';
 

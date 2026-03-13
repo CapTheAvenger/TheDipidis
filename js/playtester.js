@@ -778,7 +778,6 @@ function ptViewCard(arg1, arg2) {
     if (lbl) lbl.textContent = name;
     viewer.style.display = 'flex';
 }
-
 // --- COMMAND INPUT (Spielerspezifisch) ---
 
 function ptRunCommand(playerOverride) {
@@ -1225,7 +1224,30 @@ function ptCloseDeckSearch() {
 // --- ZONE INTERACTION ---
 
 function ptClickZone(player, zoneId) {
-    if (ptSelectedCardIndex === null) return;
+    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+
+    // Clicking on opponent's occupied zone → open damage panel
+    if (player === opp) {
+        const cards = ptState[player].field[zoneId];
+        if (cards && cards.length > 0) {
+            ptOpenOpponentPanel();
+        }
+        return;
+    }
+
+    // No hand card selected → zoom the top card of this zone
+    if (ptSelectedCardIndex === null) {
+        const cards = (zoneId === 'stadium') ? ptState.stadium
+                    : (zoneId === 'playzone') ? ptState.playZone
+                    : ptState[player].field[zoneId];
+        if (cards && cards.length > 0) {
+            const c = cards[cards.length - 1];
+            ptViewCard(c.imageUrl || CARD_BACK_URL, c.name || '');
+        }
+        return;
+    }
+
+    // Hand card selected → place it on the target zone
     const card = ptState[ptCurrentPlayer].hand[ptSelectedCardIndex];
     if (!card) return;
     ptSaveState();

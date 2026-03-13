@@ -51,6 +51,8 @@ function getInitialPlayerState() {
         field: { active: [], bench0: [], bench1: [], bench2: [], bench3: [], bench4: [] },
         damage: { active: 0, bench0: 0, bench1: 0, bench2: 0, bench3: 0, bench4: 0 },
         status: [],
+        itemLock: false,
+        toolLock: false,
         vstarUsed: false,
         gxUsed: false
     };
@@ -1628,6 +1630,17 @@ function toggleStatus(player, statusType, event) {
     ptRenderAll();
 }
 
+function ptToggleLock(player, type) {
+    ptState[player][type] = !ptState[player][type];
+    const label = type === 'itemLock' ? 'Item-Lock' : 'Tool-Lock';
+    const state = ptState[player][type] ? 'AN 🔴' : 'AUS 🟢';
+    ptLog(`${label} für ${player.toUpperCase()}: ${state}`);
+    ptRenderAll();
+    // Refresh opponent panel if open
+    const panel = document.getElementById('ptOppPanel');
+    if (panel && panel.style.display !== 'none') ptOppSwitchTab('field');
+}
+
 // --- OPPONENT DAMAGE PANEL (accessible regardless of active player) ---
 
 // --- OPPONENT FULL VIEW PANEL ---
@@ -1663,8 +1676,22 @@ function ptRenderOpponentPanel(opp, tab) {
 
     if (tab === 'field') {
         // ─ Field: all Pokémon with damage + status + zoom
+        const iLock = !!ptState[opp].itemLock;
+        const tLock = !!ptState[opp].toolLock;
+        const lkBase = 'border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;';
+        const lkOn  = lkBase + 'background:#c0392b;color:#fff;box-shadow:0 0 8px rgba(231,76,60,0.7);';
+        const lkOff = lkBase + 'background:#2c3e50;color:#aaa;';
+        const lockBar = `<div style="display:flex;gap:8px;margin-bottom:14px;padding:10px;background:rgba(255,255,255,0.04);border-radius:8px;align-items:center;">
+            <span style="font-size:11px;color:#aaa;margin-right:4px;">Locks:</span>
+            <button onclick="ptToggleLock('${opp}','itemLock')" style="${iLock ? lkOn : lkOff}" title="Item-Lock: Gegner kann keine Items spielen">
+                🚫 ${iLock ? '✅ Item-Lock AN' : 'Item-Lock'}
+            </button>
+            <button onclick="ptToggleLock('${opp}','toolLock')" style="${tLock ? lkOn : lkOff}" title="Tool-Lock: Gegner kann keine Tools spielen">
+                🔧 ${tLock ? '✅ Tool-Lock AN' : 'Tool-Lock'}
+            </button>
+        </div>`;
         const zones = ['active', 'bench0', 'bench1', 'bench2', 'bench3', 'bench4'];
-        let html = '';
+        let html = lockBar;
         zones.forEach(zoneId => {
             const cards = ptState[opp].field[zoneId];
             if (cards.length === 0) return;
@@ -1842,6 +1869,11 @@ function ptRenderAll() {
             if (vBtn) vBtn.classList.toggle('used', !!ptState[p].vstarUsed);
             if (gBtn) gBtn.classList.toggle('used', !!ptState[p].gxUsed);
         }
+        // Sync Item/Tool-Lock button visual state
+        const iLockBtn = document.getElementById(`ptItemLock-${p}`);
+        if (iLockBtn) iLockBtn.classList.toggle('active', !!ptState[p].itemLock);
+        const tLockBtn = document.getElementById(`ptToolLock-${p}`);
+        if (tLockBtn) tLockBtn.classList.toggle('active', !!ptState[p].toolLock);
 
         const pileEl = document.getElementById(`ptDiscardPile-${p}`);
         if (pileEl) {

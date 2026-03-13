@@ -2190,8 +2190,8 @@
                                      style="min-height: 105px; min-width: 75px;"></div>
                                 <div id="ptActiveModifier-p2" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
-                                    <button class="pt-status-marker" title="Item Lock" onclick="this.classList.toggle('active')">🚫</button>
-                                    <button class="pt-status-marker" title="No Tools"  onclick="this.classList.toggle('active')">🔧</button>
+                                    <button id="ptItemLock-p2" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','itemLock')">🚫</button>
+                                    <button id="ptToolLock-p2" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','toolLock')">🔧</button>
                                 </div>
                             </div>
                         </div>
@@ -2274,8 +2274,8 @@
                                      style="min-height: 105px; min-width: 75px;"></div>
                                 <div id="ptActiveModifier-p1" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
-                                    <button class="pt-status-marker" title="Item Lock" onclick="this.classList.toggle('active')">🚫</button>
-                                    <button class="pt-status-marker" title="No Tools"  onclick="this.classList.toggle('active')">🔧</button>
+                                    <button id="ptItemLock-p1" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','itemLock')">🚫</button>
+                                    <button id="ptToolLock-p1" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','toolLock')">🔧</button>
                                 </div>
                             </div>
                         </div>
@@ -2499,6 +2499,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v19"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260313-v46"></script>
+    <script src="js/playtester.js?v=20260313-v47"></script>
 </body>
 </html>

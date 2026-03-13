@@ -100,13 +100,19 @@ function openPlaytester(source) {
         const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
         if (m) {
             cardName = m[1];
-            const cd = (typeof _simFindCard === 'function') ? _simFindCard(m[2], m[3]) : null;
+            const setCode = m[2], number = m[3];
+            // Try fast set+number lookup first
+            let cd = (window.cardsBySetNumberMap || {})[`${setCode}-${number}`] || null;
+            // Fallback: _simFindCard (if available)
+            if (!cd && typeof _simFindCard === 'function') cd = _simFindCard(setCode, number);
+            // Fallback: name lookup
+            if (!cd) cd = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
             if (cd && cd.image_url) imageUrl = cd.image_url;
-            if (cd) cardType = cd.type || cd.card_type || '';
+            if (cd) cardType = cd.type || cd.card_type || cd.supertype || '';
         } else {
             const cd = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
             if (cd && cd.image_url) imageUrl = cd.image_url;
-            if (cd) cardType = cd.type || cd.card_type || '';
+            if (cd) cardType = cd.type || cd.card_type || cd.supertype || '';
         }
         for (let i = 0; i < count; i++) {
             baseCards.push({ name: cardName, imageUrl, cardType });
@@ -281,7 +287,7 @@ function parseSandboxDeck(player) {
 
         if (found) {
             imageUrl = found.image_url || CARD_BACK_URL;
-            cardType = found.card_type || found.supertype || '';
+            cardType = found.type || found.card_type || found.supertype || '';
         } else {
             console.warn(`[Sandbox] No local data for ${name} (${ptcgoCode} ${number})`);
         }

@@ -51,6 +51,7 @@ function getInitialPlayerState() {
         field: { active: [], bench0: [], bench1: [], bench2: [], bench3: [], bench4: [] },
         damage: { active: 0, bench0: 0, bench1: 0, bench2: 0, bench3: 0, bench4: 0 },
         status: [],
+        abilityUsed: { active: false, bench0: false, bench1: false, bench2: false, bench3: false, bench4: false },
         itemLock: false,
         toolLock: false,
         vstarUsed: false,
@@ -1135,6 +1136,10 @@ function ptFlipBoard() {
     const flipping = ptCurrentPlayer === 'p1';
     board.classList.toggle('flipped', flipping);
     ptCurrentPlayer = flipping ? 'p2' : 'p1';
+    // Reset ability markers for the newly active player at the start of their turn
+    if (ptState[ptCurrentPlayer] && ptState[ptCurrentPlayer].abilityUsed) {
+        Object.keys(ptState[ptCurrentPlayer].abilityUsed).forEach(k => { ptState[ptCurrentPlayer].abilityUsed[k] = false; });
+    }
     ptUpdateAreaPointerEvents();
     if (ind)      ind.innerText     = flipping ? '2' : '1';
     if (handZone) handZone.style.borderTopColor = flipping ? '#E3350D' : '#3B4CCA';
@@ -2061,9 +2066,10 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                       title="${card.name} (Doppelklick = Zoom)">`;
         // Ability marker only on the top-most (last) Pokémon
         if (index === pokemonCards.length - 1) {
-            html += `<div id="${abilityMarkerId}" class="pt-ability-marker" title="Ability used toggle"
+            const isUsed = !!(ptState[player].abilityUsed && ptState[player].abilityUsed[zoneId]);
+            html += `<div id="${abilityMarkerId}" class="pt-ability-marker${isUsed ? ' used' : ''}" title="Ability benutzt (bis Ende des Zuges)"
                           style="z-index:${11 + index};position:absolute;bottom:-6px;right:-6px;"
-                          onclick="event.stopPropagation();this.classList.toggle('used');">A</div>`;
+                          onclick="ptToggleAbilityUsed('${player}','${zoneId}',event);">A</div>`;
         }
     });
 
@@ -2123,6 +2129,15 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
 
     html += '</div>';
     return html;
+}
+
+function ptToggleAbilityUsed(player, zoneId, event) {
+    if (event) event.stopPropagation();
+    if (!ptState[player].abilityUsed) ptState[player].abilityUsed = {};
+    ptState[player].abilityUsed[zoneId] = !ptState[player].abilityUsed[zoneId];
+    const state = ptState[player].abilityUsed[zoneId];
+    ptLog(`✨ Ability auf ${zoneId} ${state ? 'benutzt (✅)' : 'zurückgesetzt'}`);
+    ptRenderAll();
 }
 
 // --- CARD CONTEXT MENU ---

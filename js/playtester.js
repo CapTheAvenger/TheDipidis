@@ -2079,9 +2079,9 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                       title="${card.name} (right-click to zoom)">`;
     });
 
-    // 3. Render Energies — horizontal fan below the Pokémon
+    // 3. Render Energies — horizontal fan at bottom edge of the Pokémon card
     if (energyCards.length > 0) {
-        html += `<div style="position:absolute;bottom:-18px;left:0;width:100%;display:flex;justify-content:center;gap:2px;z-index:30;">`;
+        html += `<div style="position:absolute;bottom:4px;left:0;width:100%;display:flex;justify-content:center;gap:2px;z-index:30;">`;
         energyCards.forEach(card => {
             const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
             const zoomCtx = `event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${card.name.replace(/'/g, "\\'")}')`;
@@ -2112,6 +2112,13 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
             onclick="addDamage('${player}','${zoneId}',event.shiftKey?-10:10,event)"
             title="Klick +10 | Shift+Klick −10"
             style="z-index:40;cursor:pointer;pointer-events:auto;">${dmg}</div>`;
+    }
+
+    // Stack badge — shown when zone has more than one card (evolutions/attachments)
+    if (cards.length > 1) {
+        html += `<div onclick="event.stopPropagation();ptOpenZoneStack('${player}','${zoneId}')"
+                     title="Alle ${cards.length} Karten ansehen"
+                     style="position:absolute;top:2px;left:2px;z-index:50;background:rgba(0,0,0,0.78);color:#fff;font-size:9px;font-weight:900;border-radius:4px;padding:2px 5px;cursor:pointer;pointer-events:auto;line-height:1;">🃏 ${cards.length}</div>`;
     }
 
     html += '</div>';
@@ -2190,6 +2197,30 @@ function ptMenuAction(type, value) {
         else if (value === 'deck')    ptShuffleIntoDeck(player, zoneId);
         else if (value === 'discard') discardTopCard(player, zoneId, null);
     }
+}
+
+function ptOpenZoneStack(player, zoneId) {
+    const cards = ptState[player].field[zoneId];
+    if (!cards || cards.length === 0) return;
+    const zoneLabel = zoneId.charAt(0).toUpperCase() + zoneId.slice(1);
+    const title = document.getElementById('ptDiscardModalTitle');
+    if (title) title.textContent = `🃏 ${zoneLabel} (${player.toUpperCase()}) – ${cards.length} Karten`;
+    const grid = document.getElementById('ptDiscardGrid');
+    if (!grid) return;
+    grid.innerHTML = cards.map((c, i) => {
+        const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const isEnergy  = (c.cardType || '').toLowerCase().includes('energy');
+        const isTool    = (c.cardType || '').toLowerCase().includes('trainer') || (c.cardType || '') === 'tool';
+        const badge     = isEnergy ? '⚡' : isTool ? '🔧' : i === 0 ? '🐾 Basis' : `🔼 Stufe ${i}`;
+        return `<div style="position:relative;cursor:pointer;text-align:center;" title="${c.name}">
+            <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;"
+                 onerror="this.src='${CARD_BACK_URL}'"
+                 ondblclick="ptViewCard(event,'${safeImg}')">
+            <div style="position:absolute;top:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#FFCB05;font-size:8px;font-weight:700;padding:2px 3px;border-radius:6px 6px 0 0;">${badge}</div>
+            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
+        </div>`;
+    }).join('');
+    document.getElementById('ptDiscardModal').style.display = 'flex';
 }
 
 function ptShuffleIntoDeck(player, zoneId) {

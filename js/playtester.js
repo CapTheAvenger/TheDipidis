@@ -1289,11 +1289,15 @@ function ptCloseDeckSearch() {
 function ptClickZone(player, zoneId) {
     const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
 
-    // Clicking on opponent's occupied zone → open damage panel
+    // Clicking on opponent's zone
     if (player === opp) {
         const cards = ptState[player].field[zoneId];
         if (cards && cards.length > 0) {
-            ptOpenOpponentPanel();
+            // Zoom the top card first
+            const c = cards[cards.length - 1];
+            ptViewCard(c.imageUrl || CARD_BACK_URL, c.name || '');
+            // Open opponent panel focused on field/this zone
+            ptOpenOpponentPanel('field', zoneId);
         }
         return;
     }
@@ -1626,55 +1630,116 @@ function toggleStatus(player, statusType, event) {
 
 // --- OPPONENT DAMAGE PANEL (accessible regardless of active player) ---
 
-function ptOpenOpponentPanel() {
+// --- OPPONENT FULL VIEW PANEL ---
+
+let _ptOppTab = 'field';
+let _ptOppFocusZone = null;
+
+function ptOpenOpponentPanel(tab, focusZone) {
     const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
-    ptRenderOpponentPanel(opp);
+    _ptOppTab = tab || 'field';
+    _ptOppFocusZone = focusZone || null;
+    const title = document.getElementById('ptOppPanelTitle');
+    if (title) title.textContent = `⚔️ Gegner (${opp.toUpperCase()})`;
+    ptOppSwitchTab(_ptOppTab);
     document.getElementById('ptOppPanel').style.display = 'flex';
 }
 
-function ptRenderOpponentPanel(opp) {
+function ptOppSwitchTab(tab) {
+    _ptOppTab = tab;
+    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+    // Update tab button styles
+    ['field','discard','lostzone'].forEach(t => {
+        const btn = document.getElementById('ptOppTab-' + t);
+        if (btn) { btn.style.background = t === tab ? '#e74c3c' : '#333'; btn.style.color = t === tab ? '#fff' : '#aaa'; }
+    });
+    ptRenderOpponentPanel(opp, tab);
+}
+
+function ptRenderOpponentPanel(opp, tab) {
     const el = document.getElementById('ptOppPanelContent');
     if (!el) return;
-    const zones = ['active', 'bench0', 'bench1', 'bench2', 'bench3', 'bench4'];
-    let html = '';
-    zones.forEach(zoneId => {
-        const cards = ptState[opp].field[zoneId];
-        if (cards.length === 0) return;
-        const card  = cards[0];
-        const dmg   = ptState[opp].damage[zoneId] || 0;
-        const stat  = ptState[opp].status;
-        const label = zoneId === 'active' ? '⭐ Active' : ('Bench ' + zoneId.slice(-1));
-        const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
-        const sSel = t => stat.includes(t) ? 'background:#e74c3c;color:#fff;' : 'background:rgba(255,255,255,0.1);color:#fff;';
-        const statusBtns = zoneId === 'active' ? `
-            <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">
-                <button onclick="toggleStatus('${opp}','poisoned');ptRenderOpponentPanel('${opp}')" style="${sSel('poisoned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Vergiftet">☠️</button>
-                <button onclick="toggleStatus('${opp}','burned');ptRenderOpponentPanel('${opp}')" style="${sSel('burned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verbrannt">🔥</button>
-                <button onclick="toggleStatus('${opp}','asleep');ptRenderOpponentPanel('${opp}')" style="${sSel('asleep')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Schlaf">💤</button>
-                <button onclick="toggleStatus('${opp}','paralyzed');ptRenderOpponentPanel('${opp}')" style="${sSel('paralyzed')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Paralyse">⚡</button>
-                <button onclick="toggleStatus('${opp}','confused');ptRenderOpponentPanel('${opp}')" style="${sSel('confused')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verwirrt">💫</button>
-            </div>` : '';
-        html += `<div style="background:rgba(255,255,255,0.07);border-radius:8px;padding:10px;margin-bottom:10px;">
-            <div style="display:flex;gap:10px;align-items:center;">
-                <img src="${safeImg}" style="width:64px;border-radius:6px;cursor:pointer;flex-shrink:0;" onerror="this.src='${CARD_BACK_URL}'" onclick="ptZoomViewCard('${safeImg}','${card.name}')">
-                <div style="flex:1;">
-                    <div style="font-weight:700;font-size:12px;margin-bottom:5px;color:#FFCB05;">${label}: ${card.name}</div>
-                    <div style="font-size:13px;font-weight:700;color:#ff6b6b;margin-bottom:6px;">💥 ${dmg} dmg</div>
-                    ${statusBtns}
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                        <button onclick="addDamage('${opp}','${zoneId}',10);ptRenderOpponentPanel('${opp}')" style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+10</button>
-                        <button onclick="addDamage('${opp}','${zoneId}',20);ptRenderOpponentPanel('${opp}')" style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+20</button>
-                        <button onclick="addDamage('${opp}','${zoneId}',30);ptRenderOpponentPanel('${opp}')" style="background:#e67e22;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+30</button>
-                        <button onclick="addDamage('${opp}','${zoneId}',50);ptRenderOpponentPanel('${opp}')" style="background:#c0392b;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;">+50</button>
-                        <button onclick="addDamage('${opp}','${zoneId}',100);ptRenderOpponentPanel('${opp}')" style="background:#922b21;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;">+100</button>
-                        <button onclick="clearDamage('${opp}','${zoneId}');ptRenderOpponentPanel('${opp}')" style="background:#2ecc71;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">Heal</button>
+    tab = tab || _ptOppTab || 'field';
+
+    if (tab === 'field') {
+        // ─ Field: all Pokémon with damage + status + zoom
+        const zones = ['active', 'bench0', 'bench1', 'bench2', 'bench3', 'bench4'];
+        let html = '';
+        zones.forEach(zoneId => {
+            const cards = ptState[opp].field[zoneId];
+            if (cards.length === 0) return;
+            const card  = cards[0];
+            const dmg   = ptState[opp].damage[zoneId] || 0;
+            const stat  = ptState[opp].status;
+            const label = zoneId === 'active' ? '⭐ Active' : ('Bank ' + (parseInt(zoneId.slice(-1)) + 1));
+            const safeImg = (card.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
+            const isFocus = _ptOppFocusZone === zoneId;
+            const sSel = t => stat.includes(t) ? 'background:#e74c3c;color:#fff;' : 'background:rgba(255,255,255,0.1);color:#fff;';
+            const statusBtns = zoneId === 'active' ? `
+                <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">
+                    <button onclick="toggleStatus('${opp}','poisoned');ptRenderOpponentPanel('${opp}','field')" style="${sSel('poisoned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Vergiftet">☠️</button>
+                    <button onclick="toggleStatus('${opp}','burned');ptRenderOpponentPanel('${opp}','field')" style="${sSel('burned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verbrannt">🔥</button>
+                    <button onclick="toggleStatus('${opp}','asleep');ptRenderOpponentPanel('${opp}','field')" style="${sSel('asleep')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Schlaf">💤</button>
+                    <button onclick="toggleStatus('${opp}','paralyzed');ptRenderOpponentPanel('${opp}','field')" style="${sSel('paralyzed')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Paralyse">⚡</button>
+                    <button onclick="toggleStatus('${opp}','confused');ptRenderOpponentPanel('${opp}','field')" style="${sSel('confused')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verwirrt">💫</button>
+                </div>` : '';
+            // Also show all attached cards (energy/tools)
+            const attachedHTML = cards.slice(1).map(ac => {
+                const ai = (ac.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
+                return `<img src="${ai}" style="width:38px;border-radius:4px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${ai}','${ac.name}')" title="${ac.name}">`;
+            }).join('');
+            html += `<div style="background:${isFocus ? 'rgba(231,76,60,0.18)' : 'rgba(255,255,255,0.05)'};border:${isFocus ? '2px solid #e74c3c' : '1px solid rgba(255,255,255,0.08)'};border-radius:10px;padding:12px;margin-bottom:10px;">
+                <div style="font-weight:700;font-size:11px;color:#FFCB05;margin-bottom:8px;">${label}</div>
+                <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <img src="${safeImg}" style="width:80px;border-radius:7px;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.5);"
+                         onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${safeImg}','${card.name}')" title="Klick zum Vergrößern">
+                    <div style="flex:1;">
+                        <div style="font-weight:700;font-size:12px;margin-bottom:4px;">${card.name}</div>
+                        <div style="font-size:16px;font-weight:900;color:#ff6b6b;margin-bottom:6px;">💥 ${dmg} Schaden</div>
+                        ${statusBtns}
+                        <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:5px;">
+                            <button onclick="addDamage('${opp}','${zoneId}',10);ptRenderOpponentPanel('${opp}','field')"  style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+10</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',20);ptRenderOpponentPanel('${opp}','field')"  style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+20</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',30);ptRenderOpponentPanel('${opp}','field')"  style="background:#e67e22;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+30</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',50);ptRenderOpponentPanel('${opp}','field')"  style="background:#c0392b;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;">+50</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',100);ptRenderOpponentPanel('${opp}','field')" style="background:#922b21;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;">+100</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',-10);ptRenderOpponentPanel('${opp}','field')" style="background:#27ae60;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">-10</button>
+                            <button onclick="clearDamage('${opp}','${zoneId}');ptRenderOpponentPanel('${opp}','field')"   style="background:#1a9e5b;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">💚 Heal</button>
+                        </div>
+                        ${attachedHTML ? `<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">${attachedHTML}</div>` : ''}
                     </div>
                 </div>
-            </div>
-        </div>`;
-    });
-    if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">Opponent has no Pokémon in play.</div>';
-    el.innerHTML = html;
+            </div>`;
+        });
+        if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">Keine Pokémon im Spiel.</div>';
+        el.innerHTML = html;
+
+    } else if (tab === 'discard') {
+        // ─ Discard pile (view-only, click to zoom)
+        const discard = ptState[opp].discard;
+        if (discard.length === 0) { el.innerHTML = '<div style="color:#aaa;text-align:center;padding:30px;">🗑️ Ablagestapel ist leer.</div>'; return; }
+        el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">` +
+            discard.map((c, i) => {
+                const si = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
+                return `<div style="position:relative;cursor:pointer;" title="${c.name}" onclick="ptViewCard('${si}','${c.name}')">
+                    <img src="${c.imageUrl || CARD_BACK_URL}" style="width:80px;border-radius:6px;display:block;" onerror="this.src='${CARD_BACK_URL}'">
+                    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;padding:2px 3px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
+                </div>`;
+            }).join('') + '</div>';
+
+    } else if (tab === 'lostzone') {
+        // ─ Lost zone (view-only, click to zoom)
+        const lz = ptState[opp].lostzone || [];
+        if (lz.length === 0) { el.innerHTML = '<div style="color:#aaa;text-align:center;padding:30px;">🌌 Lost Zone ist leer.</div>'; return; }
+        el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">` +
+            lz.map((c, i) => {
+                const si = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
+                return `<div style="position:relative;cursor:pointer;" title="${c.name}" onclick="ptViewCard('${si}','${c.name}')">
+                    <img src="${c.imageUrl || CARD_BACK_URL}" style="width:80px;border-radius:6px;display:block;filter:grayscale(0.5);" onerror="this.src='${CARD_BACK_URL}'">
+                    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(80,0,80,0.8);color:#fff;font-size:8px;padding:2px 3px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
+                </div>`;
+            }).join('') + '</div>';
+    }
 }
 
 // --- DISCARD / LOST ZONE MODALS ---

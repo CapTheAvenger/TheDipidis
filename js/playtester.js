@@ -1169,6 +1169,7 @@ function ptPassTurn() {
 
 let _ptDeckSearchPlayer = null;
 let _ptDeckSearchSort   = 'deck'; // 'deck' | 'type'
+let _ptDiscardSort      = 'order'; // 'order' | 'type' — for own discard modal
 
 function _ptDeckCardSortOrder(card) {
     // Actual DB type values: 'G Basic', 'N Stage 1', 'Supporter', 'Item', 'Tool', 'Stadium', 'Special Energy', 'Basic Energy'
@@ -1743,6 +1744,10 @@ function ptRenderOpponentPanel(opp, tab) {
                             <button onclick="addDamage('${opp}','${zoneId}',-10);ptRenderOpponentPanel('${opp}','field')" style="background:#27ae60;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">-10</button>
                             <button onclick="clearDamage('${opp}','${zoneId}');ptRenderOpponentPanel('${opp}','field')"   style="background:#1a9e5b;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">💚 Heal</button>
                         </div>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.08);">
+                            <button onclick="ptOppDiscardZone('${opp}','${zoneId}')" style="background:#7d3c98;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="Zone → Discard">🗑️ KO / Discard</button>
+                            ${zoneId !== 'active' ? `<button onclick="ptOppSetActive('${opp}','${zoneId}')" style="background:#1a5276;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="Als Active setzen">⭐ Active setzen</button>` : ''}
+                        </div>
                         ${attachedHTML ? `<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">${attachedHTML}</div>` : ''}
                     </div>
                 </div>
@@ -1781,16 +1786,57 @@ function ptRenderOpponentPanel(opp, tab) {
 
 // --- DISCARD / LOST ZONE MODALS ---
 
-function ptOpenDiscard(player) {
-    const title = document.getElementById('ptDiscardModalTitle');
-    if (title) title.textContent = `🗑️ Discard (${player.toUpperCase()}) – Click=Hand | Right-click=Lost Zone`;
+function _ptDiscardCardSortOrder(card) {
+    const t = (card.cardType || card.supertype || '').toLowerCase();
+    if (t === 'supporter')                              return 1;
+    if (t === 'item')                                   return 2;
+    if (t === 'tool')                                   return 3;
+    if (t === 'stadium')                                return 4;
+    if (t === 'special energy')                         return 5;
+    if (t === 'basic energy' || t.includes('energy'))   return 6;
+    return 0;
+}
+
+function _ptGetSortedDiscard(player) {
+    const cards = ptState[player].discard;
+    if (_ptDiscardSort === 'order') return cards.map((c, i) => ({ card: c, origIdx: i }));
+    return [...cards]
+        .map((c, i) => ({ card: c, origIdx: i }))
+        .sort((a, b) => {
+            const diff = _ptDiscardCardSortOrder(a.card) - _ptDiscardCardSortOrder(b.card);
+            return diff !== 0 ? diff : (a.card.name || '').localeCompare(b.card.name || '');
+        });
+}
+
+function ptSetDiscardSort(sort) {
+    _ptDiscardSort = sort;
+    const player = document.getElementById('ptDiscardModal')._ptPlayer;
+    if (player) _ptRefreshDiscardGrid(player);
+    const btnOrder = document.getElementById('ptDscSortOrder');
+    const btnType  = document.getElementById('ptDscSortType');
+    const on  = 'background:#2a52be;color:#fff;border-color:#3B4CCA;';
+    const off = 'background:#333;color:#ccc;border-color:#555;';
+    if (btnOrder) btnOrder.style.cssText += sort === 'order' ? on : off;
+    if (btnType)  btnType.style.cssText  += sort === 'type'  ? on : off;
+}
+
+function _ptRefreshDiscardGrid(player) {
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
-    if (ptState[player].discard.length === 0) { ptShowMessage('Discard pile is empty.'); return; }
-    grid.innerHTML = ptState[player].discard.map((c, i) => {
-        const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        const safeName = (c.name     || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        return `<div style="position:relative;cursor:pointer;" title="${c.name}">
+    const sorted = _ptGetSortedDiscard(player);
+    const groupLabels = ['🐾 Pokémon','🧑‍⚕️ Supporter','🧰 Item','🔧 Tool','🏟️ Stadion','✨ Special Energy','⚡ Basic Energy'];
+    let lastGroup = -1;
+    let html = '';
+    sorted.forEach(({ card: c, origIdx: i }) => {
+        const safeImg = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        if (_ptDiscardSort === 'type') {
+            const g = _ptDiscardCardSortOrder(c);
+            if (g !== lastGroup) {
+                lastGroup = g;
+                html += `<div style="width:100%;font-size:10px;font-weight:900;color:#FFCB05;padding:4px 0 2px 2px;">${groupLabels[g] || '🃏 Andere'}</div>`;
+            }
+        }
+        html += `<div style="position:relative;cursor:pointer;" title="${c.name}">
             <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;"
                  onerror="this.src='${CARD_BACK_URL}'"
                  onclick="ptRouteFromDiscard('${player}',${i},'hand')"
@@ -1800,8 +1846,29 @@ function ptOpenDiscard(player) {
                         color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;
                         overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
         </div>`;
-    }).join('');
-    document.getElementById('ptDiscardModal').style.display = 'flex';
+    });
+    grid.innerHTML = html;
+}
+
+function ptOpenDiscard(player) {
+    const title = document.getElementById('ptDiscardModalTitle');
+    if (title) title.textContent = `🗑️ Discard (${player.toUpperCase()}) – Klick=Hand | Rechtsklick=Lost Zone`;
+    if (!ptState[player] || ptState[player].discard.length === 0) { ptShowMessage('Discard pile is empty.'); return; }
+    // Inject sort toolbar
+    const sortBar = document.getElementById('ptDiscardSortBar');
+    if (sortBar) {
+        sortBar.style.display = 'flex';
+        const on  = ';background:#2a52be;color:#fff;border-color:#3B4CCA;';
+        const off = ';background:#333;color:#ccc;border-color:#555;';
+        const btnOrder = document.getElementById('ptDscSortOrder');
+        const btnType  = document.getElementById('ptDscSortType');
+        if (btnOrder) btnOrder.setAttribute('style', 'border:1px solid;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;' + (_ptDiscardSort === 'order' ? on : off));
+        if (btnType)  btnType.setAttribute('style',  'border:1px solid;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;' + (_ptDiscardSort === 'type'  ? on : off));
+    }
+    const modal = document.getElementById('ptDiscardModal');
+    modal._ptPlayer = player;
+    _ptRefreshDiscardGrid(player);
+    modal.style.display = 'flex';
 }
 
 function ptOpenLostZone(player) {
@@ -1809,6 +1876,8 @@ function ptOpenLostZone(player) {
     if (lz.length === 0) { ptShowMessage('Lost Zone is empty.'); return; }
     const title = document.getElementById('ptDiscardModalTitle');
     if (title) title.textContent = `🌌 Lost Zone (${player.toUpperCase()}) – Click = Return to hand`;
+    const sortBar = document.getElementById('ptDiscardSortBar');
+    if (sortBar) sortBar.style.display = 'none';
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
     grid.innerHTML = lz.map((c, i) => {
@@ -1824,6 +1893,40 @@ function ptOpenLostZone(player) {
         </div>`;
     }).join('');
     document.getElementById('ptDiscardModal').style.display = 'flex';
+}
+
+// --- OPP PANEL ACTIONS ---
+
+function ptOppDiscardZone(opp, zoneId) {
+    const cards = ptState[opp].field[zoneId];
+    if (!cards || cards.length === 0) return;
+    const count = cards.length;
+    // Move all cards in zone to opp discard
+    while (cards.length > 0) {
+        const c = cards.shift();
+        ptState[opp].discard.push(c);
+    }
+    ptState[opp].damage[zoneId] = 0;
+    ptLog(`🗑️ ${zoneId} (${opp}) → Discard (${count} Karten).`);
+    ptRenderAll();
+    ptRenderOpponentPanel(opp, 'field');
+}
+
+function ptOppSetActive(opp, zoneId) {
+    if (zoneId === 'active') return;
+    const activeCards = ptState[opp].field.active;
+    const benchCards  = ptState[opp].field[zoneId];
+    if (benchCards.length === 0) return;
+    // Swap: active ↔ bench
+    ptState[opp].field.active = benchCards;
+    ptState[opp].field[zoneId] = activeCards;
+    const dmgActive = ptState[opp].damage.active || 0;
+    const dmgBench  = ptState[opp].damage[zoneId] || 0;
+    ptState[opp].damage.active  = dmgBench;
+    ptState[opp].damage[zoneId] = dmgActive;
+    ptLog(`🔄 ${opp}: ${zoneId} wird neues Active-Pokémon.`);
+    ptRenderAll();
+    ptRenderOpponentPanel(opp, 'field');
 }
 
 function ptRouteFromDiscard(player, index, destination) {
@@ -2225,6 +2328,8 @@ function ptOpenZoneStack(player, zoneId) {
     const zoneLabel = zoneId.charAt(0).toUpperCase() + zoneId.slice(1);
     const title = document.getElementById('ptDiscardModalTitle');
     if (title) title.textContent = `🃏 ${zoneLabel} (${player.toUpperCase()}) – ${cards.length} Karten`;
+    const sortBar = document.getElementById('ptDiscardSortBar');
+    if (sortBar) sortBar.style.display = 'none';
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
     grid.innerHTML = cards.map((c, i) => {

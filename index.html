@@ -2472,9 +2472,14 @@
 
     <div id="ptDiscardModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.82); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDiscardModal()">
         <div style="background:#2a2a2a;border-radius:12px;padding:20px; max-width:90vw;max-height:85vh;overflow-y:auto;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
                 <h3 id="ptDiscardModalTitle" style="color:#fff;margin:0;">🗑️ Discard Pile</h3>
                 <button class="pt-btn pt-danger" onclick="ptCloseDiscardModal()">✕</button>
+            </div>
+            <div id="ptDiscardSortBar" style="display:none;align-items:center;gap:6px;margin-bottom:12px;">
+                <span style="font-size:11px;color:#aaa;">Sortierung:</span>
+                <button id="ptDscSortOrder" onclick="ptSetDiscardSort('order')" style="border:1px solid #3B4CCA;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#2a52be;color:#fff;">🃏 Reihenfolge</button>
+                <button id="ptDscSortType"  onclick="ptSetDiscardSort('type')"  style="border:1px solid #555;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#333;color:#ccc;">📋 Typ</button>
             </div>
             <div id="ptDiscardGrid" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
         </div>
@@ -2559,6 +2564,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v19"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260314-v58"></script>
+    <script src="js/playtester.js?v=20260314-v59"></script>
 </body>
 </html>

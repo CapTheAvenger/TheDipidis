@@ -241,8 +241,12 @@
         .pt-action-btn.red { background: #e74c3c; border-color: #c0392b; }
         .pt-action-btn:hover { background: #555; }
 
-        .pt-deck-pile { width: 45px; height: 63px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; background: repeating-linear-gradient(45deg, #1b3b8c, #1b3b8c 6px, #2a52be 6px, #2a52be 12px); border: 2px solid rgba(255,255,255,0.5); user-select: none; position: relative; z-index: 2;}
-        .pt-deck-pile:hover { transform: scale(1.05); border-color: #ffcb05; }
+        .pt-deck-pile { width: 45px; height: 63px; border-radius: 4px; cursor: default; display: flex; flex-direction: column; background: repeating-linear-gradient(45deg, #1b3b8c, #1b3b8c 6px, #2a52be 6px, #2a52be 12px); border: 2px solid rgba(255,255,255,0.5); user-select: none; position: relative; z-index: 2; overflow: hidden; }
+        .pt-deck-pile:hover { border-color: #ffcb05; }
+        .pt-deck-half { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; transition: background .12s; }
+        .pt-deck-top { border-bottom: 1px solid rgba(255,255,255,0.25); border-radius: 2px 2px 0 0; }
+        .pt-deck-bot { border-radius: 0 0 2px 2px; }
+        .pt-deck-half:hover { background: rgba(255,255,255,0.18); }
         .pt-prize-card { width: 28px; border-radius: 4px; cursor: pointer; display: block; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); transition: transform 0.15s; position: relative; z-index: 2;}
         .pt-prize-card:hover { transform: scale(1.15) translateY(-5px); border: 2px solid #ffcb05; z-index: 10;}
 
@@ -2123,7 +2127,10 @@
                             </div>
                             <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
-                                <div class="pt-deck-pile" onclick="ptDrawCards('p2', 1)">&#127136;</div>
+                                <div class="pt-deck-pile">
+                                    <div class="pt-deck-half pt-deck-top" onclick="ptDrawCards('p2', 1)" title="⬆️ Karte ziehen">⬆️</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="ptOpenDeckSearch('p2')" title="🔍 Deck durchsuchen">🔍</div>
+                                </div>
                                 <div class="pt-deck-controls">
                                     <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p2')">🔍 Search</button>
                                     <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p2')">🔀 Shuffle</button>
@@ -2204,7 +2211,10 @@
                             </div>
                             <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
-                                <div class="pt-deck-pile" onclick="ptDrawCards('p1', 1)">&#127136;</div>
+                                <div class="pt-deck-pile">
+                                    <div class="pt-deck-half pt-deck-top" onclick="ptDrawCards('p1', 1)" title="⬆️ Karte ziehen">⬆️</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="ptOpenDeckSearch('p1')" title="🔍 Deck durchsuchen">🔍</div>
+                                </div>
                                 <div class="pt-deck-controls">
                                     <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p1')">🔍 Search</button>
                                     <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p1')">🔀 Shuffle</button>
@@ -2400,13 +2410,19 @@
     </div>
 
     <div id="ptDeckSearchModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.85); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDeckSearch()">
-        <div style="background:#2a2a2a;border-radius:12px;padding:20px;max-width:90vw;width:800px;max-height:85vh;overflow-y:auto;border:2px solid #3B4CCA;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;">
-                <h3 style="color:#fff;margin:0;">&#128269; Search Deck</h3>
+        <div style="background:#2a2a2a;border-radius:12px;padding:20px;max-width:90vw;width:860px;max-height:90vh;overflow-y:auto;border:2px solid #3B4CCA;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
+                <h3 style="color:#fff;margin:0;">🔍 Deck durchsuchen</h3>
                 <div style="display:flex;gap:8px;align-items:center;">
-                    <span style="color:#aaa;font-size:12px;">Click = Hand &nbsp;|&nbsp; Right-Click = Lost Zone</span>
+                    <span style="color:#aaa;font-size:12px;">Klick = Hand | Rechtsklick = Lost Zone</span>
                     <button class="pt-btn pt-danger" onclick="ptCloseDeckSearch()">✕</button>
                 </div>
+            </div>
+            <!-- Sort toolbar -->
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+                <span style="color:#aaa;font-size:11px;flex-shrink:0;">Sortierung:</span>
+                <button id="ptDSortDeck" onclick="_ptSetDeckSort('deck')" style="padding:4px 10px;font-size:11px;border:1px solid #3B4CCA;border-radius:5px;cursor:pointer;background:#2a52be;color:#fff;">🃏 Deck-Reihenfolge</button>
+                <button id="ptDSortType" onclick="_ptSetDeckSort('type')" style="padding:4px 10px;font-size:11px;border:1px solid #555;border-radius:5px;cursor:pointer;background:#333;color:#ccc;">🏦 Pokémon → Supporter → Item → Tool → Stadion → Energie</button>
             </div>
             <div id="ptDeckSearchGrid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;"></div>
         </div>
@@ -2477,6 +2493,6 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="js/app.js?v=20260312-v19"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260313-v41"></script>
+    <script src="js/playtester.js?v=20260313-v42"></script>
 </body>
 </html>

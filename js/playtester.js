@@ -1162,13 +1162,69 @@ function ptPassTurn() {
 // --- DECK SEARCH ---
 
 let _ptDeckSearchPlayer = null;
+let _ptDeckSearchSort   = 'deck'; // 'deck' | 'type'
+
+function _ptDeckCardSortOrder(card) {
+    // Returns sort priority for TCG-standard type order
+    const t = (card.cardType || card.supertype || '').toLowerCase();
+    const n = (card.name || '').toLowerCase();
+    // Detect Pokémon: not trainer, not energy
+    if (!t.includes('trainer') && !t.includes('energy')) return 0; // Pokémon
+    if (t.includes('supporter'))                          return 1;
+    if (t.includes('item'))                               return 2;
+    if (t.includes('tool'))                               return 3;
+    if (t.includes('stadium'))                            return 4;
+    // Energy variants
+    if (t.includes('special') || n.includes('special'))  return 5; // Special Energy
+    if (t.includes('energy'))                             return 6; // Basic Energy
+    return 7; // fallback (generic Trainer)
+}
+
+function _ptSetDeckSort(sort) {
+    _ptDeckSearchSort = sort;
+    const btnDeck = document.getElementById('ptDSortDeck');
+    const btnType = document.getElementById('ptDSortType');
+    if (btnDeck) { btnDeck.style.background = sort === 'deck' ? '#2a52be' : '#333'; btnDeck.style.color = sort === 'deck' ? '#fff' : '#ccc'; btnDeck.style.borderColor = sort === 'deck' ? '#3B4CCA' : '#555'; }
+    if (btnType) { btnType.style.background = sort === 'type' ? '#2a52be' : '#333'; btnType.style.color = sort === 'type' ? '#fff' : '#ccc'; btnType.style.borderColor = sort === 'type' ? '#3B4CCA' : '#555'; }
+    _ptRefreshDeckSearchGrid();
+}
+
+function _ptGetSortedDeckCards(p) {
+    const deck = ptState[p].deck;
+    if (_ptDeckSearchSort === 'deck') {
+        // deck array: index 0 = bottom, last = top → reverse so top card is first in display
+        return [...deck].reverse();
+    }
+    // TCG type sort
+    return [...deck].sort((a, b) => {
+        const diff = _ptDeckCardSortOrder(a) - _ptDeckCardSortOrder(b);
+        return diff !== 0 ? diff : (a.name || '').localeCompare(b.name || '');
+    });
+}
 
 function _ptRefreshDeckSearchGrid() {
     const grid = document.getElementById('ptDeckSearchGrid');
     if (!grid) return;
     const p = _ptDeckSearchPlayer || ptCurrentPlayer;
+    const cards = _ptGetSortedDeckCards(p);
     grid.innerHTML = '';
-    [...ptState[p].deck].sort((a, b) => a.name.localeCompare(b.name)).forEach(card => {
+
+    // Group header label for type-sort
+    let lastGroup = -1;
+
+    cards.forEach(card => {
+        if (_ptDeckSearchSort === 'type') {
+            const group = _ptDeckCardSortOrder(card);
+            if (group !== lastGroup) {
+                lastGroup = group;
+                const groupLabel = ['🐾 Pokémon', '🧑‍⚕️ Supporter', '🧰 Item', '🔧 Tool', '🏟️ Stadion', '✨ Special Energy', '⚡ Basic Energy', '🃏 Trainer'][group] || '';
+                const sep = document.createElement('div');
+                sep.style.cssText = 'width:100%;text-align:left;color:#FFCB05;font-size:10px;font-weight:900;padding:4px 0 2px 2px;letter-spacing:.5px;';
+                sep.textContent = groupLabel;
+                grid.appendChild(sep);
+            }
+        }
+
         const wrap = document.createElement('div');
         wrap.style.cssText = 'position:relative;cursor:pointer;';
         wrap.title = card.name;
@@ -1178,8 +1234,9 @@ function _ptRefreshDeckSearchGrid() {
         img.className = 'pt-field-card';
         img.style.width = '100px';
         img.onerror = function() { this.src = CARD_BACK_URL; };
-        img.onclick = () => ptRouteFromDeck(card.ptId, 'hand');
-        img.oncontextmenu = e => { e.preventDefault(); ptRouteFromDeck(card.ptId, 'lost'); };
+        img.onclick       = () => ptRouteFromDeck(card.ptId, 'hand');
+        img.oncontextmenu = e  => { e.preventDefault(); ptRouteFromDeck(card.ptId, 'lost'); };
+        img.ondblclick    = e  => ptViewCard(img.src, card.name);
 
         const lbl = document.createElement('div');
         lbl.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 4px 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;';
@@ -1189,10 +1246,20 @@ function _ptRefreshDeckSearchGrid() {
         wrap.appendChild(lbl);
         grid.appendChild(wrap);
     });
+
+    if (cards.length === 0) {
+        grid.innerHTML = '<div style="color:#aaa;padding:20px;text-align:center;">Deck ist leer.</div>';
+    }
 }
 
 function ptOpenDeckSearch(player) {
     _ptDeckSearchPlayer = player || ptCurrentPlayer;
+    _ptDeckSearchSort   = 'deck'; // always open in deck order
+    // Reset sort button visuals
+    const btnDeck = document.getElementById('ptDSortDeck');
+    const btnType = document.getElementById('ptDSortType');
+    if (btnDeck) { btnDeck.style.background = '#2a52be'; btnDeck.style.color = '#fff'; btnDeck.style.borderColor = '#3B4CCA'; }
+    if (btnType) { btnType.style.background = '#333';    btnType.style.color = '#ccc'; btnType.style.borderColor = '#555'; }
     _ptRefreshDeckSearchGrid();
     document.getElementById('ptDeckSearchModal').style.display = 'flex';
 }

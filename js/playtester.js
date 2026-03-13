@@ -1165,6 +1165,38 @@ function ptPassTurn() {
     ptDraw1();
 }
 
+function ptOpenAttackView() {
+    const myActive  = ptState[ptCurrentPlayer].field.active;
+    const opp       = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+    const oppActive = ptState[opp].field.active;
+    // Find highest evolution Pokémon in stack
+    const _topPoke = cards => {
+        if (!cards || cards.length === 0) return null;
+        return [...cards].reverse().find(c => {
+            const ct = (c.cardType || '').toLowerCase();
+            return !ct.includes('energy') && !ct.includes('trainer') && ct !== 'tool';
+        }) || cards[0];
+    };
+    const myCard  = _topPoke(myActive);
+    const oppCard = _topPoke(oppActive);
+    const myImg   = document.getElementById('ptAttackMyImg');
+    const myName  = document.getElementById('ptAttackMyName');
+    const oppImg  = document.getElementById('ptAttackOppImg');
+    const oppName = document.getElementById('ptAttackOppName');
+    if (myImg)  myImg.src  = myCard  ? (myCard.imageUrl  || CARD_BACK_URL) : CARD_BACK_URL;
+    if (myName) myName.textContent  = myCard  ? (myCard.name  || '') : '(leer)';
+    if (oppImg) oppImg.src = oppCard ? (oppCard.imageUrl || CARD_BACK_URL) : CARD_BACK_URL;
+    if (oppName) oppName.textContent = oppCard ? (oppCard.name || '') : '(leer)';
+    const modal = document.getElementById('ptAttackModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function ptCloseAttackView() {
+    const modal = document.getElementById('ptAttackModal');
+    if (modal) modal.style.display = 'none';
+    ptPassTurn();
+}
+
 // --- DECK SEARCH ---
 
 let _ptDeckSearchPlayer = null;

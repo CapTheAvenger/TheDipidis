@@ -43,9 +43,13 @@ function signInWithGoogle() {
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   if (isIOS) {
-    // iOS WebKit (Safari + Chrome on iOS) — popup is broken, always use redirect.
-    // LOCAL persistence is already set globally in firebase-config.js.
-    firebase.auth().signInWithRedirect(provider);
+    // iOS WebKit: always use redirect. Wrap in try-catch to surface exact error.
+    try {
+      firebase.auth().signInWithRedirect(provider);
+    } catch(e) {
+      showNotification('iOS Redirect Fehler: ' + e.message + ' [' + e.code + ']', 'error');
+      console.error('signInWithRedirect threw synchronously:', e);
+    }
     return;
   }
 

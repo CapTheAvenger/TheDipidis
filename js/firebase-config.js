@@ -22,10 +22,6 @@ if (!firebase.apps.length) {
   });
 }
 
-// Set LOCAL persistence globally so auth state survives page navigation
-// (required for signInWithRedirect on iOS — sessionStorage is cleared on redirect).
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function() {});
-
 // Auth state observer — handlers are defined in firebase-globals.js.
 firebase.auth().onAuthStateChanged(function(user) {
   if (user) {

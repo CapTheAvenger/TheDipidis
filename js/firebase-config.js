@@ -11,7 +11,7 @@
 // Avoid declaring `const firebaseConfig` — the credentials file (written by
 // GitHub Actions secret) may already declare it, causing a SyntaxError.
 if (!firebase.apps.length) {
-  firebase.initializeApp(window.FIREBASE_CREDS || {
+  const _creds = Object.assign({}, window.FIREBASE_CREDS || {
     apiKey: "PLACEHOLDER_API_KEY",
     authDomain: "PLACEHOLDER_AUTHDOMAIN",
     projectId: "PLACEHOLDER_PROJECT_ID",
@@ -20,6 +20,15 @@ if (!firebase.apps.length) {
     appId: "PLACEHOLDER_APP_ID",
     measurementId: "PLACEHOLDER_MEASUREMENT_ID"
   });
+  // Override authDomain to the actual serving domain.
+  // This is required for iOS Safari/Chrome — otherwise Firebase redirects
+  // through firebaseapp.com which iOS blocks (ITP cross-origin session loss).
+  // NOTE: requires https://[hostname]/__/auth/handler to be registered in
+  // Google Cloud Console → OAuth 2.0 Client → Authorized redirect URIs.
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    _creds.authDomain = window.location.hostname;
+  }
+  firebase.initializeApp(_creds);
 }
 
 // Auth state observer — handlers are defined in firebase-globals.js.

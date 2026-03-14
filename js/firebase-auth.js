@@ -43,8 +43,17 @@ function signInWithGoogle() {
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   if (isIOS) {
-    // iOS WebKit (Safari, Chrome, Firefox on iOS) — must use redirect
-    firebase.auth().signInWithRedirect(provider);
+    // iOS WebKit: sessionStorage is cleared on cross-origin redirect (ITP).
+    // Switch to LOCAL persistence (localStorage) before redirect so Firebase
+    // can recover the pending-redirect state when the page reloads.
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(function() {
+        return firebase.auth().signInWithRedirect(provider);
+      })
+      .catch(function(err) {
+        console.error('Persistence/redirect error:', err.code, err.message);
+        showNotification('Login Fehler: ' + err.code, 'error');
+      });
     return;
   }
 

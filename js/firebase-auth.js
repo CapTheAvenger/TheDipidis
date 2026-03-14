@@ -31,10 +31,29 @@ async function signIn(email, password) {
   }
 }
 
-// Sign in with Google (redirect — works reliably on all mobile browsers)
-function signInWithGoogle() {
+// Sign in with Google
+// Strategy: popup first (direct user gesture — works on Safari native),
+// fall back to redirect if popup is blocked (in-app browsers).
+async function signInWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithRedirect(provider);
+  try {
+    const result = await firebase.auth().signInWithPopup(provider);
+    console.log('✓ Google popup sign-in:', result.user.email);
+    showNotification('Signed in with Google!', 'success');
+  } catch (err) {
+    if (
+      err.code === 'auth/popup-blocked' ||
+      err.code === 'auth/popup-closed-by-user' ||
+      err.code === 'auth/cancelled-popup-request'
+    ) {
+      // Popup was suppressed → use redirect (Instagram/Facebook in-app browsers)
+      console.log('Popup blocked, falling back to redirect…');
+      firebase.auth().signInWithRedirect(provider);
+    } else {
+      console.error('Google sign in error:', err.code, err.message);
+      showNotification(getErrorMessage(err.code) + ' (' + err.code + ')', 'error');
+    }
+  }
 }
 
 // Sign out
@@ -165,8 +184,9 @@ firebase.auth().getRedirectResult().then((result) => {
   }
 }).catch((error) => {
   if (error.code && error.code !== 'auth/no-auth-event') {
-    console.error('Google redirect error:', error);
-    showNotification(getErrorMessage(error.code), 'error');
+    console.error('Google redirect error:', error.code, error.message);
+    // Show visible error so user knows what went wrong
+    showNotification('Google Login Fehler: ' + error.code, 'error');
   }
 });
 

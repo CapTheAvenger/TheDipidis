@@ -56,7 +56,7 @@ function signInWithGoogle() {
     alert('[DEBUG v13] isIOS=true, starting redirect now...');
     firebase.auth().signInWithRedirect(provider)
       .catch(function(e) {
-        alert('[DEBUG] Redirect error: ' + (e.code || '?') + ' | ' + e.message);
+        alert('[DEBUG] code=' + JSON.stringify(e.code) + '\nmessage=' + e.message + '\nname=' + e.name);
       });
     return;
   }

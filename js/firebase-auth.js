@@ -43,17 +43,20 @@ function signInWithGoogle() {
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   if (isIOS) {
-    // Check if Firebase credentials are properly injected (not placeholder)
-    const _creds = window.FIREBASE_CREDS || {};
-    if (!_creds.apiKey || _creds.apiKey === 'PLACEHOLDER_API_KEY') {
-      showNotification('Firebase Config fehlt – bitte GitHub Actions prüfen', 'error');
-      return;
-    }
+    // Clear any stale Firebase redirect state from localStorage
+    // (corrupted state causes "The Request action is invalid" on every page load)
+    try {
+      Object.keys(localStorage).forEach(function(key) {
+        if (key.startsWith('firebase:') || key.startsWith('firebaseui:')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch(ignore) {}
+
+    alert('[DEBUG v13] isIOS=true, starting redirect now...');
     firebase.auth().signInWithRedirect(provider)
       .catch(function(e) {
-        // Catch the async Promise rejection — this shows the REAL error
-        showNotification('Redirect Fehler: [' + (e.code || '?') + '] ' + e.message, 'error');
-        console.error('signInWithRedirect rejected:', e.code, e.message, e);
+        alert('[DEBUG] Redirect error: ' + (e.code || '?') + ' | ' + e.message);
       });
     return;
   }
@@ -71,8 +74,7 @@ function signInWithGoogle() {
       ) {
         firebase.auth().signInWithRedirect(provider);
       } else {
-        console.error('Google sign in error:', err.code, err.message);
-        showNotification('Google Login Fehler: ' + err.code, 'error');
+        alert('[DEBUG] Popup error: ' + err.code + ' | ' + err.message);
       }
     });
 }

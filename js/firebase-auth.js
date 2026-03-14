@@ -43,17 +43,9 @@ function signInWithGoogle() {
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   if (isIOS) {
-    // iOS WebKit: sessionStorage is cleared on cross-origin redirect (ITP).
-    // Switch to LOCAL persistence (localStorage) before redirect so Firebase
-    // can recover the pending-redirect state when the page reloads.
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-      .then(function() {
-        return firebase.auth().signInWithRedirect(provider);
-      })
-      .catch(function(err) {
-        console.error('Persistence/redirect error:', err.code, err.message);
-        showNotification('Login Fehler: ' + err.code, 'error');
-      });
+    // iOS WebKit (Safari + Chrome on iOS) — popup is broken, always use redirect.
+    // LOCAL persistence is already set globally in firebase-config.js.
+    firebase.auth().signInWithRedirect(provider);
     return;
   }
 
@@ -196,18 +188,18 @@ function setupAuthForms() {
   }
 }
 
-// Handle redirect result after Google sign-in returns
-firebase.auth().getRedirectResult().then((result) => {
+// Handle redirect result after Google sign-in returns.
+// Suppress ALL errors here — onAuthStateChanged handles the login state.
+// "The Request action is invalid" and similar errors from getRedirectResult
+// are informational-only on non-Firebase-Hosting domains and can be ignored.
+firebase.auth().getRedirectResult().then(function(result) {
   if (result && result.user) {
     console.log('✓ Google redirect sign-in:', result.user.email);
     showNotification('Signed in with Google!', 'success');
   }
-}).catch((error) => {
-  if (error.code && error.code !== 'auth/no-auth-event') {
-    console.error('Google redirect error:', error.code, error.message);
-    // Show visible error so user knows what went wrong
-    showNotification('Google Login Fehler: ' + error.code, 'error');
-  }
+}).catch(function(error) {
+  // Log only — do not show to user. Auth state is handled by onAuthStateChanged.
+  console.log('getRedirectResult error (ignorable):', error.code, error.message);
 });
 
 // Initialize auth forms when DOM is ready

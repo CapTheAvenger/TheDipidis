@@ -32,28 +32,32 @@ async function signIn(email, password) {
 }
 
 // Sign in with Google
-// Strategy: popup first (direct user gesture — works on Safari native),
-// fall back to redirect if popup is blocked (in-app browsers).
-async function signInWithGoogle() {
+// IMPORTANT: Must NOT be async — iOS Safari breaks the "user gesture" context
+// inside async functions, causing signInWithPopup to be silently blocked.
+// Using .then()/.catch() keeps the popup call synchronous in the click handler.
+function signInWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  try {
-    const result = await firebase.auth().signInWithPopup(provider);
-    console.log('✓ Google popup sign-in:', result.user.email);
-    showNotification('Signed in with Google!', 'success');
-  } catch (err) {
-    if (
-      err.code === 'auth/popup-blocked' ||
-      err.code === 'auth/popup-closed-by-user' ||
-      err.code === 'auth/cancelled-popup-request'
-    ) {
-      // Popup was suppressed → use redirect (Instagram/Facebook in-app browsers)
-      console.log('Popup blocked, falling back to redirect…');
-      firebase.auth().signInWithRedirect(provider);
-    } else {
-      console.error('Google sign in error:', err.code, err.message);
-      showNotification(getErrorMessage(err.code) + ' (' + err.code + ')', 'error');
-    }
-  }
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  firebase.auth().signInWithPopup(provider)
+    .then(function(result) {
+      console.log('✓ Google popup sign-in:', result.user.email);
+      showNotification('Signed in with Google!', 'success');
+    })
+    .catch(function(err) {
+      if (
+        err.code === 'auth/popup-blocked' ||
+        err.code === 'auth/popup-closed-by-user' ||
+        err.code === 'auth/cancelled-popup-request'
+      ) {
+        // Popup suppressed (in-app browser) → redirect fallback
+        console.log('Popup blocked, falling back to redirect…');
+        firebase.auth().signInWithRedirect(provider);
+      } else {
+        console.error('Google sign in error:', err.code, err.message);
+        showNotification('Google Login Fehler: ' + err.code, 'error');
+      }
+    });
 }
 
 // Sign out

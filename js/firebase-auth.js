@@ -43,13 +43,18 @@ function signInWithGoogle() {
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   if (isIOS) {
-    // iOS WebKit: always use redirect. Wrap in try-catch to surface exact error.
-    try {
-      firebase.auth().signInWithRedirect(provider);
-    } catch(e) {
-      showNotification('iOS Redirect Fehler: ' + e.message + ' [' + e.code + ']', 'error');
-      console.error('signInWithRedirect threw synchronously:', e);
+    // Check if Firebase credentials are properly injected (not placeholder)
+    const _creds = window.FIREBASE_CREDS || {};
+    if (!_creds.apiKey || _creds.apiKey === 'PLACEHOLDER_API_KEY') {
+      showNotification('Firebase Config fehlt – bitte GitHub Actions prüfen', 'error');
+      return;
     }
+    firebase.auth().signInWithRedirect(provider)
+      .catch(function(e) {
+        // Catch the async Promise rejection — this shows the REAL error
+        showNotification('Redirect Fehler: [' + (e.code || '?') + '] ' + e.message, 'error');
+        console.error('signInWithRedirect rejected:', e.code, e.message, e);
+      });
     return;
   }
 

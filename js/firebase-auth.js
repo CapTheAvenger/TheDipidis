@@ -32,51 +32,40 @@ async function signIn(email, password) {
 }
 
 // Sign in with Google
-// iOS Chrome + Safari (WebKit) do NOT support signInWithPopup reliably —
-// they throw "The Request action is invalid" consistently.
-// Solution: always use redirect on iOS, popup everywhere else.
+// Uses Google Identity Services (GIS) OAuth2 token flow.
+// This avoids Firebase's signInWithRedirect which redirects to thedipidis.firebaseapp.com —
+// a cross-origin domain that iOS ITP blocks from reading the redirect state, causing
+// "The requested action is invalid" on every iOS device.
+// GIS opens a direct Google-hosted popup (no firebaseapp.com involved at all).
 function signInWithGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: 'select_account' });
-
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-  if (isIOS) {
-    // Clear any stale Firebase redirect state from localStorage
-    // (corrupted state causes "The Request action is invalid" on every page load)
-    try {
-      Object.keys(localStorage).forEach(function(key) {
-        if (key.startsWith('firebase:') || key.startsWith('firebaseui:')) {
-          localStorage.removeItem(key);
-        }
-      });
-    } catch(ignore) {}
-
-    alert('[DEBUG v13] isIOS=true, starting redirect now...');
-    firebase.auth().signInWithRedirect(provider)
-      .catch(function(e) {
-        alert('[DEBUG] code=' + JSON.stringify(e.code) + '\nmessage=' + e.message + '\nname=' + e.name);
-      });
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+    showNotification('Google Sign-In nicht verfügbar. Bitte Seite neu laden.', 'error');
     return;
   }
 
-  firebase.auth().signInWithPopup(provider)
-    .then(function(result) {
-      console.log('✓ Google popup sign-in:', result.user.email);
-      showNotification('Signed in with Google!', 'success');
-    })
-    .catch(function(err) {
-      if (
-        err.code === 'auth/popup-blocked' ||
-        err.code === 'auth/popup-closed-by-user' ||
-        err.code === 'auth/cancelled-popup-request'
-      ) {
-        firebase.auth().signInWithRedirect(provider);
-      } else {
-        alert('[DEBUG] Popup error: ' + err.code + ' | ' + err.message);
+  var tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: '539389580350-teldg43gkk994q8tnhd2b86ibevb6403.apps.googleusercontent.com',
+    scope: 'email profile',
+    callback: function(response) {
+      if (response.error) {
+        console.error('Google OAuth error:', response.error);
+        showNotification('Google Sign-In fehlgeschlagen: ' + response.error, 'error');
+        return;
       }
-    });
+      var credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
+      firebase.auth().signInWithCredential(credential)
+        .then(function(result) {
+          console.log('✓ Google sign-in:', result.user.email);
+          showNotification('Mit Google angemeldet!', 'success');
+        })
+        .catch(function(err) {
+          console.error('Firebase credential error:', err);
+          showNotification(getErrorMessage(err.code), 'error');
+        });
+    }
+  });
+
+  tokenClient.requestAccessToken({ prompt: 'select_account' });
 }
 
 // Sign out
@@ -198,20 +187,6 @@ function setupAuthForms() {
     });
   }
 }
-
-// Handle redirect result after Google sign-in returns.
-// Suppress ALL errors here — onAuthStateChanged handles the login state.
-// "The Request action is invalid" and similar errors from getRedirectResult
-// are informational-only on non-Firebase-Hosting domains and can be ignored.
-firebase.auth().getRedirectResult().then(function(result) {
-  if (result && result.user) {
-    console.log('✓ Google redirect sign-in:', result.user.email);
-    showNotification('Signed in with Google!', 'success');
-  }
-}).catch(function(error) {
-  // Log only — do not show to user. Auth state is handled by onAuthStateChanged.
-  console.log('getRedirectResult error (ignorable):', error.code, error.message);
-});
 
 // Initialize auth forms when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {

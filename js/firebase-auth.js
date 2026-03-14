@@ -31,19 +31,10 @@ async function signIn(email, password) {
   }
 }
 
-// Sign in with Google
-async function signInWithGoogle() {
-  try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await firebase.auth().signInWithPopup(provider);
-    console.log('✓ User signed in with Google:', result.user.email);
-    showNotification('Signed in with Google!', 'success');
-    return result.user;
-  } catch (error) {
-    console.error('Google sign in error:', error);
-    showNotification(getErrorMessage(error.code), 'error');
-    throw error;
-  }
+// Sign in with Google (redirect — works reliably on all mobile browsers)
+function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithRedirect(provider);
 }
 
 // Sign out
@@ -165,6 +156,19 @@ function setupAuthForms() {
     });
   }
 }
+
+// Handle redirect result after Google sign-in returns
+firebase.auth().getRedirectResult().then((result) => {
+  if (result && result.user) {
+    console.log('✓ Google redirect sign-in:', result.user.email);
+    showNotification('Signed in with Google!', 'success');
+  }
+}).catch((error) => {
+  if (error.code && error.code !== 'auth/no-auth-event') {
+    console.error('Google redirect error:', error);
+    showNotification(getErrorMessage(error.code), 'error');
+  }
+});
 
 // Initialize auth forms when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {

@@ -32,12 +32,21 @@ async function signIn(email, password) {
 }
 
 // Sign in with Google
-// IMPORTANT: Must NOT be async — iOS Safari breaks the "user gesture" context
-// inside async functions, causing signInWithPopup to be silently blocked.
-// Using .then()/.catch() keeps the popup call synchronous in the click handler.
+// iOS Chrome + Safari (WebKit) do NOT support signInWithPopup reliably —
+// they throw "The Request action is invalid" consistently.
+// Solution: always use redirect on iOS, popup everywhere else.
 function signInWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if (isIOS) {
+    // iOS WebKit (Safari, Chrome, Firefox on iOS) — must use redirect
+    firebase.auth().signInWithRedirect(provider);
+    return;
+  }
 
   firebase.auth().signInWithPopup(provider)
     .then(function(result) {
@@ -50,8 +59,6 @@ function signInWithGoogle() {
         err.code === 'auth/popup-closed-by-user' ||
         err.code === 'auth/cancelled-popup-request'
       ) {
-        // Popup suppressed (in-app browser) → redirect fallback
-        console.log('Popup blocked, falling back to redirect…');
         firebase.auth().signInWithRedirect(provider);
       } else {
         console.error('Google sign in error:', err.code, err.message);

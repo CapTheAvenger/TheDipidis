@@ -3365,13 +3365,10 @@ const BASE_PATH = './data/';
             // CRITICAL FIX: Only set if not already present (take first occurrence)
             const tournamentDecksMap = new Map();
             filteredCards.forEach(row => {
-                if (row.tournament_date) {
-                    const date = row.tournament_date;
-                    const decksInTournament = parseInt(row.total_decks_in_archetype || 0);
-                    // Only add if date not yet tracked (avoid overwriting with same value multiple times)
-                    if (!tournamentDecksMap.has(date)) {
-                        tournamentDecksMap.set(date, decksInTournament);
-                    }
+                const tournamentKey = `${row.tournament_id || ''}|||${row.tournament_date || ''}`;
+                const decksInTournament = parseInt(row.total_decks_in_archetype || 0, 10) || 0;
+                if (!tournamentDecksMap.has(tournamentKey)) {
+                    tournamentDecksMap.set(tournamentKey, decksInTournament);
                 }
             });
             
@@ -3403,7 +3400,8 @@ const BASE_PATH = './data/';
                         maxCountValues: [],
                         deckCounts: 0,
                         tournamentsWithCard: new Set(),
-                        tournamentDeckCountsWithCard: new Map()
+                        tournamentDeckCountsWithCard: new Map(),
+                        deckCountByTournament: new Map()
                     });
                 } else {
                     const cardData = cardMap.get(cardName);
@@ -3423,14 +3421,17 @@ const BASE_PATH = './data/';
                 if (maxCount > 0) {
                     cardData.maxCountValues.push(maxCount);
                 }
-                cardData.deckCounts += parseInt(row.deck_count || row.deck_inclusion_count || 0, 10) || 0;
+                const rowDeckCount = parseInt(row.deck_count || row.deck_inclusion_count || 0, 10) || 0;
+                const tournamentKey = `${row.tournament_id || ''}|||${row.tournament_date || ''}`;
+                cardData.deckCountByTournament.set(
+                    tournamentKey,
+                    (cardData.deckCountByTournament.get(tournamentKey) || 0) + rowDeckCount
+                );
                 
-                if (row.tournament_date) {
-                    cardData.tournamentsWithCard.add(row.tournament_date);
-                    // Track deck count for each tournament where this card appeared
-                    const decksInTournament = parseInt(row.total_decks_in_archetype || 0);
-                    cardData.tournamentDeckCountsWithCard.set(row.tournament_date, decksInTournament);
-                }
+                cardData.tournamentsWithCard.add(tournamentKey);
+                // Track deck count for each tournament where this card appeared
+                const decksInTournament = parseInt(row.total_decks_in_archetype || 0, 10) || 0;
+                cardData.tournamentDeckCountsWithCard.set(tournamentKey, decksInTournament);
             });
             
             // Create aggregated result
@@ -3450,25 +3451,39 @@ const BASE_PATH = './data/';
                         countFreq[a] > countFreq[b] ? a : b
                     ));
                 }
+
+                // Recalculate deckCounts per tournament with cap (prevents split-print double counting).
+                let deckCounts = 0;
+                data.deckCountByTournament.forEach((sumDeckCount, tournamentKey) => {
+                    const decksInTournament = data.tournamentDeckCountsWithCard.get(tournamentKey) || 0;
+                    const bounded = decksInTournament > 0 ? Math.min(sumDeckCount, decksInTournament) : sumDeckCount;
+                    deckCounts += bounded;
+                });
+
+                // Single-deck selection: max_count must equal full card copies in that deck (including mixed prints).
+                if (totalDecks === 1) {
+                    max_count = Math.round(data.totalCount);
+                    deckCounts = deckCounts > 0 ? 1 : 0;
+                }
                 
                 // Calculate percentage based on actual deck counts
                 // data.deckCounts is the sum of deck_count values (number of decks containing this card)
                 // totalDecks is the sum of total_decks_in_archetype values (total number of decks in all tournaments)
                 // Cap at 100 to prevent > 100% values from data anomalies
-                const percentage = totalDecks > 0 ? Math.min(100, (data.deckCounts / totalDecks * 100)) : 0;
+                const percentage = totalDecks > 0 ? Math.min(100, (deckCounts / totalDecks * 100)) : 0;
                 
                 // Calculate averages.
                 // average_count = average copies in decks that actually use the card.
                 // average_count_overall = average copies across all decks in the archetype.
-                const avgCountWhenUsed = data.deckCounts > 0 ? (data.totalCount / data.deckCounts) : 0;
+                const avgCountWhenUsed = deckCounts > 0 ? (data.totalCount / deckCounts) : 0;
                 const avgCountOverall = totalDecks > 0 ? (data.totalCount / totalDecks) : 0;
                 
                 // Update row and preserve important fields from sampleRow
                 row.total_count = data.totalCount;
                 row.max_count = max_count;
-                row.deck_count = data.deckCounts;
-                row.deck_inclusion_count = data.deckCounts;
-                row.deck_count_in_selected = data.deckCounts; // Number of decks containing this card
+                row.deck_count = deckCounts;
+                row.deck_inclusion_count = deckCounts;
+                row.deck_count_in_selected = deckCounts; // Number of decks containing this card
                 row.total_decks_in_archetype = totalDecks;
                 row.percentage_in_archetype = percentage.toFixed(1);
                 row.avg_count = avgCountWhenUsed.toFixed(2);
@@ -9293,6 +9308,7 @@ const BASE_PATH = './data/';
                 deck.cards.forEach(card => {
                     selectedRows.push({
                         ...card,
+                        tournament_id: deck.tournament_id || '',
                         tournament_date: deck.tournament_date || card.tournament_date || 'Unknown Date',
                         total_decks_in_archetype: deck.decklist_count || card.total_decks_in_archetype || 1,
                         deck_count: card.deck_count || card.deck_inclusion_count || 0,

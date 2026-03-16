@@ -1,0 +1,148 @@
+/**
+ * Firebase Globals
+ * ================
+ * Runs after firebase-config.js. Exposes auth/db as globals and defines all
+ * Firebase-related logic functions. This file is NEVER overwritten by CI.
+ *
+ * Script load order:
+ *   firebase-credentials.js  → sets window.FIREBASE_CREDS
+ *   firebase-collection.js   → collection/wishlist CRUD
+ *   firebase-config.js       → initializeApp + onAuthStateChanged
+ *   firebase-globals.js      → this file (window.auth, window.db, all handlers)
+ *   firebase-auth.js         → signIn/signUp/signOut helpers
+ */
+
+window.auth = firebase.auth();
+window.db   = firebase.firestore();
+
+if (!window.userDecks)      window.userDecks      = [];
+if (!window.userCollection) window.userCollection  = new Set();
+if (!window.userWishlist)   window.userWishlist    = new Set();
+
+// ---------------------------------------------------------------------------
+// Auth state handlers
+// ---------------------------------------------------------------------------
+
+function onUserSignedIn(user) {
+  const authPrompt     = document.getElementById('profile-auth-prompt');
+  const profileContent = document.getElementById('profile-content');
+  if (authPrompt)     authPrompt.style.display     = 'none';
+  if (profileContent) profileContent.style.display  = 'block';
+
+  // Show name/email immediately from Auth (no Firestore round-trip needed)
+  const nameEl = document.getElementById('profile-user-name');
+  if (nameEl) nameEl.textContent = user.displayName || user.email || 'User';
+
+  const userBtn = document.querySelector('.user-btn');
+  if (userBtn) {
+    userBtn.textContent = '👤 Profile';
+    userBtn.onclick = () => openTab('profile');
+  }
+
+  window.userCollection = new Set();
+  window.userWishlist   = new Set();
+  window.userDecks      = [];
+
+  loadUserProfile(user.uid);
+  loadUserCollection(user.uid);
+  loadUserDecks(user.uid);
+  loadUserWishlist(user.uid);
+}
+
+function onUserSignedOut() {
+  const authPrompt     = document.getElementById('profile-auth-prompt');
+  const profileContent = document.getElementById('profile-content');
+  if (authPrompt)     authPrompt.style.display     = 'block';
+  if (profileContent) profileContent.style.display  = 'none';
+
+  const userBtn = document.querySelector('.user-btn');
+  if (userBtn) {
+    userBtn.innerHTML = '<img src="images/pokeball-icon.png" alt="" style="width:20px;height:20px;margin-right:5px;vertical-align:middle;">Sign In';
+    userBtn.onclick = () => showAuthModal('signin');
+  }
+  clearUserData();
+}
+
+// ---------------------------------------------------------------------------
+// Firestore data loaders
+// ---------------------------------------------------------------------------
+
+async function loadUserProfile(userId) {
+  try {
+    const doc = await window.db.collection('users').doc(userId).get();
+    if (doc.exists) {
+      const profile = doc.data();
+      window.userProfile = profile;
+      if (typeof updateProfileUI === 'function') updateProfileUI(profile);
+    } else {
+      await createUserProfile(userId);
+    }
+  } catch (error) {
+    console.error('Error loading profile:', error);
+    const user = window.auth.currentUser;
+    if (user && typeof updateProfileUI === 'function') {
+      updateProfileUI({ displayName: user.displayName || user.email || 'User', createdAt: null });
+    }
+  }
+}
+
+async function createUserProfile(userId) {
+  const user = window.auth.currentUser;
+  const newProfile = {
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    displayName: user?.displayName || user?.email || 'Anonymous',
+    collection: [],
+    decks: [],
+    wishlist: [],
+    settings: { currency: 'EUR', language: 'en' }
+  };
+  try {
+    await window.db.collection('users').doc(userId).set(newProfile);
+  } catch (error) {
+    console.error('Error creating profile:', error);
+  }
+  window.userProfile = newProfile;
+  if (typeof updateProfileUI === 'function') updateProfileUI(newProfile);
+}
+
+async function loadUserCollection(userId) {
+  try {
+    const doc = await window.db.collection('users').doc(userId).get();
+    if (doc.exists) {
+      window.userCollection = new Set(doc.data().collection || []);
+      if (typeof updateCollectionUI === 'function') updateCollectionUI();
+    }
+  } catch (error) {
+    console.error('Error loading collection:', error);
+  }
+}
+
+async function loadUserWishlist(userId) {
+  try {
+    const doc = await window.db.collection('users').doc(userId).get();
+    if (doc.exists) {
+      window.userWishlist = new Set(doc.data().wishlist || []);
+      if (typeof updateWishlistUI === 'function') updateWishlistUI();
+    }
+  } catch (error) {
+    console.error('Error loading wishlist:', error);
+  }
+}
+
+async function loadUserDecks(userId) {
+  try {
+    const snapshot = await window.db.collection('users').doc(userId).collection('decks').get();
+    window.userDecks = [];
+    snapshot.forEach(doc => window.userDecks.push({ id: doc.id, ...doc.data() }));
+    if (typeof updateDecksUI === 'function') updateDecksUI();
+  } catch (error) {
+    console.error('Error loading decks:', error);
+  }
+}
+
+function clearUserData() {
+  window.userProfile    = null;
+  window.userCollection = new Set();
+  window.userWishlist   = new Set();
+  window.userDecks      = [];
+}

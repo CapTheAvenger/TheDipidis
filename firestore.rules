@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ══════════════════════════════════════════════════════════════════════
+    // MULTIPLAYER PLAYTESTER GAMES
+    // ══════════════════════════════════════════════════════════════════════
+    
+    match /games/{gameId} {
+      
+      // ✅ CREATE: Jeder eingeloggte User kann ein Spiel erstellen
+      allow create: if request.auth != null 
+        && request.resource.data.host == request.auth.uid
+        && request.resource.data.status == 'waiting';
+      
+      // ✅ READ: Nur Host & Guest dürfen das Spiel lesen
+      allow read: if request.auth != null 
+        && (request.auth.uid == resource.data.host 
+            || request.auth.uid == resource.data.guest);
+      
+      // ✅ UPDATE: Nur Host & Guest dürfen updaten
+      allow update: if request.auth != null 
+        && (request.auth.uid == resource.data.host 
+            || request.auth.uid == resource.data.guest)
+        // Verhindere, dass Host/Guest geändert werden
+        && request.resource.data.host == resource.data.host
+        && (request.resource.data.guest == resource.data.guest 
+            || resource.data.guest == null);
+      
+      // ✅ DELETE: Nur Host darf löschen
+      allow delete: if request.auth != null 
+        && request.auth.uid == resource.data.host;
+    }
+    
+    // ══════════════════════════════════════════════════════════════════════
+    // USER COLLECTIONS (bereits vorhanden - nicht überschreiben!)
+    // ══════════════════════════════════════════════════════════════════════
+    
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    match /users/{userId}/decks/{deckId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    match /users/{userId}/favorites/{favoriteId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // ══════════════════════════════════════════════════════════════════════
+    // PUBLIC READ FOR CARD DATA (Optional)
+    // ══════════════════════════════════════════════════════════════════════
+    
+    // Falls du Card-Daten in Firestore speicherst:
+    // match /cards/{cardId} {
+    //   allow read: if true;  // Public read
+    //   allow write: if false; // Nur Admin
+    // }
+  }
+}

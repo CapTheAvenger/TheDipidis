@@ -1,0 +1,615 @@
+﻿date;tournament_id;prefecture;shop;format;placement;player;archetype
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);1;サーモン;Ogerpon Arboliva
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);2;スギ;Dragapult Meowth
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);3;福嶋;Crustle Munkidori
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);4;minaminomi;Garchomp Roserade
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);5;クズボミ;Jellicent Dusknoir
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);6;右手左手ナメクジ;Ogerpon Raging-Bolt
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);7;カズ;Mega Froslass Mega Starmie
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);8;ハルト;Dragapult Dusknoir
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);9;タマ;Grimmsnarl Munkidori
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);10;Yui.;Dragapult
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);11;ドラ;Dragapult Dusknoir
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);12;メリレム;Mega Greninja Mega Starmie
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);13;モリッチ;Zoroark Darmanitan
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);14;しばやん;Beedrill Arboliva
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);15;Luna;Dragapult Meowth
+15 Mar 26;4315;ビデオ100　徳島藍住店;Tokushima;City League (JP);16;たいぞう;Mega Venusaur Ogerpon
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);1;だだだ;Greninja Dusknoir
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);2;ゆき;Crustle Munkidori
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);3;こーぎー;Ogerpon Meowth
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);4;MATA44;Dragapult Meowth
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);5;せっとん;Raging-Bolt Ogerpon
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);6;SHI-JI;Metagross Mega Skarmory
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);7;たば;Dragapult Meowth
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);8;Hikaru;Zoroark Darmanitan
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);9;SIKI;Ogerpon Arboliva
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);10;あかたく;Garchomp Roserade
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);11;エケコ;Mega Greninja Dudunsparce
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);12;もんちー;Dragapult Meowth
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);13;まっぴー;Garchomp Roserade
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);14;とうや;Ogerpon Meowth
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);15;いぶ;Grimmsnarl Munkidori
+15 Mar 26;4313;カードスタジアム小禄店;Okinawa;City League (JP);16;おお;Crustle Munkidori
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);1;かず;Mega Froslass Mega Starmie
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);2;ヤマコウ;Dragapult Meowth
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);3;Ray;Mega Lucario Hariyama
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);4;くるっぱ;Dipplin Thwackey
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);5;ふー@;Zoroark Darmanitan
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);6;明禧;Mega Meganium Mega Venusaur
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);7;サネモト;Hydreigon Zoroark
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);8;インセクターはが;Dragapult Blaziken
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);9;ねくの;Ogerpon Arboliva
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);10;しょう;Grimmsnarl Munkidori
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);11;もりくま;Ogerpon Raging-Bolt
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);12;ナマズ;Dragapult Dusknoir
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);13;そーま;Mega Meganium Ogerpon
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);14;ぴではる;Mega Lucario Mega Kangaskhan
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);15;黒マッキー;Ogerpon Raging-Bolt
+15 Mar 26;4314;【CARDBOX】Booksあんとく　三潴店;Fukuoka;City League (JP);16;サイロ;Dragapult Blaziken
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);1;五十嵐;Clefairy Meowth
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);2;Nakaba;Dragapult
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);3;もそそそ;Ogerpon Raging-Bolt
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);4;ゆいなパパ;Ogerpon Arboliva
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);5;マルコシアス;Honchkrow Porygon2
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);6;りゅうや;Dragapult Meowth
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);7;カズ;Mega Greninja Dragapult
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);8;KATA;Dragapult Latias
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);9;AN;Zoroark Mega Gengar
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);10;つきしゅう;Mega Greninja Mega Kangaskhan
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);11;つよし;Zoroark Darmanitan
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);12;なあたあ;Mega Lucario Hariyama
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);13;ベッチさん;Grimmsnarl Dusknoir
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);14;ミルフィーユ;Dragapult Dusknoir
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);15;あわのバーニングダーク;Mega Kangaskhan Ogerpon
+15 Mar 26;4312;BOOKOFF奈良法華寺店;Nara;City League (JP);16;わー;Mega Lucario Hariyama
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);1;おうる;Clefairy Ogerpon
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);2;ショウ;Dipplin Thwackey
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);3;アンク;Dragapult Munkidori
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);4;SP;Ogerpon Arboliva
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);5;コジマ;Okidogi Barbaracle
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);6;レバブル;Mega Lucario
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);7;ゴマ;Honchkrow Porygon2
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);8;じんた;Mega Starmie Mega Froslass
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);9;へろ;Clefairy Ogerpon
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);10;Ziro;Ogerpon Ogerpon-Wellspring
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);11;ショウタ;Metagross Genesect
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);12;セン;Dragapult Dusknoir
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);13;ぺこ;Spidops Mewtwo
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);14;うどん;Dragapult Meowth
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);15;ゆうびんや〒;Alakazam Dudunsparce
+15 Mar 26;4311;王の洞窟jr.　一宮２２号バイパス店;Aichi;City League (JP);16;海斗;Dragapult Dusknoir
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);1;R;Dragapult Dusknoir
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);2;κκ;Dragapult Bronzong
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);3;ひじかた;Zoroark Pecharunt
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);4;もにょ;Arboliva Ogerpon
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);5;Ken;Mega Lucario Hariyama
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);6;ブイズ;Dragapult Blaziken
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);7;やまちゃん;Dragapult Crustle
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);8;Kemo;Dragapult Froslass
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);9;千夏;Barbaracle Okidogi
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);10;Nori05S;Metagross Empoleon
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);11;おーちゃん;Mega Sharpedo Toxtricity
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);12;Ribu;Zoroark Darmanitan
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);13;さいふぁ;Grimmsnarl Froslass
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);14;がるる;Toxtricity Fezandipiti
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);15;moto;Dragapult Dusknoir
+15 Mar 26;4310;ドラゴンスター神戸三宮店;Hyōgo;City League (JP);16;島王;Spidops Mewtwo
+15 Mar 26;4309;BOOKOFF イオン本牧店;Kanagawa;City League (JP);1;pochinger;Crustle Munkidori
+15 Mar 26;4309;BOOKOFF イオン本牧店;Kanagawa;City League (JP);2;コロ助;Grimmsnarl Munkidori
+15 Mar 26;4309;BOOKOFF イオン本牧店;Kanagawa;City League (JP);3;あやしし;Garchomp Roserade
+15 Mar 26;4309;BOOKOFF イオン本牧店;Kanagawa;City League (JP);4;ぐさ;Blaziken Mega Dragonite
+15 Mar 26;4309;BOOKOFF イオン本牧店;Kanagawa;City League (JP);5;蒼太;Spidops Mewtwo
+15 Mar 26;4309;BOOKOFF イオン本牧店;Kanagawa;City League (JP);6;bamboo;Dragapult Blaziken
+15 Mar 26;4309;BOOKOFF イオン本牧店;Kanagawa;City League (JP);7;ヤバチャ;Zoroark Mega Kangaskhan
+15 Mar 26;4309;BOOKOFF イオン本牧店;Kanagawa;City League (JP);8;なすやん;Slowking Ogerpon
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);1;あら;Zoroark Darmanitan
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);2;ふらっとン;Slowking Latias
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);3;ゆうがお;Mega Froslass Grimmsnarl
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);4;Kちん;Beedrill Arboliva
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);5;たなしょー;Mega Lucario Hariyama
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);6;ゆう;Grimmsnarl Munkidori
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);7;ライス;Mega Absol Mega Kangaskhan
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);8;すぱけん;Spidops Mewtwo
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);9;あべちゃん;Spidops Mewtwo
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);10;モカ;Dragapult Meowth
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);11;yuuki;Dragapult Dusknoir
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);12;ヤクモ;Garchomp Roserade
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);13;ななくも;Ogerpon Clefairy
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);14;シオン;Mega Lucario Hariyama
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);15;ざと;Ogerpon Mega Kangaskhan
+15 Mar 26;4308;トイニティ長岡E・PLAZA店;Niigata;City League (JP);16;マリン;Zoroark Mega Dragalge
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);1;かくりつ;Yanmega Dudunsparce
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);2;、あんこ;Grimmsnarl Munkidori
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);3;りゅう;Beedrill Arboliva
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);4;マリモＧＸ;Dragapult Blaziken
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);5;なんJ民;Dragapult Dusknoir
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);6;ryou;Zoroark
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);7;こに;Metagross Jellicent
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);8;カミサマKM;Ogerpon Mega Kangaskhan
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);9;あいす;Dragapult Dusknoir
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);10;オレンジ;Grimmsnarl Froslass
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);11;カキ;Mega Kangaskhan Ogerpon
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);12;コージ;Ogerpon Clefairy
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);13;雑渡昆奈門;Mega Venusaur Ogerpon
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);14;シ;Ogerpon Ogerpon-Wellspring
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);15;ヤマト;Alakazam Dragapult
+15 Mar 26;4307;TSUTAYA BOOKSTORE　そよら成田ニュータウン;Chiba;City League (JP);16;草月;Mega Meganium Ogerpon
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);1;にょろろ;Barbaracle Okidogi
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);2;ミラン;Spidops Mewtwo
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);3;とぅるーえんど;Crustle Munkidori
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);4;ぱすかる;Noctowl Clefairy
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);5;ピタゴラ;Trevenant
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);6;あゆむ;Alakazam Dudunsparce
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);7;キテレツ斉;Dragapult
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);8;ハチマキバンギラス;Mega Lucario Solrock
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);9;ひでじ;Mega Froslass Mega Starmie
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);10;なお。;Dragapult Meowth
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);11;KK;Dragapult Meowth
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);12;運命の一劇;Mega Greninja Dudunsparce
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);13;こばーん;Ogerpon Mega Kangaskhan
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);14;カミッチュ;Hydrapple Ogerpon
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);15;こたろう;Ogerpon Raging-Bolt
+15 Mar 26;4303;BOOKOFFSUPERBAZAARノースポート・モール店;Kanagawa;City League (JP);16;団ZO;Garchomp Roserade
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);1;おせんべい;Mega Starmie Drakloak
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);2;アリ;Zoroark Dusknoir
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);3;バーバラ;Dragapult Blaziken
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);4;みーとも;Mega Lucario Hariyama
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);5;くり;Mega Greninja Dragapult
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);6;転がるフルグラ;Ogerpon Mega Kangaskhan
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);7;しょーま;Zoroark Darmanitan
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);8;もーりす;Dragapult Meowth
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);9;かんしゃくヘッド;Beedrill Arboliva
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);10;カゴ;Ogerpon Arboliva
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);11;ぺぱぴ;Zoroark
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);12;ぱるふぇ;Honchkrow Porygon-Z
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);13;モカ;Noctowl Ogerpon
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);14;とかり;Dragapult Dusknoir
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);15;ぎり;Honchkrow Porygon2
+15 Mar 26;4305;【CARDBOX】津店;Mie;City League (JP);16;ぽち。;Crustle Munkidori
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);1;よも;Ogerpon Raging-Bolt
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);2;うめ;Ogerpon Raging-Bolt
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);3;ポメヨー;Dragapult Meowth
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);4;ウル;Barbaracle Okidogi
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);5;みゅうー;Dragapult
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);6;キキョウ;Ogerpon-Wellspring Ogerpon
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);7;まつもと;Alakazam Dudunsparce
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);8;RUI;Dragapult Dusknoir
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);9;キメジマ;Ceruledge Solrock
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);10;ふるふる;Clefairy Ogerpon
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);11;なかまる;Zoroark Darmanitan
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);12;オワジン;Garchomp Roserade
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);13;としまる;Mega Froslass Mega Starmie
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);14;ぐるてん;Mega Lucario Solrock
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);15;瀬戸内;Slowking Latias
+15 Mar 26;4306;ポケ堂　仙台店;Miyagi;City League (JP);16;ヒデ;Dragapult Dusknoir
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);1;うえぽん;Crustle Munkidori
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);2;たっぴー;Mega Kangaskhan Ogerpon
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);3;しろpom;Grimmsnarl Munkidori
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);4;もっちゃん;Honchkrow Porygon2
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);5;みず;Noctowl Flareon
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);6;kuma;Dragapult Meowth
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);7;ヒバチ;Mega Lucario Hariyama
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);8;もも;Ogerpon Ogerpon-Wellspring
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);9;さと;Barbaracle Okidogi
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);10;しゅうと;Garchomp Roserade
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);11;ずうぼ;Ceruledge Meowth
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);12;さわさわサワムラー;Ogerpon Arboliva
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);13;ガラナ;Garchomp Roserade
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);14;しゅーま;Dragapult Dusknoir
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);15;やまかがし;Metagross Genesect
+15 Mar 26;4304;BOOKOFF　イオン橋本;Kanagawa;City League (JP);16;しのみや;Honchkrow Porygon2
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);1;さとけん;Honchkrow Porygon2
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);2;サヒ;Ogerpon Raging-Bolt
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);3;やこた;Mega Lucario Hariyama
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);4;こんぺいとう;Spidops Mewtwo
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);5;うじゃ;Garchomp Roserade
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);6;Anarchy;Ogerpon Mega Venusaur
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);7;ウオ吉;Mega Greninja Dudunsparce
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);8;げんさん;Mega Starmie Mega Froslass
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);9;きち;Spidops Mewtwo
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);10;ゆげ;Clefairy Ogerpon
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);11;ケージョ;Jellicent Dusknoir
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);12;ハマ・テテフ;Aegislash Dragapult
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);13;タマ;Dragapult Blaziken
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);14;たくぞー;Ogerpon Mega Venusaur
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);15;しろくま;Dragapult Meowth
+15 Mar 26;4302;BOOKOFF SUPER BAZAAR 松戸駅東口店;Chiba;City League (JP);16;たくや;Mega Absol Mega Kangaskhan
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);1;ゆめみ;Meowth Ogerpon
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);2;むにだ;Metagross Genesect
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);3;エルノ;Ogerpon Raging-Bolt
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);4;こば;Zoroark Darmanitan
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);5;サクサクパンダ;Dragapult Dusknoir
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);6;イキリンポ;Mega Lucario Hariyama
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);7;さめぴ;Mega Greninja Dragapult
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);8;こあ;Slowking Latias
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);9;ユタカ;Dragapult Dusknoir
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);10;ソウメイ;Noctowl Ogerpon
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);11;ネコバス;Dragapult Noctowl
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);12;香月(こうづき);Ceruledge Meowth
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);13;デーヒー;Ceruledge
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);14;リクルート;Honchkrow Porygon-Z
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);15;ナノ;Dragapult Dusknoir
+15 Mar 26;4300;トーナメントセンターバトロコ　高崎駅前;Gunma;City League (JP);16;ペガサス;Zoroark
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);1;ヒロ;Mega Lucario Hariyama
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);2;はまかぜ;Alakazam Dudunsparce
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);3;ねこたま;Barbaracle Okidogi
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);4;コジャケ;Beedrill Arboliva
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);5;nemo;Zoroark Darmanitan
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);6;Grimes;Zoroark Darmanitan
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);7;さく;Dragapult Meowth
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);8;みつの;Mega Lucario Hariyama
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);9;たかひろ;Zoroark Darmanitan
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);10;まつ;Dragapult Dusknoir
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);11;ひー;Zoroark Darmanitan
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);12;Yohei;Dragapult Meowth
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);13;イタクラ;Slowking
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);14;ながさわ;Clefairy Ogerpon
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);15;Busker.;Garchomp Roserade
+15 Mar 26;4301;竜星のPAO　八王子店;Tōkyō;City League (JP);16;サッカーボールナウ;Ogerpon Latias
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);1;古川;Ogerpon Clefairy
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);2;ありがとうマリル;Dragapult Dusknoir
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);3;あるこ;Mega Kangaskhan Ogerpon
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);4;グーミィ;Dragapult Blaziken
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);5;のまねこ;Dragapult Dusknoir
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);6;koni;Dragapult Meowth
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);7;とうき;Zoroark Darmanitan
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);8;リュウホウ;Dragapult Meowth
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);9;アルテ;Grimmsnarl Froslass
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);10;ぺ〜;Flygon Dudunsparce
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);11;わらびー;Dragapult Meowth
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);12;いちかわ;Mega Venusaur Ogerpon
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);13;コータ;Dragapult Meowth
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);14;カムクラ;Arboliva Ogerpon
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);15;大輝;Dragapult Meowth
+15 Mar 26;4298;トーナメントセンターバトロコ　水戸駅前;Ibaraki;City League (JP);16;ミタムラ;Ogerpon Mega Venusaur
+15 Mar 26;4299;フルコンプ　PLAYERS CENTER　八王子本店;Tōkyō;City League (JP);1;晋作;Mega Kangaskhan Raging-Bolt
+15 Mar 26;4299;フルコンプ　PLAYERS CENTER　八王子本店;Tōkyō;City League (JP);2;わい;Dragapult Meowth
+15 Mar 26;4299;フルコンプ　PLAYERS CENTER　八王子本店;Tōkyō;City League (JP);3;みゃんまー;Ogerpon Raging-Bolt
+15 Mar 26;4299;フルコンプ　PLAYERS CENTER　八王子本店;Tōkyō;City League (JP);4;ヤユッピー;Dragapult Meowth
+15 Mar 26;4299;フルコンプ　PLAYERS CENTER　八王子本店;Tōkyō;City League (JP);5;K;Garchomp Roserade
+15 Mar 26;4299;フルコンプ　PLAYERS CENTER　八王子本店;Tōkyō;City League (JP);6;キキョウ;Crustle Munkidori
+15 Mar 26;4299;フルコンプ　PLAYERS CENTER　八王子本店;Tōkyō;City League (JP);7;キム;Hydrapple Ogerpon
+15 Mar 26;4299;フルコンプ　PLAYERS CENTER　八王子本店;Tōkyō;City League (JP);8;taki;Dragapult Blaziken
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);1;たいが;Slowking Mega Slowbro
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);2;R.K;Ceruledge
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);3;pepeken;Ogerpon Mega Kangaskhan
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);4;レバン;Dragapult Blaziken
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);5;ぬ;Ogerpon Raging-Bolt
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);6;うっちーあんど;Ceruledge
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);7;ヌオーン;Mega Slowbro Mega Diancie
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);8;ゆいと;Ogerpon Noctowl
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);9;つばめ;Ogerpon Noctowl
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);10;ベン;Honchkrow Porygon2
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);11;もろへいや;Slowking Latias
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);12;だあ;Mega Lucario Hariyama
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);13;きく;Mega Lucario Hariyama
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);14;ジョセフ;Mega Lucario Hariyama
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);15;ガノン;Grimmsnarl Munkidori
+15 Mar 26;4297;TSUTAYA嵐山店;Saitama;City League (JP);16;れいじ;Dragapult Dusknoir
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);1;エイ;Dragapult Blaziken
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);2;もりそば;Dragapult Dusknoir
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);3;リュウジ;Ogerpon Ogerpon-Wellspring
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);4;U;Mega Lucario Meowth
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);5;くくいち;Mega Lucario
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);6;ゆ-ki;Mega Greninja Dusknoir
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);7;つぶあん;Dragapult Meowth
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);8;えずにあ;Dragapult Meowth
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);9;タクミ;Mega Lucario Solrock
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);10;なおや;Ceruledge
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);11;いっと;Dragapult Blaziken
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);12;ガネ;Dragapult Meowth
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);13;コジマ;Mega Lucario Hariyama
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);14;TAO;Mega Greninja Dudunsparce
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);15;たにめそ;Crustle Munkidori
+15 Mar 26;4296;トーナメントセンターバトロコ　新津田沼駅前;Chiba;City League (JP);16;とりどし;Barbaracle Okidogi
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);1;トルスケ;Mega Greninja Dudunsparce
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);2;えせもん;Zoroark
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);3;スボミー;Mega Lucario Hariyama
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);4;めるんば;Mega Lucario Hariyama
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);5;こば;Thwackey Dipplin
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);6;ネズオ君;Dragapult Meowth
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);7;KEi;Dragapult Dusknoir
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);8;りょ〜てん;Greninja Dusknoir
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);9;セスカ;Mega Kangaskhan Latias
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);10;ガマ;Dragapult Blaziken
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);11;スカイ;Crustle Munkidori
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);12;バブルホース;Garchomp Roserade
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);13;ゆー;Garchomp Roserade
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);14;こた;Dragapult Noctowl
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);15;かも;Slowking
+15 Mar 26;4293;チェルモサード;Kanagawa;City League (JP);16;コダック;Flareon Noctowl
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);1;こすけ;Ogerpon Mega Kangaskhan
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);2;ごろー;Slowking Latias
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);3;あきよ;Clefairy Ogerpon
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);4;聖夜;Mega Clefable Aromatisse
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);5;とり;Mega Kangaskhan Ogerpon
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);6;メガたみたみ;Zoroark Darmanitan
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);7;Kotaro;Spidops Mewtwo
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);8;ちゃみんす;Archaludon Meowth
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);9;めったぁ;Dragapult Mega Kangaskhan
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);10;ぞう;Garchomp Roserade
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);11;67のにゃあー;Mega Lucario Hariyama
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);12;チャニィ;Mega Meganium Ogerpon
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);13;いしかわ;Zoroark Darmanitan
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);14;みなも;Dragapult Blaziken
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);15;しん;Dragapult Meowth
+15 Mar 26;4294;カードショップリドル京急蒲田店;Tōkyō;City League (JP);16;げんぱ;Ogerpon Clefairy
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);1;いんぬ;Dragapult Meowth
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);2;おくみー;Typhlosion
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);3;まっちゃら;Dragapult Blaziken
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);4;ゆうや;Dragapult Dusknoir
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);5;すーでび;Mega Lucario Hariyama
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);6;エド;Ogerpon Raging-Bolt
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);7;ふみ;Ogerpon Noctowl
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);8;味皇;Dragapult Meowth
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);9;P0S0Y4;Dragapult Meowth
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);10;いろはす;Mega Venusaur Ogerpon
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);11;ミラクルファイターズ;Metagross Genesect
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);12;夜行性;Dragapult Meowth
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);13;たか;Ogerpon Arboliva
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);14;こっこ;Garchomp Roserade
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);15;杉ちゃん;Ogerpon Ogerpon-Wellspring
+15 Mar 26;4295;トレカステーション佐鳴台店;Shizuoka;City League (JP);16;咆狼~ほうろう~;Garchomp Roserade
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);1;くろ;Dragapult Meowth
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);2;にゃんこ;Dragapult Meowth
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);3;きゃんぐ;Dragapult Blaziken
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);4;かずき;Mega Kangaskhan Mega Absol
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);5;しまし;Mega Lucario Hariyama
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);6;k.k;Ogerpon Mega Kangaskhan
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);7;まろ;Ogerpon Clefairy
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);8;モリ;Dragapult Blaziken
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);9;タクミ;Mega Lucario Hariyama
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);10;siro;Honchkrow Porygon2
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);11;さかしろ;Mega Lucario Lunatone
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);12;てんてん;Dragapult Blaziken
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);13;タマンタ;Dragapult Blaziken
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);14;カイ;Dragapult Dusknoir
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);15;だるお;Gourgeist Alakazam
+14 Mar 26;4292;宝島　岐阜本店;Gifu;City League (JP);16;アン;Mega Greninja Noctowl
+14 Mar 26;4289;ブックオフプラス佐賀南部バイパス店;Saga;City League (JP);1;ゆうま;Dragapult Dusknoir
+14 Mar 26;4289;ブックオフプラス佐賀南部バイパス店;Saga;City League (JP);2;しょご;Barbaracle Okidogi
+14 Mar 26;4289;ブックオフプラス佐賀南部バイパス店;Saga;City League (JP);3;卵焼き;Noctowl Flareon
+14 Mar 26;4289;ブックオフプラス佐賀南部バイパス店;Saga;City League (JP);4;ルル;Zoroark
+14 Mar 26;4289;ブックオフプラス佐賀南部バイパス店;Saga;City League (JP);5;じん;Ogerpon Mega Venusaur
+14 Mar 26;4289;ブックオフプラス佐賀南部バイパス店;Saga;City League (JP);6;アッキー;Crustle Munkidori
+14 Mar 26;4289;ブックオフプラス佐賀南部バイパス店;Saga;City League (JP);7;ワタリ;Dragapult Dusknoir
+14 Mar 26;4289;ブックオフプラス佐賀南部バイパス店;Saga;City League (JP);8;トミー;Metagross Genesect
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);1;しるどん;Noctowl Flareon
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);2;ゲンガー強いよな;Mega Lucario Hariyama
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);3;あつ;Mega Greninja
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);4;いなきら;Mega Venusaur Ogerpon
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);5;バナナ;Mega Lucario Hariyama
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);6;ボビ;Mega Lucario
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);7;すけ;Dragapult Meowth
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);8;ルンルン;Hydreigon Mega Gengar
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);9;くーら;Mega Sharpedo Toxtricity
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);10;フォーク;Dragapult Meowth
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);11;なまけろ;Mega Greninja Dudunsparce
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);12;ちびちゃん;Alakazam Dudunsparce
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);13;せん;Dragapult Blaziken
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);14;Q児;Dragapult Dusknoir
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);15;ほろう;Mega Greninja Noctowl
+14 Mar 26;4291;ゲームアーク　丸亀店;Kagawa;City League (JP);16;ダイスケ;Dragapult Dusknoir
+14 Mar 26;4290;【CARDBOX】玉島店;Okayama;City League (JP);1;イッキー;Dragapult Mega Kangaskhan
+14 Mar 26;4290;【CARDBOX】玉島店;Okayama;City League (JP);2;こた;Mega Lucario Hariyama
+14 Mar 26;4290;【CARDBOX】玉島店;Okayama;City League (JP);3;さく;Slowking Mega Slowbro
+14 Mar 26;4290;【CARDBOX】玉島店;Okayama;City League (JP);4;aochi;Garchomp Roserade
+14 Mar 26;4290;【CARDBOX】玉島店;Okayama;City League (JP);5;Souta;Grimmsnarl Munkidori
+14 Mar 26;4290;【CARDBOX】玉島店;Okayama;City League (JP);6;kat;Dragapult Meowth
+14 Mar 26;4290;【CARDBOX】玉島店;Okayama;City League (JP);7;ゆういち;Dragapult Meowth
+14 Mar 26;4290;【CARDBOX】玉島店;Okayama;City League (JP);8;だいや;Dragapult Mega Greninja
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);1;やきとうもろこし;Ogerpon Arboliva
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);2;シルビア;Grimmsnarl Munkidori
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);3;なべ;Alakazam Dudunsparce
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);4;湊;Mega Lucario Hariyama
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);5;しょしんしゃ;Ogerpon Raging-Bolt
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);6;お肉;Solrock Munkidori
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);7;＊葵＊;Ogerpon Raging-Bolt
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);8;よるのおさんぽ;Dragapult Blaziken
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);9;除草剤;Dragapult
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);10;ピュシス;Spidops Mewtwo
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);11;りく;Zoroark Darmanitan
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);12;メソキング;Dragapult Munkidori
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);13;まっちゃ;Mega Starmie Mega Greninja
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);14;マグロ;Dusknoir Mega Diancie
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);15;くりす;Dragapult Meowth
+14 Mar 26;4288;オレタン福岡天神店;Fukuoka;City League (JP);16;うー浪;Alakazam Dudunsparce
+14 Mar 26;4287;三洋堂書店 星川店;Mie;City League (JP);1;ジムバトル初心者;Dragapult Blaziken
+14 Mar 26;4287;三洋堂書店 星川店;Mie;City League (JP);2;うきよえ;Dragapult Meowth
+14 Mar 26;4287;三洋堂書店 星川店;Mie;City League (JP);3;かざみぽ;Mega Starmie Mega Froslass
+14 Mar 26;4287;三洋堂書店 星川店;Mie;City League (JP);4;あらん;Mega Lucario Hariyama
+14 Mar 26;4287;三洋堂書店 星川店;Mie;City League (JP);5;ミミッキュ;Rillaboom Dipplin
+14 Mar 26;4287;三洋堂書店 星川店;Mie;City League (JP);6;ペイチン;Mega Starmie Mega Lopunny
+14 Mar 26;4287;三洋堂書店 星川店;Mie;City League (JP);7;てんぱー;Dragapult Blaziken
+14 Mar 26;4287;三洋堂書店 星川店;Mie;City League (JP);8;みぃ;Mega Kangaskhan Mega Audino
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);1;ささしま;Spidops Mewtwo
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);2;keso;Mega Lucario Hariyama
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);3;じょか;Alakazam Dudunsparce
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);4;やぶ;Ogerpon Raging-Bolt
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);5;がーく;Decidueye Yanmega
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);6;鈴井;Zoroark Pecharunt
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);7;seiju;Mega Lucario Hariyama
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);8;レリーフ;Mega Greninja Dudunsparce
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);9;u-39;Grimmsnarl Froslass
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);10;マタボー;Mega Lucario Hariyama
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);11;雪解けに;Trevenant
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);12;ken;Ogerpon Arboliva
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);13;すももいぬ;Dragapult Dusknoir
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);14;Rapid Strike;Dragapult Dusknoir
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);15;TeacH;Greninja Dusknoir
+14 Mar 26;4284;BOOKOFF SUPER BAZAAR 307号枚方池之宮店;Ōsaka;City League (JP);16;痛ビショップ;Ogerpon Raging-Bolt
+14 Mar 26;4283;ブックオフイオン山形北店;Yamagata;City League (JP);1;kabuto;Clefairy Ogerpon
+14 Mar 26;4283;ブックオフイオン山形北店;Yamagata;City League (JP);2;さわみん;Grimmsnarl Munkidori
+14 Mar 26;4283;ブックオフイオン山形北店;Yamagata;City League (JP);3;Margarine;Alakazam Dudunsparce
+14 Mar 26;4283;ブックオフイオン山形北店;Yamagata;City League (JP);4;カミッチュ;Grimmsnarl Munkidori
+14 Mar 26;4283;ブックオフイオン山形北店;Yamagata;City League (JP);5;こーせー;Trevenant Dubwool
+14 Mar 26;4283;ブックオフイオン山形北店;Yamagata;City League (JP);6;mt.sugi;Trevenant Dubwool
+14 Mar 26;4283;ブックオフイオン山形北店;Yamagata;City League (JP);7;カメ;Dragapult Dusknoir
+14 Mar 26;4283;ブックオフイオン山形北店;Yamagata;City League (JP);8;ひゅろっきん;Okidogi Barbaracle
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);1;いとしーさー;Ogerpon Clefairy
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);2;キリヤミ;Dragapult
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);3;おしょう;Slowking Mega Slowbro
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);4;DOES;Mega Lucario Solrock
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);5;まやまつ;Mega Lucario Hariyama
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);6;ダイスケ;Dragapult
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);7;れおぽん;Dipplin Thwackey
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);8;Hiro;Hydrapple Ogerpon
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);9;セジュン;Dragapult Dusknoir
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);10;umr;Zoroark Darmanitan
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);11;Teika;Zoroark Darmanitan
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);12;RX;Aegislash Metagross
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);13;Sekai;Ogerpon Clefairy
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);14;lancelot;Garchomp Roserade
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);15;むげつ;Mega Lucario Hariyama
+14 Mar 26;4285;ドラゴンスター日本橋3号店;Ōsaka;City League (JP);16;ショデ;Mega Diancie Dusknoir
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);1;さらぽて。;Mega Greninja Dragapult
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);2;だいちぇる;Mega Lucario Hariyama
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);3;バイオレット;Ogerpon Raging-Bolt
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);4;おとこじか;Dragapult Meowth
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);5;こまつ;Spidops Mewtwo
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);6;めいぬ;Spidops Mewtwo
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);7;msk;Zoroark Darmanitan
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);8;リンゴ;Zoroark Darmanitan
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);9;無色単;Garchomp Roserade
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);10;ウソッキー;Barbaracle Okidogi
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);11;かめ;Greninja Dusknoir
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);12;radcliffe;Dragapult Dusknoir
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);13;湯豆腐;Mega Lucario Hariyama
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);14;サイセン;Dragapult Meowth
+14 Mar 26;4286;GIRAFULL 広島ドンキ店;Hiroshima;City League (JP);16;kureneko;Mega Venusaur Ogerpon
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);1;すし;Zoroark Darmanitan
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);2;QJP;Dipplin Thwackey
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);3;おさ;Mega Lucario Hariyama
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);4;よしよ;Mega Lucario Solrock
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);5;としぞう;Alakazam Dudunsparce
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);6;まないた;Mega Lucario Solrock
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);7;そうま;Dusknoir Mega Diancie
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);8;たか;Mega Kangaskhan Mega Absol
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);9;ぱらぼら;Dragapult Blaziken
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);10;およべ;Ogerpon Raging-Bolt
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);11;ゆーと;Dragapult Dusknoir
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);12;きみ;Mega Slowbro Latias
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);13;キョウ;Garchomp Roserade
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);14;きなこもち;Alakazam Dudunsparce
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);15;もつ;Mega Sharpedo Toxtricity
+14 Mar 26;4282;BOOKOFF SUPER BAZAAR 248号西友岡崎店;Aichi;City League (JP);16;アキ;Mega Venusaur Ogerpon
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);1;ひびき;Dragapult Meowth
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);2;蜥蜴;Ogerpon Mega Venusaur
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);3;リュー;Metagross Genesect
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);4;デッテゥー;Zoroark Darmanitan
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);5;ヒデタケ;Slowking Latias
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);6;fisher;Dipplin Thwackey
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);7;クシカツ;Ogerpon Mega Kangaskhan
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);8;モンクラ;Mega Lucario Dusknoir
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);9;ぱっち;Dragapult Meowth
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);10;ef;Dragapult Meowth
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);11;てる;Barbaracle Okidogi
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);12;あお;Grimmsnarl Munkidori
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);13;なべだい;Mega Greninja Dudunsparce
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);14;Explorer;Arboliva Mega Kangaskhan
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);15;よこ;Ogerpon Mega Venusaur
+14 Mar 26;4281;ブックオフ イトーヨカドー溝ノ口店;Kanagawa;City League (JP);16;イオリ;Meowth Mega Kangaskhan
+14 Mar 26;4277;ブックオフプラス　田富昭和通り店;Yamanashi;City League (JP);1;わっしー;Ogerpon Raging-Bolt
+14 Mar 26;4277;ブックオフプラス　田富昭和通り店;Yamanashi;City League (JP);2;ブイ推しアニキ;Ogerpon Mega Kangaskhan
+14 Mar 26;4277;ブックオフプラス　田富昭和通り店;Yamanashi;City League (JP);3;ぴらっつぁ;Dragapult Mega Kangaskhan
+14 Mar 26;4277;ブックオフプラス　田富昭和通り店;Yamanashi;City League (JP);4;セブン@;Mega Greninja Meowth
+14 Mar 26;4277;ブックオフプラス　田富昭和通り店;Yamanashi;City League (JP);5;みので;Grimmsnarl Froslass
+14 Mar 26;4277;ブックオフプラス　田富昭和通り店;Yamanashi;City League (JP);6;キングドラ;Mega Lucario Hariyama
+14 Mar 26;4277;ブックオフプラス　田富昭和通り店;Yamanashi;City League (JP);7;アズ;Garchomp Roserade
+14 Mar 26;4277;ブックオフプラス　田富昭和通り店;Yamanashi;City League (JP);8;かずモーグリ;Dragapult Dusknoir
+14 Mar 26;4278;Duel Stade Ganryu　高崎店;Gunma;City League (JP);1;joker;Ogerpon Noctowl
+14 Mar 26;4278;Duel Stade Ganryu　高崎店;Gunma;City League (JP);2;ほっこりだいこん;Mega Kangaskhan Ogerpon
+14 Mar 26;4278;Duel Stade Ganryu　高崎店;Gunma;City League (JP);3;へりうむ;Ogerpon Arboliva
+14 Mar 26;4278;Duel Stade Ganryu　高崎店;Gunma;City League (JP);4;かるび;Dragapult Meowth
+14 Mar 26;4278;Duel Stade Ganryu　高崎店;Gunma;City League (JP);5;96猫;Zoroark
+14 Mar 26;4278;Duel Stade Ganryu　高崎店;Gunma;City League (JP);6;HIRO;Slowking Latias
+14 Mar 26;4278;Duel Stade Ganryu　高崎店;Gunma;City League (JP);7;密林;Metagross Genesect
+14 Mar 26;4278;Duel Stade Ganryu　高崎店;Gunma;City League (JP);8;シンゴジラ;Mega Lucario
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);1;kohei;Mega Lucario Hariyama
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);2;ユウヤ;Mega Sharpedo Toxtricity
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);3;かいちょん;Ceruledge
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);4;タカヒロ;Alakazam Dudunsparce
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);5;韻豆;Mega Greninja Mega Kangaskhan
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);6;イチロー;Grimmsnarl Munkidori
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);7;YAMADA;Dragapult Mega Greninja
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);8;田中Y;Mega Kangaskhan Ogerpon
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);9;ベンジャミン松本;Mega Greninja Dragapult
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);10;Rick;Ogerpon Raging-Bolt
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);11;あお;Spidops Mewtwo
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);12;だどら;Dusknoir Jellicent
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);13;ちょうこく;Garchomp Roserade
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);14;ふぁる;Dragapult Dusknoir
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);15;ずや;Ogerpon Arboliva
+14 Mar 26;4279;トレカショップKCC;Saitama;City League (JP);16;ライム;Barbaracle Okidogi
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);1;minami;Mega Lucario Hariyama
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);2;けん;Dragapult Dusknoir
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);3;スーリヤ;Aegislash Dudunsparce
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);4;batooの三番弟子;Grimmsnarl Munkidori
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);5;うあ;Dusknoir Jellicent
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);6;あさひかわ;Dragapult Meowth
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);7;4番DHたこ;Archaludon
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);8;たく（ひらがな）;Yanmega Mega Kangaskhan
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);9;てんか;Toxtricity Munkidori
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);10;みょん;Mega Lucario Hariyama
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);11;ハピ翔;Garchomp Roserade
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);12;みなとみらい;Spidops Mewtwo
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);14;シム;Dragapult Blaziken
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);15;サブロウ;Ceruledge
+14 Mar 26;4280;BOOKOFFSUPERBAZAAR町田中央通り店;Tōkyō;City League (JP);16;スイカの水筒;Zoroark Darmanitan
+14 Mar 26;4276;カードショップ竜星のPAO多摩境店;Tōkyō;City League (JP);1;アーク;Dragapult Meowth
+14 Mar 26;4276;カードショップ竜星のPAO多摩境店;Tōkyō;City League (JP);2;sinon;Dragapult Meowth
+14 Mar 26;4276;カードショップ竜星のPAO多摩境店;Tōkyō;City League (JP);3;ゆーき;Mega Lucario Hariyama
+14 Mar 26;4276;カードショップ竜星のPAO多摩境店;Tōkyō;City League (JP);4;ちゃめすけ;Mega Lucario Hariyama
+14 Mar 26;4276;カードショップ竜星のPAO多摩境店;Tōkyō;City League (JP);5;もとさ;Mega Meganium Ogerpon
+14 Mar 26;4276;カードショップ竜星のPAO多摩境店;Tōkyō;City League (JP);6;ルシ;Ceruledge
+14 Mar 26;4276;カードショップ竜星のPAO多摩境店;Tōkyō;City League (JP);7;ラボ畜;Noctowl Flareon
+14 Mar 26;4276;カードショップ竜星のPAO多摩境店;Tōkyō;City League (JP);8;てふまめは;Mega Lucario Solrock
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);1;はる;Dragapult Meowth
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);2;サカキ;Spidops Mewtwo
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);3;すだち;Archaludon
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);4;ねかた;Mega Lucario Solrock
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);5;おかいこさん;Dragapult Meowth
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);6;かっしー;Mega Meganium Mega Venusaur
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);7;タカシ;Grimmsnarl Munkidori
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);8;まつかず;Ogerpon Arboliva
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);9;のわ;Toxtricity Munkidori
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);10;ふうパパ;Spidops Mewtwo
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);11;テイル;Zoroark Darmanitan
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);12;おこのみ;Mega Kangaskhan Ogerpon
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);13;ともそう;Ogerpon Mega Kangaskhan
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);14;しらいし;Dragapult Meowth
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);15;じろー;Mega Meganium Ogerpon
+14 Mar 26;4274;トーナメントセンターバトロコ　本厚木駅前;Kanagawa;City League (JP);16;ケイタ;Ogerpon Arboliva
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);1;夢來;Dragapult Meowth
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);2;ピース;Zoroark
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);3;クッキー;Alakazam Dudunsparce
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);4;りゅう;Dragapult Dusknoir
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);5;ねこすけ;Mega Lucario Hariyama
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);6;マモ;Mega Starmie Mega Froslass
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);7;かげ;Ogerpon Ogerpon-Wellspring
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);8;たばさ;Ogerpon Mega Kangaskhan
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);9;サイタマ;Archaludon
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);10;なえとる。;Blaziken Clefairy
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);11;ポリンキー麻倉;Metagross Empoleon
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);12;ポコ太郎;Spidops Mewtwo
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);13;り！;Garchomp Roserade
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);14;来夢;Ogerpon Arboliva
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);15;スズキ;Mega Lucario Hariyama
+14 Mar 26;4273;BOOKOFFSUPERBAZAARアクロスプラザ佐世保店;Nagasaki;City League (JP);16;LK;Alakazam Dudunsparce
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);1;そのだやお;Barbaracle Okidogi
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);2;はー;Crustle Munkidori
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);3;おまつ;Zoroark Mega Gengar
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);4;たんどりー;Crustle Munkidori
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);5;つゆ♂;Greninja Mega Froslass
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);6;ハセヲ;Mega Kangaskhan Ogerpon
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);7;くくまる;Spidops Mewtwo
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);8;りぃすと;Ogerpon Meowth
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);9;ユーキ;Mega Greninja Dragapult
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);10;ノン;Dragapult Meowth
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);11;なこ;Dragapult Mega Kangaskhan
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);12;うぇるこ;Dragapult Dusknoir
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);13;マキオ;Aegislash Genesect
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);14;とんざん;Mega Dragonite Blaziken
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);15;れいん;Dragapult Dusknoir
+14 Mar 26;4275;カードショップリドル京急蒲田店;Tōkyō;City League (JP);16;ちょっくら;Grimmsnarl Munkidori

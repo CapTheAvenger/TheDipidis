@@ -9023,22 +9023,21 @@ const BASE_PATH = './data/';
             }
             
             // CSV structure: meta (format), tournament_date, archetype (deck name!), card_name, ...
-            // Some exports have empty meta/format columns; infer per tournament_date from newest set_code.
-            const inferredMetaByDate = new Map();
+            // Some exports have empty meta/format columns; infer per DECK (tournament_date + archetype) from newest set_code
+            const inferredMetaByDeck = new Map();
             cardsData.forEach(card => {
                 const tournamentDate = String(card.tournament_date || '').trim();
+                const deckArchetype = String(card.archetype || '').trim();
                 const setCode = String(card.set_code || '').trim().toUpperCase();
-                if (!tournamentDate || !setCode) return;
+                if (!tournamentDate || !deckArchetype || !setCode) return;
 
+                const deckKey = `${tournamentDate}|||${deckArchetype}`;
                 const nextOrder = pastMetaSetOrderMap[setCode] || 0;
-                const current = inferredMetaByDate.get(tournamentDate);
-                const currentOrder = current ? (pastMetaSetOrderMap[current.setCode] || 0) : -1;
+                const current = inferredMetaByDeck.get(deckKey);
+                const currentOrder = current ? (pastMetaSetOrderMap[current] || 0) : -1;
 
-                if (nextOrder >= currentOrder) {
-                    inferredMetaByDate.set(tournamentDate, {
-                        setCode,
-                        meta: derivePastMetaLabelFromSetCode(setCode, pastMetaSetOrderMap)
-                    });
+                if (nextOrder > currentOrder) {
+                    inferredMetaByDeck.set(deckKey, setCode);
                 }
             });
 
@@ -9047,7 +9046,12 @@ const BASE_PATH = './data/';
             cardsData.forEach(card => {
                 const deckArchetype = sanitizePastMetaArchetypeName(card.archetype);
                 const tournamentDate = card.tournament_date || 'Unknown Date';
-                const inferredMeta = (inferredMetaByDate.get(String(tournamentDate).trim()) || {}).meta || '';
+                
+                // Infer format per deck from the newest set code in this specific deck
+                const deckMetaLookupKey = `${String(tournamentDate).trim()}|||${String(card.archetype || '').trim()}`;
+                const inferredMetaSetCode = inferredMetaByDeck.get(deckMetaLookupKey) || '';
+                const inferredMeta = derivePastMetaLabelFromSetCode(inferredMetaSetCode, pastMetaSetOrderMap);
+                
                 const tournament = pastMetaTournaments.find(t => {
                     if (!t || t.tournament_date !== tournamentDate) return false;
                     const cardMeta = String(card.meta || '').trim();

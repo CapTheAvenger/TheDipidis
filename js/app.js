@@ -8917,6 +8917,44 @@ const BASE_PATH = './data/';
             const parsed = Number.parseFloat(normalized);
             return Number.isFinite(parsed) ? parsed : fallback;
         }
+
+        function parsePastMetaDateMs(dateValue) {
+            if (!dateValue) return 0;
+            const raw = String(dateValue).trim();
+            if (!raw) return 0;
+
+            const direct = new Date(raw);
+            if (!Number.isNaN(direct.getTime())) {
+                return direct.getTime();
+            }
+
+            const cleaned = raw.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+            const fallback = new Date(cleaned);
+            if (!Number.isNaN(fallback.getTime())) {
+                return fallback.getTime();
+            }
+
+            return 0;
+        }
+
+        function getPastMetaSortScore(metaName, setOrderMap, latestDateMap) {
+            const normalizedMeta = String(metaName || '').trim().toUpperCase();
+            if (!normalizedMeta) return 0;
+
+            const parts = normalizedMeta.split('-').map(p => p.trim()).filter(Boolean);
+            const firstSet = parts[0] || '';
+            const lastSet = parts[parts.length - 1] || '';
+            const firstOrder = setOrderMap[firstSet] || 0;
+            const lastOrder = setOrderMap[lastSet] || 0;
+            const dateMs = latestDateMap.get(String(metaName || '').trim()) || 0;
+
+            // Primary sort by ending-set recency (e.g. SVI-ASC > SVI-PFL), fallback by latest tournament date.
+            if (lastOrder > 0 || firstOrder > 0) {
+                return (lastOrder * 1000000) + (firstOrder * 1000) + Math.floor(dateMs / 1000000000);
+            }
+
+            return dateMs;
+        }
         
         async function loadPastMeta() {
             console.log('Loading Past Meta Deck Analysis...');
@@ -8938,6 +8976,21 @@ const BASE_PATH = './data/';
             
             // Store tournament overview data
             pastMetaTournaments = tournamentOverview || [];
+
+            // Load dynamic set order map for proper meta sorting (newest -> oldest)
+            let pastMetaSetOrderMap = {};
+            try {
+                const ts = Date.now();
+                const setOrderResponse = await fetch(`./data/sets.json?t=${ts}`);
+                if (setOrderResponse.ok) {
+                    const json = await setOrderResponse.json();
+                    if (json && typeof json === 'object') {
+                        pastMetaSetOrderMap = json;
+                    }
+                }
+            } catch (e) {
+                console.warn('[Past Meta] Could not load sets.json for format sorting, using date fallback.', e);
+            }
             
             // CSV structure: meta (format), tournament_date, archetype (deck name!), card_name, ...
             // Group cards by tournament_date + archetype (deck archetype)
@@ -8980,8 +9033,27 @@ const BASE_PATH = './data/';
             
             pastMetaDecks = Array.from(deckMap.values());
             
+            // Build latest date per meta for robust fallback sorting.
+            const metaLatestDateMap = new Map();
+            cardsData.forEach(card => {
+                const metaName = String(card.meta || '').trim();
+                if (!metaName) return;
+                const dateMs = parsePastMetaDateMs(card.tournament_date);
+                const current = metaLatestDateMap.get(metaName) || 0;
+                if (dateMs > current) {
+                    metaLatestDateMap.set(metaName, dateMs);
+                }
+            });
+
             // Populate Format Filter
-            const formats = [...new Set(cardsData.map(c => c.meta).filter(f => f))].sort().reverse();
+            const formats = [...new Set(cardsData.map(c => String(c.meta || '').trim()).filter(Boolean))]
+                .sort((a, b) => {
+                    const scoreA = getPastMetaSortScore(a, pastMetaSetOrderMap, metaLatestDateMap);
+                    const scoreB = getPastMetaSortScore(b, pastMetaSetOrderMap, metaLatestDateMap);
+                    if (scoreA !== scoreB) return scoreB - scoreA;
+                    return a.localeCompare(b);
+                });
+
             const formatSelect = document.getElementById('pastMetaFormatFilter');
             resetSelectWithPlaceholder(formatSelect, '-- All Formats --', 'all');
             formats.forEach(format => {

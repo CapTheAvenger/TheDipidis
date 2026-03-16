@@ -8955,6 +8955,21 @@ const BASE_PATH = './data/';
 
             return dateMs;
         }
+
+        function derivePastMetaLabelFromSetCode(setCode, setOrderMap) {
+            const code = String(setCode || '').trim().toUpperCase();
+            if (!code) return '';
+            if (code.includes('-')) return code;
+
+            // Keep legacy/old-era set codes as-is; derive modern labels as SVI-<SET>.
+            const svOrder = setOrderMap.SVI || setOrderMap.SVE || 0;
+            const codeOrder = setOrderMap[code] || 0;
+            if (svOrder > 0 && codeOrder > 0 && codeOrder >= svOrder) {
+                return `SVI-${code}`;
+            }
+
+            return code;
+        }
         
         async function loadPastMeta() {
             console.log('Loading Past Meta Deck Analysis...');
@@ -8993,19 +9008,44 @@ const BASE_PATH = './data/';
             }
             
             // CSV structure: meta (format), tournament_date, archetype (deck name!), card_name, ...
+            // Some exports have empty meta/format columns; infer per tournament_date from newest set_code.
+            const inferredMetaByDate = new Map();
+            cardsData.forEach(card => {
+                const tournamentDate = String(card.tournament_date || '').trim();
+                const setCode = String(card.set_code || '').trim().toUpperCase();
+                if (!tournamentDate || !setCode) return;
+
+                const nextOrder = pastMetaSetOrderMap[setCode] || 0;
+                const current = inferredMetaByDate.get(tournamentDate);
+                const currentOrder = current ? (pastMetaSetOrderMap[current.setCode] || 0) : -1;
+
+                if (nextOrder >= currentOrder) {
+                    inferredMetaByDate.set(tournamentDate, {
+                        setCode,
+                        meta: derivePastMetaLabelFromSetCode(setCode, pastMetaSetOrderMap)
+                    });
+                }
+            });
+
             // Group cards by tournament_date + archetype (deck archetype)
             const deckMap = new Map();
             cardsData.forEach(card => {
                 const deckArchetype = sanitizePastMetaArchetypeName(card.archetype);
                 const tournamentDate = card.tournament_date || 'Unknown Date';
-                const deckKey = `${card.meta}|||${tournamentDate}|||${deckArchetype}`;
+                const inferredMeta = (inferredMetaByDate.get(String(tournamentDate).trim()) || {}).meta || '';
+                const tournament = pastMetaTournaments.find(t => {
+                    if (!t || t.tournament_date !== tournamentDate) return false;
+                    const cardMeta = String(card.meta || '').trim();
+                    const overviewFormat = String(t.format || '').trim();
+                    return !cardMeta || !overviewFormat || overviewFormat === cardMeta;
+                });
+                const resolvedFormat = String(card.meta || '').trim()
+                    || String((tournament && tournament.format) || '').trim()
+                    || inferredMeta
+                    || 'Unknown';
+                const deckKey = `${resolvedFormat}|||${tournamentDate}|||${deckArchetype}`;
                 
                 if (!deckMap.has(deckKey)) {
-                    // Find matching tournament from overview
-                    const tournament = pastMetaTournaments.find(t => 
-                        t.tournament_date === tournamentDate && t.format === card.meta
-                    );
-                    
                     deckMap.set(deckKey, {
                         key: deckKey,
                         tournament_id: tournament ? tournament.tournament_id : tournamentDate,
@@ -9013,7 +9053,7 @@ const BASE_PATH = './data/';
                         tournament_date: tournamentDate,
                         deck_name: deckArchetype,
                         archetype: deckArchetype,
-                        format: card.meta || 'Unknown',
+                        format: resolvedFormat,
                         decklist_count: parseInt(card.total_decks_in_archetype || 1),
                         cards: []
                     });
@@ -9046,7 +9086,7 @@ const BASE_PATH = './data/';
             });
 
             // Populate Format Filter
-            const formats = [...new Set(cardsData.map(c => String(c.meta || '').trim()).filter(Boolean))]
+            const formats = [...new Set(pastMetaDecks.map(d => String(d.format || '').trim()).filter(f => f && f !== 'Unknown'))]
                 .sort((a, b) => {
                     const scoreA = getPastMetaSortScore(a, pastMetaSetOrderMap, metaLatestDateMap);
                     const scoreB = getPastMetaSortScore(b, pastMetaSetOrderMap, metaLatestDateMap);

@@ -17,6 +17,7 @@ import threading
 import concurrent.futures
 from datetime import datetime, timedelta
 from collections import defaultdict
+import re
 
 try:
     import cloudscraper
@@ -146,6 +147,54 @@ def resolve_date_range(start_date: str, end_date: str):
             
     return start_dt, end_dt
 
+def parse_limitless_tournament_date(date_str: str):
+    """Parses Limitless date formats like '15 Mar 26' or '15th March 2026'."""
+    if not date_str:
+        return None
+    raw = str(date_str).strip()
+    if not raw:
+        return None
+    try:
+        return datetime.strptime(raw, "%d %b %y")
+    except ValueError:
+        try:
+            clean_date = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', raw, flags=re.IGNORECASE)
+            return datetime.strptime(clean_date.strip(), "%d %B %Y")
+        except ValueError:
+            return None
+
+def to_iso_week_period(date_str: str) -> str:
+    """Converts a tournament date string to ISO week period (YYYY-Www)."""
+    dt = parse_limitless_tournament_date(date_str)
+    if not dt:
+        return "Unknown-Week"
+    iso_year, iso_week, _ = dt.isocalendar()
+    return f"{iso_year}-W{iso_week:02d}"
+
+def extract_tournament_date_from_html(tournament_html: str, fallback_date: str = "") -> str:
+    """Extract tournament date from tournament page (Limitless infobox/header)."""
+    if not tournament_html:
+        return fallback_date
+
+    soup = BeautifulSoup(tournament_html, 'html.parser')
+
+    for info in soup.select('.infobox-line'):
+        text = info.get_text(' ', strip=True)
+        if not text:
+            continue
+        candidate = text.split('•')[0].strip()
+        if parse_limitless_tournament_date(candidate):
+            return candidate
+
+    for elem in soup.select('.tournament-header time, .tournament-header .date'):
+        candidate = elem.get_text(' ', strip=True)
+        if parse_limitless_tournament_date(candidate):
+            return candidate
+
+    if parse_limitless_tournament_date(fallback_date):
+        return fallback_date
+    return fallback_date or ""
+
 # ============================================================================
 # CLOUDSCRAPER MULTITHREADING SETUP
 # ============================================================================
@@ -274,7 +323,8 @@ def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, card
                 'archetype': normalize_archetype_name(deck_name),
                 'cards': cards,
                 'source': 'City League',
-                'tournament_date': tournament_date
+                'tournament_date': tournament_date,
+                'date': tournament_date
             }
     except Exception as e:
         logger.debug(f"Decklist error ({deck_url}): {e}")
@@ -288,7 +338,7 @@ def process_tournament_decklists(
     max_workers: int,
     card_db: CardDatabaseLookup
 ) -> list:
-    tournament_date = tournament_info.get('date_str', '')
+    tournament_date = tournament_info.get('date') or tournament_info.get('date_str', '')
     soup = BeautifulSoup(tournament_html, 'html.parser')
     deck_tasks = []
     
@@ -399,8 +449,10 @@ def scrape_city_league(settings: dict, card_db: CardDatabaseLookup) -> list:
     for i, tournament in enumerate(tournaments, 1):
         t_id = str(tournament.get('tournament_id') or tournament.get('id', 'unknown'))
         t_name = tournament.get('shop') or tournament.get('name') or 'Tournament'
+        t_date = tournament.get('date') or tournament.get('date_str') or ''
+        tournament['date'] = t_date
         
-        logger.info(f"[{i}/{total}] Lade {t_name} (ID: {t_id})")
+        logger.info(f"[{i}/{total}] Lade {t_name} (ID: {t_id}, Datum: {t_date or 'n/a'})")
         
         t_url = tournament.get('url', '')
         if not t_url:
@@ -409,6 +461,10 @@ def scrape_city_league(settings: dict, card_db: CardDatabaseLookup) -> list:
         html = safe_fetch_html(t_url, request_timeout, max_retries, retry_delay)
         if not html:
             continue
+
+        extracted_tournament_date = extract_tournament_date_from_html(html, t_date)
+        tournament['date'] = extracted_tournament_date
+        tournament['date_str'] = extracted_tournament_date
         
         decklists = process_tournament_decklists(
             html, max_decklists, tournament, request_timeout, max_workers, card_db
@@ -454,6 +510,8 @@ def main():
         
     for deck in all_decks:
         deck['meta'] = 'City League'
+        if 'date' not in deck:
+            deck['date'] = deck.get('tournament_date', '')
         
     logger.info(f"Aggregiere Karten-Daten von {len(all_decks)} Decks...")
     aggregated_data = aggregate_card_data(all_decks, card_db, group_by_tournament_date=True)

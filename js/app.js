@@ -1436,6 +1436,85 @@ const BASE_PATH = './data/';
                 return `<span class="stat-badge stat-trend-down">⬇️ -${Math.abs(shareChange).toFixed(1)}%</span>`;
             }
         }
+
+        /**
+         * Trend indicator based on last two history points.
+         * Expects objects like: { share: number|string }
+         * @param {Array} history
+         * @returns {string}
+         */
+        function getTrendIndicator(history) {
+            if (!Array.isArray(history) || history.length < 2) return '';
+
+            const parseShare = (value) => {
+                const parsed = parseFloat(String(value ?? 0).replace(',', '.'));
+                return Number.isFinite(parsed) ? parsed : 0;
+            };
+
+            const current = parseShare(history[history.length - 1]?.share);
+            const previous = parseShare(history[history.length - 2]?.share);
+            const diff = current - previous;
+
+            if (diff > 2) return `<span class="trend-up">▲ +${diff.toFixed(1)}%</span>`;
+            if (diff < -2) return `<span class="trend-down">▼ ${diff.toFixed(1)}%</span>`;
+            return '<span class="trend-stable">●</span>';
+        }
+
+        function getCityLeagueCardShareHistory(cardName) {
+            const rows = window.cityLeagueAnalysisData || [];
+            if (!cardName || rows.length === 0) return [];
+
+            const normalizeName = (name) => {
+                const raw = String(name || '');
+                if (typeof fixCardNameEncoding === 'function') {
+                    return fixCardNameEncoding(raw).trim().toLowerCase();
+                }
+                return raw.trim().toLowerCase();
+            };
+
+            const targetName = normalizeName(cardName);
+            const parseNum = (value) => parseFloat(String(value ?? 0).replace(',', '.')) || 0;
+
+            const periodArchetypeDecks = new Map();
+            rows.forEach(row => {
+                const period = String(row.date || row.period || row.tournament_date || '').trim();
+                const archetype = String(row.archetype || '').trim().toLowerCase();
+                if (!period || !archetype) return;
+
+                const decks = parseNum(row.total_decks_in_archetype_in_period || row.total_decks_in_archetype || 0);
+                const key = `${period}|||${archetype}`;
+                const prev = periodArchetypeDecks.get(key) || 0;
+                if (decks > prev) periodArchetypeDecks.set(key, decks);
+            });
+
+            const totalDecksByPeriod = new Map();
+            periodArchetypeDecks.forEach((decks, key) => {
+                const [period] = key.split('|||');
+                totalDecksByPeriod.set(period, (totalDecksByPeriod.get(period) || 0) + decks);
+            });
+
+            const decksWithCardByPeriod = new Map();
+            rows.forEach(row => {
+                const rowName = normalizeName(row.card_name || row.full_card_name || '');
+                if (!rowName || rowName !== targetName) return;
+
+                const period = String(row.date || row.period || row.tournament_date || '').trim();
+                if (!period) return;
+
+                const decksWithCard = parseNum(row.deck_inclusion_count || row.deck_count || 0);
+                decksWithCardByPeriod.set(period, (decksWithCardByPeriod.get(period) || 0) + decksWithCard);
+            });
+
+            return Array.from(totalDecksByPeriod.keys())
+                .sort((a, b) => a.localeCompare(b))
+                .map(period => {
+                    const totalDecks = totalDecksByPeriod.get(period) || 0;
+                    const decksWithCard = decksWithCardByPeriod.get(period) || 0;
+                    const share = totalDecks > 0 ? (decksWithCard / totalDecks) * 100 : 0;
+                    return { period, share };
+                })
+                .filter(entry => Number.isFinite(entry.share));
+        }
         
         /**
          * Find the best representative image for an archetype
@@ -3644,25 +3723,38 @@ const BASE_PATH = './data/';
                 console.log('DEBUG: Filtering by date range:', dateFrom, 'to', dateTo);
                 
                 const dateDebugSample = [];
-                const hasTournamentDates = deckCards.some(row => row.tournament_date);
-                if (!hasTournamentDates) {
-                    console.warn('[City League] Date filter is active, but analysis rows have no tournament_date. Card composition remains unfiltered until city_league_analysis.csv is regenerated with per-date rows.');
+                const hasParseableTournamentDates = deckCards.some(row =>
+                    !!parseJapaneseDate(row.tournament_date || row.date || '')
+                );
+                if (!hasParseableTournamentDates) {
+                    console.error('[City League] Date filter requires per-tournament card rows (tournament_date). Current analysis CSV is fully aggregated, so share/average metrics cannot be recalculated by date.');
+                    window.currentCityLeagueDeckCards = [];
+                    window.currentCityLeagueTotalDecks = 0;
+                    clearCityLeagueDeckView();
+
+                    const statusEl = document.getElementById('cityLeagueDateFilterStatus');
+                    if (statusEl) {
+                        statusEl.textContent = 'Date filter active, but card data has no tournament dates. Re-run City League Analysis scraper and regenerate city_league_analysis.csv.';
+                        statusEl.style.color = '#ffb3b3';
+                    }
+                    return;
                 }
 
                 deckCards = deckCards.filter(row => {
-                    const tournamentDate = parseJapaneseDate(row.tournament_date);
+                    const rawTournamentDate = row.tournament_date || row.date || '';
+                    const tournamentDate = parseJapaneseDate(rawTournamentDate);
                     
                     // Collect first 5 examples for debugging
                     if (dateDebugSample.length < 5) {
                         dateDebugSample.push({
-                            raw: row.tournament_date,
+                            raw: rawTournamentDate,
                             parsed: tournamentDate,
                             passes: tournamentDate && tournamentDate >= dateFrom && tournamentDate <= dateTo
                         });
                     }
                     
-                    // Keep rows without parseable date so cards don't disappear when source has no dates.
-                    if (!tournamentDate) return true;
+                    // Strict date filtering: calculations must only use rows with parseable dates in range.
+                    if (!tournamentDate) return false;
                     return tournamentDate >= dateFrom && tournamentDate <= dateTo;
                 });
                 
@@ -4367,6 +4459,9 @@ const BASE_PATH = './data/';
                 const avgCountInUsedDecks = Math.max(0, avgCountInUsedValue).toFixed(2).replace('.', ',');  // Average in decks that use this card
                 const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
                 const totalDecksDisplay = Math.round(Math.max(0, totalDecksInArchetype));
+                const trendHistory = getCityLeagueCardShareHistory(cardName);
+                const trendIndicator = getTrendIndicator(trendHistory);
+                const showTrendOverlay = trendIndicator && !trendIndicator.includes('trend-stable');
                 
                 // PERFORMANCE: Get price using Map lookup instead of find()
                 let eurPrice = '';
@@ -4420,6 +4515,7 @@ const BASE_PATH = './data/';
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
+                            ${showTrendOverlay ? `<div class="trend-badge-overlay">${trendIndicator}</div>` : ''}
                             
                             <!-- Card info section - Mobile Overlay -->
                             <div class="card-info-bottom" style="padding: 5px; background: white; font-size: 0.7em; text-align: center; min-height: 48px; display: flex; flex-direction: column; justify-content: space-between;">
@@ -7740,6 +7836,8 @@ const BASE_PATH = './data/';
             grid.innerHTML = cards.map(card => {
                 const imageUrl = getBestCardImage(card) || buildInlineCardPlaceholder(card.card_name);
                 const fallbackUrl = buildInlineCardPlaceholder(card.card_name);
+                const trendHistory = source === 'cityLeague' ? getCityLeagueCardShareHistory(card.card_name) : [];
+                const trendIndicator = source === 'cityLeague' ? getTrendIndicator(trendHistory) : '';
                 
                 // Create JSON string for archetypes (escape properly for HTML attribute)
                 const archetypesJson = JSON.stringify(card.archetypes || []).replace(/"/g, '&quot;');
@@ -7767,7 +7865,7 @@ const BASE_PATH = './data/';
                             <div class="card-info-bottom" style="padding: 6px; background: white; font-size: 0.75em; text-align: center;">
                                 <div class="card-info-text" style="margin-bottom: 6px;">
                                     <div style="font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${card.card_name}</div>
-                                    <div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% | Ø ${card.avgCount.toFixed(2)}x</div>
+                                    <div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${card.avgCount.toFixed(2)}x</div>
                                     <div style="color: #555; font-size: 0.9em; font-weight: 500;">(${card.avgCountWhenUsed.toFixed(2)}x when used)</div>
                                 </div>
                                 
@@ -12541,8 +12639,50 @@ const BASE_PATH = './data/';
                 || document.getElementById('appLoadingOverlay')
                 || document.getElementById('app-loading');
             if (overlay) {
-                overlay.style.display = 'none';
+                overlay.remove();
             }
+
+            const spinnerSelectors = [
+                '.loading-spinner',
+                '.spinner',
+                '.spinning',
+                '[data-loading-spinner="true"]'
+            ];
+            document.querySelectorAll(spinnerSelectors.join(',')).forEach(el => {
+                el.remove();
+            });
+        }
+
+        function runAppLoadingWatchdog(delayMs = 25000) {
+            window.setTimeout(() => {
+                const staleSelectors = [
+                    '#loadingOverlay',
+                    '#loading-overlay',
+                    '#appLoadingOverlay',
+                    '#app-loading',
+                    '.loading-spinner',
+                    '.spinner',
+                    '.spinning',
+                    '[data-loading-spinner="true"]'
+                ];
+
+                const staleNodes = Array.from(document.querySelectorAll(staleSelectors.join(',')));
+
+                // Catch custom loaders that still animate infinitely even without standard class names.
+                const infiniteAnimatedNodes = Array.from(document.querySelectorAll('body *')).filter(el => {
+                    const style = window.getComputedStyle(el);
+                    const iterations = style.animationIterationCount || '';
+                    const animationName = (style.animationName || '').toLowerCase();
+                    if (!animationName || animationName === 'none') return false;
+                    return iterations === 'infinite' && animationName.includes('spin');
+                });
+
+                const nodesToRemove = new Set([...staleNodes, ...infiniteAnimatedNodes]);
+                if (nodesToRemove.size > 0) {
+                    nodesToRemove.forEach(node => node.remove());
+                    console.log(`[Init] Loading watchdog removed ${nodesToRemove.size} stale loading node(s).`);
+                }
+            }, delayMs);
         }
 
         // Initialize
@@ -12565,26 +12705,37 @@ const BASE_PATH = './data/';
                     analysisFormatDropdown.value = savedFormat;
                 }
                 window.currentCityLeagueFormat = savedFormat;
-                
-                // Ensure card indexes are built before any deck rendering starts.
-                await loadAllCardsDatabase();
 
-                // Load auxiliary datasets in parallel; failures are handled internally.
-                await Promise.all([
-                    loadPokedexNumbers(),
-                    loadAceSpecsList(),
-                    loadSetMapping(),
-                    loadRarityPreferences(),
-                    loadSetOrderMap()
-                ]);
-                
-                // Load first tab automatically
-                await loadCityLeagueData();
-                window.cityLeagueLoaded = true;
+                const startupLoads = [
+                    { key: 'all_cards', run: () => loadAllCardsDatabase() },
+                    { key: 'ace_specs', run: () => loadAceSpecsList() },
+                    { key: 'city_leagues', run: () => loadCityLeagueData() },
+                    { key: 'pokedex_numbers', run: () => loadPokedexNumbers() },
+                    { key: 'set_mapping', run: () => loadSetMapping() },
+                    { key: 'rarity_preferences', run: () => loadRarityPreferences() },
+                    { key: 'set_order', run: () => loadSetOrderMap() }
+                ];
+
+                const settledLoads = await Promise.allSettled(startupLoads.map(load => load.run()));
+                settledLoads.forEach((result, index) => {
+                    const loadKey = startupLoads[index].key;
+                    if (result.status === 'rejected') {
+                        console.error(`[Init] ${loadKey} failed:`, result.reason);
+                    }
+                });
+
+                window.cityLeagueLoaded = settledLoads[2].status === 'fulfilled';
+
+                window.__appResourcesSettled = true;
+                document.documentElement.dataset.appReady = 'true';
+                window.dispatchEvent(new CustomEvent('app:resources-settled'));
+                window.dispatchEvent(new CustomEvent('app:ui-ready'));
+                console.log('[Init] All resources settled. UI is ready.');
             } catch (e) {
                 console.error('[init] App initialization failed:', e);
             } finally {
                 hideAppLoadingOverlay();
+                runAppLoadingWatchdog();
             }
         });
         

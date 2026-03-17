@@ -6,29 +6,47 @@
  * This file is NEVER overwritten by CI — all logic lives here safely.
  */
 
-// Initialize Firebase (only once).
-// Credentials come from firebase-credentials.js (window.FIREBASE_CREDS).
-// Avoid declaring `const firebaseConfig` — the credentials file (written by
-// GitHub Actions secret) may already declare it, causing a SyntaxError.
-if (!firebase.apps.length) {
-  firebase.initializeApp(window.FIREBASE_CREDS || {
-    apiKey: "PLACEHOLDER_API_KEY",
-    authDomain: "PLACEHOLDER_AUTHDOMAIN",
-    projectId: "PLACEHOLDER_PROJECT_ID",
-    storageBucket: "PLACEHOLDER_BUCKET",
-    messagingSenderId: "PLACEHOLDER_SENDER_ID",
-    appId: "PLACEHOLDER_APP_ID",
-    measurementId: "PLACEHOLDER_MEASUREMENT_ID"
+function initFirebaseRuntime() {
+  if (window.__firebaseRuntimeInitialized) return;
+  window.__firebaseRuntimeInitialized = true;
+
+  // Initialize Firebase (only once).
+  // Credentials come from firebase-credentials.js (window.FIREBASE_CREDS).
+  // Avoid declaring `const firebaseConfig` — the credentials file (written by
+  // GitHub Actions secret) may already declare it, causing a SyntaxError.
+  if (!firebase.apps.length) {
+    firebase.initializeApp(window.FIREBASE_CREDS || {
+      apiKey: "PLACEHOLDER_API_KEY",
+      authDomain: "PLACEHOLDER_AUTHDOMAIN",
+      projectId: "PLACEHOLDER_PROJECT_ID",
+      storageBucket: "PLACEHOLDER_BUCKET",
+      messagingSenderId: "PLACEHOLDER_SENDER_ID",
+      appId: "PLACEHOLDER_APP_ID",
+      measurementId: "PLACEHOLDER_MEASUREMENT_ID"
+    });
+  }
+
+  // Auth state observer — handlers are defined in firebase-globals.js.
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      console.log('✓ User signed in:', user.email);
+      if (typeof onUserSignedIn === 'function') onUserSignedIn(user);
+    } else {
+      console.log('✗ User signed out');
+      if (typeof onUserSignedOut === 'function') onUserSignedOut();
+    }
   });
 }
 
-// Auth state observer — handlers are defined in firebase-globals.js.
-firebase.auth().onAuthStateChanged(function(user) {
-  if (user) {
-    console.log('✓ User signed in:', user.email);
-    if (typeof onUserSignedIn === 'function') onUserSignedIn(user);
-  } else {
-    console.log('✗ User signed out');
-    if (typeof onUserSignedOut === 'function') onUserSignedOut();
+function scheduleFirebaseInit() {
+  if (window.__appResourcesSettled || document.documentElement.dataset.appReady === 'true') {
+    initFirebaseRuntime();
+    return;
   }
-});
+
+  window.addEventListener('app:ui-ready', initFirebaseRuntime, { once: true });
+  // Fallback: keep auth usable even if app signal is missed.
+  setTimeout(initFirebaseRuntime, 8000);
+}
+
+scheduleFirebaseInit();

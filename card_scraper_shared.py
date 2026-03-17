@@ -152,6 +152,25 @@ def parse_tournament_date(date_str: str) -> Optional[datetime]:
             return datetime.strptime(clean.strip(), "%d %B %Y")
         except ValueError: return None
 
+def get_week_id(date_str: str) -> str:
+    """Converts a date string to week id format YYYY-Www."""
+    if not date_str:
+        return "Unknown-Week"
+
+    raw = str(date_str).strip()
+    dt = parse_tournament_date(raw)
+
+    if dt is None:
+        try:
+            dt = datetime.strptime(raw, "%d.%m.%Y")
+        except ValueError:
+            try:
+                dt = datetime.strptime(raw, "%Y-%m-%d")
+            except ValueError:
+                return "Unknown-Week"
+
+    return dt.strftime('%Y-W%W')
+
 # ============================================================================
 # UNIFIED CARD DATABASE (Replaces CardDataManager & CardTypeLookup)
 # ============================================================================
@@ -315,8 +334,8 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_t
     for deck in all_decks:
         if not deck.get('cards'): continue
         arch = normalize_archetype_name(deck['archetype'])
-        tournament_date = deck.get('tournament_date', '') if group_by_tournament_date else ''
-        group_key = (tournament_date, arch) if group_by_tournament_date else arch
+        period = get_week_id(deck.get('tournament_date') or deck.get('date', '')) if group_by_tournament_date else ''
+        group_key = (period, arch) if group_by_tournament_date else arch
         grouped_deck_counts[group_key] += 1
         seen = set()
         for c in deck['cards']:
@@ -330,9 +349,9 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_t
     result = []
     for group_key, cards in grouped_cards.items():
         if group_by_tournament_date:
-            tournament_date, arch = group_key
+            period, arch = group_key
         else:
-            tournament_date, arch = '', group_key
+            period, arch = '', group_key
 
         total_decks = grouped_deck_counts[group_key]
         for name, stats in cards.items():
@@ -362,7 +381,8 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_t
 
             if group_by_tournament_date:
                 row['meta'] = 'City League'
-                row['tournament_date'] = tournament_date
+                row['period'] = period
+                row['total_decks_in_archetype_in_period'] = total_decks
 
             result.append(row)
     return result
@@ -377,12 +397,37 @@ def save_to_csv(data: list, output_file: str, append_mode: bool = False):
             existing = list(csv.DictReader(f, delimiter=';'))
 
     if append_mode and existing:
-        new_keys = {f"{r.get('tournament_date','')}|{r['archetype']}|{r['card_name']}" for r in data}
-        merged = [r for r in existing if f"{r.get('tournament_date','')}|{r.get('archetype','')}|{r.get('card_name','')}" not in new_keys]
+        def row_period_key(row: dict) -> str:
+            period = row.get('period', '') or row.get('date', '') or row.get('tournament_date', '')
+            return f"{period}|{row.get('archetype','')}|{row.get('card_name','')}"
+
+        new_keys = {row_period_key(r) for r in data}
+        merged = [r for r in existing if row_period_key(r) not in new_keys]
         merged.extend(data)
         data = merged
 
     if not data: return
+
+    if 'period' in data[0]:
+        reordered = []
+        for row in data:
+            ordered = {'period': row.get('period', '')}
+            for key, value in row.items():
+                if key == 'period':
+                    continue
+                ordered[key] = value
+            reordered.append(ordered)
+        data = reordered
+    elif 'date' in data[0]:
+        reordered = []
+        for row in data:
+            ordered = {'date': row.get('date', '')}
+            for key, value in row.items():
+                if key == 'date':
+                    continue
+                ordered[key] = value
+            reordered.append(ordered)
+        data = reordered
 
     with open(out_path, 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=list(data[0].keys()), delimiter=';', extrasaction='ignore')

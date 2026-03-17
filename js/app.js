@@ -1194,6 +1194,34 @@ const BASE_PATH = './data/';
                 }
             }
 
+            // ── Regulation-mark scoring (used by both sort blocks below) ──────────────
+            // H (newest SV era 2024-2025) > G (SV 2023-2024) > F (SWSH late) >
+            // E (SWSH early) > D (XY era) > C (late BW) > no mark (BW/older)
+            const _REG_MARK_SCORE = { 'H': 6, 'G': 5, 'F': 4, 'E': 3, 'D': 2, 'C': 1 };
+            const _SET_TO_REG_MARK = {
+                // H mark (2024-2025, late Scarlet & Violet)
+                'SSP': 'H', 'PRE': 'H', 'SCR': 'H',
+                // G mark (2023-2024, Scarlet & Violet)
+                'SVI': 'G', 'PAL': 'G', 'OBF': 'G', 'MEW': 'G', 'PAR': 'G',
+                'PAF': 'G', 'TEF': 'G', 'TWM': 'G', 'SFA': 'G', 'SVP': 'G',
+                // F mark (2022-2023, late Sword & Shield)
+                'LOR': 'F', 'SIT': 'F', 'CRZ': 'F', 'ASR': 'F', 'FST': 'F', 'BRS': 'F',
+                // E mark (2020-2021, early/mid Sword & Shield)
+                'SSH': 'E', 'RCL': 'E', 'DAA': 'E', 'CPA': 'E', 'VIV': 'E',
+                'SHF': 'E', 'BST': 'E', 'CRE': 'E', 'EVS': 'E', 'CEL': 'E', 'PGO': 'E',
+                // D mark (XY era 2013-2016)
+                'XY': 'D', 'FLF': 'D', 'FFI': 'D', 'PHF': 'D', 'PRC': 'D', 'ROS': 'D',
+                'AOR': 'D', 'BKT': 'D', 'BKP': 'D', 'FCO': 'D', 'STS': 'D', 'EVO': 'D',
+                // C mark (late BW / BW-XY transition)
+                'PLB': 'C', 'PLF': 'C', 'BCR': 'C', 'NXD': 'C', 'DEX': 'C', 'LTR': 'C',
+                // BW era (BLK, BRS base, etc.) has no entry → score 0
+            };
+            const _getRegMarkScore = (setCode) => {
+                const mark = _SET_TO_REG_MARK[(setCode || '').toUpperCase()];
+                return mark ? (_REG_MARK_SCORE[mark] ?? 0) : 0;
+            };
+            // ─────────────────────────────────────────────────────────────────────────────
+
             if (globalPref && (globalPref === 'max' || globalPref === 'min')) {
                 // Set order loaded from sets.json at startup (higher = newer)
                 const SET_ORDER = window.setOrderMap || {};
@@ -1202,19 +1230,27 @@ const BASE_PATH = './data/';
                     const priorityA = getRarityPriority(a.rarity, a.set);
                     const priorityB = getRarityPriority(b.rarity, b.set);
                     
-                    // Primary sort: by priority (rarity)
+                    // Primary sort: by rarity priority
                     if (priorityA !== priorityB) {
                         return priorityA - priorityB;
                     }
                     
-                    // Secondary sort (same priority): by SET ORDER (newer sets first)
+                    // Secondary sort: regulation mark (H > G > F > E > D > C > no mark)
+                    // Ensures modern SV-era reprints (TEF 85) beat old BW-era prints (BLK 45)
+                    const regA = _getRegMarkScore(a.set);
+                    const regB = _getRegMarkScore(b.set);
+                    if (regA !== regB) {
+                        return regB - regA; // Higher score = newer mark = preferred
+                    }
+                    
+                    // Tertiary sort (same mark): by SET ORDER (newer sets first)
                     const setOrderA = SET_ORDER[a.set] || 0;
                     const setOrderB = SET_ORDER[b.set] || 0;
                     if (setOrderA !== setOrderB) {
                         return setOrderB - setOrderA; // Higher number = newer = preferred
                     }
                     
-                    // Tertiary sort (same set): by set number (lower number first)
+                    // Quaternary sort (same set): by card number (lower number first)
                     const numA = parseInt((a.number || '0').toString().replace(/[^\d]/g, '')) || 0;
                     const numB = parseInt((b.number || '0').toString().replace(/[^\d]/g, '')) || 0;
                     return numA - numB;
@@ -1228,10 +1264,10 @@ const BASE_PATH = './data/';
                 
                 // DEBUG: Log all versions and their priorities
                 console.log(`[getPreferredVersionForCard] All versions for "${cardName}":`, 
-                    versions.map((v, idx) => `${v.set} ${v.number} (${v.rarity || 'NO RARITY'}, priority: ${getRarityPriority(v.rarity, v.set)}, index: ${idx})`).join(', ')
+                    versions.map((v, idx) => `${v.set} ${v.number} (${v.rarity || 'NO RARITY'}, regMark: ${_getRegMarkScore(v.set)}, priority: ${getRarityPriority(v.rarity, v.set)}, index: ${idx})`).join(', ')
                 );
                 console.log(`[getPreferredVersionForCard] Sorted order:`, 
-                    sorted.map(v => `${v.set} ${v.number} (priority: ${getRarityPriority(v.rarity, v.set)})`).join(', ')
+                    sorted.map(v => `${v.set} ${v.number} (priority: ${getRarityPriority(v.rarity, v.set)}, regMark: ${_getRegMarkScore(v.set)})`).join(', ')
                 );
                 console.log(`[getPreferredVersionForCard] ${globalPref} rarity for "${cardName}": ${selected.set} ${selected.number} (${selected.rarity}, priority: ${getRarityPriority(selected.rarity, selected.set)})`);
                 return selected;
@@ -1247,10 +1283,20 @@ const BASE_PATH = './data/';
             }
 
             if (pref.mode === 'max' || pref.mode === 'min') {
+                const SET_ORDER = window.setOrderMap || {};
                 const sorted = versions.slice().sort((a, b) => {
                     const priorityA = getRarityPriority(a.rarity, a.set);
                     const priorityB = getRarityPriority(b.rarity, b.set);
-                    return priorityA - priorityB;
+                    if (priorityA !== priorityB) return priorityA - priorityB;
+                    const regA = _getRegMarkScore(a.set);
+                    const regB = _getRegMarkScore(b.set);
+                    if (regA !== regB) return regB - regA;
+                    const setOrderA = SET_ORDER[a.set] || 0;
+                    const setOrderB = SET_ORDER[b.set] || 0;
+                    if (setOrderA !== setOrderB) return setOrderB - setOrderA;
+                    const numA = parseInt((a.number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    const numB = parseInt((b.number || '0').toString().replace(/[^\d]/g, '')) || 0;
+                    return numA - numB;
                 });
                 
                 // CRITICAL FIX: Filter out NO RARITY cards (priority 999) before selecting

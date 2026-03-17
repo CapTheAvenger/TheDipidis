@@ -3543,14 +3543,24 @@ const BASE_PATH = './data/';
         function aggregateCardStatsByDate(filteredCards) {
             // Group by card_name
             const cardMap = new Map();
+
+            const getAggregationBucketKey = (row) => {
+                const tournamentId = String(row.tournament_id || '').trim();
+                const period = String(row.period || row.date || row.tournament_date || '').trim();
+
+                if (tournamentId && period) return `${tournamentId}|||${period}`;
+                if (tournamentId) return `id:${tournamentId}`;
+                if (period) return `period:${period}`;
+                return 'global';
+            };
             
             // Calculate total decks across all tournaments
             // For each unique tournament date, get the total_decks_in_archetype value
             // CRITICAL FIX: Only set if not already present (take first occurrence)
             const tournamentDecksMap = new Map();
             filteredCards.forEach(row => {
-                const tournamentKey = `${row.tournament_id || ''}|||${row.tournament_date || ''}`;
-                const decksInTournament = parseInt(row.total_decks_in_archetype || 0, 10) || 0;
+                const tournamentKey = getAggregationBucketKey(row);
+                const decksInTournament = parseInt(row.total_decks_in_archetype_in_period || row.total_decks_in_archetype || 0, 10) || 0;
                 if (!tournamentDecksMap.has(tournamentKey)) {
                     tournamentDecksMap.set(tournamentKey, decksInTournament);
                 }
@@ -3609,7 +3619,7 @@ const BASE_PATH = './data/';
                     cardData.maxCountValues.push(maxCount);
                 }
                 const rowDeckCount = parseInt(row.deck_count || row.deck_inclusion_count || 0, 10) || 0;
-                const tournamentKey = `${row.tournament_id || ''}|||${row.tournament_date || ''}`;
+                const tournamentKey = getAggregationBucketKey(row);
                 cardData.deckCountByTournament.set(
                     tournamentKey,
                     (cardData.deckCountByTournament.get(tournamentKey) || 0) + rowDeckCount
@@ -3617,7 +3627,7 @@ const BASE_PATH = './data/';
                 
                 cardData.tournamentsWithCard.add(tournamentKey);
                 // Track deck count for each tournament where this card appeared
-                const decksInTournament = parseInt(row.total_decks_in_archetype || 0, 10) || 0;
+                const decksInTournament = parseInt(row.total_decks_in_archetype_in_period || row.total_decks_in_archetype || 0, 10) || 0;
                 cardData.tournamentDeckCountsWithCard.set(tournamentKey, decksInTournament);
             });
             

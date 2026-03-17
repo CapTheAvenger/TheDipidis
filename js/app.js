@@ -7365,16 +7365,15 @@ const BASE_PATH = './data/';
             const isAceSpecCard = (c) => {
                 if (!c) return false;
 
-                // 1. Hole den Namen und bereinige ihn (kleingeschrieben, keine Leerzeichen am Rand)
-                const name = String(c.card_name || c.name || '').trim().toLowerCase();
+                const rawName = String(c.card_name || c.name || '').trim();
+                const lowerName = rawName.toLowerCase();
 
-                // 2. ABSOLUTER HARD-BLOCK: Wenn die Karte exakt "switch" oder "pokémon catcher" heißt,
-                // KANN es keine Ace Spec sein. Breche sofort ab!
-                if (name === 'switch' || name === 'pokemon catcher' || name === 'pokémon catcher') {
+                // 1. ABSOLUTER HARD-BLOCK: Diese Karten sind normale Items/Tools.
+                if (lowerName === 'switch' || lowerName === 'cross switch' || lowerName === 'pokémon catcher' || lowerName === 'pokemon catcher') {
                     return false;
                 }
 
-                // 3. Harte Liste aller bekannten ACE SPECS (Exakter Abgleich!)
+                // 2. Echte, harte ACE SPEC Liste
                 const exactAceSpecs = [
                     'awaking drum', "hero's cape", 'master ball', 'maximum belt',
                     'neo upper energy', 'prime catcher', 'reboot pod', 'hyper aroma',
@@ -7384,18 +7383,11 @@ const BASE_PATH = './data/';
                     'precious trolley', 'scramble switch', 'search computer'
                 ];
 
-                // Nutzt includes auf dem Array (prüft, ob 'name' exakt in 'exactAceSpecs' vorkommt)
-                if (exactAceSpecs.includes(name)) return true;
+                if (exactAceSpecs.includes(lowerName)) return true;
 
-                // 4. CSV Fallback
+                // 3. Fallback auf CSV-Spalten
                 if (String(c.is_ace_spec).trim().toLowerCase() === 'yes') return true;
                 if (String(c.rarity).trim().toUpperCase() === 'ACE SPEC RARE' || String(c.rarity).trim().toUpperCase() === 'ACE SPEC') return true;
-
-                // 5. Index Fallback
-                if (c.set_code && c.set_number && window.cardIndexBySetNumber) {
-                    const canonical = window.cardIndexBySetNumber.get(`${c.set_code}-${c.set_number}`);
-                    if (canonical && String(canonical.rarity).toUpperCase().includes('ACE SPEC')) return true;
-                }
 
                 return false;
             };

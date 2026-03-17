@@ -1079,6 +1079,7 @@ const BASE_PATH = './data/';
             ];
 
             if (basicEnergyNames.includes(normalized)) return true;
+            if (/^basic\s+energy(?:\s+.*)?$/i.test(normalized)) return true;
             if (/^basic\s+\{[grwlpfdm]\}\s+energy(?:\s+.*)?$/i.test(normalized)) return true;
 
             // Allow common source suffixes, e.g. "Fighting Energy SVE 22"
@@ -7318,8 +7319,10 @@ const BASE_PATH = './data/';
             
             // Basic Energy identification
             const isBaseEnergy = (card) => {
-                const type = (card.type || card.card_type || '').toLowerCase();
-                return type === 'energy' && (card.card_name || '').match(/^(Fire|Water|Grass|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon|Colorless|Neutral)\s+Energy$/i);
+                const canonicalCard = (card && card.set_code && card.set_number)
+                    ? getIndexedCardBySetNumber(card.set_code, card.set_number)
+                    : null;
+                return isBasicEnergyCardEntry(canonicalCard || card);
             };
             
             // Step 1: Aggregate cards by card_name

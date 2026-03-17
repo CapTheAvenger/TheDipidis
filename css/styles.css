@@ -3668,6 +3668,25 @@ h3:first-child {
     background: linear-gradient(135deg, #2a3a9a 0%, #1a2a7a 100%);
 }
 
+.limitless-btn:hover {
+    background: #34495e !important;
+}
+
+.archetype-jump-link {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+    display: inline-block;
+    padding: 2px 0;
+}
+
+.archetype-jump-link:hover {
+    color: #e74c3c;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 /* Mobile Board Layout (Vertical) */
 @media (max-width: 768px) {
     #playtester-board {

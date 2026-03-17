@@ -97,6 +97,95 @@ const BASE_PATH = './data/';
                 activeBtn.classList.add('active');
             }
         }
+
+        window.jumpToCardAnalysis = function(archetype, region) {
+            console.log(`[Navigation] Jumping to ${region} analysis for: ${archetype}`);
+
+            const safeArchetype = String(archetype || '').trim();
+            const normalizedRegion = String(region || '').trim();
+
+            const triggerTabSwitch = (tabId) => {
+                if (typeof switchTabAndUpdateMenu === 'function') {
+                    switchTabAndUpdateMenu(tabId);
+                } else {
+                    switchTab(tabId);
+                }
+            };
+
+            if (normalizedRegion === 'cityLeague') {
+                triggerTabSwitch('city-league-analysis');
+
+                const select = document.getElementById('cityLeagueArchetypeSelect');
+                if (select) {
+                    const optionExists = Array.from(select.options).some(opt => opt.value === safeArchetype);
+                    select.value = optionExists ? safeArchetype : 'all';
+                    select.dispatchEvent(new Event('change'));
+                }
+            } else if (normalizedRegion === 'currentMeta') {
+                triggerTabSwitch('current-analysis');
+
+                const select = document.getElementById('currentMetaArchetypeSelect');
+                if (select) {
+                    const optionExists = Array.from(select.options).some(opt => opt.value === safeArchetype);
+                    select.value = optionExists ? safeArchetype : 'all';
+                    select.dispatchEvent(new Event('change'));
+                }
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function parseArchetypeSelection(archetype) {
+            const raw = String(archetype || '').trim();
+            const isGroup = raw.startsWith('GROUP:');
+            const targetArchetypes = isGroup
+                ? raw.replace('GROUP:', '').split('|').map(v => String(v || '').trim()).filter(Boolean)
+                : [raw];
+
+            const baseName = targetArchetypes[0] ? targetArchetypes[0].split(' ')[0] : 'Group';
+            const displayArchetypeName = isGroup ? `${baseName} (All Variants)` : raw;
+
+            return { raw, isGroup, targetArchetypes, displayArchetypeName };
+        }
+
+        window.analyzeCombinedArchetype = function(mainName, variantsJson) {
+            let variants = [];
+            try {
+                variants = JSON.parse(decodeURIComponent(String(variantsJson || '')));
+            } catch (e) {
+                console.error('[Combined Deep-Dive] Could not parse variants:', e);
+                return;
+            }
+
+            if (!Array.isArray(variants) || variants.length === 0) return;
+
+            const displayName = String(mainName || '').charAt(0).toUpperCase() + String(mainName || '').slice(1);
+
+            if (typeof switchTabAndUpdateMenu === 'function') {
+                switchTabAndUpdateMenu('city-league-analysis');
+            } else {
+                switchTab('city-league-analysis');
+            }
+
+            const select = document.getElementById('cityLeagueDeckSelect');
+            if (!select) return;
+
+            const groupValue = 'GROUP:' + variants.join('|');
+
+            let option = Array.from(select.options).find(opt => opt.value === groupValue);
+            if (!option) {
+                option = document.createElement('option');
+                option.value = groupValue;
+                option.textContent = `🧩 ${displayName} (All Variants Combined)`;
+                option.style.fontWeight = 'bold';
+                option.style.color = '#e3350d';
+                select.insertBefore(option, select.options[1] || null);
+            }
+
+            select.value = groupValue;
+            select.dispatchEvent(new Event('change'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
         
         // Navigate to City League Analysis with pre-selected deck
         function navigateToAnalysisWithDeck(archetypeName) {
@@ -2764,7 +2853,7 @@ const BASE_PATH = './data/';
                     const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
                             <td style="padding: 12px; text-align: center;">${d.old_count}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count}</td>
                             <td style="padding: 12px; text-align: center; color: #e74c3c; font-weight: bold;">${change}</td>
@@ -2800,7 +2889,7 @@ const BASE_PATH = './data/';
                     const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #555; font-size: 0.9em; font-weight: 600;">(${countChangeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: #27ae60; font-weight: bold;">(-${improvement.toFixed(2)})</span></td>
                         </tr>`;
@@ -2829,7 +2918,7 @@ const BASE_PATH = './data/';
                     const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #555; font-size: 0.9em; font-weight: 600;">(${countChangeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: #e74c3c; font-weight: bold;">(+${decline.toFixed(2)})</span></td>
                         </tr>`;
@@ -2983,10 +3072,11 @@ const BASE_PATH = './data/';
                     const placementChange = parseFloat(d.avg_placement_change || '0');
                     const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
                     const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
+                    const variantsJson = encodeURIComponent(JSON.stringify(d.variants || []));
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
-                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;">${displayName}</td>
+                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
                             <td style="padding: 8px 4px; text-align: center; color: #555; font-size: 0.85em; font-weight: 600;">${d.variant_count}</td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
@@ -3019,10 +3109,11 @@ const BASE_PATH = './data/';
                     
                     // Capitalize first letter
                     const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
+                    const variantsJson = encodeURIComponent(JSON.stringify(d.variants || []));
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background=''" title="${d.variants.join(', ')}">
-                            <td style="padding: 12px; font-weight: bold;">${displayName}</td>
+                            <td style="padding: 12px; font-weight: bold; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
                             <td style="padding: 12px; text-align: center; color: #555; font-weight: 600;">${d.variant_count}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-size: 0.9em;">(${changeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.9em;">(${placementText})</span></td>
@@ -3070,7 +3161,7 @@ const BASE_PATH = './data/';
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
                         </tr>`;
@@ -3102,7 +3193,7 @@ const BASE_PATH = './data/';
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')" title="Go to analysis of ${d.archetype}">${d.archetype}</td>
+                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-size: 0.9em;">(${changeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.9em;">(${placementText})</span></td>
                         </tr>`;
@@ -3371,9 +3462,13 @@ const BASE_PATH = './data/';
         }
 
         function getCityLeagueArchetypeStats(archetype) {
-            const matches = getFilteredCityLeagueArchetypesData().filter(row =>
-                row.archetype && row.archetype.toLowerCase() === String(archetype || '').toLowerCase()
-            );
+            const selection = parseArchetypeSelection(archetype);
+            const targetsLower = selection.targetArchetypes.map(v => v.toLowerCase());
+
+            const matches = getFilteredCityLeagueArchetypesData().filter(row => {
+                const rowArch = String(row.archetype || '').trim().toLowerCase();
+                return rowArch && targetsLower.includes(rowArch);
+            });
 
             const decksCount = matches.length;
             const avgPlacement = matches.length > 0
@@ -3486,17 +3581,17 @@ const BASE_PATH = './data/';
         function getCityLeagueDeckCountFallback(archetype) {
             if (!archetype) return 0;
 
+            const selection = parseArchetypeSelection(archetype);
+            const targetsLower = selection.targetArchetypes.map(v => v.toLowerCase());
+
             const liveStats = getCityLeagueArchetypeStats(archetype);
             if (liveStats.decksCount > 0) return liveStats.decksCount;
 
             // 1) Prefer comparison dataset (new_count)
             const comparisonRows = window.cityLeagueComparisonData || [];
-            const comparisonMatch = comparisonRows.find(row =>
-                row.archetype && row.archetype.toLowerCase() === archetype.toLowerCase()
-            );
-            const comparisonCount = comparisonMatch
-                ? parseInt(comparisonMatch.new_count || comparisonMatch.count || comparisonMatch.total_decks_in_archetype || 0, 10)
-                : 0;
+            const comparisonCount = comparisonRows
+                .filter(row => row.archetype && targetsLower.includes(String(row.archetype).toLowerCase()))
+                .reduce((sum, row) => sum + (parseInt(row.new_count || row.count || row.total_decks_in_archetype || 0, 10) || 0), 0);
             if (comparisonCount > 0) return comparisonCount;
 
             // 2) Fallback to selected dropdown label: "Archetype (43 Decks)"
@@ -3513,10 +3608,9 @@ const BASE_PATH = './data/';
 
             // 3) Last fallback from analysis rows
             const analysisRows = window.cityLeagueAnalysisData || [];
-            const analysisMatch = analysisRows.find(row =>
-                row.archetype && row.archetype.toLowerCase() === archetype.toLowerCase()
-            );
-            const analysisCount = analysisMatch ? parseInt(analysisMatch.total_decks_in_archetype || 0, 10) : 0;
+            const analysisCount = analysisRows
+                .filter(row => row.archetype && targetsLower.includes(String(row.archetype).toLowerCase()))
+                .reduce((max, row) => Math.max(max, parseInt(row.total_decks_in_archetype || 0, 10) || 0), 0);
             return analysisCount > 0 ? analysisCount : 0;
         }
 
@@ -3816,6 +3910,8 @@ const BASE_PATH = './data/';
             const data = window.cityLeagueAnalysisData;
             if (!data) return;
 
+            const selection = parseArchetypeSelection(archetype);
+
             const archetypeStats = getCityLeagueArchetypeStats(archetype);
             
             // Store current archetype
@@ -3841,8 +3937,10 @@ const BASE_PATH = './data/';
                 }
             }
             
-            // Filter cards for this archetype
-            let deckCards = data.filter(row => row.archetype === archetype);
+            // Filter cards for this archetype or GROUP selection
+            let deckCards = data.filter(row =>
+                selection.targetArchetypes.includes(String(row.archetype || '').trim())
+            );
             console.log('Found cards (before date filter):', deckCards.length);
             
             // Apply date filter if active
@@ -8607,6 +8705,16 @@ const BASE_PATH = './data/';
                         // Remove old rank and delta cells
                         oldRankCell.remove();
                         rankDeltaCell.remove();
+
+                        // Make archetype clickable for deep-dive navigation
+                        const deckNameCell = row.querySelector('td');
+                        if (deckNameCell && !deckNameCell.querySelector('.archetype-jump-link')) {
+                            const archetype = String(deckNameCell.textContent || '').trim();
+                            if (archetype) {
+                                const archetypeEscaped = archetype.replace(/'/g, "\\'");
+                                deckNameCell.innerHTML = `<a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'currentMeta')" class="archetype-jump-link">${archetype}</a>`;
+                            }
+                        }
                     });
                     
                     console.log('? Full Comparison Table patched successfully');

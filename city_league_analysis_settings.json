@@ -5,7 +5,7 @@
                                         "start_date":  "13.03.2026",
                                         "end_date":  "auto",
                                         "max_decklists_per_league":  50,
-                                        "additional_tournament_ids": [ 547 ]
+                                        "additional_tournament_ids": []
                                     }
                 },
     "output_file":  "city_league_analysis.csv",

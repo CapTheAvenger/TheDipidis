@@ -418,6 +418,13 @@ function showMultiplayerLobby(roomCode, status) {
         document.body.appendChild(lobby);
     }
     
+    const safeRoomCode = String(roomCode)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
     if (status === 'waiting') {
         lobby.innerHTML = `
             <div style="text-align: center; max-width: 500px; padding: 40px; background: #1a1a1a; border-radius: 20px; border: 3px solid #FFCB05;">
@@ -425,12 +432,20 @@ function showMultiplayerLobby(roomCode, status) {
                 <p style="font-size: 1.2rem; margin-bottom: 30px;">Warte auf Gegner...</p>
                 <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                     <p style="color: #aaa; margin-bottom: 10px;">Room Code:</p>
-                    <p style="font-size: 3rem; font-weight: 900; letter-spacing: 8px; color: #FFCB05;">${roomCode}</p>
+                    <p style="font-size: 3rem; font-weight: 900; letter-spacing: 8px; color: #FFCB05;">${safeRoomCode}</p>
                 </div>
                 <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">Teile diesen Code mit deinem Gegner</p>
-                <button onclick="leaveMultiplayerGame(); hideMultiplayerLobby();" style="background: #c0392b; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;">Abbrechen</button>
+                <button id="mpCancelBtn" style="background: #c0392b; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;">Abbrechen</button>
             </div>
         `;
+
+        const cancelBtn = lobby.querySelector('#mpCancelBtn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                leaveMultiplayerGame();
+                hideMultiplayerLobby();
+            });
+        }
     } else if (status === 'playing') {
         lobby.innerHTML = `
             <div style="text-align: center; max-width: 500px; padding: 40px; background: #1a1a1a; border-radius: 20px; border: 3px solid #27ae60;">

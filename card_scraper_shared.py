@@ -17,16 +17,66 @@ import csv
 import json
 import re
 import time
+import importlib
+import logging
 import threading
 from datetime import datetime, timedelta
 from collections import defaultdict
-from typing import List, Dict, Optional, Tuple, Any, Set
+from typing import List, Dict, Optional, Tuple, Any, Set, Mapping, TypedDict, Union, DefaultDict, cast
 
 try:
-    import cloudscraper
-    from bs4 import BeautifulSoup
-except ImportError:
-    print("[WARN] cloudscraper or bs4 missing. Some functions won't work.")
+    cloudscraper = importlib.import_module('cloudscraper')
+except ModuleNotFoundError:
+    cloudscraper = None
+    print("[WARN] cloudscraper missing. Some functions won't work.")
+
+try:
+    bs4_module = importlib.import_module('bs4')
+    BeautifulSoup = getattr(bs4_module, 'BeautifulSoup', None)
+except ModuleNotFoundError:
+    BeautifulSoup = None
+    print("[WARN] bs4 missing. Some functions won't work.")
+
+
+class CardVariant(TypedDict):
+    name: str
+    set_code: str
+    set_number: str
+    number: str
+    rarity: str
+    type: str
+    supertype: str
+    image_url: str
+    _source: str
+
+
+class DeckCard(TypedDict, total=False):
+    name: str
+    count: Union[int, str]
+    set_code: str
+    set: str
+    set_number: str
+    number: str
+
+
+class DeckEntry(TypedDict, total=False):
+    cards: List[DeckCard]
+    archetype: str
+    tournament_date: str
+    date: str
+
+
+class CardStats(TypedDict):
+    total_count: int
+    deck_count: int
+    max_count: int
+    set_versions: DefaultDict[Tuple[str, str], int]
+
+
+GroupKey = Union[str, Tuple[str, str]]
+RowDict = Dict[str, Any]
+
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # OS & DIRECTORY UTILS
@@ -34,9 +84,12 @@ except ImportError:
 def setup_console_encoding() -> None:
     if sys.platform == 'win32':
         for stream in (sys.stdout, sys.stderr):
-            if hasattr(stream, 'reconfigure'):
-                try: stream.reconfigure(encoding='utf-8')
-                except Exception: pass
+            reconfigure = getattr(stream, 'reconfigure', None)
+            if callable(reconfigure):
+                try:
+                    reconfigure(encoding='utf-8')
+                except Exception as e:
+                    logger.debug("Unable to reconfigure stream encoding: %s", e)
 
 def get_app_path() -> str:
     if getattr(sys, 'frozen', False):
@@ -54,34 +107,43 @@ def get_data_dir() -> str:
     os.makedirs(data_dir, exist_ok=True)
     return data_dir
 
-def load_scraped_ids(tracking_file: str) -> set:
+def load_scraped_ids(tracking_file: str) -> Set[str]:
     if not os.path.exists(tracking_file): return set()
     try:
         with open(tracking_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            for key in ['scraped_tournament_ids', 'scraped_ids', 'ids']:
-                if key in data: return set(data.get(key, []))
-            if isinstance(data, list): return set(data)
-    except Exception: pass
+            raw_data: Any = json.load(f)
+            if isinstance(raw_data, dict):
+                data_map = cast(Mapping[str, Any], raw_data)
+                for key in ['scraped_tournament_ids', 'scraped_ids', 'ids']:
+                    value = data_map.get(key)
+                    if isinstance(value, list):
+                        return {str(v) for v in cast(List[Any], value)}
+            if isinstance(raw_data, list):
+                return {str(v) for v in cast(List[Any], raw_data)}
+    except Exception as e:
+        logger.warning("Failed to load scraped IDs from %s: %s", tracking_file, e)
     return set()
 
-def save_scraped_ids(tracking_file: str, ids: set, id_key: str = 'scraped_ids') -> None:
+def save_scraped_ids(tracking_file: str, ids: Set[str], id_key: str = 'scraped_ids') -> None:
     try:
-        data = {id_key: sorted(list(ids)), 'last_updated': time.strftime('%Y-%m-%d %H:%M:%S'), 'total_count': len(ids)}
+        data: RowDict = {id_key: sorted(list(ids)), 'last_updated': time.strftime('%Y-%m-%d %H:%M:%S'), 'total_count': len(ids)}
         os.makedirs(os.path.dirname(tracking_file) or '.', exist_ok=True)
         with open(tracking_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
     except Exception as e:
-        print(f"Warning saving tracking IDs: {e}")
+        logger.warning("Failed to save scraped IDs to %s: %s", tracking_file, e)
 
 # ============================================================================
 # NETWORK UTILS (Cloudscraper + BS4)
 # ============================================================================
 _thread_local = threading.local()
 
-def _get_scraper() -> "cloudscraper.CloudScraper":
+def _get_scraper() -> Any:
+    if cloudscraper is None:
+        raise RuntimeError("cloudscraper is not installed")
     if not hasattr(_thread_local, "scraper"):
-        _thread_local.scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
+        create_scraper = getattr(cloudscraper, 'create_scraper')
+        _thread_local.scraper = create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
     return _thread_local.scraper
 
 def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: float = 1.0) -> str:
@@ -93,11 +155,17 @@ def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: 
             resp.raise_for_status()
             return resp.text
         except Exception as e:
-            if attempt <= retries: time.sleep(retry_delay)
+            if attempt <= retries:
+                logger.debug("Fetch failed (attempt %s/%s) for %s: %s", attempt, retries + 1, url, e)
+                time.sleep(retry_delay)
+            else:
+                logger.warning("Fetch failed after %s attempts for %s: %s", retries + 1, url, e)
     return ""
 
-def fetch_page_bs4(url: str, timeout: int = 15, retries: int = 2) -> Optional["BeautifulSoup"]:
+def fetch_page_bs4(url: str, timeout: int = 15, retries: int = 2) -> Optional[Any]:
     html = safe_fetch_html(url, timeout, retries)
+    if BeautifulSoup is None:
+        return None
     return BeautifulSoup(html, 'html.parser') if html else None
 
 def fetch_page(url: str, timeout: int = 15) -> str:
@@ -124,7 +192,7 @@ def fix_mega_pokemon_name(name: str) -> str:
 def slug_to_archetype(slug: str) -> str:
     slug = re.sub(r'-+', ' ', slug.strip().replace('_', '-')).strip()
     words = slug.split(' ')
-    def smart_title(word):
+    def smart_title(word: str) -> str:
         return word.upper() if word.lower() in {'ex', 'gx', 'v', 'vmax', 'vstar'} else word.title()
     return re.sub(r'\s+', ' ', ' '.join(smart_title(w) for w in words)).strip()
 
@@ -185,25 +253,26 @@ class CardDatabaseLookup:
         'Hyper Rare': 32, 'Illustration Rare': 33
     }
 
-    def __init__(self, csv_path: str = None):
-        self.cards = {}
+    def __init__(self, csv_path: Optional[str] = None):
+        self.cards: Dict[str, List[CardVariant]] = {}
         self.manager = self  # Duck-typing for backward compatibility
         self.SET_ORDER = self._load_dynamic_set_order()
         self._load_databases()
 
-    def _load_dynamic_set_order(self) -> dict:
+    def _load_dynamic_set_order(self) -> Dict[str, int]:
         sets_path = os.path.join(get_data_dir(), 'sets.json')
         try:
             with open(sets_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except Exception:
+        except Exception as e:
+            logger.warning("Could not load sets order from %s: %s", sets_path, e)
             return {'SVP': 100, 'SVI': 100}
 
     def _load_databases(self):
         data_dir = get_data_dir()
         en_path = os.path.join(data_dir, 'all_cards_database.csv')
         jp_path = os.path.join(data_dir, 'japanese_cards_database.csv')
-        seen = set()
+        seen: Set[str] = set()
 
         if os.path.exists(en_path):
             with open(en_path, 'r', encoding='utf-8-sig') as f:
@@ -217,13 +286,17 @@ class CardDatabaseLookup:
                     name = row.get('name', '')
                     if name: self._add_card(name, row, 'japanese', seen)
 
-    def _add_card(self, name: str, row: dict, source: str, seen: set):
+        if not self.cards:
+            logger.warning("Card database is empty. Checked files: %s, %s", en_path, jp_path)
+
+    def _add_card(self, name: str, row: Mapping[str, Any], source: str, seen: Set[str]):
         sc, sn = row.get('set', ''), row.get('number', '')
         key = f"{sc}_{sn}"
         if key not in seen:
             seen.add(key)
             norm = self.normalize_name(name)
-            if norm not in self.cards: self.cards[norm] = []
+            if norm not in self.cards:
+                self.cards[norm] = []
             c_type = row.get('type', '')
             supertype = 'Energy' if 'energy' in c_type.lower() else \
                         'Trainer' if any(t in c_type.lower() for t in ['trainer','item','supporter','stadium','tool']) else \
@@ -238,7 +311,7 @@ class CardDatabaseLookup:
         norm = name.strip().lower().replace("'", "").replace("`", "").replace("\u2019", "").replace("-", " ").replace(".", "")
         return ' '.join(norm.split())
 
-    def get_card(self, set_code: str, number: str) -> Optional[dict]:
+    def get_card(self, set_code: str, number: str) -> Optional[Dict[str, str]]:
         """Manager API compatibility."""
         for variants in self.cards.values():
             for v in variants:
@@ -246,7 +319,7 @@ class CardDatabaseLookup:
                     return {'set_name': '', 'rarity': v['rarity'], 'type': v['type'], 'image_url': v['image_url']}
         return None
 
-    def get_card_info(self, card_name: str) -> Optional[dict]:
+    def get_card_info(self, card_name: str) -> Optional[Dict[str, str]]:
         norm = self.normalize_name(card_name)
         if norm in self.cards and self.cards[norm]:
             v = self.cards[norm][0]
@@ -260,7 +333,7 @@ class CardDatabaseLookup:
         low_rarity = [v for v in variants if v['rarity'] in {'Common', 'Uncommon', 'Promo'}] or variants
         best = max(low_rarity, key=lambda v: self.SET_ORDER.get(v['set_code'], 0))
         class CardInfo:
-            def __init__(self, d):
+            def __init__(self, d: CardVariant):
                 self.name = d['name']; self.set_code = d['set_code']; self.number = d['number']
                 self.rarity = d['rarity']; self.supertype = d['supertype']
         return CardInfo(best)
@@ -323,34 +396,58 @@ def is_valid_card(card_name: str) -> bool:
 # ============================================================================
 # AGGREGATION & CSV EXPORT
 # ============================================================================
-def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_tournament_date: bool = False) -> list:
+def aggregate_card_data(all_decks: List[DeckEntry], card_db: CardDatabaseLookup, group_by_tournament_date: bool = False) -> List[RowDict]:
     """
     Aggregates cards from decks into meta-analysis format.
     Neu: deck_inclusion_count und average_count für Competitive-Analyse.
     """
-    grouped_cards = defaultdict(lambda: defaultdict(lambda: {'total_count': 0, 'deck_count': 0, 'max_count': 0, 'set_versions': defaultdict(int)}))
-    grouped_deck_counts = defaultdict(int)
+    def _new_stats() -> CardStats:
+        return {
+            'total_count': 0,
+            'deck_count': 0,
+            'max_count': 0,
+            'set_versions': defaultdict(int),
+        }
+
+    grouped_cards: DefaultDict[GroupKey, DefaultDict[str, CardStats]] = defaultdict(lambda: defaultdict(_new_stats))
+    grouped_deck_counts: DefaultDict[GroupKey, int] = defaultdict(int)
 
     for deck in all_decks:
-        if not deck.get('cards'): continue
-        arch = normalize_archetype_name(deck['archetype'])
-        period = get_week_id(deck.get('tournament_date') or deck.get('date', '')) if group_by_tournament_date else ''
+        if not deck.get('cards'):
+            continue
+
+        archetype_raw = deck.get('archetype', '')
+        if not archetype_raw:
+            logger.debug("Skipping deck without archetype: %s", deck)
+            continue
+
+        arch = normalize_archetype_name(archetype_raw)
+        period = get_week_id((deck.get('tournament_date') or deck.get('date') or '')) if group_by_tournament_date else ''
         group_key = (period, arch) if group_by_tournament_date else arch
         grouped_deck_counts[group_key] += 1
-        seen = set()
-        for c in deck['cards']:
-            name = c['name']
-            grouped_cards[group_key][name]['total_count'] += c['count']
-            grouped_cards[group_key][name]['max_count'] = max(grouped_cards[group_key][name]['max_count'], c['count'])
-            sc = c.get('set_code', '') or c.get('set', '')
-            sn = c.get('set_number', '') or c.get('number', '')
+        seen: Set[str] = set()
+        for c in deck.get('cards', []):
+            name = c.get('name', '')
+            if not name:
+                continue
+
+            try:
+                count = int(c.get('count', 0))
+            except (TypeError, ValueError):
+                logger.debug("Invalid card count for %s in %s: %s", name, arch, c.get('count'))
+                continue
+
+            grouped_cards[group_key][name]['total_count'] += count
+            grouped_cards[group_key][name]['max_count'] = max(grouped_cards[group_key][name]['max_count'], count)
+            sc = str(c.get('set_code', '') or c.get('set', ''))
+            sn = str(c.get('set_number', '') or c.get('number', ''))
             if sc and sn:
-                grouped_cards[group_key][name]['set_versions'][(sc, sn)] += c['count']
+                grouped_cards[group_key][name]['set_versions'][(sc, sn)] += count
             if name not in seen:
                 grouped_cards[group_key][name]['deck_count'] += 1
                 seen.add(name)
 
-    result = []
+    result: List[RowDict] = []
     for group_key, cards in grouped_cards.items():
         if group_by_tournament_date:
             period, arch = group_key
@@ -366,22 +463,8 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_t
             # NEUE METRIK: average_count_overall = total_count / total_decks (Durchschnitt über ALLE Decks)
             average_count_overall = round(stats['total_count'] / total_decks, 2) if total_decks > 0 else 0
             
-            c_info = card_db.get_card_info(name) or {}
-
-            # Use the most-played set+number from actual decklists (not a name-only DB lookup).
-            # This prevents e.g. Drilbur BLK 45 being stored when TEF 85 was actually played.
-            set_versions = stats.get('set_versions', {})
-            if set_versions:
-                best_set, best_number = max(set_versions.items(), key=lambda x: x[1])[0]
-                specific = card_db.get_card(best_set, best_number) or {}
-                c_info = {
-                    'set_code': best_set,
-                    'number': best_number,
-                    'rarity': specific.get('rarity', c_info.get('rarity', '')),
-                    'type': specific.get('type', c_info.get('type', '')),
-                    'image_url': specific.get('image_url', c_info.get('image_url', '')),
-                }
-            row = {
+            c_info = _resolve_card_info(name, stats['set_versions'], card_db)
+            row: RowDict = {
                 'archetype': arch, 'card_name': name,
                 'card_identifier': f"{c_info.get('set_code','')} {c_info.get('number','')}".strip(),
                 'total_count': stats['total_count'], 
@@ -405,7 +488,24 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_t
             result.append(row)
     return result
 
-def save_to_csv(data: list, output_file: str, append_mode: bool = False):
+
+def _resolve_card_info(card_name: str, set_versions: Mapping[Tuple[str, str], int], card_db: CardDatabaseLookup) -> Dict[str, str]:
+    """Resolves card metadata with preference for most-played exact set+number in decklists."""
+    fallback = card_db.get_card_info(card_name) or {}
+    if not set_versions:
+        return fallback
+
+    best_set, best_number = max(set_versions.items(), key=lambda x: x[1])[0]
+    specific = card_db.get_card(best_set, best_number) or {}
+    return {
+        'set_code': best_set,
+        'number': best_number,
+        'rarity': specific.get('rarity', fallback.get('rarity', '')),
+        'type': specific.get('type', fallback.get('type', '')),
+        'image_url': specific.get('image_url', fallback.get('image_url', '')),
+    }
+
+def save_to_csv(data: List[RowDict], output_file: str, append_mode: bool = False):
     if not data: return
     out_path = os.path.join(get_data_dir(), output_file)
 
@@ -415,7 +515,7 @@ def save_to_csv(data: list, output_file: str, append_mode: bool = False):
             existing = list(csv.DictReader(f, delimiter=';'))
 
     if append_mode and existing:
-        def row_period_key(row: dict) -> str:
+        def row_period_key(row: Mapping[str, Any]) -> str:
             period = row.get('period', '') or row.get('date', '') or row.get('tournament_date', '')
             return f"{period}|{row.get('archetype','')}|{row.get('card_name','')}"
 
@@ -427,7 +527,7 @@ def save_to_csv(data: list, output_file: str, append_mode: bool = False):
     if not data: return
 
     if 'period' in data[0]:
-        reordered = []
+        reordered: List[RowDict] = []
         for row in data:
             ordered = {'period': row.get('period', '')}
             for key, value in row.items():
@@ -437,7 +537,7 @@ def save_to_csv(data: list, output_file: str, append_mode: bool = False):
             reordered.append(ordered)
         data = reordered
     elif 'date' in data[0]:
-        reordered = []
+        reordered: List[RowDict] = []
         for row in data:
             ordered = {'date': row.get('date', '')}
             for key, value in row.items():

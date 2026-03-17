@@ -1,89 +1,91 @@
-# Pokemon TCG Analysis - Clean Structure
+# Pokemon TCG Analysis - Projektstruktur
 
-## 📁 Projekt-Struktur (Aufgeräumt - Februar 2026)
+Stand: Maerz 2026
 
-### 🐍 Python Scraper
-- `all_cards_scraper.py` - Komplette Kartendatenbank von Limitless TCG
-- `japanese_cards_scraper.py` - Japanische Karten
-- `city_league_archetype_scraper.py` - Deck-Archetypen
-- `city_league_analysis_scraper.py` - City League Turnier-Analyse
-- `current_meta_analysis_scraper.py` - Aktuelles Meta-Analyse
-- `limitless_online_scraper.py` - Online-Turnier-Decks
+Dieses Dokument beschreibt die aktuelle Struktur des Repositories.
 
-### ⚙️ Settings (eine pro Scraper)
-- `all_cards_scraper_settings.json`
-- `japanese_cards_scraper_settings.json`
-- `city_league_analysis_settings.json`
-- `current_meta_analysis_settings.json`
-- `tournament_JH_settings.json`
-- `formats.json` - Format-Definitionen
+## 1) Root-Dateien
 
-### ▶️ Run Scripts (Python-basiert, KEINE .exe mehr)
-- `RUN_ALL_CARDS.bat` - Startet All Cards Scraper
-- `RUN_JAPANESE_CARDS.bat` - Startet Japanese Cards Scraper  
-- `RUN_CITY_LEAGUE_ARCHETYPES.bat` - Startet Archetype Scraper
-- `RUN_CITY_LEAGUE_ANALYSIS.bat` - Startet City League Analysis
-- `RUN_CURRENT_META.bat` - Startet Current Meta Analysis
-- `RUN_LIMITLESS_ONLINE.bat` - Startet Online Tournament Scraper
-- `RUN_TOURNAMENT_SCRAPER_JH.bat` - Startet Tournament JH Scraper
-- `RUN_ALL_SCRAPERS.bat` - Startet alle Scraper sequenziell
+### Kern-Scraper und Datenaufbereitung
+- all_cards_scraper.py
+- japanese_cards_scraper.py
+- city_league_archetype_scraper.py
+- city_league_analysis_scraper.py
+- current_meta_analysis_scraper.py
+- limitless_online_scraper.py
+- tournament_scraper_JH.py
+- card_price_scraper.py
+- pokemonproxies_scraper.py
+- prepare_card_data.py
+- update_sets.py
+- card_scraper_shared.py
 
-### 🗑️ Reset Scripts
-- `RESET_ALL_CARDS.bat` - Setzt All Cards Datenbank zurück
-- `RESET_CITY_LEAGUE.bat` - Setzt City League Daten zurück
-- `RESET_CURRENT_META.bat` - Setzt Current Meta zurück
-- `RESET_TOURNAMENT_JH.bat` - Setzt Tournament Daten zurück
+### Dashboard / Services
+- start_scraper_dashboard.py
+- START_DASHBOARD.bat
+- price_proxy_server.py
 
-### 📂 Data Ordner
-- `data/` - Enthält alle CSV/JSON Datenbank-Dateien
+### Konfiguration
+- all_cards_scraper_settings.json
+- japanese_cards_scraper_settings.json
+- city_league_archetype_settings.json
+- city_league_analysis_settings.json
+- current_meta_analysis_settings.json
+- limitless_online_settings.json
+- card_price_scraper_settings.json
+- tournament_JH_settings.json
 
-## 🚀 Quick Start
+### Projekt- und Betriebsdokumentation
+- README.md
+- PROJECT_STRUCTURE.md
+- DATA_DIRECTORY_STRUCTURE.md
+- CARD_DATA_SYSTEM.md
+- LIVE_PRICE_SYSTEM.md
+- PRICE_SCRAPER_README.md
+- ALL_CARDS_SCRAPER_README.md
+- JAPANESE_CARDS_SCRAPER_README.md
+- FIREBASE_SETUP_GUIDE.md
+- GITHUB_ACTIONS_SCHEDULE.md
 
-1. **Einzelnen Scraper starten:**
-   - Doppelklick auf `RUN_ALL_CARDS.bat` (oder anderen Scraper)
-   - Terminal zeigt Fortschritt live an
-   
-2. **Alle Scraper nacheinander:**
-   - Doppelklick auf `RUN_ALL_SCRAPERS.bat`
-   
-3. **Nach Scraper-Completion:**
-   ```bash
-   python prepare_card_data.py  # JSON für Frontend generieren
-   ```
+### Git / Deployment
+- PUSH_TO_GITHUB.bat
+- .gitignore
+- _config.yml
 
-4. **Browser aktualisieren:**
-   - Doppelklick auf `OPEN_VIEWER.bat` oder öffne `landing.html`
-   - Hard Refresh: `Ctrl+Shift+R`
+## 2) Verzeichnisse
 
-## ⚡ Wichtige Änderungen (Februar 2026)
+### data/
+Persistente CSV/JSON-Ausgaben der Scraper und vorbereitete Frontend-Daten.
 
-### ✅ **NUTZE Python-Scripts statt .exe:**
-- **Warum**: Python-Scripts sind stabiler, Settings-Loading funktioniert perfekt
-- **Keine .exe mehr**: dist/ und build/ Ordner gelöscht, *.spec Dateien entfernt
-- **Settings im Root**: Alle JSON-Settings bleiben im Hauptordner
+### js/
+Frontend-Logik (Dashboard, Auth, Collection, Playtester, Draw Simulator, Firebase).
 
-### 🧹 **Aufgeräumt:**
-- ❌ Gelöscht: ~80 MB (.exe, dist/, build/)
-- ❌ Gelöscht: ~40 Test/Fast/Debug Batch-Dateien
-- ❌ Gelöscht: Test-HTML, alte Backups, Build-Scripts
-- ✅ Behalten: Nur aktive Scraper + eine Settings-Datei pro Scraper
+### css/
+Styles fuer Dashboard und Auth-Bereiche.
 
-### 🎯 **Finale Struktur:**
-- **6 Python Scraper** (.py)
-- **6 Settings Dateien** (.json)
-- **8 Run Scripts** (.bat - Python-basiert)
-- **4 Reset Scripts** (.bat)
-- **1 Data Ordner** (CSV/JSON)
+### images/
+Statische Bilder und visuelle Assets.
 
-## 📝 Nächste Schritte
+### tests/
+Testskripte fuer Scraper- und Price-Funktionen.
 
-**Für Daily/Weekly Automation:**
-Später können spezielle Batch-Dateien erstellt werden:
-- `RUN_DAILY_UPDATE.bat` - Tägliche Updates (All Cards + Current Meta)
-- `RUN_WEEKLY_FULL.bat` - Wöchentlicher Full-Scrape aller Datenquellen
+### utils/
+Hilfsmodule fuer Parsing, Mapping, Normalisierung und Wiederverwendung.
 
-**Aktuell läuft:** All Cards Scraper im Terminal-Fenster
-**Nach Completion:** `python prepare_card_data.py` + Browser hard refresh
+### .github/
+GitHub-Workflows und Repository-Automation.
 
----
-**Stand:** Februar 2026 - Clean Python-basierte Struktur
+### .vscode/
+Workspace-spezifische Editor-Konfiguration.
+
+## 3) Empfohlener Workflow
+
+1. Gewuenschten Scraper mit Python ausfuehren (oder Dashboard starten).
+2. Bei Bedarf prepare_card_data.py ausfuehren.
+3. Frontend lokal ueber index.html oder einen lokalen HTTP-Server pruefen.
+4. Aenderungen ueber PUSH_TO_GITHUB.bat committen und pushen.
+
+## 4) Hinweis zur Pflege
+
+Wenn Dateien/Ordner im Root oder in den Kernverzeichnissen hinzukommen/entfernt werden,
+soll dieses Dokument direkt mit aktualisiert werden.

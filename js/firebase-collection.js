@@ -4,6 +4,23 @@
  * Track owned cards, wishlist, and deck building
  */
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeJsSingleQuoted(value) {
+  return String(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n');
+}
+
 // Add card to collection
 async function addToCollection(cardId) {
   const user = auth.currentUser;
@@ -416,19 +433,27 @@ function updateCollectionUI(searchFilter = '') {
         }
         
         matchingCards++;
+
+        const safeNameHtml = escapeHtml(card.name);
+        const safeSetHtml = escapeHtml(cardSet);
+        const safeNumberHtml = escapeHtml(cardNumber);
+        const safeImageAttr = escapeHtml(card.image_url);
+        const safeImageJs = escapeJsSingleQuoted(card.image_url);
+        const safeNameJs = escapeJsSingleQuoted(card.name);
+        const safeCardIdJs = escapeJsSingleQuoted(cardId);
         
         const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
         const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
         
         collectionHtml.push(`
           <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
-            <img src="${card.image_url}" alt="${card.name}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${card.image_url}', '${card.name}')">
-            <button onclick="removeFromCollection('${cardId}')" style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" title="Remove from collection">
+            <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
+            <button onclick="removeFromCollection('${safeCardIdJs}')" style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" title="Remove from collection">
               ×
             </button>
             <div style="padding: 8px; background: white;">
-              <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${card.name}</div>
-              <div style="font-size: 0.75em; color: #666;">${cardSet} ${cardNumber}</div>
+              <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
+              <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
               <div style="font-size: 0.8em; color: #27ae60; font-weight: 600; margin-top: 4px;">💰 ${priceDisplay}</div>
             </div>
           </div>
@@ -548,18 +573,26 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
 
       matchingCards++;
 
+      const safeNameHtml = escapeHtml(card.name);
+      const safeSetHtml = escapeHtml(cardSet);
+      const safeNumberHtml = escapeHtml(cardNumber);
+      const safeImageAttr = escapeHtml(card.image_url);
+      const safeImageJs = escapeJsSingleQuoted(card.image_url);
+      const safeNameJs = escapeJsSingleQuoted(card.name);
+      const safeCardIdJs = escapeJsSingleQuoted(cardId);
+
       const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
 
       wishlistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
-          <img src="${card.image_url}" alt="${card.name}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${card.image_url}', '${card.name}')">
-          <button onclick="removeFromWishlist('${cardId}')" style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" title="Remove from wishlist">
+          <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
+          <button onclick="removeFromWishlist('${safeCardIdJs}')" style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" title="Remove from wishlist">
             ×
           </button>
           <div style="padding: 8px; background: white;">
-            <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${card.name}</div>
-            <div style="font-size: 0.75em; color: #666;">${cardSet} ${cardNumber}</div>
+            <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
+            <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
             <div style="font-size: 0.8em; color: #27ae60; font-weight: 600; margin-top: 4px;">💰 ${priceDisplay}</div>
           </div>
         </div>
@@ -662,16 +695,19 @@ function updateDecksUI() {
       ${window.userDecks.map(deck => {
         const totalCards = deck.totalCards || Object.values(deck.cards || {}).reduce((sum, count) => sum + count, 0);
         const uniqueCards = Object.keys(deck.cards || {}).length;
+        const safeDeckNameHtml = escapeHtml(deck.name || '');
+        const safeArchetypeHtml = escapeHtml(deck.archetype || 'Custom');
+        const safeDeckIdJs = escapeJsSingleQuoted(deck.id || '');
         return `
           <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 10px;">
-            <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2em;">${deck.name}</h3>
+            <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.2em;">${safeDeckNameHtml}</h3>
             <p style="color: #7f8c8d; margin: 5px 0; font-size: 0.9em;">
-              <strong>Archetype:</strong> ${deck.archetype || 'Custom'}
+              <strong>Archetype:</strong> ${safeArchetypeHtml}
             </p>
             <p style="color: #34495e; margin: 10px 0; font-weight: 600;">
               🎴 ${totalCards} Cards (${uniqueCards} Unique)
             </p>
-            <button onclick="deleteDeck('${deck.id}')" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+            <button onclick="deleteDeck('${safeDeckIdJs}')" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
               🗑️ Delete
             </button>
           </div>
@@ -687,6 +723,9 @@ function updateDecksUI() {
     const totalCards = deck.totalCards || Object.values(deck.cards || {}).reduce((sum, count) => sum + count, 0);
     const uniqueCards = Object.keys(deck.cards || {}).length;
     const deckId = `saved-deck-${deckIndex}`;
+    const safeDeckNameHtml = escapeHtml(deck.name || '');
+    const safeDeckArchetypeHtml = escapeHtml(deck.archetype || 'Custom');
+    const safeDeckDeleteIdJs = escapeJsSingleQuoted(deck.id || '');
     
     // Build card grid HTML - same logic as renderMyDeckGrid
     let cardsHtml = '';
@@ -775,7 +814,8 @@ function updateDecksUI() {
         const setNumber = card.set_number || card.number;
         const count = card.deck_count || 1;
         const cardName = card.card_name || card.name;
-        const cardNameEscaped = cardName.replace(/'/g, "\\'");
+        const safeCardNameHtml = escapeHtml(cardName);
+        const safeCardNameJs = escapeJsSingleQuoted(cardName);
         
         // Get image URL
         let imageUrl = card.image_url || '';
@@ -785,6 +825,10 @@ function updateDecksUI() {
         if (!imageUrl) {
           imageUrl = `https://via.placeholder.com/245x342/667eea/ffffff?text=${encodeURIComponent(cardName)}`;
         }
+        const safeImageAttr = escapeHtml(imageUrl);
+        const safeImageJs = escapeJsSingleQuoted(imageUrl);
+        const fallbackImageUrl = `https://via.placeholder.com/245x342/667eea/ffffff?text=${encodeURIComponent(cardName)}`;
+        const safeFallbackImageAttr = escapeHtml(fallbackImageUrl);
         
         // Check if owned
         const cardId = `${cardName}|${setCode}|${setNumber}`;
@@ -796,31 +840,34 @@ function updateDecksUI() {
         // Get price
         const eurPrice = card.eur_price || '';
         const priceDisplay = eurPrice || '0,00 €';
+        const safePriceDisplayHtml = escapeHtml(priceDisplay);
         const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
         const cardmarketUrl = card.cardmarket_url || '';
-        const cardmarketUrlEscaped = cardmarketUrl.replace(/'/g, "\\'");
+        const safeCardmarketUrlJs = escapeJsSingleQuoted(cardmarketUrl);
+        const safeCardIdJs = escapeJsSingleQuoted(cardId);
+        const safeCardmarketTitleHtml = escapeHtml(eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available');
         
         cardsHtml += `
           <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <img src="${imageUrl}" alt="${cardName}" style="width: 100%; display: block; cursor: zoom-in;" loading="lazy" 
-                 onerror="this.src='https://via.placeholder.com/245x342/667eea/ffffff?text=${encodeURIComponent(cardName)}'"
-                 onclick="showSingleCard('${imageUrl}', '${cardNameEscaped}')">
+            <img src="${safeImageAttr}" alt="${safeCardNameHtml}" style="width: 100%; display: block; cursor: zoom-in;" loading="lazy" 
+                 onerror="this.src='${safeFallbackImageAttr}'"
+                 onclick="showSingleCard('${safeImageJs}', '${safeCardNameJs}')">
             
             ${ownedBadge}
             
             <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.75); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 3;">${count}</div>
             
             <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; z-index: 3;">
-              <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" 
+                  <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeCardNameJs}')" 
                       style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="Switch rarity/print">★</button>
-              <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" 
+                  <button onclick="event.stopPropagation(); openCardmarket('${safeCardmarketUrlJs}', '${safeCardNameJs}')" 
                       style="background: ${priceBackground}; color: white; height: 22px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
-                      title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
-              <button onclick="event.stopPropagation(); toggleCollection('${cardId}')" 
+                    title="${safeCardmarketTitleHtml}">${safePriceDisplayHtml}</button>
+                  <button onclick="event.stopPropagation(); toggleCollection('${safeCardIdJs}')" 
                       style="background: ${isOwned ? '#27ae60' : '#95a5a6'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: 13px; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="${isOwned ? 'Remove from collection' : 'Add to collection'}">${isOwned ? '✓' : '+'}</button>
-              <button onclick="event.stopPropagation(); toggleWishlist('${cardId}')" 
+                  <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')" 
                       style="background: ${isWishlisted ? '#FF9800' : '#bdc3c7'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">❤</button>
             </div>
@@ -833,16 +880,16 @@ function updateDecksUI() {
       <div style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 10px;">
         <div onclick="toggleDeckCollapse('${deckId}')" style="padding: 15px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
           <div style="flex: 1;">
-            <h3 style="margin: 0 0 5px 0; font-size: 1.1em; font-weight: 600;">${deck.name}</h3>
+            <h3 style="margin: 0 0 5px 0; font-size: 1.1em; font-weight: 600;">${safeDeckNameHtml}</h3>
             <div style="font-size: 0.85em; opacity: 0.9;">
-              ${deck.archetype || 'Custom'} • ${totalCards} Cards (${uniqueCards} Unique)
+              ${safeDeckArchetypeHtml} • ${totalCards} Cards (${uniqueCards} Unique)
             </div>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(52, 152, 219, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='rgba(52, 152, 219, 0.9)'" title="Copy deck list">
               📋
             </button>
-            <button onclick="event.stopPropagation(); deleteDeck('${deck.id}')" style="padding: 6px 12px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='rgba(231, 76, 60, 0.9)'" title="Delete deck">
+            <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" style="padding: 6px 12px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='rgba(231, 76, 60, 0.9)'" title="Delete deck">
               🗑️
             </button>
             <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg);">▼</div>
@@ -870,7 +917,7 @@ function openMyDecksPlaytest() {
   ['myDeckSelectP1', 'myDeckSelectP2'].forEach((selId, idx) => {
     const sel = document.getElementById(selId);
     if (!sel) return;
-    sel.innerHTML = decks.map((d, i) => `<option value="${i}">${d.name || 'Deck ' + (i+1)}</option>`).join('');
+    sel.innerHTML = decks.map((d, i) => `<option value="${i}">${escapeHtml(d.name || 'Deck ' + (i + 1))}</option>`).join('');
     if (idx === 1 && decks.length > 1) sel.value = '1';
   });
   modal.style.display = 'flex';

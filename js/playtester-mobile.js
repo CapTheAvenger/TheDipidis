@@ -74,6 +74,46 @@ function ptShowContextMenu(cardInfo) {
         };
         actionsContainer.appendChild(buttonEl);
     });
+
+    // Limitless TCG Link via DOM API erstellen (vermeidet stringbasiertes onclick HTML)
+    const setCodeRaw = card.set_code || card.set;
+    const setNumberRaw = card.set_number || card.number;
+    if (setCodeRaw && setNumberRaw) {
+        const setCode = String(setCodeRaw).toUpperCase().trim();
+        const setNumber = String(setNumberRaw).trim();
+        const limitlessUrl = `https://limitlesstcg.com/cards/${setCode}/${setNumber}`;
+
+        const limitlessBtn = document.createElement('button');
+        limitlessBtn.className = 'context-menu-btn limitless-btn';
+        limitlessBtn.style.display = 'flex';
+        limitlessBtn.style.alignItems = 'center';
+        limitlessBtn.style.justifyContent = 'space-between';
+        limitlessBtn.style.width = '100%';
+        limitlessBtn.style.padding = '10px';
+        limitlessBtn.style.background = '#2c3e50';
+        limitlessBtn.style.color = 'white';
+        limitlessBtn.style.border = 'none';
+        limitlessBtn.style.borderRadius = '6px';
+        limitlessBtn.style.marginTop = '8px';
+        limitlessBtn.style.fontWeight = 'bold';
+        limitlessBtn.style.cursor = 'pointer';
+        limitlessBtn.style.transition = 'background 0.2s';
+
+        const label = document.createElement('span');
+        label.textContent = '📊 Auf Limitless ansehen';
+        const arrow = document.createElement('span');
+        arrow.style.fontSize = '1.2em';
+        arrow.textContent = '↗';
+
+        limitlessBtn.appendChild(label);
+        limitlessBtn.appendChild(arrow);
+        limitlessBtn.addEventListener('click', () => {
+            window.open(limitlessUrl, '_blank');
+            ptHideContextMenu();
+        });
+
+        actionsContainer.appendChild(limitlessBtn);
+    }
     
     // Zeige Menu
     menu.classList.add('active');

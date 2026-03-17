@@ -1,133 +1,56 @@
-# Data Directory - Einheitliche Struktur
+# Data Directory - Aktuelle Struktur
 
-## Problem (vorher)
-Datenbanken wurden an **zwei Orten** erstellt:
-- ✅ `data/` (Haupt-Ordner, von HTML geladen)
-- ❌ `dist/data/` (Duplikat, wenn EXE aus dist/ gestartet)
+Stand: Maerz 2026
 
-## Lösung (jetzt)
+## Ziel
 
-### Einheitlicher Speicherort: `data/`
+Alle von den Scrapern erzeugten Daten liegen zentral im Ordner data/.
+Es gibt in diesem Repository keine aktive dist/-basierte EXE-Datenstruktur.
 
-**Alle Scraper schreiben in:** `data/`  
-**Alle HTML-Dateien laden von:** `data/`  
-**Keine Duplikate mehr!**
+## Grundprinzip
 
----
+- Scraper schreiben ihre Ausgaben nach data/
+- Frontend-Komponenten lesen Daten aus data/
+- Es gibt nur einen produktiven Datenpfad im Repository
 
-## Wie funktioniert es?
+## Typische Inhalte in data/
 
-### 1. Python-Skripte (aus Root)
-Wenn du BAT-Dateien im Root startest:
-- `RUN_ALL_CARDS_SCRAPER_CURRENT_META.bat`
-- `RUN_ALL_CARDS_SCRAPER_TEST.bat`
+- Karten-Datenbanken
+	- all_cards_database.csv
+	- all_cards_database.json
+	- japanese_cards_database.csv
+	- japanese_cards_database.json
 
-→ Working Directory = Root  
-→ Scraper speichert in `data/` ✓
+- Aggregierte/aufbereitete Datensaetze
+	- all_cards_merged.csv
+	- all_cards_merged.json
+	- price_data.csv
 
-### 2. EXE-Dateien (aus dist/)
-Wenn du die EXE aus `dist/` startest:
-- `dist/RUN_ALL_CARDS_SCRAPER.bat`
+- Metadaten und Mapping-Dateien
+	- sets.json
+	- ace_specs.json
+	- ace_specs_fallback.json
+	- pokemon_dex_numbers.json
 
-→ BAT macht `cd ..` (wechselt zu Root)  
-→ Working Directory = Root  
-→ Scraper speichert in `data/` ✓
+- Weitere Analyse-Outputs je nach ausgefuehrtem Scraper
+	- city_league_*.csv
+	- current_meta_*.csv
+	- tournament_*.csv
 
----
+## Betriebshinweise
 
-## Cleanup durchführen
+1. Scraper aus dem Projekt-Root starten.
+2. Nach strukturellen Updates optional prepare_card_data.py laufen lassen.
+3. Fuer Frontend-Tests den lokalen HTTP-Server auf data/ oder Root verwenden.
 
-Falls du bereits Duplikate in `dist/data/` hast:
+## Git-Hinweise
 
-```batch
-CLEANUP_DATA_DUPLICATES.bat
-```
+- Welche Daten versioniert werden, wird ueber .gitignore gesteuert.
+- Wenn neue Data-Artefakte relevant sind, muessen sie entweder:
+	- nicht ignoriert sein, oder
+	- gezielt per Ausnahme in .gitignore erlaubt werden.
 
-Das Skript:
-1. Löscht `dist/data/` komplett
-2. Behält `data/` (Haupt-Datenbank)
+## Pflege
 
----
-
-## Verzeichnis-Struktur
-
-```
-Hausi´s Pokemon TCG Analysis/
-├── data/                          ← EINZIGER Datenbank-Ordner
-│   ├── all_cards_database.csv
-│   ├── japanese_cards_database.csv
-│   ├── city_league_analysis.csv
-│   └── ...
-├── dist/                          ← Nur EXE-Dateien
-│   ├── all_cards_scraper.exe
-│   ├── japanese_cards_scraper.exe
-│   ├── *_settings.json            ← Settings für EXEs
-│   ├── logs/                      ← Log-Dateien
-│   └── RUN_ALL_CARDS_SCRAPER.bat  ← Startet EXE (läuft aus Root!)
-├── landing.html                   ← Lädt von ./data/
-├── RUN_ALL_CARDS_SCRAPER_CURRENT_META.bat
-├── RUN_ALL_CARDS_SCRAPER_TEST.bat
-└── ...
-```
-
----
-
-## Was wurde geändert?
-
-### 1. dist/RUN_ALL_CARDS_SCRAPER.bat
-```batch
-REM Change to parent directory (project root)
-cd /d "%~dp0.."
-```
-→ EXE läuft jetzt aus Root-Kontext
-
-### 2. Alle Root BAT-Dateien
-Haben bereits `pause` am Ende → Terminal schließt nicht automatisch
-
-### 3. Cleanup-Skript
-Neues Skript: `CLEANUP_DATA_DUPLICATES.bat`  
-→ Entfernt `dist/data/` Duplikate
-
----
-
-## Empfehlung
-
-### Für normale Nutzung (Entwicklung):
-Nutze BAT-Dateien im **Root**:
-- `RUN_ALL_CARDS_SCRAPER_CURRENT_META.bat` (Python)
-- `RUN_ALL_CARDS_SCRAPER_TEST.bat` (Python)
-
-### Für Deployment/Testing (EXE):
-Nutze BAT-Dateien in **dist/**:
-- `dist/RUN_ALL_CARDS_SCRAPER.bat` (EXE)
-
-**Beide** schreiben jetzt in den gleichen Ordner: `data/` ✓
-
----
-
-## Häufige Fragen
-
-**Q: Warum gibt es dist/ überhaupt?**  
-A: Für GitHub Actions, Deployment und EXE-Verteilung. Die EXEs sind portabel.
-
-**Q: Wohin gehen die Logs?**  
-A: `dist/logs/` (unabhängig davon ob EXE oder Python)
-
-**Q: Was ist mit Settings-Dateien?**  
-A: 
-- Root: `all_cards_scraper_settings.json` (für Python)
-- dist/: `all_cards_scraper_settings.json` (für EXE)
-- Beide können unterschiedlich sein!
-
-**Q: Muss ich dist/data/ manuell löschen?**  
-A: Nein, nutze `CLEANUP_DATA_DUPLICATES.bat`
-
----
-
-## Zusammenfassung
-
-✅ **Ein Ort für Daten:** `data/`  
-✅ **HTML lädt korrekt:** `./data/`  
-✅ **Keine Duplikate mehr**  
-✅ **Terminal bleibt offen:** `pause` am Ende aller BATs  
-✅ **Cleanup-Tool vorhanden:** `CLEANUP_DATA_DUPLICATES.bat`
+Wenn neue dauerhafte Dateien in data/ hinzukommen oder entfallen,
+dieses Dokument und ggf. .gitignore direkt mit aktualisieren.

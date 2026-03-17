@@ -1131,6 +1131,22 @@ const BASE_PATH = './data/';
             } else {
                 versions = getEnglishCardVersions(cardName);
             }
+
+            // MERGE: When we resolved via international prints for a specific set/number,
+            // also include ALL English versions for this card name so that newer reprints
+            // (e.g. TEF 85 Drilbur) are in the selection pool even when the archetype data
+            // only referenced an older print (e.g. BLK 45 Drilbur).
+            if (originalSet && originalNumber && versions.length > 0) {
+                const allEnglish = getEnglishCardVersions(cardName);
+                if (allEnglish.length > 0) {
+                    const seenKeys = new Set(versions.map(v => `${v.set}-${v.number}`));
+                    const extras = allEnglish.filter(v => !seenKeys.has(`${v.set}-${v.number}`));
+                    if (extras.length > 0) {
+                        versions = [...versions, ...extras];
+                        console.log(`[getPreferredVersionForCard] Merged ${extras.length} additional English reprints for "${cardName}" (pool now ${versions.length})`);
+                    }
+                }
+            }
             
             // DEBUG: Log when versions are not found
             if (versions.length === 0) {

@@ -7366,11 +7366,20 @@ const BASE_PATH = './data/';
             const canonicalName = (value) => fixCardNameEncoding((value || '').toString().trim()).toLowerCase();
             const cardsToAddMap = new Map();
             let aceSpecAdded = false;
-            const hasAceSpecInConsistencyDeck = () => Array.from(cardsToAddMap.values()).some(card =>
-                card?.is_ace_spec === 'Yes' ||
-                (card?.rarity && String(card.rarity).toLowerCase().includes('ace spec')) ||
-                isAceSpec(card)
-            );
+            const isAceSpecCard = (c) => {
+                if (!c) return false;
+                // Check 1: CSV Spalte
+                if (String(c.is_ace_spec).trim().toLowerCase() === 'yes') return true;
+                // Check 2: Rarity Feld
+                if (String(c.rarity).toUpperCase().includes('ACE SPEC')) return true;
+                // Check 3: Globale Datenbank
+                const canonical = window.cardIndexBySetNumber ? window.cardIndexBySetNumber.get(`${c.set_code}-${c.set_number}`) : null;
+                if (canonical && String(canonical.rarity).toUpperCase().includes('ACE SPEC')) return true;
+                return false;
+            };
+
+            // Hilfsfunktion: Hat das Deck schon ein Ace Spec?
+            const deckHasAceSpec = () => Array.from(cardsToAddMap.values()).some(entry => isAceSpecCard(entry));
 
             const pushCard = (card, desiredCount, logPrefix = '[Consistency]') => {
                 if (!card || currentTotal >= 60) return;
@@ -7383,8 +7392,8 @@ const BASE_PATH = './data/';
                 const perCardCap = basicEnergy ? 60 : 4;
                 const existing = cardsToAddMap.get(key);
 
-                if (isAceSpec(card)) {
-                    if ((aceSpecAdded || hasAceSpecInConsistencyDeck()) && !existing) return;
+                if (isAceSpecCard(card)) {
+                    if ((aceSpecAdded || deckHasAceSpec()) && !existing) return;
                 }
 
                 const existingCount = existing ? existing.addCount : 0;
@@ -7405,7 +7414,7 @@ const BASE_PATH = './data/';
                     });
                 }
 
-                if (isAceSpec(card)) {
+                if (isAceSpecCard(card)) {
                     aceSpecAdded = true;
                 }
 
@@ -7443,15 +7452,17 @@ const BASE_PATH = './data/';
                     });
             }
 
-            // ACE SPEC guarantee after Stage 2.
-            if (!hasAceSpecInConsistencyDeck()) {
-                const bestAceSpecCard = deckCards
-                    .filter(card => card.is_ace_spec === 'Yes' || (card.rarity && String(card.rarity).toLowerCase().includes('ace spec')) || isAceSpec(card))
+            // ==========================================
+            // 🚨 ACE SPEC GARANTIE 🚨
+            // ==========================================
+            if (!deckHasAceSpec() && currentTotal < 60) {
+                // Finde die ACE SPEC Karte, die in DIESEM Archetyp am häufigsten gespielt wird
+                const bestAceSpec = deckCards
+                    .filter(c => isAceSpecCard(c))
                     .sort((a, b) => b.sharePercent - a.sharePercent)[0];
 
-                if (bestAceSpecCard) {
-                    console.log(`[Consistency] ACE SPEC Guarantee: Adding ${bestAceSpecCard.card_name}`);
-                    pushCard(bestAceSpecCard, 1, '[Consistency][AceGuarantee]');
+                if (bestAceSpec) {
+                    pushCard(bestAceSpec, 1, '[Consistency][ACE-SPEC-Guarantee]');
                 }
             }
 
@@ -7482,8 +7493,15 @@ const BASE_PATH = './data/';
                     if (currentTotal >= 60) return;
                     const archetypeCard = archetypeMap.get(globalEntry.key);
                     if (!archetypeCard) return;
-                    if ((archetypeCard.is_ace_spec === 'Yes' || (archetypeCard.rarity && String(archetypeCard.rarity).toLowerCase().includes('ace spec')) || isAceSpec(archetypeCard)) && hasAceSpecInConsistencyDeck()) {
-                        return;
+
+                    // ==========================================
+                    // 🚨 ACE SPEC BLOCKER FÜR FALLBACK 🚨
+                    // ==========================================
+                    if (isAceSpecCard(archetypeCard)) {
+                        if (deckHasAceSpec()) {
+                            console.log(`[Consistency] Blocked additional ACE SPEC: ${archetypeCard.card_name}`);
+                            return; // Überspringt diese Karte, da wir schon ein Ace Spec haben!
+                        }
                     }
 
                     const boostCount = getRoundedAverageCount(archetypeCard, true);
@@ -7496,8 +7514,15 @@ const BASE_PATH = './data/';
             if (currentTotal < 60) {
                 shareSorted.forEach(card => {
                     if (currentTotal >= 60) return;
-                    if ((card.is_ace_spec === 'Yes' || (card.rarity && String(card.rarity).toLowerCase().includes('ace spec')) || isAceSpec(card)) && hasAceSpecInConsistencyDeck()) {
-                        return;
+
+                    // ==========================================
+                    // 🚨 ACE SPEC BLOCKER FÜR FALLBACK 🚨
+                    // ==========================================
+                    if (isAceSpecCard(card)) {
+                        if (deckHasAceSpec()) {
+                            console.log(`[Consistency] Blocked additional ACE SPEC: ${card.card_name}`);
+                            return; // Überspringt diese Karte, da wir schon ein Ace Spec haben!
+                        }
                     }
                     const avgCount = getRoundedAverageCount(card, true);
                     pushCard(card, avgCount, '[Consistency][Fallback]');

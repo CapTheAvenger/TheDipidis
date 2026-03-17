@@ -7368,13 +7368,26 @@ const BASE_PATH = './data/';
             let aceSpecAdded = false;
             const isAceSpecCard = (c) => {
                 if (!c) return false;
-                // Check 1: CSV Spalte
+
+                // 1. Harter Namens-Check (100% sicher, ignoriert fehlerhafte CSVs)
+                const aceSpecNames = [
+                    'awaking drum', 'hero\'s cape', 'master ball', 'maximum belt', 'neo upper energy',
+                    'prime catcher', 'reboot pod', 'hyper aroma', 'secret box', 'survival brace',
+                    'unfair stamp', 'legacy energy', 'dangerous laser', 'grand tree', 'neutral center',
+                    'pokémon catcher', 'sparkling crystal', 'brilliant blend', 'miracle headset',
+                    'miraculous intercom', 'precious trolley', 'scramble switch', 'search computer'
+                ];
+
+                const cardName = String(c.card_name || c.name || c.full_card_name || '').trim().toLowerCase();
+                if (aceSpecNames.includes(cardName)) return true;
+
+                // 2. Fallback über die Rarity-Eigenschaften (falls eine neue Karte im Set erscheint)
                 if (String(c.is_ace_spec).trim().toLowerCase() === 'yes') return true;
-                // Check 2: Rarity Feld
                 if (String(c.rarity).toUpperCase().includes('ACE SPEC')) return true;
-                // Check 3: Globale Datenbank
+
                 const canonical = window.cardIndexBySetNumber ? window.cardIndexBySetNumber.get(`${c.set_code}-${c.set_number}`) : null;
                 if (canonical && String(canonical.rarity).toUpperCase().includes('ACE SPEC')) return true;
+
                 return false;
             };
 
@@ -7456,12 +7469,19 @@ const BASE_PATH = './data/';
             // 🚨 ACE SPEC GARANTIE 🚨
             // ==========================================
             if (!deckHasAceSpec() && currentTotal < 60) {
-                // Finde die ACE SPEC Karte, die in DIESEM Archetyp am häufigsten gespielt wird
-                const bestAceSpec = deckCards
+                // Suche in der KOMPLETTEN uniqueCards Liste (vor Stufe 1 und 2) nach dem besten Ace Spec
+                const allAvailableAceSpecs = Object.values(uniqueCards)
                     .filter(c => isAceSpecCard(c))
-                    .sort((a, b) => b.sharePercent - a.sharePercent)[0];
+                    .map(c => {
+                        // Berechne den Share kurz für die Sortierung, falls noch nicht passiert
+                        const share = Math.min(100, Math.max(0, (c.deck_count / resolvedTotalDecks) * 100));
+                        c.tempShare = share;
+                        return c;
+                    })
+                    .sort((a, b) => b.tempShare - a.tempShare);
 
-                if (bestAceSpec) {
+                if (allAvailableAceSpecs.length > 0) {
+                    const bestAceSpec = allAvailableAceSpecs[0];
                     pushCard(bestAceSpec, 1, '[Consistency][ACE-SPEC-Guarantee]');
                 }
             }

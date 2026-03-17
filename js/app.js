@@ -832,7 +832,7 @@ const BASE_PATH = './data/';
 
             const intPrintCards = Array.from(uniqueCards.values());
             
-            console.log(`[getInternationalPrintsForCard] Found ${intPrintCards.length} international prints for ${baseCard.name} (${set} ${number}):`, 
+            console.log(`[getInternationalPrintsForCard] Found ${intPrintCards.length} international prints for ${baseCard.name_en || baseCard.name} (${set} ${number}):`,   
                 intPrintCards.map(c => `${c.set} ${c.number} (${c.rarity || 'NO RARITY'}) ${c.image_url ? '?' : '?'}`).join(', ')
             );
             
@@ -3621,14 +3621,11 @@ const BASE_PATH = './data/';
             document.getElementById('cityLeagueStatAvgPlacement').textContent = avgPlacement !== '-' ? avgPlacement : '-';
             document.getElementById('cityLeagueStatsSection').style.display = 'block';
             
-            // Show deck visual (default: grid view)
-            renderCityLeagueDeckGrid(deckCards);
-            
             // Reset button text to show list view option
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
             gridButtons.forEach(btn => btn.textContent = '📋 List View');
             
-            // Apply current filter (this will update counts and re-filter if needed)
+            // Apply current filter (this renders the grid - do not call renderCityLeagueDeckGrid separately)
             applyCityLeagueFilter();
             
             // DON'T auto-display deck here - let the caller decide

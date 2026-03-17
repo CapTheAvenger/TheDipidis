@@ -7366,6 +7366,11 @@ const BASE_PATH = './data/';
             const canonicalName = (value) => fixCardNameEncoding((value || '').toString().trim()).toLowerCase();
             const cardsToAddMap = new Map();
             let aceSpecAdded = false;
+            const hasAceSpecInConsistencyDeck = () => Array.from(cardsToAddMap.values()).some(card =>
+                card?.is_ace_spec === 'Yes' ||
+                (card?.rarity && String(card.rarity).toLowerCase().includes('ace spec')) ||
+                isAceSpec(card)
+            );
 
             const pushCard = (card, desiredCount, logPrefix = '[Consistency]') => {
                 if (!card || currentTotal >= 60) return;
@@ -7379,7 +7384,7 @@ const BASE_PATH = './data/';
                 const existing = cardsToAddMap.get(key);
 
                 if (isAceSpec(card)) {
-                    if (aceSpecAdded && !existing) return;
+                    if ((aceSpecAdded || hasAceSpecInConsistencyDeck()) && !existing) return;
                 }
 
                 const existingCount = existing ? existing.addCount : 0;
@@ -7418,22 +7423,36 @@ const BASE_PATH = './data/';
                 return ensureMinimumOne ? Math.max(1, roundedCount) : roundedCount;
             };
 
-            // Stufe 1: >90% Archetype Share
+            // Stufe 1: Core
             shareSorted
-                .filter(card => card.sharePercent > 90)
+                .filter(card => card.sharePercent >= 80)
                 .forEach(card => {
+                    if (currentTotal >= 60) return;
                     const avgCount = getRoundedAverageCount(card, true);
                     pushCard(card, avgCount, '[Consistency][Stage1]');
                 });
 
-            // Stufe 2: >70% Archetype Share (nur wenn Deck noch <50)
-            if (currentTotal < 50) {
+            // Stufe 2: Extended Core
+            if (currentTotal < 60) {
                 shareSorted
-                    .filter(card => card.sharePercent > 70)
+                    .filter(card => card.sharePercent >= 40)
                     .forEach(card => {
+                        if (currentTotal >= 60) return;
                         const avgCount = getRoundedAverageCount(card, true);
                         pushCard(card, avgCount, '[Consistency][Stage2]');
                     });
+            }
+
+            // ACE SPEC guarantee after Stage 2.
+            if (!hasAceSpecInConsistencyDeck()) {
+                const bestAceSpecCard = deckCards
+                    .filter(card => card.is_ace_spec === 'Yes' || (card.rarity && String(card.rarity).toLowerCase().includes('ace spec')) || isAceSpec(card))
+                    .sort((a, b) => b.sharePercent - a.sharePercent)[0];
+
+                if (bestAceSpecCard) {
+                    console.log(`[Consistency] ACE SPEC Guarantee: Adding ${bestAceSpecCard.card_name}`);
+                    pushCard(bestAceSpecCard, 1, '[Consistency][AceGuarantee]');
+                }
             }
 
             // Global Meta Boost (Watchtower-Prinzip)
@@ -7463,6 +7482,9 @@ const BASE_PATH = './data/';
                     if (currentTotal >= 60) return;
                     const archetypeCard = archetypeMap.get(globalEntry.key);
                     if (!archetypeCard) return;
+                    if ((archetypeCard.is_ace_spec === 'Yes' || (archetypeCard.rarity && String(archetypeCard.rarity).toLowerCase().includes('ace spec')) || isAceSpec(archetypeCard)) && hasAceSpecInConsistencyDeck()) {
+                        return;
+                    }
 
                     const boostCount = getRoundedAverageCount(archetypeCard, true);
                     console.log(`[Consistency] Meta-Boost: Adding ${archetypeCard.card_name} because it is a global staple.`);
@@ -7474,6 +7496,9 @@ const BASE_PATH = './data/';
             if (currentTotal < 60) {
                 shareSorted.forEach(card => {
                     if (currentTotal >= 60) return;
+                    if ((card.is_ace_spec === 'Yes' || (card.rarity && String(card.rarity).toLowerCase().includes('ace spec')) || isAceSpec(card)) && hasAceSpecInConsistencyDeck()) {
+                        return;
+                    }
                     const avgCount = getRoundedAverageCount(card, true);
                     pushCard(card, avgCount, '[Consistency][Fallback]');
                 });
@@ -7501,7 +7526,7 @@ const BASE_PATH = './data/';
 
             // Build confirm summary
             let summary = `MAX CONSISTENCY Deck (${currentTotal} cards):\n`;
-            summary += `Algorithm: >90% -> >70% -> Meta-Boost (>15% global)\n\n`;
+            summary += `Algorithm: >=80% -> >=40% -> ACE SPEC Guarantee -> Meta-Boost (>15% global)\n\n`;
             cardsToAdd.forEach(c => {
                 summary += `${c.addCount}x ${c.card_name} (${c.sharePercent.toFixed(0)}% archetype)\n`;
             });

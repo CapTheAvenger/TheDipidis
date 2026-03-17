@@ -7359,13 +7359,36 @@ const BASE_PATH = './data/';
             let consistencyDeck = [];
             let currentTotal = 0;
 
+            // Ace Spec Checker (STRENGER ABGLEICH)
             const isAceSpecCard = (c) => {
                 if (!c) return false;
-                const aceSpecNames = ['awaking drum', 'hero\'s cape', 'master ball', 'maximum belt', 'neo upper energy', 'prime catcher', 'reboot pod', 'hyper aroma', 'secret box', 'survival brace', 'unfair stamp', 'legacy energy', 'dangerous laser', 'grand tree', 'neutral center', 'pokémon catcher', 'sparkling crystal', 'brilliant blend', 'miracle headset', 'miraculous intercom', 'precious trolley', 'scramble switch', 'search computer'];
                 const name = String(c.card_name || c.name || '').trim().toLowerCase();
-                if (aceSpecNames.includes(name)) return true;
+
+                // 1. Exakter Namens-Abgleich (Kein 'includes', sondern '==='!)
+                const aceNames = [
+                    'awaking drum', "hero's cape", 'master ball', 'maximum belt',
+                    'neo upper energy', 'prime catcher', 'reboot pod', 'hyper aroma',
+                    'secret box', 'survival brace', 'unfair stamp', 'legacy energy',
+                    'dangerous laser', 'grand tree', 'neutral center', 'sparkling crystal',
+                    'brilliant blend', 'miracle headset', 'miraculous intercom',
+                    'precious trolley', 'scramble switch', 'search computer'
+                ];
+
+                // ACHTUNG: 'pokémon catcher' und 'switch' sind KEINE Ace Specs!
+                // (Nur 'Prime Catcher' und 'Scramble Switch').
+                // Deshalb strictly equal:
+                if (aceNames.includes(name)) return true;
+
+                // 2. Rarity-Abgleich in der lokalen CSV Zeile
                 if (String(c.is_ace_spec).trim().toLowerCase() === 'yes') return true;
-                if (String(c.rarity).toUpperCase().includes('ACE SPEC')) return true;
+                if (String(c.rarity).trim().toUpperCase() === 'ACE SPEC RARE' || String(c.rarity).trim().toUpperCase() === 'ACE SPEC') return true;
+
+                // 3. Fallback auf globale Datenbank
+                if (c.set_code && c.set_number && window.cardIndexBySetNumber) {
+                    const canonical = window.cardIndexBySetNumber.get(`${c.set_code}-${c.set_number}`);
+                    if (canonical && String(canonical.rarity).toUpperCase().includes('ACE SPEC')) return true;
+                }
+
                 return false;
             };
 

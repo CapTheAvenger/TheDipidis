@@ -1448,12 +1448,25 @@ const BASE_PATH = './data/';
 
             const parseShare = (value) => {
                 const parsed = parseFloat(String(value ?? 0).replace(',', '.'));
-                return Number.isFinite(parsed) ? parsed : 0;
+                return Number.isFinite(parsed) ? parsed : NaN;
             };
 
-            const current = parseShare(history[history.length - 1]?.share);
-            const previous = parseShare(history[history.length - 2]?.share);
+            // Compare strictly the last two available weekly points.
+            const validPoints = history.filter(point => Number.isFinite(parseShare(point?.share)));
+            if (validPoints.length < 2) return '';
+
+            const recentPoints = validPoints.slice(-2);
+            const previous = parseShare(recentPoints[0]?.share);
+            const current = parseShare(recentPoints[1]?.share);
+            if (!Number.isFinite(previous) || !Number.isFinite(current)) return '';
+
             const diff = current - previous;
+
+            // Staple protection: keep >95% staples stable unless the drop is massive.
+            if (current > 95) {
+                if (diff < -10) return `<span class="trend-down">▼ ${diff.toFixed(1)}%</span>`;
+                return '<span class="trend-stable">●</span>';
+            }
 
             if (diff > 2) return `<span class="trend-up">▲ +${diff.toFixed(1)}%</span>`;
             if (diff < -2) return `<span class="trend-down">▼ ${diff.toFixed(1)}%</span>`;
@@ -7345,11 +7358,17 @@ const BASE_PATH = './data/';
                 .filter(card => card.sharePercent > 0)
                 .sort((a, b) => b.sharePercent - a.sharePercent);
 
+            const getRoundedAverageCount = (card, ensureMinimumOne = false) => {
+                const averageCount = Number.isFinite(card?.avgCountWhenUsed) ? card.avgCountWhenUsed : 0;
+                const roundedCount = Math.round(averageCount);
+                return ensureMinimumOne ? Math.max(1, roundedCount) : roundedCount;
+            };
+
             // Stufe 1: >90% Archetype Share
             shareSorted
                 .filter(card => card.sharePercent > 90)
                 .forEach(card => {
-                    const avgCount = Math.max(1, Math.round(card.avgCountWhenUsed || 0));
+                    const avgCount = getRoundedAverageCount(card, true);
                     pushCard(card, avgCount, '[Consistency][Stage1]');
                 });
 
@@ -7358,7 +7377,7 @@ const BASE_PATH = './data/';
                 shareSorted
                     .filter(card => card.sharePercent > 70)
                     .forEach(card => {
-                        const avgCount = Math.max(1, Math.round(card.avgCountWhenUsed || 0));
+                        const avgCount = getRoundedAverageCount(card, false);
                         pushCard(card, avgCount, '[Consistency][Stage2]');
                     });
             }
@@ -7391,8 +7410,7 @@ const BASE_PATH = './data/';
                     const archetypeCard = archetypeMap.get(globalEntry.key);
                     if (!archetypeCard) return;
 
-                    const avgCount = Math.round(archetypeCard.avgCountWhenUsed || 0);
-                    const boostCount = Math.max(1, avgCount);
+                    const boostCount = getRoundedAverageCount(archetypeCard, false);
                     console.log(`[Consistency] Meta-Boost: Adding ${archetypeCard.card_name} because it is a global staple.`);
                     pushCard(archetypeCard, boostCount, '[Consistency][MetaBoost]');
                 });

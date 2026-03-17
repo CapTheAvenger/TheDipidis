@@ -4551,7 +4551,7 @@ const BASE_PATH = './data/';
                             
                             <!-- Red badge: Max Count (top-right) -->
                             <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
-                                ${maxCount}
+                                ${finalMaxCount}
                             </div>
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->

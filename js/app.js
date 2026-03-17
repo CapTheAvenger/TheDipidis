@@ -2271,6 +2271,7 @@ const BASE_PATH = './data/';
                 const analysisUrl = `${BASE_PATH}city_league_analysis${formatSuffix}.csv`;
                 const archetypesUrl = `${BASE_PATH}city_league_archetypes${formatSuffix}.csv`;
                 const comparisonUrl = `${BASE_PATH}city_league_archetypes_comparison${formatSuffix}.csv`;
+                const hasComparisonFile = format !== 'M3';
 
                 console.log(`Loading City League data for format: ${format}`);
 
@@ -2287,12 +2288,14 @@ const BASE_PATH = './data/';
                             console.error(`Could not load archetypes data (${archetypesUrl}):`, error);
                             return null;
                         }),
-                    fetch(`${comparisonUrl}?t=${timestamp}`)
-                        .then(response => response.ok ? response.text() : null)
-                        .catch(error => {
-                            console.warn(`Comparison file could not be loaded (${comparisonUrl}):`, error);
-                            return null;
-                        })
+                    hasComparisonFile
+                        ? fetch(`${comparisonUrl}?t=${timestamp}`)
+                            .then(response => response.ok ? response.text() : null)
+                            .catch(error => {
+                                console.warn(`Comparison file could not be loaded (${comparisonUrl}):`, error);
+                                return null;
+                            })
+                        : Promise.resolve(null)
                 ];
 
                 // NEU: Lade M3-Archetypen im Hintergrund, wenn wir in M4 sind
@@ -3145,6 +3148,16 @@ const BASE_PATH = './data/';
             };
         }
 
+        function getSelectedCityLeagueDeckCount(archetype) {
+            const selectEl = document.getElementById('cityLeagueDeckSelect');
+            if (!selectEl || !archetype) return 0;
+
+            const option = Array.from(selectEl.options).find(o => o.value === archetype);
+            const label = option ? option.textContent : '';
+            const match = label ? label.match(/\((\d+)\s+Decks\)/i) : null;
+            return match ? parseInt(match[1], 10) || 0 : 0;
+        }
+
         function refreshCityLeagueDeckSelect() {
             const select = document.getElementById('cityLeagueDeckSelect');
             const previousValue = select ? select.value : '';
@@ -3639,7 +3652,9 @@ const BASE_PATH = './data/';
             
             // Get current deck count from aggregated data
             // Since we now always aggregate, use total_decks_in_archetype from first card
-            let decksCount = archetypeStats.decksCount || parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
+            let decksCount = getSelectedCityLeagueDeckCount(archetype)
+                || archetypeStats.decksCount
+                || parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
             if (!decksCount || decksCount <= 0) {
                 decksCount = getCityLeagueDeckCountFallback(archetype);
             }

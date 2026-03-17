@@ -62,6 +62,7 @@ class DeckCard(TypedDict, total=False):
 class DeckEntry(TypedDict, total=False):
     cards: List[DeckCard]
     archetype: str
+    tournament_id: str
     tournament_date: str
     date: str
 
@@ -73,7 +74,7 @@ class CardStats(TypedDict):
     set_versions: DefaultDict[Tuple[str, str], int]
 
 
-GroupKey = Union[str, Tuple[str, str]]
+GroupKey = Union[str, Tuple[str, str], Tuple[str, str, str]]
 RowDict = Dict[str, Any]
 
 logger = logging.getLogger(__name__)
@@ -422,8 +423,16 @@ def aggregate_card_data(all_decks: List[DeckEntry], card_db: CardDatabaseLookup,
             continue
 
         arch = normalize_archetype_name(archetype_raw)
-        period = get_week_id((deck.get('tournament_date') or deck.get('date') or '')) if group_by_tournament_date else ''
-        group_key = (period, arch) if group_by_tournament_date else arch
+        raw_tournament_date = str(deck.get('tournament_date') or deck.get('date') or '').strip()
+        tournament_id = str(deck.get('tournament_id') or '').strip()
+
+        if group_by_tournament_date:
+            # Group on exact tournament rows for precise date filtering and trend calculations.
+            date_key = raw_tournament_date or 'Unknown-Date'
+            id_key = tournament_id or 'Unknown-Tournament'
+            group_key = (id_key, date_key, arch)
+        else:
+            group_key = arch
         grouped_deck_counts[group_key] += 1
         seen: Set[str] = set()
         for c in deck.get('cards', []):
@@ -450,9 +459,13 @@ def aggregate_card_data(all_decks: List[DeckEntry], card_db: CardDatabaseLookup,
     result: List[RowDict] = []
     for group_key, cards in grouped_cards.items():
         if group_by_tournament_date:
-            period, arch = group_key
+            if not isinstance(group_key, tuple) or len(group_key) != 3:
+                logger.debug("Unexpected group_key format in tournament mode: %s", group_key)
+                continue
+            tournament_id, tournament_date, arch = group_key
+            period = get_week_id(tournament_date)
         else:
-            period, arch = '', group_key
+            tournament_id, tournament_date, period, arch = '', '', '', group_key
 
         total_decks = grouped_deck_counts[group_key]
         for name, stats in cards.items():
@@ -482,6 +495,9 @@ def aggregate_card_data(all_decks: List[DeckEntry], card_db: CardDatabaseLookup,
 
             if group_by_tournament_date:
                 row['meta'] = 'City League'
+                row['tournament_id'] = tournament_id
+                row['tournament_date'] = tournament_date
+                row['date'] = tournament_date
                 row['period'] = period
                 row['total_decks_in_archetype_in_period'] = total_decks
 
@@ -516,8 +532,9 @@ def save_to_csv(data: List[RowDict], output_file: str, append_mode: bool = False
 
     if append_mode and existing:
         def row_period_key(row: Mapping[str, Any]) -> str:
+            tournament_id = row.get('tournament_id', '')
             period = row.get('period', '') or row.get('date', '') or row.get('tournament_date', '')
-            return f"{period}|{row.get('archetype','')}|{row.get('card_name','')}"
+            return f"{tournament_id}|{period}|{row.get('archetype','')}|{row.get('card_name','')}"
 
         new_keys = {row_period_key(r) for r in data}
         merged = [r for r in existing if row_period_key(r) not in new_keys]

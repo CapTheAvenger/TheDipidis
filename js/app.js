@@ -160,6 +160,13 @@ const BASE_PATH = './data/';
             if (!Array.isArray(variants) || variants.length === 0) return;
 
             const displayName = String(mainName || '').charAt(0).toUpperCase() + String(mainName || '').slice(1);
+            const groupValue = 'GROUP:' + variants.join('|');
+
+            // Store for deferred application — populateCityLeagueDeckSelect picks this up
+            window.pendingCombinedArchetypeSelection = {
+                value: groupValue,
+                label: `🧩 ${displayName} (All Variants Combined)`
+            };
 
             if (typeof switchTabAndUpdateMenu === 'function') {
                 switchTabAndUpdateMenu('city-league-analysis');
@@ -167,23 +174,11 @@ const BASE_PATH = './data/';
                 switchTab('city-league-analysis');
             }
 
-            const select = document.getElementById('cityLeagueDeckSelect');
-            if (!select) return;
-
-            const groupValue = 'GROUP:' + variants.join('|');
-
-            let option = Array.from(select.options).find(opt => opt.value === groupValue);
-            if (!option) {
-                option = document.createElement('option');
-                option.value = groupValue;
-                option.textContent = `🧩 ${displayName} (All Variants Combined)`;
-                option.style.fontWeight = 'bold';
-                option.style.color = '#e3350d';
-                select.insertBefore(option, select.options[1] || null);
+            // If data was already loaded, populateCityLeagueDeckSelect won't re-run — apply now
+            if (window.cityLeagueAnalysisLoaded) {
+                setTimeout(function() { applyPendingCombinedArchetypeSelection(); }, 0);
             }
 
-            select.value = groupValue;
-            select.dispatchEvent(new Event('change'));
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
         
@@ -1333,22 +1328,23 @@ const BASE_PATH = './data/';
                     if (priorityA !== priorityB) {
                         return priorityA - priorityB;
                     }
-                    
-                    // Secondary sort: regulation mark (H > G > F > E > D > C > no mark)
-                    // Ensures modern SV-era reprints (TEF 85) beat old BW-era prints (BLK 45)
-                    const regA = _getRegMarkScore(a.set);
-                    const regB = _getRegMarkScore(b.set);
-                    if (regA !== regB) {
-                        return regB - regA; // Higher score = newer mark = preferred
-                    }
-                    
-                    // Tertiary sort (same mark): by SET ORDER (newer sets first)
+
+                    // Secondary sort (same rarity): by SET ORDER (newer sets first)
+                    // This ensures we truly pick the latest print among equal low-rarity variants.
                     const setOrderA = SET_ORDER[a.set] || 0;
                     const setOrderB = SET_ORDER[b.set] || 0;
                     if (setOrderA !== setOrderB) {
                         return setOrderB - setOrderA; // Higher number = newer = preferred
                     }
                     
+                    // Tertiary sort: regulation mark (H > G > F > E > D > C > no mark)
+                    // Ensures modern SV-era reprints (TEF 85) beat old BW-era prints (BLK 45)
+                    const regA = _getRegMarkScore(a.set);
+                    const regB = _getRegMarkScore(b.set);
+                    if (regA !== regB) {
+                        return regB - regA; // Higher score = newer mark = preferred
+                    }
+
                     // Quaternary sort (same set): by card number (lower number first)
                     const numA = parseInt((a.number || '0').toString().replace(/[^\d]/g, '')) || 0;
                     const numB = parseInt((b.number || '0').toString().replace(/[^\d]/g, '')) || 0;
@@ -1387,12 +1383,12 @@ const BASE_PATH = './data/';
                     const priorityA = getRarityPriority(a.rarity, a.set);
                     const priorityB = getRarityPriority(b.rarity, b.set);
                     if (priorityA !== priorityB) return priorityA - priorityB;
-                    const regA = _getRegMarkScore(a.set);
-                    const regB = _getRegMarkScore(b.set);
-                    if (regA !== regB) return regB - regA;
                     const setOrderA = SET_ORDER[a.set] || 0;
                     const setOrderB = SET_ORDER[b.set] || 0;
                     if (setOrderA !== setOrderB) return setOrderB - setOrderA;
+                    const regA = _getRegMarkScore(a.set);
+                    const regB = _getRegMarkScore(b.set);
+                    if (regA !== regB) return regB - regA;
                     const numA = parseInt((a.number || '0').toString().replace(/[^\d]/g, '')) || 0;
                     const numB = parseInt((b.number || '0').toString().replace(/[^\d]/g, '')) || 0;
                     return numA - numB;
@@ -1421,8 +1417,8 @@ const BASE_PATH = './data/';
             const r = rarity.toLowerCase();
 
             // Low Tier (1-3)
-            if (r.includes('common')) return 1;
             if (r.includes('uncommon')) return 2;
+            if (r.includes('common')) return 1;
 
             // High-end & secret rarities (check BEFORE plain rare to avoid matching "rare" in all)
             if (r.includes('secret rare')) return 16;
@@ -1631,7 +1627,7 @@ const BASE_PATH = './data/';
                 return Number.isFinite(parsed) ? parsed : NaN;
             };
 
-            // Compare strictly the last two available weekly points.
+            // Compare strictly the last two available time points.
             const validPoints = history.filter(point => Number.isFinite(parseShare(point?.share)));
             if (validPoints.length < 2) return '';
 
@@ -1669,23 +1665,64 @@ const BASE_PATH = './data/';
             const targetArchNormalized = targetArchetype && targetArchetype !== 'all' ? targetArchetype.trim().toLowerCase() : null;
             const parseNum = (value) => parseFloat(String(value ?? 0).replace(',', '.')) || 0;
 
-            const periodArchetypeDecks = new Map();
+            const getIsoWeekFromDate = (isoDate) => {
+                const match = String(isoDate).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (!match) return '';
+
+                const year = parseInt(match[1], 10);
+                const month = parseInt(match[2], 10);
+                const day = parseInt(match[3], 10);
+                const dt = new Date(Date.UTC(year, month - 1, day));
+                if (Number.isNaN(dt.getTime())) return '';
+
+                const isoDay = dt.getUTCDay() || 7;
+                dt.setUTCDate(dt.getUTCDate() + 4 - isoDay);
+                const isoYear = dt.getUTCFullYear();
+                const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+                const weekNo = Math.ceil((((dt - yearStart) / 86400000) + 1) / 7);
+                return `${isoYear}-W${String(weekNo).padStart(2, '0')}`;
+            };
+
+            const getWeekPeriod = (row) => {
+                const rawPeriod = String(row.period || '').trim();
+                const periodMatch = rawPeriod.match(/^(\d{4})-W(\d{1,2})$/i);
+                if (periodMatch) {
+                    return `${periodMatch[1]}-W${String(periodMatch[2]).padStart(2, '0')}`;
+                }
+
+                const rawDate = String(row.tournament_date || row.date || '').trim();
+                const normalizedDate = parseJapaneseDate(rawDate) || rawDate;
+                return getIsoWeekFromDate(normalizedDate);
+            };
+
+            const getTournamentBucket = (row, weekPeriod) => {
+                const tId = String(row.tournament_id || '').trim();
+                if (tId && weekPeriod) return `${tId}|||${weekPeriod}`;
+                if (tId) return `id:${tId}`;
+                if (weekPeriod) return `week:${weekPeriod}`;
+                return 'global';
+            };
+
+            const tournamentArchetypeDecks = new Map();
             rows.forEach(row => {
-                const period = String(row.date || row.period || row.tournament_date || '').trim();
+                const period = getWeekPeriod(row);
                 const archetype = String(row.archetype || '').trim().toLowerCase();
                 if (!period || !archetype) return;
 
                 if (targetArchNormalized && archetype !== targetArchNormalized) return;
 
                 const decks = parseNum(row.total_decks_in_archetype_in_period || row.total_decks_in_archetype || 0);
-                const key = `${period}|||${archetype}`;
-                const prev = periodArchetypeDecks.get(key) || 0;
-                if (decks > prev) periodArchetypeDecks.set(key, decks);
+                const tournamentBucket = getTournamentBucket(row, period);
+                const key = `${tournamentBucket}|||${archetype}`;
+                const prev = tournamentArchetypeDecks.get(key) || 0;
+                if (decks > prev) tournamentArchetypeDecks.set(key, decks);
             });
 
             const totalDecksByPeriod = new Map();
-            periodArchetypeDecks.forEach((decks, key) => {
-                const [period] = key.split('|||');
+            tournamentArchetypeDecks.forEach((decks, key) => {
+                const keyParts = key.split('|||');
+                const period = keyParts.length >= 2 ? keyParts[1] : '';
+                if (!period) return;
                 totalDecksByPeriod.set(period, (totalDecksByPeriod.get(period) || 0) + decks);
             });
 
@@ -1694,7 +1731,7 @@ const BASE_PATH = './data/';
                 const rowName = normalizeName(row.card_name || row.full_card_name || '');
                 if (!rowName || rowName !== targetName) return;
 
-                const period = String(row.date || row.period || row.tournament_date || '').trim();
+                const period = getWeekPeriod(row);
                 const archetype = String(row.archetype || '').trim().toLowerCase();
                 if (!period || !archetype) return;
 
@@ -1705,17 +1742,7 @@ const BASE_PATH = './data/';
             });
 
             return Array.from(totalDecksByPeriod.keys())
-                .sort((a, b) => {
-                    // DD.MM.YYYY needs normalization for chronological sorting.
-                    const parseDate = (d) => {
-                        const match = String(d).match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-                        if (match) {
-                            return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
-                        }
-                        return String(d);
-                    };
-                    return parseDate(a).localeCompare(parseDate(b));
-                })
+                .sort((a, b) => String(a).localeCompare(String(b)))
                 .map(period => {
                     const totalDecks = totalDecksByPeriod.get(period) || 0;
                     const decksWithCard = decksWithCardByPeriod.get(period) || 0;
@@ -3398,6 +3425,35 @@ const BASE_PATH = './data/';
                 select.appendChild(restGroup);
             }
             
+
+            // Add combined (multi-variant) archetypes at end of alphabet
+            const combinedGroupMap = {};
+            archetypeList.forEach(archetype => {
+                let main = archetype.name.toLowerCase();
+                if (main.startsWith('mega ') || main.startsWith('alolan ') || main.startsWith('galarian ') || main.startsWith('hisuian ')) {
+                    main = main.split(' ').slice(0, 2).join(' ');
+                } else {
+                    main = main.split(' ')[0];
+                }
+                if (!combinedGroupMap[main]) combinedGroupMap[main] = { main, totalDecks: 0, variants: [] };
+                combinedGroupMap[main].totalDecks += archetype.deckCount;
+                combinedGroupMap[main].variants.push(archetype.name);
+            });
+            const combinedGroups = Object.values(combinedGroupMap)
+                .filter(g => g.variants.length >= 2)
+                .sort((a, b) => a.main.localeCompare(b.main));
+            if (combinedGroups.length > 0) {
+                const combinedOptGroup = document.createElement('optgroup');
+                combinedOptGroup.label = '🧩 Combined Archetypes (A–Z)';
+                combinedGroups.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = 'GROUP:' + g.variants.join('|');
+                    opt.textContent = `🧩 ${g.main.charAt(0).toUpperCase() + g.main.slice(1)} — All Variants (${g.totalDecks} Decks)`;
+                    combinedOptGroup.appendChild(opt);
+                });
+                select.appendChild(combinedOptGroup);
+            }
+
             // Add change event listener
             select.onchange = function() {
                 if (this.value) {
@@ -3424,6 +3480,10 @@ const BASE_PATH = './data/';
                 }
             }
             
+
+            // Apply pending combined archetype selection (from analyzeCombinedArchetype click)
+            applyPendingCombinedArchetypeSelection();
+
             // Enable search functionality
             const searchInput = document.getElementById('cityLeagueDeckSearch');
             if (searchInput) {
@@ -3490,6 +3550,25 @@ const BASE_PATH = './data/';
             const label = option ? option.textContent : '';
             const match = label ? label.match(/\((\d+)\s+Decks\)/i) : null;
             return match ? parseInt(match[1], 10) || 0 : 0;
+        }
+
+        function applyPendingCombinedArchetypeSelection() {
+            const pending = window.pendingCombinedArchetypeSelection;
+            if (!pending) return;
+            const select = document.getElementById('cityLeagueDeckSelect');
+            if (!select || select.options.length <= 1) return;
+            window.pendingCombinedArchetypeSelection = null;
+            // Option should exist in the combined optgroup; add a temporary one if not
+            let option = Array.from(select.options).find(opt => opt.value === pending.value);
+            if (!option) {
+                option = document.createElement('option');
+                option.value = pending.value;
+                option.textContent = pending.label;
+                select.appendChild(option);
+            }
+            select.value = pending.value;
+            loadCityLeagueDeckData(pending.value);
+            console.log('✅ Applied combined archetype:', pending.value.replace('GROUP:', '').split('|')[0]);
         }
 
         function refreshCityLeagueDeckSelect() {
@@ -4059,18 +4138,41 @@ const BASE_PATH = './data/';
             gridButtons.forEach(btn => btn.textContent = '📋 List View');
         }
         
+        function normalizeSetCode(rawSetCode) {
+            return String(rawSetCode || '').toUpperCase().trim();
+        }
+
+        function normalizeCardNumber(rawCardNumber) {
+            const raw = String(rawCardNumber || '').trim();
+            if (!raw) return '';
+
+            // Remove query/hash fragments often passed by translated proxy URLs.
+            const noFragment = raw.split('?')[0].split('#')[0].trim();
+            if (!noFragment) return '';
+
+            // Keep a conservative set for valid card numbers (digits, letters, hyphen, slash).
+            const cleaned = noFragment.replace(/[^0-9A-Za-z\-\/]/g, '');
+            if (!cleaned) return '';
+
+            // Normalize pure numeric values by dropping leading zeroes.
+            if (/^\d+$/.test(cleaned)) {
+                return cleaned.replace(/^0+/, '') || '0';
+            }
+
+            return cleaned;
+        }
+
         // Helper function to get Limitless Japanese fallback URL for M3/M4 cards
         function getM3JapaneseFallbackUrl(setCode, cardNumber) {
-            if (!cardNumber) return '';
-            // Remove leading zeros: 075 ? 75
-            const num = cardNumber.toString().replace(/^0+/, '');
-            const normalizedSet = String(setCode || 'M3').toUpperCase();
+            const num = normalizeCardNumber(cardNumber);
+            if (!num) return '';
+            const normalizedSet = normalizeSetCode(setCode || 'M3');
             return `https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/tpc/${normalizedSet}/${normalizedSet}_${num}_R_JP_LG.png`;
         }
 
         function getIndexedCardBySetNumber(setCode, cardNumber) {
-            const normalizedSet = String(setCode || '').toUpperCase().trim();
-            const rawNumber = String(cardNumber || '').trim();
+            const normalizedSet = normalizeSetCode(setCode);
+            const rawNumber = normalizeCardNumber(cardNumber);
             if (!normalizedSet || !rawNumber) {
                 return null;
             }
@@ -4079,7 +4181,7 @@ const BASE_PATH = './data/';
                 const exactMatch = cardIndexBySetNumber.get(`${normalizedSet}-${rawNumber}`);
                 if (exactMatch) return exactMatch;
 
-                const normalizedNumber = rawNumber.replace(/^0+/, '') || '0';
+                const normalizedNumber = /^\d+$/.test(rawNumber) ? (rawNumber.replace(/^0+/, '') || '0') : rawNumber;
                 const normalizedMatch = cardIndexBySetNumber.get(`${normalizedSet}-${normalizedNumber}`);
                 if (normalizedMatch) return normalizedMatch;
 
@@ -4096,8 +4198,8 @@ const BASE_PATH = './data/';
                 return indexedCard;
             }
 
-            const normalizedSet = String(setCode || '').toUpperCase().trim();
-            const rawNumber = String(cardNumber || '').trim();
+            const normalizedSet = normalizeSetCode(setCode);
+            const rawNumber = normalizeCardNumber(cardNumber);
             if (!normalizedSet || !rawNumber || !cardsBySetNumberMap) {
                 return null;
             }
@@ -4107,7 +4209,7 @@ const BASE_PATH = './data/';
                 return cardsBySetNumberMap[exactKey];
             }
 
-            const normalizedNumber = rawNumber.replace(/^0+/, '') || '0';
+            const normalizedNumber = /^\d+$/.test(rawNumber) ? (rawNumber.replace(/^0+/, '') || '0') : rawNumber;
             const normalizedKey = `${normalizedSet}-${normalizedNumber}`;
             if (cardsBySetNumberMap[normalizedKey]) {
                 return cardsBySetNumberMap[normalizedKey];
@@ -4119,8 +4221,8 @@ const BASE_PATH = './data/';
         }
 
         function getUnifiedCardImage(set, number) {
-            const normalizedSet = String(set || '').toUpperCase().trim();
-            const rawNumber = String(number || '').trim();
+            const normalizedSet = normalizeSetCode(set);
+            const rawNumber = normalizeCardNumber(number);
             if (!normalizedSet || !rawNumber) {
                 return '';
             }
@@ -4238,14 +4340,15 @@ const BASE_PATH = './data/';
 
             let fallbackUrl = explicitFallbackUrl || '';
             const src = img.getAttribute('src') || '';
-            const normalizedSet = (setCode || '').toUpperCase();
+            const normalizedSet = normalizeSetCode(setCode);
+            const normalizedNumber = normalizeCardNumber(cardNumber);
 
             // For M3/M4 cards, fallback to Limitless JP when the primary URL fails.
             if (!fallbackUrl) {
                 const isM3M4 = (normalizedSet === 'M3' || normalizedSet === 'M4' || /\/(M3|M4)\//i.test(src));
                 if (isM3M4) {
                     const fallbackSet = normalizedSet === 'M4' ? 'M4' : 'M3';
-                    fallbackUrl = getM3JapaneseFallbackUrl(fallbackSet, cardNumber);
+                    fallbackUrl = getM3JapaneseFallbackUrl(fallbackSet, normalizedNumber);
                 }
             }
 
@@ -4773,19 +4876,24 @@ const BASE_PATH = './data/';
                                         ${setCode} ${setNumber}
                                     </div>
                                     <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">
-                                        ${resolvedPercentage > 0 ? `${percentage}% | Ø ${Math.round(avgCountInUsedValue)}x (${Math.round(avgCountOverallValue)}x)` : ''}
+                                        ${resolvedPercentage > 0 ? `${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)` : ''}
                                     </div>
                                     <div style="font-weight: 600; color: #333; font-size: 0.58em;">
                                         ${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)
                                     </div>
                                 </div>
                                 
-                                <!-- Rarity Switcher & Actions (4 buttons: - ? Ø +) -->
-                                <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">
-                                    <button onclick="event.stopPropagation(); removeCardFromDeck('cityLeague', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Remove from deck">-</button>
-                                    <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">★</button>
-                                    <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 6px; font-weight: bold; padding: 0 1px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); min-height: unset; min-width: unset;" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
-                                    <button onclick="event.stopPropagation(); addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Add to deck">+</button>
+                                <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
+                                <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 2px; margin-top: 4px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
+                                        <button onclick="event.stopPropagation(); removeCardFromDeck('cityLeague', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Remove from deck">-</button>
+                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">★</button>
+                                        <button onclick="event.stopPropagation(); addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Add to deck">+</button>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2px;">
+                                        ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -6344,11 +6452,16 @@ const BASE_PATH = './data/';
                             ${overlayText}
                         </div>
                         
-                        <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 3px; z-index: 3; align-items: stretch;">
-                            <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">-</button>
-                            <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center;">★</button>
-                            <button class="${priceClass}" onclick="openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 20px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" title="${eurPrice ? 'Auf Cardmarket kaufen: ' + eurPrice : 'Preis nicht verfuegbar'}">${priceDisplay}</button>
-                            <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">+</button>
+                        <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: flex; flex-direction: column; gap: 2px; z-index: 3;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
+                                <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">-</button>
+                                <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center;">★</button>
+                                <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">+</button>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2px;">
+                                ${setCode && setNumber ? `<button onclick="openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 9px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                <button class="${priceClass}" onclick="openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 20px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4);" title="${eurPrice ? 'Auf Cardmarket kaufen: ' + eurPrice : 'Preis nicht verfuegbar'}">${priceDisplay}</button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -7019,6 +7132,23 @@ const BASE_PATH = './data/';
             };
             if (title) {
                 title.textContent = cardName;
+            }
+
+            // Limitless link in zoom modal
+            const modalContent = overlay.querySelector('.single-card-modal-content');
+            const existingLimitlessBtn = overlay.querySelector('#singleCardLimitlessBtn');
+            if (existingLimitlessBtn) existingLimitlessBtn.remove();
+            const resolvedSet = inferredSet || normalizedCardData.set_code || '';
+            const resolvedNum = inferredNumber || normalizedCardData.set_number || '';
+            if (modalContent && resolvedSet && resolvedNum) {
+                const lBtn = document.createElement('a');
+                lBtn.id = 'singleCardLimitlessBtn';
+                lBtn.href = `https://limitlesstcg.com/cards/${encodeURIComponent(resolvedSet)}/${encodeURIComponent(resolvedNum)}`;
+                lBtn.target = '_blank';
+                lBtn.rel = 'noopener noreferrer';
+                lBtn.textContent = `Limitless — ${resolvedSet} ${resolvedNum}`;
+                lBtn.style.cssText = 'display:block; margin-top:8px; padding:6px 14px; background:#6c3dc5; color:white; border-radius:6px; text-decoration:none; font-size:12px; font-weight:bold; text-align:center; letter-spacing:0.5px;';
+                modalContent.appendChild(lBtn);
             }
 
             document.body.style.overflow = 'hidden';
@@ -8111,11 +8241,16 @@ const BASE_PATH = './data/';
                                     ${card.metaShare > 0 ? `<div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div><div style="color: #555; font-size: 0.9em; font-weight: 500;">(${Math.round(card.avgCountWhenUsed)}x when used)</div>` : ''}
                                 </div>
                                 
-                                <!-- Action Buttons: - | ? | + -->
-                                <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 3px;">
-                                    <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'" title="Remove from deck">-</button>
-                                    <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${card.set_code} ${card.set_number})')" style="background: #ffc107; color: #333; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#e0a800'" onmouseout="this.style.background='#ffc107'" title="Switch rarity/print">★</button>
-                                    <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" style="background: #28a745; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'" title="Add to deck">+</button>
+                                <!-- Card Actions: Row 1 = - ★ + | Row 2 = L (full-width) -->
+                                <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 3px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 3px;">
+                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'" title="Remove from deck">-</button>
+                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${card.set_code} ${card.set_number})')" style="background: #ffc107; color: #333; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#e0a800'" onmouseout="this.style.background='#ffc107'" title="Switch rarity/print">★</button>
+                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" style="background: #28a745; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'" title="Add to deck">+</button>
+                                    </div>
+                                    <div>
+                                        <button onclick="event.stopPropagation(); openLimitlessCard('${card.set_code}', '${card.set_number}')" style="background: #6c3dc5; color: white; border: none; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%; transition: all 0.2s;" onmouseover="this.style.background='#5a32a3'" onmouseout="this.style.background='#6c3dc5'" title="Open on Limitless (${card.set_code} ${card.set_number})">Limitless — ${card.set_code} ${card.set_number}</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -10124,12 +10259,17 @@ const BASE_PATH = './data/';
                                         </div>
                                     </div>
                                     
-                                    <!-- Action buttons (4 buttons: - ? Ø +) -->
-                                    <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">
-                                        <button onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Remove from deck">-</button>
-                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">★</button>
-                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 6px; font-weight: bold; padding: 0 1px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); min-height: unset; min-width: unset;" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
-                                        <button onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Add to deck">+</button>
+                                    <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
+                                    <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 2px; margin-top: 4px;">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
+                                            <button onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Remove from deck">-</button>
+                                            <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">★</button>
+                                            <button onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Add to deck">+</button>
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2px;">
+                                            ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                            <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -12848,6 +12988,12 @@ const BASE_PATH = './data/';
             window.open(cardmarketUrl, '_blank');
         }
 
+        function openLimitlessCard(setCode, setNumber) {
+            if (!setCode || !setNumber) return;
+            const url = `https://limitlesstcg.com/cards/${encodeURIComponent(setCode)}/${encodeURIComponent(setNumber)}`;
+            window.open(url, '_blank');
+        }
+
         function getRarityColor(rarity) {
             const colors = {
                 'Common': '#A0A0A0',
@@ -13898,12 +14044,17 @@ const BASE_PATH = './data/';
                                         <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">${setCode} ${setNumber}</div>
                                         <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
                                     </div>
-                                    <!-- Rarity Switcher & Actions (4 buttons: - ? Ø +) -->
-                                    <div class="card-action-buttons" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 2px; margin-top: 4px;">
-                                        <button onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">-</button>
-                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;">★</button>
-                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 6px; font-weight: bold; padding: 0 1px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); min-height: unset; min-width: unset;">${priceDisplay}</button>
-                                        <button onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">+</button>
+                                    <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
+                                    <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 2px; margin-top: 4px;">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
+                                            <button onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">-</button>
+                                            <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;">★</button>
+                                            <button onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">+</button>
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2px;">
+                                            ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                            <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;">  ${priceDisplay}</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -310,7 +310,7 @@ def extract_cards_from_deck_html(deck_html: str, card_db: CardDatabaseLookup) ->
                     })
     return cards
 
-def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, card_db, timeout: int) -> dict:
+def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, tournament_id: str, card_db, timeout: int) -> dict:
     """Worker Funktion fuer Multithreading."""
     scraper = _get_scraper()
     try:
@@ -323,6 +323,7 @@ def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, card
                 'archetype': normalize_archetype_name(deck_name),
                 'cards': cards,
                 'source': 'City League',
+                'tournament_id': tournament_id,
                 'tournament_date': tournament_date,
                 'date': tournament_date
             }
@@ -368,8 +369,9 @@ def process_tournament_decklists(
     
     decks = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        tournament_id = str(tournament_info.get('tournament_id') or tournament_info.get('id') or '').strip()
         future_to_deck = {
-            executor.submit(_fetch_single_deck, url, name, tournament_date, card_db, request_timeout): url 
+            executor.submit(_fetch_single_deck, url, name, tournament_date, tournament_id, card_db, request_timeout): url 
             for url, name in deck_tasks
         }
         

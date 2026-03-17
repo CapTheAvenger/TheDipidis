@@ -1483,7 +1483,7 @@ const BASE_PATH = './data/';
             return '';
         }
 
-        function getCityLeagueCardShareHistory(cardName) {
+        function getCityLeagueCardShareHistory(cardName, targetArchetype = null) {
             const rows = window.cityLeagueAnalysisData || [];
             if (!cardName || rows.length === 0) return [];
 
@@ -1496,6 +1496,7 @@ const BASE_PATH = './data/';
             };
 
             const targetName = normalizeName(cardName);
+            const targetArchNormalized = targetArchetype && targetArchetype !== 'all' ? targetArchetype.trim().toLowerCase() : null;
             const parseNum = (value) => parseFloat(String(value ?? 0).replace(',', '.')) || 0;
 
             const periodArchetypeDecks = new Map();
@@ -1503,6 +1504,8 @@ const BASE_PATH = './data/';
                 const period = String(row.date || row.period || row.tournament_date || '').trim();
                 const archetype = String(row.archetype || '').trim().toLowerCase();
                 if (!period || !archetype) return;
+
+                if (targetArchNormalized && archetype !== targetArchNormalized) return;
 
                 const decks = parseNum(row.total_decks_in_archetype_in_period || row.total_decks_in_archetype || 0);
                 const key = `${period}|||${archetype}`;
@@ -1522,7 +1525,10 @@ const BASE_PATH = './data/';
                 if (!rowName || rowName !== targetName) return;
 
                 const period = String(row.date || row.period || row.tournament_date || '').trim();
-                if (!period) return;
+                const archetype = String(row.archetype || '').trim().toLowerCase();
+                if (!period || !archetype) return;
+
+                if (targetArchNormalized && archetype !== targetArchNormalized) return;
 
                 const decksWithCard = parseNum(row.deck_inclusion_count || row.deck_count || 0);
                 decksWithCardByPeriod.set(period, (decksWithCardByPeriod.get(period) || 0) + decksWithCard);
@@ -4518,7 +4524,8 @@ const BASE_PATH = './data/';
                 const avgCountInUsedDecks = Math.max(0, finalAvgUsed).toFixed(2).replace('.', ',');  // Average in decks that use this card
                 const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
                 const totalDecksDisplay = Math.round(Math.max(0, totalDecksInArchetype));
-                const trendHistory = getCityLeagueCardShareHistory(cardName);
+                const selectedArchetype = document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all';
+                const trendHistory = getCityLeagueCardShareHistory(cardName, selectedArchetype);
                 const trendIndicator = getTrendIndicator(trendHistory);
                 const showTrendOverlay = trendIndicator && !trendIndicator.includes('trend-stable');
                 
@@ -7920,7 +7927,10 @@ const BASE_PATH = './data/';
             grid.innerHTML = cards.map(card => {
                 const imageUrl = getBestCardImage(card) || buildInlineCardPlaceholder(card.card_name);
                 const fallbackUrl = buildInlineCardPlaceholder(card.card_name);
-                const trendHistory = source === 'cityLeague' ? getCityLeagueCardShareHistory(card.card_name) : [];
+                const selectedArchetype = source === 'cityLeague'
+                    ? (document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all')
+                    : (document.getElementById('currentMetaArchetypeSelect')?.value || 'all');
+                const trendHistory = source === 'cityLeague' ? getCityLeagueCardShareHistory(card.card_name, selectedArchetype) : [];
                 const trendIndicator = source === 'cityLeague' ? getTrendIndicator(trendHistory) : '';
                 
                 // Create JSON string for archetypes (escape properly for HTML attribute)

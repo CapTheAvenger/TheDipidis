@@ -2416,13 +2416,25 @@ const BASE_PATH = './data/';
                 window.cityLeagueAnalysisData = analysisData;
                 window.cityLeagueArchetypesData = archetypesData;
                 window.cityLeagueComparisonData = cityLeagueData;
+                const previousDeckValue = document.getElementById('cityLeagueDeckSelect')?.value || '';
                 populateCityLeagueDeckSelect(analysisData, cityLeagueData);
 
                 const deckSelect = document.getElementById('cityLeagueDeckSelect');
-                if (deckSelect) {
+                let restoredSelection = '';
+                if (deckSelect && previousDeckValue) {
+                    const stillExists = Array.from(deckSelect.options).some(option => option.value === previousDeckValue);
+                    if (stillExists) {
+                        deckSelect.value = previousDeckValue;
+                        restoredSelection = previousDeckValue;
+                    }
+                }
+                if (!restoredSelection && deckSelect) {
                     deckSelect.value = '';
                 }
-                clearCityLeagueDeckView();
+
+                if (!restoredSelection) {
+                    clearCityLeagueDeckView();
+                }
                 
                 // Render tier list banner view
                 await renderCityLeagueTierList(analysisData);
@@ -2947,6 +2959,7 @@ const BASE_PATH = './data/';
             const analysisUrl = `${BASE_PATH}city_league_analysis${formatSuffix}.csv`;
             const archetypesUrl = `${BASE_PATH}city_league_archetypes${formatSuffix}.csv`;
             const comparisonUrl = `${BASE_PATH}city_league_archetypes_comparison${formatSuffix}.csv`;
+            const hasComparisonFile = format !== 'M3';
             
             console.log(`Loading City League Analysis for format: ${format}`);
 
@@ -2963,12 +2976,14 @@ const BASE_PATH = './data/';
                         console.error(`Error loading archetypes CSV (${archetypesUrl}):`, error);
                         return null;
                     }),
-                fetch(`${comparisonUrl}?t=${timestamp}`)
-                    .then(response => response.ok ? response.text() : null)
-                    .catch(error => {
-                        console.warn(`Ignoring missing comparison CSV (${comparisonUrl}):`, error);
-                        return null;
-                    })
+                hasComparisonFile
+                    ? fetch(`${comparisonUrl}?t=${timestamp}`)
+                        .then(response => response.ok ? response.text() : null)
+                        .catch(error => {
+                            console.warn(`Ignoring missing comparison CSV (${comparisonUrl}):`, error);
+                            return null;
+                        })
+                    : Promise.resolve(null)
             ]);
 
             const data = analysisText ? parseCSV(analysisText) : null;
@@ -2984,7 +2999,15 @@ const BASE_PATH = './data/';
                 window.cityLeagueAnalysisData = data;
                 window.cityLeagueArchetypesData = archetypesData;
                 window.cityLeagueComparisonData = comparisonData;
+                const previousDeckValue = document.getElementById('cityLeagueDeckSelect')?.value || '';
                 populateCityLeagueDeckSelect(data, comparisonData);
+                const deckSelect = document.getElementById('cityLeagueDeckSelect');
+                if (deckSelect && previousDeckValue) {
+                    const stillExists = Array.from(deckSelect.options).some(option => option.value === previousDeckValue);
+                    if (stillExists) {
+                        deckSelect.value = previousDeckValue;
+                    }
+                }
                 window.cityLeagueAnalysisLoaded = true;
                 
                 // Load meta card analysis for consistency calculations

@@ -7003,12 +7003,6 @@ const BASE_PATH = './data/';
             }
             let currentTotal = 0; // Start from 0 since we just cleared the deck
             
-            // Basis Energien Identifikation - duerfen oefter als 4x sein
-            const isBaseEnergy = (card) => {
-                const type = (card.type || card.card_type || '').toLowerCase();
-                return type === 'energy' && (card.card_name || '').match(/^(Fire|Water|Grass|Lightning|Psychic|Fighting|Darkness|Metal|Fairy|Dragon|Colorless|Neutral)\s+Energy$/i);
-            };
-            
             // Step 1: Aggregate cards by card_name (sum deck_count across all tournaments)
             const uniqueCards = {};
             for (const card of cards) {
@@ -7116,23 +7110,19 @@ const BASE_PATH = './data/';
                 
                 // Get percentage for logging
                 const percentage = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
-                
-                // Safe average parsing plus canonical basic-energy detection.
-                const rawAvg = parseFloat(String(card.average_count || 0).replace(',', '.'));
+
+                // Calculate average copies per deck WHEN USED.
                 const totalCount = parseFloat(card.total_count) || 0;
                 const decksWithCard = parseFloat(card.deck_count || card.deck_inclusion_count) || 0;
-                const avgWhenUsed = Number.isFinite(rawAvg) && rawAvg > 0
-                    ? rawAvg
-                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 1);
-
-                const canonicalCard = window.cardIndexBySetNumber
-                    ? window.cardIndexBySetNumber.get(`${card.set_code}-${card.set_number}`)
-                    : null;
-                const isBasicEnergy = isBasicEnergyCardEntry(canonicalCard || card);
-
+                const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                
+                const avgWhenUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0 ? avgCountFromRow : (decksWithCard > 0 ? (totalCount / decksWithCard) : 1);
+                
                 let addCount = Math.round(avgWhenUsed);
-                if (!isBasicEnergy) {
-                    addCount = Math.min(4, Math.max(1, addCount));
+                
+                // For base energies, no limit. For other cards, max 4
+                if (!isBasicEnergy(cardName)) {
+                    addCount = Math.max(1, Math.min(addCount, 4));
                 } else {
                     addCount = Math.max(1, addCount);
                 }
@@ -7317,45 +7307,34 @@ const BASE_PATH = './data/';
             }
             let currentTotal = 0;
             
-            // Basic Energy identification
-            const isBaseEnergy = (card) => {
-                const canonicalCard = (card && card.set_code && card.set_number)
-                    ? getIndexedCardBySetNumber(card.set_code, card.set_number)
-                    : null;
-                return isBasicEnergyCardEntry(canonicalCard || card);
-            };
-            
             // Step 1: Aggregate cards by card_name
             const uniqueCards = {};
             for (const card of cards) {
                 const cardName = fixCardNameEncoding((card.card_name || card.full_card_name || card.name || '').toString().trim());
-                if (!cardName) {
-                    continue;
-                }
+                if (!cardName) continue;
 
                 const deckCountValue = parseInt(card.deck_count || card.deck_inclusion_count || 0) || 0;
                 const totalCountValue = parseFloat(card.total_count || 0) || 0;
+                const avgCountValue = parseFloat(String(card.average_count || card.avg_count || 0).replace(',', '.')) || 0;
 
                 if (!uniqueCards[cardName]) {
-                    uniqueCards[cardName] = {
-                        ...card,
-                        card_name: cardName,
-                        deck_count: deckCountValue,
-                        total_count: totalCountValue
+                    uniqueCards[cardName] = { 
+                        ...card, card_name: cardName, deck_count: deckCountValue, total_count: totalCountValue,
+                        sum_avg_count: avgCountValue, count_entries: 1
                     };
                 } else {
                     uniqueCards[cardName].deck_count += deckCountValue;
                     uniqueCards[cardName].total_count += totalCountValue;
+                    uniqueCards[cardName].sum_avg_count += avgCountValue;
+                    uniqueCards[cardName].count_entries += 1;
                 }
             }
             
             const resolvedTotalDecks = resolveBuilderTotalDecks(source, currentArchetype, cards, uniqueCards);
 
-            // Recalculate percentage for aggregated data
             for (const cardName in uniqueCards) {
                 const card = uniqueCards[cardName];
-                const deckCount = card.deck_count;
-                const percentage = Math.min(100, Math.max(0, (deckCount / resolvedTotalDecks) * 100));
+                const percentage = Math.min(100, Math.max(0, (card.deck_count / resolvedTotalDecks) * 100));
                 card.total_decks_in_archetype = resolvedTotalDecks;
                 card.percentage_in_archetype = percentage.toFixed(2).replace('.', ',');
             }
@@ -7366,15 +7345,21 @@ const BASE_PATH = './data/';
             // Step 2: Compute per-card statistics
             deckCards.forEach(card => {
                 const sharePercent = Math.min(100, Math.max(0, parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.')) || 0));
-                const totalCount = parseFloat(card.total_count) || 1;
-                const deckCount = parseInt(card.deck_count) || 1;
-                const avgCountWhenUsed = totalCount / deckCount;
-                const metaShare = getMetaShareForCard(card.card_name, source);
+
+                let avgCountWhenUsed = 1;
+                if (card.total_count > 0 && card.deck_count > 0) {
+                    avgCountWhenUsed = card.total_count / card.deck_count;
+                } else if (card.sum_avg_count > 0 && card.count_entries > 0) {
+                    avgCountWhenUsed = card.sum_avg_count / card.count_entries;
+                } else {
+                    const parsedAvg = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                    if (Number.isFinite(parsedAvg) && parsedAvg > 0) avgCountWhenUsed = parsedAvg;
+                }
+
                 card.sharePercent = sharePercent;
                 card.avgCountWhenUsed = avgCountWhenUsed;
-                card.metaShare = metaShare;
-                // Score: archetype share dominates; meta share breaks ties
-                card.score = sharePercent + (metaShare * 0.1);
+                card.metaShare = getMetaShareForCard(card.card_name, source);
+                card.score = sharePercent + (card.metaShare * 0.1);
             });
 
             // Kaskaden-Logik mit Encoding-healed Vergleichen und harter 4x Sanity-Rule.
@@ -7389,7 +7374,7 @@ const BASE_PATH = './data/';
                 if (!healedName) return;
 
                 const key = canonicalName(healedName);
-                const basicEnergy = isBaseEnergy(card);
+                const basicEnergy = isBasicEnergy(card.card_name);
                 const perCardCap = basicEnergy ? 60 : 4;
                 const existing = cardsToAddMap.get(key);
 
@@ -7485,18 +7470,19 @@ const BASE_PATH = './data/';
                 });
             }
 
-            // Fallback: Fill remaining slots with highest-share cards (respecting 4x limit except basic energy).
+            // Fallback: Fill remaining slots with highest-share cards
             if (currentTotal < 60) {
                 shareSorted.forEach(card => {
                     if (currentTotal >= 60) return;
-                    pushCard(card, 1, '[Consistency][Fallback]');
+                    const avgCount = getRoundedAverageCount(card, true);
+                    pushCard(card, avgCount, '[Consistency][Fallback]');
                 });
             }
 
-            // Final fallback for empty-share edge cases: use top basic energy if available.
+            // Final fallback for empty-share edge cases
             if (currentTotal < 60) {
                 const topBasicEnergy = deckCards
-                    .filter(card => isBaseEnergy(card))
+                    .filter(card => isBasicEnergy(card.card_name))
                     .sort((a, b) => b.sharePercent - a.sharePercent)[0];
                 if (topBasicEnergy) {
                     pushCard(topBasicEnergy, 60 - currentTotal, '[Consistency][EnergyFill]');

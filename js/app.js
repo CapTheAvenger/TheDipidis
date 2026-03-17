@@ -6518,10 +6518,14 @@ const BASE_PATH = './data/';
                     }
                 }
                 
-                // Calculate average count over all decks (total_count / total_decks_in_archetype)
-                const totalCount = parseInt(card.total_count || 0);
-                const totalDecksInArchetype = parseInt(card.total_decks_in_archetype || 1);
-                const avgCount = totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype).toFixed(2) : '0';
+                // Prefer "average in decks that use this card" for UI consistency.
+                const totalCount = parseFloat(String(card.total_count || 0).replace(',', '.')) || 0;
+                const decksWithCard = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0;
+                const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                const avgCountValue = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
+                    ? avgCountFromRow
+                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
+                const avgCount = Math.max(0, avgCountValue).toFixed(2).replace('.', ',');
                 
                 // Card image or placeholder
                 let imgHtml = '';
@@ -7037,10 +7041,14 @@ const BASE_PATH = './data/';
                 // Get percentage for logging
                 const percentage = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
                 
-                // Calculate AVERAGE count for this card: total_count / total_decks_in_archetype
-                const totalCount = parseFloat(card.total_count) || 1;
-                const totalDecksInArchetype = parseFloat(card.total_decks_in_archetype) || 1;
-                let addCount = Math.round(totalCount / totalDecksInArchetype);
+                // Calculate average copies per deck WHEN USED.
+                const totalCount = parseFloat(card.total_count) || 0;
+                const decksWithCard = parseFloat(card.deck_count || card.deck_inclusion_count) || 0;
+                const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                const avgWhenUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
+                    ? avgCountFromRow
+                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 1);
+                let addCount = Math.round(avgWhenUsed);
                 
                 // For base energies, no limit. For other cards, max 4
                 if (!isBaseEnergy(card)) {
@@ -7056,7 +7064,7 @@ const BASE_PATH = './data/';
                     cardsToAdd.push({ ...card, addCount: addCount });
                     addedNames.add(cardName);
                     currentTotal += addCount;
-                    console.log(`[autoComplete] ? ${addCount}x ${cardName} (${percentage.toFixed(1)}%, avg: ${(totalCount/totalDecksInArchetype).toFixed(1)}x) - Total: ${currentTotal}/60`);
+                    console.log(`[autoComplete] ? ${addCount}x ${cardName} (${percentage.toFixed(1)}%, avg: ${avgWhenUsed.toFixed(1)}x) - Total: ${currentTotal}/60`);
                 }
             }
             

@@ -101,6 +101,7 @@ const BASE_PATH = './data/';
         // Navigate to City League Analysis with pre-selected deck
         function navigateToAnalysisWithDeck(archetypeName) {
             console.log('🔍 Navigating to analysis with deck:', archetypeName);
+            window.pendingCityLeagueDeckSelection = archetypeName;
             
             // Switch to City League Analysis tab
             switchTab('city-league-analysis');
@@ -122,6 +123,7 @@ const BASE_PATH = './data/';
                     
                     if (matchingOption) {
                         select.value = matchingOption.value;
+                        window.pendingCityLeagueDeckSelection = null;
                         // Trigger change event to load the deck
                         const event = new Event('change', { bubbles: true });
                         select.dispatchEvent(event);
@@ -273,6 +275,7 @@ const BASE_PATH = './data/';
         let overviewCardTypeFilter = 'all'; // Current card type filter for overview section (all, Pokemon, Supporter, Item, Tool, Stadium, Energy, Special Energy, Ace Spec)
         let currentMetaOverviewCardTypeFilter = 'all'; // Card type filter for Current Meta overview
         let pastMetaOverviewCardTypeFilter = 'all'; // Card type filter for Past Meta overview
+        window.pendingCityLeagueDeckSelection = null; // Preserves cross-tab deck selection during async reloads
         
         // Ace Specs list - loaded from ace_specs.json
         let aceSpecsList = [];
@@ -3116,6 +3119,20 @@ const BASE_PATH = './data/';
                     clearCityLeagueDeckView();
                 }
             };
+
+            // If navigation requested a specific deck while data was loading, apply it now.
+            const pendingDeck = String(window.pendingCityLeagueDeckSelection || '').trim();
+            if (pendingDeck) {
+                const matchingOption = Array.from(select.options).find(option =>
+                    option.value && option.value.toLowerCase() === pendingDeck.toLowerCase()
+                );
+                if (matchingOption) {
+                    select.value = matchingOption.value;
+                    window.pendingCityLeagueDeckSelection = null;
+                    loadCityLeagueDeckData(matchingOption.value);
+                    console.log('✅ Applied pending City League deck selection:', matchingOption.value);
+                }
+            }
             
             // Enable search functionality
             const searchInput = document.getElementById('cityLeagueDeckSearch');

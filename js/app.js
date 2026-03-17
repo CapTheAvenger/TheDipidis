@@ -1134,9 +1134,17 @@ const BASE_PATH = './data/';
 
             // MERGE: When we resolved via international prints for a specific set/number,
             // also include ALL English versions for this card name so that newer reprints
-            // (e.g. TEF 85 Drilbur) are in the selection pool even when the archetype data
-            // only referenced an older print (e.g. BLK 45 Drilbur).
-            if (originalSet && originalNumber && versions.length > 0) {
+            // are in the selection pool (e.g. Boss's Orders reprints across sets).
+            // SAFETY: This merge is ONLY allowed for Trainer/Energy cards. Pokémon with the
+            // same name can have completely different attacks in different sets — merging them
+            // by name would corrupt deck building (e.g. turning TEF Drilbur into BLK Drilbur).
+            // Pokémon stay strictly bound to the exact prints returned by getInternationalPrintsForCard.
+            const _mergeCardType = (versions[0] && versions[0].type) ? versions[0].type.toLowerCase() : '';
+            const _isNonPokemon = _mergeCardType.includes('energy') ||
+                _mergeCardType.includes('trainer') || _mergeCardType.includes('supporter') ||
+                _mergeCardType.includes('item') || _mergeCardType.includes('stadium') || _mergeCardType.includes('tool');
+
+            if (_isNonPokemon && originalSet && originalNumber && versions.length > 0) {
                 const allEnglish = getEnglishCardVersions(cardName);
                 if (allEnglish.length > 0) {
                     const seenKeys = new Set(versions.map(v => `${v.set}-${v.number}`));
@@ -1146,6 +1154,8 @@ const BASE_PATH = './data/';
                         console.log(`[getPreferredVersionForCard] Merged ${extras.length} additional English reprints for "${cardName}" (pool now ${versions.length})`);
                     }
                 }
+            } else if (!_isNonPokemon && originalSet && originalNumber) {
+                console.log(`[getPreferredVersionForCard] Pokémon "${cardName}" — name-merge suppressed, using strict set/number binding`);
             }
             
             // DEBUG: Log when versions are not found

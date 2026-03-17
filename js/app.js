@@ -7445,6 +7445,19 @@ const BASE_PATH = './data/';
                 return ensureMinimumOne ? Math.max(1, roundedCount) : roundedCount;
             };
 
+            // ==========================================
+            // 🚨 ACE SPEC PRIORITY (IMMER ZUERST) 🚨
+            // ==========================================
+            const allAvailableAceSpecs = deckCards
+                .filter(c => isAceSpecCard(c))
+                .sort((a, b) => b.sharePercent - a.sharePercent);
+
+            if (allAvailableAceSpecs.length > 0) {
+                // Nimm die am häufigsten gespielte ACE SPEC dieses Archetyps (ignoriere Global Meta)
+                const bestAceSpec = allAvailableAceSpecs[0];
+                pushCard(bestAceSpec, 1, '[Consistency][ACE-SPEC-Priority]');
+            }
+
             // Stufe 1: Core
             shareSorted
                 .filter(card => card.sharePercent >= 80)
@@ -7463,27 +7476,6 @@ const BASE_PATH = './data/';
                         const avgCount = getRoundedAverageCount(card, true);
                         pushCard(card, avgCount, '[Consistency][Stage2]');
                     });
-            }
-
-            // ==========================================
-            // 🚨 ACE SPEC GARANTIE 🚨
-            // ==========================================
-            if (!deckHasAceSpec() && currentTotal < 60) {
-                // Suche in der KOMPLETTEN uniqueCards Liste (vor Stufe 1 und 2) nach dem besten Ace Spec
-                const allAvailableAceSpecs = Object.values(uniqueCards)
-                    .filter(c => isAceSpecCard(c))
-                    .map(c => {
-                        // Berechne den Share kurz für die Sortierung, falls noch nicht passiert
-                        const share = Math.min(100, Math.max(0, (c.deck_count / resolvedTotalDecks) * 100));
-                        c.tempShare = share;
-                        return c;
-                    })
-                    .sort((a, b) => b.tempShare - a.tempShare);
-
-                if (allAvailableAceSpecs.length > 0) {
-                    const bestAceSpec = allAvailableAceSpecs[0];
-                    pushCard(bestAceSpec, 1, '[Consistency][ACE-SPEC-Guarantee]');
-                }
             }
 
             // Global Meta Boost (Watchtower-Prinzip)

@@ -264,6 +264,7 @@ const BASE_PATH = './data/';
         let cardIndexBySetNumber = new Map(); // O(1) set+number -> canonical card lookup
         let cardsByNameMap = {};
         let cardsBySetNumberMap = {}; // Index for fast card lookup by set+number
+        let setOrderMap = {}; // Loaded from sets.json – higher number = newer set
         let pokedexNumbers = {}; // name (lowercase) → National Pokédex number
         let englishSetCodes = null;
         let rarityPreferences = {};
@@ -293,6 +294,21 @@ const BASE_PATH = './data/';
                 }
             } catch (e) {
                 console.warn('Could not load pokemon_dex_numbers.json', e);
+            }
+        }
+
+        async function loadSetOrderMap() {
+            try {
+                const resp = await fetch(`./data/sets.json?t=${Date.now()}`);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    if (json && typeof json === 'object') {
+                        setOrderMap = json;
+                        window.setOrderMap = json;
+                    }
+                }
+            } catch (e) {
+                console.warn('[init] Could not load sets.json for set ordering:', e);
             }
         }
 
@@ -1141,50 +1157,8 @@ const BASE_PATH = './data/';
             }
 
             if (globalPref && (globalPref === 'max' || globalPref === 'min')) {
-                // Set order (higher = newer) - based on pokemon_sets_mapping.csv
-                // Last updated: 2026-02-27
-                const SET_ORDER = {
-                    // 2026 Sets (newest first)
-                    'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
-                    'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
-                    // Scarlet & Violet (2023-2025)
-                    'SCR': 104, 'SFA': 103, 'TWM': 102, 'TEF': 101, 'PAF': 100, 'PAR': 99,
-                    'MEW': 98, 'OBF': 97, 'PAL': 96,
-                    'SVI': 112, 'SVE': 112, 'SVP': 112,
-                    // Sword & Shield (2020-2023)
-                    'CRZ': 111, 'SIT': 110, 'LOR': 109, 'PGO': 108, 'ASR': 107,
-                    'BRS': 106, 'FST': 105, 'CEL': 104, 'EVS': 103, 'CRE': 102,
-                    'BST': 101, 'SHF': 100, 'VIV': 99, 'CPA': 98, 'DAA': 97,
-                    'RCL': 96, 'SSH': 95, 'SP': 95,
-                    // Sun & Moon (2017-2019)
-                    'CEC': 94, 'HIF': 93, 'UNM': 92, 'UNB': 91, 'DET': 90,
-                    'TEU': 89, 'LOT': 88, 'DRM': 87, 'CES': 86, 'FLI': 85,
-                    'UPR': 84, 'CIN': 83, 'SLG': 82, 'BUS': 81, 'GRI': 80,
-                    'SUM': 79, 'SMP': 79,
-                    // XY (2014-2016)
-                    'EVO': 78, 'STS': 77, 'FCO': 76, 'GEN': 75, 'BKP': 74,
-                    'BKT': 73, 'AOR': 72, 'ROS': 71, 'DCR': 70, 'PRC': 69,
-                    'PHF': 68, 'FFI': 67, 'FLF': 66, 'XY': 65, 'KSS': 64, 'XYP': 65,
-                    // Black & White (2011-2013)
-                    'LTR': 63, 'PLB': 62, 'PLF': 61, 'PLS': 60, 'BCR': 59,
-                    'DRV': 58, 'DRX': 57, 'DEX': 56, 'NXD': 55, 'NVI': 54,
-                    'EPO': 53, 'BLW': 52, 'BWP': 52,
-                    // HeartGold & SoulSilver (2010-2011)
-                    'CL': 51, 'TM': 50, 'UD': 49, 'UL': 48, 'HS': 47, 'HSP': 47,
-                    // Diamond & Pearl / Platinum (2007-2009)
-                    'RM': 46, 'AR': 45, 'SV': 44, 'RR': 43, 'P9': 42, 'PL': 41,
-                    'SF': 40, 'P8': 39, 'LA': 38, 'MD': 37, 'P7': 36, 'GE': 35,
-                    'SW': 34, 'P6': 33, 'MT': 32, 'DP': 31, 'DPP': 31,
-                    // EX (2003-2007)
-                    'P5': 30, 'PK': 29, 'DF': 28, 'CG': 27, 'P4': 26, 'HP': 25,
-                    'P3': 24, 'LM': 23, 'DS': 22, 'UF': 21, 'P2': 20, 'EM': 19,
-                    'DX': 18, 'TRR': 17, 'P1': 16, 'RG': 15, 'HL': 14, 'MA': 13,
-                    'DR': 12, 'SS': 11, 'RS': 10, 'NP': 10,
-                    // WotC Era (1999-2003)
-                    'E3': 9, 'E2': 8, 'BG': 7, 'E1': 6, 'LC': 5, 'N4': 4,
-                    'N3': 3, 'SI': 2, 'N2': 1, 'N1': 1, 'G2': 1, 'G1': 1,
-                    'TR': 1, 'BS2': 1, 'FO': 1, 'JU': 1, 'BS': 1, 'WP': 1
-                };
+                // Set order loaded from sets.json at startup (higher = newer)
+                const SET_ORDER = window.setOrderMap || {};
                 
                 const sorted = versions.slice().sort((a, b) => {
                     const priorityA = getRarityPriority(a.rarity, a.set);
@@ -3931,21 +3905,11 @@ const BASE_PATH = './data/';
                 // This ensures List View shows the same version (e.g., ASC instead of MEG)
                 let displayCard = card;
                 const allCards = window.allCardsDatabase || [];
-                const allVersions = allCards.filter(c => c.name === cardName && c.set && c.number);
+                const allVersions = allCards.filter(c => (c.name_en || c.name) === cardName && c.set && c.number);
                 
                 if (overviewRarityMode !== 'all' && allVersions.length > 0) {
-                    // Set order (higher = newer, based on pokemon_sets_mapping.csv)
-                    const SET_ORDER = {
-                        'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
-                        'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
-                        'MEG': 105, 'MEP': 104, 'SP': 103, 'SVE': 102,
-                        'SCR': 101, 'TWM': 100, 'TEF': 99, 'PAR': 98, 'PAF': 97, 'PAL': 96, 'OBF': 95,
-                        'MEW': 94, 'SVI': 93, 'CRZ': 92, 'SIT': 91, 'LOR': 90, 'PGO': 89,
-                        'BLK': 99, 'WHT': 98, 'SSP': 94,
-                        'ASR': 88, 'BRS': 87, 'FST': 86, 'CEL': 85, 'EVS': 84, 'CRE': 83,
-                        'BST': 82, 'SHF': 81, 'VIV': 80, 'CPA': 79, 'DAA': 78,
-                        'RCL': 77, 'SSH': 76, 'CEC': 75
-                    };
+                    // Set order loaded from sets.json at startup (higher = newer)
+                    const SET_ORDER = window.setOrderMap || {};
                     
                     const getRarityValue = (card) => {
                         const r = (card.rarity || card.card_rarity || '').toLowerCase();
@@ -12493,7 +12457,8 @@ const BASE_PATH = './data/';
                     loadPokedexNumbers(),
                     loadAceSpecsList(),
                     loadSetMapping(),
-                    loadRarityPreferences()
+                    loadRarityPreferences(),
+                    loadSetOrderMap()
                 ]);
                 
                 // Load first tab automatically
@@ -13478,16 +13443,11 @@ const BASE_PATH = './data/';
                     const cardName = card.card_name;
                     let displayCard = card;
                     const allCards = window.allCardsDatabase || [];
-                    const allVersions = allCards.filter(c => c.name === cardName && c.set && c.number);
+                    const allVersions = allCards.filter(c => (c.name_en || c.name) === cardName && c.set && c.number);
                     
                     if (currentMetaRarityMode !== 'all' && allVersions.length > 0) {
-                        const SET_ORDER = {
-                            'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
-                            'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
-                            'MEG': 105, 'MEP': 104, 'SP': 103, 'SVE': 102,
-                            'SCR': 101, 'TWM': 100, 'TEF': 99, 'PAR': 98, 'PAF': 97, 'PAL': 96, 'OBF': 95,
-                            'MEW': 94, 'SVI': 93, 'CRZ': 92, 'SIT': 91, 'LOR': 90, 'PGO': 89
-                        };
+                        // Set order loaded from sets.json at startup (higher = newer)
+                        const SET_ORDER = window.setOrderMap || {};
                         
                         const getRarityValue = (card) => {
                             const r = (card.rarity || card.card_rarity || '').toLowerCase();

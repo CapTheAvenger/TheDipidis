@@ -3951,38 +3951,37 @@ details[open] > .tier-trending-summary::after {
 
 .trend-badge-overlay {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    top: 32px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 6px;
-    padding: 3px 7px;
+    padding: 3px 6px;
     font-size: 10px;
-    font-weight: 900;
-    color: #ffffff;
+    font-weight: 800;
+    color: #fff;
     z-index: 10;
+    pointer-events: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
     display: flex;
     align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    gap: 3px;
 }
 
 .trend-up {
-    color: #00ff88 !important;
-    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    color: #2ecc71 !important;
+    text-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
 }
 
 .trend-down {
-    color: #ff4444 !important;
-    text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+    color: #e74c3c !important;
+    text-shadow: 0 0 6px rgba(231, 76, 60, 0.6);
 }
 
 .trend-stable {
-    color: rgba(255, 255, 255, 0.5) !important;
-    font-size: 8px;
+    display: none !important;
 }
 
 /* ==========================================================================

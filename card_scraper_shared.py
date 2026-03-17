@@ -328,7 +328,7 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_t
     Aggregates cards from decks into meta-analysis format.
     Neu: deck_inclusion_count und average_count für Competitive-Analyse.
     """
-    grouped_cards = defaultdict(lambda: defaultdict(lambda: {'total_count': 0, 'deck_count': 0, 'max_count': 0}))
+    grouped_cards = defaultdict(lambda: defaultdict(lambda: {'total_count': 0, 'deck_count': 0, 'max_count': 0, 'set_versions': defaultdict(int)}))
     grouped_deck_counts = defaultdict(int)
 
     for deck in all_decks:
@@ -342,6 +342,10 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_t
             name = c['name']
             grouped_cards[group_key][name]['total_count'] += c['count']
             grouped_cards[group_key][name]['max_count'] = max(grouped_cards[group_key][name]['max_count'], c['count'])
+            sc = c.get('set_code', '') or c.get('set', '')
+            sn = c.get('set_number', '') or c.get('number', '')
+            if sc and sn:
+                grouped_cards[group_key][name]['set_versions'][(sc, sn)] += c['count']
             if name not in seen:
                 grouped_cards[group_key][name]['deck_count'] += 1
                 seen.add(name)
@@ -363,6 +367,20 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_t
             average_count_overall = round(stats['total_count'] / total_decks, 2) if total_decks > 0 else 0
             
             c_info = card_db.get_card_info(name) or {}
+
+            # Use the most-played set+number from actual decklists (not a name-only DB lookup).
+            # This prevents e.g. Drilbur BLK 45 being stored when TEF 85 was actually played.
+            set_versions = stats.get('set_versions', {})
+            if set_versions:
+                best_set, best_number = max(set_versions.items(), key=lambda x: x[1])[0]
+                specific = card_db.get_card(best_set, best_number) or {}
+                c_info = {
+                    'set_code': best_set,
+                    'number': best_number,
+                    'rarity': specific.get('rarity', c_info.get('rarity', '')),
+                    'type': specific.get('type', c_info.get('type', '')),
+                    'image_url': specific.get('image_url', c_info.get('image_url', '')),
+                }
             row = {
                 'archetype': arch, 'card_name': name,
                 'card_identifier': f"{c_info.get('set_code','')} {c_info.get('number','')}".strip(),

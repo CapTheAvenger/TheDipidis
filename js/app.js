@@ -7191,144 +7191,140 @@ const BASE_PATH = './data/';
                 card.score = sharePercent + (metaShare * 0.1);
             });
 
-            // Step 3: STRICT 5% CUTOFF -- ignore cards used in <5% of archetype decks
-            // This eliminates noise like a 3.5% Darkness Energy that nobody actually plays
-            let filtered = deckCards.filter(card => card.sharePercent >= 5);
-
-            // Step 4: Target count = Math.round(avgCountWhenUsed) -- pure data, no heuristics
-            filtered.forEach(card => {
-                let count = Math.round(card.avgCountWhenUsed);
-                // Staple guarantee: if >50% of decks play it, include at least 1
-                if (count === 0 && card.sharePercent >= 50) count = 1;
-                // ACE SPEC rule: max 1 per deck
-                if (isAceSpec(card)) count = Math.min(count, 1);
-                card.targetCount = count;
-            });
-            filtered = filtered.filter(card => card.targetCount > 0);
-
-            // Step 5: Sort by score -- highest archetype share first
-            filtered.sort((a, b) => b.score - a.score);
-            console.log(`[autoCompleteConsistency] ${filtered.length} eligible cards after 5% cutoff`);
-
-            // Step 6: Fill deck to 60 in score order
-            let cardsToAdd = [];
+            // Kaskaden-Logik mit Encoding-healed Vergleichen und harter 4x Sanity-Rule.
+            const canonicalName = (value) => fixCardNameEncoding((value || '').toString().trim()).toLowerCase();
+            const cardsToAddMap = new Map();
             let aceSpecAdded = false;
-            for (const card of filtered) {
-                if (currentTotal >= 60) break;
+
+            const pushCard = (card, desiredCount, logPrefix = '[Consistency]') => {
+                if (!card || currentTotal >= 60) return;
+
+                const healedName = fixCardNameEncoding((card.card_name || '').toString().trim());
+                if (!healedName) return;
+
+                const key = canonicalName(healedName);
+                const basicEnergy = isBaseEnergy(card);
+                const perCardCap = basicEnergy ? 60 : 4;
+                const existing = cardsToAddMap.get(key);
+
                 if (isAceSpec(card)) {
-                    if (aceSpecAdded) continue;
+                    if (aceSpecAdded && !existing) return;
+                }
+
+                const existingCount = existing ? existing.addCount : 0;
+                const targetCount = Math.max(0, Math.round(desiredCount || 0));
+                const remainingForCard = Math.max(0, perCardCap - existingCount);
+                const remainingDeckSpace = Math.max(0, 60 - currentTotal);
+                const addCount = Math.min(targetCount, remainingForCard, remainingDeckSpace);
+                if (addCount <= 0) return;
+
+                if (existing) {
+                    existing.addCount += addCount;
+                    cardsToAddMap.set(key, existing);
+                } else {
+                    cardsToAddMap.set(key, {
+                        ...card,
+                        card_name: healedName,
+                        addCount
+                    });
+                }
+
+                if (isAceSpec(card)) {
                     aceSpecAdded = true;
                 }
-                const amountToAdd = Math.min(card.targetCount, 60 - currentTotal);
-                cardsToAdd.push({ ...card, addCount: amountToAdd });
-                currentTotal += amountToAdd;
-                console.log(`[autoCompleteConsistency]   + ${amountToAdd}x ${card.card_name} (Arch: ${card.sharePercent.toFixed(1)}% @ ${card.avgCountWhenUsed.toFixed(2)}x) -- Total: ${currentTotal}/60`);
+
+                currentTotal += addCount;
+                console.log(`${logPrefix} + ${addCount}x ${healedName} (Share: ${card.sharePercent.toFixed(1)}%, Avg: ${card.avgCountWhenUsed.toFixed(2)}x) -- Total: ${currentTotal}/60`);
+            };
+
+            const shareSorted = deckCards
+                .filter(card => card.sharePercent > 0)
+                .sort((a, b) => b.sharePercent - a.sharePercent);
+
+            // Stufe 1: >90% Archetype Share
+            shareSorted
+                .filter(card => card.sharePercent > 90)
+                .forEach(card => {
+                    const avgCount = Math.max(1, Math.round(card.avgCountWhenUsed || 0));
+                    pushCard(card, avgCount, '[Consistency][Stage1]');
+                });
+
+            // Stufe 2: >70% Archetype Share (nur wenn Deck noch <50)
+            if (currentTotal < 50) {
+                shareSorted
+                    .filter(card => card.sharePercent > 70)
+                    .forEach(card => {
+                        const avgCount = Math.max(1, Math.round(card.avgCountWhenUsed || 0));
+                        pushCard(card, avgCount, '[Consistency][Stage2]');
+                    });
             }
 
-            // Step 7: Rare Candy guarantee for Stage 2 decks (ex / VMAX / GX)
-            const hasStage2ex = cardsToAdd.some(c => /\s+(ex|vmax|vstar|gx|break)\b/i.test(c.card_name));
-            if (hasStage2ex) {
-                const CANDY_MIN = 3;
-                const candyEntry = cardsToAdd.find(c => c.card_name === 'Rare Candy');
-                if (candyEntry && candyEntry.addCount < CANDY_MIN) {
-                    const bump = CANDY_MIN - candyEntry.addCount;
-                    if (currentTotal + bump <= 60) {
-                        candyEntry.addCount = CANDY_MIN;
-                        currentTotal += bump;
-                        console.log(`[autoCompleteConsistency] Rare Candy bumped to ${CANDY_MIN}x (Stage 2 deck) -- Total: ${currentTotal}/60`);
-                    }
-                }
-            }
-
-            // Step 8: Fallback fill -- reach 60 with the dominant Basic Energy
+            // Global Meta Boost (Watchtower-Prinzip)
             if (currentTotal < 60) {
-                const spaceLeft = 60 - currentTotal;
-                const primaryEnergy = filtered
-                    .filter(c => isBaseEnergy(c))
+                const globalStatsRaw = Array.isArray(window.metaCardStats)
+                    ? window.metaCardStats
+                    : (window.metaCardStats && Array.isArray(window.metaCardStats[source])
+                        ? window.metaCardStats[source]
+                        : (Array.isArray(metaCardData?.[source]) ? metaCardData[source] : []));
+
+                const globalStats = (globalStatsRaw || [])
+                    .map(entry => {
+                        const name = fixCardNameEncoding((entry.card_name || entry.name || '').toString().trim());
+                        const globalShare = parseFloat(String(entry.metaShare || entry.globalShare || entry.share || 0).replace(',', '.')) || 0;
+                        return { name, key: canonicalName(name), globalShare };
+                    })
+                    .filter(entry => entry.key && entry.globalShare > 15)
+                    .sort((a, b) => b.globalShare - a.globalShare);
+
+                const archetypeMap = new Map(
+                    deckCards
+                        .filter(card => card.sharePercent > 0)
+                        .map(card => [canonicalName(card.card_name), card])
+                );
+
+                globalStats.forEach(globalEntry => {
+                    if (currentTotal >= 60) return;
+                    const archetypeCard = archetypeMap.get(globalEntry.key);
+                    if (!archetypeCard) return;
+
+                    const avgCount = Math.round(archetypeCard.avgCountWhenUsed || 0);
+                    const boostCount = Math.max(1, avgCount);
+                    console.log(`[Consistency] Meta-Boost: Adding ${archetypeCard.card_name} because it is a global staple.`);
+                    pushCard(archetypeCard, boostCount, '[Consistency][MetaBoost]');
+                });
+            }
+
+            // Fallback: Fill remaining slots with highest-share cards (respecting 4x limit except basic energy).
+            if (currentTotal < 60) {
+                shareSorted.forEach(card => {
+                    if (currentTotal >= 60) return;
+                    pushCard(card, 1, '[Consistency][Fallback]');
+                });
+            }
+
+            // Final fallback for empty-share edge cases: use top basic energy if available.
+            if (currentTotal < 60) {
+                const topBasicEnergy = deckCards
+                    .filter(card => isBaseEnergy(card))
                     .sort((a, b) => b.sharePercent - a.sharePercent)[0];
-                if (primaryEnergy) {
-                    const existing = cardsToAdd.find(c => c.card_name === primaryEnergy.card_name);
-                    if (existing) {
-                        existing.addCount += spaceLeft;
-                    } else {
-                        cardsToAdd.push({ ...primaryEnergy, addCount: spaceLeft });
-                    }
-                    currentTotal += spaceLeft;
-                    console.log(`[autoCompleteConsistency] Fallback: +${spaceLeft}x ${primaryEnergy.card_name} -- Total: ${currentTotal}/60`);
+                if (topBasicEnergy) {
+                    pushCard(topBasicEnergy, 60 - currentTotal, '[Consistency][EnergyFill]');
                 }
             }
 
-            // Step 9: If cutoff flow failed to reach 60, ignore cutoff and rebuild via top-frequency cards
-            if (currentTotal < 60) {
-                console.log('[autoCompleteConsistency] Cutoff failed, falling back to top frequency cards.');
+            let cardsToAdd = Array.from(cardsToAddMap.values());
 
-                // Reset and rebuild from full pool (no 5% cutoff)
-                cardsToAdd = [];
-                currentTotal = 0;
-                aceSpecAdded = false;
-
-                // Keep deck structure by processing Pokemon -> Trainer -> Energy buckets
-                const getCardBucket = (card) => {
-                    const typeRaw = (card.type || card.card_type || '').toLowerCase();
-                    if (typeRaw.includes('energy')) return 'energy';
-                    if (typeRaw.includes('trainer') || typeRaw.includes('item') || typeRaw.includes('supporter') || typeRaw.includes('stadium') || typeRaw.includes('tool') || typeRaw.includes('ace spec')) return 'trainer';
-                    return 'pokemon';
-                };
-
-                const fallbackPool = deckCards
-                    .map(card => ({
-                        ...card,
-                        frequencyCount: parseFloat(card.total_count || 0),
-                        fallbackTarget: Math.max(1, Math.round(card.avgCountWhenUsed || 0))
-                    }))
-                    .sort((a, b) => b.frequencyCount - a.frequencyCount);
-
-                const bucketed = {
-                    pokemon: fallbackPool.filter(c => getCardBucket(c) === 'pokemon'),
-                    trainer: fallbackPool.filter(c => getCardBucket(c) === 'trainer'),
-                    energy: fallbackPool.filter(c => getCardBucket(c) === 'energy')
-                };
-
-                const orderedPool = [...bucketed.pokemon, ...bucketed.trainer, ...bucketed.energy];
-
-                for (const card of orderedPool) {
-                    if (currentTotal >= 60) break;
-                    if (isAceSpec(card)) {
-                        if (aceSpecAdded) continue;
-                        aceSpecAdded = true;
-                    }
-
-                    let amountToAdd = Math.min(card.fallbackTarget, 60 - currentTotal);
-                    if (isAceSpec(card)) amountToAdd = Math.min(amountToAdd, 1);
-                    if (amountToAdd <= 0) continue;
-
-                    cardsToAdd.push({ ...card, addCount: amountToAdd });
-                    currentTotal += amountToAdd;
-                }
-
-                // If still below 60, add +1 increments from the same structured order
-                let refillIndex = 0;
-                while (currentTotal < 60 && orderedPool.length > 0) {
-                    const card = orderedPool[refillIndex % orderedPool.length];
-                    refillIndex += 1;
-
-                    if (isAceSpec(card)) continue;
-
-                    const existing = cardsToAdd.find(c => c.card_name === card.card_name);
-                    if (existing) {
-                        existing.addCount += 1;
-                    } else {
-                        cardsToAdd.push({ ...card, addCount: 1 });
-                    }
-                    currentTotal += 1;
-                }
-            }
+            // Keep output deterministic.
+            cardsToAdd.sort((a, b) => {
+                if (b.sharePercent !== a.sharePercent) return b.sharePercent - a.sharePercent;
+                return a.card_name.localeCompare(b.card_name);
+            });
 
             console.log(`[autoCompleteConsistency] Deck complete: ${currentTotal}/60`);
 
             // Build confirm summary
             let summary = `MAX CONSISTENCY Deck (${currentTotal} cards):\n`;
-            summary += `Algorithm: Math.round(avgCountWhenUsed), 5% cutoff, no phase heuristics\n\n`;
+            summary += `Algorithm: >90% -> >70% -> Meta-Boost (>15% global)\n\n`;
             cardsToAdd.forEach(c => {
                 summary += `${c.addCount}x ${c.card_name} (${c.sharePercent.toFixed(0)}% archetype)\n`;
             });

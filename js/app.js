@@ -250,7 +250,17 @@ const BASE_PATH = './data/';
                 const values = lines[i].split(delimiter);
                 const row = {};
                 headers.forEach((header, index) => {
-                    row[header] = (values[index] || '').trim();
+                    const rawValue = values[index] || '';
+                    const trimmedValue = rawValue.trim();
+
+                    if (header === 'card_name' || header === 'full_card_name') {
+                        row[header] = (typeof window.fixCardNameEncoding === 'function')
+                            ? window.fixCardNameEncoding(rawValue)
+                            : trimmedValue;
+                        return;
+                    }
+
+                    row[header] = trimmedValue;
                 });
                 if (Object.values(row).some(v => v)) {
                     data.push(row);
@@ -3947,30 +3957,28 @@ const BASE_PATH = './data/';
         }
 
         function isBasicEnergyCardEntry(cardLike) {
-            const cardName = String(cardLike?.card_name || cardLike?.name || '').trim();
-            const setCode = cardLike?.set_code || cardLike?.set || '';
-            const cardNumber = cardLike?.set_number || cardLike?.number || '';
-            const canonicalCard = getCanonicalCardRecord(setCode, cardNumber);
+            if (!cardLike) return false;
 
-            const supertype = String(canonicalCard?.supertype || cardLike?.supertype || '').trim();
-            const rawSubtypes = canonicalCard?.subtypes || cardLike?.subtypes || [];
-            const subtypes = Array.isArray(rawSubtypes)
-                ? rawSubtypes
-                : String(rawSubtypes)
-                    .split(/[|,;]/)
-                    .map(value => value.trim())
-                    .filter(Boolean);
-            const typeValue = String(canonicalCard?.type || cardLike?.type || cardLike?.card_type || '').toLowerCase();
-
-            if (supertype === 'Energy' && subtypes.includes('Basic')) {
+            // 1) Safest check via official card metadata.
+            if (cardLike.supertype === 'Energy' && Array.isArray(cardLike.subtypes) && cardLike.subtypes.includes('Basic')) {
                 return true;
             }
 
-            if (typeValue.includes('basic energy')) {
-                return true;
-            }
+            // 2) Bulletproof name check for the 8 basic energies and common aliases.
+            const basicNames = [
+                'Grass Energy', 'Fire Energy', 'Water Energy', 'Lightning Energy',
+                'Psychic Energy', 'Fighting Energy', 'Darkness Energy', 'Metal Energy',
+                'Basic {G} Energy', 'Basic {R} Energy', 'Basic {W} Energy', 'Basic {L} Energy',
+                'Basic {P} Energy', 'Basic {F} Energy', 'Basic {D} Energy', 'Basic {M} Energy'
+            ];
+            const cardName = String(cardLike.card_name || cardLike.name || '').trim();
+            if (basicNames.includes(cardName)) return true;
 
-            return isBasicEnergy(cardName);
+            // 3) Fallback for localized explicit labels.
+            if (cardLike.type === 'Basis-Energie' || cardLike.supertype === 'Basis-Energie') return true;
+
+            // Everything else must be treated as Special Energy (4x cap applies).
+            return false;
         }
 
         // Universal image URL resolver used across grids, analysis, and deckbuilder.
@@ -7082,18 +7090,22 @@ const BASE_PATH = './data/';
                 // Get percentage for logging
                 const percentage = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
                 
-                // Calculate average copies per deck WHEN USED.
+                // Safe average parsing plus canonical basic-energy detection.
+                const rawAvg = parseFloat(String(card.average_count || 0).replace(',', '.'));
                 const totalCount = parseFloat(card.total_count) || 0;
                 const decksWithCard = parseFloat(card.deck_count || card.deck_inclusion_count) || 0;
-                const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
-                const avgWhenUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
-                    ? avgCountFromRow
+                const avgWhenUsed = Number.isFinite(rawAvg) && rawAvg > 0
+                    ? rawAvg
                     : (decksWithCard > 0 ? (totalCount / decksWithCard) : 1);
+
+                const canonicalCard = window.cardIndexBySetNumber
+                    ? window.cardIndexBySetNumber.get(`${card.set_code}-${card.set_number}`)
+                    : null;
+                const isBasicEnergy = isBasicEnergyCardEntry(canonicalCard || card);
+
                 let addCount = Math.round(avgWhenUsed);
-                
-                // For base energies, no limit. For other cards, max 4
-                if (!isBaseEnergy(card)) {
-                    addCount = Math.max(1, Math.min(addCount, 4));
+                if (!isBasicEnergy) {
+                    addCount = Math.min(4, Math.max(1, addCount));
                 } else {
                     addCount = Math.max(1, addCount);
                 }

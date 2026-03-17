@@ -1462,11 +1462,8 @@ const BASE_PATH = './data/';
 
             const diff = current - previous;
 
-            // Staple protection: keep >95% staples stable unless the drop is massive.
-            if (current > 95) {
-                if (diff < -10) return `<span class="trend-down">▼ ${diff.toFixed(1)}%</span>`;
-                return '<span class="trend-stable">●</span>';
-            }
+            // Staple protection: keep >95% staples always stable.
+            if (current > 95) return '<span class="trend-stable">●</span>';
 
             if (diff > 2) return `<span class="trend-up">▲ +${diff.toFixed(1)}%</span>`;
             if (diff < -2) return `<span class="trend-down">▼ ${diff.toFixed(1)}%</span>`;
@@ -4550,7 +4547,7 @@ const BASE_PATH = './data/';
                                         ${setCode} ${setNumber}
                                     </div>
                                     <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">
-                                        ${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)
+                                        ${resolvedPercentage > 0 ? `${percentage}% | Ø ${Math.round(avgCountInUsedValue)}x (${Math.round(avgCountOverallValue)}x)` : ''}
                                     </div>
                                     <div style="font-weight: 600; color: #333; font-size: 0.58em;">
                                         ${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)
@@ -7387,7 +7384,7 @@ const BASE_PATH = './data/';
                 shareSorted
                     .filter(card => card.sharePercent > 70)
                     .forEach(card => {
-                        const avgCount = getRoundedAverageCount(card, false);
+                        const avgCount = getRoundedAverageCount(card, true);
                         pushCard(card, avgCount, '[Consistency][Stage2]');
                     });
             }
@@ -7420,7 +7417,7 @@ const BASE_PATH = './data/';
                     const archetypeCard = archetypeMap.get(globalEntry.key);
                     if (!archetypeCard) return;
 
-                    const boostCount = getRoundedAverageCount(archetypeCard, false);
+                    const boostCount = getRoundedAverageCount(archetypeCard, true);
                     console.log(`[Consistency] Meta-Boost: Adding ${archetypeCard.card_name} because it is a global staple.`);
                     pushCard(archetypeCard, boostCount, '[Consistency][MetaBoost]');
                 });
@@ -7901,8 +7898,7 @@ const BASE_PATH = './data/';
                             <div class="card-info-bottom" style="padding: 6px; background: white; font-size: 0.75em; text-align: center;">
                                 <div class="card-info-text" style="margin-bottom: 6px;">
                                     <div style="font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${card.card_name}</div>
-                                    <div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${card.avgCount.toFixed(2)}x</div>
-                                    <div style="color: #555; font-size: 0.9em; font-weight: 500;">(${card.avgCountWhenUsed.toFixed(2)}x when used)</div>
+                                    ${card.metaShare > 0 ? `<div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div><div style="color: #555; font-size: 0.9em; font-weight: 500;">(${Math.round(card.avgCountWhenUsed)}x when used)</div>` : ''}
                                 </div>
                                 
                                 <!-- Action Buttons: - | ? | + -->

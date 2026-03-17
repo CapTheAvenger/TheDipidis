@@ -7266,7 +7266,7 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            console.log('[autoCompleteConsistency] ?? Starting CONSISTENCY-based deck generation');
+            console.log('[autoCompleteConsistency] 🔄 Starting CONSISTENCY-based deck generation');
             console.log('[autoCompleteConsistency] Total available cards:', cards.length);
             
             // Clear existing deck
@@ -7296,18 +7296,9 @@ const BASE_PATH = './data/';
             }
             console.log('[autoCompleteConsistency] Building consistency deck for:', currentArchetype);
             
-            // Get deck reference
-            let deck;
-            if (source === 'cityLeague') {
-                deck = window.cityLeagueDeck;
-            } else if (source === 'currentMeta') {
-                deck = window.currentMetaDeck;
-            } else if (source === 'pastMeta') {
-                deck = window.pastMetaDeck;
-            }
-            let currentTotal = 0;
-            
-            // Step 1: Aggregate cards by card_name
+            // ==========================================
+            // 1. AGGREGATE CARDS BY CARD_NAME
+            // ==========================================
             const uniqueCards = {};
             for (const card of cards) {
                 const cardName = fixCardNameEncoding((card.card_name || card.full_card_name || card.name || '').toString().trim());
@@ -7342,11 +7333,13 @@ const BASE_PATH = './data/';
             let deckCards = Object.values(uniqueCards);
             console.log('[autoCompleteConsistency] After aggregation:', deckCards.length, 'unique cards');
             
-            // Step 2: Compute per-card statistics
+            // ==========================================
+            // 2. COMPUTE PER-CARD STATISTICS
+            // ==========================================
             deckCards.forEach(card => {
                 const sharePercent = Math.min(100, Math.max(0, parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.')) || 0));
 
-                let avgCountWhenUsed = 1;
+                let avgCountWhenUsed = 0;
                 if (card.total_count > 0 && card.deck_count > 0) {
                     avgCountWhenUsed = card.total_count / card.deck_count;
                 } else if (card.sum_avg_count > 0 && card.count_entries > 0) {
@@ -7358,226 +7351,115 @@ const BASE_PATH = './data/';
 
                 card.sharePercent = sharePercent;
                 card.avgCountWhenUsed = avgCountWhenUsed;
-                card.metaShare = getMetaShareForCard(card.card_name, source);
-                card.score = sharePercent + (card.metaShare * 0.1);
             });
 
-            // Kaskaden-Logik mit Encoding-healed Vergleichen und harter 4x Sanity-Rule.
-            const canonicalName = (value) => fixCardNameEncoding((value || '').toString().trim()).toLowerCase();
-            const cardsToAddMap = new Map();
-            let aceSpecAdded = false;
+            // ==========================================
+            // 3. BUILD CONSISTENCY DECK
+            // ==========================================
+            let consistencyDeck = [];
+            let currentTotal = 0;
+
             const isAceSpecCard = (c) => {
                 if (!c) return false;
-
-                // 1. Harter Namens-Check (100% sicher, ignoriert fehlerhafte CSVs)
-                const aceSpecNames = [
-                    'awaking drum', 'hero\'s cape', 'master ball', 'maximum belt', 'neo upper energy',
-                    'prime catcher', 'reboot pod', 'hyper aroma', 'secret box', 'survival brace',
-                    'unfair stamp', 'legacy energy', 'dangerous laser', 'grand tree', 'neutral center',
-                    'pokémon catcher', 'sparkling crystal', 'brilliant blend', 'miracle headset',
-                    'miraculous intercom', 'precious trolley', 'scramble switch', 'search computer'
-                ];
-
-                const cardName = String(c.card_name || c.name || c.full_card_name || '').trim().toLowerCase();
-                if (aceSpecNames.includes(cardName)) return true;
-
-                // 2. Fallback über die Rarity-Eigenschaften (falls eine neue Karte im Set erscheint)
+                const aceSpecNames = ['awaking drum', 'hero\'s cape', 'master ball', 'maximum belt', 'neo upper energy', 'prime catcher', 'reboot pod', 'hyper aroma', 'secret box', 'survival brace', 'unfair stamp', 'legacy energy', 'dangerous laser', 'grand tree', 'neutral center', 'pokémon catcher', 'sparkling crystal', 'brilliant blend', 'miracle headset', 'miraculous intercom', 'precious trolley', 'scramble switch', 'search computer'];
+                const name = String(c.card_name || c.name || '').trim().toLowerCase();
+                if (aceSpecNames.includes(name)) return true;
                 if (String(c.is_ace_spec).trim().toLowerCase() === 'yes') return true;
                 if (String(c.rarity).toUpperCase().includes('ACE SPEC')) return true;
-
-                const canonical = window.cardIndexBySetNumber ? window.cardIndexBySetNumber.get(`${c.set_code}-${c.set_number}`) : null;
-                if (canonical && String(canonical.rarity).toUpperCase().includes('ACE SPEC')) return true;
-
                 return false;
             };
 
-            // Hilfsfunktion: Hat das Deck schon ein Ace Spec?
-            const deckHasAceSpec = () => Array.from(cardsToAddMap.values()).some(entry => isAceSpecCard(entry));
+            const deckHasAceSpec = () => consistencyDeck.some(entry => isAceSpecCard(entry.card));
 
-            const pushCard = (card, desiredCount, logPrefix = '[Consistency]') => {
-                if (!card || currentTotal >= 60) return;
-
-                const healedName = fixCardNameEncoding((card.card_name || '').toString().trim());
-                if (!healedName) return;
-
-                const key = canonicalName(healedName);
-                const basicEnergy = isBasicEnergy(card.card_name);
-                const perCardCap = basicEnergy ? 60 : 4;
-                const existing = cardsToAddMap.get(key);
-
-                if (isAceSpecCard(card)) {
-                    if ((aceSpecAdded || deckHasAceSpec()) && !existing) return;
-                }
-
-                const existingCount = existing ? existing.addCount : 0;
-                const targetCount = Math.max(0, Math.round(desiredCount || 0));
-                const remainingForCard = Math.max(0, perCardCap - existingCount);
-                const remainingDeckSpace = Math.max(0, 60 - currentTotal);
-                const addCount = Math.min(targetCount, remainingForCard, remainingDeckSpace);
-                if (addCount <= 0) return;
-
-                if (existing) {
-                    existing.addCount += addCount;
-                    cardsToAddMap.set(key, existing);
-                } else {
-                    cardsToAddMap.set(key, {
-                        ...card,
-                        card_name: healedName,
-                        addCount
-                    });
-                }
-
-                if (isAceSpecCard(card)) {
-                    aceSpecAdded = true;
-                }
-
-                currentTotal += addCount;
-                console.log(`${logPrefix} + ${addCount}x ${healedName} (Share: ${card.sharePercent.toFixed(1)}%, Avg: ${card.avgCountWhenUsed.toFixed(2)}x) -- Total: ${currentTotal}/60`);
+            const isBasicEnergyCardEntry = (c) => {
+                if (!c) return false;
+                const bNames = ['grass energy', 'fire energy', 'water energy', 'lightning energy', 'psychic energy', 'fighting energy', 'darkness energy', 'metal energy'];
+                const n = String(c.card_name || c.name || '').trim().toLowerCase();
+                return bNames.includes(n) || String(c.type || '').toLowerCase() === 'basis-energie';
             };
 
-            const shareSorted = deckCards
-                .filter(card => card.sharePercent > 0)
-                .sort((a, b) => b.sharePercent - a.sharePercent);
-
-            const getRoundedAverageCount = (card, ensureMinimumOne = false) => {
-                const averageCount = Number.isFinite(card?.avgCountWhenUsed) ? card.avgCountWhenUsed : 0;
-                const roundedCount = Math.round(averageCount);
-                return ensureMinimumOne ? Math.max(1, roundedCount) : roundedCount;
+            const pushCard = (cardData, count, logPrefix = '') => {
+                if (count <= 0 || currentTotal >= 60) return;
+                
+                const spaceLeft = 60 - currentTotal;
+                const actualCount = Math.min(count, spaceLeft);
+                
+                consistencyDeck.push({ card: cardData, count: actualCount });
+                currentTotal += actualCount;
+                console.log(`${logPrefix} + ${actualCount}x ${cardData.card_name} (Share: ${cardData.sharePercent.toFixed(1)}%, Avg: ${cardData.avgCountWhenUsed.toFixed(2)}x) -- Total: ${currentTotal}/60`);
             };
 
+            // Sortiere Karten nach Share (absteigend)
+            deckCards.sort((a, b) => b.sharePercent - a.sharePercent);
+
             // ==========================================
-            // 🚨 ACE SPEC PRIORITY (IMMER ZUERST) 🚨
+            // 🚨 1. ACE SPEC PRIORITY (Lokal) 🚨
             // ==========================================
-            const allAvailableAceSpecs = deckCards
-                .filter(c => isAceSpecCard(c))
-                .sort((a, b) => b.sharePercent - a.sharePercent);
-
-            if (allAvailableAceSpecs.length > 0) {
-                // Nimm die am häufigsten gespielte ACE SPEC dieses Archetyps (ignoriere Global Meta)
-                const bestAceSpec = allAvailableAceSpecs[0];
-                pushCard(bestAceSpec, 1, '[Consistency][ACE-SPEC-Priority]');
+            const allLocalAceSpecs = deckCards.filter(c => isAceSpecCard(c)).sort((a, b) => b.sharePercent - a.sharePercent);
+            if (allLocalAceSpecs.length > 0) {
+                pushCard(allLocalAceSpecs[0], 1, '[Consistency][ACE-SPEC-Priority]');
             }
 
-            // Stufe 1: Core
-            shareSorted
-                .filter(card => card.sharePercent >= 80)
-                .forEach(card => {
-                    if (currentTotal >= 60) return;
+            // ==========================================
+            // 🚨 2. STUFE 1 (Core: >= 80% Share) 🚨
+            // ==========================================
+            deckCards.forEach(card => {
+                if (currentTotal >= 60) return;
+                if (isAceSpecCard(card)) return; // Ace Spec haben wir schon
+                
+                if (card.sharePercent >= 80) {
+                    let addCount = Math.round(card.avgCountWhenUsed);
+                    addCount = Math.max(1, addCount); // Core Karten MÜSSEN mindestens 1x rein
+                    if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, 4);
+                    pushCard(card, addCount, '[Consistency][Stage1]');
+                }
+            });
 
-                    // 🚨 ACE SPEC BLOCKER
-                    if (isAceSpecCard(card) && deckHasAceSpec()) {
-                        console.log(`[Consistency] Blocked additional ACE SPEC: ${card.card_name}`);
-                        return;
+            // ==========================================
+            // 🚨 3. STUFE 2 (Extended Core: >= 30% Share) 🚨
+            // ==========================================
+            deckCards.forEach(card => {
+                if (currentTotal >= 60) return;
+                if (isAceSpecCard(card)) return;
+                if (consistencyDeck.some(entry => entry.card.card_name === card.card_name)) return; // Schon im Deck?
+                
+                if (card.sharePercent >= 30) {
+                    // Nur hinzufügen, wenn der kaufmännische Durchschnitt mindestens 1 ergibt! 
+                    // Verhindert, dass Müllkarten mit 0.2x das Deck füllen
+                    let addCount = Math.round(card.avgCountWhenUsed);
+                    if (addCount >= 1) {
+                        if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, 4);
+                        pushCard(card, addCount, '[Consistency][Stage2]');
                     }
+                }
+            });
 
-                    const avgCount = getRoundedAverageCount(card, true);
-                    pushCard(card, avgCount, '[Consistency][Stage1]');
-                });
-
-            // Stufe 2: Extended Core
+            // ==========================================
+            // 🚨 4. FALLBACK: Basis-Energien auffüllen 🚨
+            // ==========================================
             if (currentTotal < 60) {
-                shareSorted
-                    .filter(card => card.sharePercent >= 40)
-                    .forEach(card => {
-                        if (currentTotal >= 60) return;
-
-                        // 🚨 ACE SPEC BLOCKER
-                        if (isAceSpecCard(card) && deckHasAceSpec()) {
-                            console.log(`[Consistency] Blocked additional ACE SPEC: ${card.card_name}`);
-                            return;
-                        }
-
-                        const avgCount = getRoundedAverageCount(card, true);
-                        pushCard(card, avgCount, '[Consistency][Stage2]');
-                    });
-            }
-
-            // Global Meta Boost (Watchtower-Prinzip)
-            if (currentTotal < 60) {
-                const globalStatsRaw = Array.isArray(window.metaCardStats)
-                    ? window.metaCardStats
-                    : (window.metaCardStats && Array.isArray(window.metaCardStats[source])
-                        ? window.metaCardStats[source]
-                        : (Array.isArray(metaCardData?.[source]) ? metaCardData[source] : []));
-
-                const globalStats = (globalStatsRaw || [])
-                    .map(entry => {
-                        const name = fixCardNameEncoding((entry.card_name || entry.name || '').toString().trim());
-                        const globalShare = parseFloat(String(entry.metaShare || entry.globalShare || entry.share || 0).replace(',', '.')) || 0;
-                        return { name, key: canonicalName(name), globalShare };
-                    })
-                    .filter(entry => entry.key && entry.globalShare > 15)
-                    .sort((a, b) => b.globalShare - a.globalShare);
-
-                const archetypeMap = new Map(
-                    deckCards
-                        .filter(card => card.sharePercent > 0)
-                        .map(card => [canonicalName(card.card_name), card])
-                );
-
-                globalStats.forEach(globalEntry => {
-                    if (currentTotal >= 60) return;
-                    const archetypeCard = archetypeMap.get(globalEntry.key);
-                    if (!archetypeCard) return;
-
-                    // ==========================================
-                    // 🚨 ACE SPEC BLOCKER FÜR FALLBACK 🚨
-                    // ==========================================
-                    if (isAceSpecCard(archetypeCard)) {
-                        if (deckHasAceSpec()) {
-                            console.log(`[Consistency] Blocked additional ACE SPEC: ${archetypeCard.card_name}`);
-                            return; // Überspringt diese Karte, da wir schon ein Ace Spec haben!
-                        }
-                    }
-
-                    const boostCount = getRoundedAverageCount(archetypeCard, true);
-                    console.log(`[Consistency] Meta-Boost: Adding ${archetypeCard.card_name} because it is a global staple.`);
-                    pushCard(archetypeCard, boostCount, '[Consistency][MetaBoost]');
-                });
-            }
-
-            // Fallback: Fill remaining slots with highest-share cards
-            if (currentTotal < 60) {
-                shareSorted.forEach(card => {
-                    if (currentTotal >= 60) return;
-
-                    // ==========================================
-                    // 🚨 ACE SPEC BLOCKER FÜR FALLBACK 🚨
-                    // ==========================================
-                    if (isAceSpecCard(card)) {
-                        if (deckHasAceSpec()) {
-                            console.log(`[Consistency] Blocked additional ACE SPEC: ${card.card_name}`);
-                            return; // Überspringt diese Karte, da wir schon ein Ace Spec haben!
-                        }
-                    }
-                    const avgCount = getRoundedAverageCount(card, true);
-                    pushCard(card, avgCount, '[Consistency][Fallback]');
-                });
-            }
-
-            // Final fallback for empty-share edge cases
-            if (currentTotal < 60) {
-                const topBasicEnergy = deckCards
-                    .filter(card => isBasicEnergy(card.card_name))
-                    .sort((a, b) => b.sharePercent - a.sharePercent)[0];
+                const topBasicEnergy = deckCards.filter(c => isBasicEnergyCardEntry(c)).sort((a, b) => b.sharePercent - a.sharePercent)[0];
                 if (topBasicEnergy) {
-                    pushCard(topBasicEnergy, 60 - currentTotal, '[Consistency][EnergyFill]');
+                    pushCard(topBasicEnergy, 60 - currentTotal, '[Consistency][Fallback-Energy]');
                 }
             }
 
-            let cardsToAdd = Array.from(cardsToAddMap.values());
+            console.log(`[autoCompleteConsistency] Deck complete: ${currentTotal}/60`);
 
-            // Keep output deterministic.
+            // Altes Deck löschen und neues speichern
+            let cardsToAdd = consistencyDeck.map(entry => {
+                return { ...entry.card, addCount: entry.count };
+            });
+
+            // Keep output deterministic
             cardsToAdd.sort((a, b) => {
                 if (b.sharePercent !== a.sharePercent) return b.sharePercent - a.sharePercent;
                 return a.card_name.localeCompare(b.card_name);
             });
 
-            console.log(`[autoCompleteConsistency] Deck complete: ${currentTotal}/60`);
-
             // Build confirm summary
             let summary = `MAX CONSISTENCY Deck (${currentTotal} cards):\n`;
-            summary += `Algorithm: >=80% -> >=40% -> ACE SPEC Guarantee -> Meta-Boost (>15% global)\n\n`;
+            summary += `Algorithm: ACE SPEC Priority -> Stage 1 (>=80%) -> Stage 2 (>=30%) -> Energy Fill\n\n`;
             cardsToAdd.forEach(c => {
                 summary += `${c.addCount}x ${c.card_name} (${c.sharePercent.toFixed(0)}% archetype)\n`;
             });
@@ -7617,9 +7499,9 @@ const BASE_PATH = './data/';
 
                 if (currentTotal >= 60) {
                     if (typeof showDeckShareToast === 'function') {
-                        showDeckShareToast('✅ Optimale Liste generiert! (Core-Karten + Meta-Techs)');
+                        showDeckShareToast('✅ Optimale Liste generiert! (Consistency-Build)');
                     } else {
-                        alert('✅ Optimale Liste generiert! (Core-Karten + Meta-Techs)');
+                        alert('✅ Optimale Liste generiert! (Consistency-Build)');
                     }
                 }
             }

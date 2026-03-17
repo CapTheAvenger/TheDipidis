@@ -3391,11 +3391,14 @@ const BASE_PATH = './data/';
             console.log('DEBUG: Total decks across all tournaments:', totalDecks);
             
             filteredCards.forEach(row => {
-      const cardName = row.card_name;
+                const cardNameRaw = String(row.card_name || row.full_card_name || '').trim();
+                const cardName = normalizeCardAggregationKey(cardNameRaw);
+                if (!cardName) return;
                 
                 if (!cardMap.has(cardName)) {
+                    const rowWithDisplayName = { ...row, card_name: cardNameRaw || row.card_name || '' };
                     cardMap.set(cardName, {
-                        sampleRow: row,
+                        sampleRow: rowWithDisplayName,
                         totalCount: 0,
                         maxCountValues: [],
                         deckCounts: 0,
@@ -3407,9 +3410,9 @@ const BASE_PATH = './data/';
                     const cardData = cardMap.get(cardName);
                     // Update sample row if current row has more complete data
                     if (!cardData.sampleRow.image_url && row.image_url) {
-                        cardData.sampleRow = row;
+                        cardData.sampleRow = { ...row, card_name: cardNameRaw || row.card_name || '' };
                     } else if (!cardData.sampleRow.set_code && row.set_code) {
-                        cardData.sampleRow = row;
+                        cardData.sampleRow = { ...row, card_name: cardNameRaw || row.card_name || '' };
                     }
                 }
                 
@@ -6237,7 +6240,8 @@ const BASE_PATH = './data/';
             const cardMap = new Map();
             
             cards.forEach(card => {
-                const cardName = card.card_name;
+                const cardName = normalizeCardAggregationKey(card.card_name);
+                if (!cardName) return;
                 
                 if (!cardMap.has(cardName)) {
                     cardMap.set(cardName, card);
@@ -8933,6 +8937,14 @@ const BASE_PATH = './data/';
             return Number.isFinite(parsed) ? parsed : fallback;
         }
 
+        function normalizeCardAggregationKey(name) {
+            return String(name || '')
+                .toLowerCase()
+                .replace(/[\u2019'`]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
         function parsePastMetaDateMs(dateValue) {
             if (!dateValue) return 0;
             const raw = String(dateValue).trim();
@@ -9323,7 +9335,7 @@ const BASE_PATH = './data/';
                 });
             });
 
-            const aggregatedCards = aggregateCardStatsByDate(selectedRows).map(card => ({
+            const aggregatedCardsRaw = aggregateCardStatsByDate(selectedRows).map(card => ({
                 ...card,
                 card_count: parsePastMetaNumber(card.average_count_overall, 0),
                 decklist_count: parseInt(card.total_decks_in_archetype || totalDecklists || 1, 10) || 1,
@@ -9331,6 +9343,7 @@ const BASE_PATH = './data/';
                 deck_count: parseInt(card.deck_count || card.deck_inclusion_count || 0, 10) || 0,
                 max_count: parseInt(card.max_count || 0, 10) || 0
             }));
+            const aggregatedCards = deduplicateCards(aggregatedCardsRaw);
             
             // Create a virtual deck object for the aggregated data
             pastMetaCurrentDeck = {

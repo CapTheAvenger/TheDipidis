@@ -1462,12 +1462,15 @@ const BASE_PATH = './data/';
 
             const diff = current - previous;
 
-            // Staple protection: keep >95% staples always stable.
-            if (current > 95) return '<span class="trend-stable">●</span>';
+            // STAPLE SCHUTZ: Keine roten Pfeile bei Staples (>95%),
+            // es sei denn der Absturz ist massiv (>10%).
+            if (current > 95 && diff > -10) return '';
 
             if (diff > 2) return `<span class="trend-up">▲ +${diff.toFixed(1)}%</span>`;
             if (diff < -2) return `<span class="trend-down">▼ ${diff.toFixed(1)}%</span>`;
-            return '<span class="trend-stable">●</span>';
+
+            // Verstecke das Badge komplett, wenn stabil.
+            return '';
         }
 
         function getCityLeagueCardShareHistory(cardName) {
@@ -1516,7 +1519,17 @@ const BASE_PATH = './data/';
             });
 
             return Array.from(totalDecksByPeriod.keys())
-                .sort((a, b) => a.localeCompare(b))
+                .sort((a, b) => {
+                    // DD.MM.YYYY needs normalization for chronological sorting.
+                    const parseDate = (d) => {
+                        const match = String(d).match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+                        if (match) {
+                            return `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
+                        }
+                        return String(d);
+                    };
+                    return parseDate(a).localeCompare(parseDate(b));
+                })
                 .map(period => {
                     const totalDecks = totalDecksByPeriod.get(period) || 0;
                     const decksWithCard = decksWithCardByPeriod.get(period) || 0;
@@ -4426,7 +4439,10 @@ const BASE_PATH = './data/';
                     card_name: cardName
                 });
                 const rawPercentage = parseFloat(String(card.percentage_in_archetype || card.share_percent || 0).replace(',', '.'));
-                const maxCount = parseInt(card.max_count) || card.max_count || '?';
+                
+                // HARD CAP: Maximum 4 copies for non-basic-energy cards.
+                const isEnergy = isBasicEnergyCardEntry(card);
+                const rawMaxCount = parseInt(card.max_count) || card.max_count || 0;
                 
                 // CRITICAL: ALWAYS show green marker ONLY on the exact version that is in the deck
                 // Match by SET CODE + SET NUMBER only (not by card name, which may differ in different languages)
@@ -4474,9 +4490,14 @@ const BASE_PATH = './data/';
                     ? avgCountInUsedRaw
                     : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
 
+                const finalMaxCount = isEnergy ? rawMaxCount : Math.min(4, Math.max(1, rawMaxCount));
+                const finalAvgUsed = isEnergy ? avgCountInUsedValue : Math.min(4, avgCountInUsedValue);
+                const finalAvgOverall = isEnergy ? avgCountOverallValue : Math.min(4, avgCountOverallValue);
+                const maxCount = finalMaxCount;
+
                 const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
-                const avgCountOverall = Math.max(0, avgCountOverallValue).toFixed(2).replace('.', ',');  // Average over all decks
-                const avgCountInUsedDecks = Math.max(0, avgCountInUsedValue).toFixed(2).replace('.', ',');  // Average in decks that use this card
+                const avgCountOverall = Math.max(0, finalAvgOverall).toFixed(2).replace('.', ',');  // Average over all decks
+                const avgCountInUsedDecks = Math.max(0, finalAvgUsed).toFixed(2).replace('.', ',');  // Average in decks that use this card
                 const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
                 const totalDecksDisplay = Math.round(Math.max(0, totalDecksInArchetype));
                 const trendHistory = getCityLeagueCardShareHistory(cardName);

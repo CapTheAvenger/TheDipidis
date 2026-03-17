@@ -1069,12 +1069,20 @@ const BASE_PATH = './data/';
 
         // Check if card is a basic energy (Fire, Water, Grass, etc.)
         function isBasicEnergy(cardName) {
+            const normalized = normalizeCardName(cardName);
+            if (!normalized) return false;
+
             const basicEnergyNames = [
                 'fire energy', 'water energy', 'grass energy', 'lightning energy',
                 'psychic energy', 'fighting energy', 'darkness energy', 'metal energy',
                 'fairy energy', 'dragon energy', 'colorless energy'
             ];
-            return basicEnergyNames.includes(normalizeCardName(cardName));
+
+            if (basicEnergyNames.includes(normalized)) return true;
+            if (/^basic\s+\{[grwlpfdm]\}\s+energy(?:\s+.*)?$/i.test(normalized)) return true;
+
+            // Allow common source suffixes, e.g. "Fighting Energy SVE 22"
+            return /^(fire|water|grass|lightning|psychic|fighting|darkness|metal|fairy|dragon|colorless)\s+energy(?:\s+.*)?$/i.test(normalized);
         }
 
         function getPreferredVersionForCard(cardName, originalSet = null, originalNumber = null) {
@@ -3977,8 +3985,9 @@ const BASE_PATH = './data/';
                 'Basic {G} Energy', 'Basic {R} Energy', 'Basic {W} Energy', 'Basic {L} Energy',
                 'Basic {P} Energy', 'Basic {F} Energy', 'Basic {D} Energy', 'Basic {M} Energy'
             ];
-            const cardName = String(cardLike.card_name || cardLike.name || '').trim();
+            const cardName = String(cardLike.card_name || cardLike.full_card_name || cardLike.name || '').trim();
             if (basicNames.includes(cardName)) return true;
+            if (isBasicEnergy(cardName)) return true;
 
             // 3) Fallback for localized explicit labels.
             if (cardLike.type === 'Basis-Energie' || cardLike.supertype === 'Basis-Energie') return true;
@@ -5367,9 +5376,9 @@ const BASE_PATH = './data/';
             }
             let cardData = cards.find(c => (c.card_name || c.full_card_name) === cardName);
             if (!cardData && setCode && setNumber) {
-                cardData = (window.cardsBySetNumberMap || {})[`${setCode}-${setNumber}`] || null;
+                cardData = getIndexedCardBySetNumber(setCode, setNumber) || (window.cardsBySetNumberMap || {})[`${setCode}-${setNumber}`] || null;
             }
-            const isBaseEnergy = isBasicEnergy(cardName);
+            const isBaseEnergy = isBasicEnergyCardEntry(cardData || { card_name: cardName, name: cardName });
             const isAceSpecCard = isAceSpec(cardName);
             
             // Check limits (silent fail for batch)
@@ -5486,9 +5495,9 @@ const BASE_PATH = './data/';
             }
             let cardData = cards.find(c => (c.card_name || c.full_card_name) === cardName);
             if (!cardData && setCode && setNumber) {
-                cardData = (window.cardsBySetNumberMap || {})[`${setCode}-${setNumber}`] || null;
+                cardData = getIndexedCardBySetNumber(setCode, setNumber) || (window.cardsBySetNumberMap || {})[`${setCode}-${setNumber}`] || null;
             }
-            const isBaseEnergy = isBasicEnergy(cardName);
+            const isBaseEnergy = isBasicEnergyCardEntry(cardData || { card_name: cardName, name: cardName });
             const isAceSpecCard = isAceSpec(cardName);
             
             // Check if card already has 4 copies (only applies to non-energy, non-ace-spec cards)

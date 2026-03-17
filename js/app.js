@@ -2998,6 +2998,17 @@ const BASE_PATH = './data/';
         }
         
         function populateCityLeagueDeckSelect(data, comparisonData) {
+            const filteredArchetypesData = getFilteredCityLeagueArchetypesData();
+
+            const archetypeCountMap = new Map();
+            filteredArchetypesData.forEach(row => {
+                const archetypeName = String(row.archetype || '').trim();
+                if (!archetypeName) return;
+
+                const key = archetypeName.toLowerCase();
+                archetypeCountMap.set(key, (archetypeCountMap.get(key) || 0) + 1);
+            });
+
             // Create a map of archetype names to their current deck counts from comparison data
             const comparisonMap = new Map();
             if (comparisonData && comparisonData.length > 0) {
@@ -3011,10 +3022,14 @@ const BASE_PATH = './data/';
             
             // Extract unique archetypes with their deck counts
             const archetypeMap = new Map();
-            data.forEach(row => {
+            const sourceRows = filteredArchetypesData.length > 0 ? filteredArchetypesData : data;
+            sourceRows.forEach(row => {
                 if (row.archetype && !archetypeMap.has(row.archetype)) {
-                    // Use new_count from comparison data if available, otherwise fall back to total_decks_in_archetype
-                    const deckCount = comparisonMap.get(row.archetype.toLowerCase()) || parseInt(row.total_decks_in_archetype || 0);
+                    // Prefer live counts from raw archetype rows so dropdown and deck stats stay in sync.
+                    const deckCount = archetypeCountMap.get(row.archetype.toLowerCase())
+                        || comparisonMap.get(row.archetype.toLowerCase())
+                        || parseInt(row.total_decks_in_archetype || 0, 10)
+                        || 0;
                     archetypeMap.set(row.archetype, {
                         name: row.archetype,
                         deckCount: deckCount
@@ -3097,6 +3112,52 @@ const BASE_PATH = './data/';
         }
         
         // Date filter functions for City League
+        function getFilteredCityLeagueArchetypesData() {
+            const archetypesData = window.cityLeagueArchetypesData || [];
+            if (!window.cityLeagueDateFilterActive) {
+                return archetypesData;
+            }
+
+            const dateFrom = window.cityLeagueDateFrom || '1900-01-01';
+            const dateTo = window.cityLeagueDateTo || '2099-12-31';
+
+            return archetypesData.filter(row => {
+                const rawDate = row.date || row.tournament_date || '';
+                const parsedDate = parseJapaneseDate(rawDate);
+                return parsedDate ? parsedDate >= dateFrom && parsedDate <= dateTo : false;
+            });
+        }
+
+        function getCityLeagueArchetypeStats(archetype) {
+            const matches = getFilteredCityLeagueArchetypesData().filter(row =>
+                row.archetype && row.archetype.toLowerCase() === String(archetype || '').toLowerCase()
+            );
+
+            const decksCount = matches.length;
+            const avgPlacement = matches.length > 0
+                ? (matches.reduce((sum, row) => sum + parseInt(row.placement || 0, 10), 0) / matches.length).toFixed(2)
+                : '-';
+
+            return {
+                rows: matches,
+                decksCount,
+                avgPlacement
+            };
+        }
+
+        function refreshCityLeagueDeckSelect() {
+            const select = document.getElementById('cityLeagueDeckSelect');
+            const previousValue = select ? select.value : '';
+
+            populateCityLeagueDeckSelect(window.cityLeagueAnalysisData || [], window.cityLeagueComparisonData || []);
+
+            if (!select) return '';
+
+            const stillExists = Array.from(select.options).some(option => option.value === previousValue);
+            select.value = stillExists ? previousValue : '';
+            return select.value;
+        }
+
         function resetCityLeagueDateFilter() {
             const dateFromEl = document.getElementById('cityLeagueDateFrom');
             const dateToEl = document.getElementById('cityLeagueDateTo');
@@ -3107,11 +3168,11 @@ const BASE_PATH = './data/';
             window.cityLeagueDateFilterActive = false;
             updateCityLeagueDateFilterStatus();
             
-            // Reload current deck if one is selected
-            const cityLeagueDeckSelect = document.getElementById('cityLeagueDeckSelect');
-            const selectedArchetype = cityLeagueDeckSelect ? cityLeagueDeckSelect.value : null;
+            const selectedArchetype = refreshCityLeagueDeckSelect();
             if (selectedArchetype) {
                 loadCityLeagueDeckData(selectedArchetype);
+            } else {
+                clearCityLeagueDeckView();
             }
         }
         
@@ -3131,10 +3192,11 @@ const BASE_PATH = './data/';
             
             updateCityLeagueDateFilterStatus();
             
-            // Reload current deck if one is selected
-            const selectedArchetype = document.getElementById('cityLeagueDeckSelect')?.value;
+            const selectedArchetype = refreshCityLeagueDeckSelect();
             if (selectedArchetype) {
                 loadCityLeagueDeckData(selectedArchetype);
+            } else {
+                clearCityLeagueDeckView();
             }
         }
         
@@ -3171,6 +3233,9 @@ const BASE_PATH = './data/';
         
         function getCityLeagueDeckCountFallback(archetype) {
             if (!archetype) return 0;
+
+            const liveStats = getCityLeagueArchetypeStats(archetype);
+            if (liveStats.decksCount > 0) return liveStats.decksCount;
 
             // 1) Prefer comparison dataset (new_count)
             const comparisonRows = window.cityLeagueComparisonData || [];
@@ -3488,6 +3553,8 @@ const BASE_PATH = './data/';
             console.log('Loading deck data for:', archetype);
             const data = window.cityLeagueAnalysisData;
             if (!data) return;
+
+            const archetypeStats = getCityLeagueArchetypeStats(archetype);
             
             // Store current archetype
             window.currentCityLeagueArchetype = archetype;
@@ -3524,6 +3591,11 @@ const BASE_PATH = './data/';
                 console.log('DEBUG: Filtering by date range:', dateFrom, 'to', dateTo);
                 
                 const dateDebugSample = [];
+                const hasTournamentDates = deckCards.some(row => row.tournament_date);
+                if (!hasTournamentDates) {
+                    console.warn('[City League] Date filter is active, but analysis rows have no tournament_date. Card composition remains unfiltered until city_league_analysis.csv is regenerated with per-date rows.');
+                }
+
                 deckCards = deckCards.filter(row => {
                     const tournamentDate = parseJapaneseDate(row.tournament_date);
                     
@@ -3567,7 +3639,7 @@ const BASE_PATH = './data/';
             
             // Get current deck count from aggregated data
             // Since we now always aggregate, use total_decks_in_archetype from first card
-            let decksCount = parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
+            let decksCount = archetypeStats.decksCount || parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
             if (!decksCount || decksCount <= 0) {
                 decksCount = getCityLeagueDeckCountFallback(archetype);
             }
@@ -3577,13 +3649,7 @@ const BASE_PATH = './data/';
             console.log(`Using deck count from aggregated data: ${decksCount} decks`);
             
             // Calculate average placement from archetypes data
-            const archetypesData = window.cityLeagueArchetypesData || [];
-            const archetypeMatches = archetypesData.filter(row => 
-                row.archetype && row.archetype.toLowerCase() === archetype.toLowerCase()
-            );
-            const avgPlacement = archetypeMatches.length > 0
-                ? (archetypeMatches.reduce((sum, row) => sum + parseInt(row.placement || 0), 0) / archetypeMatches.length).toFixed(2)
-                : '-';
+            const avgPlacement = archetypeStats.avgPlacement;
             
             // Store total decks count globally for use in card displays
             window.currentCityLeagueTotalDecks = parseInt(decksCount) || 0;

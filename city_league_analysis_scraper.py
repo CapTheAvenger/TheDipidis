@@ -456,7 +456,7 @@ def main():
         deck['meta'] = 'City League'
         
     logger.info(f"Aggregiere Karten-Daten von {len(all_decks)} Decks...")
-    aggregated_data = aggregate_card_data(all_decks, card_db)
+    aggregated_data = aggregate_card_data(all_decks, card_db, group_by_tournament_date=True)
     
     output_file = settings.get('output_file', 'city_league_analysis.csv')
     append_mode = settings.get('append_mode', True)

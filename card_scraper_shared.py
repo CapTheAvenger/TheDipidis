@@ -304,30 +304,37 @@ def is_valid_card(card_name: str) -> bool:
 # ============================================================================
 # AGGREGATION & CSV EXPORT
 # ============================================================================
-def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup) -> list:
+def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup, group_by_tournament_date: bool = False) -> list:
     """
     Aggregates cards from decks into meta-analysis format.
     Neu: deck_inclusion_count und average_count für Competitive-Analyse.
     """
-    archetype_cards = defaultdict(lambda: defaultdict(lambda: {'total_count': 0, 'deck_count': 0, 'max_count': 0}))
-    archetype_deck_counts = defaultdict(int)
+    grouped_cards = defaultdict(lambda: defaultdict(lambda: {'total_count': 0, 'deck_count': 0, 'max_count': 0}))
+    grouped_deck_counts = defaultdict(int)
 
     for deck in all_decks:
         if not deck.get('cards'): continue
         arch = normalize_archetype_name(deck['archetype'])
-        archetype_deck_counts[arch] += 1
+        tournament_date = deck.get('tournament_date', '') if group_by_tournament_date else ''
+        group_key = (tournament_date, arch) if group_by_tournament_date else arch
+        grouped_deck_counts[group_key] += 1
         seen = set()
         for c in deck['cards']:
             name = c['name']
-            archetype_cards[arch][name]['total_count'] += c['count']
-            archetype_cards[arch][name]['max_count'] = max(archetype_cards[arch][name]['max_count'], c['count'])
+            grouped_cards[group_key][name]['total_count'] += c['count']
+            grouped_cards[group_key][name]['max_count'] = max(grouped_cards[group_key][name]['max_count'], c['count'])
             if name not in seen:
-                archetype_cards[arch][name]['deck_count'] += 1
+                grouped_cards[group_key][name]['deck_count'] += 1
                 seen.add(name)
 
     result = []
-    for arch, cards in archetype_cards.items():
-        total_decks = archetype_deck_counts[arch]
+    for group_key, cards in grouped_cards.items():
+        if group_by_tournament_date:
+            tournament_date, arch = group_key
+        else:
+            tournament_date, arch = '', group_key
+
+        total_decks = grouped_deck_counts[group_key]
         for name, stats in cards.items():
             deck_inclusion_count = stats['deck_count']
             pct = (deck_inclusion_count / total_decks * 100) if total_decks > 0 else 0
@@ -337,7 +344,7 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup) -> list:
             average_count_overall = round(stats['total_count'] / total_decks, 2) if total_decks > 0 else 0
             
             c_info = card_db.get_card_info(name) or {}
-            result.append({
+            row = {
                 'archetype': arch, 'card_name': name,
                 'card_identifier': f"{c_info.get('set_code','')} {c_info.get('number','')}".strip(),
                 'total_count': stats['total_count'], 
@@ -351,7 +358,13 @@ def aggregate_card_data(all_decks: list, card_db: CardDatabaseLookup) -> list:
                 'rarity': c_info.get('rarity',''), 'type': c_info.get('type',''),
                 'image_url': c_info.get('image_url',''),
                 'is_ace_spec': 'Yes' if card_db.is_ace_spec_by_name(name) else 'No'
-            })
+            }
+
+            if group_by_tournament_date:
+                row['meta'] = 'City League'
+                row['tournament_date'] = tournament_date
+
+            result.append(row)
     return result
 
 def save_to_csv(data: list, output_file: str, append_mode: bool = False):

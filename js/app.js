@@ -7463,6 +7463,13 @@ const BASE_PATH = './data/';
                 .filter(card => card.sharePercent >= 80)
                 .forEach(card => {
                     if (currentTotal >= 60) return;
+
+                    // 🚨 ACE SPEC BLOCKER
+                    if (isAceSpecCard(card) && deckHasAceSpec()) {
+                        console.log(`[Consistency] Blocked additional ACE SPEC: ${card.card_name}`);
+                        return;
+                    }
+
                     const avgCount = getRoundedAverageCount(card, true);
                     pushCard(card, avgCount, '[Consistency][Stage1]');
                 });
@@ -7473,6 +7480,13 @@ const BASE_PATH = './data/';
                     .filter(card => card.sharePercent >= 40)
                     .forEach(card => {
                         if (currentTotal >= 60) return;
+
+                        // 🚨 ACE SPEC BLOCKER
+                        if (isAceSpecCard(card) && deckHasAceSpec()) {
+                            console.log(`[Consistency] Blocked additional ACE SPEC: ${card.card_name}`);
+                            return;
+                        }
+
                         const avgCount = getRoundedAverageCount(card, true);
                         pushCard(card, avgCount, '[Consistency][Stage2]');
                     });

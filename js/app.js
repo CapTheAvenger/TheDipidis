@@ -12457,33 +12457,56 @@ const BASE_PATH = './data/';
             return rarityHierarchy[rarity] || 0;
         }
 
+        function hideAppLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay')
+                || document.getElementById('loading-overlay')
+                || document.getElementById('appLoadingOverlay')
+                || document.getElementById('app-loading');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            const lastUpdate = localStorage.getItem('lastScraperUpdate') || new Date().toLocaleDateString('de-DE');
-            document.getElementById('last-update').textContent = lastUpdate;
-            
-            // Initialize City League format dropdowns
-            const savedFormat = localStorage.getItem('cityLeagueFormat') || 'M4';
-            const formatDropdown = document.getElementById('cityLeagueFormatSelect');
-            const analysisFormatDropdown = document.getElementById('cityLeagueFormatSelectAnalysis');
-            if (formatDropdown) {
-                formatDropdown.value = savedFormat;
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const lastUpdate = localStorage.getItem('lastScraperUpdate') || new Date().toLocaleDateString('de-DE');
+                const lastUpdateEl = document.getElementById('last-update');
+                if (lastUpdateEl) {
+                    lastUpdateEl.textContent = lastUpdate;
+                }
+                
+                // Initialize City League format dropdowns
+                const savedFormat = localStorage.getItem('cityLeagueFormat') || 'M4';
+                const formatDropdown = document.getElementById('cityLeagueFormatSelect');
+                const analysisFormatDropdown = document.getElementById('cityLeagueFormatSelectAnalysis');
+                if (formatDropdown) {
+                    formatDropdown.value = savedFormat;
+                }
+                if (analysisFormatDropdown) {
+                    analysisFormatDropdown.value = savedFormat;
+                }
+                window.currentCityLeagueFormat = savedFormat;
+                
+                // Ensure card indexes are built before any deck rendering starts.
+                await loadAllCardsDatabase();
+
+                // Load auxiliary datasets in parallel; failures are handled internally.
+                await Promise.all([
+                    loadPokedexNumbers(),
+                    loadAceSpecsList(),
+                    loadSetMapping(),
+                    loadRarityPreferences()
+                ]);
+                
+                // Load first tab automatically
+                await loadCityLeagueData();
+                window.cityLeagueLoaded = true;
+            } catch (e) {
+                console.error('[init] App initialization failed:', e);
+            } finally {
+                hideAppLoadingOverlay();
             }
-            if (analysisFormatDropdown) {
-                analysisFormatDropdown.value = savedFormat;
-            }
-            window.currentCityLeagueFormat = savedFormat;
-            
-            // Load all cards database for deck builder
-            loadAllCardsDatabase();
-            loadPokedexNumbers();
-            loadAceSpecsList();
-            loadSetMapping();
-            loadRarityPreferences();
-            
-            // Load first tab automatically
-            loadCityLeagueData();
-            window.cityLeagueLoaded = true;
         });
         
         // ========================================================================

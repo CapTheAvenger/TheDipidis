@@ -136,6 +136,7 @@ function _ptMobilePlayToActive(player, handIndex) {
         ptSelectedCardIndex = handIndex;
         ptClickZone(player, 'active');
     }
+    ptHideContextMenu();
 }
 
 function _ptMobilePlayToBench(player, handIndex) {
@@ -146,11 +147,13 @@ function _ptMobilePlayToBench(player, handIndex) {
             const slot = 'bench' + i;
             if (ptState[player].field[slot].length === 0) {
                 ptClickZone(player, slot);
+                ptHideContextMenu();
                 return;
             }
         }
         alert('Bank ist voll!');
     }
+    ptHideContextMenu();
 }
 
 function _ptMobileDiscard(player, handIndex) {
@@ -160,6 +163,7 @@ function _ptMobileDiscard(player, handIndex) {
         if (typeof ptLog !== 'undefined') ptLog(`"${card.name}" abgelegt.`);
         if (typeof ptRenderAll !== 'undefined') ptRenderAll();
     }
+    ptHideContextMenu();
 }
 
 function _ptMobileShuffleIntoDeck(player, handIndex) {
@@ -170,12 +174,14 @@ function _ptMobileShuffleIntoDeck(player, handIndex) {
         if (typeof ptLog !== 'undefined') ptLog(`"${card.name}" zurück ins Deck gemischt.`);
         if (typeof ptRenderAll !== 'undefined') ptRenderAll();
     }
+    ptHideContextMenu();
 }
 
 function _ptMobileReturnToHand(player, zone) {
     if (typeof returnToHand !== 'undefined') {
         returnToHand(player, zone);
     }
+    ptHideContextMenu();
 }
 
 function _ptMobileDiscardFromField(player, zone) {
@@ -186,6 +192,7 @@ function _ptMobileDiscardFromField(player, zone) {
         if (typeof ptLog !== 'undefined') ptLog(`"${card.name}" vom Feld abgelegt.`);
         if (typeof ptRenderAll !== 'undefined') ptRenderAll();
     }
+    ptHideContextMenu();
 }
 
 function _ptMobileAdjustDamage(player, zone, amount) {
@@ -193,6 +200,7 @@ function _ptMobileAdjustDamage(player, zone, amount) {
         ptState[player].damage[zone] = Math.max(0, ptState[player].damage[zone] + amount);
         if (typeof ptRenderAll !== 'undefined') ptRenderAll();
     }
+    ptHideContextMenu();
 }
 
 function _ptMobileSwitchToActive(player, benchZone) {
@@ -200,7 +208,10 @@ function _ptMobileSwitchToActive(player, benchZone) {
     const active = ptState[player].field.active;
     const bench = ptState[player].field[benchZone];
     
-    if (bench.length === 0) return;
+    if (bench.length === 0) {
+        ptHideContextMenu();
+        return;
+    }
     
     ptState[player].field.active = bench;
     ptState[player].field[benchZone] = active;
@@ -212,6 +223,7 @@ function _ptMobileSwitchToActive(player, benchZone) {
     
     if (typeof ptLog !== 'undefined') ptLog(`Aktives getauscht mit ${benchZone}.`);
     if (typeof ptRenderAll !== 'undefined') ptRenderAll();
+    ptHideContextMenu();
 }
 
 function _ptMobileKnockout(player, zone) {
@@ -223,6 +235,7 @@ function _ptMobileKnockout(player, zone) {
         if (typeof ptLog !== 'undefined') ptLog(`${zone} K.O.!`);
         if (typeof ptRenderAll !== 'undefined') ptRenderAll();
     }
+    ptHideContextMenu();
 }
 
 // ══════════════════════════════════════════════════════════════════════════

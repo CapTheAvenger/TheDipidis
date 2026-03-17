@@ -3981,6 +3981,10 @@ const BASE_PATH = './data/';
             return false;
         }
 
+        function getEmptyStateHtml() {
+            return '<div class="empty-state"><h3>Keine Daten gefunden</h3><p>Für diese Filterkombination liegen aktuell keine Turnierdaten vor.</p></div>';
+        }
+
         // Universal image URL resolver used across grids, analysis, and deckbuilder.
         // Priority order:
         //  1. canonical image from all_cards_merged via set+number index
@@ -4362,6 +4366,12 @@ const BASE_PATH = './data/';
             const visualContainer = document.getElementById('cityLeagueDeckVisual');
             const gridContainer = document.getElementById('cityLeagueDeckGrid');
             if (!gridContainer) return;
+
+            if (!Array.isArray(cards) || cards.length === 0) {
+                gridContainer.innerHTML = getEmptyStateHtml();
+                if (visualContainer) visualContainer.style.display = 'block';
+                return;
+            }
             
             // Use the same sorting logic as "Karten Uebersicht (sortiert)"
             const sortedCards = sortCardsByType([...cards]);
@@ -7523,6 +7533,14 @@ const BASE_PATH = './data/';
                 }
 
                 updateDeckDisplay(source);
+
+                if (currentTotal >= 60) {
+                    if (typeof showDeckShareToast === 'function') {
+                        showDeckShareToast('✅ Optimale Liste generiert! (Core-Karten + Meta-Techs)');
+                    } else {
+                        alert('✅ Optimale Liste generiert! (Core-Karten + Meta-Techs)');
+                    }
+                }
             }
         }
         
@@ -7781,7 +7799,7 @@ const BASE_PATH = './data/';
             const countSpan = document.getElementById(countId);
             
             if (!metaCardData[source] || metaCardData[source].length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: #444; padding: 40px; grid-column: 1 / -1; font-weight: 500;">No cards loaded. Click "Load Meta Analysis" button.</p>';
+                grid.innerHTML = getEmptyStateHtml();
                 countSpan.textContent = '0 Cards';
                 return;
             }
@@ -7894,7 +7912,7 @@ const BASE_PATH = './data/';
             countSpan.textContent = `${cards.length} Cards`;
             
             if (cards.length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: #444; padding: 40px; grid-column: 1 / -1; font-weight: 500;">No cards match current filters</p>';
+                grid.innerHTML = getEmptyStateHtml();
                 return;
             }
             
@@ -13556,6 +13574,12 @@ const BASE_PATH = './data/';
             const visualContainer = document.getElementById('currentMetaDeckVisual');
             const gridContainer = document.getElementById('currentMetaDeckGrid');
             if (!gridContainer) return;
+
+            if (!Array.isArray(cards) || cards.length === 0) {
+                gridContainer.innerHTML = getEmptyStateHtml();
+                if (visualContainer) visualContainer.style.display = 'block';
+                return;
+            }
             
             const sortedCards = sortCardsByType([...cards]);
             const currentDeck = window.currentMetaDeck || {};

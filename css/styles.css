@@ -86,6 +86,14 @@
             flex-shrink: 0;
             min-height: 44px;
         }
+
+        .tab-subtitle {
+            font-size: 10px;
+            opacity: 0.7;
+            display: block;
+            margin-top: 2px;
+            line-height: 1;
+        }
         
         .tab-btn:hover {
             background: rgba(255,255,255,0.3);
@@ -3478,6 +3486,13 @@ h3:first-child {
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
 }
 
+.heatmap-container tbody tr:hover td,
+.matchup-heatmap-container tbody tr:hover td {
+    filter: brightness(0.85);
+    transition: filter 0.2s;
+    cursor: crosshair;
+}
+
 /* Spezifische Heatmap-Farben (Falls dein JS CSS-Klassen nutzt) */
 .heatmap-favorable { 
     background-color: rgba(76, 175, 80, 0.15) !important; 
@@ -3574,6 +3589,27 @@ h3:first-child {
 
 #ptContextMenu.active {
     bottom: 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #7f8c8d;
+    background: white;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.empty-state h3 {
+    margin-bottom: 8px;
+    color: #5d6d7e;
+    font-size: 1.2rem;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
 }
 
 #ptContextHeader {

@@ -61,15 +61,15 @@ const BASE_PATH = './data/';
             },
             'cards': {
                 title: '\ud83e\uddf0 Card Database',
-                html: '<p>Search and browse the complete Pok\u00e9mon TCG card database.</p><ul><li><strong>Search:</strong> Find cards by name with auto-complete</li><li><strong>Filters:</strong> Filter by set, type, rarity, and more</li><li><strong>Card Details:</strong> Click any card for full details and pricing</li><li><strong>Collection:</strong> Mark cards you own with the checkmark button</li><li><strong>Wishlist:</strong> Star cards you want to acquire</li></ul>'
+                html: '<p>Search and browse the complete Pok\u00e9mon TCG card database.</p><ul><li><strong>Search:</strong> Find cards by name with auto-complete</li><li><strong>Filters:</strong> Filter by set, type, rarity, and more</li><li><strong>Sort:</strong> Sets sorted newest\u2192oldest (new sets always appear first)</li><li><strong>Card Details:</strong> Click any card for full details and pricing</li><li><strong>Collection:</strong> Mark cards you own with the checkmark button</li><li><strong>Wishlist:</strong> Star cards you want to acquire</li></ul>'
             },
             'proxy': {
                 title: '\ud83d\udda8\ufe0f Proxy Printer',
-                html: '<p>Create printable proxy cards for testing and casual play.</p><ul><li><strong>Import Deck:</strong> Paste a deck list and auto-generate proxies</li><li><strong>Manual Add:</strong> Search and add individual cards</li><li><strong>Print Layout:</strong> Optimized for standard card size printing</li><li><strong>Adjust Quantities:</strong> Set exact copies for each card</li></ul>'
+                html: '<p>Create printable proxy cards for testing and casual play.</p><ul><li><strong>Import Deck:</strong> Paste a deck list and auto-generate proxies</li><li><strong>Manual Add:</strong> Search and add individual cards</li><li><strong>Print Layout:</strong> Optimized for standard 6.3cm \u00d7 8.8cm card size (fits sleeves)</li><li><strong>Adjust Quantities:</strong> Set exact copies for each card</li><li><strong>@media print:</strong> Browser print produces A4 pages with correct card dimensions</li></ul>'
             },
             'sandbox': {
                 title: '\u2694\ufe0f Battle Sandbox',
-                html: '<p>Simulate 2-player Pok\u00e9mon TCG matches with full game mechanics.</p><ul><li><strong>Import Decks:</strong> Paste deck lists for Player 1 and Player 2</li><li><strong>Draw Simulator:</strong> Test opening hands and prize cards</li><li><strong>Game Board:</strong> Full interactive play area with bench and active slots</li><li><strong>Load Saved Decks:</strong> Use decks from your profile</li></ul>'
+                html: '<p>Simulate 2-player Pok\u00e9mon TCG matches with full game mechanics.</p><ul><li><strong>Import Decks:</strong> Paste deck lists for Player 1 and Player 2</li><li><strong>Draw Simulator:</strong> Test opening hands and prize cards</li><li><strong>Game Board:</strong> Full interactive play area with bench and active slots</li><li><strong>Load Saved Decks:</strong> Use decks from your profile</li><li><strong>Judge:</strong> Both players shuffle hand into deck, draw exactly 4 (TCG rule)</li><li><strong>Iono:</strong> Shuffle hand under deck, draw equal to remaining prizes</li><li><strong>Deck Search \ud83d\udd0d:</strong> Browse your deck mid-game with sort options</li></ul>'
             },
             'profile': {
                 title: '\ud83d\udc64 User Profile',

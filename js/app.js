@@ -7843,6 +7843,14 @@ const BASE_PATH = './data/';
             cityLeague: { shareThreshold: 'all', cardType: 'all', sortBy: 'type', searchTerm: '' },
             currentMeta: { shareThreshold: 'all', cardType: 'all', sortBy: 'type', searchTerm: '' }
         };
+
+        function getActiveCityLeagueFormat() {
+            const formatFromAnalysisSelect = document.getElementById('cityLeagueFormatSelectAnalysis')?.value;
+            const formatFromMainSelect = document.getElementById('cityLeagueFormatSelect')?.value;
+            const raw = formatFromAnalysisSelect || formatFromMainSelect || window.currentCityLeagueFormat || localStorage.getItem('cityLeagueFormat') || 'M4';
+            const normalized = String(raw).trim().toUpperCase();
+            return normalized === 'M3' ? 'M3' : 'M4';
+        }
         
         async function loadMetaCardAnalysis(source) {
             console.log('[loadMetaCardAnalysis] Loading meta analysis for:', source);
@@ -7854,7 +7862,14 @@ const BASE_PATH = './data/';
             try {
                 // ? FIX: Use comparison data for correct Top 10, then analysis data for cards
                 const timestamp = new Date().getTime();
-                const cityLeagueFormat = window.currentCityLeagueFormat || 'M4';
+                const cityLeagueFormat = source === 'cityLeague'
+                    ? getActiveCityLeagueFormat()
+                    : (window.currentCityLeagueFormat || 'M4');
+                if (source === 'cityLeague') {
+                    // Keep all loaders aligned even if a stale global value lingers.
+                    window.currentCityLeagueFormat = cityLeagueFormat;
+                    localStorage.setItem('cityLeagueFormat', cityLeagueFormat);
+                }
                 const cityLeagueSuffix = (source === 'cityLeague' && cityLeagueFormat === 'M3') ? '_M3' : '';
                 
                 // Load comparison data (has correct unique deck counts per archetype)
@@ -7862,6 +7877,7 @@ const BASE_PATH = './data/';
                     ? `city_league_archetypes_comparison${cityLeagueSuffix}.csv`
                     : 'limitless_online_decks_comparison.csv';
                 const archetypeField = source === 'cityLeague' ? 'archetype' : 'deck_name'; // City League uses 'archetype', Current Meta uses 'deck_name'
+                console.log('[loadMetaCardAnalysis] City League format:', cityLeagueFormat, 'comparison file:', comparisonFile);
 
                 let comparisonData = [];
                 const loadCityLeagueComparisonFallback = async () => {
@@ -7892,6 +7908,19 @@ const BASE_PATH = './data/';
                         throw comparisonError;
                     }
                 }
+
+                if (source === 'cityLeague' && cityLeagueFormat === 'M3') {
+                    // Guard: if comparison rows look like current format (M4), force-load explicit M3 file.
+                    const looksLikeM4Comparison = Array.isArray(comparisonData) && comparisonData.length > 0 && comparisonData.length < 200;
+                    if (looksLikeM4Comparison) {
+                        console.warn('[loadMetaCardAnalysis] Guard triggered: comparison data shape looks like M4 while M3 is selected. Forcing explicit M3 comparison file.');
+                        const forcedComparisonResponse = await fetch(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}&forceM3=1`);
+                        if (forcedComparisonResponse.ok) {
+                            const forcedComparisonText = await forcedComparisonResponse.text();
+                            comparisonData = parseCSV(forcedComparisonText);
+                        }
+                    }
+                }
                 
                 console.log('[loadMetaCardAnalysis] Loaded', comparisonData.length, 'archetypes from comparison CSV');
                 
@@ -7917,10 +7946,26 @@ const BASE_PATH = './data/';
                 const analysisFile = source === 'cityLeague'
                     ? `city_league_analysis${cityLeagueSuffix}.csv`
                     : 'current_meta_card_data.csv';
+                if (source === 'cityLeague') {
+                    console.log('[loadMetaCardAnalysis] Analysis file:', analysisFile);
+                }
                 const analysisResponse = await fetch(`${BASE_PATH}${analysisFile}?t=${timestamp}`);
                 if (!analysisResponse.ok) throw new Error('Failed to load analysis data');
                 const analysisText = await analysisResponse.text();
-                const allAnalysisData = parseCSV(analysisText);
+                let allAnalysisData = parseCSV(analysisText);
+
+                if (source === 'cityLeague' && cityLeagueFormat === 'M3') {
+                    // Guard: if analysis rows are suspiciously small for M3 history, force-load explicit M3 file.
+                    const looksLikeM4Analysis = Array.isArray(allAnalysisData) && allAnalysisData.length > 0 && allAnalysisData.length < 50000;
+                    if (looksLikeM4Analysis) {
+                        console.warn('[loadMetaCardAnalysis] Guard triggered: analysis data shape looks like M4 while M3 is selected. Forcing explicit M3 analysis file.');
+                        const forcedAnalysisResponse = await fetch(`${BASE_PATH}city_league_analysis_M3.csv?t=${timestamp}&forceM3=1`);
+                        if (forcedAnalysisResponse.ok) {
+                            const forcedAnalysisText = await forcedAnalysisResponse.text();
+                            allAnalysisData = parseCSV(forcedAnalysisText);
+                        }
+                    }
+                }
                 if (source === 'currentMeta') {
                     healCurrentMetaCardRows(allAnalysisData);
                 }

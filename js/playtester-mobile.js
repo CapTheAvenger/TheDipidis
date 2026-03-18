@@ -191,7 +191,7 @@ function _ptMobilePlayToBench(player, handIndex) {
                 return;
             }
         }
-        alert('Bank ist voll!');
+        showToast('Bank ist voll!', 'warning');
     }
     ptHideContextMenu();
 }

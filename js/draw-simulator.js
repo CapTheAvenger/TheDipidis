@@ -16,7 +16,7 @@ function openDrawSimulator(source) {
 
     const totalCards = Object.values(deckObj).reduce((s, c) => s + c, 0);
     if (totalCards === 0) {
-        alert('Dein Deck ist leer! Füge erst Karten hinzu.');
+        showToast('Dein Deck ist leer! Füge erst Karten hinzu.', 'warning');
         return;
     }
 
@@ -79,7 +79,7 @@ function drawNewHand() {
 
 function drawExtraCard() {
     if (_simulatorHand.length >= _simulatorDeck.length) {
-        alert('Keine Karten mehr im Deck!');
+        showToast('Keine Karten mehr im Deck!', 'warning');
         return;
     }
     _simulatorHand.push(_simulatorDeck[_simulatorHand.length]);

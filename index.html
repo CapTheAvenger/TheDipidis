@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/styles.css?v=20260317-v63">
+    <link rel="stylesheet" href="css/styles.css?v=20260318-v64">
     <link rel="stylesheet" href="css/auth-styles.css">
 
     <style id="pokeball-menu-styles">
@@ -469,7 +469,7 @@
             <div id="city-league" class="tab-content active">
                 <div class="city-league-container">
                     <div class="city-league-header">
-                        <h1>🇯🇵 City League Development</h1>
+                        <h1>🇯🇵 City League Development <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help">?</button></h1>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
                             <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
                                 <option value="M4">M4 - Ninja Spinner (Aktuell)</option>
@@ -488,7 +488,7 @@
             <div id="city-league-analysis" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>🦅 City League Deck Analysis</h1>
+                        <h1>🦅 City League Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help">?</button></h1>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
                             <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
                                 <option value="M4">M4 - Ninja Spinner (Aktuell)</option>
@@ -711,10 +711,10 @@
             <div id="current-meta" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>🎮 Limitless Online Comparison</h1>
+                        <h1>🎮 Limitless Online Comparison <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help">?</button></h1>
                     </div>
                     <div id="currentMetaContent" style="padding: 30px; background: #ffffff;">
-                        <div style="text-align: center; padding: 40px; color: #999;">Loading...</div>
+                        <div class="skeleton-row"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
                     </div>
                 </div>
             </div>
@@ -723,7 +723,7 @@
             <div id="current-analysis" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>📈 Current Meta Deck Analysis</h1>
+                        <h1>📈 Current Meta Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help">?</button></h1>
                         <p>Analyze and Build Decks from Current Meta</p>
                     </div>
                     
@@ -989,7 +989,7 @@
             <div id="past-meta" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>🏆 Past Tournament Deck Analysis</h1>
+                        <h1>🏆 Past Tournament Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('past-meta')" title="Help">?</button></h1>
                         <p>Analyze and Build Decks from Past Tournaments</p>
                     </div>
                     
@@ -1158,7 +1158,7 @@
             
             <!-- Tab 6: Cards -->
             <div id="cards" class="tab-content">
-                <h1>🧰 Card Database</h1>
+                <h1>🧰 Card Database <button class="tab-help-btn" onclick="openTabHelp('cards')" title="Help">?</button></h1>
                 
                 <!-- Filter Section -->
                 <div class="cards-filter-section filter-section-main">
@@ -1325,14 +1325,14 @@
                 </div>
                 
                 <!-- Cards Grid -->
-                <div id="cardsContent" class="loading">Loading cards...</div>
+                <div id="cardsContent"><div class="skeleton-row"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div></div>
             </div>
 
             <!-- Tab: Proxy Printer -->
             <div id="proxy" class="tab-content">
                 <div class="container" style="background: white; padding: 25px; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.08);">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 18px;">
-                        <h1 style="margin:0; color:#2c3e50;">🖨️ Proxy Printer</h1>
+                        <h1 style="margin:0; color:#2c3e50;">🖨️ Proxy Printer <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help">?</button></h1>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
                             <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;">Unique: <span id="proxyUniqueCount">0</span></div>
                             <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;">Copies: <span id="proxyCopiesCount">0</span></div>
@@ -1379,7 +1379,7 @@
             <div id="sandbox" class="tab-content">
                 <div class="container" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="font-size: 2.5em; color: #3B4CCA; margin-bottom: 10px;">⚔️ Battle Sandbox</h1>
+                        <h1 style="font-size: 2.5em; color: #3B4CCA; margin-bottom: 10px;">⚔️ Battle Sandbox <button class="tab-help-btn" onclick="openTabHelp('sandbox')" title="Help">?</button></h1>
                         <p style="font-size: 1.1em; color: #7f8c8d; font-weight: 600;">Import decks for 2 players and start the match.</p>
                     </div>
 
@@ -1429,7 +1429,7 @@
             <div id="tutorial" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>📖 How to Use This Website</h1>
+                        <h1>📖 How to Use This Website <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help">?</button></h1>
                         <p>Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v37 (March 2026)</p>
                     </div>
                     
@@ -1859,7 +1859,7 @@
                     <div class="header">
                         <h1>
                             <img src="images/pokeball-icon.png" alt="" style="width: 32px; height: 32px; margin-right: 10px; vertical-align: middle;">
-                            User Profile
+                            User Profile <button class="tab-help-btn" onclick="openTabHelp('profile')" title="Help">?</button>
                         </h1>
                         <p>Manage your collection, decks, and settings</p>
                     </div>
@@ -2715,13 +2715,26 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-credentials.js?v=20260311-v2"></script>
-    <script src="js/firebase-collection.js?v=20260312-v13"></script>
+    <script src="js/firebase-collection.js?v=20260318-v14"></script>
     <script src="js/firebase-config.js?v=20260314-v9"></script>
     <script src="js/firebase-globals.js?v=20260311-v2"></script>
     <script src="js/firebase-auth.js?v=20260314-v15"></script>
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="js/app.js?v=20260318-v68"></script>
+    <script src="js/app.js?v=20260318-v69"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Context Help Modal -->
+    <div id="helpModal" onclick="if(event.target===this)closeHelpModal()">
+        <div class="help-modal-content">
+            <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+            <h2 class="help-modal-title"></h2>
+            <div class="help-modal-body"></div>
+        </div>
+    </div>
+
 </body>
 </html>

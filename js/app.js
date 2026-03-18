@@ -8,6 +8,95 @@ const BASE_PATH = './data/';
         const devWarn = (...args) => DEV_MODE && console.warn(...args);
 
         // ============================================================
+        // TOAST NOTIFICATION SYSTEM
+        // ============================================================
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const icons = { success: '\u2705', warning: '\u26a0\ufe0f', error: '\u274c', info: '\u2139\ufe0f' };
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'toast-icon';
+            iconSpan.textContent = icons[type] || icons.info;
+            const msgSpan = document.createElement('span');
+            msgSpan.className = 'toast-message';
+            msgSpan.textContent = message;
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'toast-close';
+            closeBtn.textContent = '\u00d7';
+            closeBtn.onclick = () => { toast.classList.add('toast-dismissing'); setTimeout(() => toast.remove(), 300); };
+            toast.appendChild(iconSpan);
+            toast.appendChild(msgSpan);
+            toast.appendChild(closeBtn);
+            container.appendChild(toast);
+            if (duration > 0) {
+                setTimeout(() => { if (toast.parentElement) { toast.classList.add('toast-dismissing'); setTimeout(() => toast.remove(), 300); } }, duration);
+            }
+        }
+
+        // ============================================================
+        // CONTEXT HELP SYSTEM
+        // ============================================================
+        const TAB_HELP_CONTENT = {
+            'city-league': {
+                title: '\ud83c\uddef\ud83c\uddf5 City League Development',
+                html: '<p>Shows archetype popularity trends from Japanese City League tournaments.</p><ul><li><strong>Chart:</strong> Tracks how each deck archetype evolves over time</li><li><strong>Format Filter:</strong> Switch between M4 (current) and M3 (archive)</li><li><strong>Click any archetype</strong> in the legend to toggle its visibility</li><li><strong>Hover</strong> over data points for exact tournament counts</li></ul>'
+            },
+            'city-league-analysis': {
+                title: '\ud83e\udd85 City League Deck Analysis',
+                html: '<p>Browse and analyze individual deck lists from City League tournaments.</p><ul><li><strong>Archetype Filter:</strong> Select a deck archetype to view its lists</li><li><strong>Deck Builder:</strong> Click cards to add them to your deck</li><li><strong>Max Consistency Algorithm:</strong> Shows the statistically optimal card distribution</li><li><strong>Combined Variants:</strong> Merges similar deck variants for better analysis</li><li><strong>Copy Deck:</strong> Export any deck list for Pok\u00e9mon TCG Live</li></ul>'
+            },
+            'current-meta': {
+                title: '\ud83c\udfae Limitless Online Comparison',
+                html: '<p>Compare archetype meta shares between different tournament sources.</p><ul><li><strong>Side-by-side comparison</strong> of City League vs Limitless Online data</li><li><strong>Charts:</strong> Pie and bar charts for visual comparison</li><li><strong>Meta Share %:</strong> See how popular each deck is in different formats</li></ul>'
+            },
+            'current-analysis': {
+                title: '\ud83d\udcc8 Current Meta Deck Analysis',
+                html: '<p>Analyze deck lists from current Limitless Online tournaments.</p><ul><li><strong>Archetype Filter:</strong> Browse decks by archetype</li><li><strong>Card Distribution:</strong> See which cards appear most frequently</li><li><strong>Deck Builder:</strong> Build and modify decks interactively</li><li><strong>Max Consistency:</strong> Get the optimal 60-card build</li></ul>'
+            },
+            'past-meta': {
+                title: '\ud83c\udfc6 Past Tournament Deck Analysis',
+                html: '<p>Historical tournament data from major events (Regionals, EUIC, Worlds, etc.).</p><ul><li><strong>Format Filter:</strong> Filter by format code (e.g., TEF-SCR, OBF-TWM)</li><li><strong>Source Filter:</strong> Choose specific tournaments or regions</li><li><strong>Full Deck Analysis:</strong> Same powerful tools as current meta tab</li><li><strong>Historical Trends:</strong> Track how decks evolved across formats</li></ul>'
+            },
+            'cards': {
+                title: '\ud83e\uddf0 Card Database',
+                html: '<p>Search and browse the complete Pok\u00e9mon TCG card database.</p><ul><li><strong>Search:</strong> Find cards by name with auto-complete</li><li><strong>Filters:</strong> Filter by set, type, rarity, and more</li><li><strong>Card Details:</strong> Click any card for full details and pricing</li><li><strong>Collection:</strong> Mark cards you own with the checkmark button</li><li><strong>Wishlist:</strong> Star cards you want to acquire</li></ul>'
+            },
+            'proxy': {
+                title: '\ud83d\udda8\ufe0f Proxy Printer',
+                html: '<p>Create printable proxy cards for testing and casual play.</p><ul><li><strong>Import Deck:</strong> Paste a deck list and auto-generate proxies</li><li><strong>Manual Add:</strong> Search and add individual cards</li><li><strong>Print Layout:</strong> Optimized for standard card size printing</li><li><strong>Adjust Quantities:</strong> Set exact copies for each card</li></ul>'
+            },
+            'sandbox': {
+                title: '\u2694\ufe0f Battle Sandbox',
+                html: '<p>Simulate 2-player Pok\u00e9mon TCG matches with full game mechanics.</p><ul><li><strong>Import Decks:</strong> Paste deck lists for Player 1 and Player 2</li><li><strong>Draw Simulator:</strong> Test opening hands and prize cards</li><li><strong>Game Board:</strong> Full interactive play area with bench and active slots</li><li><strong>Load Saved Decks:</strong> Use decks from your profile</li></ul>'
+            },
+            'profile': {
+                title: '\ud83d\udc64 User Profile',
+                html: '<p>Manage your personal card collection, saved decks, and settings.</p><ul><li><strong>Collection:</strong> Track cards you own across all sets</li><li><strong>Saved Decks:</strong> Store and manage your deck builds</li><li><strong>Wishlist:</strong> Keep a list of cards you want</li><li><strong>Settings:</strong> Configure display preferences</li></ul>'
+            },
+            'tutorial': {
+                title: '\ud83d\udcd6 How to Use',
+                html: '<p>Comprehensive guide to all features of this website.</p><ul><li><strong>Tab Guides:</strong> Detailed instructions for each section</li><li><strong>FAQ:</strong> Answers to common questions</li><li><strong>Changelog:</strong> Latest features and improvements</li></ul>'
+            }
+        };
+
+        function openTabHelp(tabId) {
+            const help = TAB_HELP_CONTENT[tabId];
+            if (!help) return;
+            const modal = document.getElementById('helpModal');
+            if (!modal) return;
+            modal.querySelector('.help-modal-title').textContent = help.title;
+            modal.querySelector('.help-modal-body').innerHTML = help.html;
+            modal.classList.add('active');
+        }
+
+        function closeHelpModal() {
+            const modal = document.getElementById('helpModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        // ============================================================
         // GLOBAL DECK SORT HELPERS (Official Pokémon TCG Sort Order)
         // ============================================================
         window.getCardSortPriority = function(card) {
@@ -565,7 +654,7 @@ const BASE_PATH = './data/';
             if (source === 'pastMeta') deckMap = window.pastMetaDeck;
 
             if (!deckMap || Object.keys(deckMap).length === 0) {
-                alert('No deck cards found for this source.');
+                showToast('No deck cards found for this source.', 'warning');
                 return;
             }
 
@@ -604,7 +693,7 @@ const BASE_PATH = './data/';
 
             const text = String(input.value || '').trim();
             if (!text) {
-                alert('Paste a decklist first.');
+                showToast('Paste a decklist first.', 'warning');
                 return;
             }
 
@@ -626,7 +715,7 @@ const BASE_PATH = './data/';
             }
 
             if (entries.length === 0) {
-                alert('Could not parse decklist. Use lines like: "4 Buddy-Buddy Poffin SVI 186" or "2 Rare Candy"');
+                showToast('Could not parse decklist. Use format: 4 Buddy-Buddy Poffin SVI 186', 'error');
                 return;
             }
 
@@ -650,7 +739,7 @@ const BASE_PATH = './data/';
 
             const cardNameRaw = String(nameInput?.value || '').trim();
             if (!cardNameRaw) {
-                alert('Please enter a card name.');
+                showToast('Please enter a card name.', 'warning');
                 return;
             }
 
@@ -678,7 +767,7 @@ const BASE_PATH = './data/';
         function printProxyQueue() {
             const queue = window.proxyQueue || [];
             if (queue.length === 0) {
-                alert('Proxy queue is empty.');
+                showToast('Proxy queue is empty.', 'warning');
                 return;
             }
 
@@ -723,7 +812,7 @@ const BASE_PATH = './data/';
 
             const popup = window.open('', '_blank');
             if (!popup) {
-                alert('Unable to open print window. Please allow popups for this site.');
+                showToast('Unable to open print window. Please allow popups for this site.', 'error');
                 return;
             }
 
@@ -777,7 +866,7 @@ const BASE_PATH = './data/';
             const newCards = comparisonCards.filter(card => card.changeType === 'new' && parseProxyCount(card.newCount, 0) > 0);
 
             if (newCards.length === 0) {
-                alert('No newly added cards found in comparison results.');
+                showToast('No newly added cards found in comparison results.', 'warning');
                 return;
             }
 
@@ -6350,7 +6439,7 @@ const BASE_PATH = './data/';
             
             const cards = window.currentCityLeagueDeckCards;
             if (!cards || cards.length === 0) {
-                alert('? Please select a deck first!');
+                showToast('Please select a deck first!', 'warning');
                 return;
             }
             
@@ -6383,7 +6472,7 @@ const BASE_PATH = './data/';
             
             // If no deck AND no archetype cards, show error
             if (!hasDeck && allCards.length === 0) {
-                alert('⚠️ No cards to copy!\n\nPlease select an archetype first.');
+                showToast('No cards to copy! Please select an archetype first.', 'warning');
                 return;
             }
             
@@ -6556,10 +6645,10 @@ const BASE_PATH = './data/';
             
             // Copy to clipboard
             navigator.clipboard.writeText(output).then(() => {
-                alert('? Deck copied to clipboard!');
+                showToast('Deck copied to clipboard!', 'success');
             }).catch(err => {
                 console.error('Error copying:', err);
-                alert('? Error copying to clipboard!');
+                showToast('Error copying to clipboard!', 'error');
             });
         }
 
@@ -7049,7 +7138,7 @@ const BASE_PATH = './data/';
             
             const currentTotal = Object.values(deck).reduce((sum, count) => sum + count, 0);
             if (currentTotal >= 70) {
-                alert('Deck has reached maximum (70 cards)!');
+                showToast('Deck has reached maximum (70 cards)!', 'warning');
                 return;
             }
             
@@ -7073,30 +7162,30 @@ const BASE_PATH = './data/';
             
             // Check if card already has 4 copies (only applies to non-energy, non-ace-spec cards)
             if (!isBaseEnergy && !isAceSpecCard && deck[deckKey] >= 4) {
-                alert('Maximum 4 copies per card!');
+                showToast('Maximum 4 copies per card!', 'warning');
                 return;
             }
             
             // Ace Spec cards can only have 1 copy in deck
             if (isAceSpecCard && deck[deckKey] >= 1) {
-                alert('Ace Spec cards may only be in deck once!');
+                showToast('Ace Spec cards may only be in deck once!', 'warning');
                 return;
             }
             
             // DECK-WIDE Ace Spec limit: only 1 Ace Spec card total in entire deck
             if (isAceSpecCard && getTotalAceSpecCopiesInDeck(deck) >= 1) {
-                alert('Only 1 Ace Spec card allowed per deck! Remove the existing one first.');
+                showToast('Only 1 Ace Spec card allowed per deck! Remove the existing one first.', 'warning');
                 return;
             }
             
             // Radiant Pokémon: max 1 copy, and only 1 Radiant total in deck
             if (isRadiantPokemon(cardName)) {
                 if (deck[deckKey] >= 1) {
-                    alert('Radiant Pokémon may only be in deck once!');
+                    showToast('Radiant Pokémon may only be in deck once!', 'warning');
                     return;
                 }
                 if (getTotalRadiantCopiesInDeck(deck) >= 1) {
-                    alert('Only 1 Radiant Pokémon allowed per deck! Remove the existing one first.');
+                    showToast('Only 1 Radiant Pokémon allowed per deck! Remove the existing one first.', 'warning');
                     return;
                 }
             }
@@ -8274,7 +8363,7 @@ const BASE_PATH = './data/';
             }
             
             if (!deck || Object.keys(deck).length === 0) {
-                alert('Your deck is empty!');
+                showToast('Your deck is empty!', 'warning');
                 return;
             }
             
@@ -8395,7 +8484,7 @@ const BASE_PATH = './data/';
                 copyPastMetaDeckOverview();
             } else {
                 console.log('[copyDeck] Unsupported source:', source);
-                alert('? This function is not available for this tab!');
+                showToast('This function is not available for this tab!', 'warning');
             }
         }
         
@@ -8577,7 +8666,7 @@ const BASE_PATH = './data/';
             }
             
             if (!cards || cards.length === 0) {
-                alert('No cards to add!');
+                showToast('No cards to add!', 'warning');
                 return;
             }
             
@@ -8942,7 +9031,7 @@ const BASE_PATH = './data/';
             }
             
             if (!cards || cards.length === 0) {
-                alert('No cards to add!');
+                showToast('No cards to add!', 'warning');
                 return;
             }
             
@@ -9254,7 +9343,7 @@ const BASE_PATH = './data/';
                     if (typeof showDeckShareToast === 'function') {
                         showDeckShareToast('✅ Optimale Liste generiert! (Consistency-Build)');
                     } else {
-                        alert('✅ Optimale Liste generiert! (Consistency-Build)');
+                        showToast('Optimale Liste generiert! (Consistency-Build)', 'success');
                     }
                 }
             }
@@ -11231,7 +11320,7 @@ const BASE_PATH = './data/';
             
             if (!cardsData || cardsData.length === 0) {
                 const errorMsg = 'No past tournament data found';
-                alert(errorMsg);
+                showToast(errorMsg, 'error');
                 console.error(errorMsg);
                 return;
             }
@@ -12046,7 +12135,7 @@ const BASE_PATH = './data/';
             }
             
             if (!pastMetaCurrentCards || pastMetaCurrentCards.length === 0) {
-                alert('? Please select a deck first!');
+                showToast('Please select a deck first!', 'warning');
                 return;
             }
             
@@ -12068,7 +12157,7 @@ const BASE_PATH = './data/';
         
         function copyPastMetaDeckOverview() {
             if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
-                alert('No cards available to copy');
+                showToast('No cards available to copy', 'warning');
                 return;
             }
             
@@ -12080,10 +12169,10 @@ const BASE_PATH = './data/';
             });
             
             navigator.clipboard.writeText(deckText).then(() => {
-                alert('? Deck list copied!');
+                showToast('Deck list copied!', 'success');
             }).catch(err => {
                 console.error('Failed to copy:', err);
-                alert('? Error copying');
+                showToast('Error copying', 'error');
             });
         }
         
@@ -13781,7 +13870,7 @@ const BASE_PATH = './data/';
                     }, 2000);
                 }).catch(err => {
                     console.error('Copy failed:', err);
-                    alert('Copy failed');
+                    showToast('Copy failed', 'error');
                 });
             };
             leftControls.appendChild(copyBtn);
@@ -14348,7 +14437,7 @@ const BASE_PATH = './data/';
 
         function openRaritySwitcher(cardName, deckKey) {
             if (!window.allCardsDatabase) {
-                alert('Card database not loaded yet...');
+                showToast('Card database not loaded yet...', 'info');
                 return;
             }
 
@@ -14506,7 +14595,7 @@ const BASE_PATH = './data/';
             }
             
             if (versions.length === 0) {
-                alert(`No complete versions found for "${actualCardName}".\n\nPossible reasons:\n- Card not fully indexed (missing Rarity/Image URL/Int. Prints)\n- All Cards Scraper has not finished yet\n- Only Japanese sets available\n\nSearched name: "${actualCardName}"\n\nTip: Wait for the All Cards Scraper to finish.`);
+                showToast(`No complete versions found for "${actualCardName}". Card may not be fully indexed yet.`, 'warning', 5000);
                 console.error(`[openRaritySwitcher] No complete versions found for "${actualCardName}".`);
                 return;
             }
@@ -14653,7 +14742,7 @@ const BASE_PATH = './data/';
 
         function openCardmarket(cardmarketUrl, cardName) {
             if (!cardmarketUrl || cardmarketUrl.trim() === '') {
-                alert(`⚠️ Cardmarket link not available for ${cardName}\n\nPossible reasons:\n- Price Scraper has not been run yet\n- Card has no Cardmarket data\n\nPlease run RUN_PRICE_SCRAPER.bat.`);
+                showToast(`Cardmarket link not available for ${cardName}`, 'warning');
                 return;
             }
             
@@ -15108,7 +15197,7 @@ const BASE_PATH = './data/';
             }
             
             if (deckCards.length === 0) {
-                alert(`No data found for ${archetype} with filter "${currentMetaFormatFilter}"!`);
+                showToast(`No data found for ${archetype} with filter "${currentMetaFormatFilter}"!`, 'warning');
                 clearCurrentMetaDeckView();
                 return;
             }
@@ -15972,7 +16061,7 @@ const BASE_PATH = './data/';
             
             const cards = window.currentCurrentMetaDeckCards;
             if (!cards || cards.length === 0) {
-                alert('? Please select a deck first!');
+                showToast('Please select a deck first!', 'warning');
                 return;
             }
             
@@ -16000,7 +16089,7 @@ const BASE_PATH = './data/';
             const allCardsFromDb = window.allCardsDatabase || [];
             
             if (!hasDeck && allCards.length === 0) {
-                alert('⚠️ No cards to copy!\n\nPlease select an archetype first.');
+                showToast('No cards to copy! Please select an archetype first.', 'warning');
                 return;
             }
             
@@ -16133,10 +16222,10 @@ const BASE_PATH = './data/';
             if (energy.length > 0) output += `Energy: ${energyCount}\n` + energy.join('\n');
             
             navigator.clipboard.writeText(output).then(() => {
-                alert('? Deck copied to clipboard!');
+                showToast('Deck copied to clipboard!', 'success');
             }).catch(err => {
                 console.error('Error copying:', err);
-                alert('? Error copying to clipboard!');
+                showToast('Error copying to clipboard!', 'error');
             });
         }
         
@@ -16211,26 +16300,26 @@ const BASE_PATH = './data/';
             const selectedDeckId = savedDeckSelect.value;
             
             if (!selectedDeckId) {
-                alert('⚠️ Please select a saved deck!');
+                showToast('Please select a saved deck!', 'warning');
                 return;
             }
             
             if (!currentDeckSource) {
-                alert('⚠️ Error: No deck source selected!');
+                showToast('No deck source selected!', 'error');
                 return;
             }
             
             // Check if card database is loaded
             if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
                 console.error('[compareWithSavedDeck] ERROR: cardsBySetNumberMap not loaded!');
-                alert('⚠️ Error: Card database not loaded yet. Please wait a moment and try again.');
+                showToast('Card database not loaded yet. Please wait a moment and try again.', 'warning');
                 return;
             }
             
             // Get selected saved deck
             const savedDeck = window.userDecks.find(d => d.id === selectedDeckId);
             if (!savedDeck) {
-                alert('⚠️ Error: Saved deck not found!');
+                showToast('Saved deck not found!', 'error');
                 return;
             }
             
@@ -16273,7 +16362,7 @@ const BASE_PATH = './data/';
                            window.pastMetaDeck;
             
             if (!deckMap || Object.keys(deckMap).length === 0) {
-                alert('⚠️ Error: Current deck is empty!');
+                showToast('Current deck is empty!', 'warning');
                 return;
             }
             
@@ -16612,19 +16701,19 @@ const BASE_PATH = './data/';
             const oldDeckText = document.getElementById('oldDeckListInput').value.trim();
             
             if (!oldDeckText) {
-                alert('⚠️ Please paste an old deck list first!');
+                showToast('Please paste an old deck list first!', 'warning');
                 return;
             }
             
             if (!currentDeckSource) {
-                alert('⚠️ Error: No deck source selected!');
+                showToast('No deck source selected!', 'error');
                 return;
             }
             
             // Check if card database is loaded
             if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
                 console.error('[deckCompare] ERROR: cardsBySetNumberMap not loaded!');
-                alert('⚠️ Error: Card database not loaded yet. Please wait a moment and try again.');
+                showToast('Card database not loaded yet. Please wait a moment and try again.', 'warning');
                 return;
             }
             
@@ -16640,7 +16729,7 @@ const BASE_PATH = './data/';
                            window.pastMetaDeck;
             
             if (!deckMap || Object.keys(deckMap).length === 0) {
-                alert('⚠️ Error: Current deck is empty!');
+                showToast('Current deck is empty!', 'warning');
                 return;
             }
             

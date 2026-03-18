@@ -32,7 +32,7 @@ async function createMultiplayerGame(deckObject) {
         // Firebase Auth Check
         const user = firebase.auth().currentUser;
         if (!user) {
-            alert('Bitte zuerst einloggen!');
+            showToast('Bitte zuerst einloggen!', 'warning');
             throw new Error('Not authenticated');
         }
 
@@ -85,7 +85,7 @@ async function createMultiplayerGame(deckObject) {
 
     } catch (error) {
         console.error('[Multiplayer] Create game error:', error);
-        alert('Fehler beim Erstellen des Spiels: ' + error.message);
+        showToast('Fehler beim Erstellen des Spiels: ' + error.message, 'error');
         throw error;
     }
 }
@@ -100,7 +100,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
     try {
         const user = firebase.auth().currentUser;
         if (!user) {
-            alert('Bitte zuerst einloggen!');
+            showToast('Bitte zuerst einloggen!', 'warning');
             throw new Error('Not authenticated');
         }
 
@@ -113,7 +113,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
             .get();
 
         if (gamesSnapshot.empty) {
-            alert('Spiel nicht gefunden oder bereits gestartet!');
+            showToast('Spiel nicht gefunden oder bereits gestartet!', 'warning');
             throw new Error('Game not found');
         }
 
@@ -123,7 +123,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
 
         // Check: Nicht dem eigenen Spiel beitreten
         if (gameData.host === user.uid) {
-            alert('Du kannst nicht deinem eigenen Spiel beitreten!');
+            showToast('Du kannst nicht deinem eigenen Spiel beitreten!', 'warning');
             throw new Error('Cannot join own game');
         }
 
@@ -158,7 +158,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
 
     } catch (error) {
         console.error('[Multiplayer] Join game error:', error);
-        alert('Fehler beim Beitreten: ' + error.message);
+        showToast('Fehler beim Beitreten: ' + error.message, 'error');
         throw error;
     }
 }
@@ -214,7 +214,7 @@ function listenToGameState(gameId) {
         if (!doc.exists) {
             console.warn('[Multiplayer] Game document deleted');
             leaveMultiplayerGame();
-            alert('Das Spiel wurde beendet.');
+            showToast('Das Spiel wurde beendet.', 'info');
             return;
         }
 
@@ -249,7 +249,7 @@ function listenToGameState(gameId) {
         if (data.status === 'finished') {
             mpSyncEnabled = false;
             leaveMultiplayerGame();
-            alert('Das Spiel wurde beendet.');
+            showToast('Das Spiel wurde beendet.', 'info');
             return;
         }
 
@@ -280,7 +280,7 @@ function listenToGameState(gameId) {
 
     }, (error) => {
         console.error('[Multiplayer] Snapshot error:', error);
-        alert('Verbindungsfehler: ' + error.message);
+        showToast('Verbindungsfehler: ' + error.message, 'error');
     });
 }
 
@@ -491,13 +491,13 @@ async function mpCreateGame() {
         // Check Auth
         const user = firebase.auth().currentUser;
         if (!user) {
-            alert('⚠️ Bitte zuerst einloggen!\n\nKlicke auf "Login/Register" um Firebase Authentication zu aktivieren.');
+            showToast('Bitte zuerst einloggen!', 'warning');
             return;
         }
 
         // Check ob aktuelles Deck vorhanden
         if (!window.currentDeck || typeof window.currentDeck !== 'object') {
-            alert('⚠️ Bitte zuerst ein Deck in der Collection auswählen!');
+            showToast('Bitte zuerst ein Deck in der Collection auswählen!', 'warning');
             return;
         }
 
@@ -521,13 +521,13 @@ async function mpJoinGame() {
         // Check Auth
         const user = firebase.auth().currentUser;
         if (!user) {
-            alert('⚠️ Bitte zuerst einloggen!\n\nKlicke auf "Login/Register" um Firebase Authentication zu aktivieren.');
+            showToast('Bitte zuerst einloggen!', 'warning');
             return;
         }
 
         // Check ob aktuelles Deck vorhanden
         if (!window.currentDeck || typeof window.currentDeck !== 'object') {
-            alert('⚠️ Bitte zuerst ein Deck in der Collection auswählen!');
+            showToast('Bitte zuerst ein Deck in der Collection auswählen!', 'warning');
             return;
         }
 
@@ -535,7 +535,7 @@ async function mpJoinGame() {
         const roomCode = prompt('🔑 Room-Code eingeben (5 Zeichen):');
         
         if (!roomCode || roomCode.length !== 5) {
-            alert('Ungültiger Room-Code!');
+            showToast('Ungültiger Room-Code!', 'error');
             return;
         }
 

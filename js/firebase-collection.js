@@ -917,7 +917,7 @@ function openMyDecksPlaytest() {
     if (typeof showNotification === 'function') {
       showNotification('No saved decks yet.', 'error');
     } else {
-      alert('No saved decks yet!');
+      showToast('No saved decks yet!', 'warning');
     }
     return;
   }
@@ -944,7 +944,7 @@ async function startMyDecksPlaytest() {
     if (typeof showNotification === 'function') {
       showNotification('Could not load Player 1 deck.', 'error');
     } else {
-      alert('Could not load Player 1 deck!');
+      showToast('Could not load Player 1 deck!', 'error');
     }
     return;
   }
@@ -952,7 +952,7 @@ async function startMyDecksPlaytest() {
     if (typeof showNotification === 'function') {
       showNotification('Could not load Player 2 deck.', 'error');
     } else {
-      alert('Could not load Player 2 deck!');
+      showToast('Could not load Player 2 deck!', 'error');
     }
     return;
   }
@@ -969,7 +969,7 @@ async function startMyDecksPlaytest() {
     if (typeof showNotification === 'function') {
       showNotification('Playtester could not be loaded.', 'error');
     } else {
-      alert('Playtester not loaded yet!');
+      showToast('Playtester not loaded yet!', 'error');
     }
     return;
   }
@@ -1012,7 +1012,7 @@ async function startMyDecksPlaytest() {
 function copyMyDeck(deckIndex) {
   const deck = window.userDecks && window.userDecks[deckIndex];
   if (!deck || !deck.cards) {
-    alert('Deck not found!');
+    showToast('Deck not found!', 'error');
     return;
   }
 
@@ -1075,9 +1075,9 @@ function copyMyDeck(deckIndex) {
   output = output.trim();
 
   navigator.clipboard.writeText(output).then(() => {
-    alert('✅ Deck copied to clipboard!');
+    showToast('Deck copied to clipboard!', 'success');
   }).catch(() => {
-    alert('❌ Error copying to clipboard!');
+    showToast('Error copying to clipboard!', 'error');
   });
 }
 

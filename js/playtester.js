@@ -93,7 +93,7 @@ function openPlaytester(source) {
         if (typeof showNotification === 'function') {
             showNotification('Your deck is empty. Add some cards first.', 'error');
         } else {
-            alert('Your deck is empty! Add some cards first.');
+            showToast('Your deck is empty! Add some cards first.', 'warning');
         }
         return;
     }
@@ -322,7 +322,7 @@ function startStandalonePlaytester() {
     const p2Count = standaloneDecks.p2.reduce((s, c) => s + c.count, 0);
 
     if (p1Count === 0 && p2Count === 0) {
-        alert('Please import at least one deck for Player 1!');
+        showToast('Please import at least one deck for Player 1!', 'warning');
         return;
     }
 
@@ -374,7 +374,7 @@ function startPlaytesterWithOpponent() {
         if (typeof showNotification === 'function') {
             showNotification('Bitte füge ein Deck für den Gegner ein oder wähle Mirror Match.', 'error');
         } else {
-            alert('Bitte füge ein Deck für den Gegner ein oder wähle "Mirror Match".');
+            showToast('Bitte füge ein Deck für den Gegner ein oder wähle Mirror Match.', 'warning');
         }
         return;
     }

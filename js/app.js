@@ -6448,7 +6448,7 @@ const BASE_PATH = './data/';
                         
                         <div class="card-max-count">${count}</div>
                         
-                        <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: white; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap; z-index: 2;">
+                        <div style="position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: white; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap; z-index: 5; pointer-events: none;">
                             ${overlayText}
                         </div>
                         
@@ -7854,15 +7854,44 @@ const BASE_PATH = './data/';
             try {
                 // ? FIX: Use comparison data for correct Top 10, then analysis data for cards
                 const timestamp = new Date().getTime();
+                const cityLeagueFormat = window.currentCityLeagueFormat || 'M4';
+                const cityLeagueSuffix = (source === 'cityLeague' && cityLeagueFormat === 'M3') ? '_M3' : '';
                 
                 // Load comparison data (has correct unique deck counts per archetype)
-                const comparisonFile = source === 'cityLeague' ? 'city_league_archetypes_comparison.csv' : 'limitless_online_decks_comparison.csv';
+                const comparisonFile = source === 'cityLeague'
+                    ? `city_league_archetypes_comparison${cityLeagueSuffix}.csv`
+                    : 'limitless_online_decks_comparison.csv';
                 const archetypeField = source === 'cityLeague' ? 'archetype' : 'deck_name'; // City League uses 'archetype', Current Meta uses 'deck_name'
-                
-                const comparisonResponse = await fetch(`${BASE_PATH}${comparisonFile}?t=${timestamp}`);
-                if (!comparisonResponse.ok) throw new Error('Failed to load comparison data');
-                const comparisonText = await comparisonResponse.text();
-                const comparisonData = parseCSV(comparisonText);
+
+                let comparisonData = [];
+                const loadCityLeagueComparisonFallback = async () => {
+                    // Fallback for format-specific missing/unreachable comparison files: derive from archetype rows.
+                    const archetypesFallbackFile = `city_league_archetypes${cityLeagueSuffix}.csv`;
+                    const archResp = await fetch(`${BASE_PATH}${archetypesFallbackFile}?t=${timestamp}`);
+                    if (!archResp.ok) throw new Error('Failed to load comparison and fallback archetypes data');
+                    const archText = await archResp.text();
+                    comparisonData = deriveCityLeagueComparisonData(parseCSV(archText));
+                    console.warn(`[loadMetaCardAnalysis] Comparison CSV unavailable for ${cityLeagueFormat}; using derived fallback from archetypes`);
+                };
+
+                try {
+                    const comparisonResponse = await fetch(`${BASE_PATH}${comparisonFile}?t=${timestamp}`);
+                    if (comparisonResponse.ok) {
+                        const comparisonText = await comparisonResponse.text();
+                        comparisonData = parseCSV(comparisonText);
+                    } else if (source === 'cityLeague') {
+                        await loadCityLeagueComparisonFallback();
+                    } else {
+                        throw new Error('Failed to load comparison data');
+                    }
+                } catch (comparisonError) {
+                    if (source === 'cityLeague') {
+                        console.warn('[loadMetaCardAnalysis] Comparison fetch failed, trying fallback:', comparisonError);
+                        await loadCityLeagueComparisonFallback();
+                    } else {
+                        throw comparisonError;
+                    }
+                }
                 
                 console.log('[loadMetaCardAnalysis] Loaded', comparisonData.length, 'archetypes from comparison CSV');
                 
@@ -7885,7 +7914,9 @@ const BASE_PATH = './data/';
                 console.log('[loadMetaCardAnalysis] Total unique decks in Top 10:', totalDecksInTop10);
                 
                 // Load analysis data (has cards per archetype)
-                const analysisFile = source === 'cityLeague' ? 'city_league_analysis.csv' : 'current_meta_card_data.csv';
+                const analysisFile = source === 'cityLeague'
+                    ? `city_league_analysis${cityLeagueSuffix}.csv`
+                    : 'current_meta_card_data.csv';
                 const analysisResponse = await fetch(`${BASE_PATH}${analysisFile}?t=${timestamp}`);
                 if (!analysisResponse.ok) throw new Error('Failed to load analysis data');
                 const analysisText = await analysisResponse.text();

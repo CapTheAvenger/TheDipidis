@@ -135,6 +135,170 @@ def fetch_page_bs4(url: str, retries: int = 2):
                 logger.debug(f"Fetch fehlgeschlagen: {url} -> {e}")
     return None
 
+
+FORMAT_CODE_BY_SET: Dict[str, str] = {
+    "ASC": "SVI-ASC",
+    "PFL": "SVI-PFL",
+    "MEG": "SVI-MEG",
+    "BLK": "SVI-BLK",
+    "WHT": "SVI-BLK",
+    "DRI": "SVI-DRI",
+    "JTG": "SVI-JTG",
+    "PRE": "BRS-PRE",
+    "SSP": "BRS-SSP",
+    "SCR": "BRS-SCR",
+    "SFA": "BRS-SFA",
+    "TWM": "BRS-TWM",
+    "TEF": "BRS-TEF",
+    "PAR": "BST-PAR",
+    "PAF": "SVI-PAF",
+}
+
+FORMAT_NAME_TO_CODE: Dict[str, str] = {
+    "scarlet & violet - ascended heroes": "SVI-ASC",
+    "scarlet & violet - phantasmal flames": "SVI-PFL",
+    "scarlet & violet - mega evolution": "SVI-MEG",
+    "scarlet & violet - black bolt": "SVI-BLK",
+    "scarlet & violet - white flare": "SVI-BLK",
+    "scarlet & violet - black bolt / white flare": "SVI-BLK",
+    "scarlet & violet - destined rivals": "SVI-DRI",
+    "scarlet & violet - journey together": "SVI-JTG",
+    "brilliant stars - prismatic evolutions": "BRS-PRE",
+    "brilliant stars - surging sparks": "BRS-SSP",
+    "brilliant stars - stellar crown": "BRS-SCR",
+    "brilliant stars - shrouded fable": "BRS-SFA",
+    "brilliant stars - twilight masquerade": "BRS-TWM",
+    "brilliant stars - temporal forces": "BRS-TEF",
+    "battle styles - paradox rift": "BST-PAR",
+    "meta play!": "Meta Play!",
+    "meta live": "Meta Live",
+}
+
+FORMAT_CODE_DISPLAY: Dict[str, str] = {
+    "SVI-ASC": "Scarlet & Violet - Ascended Heroes",
+    "SVI-PFL": "Scarlet & Violet - Phantasmal Flames",
+    "SVI-MEG": "Scarlet & Violet - Mega Evolution",
+    "SVI-BLK": "Scarlet & Violet - Black Bolt / White Flare",
+    "SVI-DRI": "Scarlet & Violet - Destined Rivals",
+    "SVI-JTG": "Scarlet & Violet - Journey Together",
+    "BRS-PRE": "Brilliant Stars - Prismatic Evolutions",
+    "BRS-SSP": "Brilliant Stars - Surging Sparks",
+    "BRS-SCR": "Brilliant Stars - Stellar Crown",
+    "BRS-SFA": "Brilliant Stars - Shrouded Fable",
+    "BRS-TWM": "Brilliant Stars - Twilight Masquerade",
+    "BRS-TEF": "Brilliant Stars - Temporal Forces",
+    "BST-PAR": "Battle Styles - Paradox Rift",
+    "SVI-PAF": "Scarlet & Violet - Paldean Fates",
+}
+
+
+def _load_set_order_map() -> Dict[str, int]:
+    sets_path = os.path.join(get_data_dir(), "sets.json")
+    try:
+        with open(sets_path, "r", encoding="utf-8") as f:
+            raw = json.load(f)
+            if isinstance(raw, dict):
+                return {str(k).upper(): int(v) for k, v in raw.items() if isinstance(v, (int, float))}
+    except Exception as e:
+        logger.warning("Could not load set order map from %s: %s", sets_path, e)
+    return {}
+
+
+SET_ORDER_MAP = _load_set_order_map()
+
+
+def normalize_tournament_format(raw_format: str) -> str:
+    raw = str(raw_format or "").strip()
+    if not raw:
+        return ""
+
+    # Accept already normalized code.
+    upper_raw = raw.upper()
+    if upper_raw in FORMAT_CODE_DISPLAY:
+        return upper_raw
+
+    lowered = raw.lower()
+    if lowered in FORMAT_NAME_TO_CODE:
+        return FORMAT_NAME_TO_CODE[lowered]
+
+    for name, code in FORMAT_NAME_TO_CODE.items():
+        if name in lowered:
+            return code
+
+    # Normalize common compact patterns like SVI-ASC, BRS-TEF, BST-PAR.
+    compact = re.search(r"\b(SVI|BRS|BST)\s*[-/]\s*([A-Z]{3})\b", upper_raw)
+    if compact:
+        return f"{compact.group(1)}-{compact.group(2)}"
+
+    # Fallback for bare set codes.
+    if upper_raw in FORMAT_CODE_BY_SET:
+        return FORMAT_CODE_BY_SET[upper_raw]
+
+    return raw
+
+
+def infer_format_from_decks(decks_data: List[Dict[str, Any]]) -> str:
+    newest_set = ""
+    newest_order = -1
+
+    for deck in decks_data:
+        for card in deck.get("cards", []):
+            set_code = str(card.get("set_code", "") or "").upper().strip()
+            if not set_code:
+                continue
+
+            order = SET_ORDER_MAP.get(set_code, 0)
+            if order > newest_order:
+                newest_order = order
+                newest_set = set_code
+
+    if newest_set in FORMAT_CODE_BY_SET:
+        return FORMAT_CODE_BY_SET[newest_set]
+
+    return ""
+
+
+def update_formats_catalog(new_formats: List[str]) -> None:
+    catalog_path = os.path.join(get_data_dir(), "formats_catalog.json")
+
+    known_codes = set(FORMAT_CODE_DISPLAY.keys())
+    observed_codes: Set[str] = set()
+    for f in new_formats:
+        normalized = normalize_tournament_format(f)
+        if normalized:
+            observed_codes.add(normalized)
+
+    try:
+        if os.path.exists(catalog_path):
+            with open(catalog_path, "r", encoding="utf-8") as f:
+                existing = json.load(f)
+            for row in existing.get("formats", []):
+                code = normalize_tournament_format(row.get("code", ""))
+                if code:
+                    observed_codes.add(code)
+    except Exception as e:
+        logger.warning("Could not read existing formats catalog: %s", e)
+
+    all_codes = sorted(observed_codes | known_codes)
+    payload = {
+        "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "formats": [
+            {
+                "code": code,
+                "name": FORMAT_CODE_DISPLAY.get(code, code),
+                "source": "known" if code in known_codes else "scraped"
+            }
+            for code in all_codes
+        ]
+    }
+
+    try:
+        with open(catalog_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2, ensure_ascii=False)
+        logger.info("Formats catalog updated: %s (%d formats)", catalog_path, len(payload["formats"]))
+    except Exception as e:
+        logger.warning("Could not write formats catalog: %s", e)
+
 def get_format_code(format_name: str) -> str:
     format_mapping = {
         "Scarlet & Violet - Phantasmal Flames": "SVI-PFL",
@@ -158,7 +322,7 @@ def get_format_code(format_name: str) -> str:
     for full_name, code in format_mapping.items():
         if full_name.lower() in format_name.lower():
             return code
-    return format_name
+    return normalize_tournament_format(format_name)
 
 # ============================================================================
 # TOURNAMENT PARSING
@@ -236,10 +400,19 @@ def get_tournament_info(url: str) -> dict:
     if players_match:
         info["players"] = players_match.group(1)
 
-    # 3. Format direkt aus Format-Link extrahieren
+    # 3. Format aus URL-Parametern extrahieren (falls vorhanden)
     format_code_match = re.search(r'<a[^>]*href=["\'][^"\']*[?&]format=([^"\'&]+)["\'][^>]*>', html_text, re.IGNORECASE)
     if format_code_match:
-        info["format"] = format_code_match.group(1).strip()
+        raw_format = urllib.parse.unquote(format_code_match.group(1).strip())
+        info["format"] = normalize_tournament_format(raw_format)
+
+    # 3b. Fallback: bekannte Format-Namen direkt im Seitentext erkennen
+    if not info["format"]:
+        page_text = soup.get_text(" ", strip=True).lower()
+        for known_name, format_code in FORMAT_NAME_TO_CODE.items():
+            if known_name in page_text and format_code not in {"Meta Live", "Meta Play!"}:
+                info["format"] = format_code
+                break
 
     # 4. Meta korrekt zuweisen
     is_jp = False
@@ -410,7 +583,9 @@ def aggregate_tournament_cards(all_decks: list, t_info: dict, card_db: CardDatab
             average_count = round(stat["total_count"] / deck_inclusion_count, 2) if deck_inclusion_count > 0 else 0
 
             aggregated.append({
-                "meta": t_info.get("format", "Past Meta"),
+                "tournament_id": t_info.get("id", ""),
+                "tournament_name": t_info.get("name", ""),
+                "meta": t_info.get("format") or "Past Meta",
                 "tournament_date": t_info.get("date", ""),
                 "archetype": arch_name,
                 "card_name": samp["name"],
@@ -474,6 +649,9 @@ def save_csv_files(data: list, output_file: str, append_mode: bool):
                 writer.writeheader()
             writer.writerows(rows)
 
+            formats_for_catalog = [str(row.get("format", "") or "") for row in o_rows]
+            update_formats_catalog(formats_for_catalog)
+
     return overview_f, cards_f
 
 # ============================================================================
@@ -513,6 +691,7 @@ def main():
 
         info = get_tournament_info(t["url"])
         t.update(info)
+        t["format"] = normalize_tournament_format(t.get("format", ""))
 
         name_lower = t["name"].lower()
         if t["meta"] in ["Standard (JP)", "Expanded"]:
@@ -553,6 +732,11 @@ def main():
                     logger.warning(f"Fehler bei {d_info['url']}: {e}")
 
         if decks_data:
+            if not t.get("format"):
+                inferred_format = infer_format_from_decks(decks_data)
+                if inferred_format:
+                    t["format"] = inferred_format
+
             t["cards"]       = aggregate_tournament_cards(decks_data, t, card_db)
             t["total_cards"] = len(t["cards"])
             t["status"]      = "success"

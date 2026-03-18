@@ -913,7 +913,14 @@ function openMyDecksPlaytest() {
   const modal = document.getElementById('myDecksPlaytestModal');
   if (!modal) return;
   const decks = window.userDecks || [];
-  if (decks.length === 0) { alert('No saved decks yet!'); return; }
+  if (decks.length === 0) {
+    if (typeof showNotification === 'function') {
+      showNotification('No saved decks yet.', 'error');
+    } else {
+      alert('No saved decks yet!');
+    }
+    return;
+  }
   ['myDeckSelectP1', 'myDeckSelectP2'].forEach((selId, idx) => {
     const sel = document.getElementById(selId);
     if (!sel) return;
@@ -928,14 +935,44 @@ function closeMyDecksPlaytest() {
   if (modal) modal.style.display = 'none';
 }
 
-function startMyDecksPlaytest() {
+async function startMyDecksPlaytest() {
   const p1Idx = parseInt(document.getElementById('myDeckSelectP1').value);
   const p2Idx = parseInt(document.getElementById('myDeckSelectP2').value);
   const deck1 = window.userDecks && window.userDecks[p1Idx];
   const deck2 = window.userDecks && window.userDecks[p2Idx];
-  if (!deck1 || !deck1.cards) { alert('Could not load Player 1 deck!'); return; }
-  if (!deck2 || !deck2.cards) { alert('Could not load Player 2 deck!'); return; }
-  if (typeof standaloneDecks === 'undefined') { alert('Playtester not loaded yet!'); return; }
+  if (!deck1 || !deck1.cards) {
+    if (typeof showNotification === 'function') {
+      showNotification('Could not load Player 1 deck.', 'error');
+    } else {
+      alert('Could not load Player 1 deck!');
+    }
+    return;
+  }
+  if (!deck2 || !deck2.cards) {
+    if (typeof showNotification === 'function') {
+      showNotification('Could not load Player 2 deck.', 'error');
+    } else {
+      alert('Could not load Player 2 deck!');
+    }
+    return;
+  }
+
+  if (typeof standaloneDecks === 'undefined' && typeof window.ensurePlaytesterScriptsLoaded === 'function') {
+    try {
+      await window.ensurePlaytesterScriptsLoaded({ notify: true });
+    } catch (error) {
+      console.error('[My Decks Playtest] Failed to load playtester scripts:', error);
+    }
+  }
+
+  if (typeof standaloneDecks === 'undefined') {
+    if (typeof showNotification === 'function') {
+      showNotification('Playtester could not be loaded.', 'error');
+    } else {
+      alert('Playtester not loaded yet!');
+    }
+    return;
+  }
 
   // Regex handles all number formats: 183, TG01, GG01, 001/198, PA-01, etc.
   const keyRx = /^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9/a-z-]+)\)$/;

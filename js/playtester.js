@@ -89,7 +89,14 @@ function openPlaytester(source) {
                   : source === 'pastMeta'    ? (window.pastMetaDeck    || {})
                   : {};
     const totalCards = Object.values(deckObj).reduce((s, c) => s + c, 0);
-    if (totalCards === 0) { alert('Your deck is empty! Add some cards first.'); return; }
+    if (totalCards === 0) {
+        if (typeof showNotification === 'function') {
+            showNotification('Your deck is empty. Add some cards first.', 'error');
+        } else {
+            alert('Your deck is empty! Add some cards first.');
+        }
+        return;
+    }
     if (totalCards < 60) {
         if (!confirm(`Your deck only has ${totalCards}/60 cards. Start anyway?`)) return;
     }
@@ -364,7 +371,11 @@ function startPlaytesterWithMirror() {
 function startPlaytesterWithOpponent() {
     const opponentString = document.getElementById('playtesterOpponentDeck').value.trim();
     if (!opponentString) {
-        alert('Bitte füge ein Deck für den Gegner ein oder wähle "Mirror Match".');
+        if (typeof showNotification === 'function') {
+            showNotification('Bitte füge ein Deck für den Gegner ein oder wähle Mirror Match.', 'error');
+        } else {
+            alert('Bitte füge ein Deck für den Gegner ein oder wähle "Mirror Match".');
+        }
         return;
     }
     closePlaytesterSetup();

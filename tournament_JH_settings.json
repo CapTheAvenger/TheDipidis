@@ -12,6 +12,6 @@
                              "Worlds",
                              "International"
                          ],
-    "append_mode":  true,
+    "append_mode":  false,
     "_comment":  "FULL RE-SCRAPE: append_mode=false will OVERWRITE existing data. Scrapes individual deck lists from all tournaments. max_tournaments=150 for complete coverage. delay=0 for speed (Limitless can handle it). WICHTIG: Scraping dauert deutlich länger (ca. 0.3-0.5 Minuten pro Turnier)."
 }

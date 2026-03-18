@@ -37,7 +37,21 @@ async function signIn(email, password) {
 // a cross-origin domain that iOS ITP blocks from reading the redirect state, causing
 // "The requested action is invalid" on every iOS device.
 // GIS opens a direct Google-hosted popup (no firebaseapp.com involved at all).
+function hasValidFirebaseCredentials() {
+  const creds = window.FIREBASE_CREDS || {};
+  const requiredKeys = ['apiKey', 'authDomain', 'projectId', 'appId'];
+  return requiredKeys.every((key) => {
+    const value = String(creds[key] || '').trim();
+    return value && !value.startsWith('PLACEHOLDER_');
+  });
+}
+
 function signInWithGoogle() {
+  if (!hasValidFirebaseCredentials()) {
+    showNotification('Firebase Auth ist lokal nicht konfiguriert. Trage echte FIREBASE_CREDS in js/firebase-credentials.js ein.', 'error');
+    return;
+  }
+
   if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
     showNotification('Google Sign-In nicht verfügbar. Bitte Seite neu laden.', 'error');
     return;
@@ -97,40 +111,43 @@ function getErrorMessage(errorCode) {
   const messages = {
     'auth/email-already-in-use': 'This email is already registered',
     'auth/invalid-email': 'Invalid email address',
+    'auth/invalid-api-key': 'Firebase API key is invalid or missing',
+    'auth/app-not-authorized': 'This domain is not authorized for the configured Firebase app',
+    'auth/operation-not-allowed': 'Google sign-in is not enabled in Firebase Authentication',
+    'auth/unauthorized-domain': 'This domain is not authorized for Google sign-in',
     'auth/weak-password': 'Password should be at least 6 characters',
     'auth/user-not-found': 'No account found with this email',
     'auth/wrong-password': 'Incorrect password',
     'auth/too-many-requests': 'Too many attempts. Try again later',
-    'auth/network-request-failed': 'Network error. Check your connection'
+    'auth/network-request-failed': 'Network error. Check your connection',
+    'auth/popup-blocked': 'Popup was blocked by the browser',
+    'auth/popup-closed-by-user': 'Google popup was closed before sign-in finished'
   };
   return messages[errorCode] || 'Authentication error occurred';
 }
 
 // Show notification
 function showNotification(message, type = 'info') {
+  const duration = arguments[2] || 3200;
+  let container = document.getElementById('notificationStack');
+
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'notificationStack';
+    container.className = 'toast-stack';
+    document.body.appendChild(container);
+  }
+
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   notification.textContent = message;
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 25px;
-    border-radius: 8px;
-    background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
-    color: white;
-    font-weight: 500;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 10000;
-    animation: slideInRight 0.3s ease;
-  `;
-  
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.style.animation = 'slideOutRight 0.3s ease';
-    setTimeout(() => notification.remove(), 300);
-  }, 3000);
+
+  container.appendChild(notification);
+
+  window.setTimeout(() => {
+    notification.classList.add('notification-leave');
+    window.setTimeout(() => notification.remove(), 280);
+  }, duration);
 }
 
 // Handle auth form submission
@@ -167,7 +184,14 @@ function setupAuthForms() {
   // Google Sign In
   const googleBtn = document.getElementById('google-signin-btn');
   if (googleBtn) {
-    googleBtn.addEventListener('click', () => signInWithGoogle());
+    if (!hasValidFirebaseCredentials()) {
+      googleBtn.disabled = true;
+      googleBtn.title = 'Firebase Credentials fehlen lokal';
+      googleBtn.style.opacity = '0.6';
+      googleBtn.style.cursor = 'not-allowed';
+    } else {
+      googleBtn.addEventListener('click', () => signInWithGoogle());
+    }
   }
   
   // Sign Out

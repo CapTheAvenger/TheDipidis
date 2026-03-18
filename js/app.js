@@ -2176,6 +2176,20 @@ const BASE_PATH = './data/';
                 .toLowerCase();
         }
 
+        function getSafeCardIdentityName(name) {
+            const raw = fixMojibake(String(name || '')).trim();
+            if (!raw) return '';
+
+            // Remove trailing print markers only (e.g. "(SVI 123)", "SVI 123")
+            // while preserving gameplay-critical suffixes like ex/V/GX/VMAX.
+            const noTrailingPrint = raw
+                .replace(/\s*\(([A-Z0-9]{2,6})\s+([A-Z0-9-]{1,8})\)\s*$/i, '')
+                .replace(/\s+([A-Z0-9]{2,6})\s+([A-Z0-9-]{1,8})\s*$/i, '')
+                .trim();
+
+            return noTrailingPrint || raw;
+        }
+
         // Check if card is a basic energy (Fire, Water, Grass, etc.)
         function isBasicEnergy(cardName) {
             const normalized = normalizeCardName(cardName);
@@ -2200,6 +2214,41 @@ const BASE_PATH = './data/';
             return /^radiant\s+/.test(normalized);
         }
 
+        function isPrismStarCard(cardName) {
+            const raw = String(cardName || '');
+            return raw.includes('◇') || /\bprism\s*star\b/i.test(raw);
+        }
+
+        function getDeckCopiesForCardName(deckObj, cardName) {
+            const target = getSafeCardIdentityName(cardName);
+            if (!target) return 0;
+
+            return Object.entries(deckObj || {}).reduce((sum, [key, count]) => {
+                const keyMatch = String(key || '').match(/^(.+?)\s+\([A-Z0-9-]+\s+[A-Z0-9-]+\)$/);
+                const keyName = getSafeCardIdentityName(keyMatch ? keyMatch[1] : key);
+                if (keyName !== target) return sum;
+                return sum + (parseInt(count, 10) || 0);
+            }, 0);
+        }
+
+        function getTotalAceSpecCopiesInDeck(deckObj) {
+            return Object.entries(deckObj || {}).reduce((sum, [key, count]) => {
+                const keyMatch = String(key || '').match(/^(.+?)\s+\([A-Z0-9-]+\s+[A-Z0-9-]+\)$/);
+                const keyName = keyMatch ? keyMatch[1] : key;
+                if (!isAceSpec(keyName)) return sum;
+                return sum + (parseInt(count, 10) || 0);
+            }, 0);
+        }
+
+        function getTotalRadiantCopiesInDeck(deckObj) {
+            return Object.entries(deckObj || {}).reduce((sum, [key, count]) => {
+                const keyMatch = String(key || '').match(/^(.+?)\s+\([A-Z0-9-]+\s+[A-Z0-9-]+\)$/);
+                const keyName = keyMatch ? keyMatch[1] : key;
+                if (!isRadiantPokemon(keyName)) return sum;
+                return sum + (parseInt(count, 10) || 0);
+            }, 0);
+        }
+
         function getLegalMaxCopies(cardNameOrCard, fallbackCard = null) {
             const cardLike = (typeof cardNameOrCard === 'string')
                 ? (fallbackCard || { card_name: cardNameOrCard, name: cardNameOrCard })
@@ -2209,8 +2258,173 @@ const BASE_PATH = './data/';
                 : (cardLike.card_name || cardLike.full_card_name || cardLike.name || '');
 
             if (isBasicEnergyCardEntry(cardLike)) return 59;
-            if (isAceSpec(cardLike) || isRadiantPokemon(cardName)) return 1;
+            if (isAceSpec(cardLike) || isRadiantPokemon(cardName) || isPrismStarCard(cardName)) return 1;
             return 4;
+        }
+
+        let averageDisplayMode = (localStorage.getItem('averageDisplayMode') || 'exact').toLowerCase() === 'recommended'
+            ? 'recommended'
+            : 'exact';
+
+        function formatAverageValueForUi(avgValue) {
+            const value = Number(avgValue) || 0;
+            if (averageDisplayMode === 'recommended') {
+                return String(Math.max(0, Math.round(value))).replace('.', ',');
+            }
+            return value.toFixed(2).replace('.', ',');
+        }
+
+        function getAverageValueSuffix() {
+            return averageDisplayMode === 'recommended' ? '(empf.)' : '(exakt)';
+        }
+
+        function setAverageDisplayMode(mode) {
+            averageDisplayMode = String(mode || '').toLowerCase() === 'recommended' ? 'recommended' : 'exact';
+            localStorage.setItem('averageDisplayMode', averageDisplayMode);
+
+            const exactBtn = document.getElementById('avgModeExactBtn');
+            const recommendedBtn = document.getElementById('avgModeRecommendedBtn');
+            if (exactBtn) exactBtn.style.opacity = averageDisplayMode === 'exact' ? '1' : '0.65';
+            if (recommendedBtn) recommendedBtn.style.opacity = averageDisplayMode === 'recommended' ? '1' : '0.65';
+
+            if (window.currentCityLeagueDeckCards && window.currentCityLeagueDeckCards.length > 0) {
+                applyCityLeagueFilter();
+            }
+            if (window.currentCurrentMetaDeckCards && window.currentCurrentMetaDeckCards.length > 0) {
+                filterCurrentMetaCards();
+            }
+            if (Array.isArray(pastMetaFilteredCards) && pastMetaFilteredCards.length > 0) {
+                renderPastMetaCards();
+            }
+            if (metaCardData.cityLeague.length > 0) renderMetaCards('cityLeague');
+            if (metaCardData.currentMeta.length > 0) renderMetaCards('currentMeta');
+        }
+
+        function ensureAverageDisplayToggleUi() {
+            if (document.getElementById('avgModeToggleBar')) return;
+
+            const host = document.querySelector('.header') || document.body;
+            if (!host) return;
+
+            const wrap = document.createElement('div');
+            wrap.id = 'avgModeToggleBar';
+            wrap.style.cssText = 'display:flex; gap:8px; justify-content:flex-end; align-items:center; margin-top:12px; flex-wrap:wrap;';
+            wrap.innerHTML = `
+                <span style="font-size:0.82em; font-weight:700; color:#fef3c7; background:rgba(0,0,0,0.22); padding:4px 10px; border-radius:999px;">Average Anzeige</span>
+                <button id="avgModeExactBtn" type="button" class="btn-modern" onclick="setAverageDisplayMode('exact')" style="padding:6px 10px; font-size:0.82em;">Exakt (2,60)</button>
+                <button id="avgModeRecommendedBtn" type="button" class="btn-modern" onclick="setAverageDisplayMode('recommended')" style="padding:6px 10px; font-size:0.82em;">Empfohlen (3)</button>
+            `;
+
+            host.appendChild(wrap);
+            setAverageDisplayMode(averageDisplayMode);
+        }
+
+        function sanitizeDeckDependencies(cardsToAdd) {
+            const list = Array.isArray(cardsToAdd) ? cardsToAdd : [];
+            if (list.length === 0) return list;
+
+            const hasStage2 = list.some(entry => String(entry?.type || entry?.card_type || '').toLowerCase().includes('stage 2'));
+            if (!hasStage2) {
+                return list.filter(entry => normalizeCardName(entry.card_name) !== 'rare candy');
+            }
+
+            const next = list.map(entry => ({ ...entry }));
+            const rareCandy = next.find(entry => normalizeCardName(entry.card_name) === 'rare candy');
+            if (rareCandy && Number.isFinite(rareCandy.addCount)) {
+                rareCandy.addCount = Math.min(rareCandy.addCount, 3);
+            }
+            return next;
+        }
+
+        // ====================================================================
+        // STRICT BASE CARD NAME – Intelligent name normalizer for Combined
+        // Variants.  Preserves gameplay-critical suffixes (ex, V, GX, VMAX,
+        // VSTAR, V-UNION) so that e.g. "Lucario ex" and "Lucario" are NEVER
+        // merged, while different set prints of the same card ARE merged.
+        // ====================================================================
+        function getStrictBaseCardName(rawName) {
+            let name = fixMojibake(String(rawName || '')).trim();
+            if (!name) return '';
+
+            // 1. Remove trailing set/number markers: "Lucario ex (PAL 123)" → "Lucario ex"
+            name = name
+                .replace(/\s*\(([A-Z0-9]{2,6})\s+([A-Z0-9-]{1,8})\)\s*$/i, '')
+                .replace(/\s+([A-Z0-9]{2,6})\s+([A-Z0-9-]{1,8})\s*$/i, '')
+                .trim();
+
+            // 2. Normalize Unicode curly quotes / apostrophes → straight apostrophe
+            name = name.replace(/[\u2018\u2019\u201A\u201B`\u0060]/g, "'");
+
+            // 3. Collapse whitespace
+            name = name.replace(/\s+/g, ' ').trim();
+
+            // 4. Lowercase for comparison, but we keep original casing in
+            //    the returned value so display labels look nice.
+            return name;
+        }
+
+        // ====================================================================
+        // COMBINED VARIANT STATS – Aggregates multiple set prints of the
+        // same logical card into one entry with mathematically correct stats.
+        //
+        // Parameters:
+        //   variants  – array of per-print objects, each MUST have at least:
+        //               { card_name, deck_count, total_count, percentage_in_archetype }
+        //   totalDecksInArchetype – the denominator for share calculation
+        //
+        // Returns an object with:
+        //   combinedShare        – capped at 100 %
+        //   combinedAvgWhenUsed  – capped at legal max copies
+        //   recommendedCount     – integer copy count for auto-builder
+        //   baseName             – the canonical display name (best variant)
+        //   legalMax             – legal max copies for this card
+        // ====================================================================
+        function calculateCombinedVariantStats(variants, totalDecksInArchetype) {
+            if (!Array.isArray(variants) || variants.length === 0) {
+                return { combinedShare: 0, combinedAvgWhenUsed: 0, recommendedCount: 0, baseName: '', legalMax: 4 };
+            }
+            const safeTotalDecks = Math.max(1, totalDecksInArchetype || 1);
+
+            // ------ Determine legal max for this card group ------
+            // Use the first variant's properties plus the base name
+            const representative = variants[0];
+            const baseName = getStrictBaseCardName(representative.card_name || representative.name || '');
+            const legalMax = getLegalMaxCopies(baseName, representative);
+
+            // ------ Step 1: union of decks that used ANY print ------
+            // We don't have per-deck granularity, so we use the maximum
+            // deck_count across all prints as an estimate of the number
+            // of unique decks that used "this card".  This is conservative
+            // and will never exceed the true value.
+            let maxDeckCount = 0;
+            let sumTotalCopies = 0;
+
+            variants.forEach(v => {
+                const dc = parseFloat(String(v.deck_count || v.deck_inclusion_count || 0).replace(',', '.')) || 0;
+                const tc = parseFloat(String(v.total_count || 0).replace(',', '.')) || 0;
+                maxDeckCount = Math.max(maxDeckCount, dc);
+                sumTotalCopies += tc;
+            });
+
+            // ------ Step 2: Combined share = max(deck_count) / totalDecks ------
+            const rawCombinedShare = (maxDeckCount / safeTotalDecks) * 100;
+            const combinedShare = Math.min(100, Math.max(0, rawCombinedShare));
+
+            // ------ Step 3: Average copies when used ------
+            // = total copies across all prints / decks that used any print
+            const rawAvg = maxDeckCount > 0 ? sumTotalCopies / maxDeckCount : 0;
+            const combinedAvgWhenUsed = Math.min(legalMax, Math.max(0, rawAvg));
+
+            // ------ Step 4: Recommended copy count for auto-builder ------
+            const recommendedCount = Math.min(legalMax, Math.max(1, Math.round(combinedAvgWhenUsed)));
+
+            return {
+                combinedShare: parseFloat(combinedShare.toFixed(1)),
+                combinedAvgWhenUsed: parseFloat(combinedAvgWhenUsed.toFixed(2)),
+                recommendedCount,
+                baseName,
+                legalMax
+            };
         }
 
         function safeParseFloat(val, fallback = 0) {
@@ -6712,6 +6926,15 @@ const BASE_PATH = './data/';
             if (isAceSpecCard && deck[deckKey] >= 1) {
                 return false;
             }
+            // Deck-wide Ace Spec limit
+            if (isAceSpecCard && getTotalAceSpecCopiesInDeck(deck) >= 1) {
+                return false;
+            }
+            // Radiant Pokémon limits
+            if (isRadiantPokemon(cardName)) {
+                if (deck[deckKey] >= 1) return false;
+                if (getTotalRadiantCopiesInDeck(deck) >= 1) return false;
+            }
             
             deck[deckKey]++;
             
@@ -6834,6 +7057,24 @@ const BASE_PATH = './data/';
             if (isAceSpecCard && deck[deckKey] >= 1) {
                 alert('Ace Spec cards may only be in deck once!');
                 return;
+            }
+            
+            // DECK-WIDE Ace Spec limit: only 1 Ace Spec card total in entire deck
+            if (isAceSpecCard && getTotalAceSpecCopiesInDeck(deck) >= 1) {
+                alert('Only 1 Ace Spec card allowed per deck! Remove the existing one first.');
+                return;
+            }
+            
+            // Radiant Pokémon: max 1 copy, and only 1 Radiant total in deck
+            if (isRadiantPokemon(cardName)) {
+                if (deck[deckKey] >= 1) {
+                    alert('Radiant Pokémon may only be in deck once!');
+                    return;
+                }
+                if (getTotalRadiantCopiesInDeck(deck) >= 1) {
+                    alert('Only 1 Radiant Pokémon allowed per deck! Remove the existing one first.');
+                    return;
+                }
             }
             
             deck[deckKey]++;
@@ -8393,7 +8634,44 @@ const BASE_PATH = './data/';
                 card.percentage_in_archetype = percentage.toFixed(2).replace('.', ',');
             }
             
-            let deckCards = Object.values(uniqueCards);
+            // ===================================================================
+            // COMBINED VARIANTS: Group by strict base name, merge set prints,
+            // and use mathematically correct recommendedCount.
+            // ===================================================================
+            const variantGroups = {};
+            for (const cardName in uniqueCards) {
+                const baseName = getStrictBaseCardName(cardName);
+                if (!variantGroups[baseName]) variantGroups[baseName] = [];
+                variantGroups[baseName].push(uniqueCards[cardName]);
+            }
+
+            const mergedUniqueCards = {};
+            for (const baseName in variantGroups) {
+                const group = variantGroups[baseName];
+                if (group.length === 1) {
+                    // Single print — keep as-is
+                    mergedUniqueCards[baseName] = group[0];
+                } else {
+                    // Multiple prints — merge via Combined Variant Stats
+                    const stats = calculateCombinedVariantStats(group, resolvedTotalDecks);
+                    // Pick the variant with the highest deck_count as representative
+                    const bestVariant = group.reduce((best, v) =>
+                        (parseFloat(v.deck_count || 0) > parseFloat(best.deck_count || 0)) ? v : best, group[0]);
+                    mergedUniqueCards[baseName] = {
+                        ...bestVariant,
+                        card_name: stats.baseName || bestVariant.card_name,
+                        percentage_in_archetype: stats.combinedShare.toFixed(2).replace('.', ','),
+                        sharePercent: stats.combinedShare,
+                        avgCountWhenUsed: stats.combinedAvgWhenUsed,
+                        _recommendedCount: stats.recommendedCount,
+                        _legalMax: stats.legalMax,
+                        _isMerged: group.length > 1
+                    };
+                    devLog(`[autoComplete][CombinedVariants] Merged ${group.length} prints of "${baseName}" → share=${stats.combinedShare}%, avg=${stats.combinedAvgWhenUsed}, rec=${stats.recommendedCount}`);
+                }
+            }
+            
+            let deckCards = Object.values(mergedUniqueCards);
             devLog('[autoComplete] After aggregation:', deckCards.length, 'unique cards');
             
             // Debug: Log all card types to understand structure
@@ -8450,6 +8728,8 @@ const BASE_PATH = './data/';
             // ===================================================================
             devLog('[autoComplete] Building deck from highest percentage downwards...');
             
+            let radiantAdded = false; // Deck-wide: max 1 Radiant Pokémon total
+            
             // Cards are already sorted by percentage (descending) from Step 2
             for (const card of deckCards) {
                 if (currentTotal >= 60) {
@@ -8468,21 +8748,37 @@ const BASE_PATH = './data/';
                     continue;
                 }
                 
+                // Deck-wide Radiant limit: only 1 Radiant Pokémon total
+                if (isRadiantPokemon(cardName)) {
+                    if (radiantAdded) {
+                        devLog('[autoComplete] Skipping Radiant (deck already has one):', cardName);
+                        continue;
+                    }
+                    radiantAdded = true;
+                }
+                
                 // Get percentage for logging
                 const percentage = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
 
-                // Calculate average copies per deck WHEN USED.
-                const totalCount = parseFloat(card.total_count) || 0;
-                const decksWithCard = parseFloat(card.deck_count || card.deck_inclusion_count) || 0;
-                const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                // Use Combined Variants recommendedCount when available
+                let addCount;
+                if (card._recommendedCount != null) {
+                    addCount = card._recommendedCount;
+                } else {
+                    // Fallback: Calculate average copies per deck WHEN USED.
+                    const totalCount = parseFloat(card.total_count) || 0;
+                    const decksWithCard = parseFloat(card.deck_count || card.deck_inclusion_count) || 0;
+                    const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                    
+                    const avgWhenUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0 ? avgCountFromRow : (decksWithCard > 0 ? (totalCount / decksWithCard) : 1);
+                    
+                    addCount = Math.round(avgWhenUsed);
+                }
                 
-                const avgWhenUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0 ? avgCountFromRow : (decksWithCard > 0 ? (totalCount / decksWithCard) : 1);
-                
-                let addCount = Math.round(avgWhenUsed);
-                
-                // For base energies, no limit. For other cards, max 4
+                // Cap at legal max for this card
+                const legalMax = card._legalMax || getLegalMaxCopies(cardName, card);
                 if (!isBasicEnergy(cardName)) {
-                    addCount = Math.max(1, Math.min(addCount, 4));
+                    addCount = Math.max(1, Math.min(addCount, legalMax));
                 } else {
                     addCount = Math.max(1, addCount);
                 }
@@ -8494,7 +8790,7 @@ const BASE_PATH = './data/';
                     cardsToAdd.push({ ...card, addCount: addCount });
                     addedNames.add(cardName);
                     currentTotal += addCount;
-                    devLog(`[autoComplete] ${addCount}x ${cardName} (${percentage.toFixed(1)}%, avg: ${avgWhenUsed.toFixed(1)}x) - Total: ${currentTotal}/60`);
+                    devLog(`[autoComplete] ${addCount}x ${cardName} (${percentage.toFixed(1)}%, avg: ${(card.avgCountWhenUsed || addCount).toFixed ? (card.avgCountWhenUsed || addCount).toFixed(1) : addCount}x) - Total: ${currentTotal}/60`);
                 }
             }
             
@@ -8697,6 +8993,39 @@ const BASE_PATH = './data/';
             devLog('[autoCompleteConsistency] After aggregation:', deckCards.length, 'unique cards');
             
             // ==========================================
+            // COMBINED VARIANTS: Group by strict base name, merge set prints
+            // ==========================================
+            const variantGroups = {};
+            for (const card of deckCards) {
+                const baseName = getStrictBaseCardName(card.card_name);
+                if (!variantGroups[baseName]) variantGroups[baseName] = [];
+                variantGroups[baseName].push(card);
+            }
+
+            const mergedDeckCards = [];
+            for (const baseName in variantGroups) {
+                const group = variantGroups[baseName];
+                if (group.length === 1) {
+                    mergedDeckCards.push(group[0]);
+                } else {
+                    const stats = calculateCombinedVariantStats(group, resolvedTotalDecks);
+                    const bestVariant = group.reduce((best, v) =>
+                        (parseFloat(v.deck_count || 0) > parseFloat(best.deck_count || 0)) ? v : best, group[0]);
+                    mergedDeckCards.push({
+                        ...bestVariant,
+                        card_name: stats.baseName || bestVariant.card_name,
+                        percentage_in_archetype: stats.combinedShare.toFixed(2).replace('.', ','),
+                        _recommendedCount: stats.recommendedCount,
+                        _legalMax: stats.legalMax,
+                        _isMerged: true
+                    });
+                    devLog(`[autoCompleteConsistency][CombinedVariants] Merged ${group.length} prints of "${baseName}" → share=${stats.combinedShare}%, rec=${stats.recommendedCount}`);
+                }
+            }
+            deckCards = mergedDeckCards;
+            devLog('[autoCompleteConsistency] After Combined Variants merge:', deckCards.length, 'unique cards');
+            
+            // ==========================================
             // 2. COMPUTE PER-CARD STATISTICS
             // ==========================================
             deckCards.forEach(card => {
@@ -8778,6 +9107,8 @@ const BASE_PATH = './data/';
             // Sortiere Karten nach Share (absteigend)
             deckCards.sort((a, b) => b.sharePercent - a.sharePercent);
 
+            let radiantAdded = false; // Deck-wide: max 1 Radiant Pokémon total
+
             // ==========================================
             // 🚨 1. ACE SPEC PRIORITY (Lokal) 🚨
             // ==========================================
@@ -8793,10 +9124,17 @@ const BASE_PATH = './data/';
                 if (currentTotal >= 60) return;
                 if (isAceSpecCard(card)) return; // Ace Spec haben wir schon
                 
+                // Deck-wide Radiant limit
+                if (isRadiantPokemon(card.card_name)) {
+                    if (radiantAdded) return;
+                    radiantAdded = true;
+                }
+                
                 if (card.sharePercent >= 80) {
-                    let addCount = Math.round(card.avgCountWhenUsed);
+                    let addCount = card._recommendedCount != null ? card._recommendedCount : Math.round(card.avgCountWhenUsed);
                     addCount = Math.max(1, addCount); // Core Karten MÜSSEN mindestens 1x rein
-                    if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, 4);
+                    const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
+                    if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, legalMax);
                     pushCard(card, addCount, '[Consistency][Stage1]');
                 }
             });
@@ -8809,12 +9147,17 @@ const BASE_PATH = './data/';
                 if (isAceSpecCard(card)) return;
                 if (consistencyDeck.some(entry => entry.card.card_name === card.card_name)) return; // Schon im Deck?
                 
+                // Deck-wide Radiant limit
+                if (isRadiantPokemon(card.card_name)) {
+                    if (radiantAdded) return;
+                    radiantAdded = true;
+                }
+                
                 if (card.sharePercent >= 30) {
-                    // Nur hinzufügen, wenn der kaufmännische Durchschnitt mindestens 1 ergibt! 
-                    // Verhindert, dass Müllkarten mit 0.2x das Deck füllen
-                    let addCount = Math.round(card.avgCountWhenUsed);
+                    let addCount = card._recommendedCount != null ? card._recommendedCount : Math.round(card.avgCountWhenUsed);
                     if (addCount >= 1) {
-                        if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, 4);
+                        const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
+                        if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, legalMax);
                         pushCard(card, addCount, '[Consistency][Stage2]');
                     }
                 }
@@ -9197,11 +9540,85 @@ const BASE_PATH = './data/';
                     };
                 });
 
+                // ==============================================================
+                // COMBINED VARIANTS – Merge different set prints of the same
+                // logical card so that e.g. "Riolu (OBF 112)" + "Riolu (PAL 113)"
+                // become a single "Riolu" entry with share ≤ 100% and average
+                // capped at the legal maximum.
+                // ==============================================================
+                const variantGroups = {};
+                metaCards.forEach(card => {
+                    const baseName = getStrictBaseCardName(card.card_name);
+                    if (!variantGroups[baseName]) variantGroups[baseName] = [];
+                    variantGroups[baseName].push(card);
+                });
+
+                const mergedMetaCards = [];
+                Object.entries(variantGroups).forEach(([baseName, variants]) => {
+                    if (variants.length <= 1) {
+                        // Single print – keep as-is but still cap values
+                        const card = variants[0];
+                        const legalMax = getLegalMaxCopies(card.card_name, card);
+                        card.metaShare = Math.min(100, card.metaShare);
+                        card.avgCountWhenUsed = Math.min(legalMax, card.avgCountWhenUsed);
+                        card.avgCount = Math.min(legalMax, card.avgCount);
+                        card.recommendedCount = Math.min(legalMax, Math.max(1, Math.round(card.avgCountWhenUsed)));
+                        mergedMetaCards.push(card);
+                        return;
+                    }
+
+                    // Multiple prints → combine using calculateCombinedVariantStats
+                    const combinedVariantInputs = variants.map(v => ({
+                        card_name: v.card_name,
+                        deck_count: v.totalDecksWithCard,
+                        total_count: v.avgCountWhenUsed * v.totalDecksWithCard, // reconstruct from avg
+                        percentage_in_archetype: v.metaShare,
+                        type: v.type,
+                        rarity: v.rarity,
+                        set_code: v.set_code,
+                        set_number: v.set_number,
+                        image_url: v.image_url,
+                        archetypes: v.archetypes
+                    }));
+                    const combined = calculateCombinedVariantStats(combinedVariantInputs, safeTotalDecksInTop10);
+
+                    // Pick the "best" variant for display (highest inclusion)
+                    const bestVariant = variants.reduce((a, b) => (a.totalDecksWithCard >= b.totalDecksWithCard) ? a : b, variants[0]);
+
+                    // Merge all archetype breakdowns
+                    const mergedArchetypes = [];
+                    const seenArch = new Set();
+                    variants.forEach(v => {
+                        (v.archetypes || []).forEach(arch => {
+                            if (!seenArch.has(arch.name.toLowerCase())) {
+                                seenArch.add(arch.name.toLowerCase());
+                                mergedArchetypes.push(arch);
+                            }
+                        });
+                    });
+
+                    mergedMetaCards.push({
+                        card_name: bestVariant.card_name,
+                        set_code: bestVariant.set_code,
+                        set_number: bestVariant.set_number,
+                        type: bestVariant.type,
+                        rarity: bestVariant.rarity,
+                        image_url: bestVariant.image_url,
+                        totalDecksWithCard: Math.round(Math.max(...variants.map(v => v.totalDecksWithCard))),
+                        metaShare: combined.combinedShare,
+                        avgCount: Math.min(combined.legalMax, combined.combinedAvgWhenUsed * (combined.combinedShare / 100)),
+                        avgCountWhenUsed: combined.combinedAvgWhenUsed,
+                        recommendedCount: combined.recommendedCount,
+                        archetypes: mergedArchetypes,
+                        _combinedVariants: variants.length // marker for debugging
+                    });
+                });
+
                 // Meta Card Analysis should always show the latest low-rarity print.
                 // Force 'min' resolution here so it is independent from current UI rarity settings.
                 const previousGlobalRarityPreference = globalRarityPreference;
                 globalRarityPreference = 'min';
-                metaCards.forEach(card => {
+                mergedMetaCards.forEach(card => {
                     const preferredVersion = getPreferredVersionForCard(card.card_name, card.set_code, card.set_number);
                     if (preferredVersion) {
                         card.set_code = preferredVersion.set;
@@ -9217,7 +9634,7 @@ const BASE_PATH = './data/';
                 });
                 globalRarityPreference = previousGlobalRarityPreference;
                 
-                metaCardData[source] = metaCards;
+                metaCardData[source] = mergedMetaCards;
                 
                 renderMetaCards(source);
                 

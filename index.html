@@ -1430,7 +1430,7 @@
                 <div class="container">
                     <div class="header">
                         <h1>📖 How to Use This Website</h1>
-                        <p>Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v36 (March 2026)</p>
+                        <p>Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v37 (March 2026)</p>
                     </div>
                     
                     <div style="max-width: 1200px; margin: 0 auto; padding: 30px; background: white; border-radius: 10px;">
@@ -1443,7 +1443,7 @@
                                 Access Japanese City League results, international tournament data, and detailed card statistics to build competitive decks — and test them directly in your browser.
                             </p>
                             <div style="background: #fef9e7; border-left: 4px solid #f39c12; padding: 12px 16px; border-radius: 6px; margin-top: 12px;">
-                                <strong>🆕 New this week:</strong> Playtester now loads directly from <strong>My Decks</strong> via the ⚔️ Playtest button. Stepper controls in the playtester. Auto-Complete deck algorithm fully rewritten (v18). All broken ★ symbols fixed across every tab.
+                                <strong>🆕 New in v37:</strong> <strong>Combined Variants</strong> — cards from different sets (e.g. Riolu MEG 76 = Riolu ASC 112) are automatically combined in statistics, Auto-Complete, and the Deck Builder. <strong>Energy Sort Fix</strong> — Special Energy now always sorts before Basic Energy across all views. <strong>Data Accuracy</strong> — fixed proportional scaling for card counts, GROUP archetype deck totals now correctly sum all sub-archetypes.
                             </div>
                         </section>
                         
@@ -1505,8 +1505,22 @@
                                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #e67e22;">
                                     <h3 style="color: #e67e22; margin-top: 0;">🏆 Past Meta</h3>
                                     <p style="line-height: 1.7;"><strong>Purpose:</strong> Analyze historical tournament winners and past format decklists</p>
-                                    <p style="line-height: 1.7;"><strong>Features:</strong> Format filter, tournament filter, deck analysis just like other tabs</p>
+                                    <p style="line-height: 1.7;"><strong>Features:</strong> Format filter (SVI-ASC, SVI-PFL, BRS-PRE, etc.), tournament filter, deck analysis with all Deck Builder features</p>
                                     <p style="line-height: 1.7;"><strong>Best for:</strong> Learning from winning decks, understanding format evolution</p>
+                                </div>
+                                
+                                <!-- Proxy Printer Tab -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #c0392b;">
+                                    <h3 style="color: #c0392b; margin-top: 0;">🖨️ Proxy Printer</h3>
+                                    <p style="line-height: 1.7;"><strong>Purpose:</strong> Create printable proxy cards for playtesting physical decks</p>
+                                    <p style="line-height: 1.7;"><strong>Features:</strong></p>
+                                    <ul style="line-height: 1.7;">
+                                        <li>📋 <strong>Import Decklist:</strong> Paste a Pokémon TCG Live export to queue all cards</li>
+                                        <li>🎯 <strong>Add Single Card:</strong> Search by name, set, and number</li>
+                                        <li>➕ <strong>From Deck Tabs:</strong> One-click add from City League, Current Meta, or Past Meta decks</li>
+                                        <li>🖨️ <strong>Print Queue:</strong> All cards rendered in a print-friendly layout</li>
+                                        <li>🔢 <strong>Counter:</strong> Unique cards and total copies displayed</li>
+                                    </ul>
                                 </div>
                                 
                                 <!-- Cards Tab -->
@@ -1567,7 +1581,7 @@
                                 <!-- How to Use Tab -->
                                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #2ecc71;">
                                     <h3 style="color: #2ecc71; margin-top: 0;">📖 How to Use</h3>
-                                    <p style="line-height: 1.7;"><strong>This guide!</strong> Complete documentation for all features — updated to v36</p>
+                                    <p style="line-height: 1.7;"><strong>This guide!</strong> Complete documentation for all features — updated to v37</p>
                                 </div>
                             </div>
                         </section>
@@ -1649,6 +1663,7 @@
                                 <ul style="line-height: 1.8; margin: 0;">
                                     <li><strong>5% meta-share cutoff:</strong> Cards appearing in &lt;5% of decks are ignored (no false positives)</li>
                                     <li><strong>Smart rounding:</strong> Uses <em>avgCountWhenUsed</em> (average among decks that actually include the card, not all decks) — so e.g. 3.07× → rounds to 3, not 4</li>
+                                    <li><strong>Combined Variants (NEW):</strong> Cards from different sets (e.g. Riolu MEG 76 = Riolu ASC 112) are automatically combined — usage% reflects the true card popularity regardless of which print was used</li>
                                     <li><strong>Rare Candy guarantee:</strong> Stage 2 evolution lines always include Rare Candy</li>
                                     <li><strong>Ace Spec slot:</strong> 1 Ace Spec added automatically based on data</li>
                                     <li><strong>Fallback fill:</strong> Remaining slots filled with highest-priority cards to always reach 60</li>
@@ -1805,6 +1820,16 @@
                             <div style="margin-bottom: 15px;">
                                 <h4 style="color: #555; margin-bottom: 5px;">Q: The Playtester loaded wrong card arts from My Decks — is that fixed?</h4>
                                 <p style="margin-left: 20px; line-height: 1.7;">A: Yes, fixed in v35. The new direct lookup bypasses the string roundtrip, so cards with Trainer Gallery numbers (TG01), Gallery Gold (GG01), full arts, and promos all resolve to the exact saved print.</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: What are "Combined Variants"?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: New in v37. When the same card is printed in multiple sets (e.g. Riolu in MEG and ASC), the website automatically combines their statistics. Usage%, average count, and deck inclusion are calculated across all prints. The Deck Builder, Auto-Complete, and Card Overview all respect this — so you see the true popularity of a card regardless of which set version players used.</p>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <h4 style="color: #555; margin-bottom: 5px;">Q: Why do Special Energies appear before Basic Energies?</h4>
+                                <p style="margin-left: 20px; line-height: 1.7;">A: This is the correct sort order (fixed in v37). Special Energies (Jet Energy, Double Turbo, etc.) sort before Basic Energies (Fire, Water, etc.) across all views — matching standard deck list conventions.</p>
                             </div>
                             
                             <div style="margin-bottom: 15px;">

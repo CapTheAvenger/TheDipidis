@@ -501,6 +501,52 @@ const BASE_PATH = './data/';
             const safeArchetype = String(archetype || '').trim();
             const normalizedRegion = String(region || '').trim();
 
+            const applyArchetypeSelectionWhenReady = (selectId, onApplied) => {
+                let attempts = 0;
+                const maxAttempts = 60;
+
+                const applySelection = () => {
+                    attempts += 1;
+                    const select = document.getElementById(selectId);
+                    if (!select) {
+                        if (attempts < maxAttempts) {
+                            setTimeout(applySelection, 100);
+                        }
+                        return;
+                    }
+
+                    const options = Array.from(select.options || []);
+                    if (options.length <= 1) {
+                        if (attempts < maxAttempts) {
+                            setTimeout(applySelection, 100);
+                        }
+                        return;
+                    }
+
+                    const exactMatch = options.find(opt => opt.value === safeArchetype);
+                    const caseInsensitiveMatch = exactMatch || options.find(opt =>
+                        String(opt.value || '').toLowerCase() === safeArchetype.toLowerCase()
+                    );
+
+                    if (caseInsensitiveMatch) {
+                        select.value = caseInsensitiveMatch.value;
+                    } else {
+                        const allOption = options.find(opt => opt.value === 'all');
+                        if (allOption) {
+                            select.value = 'all';
+                        }
+                    }
+
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+
+                    if (typeof onApplied === 'function') {
+                        onApplied(caseInsensitiveMatch ? caseInsensitiveMatch.value : null);
+                    }
+                };
+
+                setTimeout(applySelection, 0);
+            };
+
             const triggerTabSwitch = (tabId) => {
                 if (typeof switchTabAndUpdateMenu === 'function') {
                     switchTabAndUpdateMenu(tabId);
@@ -511,22 +557,14 @@ const BASE_PATH = './data/';
 
             if (normalizedRegion === 'cityLeague') {
                 triggerTabSwitch('city-league-analysis');
-
-                const select = document.getElementById('cityLeagueArchetypeSelect');
-                if (select) {
-                    const optionExists = Array.from(select.options).some(opt => opt.value === safeArchetype);
-                    select.value = optionExists ? safeArchetype : 'all';
-                    select.dispatchEvent(new Event('change'));
-                }
+                applyArchetypeSelectionWhenReady('cityLeagueDeckSelect', function(selectedValue) {
+                    window.currentCityLeagueArchetype = selectedValue || null;
+                });
             } else if (normalizedRegion === 'currentMeta') {
                 triggerTabSwitch('current-analysis');
-
-                const select = document.getElementById('currentMetaArchetypeSelect');
-                if (select) {
-                    const optionExists = Array.from(select.options).some(opt => opt.value === safeArchetype);
-                    select.value = optionExists ? safeArchetype : 'all';
-                    select.dispatchEvent(new Event('change'));
-                }
+                applyArchetypeSelectionWhenReady('currentMetaDeckSelect', function(selectedValue) {
+                    window.currentCurrentMetaArchetype = selectedValue || null;
+                });
             }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -690,22 +728,59 @@ const BASE_PATH = './data/';
             return rows;
         }
 
-        async function loadCSV(filename) {
+        const csvMemoryCache = new Map();
+        const csvInFlight = new Map();
+
+        async function loadCSV(filename, options = {}) {
             try {
-                const timestamp = new Date().getTime();
-                const response = await fetch(`${BASE_PATH}${filename}?t=${timestamp}`);
-                if (response.ok) {
+                const forceRefresh = Boolean(options && options.forceRefresh);
+                const cacheKey = String(filename || '').toLowerCase();
+
+                if (!forceRefresh && csvMemoryCache.has(cacheKey)) {
+                    return csvMemoryCache.get(cacheKey);
+                }
+
+                if (!forceRefresh && csvInFlight.has(cacheKey)) {
+                    return await csvInFlight.get(cacheKey);
+                }
+
+                const requestUrl = forceRefresh
+                    ? `${BASE_PATH}${filename}?t=${Date.now()}`
+                    : `${BASE_PATH}${filename}`;
+
+                const loadPromise = (async () => {
+                    const response = await fetch(requestUrl);
+                    if (!response.ok) {
+                        return null;
+                    }
+
                     const text = await response.text();
                     const parsed = parseCSV(text);
                     const fileLower = String(filename || '').toLowerCase();
                     if (fileLower.includes('current_meta')) {
                         healCurrentMetaCardRows(parsed);
                     }
+
+                    if (!forceRefresh) {
+                        csvMemoryCache.set(cacheKey, parsed);
+                    }
+
                     return parsed;
+                })();
+
+                if (!forceRefresh) {
+                    csvInFlight.set(cacheKey, loadPromise);
                 }
-                return null;
+
+                const result = await loadPromise;
+                if (!forceRefresh) {
+                    csvInFlight.delete(cacheKey);
+                }
+                return result;
             } catch (e) {
                 console.error(`Error loading ${filename}:`, e);
+                const cacheKey = String(filename || '').toLowerCase();
+                csvInFlight.delete(cacheKey);
                 return null;
             }
         }

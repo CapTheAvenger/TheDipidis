@@ -588,6 +588,16 @@ const BASE_PATH = './data/';
             showProxyToast(`Added ${addedCopies} deck cards to proxy queue`);
         }
 
+        function sendCurrentDeckToProxyPrinter(source) {
+            addCurrentDeckToProxy(source);
+
+            if (typeof switchTabAndUpdateMenu === 'function') {
+                switchTabAndUpdateMenu('proxy');
+            } else if (typeof switchTab === 'function') {
+                switchTab('proxy');
+            }
+        }
+
         function importDecklistToProxy() {
             const input = document.getElementById('proxyDecklistInput');
             if (!input) return;
@@ -7145,49 +7155,72 @@ const BASE_PATH = './data/';
                     .replace(/\s+[A-Z0-9]{2,4}\s+[A-Z0-9]+\s*$/i, '')
             ).replace(/[^a-z0-9]/g, '');
             const calculateCardStatsMap = (cardsForStats) => {
-                const statsMap = new Map();
+                const aggregateMap = new Map();
 
                 cardsForStats.forEach(row => {
                     const rowName = row.card_name || row.full_card_name || row.name || '';
-                    const cardName = rowName;
                     const key = normalizeOverlayName(rowName);
                     if (!key) return;
 
-                    const shareRaw = row.percentage_in_archetype ?? row.share ?? row.share_percent ?? 0;
-                    const parsedShare = parseFloat(String(shareRaw).replace(',', '.'));
-
-                    const totalDecksRaw = parseFloat(String(row.total_decks_in_archetype || row.decklist_count || row.total_decks || 0).replace(',', '.'));
+                    const shareRaw = safeParseFloat(row.percentage_in_archetype ?? row.share ?? row.share_percent ?? 0);
+                    const totalDecksRaw = safeParseFloat(row.total_decks_in_archetype || row.decklist_count || row.total_decks || 0);
                     const totalDecks = Number.isFinite(totalDecksRaw) && totalDecksRaw > 0 ? Math.max(1, Math.floor(totalDecksRaw)) : 1;
-                    const totalCountRaw = parseFloat(String(row.total_count || row.card_count || 0).replace(',', '.'));
-                    const deckCountRaw = parseFloat(String(row.deck_count || row.deck_inclusion_count || 0).replace(',', '.'));
-                    const deckInclusionRaw = parseFloat(String(row.deck_count || row.deck_inclusion_count || 0).replace(',', '.'));
-                    const avgRaw = parseFloat(String(row.avg_count || row.average_count || row.average_count_overall || 0).replace(',', '.'));
+                    const totalCountRaw = safeParseFloat(row.total_count || row.card_count || 0);
+                    const deckCountRaw = safeParseFloat(row.deck_count || row.deck_inclusion_count || 0);
+                    const avgWhenUsedRaw = safeParseFloat(row.avg_count || row.average_count || '', NaN);
+                    const avgOverallRaw = safeParseFloat(row.average_count_overall || '', NaN);
+                    const inferredDeckCount = deckCountRaw > 0
+                        ? deckCountRaw
+                        : (shareRaw > 0 && totalDecks > 0 ? (shareRaw / 100) * totalDecks : 0);
+                    const inferredTotalCount = totalCountRaw > 0
+                        ? totalCountRaw
+                        : (Number.isFinite(avgWhenUsedRaw) && avgWhenUsedRaw > 0 && inferredDeckCount > 0
+                            ? avgWhenUsedRaw * inferredDeckCount
+                            : (Number.isFinite(avgOverallRaw) && avgOverallRaw > 0 && totalDecks > 0
+                                ? avgOverallRaw * totalDecks
+                                : 0));
 
-                    let share = Number.isFinite(parsedShare) ? parsedShare : 0;
-                    if (share === 0 && totalDecks > 0 && Number.isFinite(deckCountRaw) && deckCountRaw > 0) {
-                        share = (deckCountRaw / totalDecks) * 100;
+                    const prev = aggregateMap.get(key) || {
+                        cardName: rowName,
+                        totalDecks: 0,
+                        totalCount: 0,
+                        deckCount: 0,
+                        fallbackShare: 0,
+                        fallbackAvg: 0
+                    };
+
+                    prev.cardName = prev.cardName || rowName;
+                    prev.totalDecks = Math.max(prev.totalDecks, totalDecks);
+                    prev.totalCount += Math.max(0, inferredTotalCount);
+                    prev.deckCount += Math.max(0, inferredDeckCount);
+                    prev.fallbackShare = Math.max(prev.fallbackShare, Math.max(0, shareRaw));
+                    if (Number.isFinite(avgWhenUsedRaw) && avgWhenUsedRaw > 0) {
+                        prev.fallbackAvg = Math.max(prev.fallbackAvg, avgWhenUsedRaw);
+                    } else if (Number.isFinite(avgOverallRaw) && avgOverallRaw > 0) {
+                        prev.fallbackAvg = Math.max(prev.fallbackAvg, avgOverallRaw);
                     }
-                    if (share > 100) {
-                        console.warn('Unplausibler Share fuer Karte:', cardName);
-                        share = 100;
-                    }
-                    share = Math.max(0, share);
 
-                    let avgCount = Number.isFinite(avgRaw) && avgRaw > 0 ? avgRaw : 0;
-                        if (avgCount === 0 && Number.isFinite(totalCountRaw) && totalCountRaw > 0) {
-                            // Prefer when-used average (totalCount / deckInclusion) over overall average
-                            if (Number.isFinite(deckInclusionRaw) && deckInclusionRaw > 0) {
-                                avgCount = totalCountRaw / deckInclusionRaw;
-                            } else if (totalDecks > 0) {
-                                avgCount = totalCountRaw / totalDecks;
-                            }
-                        }
+                    aggregateMap.set(key, prev);
+                });
 
-                    const prev = statsMap.get(key) || { share: 0, avgCount: 0 };
-                    statsMap.set(key, {
-                        share: Math.max(prev.share, share),
-                        avgCount: Math.max(prev.avgCount, avgCount)
-                    });
+                const statsMap = new Map();
+                aggregateMap.forEach((entry, key) => {
+                    const legalMaxCopies = getLegalMaxCopies(entry.cardName || '', { card_name: entry.cardName || '' });
+                    const totalDecks = Math.max(1, entry.totalDecks || 1);
+                    const combinedDeckCount = Math.min(totalDecks, Math.max(0, entry.deckCount || 0));
+                    const cappedTotalCount = Math.min(
+                        Math.max(0, entry.totalCount || 0),
+                        combinedDeckCount * legalMaxCopies
+                    );
+
+                    const share = combinedDeckCount > 0
+                        ? Math.min(100, (combinedDeckCount / totalDecks) * 100)
+                        : Math.min(100, Math.max(0, entry.fallbackShare || 0));
+                    const avgCount = combinedDeckCount > 0
+                        ? Math.min(legalMaxCopies, cappedTotalCount / combinedDeckCount)
+                        : Math.min(legalMaxCopies, Math.max(0, entry.fallbackAvg || 0));
+
+                    statsMap.set(key, { share, avgCount });
                 });
 
                 return statsMap;

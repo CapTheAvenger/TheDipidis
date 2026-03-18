@@ -640,6 +640,7 @@
                                     <button class="btn-modern success" onclick="saveCurrentDeckToProfile('cityLeague')">💾 Save</button>
                                     <button class="btn-modern" onclick="openDeckCompare('cityLeague')">🔄 Compare</button>
                                     <button class="btn-modern" onclick="copyDeck('cityLeague')">📋 Copy</button>
+                                    <button class="btn-modern" onclick="sendCurrentDeckToProxyPrinter('cityLeague')" title="Add complete deck to proxy queue and open Proxy Printer">🖨️ Deck → Proxy</button>
                                     <button class="btn-modern" onclick="shareDeck('cityLeague')">🔗 Share</button>
                                     <button class="btn-modern" onclick="importFromPTCGL('cityLeague')" title="Import from Pokémon TCG Live">📥 PTCGL</button>
                                     <button class="btn-modern" onclick="exportToPTCGL('cityLeague')" title="Export to Pokémon TCG Live">📤 PTCGL</button>
@@ -917,6 +918,7 @@
                                     <button class="btn-modern success" onclick="saveCurrentDeckToProfile('currentMeta')">💾 Save</button>
                                     <button class="btn-modern" onclick="openDeckCompare('currentMeta')">🔄 Compare</button>
                                     <button class="btn-modern" onclick="copyDeck('currentMeta')">📋 Copy</button>
+                                    <button class="btn-modern" onclick="sendCurrentDeckToProxyPrinter('currentMeta')" title="Add complete deck to proxy queue and open Proxy Printer">🖨️ Deck → Proxy</button>
                                     <button class="btn-modern" onclick="shareDeck('currentMeta')">🔗 Share</button>
                                     <button class="btn-modern" onclick="importFromPTCGL('currentMeta')" title="Import from Pokémon TCG Live">📥 PTCGL</button>
                                     <button class="btn-modern" onclick="exportToPTCGL('currentMeta')" title="Export to Pokémon TCG Live">📤 PTCGL</button>
@@ -1131,6 +1133,7 @@
                                     <button class="btn-modern success" onclick="saveCurrentDeckToProfile('pastMeta')">💾 Save</button>
                                     <button class="btn-modern" onclick="openDeckCompare('pastMeta')">🔄 Compare</button>
                                     <button class="btn-modern" onclick="copyDeck('pastMeta')">📋 Copy</button>
+                                    <button class="btn-modern" onclick="sendCurrentDeckToProxyPrinter('pastMeta')" title="Add complete deck to proxy queue and open Proxy Printer">🖨️ Deck → Proxy</button>
                                     <button class="btn-modern" onclick="shareDeck('pastMeta')">🔗 Share</button>
                                     <button class="btn-modern" onclick="importFromPTCGL('pastMeta')" title="Import from Pokémon TCG Live">📥 PTCGL</button>
                                     <button class="btn-modern" onclick="exportToPTCGL('pastMeta')" title="Export to Pokémon TCG Live">📤 PTCGL</button>
@@ -1348,11 +1351,12 @@
                         <div style="border:1px solid #dee2e6; border-radius:10px; padding:14px;">
                             <h3 style="margin:0 0 10px 0; color:#2c3e50;">🎯 Add Single Card</h3>
                             <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 80px; gap:8px;">
-                                <input id="proxyManualName" type="text" placeholder="Card name" style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
+                                <input id="proxyManualName" type="text" placeholder="Card name (search...)" autocomplete="off" list="proxyManualNameSuggestions" style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
                                 <input id="proxyManualSet" type="text" placeholder="Set" style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
                                 <input id="proxyManualNumber" type="text" placeholder="No." style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
                                 <input id="proxyManualCount" type="number" min="1" value="1" style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
                             </div>
+                            <datalist id="proxyManualNameSuggestions"></datalist>
                             <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
                                 <button class="btn-modern" onclick="addManualProxyCard()" style="background:#e74c3c; border-color:#c0392b; color:white;">Add Card</button>
                             </div>
@@ -2498,7 +2502,7 @@
         </div>
         <div style="flex:1;overflow-y:auto;padding:10px 14px;">
             <div id="ptZoomBigImgWrap" style="text-align:center;margin-bottom:12px;">
-                <img id="ptZoomBigImg" src="" alt="" style="max-width:100%;max-height:420px;border-radius:10px;border:2px solid #3B4CCA;display:none;cursor:pointer;" onerror="this.style.display='none'" onload="this.style.display='block'" onclick="ptViewCard(this.src,document.getElementById('ptZoomBigName').textContent)" title="Click for fullscreen">
+                <img id="ptZoomBigImg" src="" alt="" loading="lazy" style="max-width:100%;max-height:420px;border-radius:10px;border:2px solid #3B4CCA;display:none;cursor:pointer;" onerror="this.style.display='none'" onload="this.style.display='block'" onclick="ptViewCard(this.src,document.getElementById('ptZoomBigName').textContent)" title="Click for fullscreen">
                 <div id="ptZoomBigName" style="color:#FFCB05;font-size:12px;font-weight:700;margin-top:6px;"></div>
             </div>
             <div id="ptZoomPanelGrid" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;"></div>
@@ -2527,7 +2531,7 @@
 
     <div id="ptCardViewer" style="display:none;position:fixed;inset:0;z-index:22000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;cursor:pointer;" onclick="this.style.display='none'" >
         <div onclick="event.stopPropagation()" style="text-align:center;">
-            <img id="ptCardViewerImg" src="" style="max-width:min(95vw,420px);max-height:min(90vh,600px);border-radius:10px;display:block;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.9);">
+            <img id="ptCardViewerImg" src="" loading="lazy" style="max-width:min(95vw,420px);max-height:min(90vh,600px);border-radius:10px;display:block;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.9);">
             <div id="ptCardViewerName" style="color:#fff;margin-top:10px;font-weight:700;font-size:14px;"></div>
             <div style="color:#888;font-size:11px;margin-top:4px;">Klick irgendwo zum Schließen</div>
         </div>
@@ -2694,8 +2698,5 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="js/app.js?v=20260318-v68"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
-    <script src="js/playtester.js?v=20260314-v62"></script>
-    <script src="js/playtester-mobile.js?v=20260315-v1"></script>
-    <script src="js/firebase-multiplayer.js?v=20260315-v1"></script>
 </body>
 </html>

@@ -14656,25 +14656,14 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            // Recalculate aggregated values based on filtered data
-            // Note: CSV data is already aggregated per meta (Meta Live / Meta Play!)
-            // So the filtered data already has correct values for that meta source
-            // We just need to ensure the percentage is correct relative to the filtered archetype total
-            
-            // Calculate total unique decks in archetype from filtered data
-            // Use card_identifier (SET NUM) to identify unique card entries
-            const uniqueCardVersions = new Set();
-            let totalDecksInArchetype = 0;
-            
-            // Find a card with max total_decks_in_archetype value to use as archetype total
-            deckCards.forEach(row => {
-                const deckCount = parseInt(row.total_decks_in_archetype || 0);
-                if (deckCount > totalDecksInArchetype) {
-                    totalDecksInArchetype = deckCount;
-                }
-            });
-            
-            // Deduplicate
+            // Current Meta currently falls back to tournament_cards_data_cards.csv when
+            // current_meta_card_data.csv is missing. In that mode, rows are per tournament
+            // and per print, so we must aggregate stats before choosing a display print.
+            if (deckCards.length > 0) {
+                deckCards = aggregateCardStatsByDate(deckCards);
+            }
+
+            // Deduplicate only after statistics have been merged across tournaments/prints.
             deckCards = deduplicateCards(deckCards);
             
             window.currentCurrentMetaDeckCards = deckCards;

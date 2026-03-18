@@ -2383,39 +2383,51 @@ const BASE_PATH = './data/';
             if (!Array.isArray(variants) || variants.length === 0) {
                 return { combinedShare: 0, combinedAvgWhenUsed: 0, recommendedCount: 0, baseName: '', legalMax: 4 };
             }
-            const safeTotalDecks = Math.max(1, totalDecksInArchetype || 1);
 
             // ------ Determine legal max for this card group ------
-            // Use the first variant's properties plus the base name
             const representative = variants[0];
             const baseName = getStrictBaseCardName(representative.card_name || representative.name || '');
             const legalMax = getLegalMaxCopies(baseName, representative);
 
-            // ------ Step 1: union of decks that used ANY print ------
-            // We don't have per-deck granularity, so we use the maximum
-            // deck_count across all prints as an estimate of the number
-            // of unique decks that used "this card".  This is conservative
-            // and will never exceed the true value.
+            // ------ Step 1: Robust extraction from all variant rows ------
+            let totalCopiesInAllDecks = 0;
+            let sumOfDecksPlayed = 0;
             let maxDeckCount = 0;
-            let sumTotalCopies = 0;
 
             variants.forEach(v => {
-                const dc = parseFloat(String(v.deck_count || v.deck_inclusion_count || 0).replace(',', '.')) || 0;
-                const tc = parseFloat(String(v.total_count || 0).replace(',', '.')) || 0;
-                maxDeckCount = Math.max(maxDeckCount, dc);
-                sumTotalCopies += tc;
+                // Robust CSV column name handling
+                let deckCount = parseFloat(String(v.deck_count || v.deckCount || v.deck_inclusion_count || 0).replace(',', '.')) || 0;
+                let totalCount = parseFloat(String(v.total_count || v.totalCount || v.total_copies || 0).replace(',', '.')) || 0;
+                const avgWhenUsed = parseFloat(String(v.avgCountWhenUsed || v.average_count || v.avg_count || 0).replace(',', '.')) || 0;
+
+                // Fallback: reconstruct totalCount from average if missing
+                if (totalCount === 0 && avgWhenUsed > 0 && deckCount > 0) {
+                    totalCount = avgWhenUsed * deckCount;
+                }
+
+                totalCopiesInAllDecks += totalCount;
+                sumOfDecksPlayed += deckCount;
+                maxDeckCount = Math.max(maxDeckCount, deckCount);
             });
 
-            // ------ Step 2: Combined share = max(deck_count) / totalDecks ------
-            const rawCombinedShare = (maxDeckCount / safeTotalDecks) * 100;
+            // ------ Step 2: Safe denominator ------
+            // CRITICAL: If the passed denominator (totalDecksInArchetype) is
+            // smaller than the observed deck counts (format-filter mismatch),
+            // use the larger value to prevent inflated averages.
+            const safeTotalDecks = Math.max(1, totalDecksInArchetype || 1, sumOfDecksPlayed);
+
+            // For Combined Variants: use max(deck_count) as union estimate
+            const estimatedUniqueDecks = Math.min(safeTotalDecks, maxDeckCount);
+
+            // ------ Step 3: Combined share ------
+            const rawCombinedShare = (estimatedUniqueDecks / safeTotalDecks) * 100;
             const combinedShare = Math.min(100, Math.max(0, rawCombinedShare));
 
-            // ------ Step 3: Average copies when used ------
-            // = total copies across all prints / decks that used any print
-            const rawAvg = maxDeckCount > 0 ? sumTotalCopies / maxDeckCount : 0;
+            // ------ Step 4: Average copies when used ------
+            const rawAvg = estimatedUniqueDecks > 0 ? totalCopiesInAllDecks / estimatedUniqueDecks : 0;
             const combinedAvgWhenUsed = Math.min(legalMax, Math.max(0, rawAvg));
 
-            // ------ Step 4: Recommended copy count for auto-builder ------
+            // ------ Step 5: Recommended copy count for auto-builder ------
             const recommendedCount = Math.min(legalMax, Math.max(1, Math.round(combinedAvgWhenUsed)));
 
             return {
@@ -9487,6 +9499,18 @@ const BASE_PATH = './data/';
                             : 0;
 
                         let totalCopiesForArchetype = Math.max(0, archData.totalCopies || 0);
+
+                        // FIX 1: When deck count was capped (multi-tournament rows
+                        // accumulated more than the archetype's known deck count from
+                        // comparison data), proportionally scale down totalCopies.
+                        // Without this, global card copies get divided by a capped
+                        // (format-filtered) deck count, inflating averages to 4x.
+                        const rawEstimatedDecks = Math.max(0, archData.estimatedDecksWithCard || 0);
+                        if (totalCopiesForArchetype > 0 && rawEstimatedDecks > 0 && estimatedDecks < rawEstimatedDecks) {
+                            const scaleFactor = estimatedDecks / rawEstimatedDecks;
+                            totalCopiesForArchetype = totalCopiesForArchetype * scaleFactor;
+                        }
+
                         if (totalCopiesForArchetype <= 0 && estimatedDecks > 0 && fallbackAverageCopiesWhenUsed > 0) {
                             totalCopiesForArchetype = estimatedDecks * fallbackAverageCopiesWhenUsed;
                         }

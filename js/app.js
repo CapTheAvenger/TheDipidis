@@ -5115,16 +5115,31 @@ const BASE_PATH = './data/';
                 return 'global';
             };
             
-            // Calculate total decks across all tournaments
-            // For each unique tournament date, get the total_decks_in_archetype value
-            // CRITICAL FIX: Only set if not already present (take first occurrence)
-            const tournamentDecksMap = new Map();
+            // Calculate total decks across all tournaments.
+            // For GROUP selections (multiple sub-archetypes), we must SUM
+            // deck counts across different archetypes within each tournament,
+            // while avoiding double-counting within the same archetype.
+            // E.g. Mega Lucario Hariyama (608) + Solrock (196) = 804 in one tournament.
+            const tournamentArchetypeDecksMap = new Map();
             filteredCards.forEach(row => {
                 const tournamentKey = getAggregationBucketKey(row);
+                const archetype = String(row.archetype || '').trim();
                 const decksInTournament = parseInt(row.total_decks_in_archetype_in_period || row.total_decks_in_archetype || 0, 10) || 0;
-                if (!tournamentDecksMap.has(tournamentKey)) {
-                    tournamentDecksMap.set(tournamentKey, decksInTournament);
+                if (!tournamentArchetypeDecksMap.has(tournamentKey)) {
+                    tournamentArchetypeDecksMap.set(tournamentKey, new Map());
                 }
+                const archetypeMap = tournamentArchetypeDecksMap.get(tournamentKey);
+                // Take max per archetype per tournament (avoid double-counting from multiple card rows)
+                if (!archetypeMap.has(archetype) || archetypeMap.get(archetype) < decksInTournament) {
+                    archetypeMap.set(archetype, decksInTournament);
+                }
+            });
+            // Sum across archetypes within each tournament
+            const tournamentDecksMap = new Map();
+            tournamentArchetypeDecksMap.forEach((archetypeMap, tournamentKey) => {
+                let total = 0;
+                archetypeMap.forEach(count => { total += count; });
+                tournamentDecksMap.set(tournamentKey, total);
             });
             
             // Sum up decks across all tournaments.
@@ -5158,7 +5173,6 @@ const BASE_PATH = './data/';
                         maxCountValues: [],
                         deckCounts: 0,
                         tournamentsWithCard: new Set(),
-                        tournamentDeckCountsWithCard: new Map(),
                         deckCountByTournament: new Map()
                     });
                 } else {
@@ -5187,9 +5201,6 @@ const BASE_PATH = './data/';
                 );
                 
                 cardData.tournamentsWithCard.add(tournamentKey);
-                // Track deck count for each tournament where this card appeared
-                const decksInTournament = parseInt(row.total_decks_in_archetype_in_period || row.total_decks_in_archetype || 0, 10) || 0;
-                cardData.tournamentDeckCountsWithCard.set(tournamentKey, decksInTournament);
             });
             
             // Create aggregated result
@@ -5212,9 +5223,10 @@ const BASE_PATH = './data/';
                 }
 
                 // Recalculate deckCounts per tournament with cap (prevents split-print double counting).
+                // Use the corrected tournamentDecksMap which sums across archetypes for GROUP selections.
                 let deckCounts = 0;
                 data.deckCountByTournament.forEach((sumDeckCount, tournamentKey) => {
-                    const decksInTournament = data.tournamentDeckCountsWithCard.get(tournamentKey) || 0;
+                    const decksInTournament = tournamentDecksMap.get(tournamentKey) || 0;
                     const bounded = decksInTournament > 0 ? Math.min(sumDeckCount, decksInTournament) : sumDeckCount;
                     deckCounts += bounded;
                 });

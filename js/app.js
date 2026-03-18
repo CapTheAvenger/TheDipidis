@@ -1,5 +1,12 @@
 const BASE_PATH = './data/';
-        
+
+        // ============================================================
+        // DEV LOGGER — set DEV_MODE = true locally for verbose logs
+        // ============================================================
+        const DEV_MODE = false;
+        const devLog = (...args) => DEV_MODE && console.log(...args);
+        const devWarn = (...args) => DEV_MODE && console.warn(...args);
+
         // ============================================================
         // GLOBAL DECK SORT HELPERS (Official Pokémon TCG Sort Order)
         // ============================================================
@@ -56,6 +63,9 @@ const BASE_PATH = './data/';
         window.proxyQueue = window.proxyQueue || [];
 
         const PROXY_QUEUE_STORAGE_KEY = 'proxyQueueV1';
+        const PROXY_MANUAL_SUGGESTIONS_ID = 'proxyManualNameSuggestions';
+        let proxyManualSearchIndex = [];
+        let proxyManualSearchIndexReady = false;
 
         function normalizeProxySetCode(setCode) {
             const raw = String(setCode || '').trim();
@@ -77,6 +87,282 @@ const BASE_PATH = './data/';
             const parsed = parseInt(value, 10);
             if (!Number.isFinite(parsed) || parsed <= 0) return fallbackValue;
             return parsed;
+        }
+
+        function getCardDisplayName(card) {
+            return String(card?.name_en || card?.name || '').trim();
+        }
+
+        function getCardSetCode(card) {
+            return normalizeProxySetCode(card?.set || card?.set_code || '');
+        }
+
+        function getCardNumber(card) {
+            return normalizeProxyCardNumber(card?.number || card?.set_number || '');
+        }
+
+        const DEFERRED_PLAYTESTER_SCRIPTS = [
+            'js/playtester.js?v=20260314-v62',
+            'js/playtester-mobile.js?v=20260315-v1',
+            'js/firebase-multiplayer.js?v=20260315-v1'
+        ];
+        let deferredPlaytesterScriptsPromise = null;
+
+        function createCardSkeletonMarkup(count = 10) {
+            return Array.from({ length: count }, () => `
+                <div class="card-skeleton" aria-hidden="true">
+                    <div class="card-skeleton-image"></div>
+                    <div class="card-skeleton-line card-skeleton-line-title"></div>
+                    <div class="card-skeleton-line"></div>
+                    <div class="card-skeleton-actions">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setGridLoadingSkeleton(gridOrId, count = 10) {
+            const grid = typeof gridOrId === 'string' ? document.getElementById(gridOrId) : gridOrId;
+            if (!grid) return;
+            grid.classList.add('card-grid-loading');
+            grid.innerHTML = createCardSkeletonMarkup(count);
+        }
+
+        function clearGridLoadingSkeleton(gridOrId) {
+            const grid = typeof gridOrId === 'string' ? document.getElementById(gridOrId) : gridOrId;
+            if (!grid) return;
+            grid.classList.remove('card-grid-loading');
+        }
+
+        function loadDeferredScript(src) {
+            return new Promise((resolve, reject) => {
+                const existing = document.querySelector(`script[src="${src}"]`);
+                if (existing) {
+                    if (existing.dataset.loaded === 'true') {
+                        resolve();
+                        return;
+                    }
+                    existing.addEventListener('load', () => resolve(), { once: true });
+                    existing.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = false;
+                script.dataset.deferredPlaytester = 'true';
+                script.addEventListener('load', () => {
+                    script.dataset.loaded = 'true';
+                    resolve();
+                }, { once: true });
+                script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
+                document.body.appendChild(script);
+            });
+        }
+
+        async function ensurePlaytesterScriptsLoaded(options = {}) {
+            const { notify = false } = options;
+
+            if (window.__playtesterScriptsReady === true) {
+                return;
+            }
+
+            if (!deferredPlaytesterScriptsPromise) {
+                if (notify && typeof showNotification === 'function') {
+                    showNotification('Playtester wird geladen...', 'info', 1800);
+                }
+
+                deferredPlaytesterScriptsPromise = (async () => {
+                    for (const src of DEFERRED_PLAYTESTER_SCRIPTS) {
+                        await loadDeferredScript(src);
+                    }
+                    window.__playtesterScriptsReady = true;
+                })().catch(error => {
+                    deferredPlaytesterScriptsPromise = null;
+                    throw error;
+                });
+            }
+
+            return deferredPlaytesterScriptsPromise;
+        }
+
+        window.ensurePlaytesterScriptsLoaded = ensurePlaytesterScriptsLoaded;
+
+        ['openPlaytester', 'openPlaytesterSetup', 'startPlaytesterWithMirror', 'startPlaytesterWithOpponent'].forEach(functionName => {
+            if (typeof window[functionName] === 'function') return;
+
+            const deferredWrapper = async function(...args) {
+                try {
+                    await ensurePlaytesterScriptsLoaded({ notify: true });
+                    if (typeof window[functionName] === 'function' && window[functionName] !== deferredWrapper) {
+                        return window[functionName](...args);
+                    }
+                } catch (error) {
+                    console.error(`[Playtester] Could not load ${functionName}:`, error);
+                    if (typeof showNotification === 'function') {
+                        showNotification('Playtester konnte nicht geladen werden.', 'error');
+                    }
+                }
+            };
+
+            window[functionName] = deferredWrapper;
+        });
+
+        function buildProxyManualSearchIndex() {
+            const cards = Array.isArray(window.allCardsDatabase) ? window.allCardsDatabase : [];
+            if (cards.length === 0) {
+                proxyManualSearchIndex = [];
+                proxyManualSearchIndexReady = false;
+                return;
+            }
+
+            const byName = new Map();
+            cards.forEach(card => {
+                const displayName = getCardDisplayName(card);
+                if (!displayName) return;
+
+                const normalized = normalizeCardName(displayName);
+                if (!normalized) return;
+
+                const current = byName.get(normalized);
+                const setCode = getCardSetCode(card);
+                const setNumber = getCardNumber(card);
+                const setOrder = setOrderMap && setCode ? (setOrderMap[setCode] || 0) : 0;
+
+                if (!current) {
+                    byName.set(normalized, {
+                        normalized,
+                        name: displayName,
+                        set: setCode,
+                        number: setNumber,
+                        setOrder,
+                        rarity: String(card?.rarity || ''),
+                        type: String(card?.type || '')
+                    });
+                    return;
+                }
+
+                // Prefer newer set entries for proxy default print selection.
+                if (setOrder > current.setOrder) {
+                    current.name = displayName;
+                    current.set = setCode;
+                    current.number = setNumber;
+                    current.setOrder = setOrder;
+                    current.rarity = String(card?.rarity || '');
+                    current.type = String(card?.type || '');
+                }
+            });
+
+            proxyManualSearchIndex = Array.from(byName.values()).sort((a, b) => a.name.localeCompare(b.name));
+            proxyManualSearchIndexReady = true;
+        }
+
+        async function ensureProxyManualSearchReady() {
+            if (!Array.isArray(window.allCardsDatabase) || window.allCardsDatabase.length === 0) {
+                try {
+                    await loadAllCardsDatabase();
+                } catch (e) {
+                    console.warn('[Proxy] Could not load card DB for manual search:', e);
+                }
+            }
+
+            if (!proxyManualSearchIndexReady || proxyManualSearchIndex.length === 0) {
+                buildProxyManualSearchIndex();
+            }
+        }
+
+        function getProxyManualNameSuggestions(searchTerm, limit = 30) {
+            const term = normalizeCardName(searchTerm);
+            if (!term || term.length < 2 || proxyManualSearchIndex.length === 0) return [];
+
+            const startsWith = [];
+            const contains = [];
+            for (const entry of proxyManualSearchIndex) {
+                if (entry.normalized.startsWith(term)) {
+                    startsWith.push(entry);
+                } else if (entry.normalized.includes(term)) {
+                    contains.push(entry);
+                }
+
+                if (startsWith.length >= limit) break;
+            }
+
+            const remaining = Math.max(0, limit - startsWith.length);
+            return remaining > 0 ? startsWith.concat(contains.slice(0, remaining)) : startsWith;
+        }
+
+        function updateProxyManualNameSuggestions() {
+            const nameInput = document.getElementById('proxyManualName');
+            const datalist = document.getElementById(PROXY_MANUAL_SUGGESTIONS_ID);
+            if (!nameInput || !datalist) return;
+
+            const suggestions = getProxyManualNameSuggestions(nameInput.value || '');
+            datalist.innerHTML = suggestions.map(entry => {
+                const printInfo = entry.set && entry.number ? `${entry.set} ${entry.number}` : 'unknown print';
+                const value = escapeHtmlAttr(entry.name);
+                const label = escapeHtmlAttr(printInfo);
+                return `<option value="${value}" label="${label}"></option>`;
+            }).join('');
+        }
+
+        function findProxyManualCardEntry(name) {
+            const normalizedInput = normalizeCardName(name);
+            if (!normalizedInput || proxyManualSearchIndex.length === 0) return null;
+
+            const exact = proxyManualSearchIndex.find(entry => entry.normalized === normalizedInput);
+            if (exact) return exact;
+
+            const startsWith = proxyManualSearchIndex.find(entry => entry.normalized.startsWith(normalizedInput));
+            if (startsWith) return startsWith;
+
+            return proxyManualSearchIndex.find(entry => entry.normalized.includes(normalizedInput)) || null;
+        }
+
+        function applyProxyManualSelectionFromName() {
+            const nameInput = document.getElementById('proxyManualName');
+            const setInput = document.getElementById('proxyManualSet');
+            const numberInput = document.getElementById('proxyManualNumber');
+            if (!nameInput || !setInput || !numberInput) return;
+
+            const entry = findProxyManualCardEntry(nameInput.value || '');
+            if (!entry) return;
+
+            nameInput.value = entry.name;
+            if (entry.set && !String(setInput.value || '').trim()) {
+                setInput.value = entry.set;
+            }
+            if (entry.number && !String(numberInput.value || '').trim()) {
+                numberInput.value = entry.number;
+            }
+        }
+
+        async function initializeProxyManualSearchInput() {
+            await ensureProxyManualSearchReady();
+
+            const nameInput = document.getElementById('proxyManualName');
+            if (!nameInput) return;
+            if (nameInput.dataset.proxySearchReady === '1') return;
+
+            nameInput.dataset.proxySearchReady = '1';
+            nameInput.setAttribute('list', PROXY_MANUAL_SUGGESTIONS_ID);
+
+            nameInput.addEventListener('focus', () => {
+                updateProxyManualNameSuggestions();
+            });
+            nameInput.addEventListener('input', () => {
+                updateProxyManualNameSuggestions();
+            });
+            nameInput.addEventListener('change', () => {
+                applyProxyManualSelectionFromName();
+            });
+            nameInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addManualProxyCard();
+                }
+            });
         }
 
         function showProxyToast(message) {
@@ -190,8 +476,19 @@ const BASE_PATH = './data/';
         }
 
         function addCardToProxy(cardName, setCode = '', cardNumber = '', count = 1, suppressToast = false) {
+            return addCardToProxyInternal(cardName, setCode, cardNumber, count, {
+                suppressToast,
+                suppressRender: false,
+                suppressPersist: false
+            });
+        }
+
+        function addCardToProxyInternal(cardName, setCode = '', cardNumber = '', count = 1, options = {}) {
+            const suppressToast = Boolean(options.suppressToast);
+            const suppressRender = Boolean(options.suppressRender);
+            const suppressPersist = Boolean(options.suppressPersist);
             const name = String(cardName || '').trim();
-            if (!name) return;
+            if (!name) return 0;
 
             const normalizedSet = normalizeProxySetCode(setCode);
             const normalizedNumber = normalizeProxyCardNumber(cardNumber);
@@ -214,13 +511,19 @@ const BASE_PATH = './data/';
             }
 
             window.proxyQueue = queue;
-            saveProxyQueue();
-            renderProxyQueue();
+            if (!suppressPersist) {
+                saveProxyQueue();
+            }
+            if (!suppressRender) {
+                renderProxyQueue();
+            }
 
             if (!suppressToast) {
                 const setPart = normalizedSet && normalizedNumber ? ` (${normalizedSet} ${normalizedNumber})` : '';
                 showProxyToast(`Added to proxy queue: ${name}${setPart} x${normalizedCount}`);
             }
+
+            return normalizedCount;
         }
 
         function setProxyCardCount(cardName, setCode = '', cardNumber = '', value = 1) {
@@ -273,13 +576,14 @@ const BASE_PATH = './data/';
 
                 const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
                 if (match) {
-                    addCardToProxy(match[1], match[2], match[3], copies, true);
+                    addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
                 } else {
-                    addCardToProxy(deckKey, '', '', copies, true);
+                    addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
                 }
                 addedCopies += copies;
             });
 
+            saveProxyQueue();
             renderProxyQueue();
             showProxyToast(`Added ${addedCopies} deck cards to proxy queue`);
         }
@@ -319,10 +623,11 @@ const BASE_PATH = './data/';
             let addedCopies = 0;
             entries.forEach(entry => {
                 const amount = parseProxyCount(entry.count, 1);
-                addCardToProxy(entry.name, entry.set, entry.number, amount, true);
+                addCardToProxyInternal(entry.name, entry.set, entry.number, amount, { suppressToast: true, suppressRender: true, suppressPersist: true });
                 addedCopies += amount;
             });
 
+            saveProxyQueue();
             renderProxyQueue();
             showProxyToast(`Imported ${addedCopies} cards into proxy queue`);
         }
@@ -333,16 +638,31 @@ const BASE_PATH = './data/';
             const numberInput = document.getElementById('proxyManualNumber');
             const countInput = document.getElementById('proxyManualCount');
 
-            const cardName = String(nameInput?.value || '').trim();
-            if (!cardName) {
+            const cardNameRaw = String(nameInput?.value || '').trim();
+            if (!cardNameRaw) {
                 alert('Please enter a card name.');
                 return;
             }
+
+            const suggestedEntry = findProxyManualCardEntry(cardNameRaw);
+            if (suggestedEntry) {
+                if (nameInput) nameInput.value = suggestedEntry.name;
+                if (setInput && !String(setInput.value || '').trim()) setInput.value = suggestedEntry.set || '';
+                if (numberInput && !String(numberInput.value || '').trim()) numberInput.value = suggestedEntry.number || '';
+            }
+
+            const cardName = String(nameInput?.value || cardNameRaw).trim();
 
             const setCode = String(setInput?.value || '').trim();
             const cardNumber = String(numberInput?.value || '').trim();
             const count = parseProxyCount(countInput?.value || '1', 1);
             addCardToProxy(cardName, setCode, cardNumber, count);
+
+            if (nameInput) nameInput.value = '';
+            if (setInput) setInput.value = '';
+            if (numberInput) numberInput.value = '';
+            if (countInput) countInput.value = '1';
+            updateProxyManualNameSuggestions();
         }
 
         function printProxyQueue() {
@@ -369,14 +689,16 @@ const BASE_PATH = './data/';
                 const cardsHtml = pageCards.map(card => {
                     const imageUrl = getCardImageSource(card.name, card.set, card.number) || buildInlineCardPlaceholder(card.name);
                     const safeImage = escapeHtmlAttr(imageUrl);
-                    const safeName = escapeHtmlAttr(card.name);
-                    const safePrint = card.set && card.number ? `${escapeHtmlAttr(card.set)} ${escapeHtmlAttr(card.number)}` : 'Unknown print';
 
                     return `
-                        <div class="proxy-card">
-                            <img src="${safeImage}" alt="${safeName}">
-                            <div class="proxy-label">${safeName}</div>
-                            <div class="proxy-print">${safePrint}</div>
+                        <div class="proxy-slot">
+                            <span class="cut cut-top-left"></span>
+                            <span class="cut cut-top-right"></span>
+                            <span class="cut cut-bottom-left"></span>
+                            <span class="cut cut-bottom-right"></span>
+                            <div class="proxy-card">
+                                <img src="${safeImage}" alt="">
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -402,16 +724,34 @@ const BASE_PATH = './data/';
                     <meta charset="utf-8">
                     <title>Proxy Print</title>
                     <style>
-                        @page { size: A4 portrait; margin: 10mm; }
-                        body { margin: 0; font-family: Arial, sans-serif; }
+                        @page { size: A4 portrait; margin: 8mm; }
+                        * { box-sizing: border-box; }
+                        body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
                         .proxy-page { page-break-after: always; }
                         .proxy-page:last-child { page-break-after: auto; }
-                        .proxy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8mm; }
-                        .proxy-card { border: 1px solid #bbb; border-radius: 4px; padding: 3mm; text-align: center; }
-                        .proxy-card img { width: 100%; max-height: 83mm; object-fit: contain; display: block; }
-                        .proxy-label { font-size: 10pt; font-weight: 700; margin-top: 2mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                        .proxy-print { font-size: 8.5pt; color: #555; }
-                        footer { margin-top: 4mm; text-align: center; font-size: 8pt; color: #666; }
+                        .proxy-grid { display: grid; grid-template-columns: repeat(3, 63mm); grid-auto-rows: 88mm; gap: 3mm; justify-content: center; }
+                        .proxy-slot { position: relative; width: 63mm; height: 88mm; }
+                        .proxy-card { position: absolute; inset: 0; overflow: hidden; border: 0.2mm solid rgba(0,0,0,0.35); border-radius: 1.8mm; background: #fff; }
+                        .proxy-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+                        .cut { position: absolute; width: 4mm; height: 4mm; pointer-events: none; }
+                        .cut::before, .cut::after { content: ''; position: absolute; background: #000; }
+                        .cut::before { width: 4mm; height: 0.25mm; }
+                        .cut::after { width: 0.25mm; height: 4mm; }
+                        .cut-top-left { top: -1.6mm; left: -1.6mm; }
+                        .cut-top-left::before, .cut-top-left::after { top: 0; left: 0; }
+                        .cut-top-right { top: -1.6mm; right: -1.6mm; }
+                        .cut-top-right::before { top: 0; right: 0; }
+                        .cut-top-right::after { top: 0; right: 0; }
+                        .cut-bottom-left { bottom: -1.6mm; left: -1.6mm; }
+                        .cut-bottom-left::before { bottom: 0; left: 0; }
+                        .cut-bottom-left::after { bottom: 0; left: 0; }
+                        .cut-bottom-right { bottom: -1.6mm; right: -1.6mm; }
+                        .cut-bottom-right::before { bottom: 0; right: 0; }
+                        .cut-bottom-right::after { bottom: 0; right: 0; }
+                        footer { margin-top: 3mm; text-align: center; font-size: 7.5pt; color: #666; }
+                        @media print {
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                        }
                     </style>
                 </head>
                 <body>${pageHtml}</body>
@@ -446,6 +786,7 @@ const BASE_PATH = './data/';
 
         document.addEventListener('DOMContentLoaded', function() {
             renderProxyQueue();
+            initializeProxyManualSearchInput();
         });
         
         // Tab switching
@@ -482,6 +823,7 @@ const BASE_PATH = './data/';
                         break;
                     case 'proxy':
                         renderProxyQueue();
+                        initializeProxyManualSearchInput();
                         break;
                 }
             }
@@ -501,52 +843,6 @@ const BASE_PATH = './data/';
             const safeArchetype = String(archetype || '').trim();
             const normalizedRegion = String(region || '').trim();
 
-            const applyArchetypeSelectionWhenReady = (selectId, onApplied) => {
-                let attempts = 0;
-                const maxAttempts = 60;
-
-                const applySelection = () => {
-                    attempts += 1;
-                    const select = document.getElementById(selectId);
-                    if (!select) {
-                        if (attempts < maxAttempts) {
-                            setTimeout(applySelection, 100);
-                        }
-                        return;
-                    }
-
-                    const options = Array.from(select.options || []);
-                    if (options.length <= 1) {
-                        if (attempts < maxAttempts) {
-                            setTimeout(applySelection, 100);
-                        }
-                        return;
-                    }
-
-                    const exactMatch = options.find(opt => opt.value === safeArchetype);
-                    const caseInsensitiveMatch = exactMatch || options.find(opt =>
-                        String(opt.value || '').toLowerCase() === safeArchetype.toLowerCase()
-                    );
-
-                    if (caseInsensitiveMatch) {
-                        select.value = caseInsensitiveMatch.value;
-                    } else {
-                        const allOption = options.find(opt => opt.value === 'all');
-                        if (allOption) {
-                            select.value = 'all';
-                        }
-                    }
-
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-
-                    if (typeof onApplied === 'function') {
-                        onApplied(caseInsensitiveMatch ? caseInsensitiveMatch.value : null);
-                    }
-                };
-
-                setTimeout(applySelection, 0);
-            };
-
             const triggerTabSwitch = (tabId) => {
                 if (typeof switchTabAndUpdateMenu === 'function') {
                     switchTabAndUpdateMenu(tabId);
@@ -556,15 +852,43 @@ const BASE_PATH = './data/';
             };
 
             if (normalizedRegion === 'cityLeague') {
+                // Store pending selection — populateCityLeagueDeckSelect will apply it when ready
+                window.pendingCityLeagueDeckSelection = safeArchetype;
                 triggerTabSwitch('city-league-analysis');
-                applyArchetypeSelectionWhenReady('cityLeagueDeckSelect', function(selectedValue) {
-                    window.currentCityLeagueArchetype = selectedValue || null;
-                });
+                // If data already loaded, the populate function won't re-run — apply immediately
+                if (window.cityLeagueAnalysisLoaded) {
+                    const select = document.getElementById('cityLeagueDeckSelect');
+                    if (select && select.options.length > 1) {
+                        const match = Array.from(select.options).find(o =>
+                            String(o.value || '').toLowerCase() === safeArchetype.toLowerCase()
+                        );
+                        if (match) {
+                            select.value = match.value;
+                            window.pendingCityLeagueDeckSelection = null;
+                            window.currentCityLeagueArchetype = match.value;
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }
             } else if (normalizedRegion === 'currentMeta') {
+                // Store pending selection — populateCurrentMetaDeckSelect will apply it when ready
+                window.pendingCurrentMetaDeckSelection = safeArchetype;
                 triggerTabSwitch('current-analysis');
-                applyArchetypeSelectionWhenReady('currentMetaDeckSelect', function(selectedValue) {
-                    window.currentCurrentMetaArchetype = selectedValue || null;
-                });
+                // If data already loaded, the populate function won't re-run — apply immediately
+                if (window.currentMetaAnalysisLoaded) {
+                    const select = document.getElementById('currentMetaDeckSelect');
+                    if (select && select.options.length > 1) {
+                        const match = Array.from(select.options).find(o =>
+                            String(o.value || '').toLowerCase() === safeArchetype.toLowerCase()
+                        );
+                        if (match) {
+                            select.value = match.value;
+                            window.pendingCurrentMetaDeckSelection = null;
+                            window.currentCurrentMetaArchetype = match.value;
+                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }
             }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -728,6 +1052,134 @@ const BASE_PATH = './data/';
             return rows;
         }
 
+        const KNOWN_META_FORMAT_CODES = [
+            'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
+            'BRS-PRE', 'BRS-SSP', 'BRS-SCR', 'BRS-SFA', 'BRS-TWM', 'BRS-TEF',
+            'BST-PAR', 'SVI-PAF'
+        ];
+
+        const TOURNAMENT_FORMAT_NAME_TO_CODE = {
+            'scarlet & violet - ascended heroes': 'SVI-ASC',
+            'scarlet & violet - phantasmal flames': 'SVI-PFL',
+            'scarlet & violet - mega evolution': 'SVI-MEG',
+            'scarlet & violet - black bolt': 'SVI-BLK',
+            'scarlet & violet - white flare': 'SVI-BLK',
+            'scarlet & violet - black bolt / white flare': 'SVI-BLK',
+            'scarlet & violet - destined rivals': 'SVI-DRI',
+            'scarlet & violet - journey together': 'SVI-JTG',
+            'brilliant stars - prismatic evolutions': 'BRS-PRE',
+            'brilliant stars - surging sparks': 'BRS-SSP',
+            'brilliant stars - stellar crown': 'BRS-SCR',
+            'brilliant stars - shrouded fable': 'BRS-SFA',
+            'brilliant stars - twilight masquerade': 'BRS-TWM',
+            'brilliant stars - temporal forces': 'BRS-TEF',
+            'battle styles - paradox rift': 'BST-PAR',
+            'meta play!': 'Meta Play!',
+            'meta live': 'Meta Live'
+        };
+
+        function mapSetCodeToMetaFormat(setCode) {
+            const code = String(setCode || '').trim().toUpperCase();
+            if (!code) return '';
+
+            const explicit = {
+                ASC: 'SVI-ASC',
+                PFL: 'SVI-PFL',
+                MEG: 'SVI-MEG',
+                BLK: 'SVI-BLK',
+                WHT: 'SVI-BLK',
+                DRI: 'SVI-DRI',
+                JTG: 'SVI-JTG',
+                PRE: 'BRS-PRE',
+                SSP: 'BRS-SSP',
+                SCR: 'BRS-SCR',
+                SFA: 'BRS-SFA',
+                TWM: 'BRS-TWM',
+                TEF: 'BRS-TEF',
+                PAR: 'BST-PAR',
+                PAF: 'SVI-PAF'
+            };
+
+            if (explicit[code]) return explicit[code];
+            if (code.includes('-')) return code;
+
+            const sviOrder = setOrderMap.SVI || setOrderMap.SVE || 0;
+            const codeOrder = setOrderMap[code] || 0;
+            if (sviOrder > 0 && codeOrder > 0 && codeOrder >= sviOrder) {
+                return `SVI-${code}`;
+            }
+
+            return code;
+        }
+
+        function normalizeTournamentFormatLabel(rawFormat, fallbackSetCode = '') {
+            const raw = String(rawFormat || '').trim();
+            if (!raw) return mapSetCodeToMetaFormat(fallbackSetCode);
+            if (KNOWN_META_FORMAT_CODES.includes(raw) || raw === 'Meta Live' || raw === 'Meta Play!') return raw;
+
+            const normalized = raw.toLowerCase();
+            if (TOURNAMENT_FORMAT_NAME_TO_CODE[normalized]) {
+                return TOURNAMENT_FORMAT_NAME_TO_CODE[normalized];
+            }
+
+            for (const key of Object.keys(TOURNAMENT_FORMAT_NAME_TO_CODE)) {
+                if (normalized.includes(key)) {
+                    return TOURNAMENT_FORMAT_NAME_TO_CODE[key];
+                }
+            }
+
+            return mapSetCodeToMetaFormat(fallbackSetCode) || raw;
+        }
+
+        function sanitizeTournamentArchetypeName(archetype) {
+            const raw = String(archetype || '').trim();
+            if (!raw) return '';
+            return raw
+                .replace(/\d+[\.,]\d+\$\d+[\.,]\d+€\s*$/g, '')
+                .replace(/[\s\u00a0]+$/g, '')
+                .trim();
+        }
+
+        function normalizeCurrentMetaFallbackRows(rows) {
+            if (!Array.isArray(rows)) return [];
+            return rows.map(row => {
+                const normalized = { ...row };
+                normalized.archetype = sanitizeTournamentArchetypeName(normalized.archetype || '');
+
+                const normalizedFormat = normalizeTournamentFormatLabel(normalized.format || normalized.meta || '', normalized.set_code || '');
+                normalized.format = normalizedFormat;
+                normalized.meta = normalized.meta && String(normalized.meta).trim() ? normalized.meta : 'Meta Play!';
+
+                if (!normalized.deck_count && normalized.deck_inclusion_count) {
+                    normalized.deck_count = normalized.deck_inclusion_count;
+                }
+
+                if (!normalized.average_count_overall && normalized.total_count && normalized.total_decks_in_archetype) {
+                    const totalCount = parseFloat(String(normalized.total_count).replace(',', '.')) || 0;
+                    const totalDecks = parseFloat(String(normalized.total_decks_in_archetype).replace(',', '.')) || 0;
+                    normalized.average_count_overall = totalDecks > 0 ? (totalCount / totalDecks).toFixed(2) : '0';
+                }
+
+                return normalized;
+            }).filter(row => row && row.card_name && row.archetype);
+        }
+
+        async function loadCurrentMetaRowsWithFallback(options = {}) {
+            const primary = await loadCSV('current_meta_card_data.csv', options);
+            if (Array.isArray(primary) && primary.length > 0) {
+                return primary;
+            }
+
+            const fallback = await loadCSV('tournament_cards_data_cards.csv', options);
+            if (Array.isArray(fallback) && fallback.length > 0) {
+                const normalizedFallback = normalizeCurrentMetaFallbackRows(fallback);
+                console.warn(`[Current Meta] Using tournament fallback dataset (${normalizedFallback.length} rows) because current_meta_card_data.csv is missing or empty.`);
+                return normalizedFallback;
+            }
+
+            return [];
+        }
+
         const csvMemoryCache = new Map();
         const csvInFlight = new Map();
 
@@ -832,6 +1284,10 @@ const BASE_PATH = './data/';
         let cardIndexBySetNumber = new Map(); // O(1) set+number -> canonical card lookup
         let cardsByNameMap = {};
         let cardsBySetNumberMap = {}; // Index for fast card lookup by set+number
+        let myDeckRenderDbCache = null;
+        let overviewPriceLookupCache = null;
+        let internationalPrintsCache = new Map();
+        let preferredVersionCache = new Map();
         let setOrderMap = {}; // Loaded from sets.json – higher number = newer set
         let pokedexNumbers = {}; // name (lowercase) → National Pokédex number
         let englishSetCodes = null;
@@ -842,6 +1298,20 @@ const BASE_PATH = './data/';
         let currentMetaOverviewCardTypeFilter = 'all'; // Card type filter for Current Meta overview
         let pastMetaOverviewCardTypeFilter = 'all'; // Card type filter for Past Meta overview
         window.pendingCityLeagueDeckSelection = null; // Preserves cross-tab deck selection during async reloads
+        const versionSelectionDebugEnabled = () => window.location.search.includes('debugVersionSelection=1');
+
+        function debugVersionSelectionLog(...args) {
+            if (versionSelectionDebugEnabled()) {
+                console.log(...args);
+            }
+        }
+
+        function invalidateCardLookupCaches() {
+            myDeckRenderDbCache = null;
+            overviewPriceLookupCache = null;
+            internationalPrintsCache.clear();
+            preferredVersionCache.clear();
+        }
         
         // Ace Specs list - loaded from ace_specs.json
         let aceSpecsList = [];
@@ -907,6 +1377,7 @@ const BASE_PATH = './data/';
                         if (!cardIndexMap.has(exactKey)) cardIndexMap.set(exactKey, c);
                         if (normalizedKey && !cardIndexMap.has(normalizedKey)) cardIndexMap.set(normalizedKey, c);
                     });
+                    invalidateCardLookupCaches();
                     window.cardIndexMap = cardIndexMap;
                     console.log(`✅ Loaded ${allCardsDatabase.length} cards from all_cards_merged.json (with prices)`);
                     console.log(`📊 Karten mit mehreren Versionen:`, Object.keys(cardsByNameMap).filter(k => cardsByNameMap[k].length > 1).length);
@@ -999,6 +1470,65 @@ const BASE_PATH = './data/';
                 || cardIndexMap.get(repaired)
                 || cardIndexMap.get(normalized)
                 || null;
+        }
+
+        function getMyDeckRenderDbCache() {
+            if (myDeckRenderDbCache) {
+                return myDeckRenderDbCache;
+            }
+
+            const cardDataByName = {};
+            const cardDataByKey = {};
+
+            allCardsDatabase.forEach(card => {
+                const primaryName = String(card.name_en || card.name || '').trim();
+                if (!primaryName) return;
+
+                const imageUrl = getUnifiedCardImage(card.set, card.number) || card.image_url || '';
+                const cardData = {
+                    card_name: primaryName,
+                    image_url: imageUrl,
+                    percentage_in_archetype: 0,
+                    type: card.type || 'Unknown',
+                    card_type: card.type || 'Unknown',
+                    set_code: card.set,
+                    set_number: card.number,
+                    rarity: card.rarity
+                };
+
+                if (!cardDataByName[primaryName]) {
+                    cardDataByName[primaryName] = cardData;
+                }
+
+                cardDataByKey[`${primaryName} (${card.set} ${card.number})`] = cardData;
+            });
+
+            myDeckRenderDbCache = { cardDataByName, cardDataByKey };
+            return myDeckRenderDbCache;
+        }
+
+        function getOverviewPriceLookupCache() {
+            if (overviewPriceLookupCache instanceof Map) {
+                return overviewPriceLookupCache;
+            }
+
+            const map = new Map();
+            allCardsDatabase.forEach(card => {
+                if (!card.set || !card.number) return;
+
+                const normalizedSet = normalizeSetCode(card.set);
+                const normalizedNumber = normalizeCardNumber(card.number);
+                if (!normalizedSet || !normalizedNumber) return;
+
+                map.set(`${normalizedSet}-${normalizedNumber}`, card);
+
+                if (/^\d+$/.test(normalizedNumber)) {
+                    map.set(`${normalizedSet}-${normalizedNumber.padStart(3, '0')}`, card);
+                }
+            });
+
+            overviewPriceLookupCache = map;
+            return overviewPriceLookupCache;
         }
 
         function buildCardIndexBySetNumber(cards) {
@@ -1368,22 +1898,34 @@ const BASE_PATH = './data/';
         // Get international prints for a specific card (set + number)
         function getInternationalPrintsForCard(set, number) {
             if (!cardsBySetNumberMap || Object.keys(cardsBySetNumberMap).length === 0) {
-                console.warn('[getInternationalPrintsForCard] Index not loaded yet');
+                debugVersionSelectionLog('[getInternationalPrintsForCard] Index not loaded yet');
                 return [];
             }
+
+            const normalizedSet = normalizeSetCode(set);
+            const normalizedNumber = normalizeCardNumber(number);
+            if (!normalizedSet || !normalizedNumber) {
+                return [];
+            }
+
+            const cacheKey = `${normalizedSet}-${normalizedNumber}`;
+            if (internationalPrintsCache.has(cacheKey)) {
+                return internationalPrintsCache.get(cacheKey);
+            }
             
-            // Fast lookup using index instead of array.find()
-            const key = `${set}-${number}`;
-            const baseCard = cardsBySetNumberMap[key];
+            const baseCard = getIndexedCardBySetNumber(normalizedSet, normalizedNumber);
             
             if (!baseCard) {
-                console.warn(`[getInternationalPrintsForCard] Card not found: ${set} ${number}`);
+                internationalPrintsCache.set(cacheKey, []);
+                debugVersionSelectionLog(`[getInternationalPrintsForCard] Card not found: ${normalizedSet} ${normalizedNumber}`);
                 return [];
             }
             
             if (!baseCard.international_prints) {
-                console.log(`[getInternationalPrintsForCard] No international prints for ${set} ${number}, returning base card only`);
-                return [baseCard];
+                const result = [baseCard];
+                internationalPrintsCache.set(cacheKey, result);
+                debugVersionSelectionLog(`[getInternationalPrintsForCard] No international prints for ${normalizedSet} ${normalizedNumber}, returning base card only`);
+                return result;
             }
             
             // Parse "ASC-112,MEG-76,MEP-10" -> [{set: "ASC", number: "112"}, ...]
@@ -1416,9 +1958,10 @@ const BASE_PATH = './data/';
             });
 
             const intPrintCards = Array.from(uniqueCards.values());
-            
-            console.log(`[getInternationalPrintsForCard] Found ${intPrintCards.length} international prints for ${baseCard.name_en || baseCard.name} (${set} ${number}):`,   
-                intPrintCards.map(c => `${c.set} ${c.number} (${c.rarity || 'NO RARITY'}) ${c.image_url ? '?' : '?'}`).join(', ')
+            internationalPrintsCache.set(cacheKey, intPrintCards);
+            debugVersionSelectionLog(
+                `[getInternationalPrintsForCard] Found ${intPrintCards.length} international prints for ${baseCard.name_en || baseCard.name} (${normalizedSet} ${normalizedNumber}):`,
+                intPrintCards.map(c => `${c.set} ${c.number} (${c.rarity || 'NO RARITY'})`).join(', ')
             );
             
             return intPrintCards;
@@ -1642,45 +2185,75 @@ const BASE_PATH = './data/';
             return /^(fire|water|grass|lightning|psychic|fighting|darkness|metal|fairy|dragon|colorless)\s+energy(?:\s+.*)?$/i.test(normalized);
         }
 
+        function isRadiantPokemon(cardName) {
+            const normalized = normalizeCardName(cardName);
+            return /^radiant\s+/.test(normalized);
+        }
+
+        function getLegalMaxCopies(cardNameOrCard, fallbackCard = null) {
+            const cardLike = (typeof cardNameOrCard === 'string')
+                ? (fallbackCard || { card_name: cardNameOrCard, name: cardNameOrCard })
+                : (cardNameOrCard || fallbackCard || {});
+            const cardName = (typeof cardNameOrCard === 'string')
+                ? cardNameOrCard
+                : (cardLike.card_name || cardLike.full_card_name || cardLike.name || '');
+
+            if (isBasicEnergyCardEntry(cardLike)) return 59;
+            if (isAceSpec(cardLike) || isRadiantPokemon(cardName)) return 1;
+            return 4;
+        }
+
+        function safeParseFloat(val, fallback = 0) {
+            const n = parseFloat(String(val ?? fallback).replace(',', '.'));
+            return Number.isFinite(n) ? n : fallback;
+        }
+
         function getPreferredVersionForCard(cardName, originalSet = null, originalNumber = null) {
             const pref = getRarityPreference(cardName);
             const globalPref = getGlobalRarityPreference();
+            const normalizedSet = normalizeSetCode(originalSet);
+            const normalizedNumber = normalizeCardNumber(originalNumber);
+            const prefSignature = pref ? JSON.stringify(pref) : 'none';
+            const cacheKey = `${normalizeCardName(cardName)}|${normalizedSet}|${normalizedNumber}|${globalPref || 'none'}|${prefSignature}`;
+
+            if (preferredVersionCache.has(cacheKey)) {
+                return preferredVersionCache.get(cacheKey);
+            }
             
             // If originalSet and originalNumber provided, try international prints first
             let versions;
-            if (originalSet && originalNumber) {
-                versions = getInternationalPrintsForCard(originalSet, originalNumber);
-                
-                // DEBUG: Log international prints for troubleshooting
-                console.log(`[getPreferredVersionForCard] International prints for ${cardName} (${originalSet} ${originalNumber}):`, 
-                    versions.map(v => `${v.set}-${v.number} (rarity: "${v.rarity || 'NONE'}")`));
+            if (normalizedSet && normalizedNumber) {
+                versions = getInternationalPrintsForCard(normalizedSet, normalizedNumber);
+                debugVersionSelectionLog(
+                    `[getPreferredVersionForCard] International prints for ${cardName} (${normalizedSet} ${normalizedNumber}):`,
+                    versions.map(v => `${v.set}-${v.number} (rarity: "${v.rarity || 'NONE'}")`)
+                );
                 
                 // Intelligent fallback: If no international prints OR if international prints has NO rarity data,
                 // fall back to all versions (fixes Judge DRI 222 issue while preserving Promo cards)
                 const hasSufficientRarity = versions.length > 0 && 
                     versions.some(v => v.rarity && v.rarity.trim() !== '');
-                
-                console.log(`[getPreferredVersionForCard] hasSufficientRarity for ${cardName}: ${hasSufficientRarity}`);
+                debugVersionSelectionLog(`[getPreferredVersionForCard] hasSufficientRarity for ${cardName}: ${hasSufficientRarity}`);
                 
                 if (versions.length === 0 || !hasSufficientRarity) {
                     const fallbackReason = versions.length === 0 ? 'no international prints' : 
                         'international prints has no rarity data';
                     versions = getEnglishCardVersions(cardName);
-                    console.log(`[getPreferredVersionForCard] ${fallbackReason} for ${cardName} (${originalSet} ${originalNumber}), using ALL ${versions.length} versions`);
+                    debugVersionSelectionLog(`[getPreferredVersionForCard] ${fallbackReason} for ${cardName} (${normalizedSet} ${normalizedNumber}), using ALL ${versions.length} versions`);
                 } else {
-                    console.log(`[getPreferredVersionForCard] Using international prints for ${cardName} (${originalSet} ${originalNumber})`);
+                    debugVersionSelectionLog(`[getPreferredVersionForCard] Using international prints for ${cardName} (${normalizedSet} ${normalizedNumber})`);
                     // If the original card is from a non-English set, prefer English versions only
                     // This prevents Japanese cards from being selected as the preferred version
                     if (window.englishSetCodes && window.englishSetCodes.size > 0 && 
-                        originalSet && !window.englishSetCodes.has(originalSet)) {
+                        normalizedSet && !window.englishSetCodes.has(normalizedSet)) {
                         const englishVersions = versions.filter(v => window.englishSetCodes.has(v.set));
                         if (englishVersions.length > 0) {
                             versions = englishVersions;
-                            console.log(`[getPreferredVersionForCard] Filtered to ${versions.length} English versions for non-English original (${originalSet})`);
+                            debugVersionSelectionLog(`[getPreferredVersionForCard] Filtered to ${versions.length} English versions for non-English original (${normalizedSet})`);
                         } else {
                             // No English int prints found, fall back to English by name
                             versions = getEnglishCardVersions(cardName);
-                            console.log(`[getPreferredVersionForCard] No English int prints for ${cardName} (${originalSet}), falling back to name lookup: ${versions.length} versions`);
+                            debugVersionSelectionLog(`[getPreferredVersionForCard] No English int prints for ${cardName} (${normalizedSet}), falling back to name lookup: ${versions.length} versions`);
                         }
                     }
                 }
@@ -1700,27 +2273,30 @@ const BASE_PATH = './data/';
                 _mergeCardType.includes('trainer') || _mergeCardType.includes('supporter') ||
                 _mergeCardType.includes('item') || _mergeCardType.includes('stadium') || _mergeCardType.includes('tool');
 
-            if (_isNonPokemon && originalSet && originalNumber && versions.length > 0) {
+            if (_isNonPokemon && normalizedSet && normalizedNumber && versions.length > 0) {
                 const allEnglish = getEnglishCardVersions(cardName);
                 if (allEnglish.length > 0) {
                     const seenKeys = new Set(versions.map(v => `${v.set}-${v.number}`));
                     const extras = allEnglish.filter(v => !seenKeys.has(`${v.set}-${v.number}`));
                     if (extras.length > 0) {
                         versions = [...versions, ...extras];
-                        console.log(`[getPreferredVersionForCard] Merged ${extras.length} additional English reprints for "${cardName}" (pool now ${versions.length})`);
+                        debugVersionSelectionLog(`[getPreferredVersionForCard] Merged ${extras.length} additional English reprints for "${cardName}" (pool now ${versions.length})`);
                     }
                 }
-            } else if (!_isNonPokemon && originalSet && originalNumber) {
-                console.log(`[getPreferredVersionForCard] Pokémon "${cardName}" — name-merge suppressed, using strict set/number binding`);
+            } else if (!_isNonPokemon && normalizedSet && normalizedNumber) {
+                debugVersionSelectionLog(`[getPreferredVersionForCard] Pokémon "${cardName}" — name-merge suppressed, using strict set/number binding`);
             }
             
             // DEBUG: Log when versions are not found
             if (versions.length === 0) {
-                console.log(`[getPreferredVersionForCard] No versions found for: "${cardName}"`);
-                console.log(`[getPreferredVersionForCard] cardsByNameMap has:`, Object.keys(cardsByNameMap).filter(k => k.toLowerCase().includes(cardName.toLowerCase().substring(0, 5))).slice(0, 5));
+                debugVersionSelectionLog(`[getPreferredVersionForCard] No versions found for: "${cardName}"`);
+                debugVersionSelectionLog(`[getPreferredVersionForCard] cardsByNameMap has:`, Object.keys(cardsByNameMap).filter(k => k.toLowerCase().includes(cardName.toLowerCase().substring(0, 5))).slice(0, 5));
             }
             
-            if (versions.length === 0) return null;
+            if (versions.length === 0) {
+                preferredVersionCache.set(cacheKey, null);
+                return null;
+            }
 
             // SPECIAL HANDLING: Basic Energies should always use SVE prints (17-24)
             if (isBasicEnergy(cardName) && globalPref === 'min') {
@@ -1747,7 +2323,8 @@ const BASE_PATH = './data/';
                     );
                     
                     if (correctSVEVersion) {
-                        console.log(`⚡ Basic Energy "${cardName}": Using SVE ${correctSVEVersion.number} ⚡`);
+                        debugVersionSelectionLog(`⚡ Basic Energy "${cardName}": Using SVE ${correctSVEVersion.number} ⚡`);
+                        preferredVersionCache.set(cacheKey, correctSVEVersion);
                         return correctSVEVersion;
                     }
                 }
@@ -1755,7 +2332,8 @@ const BASE_PATH = './data/';
                 // Fallback: If specific SVE number not found, use any SVE version
                 const sveVersions = versions.filter(v => v.set === 'SVE');
                 if (sveVersions.length > 0) {
-                    console.log(`⚡ Basic Energy "${cardName}": Using fallback SVE ${sveVersions[0].number}`);
+                    debugVersionSelectionLog(`⚡ Basic Energy "${cardName}": Using fallback SVE ${sveVersions[0].number}`);
+                    preferredVersionCache.set(cacheKey, sveVersions[0]);
                     return sveVersions[0];
                 }
             }
@@ -1830,23 +2408,27 @@ const BASE_PATH = './data/';
                 const selected = globalPref === 'max' ? finalList[finalList.length - 1] : finalList[0];
                 
                 // DEBUG: Log all versions and their priorities
-                console.log(`[getPreferredVersionForCard] All versions for "${cardName}":`, 
+                debugVersionSelectionLog(`[getPreferredVersionForCard] All versions for "${cardName}":`, 
                     versions.map((v, idx) => `${v.set} ${v.number} (${v.rarity || 'NO RARITY'}, regMark: ${_getRegMarkScore(v.set)}, priority: ${getRarityPriority(v.rarity, v.set)}, index: ${idx})`).join(', ')
                 );
-                console.log(`[getPreferredVersionForCard] Sorted order:`, 
+                debugVersionSelectionLog(`[getPreferredVersionForCard] Sorted order:`, 
                     sorted.map(v => `${v.set} ${v.number} (priority: ${getRarityPriority(v.rarity, v.set)}, regMark: ${_getRegMarkScore(v.set)})`).join(', ')
                 );
-                console.log(`[getPreferredVersionForCard] ${globalPref} rarity for "${cardName}": ${selected.set} ${selected.number} (${selected.rarity}, priority: ${getRarityPriority(selected.rarity, selected.set)})`);
+                debugVersionSelectionLog(`[getPreferredVersionForCard] ${globalPref} rarity for "${cardName}": ${selected.set} ${selected.number} (${selected.rarity}, priority: ${getRarityPriority(selected.rarity, selected.set)})`);
+                preferredVersionCache.set(cacheKey, selected);
                 return selected;
             }
 
             // If no global preference (shouldn't happen as default is 'min'), return null
             if (!pref) {
+                preferredVersionCache.set(cacheKey, null);
                 return null;
             }
 
             if (pref.mode === 'specific' && pref.set && pref.number) {
-                return versions.find(v => v.set === pref.set && v.number === pref.number) || null;
+                const specificVersion = versions.find(v => v.set === pref.set && v.number === pref.number) || null;
+                preferredVersionCache.set(cacheKey, specificVersion);
+                return specificVersion;
             }
 
             if (pref.mode === 'max' || pref.mode === 'min') {
@@ -1869,9 +2451,12 @@ const BASE_PATH = './data/';
                 // CRITICAL FIX: Filter out NO RARITY cards (priority 999) before selecting
                 const validSorted = sorted.filter(v => getRarityPriority(v.rarity, v.set) < 999);
                 const finalList = validSorted.length > 0 ? validSorted : sorted;
-                return pref.mode === 'max' ? finalList[finalList.length - 1] : finalList[0];
+                const selected = pref.mode === 'max' ? finalList[finalList.length - 1] : finalList[0];
+                preferredVersionCache.set(cacheKey, selected);
+                return selected;
             }
 
+            preferredVersionCache.set(cacheKey, null);
             return null;
         }
 
@@ -2552,7 +3137,6 @@ const BASE_PATH = './data/';
             if (!container) return;
             
             // Load CSV data
-            const timestamp = new Date().getTime();
             let metaData = [];
             let cardDataByArchetype = {};
             
@@ -2565,19 +3149,14 @@ const BASE_PATH = './data/';
                 }
                 
                 // Load card data for images
-                const cardsResponse = await fetch(`${BASE_PATH}current_meta_card_data.csv?t=${timestamp}`);
-                if (cardsResponse.ok) {
-                    const cardsText = await cardsResponse.text();
-                    const cardsData = parseCSV(cardsText);
-                    healCurrentMetaCardRows(cardsData);
-                    
-                    // Group cards by archetype
-                    cardsData.forEach(card => {
-                        const arch = card.archetype;
-                        if (!cardDataByArchetype[arch]) cardDataByArchetype[arch] = [];
-                        cardDataByArchetype[arch].push(card);
-                    });
-                }
+                const cardsData = await loadCurrentMetaRowsWithFallback({ forceRefresh: true });
+
+                // Group cards by archetype
+                cardsData.forEach(card => {
+                    const arch = card.archetype;
+                    if (!cardDataByArchetype[arch]) cardDataByArchetype[arch] = [];
+                    cardDataByArchetype[arch].push(card);
+                });
             } catch (e) {
                 console.warn('Could not load meta data for tier list:', e);
                 return;
@@ -2855,16 +3434,10 @@ const BASE_PATH = './data/';
             if (!container) return;
             
             // Load card data
-            const timestamp = new Date().getTime();
             let cardData = [];
             
             try {
-                const cardsResponse = await fetch(`${BASE_PATH}current_meta_card_data.csv?t=${timestamp}`);
-                if (cardsResponse.ok) {
-                    const cardsText = await cardsResponse.text();
-                    cardData = parseCSV(cardsText);
-                    healCurrentMetaCardRows(cardData);
-                }
+                cardData = await loadCurrentMetaRowsWithFallback({ forceRefresh: true });
             } catch (e) {
                 console.warn('Could not load card data for top cards widget:', e);
                 return;
@@ -3932,7 +4505,7 @@ const BASE_PATH = './data/';
                     loadCityLeagueDeckData(this.value);
                     // DON'T auto-display deck - user must click "Generate Deck" button
                     // This prevents unwanted deck building when just browsing decks
-                    console.log('[Dropdown] Archetype selected:', this.value, '- waiting for user to generate deck');
+                    devLog('[Dropdown] Archetype selected:', this.value, '- waiting for user to generate deck');
                 } else {
                     clearCityLeagueDeckView();
                 }
@@ -4388,6 +4961,7 @@ const BASE_PATH = './data/';
             
             cardMap.forEach((data, cardName) => {
                 const row = { ...data.sampleRow };
+                const legalMaxCopies = getLegalMaxCopies(data.sampleRow?.card_name || cardName, data.sampleRow);
                 
                 // Calculate aggregated max_count (most common value)
                 let max_count = 0;
@@ -4414,6 +4988,14 @@ const BASE_PATH = './data/';
                     max_count = Math.round(data.totalCount);
                     deckCounts = deckCounts > 0 ? 1 : 0;
                 }
+
+                if (max_count > 0) {
+                    max_count = Math.min(max_count, legalMaxCopies);
+                }
+
+                const cappedTotalCount = deckCounts > 0
+                    ? Math.min(data.totalCount, deckCounts * legalMaxCopies)
+                    : data.totalCount;
                 
                 // Calculate percentage based on actual deck counts
                 // data.deckCounts is the sum of deck_count values (number of decks containing this card)
@@ -4424,11 +5006,11 @@ const BASE_PATH = './data/';
                 // Calculate averages.
                 // average_count = average copies in decks that actually use the card.
                 // average_count_overall = average copies across all decks in the archetype.
-                const avgCountWhenUsed = deckCounts > 0 ? (data.totalCount / deckCounts) : 0;
-                const avgCountOverall = totalDecks > 0 ? (data.totalCount / totalDecks) : 0;
+                const avgCountWhenUsed = Math.min(legalMaxCopies, deckCounts > 0 ? (cappedTotalCount / deckCounts) : 0);
+                const avgCountOverall = Math.min(legalMaxCopies, totalDecks > 0 ? (cappedTotalCount / totalDecks) : 0);
                 
                 // Update row and preserve important fields from sampleRow
-                row.total_count = data.totalCount;
+                row.total_count = cappedTotalCount;
                 row.max_count = max_count;
                 row.deck_count = deckCounts;
                 row.deck_inclusion_count = deckCounts;
@@ -4974,7 +5556,7 @@ const BASE_PATH = './data/';
                     ...displayCard,
                     card_name: cardName
                 });
-                const rawPercentage = parseFloat(String(card.percentage_in_archetype || card.share_percent || 0).replace(',', '.'));
+                const rawPercentage = safeParseFloat(card.percentage_in_archetype || card.share_percent || 0);
                 const maxCount = parseInt(card.max_count) || card.max_count || '?';
                 const cardNameEscaped = cardName.replace(/'/g, "\\'");
                 const setCode = displayCard.set_code || '';
@@ -4999,12 +5581,12 @@ const BASE_PATH = './data/';
                 }
                 
                 // Get deck statistics
-                const decksWithCard = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0;
+                const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
                 // Use global total decks count instead of per-date total_decks_in_archetype
-                const totalDecksInArchetype = parseFloat(String(window.currentCityLeagueTotalDecks || card.total_decks_in_archetype || 0).replace(',', '.')) || 0;
-                const totalCount = parseFloat(String(card.total_count || 0).replace(',', '.')) || 0;
-                const avgCountOverallRaw = parseFloat(String(card.average_count_overall || '').replace(',', '.'));
-                const avgCountInUsedRaw = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                const totalDecksInArchetype = safeParseFloat(window.currentCityLeagueTotalDecks || card.total_decks_in_archetype || 0);
+                const totalCount = safeParseFloat(card.total_count || 0);
+                const avgCountOverallRaw = safeParseFloat(card.average_count_overall || '', NaN);
+                const avgCountInUsedRaw = safeParseFloat(card.average_count || card.avg_count || '', NaN);
 
                 const resolvedPercentage = Number.isFinite(rawPercentage) && rawPercentage > 0
                     ? rawPercentage
@@ -5080,7 +5662,7 @@ const BASE_PATH = './data/';
         
         // Set overview rarity mode and refresh display
         function setOverviewRarityMode(mode) {
-            console.log('?? Setting overview rarity mode to:', mode);
+            debugVersionSelectionLog('?? Setting overview rarity mode to:', mode);
             overviewRarityMode = mode;
             
             // Synchronize with global rarity preference so deck builder uses same setting
@@ -5091,7 +5673,7 @@ const BASE_PATH = './data/';
             } else {
                 globalRarityPreference = mode; // 'min' or 'max'
             }
-            console.log('?? Global rarity preference synced to:', globalRarityPreference || 'none (original cards)');
+            debugVersionSelectionLog('?? Global rarity preference synced to:', globalRarityPreference || 'none (original cards)');
             
             // Update button styles - make sure elements exist first
             const btnMin = document.getElementById('overviewRarityMin');
@@ -5104,17 +5686,17 @@ const BASE_PATH = './data/';
             
             // Re-render the grid with current cards (preserve percentage filter)
             const cards = window.currentCityLeagueDeckCards;
-            console.log('?? Cards available for re-render:', cards ? cards.length : 'none');
+            debugVersionSelectionLog('?? Cards available for re-render:', cards ? cards.length : 'none');
             if (cards && cards.length > 0) {
-                console.log('? Re-rendering grid with mode:', mode);
+                debugVersionSelectionLog('? Re-rendering grid with mode:', mode);
                 applyCityLeagueFilter();  // Use filter function to preserve percentage filter
             } else {
-                console.warn('?? No cards available to render - mode saved for when deck is selected');
+                debugVersionSelectionLog('?? No cards available to render - mode saved for when deck is selected');
             }
             
             // Also update the deck display with new rarity preference
             if (window.cityLeagueDeck && Object.keys(window.cityLeagueDeck).length > 0) {
-                console.log('?? Re-rendering deck with new rarity preference');
+                debugVersionSelectionLog('?? Re-rendering deck with new rarity preference');
                 updateDeckDisplay('cityLeague');
             }
         }
@@ -5124,7 +5706,7 @@ const BASE_PATH = './data/';
         // ============================================================================
         // Render function for grid view (compact view)
         function renderCityLeagueDeckGrid(cards) {
-            console.log('?? renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
+            debugVersionSelectionLog('?? renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
             const visualContainer = document.getElementById('cityLeagueDeckVisual');
             const gridContainer = document.getElementById('cityLeagueDeckGrid');
             if (!gridContainer) return;
@@ -5140,22 +5722,7 @@ const BASE_PATH = './data/';
             
             // Get current deck to show deck counts
             const currentDeck = window.cityLeagueDeck || {};
-            
-            // PERFORMANCE: Pre-build price lookup Map for O(1) access
-            const allCardsDatabase = window.allCardsDatabase || [];
-            const priceMap = new Map();
-            allCardsDatabase.forEach(card => {
-                if (card.set && card.number) {
-                    const key = `${card.set}-${card.number}`;
-                    priceMap.set(key, card);
-                    // Also store with normalized number (without leading zeros)
-                    const normalizedNumber = card.number.replace(/^0+/, '') || '0';
-                    const normalizedKey = `${card.set}-${normalizedNumber}`;
-                    if (normalizedKey !== key) {
-                        priceMap.set(normalizedKey, card);
-                    }
-                }
-            });
+            const priceMap = getOverviewPriceLookupCache();
             
             let html = '';
             sortedCards.forEach(card => {
@@ -5172,7 +5739,7 @@ const BASE_PATH = './data/';
                 if (overviewRarityMode === 'all') {
                     // Show ALL international prints of this specific card
                     let allVersions = getInternationalPrintsForCard(originalSetCode, originalSetNumber);
-                    console.log(`?? All mode for ${cardName} (${originalSetCode} ${originalSetNumber}): found ${allVersions.length} int prints`);
+                    debugVersionSelectionLog(`?? All mode for ${cardName} (${originalSetCode} ${originalSetNumber}): found ${allVersions.length} int prints`);
                     
                     if (allVersions && allVersions.length > 0) {
                         versionsToRender = allVersions.map(v => ({
@@ -5191,7 +5758,7 @@ const BASE_PATH = './data/';
                     const preferredVersion = getPreferredVersionForCard(cardName, originalSetCode, originalSetNumber);
                     
                     if (preferredVersion) {
-                        console.log(`?? ${overviewRarityMode} mode for ${cardName}: using PREFERRED version ${preferredVersion.set} ${preferredVersion.number} (${preferredVersion.rarity})`);
+                        debugVersionSelectionLog(`?? ${overviewRarityMode} mode for ${cardName}: using PREFERRED version ${preferredVersion.set} ${preferredVersion.number} (${preferredVersion.rarity})`);
                         versionsToRender = [{
                             ...card,
                             set_code: preferredVersion.set,
@@ -5201,7 +5768,7 @@ const BASE_PATH = './data/';
                         }];
                     } else {
                         // No preferred version found, use original
-                        console.log(`?? ${overviewRarityMode} mode for ${cardName}: no preferred version found, using original`);
+                        debugVersionSelectionLog(`?? ${overviewRarityMode} mode for ${cardName}: no preferred version found, using original`);
                         versionsToRender = [card];
                     }
                 }
@@ -5218,10 +5785,9 @@ const BASE_PATH = './data/';
                     set_number: setNumber,
                     card_name: cardName
                 });
-                const rawPercentage = parseFloat(String(card.percentage_in_archetype || card.share_percent || 0).replace(',', '.'));
+                const rawPercentage = safeParseFloat(card.percentage_in_archetype || card.share_percent || 0);
                 
-                // HARD CAP: Maximum 4 copies for non-basic-energy cards.
-                const isEnergy = isBasicEnergyCardEntry(card);
+                const legalMaxCopies = getLegalMaxCopies(cardName, card);
                 const rawMaxCount = parseInt(card.max_count) || card.max_count || 0;
                 
                 // CRITICAL: ALWAYS show green marker ONLY on the exact version that is in the deck
@@ -5251,14 +5817,14 @@ const BASE_PATH = './data/';
                 }
                 
                 // Get deck statistics: how many decks use this card vs total decks in archetype
-                const decksWithCard = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0;  // Number of decks that contain this card
+                const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
                 // Use global total decks count instead of per-date total_decks_in_archetype
-                const totalDecksInArchetype = parseFloat(String(window.currentCityLeagueTotalDecks || card.total_decks_in_archetype || 0).replace(',', '.')) || 0;
+                const totalDecksInArchetype = safeParseFloat(window.currentCityLeagueTotalDecks || card.total_decks_in_archetype || 0);
                 
                 // Get average count statistics
-                const totalCount = parseFloat(String(card.total_count || 0).replace(',', '.')) || 0;
-                const avgCountOverallRaw = parseFloat(String(card.average_count_overall || '').replace(',', '.'));
-                const avgCountInUsedRaw = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                const totalCount = safeParseFloat(card.total_count || 0);
+                const avgCountOverallRaw = safeParseFloat(card.average_count_overall || '', NaN);
+                const avgCountInUsedRaw = safeParseFloat(card.average_count || card.avg_count || '', NaN);
 
                 const resolvedPercentage = Number.isFinite(rawPercentage) && rawPercentage > 0
                     ? rawPercentage
@@ -5270,9 +5836,11 @@ const BASE_PATH = './data/';
                     ? avgCountInUsedRaw
                     : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
 
-                const finalMaxCount = isEnergy ? rawMaxCount : Math.min(4, Math.max(1, rawMaxCount));
-                const finalAvgUsed = isEnergy ? avgCountInUsedValue : Math.min(4, avgCountInUsedValue);
-                const finalAvgOverall = isEnergy ? avgCountOverallValue : Math.min(4, avgCountOverallValue);
+                const finalMaxCount = rawMaxCount > 0
+                    ? Math.min(legalMaxCopies, Math.max(1, rawMaxCount))
+                    : 0;
+                const finalAvgUsed = Math.min(legalMaxCopies, avgCountInUsedValue);
+                const finalAvgOverall = Math.min(legalMaxCopies, avgCountOverallValue);
                 const maxCount = finalMaxCount;
 
                 const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
@@ -5290,18 +5858,13 @@ const BASE_PATH = './data/';
                 let cardmarketUrl = '';
                 let germanCardName = (displayCard.name_de || card.name_de || card.card_name_de || '').toLowerCase();
                 if (setCode && setNumber) {
-                    // Try exact match first
-                    let key = `${setCode}-${setNumber}`;
-                    let priceCard = priceMap.get(key);
+                    const normalizedSet = normalizeSetCode(setCode);
+                    const normalizedNumber = normalizeCardNumber(setNumber);
+                    let priceCard = priceMap.get(`${normalizedSet}-${normalizedNumber}`);
                     
                     // If no exact match, try with normalized numbers (remove leading zeros)
-                    if (!priceCard) {
-                        const normalizedNumber = setNumber.replace(/^0+/, '') || '0';
-                        const normalizedKey = `${setCode}-${normalizedNumber}`;
-                        priceCard = priceMap.get(normalizedKey);
-                        if (priceCard) {
-                            console.log(`[Price Lookup] Found with normalized number for ${cardName}: ${setCode} ${setNumber} -> ${normalizedNumber}`);
-                        }
+                    if (!priceCard && /^\d+$/.test(normalizedNumber)) {
+                        priceCard = priceMap.get(`${normalizedSet}-${normalizedNumber.padStart(3, '0')}`);
                     }
                     
                     if (priceCard) {
@@ -5310,8 +5873,6 @@ const BASE_PATH = './data/';
                         if (priceCard.name_de) {
                             germanCardName = String(priceCard.name_de).toLowerCase();
                         }
-                    } else {
-                        console.log(`[Price Lookup] ? No price found for ${cardName} (${setCode} ${setNumber})`);
                     }
                 }
                 const priceDisplay = eurPrice || '0,00€';
@@ -6341,6 +6902,28 @@ const BASE_PATH = './data/';
                 updateDeckDisplay(source);
             }
         }
+
+        const pendingDeckRefreshBySource = {};
+
+        function scheduleDeckDependentRefresh(source) {
+            if (pendingDeckRefreshBySource[source]) {
+                cancelAnimationFrame(pendingDeckRefreshBySource[source]);
+            }
+
+            pendingDeckRefreshBySource[source] = requestAnimationFrame(() => {
+                pendingDeckRefreshBySource[source] = null;
+
+                if (source === 'cityLeague') {
+                    applyCityLeagueFilter();
+                } else if (source === 'currentMeta') {
+                    applyCurrentMetaFilter();
+                } else if (source === 'pastMeta') {
+                    renderPastMetaCards();
+                }
+
+                updateOpeningHandStats(source);
+            });
+        }
         
         function clearDeck(source) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
@@ -6485,20 +7068,11 @@ const BASE_PATH = './data/';
                 }
             }
             
-            // Update the My Deck grid
+            // Update the My Deck grid immediately for responsive button feedback.
             renderMyDeckGrid(source);
-            
-            // CRITICAL: Also refresh the Overview Grid to show updated badges
-            // Use the filter functions to preserve active filters (e.g., >90% cards)
-            if (source === 'cityLeague') {
-                applyCityLeagueFilter();
-            } else if (source === 'currentMeta') {
-                applyCurrentMetaFilter();
-            } else if (source === 'pastMeta') {
-                renderPastMetaCards();
-            }
-            // Update opening hand probability statistics
-            updateOpeningHandStats(source);
+
+            // Refresh overview badges and opening hand stats on the next frame.
+            scheduleDeckDependentRefresh(source);
         }
         
         function renderMyDeckGrid(source) {
@@ -6523,11 +7097,11 @@ const BASE_PATH = './data/';
             }
             
             const allCards = currentCardsKey ? (window[currentCardsKey] || []) : (pastMetaFilteredCards || []);
-            const allCardsFromDb = window.allCardsDatabase || [];
+            const dbCache = getMyDeckRenderDbCache();
             
             // Build card data maps: by name and by name+set+number
-            const cardDataByName = {};
-            const cardDataByKey = {};
+            const cardDataByName = Object.create((dbCache && dbCache.cardDataByName) || null);
+            const cardDataByKey = Object.create((dbCache && dbCache.cardDataByKey) || null);
             const cardStatsByNormalizedName = {};
             const cardStatsBySetNumber = {};
             
@@ -6564,31 +7138,6 @@ const BASE_PATH = './data/';
                 }
             });
             
-            // Then add cards from allCardsDatabase with both keys
-            allCardsFromDb.forEach(card => {
-                // CRITICAL FIX: Use actual image_url from database, fallback to buildCardImageUrl only if missing or empty
-                const imageUrl = getUnifiedCardImage(card.set, card.number) || card.image_url || '';
-                const cardData = {
-                    card_name: card.name,
-                    image_url: imageUrl,
-                    percentage_in_archetype: 0,
-                    type: card.type || 'Unknown',
-                    card_type: card.type || 'Unknown',
-                    set_code: card.set,
-                    set_number: card.number,
-                    rarity: card.rarity
-                };
-                
-                // Key by name only
-                if (!cardDataByName[card.name]) {
-                    cardDataByName[card.name] = cardData;
-                }
-                
-                // Key by "name (SET NUM)" for exact version match
-                const versionKey = `${card.name} (${card.set} ${card.number})`;
-                cardDataByKey[versionKey] = cardData;
-            });
-
             // Build stats map before rendering grid cards so overlay has reliable share/avg values.
             const normalizeOverlayName = (name) => normalizeCardName(
                 String(name || '')
@@ -7734,14 +8283,14 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            console.log('[autoComplete] Starting autoComplete for', source);
-            console.log('[autoComplete] Total available cards:', cards.length);
+            devLog('[autoComplete] Starting autoComplete for', source);
+            devLog('[autoComplete] Total available cards:', cards.length);
             
             // ===================================================================
             // CRITICAL FIX: Always clear deck when generating
             // This ensures we build a fresh deck from scratch, not add to existing
             // ===================================================================
-            console.log('[autoComplete] ??? Clearing existing deck to build fresh...');
+            devLog('[autoComplete] Clearing existing deck to build fresh...');
             if (source === 'cityLeague') {
                 window.cityLeagueDeck = {};
                 window.cityLeagueDeckOrder = [];
@@ -7765,7 +8314,7 @@ const BASE_PATH = './data/';
             } else if (source === 'pastMeta') {
                 currentArchetype = window.pastMetaCurrentArchetype;
             }
-            console.log('[autoComplete] Building deck for archetype:', currentArchetype);
+            devLog('[autoComplete] Building deck for archetype:', currentArchetype);
             
             // Get deck reference and initialize card counter
             let deck;
@@ -7800,8 +8349,11 @@ const BASE_PATH = './data/';
             const resolvedTotalDecks = resolveBuilderTotalDecks(source, currentArchetype, cards, uniqueCards);
 
             // Recalculate percentage_in_archetype for each card based on aggregated deck_count
+            // Cap total_count at legal maximum (Ace Spec/Radiant = 1, Basic Energy = 59, else = 4)
             for (const cardName in uniqueCards) {
                 const card = uniqueCards[cardName];
+                const legalMaxCopies = getLegalMaxCopies(cardName, card);
+                card.total_count = Math.min(card.total_count, card.deck_count * legalMaxCopies);
                 const deckCount = card.deck_count;
                 const percentage = Math.min(100, Math.max(0, (deckCount / resolvedTotalDecks) * 100));
                 card.total_decks_in_archetype = resolvedTotalDecks;
@@ -7809,7 +8361,7 @@ const BASE_PATH = './data/';
             }
             
             let deckCards = Object.values(uniqueCards);
-            console.log('[autoComplete] After aggregation:', deckCards.length, 'unique cards');
+            devLog('[autoComplete] After aggregation:', deckCards.length, 'unique cards');
             
             // Debug: Log all card types to understand structure
             const typeSet = new Set();
@@ -7817,7 +8369,7 @@ const BASE_PATH = './data/';
                 const type = card.type || card.card_type || '';
                 typeSet.add(type);
             });
-            console.log('[autoComplete] Card types found:', Array.from(typeSet));
+            devLog('[autoComplete] Card types found:', Array.from(typeSet));
             
             // Step 2: Sort by percentage (descending)
             deckCards.sort((a, b) => {
@@ -7845,30 +8397,30 @@ const BASE_PATH = './data/';
             if (aceSpecCards.length > 0) {
                 bestAceSpec = aceSpecCards[0]; // First one = highest percentage
                 const acePercentage = parseFloat((bestAceSpec.percentage_in_archetype || '0').toString().replace(',', '.'));
-                console.log('[autoComplete] ?? ACE SPEC SELECTED:', bestAceSpec.card_name, `(${acePercentage}%)`);
+                devLog('[autoComplete] ACE SPEC SELECTED:', bestAceSpec.card_name, `(${acePercentage}%)`);
                 
                 if (!addedNames.has(bestAceSpec.card_name)) {
                     cardsToAdd.push({ ...bestAceSpec, addCount: 1 });
                     addedNames.add(bestAceSpec.card_name);
                     currentTotal += 1;
-                    console.log('[autoComplete] ? Added Ace Spec (1x):', bestAceSpec.card_name);
+                    devLog('[autoComplete] Added Ace Spec (1x):', bestAceSpec.card_name);
                 } else {
-                    console.log('[autoComplete] ?? Ace Spec already in deck:', bestAceSpec.card_name);
+                    devLog('[autoComplete] Ace Spec already in deck:', bestAceSpec.card_name);
                 }
             } else {
-                console.log('[autoComplete] ?? WARNING: No Ace Spec found in deck list!');
+                devLog('[autoComplete] WARNING: No Ace Spec found in deck list!');
             }
             
             
             // ===================================================================
             // Step 4: Add remaining cards from 100% downwards until deck is full
             // ===================================================================
-            console.log('[autoComplete] ?? Building deck from highest percentage (100%) downwards...');
+            devLog('[autoComplete] Building deck from highest percentage downwards...');
             
             // Cards are already sorted by percentage (descending) from Step 2
             for (const card of deckCards) {
                 if (currentTotal >= 60) {
-                    console.log('[autoComplete] ? Deck complete (60 cards - tournament legal) - stopping');
+                    devLog('[autoComplete] Deck complete (60 cards) - stopping');
                     break;
                 }
                 
@@ -7879,7 +8431,7 @@ const BASE_PATH = './data/';
                 
                 // Skip Ace Spec cards (the best one was already added in Step 3)
                 if (isAceSpec(card)) {
-                    console.log('[autoComplete] ?? Skipping Ace Spec (already added):', cardName);
+                    devLog('[autoComplete] Skipping Ace Spec (already added):', cardName);
                     continue;
                 }
                 
@@ -7909,12 +8461,12 @@ const BASE_PATH = './data/';
                     cardsToAdd.push({ ...card, addCount: addCount });
                     addedNames.add(cardName);
                     currentTotal += addCount;
-                    console.log(`[autoComplete] ? ${addCount}x ${cardName} (${percentage.toFixed(1)}%, avg: ${avgWhenUsed.toFixed(1)}x) - Total: ${currentTotal}/60`);
+                    devLog(`[autoComplete] ${addCount}x ${cardName} (${percentage.toFixed(1)}%, avg: ${avgWhenUsed.toFixed(1)}x) - Total: ${currentTotal}/60`);
                 }
             }
             
             
-            console.log('[autoComplete] Total cards to add:', currentTotal, 'in', cardsToAdd.length, 'unique entries');
+            devLog('[autoComplete] Total cards to add:', currentTotal, 'in', cardsToAdd.length, 'unique entries');
             
             // Show summary grouped by type
             let summary = `Auto-Complete will add ${currentTotal} cards:\n\n`;
@@ -7946,12 +8498,12 @@ const BASE_PATH = './data/';
                     if (preferredVersion) {
                         setCode = preferredVersion.set;
                         setNumber = preferredVersion.number;
-                        console.log(`[autoComplete] Using PREFERRED version for ${card.card_name}: ${setCode} ${setNumber} (${preferredVersion.rarity})`);
+                        devLog(`[autoComplete] Using PREFERRED version for ${card.card_name}: ${setCode} ${setNumber} (${preferredVersion.rarity})`);
                     } else {
                         // Fallback to original if no preferred version found
                         setCode = originalSetCode;
                         setNumber = originalSetNumber;
-                        console.log(`[autoComplete] No preferred version for ${card.card_name}, using original: ${setCode} ${setNumber}`);
+                        devLog(`[autoComplete] No preferred version for ${card.card_name}, using original: ${setCode} ${setNumber}`);
                     }
                     
                     // ?? PERFORMANCE: Use batch add (no display updates per card)
@@ -7959,7 +8511,7 @@ const BASE_PATH = './data/';
                         addCardToDeckBatch(source, card.card_name, setCode, setNumber);
                     }
                 });
-                console.log('[autoComplete] Deck completed with rarity mode:', globalRarityPreference);
+                devLog('[autoComplete] Deck completed with rarity mode:', globalRarityPreference);
                 
                 // Save deck to localStorage
                 if (source === 'cityLeague') {
@@ -8069,7 +8621,7 @@ const BASE_PATH = './data/';
             } else if (source === 'pastMeta') {
                 currentArchetype = window.pastMetaCurrentArchetype;
             }
-            console.log('[autoCompleteConsistency] Building consistency deck for:', currentArchetype);
+            devLog('[autoCompleteConsistency] Building consistency deck for:', currentArchetype);
             
             // ==========================================
             // 1. AGGREGATE CARDS BY CARD_NAME
@@ -8098,15 +8650,18 @@ const BASE_PATH = './data/';
             
             const resolvedTotalDecks = resolveBuilderTotalDecks(source, currentArchetype, cards, uniqueCards);
 
+            // Cap total_count at legal maximum (Ace Spec/Radiant = 1, Basic Energy = 59, else = 4)
             for (const cardName in uniqueCards) {
                 const card = uniqueCards[cardName];
+                const legalMaxCopies = getLegalMaxCopies(cardName, card);
+                card.total_count = Math.min(card.total_count, card.deck_count * legalMaxCopies);
                 const percentage = Math.min(100, Math.max(0, (card.deck_count / resolvedTotalDecks) * 100));
                 card.total_decks_in_archetype = resolvedTotalDecks;
                 card.percentage_in_archetype = percentage.toFixed(2).replace('.', ',');
             }
             
             let deckCards = Object.values(uniqueCards);
-            console.log('[autoCompleteConsistency] After aggregation:', deckCards.length, 'unique cards');
+            devLog('[autoCompleteConsistency] After aggregation:', deckCards.length, 'unique cards');
             
             // ==========================================
             // 2. COMPUTE PER-CARD STATISTICS
@@ -8283,7 +8838,7 @@ const BASE_PATH = './data/';
                     }
                 });
 
-                console.log('[autoCompleteConsistency] Consistency deck completed with rarity mode:', globalRarityPreference);
+                devLog('[autoCompleteConsistency] Consistency deck completed with rarity mode:', globalRarityPreference);
 
                 if (source === 'cityLeague') {
                     saveCityLeagueDeck();
@@ -8328,11 +8883,9 @@ const BASE_PATH = './data/';
         }
         
         async function loadMetaCardAnalysis(source) {
-            console.log('[loadMetaCardAnalysis] Loading meta analysis for:', source);
-            
             const gridId = source === 'cityLeague' ? 'cityLeagueMetaGrid' : 'currentMetaMetaGrid';
             const grid = document.getElementById(gridId);
-            grid.innerHTML = '<p style="text-align: center; padding: 40px; grid-column: 1 / -1;">Loading top 10 archetypes...</p>';
+            setGridLoadingSkeleton(grid, 10);
             
             try {
                 // ? FIX: Use comparison data for correct Top 10, then analysis data for cards
@@ -8352,8 +8905,6 @@ const BASE_PATH = './data/';
                     ? `city_league_archetypes_comparison${cityLeagueSuffix}.csv`
                     : 'limitless_online_decks_comparison.csv';
                 const archetypeField = source === 'cityLeague' ? 'archetype' : 'deck_name'; // City League uses 'archetype', Current Meta uses 'deck_name'
-                console.log('[loadMetaCardAnalysis] City League format:', cityLeagueFormat, 'comparison file:', comparisonFile);
-
                 let comparisonData = [];
                 const loadCityLeagueComparisonFallback = async () => {
                     // Fallback for format-specific missing/unreachable comparison files: derive from archetype rows.
@@ -8397,8 +8948,6 @@ const BASE_PATH = './data/';
                     }
                 }
                 
-                console.log('[loadMetaCardAnalysis] Loaded', comparisonData.length, 'archetypes from comparison CSV');
-                
                 // Get Top 10 archetypes by new_count (unique deck count)
                 const top10Archetypes = comparisonData
                     .filter(row => row[archetypeField] && row.new_count)
@@ -8409,25 +8958,24 @@ const BASE_PATH = './data/';
                     .sort((a, b) => b.deckCount - a.deckCount)
                     .slice(0, 10);
                 
-                console.log('[loadMetaCardAnalysis] Top 10 archetypes:', top10Archetypes.map(a => `${a.name} (${a.deckCount} decks)`));
-                
                 const top10Names = new Set(top10Archetypes.map(a => a.name.toLowerCase()));
                 const totalDecksInTop10 = top10Archetypes.reduce((sum, a) => sum + a.deckCount, 0);
                 const safeTotalDecksInTop10 = Math.max(1, Math.floor(totalDecksInTop10));
-                
-                console.log('[loadMetaCardAnalysis] Total unique decks in Top 10:', totalDecksInTop10);
                 
                 // Load analysis data (has cards per archetype)
                 const analysisFile = source === 'cityLeague'
                     ? `city_league_analysis${cityLeagueSuffix}.csv`
                     : 'current_meta_card_data.csv';
-                if (source === 'cityLeague') {
-                    console.log('[loadMetaCardAnalysis] Analysis file:', analysisFile);
+                let allAnalysisData = [];
+
+                if (source === 'currentMeta') {
+                    allAnalysisData = await loadCurrentMetaRowsWithFallback({ forceRefresh: true });
+                } else {
+                    const analysisResponse = await fetch(`${BASE_PATH}${analysisFile}?t=${timestamp}`);
+                    if (!analysisResponse.ok) throw new Error('Failed to load analysis data');
+                    const analysisText = await analysisResponse.text();
+                    allAnalysisData = parseCSV(analysisText);
                 }
-                const analysisResponse = await fetch(`${BASE_PATH}${analysisFile}?t=${timestamp}`);
-                if (!analysisResponse.ok) throw new Error('Failed to load analysis data');
-                const analysisText = await analysisResponse.text();
-                let allAnalysisData = parseCSV(analysisText);
 
                 if (source === 'cityLeague' && cityLeagueFormat === 'M3') {
                     // Guard: if analysis rows are suspiciously small for M3 history, force-load explicit M3 file.
@@ -8445,15 +8993,11 @@ const BASE_PATH = './data/';
                     healCurrentMetaCardRows(allAnalysisData);
                 }
                 
-                console.log('[loadMetaCardAnalysis] Loaded', allAnalysisData.length, 'card entries from analysis CSV');
-                
                 // Filter to only Top 10 archetypes
                 const top10AnalysisData = allAnalysisData.filter(row => {
                     const arch = (row.archetype || '').toLowerCase();
                     return top10Names.has(arch);
                 });
-                
-                console.log('[loadMetaCardAnalysis] Filtered to', top10AnalysisData.length, 'card entries from Top 10');
                 
                 // Build map of archetype -> deckCount from comparison data
                 const archetypeMap = {};
@@ -8538,13 +9082,12 @@ const BASE_PATH = './data/';
                     }
                 });
                 
-                console.log('[loadMetaCardAnalysis] Aggregated', Object.keys(cardArchetypeMap).length, 'unique cards');
-                
                 // Calculate meta-wide stats
                 const metaCards = Object.values(cardArchetypeMap).map(cardData => {
                     let totalDecksWithCard = 0;
                     let totalCopies = 0;
                     const archetypes = [];
+                    const legalMaxCopies = getLegalMaxCopies(cardData.card_name, cardData);
                     
                     // For each archetype this card appears in
                     Object.values(cardData.byArchetype).forEach(archData => {
@@ -8570,6 +9113,10 @@ const BASE_PATH = './data/';
                         let totalCopiesForArchetype = Math.max(0, archData.totalCopies || 0);
                         if (totalCopiesForArchetype <= 0 && estimatedDecks > 0 && fallbackAverageCopiesWhenUsed > 0) {
                             totalCopiesForArchetype = estimatedDecks * fallbackAverageCopiesWhenUsed;
+                        }
+
+                        if (estimatedDecks > 0) {
+                            totalCopiesForArchetype = Math.min(totalCopiesForArchetype, estimatedDecks * legalMaxCopies);
                         }
 
                         const avgCopiesPerDeckWhenUsed = estimatedDecks > 0
@@ -8611,8 +9158,8 @@ const BASE_PATH = './data/';
                         image_url: cardData.image_url,
                         totalDecksWithCard: Math.round(totalDecksWithCard),
                         metaShare: parseFloat(correctedMetaShare.toFixed(1)),
-                        avgCount: safeTotalDecksInTop10 > 0 ? totalCopies / safeTotalDecksInTop10 : 0,
-                        avgCountWhenUsed: totalDecksWithCard > 0 ? totalCopies / totalDecksWithCard : 0,
+                        avgCount: Math.min(legalMaxCopies, safeTotalDecksInTop10 > 0 ? totalCopies / safeTotalDecksInTop10 : 0),
+                        avgCountWhenUsed: Math.min(legalMaxCopies, totalDecksWithCard > 0 ? totalCopies / totalDecksWithCard : 0),
                         archetypes: archetypes
                     };
                 });
@@ -8637,21 +9184,13 @@ const BASE_PATH = './data/';
                 });
                 globalRarityPreference = previousGlobalRarityPreference;
                 
-                // Debug: Log a sample card
-                const sampleCard = metaCards.find(c => c.card_name.includes('Boss'));
-                if (sampleCard) {
-                    console.log('[loadMetaCardAnalysis] Sample card:', sampleCard.card_name);
-                    console.log('  ? metaShare:', sampleCard.metaShare.toFixed(2) + '%', `(${sampleCard.totalDecksWithCard} decks / ${totalDecksInTop10} total)`);
-                    console.log('  ? archetypes:', sampleCard.archetypes.slice(0, 3).map(a => `${a.name} (${a.percentage}%)`));
-                }
-                
                 metaCardData[source] = metaCards;
-                console.log('[loadMetaCardAnalysis] Loaded', metaCards.length, 'unique cards from Top 10 archetypes');
                 
                 renderMetaCards(source);
                 
             } catch (error) {
                 console.error('[loadMetaCardAnalysis] Error:', error);
+                clearGridLoadingSkeleton(grid);
                 grid.innerHTML = '<p style="text-align: center; color: #dc3545; padding: 40px; grid-column: 1 / -1;">? Error loading meta analysis</p>';
             }
         }
@@ -8661,6 +9200,7 @@ const BASE_PATH = './data/';
             const countId = source === 'cityLeague' ? 'cityLeagueMetaCardCount' : 'currentMetaMetaCardCount';
             const grid = document.getElementById(gridId);
             const countSpan = document.getElementById(countId);
+            clearGridLoadingSkeleton(grid);
             
             if (!metaCardData[source] || metaCardData[source].length === 0) {
                 grid.innerHTML = getEmptyStateHtml();
@@ -10045,6 +10585,7 @@ const BASE_PATH = './data/';
         let pastMetaCurrentDeck = null;
         let pastMetaCurrentCards = [];
         let pastMetaFilteredCards = [];
+        let pastMetaCurrentScope = null;
         let pastMetaRarityMode = 'min'; // 'min', 'max', 'all'
         let pastMetaShowGridView = true; // Default: Grid View
 
@@ -10128,16 +10669,66 @@ const BASE_PATH = './data/';
         function derivePastMetaLabelFromSetCode(setCode, setOrderMap) {
             const code = String(setCode || '').trim().toUpperCase();
             if (!code) return '';
-            if (code.includes('-')) return code;
+            const mapped = mapSetCodeToMetaFormat(code);
+            return mapped || code;
+        }
 
-            // Keep legacy/old-era set codes as-is; derive modern labels as SVI-<SET>.
-            const svOrder = setOrderMap.SVI || setOrderMap.SVE || 0;
-            const codeOrder = setOrderMap[code] || 0;
-            if (svOrder > 0 && codeOrder > 0 && codeOrder >= svOrder) {
-                return `SVI-${code}`;
+        function getPastMetaDeckTournamentKey(deck) {
+            const tournamentId = String(deck?.tournament_id || '').trim();
+            const tournamentName = String(deck?.tournament_name || '').trim();
+            const tournamentDate = String(deck?.tournament_date || '').trim();
+            const format = String(deck?.format || '').trim();
+
+            if (tournamentId) return `id:${tournamentId}`;
+            if (tournamentName && tournamentDate) return `${format}|||${tournamentDate}|||${tournamentName}`;
+            if (tournamentDate) return `${format}|||${tournamentDate}`;
+            if (tournamentName) return `${format}|||${tournamentName}`;
+            return format || 'unknown';
+        }
+
+        function getPastMetaRepresentativeCardCopies(card) {
+            const avgOverall = parsePastMetaNumber(card?.card_count ?? card?.average_count_overall, 0);
+            const maxCount = parseInt(card?.max_count || 0, 10) || 0;
+            const deckCount = parseInt(card?.deck_count || card?.deck_inclusion_count || 0, 10) || 0;
+
+            if (!pastMetaCurrentScope || pastMetaCurrentScope.totalDecklists <= 1) {
+                return maxCount;
             }
 
-            return code;
+            if (avgOverall > 0) {
+                return avgOverall;
+            }
+
+            if (deckCount > 0) {
+                return 1;
+            }
+
+            return maxCount;
+        }
+
+        function getPastMetaDisplayCount(card) {
+            const representativeCopies = getPastMetaRepresentativeCardCopies(card);
+            const maxCount = parseInt(card?.max_count || 0, 10) || 0;
+
+            if (!pastMetaCurrentScope || pastMetaCurrentScope.totalDecklists <= 1) {
+                return maxCount;
+            }
+
+            if (representativeCopies > 0) {
+                return Math.max(1, Math.round(representativeCopies));
+            }
+
+            return maxCount;
+        }
+
+        function getPastMetaSummaryTotalCount(cards) {
+            if (!Array.isArray(cards) || cards.length === 0) return 0;
+
+            if (!pastMetaCurrentScope || pastMetaCurrentScope.totalDecklists <= 1) {
+                return cards.reduce((sum, card) => sum + (parseInt(card.max_count || 0, 10) || 0), 0);
+            }
+
+            return cards.reduce((sum, card) => sum + getPastMetaRepresentativeCardCopies(card), 0);
         }
         
         async function loadPastMeta() {
@@ -10180,12 +10771,14 @@ const BASE_PATH = './data/';
             // Some exports have empty meta/format columns; infer per DECK (tournament_date + archetype) from newest set_code
             const inferredMetaByDeck = new Map();
             cardsData.forEach(card => {
+                const tournamentId = String(card.tournament_id || '').trim();
                 const tournamentDate = String(card.tournament_date || '').trim();
                 const deckArchetype = String(card.archetype || '').trim();
                 const setCode = String(card.set_code || '').trim().toUpperCase();
-                if (!tournamentDate || !deckArchetype || !setCode) return;
+                if ((!tournamentId && !tournamentDate) || !deckArchetype || !setCode) return;
 
-                const deckKey = `${tournamentDate}|||${deckArchetype}`;
+                const deckPeriodKey = tournamentId || tournamentDate;
+                const deckKey = `${deckPeriodKey}|||${deckArchetype}`;
                 const nextOrder = pastMetaSetOrderMap[setCode] || 0;
                 const current = inferredMetaByDeck.get(deckKey);
                 const currentOrder = current ? (pastMetaSetOrderMap[current] || 0) : -1;
@@ -10200,29 +10793,35 @@ const BASE_PATH = './data/';
             cardsData.forEach(card => {
                 const deckArchetype = sanitizePastMetaArchetypeName(card.archetype);
                 const tournamentDate = card.tournament_date || 'Unknown Date';
+                const cardTournamentId = String(card.tournament_id || '').trim();
+                const cardTournamentName = String(card.tournament_name || '').trim();
                 
                 // Infer format per deck from the newest set code in this specific deck
-                const deckMetaLookupKey = `${String(tournamentDate).trim()}|||${String(card.archetype || '').trim()}`;
+                const deckPeriodKey = cardTournamentId || String(tournamentDate).trim();
+                const deckMetaLookupKey = `${deckPeriodKey}|||${String(card.archetype || '').trim()}`;
                 const inferredMetaSetCode = inferredMetaByDeck.get(deckMetaLookupKey) || '';
                 const inferredMeta = derivePastMetaLabelFromSetCode(inferredMetaSetCode, pastMetaSetOrderMap);
                 
-                const tournament = pastMetaTournaments.find(t => {
+                const matchingTournaments = pastMetaTournaments.filter(t => {
                     if (!t || t.tournament_date !== tournamentDate) return false;
                     const cardMeta = String(card.meta || '').trim();
                     const overviewFormat = String(t.format || '').trim();
                     return !cardMeta || !overviewFormat || overviewFormat === cardMeta;
                 });
+                const tournament = matchingTournaments.length === 1 ? matchingTournaments[0] : null;
                 const resolvedFormat = String(card.meta || '').trim()
                     || String((tournament && tournament.format) || '').trim()
                     || inferredMeta
                     || 'Unknown';
-                const deckKey = `${resolvedFormat}|||${tournamentDate}|||${deckArchetype}`;
+                const resolvedTournamentId = cardTournamentId || String((tournament && tournament.tournament_id) || '').trim() || tournamentDate;
+                const resolvedTournamentName = cardTournamentName || String((tournament && tournament.tournament_name) || '').trim() || tournamentDate;
+                const deckKey = `${resolvedFormat}|||${resolvedTournamentId}|||${deckArchetype}`;
                 
                 if (!deckMap.has(deckKey)) {
                     deckMap.set(deckKey, {
                         key: deckKey,
-                        tournament_id: tournament ? tournament.tournament_id : tournamentDate,
-                        tournament_name: tournament ? tournament.tournament_name : tournamentDate,
+                        tournament_id: resolvedTournamentId,
+                        tournament_name: resolvedTournamentName,
                         tournament_date: tournamentDate,
                         deck_name: deckArchetype,
                         archetype: deckArchetype,
@@ -10429,6 +11028,7 @@ const BASE_PATH = './data/';
                 document.getElementById('pastMetaDeckVisual').style.display = 'none';
                 pastMetaCurrentDeck = null;
                 pastMetaCurrentCards = [];
+                pastMetaCurrentScope = null;
                 return;
             }
             
@@ -10447,6 +11047,9 @@ const BASE_PATH = './data/';
                 console.error('No matching decks found for archetype:', selectedArchetype);
                 return;
             }
+
+            const uniqueTournamentKeys = new Set(matchingDecks.map(deck => getPastMetaDeckTournamentKey(deck)));
+            const uniqueTournamentCount = uniqueTournamentKeys.size;
             
             // Aggregate cards across all matching decks (same statistical pipeline as City/Global)
             const selectedRows = [];
@@ -10486,6 +11089,14 @@ const BASE_PATH = './data/';
                 max_count: parseInt(card.max_count || 0, 10) || 0
             }));
             const aggregatedCards = deduplicateCards(aggregatedCardsRaw);
+            pastMetaCurrentScope = {
+                format: formatFilter,
+                tournamentFilter,
+                totalDecklists,
+                uniqueTournamentCount,
+                selectedDeckEntryCount: matchingDecks.length,
+                multiTournament: uniqueTournamentCount > 1
+            };
             
             // Create a virtual deck object for the aggregated data
             pastMetaCurrentDeck = {
@@ -10493,7 +11104,7 @@ const BASE_PATH = './data/';
                 archetype: selectedArchetype,
                 format: formatFilter === 'all' ? 'Multi-Format' : formatFilter,
                 tournament_name: tournamentNames.join(', '),
-                tournament_count: matchingDecks.length,
+                tournament_count: uniqueTournamentCount,
                 decklist_count: totalDecklists,
                 cards: aggregatedCards
             };
@@ -10502,15 +11113,15 @@ const BASE_PATH = './data/';
             
             // Update stats
             document.getElementById('pastMetaStatsSection').style.display = 'block';
-            const totalCards = aggregatedCards.reduce((sum, c) => sum + (parseInt(c.max_count || 0, 10) || 0), 0);
+            const totalCards = getPastMetaSummaryTotalCount(aggregatedCards);
             document.getElementById('pastMetaStatCards').textContent = `${aggregatedCards.length} / ${Math.round(totalCards)}`;
             
             // Show tournament info based on count
-            if (matchingDecks.length === 1) {
+            if (uniqueTournamentCount === 1) {
                 const cleanName = tournamentNames[0];
                 document.getElementById('pastMetaStatTournament').textContent = `${cleanName} (${totalDecklists} decklists)`;
             } else {
-                document.getElementById('pastMetaStatTournament').textContent = `${matchingDecks.length} Tournaments (${totalDecklists} total decklists)`;
+                document.getElementById('pastMetaStatTournament').textContent = `${uniqueTournamentCount} Tournaments (${totalDecklists} total decklists)`;
             }
             
             document.getElementById('pastMetaStatFormat').textContent = pastMetaCurrentDeck.format;
@@ -10521,7 +11132,7 @@ const BASE_PATH = './data/';
             // Apply filters and render
             filterPastMetaCards();
             
-            console.log(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${matchingDecks.length} tournaments, ${totalDecklists} total decklists)`);
+            console.log(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${uniqueTournamentCount} tournaments, ${totalDecklists} total decklists)`);
         }
         
         function filterPastMetaCards() {
@@ -10563,7 +11174,7 @@ const BASE_PATH = './data/';
             const sortedCards = sortCardsByType(cardsToShow);
             
             // Update counts
-            const totalCards = sortedCards.reduce((sum, c) => sum + (parseInt(c.max_count || 0, 10) || 0), 0);
+            const totalCards = getPastMetaSummaryTotalCount(sortedCards);
             document.getElementById('pastMetaCardCount').textContent = `${sortedCards.length} Cards`;
             document.getElementById('pastMetaCardCountSummary').textContent = `/ ${Math.round(totalCards)} Total`;
             
@@ -10595,7 +11206,7 @@ const BASE_PATH = './data/';
             
             cards.forEach(card => {
                 const cardName = card.full_card_name || card.card_name || 'Unknown Card';
-                const count = parseInt(card.max_count || 0, 10) || 0;
+                const count = getPastMetaDisplayCount(card);
                 const isAceSpecCard = isAceSpec(cardName);
                 const proxySetCode = card.set_code || card.set || '';
                 const proxySetNumber = card.set_number || card.number || '';
@@ -10636,7 +11247,7 @@ const BASE_PATH = './data/';
                 const cardFullName = fixMojibake(card.full_card_name || card.card_name || 'Unknown Card');
                 const cardNameEscaped = cardFullName.replace(/'/g, "\\'");
                 const avgCount = parseFloat(String(card.card_count || card.average_count_overall || 0).replace(',', '.')) || 0; // Average count across all decklists (e.g., 0.98)
-                const maxCount = parseInt(card.max_count || 0, 10) || 0;
+                const maxCount = getPastMetaDisplayCount(card);
                 const decklistCount = parseFloat(String(card.decklist_count || card.total_decks_in_archetype || 0).replace(',', '.')) || 0; // Total decklists in archetype
                 const deckCountByStats = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0; // Number of decks containing this card
                 
@@ -11137,10 +11748,7 @@ const BASE_PATH = './data/';
                 
                 // Load Current Meta Analysis CSV
                 try {
-                    const currentMetaResponse = await fetch(BASE_PATH + 'current_meta_card_data.csv');
-                    const currentMetaText = await currentMetaResponse.text();
-                    const currentMetaCards = parseCSV(currentMetaText);
-                    healCurrentMetaCardRows(currentMetaCards);
+                    const currentMetaCards = await loadCurrentMetaRowsWithFallback();
                     currentMetaCards.forEach(card => {
                         if (card.card_name) {
                             const cardNameNorm = normalizeCardName(card.card_name);
@@ -11263,13 +11871,14 @@ const BASE_PATH = './data/';
                         let processedRows = 0;
                         
                         rows.forEach(row => {
-                            if (!row.card_name || !row.archetype || !row.meta) {
+                            const resolvedMeta = normalizeTournamentFormatLabel(row.meta || row.format || '', row.set_code || '');
+                            if (!row.card_name || !row.archetype || !resolvedMeta) {
                                 if (processedRows === 0) {
                                     console.log(`[Deck Coverage] Skipping row - missing fields:`, { 
                                         has_card_name: !!row.card_name, 
                                         has_archetype: !!row.archetype, 
-                                        has_meta: !!row.meta,
-                                        meta_value: row.meta
+                                        has_meta: !!resolvedMeta,
+                                        meta_value: resolvedMeta
                                     });
                                 }
                                 return;
@@ -11281,7 +11890,7 @@ const BASE_PATH = './data/';
                             // Skip basic energies from coverage tracking
                             if (isBasicEnergy(row.card_name)) return;
                             
-                            const archetypeKey = `${row.meta}|${row.archetype}`;
+                            const archetypeKey = `${resolvedMeta}|${row.archetype}`;
                             const tournamentDate = row.tournament_date || null; // e.g., "13th February 2026"
                             
                             // Extract the actual counts from CSV
@@ -11367,13 +11976,13 @@ const BASE_PATH = './data/';
                             
                             // Track meta
                             if (processedRows <= 3) {
-                                console.log(`[Deck Coverage] Adding meta: "${row.meta}" for card: ${cardName}`);
+                                console.log(`[Deck Coverage] Adding meta: "${resolvedMeta}" for card: ${cardName}`);
                             }
-                            window.allMetas.add(row.meta);
-                            if (!window.metaCardsMap.has(row.meta)) {
-                                window.metaCardsMap.set(row.meta, new Set());
+                            window.allMetas.add(resolvedMeta);
+                            if (!window.metaCardsMap.has(resolvedMeta)) {
+                                window.metaCardsMap.set(resolvedMeta, new Set());
                             }
-                            window.metaCardsMap.get(row.meta).add(cardName);
+                            window.metaCardsMap.get(resolvedMeta).add(cardName);
                         });
                         
                         console.log(`[Deck Coverage] Processed ${processedRows} rows from ${source.name}`);
@@ -11409,24 +12018,14 @@ const BASE_PATH = './data/';
                 
                 // 1. Load formats from current meta card data
                 try {
-                    const response = await fetch(BASE_PATH + 'current_meta_card_data.csv');
-                    const csvText = await response.text();
-                    
-                    // Parse CSV manually (semicolon separated)
-                    const lines = csvText.split('\n').filter(line => line.trim());
-                    const headers = lines[0].split(';');
-                    const metaIndex = headers.indexOf('meta');
-                    
-                    if (metaIndex !== -1) {
-                        // Extract unique meta/format values
-                        for (let i = 1; i < lines.length; i++) {
-                            const cells = lines[i].split(';');
-                            if (cells[metaIndex] && cells[metaIndex].trim()) {
-                                uniqueFormats.add(cells[metaIndex].trim());
-                            }
+                    const currentMetaRows = await loadCurrentMetaRowsWithFallback();
+                    currentMetaRows.forEach(row => {
+                        const format = normalizeTournamentFormatLabel(row.format || row.meta || '', row.set_code || '');
+                        if (format && format !== 'Meta Live' && format !== 'Meta Play!') {
+                            uniqueFormats.add(format);
                         }
-                        console.log(`[Cards Tab] Loaded formats from current meta`);
-                    }
+                    });
+                    console.log(`[Cards Tab] Loaded formats from current meta/fallback dataset`);
                 } catch (err) {
                     console.warn('[Cards Tab] Could not load current_meta_card_data.csv:', err);
                 }
@@ -11446,7 +12045,10 @@ const BASE_PATH = './data/';
                         for (let i = 1; i < lines.length; i++) {
                             const cells = lines[i].split(';');
                             if (cells[formatIndex] && cells[formatIndex].trim()) {
-                                uniqueFormats.add(cells[formatIndex].trim());
+                                const normalized = normalizeTournamentFormatLabel(cells[formatIndex].trim());
+                                if (normalized && normalized !== 'Meta Live' && normalized !== 'Meta Play!') {
+                                    uniqueFormats.add(normalized);
+                                }
                             }
                         }
                         console.log(`[Cards Tab] Loaded formats from tournament overview`);
@@ -11454,6 +12056,9 @@ const BASE_PATH = './data/';
                 } catch (err) {
                     console.warn('[Cards Tab] Could not load tournament_cards_data_overview.csv:', err);
                 }
+
+                // 3. Guarantee baseline known formats are available when data exists but misses labels.
+                KNOWN_META_FORMAT_CODES.forEach(formatCode => uniqueFormats.add(formatCode));
                 
                 // Map Meta Play! and Meta Live to SVI-PFL (don't show them separately)
                 const formatMapping = {
@@ -11461,15 +12066,8 @@ const BASE_PATH = './data/';
                     'Meta Live': 'SVI-PFL'
                 };
                 
-                // Convert mapped formats
-                const mappedFormats = new Set();
-                uniqueFormats.forEach(format => {
-                    const mapped = formatMapping[format] || format;
-                    mappedFormats.add(mapped);
-                });
-                
                 // Create formats array sorted (newest to oldest - reverse alphabetical for SVI-XXX format)
-                const sortedFormats = Array.from(mappedFormats).sort((a, b) => b.localeCompare(a));
+                const sortedFormats = Array.from(uniqueFormats).sort((a, b) => b.localeCompare(a));
                 window.cardFormatsData = {
                     formats: sortedFormats.map(format => ({
                         code: format,
@@ -13742,7 +14340,7 @@ const BASE_PATH = './data/';
         // Load Current Meta Analysis Data
         async function loadCurrentMetaAnalysis() {
             console.log('Loading Current Meta Analysis...');
-            const data = await loadCSV('current_meta_card_data.csv');
+            const data = await loadCurrentMetaRowsWithFallback();
             console.log('Loaded data:', data ? `${data.length} rows` : 'null');
             
             // Load deck stats (winrates)
@@ -13894,13 +14492,27 @@ const BASE_PATH = './data/';
                     // Display the deck after loading archetype data
                     if (window.currentMetaDeck && Object.keys(window.currentMetaDeck).length > 0) {
                         updateDeckDisplay('currentMeta');
-                        console.log('[Dropdown] Displaying saved deck for selected archetype');
+                        devLog('[Dropdown] Displaying saved deck for selected archetype');
                     }
                 } else {
                     clearCurrentMetaDeckView();
                 }
             };
-            
+
+            // Apply pending navigation selection (from jumpToCardAnalysis)
+            const pendingMeta = String(window.pendingCurrentMetaDeckSelection || '').trim();
+            if (pendingMeta) {
+                const matchingOption = Array.from(select.options).find(option =>
+                    option.value && option.value.toLowerCase() === pendingMeta.toLowerCase()
+                );
+                if (matchingOption) {
+                    select.value = matchingOption.value;
+                    window.pendingCurrentMetaDeckSelection = null;
+                    window.currentCurrentMetaArchetype = matchingOption.value;
+                    loadCurrentMetaDeckData(matchingOption.value);
+                }
+            }
+
             // Enable search functionality
             const searchInput = document.getElementById('currentMetaDeckSearch');
             if (searchInput) {
@@ -13973,7 +14585,6 @@ const BASE_PATH = './data/';
         
         // Load deck data with format filtering
         function loadCurrentMetaDeckData(archetype) {
-            console.log('Loading Current Meta deck data for:', archetype);
             const data = window.currentMetaAnalysisData;
             if (!data) return;
             
@@ -13984,11 +14595,8 @@ const BASE_PATH = './data/';
             if (savedDeck) {
                 try {
                     const parsed = JSON.parse(savedDeck);
-                    if (parsed.archetype === archetype) {
-                        console.log('[loadCurrentMetaDeckData] Deck already loaded for this archetype');
-                    } else {
+                    if (parsed.archetype !== archetype) {
                         // Different archetype - CLEAR old deck
-                        console.log('[loadCurrentMetaDeckData] Clearing old deck from different archetype:', parsed.archetype);
                         window.currentMetaDeck = {};
                         window.currentMetaDeckOrder = [];
                         saveCurrentMetaDeck();
@@ -14003,13 +14611,10 @@ const BASE_PATH = './data/';
                 row.archetype && row.archetype.toLowerCase() === archetype.toLowerCase()
             );
             
-            console.log(`Found ${deckCards.length} cards for archetype ${archetype}`);
-            
             // Apply format filter
             if (currentMetaFormatFilter !== 'all') {
                 const filterValue = currentMetaFormatFilter === 'live' ? 'Meta Live' : 'Meta Play!';
                 deckCards = deckCards.filter(row => row.meta === filterValue);
-                console.log(`After ${currentMetaFormatFilter} filter: ${deckCards.length} cards`);
             }
             
             if (deckCards.length === 0) {
@@ -14036,11 +14641,8 @@ const BASE_PATH = './data/';
                 }
             });
             
-            console.log(`Total decks in archetype (${archetype}) after filter: ${totalDecksInArchetype}`);
-            
             // Deduplicate
             deckCards = deduplicateCards(deckCards);
-            console.log('Found cards (after deduplication):', deckCards.length);
             
             window.currentCurrentMetaDeckCards = deckCards;
             
@@ -14470,7 +15072,6 @@ const BASE_PATH = './data/';
         
         // Render grid view
         function renderCurrentMetaDeckGrid(cards) {
-            console.log('?? renderCurrentMetaDeckGrid called with:', cards.length, 'cards');
             const visualContainer = document.getElementById('currentMetaDeckVisual');
             const gridContainer = document.getElementById('currentMetaDeckGrid');
             if (!gridContainer) return;
@@ -14552,7 +15153,11 @@ const BASE_PATH = './data/';
                         image_url: imageUrl
                     });
                     const rawPercentage = parseFloat(String(card.percentage_in_archetype || card.share_percent || 0).replace(',', '.'));
-                    const maxCount = parseInt(card.max_count) || card.max_count || '?';
+                    const legalMaxCopies = getLegalMaxCopies(cardName, card);
+                    const rawMaxCount = parseInt(card.max_count) || card.max_count || 0;
+                    const maxCount = rawMaxCount > 0
+                        ? Math.min(legalMaxCopies, Math.max(1, rawMaxCount))
+                        : '?';
                     
                     let deckCount = 0;
                     if (setCode && setNumber) {
@@ -14588,9 +15193,12 @@ const BASE_PATH = './data/';
                         ? avgCountInUsedRaw
                         : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
 
+                    const cappedAvgCountOverallValue = Math.min(legalMaxCopies, avgCountOverallValue);
+                    const cappedAvgCountInUsedValue = Math.min(legalMaxCopies, avgCountInUsedValue);
+
                     const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
-                    const avgCountOverall = Math.max(0, avgCountOverallValue).toFixed(2).replace('.', ',');
-                    const avgCountInUsedDecks = Math.max(0, avgCountInUsedValue).toFixed(2).replace('.', ',');
+                    const avgCountOverall = Math.max(0, cappedAvgCountOverallValue).toFixed(2).replace('.', ',');
+                    const avgCountInUsedDecks = Math.max(0, cappedAvgCountInUsedValue).toFixed(2).replace('.', ',');
                     
                     let eurPrice = '';
                     let cardmarketUrl = '';

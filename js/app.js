@@ -2388,6 +2388,16 @@ const BASE_PATH = './data/';
             return 4;
         }
 
+        function getOpeningHandProbability(copies, deckSize = 60) {
+            if (copies <= 0 || deckSize < 7) return 0;
+            let pNotDrawing = 1;
+            for (let i = 0; i < 7; i++) {
+                pNotDrawing *= (deckSize - copies - i) / (deckSize - i);
+            }
+            if (pNotDrawing < 0 || isNaN(pNotDrawing)) pNotDrawing = 0;
+            return ((1 - pNotDrawing) * 100).toFixed(1);
+        }
+
         let averageDisplayMode = (localStorage.getItem('averageDisplayMode') || 'exact').toLowerCase() === 'recommended'
             ? 'recommended'
             : 'exact';
@@ -7974,11 +7984,14 @@ const BASE_PATH = './data/';
                 const cardId = `${safeCardName}|${setCode}|${setNumber}`;
                 const isOwned = window.userCollection && window.userCollection.has(cardId);
                 const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
+                const prob = getOpeningHandProbability(count, 60);
+                const probBadge = `<div class="start-hand-prob" title="Wahrscheinlichkeit auf der Starthand (7 Karten)">✋ ${prob}%</div>`;
                 
                 html += `
                     <div class="deck-card" style="position: relative;" title="${safeCardName} (${count}x) - ${percentage}%">
                         <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" style="cursor: zoom-in;" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped}')">
                         
+                        ${probBadge}
                         ${ownedBadge}
                         
                         <div class="card-max-count">${count}</div>

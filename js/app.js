@@ -886,6 +886,13 @@ const BASE_PATH = './data/';
         document.addEventListener('DOMContentLoaded', function() {
             renderProxyQueue();
             initializeProxyManualSearchInput();
+
+            // Mobile Drag & Drop polyfill
+            if (typeof MobileDragDrop !== 'undefined' && MobileDragDrop.polyfill) {
+                MobileDragDrop.polyfill({ holdToDrag: 300 });
+            }
+            // Passive touchmove listener for mobile drag support
+            window.addEventListener('touchmove', function() {}, { passive: false });
         });
         
         // Tab switching
@@ -7438,6 +7445,7 @@ const BASE_PATH = './data/';
             const priceEl = document.getElementById(priceElId);
             if (priceEl) {
                 let totalPrice = 0;
+                let hasAnyPrice = false;
                 for (const [deckKey, count] of Object.entries(deck)) {
                     if (!count || count <= 0) continue;
                     let cardData = null;
@@ -7451,10 +7459,10 @@ const BASE_PATH = './data/';
                     }
                     if (cardData && cardData.eur_price && cardData.eur_price !== '' && cardData.eur_price !== 'N/A') {
                         const p = parseFloat(String(cardData.eur_price).replace(',', '.'));
-                        if (!isNaN(p)) totalPrice += p * count;
+                        if (!isNaN(p)) { totalPrice += p * (parseInt(count) || 0); hasAnyPrice = true; }
                     }
                 }
-                priceEl.textContent = totalPrice.toFixed(2) + ' \u20ac';
+                priceEl.textContent = hasAnyPrice ? (isNaN(totalPrice) ? '0.00' : totalPrice.toFixed(2)) + ' \u20ac' : 'N/A';
             }
 
             // Add visual warning to deck container if over 60 cards
@@ -11020,7 +11028,9 @@ const BASE_PATH = './data/';
                             }
                             
                             const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} games)`;
-                            tableHtml += `<td style="background: ${bgColor}; color: ${textColor}; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd; cursor: help; transition: all 0.2s;" title="${tooltip}" onmouseover="this.style.transform='scale(1.1)'; this.style.zIndex='10'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1'; this.style.boxShadow='none'">${winRate.toFixed(1)}%</td>`;
+                            const safeRow = rowDeck.replace(/'/g, "\\'");
+                            const safeCol = colDeck.replace(/'/g, "\\'");
+                            tableHtml += `<td style="background: ${bgColor}; color: ${textColor}; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd; cursor: help; transition: all 0.2s;" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)" onmouseover="this.style.transform='scale(1.1)'; this.style.zIndex='10'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1'; this.style.boxShadow='none'">${winRate.toFixed(1)}%</td>`;
                         }
                     });
                     tableHtml += '</tr>';
@@ -13150,10 +13160,9 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            // Reset to page 1 when filters change (unless showing all cards)
-            if (!showAllCards) {
-                currentCardsPage = 1;
-            }
+            // Always reset to page 1 when filters change
+            currentCardsPage = 1;
+            showAllCards = false;
             
             const searchInput = document.getElementById('cardSearch');
             const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
@@ -13185,8 +13194,8 @@ const BASE_PATH = './data/';
             let failedValidation = 0;
             
             window.filteredCardsData = window.allCardsData.filter(card => {
-                // Skip invalid cards
-                if (!card || !card.name || card.name === 'name' || !card.image_url) {
+                // Skip invalid cards (allow missing image_url — UI will show placeholder)
+                if (!card || !card.name || card.name === 'name') {
                     failedValidation++;
                     return false;
                 }
@@ -14835,7 +14844,15 @@ const BASE_PATH = './data/';
 
         function openLimitlessCard(setCode, setNumber) {
             if (!setCode || !setNumber) return;
-            const url = `https://limitlesstcg.com/cards/${encodeURIComponent(setCode)}/${encodeURIComponent(setNumber)}`;
+            // Map promo set codes to Limitless format
+            const limitlessSetMap = {
+                'SVP': 'PR-SV', 'SVPEN': 'PR-SV',
+                'SWSHP': 'PR-SW', 'SWP': 'PR-SW',
+                'SMP': 'PR-SM', 'SMPRO': 'PR-SM',
+                'XYP': 'PR-XY', 'BWP': 'PR-BW'
+            };
+            const mappedSet = limitlessSetMap[setCode.toUpperCase()] || setCode;
+            const url = `https://limitlesstcg.com/cards/${encodeURIComponent(mappedSet)}/${encodeURIComponent(setNumber)}`;
             window.open(url, '_blank');
         }
 
@@ -16728,6 +16745,21 @@ const BASE_PATH = './data/';
                         number: setNumber,
                         key: `${setCode}-${setNumber}` // Unique identifier
                     });
+                } else {
+                    // Fallback: PTCGL basic energy lines like "10 Basic {R} Energy Energy"
+                    const energyMatch = line.match(/^(\d+)\s+Basic\s+\{([RGWLPFDM])\}\s+Energy/i);
+                    if (energyMatch) {
+                        const energyMap = { G:'1', R:'2', W:'3', L:'4', P:'5', F:'6', D:'7', M:'8' };
+                        const energyNames = { G:'Basic Grass Energy', R:'Basic Fire Energy', W:'Basic Water Energy', L:'Basic Lightning Energy', P:'Basic Psychic Energy', F:'Basic Fighting Energy', D:'Basic Darkness Energy', M:'Basic Metal Energy' };
+                        const code = energyMatch[2].toUpperCase();
+                        deck.push({
+                            count: parseInt(energyMatch[1]),
+                            name: energyNames[code] || 'Basic Energy',
+                            set: 'SVE',
+                            number: energyMap[code] || '1',
+                            key: `SVE-${energyMap[code] || '1'}`
+                        });
+                    }
                 }
             }
             
@@ -16865,6 +16897,7 @@ const BASE_PATH = './data/';
             } else if (source === 'pastMeta') {
                 deck = window.pastMetaDeck; order = window.pastMetaDeckOrder; archetype = window.pastMetaCurrentArchetype;
             } else return;
+            if (!deck || typeof deck !== 'object') { showDeckShareToast('⚠️ No deck data available!'); return; }
             const total = Object.values(deck || {}).reduce((s, c) => s + c, 0);
             if (total === 0) { showDeckShareToast('⚠️ No cards in deck to share!'); return; }
             

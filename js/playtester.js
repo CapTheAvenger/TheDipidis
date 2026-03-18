@@ -98,7 +98,11 @@ function openPlaytester(source) {
         return;
     }
     if (totalCards < 60) {
-        if (!confirm(`Your deck only has ${totalCards}/60 cards. Start anyway?`)) return;
+        if (typeof showNotification === 'function') {
+            showNotification(`⚠️ Deck has only ${totalCards}/60 cards. You can still play!`, 'warning');
+        } else if (typeof showToast === 'function') {
+            showToast(`Deck has only ${totalCards}/60 cards.`, 'warning');
+        }
     }
 
     const baseCards = [];
@@ -174,7 +178,32 @@ function parseSandboxDeckToExactPrints(textInput, player) {
     textInput.split('\n').forEach(rawLine => {
         const line = rawLine.trim();
         const match = line.match(lineRegex);
-        if (!match) return;
+        if (!match) {
+            // Fallback: PTCGL basic energy lines like "10 Basic {R} Energy Energy"
+            const energyMatch = line.match(/^(\d+)\s+Basic\s+\{([RGWLPFDM])\}\s+Energy/i);
+            if (energyMatch) {
+                const energyMap = { G:'1', R:'2', W:'3', L:'4', P:'5', F:'6', D:'7', M:'8' };
+                const energyNames = { G:'Basic Grass Energy', R:'Basic Fire Energy', W:'Basic Water Energy', L:'Basic Lightning Energy', P:'Basic Psychic Energy', F:'Basic Fighting Energy', D:'Basic Darkness Energy', M:'Basic Metal Energy' };
+                const code = energyMatch[2].toUpperCase();
+                const count = parseInt(energyMatch[1]);
+                const name = energyNames[code] || 'Basic Energy';
+                const setCode = 'SVE';
+                const number = energyMap[code] || '1';
+                let imageUrl = CARD_BACK_URL;
+                let cardType = '';
+                const db = window.cardsBySetNumberMap || {};
+                const found = db[`${setCode}-${number}`] || null;
+                if (found) {
+                    imageUrl = found.image_url || CARD_BACK_URL;
+                    cardType = found.card_type || found.supertype || found.type || '';
+                }
+                for (let i = 0; i < count; i++) {
+                    newDeck.push({ name, imageUrl, cardType, setCode, number,
+                                   ptId: player + '_' + Math.random().toString(36).substr(2, 9) });
+                }
+            }
+            return;
+        }
 
         const count    = parseInt(match[1]);
         const name     = match[2].trim();
@@ -263,7 +292,22 @@ function parseSandboxDeck(player) {
     for (let line of lines) {
         line = line.trim();
         const match = line.match(lineRegex);
-        if (!match) continue;
+        if (!match) {
+            // Fallback: PTCGL basic energy lines like "10 Basic {R} Energy Energy"
+            const energyMatch = line.match(/^(\d+)\s+Basic\s+\{([RGWLPFDM])\}\s+Energy/i);
+            if (energyMatch) {
+                const energyMap = { G:'1', R:'2', W:'3', L:'4', P:'5', F:'6', D:'7', M:'8' };
+                const energyNames = { G:'Basic Grass Energy', R:'Basic Fire Energy', W:'Basic Water Energy', L:'Basic Lightning Energy', P:'Basic Psychic Energy', F:'Basic Fighting Energy', D:'Basic Darkness Energy', M:'Basic Metal Energy' };
+                const code = energyMatch[2].toUpperCase();
+                entries.push({
+                    count: parseInt(energyMatch[1]),
+                    name: energyNames[code] || 'Basic Energy',
+                    ptcgoCode: 'SVE',
+                    number: energyMap[code] || '1'
+                });
+            }
+            continue;
+        }
         entries.push({
             count:     parseInt(match[1]),
             name:      match[2],

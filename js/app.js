@@ -6526,7 +6526,7 @@ const BASE_PATH = './data/';
                 if (category === 'Pokemon') {
                     pokemon.push(line);
                     pokemonCount += count;
-                } else if (category === 'Energy' || category === 'Special Energy') {
+                } else if (category === 'Basic Energy' || category === 'Energy' || category === 'Special Energy') {
                     energy.push(line);
                     energyCount += count;
                 } else {
@@ -7838,12 +7838,11 @@ const BASE_PATH = './data/';
              */
             if (!cardType) return 'Pokemon';
             
-            // IMPORTANT FIX: Check for Energy BEFORE element letter check
-            // This fixes "Basic Energy" being sorted as Pokemon instead of Energy
+            // IMPORTANT: Check Special Energy BEFORE generic energy check,
+            // so that Special Energy gets its own sort category (before Basic Energy).
             const typeLower = cardType.toLowerCase();
-            if (typeLower.includes('energy')) return 'Energy';
-            if (cardType === 'Special Energy') return 'Special Energy';
-            if (cardType === 'Energy') return 'Energy';
+            if (typeLower.includes('special energy')) return 'Special Energy';
+            if (typeLower.includes('energy')) return 'Basic Energy';
             
             // Check if it's a Pokemon (type starts with element letter)
             if (cardType.charAt(0).match(/[GRWLPFDMNC]/)) {
@@ -7970,6 +7969,7 @@ const BASE_PATH = './data/';
                 'Tool': 4,
                 'Stadium': 5,
                 'Special Energy': 6,
+                'Basic Energy': 7,
                 'Energy': 7
             };
             
@@ -8831,7 +8831,7 @@ const BASE_PATH = './data/';
                 const line = `${card.addCount}x ${card.card_name}`;
                 
                 if (category === 'Pokemon') pokemon.push(line);
-                else if (category === 'Energy') energy.push(line);
+                else if (category === 'Basic Energy' || category === 'Special Energy') energy.push(line);
                 else trainer.push(line);
             });
             
@@ -9712,7 +9712,10 @@ const BASE_PATH = './data/';
                 } else if (filter.cardType === 'Pokemon') {
                     cards = cards.filter(c => getCardTypeCategory(c.type) === 'Pokemon');
                 } else if (filter.cardType === 'Energy') {
-                    cards = cards.filter(c => getCardTypeCategory(c.type) === 'Energy');
+                    cards = cards.filter(c => {
+                        const cat = getCardTypeCategory(c.type);
+                        return cat === 'Basic Energy' || cat === 'Special Energy';
+                    });
                 }
             }
             
@@ -9785,7 +9788,7 @@ const BASE_PATH = './data/';
                 cards.sort((a, b) => b.avgCount - a.avgCount);
             } else if (filter.sortBy === 'type') {
                 // Sort by card type category (Pokemon, Supporter, Item, Tool, Stadium, Energy)
-                const typeOrder = { 'Pokemon': 0, 'Supporter': 1, 'Item': 2, 'Tool': 3, 'Stadium': 4, 'Special Energy': 5, 'Energy': 6 };
+                const typeOrder = { 'Pokemon': 0, 'Supporter': 1, 'Item': 2, 'Tool': 3, 'Stadium': 4, 'Special Energy': 5, 'Basic Energy': 6, 'Energy': 6 };
                 cards.sort((a, b) => {
                     const catA = getCardTypeCategory(a.type);
                     const catB = getCardTypeCategory(b.type);
@@ -13557,6 +13560,7 @@ const BASE_PATH = './data/';
                     'Tool': 4,
                     'Stadium': 5,
                     'Special Energy': 6,
+                    'Basic Energy': 7,
                     'Energy': 7
                 };
                 
@@ -16114,7 +16118,7 @@ const BASE_PATH = './data/';
                 if (category === 'Pokemon') {
                     pokemon.push(line);
                     pokemonCount += count;
-                } else if (category === 'Energy' || category === 'Special Energy') {
+                } else if (category === 'Basic Energy' || category === 'Energy' || category === 'Special Energy') {
                     energy.push(line);
                     energyCount += count;
                 } else {

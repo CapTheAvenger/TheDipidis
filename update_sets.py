@@ -34,51 +34,48 @@ except ImportError:
 # Hardcoded fallback — used if live scraping fails
 FALLBACK_SET_ORDER = {
     # Mega (2025-2026)
-    'ASC': 135, 'PFL': 134, 'MEG': 133, 'MEE': 133, 'MEP': 133,
+    'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,
     # Scarlet & Violet (2023-2025)
-    'BLK': 132, 'WHT': 131, 'DRI': 130, 'JTG': 129, 'PRE': 128,
-    'SSP': 127, 'SCR': 126, 'SFA': 125, 'TWM': 124, 'TEF': 123,
-    'PAF': 122, 'PAR': 121, 'MEW': 120, 'OBF': 119, 'PAL': 118,
-    'SVI': 117, 'SVE': 117, 'SVP': 117,
+    'BLK': 145, 'WHT': 144, 'DRI': 143, 'JTG': 142, 'PRE': 141,
+    'SSP': 140, 'SCR': 139, 'SFA': 138, 'TWM': 137, 'TEF': 136,
+    'PAF': 135, 'PAR': 134, 'MEW': 133, 'OBF': 132, 'PAL': 131,
+    'SVI': 130, 'SVE': 129, 'SVP': 128,
     # Sword & Shield (2020-2023)
-    'CRZ': 116, 'SIT': 115, 'LOR': 114, 'PGO': 113, 'ASR': 112,
-    'BRS': 111, 'FST': 110, 'CEL': 109, 'EVS': 108, 'CRE': 107,
-    'BST': 106, 'SHF': 105, 'VIV': 104, 'CPA': 103, 'DAA': 102,
-    'RCL': 101, 'SSH': 100, 'SP': 100, 'SWSH': 100, 'SWSHP': 100,
-    'PR-SW': 100,
+    'CRZ': 127, 'SIT': 126, 'LOR': 125, 'PGO': 124, 'ASR': 123,
+    'BRS': 122, 'FST': 121, 'CEL': 120, 'EVS': 119, 'CRE': 118,
+    'BST': 117, 'SHF': 116, 'VIV': 115, 'CPA': 114, 'DAA': 113,
+    'RCL': 112, 'SSH': 111, 'SWSH': 111, 'SP': 110, 'SWSHP': 110,
+    'PR-SW': 110,
     # Sun & Moon (2017-2019)
-    'CEC': 99, 'HIF': 98, 'UNM': 97, 'UNB': 96, 'DET': 95,
-    'TEU': 94, 'LOT': 93, 'DRM': 92, 'CES': 91, 'FLI': 90,
-    'UPR': 89, 'CIN': 88, 'SLG': 87, 'BUS': 86, 'GRI': 85,
-    'SUM': 84, 'SMP': 84, 'PR-SM': 84,
+    'CEC': 109, 'HIF': 108, 'UNM': 107, 'UNB': 106, 'DET': 105,
+    'TEU': 104, 'LOT': 103, 'DRM': 102, 'CES': 101, 'FLI': 100,
+    'UPR': 99, 'CIN': 98, 'SLG': 97, 'BUS': 96, 'GRI': 95,
+    'SUM': 94, 'SMP': 93, 'PR-SM': 93,
     # XY (2014-2016)
-    'EVO': 83, 'STS': 82, 'FCO': 81, 'GEN': 80, 'BKP': 79,
-    'BKT': 78, 'AOR': 77, 'ROS': 76, 'DCR': 75, 'PRC': 74,
-    'PHF': 73, 'FFI': 72, 'FLF': 71, 'XY': 70, 'XYP': 70,
-    'PR-XY': 70,
+    'EVO': 92, 'STS': 91, 'FCO': 90, 'GEN': 89, 'BKP': 88,
+    'BKT': 87, 'AOR': 86, 'ROS': 85, 'DCR': 84, 'PRC': 83,
+    'PHF': 82, 'FFI': 81, 'FLF': 80, 'XY': 79, 'KSS': 78,
+    'XYP': 77, 'PR-XY': 77,
     # Black & White (2011-2013)
-    'LTR': 69, 'PLB': 68, 'PLF': 67, 'PLS': 66, 'BCR': 65,
-    'DRX': 64, 'DEX': 63, 'NXD': 62, 'NVI': 61, 'EPO': 60,
-    'BLW': 59, 'BWP': 59, 'PR-BLW': 59,
+    'LTR': 76, 'PLB': 75, 'PLF': 74, 'PLS': 73, 'BCR': 72,
+    'DRV': 71, 'DRX': 70, 'DEX': 69, 'NXD': 68, 'NVI': 67,
+    'EPO': 66, 'BLW': 65, 'BWP': 64, 'PR-BLW': 64,
     # HeartGold & SoulSilver (2010-2011)
-    'CL': 58, 'TM': 57, 'UD': 56, 'UL': 55, 'HS': 54, 'HSP': 54,
-    'PR-HS': 54,
-    # Platinum (2009-2010)
-    'AR': 53, 'SV': 52, 'RR': 51, 'PL': 50, 'SF': 49,
-    # Diamond & Pearl (2007-2009)
-    'LA': 48, 'MD': 47, 'GE': 46, 'SW': 45, 'MT': 44, 'DP': 43,
-    'DPP': 43, 'PR-DP': 43,
+    'CL': 63, 'TM': 62, 'UD': 61, 'UL': 60, 'HS': 59, 'HSP': 58,
+    'PR-HS': 58,
+    # Diamond & Pearl / Platinum (2007-2010)
+    'RM': 57, 'AR': 56, 'SV': 55, 'RR': 54, 'P9': 53, 'PL': 52,
+    'SF': 51, 'P8': 50, 'LA': 49, 'MD': 48, 'P7': 47, 'GE': 46,
+    'SW': 45, 'P6': 44, 'MT': 43, 'DP': 42, 'DPP': 41, 'PR-DP': 41,
     # EX (2003-2007)
-    'PK': 42, 'DF': 41, 'CG': 40, 'HP': 39, 'LM': 38, 'DS': 37,
-    'UF': 36, 'EM': 35, 'DX': 34, 'TRR': 33, 'RG': 32, 'HL': 31,
-    'MA': 30, 'DR': 29, 'SS': 28, 'RS': 27,
-    # e-Card & Neo (2000-2003)
-    'E3': 26, 'E2': 25, 'E1': 24, 'LC': 23, 'N4': 22, 'N3': 21,
-    'N2': 20, 'N1': 19,
-    # Classic (1999-2000)
-    'G2': 18, 'G1': 17, 'TR': 16, 'BS2': 15, 'FO': 14, 'JU': 13, 'BS': 12,
-    # Older Special Sets
-    'NP': 55, 'WP': 55, 'POP': 55, 'M3': 25, 'MC': 20, 'MP1': 55,
+    'P5': 40, 'PK': 39, 'DF': 38, 'CG': 37, 'P4': 36, 'HP': 35,
+    'P3': 34, 'LM': 33, 'DS': 32, 'UF': 31, 'P2': 30, 'EM': 29,
+    'DX': 28, 'TRR': 27, 'P1': 26, 'RG': 25, 'HL': 24, 'MA': 23,
+    'DR': 22, 'SS': 21, 'RS': 20, 'NP': 19,
+    # e-Card & WotC (1999-2003)
+    'E3': 18, 'E2': 17, 'BG': 16, 'E1': 15, 'LC': 14, 'N4': 13,
+    'N3': 12, 'SI': 11, 'N2': 10, 'N1': 9, 'G2': 8, 'G1': 7,
+    'TR': 6, 'BS2': 5, 'FO': 4, 'JU': 3, 'BS': 2, 'WP': 1,
 }
 
 

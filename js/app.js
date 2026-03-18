@@ -6976,6 +6976,21 @@ const BASE_PATH = './data/';
         
         // Initialize deck - ALWAYS start fresh on page load
         // Clear any saved deck data to prevent old decks from showing up
+        // But check for autosave recovery first
+        (function _checkAutosaveOnInit() {
+            try {
+                const saved = localStorage.getItem('autosave_deck');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    const totalCards = Object.values(data.cityLeague?.deck || {}).reduce((s,c)=>s+c,0)
+                                   + Object.values(data.currentMeta?.deck || {}).reduce((s,c)=>s+c,0)
+                                   + Object.values(data.pastMeta?.deck || {}).reduce((s,c)=>s+c,0);
+                    if (totalCards > 0) {
+                        window._pendingAutosave = data;
+                    }
+                }
+            } catch(e) { /* ignore */ }
+        })();
         localStorage.removeItem('cityLeagueDeck');
         localStorage.removeItem('currentMetaDeck');
         localStorage.removeItem('pastMetaDeck');
@@ -6991,6 +7006,45 @@ const BASE_PATH = './data/';
         console.log('[Init] Starting with empty deck (localStorage cleared on page load)');
         // Check for a shared deck in the URL – runs after clearing so it wins
         setTimeout(function() { if (typeof importDeckFromUrl === 'function') importDeckFromUrl(); }, 100);
+
+        // Auto-save deck restore prompt (runs after DOM + shared deck import)
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (!window._pendingAutosave) return;
+                const data = window._pendingAutosave;
+                delete window._pendingAutosave;
+                // Don't prompt if a shared deck was already imported
+                const anyDeck = Object.values(window.cityLeagueDeck || {}).reduce((s,c)=>s+c,0)
+                             + Object.values(window.currentMetaDeck || {}).reduce((s,c)=>s+c,0)
+                             + Object.values(window.pastMetaDeck || {}).reduce((s,c)=>s+c,0);
+                if (anyDeck > 0) return;
+
+                const ts = data.timestamp ? new Date(data.timestamp).toLocaleString() : '';
+                if (confirm('Ein ungespeichertes Deck wurde gefunden' + (ts ? ' (' + ts + ')' : '') + '.\nMöchtest du es wiederherstellen?')) {
+                    ['cityLeague', 'currentMeta', 'pastMeta'].forEach(src => {
+                        const saved = data[src];
+                        if (!saved || !saved.deck || Object.keys(saved.deck).length === 0) return;
+                        if (src === 'cityLeague') {
+                            window.cityLeagueDeck = saved.deck;
+                            window.cityLeagueDeckOrder = saved.order || [];
+                            window.currentCityLeagueArchetype = saved.archetype || null;
+                        } else if (src === 'currentMeta') {
+                            window.currentMetaDeck = saved.deck;
+                            window.currentMetaDeckOrder = saved.order || [];
+                            window.currentCurrentMetaArchetype = saved.archetype || null;
+                        } else if (src === 'pastMeta') {
+                            window.pastMetaDeck = saved.deck;
+                            window.pastMetaDeckOrder = saved.order || [];
+                            window.pastMetaCurrentArchetype = saved.archetype || null;
+                        }
+                        if (typeof updateDeckDisplay === 'function') updateDeckDisplay(src);
+                    });
+                    if (typeof showToast === 'function') showToast('Deck wiederhergestellt!', 'success');
+                } else {
+                    localStorage.removeItem('autosave_deck');
+                }
+            }, 500);
+        });
         
         // ---------------------------------------------------------------
         // BATCH ADD FUNCTION - For Auto-Generate Performance
@@ -7487,6 +7541,24 @@ const BASE_PATH = './data/';
             
             // Update the My Deck grid immediately for responsive button feedback.
             renderMyDeckGrid(source);
+
+            // Auto-save deck to localStorage for crash recovery
+            try {
+                const allDecks = {
+                    cityLeague:  { deck: window.cityLeagueDeck  || {}, order: window.cityLeagueDeckOrder  || [], archetype: window.currentCityLeagueArchetype  || null },
+                    currentMeta: { deck: window.currentMetaDeck || {}, order: window.currentMetaDeckOrder || [], archetype: window.currentCurrentMetaArchetype || null },
+                    pastMeta:    { deck: window.pastMetaDeck    || {}, order: window.pastMetaDeckOrder    || [], archetype: window.pastMetaCurrentArchetype    || null },
+                    timestamp: new Date().toISOString()
+                };
+                const totalCards = Object.values(allDecks.cityLeague.deck).reduce((s,c)=>s+c,0)
+                               + Object.values(allDecks.currentMeta.deck).reduce((s,c)=>s+c,0)
+                               + Object.values(allDecks.pastMeta.deck).reduce((s,c)=>s+c,0);
+                if (totalCards > 0) {
+                    localStorage.setItem('autosave_deck', JSON.stringify(allDecks));
+                } else {
+                    localStorage.removeItem('autosave_deck');
+                }
+            } catch(e) { /* ignore autosave errors */ }
 
             // Refresh overview badges and opening hand stats on the next frame.
             scheduleDeckDependentRefresh(source);
@@ -13697,17 +13769,20 @@ const BASE_PATH = './data/';
             console.log(`[Cards Tab] Sorting cards by: ${sortOrder}`);
             
             if (sortOrder === 'set') {
-                // Sort by SET CODE (alphabetically), then SET NUMBER (numerically)
+                // Sort by SET release order DESCENDING (newest first), then SET NUMBER ascending
+                const SET_ORDER = window.setOrderMap || {};
                 cards.sort((a, b) => {
-                    const setCodeA = a.set || '';
-                    const setCodeB = b.set || '';
+                    const setCodeA = (a.set || '').toUpperCase();
+                    const setCodeB = (b.set || '').toUpperCase();
                     
-                    // First by set code
-                    if (setCodeA !== setCodeB) {
-                        return setCodeA.localeCompare(setCodeB);
+                    // First by set release order (descending = newest first)
+                    const orderA = SET_ORDER[setCodeA] || SET_ORDER[setCodeA.toLowerCase()] || 0;
+                    const orderB = SET_ORDER[setCodeB] || SET_ORDER[setCodeB.toLowerCase()] || 0;
+                    if (orderA !== orderB) {
+                        return orderB - orderA; // descending: newest set first
                     }
                     
-                    // Then by set number (extract numeric part)
+                    // Then by set number ascending within same set (1, 2, 3...)
                     const setNumA = parseInt((a.number || '0').toString().replace(/[^\d]/g, '')) || 0;
                     const setNumB = parseInt((b.number || '0').toString().replace(/[^\d]/g, '')) || 0;
                     if (setNumA !== setNumB) {
@@ -14799,6 +14874,35 @@ const BASE_PATH = './data/';
                 if (modal && modal.classList.contains('show')) {
                     closeRaritySwitcher();
                 }
+            }
+        });
+
+        // ── Global click-outside-to-close for overlay modals ───────────
+        window.addEventListener('click', function(e) {
+            const target = e.target;
+            // Rarity Switcher Modal
+            const rarityModal = document.getElementById('raritySwitcherModal');
+            if (rarityModal && target === rarityModal && rarityModal.classList.contains('show')) {
+                closeRaritySwitcher();
+                return;
+            }
+            // Fullscreen Card Modal
+            const fsModal = document.getElementById('fullscreenCardModal');
+            if (fsModal && target === fsModal && fsModal.classList.contains('active')) {
+                closeFullscreenCard();
+                return;
+            }
+            // Image View Modal
+            const imgModal = document.getElementById('imageViewModal');
+            if (imgModal && target === imgModal && imgModal.style.display !== 'none') {
+                if (typeof closeImageView === 'function') closeImageView();
+                return;
+            }
+            // Deck Compare Modal
+            const dcModal = document.getElementById('deckCompareModal');
+            if (dcModal && target === dcModal && dcModal.style.display !== 'none') {
+                if (typeof closeDeckCompare === 'function') closeDeckCompare();
+                return;
             }
         });
 
@@ -16537,6 +16641,20 @@ const BASE_PATH = './data/';
                     }
                 }
                 
+                // Third: Try base card name match (e.g. Boss's Orders PAL vs BRS)
+                if (!bestMatch) {
+                    const oldBase = getStrictBaseCardName(oldCard.name);
+                    for (let i = 0; i < currentDeck.length; i++) {
+                        if (currentDeckMatched[i]) continue;
+                        const newCard = currentDeck[i];
+                        if (oldBase && getStrictBaseCardName(newCard.name).toLowerCase() === oldBase.toLowerCase()) {
+                            bestMatch = newCard;
+                            bestMatchIndex = i;
+                            break;
+                        }
+                    }
+                }
+                
                 if (bestMatch) {
                     // Card found in new deck - mark as matched
                     currentDeckMatched[bestMatchIndex] = true;
@@ -16569,6 +16687,15 @@ const BASE_PATH = './data/';
                         areSameInternationalPrint(old.set, old.number, newCard.set, newCard.number)) {
                         oldCard = old;
                         break;
+                    }
+                    // Also check base card name (e.g. Boss's Orders PAL vs BRS)
+                    if (!oldCard) {
+                        const oldBase = getStrictBaseCardName(old.name);
+                        const newBase = getStrictBaseCardName(newCard.name);
+                        if (oldBase && newBase && oldBase.toLowerCase() === newBase.toLowerCase()) {
+                            oldCard = old;
+                            break;
+                        }
                     }
                 }
                 

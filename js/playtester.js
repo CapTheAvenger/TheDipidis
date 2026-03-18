@@ -1106,12 +1106,11 @@ function ptHandAction(type) {
 
 // --- GLOBAL TWO-PLAYER ACTIONS ---
 
-// JUDGE: beide mischen ihre Hand INS Deck, shufflen das ganze Deck, ziehen X von oben
+// JUDGE: beide mischen ihre Hand INS Deck, shufflen das ganze Deck, ziehen exakt 4 (TCG-Regel)
 function ptGlobalJudge() {
     ptSaveState();
-    const drawP1 = parseInt(document.getElementById('ptJudgeDrawP1')?.value) || 0;
-    const drawP2 = parseInt(document.getElementById('ptJudgeDrawP2')?.value) || 0;
-    [['p1', drawP1], ['p2', drawP2]].forEach(([p, amt]) => {
+    const JUDGE_DRAW = 4; // TCG Rule: Judge always draws exactly 4
+    ['p1', 'p2'].forEach(p => {
         ptState[p].deck.push(...ptState[p].hand);
         ptState[p].hand = [];
         const deck = ptState[p].deck;
@@ -1119,20 +1118,21 @@ function ptGlobalJudge() {
             const j = Math.floor(Math.random() * (i + 1));
             [deck[i], deck[j]] = [deck[j], deck[i]];
         }
-        for (let i = 0; i < amt; i++) if (deck.length > 0) ptState[p].hand.push(deck.pop());
+        for (let i = 0; i < JUDGE_DRAW; i++) if (deck.length > 0) ptState[p].hand.push(deck.pop());
     });
-    ptLog(`⚖️ Judge: Beide mischen ins Deck. P1 zieht ${drawP1}, P2 zieht ${drawP2}.`);
+    ptLog(`⚖️ Judge: Beide mischen Hand ins Deck, shufflen, ziehen je ${JUDGE_DRAW}.`);
     ptRenderAll();
 }
 
-// IONO: beide mischen nur ihre eigene Hand, legen sie UNTER das Deck, ziehen X von oben (ohne Deck zu mischen)
+// IONO: Hand in zufälliger Reihenfolge UNTER das Deck, ziehen = Anzahl verbleibender Prizes (TCG-Regel)
 function ptGlobalIono() {
     ptSaveState();
-    const drawP1 = parseInt(document.getElementById('ptIonoDrawP1')?.value) || 0;
-    const drawP2 = parseInt(document.getElementById('ptIonoDrawP2')?.value) || 0;
-    [['p1', drawP1], ['p2', drawP2]].forEach(([p, amt]) => {
+    const draws = {};
+    ['p1', 'p2'].forEach(p => {
+        const amt = ptState[p].prizes.length; // TCG Rule: draw = remaining prize cards
+        draws[p] = amt;
         if (ptState[p].hand.length > 0) {
-            // Nur die Handkarten mischen, nicht das Deck
+            // Handkarten in zufälliger Reihenfolge UNTER das Deck legen (nicht ins Deck mischen)
             const handCards = [...ptState[p].hand];
             for (let i = handCards.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -1144,7 +1144,7 @@ function ptGlobalIono() {
         }
         for (let i = 0; i < amt; i++) if (ptState[p].deck.length > 0) ptState[p].hand.push(ptState[p].deck.pop());
     });
-    ptLog(`⚡ Iono: Hände gemischt unter das Deck. P1 zieht ${drawP1}, P2 zieht ${drawP2}.`);
+    ptLog(`⚡ Iono: Hände unter das Deck gelegt. P1 zieht ${draws.p1} (Prizes), P2 zieht ${draws.p2} (Prizes).`);
     ptRenderAll();
 }
 
@@ -2079,10 +2079,10 @@ function ptRenderAll() {
             if (ptState[p].discard.length > 0) {
                 const top = ptState[p].discard[ptState[p].discard.length - 1];
                 pileEl.innerHTML = `<img src="${top.imageUrl || CARD_BACK_URL}" class="pt-field-card"
-                    style="width:62px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'"
+                    style="cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'"
                     onclick="${discardClick}" title="Discard – ${ptState[p].discard.length} Karten (klicken zum Öffnen)">`;
             } else {
-                pileEl.innerHTML = `<div class="pt-empty-slot" style="width:62px;height:87px;font-size:10px;cursor:pointer;"
+                pileEl.innerHTML = `<div class="pt-empty-slot" style="font-size:10px;cursor:pointer;"
                     onclick="${discardClick}">Discard</div>`;
             }
         }

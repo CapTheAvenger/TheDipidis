@@ -170,7 +170,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            z-index: 10000;
+            z-index: 99999;
             pointer-events: none;
         }
 
@@ -4574,5 +4574,44 @@ details[open] > .tier-trending-summary::after {
         min-width: auto;
         max-width: none;
         width: 100%;
+    }
+}
+
+/* ============================================================ */
+/* PROXY PRINTER - PRINT LAYOUT                                  */
+/* ============================================================ */
+@media print {
+    /* Hide everything except the proxy print area */
+    body > *:not(.proxy-print-area) {
+        display: none !important;
+    }
+    .proxy-print-area {
+        display: block !important;
+    }
+    .proxy-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 6.3cm);
+        grid-auto-rows: 8.8cm;
+        gap: 2mm;
+        justify-content: center;
+    }
+    .proxy-slot,
+    .proxy-card,
+    .print-card {
+        width: 6.3cm !important;
+        height: 8.8cm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        page-break-inside: avoid;
+    }
+    .proxy-card img,
+    .print-card img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+    @page {
+        size: A4 portrait;
+        margin: 5mm;
     }
 }

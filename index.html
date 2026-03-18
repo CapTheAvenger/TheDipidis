@@ -415,6 +415,7 @@
                             <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')">📈 Deck Analysis (Global)</button>
                             <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')">🏆 Past Meta</button>
                             <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')">🧰 Card Database</button>
+                            <button id="menu-btn-proxy"                class="menu-item"        onclick="switchTabAndUpdateMenu('proxy')">🖨️ Proxy Printer</button>
                             <button id="menu-btn-sandbox"              class="menu-item"        onclick="switchTabAndUpdateMenu('sandbox')">⚔️ Playtester Sandbox</button>
                             <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')">👤 My Profile</button>
                             <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')">📖 How to Use</button>
@@ -455,6 +456,7 @@
                 <button class="tab-btn" onclick="switchTab('current-analysis')">📈 Current Meta Deck Analysis</button>
                 <button class="tab-btn" onclick="switchTab('past-meta')">🏆 Past Meta</button>
                 <button class="tab-btn" onclick="switchTab('cards')">🧰 Cards</button>
+                <button class="tab-btn" onclick="switchTab('proxy')">🖨️ Proxy Printer</button>
                 <button class="tab-btn" onclick="switchTab('sandbox')">⚔️ Playtester</button>
                 <button class="tab-btn" onclick="switchTab('profile')">
                     <img src="images/pokeball-icon.png" alt="Profile" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;">
@@ -1321,6 +1323,52 @@
                 
                 <!-- Cards Grid -->
                 <div id="cardsContent" class="loading">Loading cards...</div>
+            </div>
+
+            <!-- Tab: Proxy Printer -->
+            <div id="proxy" class="tab-content">
+                <div class="container" style="background: white; padding: 25px; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.08);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 18px;">
+                        <h1 style="margin:0; color:#2c3e50;">🖨️ Proxy Printer</h1>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;">Unique: <span id="proxyUniqueCount">0</span></div>
+                            <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;">Copies: <span id="proxyCopiesCount">0</span></div>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                        <div style="border:1px solid #dee2e6; border-radius:10px; padding:14px;">
+                            <h3 style="margin:0 0 10px 0; color:#2c3e50;">📋 Import Decklist</h3>
+                            <textarea id="proxyDecklistInput" placeholder="4 Buddy-Buddy Poffin SVI 186&#10;2 Rare Candy PAF 89" style="width:100%; min-height:140px; resize:vertical; border:1px solid #ced4da; border-radius:8px; padding:10px; font-family: Consolas, monospace; font-size: 13px;"></textarea>
+                            <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                                <button class="btn-modern" onclick="importDecklistToProxy()" style="background:#e74c3c; border-color:#c0392b; color:white;">Add Decklist to Queue</button>
+                            </div>
+                        </div>
+
+                        <div style="border:1px solid #dee2e6; border-radius:10px; padding:14px;">
+                            <h3 style="margin:0 0 10px 0; color:#2c3e50;">🎯 Add Single Card</h3>
+                            <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 80px; gap:8px;">
+                                <input id="proxyManualName" type="text" placeholder="Card name" style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
+                                <input id="proxyManualSet" type="text" placeholder="Set" style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
+                                <input id="proxyManualNumber" type="text" placeholder="No." style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
+                                <input id="proxyManualCount" type="number" min="1" value="1" style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
+                            </div>
+                            <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                                <button class="btn-modern" onclick="addManualProxyCard()" style="background:#e74c3c; border-color:#c0392b; color:white;">Add Card</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+                        <button class="btn-modern" onclick="addCurrentDeckToProxy('cityLeague')">➕ Add City League Deck</button>
+                        <button class="btn-modern" onclick="addCurrentDeckToProxy('currentMeta')">➕ Add Current Meta Deck</button>
+                        <button class="btn-modern" onclick="addCurrentDeckToProxy('pastMeta')">➕ Add Past Meta Deck</button>
+                        <button class="btn-modern" onclick="printProxyQueue()" style="background:#27ae60; border-color:#1e8449; color:white;">🖨️ Print Queue</button>
+                        <button class="btn-modern" onclick="clearProxyQueue()" style="background:#6c757d; border-color:#495057; color:white;">🗑️ Clear Queue</button>
+                    </div>
+
+                    <div id="proxyQueueList" style="display:grid; gap:10px;"></div>
+                </div>
             </div>
 
             <!-- Tab: Sandbox Playtester -->
@@ -2644,7 +2692,7 @@
     <script src="js/firebase-auth.js?v=20260314-v15"></script>
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="js/app.js?v=20260318-v67"></script>
+    <script src="js/app.js?v=20260318-v68"></script>
     <script src="js/draw-simulator.js?v=20260311-v1"></script>
     <script src="js/playtester.js?v=20260314-v62"></script>
     <script src="js/playtester-mobile.js?v=20260315-v1"></script>

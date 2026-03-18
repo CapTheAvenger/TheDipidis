@@ -53,6 +53,400 @@ const BASE_PATH = './data/';
         window.currentCityLeagueArchetype = window.currentCityLeagueArchetype || null;
         window.currentCurrentMetaArchetype = window.currentCurrentMetaArchetype || null;
         window.pastMetaCurrentArchetype = window.pastMetaCurrentArchetype || null;
+        window.proxyQueue = window.proxyQueue || [];
+
+        const PROXY_QUEUE_STORAGE_KEY = 'proxyQueueV1';
+
+        function normalizeProxySetCode(setCode) {
+            const raw = String(setCode || '').trim();
+            if (!raw || raw === '???') return '';
+            return raw.toUpperCase();
+        }
+
+        function normalizeProxyCardNumber(cardNumber) {
+            const raw = String(cardNumber || '').trim();
+            if (!raw || raw === '?') return '';
+            return raw;
+        }
+
+        function buildProxyItemId(cardName, setCode, cardNumber) {
+            return `${String(cardName || '').trim().toLowerCase()}|${normalizeProxySetCode(setCode)}|${normalizeProxyCardNumber(cardNumber)}`;
+        }
+
+        function parseProxyCount(value, fallbackValue = 1) {
+            const parsed = parseInt(value, 10);
+            if (!Number.isFinite(parsed) || parsed <= 0) return fallbackValue;
+            return parsed;
+        }
+
+        function showProxyToast(message) {
+            let toast = document.getElementById('proxyToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'proxyToast';
+                toast.style.cssText = 'position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 12px 16px; border-radius: 10px; font-weight: 700; box-shadow: 0 8px 22px rgba(0,0,0,0.25); z-index: 99999; opacity: 0; transition: opacity 0.25s; pointer-events: none; max-width: 380px;';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2200);
+        }
+
+        function saveProxyQueue() {
+            try {
+                localStorage.setItem(PROXY_QUEUE_STORAGE_KEY, JSON.stringify(window.proxyQueue || []));
+            } catch (e) {
+                console.warn('[Proxy] Could not persist proxy queue:', e);
+            }
+        }
+
+        function loadProxyQueue() {
+            try {
+                const saved = localStorage.getItem(PROXY_QUEUE_STORAGE_KEY);
+                if (!saved) {
+                    window.proxyQueue = [];
+                    return;
+                }
+                const parsed = JSON.parse(saved);
+                if (!Array.isArray(parsed)) {
+                    window.proxyQueue = [];
+                    return;
+                }
+                window.proxyQueue = parsed
+                    .filter(item => item && typeof item === 'object' && item.name)
+                    .map(item => ({
+                        id: buildProxyItemId(item.name, item.set, item.number),
+                        name: String(item.name || '').trim(),
+                        set: normalizeProxySetCode(item.set),
+                        number: normalizeProxyCardNumber(item.number),
+                        count: parseProxyCount(item.count, 1)
+                    }));
+            } catch (e) {
+                console.warn('[Proxy] Could not load proxy queue:', e);
+                window.proxyQueue = [];
+            }
+        }
+
+        function getProxyQueueTotals() {
+            const queue = window.proxyQueue || [];
+            const totalCopies = queue.reduce((sum, item) => sum + parseProxyCount(item.count, 0), 0);
+            return {
+                uniqueCards: queue.length,
+                totalCopies
+            };
+        }
+
+        function syncProxyStats() {
+            const totals = getProxyQueueTotals();
+            const uniqueEl = document.getElementById('proxyUniqueCount');
+            const copiesEl = document.getElementById('proxyCopiesCount');
+            if (uniqueEl) uniqueEl.textContent = String(totals.uniqueCards);
+            if (copiesEl) copiesEl.textContent = String(totals.totalCopies);
+        }
+
+        function renderProxyQueue() {
+            syncProxyStats();
+            const list = document.getElementById('proxyQueueList');
+            if (!list) return;
+
+            const queue = window.proxyQueue || [];
+            if (queue.length === 0) {
+                list.innerHTML = '<div style="padding: 20px; text-align: center; color: #555; background: #fff; border: 2px dashed #d0d7de; border-radius: 10px;">No cards in proxy queue yet. Use the new "Proxy" buttons in Overview, Deck, Meta Cards, Cards DB or Comparison.</div>';
+                return;
+            }
+
+            const html = queue.map(item => {
+                const safeName = escapeHtmlAttr(item.name);
+                const safeSet = escapeHtmlAttr(item.set || 'N/A');
+                const safeNumber = escapeHtmlAttr(item.number || 'N/A');
+                const displaySetNumber = (item.set && item.number) ? `${safeSet} ${safeNumber}` : 'No print specified';
+                const imageUrl = getCardImageSource(item.name, item.set, item.number) || buildInlineCardPlaceholder(item.name);
+                const escapedImageUrl = escapeHtmlAttr(imageUrl);
+                const jsName = String(item.name || '').replace(/'/g, "\\'");
+                const jsSet = String(item.set || '').replace(/'/g, "\\'");
+                const jsNumber = String(item.number || '').replace(/'/g, "\\'");
+
+                return `
+                    <div style="display: grid; grid-template-columns: 78px 1fr auto; gap: 12px; align-items: center; background: white; border: 1px solid #e1e8ed; border-radius: 10px; padding: 10px;">
+                        <img src="${escapedImageUrl}" alt="${safeName}" style="width: 78px; height: 108px; object-fit: cover; border-radius: 6px; border: 1px solid #d0d7de;" onerror="this.src='${buildInlineCardPlaceholder('Proxy')}';">
+                        <div style="min-width: 0;">
+                            <div style="font-weight: 800; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeName}</div>
+                            <div style="font-size: 0.9em; color: #555; margin-top: 2px;">${displaySetNumber}</div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 32px 44px 32px; gap: 4px; align-items: center;">
+                            <button onclick="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', ${parseProxyCount(item.count, 1) - 1})" style="height: 30px; border: none; border-radius: 6px; background: #dc3545; color: white; font-weight: bold; cursor: pointer;">-</button>
+                            <input type="number" min="1" value="${parseProxyCount(item.count, 1)}" onchange="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', this.value)" style="height: 30px; width: 44px; text-align: center; border: 1px solid #ccd6dd; border-radius: 6px; font-weight: 700;">
+                            <button onclick="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', ${parseProxyCount(item.count, 1) + 1})" style="height: 30px; border: none; border-radius: 6px; background: #28a745; color: white; font-weight: bold; cursor: pointer;">+</button>
+                            <button onclick="removeCardFromProxy('${jsName}', '${jsSet}', '${jsNumber}')" style="grid-column: 1 / span 3; height: 28px; border: none; border-radius: 6px; background: #6c757d; color: white; font-size: 0.8em; cursor: pointer;">Remove</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            list.innerHTML = html;
+        }
+
+        function addCardToProxy(cardName, setCode = '', cardNumber = '', count = 1, suppressToast = false) {
+            const name = String(cardName || '').trim();
+            if (!name) return;
+
+            const normalizedSet = normalizeProxySetCode(setCode);
+            const normalizedNumber = normalizeProxyCardNumber(cardNumber);
+            const normalizedCount = parseProxyCount(count, 1);
+            const id = buildProxyItemId(name, normalizedSet, normalizedNumber);
+
+            const queue = window.proxyQueue || [];
+            const existing = queue.find(item => item.id === id);
+
+            if (existing) {
+                existing.count = parseProxyCount(existing.count, 1) + normalizedCount;
+            } else {
+                queue.push({
+                    id,
+                    name,
+                    set: normalizedSet,
+                    number: normalizedNumber,
+                    count: normalizedCount
+                });
+            }
+
+            window.proxyQueue = queue;
+            saveProxyQueue();
+            renderProxyQueue();
+
+            if (!suppressToast) {
+                const setPart = normalizedSet && normalizedNumber ? ` (${normalizedSet} ${normalizedNumber})` : '';
+                showProxyToast(`Added to proxy queue: ${name}${setPart} x${normalizedCount}`);
+            }
+        }
+
+        function setProxyCardCount(cardName, setCode = '', cardNumber = '', value = 1) {
+            const id = buildProxyItemId(cardName, setCode, cardNumber);
+            const queue = window.proxyQueue || [];
+            const item = queue.find(entry => entry.id === id);
+            if (!item) return;
+
+            const nextValue = parseInt(value, 10);
+            if (!Number.isFinite(nextValue) || nextValue <= 0) {
+                window.proxyQueue = queue.filter(entry => entry.id !== id);
+            } else {
+                item.count = nextValue;
+            }
+
+            saveProxyQueue();
+            renderProxyQueue();
+        }
+
+        function removeCardFromProxy(cardName, setCode = '', cardNumber = '') {
+            const id = buildProxyItemId(cardName, setCode, cardNumber);
+            window.proxyQueue = (window.proxyQueue || []).filter(item => item.id !== id);
+            saveProxyQueue();
+            renderProxyQueue();
+        }
+
+        function clearProxyQueue() {
+            if (!window.proxyQueue || window.proxyQueue.length === 0) return;
+            if (!confirm('Clear complete proxy queue?')) return;
+            window.proxyQueue = [];
+            saveProxyQueue();
+            renderProxyQueue();
+        }
+
+        function addCurrentDeckToProxy(source) {
+            let deckMap = null;
+            if (source === 'cityLeague') deckMap = window.cityLeagueDeck;
+            if (source === 'currentMeta') deckMap = window.currentMetaDeck;
+            if (source === 'pastMeta') deckMap = window.pastMetaDeck;
+
+            if (!deckMap || Object.keys(deckMap).length === 0) {
+                alert('No deck cards found for this source.');
+                return;
+            }
+
+            let addedCopies = 0;
+            Object.entries(deckMap).forEach(([deckKey, count]) => {
+                const copies = parseProxyCount(count, 0);
+                if (copies <= 0) return;
+
+                const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                if (match) {
+                    addCardToProxy(match[1], match[2], match[3], copies, true);
+                } else {
+                    addCardToProxy(deckKey, '', '', copies, true);
+                }
+                addedCopies += copies;
+            });
+
+            renderProxyQueue();
+            showProxyToast(`Added ${addedCopies} deck cards to proxy queue`);
+        }
+
+        function importDecklistToProxy() {
+            const input = document.getElementById('proxyDecklistInput');
+            if (!input) return;
+
+            const text = String(input.value || '').trim();
+            if (!text) {
+                alert('Paste a decklist first.');
+                return;
+            }
+
+            let entries = parseDeckList(text);
+            if (!Array.isArray(entries) || entries.length === 0) {
+                entries = [];
+                text.split('\n').forEach(line => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return;
+                    const match = trimmed.match(/^(\d+)\s+(.+)$/);
+                    if (!match) return;
+                    entries.push({
+                        count: parseProxyCount(match[1], 1),
+                        name: String(match[2] || '').trim(),
+                        set: '',
+                        number: ''
+                    });
+                });
+            }
+
+            if (entries.length === 0) {
+                alert('Could not parse decklist. Use lines like: "4 Buddy-Buddy Poffin SVI 186" or "2 Rare Candy"');
+                return;
+            }
+
+            let addedCopies = 0;
+            entries.forEach(entry => {
+                const amount = parseProxyCount(entry.count, 1);
+                addCardToProxy(entry.name, entry.set, entry.number, amount, true);
+                addedCopies += amount;
+            });
+
+            renderProxyQueue();
+            showProxyToast(`Imported ${addedCopies} cards into proxy queue`);
+        }
+
+        function addManualProxyCard() {
+            const nameInput = document.getElementById('proxyManualName');
+            const setInput = document.getElementById('proxyManualSet');
+            const numberInput = document.getElementById('proxyManualNumber');
+            const countInput = document.getElementById('proxyManualCount');
+
+            const cardName = String(nameInput?.value || '').trim();
+            if (!cardName) {
+                alert('Please enter a card name.');
+                return;
+            }
+
+            const setCode = String(setInput?.value || '').trim();
+            const cardNumber = String(numberInput?.value || '').trim();
+            const count = parseProxyCount(countInput?.value || '1', 1);
+            addCardToProxy(cardName, setCode, cardNumber, count);
+        }
+
+        function printProxyQueue() {
+            const queue = window.proxyQueue || [];
+            if (queue.length === 0) {
+                alert('Proxy queue is empty.');
+                return;
+            }
+
+            const copies = [];
+            queue.forEach(item => {
+                const count = parseProxyCount(item.count, 1);
+                for (let i = 0; i < count; i++) {
+                    copies.push(item);
+                }
+            });
+
+            const pages = [];
+            for (let i = 0; i < copies.length; i += 9) {
+                pages.push(copies.slice(i, i + 9));
+            }
+
+            const pageHtml = pages.map((pageCards, pageIndex) => {
+                const cardsHtml = pageCards.map(card => {
+                    const imageUrl = getCardImageSource(card.name, card.set, card.number) || buildInlineCardPlaceholder(card.name);
+                    const safeImage = escapeHtmlAttr(imageUrl);
+                    const safeName = escapeHtmlAttr(card.name);
+                    const safePrint = card.set && card.number ? `${escapeHtmlAttr(card.set)} ${escapeHtmlAttr(card.number)}` : 'Unknown print';
+
+                    return `
+                        <div class="proxy-card">
+                            <img src="${safeImage}" alt="${safeName}">
+                            <div class="proxy-label">${safeName}</div>
+                            <div class="proxy-print">${safePrint}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <section class="proxy-page">
+                        <div class="proxy-grid">${cardsHtml}</div>
+                        <footer>Page ${pageIndex + 1} / ${pages.length}</footer>
+                    </section>
+                `;
+            }).join('');
+
+            const popup = window.open('', '_blank');
+            if (!popup) {
+                alert('Unable to open print window. Please allow popups for this site.');
+                return;
+            }
+
+            popup.document.write(`
+                <!doctype html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>Proxy Print</title>
+                    <style>
+                        @page { size: A4 portrait; margin: 10mm; }
+                        body { margin: 0; font-family: Arial, sans-serif; }
+                        .proxy-page { page-break-after: always; }
+                        .proxy-page:last-child { page-break-after: auto; }
+                        .proxy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8mm; }
+                        .proxy-card { border: 1px solid #bbb; border-radius: 4px; padding: 3mm; text-align: center; }
+                        .proxy-card img { width: 100%; max-height: 83mm; object-fit: contain; display: block; }
+                        .proxy-label { font-size: 10pt; font-weight: 700; margin-top: 2mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                        .proxy-print { font-size: 8.5pt; color: #555; }
+                        footer { margin-top: 4mm; text-align: center; font-size: 8pt; color: #666; }
+                    </style>
+                </head>
+                <body>${pageHtml}</body>
+                </html>
+            `);
+            popup.document.close();
+            popup.focus();
+            popup.print();
+        }
+
+        function addComparisonNewCardsToProxy() {
+            const comparisonCards = Array.isArray(window.lastDeckComparisonCards) ? window.lastDeckComparisonCards : [];
+            const newCards = comparisonCards.filter(card => card.changeType === 'new' && parseProxyCount(card.newCount, 0) > 0);
+
+            if (newCards.length === 0) {
+                alert('No newly added cards found in comparison results.');
+                return;
+            }
+
+            let addedCopies = 0;
+            newCards.forEach(card => {
+                const count = parseProxyCount(card.newCount, 1);
+                addCardToProxy(card.name, card.set, card.number, count, true);
+                addedCopies += count;
+            });
+
+            renderProxyQueue();
+            showProxyToast(`Added ${newCards.length} new cards (${addedCopies} copies) to proxy queue`);
+        }
+
+        loadProxyQueue();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProxyQueue();
+        });
         
         // Tab switching
         function switchTab(tabName) {
@@ -85,6 +479,9 @@ const BASE_PATH = './data/';
                         break;
                     case 'cards':
                         if (!window.cardsLoaded) loadCards();
+                        break;
+                    case 'proxy':
+                        renderProxyQueue();
                         break;
                 }
             }
@@ -4587,8 +4984,9 @@ const BASE_PATH = './data/';
                         </div>
                         
                         <!-- Add Button -->
-                        <div style="flex-shrink: 0;">
+                        <div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 6px;">
                             <button class="btn btn-success" style="padding: 10px 20px; font-size: 0.95em; white-space: nowrap;" onclick="addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="Add to deck">Add to Deck</button>
+                            <button class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9em; white-space: nowrap; background: #e74c3c; border-color: #c0392b;" onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" title="Add to proxy">Proxy</button>
                         </div>
                     </div>
                 `;
@@ -4890,8 +5288,9 @@ const BASE_PATH = './data/';
                                         <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">★</button>
                                         <button onclick="event.stopPropagation(); addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Add to deck">+</button>
                                     </div>
-                                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 2px;">
                                         ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Add to proxy">P</button>
                                         <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
                                     </div>
                                 </div>
@@ -5376,7 +5775,7 @@ const BASE_PATH = './data/';
                     html += `<td>${setNumber}</td>`;
                     html += `<td><strong style="color: #667eea;">${percentage}%</strong></td>`;
                     html += `<td><strong style="color: #27ae60;">${avgCount}x</strong></td>`;
-                    html += `<td><button class="btn btn-primary" onclick="addCardToDeck('cityLeague', '${cardName.replace(/'/g, "\\'")}')">+ Add</button></td>`;
+                    html += `<td style="display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick="addCardToDeck('cityLeague', '${cardName.replace(/'/g, "\\'")}')">+ Add</button><button class="btn" style="background:#e74c3c;color:white;" onclick="addCardToProxy('${cardName.replace(/'/g, "\\'")}', '${setCode}', '${setNumber}', 1)">Proxy</button></td>`;
                     html += '</tr>';
                 });
 
@@ -6458,8 +6857,9 @@ const BASE_PATH = './data/';
                                 <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center;">★</button>
                                 <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">+</button>
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 2px;">
                                 ${setCode && setNumber ? `<button onclick="openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 9px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                <button onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 9px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center;" title="Add to proxy">P</button>
                                 <button class="${priceClass}" onclick="openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 20px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4);" title="${eurPrice ? 'Auf Cardmarket kaufen: ' + eurPrice : 'Preis nicht verfuegbar'}">${priceDisplay}</button>
                             </div>
                         </div>
@@ -7986,8 +8386,8 @@ const BASE_PATH = './data/';
                     archetypeMap[arch.name.toLowerCase()] = arch.deckCount;
                 });
                 
-                // Aggregate cards: Calculate average percentage per archetype, then multiply by total deck count
-                const cardArchetypeMap = {}; // card -> archetype -> {percentages[], dates[]}
+                // Aggregate cards using raw included-deck counts so small samples do not skew the meta share.
+                const cardArchetypeMap = {}; // card -> archetype -> aggregated usage totals
                 
                 top10AnalysisData.forEach(row => {
                     const cardName = source === 'currentMeta'
@@ -8028,29 +8428,39 @@ const BASE_PATH = './data/';
                     if (!cardArchetypeMap[cardName].byArchetype[archetypeLower]) {
                         cardArchetypeMap[cardName].byArchetype[archetypeLower] = {
                             name: archetype,
-                            percentages: [],
-                            copiesWhenUsed: [],
-                            deckCount: archetypeDeckCount
+                            deckCount: archetypeDeckCount,
+                            estimatedDecksWithCard: 0,
+                            totalCopies: 0,
+                            fallbackPercentages: [],
+                            fallbackCopiesWhenUsed: []
                         };
                     }
 
-                    // Prefer exact total_count/deck_count, then per-row average_count fallback.
-                    let copiesPerDeckWhenUsed = 0;
-                    if (deckCount > 0 && totalCount > 0) {
-                        copiesPerDeckWhenUsed = totalCount / deckCount;
-                    } else if (avgCountWhenUsed > 0) {
-                        copiesPerDeckWhenUsed = avgCountWhenUsed;
-                    } else if (avgCountOverall > 0 && archetypeDeckCount > 0 && safePercentage > 0) {
-                        const impliedDecksWithCard = (safePercentage / 100) * archetypeDeckCount;
-                        copiesPerDeckWhenUsed = impliedDecksWithCard > 0
-                            ? (avgCountOverall * archetypeDeckCount) / impliedDecksWithCard
-                            : 0;
+                    const archetypeEntry = cardArchetypeMap[cardName].byArchetype[archetypeLower];
+
+                    if (deckCount > 0) {
+                        archetypeEntry.estimatedDecksWithCard += deckCount;
+                    } else if (safePercentage > 0 && archetypeDeckCount > 0) {
+                        archetypeEntry.fallbackPercentages.push(safePercentage);
                     }
-                    
-                    cardArchetypeMap[cardName].byArchetype[archetypeLower].percentages.push(percentage);
-                    cardArchetypeMap[cardName].byArchetype[archetypeLower].copiesWhenUsed.push(
-                        Number.isFinite(copiesPerDeckWhenUsed) && copiesPerDeckWhenUsed > 0 ? copiesPerDeckWhenUsed : 0
-                    );
+
+                    if (totalCount > 0) {
+                        archetypeEntry.totalCopies += totalCount;
+                    } else {
+                        let copiesPerDeckWhenUsed = 0;
+                        if (avgCountWhenUsed > 0) {
+                            copiesPerDeckWhenUsed = avgCountWhenUsed;
+                        } else if (avgCountOverall > 0 && archetypeDeckCount > 0 && safePercentage > 0) {
+                            const impliedDecksWithCard = (safePercentage / 100) * archetypeDeckCount;
+                            copiesPerDeckWhenUsed = impliedDecksWithCard > 0
+                                ? (avgCountOverall * archetypeDeckCount) / impliedDecksWithCard
+                                : 0;
+                        }
+
+                        if (Number.isFinite(copiesPerDeckWhenUsed) && copiesPerDeckWhenUsed > 0) {
+                            archetypeEntry.fallbackCopiesWhenUsed.push(copiesPerDeckWhenUsed);
+                        }
+                    }
                 });
                 
                 console.log('[loadMetaCardAnalysis] Aggregated', Object.keys(cardArchetypeMap).length, 'unique cards');
@@ -8063,28 +8473,45 @@ const BASE_PATH = './data/';
                     
                     // For each archetype this card appears in
                     Object.values(cardData.byArchetype).forEach(archData => {
-                        // Average percentage across all tournament dates
-                        const avgPercentageRaw = archData.percentages.reduce((sum, p) => sum + p, 0) / archData.percentages.length;
-                        const avgPercentage = Math.min(100, Math.max(0, avgPercentageRaw));
-                        
-                        // Estimated decks with this card = avgPercentage * total archetype deck count
-                        const estimatedDecksRaw = (avgPercentage / 100) * archData.deckCount;
-                        const estimatedDecks = Math.min(archData.deckCount, Math.max(0, estimatedDecksRaw));
-                        
-                        // Average copies in decks that use this card, ignoring invalid per-row zero fallbacks.
-                        const validCopies = (archData.copiesWhenUsed || []).filter(v => Number.isFinite(v) && v > 0);
-                        const avgCopiesPerDeckWhenUsed = validCopies.length > 0
-                            ? validCopies.reduce((sum, v) => sum + v, 0) / validCopies.length
+                        const cappedDecksWithCard = Math.min(
+                            archData.deckCount,
+                            Math.max(0, archData.estimatedDecksWithCard || 0)
+                        );
+
+                        const fallbackAveragePercentage = archData.fallbackPercentages.length > 0
+                            ? archData.fallbackPercentages.reduce((sum, p) => sum + p, 0) / archData.fallbackPercentages.length
+                            : 0;
+                        const fallbackEstimatedDecks = Math.min(
+                            archData.deckCount,
+                            Math.max(0, (fallbackAveragePercentage / 100) * archData.deckCount)
+                        );
+
+                        const estimatedDecks = cappedDecksWithCard > 0 ? cappedDecksWithCard : fallbackEstimatedDecks;
+
+                        const fallbackAverageCopiesWhenUsed = archData.fallbackCopiesWhenUsed.length > 0
+                            ? archData.fallbackCopiesWhenUsed.reduce((sum, v) => sum + v, 0) / archData.fallbackCopiesWhenUsed.length
+                            : 0;
+
+                        let totalCopiesForArchetype = Math.max(0, archData.totalCopies || 0);
+                        if (totalCopiesForArchetype <= 0 && estimatedDecks > 0 && fallbackAverageCopiesWhenUsed > 0) {
+                            totalCopiesForArchetype = estimatedDecks * fallbackAverageCopiesWhenUsed;
+                        }
+
+                        const avgCopiesPerDeckWhenUsed = estimatedDecks > 0
+                            ? totalCopiesForArchetype / estimatedDecks
+                            : 0;
+                        const archetypePercentage = archData.deckCount > 0
+                            ? Math.min(100, Math.max(0, (estimatedDecks / archData.deckCount) * 100))
                             : 0;
                         
                         totalDecksWithCard += estimatedDecks;
-                        totalCopies += estimatedDecks * avgCopiesPerDeckWhenUsed;
+                        totalCopies += totalCopiesForArchetype;
                         
                         archetypes.push({
                             name: archData.name,
                             deckCount: Math.round(estimatedDecks),
                             totalDecks: archData.deckCount,
-                            percentage: avgPercentage.toFixed(1)
+                            percentage: archetypePercentage.toFixed(1)
                         });
                     });
                     
@@ -8324,7 +8751,8 @@ const BASE_PATH = './data/';
                                         <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${card.set_code} ${card.set_number})')" style="background: #ffc107; color: #333; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#e0a800'" onmouseout="this.style.background='#ffc107'" title="Switch rarity/print">★</button>
                                         <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" style="background: #28a745; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'" title="Add to deck">+</button>
                                     </div>
-                                    <div>
+                                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 3px;">
+                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${card.set_code}', '${card.set_number}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-weight: bold; font-size: 11px; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e74c3c'" title="Add to proxy">Proxy</button>
                                         <button onclick="event.stopPropagation(); openLimitlessCard('${card.set_code}', '${card.set_number}')" style="background: #6c3dc5; color: white; border: none; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%; transition: all 0.2s;" onmouseover="this.style.background='#5a32a3'" onmouseout="this.style.background='#6c3dc5'" title="Open on Limitless (${card.set_code} ${card.set_number})">Limitless — ${card.set_code} ${card.set_number}</button>
                                     </div>
                                 </div>
@@ -10094,12 +10522,14 @@ const BASE_PATH = './data/';
                 const cardName = card.full_card_name || card.card_name || 'Unknown Card';
                 const count = parseInt(card.max_count || 0, 10) || 0;
                 const isAceSpecCard = isAceSpec(cardName);
+                const proxySetCode = card.set_code || card.set || '';
+                const proxySetNumber = card.set_number || card.number || '';
                 
                 html += '<tr>';
                 html += `<td style="text-align: center; font-weight: bold; color: #2c3e50;">${count}</td>`;
                 html += `<td>${cardName}</td>`;
                 html += `<td style="text-align: center;">${isAceSpecCard ? '<span style="color: #e74c3c; font-weight: bold;">★</span>' : '-'}</td>`;
-                html += `<td style="text-align: center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${cardName.replace(/'/g, "\\'")}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button></td>`;
+                html += `<td style="text-align: center; display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${cardName.replace(/'/g, "\\'")}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button><button class="btn" style="padding: 6px 10px; font-size: 0.8em; background:#e74c3c; color:white;" onclick='addCardToProxy("${cardName.replace(/'/g, "\\'")}", "${proxySetCode}", "${proxySetNumber}", 1)'>Proxy</button></td>`;
                 html += '</tr>';
             });
             
@@ -10342,8 +10772,9 @@ const BASE_PATH = './data/';
                                             <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">★</button>
                                             <button onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Add to deck">+</button>
                                         </div>
-                                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2px;">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 2px;">
                                             ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                            <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Add to proxy">P</button>
                                             <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
                                         </div>
                                     </div>
@@ -12330,6 +12761,8 @@ const BASE_PATH = './data/';
             const displayName = card.name || 'Unknown Card';
             const displaySet = card.set || '???';
             const displayNumber = card.number || '?';
+            const proxySetCode = card.set || '';
+            const proxySetNumber = card.number || '';
             const displayType = card.type || 'Unknown';
             const displayRarity = card.rarity || 'Unknown';
             const displayCardMarketUrl = card.cardmarket_url || '#';
@@ -12418,6 +12851,7 @@ const BASE_PATH = './data/';
                         <div class="card-database-rarity-btn ${rarityClass}" onclick='openRaritySwitcherFromDB("${escapedName}", "${displaySet}", "${displayNumber}")' style="display: block; padding: 8px; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View all prints for ${displayRarity}">
                             ${displayRarity}
                         </div>
+                        <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" style="display: block; padding: 8px; background: #e74c3c; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; border: none; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.35)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="Add to proxy queue">Proxy</button>
                     </div>
                     ${coverageDisplay}
                 </div>
@@ -14127,8 +14561,9 @@ const BASE_PATH = './data/';
                                             <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;">★</button>
                                             <button onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">+</button>
                                         </div>
-                                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2px;">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 2px;">
                                             ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                            <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Add to proxy">P</button>
                                             <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;">  ${priceDisplay}</button>
                                         </div>
                                     </div>
@@ -14288,8 +14723,9 @@ const BASE_PATH = './data/';
                                     <div><span style="color: #555; font-size: 0.85em; font-weight: 600;">Max Count:</span> <span style="font-weight: 600; color: #dc3545; margin-left: 5px;">${maxCount}</span></div>
                                 </div>
                             </div>
-                            <div style="flex-shrink: 0;">
+                            <div style="flex-shrink: 0; display:flex; flex-direction:column; gap:6px;">
                                 <button class="btn btn-success" style="padding: 10px 20px; font-size: 0.95em;" onclick="addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')">Add to Deck</button>
+                                <button class="btn" style="padding: 10px 20px; font-size: 0.85em; background:#e74c3c; color:white;" onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)">Proxy</button>
                             </div>
                         </div>
                     `;
@@ -14836,6 +15272,7 @@ const BASE_PATH = './data/';
         
         // Display comparison results
         function displayComparisonResults(allDisplayCards, oldDeckName) {
+            window.lastDeckComparisonCards = Array.isArray(allDisplayCards) ? allDisplayCards : [];
             const resultDiv = document.getElementById('deckCompareResult');
             resultDiv.style.display = 'block';
             
@@ -14847,7 +15284,10 @@ const BASE_PATH = './data/';
             
             let html = `
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; color: white;">
-                    <h3 style="margin: 0 0 15px 0; font-size: 1.3em;">?? Comparison Results: ${oldDeckName} vs Current Deck</h3>
+                    <div style="display:flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <h3 style="margin: 0 0 15px 0; font-size: 1.3em;">?? Comparison Results: ${oldDeckName} vs Current Deck</h3>
+                        <button onclick="addComparisonNewCardsToProxy()" style="margin-bottom: 15px; border: none; border-radius: 8px; padding: 8px 12px; background: #e74c3c; color: white; font-weight: 700; cursor: pointer;">Proxy: Add New Cards</button>
+                    </div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
                         <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center;">
                             <div style="font-size: 2em; font-weight: bold;">${removed.length}</div>
@@ -14890,6 +15330,10 @@ const BASE_PATH = './data/';
                                            group.type === 'new' ? `0 ? ${card.newCount}` :
                                            group.type === 'changed' ? `${card.oldCount} ? ${card.newCount}` :
                                            `${card.newCount}`;
+                        const proxyCount = group.type === 'new' ? parseProxyCount(card.newCount, 1) : 1;
+                        const cardNameEscaped = String(card.name || '').replace(/'/g, "\\'");
+                        const cardSetEscaped = String(card.set || '').replace(/'/g, "\\'");
+                        const cardNumberEscaped = String(card.number || '').replace(/'/g, "\\'");
                         
                         const cardData = cardsBySetNumberMap[`${card.set}-${card.number}`];
                         const imageUrl = cardData ? cardData.image_url : '';
@@ -14900,6 +15344,7 @@ const BASE_PATH = './data/';
                                 <div style="font-weight: 600; font-size: 0.9em; margin-bottom: 4px;">${card.name}</div>
                                 <div style="font-size: 0.8em; color: #666; margin-bottom: 4px;">${card.set} ${card.number}</div>
                                 <div style="font-size: 1.1em; font-weight: bold; color: ${group.color};">${countDisplay}</div>
+                                <button onclick="addCardToProxy('${cardNameEscaped}', '${cardSetEscaped}', '${cardNumberEscaped}', ${proxyCount})" style="margin-top: 8px; border: none; border-radius: 6px; padding: 6px 8px; background: #e74c3c; color: white; font-weight: 700; cursor: pointer; width: 100%;">Add to Proxy</button>
                             </div>
                         `;
                     });

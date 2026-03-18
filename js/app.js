@@ -1483,7 +1483,11 @@ const BASE_PATH = './data/';
                 if (response.ok) {
                     const jsonData = await response.json();
                     // Extract cards array from JSON structure
-                    allCardsDatabase = jsonData.cards || jsonData;
+                    allCardsDatabase = (jsonData.cards || jsonData).map(c => {
+                        // Ensure 'name' field exists (JSON may only have 'name_en')
+                        if (!c.name && c.name_en) c.name = c.name_en;
+                        return c;
+                    });
                     window.allCardsDatabase = allCardsDatabase;
                     cardIndexBySetNumber = buildCardIndexBySetNumber(allCardsDatabase);
                     window.cardIndexBySetNumber = cardIndexBySetNumber;

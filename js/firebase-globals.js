@@ -33,11 +33,14 @@ function onUserSignedIn(user) {
   const nameEl = document.getElementById('profile-user-name');
   if (nameEl) nameEl.textContent = user.displayName || user.email || 'User';
 
-  const userBtn = document.querySelector('.user-btn');
-  if (userBtn) {
-    userBtn.textContent = '👤 Profile';
-    userBtn.onclick = () => openTab('profile');
-  }
+  // Toggle header auth UI: hide sign-in button, show user-info bar
+  const signinBtn = document.getElementById('signin-btn');
+  const userInfoBar = document.getElementById('user-info');
+  if (signinBtn) signinBtn.style.display = 'none';
+  if (userInfoBar) userInfoBar.style.display = 'flex';
+
+  const emailDisplay = document.getElementById('user-email-display');
+  if (emailDisplay) emailDisplay.textContent = user.displayName || user.email || '';
 
   window.userCollection = new Set();
   window.userWishlist   = new Set();
@@ -55,11 +58,12 @@ function onUserSignedOut() {
   if (authPrompt)     authPrompt.style.display     = 'block';
   if (profileContent) profileContent.style.display  = 'none';
 
-  const userBtn = document.querySelector('.user-btn');
-  if (userBtn) {
-    userBtn.innerHTML = '<img src="images/pokeball-icon.png" alt="" style="width:20px;height:20px;margin-right:5px;vertical-align:middle;">Sign In';
-    userBtn.onclick = () => showAuthModal('signin');
-  }
+  // Toggle header auth UI: show sign-in button, hide user-info bar
+  const signinBtn = document.getElementById('signin-btn');
+  const userInfoBar = document.getElementById('user-info');
+  if (signinBtn) signinBtn.style.display = '';
+  if (userInfoBar) userInfoBar.style.display = 'none';
+
   clearUserData();
 }
 

@@ -11722,6 +11722,10 @@ const BASE_PATH = './data/';
                 deck.cards.forEach(card => {
                     selectedRows.push({
                         ...card,
+                        // Override raw archetype (which may contain price suffixes like
+                        // "Alakazam Dudunsparce35.27$23.60€") with the sanitized deck name
+                        // so aggregateCardStatsByDate counts all variants as ONE archetype.
+                        archetype: deck.deck_name || card.archetype || '',
                         tournament_id: deck.tournament_id || '',
                         tournament_date: deck.tournament_date || card.tournament_date || 'Unknown Date',
                         total_decks_in_archetype: deck.decklist_count || card.total_decks_in_archetype || 1,

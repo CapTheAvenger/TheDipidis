@@ -38,15 +38,6 @@ function initFirebaseRuntime() {
   });
 }
 
-function scheduleFirebaseInit() {
-  if (window.__appResourcesSettled || document.documentElement.dataset.appReady === 'true') {
-    initFirebaseRuntime();
-    return;
-  }
-
-  window.addEventListener('app:ui-ready', initFirebaseRuntime, { once: true });
-  // Fallback: keep auth usable even if app signal is missed.
-  setTimeout(initFirebaseRuntime, 8000);
-}
-
-scheduleFirebaseInit();
+// Run synchronously — the Firebase SDK scripts are already loaded at this point,
+// and firebase-globals.js (next in load order) needs firebase.auth() immediately.
+initFirebaseRuntime();

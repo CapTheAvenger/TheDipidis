@@ -1241,16 +1241,42 @@ const BASE_PATH = './data/';
 
         function normalizeCurrentMetaFallbackRows(rows) {
             if (!Array.isArray(rows)) return [];
+
+            // First pass: detect how many distinct raw archetypes collapse into
+            // each sanitized name per tournament, so we can correct total_decks_in_archetype.
+            const rawArchetypesPerGroup = new Map(); // key "tournamentId|||sanitizedArch" → Set<rawArch>
+            rows.forEach(row => {
+                const rawArch = String(row.archetype || '').trim();
+                const sanitized = sanitizeTournamentArchetypeName(rawArch);
+                const tournamentId = String(row.tournament_id || '').trim();
+                const groupKey = `${tournamentId}|||${sanitized}`;
+                if (!rawArchetypesPerGroup.has(groupKey)) rawArchetypesPerGroup.set(groupKey, new Set());
+                rawArchetypesPerGroup.get(groupKey).add(rawArch);
+            });
+
             return rows.map(row => {
                 const normalized = { ...row };
-                normalized.archetype = sanitizeTournamentArchetypeName(normalized.archetype || '');
+                const rawArch = String(normalized.archetype || '').trim();
+                normalized.archetype = sanitizeTournamentArchetypeName(rawArch);
 
                 const normalizedFormat = normalizeTournamentFormatLabel(normalized.format || normalized.meta || '', normalized.set_code || '');
                 normalized.format = normalizedFormat;
-                normalized.meta = normalized.meta && String(normalized.meta).trim() ? normalized.meta : 'Meta Play!';
+                // Fallback CSV (tournament_cards_data_cards.csv) stores format codes
+                // (e.g. 'SVI-ASC') in the meta column, not source labels. Since all
+                // tournament data is from major tournaments, always tag as 'Meta Play!'.
+                normalized.meta = 'Meta Play!';
 
                 if (!normalized.deck_count && normalized.deck_inclusion_count) {
                     normalized.deck_count = normalized.deck_inclusion_count;
+                }
+
+                // Correct total_decks_in_archetype when per-decklist rows collapsed
+                const tournamentId = String(normalized.tournament_id || '').trim();
+                const groupKey = `${tournamentId}|||${normalized.archetype}`;
+                const rawCount = rawArchetypesPerGroup.get(groupKey)?.size || 0;
+                const csvCount = parseInt(normalized.total_decks_in_archetype || 0, 10) || 0;
+                if (rawCount > csvCount) {
+                    normalized.total_decks_in_archetype = String(rawCount);
                 }
 
                 if (!normalized.average_count_overall && normalized.total_count && normalized.total_decks_in_archetype) {
@@ -2609,7 +2635,23 @@ const BASE_PATH = './data/';
                     }
                 }
             } else if (!_isNonPokemon && normalizedSet && normalizedNumber) {
-                debugVersionSelectionLog(`[getPreferredVersionForCard] Pokémon "${cardName}" — name-merge suppressed, using strict set/number binding`);
+                // Pokémon from promo sets (SVP, MEP, etc.) often have standard set prints
+                // that should be selectable. Since all prints of the SAME promo are identical
+                // (same attacks/HP), merging by name is safe for cards originating from promo sets.
+                const promoSets = ['MEP', 'SVP', 'SP', 'SMP', 'XYP', 'BWP', 'HSP', 'DPP', 'NP', 'WP'];
+                if (promoSets.includes(normalizedSet)) {
+                    const allEnglish = getEnglishCardVersions(cardName);
+                    if (allEnglish.length > 0) {
+                        const seenKeys = new Set(versions.map(v => `${v.set}-${v.number}`));
+                        const extras = allEnglish.filter(v => !seenKeys.has(`${v.set}-${v.number}`));
+                        if (extras.length > 0) {
+                            versions = [...versions, ...extras];
+                            debugVersionSelectionLog(`[getPreferredVersionForCard] Promo Pokémon "${cardName}" — merged ${extras.length} standard-set reprints (pool now ${versions.length})`);
+                        }
+                    }
+                } else {
+                    debugVersionSelectionLog(`[getPreferredVersionForCard] Pokémon "${cardName}" — name-merge suppressed, using strict set/number binding`);
+                }
             }
             
             // DEBUG: Log when versions are not found
@@ -7398,11 +7440,10 @@ const BASE_PATH = './data/';
                     const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
                     if (setMatch) {
                         const key = `${setMatch[2]}-${setMatch[3]}`;
-                        if (window.cardsBySetNumberMap) cardData = window.cardsBySetNumberMap[key];
-                        if (!cardData)
-                            cardData = (window.cardsBySetNumberMap || {})[`${setMatch[2]}-${setMatch[3]}`] || null;
+                        cardData = getIndexedCardBySetNumber(setMatch[2], setMatch[3]);
+                        if (!cardData && cardsBySetNumberMap) cardData = cardsBySetNumberMap[key] || null;
                     } else {
-                        cardData = (window.cardIndexMap && window.cardIndexMap.get(deckKey)) || null;
+                        cardData = (cardIndexMap && cardIndexMap.get(deckKey)) || null;
                     }
                     if (cardData && cardData.eur_price && cardData.eur_price !== '' && cardData.eur_price !== 'N/A') {
                         const p = parseFloat(String(cardData.eur_price).replace(',', '.'));
@@ -10929,21 +10970,36 @@ const BASE_PATH = './data/';
                             return;
                         }
                         
+                        // Parse record field "W - L - D" to extract wins/losses
+                        let parsedWins = 0, parsedLosses = 0, parsedDraws = 0;
+                        const recordStr = cellData.record || '';
+                        if (recordStr) {
+                            const parts = recordStr.split(/\s*-\s*/);
+                            if (parts.length >= 2) {
+                                parsedWins = parseInt(parts[0]) || 0;
+                                parsedLosses = parseInt(parts[1]) || 0;
+                                parsedDraws = parts.length >= 3 ? (parseInt(parts[2]) || 0) : 0;
+                            }
+                        }
+                        // Fallback to explicit wins/losses fields if record not available
+                        if (!recordStr && (cellData.wins !== undefined || cellData.losses !== undefined)) {
+                            parsedWins = parseInt(cellData.wins) || 0;
+                            parsedLosses = parseInt(cellData.losses) || 0;
+                        }
+
                         // Flexibles Auslesen der Winrate
                         const winRateStr = cellData.winRate || cellData.winrate || cellData.win_rate || cellData.wr;
                         let winRate = parseFloat(winRateStr);
                         
                         // Fallback: Winrate selbst berechnen
-                        if (isNaN(winRate) && cellData.matches > 0 && cellData.wins !== undefined) {
-                            winRate = (parseFloat(cellData.wins) / parseFloat(cellData.matches)) * 100;
-                        } else if (isNaN(winRate) && (cellData.wins + cellData.losses) > 0) {
-                            winRate = (parseFloat(cellData.wins) / (cellData.wins + cellData.losses)) * 100;
+                        if (isNaN(winRate) && (parsedWins + parsedLosses) > 0) {
+                            winRate = (parsedWins / (parsedWins + parsedLosses)) * 100;
                         }
                         
                         if (isNaN(winRate)) {
                             tableHtml += '<td style="background: rgba(149, 165, 166, 0.15); color: #95a5a6; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd;">-</td>';
                         } else {
-                            const totalGames = (cellData.wins || 0) + (cellData.losses || 0);
+                            const totalGames = parseInt(cellData.total_games) || (parsedWins + parsedLosses + parsedDraws);
                             let bgColor, textColor;
                             
                             if (winRate >= 55.0) {
@@ -10959,7 +11015,7 @@ const BASE_PATH = './data/';
                                 textColor = '#7f8c8d';
                             }
                             
-                            const tooltip = `${cellData.wins || 0}W - ${cellData.losses || 0}L (${totalGames} games)`;
+                            const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} games)`;
                             tableHtml += `<td style="background: ${bgColor}; color: ${textColor}; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd; cursor: help; transition: all 0.2s;" title="${tooltip}" onmouseover="this.style.transform='scale(1.1)'; this.style.zIndex='10'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1'; this.style.boxShadow='none'">${winRate.toFixed(1)}%</td>`;
                         }
                     });
@@ -11405,8 +11461,17 @@ const BASE_PATH = './data/';
                         archetype: deckArchetype,
                         format: resolvedFormat,
                         decklist_count: parseInt(card.total_decks_in_archetype || 1),
+                        _rawArchetypes: new Set([String(card.archetype || '').trim()]),
                         cards: []
                     });
+                } else {
+                    const existing = deckMap.get(deckKey);
+                    // Track max decklist count seen across all merging rows
+                    const rowDecklistCount = parseInt(card.total_decks_in_archetype || 1);
+                    existing.decklist_count = Math.max(existing.decklist_count, rowDecklistCount);
+                    // Track distinct raw archetypes (before sanitization) to detect
+                    // per-decklist rows that collapsed into one archetype
+                    existing._rawArchetypes.add(String(card.archetype || '').trim());
                 }
                 deckMap.get(deckKey).cards.push({
                     ...card,
@@ -11421,6 +11486,16 @@ const BASE_PATH = './data/';
                 });
             });
             
+            // Post-process: if multiple distinct raw archetypes collapsed into one
+            // sanitized name (e.g. different deck prices appended), use the raw archetype
+            // count as decklist_count when it exceeds the CSV-reported value.
+            deckMap.forEach(deck => {
+                if (deck._rawArchetypes && deck._rawArchetypes.size > deck.decklist_count) {
+                    deck.decklist_count = deck._rawArchetypes.size;
+                }
+                delete deck._rawArchetypes; // Clean up temporary tracking set
+            });
+
             pastMetaDecks = Array.from(deckMap.values());
             
             // Build latest date per meta for robust fallback sorting.

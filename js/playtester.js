@@ -852,6 +852,10 @@ function ptToggleZoomPanel() {
     if (ptZoomPanelOpen) ptRenderZoomPanel();
 }
 
+function ptZoomBoard() {
+    ptToggleZoomPanel();
+}
+
 function ptRenderZoomPanel(filter) {
     const grid = document.getElementById('ptZoomPanelGrid');
     if (!grid) return;

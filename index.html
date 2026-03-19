@@ -2221,12 +2221,21 @@
     <div id="playtesterModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:15000; flex-direction:column;">
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
 
-        <div class="pt-controls" style="display:flex; justify-content:space-around; flex-wrap:nowrap; overflow:hidden; padding:5px; background:#fff; border-bottom:1px solid #ccc; width: 100%;">
-            <button title="Multiplayer" onclick="openMultiplayerMenu()" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">👥</button>
-            <button title="Start / Reset" onclick="startPlaytesterSetup()" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">▶️</button>
-            <button title="Flip Board" onclick="ptFlipBoard()" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">🔄</button>
-            <button title="Log" onclick="ptToggleLog()" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">📝</button>
-            <button title="Münze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">🪙</button>
+        <div class="pt-controls" style="display:flex; justify-content:space-around; align-items:center; flex-wrap:nowrap; overflow:visible; padding:5px; background:#fff; border-bottom:1px solid #ccc; width: 100%; position:relative; z-index:1000;">
+            <button title="Multiplayer" onclick="openMultiplayerMenu()" style="font-size:20px; padding:5px; border:none; background:transparent;">👥</button>
+            <button title="Start / Reset" onclick="startPlaytesterSetup()" style="font-size:20px; padding:5px; border:none; background:transparent;">▶️</button>
+            <button title="Flip Board" onclick="ptFlipBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;">🔄</button>
+            <button title="Log" onclick="ptToggleLog()" style="font-size:20px; padding:5px; border:none; background:transparent;">📝</button>
+            <button title="Münze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" style="font-size:20px; padding:5px; border:none; background:transparent;">🪙</button>
+            <button title="Zoom" onclick="ptZoomBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;">🔍</button>
+
+            <div style="position:relative;">
+                <button onclick="let m = document.getElementById('ptTopMoreMenu'); m.style.display = m.style.display==='none'?'flex':'none';" style="font-size:20px; padding:5px; border:none; background:transparent;">⋮</button>
+                <div id="ptTopMoreMenu" style="display:none; position:absolute; top:35px; right:0; background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px; flex-direction:column; gap:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2);">
+                    <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar'); this.parentElement.style.display='none';">VSTAR</button>
+                    <button id="ptGxMarker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx'); this.parentElement.style.display='none';">GX</button>
+                </div>
+            </div>
         </div>
 
         <button id="fab-action-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡</button>
@@ -2337,20 +2346,6 @@
                 <div style="position: absolute; top: 50%; left: 22%; transform: translate(-50%, -50%); z-index: 5;">
                     <div class="static-element" style="display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.55); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
                         <button class="pt-btn" onclick="ptFlipCoin()">🪙 Coin</button>
-                        <button class="pt-btn" onclick="ptOpenAttackView()" style="background:#c0392b; color:white; border-color:#e74c3c; font-weight:700;">⚔️ Attack</button>
-                        <button class="pt-btn" onclick="ptPassTurn()" style="background:#27ae60; color:white; border-color:#2ecc71;">⏭️ End Turn</button>
-                        <div style="display:flex; gap:4px; justify-content:center; margin-top:2px;">
-                            <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')">VSTAR</button>
-                            <button id="ptGxMarker"    class="pt-marker pt-marker-gx"    onclick="ptToggleMarker('gx')">GX</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── CENTER: Floating action buttons ── -->
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(75px, -50%); z-index: 50;">
-                    <div class="static-element" style="display: flex; flex-direction: column; gap: 12px;">
-                        <button class="pt-btn" onclick="ptOpenOpponentPanel()" style="background:#c0392b;color:#fff;border-color:#e74c3c; padding: 5px 10px; font-size: 11px; box-shadow: 0 3px 8px rgba(0,0,0,0.6);" title="Schaden &amp; Status beim Gegner setzen">⚔️ Opp. View</button>
-                        <button class="pt-btn" onclick="ptToggleZoomPanel()" style="background:#2c3e50;color:#fff;border-color:#34495e; padding: 5px 10px; font-size: 11px; box-shadow: 0 3px 8px rgba(0,0,0,0.6);" title="Karte zoomen / suchen">🔍 Zoom</button>
                     </div>
                 </div>
 
@@ -2489,7 +2484,6 @@
                         <div style="position: absolute; bottom: 20px; left: 20px; text-align: center; display: flex; flex-direction: column; gap: 6px;">
                             <div class="pt-zone-label">P1 Prizes</div>
                             <div id="ptPrizeZone-p1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; width: clamp(70px, 11vw, 94px);"></div>
-                            <button class="pt-btn-small" onclick="ptRedrawPrizes('p1')" style="background: rgba(0,0,0,0.6);" title="Shuffle prizes back into deck and re-deal">🔄 Redraw</button>
                         </div>
 
                         <!-- P1 Bench -->
@@ -2521,6 +2515,14 @@
                         </div>
 
                     </div>
+                </div>
+
+                <div id="pt-side-buttons-left">
+                    <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">⚔️ Attack</button>
+                    <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">⏭️ End</button>
+                </div>
+                <div id="pt-side-buttons-right">
+                    <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">👀 Opp.</button>
                 </div>
 
             </div>

@@ -4009,6 +4009,54 @@ h3:first-child {
         border: none !important;
         background: transparent !important;
     }
+
+    /* Container für die linke Seite (Attack & End Turn) */
+    #pt-side-buttons-left {
+        position: fixed !important;
+        left: 0 !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+        z-index: 999 !important;
+    }
+
+    /* Container für die rechte Seite (Opp View) */
+    #pt-side-buttons-right {
+        position: fixed !important;
+        right: 0 !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        z-index: 999 !important;
+    }
+
+    /* Gemeinsames Design für die Side-Buttons */
+    .pt-side-btn {
+        border: none !important;
+        color: white !important;
+        font-weight: bold !important;
+        padding: 10px 8px !important;
+        font-size: 12px !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+        cursor: pointer !important;
+    }
+
+    /* Links (Attack & End) docken an den linken Rand an */
+    .attack-btn {
+        background: #c0392b !important;
+        border-radius: 0 8px 8px 0 !important; /* Rechts abgerundet */
+    }
+    .endturn-btn {
+        background: #27ae60 !important;
+        border-radius: 0 8px 8px 0 !important;
+    }
+
+    /* Rechts (Opp View) dockt an den rechten Rand an */
+    .oppview-btn {
+        background: #8e44ad !important;
+        border-radius: 8px 0 0 8px !important; /* Links abgerundet */
+    }
 }
 
 /* Sehr kleine Displays (Smartphones im Portrait) */

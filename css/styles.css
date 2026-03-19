@@ -4817,6 +4817,43 @@ details[open] > .tier-trending-summary::after {
         gap: 6px !important;
         padding: 0 !important;
     }
+
+    /* === PROXY PRINTER TAB — Mobile Layout === */
+
+    /* 1. Action buttons (Add Deck, Print, Clear) in 2-column grid */
+    #proxy .container > div[style*="margin-bottom:12px"] {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+
+    /* 2. Print Queue button full-width highlight */
+    #proxy button[onclick*="printProxyQueue"] {
+        grid-column: 1 / -1 !important;
+        padding: 12px !important;
+        font-size: 1.1em !important;
+    }
+
+    /* 3. Textarea full width */
+    #proxy textarea {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 4. Queue list on 3 columns (like meta card grid) */
+    #proxyQueueList {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        padding: 0 !important;
+    }
+
+    /* 5. Remove button touch-friendly */
+    #proxyQueueList button[onclick*="removeCardFromProxy"] {
+        min-height: 32px !important;
+        font-size: 14px !important;
+        border-radius: 6px !important;
+    }
 }
 
 /* ============================================================ */

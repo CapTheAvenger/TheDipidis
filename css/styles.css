@@ -4023,6 +4023,29 @@ h3:first-child {
         max-width: clamp(30px, 10vw, 55px) !important;
         font-size: 7px !important;
     }
+
+    /* 12. Hand-Aktionsleisten (Spieler & Gegner) ausblenden – Quick Actions Menu ersetzt sie */
+    #ptHandActionBar,
+    #ptOppHandActionBar,
+    .hand-action-bar,
+    .player-controls-container {
+        display: none !important;
+    }
+
+    /* 13. Zonen-Header kompakter */
+    .pt-zone-header,
+    .zone-label {
+        margin-bottom: 2px !important;
+        padding: 2px !important;
+        font-size: 11px !important;
+    }
+
+    /* 14. Spielfeld-Arena maximal nach oben */
+    #playtester-board,
+    #pt-board {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
 }
 
 /* Sehr kleine Displays (Smartphones im Portrait) */

@@ -3912,26 +3912,43 @@ h3:first-child {
         transform: scale(0.8) !important;
     }
 
-    /* 3. Toolbar oben: sauberes Swipe-Menü */
+    /* 3. Toolbar fixieren und Icons zentrieren */
     .pt-toolbar {
         display: flex !important;
+        justify-content: space-around !important;
         flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        gap: 8px !important;
-        padding: 5px 8px !important;
+        overflow: hidden !important;
+        gap: 4px !important;
+        padding: 5px !important;
         width: 100% !important;
-        scrollbar-width: none;
+        align-items: center !important;
     }
-    .pt-toolbar::-webkit-scrollbar { display: none; }
     .pt-toolbar > div { flex-wrap: nowrap !important; }
     .pt-toolbar .pt-btn {
-        flex-shrink: 0 !important;
-        white-space: nowrap !important;
-        height: 38px !important;
-        font-size: 13px !important;
-        padding: 0 14px !important;
+        font-size: 16px !important;
+        padding: 8px 12px !important;
+        min-width: unset !important;
         display: inline-block !important;
+    }
+    .pt-toolbar .btn-text { display: none !important; }
+
+    /* Floating Action Button */
+    #fab-action-btn {
+        position: fixed;
+        bottom: 120px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #9c27b0;
+        color: white;
+        font-size: 24px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        border: none;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     /* 4. Hand-Aktionsleiste: horizontal wischbar */
@@ -5383,4 +5400,8 @@ details[open] > .tier-trending-summary::after {
         height: 14px;
         margin-bottom: 0;
     }
+}
+
+#fab-action-btn {
+    display: none;
 }

@@ -2835,6 +2835,95 @@ function ptOpponentShuffleAndDraw() {
     ptLog('\uD83D\uDD04 Opponent Shuffle & Draw: ' + opp.toUpperCase() + ' mischt Hand ins Deck und zieht ' + drawn + '.');
     ptRenderAll();
 }
+
+window.executeCustomJudge = function() {
+    var p1 = parseInt(document.getElementById('inpJudgeP1')?.value) || 4;
+    var p2 = parseInt(document.getElementById('inpJudgeP2')?.value) || 4;
+
+    ptSaveState();
+
+    // P1 Shuffle & Draw
+    ptState.p1.deck.push.apply(ptState.p1.deck, ptState.p1.hand);
+    ptState.p1.hand = [];
+    ptShuffleDeck('p1');
+    ptDrawCards('p1', p1);
+
+    // P2 Shuffle & Draw
+    ptState.p2.deck.push.apply(ptState.p2.deck, ptState.p2.hand);
+    ptState.p2.hand = [];
+    ptShuffleDeck('p2');
+    ptDrawCards('p2', p2);
+
+    if (typeof showToast === 'function') showToast('Judge gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
+    else ptShowMessage('Judge gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
+
+    var modal = document.getElementById('ptDirectActionModal');
+    if (modal) modal.style.display = 'none';
+    ptRenderAll();
+    ptSaveState();
+};
+
+window.executeCustomIono = function() {
+    var p1 = parseInt(document.getElementById('inpIonoP1')?.value) || 6;
+    var p2 = parseInt(document.getElementById('inpIonoP2')?.value) || 6;
+
+    ptSaveState();
+
+    // Iono: hands go to bottom of deck
+    ptState.p1.hand.sort(function() { return Math.random() - 0.5; });
+    ptState.p1.deck.unshift.apply(ptState.p1.deck, ptState.p1.hand);
+    ptState.p1.hand = [];
+    ptDrawCards('p1', p1);
+
+    ptState.p2.hand.sort(function() { return Math.random() - 0.5; });
+    ptState.p2.deck.unshift.apply(ptState.p2.deck, ptState.p2.hand);
+    ptState.p2.hand = [];
+    ptDrawCards('p2', p2);
+
+    if (typeof showToast === 'function') showToast('Iono gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
+    else ptShowMessage('Iono gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
+
+    var modal = document.getElementById('ptDirectActionModal');
+    if (modal) modal.style.display = 'none';
+    ptRenderAll();
+    ptSaveState();
+};
+
+window.executeOwnShuffleDraw = function() {
+    var count = parseInt(document.getElementById('inpOwnSD')?.value) || 6;
+    var p = ptCurrentPlayer || 'p1';
+
+    ptSaveState();
+    ptState[p].deck.push.apply(ptState[p].deck, ptState[p].hand);
+    ptState[p].hand = [];
+    ptShuffleDeck(p);
+    ptDrawCards(p, count);
+
+    var modal = document.getElementById('ptDirectActionModal');
+    if (modal) modal.style.display = 'none';
+    ptRenderAll();
+    ptSaveState();
+};
+
+window.executeOppShuffleDraw = function() {
+    var count = parseInt(document.getElementById('inpOppSD')?.value) || 4;
+    var opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+
+    ptSaveState();
+    ptState[opp].deck.push.apply(ptState[opp].deck, ptState[opp].hand);
+    ptState[opp].hand = [];
+    ptShuffleDeck(opp);
+    ptDrawCards(opp, count);
+
+    var modal = document.getElementById('ptDirectActionModal');
+    if (modal) modal.style.display = 'none';
+    ptRenderAll();
+    ptSaveState();
+};
+
+window.renderPlaytester = window.renderPlaytester || ptRenderAll;
+window.savePtState = window.savePtState || ptSaveState;
+
 window.ptOpponentShuffleAndDraw = ptOpponentShuffleAndDraw;
 window.startStandalonePlaytester = startStandalonePlaytester;
 window.parseSandboxDeckToExactPrints = parseSandboxDeckToExactPrints;

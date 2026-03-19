@@ -2227,12 +2227,55 @@
                 <span id="ptMessage" style="color:#FFCB05; font-weight:700; font-size:0.9em; min-width:80px; margin-left: 10px;"></span>
             </div>
             <div style="display:flex; gap:6px; flex-wrap:nowrap; align-items:center;">
-                <button class="pt-btn" onclick="ptNewGame()">♻️ Restart</button>
-                <button class="pt-btn pt-danger" onclick="closePlaytester()">🚪 Quit</button>
-                <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip Board</button>
-                <button class="pt-btn" onclick="toggleMultiplayerMenu()" id="mpToggleBtn">🌐 Multiplayer</button>
-                <button class="pt-btn" onclick="ptToggleLog()">📋 Log</button>
-                <button class="pt-btn" onclick="ptQuickActionsMenu()" style="background:#6c3483;border-color:#8e44ad;color:#fff;">⋯ Actions</button>
+                <button class="pt-btn" onclick="toggleMultiplayerMenu()" id="mpToggleBtn" title="Multiplayer">👥</button>
+                <button class="pt-btn" onclick="ptNewGame()" title="Start Sandbox">▶️</button>
+                <button class="pt-btn pt-danger" onclick="closePlaytester()" title="Leave">🚪</button>
+                <button class="pt-btn" onclick="ptFlipBoard()" title="Flip Board">🔄</button>
+                <button class="pt-btn" onclick="ptToggleLog()" title="Log">📝</button>
+            </div>
+        </div>
+
+        <button id="fab-action-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡</button>
+
+        <div id="ptDirectActionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10001; align-items:center; justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+            <div style="background:white; padding:20px; border-radius:12px; width:90%; max-width:350px; display:flex; flex-direction:column; gap:12px;">
+                <h3 style="margin:0; text-align:center;">Actions</h3>
+
+                <button class="btn-primary" onclick="ptOpenDeckSearch(ptCurrentPlayer); document.getElementById('ptDirectActionModal').style.display='none'">🔍 Deck Search</button>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" style="flex:1;" onclick="ptDrawCards(ptCurrentPlayer, parseInt(document.getElementById('inpDraw').value)||1); ptRenderAll(); ptSaveState();">🃏 Draw</button>
+                    <input type="number" id="inpDraw" value="1" style="width:60px; text-align:center; border:1px solid #ccc; border-radius:6px;">
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" style="flex:1;" onclick="ptLookCards(ptCurrentPlayer, 'top', parseInt(document.getElementById('inpLook').value)||5)">👀 Look Top X</button>
+                    <input type="number" id="inpLook" value="5" style="width:60px; text-align:center; border:1px solid #ccc; border-radius:6px;">
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="number" id="inpJudgeP1" value="4" style="width:50px; text-align:center; border:1px solid #ccc; border-radius:6px;">
+                    <button class="btn-secondary" style="flex:1; background:#f39c12; color:white;" onclick="executeCustomJudge()">⚖️ Judge</button>
+                    <input type="number" id="inpJudgeP2" value="4" style="width:50px; text-align:center; border:1px solid #ccc; border-radius:6px;">
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" style="flex:1;" onclick="executeOwnShuffleDraw()">🔄 Own Shuffle & Draw</button>
+                    <input type="number" id="inpOwnSD" value="6" style="width:60px; text-align:center; border:1px solid #ccc; border-radius:6px;">
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" style="flex:1;" onclick="executeOppShuffleDraw()">🔄 Opp Shuffle & Draw</button>
+                    <input type="number" id="inpOppSD" value="4" style="width:60px; text-align:center; border:1px solid #ccc; border-radius:6px;">
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="number" id="inpIonoP1" value="6" style="width:50px; text-align:center; border:1px solid #ccc; border-radius:6px;">
+                    <button class="btn-secondary" style="flex:1; background:#e74c3c; color:white;" onclick="executeCustomIono()">🌪️ Iono</button>
+                    <input type="number" id="inpIonoP2" value="6" style="width:50px; text-align:center; border:1px solid #ccc; border-radius:6px;">
+                </div>
+
+                <button onclick="document.getElementById('ptDirectActionModal').style.display='none'" style="margin-top:10px; padding:10px; border-radius:6px; border:none; background:#eee;">Schließen</button>
             </div>
         </div>
 

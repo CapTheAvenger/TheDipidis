@@ -4281,8 +4281,9 @@ h3:first-child {
 
     #pt-side-buttons-right {
         position: fixed !important;
-        right: 0 !important;
-        top: 45% !important;
+        left: 0 !important;
+        right: auto !important;
+        top: 62% !important;
         transform: translateY(-50%) !important;
         display: flex !important;
         flex-direction: column !important;
@@ -4312,7 +4313,7 @@ h3:first-child {
 
     .oppview-btn {
         background: #8e44ad !important;
-        border-radius: 8px 0 0 8px !important;
+        border-radius: 0 8px 8px 0 !important;
     }
 
     /* Mobile cleanup: actions already in floating/FAB menus */
@@ -4338,11 +4339,11 @@ h3:first-child {
     /* Raise piles and prizes so bench is no longer covered */
     #p1-area > div > div[style*="bottom: 20px"][style*="right: 20px"][style*="flex-direction: column"],
     #p2-area > div > div[style*="bottom: 20px"][style*="right: 20px"][style*="flex-direction: column"] {
-        bottom: 92px !important;
+        bottom: 132px !important;
     }
     #p1-area > div > div[style*="bottom: 20px"][style*="left: 20px"],
     #p2-area > div > div[style*="bottom: 20px"][style*="left: 20px"] {
-        bottom: 92px !important;
+        bottom: 132px !important;
     }
 
     /* Move lost zone out of board view on mobile */
@@ -4352,17 +4353,24 @@ h3:first-child {
         display: none !important;
     }
 
-    /* Mobile lost shortcut next to discard */
+    /* Lost shortcut currently disabled on mobile */
     .pt-mobile-lost-shortcut {
-        display: inline-block !important;
-        margin-top: 4px !important;
-        border: 1px solid #8e44ad !important;
-        background: rgba(142,68,173,0.18) !important;
-        color: #d2b4de !important;
-        border-radius: 6px !important;
-        padding: 3px 6px !important;
-        font-size: 10px !important;
-        font-weight: 700 !important;
+        display: none !important;
+    }
+
+    /* Hide bench placeholder texts like "Bench 5" on mobile */
+    #ptBench0-p1 .pt-empty-slot,
+    #ptBench1-p1 .pt-empty-slot,
+    #ptBench2-p1 .pt-empty-slot,
+    #ptBench3-p1 .pt-empty-slot,
+    #ptBench4-p1 .pt-empty-slot,
+    #ptBench0-p2 .pt-empty-slot,
+    #ptBench1-p2 .pt-empty-slot,
+    #ptBench2-p2 .pt-empty-slot,
+    #ptBench3-p2 .pt-empty-slot,
+    #ptBench4-p2 .pt-empty-slot {
+        color: transparent !important;
+        font-size: 0 !important;
     }
 }
 

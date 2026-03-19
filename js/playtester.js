@@ -1185,7 +1185,13 @@ function ptRedrawPrizes(player) {
 // --- NEW HELPER FUNCTIONS ---
 
 function ptDrawCards(player, amount) {
+    // Compatibility: ptDrawCards(amount)
+    if (amount === undefined && !isNaN(parseInt(player))) {
+        amount = parseInt(player);
+        player = ptCurrentPlayer;
+    }
     const p = player || ptCurrentPlayer;
+    amount = parseInt(amount) || 1;
     let drawn = 0;
     for (let i = 0; i < amount; i++) {
         if (ptState[p].deck.length > 0) { ptState[p].hand.push(ptState[p].deck.pop()); drawn++; }
@@ -1206,11 +1212,19 @@ function ptShuffleDeck(player) {
 }
 
 function ptLookCards(player, position, amount) {
+    // Compatibility: ptLookCards(amount)
+    if (position === undefined && amount === undefined && !isNaN(parseInt(player))) {
+        amount = parseInt(player);
+        position = 'top';
+        player = ptCurrentPlayer;
+    }
     const p = player || ptCurrentPlayer;
+    position = position || 'top';
+    amount = parseInt(amount) || 5;
     ptLookingAtPlayer   = p;
     ptLookingAtIsBottom = (position === 'bottom');
     const deck = ptState[p].deck;
-    const take = Math.min(amount || 5, deck.length);
+    const take = Math.min(amount, deck.length);
     if (take === 0) { ptShowMessage('Deck is empty!'); return; }
     if (ptLookingAtIsBottom) {
         ptLookingAt = deck.splice(0, take);
@@ -2919,6 +2933,14 @@ window.executeOppShuffleDraw = function() {
     if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
+};
+
+window.openMultiplayerMenu = function() {
+    if (typeof toggleMultiplayerMenu === 'function') toggleMultiplayerMenu();
+};
+
+window.startPlaytesterSetup = function() {
+    if (typeof ptNewGame === 'function') ptNewGame();
 };
 
 window.renderPlaytester = window.renderPlaytester || ptRenderAll;

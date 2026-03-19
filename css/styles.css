@@ -3932,23 +3932,26 @@ h3:first-child {
     }
     .pt-toolbar .btn-text { display: none !important; }
 
-    /* Floating Action Button */
     #fab-action-btn {
-        position: fixed;
-        bottom: 120px;
-        right: 15px;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: #9c27b0;
-        color: white;
-        font-size: 24px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        border: none;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        position: fixed !important;
+        bottom: 130px !important;
+        right: 15px !important;
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 50% !important;
+        background-color: #9c27b0 !important;
+        color: white !important;
+        font-size: 28px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+        border: none !important;
+        z-index: 1000 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer;
+    }
+    #fab-action-btn:active {
+        transform: scale(0.9);
     }
 
     /* 4. Hand-Aktionsleiste: horizontal wischbar */

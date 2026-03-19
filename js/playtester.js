@@ -481,6 +481,7 @@ function ptNewGame() {
 
     ptRenderAll();
     ptOpenStartPhase();
+    ptInitMobileDeckTriggers();
 }
 
 // ── Start Phase: coin flip → hand display → active selection ─────────────
@@ -491,8 +492,8 @@ function _ptIsBasic(card) {
     // Explicit non-Pokémon types
     if (t === 'supporter' || t === 'item' || t === 'tool' || t === 'stadium') return false;
     if (t.includes('energy')) return false;
-    // Everything else = Pokémon (e.g. 'G Basic', 'N Stage 1', '' for unknown)
-    return true;
+    // Check for "Basic" in the type string (e.g. "GBasic", "WBasic", "Basic")
+    return t.includes('basic');
 }
 function _ptHasBasic(player) {
     return ptState[player].hand.some(_ptIsBasic);
@@ -2458,4 +2459,68 @@ function ptShuffleIntoDeck(player, zoneId) {
         }
         ptRenderAll();
     }
+}
+
+// ── ZIEL 3: Mobile toggle for extended hand actions ──────────────────────
+function ptToggleMobileActions() {
+    const ext = document.getElementById('ptExtendedActions');
+    if (!ext) return;
+    ext.classList.toggle('pt-expanded');
+    const btn = document.querySelector('.pt-mobile-toggle');
+    if (btn) btn.textContent = ext.classList.contains('pt-expanded') ? '✕' : '⚙️';
+}
+
+// ── ZIEL 4: Mobile deck popup menu ──────────────────────────────────────
+function ptShowDeckPopup(player, deckEl) {
+    ptCloseDeckPopup();
+    const popup = document.createElement('div');
+    popup.id = 'ptDeckPopup';
+    popup.className = 'pt-deck-popup';
+    popup.innerHTML =
+        '<div class="pt-deck-popup-title">\u{1F4E6} Deck (' + player.toUpperCase() + ')</div>' +
+        '<button class="pt-btn-small" style="width:100%;background:#2a52be;border-color:#3B4CCA;margin-bottom:2px;" onclick="ptDrawCards(\'' + player + '\',1);ptCloseDeckPopup()">\u2B06\uFE0F Draw 1</button>' +
+        '<button class="pt-btn-small" style="width:100%;background:#2a52be;border-color:#3B4CCA;margin-bottom:2px;" onclick="ptOpenDeckSearch(\'' + player + '\');ptCloseDeckPopup()">\u{1F50D} Search</button>' +
+        '<button class="pt-btn-small" style="width:100%;margin-bottom:2px;" onclick="ptShuffleDeck(\'' + player + '\');ptCloseDeckPopup()">\u{1F500} Shuffle</button>' +
+        '<div class="pt-stepper-group">' +
+            '<button class="pt-stepper-btn" onclick="updateStepper(\'' + player + '-pop-draw\',-1)">-</button>' +
+            '<span id="' + player + '-pop-draw" class="pt-stepper-val">2</span>' +
+            '<button class="pt-stepper-btn" onclick="updateStepper(\'' + player + '-pop-draw\',1)">+</button>' +
+            '<button class="pt-stepper-action" onclick="ptDrawCards(\'' + player + '\',parseInt(document.getElementById(\'' + player + '-pop-draw\').innerText));ptCloseDeckPopup()">DRAW</button>' +
+        '</div>' +
+        '<div class="pt-stepper-group">' +
+            '<button class="pt-stepper-btn" onclick="updateStepper(\'' + player + '-pop-top\',-1)">-</button>' +
+            '<span id="' + player + '-pop-top" class="pt-stepper-val">5</span>' +
+            '<button class="pt-stepper-btn" onclick="updateStepper(\'' + player + '-pop-top\',1)">+</button>' +
+            '<button class="pt-stepper-action" onclick="ptLookCards(\'' + player + '\',\'top\',parseInt(document.getElementById(\'' + player + '-pop-top\').innerText));ptCloseDeckPopup()">TOP</button>' +
+        '</div>' +
+        '<div class="pt-stepper-group">' +
+            '<button class="pt-stepper-btn" onclick="updateStepper(\'' + player + '-pop-bot\',-1)">-</button>' +
+            '<span id="' + player + '-pop-bot" class="pt-stepper-val">1</span>' +
+            '<button class="pt-stepper-btn" onclick="updateStepper(\'' + player + '-pop-bot\',1)">+</button>' +
+            '<button class="pt-stepper-action" onclick="ptLookCards(\'' + player + '\',\'bottom\',parseInt(document.getElementById(\'' + player + '-pop-bot\').innerText));ptCloseDeckPopup()">BOT</button>' +
+        '</div>' +
+        '<button class="pt-btn-small pt-deck-popup-close" onclick="ptCloseDeckPopup()">\u2715 Close</button>';
+    var rect = deckEl.getBoundingClientRect();
+    popup.style.left = Math.min(Math.max(rect.left - 60, 8), window.innerWidth - 190) + 'px';
+    popup.style.top = Math.max(rect.top - 280, 10) + 'px';
+    document.body.appendChild(popup);
+}
+
+function ptCloseDeckPopup() {
+    var popup = document.getElementById('ptDeckPopup');
+    if (popup) popup.remove();
+}
+
+function ptInitMobileDeckTriggers() {
+    if (window.innerWidth > 768) return;
+    document.querySelectorAll('.pt-deck-pile').forEach(function(pile) {
+        if (pile.dataset.mobileInit) return;
+        pile.dataset.mobileInit = '1';
+        var player = pile.closest('#p1-area') ? 'p1' : 'p2';
+        var trigger = document.createElement('button');
+        trigger.className = 'pt-btn-small pt-deck-popup-trigger';
+        trigger.textContent = '\u22EE Deck Menu';
+        trigger.onclick = function() { ptShowDeckPopup(player, pile); };
+        pile.parentElement.appendChild(trigger);
+    });
 }

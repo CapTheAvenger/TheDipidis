@@ -2252,7 +2252,7 @@
         <div style="flex:1; display:flex; justify-content:center; align-items:center; padding: 15px; overflow: hidden; box-sizing:border-box; position: relative;">
 
             <!-- ── LEGEND — static, left-centre ── -->
-            <div style="position:absolute; top:50%; left:8px; transform:translateY(-50%); z-index:200;
+            <div class="pt-legend-box" style="position:absolute; top:50%; left:8px; transform:translateY(-50%); z-index:200;
                 background:rgba(10,10,10,0.88); border:1px solid #333; border-radius:6px;
                 padding:8px 10px; color:#ddd; font-size:9px; box-shadow:0 4px 12px rgba(0,0,0,0.8);
                 display:flex; flex-direction:column; gap:4px; user-select:none; pointer-events:none; width:155px;">
@@ -2480,11 +2480,15 @@
                     Hand (<span id="ptHandCount">0</span>) &mdash; P<span id="activePlayerIndicator">1</span>
                 </div>
 
-                <div style="display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
+                <div id="ptHandActionBar" style="display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
 
                     <button class="pt-btn" style="padding: 4px 8px; background:#e67e22; color:white; border-color:#d35400;" onclick="ptUndo()" title="Letzte Aktion rückgängig machen">↩️ Undo</button>
 
                         <button class="pt-btn" style="padding: 4px 8px; background:#8e44ad; color:white; border-color:#9b59b6;" onclick="ptMulligan(ptCurrentPlayer)" title="Hand ins Deck, 7 neue ziehen">🃏 Mulligan</button>
+
+                    <button class="pt-btn pt-mobile-toggle" style="padding: 4px 8px; background:#555; color:white; border-color:#777;" onclick="ptToggleMobileActions()" title="More actions">⚙️</button>
+
+                    <div id="ptExtendedActions" style="display:contents;">
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
                     <span style="color: #ccc; font-size: 10px; font-weight: bold;">Self:</span>
@@ -2511,6 +2515,7 @@
                     <span style="color: #ccc; font-size: 10px; font-weight: bold;">Cmd:</span>
                     <input type="text" id="ptCommandInput-p1" class="pt-cmd-input" placeholder="/draw 3…" style="width: 80px;" onkeydown="if(event.key==='Enter'){ptRunCommand();event.preventDefault();}"
                            title="Commands: /draw N  /mill N  /top N  /iono N  /roxanne N  /shuffle  /coin N  /dice  /attach [active|bench0-4]">
+                    </div>
                 </div>
 
             </div>

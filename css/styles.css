@@ -3831,6 +3831,12 @@ h3:first-child {
     cursor: pointer;
 }
 
+/* Desktop defaults — hidden mobile-only elements */
+.pt-mobile-toggle,
+.pt-deck-popup-trigger {
+    display: none;
+}
+
 /* Mobile Board Layout (Vertical) */
 @media (max-width: 768px) {
     #playtester-board {
@@ -3978,6 +3984,83 @@ h3:first-child {
         gap: 8px !important;
         width: 100% !important;
         justify-items: center !important;
+    }
+
+    /* === ZIEL 2: Setup Phase — fit 7 cards on mobile === */
+    #ptStartPhaseModal > div {
+        padding: 12px 6px !important;
+        width: 98vw !important;
+    }
+    #ptStartPhaseModal div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    #ptStartPhaseModal img {
+        width: clamp(36px, 11vw, 55px) !important;
+    }
+    #ptStartPhaseModal span[style*="max-width:72px"] {
+        max-width: clamp(36px, 11vw, 55px) !important;
+        font-size: 7px !important;
+    }
+
+    /* === ZIEL 3: Hide Arena banner & extended hand actions on mobile === */
+    .pt-toolbar > div:first-child > span:first-child {
+        display: none !important;
+    }
+    /* Hide Legend on mobile */
+    .pt-legend-box {
+        display: none !important;
+    }
+    .pt-mobile-toggle {
+        display: inline-flex !important;
+    }
+    #ptExtendedActions {
+        display: none !important;
+    }
+    #ptExtendedActions.pt-expanded {
+        display: contents !important;
+    }
+
+    /* === ZIEL 4: Hide permanent deck-controls panel on mobile === */
+    .pt-deck-controls {
+        display: none !important;
+    }
+    /* Deck popup styling */
+    .pt-deck-popup {
+        position: fixed;
+        z-index: 25000;
+        background: rgba(10, 10, 30, 0.96);
+        border: 2px solid #FFCB05;
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        width: 170px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+    }
+    .pt-deck-popup-title {
+        color: #FFCB05;
+        font-weight: 900;
+        font-size: 11px;
+        text-align: center;
+        margin-bottom: 4px;
+    }
+    .pt-deck-popup-close {
+        margin-top: 4px;
+        background: #e74c3c !important;
+        border-color: #c0392b !important;
+        color: #fff !important;
+    }
+    .pt-deck-popup-trigger {
+        display: block !important;
+        margin-top: 4px;
+        background: #1b3b8c;
+        border-color: #3B4CCA;
+        color: #fff;
+        font-size: 11px;
+        padding: 4px 8px;
+        width: 100%;
     }
 }
 

@@ -47,6 +47,22 @@ service cloud.firestore {
     match /users/{userId}/favorites/{favoriteId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // USER PROFILES, COLLECTIONS & WISHLISTS
+    // ══════════════════════════════════════════════════════════════════════
+
+    match /profiles/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /collections/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /wishlists/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
     
     // ══════════════════════════════════════════════════════════════════════
     // PUBLIC READ FOR CARD DATA (Optional)

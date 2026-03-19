@@ -5291,3 +5291,96 @@ details[open] > .tier-trending-summary::after {
     font-weight: bold !important;
     border-radius: 8px !important;
 }
+
+@media (max-width: 768px) {
+    /* Grundlayout komprimieren */
+    body {
+        padding: 0;
+        margin: 0;
+        font-size: 11px;
+    }
+
+    /* Header/Suchleiste */
+    .header-controls {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 2px;
+        padding: 2px;
+        height: auto;
+    }
+    .header-controls select,
+    .header-controls input {
+        padding: 2px 4px;
+        font-size: 11px;
+        height: 22px;
+    }
+    .search-filters { font-size: 10px; }
+
+    /* Hauptinhalt / Kartenliste */
+    #main-content {
+        margin: 0;
+        padding: 2px;
+    }
+    .card-row {
+        margin-bottom: 2px;
+        padding: 2px;
+    }
+    .card-info {
+        display: flex;
+        gap: 1px;
+        flex-wrap: wrap;
+        font-size: 10px;
+    }
+    .card-name {
+        font-size: 11px;
+        font-weight: bold;
+        flex: 0 0 100%;
+    }
+    .card-set-info { flex: 0 0 auto; color: #666; }
+
+    /* Preisbereich komprimieren */
+    .price-area {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        font-size: 10px;
+        width: 100%;
+    }
+    .price-point {
+        text-align: left;
+        white-space: nowrap;
+    }
+    .price-label { font-size: 9px; }
+    .price-value-mid { font-size: 11px; font-weight: bold; }
+    .price-point-details,
+    .detail-price-points {
+        display: none;
+    }
+
+    /* Archetyp-Blöcke (unten) */
+    #archetype-section {
+        padding: 2px;
+        margin-bottom: 30px;
+    }
+    .archetype-block {
+        padding: 2px;
+        margin-bottom: 2px;
+    }
+    .archetype-header { font-size: 11px; margin-bottom: 1px; }
+    .archetype-card-list { gap: 1px; }
+    .archetype-card-list li { font-size: 10px; padding: 0; }
+
+    /* Bottom Navigation */
+    #bottom-nav {
+        height: 28px;
+        font-size: 9px;
+    }
+    #bottom-nav .nav-item {
+        padding: 1px;
+    }
+    #bottom-nav .nav-icon {
+        width: 14px;
+        height: 14px;
+        margin-bottom: 0;
+    }
+}

@@ -3848,6 +3848,7 @@ h3:first-child {
     /* 1. Störende Texte und Banner ausblenden */
     .hide-on-mobile,
     .pt-legend-box,
+    .pt-zone-label,
     .pt-toolbar > div:first-child > span:first-child {
         display: none !important;
     }
@@ -3972,6 +3973,21 @@ h3:first-child {
     .pt-hand-card {
         width: 70px !important;
         height: 98px !important;
+    }
+
+    /* 7b. Handkarten-Überlappung: Platz sparen, Tap zum Aufklappen */
+    .pt-hand-wrapper {
+        margin-right: -45px !important;
+        transition: margin-right 0.2s ease !important;
+        flex-shrink: 0 !important;
+    }
+    .pt-hand-wrapper:last-child {
+        margin-right: 0 !important;
+    }
+    .pt-hand-wrapper:active,
+    .pt-hand-wrapper:focus-within,
+    .pt-hand-wrapper.pt-hand-expanded {
+        margin-right: 5px !important;
     }
     .pt-empty-slot, .pt-dropzone {
         min-width: 60px !important;

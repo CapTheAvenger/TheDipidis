@@ -2139,6 +2139,11 @@ function ptRenderHand() {
         wrapper.className = 'pt-hand-wrapper';
         wrapper.draggable = true;
         wrapper.ondragstart = e => ptDragStartHand(e, i);
+        // Mobile: tap to expand overlapping card
+        wrapper.addEventListener('touchstart', function() {
+            zone.querySelectorAll('.pt-hand-expanded').forEach(el => el.classList.remove('pt-hand-expanded'));
+            this.classList.add('pt-hand-expanded');
+        }, { passive: true });
 
         const img = document.createElement('img');
         img.src       = card.imageUrl || CARD_BACK_URL;

@@ -9304,22 +9304,20 @@ const BASE_PATH = './data/';
 
             // ==========================================
             // 🚨 KUGELSICHERER ACE SPEC CHECKER 🚨
-            // Nutzt die zentrale isAceSpec() + CSV-Fallback
+            // Nutzt die zentrale isAceSpec() + Rarity/Rules
+            // CSV is_ace_spec wird IGNORIERT (fehlerhaft bei Jamming Tower etc.)
             // ==========================================
             const isAceSpecCard = (c) => {
                 if (!c) return false;
 
-                // 1. Zentrale aceSpecsList aus ace_specs.json (primäre Quelle)
+                // 1. Zentrale aceSpecsList aus ace_specs.json (primäre, vertrauenswürdige Quelle)
                 if (isAceSpec(c)) return true;
 
-                // 2. Fallback: CSV-Spalte is_ace_spec
-                if (String(c.is_ace_spec).trim().toLowerCase() === 'yes') return true;
-
-                // 3. Fallback: Rarity-Feld
+                // 2. Rarity-Feld muss explizit "ACE SPEC" enthalten
                 const rarity = String(c.rarity || '').trim().toUpperCase();
                 if (rarity === 'ACE SPEC RARE' || rarity === 'ACE SPEC') return true;
 
-                // 4. Fallback: Rules-Text (z.B. "ACE SPEC rule: You can't have more than 1...")
+                // 3. Rules-Text (z.B. "ACE SPEC rule: You can't have more than 1...")
                 if (Array.isArray(c.rules)) {
                     for (const rule of c.rules) {
                         if (String(rule).toUpperCase().includes('ACE SPEC')) return true;

@@ -3841,77 +3841,29 @@ h3:first-child {
 
 /* Mobile Board Layout (Vertical) */
 /* ============================================================ */
-/* PLAYTESTER MOBILE OVERHAUL (CLEAN APP LAYOUT)                */
+/* PLAYTESTER MOBILE OVERHAUL (APP-STYLE UX)                    */
 /* ============================================================ */
 @media (max-width: 768px) {
 
-    /* 1. Hide decorative text banners & legend on mobile */
+    /* 1. Störende Texte und Banner ausblenden */
     .hide-on-mobile,
     .pt-legend-box,
     .pt-toolbar > div:first-child > span:first-child {
         display: none !important;
     }
 
-    /* 2. Toolbar: horizontal swipe strip */
-    .pt-toolbar {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        gap: 8px !important;
-        padding: 6px 8px !important;
-        width: 100% !important;
-        scrollbar-width: none;
-    }
-    .pt-toolbar::-webkit-scrollbar { display: none; }
-    .pt-toolbar > div { flex-wrap: nowrap !important; }
-    .pt-toolbar .pt-btn {
-        flex-shrink: 0 !important;
-        white-space: nowrap !important;
-        height: 38px !important;
-        font-size: 13px !important;
-        padding: 0 12px !important;
-        display: inline-block !important;
-    }
-
-    /* 3. Hand action bar: horizontal swipe strip */
-    .pt-mobile-toggle { display: none !important; }
-    #ptExtendedActions { display: contents !important; }
-    #ptHandActionBar {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        gap: 8px !important;
-        padding: 4px 10px !important;
-        width: 100% !important;
-        scrollbar-width: none;
-    }
-    #ptHandActionBar::-webkit-scrollbar { display: none; }
-    #ptHandActionBar button,
-    #ptHandActionBar input,
-    #ptHandActionBar span {
-        flex: 0 0 auto !important;
-        white-space: nowrap !important;
-    }
-    #ptHandActionBar .pt-btn {
-        height: 36px !important;
-        font-size: 12px !important;
-        padding: 0 12px !important;
-    }
-
-    /* 4. Board: vertical column layout, no overlap */
+    /* 2. Spielfeld entzerren (alles untereinander, keine festen Höhen) */
     #playtester-board,
     #playtester-board.pt-arena {
         display: flex !important;
         flex-direction: column !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
+        position: relative !important;
         height: auto !important;
         gap: 15px !important;
-        width: 100% !important;
-        overflow-x: hidden !important;
         padding-bottom: 20px !important;
+        width: 100% !important;
+        align-items: center !important;
+        overflow-x: hidden !important;
     }
     #p2-area, #p1-area {
         height: auto !important;
@@ -3924,26 +3876,74 @@ h3:first-child {
         transform: scale(0.8) !important;
     }
 
-    /* 5. Side zones (Lost/Deck/Discard): row layout instead of absolute column */
+    /* 3. Toolbar oben: sauberes Swipe-Menü */
+    .pt-toolbar {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 8px !important;
+        padding: 5px 8px !important;
+        width: 100% !important;
+        scrollbar-width: none;
+    }
+    .pt-toolbar::-webkit-scrollbar { display: none; }
+    .pt-toolbar > div { flex-wrap: nowrap !important; }
+    .pt-toolbar .pt-btn {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        height: 38px !important;
+        font-size: 13px !important;
+        padding: 0 14px !important;
+        display: inline-block !important;
+    }
+
+    /* 4. Hand-Aktionsleiste: horizontal wischbar */
+    .pt-mobile-toggle { display: none !important; }
+    #ptExtendedActions { display: contents !important; }
+    #ptHandActionBar {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 8px !important;
+        padding: 5px 10px !important;
+        width: 100% !important;
+        scrollbar-width: none;
+    }
+    #ptHandActionBar::-webkit-scrollbar { display: none; }
+    #ptHandActionBar button,
+    #ptHandActionBar input,
+    #ptHandActionBar span {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+    }
+    #ptHandActionBar .pt-btn {
+        height: 38px !important;
+        font-size: 13px !important;
+        padding: 0 14px !important;
+    }
+
+    /* 5. Zonen (Deck, Discard, Lost) nebeneinander statt absolut-gestapelt */
     #p1-area > div > div[style*="flex-direction: column"][style*="right: 20px"],
     #p2-area > div > div[style*="flex-direction: column"][style*="right: 20px"] {
         position: static !important;
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: wrap !important;
         justify-content: center !important;
-        gap: 15px !important;
+        gap: 20px !important;
         width: 100% !important;
         margin-top: 10px !important;
+        flex-wrap: wrap !important;
     }
 
-    /* Prize zones: relative */
+    /* Prize zones: static positioning */
     #p1-area > div > div[style*="left: 20px"],
     #p2-area > div > div[style*="left: 20px"] {
         position: static !important;
     }
 
-    /* 6. Bench: centered flex-wrap row */
+    /* 6. Bench zentrieren und in eine wischbare Reihe */
     #p1-area div[style*="bottom: 20px"][style*="left: 50%"],
     #p2-area div[style*="bottom: 20px"][style*="left: 50%"] {
         position: relative !important;
@@ -3956,13 +3956,14 @@ h3:first-child {
     #p1-area div[style*="justify-content:center"][style*="display:flex"],
     #p2-area div[style*="justify-content:center"][style*="display:flex"] {
         display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        justify-content: flex-start !important;
         gap: 6px !important;
         width: 100% !important;
     }
 
-    /* 7. Card sizes */
+    /* 7. Kartengrößen auf Mobile bändigen */
     .pt-card-mini {
         width: clamp(40px, 12vw, 65px) !important;
         height: auto !important;
@@ -3977,7 +3978,7 @@ h3:first-child {
         min-height: 84px !important;
     }
 
-    /* 8. Steppers & damage counters scaled */
+    /* 8. Stepper & Damage Counter verkleinern */
     .pt-stepper-group {
         transform: scale(0.8) !important;
         transform-origin: bottom center !important;
@@ -3988,7 +3989,7 @@ h3:first-child {
         margin-bottom: -5px !important;
     }
 
-    /* 9. Deck: hide half-split, tap triggers ptDeckMenu prompt */
+    /* 9. Deck: Halbe-Labels ausblenden, Tipp öffnet ptDeckMenu */
     .pt-deck-half { display: none !important; }
     .pt-deck-pile {
         transform: scale(1.1) !important;
@@ -3998,7 +3999,7 @@ h3:first-child {
     .pt-deck-controls { display: none !important; }
     .pt-deck-popup-trigger { display: none !important; }
 
-    /* 10. Setup phase grid (fit 7 cards) */
+    /* 10. Setup Phase: Alle 7 Karten sichtbar */
     #ptStartPhaseModal > div {
         padding: 12px 6px !important;
         width: 98vw !important;
@@ -4007,11 +4008,19 @@ h3:first-child {
         grid-template-columns: 1fr !important;
         gap: 10px !important;
     }
+    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        gap: 4px !important;
+        width: 100% !important;
+        justify-content: flex-start !important;
+    }
     #ptStartPhaseModal img {
-        width: clamp(36px, 11vw, 55px) !important;
+        width: clamp(30px, 10vw, 55px) !important;
     }
     #ptStartPhaseModal span[style*="max-width:72px"] {
-        max-width: clamp(36px, 11vw, 55px) !important;
+        max-width: clamp(30px, 10vw, 55px) !important;
         font-size: 7px !important;
     }
 }

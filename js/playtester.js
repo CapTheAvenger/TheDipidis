@@ -2535,6 +2535,18 @@ function ptDeckMenu(player) {
 }
 window.ptDeckMenu = ptDeckMenu;
 
+// ── Quick Actions Menu (Mobile Shortcut) ─────────────────────────────────
+function ptQuickActionsMenu() {
+    var player = ptCurrentPlayer || 'p1';
+    var action = prompt('QUICK ACTIONS MENU\n\nWähle eine Aktion:\n1 = Iono (Enigmara)\n2 = Karte ziehen (Draw)\n3 = Deck durchsuchen (Search)\n4 = Oberste Karten ansehen (Look)\n5 = Gegner mischt & zieht X', '1');
+    if (action === '1') ptGlobalIono();
+    else if (action === '2') ptDrawCards(player, 1);
+    else if (action === '3') ptOpenDeckSearch(player);
+    else if (action === '4') ptLookCards(player, 'top', 5);
+    else if (action === '5') ptOpponentShuffleAndDraw();
+}
+window.ptQuickActionsMenu = ptQuickActionsMenu;
+
 // ── Opponent Shuffle & Draw X ───────────────────────────────────────────
 function ptOpponentShuffleAndDraw() {
     var input = prompt('Wie viele Karten soll der Gegner ziehen?', '4');

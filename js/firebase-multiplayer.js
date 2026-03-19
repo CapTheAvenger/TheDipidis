@@ -484,6 +484,17 @@ function toggleMultiplayerMenu() {
     }
 }
 
+/** Opens the playtester modal (if hidden) and shows the multiplayer menu */
+function openMultiplayerFromSandbox() {
+    const modal = document.getElementById('playtesterModal');
+    if (modal) modal.style.display = 'flex';
+    const menu = document.getElementById('mpMenu');
+    if (menu) {
+        menu.style.display = 'block';
+        mpPopulateDeckSelect();
+    }
+}
+
 /** Populate the deck dropdown from window.userDecks */
 function mpPopulateDeckSelect() {
     const sel = document.getElementById('mpDeckSelect');
@@ -582,6 +593,7 @@ if (typeof window !== 'undefined') {
     window.mpAction = mpAction;
     window.mpIsMultiplayer = () => mpSyncEnabled;
     window.toggleMultiplayerMenu = toggleMultiplayerMenu;
+    window.openMultiplayerFromSandbox = openMultiplayerFromSandbox;
     window.mpCreateGame = mpCreateGame;
     window.mpJoinGame = mpJoinGame;
 }

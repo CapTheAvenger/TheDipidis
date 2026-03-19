@@ -3953,6 +3953,7 @@ h3:first-child {
         padding: 8px 6px !important;
         max-height: 95vh !important;
         overflow-y: hidden !important;
+        padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
     }
     #ptStartPhaseModal h2 {
         margin: 0 0 4px 0 !important;
@@ -4041,6 +4042,8 @@ h3:first-child {
         flex-wrap: nowrap !important;
         overflow-x: hidden !important;
         padding: 5px !important;
+        padding-left: calc(5px + env(safe-area-inset-left)) !important;
+        padding-right: calc(5px + env(safe-area-inset-right)) !important;
         width: 100% !important;
         justify-content: space-around !important;
     }
@@ -4055,6 +4058,7 @@ h3:first-child {
     #pt-side-buttons-left {
         position: fixed !important;
         left: 0 !important;
+        left: env(safe-area-inset-left) !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
         display: flex !important;
@@ -4067,6 +4071,7 @@ h3:first-child {
     #pt-side-buttons-right {
         position: fixed !important;
         right: 0 !important;
+        right: env(safe-area-inset-right) !important;
         top: 50% !important;
         transform: translateY(-50%) !important;
         z-index: 999 !important;
@@ -4132,6 +4137,7 @@ h3:first-child {
         width: 97vw !important;
         max-height: 96vh !important;
         padding: 6px 5px !important;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom)) !important;
     }
     #ptStartPhaseModal h2 {
         font-size: 1.55rem !important;
@@ -4184,6 +4190,11 @@ h3:first-child {
     .pt-controls button {
         font-size: 18px !important;
         padding: 4px !important;
+    }
+
+    .pt-controls {
+        padding-left: calc(4px + env(safe-area-inset-left)) !important;
+        padding-right: calc(4px + env(safe-area-inset-right)) !important;
     }
 }
 /* ==========================================================================

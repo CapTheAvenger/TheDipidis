@@ -2215,12 +2215,15 @@
                 <span style="color:#fff; font-size:1.1em; font-weight:900; letter-spacing: 1px;">⚔️ ARENA</span>
                 <span id="ptMessage" style="color:#FFCB05; font-weight:700; font-size:0.9em; min-width:80px; margin-left: 10px;"></span>
             </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip Board</button>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 <button class="pt-btn" onclick="ptNewGame()">♻️ Restart</button>
-                <button class="pt-btn" onclick="toggleMultiplayerMenu()" id="mpToggleBtn">🌐 Multiplayer</button>
-                <button class="pt-btn" onclick="ptToggleLog()">📋 Log</button>
                 <button class="pt-btn pt-danger" onclick="closePlaytester()">🚪 Quit</button>
+                <button class="pt-btn pt-toolbar-more-btn" onclick="document.getElementById('ptToolbarMore').classList.toggle('pt-toolbar-show')" title="More actions">⋯ More</button>
+                <div id="ptToolbarMore" class="pt-toolbar-more">
+                    <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip Board</button>
+                    <button class="pt-btn" onclick="toggleMultiplayerMenu()" id="mpToggleBtn">🌐 Multiplayer</button>
+                    <button class="pt-btn" onclick="ptToggleLog()">📋 Log</button>
+                </div>
             </div>
         </div>
 

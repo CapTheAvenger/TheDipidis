@@ -3837,6 +3837,14 @@ h3:first-child {
     display: none;
 }
 
+/* Desktop: "More" container flows inline, toggle button hidden */
+.pt-toolbar-more {
+    display: contents;
+}
+.pt-toolbar-more-btn {
+    display: none !important;
+}
+
 /* Mobile Board Layout (Vertical) */
 @media (max-width: 768px) {
     #playtester-board {
@@ -3976,16 +3984,6 @@ h3:first-child {
         transform-origin: bottom center !important;
     }
 
-    /* 5. Side zones (Deck/Discard/Lost/Prizes columns) as grid */
-    #p1-area > div > div[style*="flex-direction: column"][style*="position: absolute"][style*="right: 20px"],
-    #p2-area > div > div[style*="flex-direction: column"][style*="position: absolute"][style*="right: 20px"] {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)) !important;
-        gap: 8px !important;
-        width: 100% !important;
-        justify-items: center !important;
-    }
-
     /* === ZIEL 2: Setup Phase — fit 7 cards on mobile === */
     #ptStartPhaseModal > div {
         padding: 12px 6px !important;
@@ -4019,6 +4017,54 @@ h3:first-child {
     }
     #ptExtendedActions.pt-expanded {
         display: contents !important;
+    }
+
+    /* === TOOLBAR MORE BUTTON on mobile === */
+    .pt-toolbar-more-btn {
+        display: inline-block !important;
+        background: #555 !important;
+        border-color: #777 !important;
+        color: #fff !important;
+    }
+    .pt-toolbar-more {
+        display: none;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .pt-toolbar-more.pt-toolbar-show {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+
+    /* === ARENA LAYOUT: Bench & Side Zones improved === */
+    /* Bench rows clear and centered with slightly bigger slots */
+    #p1-area div[style*="bottom: 20px"][style*="left: 50%"],
+    #p2-area div[style*="bottom: 20px"][style*="left: 50%"] {
+        position: relative !important;
+        bottom: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        margin-top: 10px !important;
+    }
+    /* Side zones (Lost/Deck/Discard) as 2-col grid, bigger */
+    #p1-area > div > div[style*="flex-direction: column"][style*="right: 20px"],
+    #p2-area > div > div[style*="flex-direction: column"][style*="right: 20px"] {
+        position: relative !important;
+        bottom: auto !important;
+        right: auto !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px !important;
+        width: 90% !important;
+        margin: 10px auto !important;
+        justify-items: center !important;
+    }
+    /* Deck pile slightly larger on mobile */
+    .pt-deck-pile {
+        transform: scale(1.1) !important;
+        transform-origin: center center !important;
     }
 
     /* === ZIEL 4: Hide permanent deck-controls panel on mobile === */

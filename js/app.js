@@ -4492,35 +4492,7 @@ const BASE_PATH = './data/';
             
             const isMobile = window.innerWidth <= 768;
             let tableHTML = '';
-            
-                if (m3DataRaw) {
-                    const parsedM3 = await fetchAndParseCSV(`${BASE_PATH}city_league_archetypes_M3.csv?t=${timestamp}`);
-                    const aggregatedM3 = deriveCityLeagueComparisonData(parsedM3);
-                    const m3PlacementStatsMap = buildCityLeaguePlacementStatsMap(parsedM3);
-                    const enrichedM3 = enrichCityLeagueDataWithPlacementStats(aggregatedM3, m3PlacementStatsMap);
-                    window.m3BaselineData = {};
-                    window.m3ArchetypeData = {};
-                    enrichedM3.forEach(row => {
-                        const deckName = row.name || row.archetype;
-                        if (!deckName) return;
-
-                        const normalizedAvgPlacement = (row.new_avg_placement || row.average_placement || row.avg_placement || '0').replace(',', '.');
-                        const normalizedShare = (row.new_meta_share || row.new_share || row.share || row.percentage_in_archetype || '0').replace(',', '.');
-
-                        window.m3BaselineData[deckName] = {
-                            ...row,
-                            average_placement: normalizedAvgPlacement,
-                            avg_placement: normalizedAvgPlacement,
-                            share: normalizedShare,
-                            percentage_in_archetype: normalizedShare
-                        };
-                        window.m3ArchetypeData[deckName] = {
-                            share: normalizedShare,
-                            avgPlacement: normalizedAvgPlacement,
-                            count: row.new_count || row.count || 0
-                        };
-                    });
-                }
+            // ...existing code...
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
                             <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>

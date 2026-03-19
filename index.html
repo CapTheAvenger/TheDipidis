@@ -2232,6 +2232,8 @@
             <div style="position:relative;">
                 <button onclick="let m = document.getElementById('ptTopMoreMenu'); m.style.display = m.style.display==='none'?'flex':'none';" style="font-size:20px; padding:5px; border:none; background:transparent;">⋮</button>
                 <div id="ptTopMoreMenu" style="display:none; position:absolute; top:35px; right:0; background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px; flex-direction:column; gap:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2);">
+                    <button class="pt-mobile-menu-action" onclick="ptUndo(); this.parentElement.style.display='none';">↩️ Undo</button>
+                    <button class="pt-mobile-menu-action" onclick="ptMulligan(ptCurrentPlayer); this.parentElement.style.display='none';">🃏 Mulligan</button>
                     <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar'); this.parentElement.style.display='none';">VSTAR</button>
                     <button id="ptGxMarker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx'); this.parentElement.style.display='none';">GX</button>
                 </div>

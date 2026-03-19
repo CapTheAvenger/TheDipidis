@@ -4254,6 +4254,11 @@ h3:first-child {
 .tier-3 .deck-tier-title { color: #388e3c; border-color: #388e3c; }
 .tier-trending .deck-tier-title { color: #1976d2; border-color: #1976d2; }
 
+/* Hidden by default so desktop layout stays unchanged */
+.pt-mobile-menu-action {
+    display: none;
+}
+
 /* ===================================================
    FIX: SCHWEBENDE KAMPF-BUTTONS (MOBILE)
    =================================================== */
@@ -4303,6 +4308,26 @@ h3:first-child {
     .oppview-btn {
         background: #8e44ad !important;
         border-radius: 8px 0 0 8px !important;
+    }
+
+    /* Mobile cleanup: actions already in floating/FAB menus */
+    #ptHandActionBar,
+    .pt-deck-controls,
+    .pt-legend-box {
+        display: none !important;
+    }
+
+    /* Show mobile-only items inside top menu */
+    .pt-mobile-menu-action {
+        display: block !important;
+        border: none !important;
+        border-radius: 6px !important;
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+        background: #34495e !important;
+        text-align: left !important;
     }
 }
 

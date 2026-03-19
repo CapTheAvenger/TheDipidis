@@ -4122,6 +4122,70 @@ h3:first-child {
         font-size: 1rem !important;
     }
 }
+
+/* Extra-compact phones (iPhone mini/SE class) */
+@media (max-width: 430px) {
+    #ptStartPhaseModal {
+        padding: 6px !important;
+    }
+    #ptStartPhaseModal > div {
+        width: 97vw !important;
+        max-height: 96vh !important;
+        padding: 6px 5px !important;
+    }
+    #ptStartPhaseModal h2 {
+        font-size: 1.55rem !important;
+        margin: 0 0 2px 0 !important;
+    }
+    #ptStartPhaseModal p {
+        font-size: 11px !important;
+        margin: 0 0 4px 0 !important;
+        line-height: 1.15 !important;
+    }
+    #ptStartPhaseModal > div > div[style*="grid-template-columns"] {
+        gap: 6px !important;
+        margin-bottom: 6px !important;
+    }
+    #ptStartPhaseModal > div > div[style*="border:2px solid"] {
+        padding: 6px !important;
+    }
+    .pt-setup-hand-row {
+        gap: 3px !important;
+        margin-bottom: 4px !important;
+    }
+    .pt-setup-hand-row img {
+        width: 36px !important;
+        border-radius: 3px !important;
+    }
+    #ptStartPhaseModal button[onclick*="ptStartMulligan"],
+    #ptStartPhaseModal button[onclick*="ptStartClearBench"] {
+        padding: 5px 8px !important;
+        font-size: 10px !important;
+    }
+    #ptStartBtn {
+        font-size: 0.95em !important;
+        padding: 8px 18px !important;
+    }
+    #ptStartHint {
+        font-size: 10px !important;
+        margin-top: 3px !important;
+    }
+
+    /* Side buttons smaller so they do not cover board on narrow screens */
+    #pt-side-buttons-left {
+        gap: 10px !important;
+    }
+    .pt-side-btn {
+        font-size: 11px !important;
+        padding: 8px 6px !important;
+    }
+
+    /* Slightly smaller top controls to prevent crowding */
+    .pt-controls button {
+        font-size: 18px !important;
+        padding: 4px !important;
+    }
+}
 /* ==========================================================================
    🔥 META DECK BANNER (Tier List Style)
    ========================================================================== */

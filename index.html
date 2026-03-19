@@ -2229,15 +2229,10 @@
             <button title="Münze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" style="font-size:20px; padding:5px; border:none; background:transparent;">🪙</button>
             <button title="Zoom" onclick="ptZoomBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;">🔍</button>
 
-            <div style="position:relative;">
-                <button onclick="let m = document.getElementById('ptTopMoreMenu'); m.style.display = m.style.display==='none'?'flex':'none';" style="font-size:20px; padding:5px; border:none; background:transparent;">⋮</button>
-                <div id="ptTopMoreMenu" style="display:none; position:fixed; top:58px; right:8px; background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px; flex-direction:column; gap:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:12005;">
-                    <button class="pt-mobile-menu-action" onclick="ptUndo(); this.parentElement.style.display='none';">↩️ Undo</button>
-                    <button class="pt-mobile-menu-action" onclick="ptMulligan(ptCurrentPlayer); this.parentElement.style.display='none';">🃏 Mulligan</button>
-                    <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar'); this.parentElement.style.display='none';">V</button>
-                    <button id="ptGxMarker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx'); this.parentElement.style.display='none';">GX</button>
-                </div>
-            </div>
+            <button title="Undo" onclick="ptUndo()" style="font-size:20px; padding:5px; border:none; background:transparent;">↩️</button>
+            <button title="Mulligan" onclick="ptMulligan(ptCurrentPlayer)" style="font-size:20px; padding:5px; border:none; background:transparent;">🃏</button>
+            <button id="ptVstarMarker" title="V Marker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;">V</button>
+            <button id="ptGxMarker" title="GX Marker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;">GX</button>
         </div>
 
         <div id="ptDirectActionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10001; align-items:center; justify-content:center;">
@@ -2331,7 +2326,7 @@
             <div id="playtester-board" class="pt-arena">
 
                 <!-- ── CENTER: Stadium (right) + Action Buttons (left) — always stay upright ── -->
-                <div style="position: absolute; top: 50%; right: 22%; transform: translate(50%, -50%); z-index: 5;">
+                <div style="position: absolute; top: 50%; right: 14%; transform: translate(50%, -50%); z-index: 5;">
                     <div class="static-element" style="background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center; position: relative;">
                         <div class="pt-zone-label" style="color:#a8e6cf; margin-bottom: 6px;">🏟️ Stadium</div>
                         <div style="position: relative; display: inline-block;">
@@ -2520,7 +2515,7 @@
             <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">⚔️ Attack</button>
             <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">⏭️ End Turn</button>
             <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">⚔️ Opp. View</button>
-            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡</button>
+            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡ Actions</button>
         </div>
 
         <div class="pt-hand-zone">

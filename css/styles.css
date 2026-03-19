@@ -4152,6 +4152,29 @@ h3:first-child {
     .pt-radial-icon {
         font-size: 16px;
     }
+
+    /* 18. Hand card overlap for more space */
+    #ptHandZone {
+        gap: 0px !important;
+        justify-content: center !important;
+    }
+    #ptHandZone .pt-hand-wrapper {
+        margin-right: -35px !important;
+        transition: transform 0.2s ease, margin 0.2s ease, z-index 0s;
+        position: relative;
+        z-index: 1;
+        flex-shrink: 0;
+    }
+    #ptHandZone .pt-hand-wrapper:last-child {
+        margin-right: 0 !important;
+    }
+    #ptHandZone .pt-hand-wrapper.pt-hand-expanded,
+    #ptHandZone .pt-hand-wrapper:active {
+        margin-right: 5px !important;
+        margin-left: 10px !important;
+        transform: translateY(-18px) scale(1.15);
+        z-index: 100 !important;
+    }
 }
 
 /* Sehr kleine Displays (Smartphones im Portrait) */
@@ -4281,6 +4304,12 @@ details[open] > .tier-trending-summary::after {
 @keyframes tierReveal {
     from { opacity: 0; transform: translateY(-6px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ptCoinPop {
+    0%   { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+    60%  { transform: scale(1.1) rotate(5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 .deck-banner-grid {

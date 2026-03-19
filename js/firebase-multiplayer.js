@@ -16,6 +16,7 @@ let mpUnsubscribe = null;      // onSnapshot Listener zum Cleanup
 let mpIsHost = false;          // Shortcut für Rolle
 let mpSyncEnabled = false;     // Flag: Synchronisation aktiv/inaktiv
 let mpLastSyncTime = 0;        // Verhindert Sync-Loops
+let _mpLastSeenFlip = '';      // De-dup coin flip notifications
 const MP_SYNC_DEBOUNCE = 100;  // Min. 100ms zwischen Syncs
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -358,6 +359,15 @@ function listenToGameState(gameId) {
                     const action = data.lastActionDescription || 'Gegner hat gezogen';
                     ptShowMessage(`🌐 ${action}`);
                 }
+            }
+        }
+
+        // Coin flip detection: show opponent's flip result
+        if (data.lastCoinFlip && data.lastCoinFlip.player !== mpRole) {
+            const flipKey = `${data.lastCoinFlip.result}_${data.lastCoinFlip.player}_${data.lastCoinFlip.timestamp?.seconds || 0}`;
+            if (flipKey !== _mpLastSeenFlip) {
+                _mpLastSeenFlip = flipKey;
+                _mpShowCoinResult(data.lastCoinFlip.result, data.lastCoinFlip.player);
             }
         }
 
@@ -718,6 +728,68 @@ async function mpJoinGame() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+// MULTIPLAYER COIN FLIP (synchronized via Firebase)
+// ══════════════════════════════════════════════════════════════════════════
+
+async function mpFlipCoin() {
+    if (!mpSyncEnabled || !mpGameId) {
+        // Offline-Modus: einfacher lokaler Flip
+        const result = Math.random() >= 0.5 ? 'heads' : 'tails';
+        _mpShowCoinResult(result, mpRole || 'p1');
+        return;
+    }
+
+    const result = Math.random() >= 0.5 ? 'heads' : 'tails';
+    const flipper = mpRole || 'p1';
+
+    try {
+        const db = firebase.firestore();
+        await db.collection('games').doc(mpGameId).update({
+            lastCoinFlip: {
+                result: result,
+                player: flipper,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            },
+            lastActionDescription: `🪙 Coin flip: ${result === 'heads' ? 'Kopf' : 'Zahl'}`,
+            lastActionBy: flipper
+        });
+    } catch (error) {
+        console.error('[Multiplayer] Coin flip sync error:', error);
+    }
+
+    _mpShowCoinResult(result, flipper);
+}
+
+/**
+ * Shows a big animated coin flip result overlay
+ */
+function _mpShowCoinResult(result, flipper) {
+    const isHeads = result === 'heads';
+    const emoji = isHeads ? '🟡' : '⚫';
+    const label = isHeads ? 'KOPF (Heads)' : 'ZAHL (Tails)';
+    const bgColor = isHeads ? 'rgba(241,196,15,0.95)' : 'rgba(52,73,94,0.95)';
+    const textColor = isHeads ? '#000' : '#fff';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'mpCoinFlipOverlay';
+    overlay.style.cssText = `position:fixed;inset:0;z-index:30000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;`;
+    overlay.innerHTML = `
+        <div style="background:${bgColor};color:${textColor};border-radius:24px;padding:40px 60px;text-align:center;
+            box-shadow:0 8px 40px rgba(0,0,0,0.6);animation:ptCoinPop 0.4s ease-out;">
+            <div style="font-size:80px;margin-bottom:12px;">${emoji}</div>
+            <div style="font-size:28px;font-weight:900;margin-bottom:8px;">🪙 ${label}</div>
+            <div style="font-size:14px;opacity:0.8;">Geworfen von ${flipper.toUpperCase()}</div>
+        </div>`;
+    overlay.onclick = () => overlay.remove();
+    document.body.appendChild(overlay);
+
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 3000);
+
+    if (typeof ptLog === 'function') ptLog(`🪙 Münzwurf: ${label} (von ${flipper.toUpperCase()})`);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 // PUBLIC API EXPORT
 // ══════════════════════════════════════════════════════════════════════════
 
@@ -733,6 +805,7 @@ if (typeof window !== 'undefined') {
     window.openMultiplayerFromSandbox = openMultiplayerFromSandbox;
     window.mpCreateGame = mpCreateGame;
     window.mpJoinGame = mpJoinGame;
+    window.mpFlipCoin = mpFlipCoin;
 }
 
 console.log('[Multiplayer] Module loaded');

@@ -1105,10 +1105,13 @@ function ptUpdateAreaPointerEvents() {
 
 function ptDraw1(playerOverride = null) {
     let p = playerOverride || ptCurrentPlayer;
+    // MP safety: only draw for local player
+    if (ptState.isMultiplayer && p !== ptState.localRole) return;
     if (ptState[p].deck.length > 0) {
         ptState[p].hand.push(ptState[p].deck.pop());
         ptRenderAll();
         ptLog('Drew a card.');
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Drew a card');
     } else {
         ptShowMessage('Deck is empty!');
     }
@@ -1286,6 +1289,11 @@ function ptMulligan(player) {
 }
 
 function ptFlipCoin() {
+    // In MP mode, use synchronized coin flip via Firebase
+    if (ptState.isMultiplayer && typeof mpFlipCoin === 'function') {
+        mpFlipCoin();
+        return;
+    }
     const result = Math.random() >= 0.5 ? 'HEADS!' : 'TAILS!';
     ptLog(`🪙 Coin flip: ${result}`);
 }
@@ -1296,6 +1304,11 @@ function ptFlipBoard() {
     const ind      = document.getElementById('activePlayerIndicator');
     if (!board) return;
     const flipping = ptCurrentPlayer === 'p1';
+    // In MP mode, only flip if it's your turn (you are the current player)
+    if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole) {
+        ptShowMessage('Nicht dein Zug!');
+        return;
+    }
     board.classList.toggle('flipped', flipping);
     ptCurrentPlayer = flipping ? 'p2' : 'p1';
     // Reset ability markers for the newly active player at the start of their turn
@@ -1311,6 +1324,7 @@ function ptFlipBoard() {
     if (vBtn) vBtn.classList.toggle('used', !!(ptState[ptCurrentPlayer] && ptState[ptCurrentPlayer].vstarUsed));
     if (gBtn) gBtn.classList.toggle('used', !!(ptState[ptCurrentPlayer] && ptState[ptCurrentPlayer].gxUsed));
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Turn passed to ' + ptCurrentPlayer.toUpperCase());
 }
 
 function ptPassTurn() {
@@ -1486,6 +1500,9 @@ function ptCloseDeckSearch() {
 function ptClickZone(player, zoneId) {
     const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
 
+    // MP safety: block playing cards as the opponent
+    if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole && ptSelectedCardIndex !== null) return;
+
     // Clicking on opponent's zone
     if (player === opp) {
         const cards = ptState[player].field[zoneId];
@@ -1530,6 +1547,7 @@ function ptClickZone(player, zoneId) {
     ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1);
     ptSelectedCardIndex = null;
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
 }
 
 // --- FIELD-TO-FIELD DRAG DROP ---
@@ -1806,6 +1824,43 @@ function addDamage(player, zoneId, amount, event) {
     if (event) event.stopPropagation();
     ptState[player].damage[zoneId] = Math.max(0, (ptState[player].damage[zoneId] || 0) + amount);
     ptLog(`+${amount} damage on ${zoneId}.`);
+    ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase(`Damage ${amount > 0 ? '+' : ''}${amount} on ${zoneId}`);
+}
+
+// ── Damage Swipe Gesture ────────────────────────────────────────────────
+let _ptDmgSwipeStartX = 0;
+let _ptDmgSwipeAccum  = 0;
+
+function ptDmgSwipeStart(event, player, zoneId) {
+    event.stopPropagation();
+    if (event.touches && event.touches.length === 1) {
+        _ptDmgSwipeStartX = event.touches[0].clientX;
+        _ptDmgSwipeAccum  = 0;
+    }
+}
+
+function ptDmgSwipeMove(event, player, zoneId) {
+    event.stopPropagation();
+    event.preventDefault();
+    if (!event.touches || event.touches.length !== 1) return;
+    const dx = event.touches[0].clientX - _ptDmgSwipeStartX;
+    // Every 25px of horizontal movement = 10 damage increment
+    const steps = Math.floor(dx / 25) - _ptDmgSwipeAccum;
+    if (steps !== 0) {
+        _ptDmgSwipeAccum += steps;
+        ptState[player].damage[zoneId] = Math.max(0, (ptState[player].damage[zoneId] || 0) + steps * 10);
+        // Update value display without full re-render
+        const overlay = event.currentTarget;
+        const valEl = overlay && overlay.querySelector('.pt-dmg-value');
+        if (valEl) valEl.textContent = ptState[player].damage[zoneId];
+    }
+}
+
+function ptDmgSwipeEnd(event) {
+    event.stopPropagation();
+    _ptDmgSwipeStartX = 0;
+    _ptDmgSwipeAccum = 0;
     ptRenderAll();
 }
 
@@ -2229,6 +2284,24 @@ function ptRenderAll() {
     if (playEl) playEl.innerHTML = generateNeutralZone('playzone', 'Drop', 136);
 
     ptRenderHand();
+
+    // Board perspective: in MP, P2 sees their own board at the bottom
+    if (ptState.isMultiplayer && ptState.localRole) {
+        const p1Area = document.getElementById('p1-area');
+        const p2Area = document.getElementById('p2-area');
+        if (p1Area && p2Area) {
+            const p2Inner = p2Area.querySelector('div'); // The child div with rotate(180deg)
+            if (ptState.localRole === 'p2') {
+                // P2 perspective: P2 area normal (bottom), P1 area rotated (top)
+                if (p2Inner) p2Inner.style.transform = 'rotate(0deg)';
+                p1Area.style.transform = 'rotate(180deg)';
+            } else {
+                // P1 perspective (default): P1 normal, P2 rotated
+                if (p2Inner) p2Inner.style.transform = 'rotate(180deg)';
+                p1Area.style.transform = '';
+            }
+        }
+    }
 }
 
 function ptRenderHand() {
@@ -2238,9 +2311,28 @@ function ptRenderHand() {
     if (cnt) cnt.innerText = ptState[ptCurrentPlayer].hand.length;
     zone.innerHTML = '';
 
+    // In MP mode, check if we're rendering our own hand or the opponent's
+    const isMP = ptState.isMultiplayer;
+    const localRole = ptState.localRole;
+    const isOpponentHand = isMP && ptCurrentPlayer !== localRole;
+
     ptState[ptCurrentPlayer].hand.forEach((card, i) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'pt-hand-wrapper';
+
+        if (isOpponentHand) {
+            // Opponent hand in MP → show card backs, no interaction
+            const img = document.createElement('img');
+            img.src = CARD_BACK_URL;
+            img.className = 'pt-hand-card';
+            img.title = 'Verdeckte Karte';
+            img.draggable = false;
+            img.style.opacity = '0.7';
+            wrapper.appendChild(img);
+            zone.appendChild(wrapper);
+            return;
+        }
+
         wrapper.draggable = true;
         wrapper.ondragstart = e => ptDragStartHand(e, i);
         // Mobile: tap to expand overlapping card
@@ -2276,17 +2368,22 @@ function ptRenderHand() {
 }
 
 function ptSelectHandCard(index) {
+    // Block opponent card selection in MP
+    if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole) return;
     ptSelectedCardIndex = (ptSelectedCardIndex === index) ? null : index;
     ptRenderHand();
 }
 
 function ptDiscardFromHand(index, event) {
     if (event) event.stopPropagation();
+    // Block opponent actions in MP
+    if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole) return;
     const card = ptState[ptCurrentPlayer].hand.splice(index, 1)[0];
     ptState[ptCurrentPlayer].discard.push(card);
     ptSelectedCardIndex = null;
     ptLog(`Discarded "${card.name}" from hand.`);
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Discarded ' + card.name);
 }
 
 function ptTakePrize(player, index) {
@@ -2421,10 +2518,14 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
         }
     }
 
-    // Damage overlay — compact +/- controls
+    // Damage overlay — compact +/- controls + swipe gesture
     const dmg = ptState[player].damage[zoneId];
     if (dmg > 0) {
-        html += `<div class="pt-damage-overlay" onclick="event.stopPropagation();" style="z-index:40;pointer-events:auto;">
+        html += `<div class="pt-damage-overlay" onclick="event.stopPropagation();"
+            ontouchstart="ptDmgSwipeStart(event,'${player}','${zoneId}')"
+            ontouchmove="ptDmgSwipeMove(event,'${player}','${zoneId}')"
+            ontouchend="ptDmgSwipeEnd(event)"
+            style="z-index:40;pointer-events:auto;">
             <button class="pt-dmg-btn pt-dmg-minus" onclick="addDamage('${player}','${zoneId}',-10,event)" title="-10">◀</button>
             <span class="pt-dmg-value" onclick="addDamage('${player}','${zoneId}',event.shiftKey?-10:10,event)" title="Klick +10 | Shift -10">${dmg}</span>
             <button class="pt-dmg-btn pt-dmg-plus" onclick="addDamage('${player}','${zoneId}',10,event)" title="+10">▶</button>

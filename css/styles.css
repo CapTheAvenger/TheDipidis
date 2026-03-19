@@ -3840,145 +3840,165 @@ h3:first-child {
 
 
 /* Mobile Board Layout (Vertical) */
+/* ============================================================ */
+/* PLAYTESTER MOBILE OVERHAUL (CLEAN APP LAYOUT)                */
+/* ============================================================ */
 @media (max-width: 768px) {
-    #playtester-board {
-        flex-direction: column !important;
-        justify-content: space-between !important;
-    }
-    
-    /* P2 Area oben, P1 Area unten */
-    #p2-area {
-        height: 48vh !important;
-        position: relative !important;
-        transform: none !important;
-    }
-    
-    #p1-area {
-        height: 48vh !important;
-        position: relative !important;
-    }
-    
-    /* Karten kleiner auf Mobile */
-    .pt-card-mini {
-        width: 60px !important;
-        height: 84px !important;
-    }
-    
-    .pt-hand-card {
-        width: 70px !important;
-        height: 98px !important;
-    }
-    
-    /* Toolbar Buttons stapeln */
-    .pt-toolbar {
-        flex-wrap: wrap !important;
-        padding: 6px !important;
-    }
-    
-    .pt-toolbar > div {
-        flex-wrap: wrap !important;
-    }
-    
-    .pt-btn {
-        font-size: 0.85rem !important;
-        padding: 6px 10px !important;
-    }
-    
-    /* Stadium & Action Buttons kompakter */
-    #playtester-board > div[style*="position: absolute"] {
-        transform: scale(0.8) !important;
-    }
-    
-    /* Touch-Ziele vergr��ern */
-    .pt-empty-slot, .pt-dropzone {
-        min-width: 70px !important;
-        min-height: 98px !important;
+
+    /* 1. Hide decorative text banners & legend on mobile */
+    .hide-on-mobile,
+    .pt-legend-box,
+    .pt-toolbar > div:first-child > span:first-child {
+        display: none !important;
     }
 
-    /* === PLAYTESTER MOBILE CLEANUP (Overlap Fixes) === */
-
-    /* 1. Toolbar (top bar) scrollable */
+    /* 2. Toolbar: horizontal swipe strip */
     .pt-toolbar {
         display: flex !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
         gap: 8px !important;
-        padding-bottom: 8px !important;
+        padding: 6px 8px !important;
         width: 100% !important;
         scrollbar-width: none;
     }
-    .pt-toolbar::-webkit-scrollbar {
-        display: none;
-    }
+    .pt-toolbar::-webkit-scrollbar { display: none; }
+    .pt-toolbar > div { flex-wrap: nowrap !important; }
     .pt-toolbar .pt-btn {
         flex-shrink: 0 !important;
         white-space: nowrap !important;
         height: 38px !important;
-        font-size: 12px !important;
+        font-size: 13px !important;
         padding: 0 12px !important;
+        display: inline-block !important;
     }
 
-    /* Hand zone button bar scrollable */
-    .pt-hand-zone > div:first-child {
+    /* 3. Hand action bar: horizontal swipe strip */
+    .pt-mobile-toggle { display: none !important; }
+    #ptExtendedActions { display: contents !important; }
+    #ptHandActionBar {
         display: flex !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
         gap: 8px !important;
-        padding-bottom: 8px !important;
+        padding: 4px 10px !important;
         width: 100% !important;
         scrollbar-width: none;
     }
-    .pt-hand-zone > div:first-child::-webkit-scrollbar {
-        display: none;
-    }
-    .pt-hand-zone > div:first-child .pt-btn {
-        flex-shrink: 0 !important;
+    #ptHandActionBar::-webkit-scrollbar { display: none; }
+    #ptHandActionBar button,
+    #ptHandActionBar input,
+    #ptHandActionBar span {
+        flex: 0 0 auto !important;
         white-space: nowrap !important;
-        height: 38px !important;
+    }
+    #ptHandActionBar .pt-btn {
+        height: 36px !important;
         font-size: 12px !important;
         padding: 0 12px !important;
     }
 
-    /* 2. Board (arena) vertical layout */
+    /* 4. Board: vertical column layout, no overlap */
+    #playtester-board,
     #playtester-board.pt-arena {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        gap: 12px !important;
+        justify-content: flex-start !important;
+        height: auto !important;
+        gap: 15px !important;
         width: 100% !important;
         overflow-x: hidden !important;
+        padding-bottom: 20px !important;
+    }
+    #p2-area, #p1-area {
+        height: auto !important;
+        position: relative !important;
+    }
+    #p2-area { transform: none !important; }
+
+    /* Stadium & center floats scaled */
+    #playtester-board > div[style*="position: absolute"] {
+        transform: scale(0.8) !important;
     }
 
-    /* 3. Bench zones compact & centered */
+    /* 5. Side zones (Lost/Deck/Discard): row layout instead of absolute column */
+    #p1-area > div > div[style*="flex-direction: column"][style*="right: 20px"],
+    #p2-area > div > div[style*="flex-direction: column"][style*="right: 20px"] {
+        position: static !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 15px !important;
+        width: 100% !important;
+        margin-top: 10px !important;
+    }
+
+    /* Prize zones: relative */
+    #p1-area > div > div[style*="left: 20px"],
+    #p2-area > div > div[style*="left: 20px"] {
+        position: static !important;
+    }
+
+    /* 6. Bench: centered flex-wrap row */
+    #p1-area div[style*="bottom: 20px"][style*="left: 50%"],
+    #p2-area div[style*="bottom: 20px"][style*="left: 50%"] {
+        position: relative !important;
+        bottom: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        margin-top: 10px !important;
+    }
     #p1-area div[style*="justify-content:center"][style*="display:flex"],
     #p2-area div[style*="justify-content:center"][style*="display:flex"] {
         display: flex !important;
         flex-wrap: wrap !important;
         justify-content: center !important;
-        gap: 4px !important;
+        gap: 6px !important;
         width: 100% !important;
     }
 
-    /* 4. Steppers & damage counters scaled down to prevent overlap */
-    .pt-stepper-group {
-        transform: scale(0.85) !important;
-        transform-origin: bottom center !important;
+    /* 7. Card sizes */
+    .pt-card-mini {
+        width: clamp(40px, 12vw, 65px) !important;
+        height: auto !important;
+        aspect-ratio: 2.5 / 3.5 !important;
     }
-    .pt-deck-controls {
-        width: 100% !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 4px !important;
+    .pt-hand-card {
+        width: 70px !important;
+        height: 98px !important;
+    }
+    .pt-empty-slot, .pt-dropzone {
+        min-width: 60px !important;
+        min-height: 84px !important;
+    }
+
+    /* 8. Steppers & damage counters scaled */
+    .pt-stepper-group {
+        transform: scale(0.8) !important;
+        transform-origin: bottom center !important;
     }
     .pt-dmg-modifier {
-        transform: scale(0.85) !important;
+        transform: scale(0.8) !important;
         transform-origin: bottom center !important;
+        margin-bottom: -5px !important;
     }
 
-    /* === ZIEL 2: Setup Phase — fit 7 cards on mobile === */
+    /* 9. Deck: hide half-split, tap triggers ptDeckMenu prompt */
+    .pt-deck-half { display: none !important; }
+    .pt-deck-pile {
+        transform: scale(1.1) !important;
+        transform-origin: center center !important;
+        cursor: pointer;
+    }
+    .pt-deck-controls { display: none !important; }
+    .pt-deck-popup-trigger { display: none !important; }
+
+    /* 10. Setup phase grid (fit 7 cards) */
     #ptStartPhaseModal > div {
         padding: 12px 6px !important;
         width: 98vw !important;
@@ -3993,127 +4013,6 @@ h3:first-child {
     #ptStartPhaseModal span[style*="max-width:72px"] {
         max-width: clamp(36px, 11vw, 55px) !important;
         font-size: 7px !important;
-    }
-
-    /* === SWIPE LAYOUT: Hide banners, all bars horizontal scrollable === */
-    .pt-toolbar > div:first-child > span:first-child {
-        display: none !important;
-    }
-    .pt-legend-box {
-        display: none !important;
-    }
-
-    /* Hide ⚙️ toggle — all actions visible in swipe bar now */
-    .pt-mobile-toggle {
-        display: none !important;
-    }
-    /* Extended actions always visible as inline flow */
-    #ptExtendedActions {
-        display: contents !important;
-    }
-
-    /* Hand action bar as horizontal swipe strip */
-    #ptHandActionBar {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        gap: 8px !important;
-        padding: 4px 10px !important;
-        width: 100% !important;
-        scrollbar-width: none;
-    }
-    #ptHandActionBar::-webkit-scrollbar {
-        display: none;
-    }
-    #ptHandActionBar button,
-    #ptHandActionBar input,
-    #ptHandActionBar span {
-        flex: 0 0 auto !important;
-        white-space: nowrap !important;
-    }
-    #ptHandActionBar .pt-btn {
-        height: 36px !important;
-        font-size: 12px !important;
-        padding: 0 12px !important;
-    }
-
-    /* Bench rows: relative positioning, wischbar */
-    #p1-area div[style*="bottom: 20px"][style*="left: 50%"],
-    #p2-area div[style*="bottom: 20px"][style*="left: 50%"] {
-        position: relative !important;
-        bottom: auto !important;
-        left: auto !important;
-        transform: none !important;
-        width: 100% !important;
-        margin-top: 10px !important;
-    }
-
-    /* Side zones (Lost/Deck/Discard) as row layout */
-    #p1-area > div > div[style*="flex-direction: column"][style*="right: 20px"],
-    #p2-area > div > div[style*="flex-direction: column"][style*="right: 20px"] {
-        position: relative !important;
-        bottom: auto !important;
-        right: auto !important;
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 8px !important;
-        width: 100% !important;
-        margin: 10px auto !important;
-    }
-
-    /* Deck pile: hide half-labels on mobile, single tap for menu */
-    .pt-deck-half {
-        display: none !important;
-    }
-    .pt-deck-pile {
-        transform: scale(1.1) !important;
-        transform-origin: center center !important;
-        cursor: pointer;
-    }
-
-    /* === ZIEL 4: Hide permanent deck-controls panel on mobile === */
-    .pt-deck-controls {
-        display: none !important;
-    }
-    /* Deck popup styling */
-    .pt-deck-popup {
-        position: fixed;
-        z-index: 25000;
-        background: rgba(10, 10, 30, 0.96);
-        border: 2px solid #FFCB05;
-        border-radius: 12px;
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        width: 170px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.8);
-    }
-    .pt-deck-popup-title {
-        color: #FFCB05;
-        font-weight: 900;
-        font-size: 11px;
-        text-align: center;
-        margin-bottom: 4px;
-    }
-    .pt-deck-popup-close {
-        margin-top: 4px;
-        background: #e74c3c !important;
-        border-color: #c0392b !important;
-        color: #fff !important;
-    }
-    .pt-deck-popup-trigger {
-        display: block !important;
-        margin-top: 4px;
-        background: #1b3b8c;
-        border-color: #3B4CCA;
-        color: #fff;
-        font-size: 11px;
-        padding: 4px 8px;
-        width: 100%;
     }
 }
 

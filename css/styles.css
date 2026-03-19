@@ -3874,64 +3874,77 @@ h3:first-child {
 
 
 
-/* Mobile Board Layout (Vertical) */
-/* ============================================================ */
-/* PLAYTESTER MOBILE OVERHAUL (APP-STYLE UX)                    */
-/* ============================================================ */
+/* ===================================================
+   MOBILE PLAYTESTER - ERZWUNGENES LAYOUT (DO NOT OVERWRITE)
+   =================================================== */
 @media (max-width: 768px) {
+    /* 1. Spielfeld Container stauchen */
+    #playtester-board {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        height: calc(100vh - 140px) !important; /* Verhindert endloses Scrollen */
+        overflow: hidden !important;
+        padding: 5px !important;
+        margin: 0 !important;
+    }
 
-    /* 1. Störende Texte und Banner ausblenden */
-    .hide-on-mobile,
-    .pt-legend-box,
-    .pt-zone-label,
-    .pt-toolbar > div:first-child > span:first-child {
+    /* 2. Zonen (Active / Bench) extrem kompakt */
+    .pt-active-zone, .pt-bench-zone {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        min-height: 90px !important;
+        padding: 2px !important;
+        margin-bottom: 5px !important;
+    }
+
+    /* 3. Karten auf dem Feld (klein & scharf) */
+    .pt-card-wrapper {
+        margin: 0 2px !important;
+    }
+    .pt-card-img {
+        height: 85px !important; /* Fixe, kleine Höhe */
+        width: auto !important;
+        max-width: 60px !important;
+        object-fit: contain !important;
+        border-radius: 4px !important;
+    }
+
+    /* 4. Hand-Zone (Strikte wischbare Reihe, KEIN Stappeln!) */
+    #pt-hand-zone {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        height: 100px !important;
+        min-height: 100px !important;
+        background: rgba(0,0,0,0.05) !important;
+        border-top: 1px solid #ccc !important;
+        padding: 5px !important;
+        gap: 5px !important; /* Karten liegen nebeneinander, keine negative Überlappung die buggy wird */
+        align-items: center !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Handkarten zwingen, in der Reihe zu bleiben */
+    #pt-hand-zone .pt-card-wrapper {
+        flex: 0 0 auto !important; /* Verhindert das Quetschen/Umbrechen */
+        margin: 0 !important;
+        transform: none !important; /* Löscht alte Hover-Verschiebungen */
+    }
+    #pt-hand-zone .pt-card-img {
+        height: 85px !important;
+    }
+
+    /* 5. Texte & Labels ausblenden um Platz zu sparen */
+    #playtester-board .zone-label,
+    #playtester-board .pt-zone-label,
+    #pt-hand-zone .hand-count-label {
         display: none !important;
     }
 
-    /* 2. Spielfeld entzerren (alles untereinander, keine festen Höhen) */
-    #playtester-board,
-    #playtester-board.pt-arena {
-        display: flex !important;
-        flex-direction: column !important;
-        position: relative !important;
-        height: auto !important;
-        gap: 15px !important;
-        padding-bottom: 20px !important;
-        width: 100% !important;
-        align-items: center !important;
-        overflow-x: hidden !important;
-    }
-    #p2-area, #p1-area {
-        height: auto !important;
-        position: relative !important;
-    }
-    #p2-area { transform: none !important; }
-
-    /* Stadium & center floats scaled */
-    #playtester-board > div[style*="position: absolute"] {
-        transform: scale(0.8) !important;
-    }
-
-    /* 3. Toolbar fixieren und Icons zentrieren */
-    .pt-toolbar {
-        display: flex !important;
-        justify-content: space-around !important;
-        flex-wrap: nowrap !important;
-        overflow: hidden !important;
-        gap: 4px !important;
-        padding: 5px !important;
-        width: 100% !important;
-        align-items: center !important;
-    }
-    .pt-toolbar > div { flex-wrap: nowrap !important; }
-    .pt-toolbar .pt-btn {
-        font-size: 16px !important;
-        padding: 8px 12px !important;
-        min-width: unset !important;
-        display: inline-block !important;
-    }
-    .pt-toolbar .btn-text { display: none !important; }
-
+    /* FAB Button */
     #fab-action-btn {
         position: fixed !important;
         bottom: 130px !important;
@@ -3954,293 +3967,20 @@ h3:first-child {
         transform: scale(0.9);
     }
 
-    /* 4. Hand-Aktionsleiste: horizontal wischbar */
-    .pt-mobile-toggle { display: none !important; }
-    #ptExtendedActions { display: contents !important; }
-    #ptHandActionBar {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        gap: 8px !important;
-        padding: 5px 10px !important;
-        width: 100% !important;
-        scrollbar-width: none;
-    }
-    #ptHandActionBar::-webkit-scrollbar { display: none; }
-    #ptHandActionBar button,
-    #ptHandActionBar input,
-    #ptHandActionBar span {
-        flex: 0 0 auto !important;
-        white-space: nowrap !important;
-    }
-    #ptHandActionBar .pt-btn {
-        height: 38px !important;
-        font-size: 13px !important;
-        padding: 0 14px !important;
-    }
-
-    /* 5. Zonen (Deck, Discard, Lost) nebeneinander statt absolut-gestapelt */
-    #p1-area > div > div[style*="flex-direction: column"][style*="right: 20px"],
-    #p2-area > div > div[style*="flex-direction: column"][style*="right: 20px"] {
-        position: static !important;
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: center !important;
-        gap: 20px !important;
-        width: 100% !important;
-        margin-top: 10px !important;
-        flex-wrap: wrap !important;
-    }
-
-    /* Prize zones: static positioning */
-    #p1-area > div > div[style*="left: 20px"],
-    #p2-area > div > div[style*="left: 20px"] {
-        position: static !important;
-    }
-
-    /* 6. Bench zentrieren und in eine wischbare Reihe */
-    #p1-area div[style*="bottom: 20px"][style*="left: 50%"],
-    #p2-area div[style*="bottom: 20px"][style*="left: 50%"] {
-        position: relative !important;
-        bottom: auto !important;
-        left: auto !important;
-        transform: none !important;
-        width: 100% !important;
-        margin-top: 10px !important;
-    }
-    #p1-area div[style*="justify-content:center"][style*="display:flex"],
-    #p2-area div[style*="justify-content:center"][style*="display:flex"] {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        justify-content: flex-start !important;
-        gap: 6px !important;
-        width: 100% !important;
-    }
-
-    /* 7. Kartengrößen auf Mobile bändigen */
-    .pt-card-mini {
-        width: clamp(40px, 12vw, 65px) !important;
-        height: auto !important;
-        aspect-ratio: 2.5 / 3.5 !important;
-    }
-    .pt-hand-card {
-        width: 70px !important;
-        height: 98px !important;
-    }
-
-    /* 7b. Handkarten-Überlappung: Platz sparen, Tap zum Aufklappen */
-    .pt-hand-wrapper {
-        margin-right: -45px !important;
-        transition: margin-right 0.2s ease !important;
-        flex-shrink: 0 !important;
-    }
-    .pt-hand-wrapper:last-child {
-        margin-right: 0 !important;
-    }
-    .pt-hand-wrapper:active,
-    .pt-hand-wrapper:focus-within,
-    .pt-hand-wrapper.pt-hand-expanded {
-        margin-right: 5px !important;
-    }
-    .pt-empty-slot, .pt-dropzone {
-        min-width: 60px !important;
-        min-height: 84px !important;
-    }
-
-    /* 8. Stepper & Damage Counter verkleinern */
-    .pt-stepper-group {
-        transform: scale(0.8) !important;
-        transform-origin: bottom center !important;
-    }
-    .pt-dmg-modifier {
-        transform: scale(0.8) !important;
-        transform-origin: bottom center !important;
-        margin-bottom: -5px !important;
-    }
-
-    /* 9. Deck: Halbe-Labels ausblenden, Tipp öffnet ptDeckMenu */
-    .pt-deck-half { display: none !important; }
-    .pt-deck-pile {
-        transform: scale(1.1) !important;
-        transform-origin: center center !important;
-        cursor: pointer;
-    }
-    .pt-deck-controls { display: none !important; }
-    .pt-deck-popup-trigger { display: none !important; }
-
-    /* 10. Setup Phase: keine Überlappung, horizontal swipebar */
-    #ptStartPhaseModal > div {
-        padding: 12px 6px !important;
-        width: 98vw !important;
-    }
-    #ptStartPhaseModal div[style*="grid-template-columns"] {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
-    }
-    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"],
-    #ptStartPhaseModal div[style*="flex-wrap:nowrap"] {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-        gap: 8px !important;
-        width: 100% !important;
-        justify-content: flex-start !important;
-        padding: 10px 4px !important;
-    }
-    #ptStartPhaseModal .pt-hand-zone {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-    }
-    /* Setup-Karten ohne negative Margins */
-    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] > div,
-    #ptStartPhaseModal div[style*="flex-wrap:nowrap"] > div {
-        margin-right: 0 !important;
-        transition: transform 0.2s ease, margin 0.2s ease;
-        z-index: 1;
-        flex-shrink: 0;
-    }
-    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] > div:last-child,
-    #ptStartPhaseModal div[style*="flex-wrap:nowrap"] > div:last-child {
-        margin-right: 0 !important;
-    }
-    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] > div:active,
-    #ptStartPhaseModal div[style*="flex-wrap:nowrap"] > div:active {
-        margin-right: 0 !important;
-        transform: translateY(-8px) scale(1.12);
-        z-index: 100;
-    }
-    #ptStartPhaseModal img {
-        width: clamp(38px, 12vw, 60px) !important;
-        border-radius: 5px !important;
-    }
-    #ptStartPhaseModal span[style*="max-width:72px"] {
-        max-width: clamp(30px, 10vw, 55px) !important;
-        font-size: 7px !important;
-    }
-
-    /* 12. Hand-Aktionsleisten (Spieler & Gegner) ausblenden – Quick Actions Menu ersetzt sie */
-    #ptHandActionBar,
-    #ptOppHandActionBar,
-    .hand-action-bar,
-    .player-controls-container {
-        display: none !important;
-    }
-
-    /* 13. Zonen-Header kompakter */
-    .pt-zone-header,
-    .zone-label {
-        margin-bottom: 2px !important;
-        padding: 2px !important;
-        font-size: 11px !important;
-    }
-
-    /* Zone-Labels in mobiler Arena ausblenden */
-    #playtester-board .zone-label,
-    #playtester-board .pt-zone-label {
-        display: none !important;
-    }
-
-    /* 14. Spielfeld-Arena maximal nach oben */
-    #playtester-board,
-    #pt-board {
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        padding-top: 5px !important;
-    }
-
-    /* Zonen (Active/Bench) kompakter */
-    .pt-active-zone,
-    .pt-bench-zone,
-    .pt-dropzone {
-        padding: 2px !important;
-        min-height: auto !important;
-    }
-
-    /* 15. Compact energy/tool overlays on mobile */
-    .pt-attachment-energy {
-        width: 16px !important;
-        height: 16px !important;
-    }
-    .pt-attachment-tool {
-        width: 18px !important;
-        height: 24px !important;
-    }
-
-    /* 16. Compact damage overlay on mobile */
-    .pt-damage-overlay {
-        top: -8px !important;
-        right: -10px !important;
-    }
-    .pt-dmg-btn {
-        width: 16px !important;
-        height: 18px !important;
-        font-size: 9px !important;
-    }
-    .pt-dmg-value {
-        font-size: 9px !important;
-        min-width: 18px !important;
-    }
-
-    /* 17. Radial menu sizing on mobile */
-    .pt-radial-btn {
-        width: 48px;
-        height: 48px;
-    }
-    .pt-radial-icon {
-        font-size: 16px;
-    }
-
-    /* 18. Hand card overlap for more space */
-    #ptHandZone {
-        gap: 0px !important;
-        justify-content: center !important;
-    }
-
-    /* Hand und Toolbar stauchen */
-    #pt-hand-zone,
-    .pt-hand-zone {
-        height: 100px !important;
-        padding: 0 !important;
-    }
-    #pt-hand-zone .pt-card-img,
-    #ptHandZone .pt-card-img,
-    #ptHandZone .pt-hand-card {
-        height: 90px !important;
-        width: auto !important;
-    }
+    /* Toolbar */
     .pt-controls {
         display: flex !important;
         flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        padding: 2px !important;
+        overflow-x: hidden !important;
+        padding: 5px !important;
+        width: 100% !important;
+        justify-content: space-around !important;
     }
     .pt-controls button {
         padding: 5px 10px !important;
         font-size: 20px !important;
         border: none !important;
         background: transparent !important;
-    }
-    #ptHandZone .pt-hand-wrapper {
-        margin-right: -35px !important;
-        transition: transform 0.2s ease, margin 0.2s ease, z-index 0s;
-        position: relative;
-        z-index: 1;
-        flex-shrink: 0;
-    }
-    #ptHandZone .pt-hand-wrapper:last-child {
-        margin-right: 0 !important;
-    }
-    #ptHandZone .pt-hand-wrapper.pt-hand-expanded,
-    #ptHandZone .pt-hand-wrapper:active {
-        margin-right: 5px !important;
-        margin-left: 10px !important;
-        transform: translateY(-18px) scale(1.15);
-        z-index: 100 !important;
     }
 }
 

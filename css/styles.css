@@ -4287,9 +4287,9 @@ h3:first-child {
         border: none !important;
         color: white !important;
         font-weight: bold !important;
-        padding: 9px 6px !important;
-        font-size: 11px !important;
-        min-width: 76px !important;
+        padding: 7px 5px !important;
+        font-size: 10px !important;
+        min-width: 68px !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
         cursor: pointer !important;
         white-space: nowrap !important;
@@ -4319,8 +4319,8 @@ h3:first-child {
         border-radius: 0 8px 8px 0 !important;
         background: #9c27b0 !important;
         color: #fff !important;
-        font-size: 18px !important;
-        padding: 8px 6px !important;
+        font-size: 16px !important;
+        padding: 7px 5px !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
         border: none !important;
         cursor: pointer !important;
@@ -4355,11 +4355,17 @@ h3:first-child {
     /* Raise piles and prizes so bench is no longer covered */
     #p1-area > div > div[style*="bottom: 20px"][style*="right: 20px"][style*="flex-direction: column"],
     #p2-area > div > div[style*="bottom: 20px"][style*="right: 20px"][style*="flex-direction: column"] {
-        bottom: 132px !important;
+        bottom: 56px !important;
     }
     #p1-area > div > div[style*="bottom: 20px"][style*="left: 20px"],
     #p2-area > div > div[style*="bottom: 20px"][style*="left: 20px"] {
-        bottom: 132px !important;
+        bottom: 112px !important;
+    }
+
+    /* Shift bench slightly left to free right-side space */
+    #p1-area > div > div[style*="bottom: 20px"][style*="left: 50%"],
+    #p2-area > div > div[style*="bottom: 20px"][style*="left: 50%"] {
+        left: 46% !important;
     }
 
     /* Move lost zone out of board view on mobile */
@@ -4374,17 +4380,25 @@ h3:first-child {
         display: none !important;
     }
 
-    /* Discard: label a bit smaller, touch target larger */
+    /* Swap sizing: deck larger, discard smaller */
+    .pt-deck-pile {
+        width: 92px !important;
+        height: 126px !important;
+    }
+    .pt-deck-half {
+        font-size: 18px !important;
+    }
+
     #ptDiscardPile-p1,
     #ptDiscardPile-p2 {
-        min-width: 66px !important;
-        min-height: 94px !important;
+        min-width: 48px !important;
+        min-height: 68px !important;
     }
     #ptDiscardPile-p1 .pt-empty-slot,
     #ptDiscardPile-p2 .pt-empty-slot {
-        min-width: 66px !important;
-        min-height: 94px !important;
-        font-size: 9px !important;
+        min-width: 48px !important;
+        min-height: 68px !important;
+        font-size: 8px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;

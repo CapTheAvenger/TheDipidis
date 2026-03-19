@@ -7389,6 +7389,64 @@ const BASE_PATH = './data/';
         }
 
         const pendingDeckRefreshBySource = {};
+        const synergyStatsCacheBySource = {
+            cityLeague: null,
+            currentMeta: null,
+            pastMeta: null
+        };
+        const synergyReadyBySource = {
+            cityLeague: false,
+            currentMeta: false,
+            pastMeta: false
+        };
+        const forceSynergyRecomputeBySource = {
+            cityLeague: false,
+            currentMeta: false,
+            pastMeta: false
+        };
+
+        function getSynergyCalcButtonId(source) {
+            if (source === 'cityLeague') return 'cityLeagueSynergyCalcBtn';
+            if (source === 'currentMeta') return 'currentMetaSynergyCalcBtn';
+            if (source === 'pastMeta') return 'pastMetaSynergyCalcBtn';
+            return '';
+        }
+
+        function invalidateSynergyCache(source) {
+            if (!synergyReadyBySource.hasOwnProperty(source)) return;
+            synergyReadyBySource[source] = false;
+            forceSynergyRecomputeBySource[source] = false;
+            synergyStatsCacheBySource[source] = null;
+        }
+
+        async function triggerSynergyCalculation(source) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+
+            const btn = document.getElementById(getSynergyCalcButtonId(source));
+            const previousText = btn ? btn.textContent : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '⏳ Berechne Synergien...';
+            }
+
+            // Yield to the browser so the loading state paints before heavy calculation starts.
+            await new Promise(resolve => requestAnimationFrame(resolve));
+
+            try {
+                forceSynergyRecomputeBySource[source] = true;
+                renderMyDeckGrid(source);
+                if (typeof showDeckShareToast === 'function') {
+                    showDeckShareToast('🪄 Synergien aktualisiert');
+                }
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = previousText || '🪄 Synergien berechnen (KI-Vorschläge)';
+                }
+            }
+        }
+
+        window.triggerSynergyCalculation = triggerSynergyCalculation;
 
         function scheduleDeckDependentRefresh(source) {
             if (pendingDeckRefreshBySource[source]) {
@@ -7465,6 +7523,9 @@ const BASE_PATH = './data/';
                 else if (source === 'currentMeta') saveCurrentMetaDeck();
                 else if (source === 'pastMeta') savePastMetaDeck();
             }
+
+            // Deck changed: mark synergy stats stale until manually recalculated.
+            invalidateSynergyCache(source);
             
             let deck;
             if (source === 'cityLeague') {
@@ -7719,7 +7780,16 @@ const BASE_PATH = './data/';
                 return statsMap;
             };
 
-            const calculatedCardStats = calculateCardStatsMap(allCards);
+            const shouldCalculateSynergyNow = forceSynergyRecomputeBySource[source] ||
+                (synergyReadyBySource[source] && !synergyStatsCacheBySource[source]);
+
+            let calculatedCardStats = synergyStatsCacheBySource[source];
+            if (shouldCalculateSynergyNow) {
+                calculatedCardStats = calculateCardStatsMap(allCards);
+                synergyStatsCacheBySource[source] = calculatedCardStats;
+                synergyReadyBySource[source] = true;
+                forceSynergyRecomputeBySource[source] = false;
+            }
             
             // Convert deck to array with card data
             const deckCards = [];
@@ -7965,7 +8035,7 @@ const BASE_PATH = './data/';
                 const fallbackAvg = Math.max(0, fallbackAvgValue).toFixed(2).replace('.', ',');
 
                 const statsKey = normalizeOverlayName(baseName);
-                const statEntry = calculatedCardStats.get(statsKey);
+                const statEntry = calculatedCardStats ? calculatedCardStats.get(statsKey) : null;
                 const isM3Special = ((setCode || '').toUpperCase() === 'M3')
                     || ((card.original_set_code || '').toUpperCase() === 'M3')
                     || (typeof imageUrl === 'string' && /\/M3\//i.test(imageUrl));
@@ -10286,11 +10356,17 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            // Build list of card names (limit to 20)
-            const limitedNames = uniqueNames.slice(0, 20);
-            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px;">';
-            
-            limitedNames.forEach(cardName => {
+            // 1. Count all found cards
+            const totalFound = uniqueNames.length;
+
+            // 2. Hard cap rendering at 60 entries
+            const MAX_RENDER = 60;
+            const cardsToRender = uniqueNames.slice(0, MAX_RENDER);
+
+            // 3. Generate HTML only for capped list
+            let htmlString = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px;">';
+
+            cardsToRender.forEach(cardName => {
                 const cardNameEscaped = cardName.replace(/'/g, "\\'");
                 const versionsCount = matchingCards.filter(c => c.name === cardName).length;
                 const deck = source === 'cityLeague' ? (window.cityLeagueDeck || {}) : (window.currentMetaDeck || {});
@@ -10300,7 +10376,7 @@ const BASE_PATH = './data/';
                 const firstVersion = matchingCards.find(c => c.name === cardName);
                 const imageUrl = firstVersion ? getUnifiedCardImage(firstVersion.set, firstVersion.number) : '';
                 
-                html += `
+                htmlString += `
                     <div onclick="selectCardName('${cardNameEscaped}', '${source}')" style="background: white; padding: 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; border-left: 2px solid #667eea; display: flex; gap: 8px; align-items: center;" onmouseover="this.style.background='#f9f9f9'; this.style.transform='translateX(3px)';" onmouseout="this.style.background='white'; this.style.transform='translateX(0)';">
                         <div style="width: 40px; height: 50px; background: #f5f5f5; border-radius: 3px; overflow: hidden; flex-shrink: 0;">
                             <img src="${imageUrl}" alt="${cardName}" style="width: 100%; height: 100%; object-fit: contain; cursor: zoom-in;" onerror="handleCardImageError(this, '${firstVersion ? firstVersion.set : ''}', '${firstVersion ? firstVersion.number : ''}')" loading="lazy">
@@ -10313,9 +10389,21 @@ const BASE_PATH = './data/';
                     </div>
                 `;
             });
-            
-            html += '</div>';
-            resultsContainer.innerHTML = html;
+
+            // 4. Add hint when results were truncated
+            if (totalFound > MAX_RENDER) {
+                htmlString += `
+                    <div style="text-align: center; padding: 20px; color: #7f8c8d; font-size: 14px; width: 100%; grid-column: 1 / -1;">
+                        ⚠️ <b>+ ${totalFound - MAX_RENDER} weitere Karten gefunden.</b><br>
+                        Bitte tippe mehr Text in die Suche, um die Ergebnisse einzugrenzen.
+                    </div>
+                `;
+            }
+
+            htmlString += '</div>';
+
+            // 5. Inject HTML into container
+            resultsContainer.innerHTML = htmlString;
         }
         
         function selectCardName(cardName, source = 'cityLeague') {

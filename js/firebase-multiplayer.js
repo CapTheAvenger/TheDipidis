@@ -381,6 +381,39 @@ function listenToGameState(gameId) {
 // 3. STATE UPDATES
 // ══════════════════════════════════════════════════════════════════════════
 
+function compressStateForFirebase(state) {
+    if (!state) return state;
+
+    // Tiefe Kopie erstellen, um den lokalen State nicht zu zerstören
+    const compressed = JSON.parse(JSON.stringify(state));
+
+    // Rekursive Funktion, um alle Arrays und Objekte im State zu durchkämmen
+    function stripHeavyCardData(obj) {
+        if (Array.isArray(obj)) {
+            obj.forEach(stripHeavyCardData);
+        } else if (obj !== null && typeof obj === 'object') {
+            // Wenn es sich um eine Karte handelt (hat name und id/set_code)
+            if (obj.name && (obj.id || obj.set_code || obj.setCode)) {
+                // Lösche die extrem speicherfressenden Attribute
+                delete obj.prices;
+                delete obj.tcgplayer;
+                delete obj.cardmarket;
+                delete obj.legalities;
+                delete obj.flavorText;
+                // Optional: delete obj.rules;
+            }
+
+            // Gehe tiefer (für attachedCards etc.)
+            for (const key in obj) {
+                stripHeavyCardData(obj[key]);
+            }
+        }
+    }
+
+    stripHeavyCardData(compressed);
+    return compressed;
+}
+
 /**
  * Synchronisiert lokalen State zu Firestore
  * @param {string} actionDescription - Beschreibung der Aktion (optional)
@@ -399,9 +432,11 @@ async function syncStateToFirebase(actionDescription = '') {
 
         const db = firebase.firestore();
         
-        // Update Firestore mit aktuellem ptState
+        const shrunkenState = compressStateForFirebase(ptState);
+
+        // Update Firestore mit komprimiertem State
         await db.collection('games').doc(mpGameId).update({
-            state: ptState,
+            state: shrunkenState,
             lastAction: firebase.firestore.FieldValue.serverTimestamp(),
             lastActionDescription: actionDescription,
             lastActionBy: mpRole
@@ -437,8 +472,9 @@ async function mpSyncSetupReady() {
     try {
         const db = firebase.firestore();
         mpLastSyncTime = Date.now();
+        const shrunkenLocalState = compressStateForFirebase(ptState[localRole]);
         await db.collection('games').doc(mpGameId).update({
-            [`state.${localRole}`]: ptState[localRole],
+            [`state.${localRole}`]: shrunkenLocalState,
             [`state.mpSetupReady.${localRole}`]: true,
             lastAction: firebase.firestore.FieldValue.serverTimestamp(),
             lastActionDescription: `${localRole} setup complete`,

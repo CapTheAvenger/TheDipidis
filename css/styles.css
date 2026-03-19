@@ -5587,12 +5587,13 @@ details[open] > .tier-trending-summary::after {
     #pt-side-buttons-left {
         position: fixed !important;
         left: 0 !important;
-        top: 45% !important;
+        top: 55% !important;
         transform: translateY(-50%) !important;
         display: flex !important;
         flex-direction: column !important;
-        gap: 15px !important;
+        gap: 8px !important;
         z-index: 9999 !important;
+        pointer-events: none !important;
     }
 
     #pt-side-buttons-right {
@@ -5606,14 +5607,22 @@ details[open] > .tier-trending-summary::after {
     }
 
     .pt-side-btn {
+        pointer-events: auto !important;
         border: none !important;
         color: white !important;
         font-weight: bold !important;
-        padding: 12px 8px !important;
-        font-size: 13px !important;
+        padding: 10px 6px !important;
+        font-size: 11px !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
         cursor: pointer !important;
         white-space: nowrap !important;
+        opacity: 0.85 !important;
+        transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .pt-side-btn:active {
+        opacity: 1 !important;
+        transform: scale(0.95);
     }
 
     .attack-btn {
@@ -5629,5 +5638,23 @@ details[open] > .tier-trending-summary::after {
     .oppview-btn {
         background: #8e44ad !important;
         border-radius: 8px 0 0 8px !important;
+    }
+
+    /* Deck verkleinern */
+    .pt-deck-pile {
+        width: 60px !important;
+        height: 85px !important;
+        font-size: 10px !important;
+    }
+    .pt-deck-half {
+        font-size: 14px !important;
+    }
+
+    /* FAB Action Button kompakter machen */
+    #fab-action-btn.fab-side-btn {
+        background: #9c27b0 !important;
+        border-radius: 0 8px 8px 0 !important;
+        font-size: 18px !important;
+        padding: 10px !important;
     }
 }

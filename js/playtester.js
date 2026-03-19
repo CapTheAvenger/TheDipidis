@@ -487,6 +487,22 @@ function ptNewGame() {
 // ── Start Phase: coin flip → hand display → active selection ─────────────
 
 // Helpers to detect Basic Pokémon (not Energy, not Trainer subtype)
+function _ptIsPokemon(card) {
+    const t = (card.cardType || card.supertype || '').toLowerCase();
+    if (t === 'supporter' || t === 'item' || t === 'tool' || t === 'stadium') return false;
+    if (t.includes('energy')) return false;
+    if (t.includes('basic') || t.includes('stage') || t.includes('pokémon') || t.includes('pokemon')) return true;
+    if (t.includes('v') || t.includes('ex') || t.includes('gx') || t.includes('vmax') || t.includes('vstar')) return true;
+    // Fallback: if no type info, check name for known non-Pokémon patterns
+    if (!t) {
+        const name = (card.name || '').toLowerCase();
+        if (/\benergy\b/i.test(name)) return false;
+        if (/^(professor|boss|arven|iono|judge|penny|cynthia|marnie|roxanne|irida|colress|n |research|nest ball|ultra ball|rare candy|switch|escape rope|battle vip|trekking shoes|pal pad|super rod|energy recycler|pokégear|exp\. share|forest seal|choice belt|tool scrapper|lost vacuum|counter catcher|crushing hammer|enhanced hammer|field blower|gust|lysandre|acerola|guzma|boss.s orders|temple|artazon|beach court|collapsed|mesagoza|jamming tower|path to the peak|tower of darkness|magma basin|chaotic swell|training court)/i.test(name)) return false;
+        return true; // unknown card with no type → allow as Pokémon (benefit of doubt)
+    }
+    return false;
+}
+
 function _ptIsBasic(card) {
     const t = (card.cardType || card.supertype || '').toLowerCase();
     // Explicit non-Pokémon types
@@ -643,6 +659,12 @@ function ptStartCardClick(player, index) {
     // Block opponent clicks in MP mode
     if (ptState.isMultiplayer && player !== ptState.localRole) return;
     if (ptState.isMultiplayer && ptState.mpSetupReady && ptState.mpSetupReady[ptState.localRole]) return;
+    // Setup: only Basic Pokémon allowed
+    const setupCard = ptState[player].hand[index];
+    if (!setupCard || !_ptIsBasic(setupCard)) {
+        ptShowMessage('⛔ Im Setup nur Basic Pokémon erlaubt!');
+        return;
+    }
     const choices = ptStartChoices[player] || { active: null, bench: [] };
     if (choices.active === null) {
         // First basic clicked → set as Active
@@ -714,6 +736,16 @@ function ptStartMulligan(player) {
     // Block opponent mulligan in MP mode
     if (ptState.isMultiplayer && player !== ptState.localRole) return;
     if (ptState.isMultiplayer && ptState.mpSetupReady && ptState.mpSetupReady[ptState.localRole]) return;
+
+    // Reset ALL setup selections before reshuffling
+    ptStartChoices[player] = { active: null, bench: [] };
+    ptState[player].field.active = [];
+    ptState[player].field.bench0 = [];
+    ptState[player].field.bench1 = [];
+    ptState[player].field.bench2 = [];
+    ptState[player].field.bench3 = [];
+    ptState[player].field.bench4 = [];
+
     ptState[player].deck.push(...ptState[player].hand);
     ptState[player].hand = [];
     const deck = ptState[player].deck;
@@ -722,7 +754,6 @@ function ptStartMulligan(player) {
         [deck[i], deck[j]] = [deck[j], deck[i]];
     }
     for (let i = 0; i < 7; i++) if (deck.length > 0) ptState[player].hand.push(deck.pop());
-    ptStartChoices[player] = { active: null, bench: [] };
     ptLog(`🃏 ${player.toUpperCase()} mulligan — new 7-card hand.`);
     ptRenderStartPhaseModal();
 }
@@ -1531,6 +1562,17 @@ function ptClickZone(player, zoneId) {
     // Hand card selected → place it on the target zone
     const card = ptState[ptCurrentPlayer].hand[ptSelectedCardIndex];
     if (!card) return;
+
+    // Block non-Pokémon cards from being placed on Active or Bench zones
+    if (zoneId === 'active' || zoneId.startsWith('bench')) {
+        if (!_ptIsPokemon(card)) {
+            ptShowMessage('⛔ Nur Pokémon dürfen auf Active/Bench gelegt werden!');
+            ptSelectedCardIndex = null;
+            ptRenderHand();
+            return;
+        }
+    }
+
     ptSaveState();
 
     if (zoneId === 'playzone') {

@@ -646,7 +646,7 @@ function ptRenderStartHandHTML(player) {
             <span style="font-size:10px;font-weight:400;color:#aaa;">Dbl-click any card to zoom</span>
         </div>
         ${noBasicWarn}
-        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:90px;margin-bottom:8px;">${cardsHTML}</div>
+        <div class="pt-setup-hand-row" style="display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;justify-content:flex-start;min-height:90px;margin-bottom:8px;padding-bottom:4px;-webkit-overflow-scrolling:touch;">${cardsHTML}</div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
             <button onclick="ptStartMulligan('${player}')" style="${mulBtnStyle}">🃏 Mulligan</button>
             <button onclick="ptStartClearBench('${player}')" style="${clrBtnStyle}">Clear Bench</button>

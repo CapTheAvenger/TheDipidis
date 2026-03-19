@@ -3944,6 +3944,33 @@ h3:first-child {
         display: none !important;
     }
 
+    /* 6. Setup Phase: Single-column, horizontal card scroll */
+    #ptStartPhaseModal > div {
+        width: 96vw !important;
+        padding: 12px 8px !important;
+        max-height: 92vh !important;
+        overflow-y: auto !important;
+    }
+    #ptStartPhaseModal > div > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    .pt-setup-hand-row {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        justify-content: flex-start !important;
+        scrollbar-width: none;
+    }
+    .pt-setup-hand-row::-webkit-scrollbar { display: none; }
+    .pt-setup-hand-row > div {
+        flex: 0 0 auto !important;
+        margin: 0 !important;
+    }
+    .pt-setup-hand-row img {
+        width: 60px !important;
+        height: auto !important;
+    }
+
     /* FAB Button */
     #fab-action-btn {
         position: fixed !important;

@@ -503,6 +503,18 @@ function _ptIsPokemon(card) {
     return false;
 }
 
+function _ptIsEnergy(card) {
+    const t = (card.cardType || card.supertype || '').toLowerCase();
+    if (t.includes('energy')) return true;
+    return /\benergy\b/i.test(card.name || '');
+}
+
+function _ptIsTool(card) {
+    const t = (card.cardType || card.supertype || '').toLowerCase();
+    if (t === 'tool' || t.includes('tool')) return true;
+    return /\btool\b/i.test(card.name || '');
+}
+
 function _ptIsBasic(card) {
     const t = (card.cardType || card.supertype || '').toLowerCase();
     // Explicit non-Pokémon types
@@ -1581,10 +1593,24 @@ function ptClickZone(player, zoneId) {
     const card = ptState[ptCurrentPlayer].hand[ptSelectedCardIndex];
     if (!card) return;
 
-    // Block non-Pokémon cards from being placed on Active or Bench zones
+    // Active/Bench handling:
+    // - Pokémon can be played as usual
+    // - Energy/Tool can only be attached to an occupied Pokémon zone
+    // - Other card types are blocked
     if (zoneId === 'active' || zoneId.startsWith('bench')) {
-        if (!_ptIsPokemon(card)) {
-            ptShowMessage('⛔ Nur Pokémon dürfen auf Active/Bench gelegt werden!');
+        const targetStack = ptState[player].field[zoneId];
+        const isPokemon = _ptIsPokemon(card);
+        const isAttach = _ptIsEnergy(card) || _ptIsTool(card);
+
+        if (!isPokemon && !isAttach) {
+            ptShowMessage('⛔ Nur Pokémon, Energy oder Tools dürfen auf Active/Bench!');
+            ptSelectedCardIndex = null;
+            ptRenderHand();
+            return;
+        }
+
+        if (isAttach && (!targetStack || targetStack.length === 0)) {
+            ptShowMessage('⛔ Energy/Tool kann nur an ein vorhandenes Pokémon angelegt werden!');
             ptSelectedCardIndex = null;
             ptRenderHand();
             return;
@@ -2418,14 +2444,16 @@ function ptRenderHand() {
         };
         img.ondblclick = () => ptViewCard(card.imageUrl, card.name);
 
-        const discBtn = document.createElement('button');
-        discBtn.className = 'pt-hand-disc-btn';
-        discBtn.innerHTML = '🗑️';
-        discBtn.title     = 'Discard';
-        discBtn.onclick   = e => ptDiscardFromHand(i, e);
-
         wrapper.appendChild(img);
-        wrapper.appendChild(discBtn);
+        const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        if (!isMobileViewport) {
+            const discBtn = document.createElement('button');
+            discBtn.className = 'pt-hand-disc-btn';
+            discBtn.innerHTML = '🗑️';
+            discBtn.title     = 'Discard';
+            discBtn.onclick   = e => ptDiscardFromHand(i, e);
+            wrapper.appendChild(discBtn);
+        }
         zone.appendChild(wrapper);
     });
 }

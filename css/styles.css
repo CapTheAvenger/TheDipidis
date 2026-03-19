@@ -4776,6 +4776,16 @@ details[open] > .tier-trending-summary::after {
         height: 24px !important;
         font-size: 10px !important;
     }
+
+    /* Meta Card Analysis Grids auf exakt 3 Spalten erzwingen */
+    #metaCardsGrid,
+    #currentMetaCardsGrid,
+    #pastMetaCardsGrid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        padding: 0 !important;
+    }
 }
 
 /* ============================================================ */

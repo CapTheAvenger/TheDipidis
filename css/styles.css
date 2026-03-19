@@ -4254,6 +4254,58 @@ h3:first-child {
 .tier-3 .deck-tier-title { color: #388e3c; border-color: #388e3c; }
 .tier-trending .deck-tier-title { color: #1976d2; border-color: #1976d2; }
 
+/* ===================================================
+   FIX: SCHWEBENDE KAMPF-BUTTONS (MOBILE)
+   =================================================== */
+@media (max-width: 768px) {
+    #pt-side-buttons-left {
+        position: fixed !important;
+        left: 0 !important;
+        top: 45% !important;
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+        z-index: 9999 !important;
+    }
+
+    #pt-side-buttons-right {
+        position: fixed !important;
+        right: 0 !important;
+        top: 45% !important;
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        z-index: 9999 !important;
+    }
+
+    .pt-side-btn {
+        border: none !important;
+        color: white !important;
+        font-weight: bold !important;
+        padding: 12px 8px !important;
+        font-size: 13px !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+        cursor: pointer !important;
+        white-space: nowrap !important;
+    }
+
+    .attack-btn {
+        background: #c0392b !important;
+        border-radius: 0 8px 8px 0 !important;
+    }
+
+    .endturn-btn {
+        background: #27ae60 !important;
+        border-radius: 0 8px 8px 0 !important;
+    }
+
+    .oppview-btn {
+        background: #8e44ad !important;
+        border-radius: 8px 0 0 8px !important;
+    }
+}
+
 /* Collapsible Rogue/Trending section */
 .tier-trending details { list-style: none; }
 .tier-trending details > summary { list-style: none; }

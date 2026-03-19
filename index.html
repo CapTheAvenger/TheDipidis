@@ -238,6 +238,12 @@
         }
         .pt-legend-item { display: flex; align-items: center; gap: 8px; line-height: 1.3; }
         .pt-damage-badge { position: absolute; top: -8px; right: -8px; background: radial-gradient(circle at top left, #ff6b6b, #c0392b); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; border: 2px solid #fff; pointer-events: none; z-index: 20; }
+        .pt-damage-overlay { position: absolute; top: -10px; right: -14px; display: flex; align-items: center; gap: 0; z-index: 40; background: rgba(0,0,0,0.85); border-radius: 12px; border: 2px solid #ff6b6b; padding: 1px 2px; }
+        .pt-dmg-btn { background: none; border: none; color: #fff; font-size: 10px; font-weight: 900; cursor: pointer; width: 18px; height: 20px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
+        .pt-dmg-btn:active { transform: scale(0.85); }
+        .pt-dmg-minus { color: #2ecc71; }
+        .pt-dmg-plus { color: #ff6b6b; }
+        .pt-dmg-value { color: #fff; font-size: 10px; font-weight: 900; min-width: 22px; text-align: center; cursor: pointer; }
 
         .pt-field-actions { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); display: none; gap: 2px; z-index: 100; background: rgba(0,0,0,0.9); padding: 4px; border-radius: 6px; border: 1px solid #444; flex-direction: column; }
         .pt-field-card:hover ~ .pt-field-actions, .pt-field-actions:hover { display: flex; }

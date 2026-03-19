@@ -2344,6 +2344,9 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                      onclick="ptClickZone('${player}','${zoneId}'); if(typeof ptMobileCardTap==='function') ptMobileCardTap('${player}','${zoneId}',0);"
                      onmouseenter="ptOpenCardMenu(event,'${player}','${zoneId}')"
                      onmouseleave="ptScheduleMenuClose()"
+                     ontouchstart="if(typeof ptFieldTouchStart==='function') ptFieldTouchStart(event,'${player}','${zoneId}')"
+                     ontouchend="if(typeof ptFieldTouchEnd==='function') ptFieldTouchEnd()"
+                     ontouchmove="if(typeof ptFieldTouchMove==='function') ptFieldTouchMove()"
                      draggable="true" ondragstart="ptDragStartField(event,'${elementId}')">` ;
 
     let energyCards  = [];
@@ -2418,13 +2421,14 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
         }
     }
 
-    // Damage badge — click +10 / shift+click −10
+    // Damage overlay — compact +/- controls
     const dmg = ptState[player].damage[zoneId];
     if (dmg > 0) {
-        html += `<div class="pt-damage-badge"
-            onclick="addDamage('${player}','${zoneId}',event.shiftKey?-10:10,event)"
-            title="Klick +10 | Shift+Klick −10"
-            style="z-index:40;cursor:pointer;pointer-events:auto;">${dmg}</div>`;
+        html += `<div class="pt-damage-overlay" onclick="event.stopPropagation();" style="z-index:40;pointer-events:auto;">
+            <button class="pt-dmg-btn pt-dmg-minus" onclick="addDamage('${player}','${zoneId}',-10,event)" title="-10">◀</button>
+            <span class="pt-dmg-value" onclick="addDamage('${player}','${zoneId}',event.shiftKey?-10:10,event)" title="Klick +10 | Shift -10">${dmg}</span>
+            <button class="pt-dmg-btn pt-dmg-plus" onclick="addDamage('${player}','${zoneId}',10,event)" title="+10">▶</button>
+        </div>`;
     }
 
     // Stack badge — shown when zone has more than one card (evolutions/attachments)

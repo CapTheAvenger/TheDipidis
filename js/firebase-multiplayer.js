@@ -267,6 +267,18 @@ function listenToGameState(gameId) {
                 console.log(`[MP-DIAG] Sample card: name="${sample.name}", imageUrl="${(sample.imageUrl||'').substring(0,60)}...", cardType="${sample.cardType}"`);
             } else {
                 console.warn('[MP-DIAG] ⚠️ Hand ist LEER! Firebase-State p1.hand:', data.state.p1?.hand?.length, 'p2.hand:', data.state.p2?.hand?.length);
+                // Safety: If hand is empty but deck has cards, redraw 7
+                if (localDeck.length > 0) {
+                    console.log('[MP-DIAG] Safety redraw: shuffling deck and drawing 7 cards');
+                    const deck = ptState[lr].deck;
+                    for (let i = deck.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [deck[i], deck[j]] = [deck[j], deck[i]];
+                    }
+                    for (let i = 0; i < 7 && deck.length > 0; i++) {
+                        ptState[lr].hand.push(deck.pop());
+                    }
+                }
             }
 
             // Playtester-Modal anzeigen

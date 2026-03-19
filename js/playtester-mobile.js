@@ -287,8 +287,152 @@ function ptMobileCardTap(player, zone, index) {
     ptShowContextMenu({ player, zone, index });
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// LONG-PRESS RADIAL MENU (Field Cards)
+// ══════════════════════════════════════════════════════════════════════════
+
+let _ptLongPressTimer = null;
+let _ptLongPressFired = false;
+
+function ptFieldTouchStart(event, player, zone) {
+    _ptLongPressFired = false;
+    _ptLongPressTimer = setTimeout(() => {
+        _ptLongPressFired = true;
+        event.preventDefault();
+        ptShowRadialMenu(event.touches[0], player, zone);
+    }, 500);
+}
+
+function ptFieldTouchEnd() {
+    clearTimeout(_ptLongPressTimer);
+    _ptLongPressTimer = null;
+}
+
+function ptFieldTouchMove() {
+    clearTimeout(_ptLongPressTimer);
+    _ptLongPressTimer = null;
+}
+
+function ptShowRadialMenu(touch, player, zone) {
+    ptHideRadialMenu();
+    const cx = touch.clientX;
+    const cy = touch.clientY;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'ptRadialOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:25000;background:rgba(0,0,0,0.4);';
+    overlay.addEventListener('click', ptHideRadialMenu);
+
+    const menu = document.createElement('div');
+    menu.id = 'ptRadialMenu';
+    menu.style.cssText = `position:fixed;left:${cx}px;top:${cy}px;z-index:25001;transform:translate(-50%,-50%);`;
+
+    // Determine which actions make sense for this zone
+    const actions = [];
+    const hasCards = ptState[player] && ptState[player].field[zone] && ptState[player].field[zone].length > 0;
+    if (!hasCards) { return; }
+
+    // Check if hand has energy cards
+    const hasEnergy = ptState[player].hand.some(c => {
+        const ct = (c.cardType || c.supertype || '').toLowerCase();
+        return ct.includes('energy');
+    });
+    // Check if hand has evolution cards
+    const hasEvolution = ptState[player].hand.some(c => {
+        const ct = (c.cardType || c.supertype || '').toLowerCase();
+        return ct.includes('stage') || ct.includes('evolution') || ct.includes('break') || ct.includes('mega') || ct.includes('level');
+    });
+
+    if (hasEnergy) actions.push({ icon: '⚡', label: 'Energy', action: () => _ptRadialAttachEnergy(player, zone) });
+    actions.push({ icon: '🗑️', label: 'Ablegen', action: () => { discardTopCard(player, zone, null); } });
+    if (hasEvolution) actions.push({ icon: '🔼', label: 'Evolve', action: () => _ptRadialEvolve(player, zone) });
+    actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
+    actions.push({ icon: '💥', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); } });
+    if (zone !== 'active') {
+        actions.push({ icon: '🔄', label: 'Aktiv', action: () => { _ptMobileSwitchToActive(player, zone); } });
+    }
+
+    // Arrange in a circle
+    const radius = 65;
+    const startAngle = -Math.PI / 2; // top
+    const angleStep = (2 * Math.PI) / actions.length;
+
+    actions.forEach((act, i) => {
+        const angle = startAngle + i * angleStep;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        const btn = document.createElement('button');
+        btn.className = 'pt-radial-btn';
+        btn.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%);`;
+        btn.innerHTML = `<span class="pt-radial-icon">${act.icon}</span><span class="pt-radial-label">${act.label}</span>`;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            ptHideRadialMenu();
+            act.action();
+        });
+        menu.appendChild(btn);
+    });
+
+    // Center dot
+    const dot = document.createElement('div');
+    dot.style.cssText = 'width:10px;height:10px;border-radius:50%;background:#FFCB05;position:absolute;left:0;top:0;transform:translate(-50%,-50%);';
+    menu.appendChild(dot);
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(menu);
+
+    // Clamp menu position to viewport
+    const rect = menu.getBoundingClientRect();
+    let adjX = cx, adjY = cy;
+    if (rect.left < 10) adjX = cx + (10 - rect.left);
+    if (rect.right > window.innerWidth - 10) adjX = cx - (rect.right - window.innerWidth + 10);
+    if (rect.top < 10) adjY = cy + (10 - rect.top);
+    if (rect.bottom > window.innerHeight - 10) adjY = cy - (rect.bottom - window.innerHeight + 10);
+    if (adjX !== cx || adjY !== cy) {
+        menu.style.left = adjX + 'px';
+        menu.style.top = adjY + 'px';
+    }
+}
+
+function ptHideRadialMenu() {
+    const overlay = document.getElementById('ptRadialOverlay');
+    const menu = document.getElementById('ptRadialMenu');
+    if (overlay) overlay.remove();
+    if (menu) menu.remove();
+}
+
+function _ptRadialAttachEnergy(player, zone) {
+    // Attach first energy card from hand to this zone
+    const energyIdx = ptState[player].hand.findIndex(c => {
+        const ct = (c.cardType || c.supertype || '').toLowerCase();
+        return ct.includes('energy');
+    });
+    if (energyIdx === -1) return;
+    const [energyCard] = ptState[player].hand.splice(energyIdx, 1);
+    ptState[player].field[zone].push(energyCard);
+    if (typeof ptLog === 'function') ptLog(`⚡ Attached "${energyCard.name}" to ${zone}.`);
+    if (typeof ptRenderAll === 'function') ptRenderAll();
+}
+
+function _ptRadialEvolve(player, zone) {
+    // Find first evolution card in hand and place on zone
+    const evolveIdx = ptState[player].hand.findIndex(c => {
+        const ct = (c.cardType || c.supertype || '').toLowerCase();
+        return ct.includes('stage') || ct.includes('evolution') || ct.includes('break') || ct.includes('mega') || ct.includes('level');
+    });
+    if (evolveIdx === -1) return;
+    const [evoCard] = ptState[player].hand.splice(evolveIdx, 1);
+    ptState[player].field[zone].push(evoCard);
+    if (typeof ptLog === 'function') ptLog(`🔼 Evolved ${zone} with "${evoCard.name}".`);
+    if (typeof ptRenderAll === 'function') ptRenderAll();
+}
+
 // Initialisierung
 if (typeof window !== 'undefined') {
     window.ptMobileCardTap = ptMobileCardTap;
     window.ptHideContextMenu = ptHideContextMenu;
+    window.ptFieldTouchStart = ptFieldTouchStart;
+    window.ptFieldTouchEnd = ptFieldTouchEnd;
+    window.ptFieldTouchMove = ptFieldTouchMove;
+    window.ptHideRadialMenu = ptHideRadialMenu;
 }

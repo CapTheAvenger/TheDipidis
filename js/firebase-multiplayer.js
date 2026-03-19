@@ -478,9 +478,24 @@ function toggleMultiplayerMenu() {
     
     if (menu.style.display === 'none' || !menu.style.display) {
         menu.style.display = 'block';
+        mpPopulateDeckSelect();
     } else {
         menu.style.display = 'none';
     }
+}
+
+/** Populate the deck dropdown from window.userDecks */
+function mpPopulateDeckSelect() {
+    const sel = document.getElementById('mpDeckSelect');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">-- Wähle ein Deck für das Match --</option>';
+    const decks = window.userDecks || [];
+    decks.forEach((d, i) => {
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = d.name || ('Deck ' + (i + 1));
+        sel.appendChild(opt);
+    });
 }
 
 /**
@@ -495,16 +510,19 @@ async function mpCreateGame() {
             return;
         }
 
-        // Check ob aktuelles Deck vorhanden
-        if (!window.currentDeck || typeof window.currentDeck !== 'object') {
-            showToast('Bitte zuerst ein Deck in der Collection auswählen!', 'warning');
+        // Read selected deck from dropdown
+        const sel = document.getElementById('mpDeckSelect');
+        const idx = sel ? sel.value : '';
+        if (idx === '' || !window.userDecks || !window.userDecks[Number(idx)]) {
+            showToast('Bitte zuerst ein Deck auswählen!', 'warning');
             return;
         }
+        const deckObj = window.userDecks[Number(idx)].cards;
 
         toggleMultiplayerMenu();
 
         // Create Game
-        const roomCode = await createMultiplayerGame(window.currentDeck);
+        const roomCode = await createMultiplayerGame(deckObj);
         
         console.log(`[UI] Game created with code: ${roomCode}`);
 
@@ -525,11 +543,14 @@ async function mpJoinGame() {
             return;
         }
 
-        // Check ob aktuelles Deck vorhanden
-        if (!window.currentDeck || typeof window.currentDeck !== 'object') {
-            showToast('Bitte zuerst ein Deck in der Collection auswählen!', 'warning');
+        // Read selected deck from dropdown
+        const sel = document.getElementById('mpDeckSelect');
+        const idx = sel ? sel.value : '';
+        if (idx === '' || !window.userDecks || !window.userDecks[Number(idx)]) {
+            showToast('Bitte zuerst ein Deck auswählen!', 'warning');
             return;
         }
+        const deckObj = window.userDecks[Number(idx)].cards;
 
         // Prompt für Room-Code
         const roomCode = prompt('🔑 Room-Code eingeben (5 Zeichen):');
@@ -542,7 +563,7 @@ async function mpJoinGame() {
         toggleMultiplayerMenu();
 
         // Join Game
-        await joinMultiplayerGame(roomCode, window.currentDeck);
+        await joinMultiplayerGame(roomCode, deckObj);
 
     } catch (error) {
         console.error('[UI] Join game failed:', error);

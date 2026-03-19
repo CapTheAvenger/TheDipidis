@@ -3890,12 +3890,23 @@ h3:first-child {
     }
 
     /* 2. Zonen (Active / Bench) extrem kompakt */
-    .pt-active-zone, .pt-bench-zone {
+    .pt-active-zone {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         min-height: 90px !important;
         padding: 2px !important;
+        margin-bottom: 5px !important;
+    }
+
+    .pt-bench-zone {
+        display: flex !important;
+        justify-content: flex-start !important; /* Schiebt alles nach links */
+        align-items: center !important;
+        min-height: 90px !important;
+        padding-left: 15px !important; /* Kleiner Abstand zu den Preiskarten */
+        width: 100% !important;
+        gap: 5px !important;
         margin-bottom: 5px !important;
     }
 

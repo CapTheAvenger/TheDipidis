@@ -174,6 +174,7 @@ function _ptClearHighlights() {
 function _ptMobilePlayToActive(player, handIndex) {
     if (typeof ptClickZone !== 'undefined') {
         ptSelectedCardIndex = handIndex;
+        if (typeof ptUpdateAttachModeFromSelection === 'function') ptUpdateAttachModeFromSelection(player);
         ptClickZone(player, 'active');
     }
     ptHideContextMenu();
@@ -182,6 +183,7 @@ function _ptMobilePlayToActive(player, handIndex) {
 function _ptMobilePlayToBench(player, handIndex) {
     // Keep card selected so player can tap the exact bench slot/Pokemon.
     ptSelectedCardIndex = handIndex;
+    if (typeof ptUpdateAttachModeFromSelection === 'function') ptUpdateAttachModeFromSelection(player);
     if (typeof ptRenderHand === 'function') ptRenderHand();
     if (typeof ptShowMessage === 'function') {
         ptShowMessage('Wähle jetzt dein gewünschtes Bank-Pokémon oder einen freien Bank-Slot.');
@@ -278,6 +280,11 @@ function _ptMobileKnockout(player, zone) {
 // ══════════════════════════════════════════════════════════════════════════
 
 function ptMobileCardTap(player, zone, index) {
+    // Guard: while attach mode is active, do not open context/damage modal on target tap.
+    if (window.pendingAttachAction || (typeof ptIsAttachSelection === 'function' && ptIsAttachSelection(player))) {
+        console.log('Attach-Modus aktiv: Blockiere Schadens-Modal.');
+        return;
+    }
     // Event-Handler für Karten-Tap auf Mobil-Geräten
     ptShowContextMenu({ player, zone, index });
 }

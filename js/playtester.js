@@ -15,6 +15,7 @@ let ptLookingAtIsBottom = false;
 let ptLookingAtPlayer = 'p1';
 let _ptMsgTimer = null;
 let ptActiveBuffs = { p1: 0, p2: 0 };
+window.pendingAttachAction = false;
 
 // ── Game-start phase state ──────────────────────────────────────────────
 let ptStartPhase = false;   // true while coin-flip / active-selection is running
@@ -513,6 +514,25 @@ function _ptIsTool(card) {
     const t = (card.cardType || card.supertype || '').toLowerCase();
     if (t === 'tool' || t.includes('tool')) return true;
     return /\btool\b/i.test(card.name || '');
+}
+
+function ptIsAttachSelection(player = ptCurrentPlayer) {
+    if (ptSelectedCardIndex === null || !ptState[player]) return false;
+    const card = ptState[player].hand[ptSelectedCardIndex];
+    if (!card) return false;
+    return _ptIsEnergy(card) || _ptIsTool(card);
+}
+
+function ptSetAttachMode(active) {
+    const isActive = !!active;
+    window.pendingAttachAction = isActive;
+    if (document && document.body) {
+        document.body.classList.toggle('attach-mode-active', isActive);
+    }
+}
+
+function ptUpdateAttachModeFromSelection(player = ptCurrentPlayer) {
+    ptSetAttachMode(ptIsAttachSelection(player));
 }
 
 function _ptIsBasic(card) {
@@ -1567,6 +1587,7 @@ function ptCloseDeckSearch() {
 
 function ptClickZone(player, zoneId) {
     const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+    const wasAttachAction = (window.pendingAttachAction === true) || ptIsAttachSelection(ptCurrentPlayer);
 
     // MP safety: block playing cards as the opponent
     if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole && ptSelectedCardIndex !== null) return;
@@ -1598,7 +1619,10 @@ function ptClickZone(player, zoneId) {
 
     // Hand card selected → place it on the target zone
     const card = ptState[ptCurrentPlayer].hand[ptSelectedCardIndex];
-    if (!card) return;
+    if (!card) {
+        ptSetAttachMode(false);
+        return;
+    }
 
     // Active/Bench handling:
     // - Pokémon can be played as usual
@@ -1612,6 +1636,7 @@ function ptClickZone(player, zoneId) {
         if (!isPokemon && !isAttach) {
             ptShowMessage('⛔ Nur Pokémon, Energy oder Tools dürfen auf Active/Bench!');
             ptSelectedCardIndex = null;
+            ptSetAttachMode(false);
             ptRenderHand();
             return;
         }
@@ -1619,6 +1644,7 @@ function ptClickZone(player, zoneId) {
         if (isAttach && (!targetStack || targetStack.length === 0)) {
             ptShowMessage('⛔ Energy/Tool kann nur an ein vorhandenes Pokémon angelegt werden!');
             ptSelectedCardIndex = null;
+            ptSetAttachMode(false);
             ptRenderHand();
             return;
         }
@@ -1639,6 +1665,11 @@ function ptClickZone(player, zoneId) {
     }
     ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1);
     ptSelectedCardIndex = null;
+    if (wasAttachAction) {
+        setTimeout(() => ptSetAttachMode(false), 0);
+    } else {
+        ptSetAttachMode(false);
+    }
     ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
 }
@@ -2469,6 +2500,7 @@ function ptSelectHandCard(index) {
     // Block opponent card selection in MP
     if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole) return;
     ptSelectedCardIndex = (ptSelectedCardIndex === index) ? null : index;
+    ptUpdateAttachModeFromSelection(ptCurrentPlayer);
     ptRenderHand();
 }
 
@@ -2479,6 +2511,7 @@ function ptDiscardFromHand(index, event) {
     const card = ptState[ptCurrentPlayer].hand.splice(index, 1)[0];
     ptState[ptCurrentPlayer].discard.push(card);
     ptSelectedCardIndex = null;
+    ptSetAttachMode(false);
     ptLog(`Discarded "${card.name}" from hand.`);
     ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Discarded ' + card.name);

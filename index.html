@@ -2777,25 +2777,30 @@
 
     <!-- Draw Simulator Modal -->
     <div id="drawSimulatorModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;" onclick="if(event.target===this)closeDrawSimulator()">
-        <div style="background:#1a1a2e;border-radius:16px;max-width:800px;width:95%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:helpModalIn 0.25s ease-out;position:relative;color:#eee;">
+        <div id="drawSimModal" style="background:#1a1a2e;border-radius:16px;max-width:800px;width:95%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:helpModalIn 0.25s ease-out;position:relative;color:#eee;">
             <button onclick="closeDrawSimulator()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:4px 8px;border-radius:8px;line-height:1;">&times;</button>
             <h2 style="margin-top:0;color:#FFCB05;font-size:1.4em;border-bottom:2px solid #3B4CCA;padding-bottom:10px;margin-bottom:16px;">🎲 Starthand Simulator</h2>
             <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
-                <button class="btn-modern primary" onclick="drawNewHand()">🔄 Neue Hand</button>
-                <button class="btn-modern" onclick="drawExtraCard()">➕ Karte ziehen</button>
+                <button class="btn-modern btn-primary" onclick="drawNewHand()">🔄 Neue Hand</button>
+                <button class="btn-modern btn-primary" onclick="drawExtraCard()">➕ Karte ziehen</button>
                 <span style="margin-left:auto;font-size:13px;color:#aaa;align-self:center;">Deck: <strong id="simulatorDeckCount" style="color:#FFCB05;">0</strong> verbleibend</span>
             </div>
-            <div id="simulatorHandGrid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:160px;margin-bottom:24px;"></div>
+            <div id="simulatorHandGrid" class="draw-sim-hand" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:160px;margin-bottom:24px;"></div>
 
             <!-- Combo Calculator Section -->
             <div style="border-top:2px solid #333;padding-top:18px;">
                 <h3 style="margin:0 0 12px 0;color:#FFCB05;font-size:1.1em;">🎯 Combo-Wahrscheinlichkeit</h3>
                 <p style="font-size:12px;color:#888;margin:0 0 10px 0;">Wähle bis zu 4 Karten — Berechnung per Monte-Carlo-Simulation (10.000 Iterationen)</p>
                 <div id="comboTargetBadges" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;margin-bottom:10px;"></div>
-                <div id="comboCardList" style="max-height:180px;overflow-y:auto;border:1px solid #333;border-radius:8px;margin-bottom:12px;background:#111;"></div>
+                <div class="combo-grid" style="margin-bottom:12px;">
+                    <select id="comboTarget1" onchange="onComboDropdownChange()"></select>
+                    <select id="comboTarget2" onchange="onComboDropdownChange()"></select>
+                    <select id="comboTarget3" onchange="onComboDropdownChange()"></select>
+                    <select id="comboTarget4" onchange="onComboDropdownChange()"></select>
+                </div>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                    <button class="btn-modern primary" onclick="runComboCalculation()" style="font-weight:700;">📊 Berechne Chance</button>
-                    <button class="btn-modern" onclick="clearComboTargets()">🗑️ Auswahl löschen</button>
+                    <button class="btn-modern btn-primary" onclick="runComboCalculation()" style="font-weight:700;">📊 Berechne Chance</button>
+                    <button class="btn-modern btn-primary" onclick="clearComboTargets()">🗑️ Auswahl löschen</button>
                     <span id="comboResultDisplay" style="margin-left:auto;font-size:1.1em;font-weight:700;color:#2ecc71;"></span>
                 </div>
             </div>

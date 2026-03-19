@@ -50,7 +50,7 @@ function openDrawSimulator(source) {
     document.getElementById('drawSimulatorModal').style.display = 'flex';
     _comboTargets = [];
     drawNewHand();
-    _renderComboCardList();
+    _populateComboDropdowns();
     _renderComboTargets();
     document.getElementById('comboResultDisplay').textContent = '';
 }
@@ -127,69 +127,49 @@ function _renderSimulatorHand() {
 // Combo-Wahrscheinlichkeit (Monte-Carlo)
 // -------------------------------------------------------
 
-function _renderComboCardList() {
-    const container = document.getElementById('comboCardList');
-    if (!container) return;
-    container.innerHTML = '';
-
-    // Build unique card names from the deck
-    const seen = new Set();
-    const uniqueCards = [];
-    _simulatorDeck.forEach(c => {
-        if (!seen.has(c.name)) {
-            seen.add(c.name);
-            const count = _simulatorDeck.filter(d => d.name === c.name).length;
-            uniqueCards.push({ name: c.name, imageUrl: c.imageUrl, count });
-        }
-    });
-    uniqueCards.sort((a, b) => a.name.localeCompare(b.name));
-
-    uniqueCards.forEach(card => {
-        const isSelected = _comboTargets.includes(card.name);
-        const row = document.createElement('div');
-        row.style.cssText = `display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;border-bottom:1px solid #222;transition:background 0.15s;${isSelected ? 'background:#1a3a1a;' : ''}`;
-        row.onmouseenter = function() { this.style.background = isSelected ? '#1a4a1a' : '#222'; };
-        row.onmouseleave = function() { this.style.background = isSelected ? '#1a3a1a' : ''; };
-        row.onclick = () => _toggleComboTarget(card.name);
-
-        const img = document.createElement('img');
-        img.src = card.imageUrl;
-        img.style.cssText = 'width:32px;height:45px;object-fit:cover;border-radius:3px;';
-        img.onerror = function() { this.src = 'images/card-back.png'; };
-
-        const nameSpan = document.createElement('span');
-        nameSpan.style.cssText = 'flex:1;font-size:12px;color:#ddd;';
-        nameSpan.textContent = card.name;
-
-        const countSpan = document.createElement('span');
-        countSpan.style.cssText = 'font-size:11px;color:#888;min-width:24px;text-align:right;';
-        countSpan.textContent = `×${card.count}`;
-
-        const checkSpan = document.createElement('span');
-        checkSpan.style.cssText = `font-size:14px;min-width:20px;text-align:center;color:${isSelected ? '#2ecc71' : '#555'};`;
-        checkSpan.textContent = isSelected ? '✅' : '◻️';
-
-        row.appendChild(img);
-        row.appendChild(nameSpan);
-        row.appendChild(countSpan);
-        row.appendChild(checkSpan);
-        container.appendChild(row);
-    });
+function _getUniqueDeckCardNames() {
+    const unique = [...new Set(_simulatorDeck.map(c => c.name))];
+    unique.sort((a, b) => a.localeCompare(b));
+    return unique;
 }
 
-function _toggleComboTarget(cardName) {
-    const idx = _comboTargets.indexOf(cardName);
-    if (idx >= 0) {
-        _comboTargets.splice(idx, 1);
-    } else {
-        if (_comboTargets.length >= 4) {
-            showToast('Maximal 4 Karten auswählbar!', 'warning');
-            return;
+function _populateComboDropdowns() {
+    const cardNames = _getUniqueDeckCardNames();
+    for (let i = 1; i <= 4; i++) {
+        const select = document.getElementById(`comboTarget${i}`);
+        if (!select) continue;
+
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">-- Zielkarte wählen --</option>';
+        cardNames.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            select.appendChild(option);
+        });
+
+        if (currentValue && cardNames.includes(currentValue)) {
+            select.value = currentValue;
+        } else {
+            select.value = '';
         }
-        _comboTargets.push(cardName);
     }
+}
+
+function onComboDropdownChange() {
+    const selected = [];
+    for (let i = 1; i <= 4; i++) {
+        const value = document.getElementById(`comboTarget${i}`)?.value || '';
+        if (value && !selected.includes(value)) selected.push(value);
+    }
+
+    if (selected.length > 4) {
+        showToast('Maximal 4 Karten auswählbar!', 'warning');
+        return;
+    }
+
+    _comboTargets = selected;
     _renderComboTargets();
-    _renderComboCardList();
 }
 
 function _renderComboTargets() {
@@ -214,8 +194,11 @@ function _renderComboTargets() {
 
 function clearComboTargets() {
     _comboTargets = [];
+    for (let i = 1; i <= 4; i++) {
+        const select = document.getElementById(`comboTarget${i}`);
+        if (select) select.value = '';
+    }
     _renderComboTargets();
-    _renderComboCardList();
     document.getElementById('comboResultDisplay').textContent = '';
 }
 

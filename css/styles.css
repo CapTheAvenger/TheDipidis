@@ -5189,3 +5189,60 @@ details[open] > .tier-trending-summary::after {
         margin: 5mm;
     }
 }
+
+/* Das Modal selbst */
+#drawSimModal {
+    width: 95% !important;
+    max-width: 500px !important;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px !important;
+    border-radius: 12px !important;
+    text-align: center;
+}
+
+/* Die 7 Handkarten - Wischbare Reihe (Swipe) */
+.draw-sim-hand {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 10px !important;
+    padding: 10px 5px !important;
+    margin-bottom: 20px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.draw-sim-hand::-webkit-scrollbar { display: none; }
+
+.draw-sim-hand img {
+    height: 140px !important;
+    width: auto !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    flex-shrink: 0 !important;
+}
+
+/* Das Combo-Menü - Sauberes 2x2 Grid */
+.combo-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+}
+
+.combo-grid select {
+    width: 100% !important;
+    padding: 8px !important;
+    font-size: 14px !important;
+    border-radius: 6px !important;
+    border: 1px solid #ccc !important;
+}
+
+/* Schöne Buttons im Modal */
+#drawSimModal button {
+    width: 100% !important;
+    margin-bottom: 10px !important;
+    padding: 12px !important;
+    font-weight: bold !important;
+    border-radius: 8px !important;
+}

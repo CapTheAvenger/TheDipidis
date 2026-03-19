@@ -4493,13 +4493,13 @@ const BASE_PATH = './data/';
             const isMobile = window.innerWidth <= 768;
             let tableHTML = '';
             // ...existing code...
-                    tableHTML += `
-                        <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
-                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
-                            <td style="padding: 8px 4px; text-align: center; color: #555; font-size: 0.85em; font-weight: 600;">${d.variant_count}</td>
-                            <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
-                            <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
-                        </tr>`;
+                        tableHTML += `
+                            <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
+                                <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
+                                <td style="padding: 8px 4px; text-align: center; color: #555; font-size: 0.85em; font-weight: 600;">${d.variant_count}</td>
+                                <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
+                                <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
+                            </tr>`;
                 });
                 
                 tableHTML += `</tbody></table>`;

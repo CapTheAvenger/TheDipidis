@@ -4730,6 +4730,52 @@ details[open] > .tier-trending-summary::after {
         flex-direction: column !important;
         align-items: flex-start !important;
     }
+
+    /* 1. Starthand-Wahrscheinlichkeit nach unten links verschieben */
+    .start-hand-prob {
+        top: auto !important;
+        bottom: 5px !important;
+        left: 5px !important;
+        font-size: 0.55em !important;
+        padding: 2px 4px !important;
+    }
+
+    /* 2. Info-Container flexibel machen, damit nichts abgeschnitten wird */
+    .card-info-bottom {
+        min-height: max-content !important;
+        padding: 4px !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* 3. Text-Bereich: Share-Banner nach unten zu den Buttons drücken */
+    .card-info-text {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-grow: 1 !important;
+    }
+    
+    /* Das 3. div ist das Banner "100,0% | Ø 25,13x" */
+    .card-info-text > div:nth-child(3) {
+        margin-top: auto !important; 
+        padding-top: 4px !important;
+        margin-bottom: 2px !important;
+    }
+
+    /* 4. Action-Buttons entzerren und klickbar machen */
+    .card-action-buttons {
+        margin-top: 2px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+    }
+    .card-action-buttons > div {
+        gap: 4px !important;
+    }
+    .card-action-buttons button {
+        height: 24px !important;
+        font-size: 10px !important;
+    }
 }
 
 /* ============================================================ */

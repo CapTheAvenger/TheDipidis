@@ -4373,6 +4373,36 @@ h3:first-child {
         color: transparent !important;
         font-size: 0 !important;
     }
+
+    /* Hand header cleanup: show only compact counter above cards */
+    .pt-hand-zone > div:first-child {
+        display: none !important;
+    }
+    #ptHandZone {
+        position: relative !important;
+        justify-content: flex-start !important;
+        gap: 0 !important;
+        padding: 18px 4px 6px 4px !important;
+    }
+    #ptHandZone::before {
+        content: "HAND (" attr(data-hand-count) ") - P" attr(data-active-player);
+        position: absolute;
+        top: 1px;
+        left: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #fff;
+        opacity: 0.95;
+        pointer-events: none;
+        z-index: 3;
+    }
+    #ptHandZone .pt-hand-wrapper {
+        margin-right: -10px !important;
+        flex: 0 0 auto !important;
+    }
+    #ptHandZone .pt-hand-wrapper:last-child {
+        margin-right: 0 !important;
+    }
 }
 
 /* Collapsible Rogue/Trending section */

@@ -2368,7 +2368,10 @@ function ptRenderHand() {
     const zone = document.getElementById('ptHandZone');
     const cnt  = document.getElementById('ptHandCount');
     if (!zone) return;
-    if (cnt) cnt.innerText = ptState[ptCurrentPlayer].hand.length;
+    const handCount = ptState[ptCurrentPlayer].hand.length;
+    if (cnt) cnt.innerText = handCount;
+    zone.dataset.handCount = String(handCount);
+    zone.dataset.activePlayer = (ptCurrentPlayer === 'p1') ? '1' : '2';
     zone.innerHTML = '';
 
     // In MP mode, check if we're rendering our own hand or the opponent's

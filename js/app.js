@@ -4486,7 +4486,7 @@ const BASE_PATH = './data/';
         }
         
         // Render Combined Table
-        function renderCombinedTable(data) {
+        async function renderCombinedTable(data) {
             const container = document.getElementById('cityLeagueCombinedTable');
             if (!container) return;
             

@@ -4384,13 +4384,18 @@ h3:first-child {
         padding: 18px 4px 6px 4px !important;
     }
     #ptHandZone::before {
-        content: "HAND (" attr(data-hand-count) ") - P" attr(data-active-player);
+        content: attr(data-hand-count);
         position: absolute;
         top: 1px;
         left: 4px;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         color: #fff;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 999px;
+        padding: 1px 6px;
+        line-height: 1.2;
         opacity: 0.95;
         pointer-events: none;
         z-index: 3;

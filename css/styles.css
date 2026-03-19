@@ -3887,6 +3887,7 @@ h3:first-child {
         overflow: hidden !important;
         padding: 5px !important;
         margin: 0 !important;
+        padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px)) !important;
     }
 
     /* 2. Zonen (Active / Bench) extrem kompakt */
@@ -4042,6 +4043,7 @@ h3:first-child {
         align-items: center !important;
         justify-content: center !important;
         cursor: pointer;
+        margin-bottom: env(safe-area-inset-bottom, 0px) !important;
     }
     #fab-action-btn:active {
         transform: scale(0.9);
@@ -4070,7 +4072,7 @@ h3:first-child {
         position: fixed !important;
         left: 0 !important;
         left: env(safe-area-inset-left) !important;
-        top: 50% !important;
+        top: calc(45% - env(safe-area-inset-bottom, 0px)) !important;
         transform: translateY(-50%) !important;
         display: flex !important;
         flex-direction: column !important;
@@ -4083,7 +4085,7 @@ h3:first-child {
         position: fixed !important;
         right: 0 !important;
         right: env(safe-area-inset-right) !important;
-        top: 50% !important;
+        top: calc(45% - env(safe-area-inset-bottom, 0px)) !important;
         transform: translateY(-50%) !important;
         z-index: 999 !important;
     }

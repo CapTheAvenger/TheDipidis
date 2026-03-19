@@ -468,13 +468,13 @@
 
                 <div id="user-menu">
                     <button id="signin-btn" class="user-btn" onclick="showAuthModal('signin')" style="display: none; background: #f8f9fa; border: 2px solid #ddd; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer;">
-                        <img src="images/pokeball-icon.png" alt="Sign In" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
+                        <img loading="lazy" src="images/pokeball-icon.png" alt="Sign In" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
                         Sign In
                     </button>
                     <div id="user-info" class="user-info" style="display: none; align-items: center; gap: 15px;">
                         <span id="user-email-display" style="color: #7f8c8d; font-weight: 600; font-size: 0.9em;"></span>
                         <button class="user-btn" onclick="switchTabAndUpdateMenu('profile')" style="background: #e8f4fd; color: #3B4CCA; border: 2px solid #3B4CCA; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
-                            <img src="images/pokeball-icon.png" alt="My Profile" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
+                            <img loading="lazy" src="images/pokeball-icon.png" alt="My Profile" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
                             My Profile
                         </button>
                     </div>
@@ -494,7 +494,7 @@
                 <button class="tab-btn" onclick="switchTab('proxy')">🖨️ Proxy Printer</button>
                 <button class="tab-btn" onclick="switchTab('sandbox')">⚔️ Playtester</button>
                 <button class="tab-btn" onclick="switchTab('profile')">
-                    <img src="images/pokeball-icon.png" alt="Profile" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;">
+                    <img loading="lazy" src="images/pokeball-icon.png" alt="Profile" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;">
                     Profile
                 </button>
                 <button class="tab-btn" onclick="switchTab('tutorial')">📖 How to Use</button>
@@ -1907,7 +1907,7 @@
                 <div class="container">
                     <div class="header">
                         <h1>
-                            <img src="images/pokeball-icon.png" alt="" style="width: 32px; height: 32px; margin-right: 10px; vertical-align: middle;">
+                            <img loading="lazy" src="images/pokeball-icon.png" alt="" style="width: 32px; height: 32px; margin-right: 10px; vertical-align: middle;">
                             User Profile <button class="tab-help-btn" onclick="openTabHelp('profile')" title="Help"></button>
                         </h1>
                         <p>Manage your collection, decks, and settings</p>
@@ -1915,7 +1915,7 @@
                     
                     <!-- Not signed in -->
                     <div id="profile-auth-prompt" style="text-align: center; padding: 60px 20px; display: block;">
-                        <img src="images/pokeball-icon.png" alt="" style="width: 120px; height: 120px; margin-bottom: 20px;">
+                        <img loading="lazy" src="images/pokeball-icon.png" alt="" style="width: 120px; height: 120px; margin-bottom: 20px;">
                         <h2 style="margin-bottom: 20px;">Sign in to unlock all features</h2>
                         <p style="color: #666; margin-bottom: 30px; font-size: 1.1em;">
                             Track your card collection, save custom decks, and sync across devices
@@ -2055,7 +2055,7 @@
             <!-- Sign In Form -->
             <div id="signin-form-container">
                 <h2 style="margin-bottom: 20px;">
-                    <img src="images/pokeball-icon.png" alt="" style="width: 28px; height: 28px; margin-right: 10px; vertical-align: middle;">
+                    <img loading="lazy" src="images/pokeball-icon.png" alt="" style="width: 28px; height: 28px; margin-right: 10px; vertical-align: middle;">
                     Sign In
                 </h2>
                 <form id="sign-in-form" style="margin-bottom: 20px;">
@@ -2094,7 +2094,7 @@
             <!-- Sign Up Form -->
             <div id="signup-form-container" style="display: none;">
                 <h2 style="margin-bottom: 20px;">
-                    <img src="images/pokeball-icon.png" alt="" style="width: 28px; height: 28px; margin-right: 10px; vertical-align: middle;">
+                    <img loading="lazy" src="images/pokeball-icon.png" alt="" style="width: 28px; height: 28px; margin-right: 10px; vertical-align: middle;">
                     Create Account
                 </h2>
                 <form id="sign-up-form" style="margin-bottom: 20px;">
@@ -2814,6 +2814,7 @@
     <script src="js/firebase-auth.js?v=20260314-v15"></script>
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="js/app.js?v=20260318-v72"></script>
     <script src="js/draw-simulator.js?v=20260319-v2"></script>
 

@@ -546,7 +546,7 @@ const BASE_PATH = './data/';
 
                 return `
                     <div style="display: grid; grid-template-columns: 78px 1fr auto; gap: 12px; align-items: center; background: white; border: 1px solid #e1e8ed; border-radius: 10px; padding: 10px;">
-                        <img src="${escapedImageUrl}" alt="${safeName}" style="width: 78px; height: 108px; object-fit: cover; border-radius: 6px; border: 1px solid #d0d7de;" onerror="this.src='${buildInlineCardPlaceholder('Proxy')}';">
+                        <img loading="lazy" src="${escapedImageUrl}" alt="${safeName}" style="width: 78px; height: 108px; object-fit: cover; border-radius: 6px; border: 1px solid #d0d7de;" onerror="this.src='${buildInlineCardPlaceholder('Proxy')}';">
                         <div style="min-width: 0;">
                             <div style="font-weight: 800; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeName}</div>
                             <div style="font-size: 0.9em; color: #555; margin-top: 2px;">${displaySetNumber}</div>
@@ -796,7 +796,7 @@ const BASE_PATH = './data/';
                             <span class="cut cut-bottom-left"></span>
                             <span class="cut cut-bottom-right"></span>
                             <div class="proxy-card">
-                                <img src="${safeImage}" alt="">
+                                <img loading="lazy" src="${safeImage}" alt="">
                             </div>
                         </div>
                     `;
@@ -1332,25 +1332,21 @@ const BASE_PATH = './data/';
                     ? `${BASE_PATH}${filename}?t=${Date.now()}`
                     : `${BASE_PATH}${filename}`;
 
-                const loadPromise = (async () => {
-                    const response = await fetch(requestUrl);
-                    if (!response.ok) {
-                        return null;
-                    }
+                const delimiter = filename.endsWith('.csv') && filename.includes('mapping') ? ',' : ';';
 
-                    const text = await response.text();
-                    const parsed = parseCSV(text);
+                const loadPromise = fetchAndParseCSV(requestUrl, delimiter).then(parsed => {
                     const fileLower = String(filename || '').toLowerCase();
                     if (fileLower.includes('current_meta')) {
                         healCurrentMetaCardRows(parsed);
                     }
-
                     if (!forceRefresh) {
                         csvMemoryCache.set(cacheKey, parsed);
                     }
-
                     return parsed;
-                })();
+                }).catch(e => {
+                    console.error(`PapaParse error loading ${filename}:`, e);
+                    return null;
+                });
 
                 if (!forceRefresh) {
                     csvInFlight.set(cacheKey, loadPromise);
@@ -1369,45 +1365,35 @@ const BASE_PATH = './data/';
             }
         }
         
-        function parseCSV(text) {
-            return parseCSVWithDelimiter(text, ';');
-        }
 
-        function parseCSVWithDelimiter(text, delimiter) {
-            // Remove BOM if present
-            if (text.charCodeAt(0) === 0xFEFF) {
-                text = text.slice(1);
-            }
-            
-            const lines = text.trim().split('\n').filter(line => line.trim());
-            if (lines.length < 2) return [];
-            
-            const headers = lines[0].split(delimiter).map(h => h.trim());
-            const data = [];
-            
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const values = lines[i].split(delimiter);
-                const row = {};
-                headers.forEach((header, index) => {
-                    const rawValue = values[index] || '';
-                    const trimmedValue = rawValue.trim();
-
-                    if (header === 'card_name' || header === 'full_card_name') {
-                        row[header] = (typeof window.fixCardNameEncoding === 'function')
-                            ? window.fixCardNameEncoding(rawValue)
-                            : trimmedValue;
-                        return;
+        // Async CSV fetch and parse using PapaParse with Web Worker
+        async function fetchAndParseCSV(url, delimiter = ';') {
+            return new Promise((resolve, reject) => {
+                Papa.parse(url, {
+                    download: true,
+                    header: true,
+                    delimiter: delimiter,
+                    worker: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        // Optionally fix encoding for card_name/full_card_name
+                        if (Array.isArray(results.data)) {
+                            results.data.forEach(row => {
+                                if (row.card_name && typeof window.fixCardNameEncoding === 'function') {
+                                    row.card_name = window.fixCardNameEncoding(row.card_name);
+                                }
+                                if (row.full_card_name && typeof window.fixCardNameEncoding === 'function') {
+                                    row.full_card_name = window.fixCardNameEncoding(row.full_card_name);
+                                }
+                            });
+                        }
+                        resolve(results.data);
+                    },
+                    error: function(err) {
+                        reject(err);
                     }
-
-                    row[header] = trimmedValue;
                 });
-                if (Object.values(row).some(v => v)) {
-                    data.push(row);
-                }
-            }
-            
-            return data;
+            });
         }
         
         // Load all cards database for deck builder
@@ -1568,7 +1554,7 @@ const BASE_PATH = './data/';
                 const response = await fetch(`./pokemon_sets_mapping.csv?t=${timestamp}`);
                 if (!response.ok) return;
                 const text = await response.text();
-                const rows = parseCSVWithDelimiter(text, ',');
+                const rows = await fetchAndParseCSV(`./pokemon_sets_mapping.csv?t=${timestamp}`, ',');
                 englishSetCodes = new Set(rows.map(row => row.set_code).filter(Boolean));
                 window.englishSetCodes = englishSetCodes;
             } catch (error) {
@@ -3308,7 +3294,7 @@ const BASE_PATH = './data/';
                     const cardsResponse = await fetch(`${BASE_PATH}city_league_analysis${formatSuffix}.csv?t=${timestamp}`);
                     if (!cardsResponse.ok) return [];
                     const cardsText = await cardsResponse.text();
-                    return parseCSV(cardsText);
+                    return await fetchAndParseCSV(`${BASE_PATH}${cardsFile}`);
                 })();
 
                 // Group cards by archetype
@@ -3534,7 +3520,7 @@ const BASE_PATH = './data/';
                 const comparisonResponse = await fetch(`${BASE_PATH}limitless_online_decks_comparison.csv?t=${timestamp}`);
                 if (comparisonResponse.ok) {
                     const comparisonText = await comparisonResponse.text();
-                    metaData = parseCSV(comparisonText);
+                    metaData = await fetchAndParseCSV(`${BASE_PATH}limitless_online_decks_comparison.csv?t=${timestamp}`);
                 }
                 
                 // Load card data for images
@@ -3900,7 +3886,7 @@ const BASE_PATH = './data/';
                 const response = await fetch(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}`);
                 if (response.ok) {
                     const text = await response.text();
-                    const m3Data = parseCSV(text);
+                    const m3Data = await fetchAndParseCSV(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}`);
                     
                     // Convert to Map for quick lookup by archetype name
                     window.m3ArchetypeData = {};
@@ -4071,9 +4057,9 @@ const BASE_PATH = './data/';
                     return;
                 }
 
-                const analysisData = parseCSV(analysisText);
-                const archetypesData = parseCSV(archetypesText);
-                const comparisonData = comparisonText ? parseCSV(comparisonText) : null;
+                const analysisData = await fetchAndParseCSV(analysisUrl);
+                const archetypesData = await fetchAndParseCSV(archetypesUrl);
+                const comparisonData = comparisonText ? await fetchAndParseCSV(comparisonUrl) : null;
                 const placementStatsMap = buildCityLeaguePlacementStatsMap(archetypesData);
 
                 // NEU: M3 Daten parsen und im globalen Objekt speichern
@@ -4507,34 +4493,34 @@ const BASE_PATH = './data/';
             const isMobile = window.innerWidth <= 768;
             let tableHTML = '';
             
-            if (isMobile) {
-                // Mobile: Kompakte Version
-                tableHTML = `
-                <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 0.68em; table-layout: fixed;">
-                    <colgroup>
-                        <col style="width: 40%;">
-                        <col style="width: 15%;">
-                        <col style="width: 22.5%;">
-                        <col style="width: 22.5%;">
-                    </colgroup>
-                    <thead>
-                        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <th style="padding: 8px 4px; text-align: left; font-weight: 600; font-size: 0.95em;">Pokemon</th>
-                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Var.</th>
-                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Count</th>
-                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Avg.</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-                
-                data.forEach(d => {
-                    const changeValue = parseInt(d.count_change || 0);
-                    const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
-                    const placementChange = parseFloat(d.avg_placement_change || '0');
-                    const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
-                    const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
-                    const variantsJson = encodeURIComponent(JSON.stringify(d.variants || []));
-                    
+                if (m3DataRaw) {
+                    const parsedM3 = await fetchAndParseCSV(`${BASE_PATH}city_league_archetypes_M3.csv?t=${timestamp}`);
+                    const aggregatedM3 = deriveCityLeagueComparisonData(parsedM3);
+                    const m3PlacementStatsMap = buildCityLeaguePlacementStatsMap(parsedM3);
+                    const enrichedM3 = enrichCityLeagueDataWithPlacementStats(aggregatedM3, m3PlacementStatsMap);
+                    window.m3BaselineData = {};
+                    window.m3ArchetypeData = {};
+                    enrichedM3.forEach(row => {
+                        const deckName = row.name || row.archetype;
+                        if (!deckName) return;
+
+                        const normalizedAvgPlacement = (row.new_avg_placement || row.average_placement || row.avg_placement || '0').replace(',', '.');
+                        const normalizedShare = (row.new_meta_share || row.new_share || row.share || row.percentage_in_archetype || '0').replace(',', '.');
+
+                        window.m3BaselineData[deckName] = {
+                            ...row,
+                            average_placement: normalizedAvgPlacement,
+                            avg_placement: normalizedAvgPlacement,
+                            share: normalizedShare,
+                            percentage_in_archetype: normalizedShare
+                        };
+                        window.m3ArchetypeData[deckName] = {
+                            share: normalizedShare,
+                            avgPlacement: normalizedAvgPlacement,
+                            count: row.new_count || row.count || 0
+                        };
+                    });
+                }
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
                             <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
@@ -4740,9 +4726,9 @@ const BASE_PATH = './data/';
                     : Promise.resolve(null)
             ]);
 
-            const data = analysisText ? parseCSV(analysisText) : null;
-            const archetypesData = archetypesText ? parseCSV(archetypesText) : null;
-            const comparisonData = comparisonText ? parseCSV(comparisonText) : deriveCityLeagueComparisonData(archetypesData || []);
+            const data = analysisText ? await fetchAndParseCSV(analysisUrl) : null;
+            const archetypesData = archetypesText ? await fetchAndParseCSV(archetypesUrl) : null;
+            const comparisonData = comparisonText ? await fetchAndParseCSV(comparisonUrl) : deriveCityLeagueComparisonData(archetypesData || []);
 
             console.log('Loaded data:', data ? `${data.length} rows` : 'null');
             console.log('Loaded archetypes data:', archetypesData ? `${archetypesData.length} rows` : 'null');

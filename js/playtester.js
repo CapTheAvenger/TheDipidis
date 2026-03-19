@@ -2462,11 +2462,21 @@ function ptRenderHand() {
 
         wrapper.draggable = true;
         wrapper.ondragstart = e => ptDragStartHand(e, i);
-        // Mobile: tap to expand overlapping card
-        wrapper.addEventListener('touchstart', function() {
+        // Mobile: tap to expand overlapping card and optionally start touch-drag.
+        wrapper.addEventListener('touchstart', function(e) {
             zone.querySelectorAll('.pt-hand-expanded').forEach(el => el.classList.remove('pt-hand-expanded'));
             this.classList.add('pt-hand-expanded');
-        }, { passive: true });
+            if (typeof ptMobileHandTouchStart === 'function') ptMobileHandTouchStart(e, i, this);
+        }, { passive: false });
+        wrapper.addEventListener('touchmove', function(e) {
+            if (typeof ptMobileHandTouchMove === 'function') ptMobileHandTouchMove(e);
+        }, { passive: false });
+        wrapper.addEventListener('touchend', function(e) {
+            if (typeof ptMobileHandTouchEnd === 'function') ptMobileHandTouchEnd(e);
+        }, { passive: false });
+        wrapper.addEventListener('touchcancel', function(e) {
+            if (typeof ptMobileHandTouchEnd === 'function') ptMobileHandTouchEnd(e);
+        }, { passive: false });
 
         const img = document.createElement('img');
         img.src       = card.imageUrl || CARD_BACK_URL;

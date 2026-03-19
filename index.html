@@ -2234,7 +2234,7 @@
                 <div id="ptTopMoreMenu" style="display:none; position:fixed; top:58px; right:8px; background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px; flex-direction:column; gap:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:12005;">
                     <button class="pt-mobile-menu-action" onclick="ptUndo(); this.parentElement.style.display='none';">↩️ Undo</button>
                     <button class="pt-mobile-menu-action" onclick="ptMulligan(ptCurrentPlayer); this.parentElement.style.display='none';">🃏 Mulligan</button>
-                    <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar'); this.parentElement.style.display='none';">VSTAR</button>
+                    <button id="ptVstarMarker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar'); this.parentElement.style.display='none';">V</button>
                     <button id="ptGxMarker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx'); this.parentElement.style.display='none';">GX</button>
                 </div>
             </div>
@@ -2482,7 +2482,7 @@
                         </div>
 
                         <!-- P1 Bench -->
-                        <div style="position: absolute; bottom: 20px; left: 58%; transform: translateX(-50%); text-align: center; z-index: 50;">
+                        <div style="position: absolute; bottom: 20px; left: 41%; transform: translateX(-50%); text-align: center; z-index: 50;">
                             <div class="pt-zone-label">P1 Bench</div>
                                <div style="display:flex; justify-content:center; gap:clamp(3px, 1vw, 8px);" class="pt-dropzone pt-bench-zone"
                                  ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-bench')">

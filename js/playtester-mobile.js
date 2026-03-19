@@ -10,6 +10,8 @@
 // ══════════════════════════════════════════════════════════════════════════
 
 let ptMobileSelected = null; // { player: 'p1', zone: 'active'|'bench0'|'hand', index: 0 }
+let _ptTouchDragState = null;
+let _ptTouchDragHoverZone = null;
 
 // ══════════════════════════════════════════════════════════════════════════
 // CONTEXT ACTION MENU (Bottom Sheet)
@@ -165,6 +167,176 @@ function _ptHighlightSelectedCard({ player, zone, index }) {
 
 function _ptClearHighlights() {
     document.querySelectorAll('.pt-selected').forEach(el => el.classList.remove('pt-selected'));
+}
+
+function _ptTouchTargetZoneFromElement(el) {
+    if (!el) return null;
+    const zoneEl = el.closest('.pt-dropzone');
+    if (!zoneEl || !zoneEl.id) return null;
+
+    const id = zoneEl.id;
+    if (id === 'ptStadiumZone') return 'stadium';
+    if (id === 'ptPlayZone') return 'playzone';
+    if (id === 'ptHandZone') return 'hand';
+    if (id === 'ptDiscardPile-p1') return 'p1-discard';
+    if (id === 'ptDiscardPile-p2') return 'p2-discard';
+    if (id === 'ptLostPile-p1') return 'p1-lost';
+    if (id === 'ptLostPile-p2') return 'p2-lost';
+    if (id === 'ptActiveZone-p1') return 'p1-active';
+    if (id === 'ptActiveZone-p2') return 'p2-active';
+
+    const benchMatch = id.match(/^ptBench(\d)-(p1|p2)$/i);
+    if (benchMatch) return `${benchMatch[2]}-bench${benchMatch[1]}`;
+
+    return null;
+}
+
+function _ptTouchDragClearUI() {
+    if (_ptTouchDragHoverZone) {
+        _ptTouchDragHoverZone.classList.remove('drag-over');
+        _ptTouchDragHoverZone = null;
+    }
+    if (_ptTouchDragState && _ptTouchDragState.ghostEl) {
+        _ptTouchDragState.ghostEl.remove();
+    }
+}
+
+function _ptTouchDragCreateGhost(sourceWrapper) {
+    const img = sourceWrapper ? sourceWrapper.querySelector('.pt-hand-card') : null;
+    if (!img) return null;
+    const ghost = img.cloneNode(true);
+    ghost.style.position = 'fixed';
+    ghost.style.zIndex = '30002';
+    ghost.style.pointerEvents = 'none';
+    ghost.style.width = Math.max(44, Math.round(img.getBoundingClientRect().width)) + 'px';
+    ghost.style.height = 'auto';
+    ghost.style.borderRadius = '8px';
+    ghost.style.opacity = '0.92';
+    ghost.style.boxShadow = '0 8px 22px rgba(0,0,0,0.55)';
+    ghost.style.transform = 'translate(-50%, -50%)';
+    document.body.appendChild(ghost);
+    return ghost;
+}
+
+function _ptMobileDropHandCard(handIndex, targetZone, clientX) {
+    if (typeof ptClickZone !== 'function') return;
+    if (!ptState[ptCurrentPlayer] || handIndex < 0 || handIndex >= ptState[ptCurrentPlayer].hand.length) return;
+
+    ptSelectedCardIndex = handIndex;
+
+    if (targetZone === 'stadium') ptClickZone(ptCurrentPlayer, 'stadium');
+    else if (targetZone === 'playzone') ptClickZone(ptCurrentPlayer, 'playzone');
+    else if (targetZone === 'p1-active') ptClickZone('p1', 'active');
+    else if (targetZone === 'p2-active') ptClickZone('p2', 'active');
+    else if (targetZone === 'p1-bench0') ptClickZone('p1', 'bench0');
+    else if (targetZone === 'p1-bench1') ptClickZone('p1', 'bench1');
+    else if (targetZone === 'p1-bench2') ptClickZone('p1', 'bench2');
+    else if (targetZone === 'p1-bench3') ptClickZone('p1', 'bench3');
+    else if (targetZone === 'p1-bench4') ptClickZone('p1', 'bench4');
+    else if (targetZone === 'p2-bench0') ptClickZone('p2', 'bench0');
+    else if (targetZone === 'p2-bench1') ptClickZone('p2', 'bench1');
+    else if (targetZone === 'p2-bench2') ptClickZone('p2', 'bench2');
+    else if (targetZone === 'p2-bench3') ptClickZone('p2', 'bench3');
+    else if (targetZone === 'p2-bench4') ptClickZone('p2', 'bench4');
+    else if (targetZone === 'p1-discard') {
+        const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
+        if (c) { ptState.p1.discard.push(c); if (typeof ptLog === 'function') ptLog(`Discarded "${c.name}".`); }
+        ptSelectedCardIndex = null;
+        if (typeof ptRenderAll === 'function') ptRenderAll();
+    } else if (targetZone === 'p2-discard') {
+        const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
+        if (c) { ptState.p2.discard.push(c); if (typeof ptLog === 'function') ptLog(`Discarded "${c.name}".`); }
+        ptSelectedCardIndex = null;
+        if (typeof ptRenderAll === 'function') ptRenderAll();
+    } else if (targetZone === 'p1-lost') {
+        const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
+        if (c) { ptState.p1.lostzone.push(c); if (typeof ptLog === 'function') ptLog(`Sent "${c.name}" to Lost Zone.`); }
+        ptSelectedCardIndex = null;
+        if (typeof ptRenderAll === 'function') ptRenderAll();
+    } else if (targetZone === 'p2-lost') {
+        const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
+        if (c) { ptState.p2.lostzone.push(c); if (typeof ptLog === 'function') ptLog(`Sent "${c.name}" to Lost Zone.`); }
+        ptSelectedCardIndex = null;
+        if (typeof ptRenderAll === 'function') ptRenderAll();
+    } else if (targetZone === 'hand') {
+        const hand = ptState[ptCurrentPlayer].hand;
+        const handEl = document.getElementById('ptHandZone');
+        const wrappers = handEl ? [...handEl.querySelectorAll('.pt-hand-wrapper')] : [];
+        const afterEl = (typeof getDragAfterElement === 'function' && handEl)
+            ? getDragAfterElement(handEl, clientX)
+            : null;
+        let targetIdx = afterEl ? wrappers.indexOf(afterEl) : hand.length;
+        if (targetIdx === -1) targetIdx = hand.length;
+        if (targetIdx !== handIndex) {
+            const [card] = hand.splice(handIndex, 1);
+            const insertAt = targetIdx > handIndex ? targetIdx - 1 : targetIdx;
+            hand.splice(insertAt, 0, card);
+        }
+        ptSelectedCardIndex = null;
+        if (typeof ptRenderAll === 'function') ptRenderAll();
+    }
+}
+
+function ptMobileHandTouchStart(event, handIndex, wrapperEl) {
+    if (!event.touches || event.touches.length !== 1) return;
+    const t = event.touches[0];
+    _ptTouchDragState = {
+        handIndex,
+        wrapperEl,
+        startX: t.clientX,
+        startY: t.clientY,
+        dragging: false,
+        ghostEl: null
+    };
+}
+
+function ptMobileHandTouchMove(event) {
+    if (!_ptTouchDragState || !event.touches || event.touches.length !== 1) return;
+    const t = event.touches[0];
+    const dx = t.clientX - _ptTouchDragState.startX;
+    const dy = t.clientY - _ptTouchDragState.startY;
+    const dist = Math.hypot(dx, dy);
+
+    if (!_ptTouchDragState.dragging && dist > 10) {
+        _ptTouchDragState.dragging = true;
+        _ptTouchDragState.ghostEl = _ptTouchDragCreateGhost(_ptTouchDragState.wrapperEl);
+    }
+    if (!_ptTouchDragState.dragging) return;
+
+    event.preventDefault();
+
+    if (_ptTouchDragState.ghostEl) {
+        _ptTouchDragState.ghostEl.style.left = t.clientX + 'px';
+        _ptTouchDragState.ghostEl.style.top = t.clientY + 'px';
+    }
+
+    const under = document.elementFromPoint(t.clientX, t.clientY);
+    const zoneEl = under ? under.closest('.pt-dropzone') : null;
+    if (_ptTouchDragHoverZone !== zoneEl) {
+        if (_ptTouchDragHoverZone) _ptTouchDragHoverZone.classList.remove('drag-over');
+        _ptTouchDragHoverZone = zoneEl;
+        if (_ptTouchDragHoverZone) _ptTouchDragHoverZone.classList.add('drag-over');
+    }
+}
+
+function ptMobileHandTouchEnd(event) {
+    if (!_ptTouchDragState) return;
+    const wasDragging = _ptTouchDragState.dragging;
+
+    if (wasDragging) {
+        event.preventDefault();
+        const t = (event.changedTouches && event.changedTouches[0]) ? event.changedTouches[0] : null;
+        const clientX = t ? t.clientX : _ptTouchDragState.startX;
+        const clientY = t ? t.clientY : _ptTouchDragState.startY;
+        const under = document.elementFromPoint(clientX, clientY);
+        const targetZone = _ptTouchTargetZoneFromElement(under);
+        if (targetZone) {
+            _ptMobileDropHandCard(_ptTouchDragState.handIndex, targetZone, clientX);
+        }
+    }
+
+    _ptTouchDragClearUI();
+    _ptTouchDragState = null;
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -482,4 +654,7 @@ if (typeof window !== 'undefined') {
     window.ptFieldTouchEnd = ptFieldTouchEnd;
     window.ptFieldTouchMove = ptFieldTouchMove;
     window.ptHideRadialMenu = ptHideRadialMenu;
+    window.ptMobileHandTouchStart = ptMobileHandTouchStart;
+    window.ptMobileHandTouchMove = ptMobileHandTouchMove;
+    window.ptMobileHandTouchEnd = ptMobileHandTouchEnd;
 }

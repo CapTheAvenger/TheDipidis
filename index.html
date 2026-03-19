@@ -2221,12 +2221,12 @@
     <div id="playtesterModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:15000; flex-direction:column;">
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
 
-        <div class="pt-controls" style="display:flex; justify-content:space-around; flex-wrap:nowrap; overflow:hidden; padding:5px; background:#fff; border-bottom:1px solid #ccc;">
-            <button title="Multiplayer" onclick="openMultiplayerMenu()">👥</button>
-            <button title="Start / Reset" onclick="startPlaytesterSetup()">▶️</button>
-            <button title="Flip Board" onclick="ptFlipBoard()">🔄</button>
-            <button title="Log" onclick="ptToggleLog()">📝</button>
-            <button title="Münze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')">🪙</button>
+        <div class="pt-controls" style="display:flex; justify-content:space-around; flex-wrap:nowrap; overflow:hidden; padding:5px; background:#fff; border-bottom:1px solid #ccc; width: 100%;">
+            <button title="Multiplayer" onclick="openMultiplayerMenu()" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">👥</button>
+            <button title="Start / Reset" onclick="startPlaytesterSetup()" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">▶️</button>
+            <button title="Flip Board" onclick="ptFlipBoard()" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">🔄</button>
+            <button title="Log" onclick="ptToggleLog()" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">📝</button>
+            <button title="Münze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" style="font-size:20px; padding:5px 10px; border:none; background:transparent;">🪙</button>
         </div>
 
         <button id="fab-action-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡</button>

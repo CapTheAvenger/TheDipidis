@@ -4594,6 +4594,145 @@ details[open] > .tier-trending-summary::after {
 }
 
 /* ============================================================ */
+/* MOBILE UX — Layout, Scroll & Touch Improvements               */
+/* ============================================================ */
+@media (max-width: 768px) {
+
+    /* --- Fix 1: Deck Builder action buttons → responsive grid --- */
+    .action-bar {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+        gap: 8px !important;
+        align-items: stretch !important;
+    }
+
+    .action-bar > div {
+        display: contents !important;
+    }
+
+    .action-bar .action-divider {
+        display: none !important;
+    }
+
+    .action-bar .action-group-label {
+        grid-column: 1 / -1;
+        font-size: 0.85em;
+    }
+
+    .action-bar .btn-modern {
+        width: 100%;
+        min-height: 44px;
+        font-size: 0.9em;
+        justify-content: center;
+    }
+
+    /* "Your Deck" button row (Save, Compare, Copy, etc.) */
+    .section-panel > div:first-child > div:last-child {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+        gap: 6px !important;
+        width: 100%;
+    }
+
+    .section-panel > div:first-child > div:last-child .btn-modern {
+        width: 100%;
+        min-height: 40px;
+        font-size: 0.85em;
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* --- Fix 2: Card filter bar → horizontal scroll (swipe) --- */
+    .cards-header > div:nth-child(2) > div {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding-bottom: 4px !important;
+    }
+
+    .cards-header > div:nth-child(2) > div::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cards-header > div:nth-child(2) > div > button {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+    }
+
+    .cards-header .btn-toggle-group {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .cards-header .btn-toggle-group::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cards-header .btn-toggle-group .btn-toggle-item {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+    }
+
+    /* --- Fix 3: Matchup section → single column, full-width inputs --- */
+    .matchups-grid-container,
+    .section-grid-container {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+
+    .matchups-grid-container input[type="text"],
+    .matchups-grid-container select {
+        width: 100% !important;
+        box-sizing: border-box;
+        min-height: 44px;
+        font-size: 1em;
+    }
+
+    /* --- Fix 4: Deck statistics → single column grid --- */
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .stat-card {
+        padding: 14px !important;
+    }
+
+    .stat-card .value {
+        font-size: 1.3em;
+    }
+
+    /* --- Fix 5: Deck-card action buttons → bigger touch targets --- */
+    .deck-card button {
+        min-height: 36px !important;
+        height: auto !important;
+        font-size: 13px !important;
+    }
+
+    .deck-card > div:last-child > div {
+        gap: 4px !important;
+    }
+
+    /* General tap comfort for inline filter buttons */
+    .cards-header button,
+    .cards-header .btn-toggle-item {
+        min-height: 40px;
+        padding: 8px 12px !important;
+    }
+
+    /* Keep deck-summary stacked on mobile */
+    .deck-summary {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+}
+
+/* ============================================================ */
 /* PROXY PRINTER - PRINT LAYOUT                                  */
 /* ============================================================ */
 @media print {

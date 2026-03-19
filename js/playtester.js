@@ -517,9 +517,17 @@ function ptRenderStartPhaseModal() {
     if (!modal) return;
 
     let html = `<div style="background:#1a1a2e;border:2px solid #3B4CCA;border-radius:14px;padding:24px;width:min(98vw,960px);max-height:92vh;overflow-y:auto;color:#fff;">`;
+    const isMP = ptState.isMultiplayer;
+    const localRole = ptState.localRole;
+    const mpHeaderText = isMP
+        ? `🌐 <strong>Multiplayer Setup</strong> — Du bist <strong>${localRole === 'p1' ? '🔵 Player 1' : '🔴 Player 2'}</strong>. Wähle dein Aktives &amp; Bank-Pokémon, dann klicke <strong>Bereit!</strong>`
+        : `🔵 <strong>P1</strong> geht zuerst. Wähle dein Aktives &amp; Bank-Pokémon, dann auf <strong>Let's Battle!</strong>`;
+    const mpBtnText = isMP ? '✅ Bereit!' : '👊 Let\'s Battle!';
+    const mpHintText = isMP ? 'Wähle dein Aktives Pokémon' : 'Beide Spieler müssen ein Aktives Pokémon wählen';
+
     html += `
         <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🃏 Setup Phase</h2>
-        <p style="text-align:center;color:#ccc;margin-bottom:8px;">🔵 <strong>P1</strong> geht zuerst. Wähle dein Aktives &amp; Bank-Pokémon, dann auf <strong>Let's Battle!</strong></p>
+        <p style="text-align:center;color:#ccc;margin-bottom:8px;">${mpHeaderText}</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
             ${ptRenderStartHandHTML('p1')}
             ${ptRenderStartHandHTML('p2')}
@@ -527,9 +535,9 @@ function ptRenderStartPhaseModal() {
         <div style="text-align:center;margin-bottom:10px;">
             <button onclick="ptConfirmStartActives()" id="ptStartBtn"
                 style="font-size:1.1em;padding:13px 44px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(39,174,96,0.4);">
-                👊 Let's Battle!
+                ${mpBtnText}
             </button>
-            <p id="ptStartHint" style="color:#f1c40f;font-size:12px;margin-top:6px;">Beide Spieler müssen ein Aktives Pokémon wählen</p>
+            <p id="ptStartHint" style="color:#f1c40f;font-size:12px;margin-top:6px;">${mpHintText}</p>
         </div>`;
     html += `</div>`;
     modal.innerHTML = html;
@@ -539,6 +547,34 @@ function ptRenderStartPhaseModal() {
 function ptRenderStartHandHTML(player) {
     const label = player === 'p1' ? '🔵 Player 1' : '🔴 Player 2';
     const borderColor = player === 'p1' ? '#3B4CCA' : '#E3350D';
+
+    // === MULTIPLAYER: Gegnerhand verdeckt ===
+    const isMP = ptState.isMultiplayer;
+    const isOpponent = isMP && player !== ptState.localRole;
+    if (isOpponent) {
+        const cardCount = (ptState[player] && ptState[player].hand) ? ptState[player].hand.length : 7;
+        let cardsHTML = '';
+        for (let i = 0; i < cardCount; i++) {
+            cardsHTML += `<div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;">
+                <img src="${CARD_BACK_URL}" title="Verdeckte Karte" style="width:70px;border-radius:6px;opacity:0.7;">
+                <span style="font-size:8px;color:#666;">???</span>
+            </div>`;
+        }
+        const oppReady = ptState.mpSetupReady && ptState.mpSetupReady[player];
+        const readyBanner = oppReady
+            ? `<div style="background:#27ae60;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;">✅ Bereit!</div>`
+            : `<div style="background:#e67e22;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;">⏳ Wählt Karten...</div>`;
+        return `<div style="border:2px solid ${borderColor};border-radius:10px;padding:14px;">
+            <div style="font-weight:900;margin-bottom:8px;font-size:1em;color:${borderColor};">
+                <span>${label} (Gegner)</span>
+            </div>
+            ${readyBanner}
+            <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:90px;margin-bottom:8px;">${cardsHTML}</div>
+            <div style="margin-top:7px;text-align:center;font-size:11px;color:#aaa;">Gegnerhand ist verdeckt</div>
+        </div>`;
+    }
+
+    // === SOLO / LOKALER SPIELER: Normale Darstellung ===
     const activeIdx  = ptStartChoices[player]?.active ?? null;
     const benchIdxs  = ptStartChoices[player]?.bench ?? [];
     const hasBasic   = _ptHasBasic(player);
@@ -591,6 +627,9 @@ function ptRenderStartHandHTML(player) {
 }
 
 function ptStartCardClick(player, index) {
+    // Block opponent clicks in MP mode
+    if (ptState.isMultiplayer && player !== ptState.localRole) return;
+    if (ptState.isMultiplayer && ptState.mpSetupReady && ptState.mpSetupReady[ptState.localRole]) return;
     const choices = ptStartChoices[player] || { active: null, bench: [] };
     if (choices.active === null) {
         // First basic clicked → set as Active
@@ -633,6 +672,23 @@ function ptUpdateStartBtn() {
     const btn  = document.getElementById('ptStartBtn');
     const hint = document.getElementById('ptStartHint');
     if (!btn) return;
+
+    // === MULTIPLAYER MODE ===
+    if (ptState.isMultiplayer && ptState.localRole) {
+        const localRole = ptState.localRole;
+        const localOk = ptStartChoices[localRole]?.active !== null && ptStartChoices[localRole]?.active !== undefined;
+        const alreadyReady = ptState.mpSetupReady && ptState.mpSetupReady[localRole];
+        btn.disabled = !localOk || !!alreadyReady;
+        btn.style.opacity = (localOk && !alreadyReady) ? '1' : '0.45';
+        if (hint) {
+            if (alreadyReady) { hint.textContent = '⏳ Warte auf Gegner...'; hint.style.display = 'block'; }
+            else if (!localOk) { hint.textContent = 'Wähle dein Aktives Pokémon'; hint.style.display = 'block'; }
+            else hint.style.display = 'none';
+        }
+        return;
+    }
+
+    // === SOLO MODE ===
     const p1ok = ptStartChoices.p1?.active !== null && ptStartChoices.p1?.active !== undefined;
     const p2ok = ptStartChoices.p2?.active !== null && ptStartChoices.p2?.active !== undefined;
     const ready = p1ok && p2ok;
@@ -642,6 +698,9 @@ function ptUpdateStartBtn() {
 }
 
 function ptStartMulligan(player) {
+    // Block opponent mulligan in MP mode
+    if (ptState.isMultiplayer && player !== ptState.localRole) return;
+    if (ptState.isMultiplayer && ptState.mpSetupReady && ptState.mpSetupReady[ptState.localRole]) return;
     ptState[player].deck.push(...ptState[player].hand);
     ptState[player].hand = [];
     const deck = ptState[player].deck;
@@ -671,6 +730,38 @@ function ptDoStartCoinFlip() {
 }
 
 function ptConfirmStartActives() {
+    // === MULTIPLAYER MODE: Nur lokalen Spieler verarbeiten ===
+    if (ptState.isMultiplayer && ptState.localRole) {
+        const localRole = ptState.localRole;
+        const choices = ptStartChoices[localRole] || {};
+        if (choices.active === null || choices.active === undefined) return;
+        // Already confirmed?
+        if (ptState.mpSetupReady && ptState.mpSetupReady[localRole]) return;
+
+        // Move active + bench cards from hand to field
+        const allIdxs = [choices.active, ...(choices.bench || [])].sort((a, b) => b - a);
+        const cards = {};
+        allIdxs.forEach(i => { cards[i] = ptState[localRole].hand.splice(i, 1)[0]; });
+        ptState[localRole].field.active.push(cards[choices.active]);
+        (choices.bench || []).forEach((origIdx, slot) => {
+            ptState[localRole].field['bench' + slot].push(cards[origIdx]);
+        });
+
+        // Mark local player as ready
+        if (!ptState.mpSetupReady) ptState.mpSetupReady = {};
+        ptState.mpSetupReady[localRole] = true;
+
+        // Sync to Firebase (field-level update — no race condition)
+        if (typeof mpSyncSetupReady === 'function') mpSyncSetupReady();
+
+        ptLog(`✅ ${localRole.toUpperCase()} ist bereit!`);
+
+        // Re-render setup modal (shows 'Warte auf Gegner...')
+        ptRenderStartPhaseModal();
+        return;
+    }
+
+    // === SOLO MODE: Beide Spieler verarbeiten (Original-Logik) ===
     const p1choices = ptStartChoices.p1 || {};
     const p2choices = ptStartChoices.p2 || {};
     if (p1choices.active === null || p1choices.active === undefined) return;

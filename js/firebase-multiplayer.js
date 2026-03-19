@@ -129,11 +129,29 @@ async function joinMultiplayerGame(roomCode, deckObject) {
 
         // Guest-Deck laden
         const baseCards = convertDeckObjectToCards(deckObject);
-        const updatedState = { ...gameData.state };
+        // Deep-copy state to avoid reference issues
+        const updatedState = JSON.parse(JSON.stringify(gameData.state));
         
         baseCards.forEach(card => {
             updatedState.p2.deck.push({ ...card, ptId: 'p2_' + Math.random().toString(36).substr(2, 9) });
         });
+
+        // ── Shuffle both decks & deal 7-card starting hands ──
+        ['p1', 'p2'].forEach(p => {
+            const deck = updatedState[p].deck;
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            updatedState[p].hand = [];
+            for (let i = 0; i < 7; i++) {
+                if (deck.length > 0) updatedState[p].hand.push(deck.pop());
+            }
+        });
+
+        // Mark as multiplayer game with setup tracking
+        updatedState.isMultiplayer = true;
+        updatedState.mpSetupReady = { p1: false, p2: false };
 
         // Update Firestore: Guest beigetreten, Status = playing
         await db.collection('games').doc(mpGameId).update({
@@ -229,21 +247,35 @@ function listenToGameState(gameId) {
             // Verstecke Lobby, zeige Spielfeld
             hideMultiplayerLobby();
             
-            // Initial State laden
+            // State laden (bereits geschuffelt + 7 Karten gezogen)
             if (typeof ptState !== 'undefined') {
                 Object.assign(ptState, data.state);
             }
-            
-            // Render
-            if (typeof ptRenderAll === 'function') {
-                ptRenderAll();
+
+            // Lokale Rolle setzen (Host = p1, Guest = p2)
+            ptState.localRole = mpIsHost ? 'p1' : 'p2';
+            ptState.isMultiplayer = true;
+            if (!ptState.mpSetupReady) ptState.mpSetupReady = { p1: false, p2: false };
+
+            // Playtester-Modal anzeigen
+            const ptModal = document.getElementById('playtesterModal');
+            if (ptModal) ptModal.style.display = 'flex';
+
+            // Setup-Phase Variablen initialisieren
+            if (typeof ptStartPhase !== 'undefined') ptStartPhase = true;
+            if (typeof ptStartChoices !== 'undefined') {
+                ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
             }
-            
-            // Starte Spiel-Logik (z.B. Coin Flip für Starting Player)
-            if (typeof ptNewGame === 'function' && mpIsHost) {
-                // Host triggert Spielstart
-                setTimeout(() => ptNewGame(), 500);
-            }
+            if (typeof ptCurrentPlayer !== 'undefined') ptCurrentPlayer = 'p1';
+            if (typeof ptActionLog !== 'undefined') ptActionLog = [];
+
+            // Render Board + Setup-Modal öffnen (KEIN ptNewGame — Hände sind bereits gezogen)
+            if (typeof ptRenderAll === 'function') ptRenderAll();
+            if (typeof ptOpenStartPhase === 'function') ptOpenStartPhase();
+            if (typeof setupDragAndDrop === 'function') setupDragAndDrop();
+            if (typeof setupHotkeys === 'function') setupHotkeys();
+
+            console.log(`[Multiplayer] Setup phase started. Local role: ${ptState.localRole}, Hand: ${ptState[ptState.localRole].hand.length} cards`);
         }
 
         if (data.status === 'finished') {
@@ -261,8 +293,35 @@ function listenToGameState(gameId) {
                 console.log('[Multiplayer] Syncing remote state...');
                 
                 if (typeof ptState !== 'undefined') {
+                    // Bewahre lokale Rolle
+                    const savedLocalRole = ptState.localRole;
                     // Deep merge: Überschreibe lokalen State
                     Object.assign(ptState, data.state);
+                    // Stelle lokale Rolle wieder her
+                    if (savedLocalRole) ptState.localRole = savedLocalRole;
+                }
+
+                // Prüfe ob beide Spieler Setup abgeschlossen haben
+                const setupReady = data.state.mpSetupReady;
+                if (setupReady && setupReady.p1 && setupReady.p2 && typeof ptStartPhase !== 'undefined' && ptStartPhase) {
+                    console.log('[Multiplayer] Both players ready — finalizing setup');
+                    // Beide bereit: Preiskarten verteilen & Spiel starten
+                    ['p1', 'p2'].forEach(p => {
+                        if (ptState[p].prizes.length === 0) {
+                            for (let i = 0; i < 6; i++) {
+                                if (ptState[p].deck.length > 0) ptState[p].prizes.push(ptState[p].deck.pop());
+                            }
+                        }
+                    });
+                    ptStartPhase = false;
+                    if (typeof ptStartChoices !== 'undefined') {
+                        ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
+                    }
+                    const fpModal = document.getElementById('ptStartPhaseModal');
+                    if (fpModal) fpModal.style.display = 'none';
+                    if (typeof ptLog === 'function') ptLog('✅ Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!');
+                    // Sync final state
+                    syncStateToFirebase('Game started — both players ready');
                 }
                 
                 // Re-render UI
@@ -332,6 +391,29 @@ async function mpAction(action, description) {
         action();
     }
     await syncStateToFirebase(description);
+}
+
+/**
+ * Sync Setup-Ready-Status: Schreibt NUR die lokale Spielerseite + Ready-Flag
+ * Verwendet Firestore Field-Level-Update um Race-Conditions zu vermeiden
+ */
+async function mpSyncSetupReady() {
+    if (!mpGameId) return;
+    const localRole = ptState.localRole || (mpIsHost ? 'p1' : 'p2');
+    try {
+        const db = firebase.firestore();
+        mpLastSyncTime = Date.now();
+        await db.collection('games').doc(mpGameId).update({
+            [`state.${localRole}`]: ptState[localRole],
+            [`state.mpSetupReady.${localRole}`]: true,
+            lastAction: firebase.firestore.FieldValue.serverTimestamp(),
+            lastActionDescription: `${localRole} setup complete`,
+            lastActionBy: mpRole
+        });
+        console.log(`[Multiplayer] Setup synced for ${localRole}`);
+    } catch (error) {
+        console.error('[Multiplayer] Setup sync error:', error);
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -610,6 +692,7 @@ if (typeof window !== 'undefined') {
     window.syncStateToFirebase = syncStateToFirebase;
     window.mpAction = mpAction;
     window.mpIsMultiplayer = () => mpSyncEnabled;
+    window.mpSyncSetupReady = mpSyncSetupReady;
     window.toggleMultiplayerMenu = toggleMultiplayerMenu;
     window.openMultiplayerFromSandbox = openMultiplayerFromSandbox;
     window.mpCreateGame = mpCreateGame;

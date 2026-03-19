@@ -2585,3 +2585,5 @@ function ptOpponentShuffleAndDraw() {
     ptRenderAll();
 }
 window.ptOpponentShuffleAndDraw = ptOpponentShuffleAndDraw;
+window.startStandalonePlaytester = startStandalonePlaytester;
+window.parseSandboxDeckToExactPrints = parseSandboxDeckToExactPrints;

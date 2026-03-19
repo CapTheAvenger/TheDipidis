@@ -279,7 +279,7 @@ const BASE_PATH = './data/';
 
         window.ensurePlaytesterScriptsLoaded = ensurePlaytesterScriptsLoaded;
 
-        ['openPlaytester', 'openPlaytesterSetup', 'startPlaytesterWithMirror', 'startPlaytesterWithOpponent'].forEach(functionName => {
+        ['openPlaytester', 'openPlaytesterSetup', 'startPlaytesterWithMirror', 'startPlaytesterWithOpponent', 'startStandalonePlaytester', 'parseSandboxDeckToExactPrints', 'openMultiplayerFromSandbox'].forEach(functionName => {
             if (typeof window[functionName] === 'function') return;
 
             const deferredWrapper = async function(...args) {

@@ -3837,13 +3837,7 @@ h3:first-child {
     display: none;
 }
 
-/* Desktop: "More" container flows inline, toggle button hidden */
-.pt-toolbar-more {
-    display: contents;
-}
-.pt-toolbar-more-btn {
-    display: none !important;
-}
+
 
 /* Mobile Board Layout (Vertical) */
 @media (max-width: 768px) {
@@ -4001,44 +3995,50 @@ h3:first-child {
         font-size: 7px !important;
     }
 
-    /* === ZIEL 3: Hide Arena banner & extended hand actions on mobile === */
+    /* === SWIPE LAYOUT: Hide banners, all bars horizontal scrollable === */
     .pt-toolbar > div:first-child > span:first-child {
         display: none !important;
     }
-    /* Hide Legend on mobile */
     .pt-legend-box {
         display: none !important;
     }
+
+    /* Hide ⚙️ toggle — all actions visible in swipe bar now */
     .pt-mobile-toggle {
-        display: inline-flex !important;
-    }
-    #ptExtendedActions {
         display: none !important;
     }
-    #ptExtendedActions.pt-expanded {
+    /* Extended actions always visible as inline flow */
+    #ptExtendedActions {
         display: contents !important;
     }
 
-    /* === TOOLBAR MORE BUTTON on mobile === */
-    .pt-toolbar-more-btn {
-        display: inline-block !important;
-        background: #555 !important;
-        border-color: #777 !important;
-        color: #fff !important;
-    }
-    .pt-toolbar-more {
-        display: none;
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-    .pt-toolbar-more.pt-toolbar-show {
+    /* Hand action bar as horizontal swipe strip */
+    #ptHandActionBar {
         display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 6px !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 8px !important;
+        padding: 4px 10px !important;
+        width: 100% !important;
+        scrollbar-width: none;
+    }
+    #ptHandActionBar::-webkit-scrollbar {
+        display: none;
+    }
+    #ptHandActionBar button,
+    #ptHandActionBar input,
+    #ptHandActionBar span {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+    }
+    #ptHandActionBar .pt-btn {
+        height: 36px !important;
+        font-size: 12px !important;
+        padding: 0 12px !important;
     }
 
-    /* === ARENA LAYOUT: Bench & Side Zones improved === */
-    /* Bench rows clear and centered with slightly bigger slots */
+    /* Bench rows: relative positioning, wischbar */
     #p1-area div[style*="bottom: 20px"][style*="left: 50%"],
     #p2-area div[style*="bottom: 20px"][style*="left: 50%"] {
         position: relative !important;
@@ -4048,23 +4048,30 @@ h3:first-child {
         width: 100% !important;
         margin-top: 10px !important;
     }
-    /* Side zones (Lost/Deck/Discard) as 2-col grid, bigger */
+
+    /* Side zones (Lost/Deck/Discard) as row layout */
     #p1-area > div > div[style*="flex-direction: column"][style*="right: 20px"],
     #p2-area > div > div[style*="flex-direction: column"][style*="right: 20px"] {
         position: relative !important;
         bottom: auto !important;
         right: auto !important;
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 12px !important;
-        width: 90% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        width: 100% !important;
         margin: 10px auto !important;
-        justify-items: center !important;
     }
-    /* Deck pile slightly larger on mobile */
+
+    /* Deck pile: hide half-labels on mobile, single tap for menu */
+    .pt-deck-half {
+        display: none !important;
+    }
     .pt-deck-pile {
         transform: scale(1.1) !important;
         transform-origin: center center !important;
+        cursor: pointer;
     }
 
     /* === ZIEL 4: Hide permanent deck-controls panel on mobile === */

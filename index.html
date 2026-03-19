@@ -2215,15 +2215,12 @@
                 <span style="color:#fff; font-size:1.1em; font-weight:900; letter-spacing: 1px;">⚔️ ARENA</span>
                 <span id="ptMessage" style="color:#FFCB05; font-weight:700; font-size:0.9em; min-width:80px; margin-left: 10px;"></span>
             </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+            <div style="display:flex; gap:6px; flex-wrap:nowrap; align-items:center;">
                 <button class="pt-btn" onclick="ptNewGame()">♻️ Restart</button>
                 <button class="pt-btn pt-danger" onclick="closePlaytester()">🚪 Quit</button>
-                <button class="pt-btn pt-toolbar-more-btn" onclick="document.getElementById('ptToolbarMore').classList.toggle('pt-toolbar-show')" title="More actions">⋯ More</button>
-                <div id="ptToolbarMore" class="pt-toolbar-more">
-                    <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip Board</button>
-                    <button class="pt-btn" onclick="toggleMultiplayerMenu()" id="mpToggleBtn">🌐 Multiplayer</button>
-                    <button class="pt-btn" onclick="ptToggleLog()">📋 Log</button>
-                </div>
+                <button class="pt-btn" onclick="ptFlipBoard()">🔄 Flip Board</button>
+                <button class="pt-btn" onclick="toggleMultiplayerMenu()" id="mpToggleBtn">🌐 Multiplayer</button>
+                <button class="pt-btn" onclick="ptToggleLog()">📋 Log</button>
             </div>
         </div>
 
@@ -2316,9 +2313,9 @@
                             </div>
                             <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
-                                <div class="pt-deck-pile">
-                                    <div class="pt-deck-half pt-deck-top" onclick="ptDrawCards('p2', 1)" title="⬆️ Karte ziehen">⬆️</div>
-                                    <div class="pt-deck-half pt-deck-bot" onclick="ptOpenDeckSearch('p2')" title="🔍 Deck durchsuchen">🔍</div>
+                                <div class="pt-deck-pile" onclick="ptDeckMenu('p2')">
+                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p2', 1)" title="⬆️ Karte ziehen">⬆️</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p2')" title="🔍 Deck durchsuchen">🔍</div>
                                 </div>
                                 <div class="pt-deck-controls">
                                     <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p2')">🔍 Search</button>
@@ -2400,9 +2397,9 @@
                             </div>
                             <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
-                                <div class="pt-deck-pile">
-                                    <div class="pt-deck-half pt-deck-top" onclick="ptDrawCards('p1', 1)" title="⬆️ Karte ziehen">⬆️</div>
-                                    <div class="pt-deck-half pt-deck-bot" onclick="ptOpenDeckSearch('p1')" title="🔍 Deck durchsuchen">🔍</div>
+                                <div class="pt-deck-pile" onclick="ptDeckMenu('p1')">
+                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p1', 1)" title="⬆️ Karte ziehen">⬆️</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p1')" title="🔍 Deck durchsuchen">🔍</div>
                                 </div>
                                 <div class="pt-deck-controls">
                                     <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p1')">🔍 Search</button>

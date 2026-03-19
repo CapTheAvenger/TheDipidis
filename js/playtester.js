@@ -2525,6 +2525,16 @@ function ptInitMobileDeckTriggers() {
     });
 }
 
+// ── Deck Menu (Mobile Tap) ──────────────────────────────────────────────
+function ptDeckMenu(player) {
+    var action = prompt('DECK MENU\n\nWähle eine Aktion:\n1 = Karte ziehen\n2 = Deck durchsuchen (Search)\n3 = Oberste Karten ansehen\n4 = Gegner mischt & zieht X', '1');
+    if (action === '1') ptDrawCards(player, 1);
+    else if (action === '2') ptOpenDeckSearch(player);
+    else if (action === '3') ptLookCards(player, 'top', 5);
+    else if (action === '4') ptOpponentShuffleAndDraw();
+}
+window.ptDeckMenu = ptDeckMenu;
+
 // ── Opponent Shuffle & Draw X ───────────────────────────────────────────
 function ptOpponentShuffleAndDraw() {
     var input = prompt('Wie viele Karten soll der Gegner ziehen?', '4');

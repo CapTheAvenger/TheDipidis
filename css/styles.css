@@ -4259,6 +4259,11 @@ h3:first-child {
     display: none;
 }
 
+/* Hidden on desktop; shown on mobile only */
+.pt-mobile-lost-shortcut {
+    display: none;
+}
+
 /* ===================================================
    FIX: SCHWEBENDE KAMPF-BUTTONS (MOBILE)
    =================================================== */
@@ -4328,6 +4333,36 @@ h3:first-child {
         color: #fff !important;
         background: #34495e !important;
         text-align: left !important;
+    }
+
+    /* Raise piles and prizes so bench is no longer covered */
+    #p1-area > div > div[style*="bottom: 20px"][style*="right: 20px"][style*="flex-direction: column"],
+    #p2-area > div > div[style*="bottom: 20px"][style*="right: 20px"][style*="flex-direction: column"] {
+        bottom: 92px !important;
+    }
+    #p1-area > div > div[style*="bottom: 20px"][style*="left: 20px"],
+    #p2-area > div > div[style*="bottom: 20px"][style*="left: 20px"] {
+        bottom: 92px !important;
+    }
+
+    /* Move lost zone out of board view on mobile */
+    #ptLostPile-p1,
+    #ptLostPile-p2,
+    .pt-zone-label[style*="#d136c1"] {
+        display: none !important;
+    }
+
+    /* Mobile lost shortcut next to discard */
+    .pt-mobile-lost-shortcut {
+        display: inline-block !important;
+        margin-top: 4px !important;
+        border: 1px solid #8e44ad !important;
+        background: rgba(142,68,173,0.18) !important;
+        color: #d2b4de !important;
+        border-radius: 6px !important;
+        padding: 3px 6px !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
     }
 }
 

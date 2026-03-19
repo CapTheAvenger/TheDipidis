@@ -2512,6 +2512,11 @@
 
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
+                    <span style="color: #e74c3c; font-size: 10px; font-weight: bold;">Opp:</span>
+                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#c0392b; color:white; border-color:#e74c3c;" onclick="ptOpponentShuffleAndDraw()" title="Gegner mischt Hand ins Deck und zieht X Karten">🔄 S&amp;D</button>
+
+                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
+
                     <span style="color: #ccc; font-size: 10px; font-weight: bold;">Cmd:</span>
                     <input type="text" id="ptCommandInput-p1" class="pt-cmd-input" placeholder="/draw 3…" style="width: 80px;" onkeydown="if(event.key==='Enter'){ptRunCommand();event.preventDefault();}"
                            title="Commands: /draw N  /mill N  /top N  /iono N  /roxanne N  /shuffle  /coin N  /dice  /attach [active|bench0-4]">

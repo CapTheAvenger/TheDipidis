@@ -2524,3 +2524,34 @@ function ptInitMobileDeckTriggers() {
         pile.parentElement.appendChild(trigger);
     });
 }
+
+// ── Opponent Shuffle & Draw X ───────────────────────────────────────────
+function ptOpponentShuffleAndDraw() {
+    var input = prompt('Wie viele Karten soll der Gegner ziehen?', '4');
+    if (!input || isNaN(parseInt(input))) return;
+    var num = Math.max(0, parseInt(input));
+
+    ptSaveState();
+    var opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+
+    // Hand ins Deck mischen
+    ptState[opp].deck.push.apply(ptState[opp].deck, ptState[opp].hand);
+    ptState[opp].hand = [];
+
+    // Fisher-Yates shuffle
+    var deck = ptState[opp].deck;
+    for (var i = deck.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = deck[i]; deck[i] = deck[j]; deck[j] = tmp;
+    }
+
+    // Draw X
+    var drawn = Math.min(num, deck.length);
+    for (var k = 0; k < drawn; k++) {
+        ptState[opp].hand.push(deck.pop());
+    }
+
+    ptLog('\uD83D\uDD04 Opponent Shuffle & Draw: ' + opp.toUpperCase() + ' mischt Hand ins Deck und zieht ' + drawn + '.');
+    ptRenderAll();
+}
+window.ptOpponentShuffleAndDraw = ptOpponentShuffleAndDraw;

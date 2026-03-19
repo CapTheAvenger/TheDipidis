@@ -2240,8 +2240,6 @@
             </div>
         </div>
 
-        <button id="fab-action-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡</button>
-
         <div id="ptDirectActionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10001; align-items:center; justify-content:center;">
             <div style="background:#fff; padding:15px; border-radius:12px; width:90%; max-width:350px; display:flex; flex-direction:column; gap:12px;">
                 <h3 style="margin:0; text-align:center; font-size:16px;">Spiel-Aktionen</h3>
@@ -2342,12 +2340,6 @@
                                  style="width:82px;height:114px;"></div>
                             <div class="pt-stadium-marker" title="Stadium-Effekt benutzt" onclick="this.classList.toggle('used')">S</div>
                         </div>
-                    </div>
-                </div>
-
-                <div style="position: absolute; top: 50%; left: 22%; transform: translate(-50%, -50%); z-index: 5;">
-                    <div class="static-element" style="display: flex; flex-direction: column; gap: 6px; background: rgba(0,0,0,0.55); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
-                        <button class="pt-btn" onclick="ptFlipCoin()">🪙 Coin</button>
                     </div>
                 </div>
 
@@ -2528,6 +2520,7 @@
             <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">⚔️ Attack</button>
             <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">⏭️ End Turn</button>
             <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">⚔️ Opp. View</button>
+            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡</button>
         </div>
 
         <div class="pt-hand-zone">

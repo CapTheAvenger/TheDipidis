@@ -4271,23 +4271,16 @@ h3:first-child {
     #pt-side-buttons-left {
         position: fixed !important;
         left: 0 !important;
-        top: 36% !important;
+        top: 50% !important;
         transform: translateY(-50%) !important;
         display: flex !important;
         flex-direction: column !important;
-        gap: 12px !important;
+        gap: 10px !important;
         z-index: 9999 !important;
     }
 
     #pt-side-buttons-right {
-        position: fixed !important;
-        left: 0 !important;
-        right: auto !important;
-        top: 58% !important;
-        transform: translateY(-50%) !important;
-        display: flex !important;
-        flex-direction: column !important;
-        z-index: 9999 !important;
+        display: none !important;
     }
 
     .pt-side-btn {
@@ -4315,6 +4308,26 @@ h3:first-child {
     .oppview-btn {
         background: #8e44ad !important;
         border-radius: 0 8px 8px 0 !important;
+    }
+
+    /* FAB is now the 4th left-side action button */
+    #fab-action-btn.fab-side-btn {
+        position: static !important;
+        display: block !important;
+        width: auto !important;
+        height: auto !important;
+        border-radius: 0 8px 8px 0 !important;
+        background: #9c27b0 !important;
+        color: #fff !important;
+        font-size: 20px !important;
+        padding: 10px 8px !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+        border: none !important;
+        cursor: pointer !important;
+        transform: none !important;
+        right: auto !important;
+        bottom: auto !important;
+        z-index: auto !important;
     }
 
     /* Mobile cleanup: actions already in floating/FAB menus */

@@ -4271,11 +4271,11 @@ h3:first-child {
     #pt-side-buttons-left {
         position: fixed !important;
         left: 0 !important;
-        top: 45% !important;
+        top: 36% !important;
         transform: translateY(-50%) !important;
         display: flex !important;
         flex-direction: column !important;
-        gap: 15px !important;
+        gap: 12px !important;
         z-index: 9999 !important;
     }
 
@@ -4283,7 +4283,7 @@ h3:first-child {
         position: fixed !important;
         left: 0 !important;
         right: auto !important;
-        top: 62% !important;
+        top: 58% !important;
         transform: translateY(-50%) !important;
         display: flex !important;
         flex-direction: column !important;
@@ -4296,6 +4296,7 @@ h3:first-child {
         font-weight: bold !important;
         padding: 12px 8px !important;
         font-size: 13px !important;
+        min-width: 92px !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
         cursor: pointer !important;
         white-space: nowrap !important;

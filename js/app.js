@@ -1373,7 +1373,7 @@ const BASE_PATH = './data/';
                     download: true,
                     header: true,
                     delimiter: delimiter,
-                    worker: true,
+                    worker: false,
                     skipEmptyLines: true,
                     complete: function(results) {
                         // Optionally fix encoding for card_name/full_card_name

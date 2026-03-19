@@ -1390,6 +1390,13 @@ function ptFlipBoard() {
 
 function ptPassTurn() {
     const p = ptCurrentPlayer;
+
+    const activeModEl = document.getElementById(`ptActiveModifier-${p}`);
+    if (activeModEl) {
+        activeModEl.classList.remove('active');
+        activeModEl.innerText = '+0';
+    }
+
     let dmg = 0;
     if (ptState[p].status.includes('poisoned')) dmg += 10;
     if (ptState[p].status.includes('burned'))   dmg += 20;

@@ -1501,6 +1501,7 @@ const BASE_PATH = './data/';
                     cardsByNameMap = buildCardsByNameMap(allCardsDatabase);
                     window.cardsByNameMap = cardsByNameMap;
                     cardsBySetNumberMap = buildCardsBySetNumberMap(allCardsDatabase); // Build index for fast lookup
+                    window.cardsBySetNumberMap = cardsBySetNumberMap; // Expose for multiplayer & playtester
                     // Build O(1) name index (exact + normalized keys)
                     cardIndexMap = new Map();
                     allCardsDatabase.forEach(c => {

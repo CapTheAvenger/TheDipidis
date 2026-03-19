@@ -4015,7 +4015,7 @@ h3:first-child {
     .pt-deck-controls { display: none !important; }
     .pt-deck-popup-trigger { display: none !important; }
 
-    /* 10. Setup Phase: Alle 7 Karten sichtbar */
+    /* 10. Setup Phase: Karten-Überlappung + Mobile-Layout */
     #ptStartPhaseModal > div {
         padding: 12px 6px !important;
         width: 98vw !important;
@@ -4024,16 +4024,37 @@ h3:first-child {
         grid-template-columns: 1fr !important;
         gap: 10px !important;
     }
-    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] {
+    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"],
+    #ptStartPhaseModal div[style*="flex-wrap:nowrap"] {
         display: flex !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
-        gap: 4px !important;
+        gap: 0px !important;
         width: 100% !important;
-        justify-content: flex-start !important;
+        justify-content: center !important;
+        padding: 10px 4px !important;
+    }
+    /* Setup-Karten überlappen sich für Platzersparnis */
+    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] > div,
+    #ptStartPhaseModal div[style*="flex-wrap:nowrap"] > div {
+        margin-right: -35px !important;
+        transition: transform 0.2s ease, margin 0.2s ease;
+        z-index: 1;
+        flex-shrink: 0;
+    }
+    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] > div:last-child,
+    #ptStartPhaseModal div[style*="flex-wrap:nowrap"] > div:last-child {
+        margin-right: 0 !important;
+    }
+    #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] > div:active,
+    #ptStartPhaseModal div[style*="flex-wrap:nowrap"] > div:active {
+        margin-right: 5px !important;
+        transform: translateY(-8px) scale(1.12);
+        z-index: 100;
     }
     #ptStartPhaseModal img {
-        width: clamp(30px, 10vw, 55px) !important;
+        width: clamp(38px, 12vw, 60px) !important;
+        border-radius: 5px !important;
     }
     #ptStartPhaseModal span[style*="max-width:72px"] {
         max-width: clamp(30px, 10vw, 55px) !important;

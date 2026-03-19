@@ -493,7 +493,20 @@ function _ptIsBasic(card) {
     if (t === 'supporter' || t === 'item' || t === 'tool' || t === 'stadium') return false;
     if (t.includes('energy')) return false;
     // Check for "Basic" in the type string (e.g. "GBasic", "WBasic", "Basic")
-    return t.includes('basic');
+    if (t.includes('basic')) return true;
+    // Fallback: Wenn cardType leer ist, prüfe Kartenname gegen bekannte Basic-Muster
+    // (Rettung für den Fall, dass card data nicht geladen wurde)
+    if (!t) {
+        const name = (card.name || '').toLowerCase();
+        // Nicht-Pokémon erkennen und ausschließen
+        if (/\benergy\b/i.test(name)) return false;
+        if (/^(professor|boss|arven|iono|judge|penny|cynthia|marnie|roxanne|irida|colress|n |research|nest ball|ultra ball|rare candy|switch|escape rope|battle vip|trekking shoes|pal pad|super rod|energy recycler|pokégear|exp\. share|forest seal|choice belt|tool scrapper|lost vacuum|counter catcher|crushing hammer|enhanced hammer|field blower|gust|lysandre|acerola|guzma|boss.s orders|temple|artazon|beach court|collapsed|mesagoza|jamming tower|path to the peak|tower of darkness|magma basin|chaotic swell|training court)/i.test(name)) return false;
+        // Pokémon-typische Namensmuster (Ex, V, ex, GX, VSTAR, etc.)
+        if (/\bex\b|\bv\b|\bvmax\b|\bvstar\b|\bgx\b|\btag team\b/i.test(name)) return true;
+        // Einsilbige Pokémon-Namen ohne Trainer-Indikatoren: wahrscheinlich ein Basic
+        // Aber wir können hier nicht sicher sein, also false
+    }
+    return false;
 }
 function _ptHasBasic(player) {
     return ptState[player].hand.some(_ptIsBasic);

@@ -257,6 +257,18 @@ function listenToGameState(gameId) {
             ptState.isMultiplayer = true;
             if (!ptState.mpSetupReady) ptState.mpSetupReady = { p1: false, p2: false };
 
+            // 🔍 DIAGNOSE: State-Validierung
+            const lr = ptState.localRole;
+            const localHand = ptState[lr] && ptState[lr].hand ? ptState[lr].hand : [];
+            const localDeck = ptState[lr] && ptState[lr].deck ? ptState[lr].deck : [];
+            console.log(`[MP-DIAG] Role: ${lr}, Hand: ${localHand.length}, Deck: ${localDeck.length}`);
+            if (localHand.length > 0) {
+                const sample = localHand[0];
+                console.log(`[MP-DIAG] Sample card: name="${sample.name}", imageUrl="${(sample.imageUrl||'').substring(0,60)}...", cardType="${sample.cardType}"`);
+            } else {
+                console.warn('[MP-DIAG] ⚠️ Hand ist LEER! Firebase-State p1.hand:', data.state.p1?.hand?.length, 'p2.hand:', data.state.p2?.hand?.length);
+            }
+
             // Playtester-Modal anzeigen
             const ptModal = document.getElementById('playtesterModal');
             if (ptModal) ptModal.style.display = 'flex';
@@ -455,10 +467,21 @@ function convertDeckObjectToCards(deckObject) {
             const setCode = m[2];
             const number = m[3];
             
-            // Lookup Card Data
-            if (window.cardsBySetNumberMap) {
-                const key = `${setCode}-${number}`;
-                const cd = window.cardsBySetNumberMap[key];
+            // 3-Tier Lookup (identisch mit openPlaytester)
+            let cd = (window.cardsBySetNumberMap || {})[`${setCode}-${number}`] || null;
+            // Fallback: _simFindCard
+            if (!cd && typeof _simFindCard === 'function') cd = _simFindCard(setCode, number);
+            // Fallback: allCardsDatabase Name-Suche
+            if (!cd && window.allCardsDatabase) cd = window.allCardsDatabase.find(c => c.name === cardName || c.name_en === cardName) || null;
+            
+            if (cd) {
+                imageUrl = cd.image_url || imageUrl;
+                cardType = cd.type || cd.card_type || cd.supertype || '';
+            }
+        } else {
+            // Kein Set/Number — Name-Suche
+            if (window.allCardsDatabase) {
+                const cd = window.allCardsDatabase.find(c => c.name === cardName || c.name_en === cardName);
                 if (cd) {
                     imageUrl = cd.image_url || imageUrl;
                     cardType = cd.type || cd.card_type || cd.supertype || '';
@@ -471,6 +494,7 @@ function convertDeckObjectToCards(deckObject) {
         }
     }
     
+    console.log(`[Multiplayer] convertDeckObjectToCards: ${cards.length} Karten, davon ${cards.filter(c => c.imageUrl !== 'https://images.pokemontcg.io/card-back.png').length} mit Bild, ${cards.filter(c => c.cardType).length} mit Typ`);
     return cards;
 }
 

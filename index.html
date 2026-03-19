@@ -284,6 +284,11 @@
 
         .pt-arena.flipped { transform: rotate(180deg); }
         .pt-arena.flipped .static-element { transform: rotate(180deg); }
+        .pt-arena.flipped .pt-stadium-anchor {
+            right: auto !important;
+            left: 14% !important;
+            transform: translate(-50%, -50%) !important;
+        }
 
         .pt-deck-controls {
             position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
@@ -2326,7 +2331,7 @@
             <div id="playtester-board" class="pt-arena">
 
                 <!-- ── CENTER: Stadium (right) + Action Buttons (left) — always stay upright ── -->
-                <div style="position: absolute; top: 50%; right: 14%; transform: translate(50%, -50%); z-index: 5;">
+                <div class="pt-stadium-anchor" style="position: absolute; top: 50%; right: 14%; transform: translate(50%, -50%); z-index: 5;">
                     <div class="static-element" style="background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center; position: relative;">
                         <div class="pt-zone-label" style="color:#a8e6cf; margin-bottom: 6px;">🏟️ Stadium</div>
                         <div style="position: relative; display: inline-block;">

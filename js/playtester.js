@@ -2021,6 +2021,7 @@ function ptToggleLock(player, type) {
 
 let _ptOppTab = 'field';
 let _ptOppFocusZone = null;
+let _ptOppLastContainer = 'ptOppPanelContent';
 
 function ptOpenOpponentPanel(tab, focusZone) {
     const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
@@ -2044,7 +2045,8 @@ function ptOppSwitchTab(tab) {
 }
 
 function ptRenderOpponentPanel(opp, tab, containerId) {
-    const el = document.getElementById(containerId || 'ptOppPanelContent');
+    _ptOppLastContainer = containerId || 'ptOppPanelContent';
+    const el = document.getElementById(_ptOppLastContainer);
     if (!el) return;
     tab = tab || _ptOppTab || 'field';
 
@@ -2083,11 +2085,11 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
             const sSel = t => stat.includes(t) ? 'background:#e74c3c;color:#fff;' : 'background:rgba(255,255,255,0.1);color:#fff;';
             const statusBtns = zoneId === 'active' ? `
                 <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">
-                    <button onclick="toggleStatus('${opp}','poisoned');ptRenderOpponentPanel('${opp}','field')" style="${sSel('poisoned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Vergiftet">☠️</button>
-                    <button onclick="toggleStatus('${opp}','burned');ptRenderOpponentPanel('${opp}','field')" style="${sSel('burned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verbrannt">🔥</button>
-                    <button onclick="toggleStatus('${opp}','asleep');ptRenderOpponentPanel('${opp}','field')" style="${sSel('asleep')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Schlaf">💤</button>
-                    <button onclick="toggleStatus('${opp}','paralyzed');ptRenderOpponentPanel('${opp}','field')" style="${sSel('paralyzed')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Paralyse">⚡</button>
-                    <button onclick="toggleStatus('${opp}','confused');ptRenderOpponentPanel('${opp}','field')" style="${sSel('confused')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verwirrt">💫</button>
+                    <button onclick="toggleStatus('${opp}','poisoned');ptRefreshOpponentField('${opp}')" style="${sSel('poisoned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Vergiftet">☠️</button>
+                    <button onclick="toggleStatus('${opp}','burned');ptRefreshOpponentField('${opp}')" style="${sSel('burned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verbrannt">🔥</button>
+                    <button onclick="toggleStatus('${opp}','asleep');ptRefreshOpponentField('${opp}')" style="${sSel('asleep')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Schlaf">💤</button>
+                    <button onclick="toggleStatus('${opp}','paralyzed');ptRefreshOpponentField('${opp}')" style="${sSel('paralyzed')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Paralyse">⚡</button>
+                    <button onclick="toggleStatus('${opp}','confused');ptRefreshOpponentField('${opp}')" style="${sSel('confused')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="Verwirrt">💫</button>
                 </div>` : '';
             // Also show all attached cards (energy/tools)
             const attachedHTML = cards.slice(1).map(ac => {
@@ -2104,13 +2106,13 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
                         <div style="font-size:16px;font-weight:900;color:#ff6b6b;margin-bottom:6px;">💥 ${dmg} Schaden</div>
                         ${statusBtns}
                         <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:5px;">
-                            <button onclick="addDamage('${opp}','${zoneId}',10);ptRenderOpponentPanel('${opp}','field')"  style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+10</button>
-                            <button onclick="addDamage('${opp}','${zoneId}',20);ptRenderOpponentPanel('${opp}','field')"  style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+20</button>
-                            <button onclick="addDamage('${opp}','${zoneId}',30);ptRenderOpponentPanel('${opp}','field')"  style="background:#e67e22;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+30</button>
-                            <button onclick="addDamage('${opp}','${zoneId}',50);ptRenderOpponentPanel('${opp}','field')"  style="background:#c0392b;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;">+50</button>
-                            <button onclick="addDamage('${opp}','${zoneId}',100);ptRenderOpponentPanel('${opp}','field')" style="background:#922b21;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;">+100</button>
-                            <button onclick="addDamage('${opp}','${zoneId}',-10);ptRenderOpponentPanel('${opp}','field')" style="background:#27ae60;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">-10</button>
-                            <button onclick="clearDamage('${opp}','${zoneId}');ptRenderOpponentPanel('${opp}','field')"   style="background:#1a9e5b;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">💚 Heal</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',10);ptRefreshOpponentField('${opp}')"  style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+10</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',20);ptRefreshOpponentField('${opp}')"  style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+20</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',30);ptRefreshOpponentField('${opp}')"  style="background:#e67e22;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+30</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',50);ptRefreshOpponentField('${opp}')"  style="background:#c0392b;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;">+50</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',100);ptRefreshOpponentField('${opp}')" style="background:#922b21;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;">+100</button>
+                            <button onclick="addDamage('${opp}','${zoneId}',-10);ptRefreshOpponentField('${opp}')" style="background:#27ae60;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">-10</button>
+                            <button onclick="clearDamage('${opp}','${zoneId}');ptRefreshOpponentField('${opp}')"   style="background:#1a9e5b;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">💚 Heal</button>
                         </div>
                         <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.08);">
                             <button onclick="ptOppDiscardZone('${opp}','${zoneId}')" style="background:#7d3c98;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="Zone → Discard">🗑️ KO / Discard</button>
@@ -2150,6 +2152,10 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
                 </div>`;
             }).join('') + '</div>';
     }
+}
+
+function ptRefreshOpponentField(opp) {
+    ptRenderOpponentPanel(opp, 'field', _ptOppLastContainer || 'ptOppPanelContent');
 }
 
 // --- DISCARD / LOST ZONE MODALS ---
@@ -2659,17 +2665,11 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
         }
     }
 
-    // Damage overlay — compact +/- controls + swipe gesture
+    // Damage badge — centered at top (no slider/swipe controls)
     const dmg = ptState[player].damage[zoneId];
     if (dmg > 0) {
-        html += `<div class="pt-damage-overlay" onclick="event.stopPropagation();"
-            ontouchstart="ptDmgSwipeStart(event,'${player}','${zoneId}')"
-            ontouchmove="ptDmgSwipeMove(event,'${player}','${zoneId}')"
-            ontouchend="ptDmgSwipeEnd(event)"
-            style="z-index:40;pointer-events:auto;">
-            <button class="pt-dmg-btn pt-dmg-minus" onclick="addDamage('${player}','${zoneId}',-10,event)" title="-10">◀</button>
-            <span class="pt-dmg-value" onclick="addDamage('${player}','${zoneId}',event.shiftKey?-10:10,event)" title="Klick +10 | Shift -10">${dmg}</span>
-            <button class="pt-dmg-btn pt-dmg-plus" onclick="addDamage('${player}','${zoneId}',10,event)" title="+10">▶</button>
+        html += `<div class="pt-damage-badge" style="left:50%;right:auto;transform:translateX(-50%);top:-10px;pointer-events:none;z-index:40;">
+            ${dmg}
         </div>`;
     }
 

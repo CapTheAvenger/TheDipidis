@@ -280,13 +280,25 @@ function _ptMobileKnockout(player, zone) {
 // ══════════════════════════════════════════════════════════════════════════
 
 function ptMobileCardTap(player, zone, index) {
+    if (zone === 'hand') {
+        ptShowContextMenu({ player, zone, index });
+        return;
+    }
+
     // Guard: while attach mode is active, do not open context/damage modal on target tap.
     if (window.pendingAttachAction || (typeof ptIsAttachSelection === 'function' && ptIsAttachSelection(player))) {
         console.log('Attach-Modus aktiv: Blockiere Schadens-Modal.');
         return;
     }
-    // Event-Handler für Karten-Tap auf Mobil-Geräten
-    ptShowContextMenu({ player, zone, index });
+
+    const zoneEl = _ptGetZoneElement(player, zone);
+    if (!zoneEl) return;
+    const rect = zoneEl.getBoundingClientRect();
+    const touch = {
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2
+    };
+    ptShowRadialMenu(touch, player, zone);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -297,12 +309,10 @@ let _ptLongPressTimer = null;
 let _ptLongPressFired = false;
 
 function ptFieldTouchStart(event, player, zone) {
+    // Long-press opening is intentionally disabled.
     _ptLongPressFired = false;
-    _ptLongPressTimer = setTimeout(() => {
-        _ptLongPressFired = true;
-        event.preventDefault();
-        ptShowRadialMenu(event.touches[0], player, zone);
-    }, 500);
+    clearTimeout(_ptLongPressTimer);
+    _ptLongPressTimer = null;
 }
 
 function ptFieldTouchEnd() {
@@ -339,6 +349,11 @@ function ptShowRadialMenu(touch, player, zone) {
         const ct = (c.cardType || c.supertype || '').toLowerCase();
         return ct.includes('energy');
     });
+    // Check if hand has tool cards
+    const hasTool = ptState[player].hand.some(c => {
+        const ct = (c.cardType || c.supertype || '').toLowerCase();
+        return ct === 'tool' || ct.includes('tool');
+    });
     // Check if hand has evolution cards
     const hasEvolution = ptState[player].hand.some(c => {
         const ct = (c.cardType || c.supertype || '').toLowerCase();
@@ -346,8 +361,10 @@ function ptShowRadialMenu(touch, player, zone) {
     });
 
     if (hasEnergy) actions.push({ icon: '⚡', label: 'Energy', action: () => _ptRadialAttachEnergy(player, zone) });
+    if (hasTool) actions.push({ icon: '🔧', label: 'Tool', action: () => _ptRadialAttachTool(player, zone) });
     actions.push({ icon: '🗑️', label: 'Ablegen', action: () => { discardTopCard(player, zone, null); } });
     if (hasEvolution) actions.push({ icon: '🔼', label: 'Evolve', action: () => _ptRadialEvolve(player, zone) });
+    actions.push({ icon: '⚙️', label: 'Menü', action: () => _ptRadialOpenContextMenu(player, zone) });
     actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
     actions.push({ icon: '💥', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); } });
     if (zone !== 'active') {
@@ -403,6 +420,22 @@ function ptHideRadialMenu() {
     if (menu) menu.remove();
 }
 
+function _ptGetZoneElement(player, zone) {
+    if (zone === 'active') return document.getElementById(`ptActiveZone-${player}`);
+    if (zone && zone.startsWith('bench')) {
+        const benchNum = zone.replace('bench', '');
+        return document.getElementById(`ptBench${benchNum}-${player}`);
+    }
+    return null;
+}
+
+function _ptRadialOpenContextMenu(player, zone) {
+    if (typeof ptOpenCardMenu !== 'function') return;
+    const targetEl = _ptGetZoneElement(player, zone);
+    if (!targetEl) return;
+    ptOpenCardMenu({ currentTarget: targetEl }, player, zone, true);
+}
+
 function _ptRadialAttachEnergy(player, zone) {
     // Attach first energy card from hand to this zone
     const energyIdx = ptState[player].hand.findIndex(c => {
@@ -413,6 +446,18 @@ function _ptRadialAttachEnergy(player, zone) {
     const [energyCard] = ptState[player].hand.splice(energyIdx, 1);
     ptState[player].field[zone].push(energyCard);
     if (typeof ptLog === 'function') ptLog(`⚡ Attached "${energyCard.name}" to ${zone}.`);
+    if (typeof ptRenderAll === 'function') ptRenderAll();
+}
+
+function _ptRadialAttachTool(player, zone) {
+    const toolIdx = ptState[player].hand.findIndex(c => {
+        const ct = (c.cardType || c.supertype || '').toLowerCase();
+        return ct === 'tool' || ct.includes('tool');
+    });
+    if (toolIdx === -1) return;
+    const [toolCard] = ptState[player].hand.splice(toolIdx, 1);
+    ptState[player].field[zone].push(toolCard);
+    if (typeof ptLog === 'function') ptLog(`🔧 Attached "${toolCard.name}" to ${zone}.`);
     if (typeof ptRenderAll === 'function') ptRenderAll();
 }
 

@@ -2704,7 +2704,10 @@ function ptCancelMenuClose() {
     _ptMenuHideTimer = null;
 }
 
-function ptOpenCardMenu(event, player, zoneId) {
+function ptOpenCardMenu(event, player, zoneId, forceOpen = false) {
+    const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    if (isMobileViewport && !forceOpen) return;
+
     ptCancelMenuClose();
     ptActiveMenuPlayer = player;
     ptActiveMenuZoneId = zoneId;

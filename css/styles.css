@@ -4786,6 +4786,37 @@ details[open] > .tier-trending-summary::after {
         gap: 6px !important;
         padding: 0 !important;
     }
+
+    /* 1. Card Database Filter-Wand in kompaktes 2-Spalten-Grid */
+    .cards-filter-section > div:nth-child(2) {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+
+    /* 2. Suchfeld, Reset-Zeile und Results auf volle Breite */
+    .cards-filter-section > div:first-child,
+    .cards-filter-section > div:last-child {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+    }
+
+    /* 3. Filter-Header und Dropdowns für Touch optimieren */
+    .cards-filter-section select {
+        width: 100% !important;
+        font-size: 14px !important;
+        padding: 8px 4px !important;
+        box-sizing: border-box !important;
+        height: 38px !important;
+    }
+
+    /* 4. Card Database Grid auf 3 Spalten */
+    .card-database-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        padding: 0 !important;
+    }
 }
 
 /* ============================================================ */

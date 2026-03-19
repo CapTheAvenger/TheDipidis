@@ -3886,6 +3886,99 @@ h3:first-child {
         min-width: 70px !important;
         min-height: 98px !important;
     }
+
+    /* === PLAYTESTER MOBILE CLEANUP (Overlap Fixes) === */
+
+    /* 1. Toolbar (top bar) scrollable */
+    .pt-toolbar {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 8px !important;
+        padding-bottom: 8px !important;
+        width: 100% !important;
+        scrollbar-width: none;
+    }
+    .pt-toolbar::-webkit-scrollbar {
+        display: none;
+    }
+    .pt-toolbar .pt-btn {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        height: 38px !important;
+        font-size: 12px !important;
+        padding: 0 12px !important;
+    }
+
+    /* Hand zone button bar scrollable */
+    .pt-hand-zone > div:first-child {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 8px !important;
+        padding-bottom: 8px !important;
+        width: 100% !important;
+        scrollbar-width: none;
+    }
+    .pt-hand-zone > div:first-child::-webkit-scrollbar {
+        display: none;
+    }
+    .pt-hand-zone > div:first-child .pt-btn {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        height: 38px !important;
+        font-size: 12px !important;
+        padding: 0 12px !important;
+    }
+
+    /* 2. Board (arena) vertical layout */
+    #playtester-board.pt-arena {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px !important;
+        width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    /* 3. Bench zones compact & centered */
+    #p1-area div[style*="justify-content:center"][style*="display:flex"],
+    #p2-area div[style*="justify-content:center"][style*="display:flex"] {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 4px !important;
+        width: 100% !important;
+    }
+
+    /* 4. Steppers & damage counters scaled down to prevent overlap */
+    .pt-stepper-group {
+        transform: scale(0.85) !important;
+        transform-origin: bottom center !important;
+    }
+    .pt-deck-controls {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }
+    .pt-dmg-modifier {
+        transform: scale(0.85) !important;
+        transform-origin: bottom center !important;
+    }
+
+    /* 5. Side zones (Deck/Discard/Lost/Prizes columns) as grid */
+    #p1-area > div > div[style*="flex-direction: column"][style*="position: absolute"][style*="right: 20px"],
+    #p2-area > div > div[style*="flex-direction: column"][style*="position: absolute"][style*="right: 20px"] {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)) !important;
+        gap: 8px !important;
+        width: 100% !important;
+        justify-items: center !important;
+    }
 }
 
 /* Sehr kleine Displays (Smartphones im Portrait) */

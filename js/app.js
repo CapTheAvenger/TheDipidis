@@ -9304,33 +9304,27 @@ const BASE_PATH = './data/';
 
             // ==========================================
             // 🚨 KUGELSICHERER ACE SPEC CHECKER 🚨
+            // Nutzt die zentrale isAceSpec() + CSV-Fallback
             // ==========================================
             const isAceSpecCard = (c) => {
                 if (!c) return false;
 
-                const rawName = String(c.card_name || c.name || '').trim();
-                const lowerName = rawName.toLowerCase();
+                // 1. Zentrale aceSpecsList aus ace_specs.json (primäre Quelle)
+                if (isAceSpec(c)) return true;
 
-                // 1. ABSOLUTER HARD-BLOCK: Diese Karten sind normale Items/Tools.
-                if (lowerName === 'switch' || lowerName === 'cross switch' || lowerName === 'pokémon catcher' || lowerName === 'pokemon catcher') {
-                    return false;
-                }
-
-                // 2. Echte, harte ACE SPEC Liste
-                const exactAceSpecs = [
-                    'awaking drum', "hero's cape", 'master ball', 'maximum belt',
-                    'neo upper energy', 'prime catcher', 'reboot pod', 'hyper aroma',
-                    'secret box', 'survival brace', 'unfair stamp', 'legacy energy',
-                    'dangerous laser', 'grand tree', 'neutral center', 'sparkling crystal',
-                    'brilliant blend', 'miracle headset', 'miraculous intercom',
-                    'precious trolley', 'scramble switch', 'search computer'
-                ];
-
-                if (exactAceSpecs.includes(lowerName)) return true;
-
-                // 3. Fallback auf CSV-Spalten
+                // 2. Fallback: CSV-Spalte is_ace_spec
                 if (String(c.is_ace_spec).trim().toLowerCase() === 'yes') return true;
-                if (String(c.rarity).trim().toUpperCase() === 'ACE SPEC RARE' || String(c.rarity).trim().toUpperCase() === 'ACE SPEC') return true;
+
+                // 3. Fallback: Rarity-Feld
+                const rarity = String(c.rarity || '').trim().toUpperCase();
+                if (rarity === 'ACE SPEC RARE' || rarity === 'ACE SPEC') return true;
+
+                // 4. Fallback: Rules-Text (z.B. "ACE SPEC rule: You can't have more than 1...")
+                if (Array.isArray(c.rules)) {
+                    for (const rule of c.rules) {
+                        if (String(rule).toUpperCase().includes('ACE SPEC')) return true;
+                    }
+                }
 
                 return false;
             };

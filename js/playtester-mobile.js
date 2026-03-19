@@ -180,18 +180,13 @@ function _ptMobilePlayToActive(player, handIndex) {
 }
 
 function _ptMobilePlayToBench(player, handIndex) {
-    if (typeof ptClickZone !== 'undefined') {
-        ptSelectedCardIndex = handIndex;
-        // Finde freien Bench-Slot
-        for (let i = 0; i < 5; i++) {
-            const slot = 'bench' + i;
-            if (ptState[player].field[slot].length === 0) {
-                ptClickZone(player, slot);
-                ptHideContextMenu();
-                return;
-            }
-        }
-        showToast('Bank ist voll!', 'warning');
+    // Keep card selected so player can tap the exact bench slot/Pokemon.
+    ptSelectedCardIndex = handIndex;
+    if (typeof ptRenderHand === 'function') ptRenderHand();
+    if (typeof ptShowMessage === 'function') {
+        ptShowMessage('Wähle jetzt dein gewünschtes Bank-Pokémon oder einen freien Bank-Slot.');
+    } else if (typeof showToast === 'function') {
+        showToast('Wähle jetzt dein gewünschtes Bank-Pokémon oder einen freien Bank-Slot.', 'info');
     }
     ptHideContextMenu();
 }

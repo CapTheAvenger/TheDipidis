@@ -4380,13 +4380,13 @@ h3:first-child {
         display: none !important;
     }
 
-    /* Swap sizing: deck larger, discard smaller */
+    /* Mobile sizing: keep deck compact */
     .pt-deck-pile {
-        width: 92px !important;
-        height: 126px !important;
+        width: 78px !important;
+        height: 108px !important;
     }
     .pt-deck-half {
-        font-size: 18px !important;
+        font-size: 15px !important;
     }
 
     #ptDiscardPile-p1,
@@ -4427,6 +4427,21 @@ h3:first-child {
     #ptBench4-p2 .pt-field-card {
         width: 55px !important;
         height: 75px !important;
+    }
+
+    /* Keep bench slots fixed when a Pokemon is placed (no horizontal jump) */
+    #ptBench0-p1 > div,
+    #ptBench1-p1 > div,
+    #ptBench2-p1 > div,
+    #ptBench3-p1 > div,
+    #ptBench4-p1 > div,
+    #ptBench0-p2 > div,
+    #ptBench1-p2 > div,
+    #ptBench2-p2 > div,
+    #ptBench3-p2 > div,
+    #ptBench4-p2 > div {
+        width: 55px !important;
+        min-height: 75px !important;
     }
 
     /* Hide bench placeholder texts like "Bench 5" on mobile */

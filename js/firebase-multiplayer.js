@@ -510,33 +510,66 @@ function mpPopulateDeckSelect() {
 }
 
 /**
+ * Parse PTCGL text into { "Name (SET NUM)": count } format for multiplayer
+ */
+function mpParsePTCGLText(text) {
+    const lineRegex = /^(\d+)\s+(.+?)\s+([A-Za-z0-9-]+)\s+(\d+[A-Za-z]?)(?:\s+.*)?$/;
+    const energyRegex = /^(\d+)\s+Basic\s+\{([RGWLPFDM])\}\s+Energy/i;
+    const energyNames = { G:'Basic Grass Energy', R:'Basic Fire Energy', W:'Basic Water Energy', L:'Basic Lightning Energy', P:'Basic Psychic Energy', F:'Basic Fighting Energy', D:'Basic Darkness Energy', M:'Basic Metal Energy' };
+    const energyMap = { G:'1', R:'2', W:'3', L:'4', P:'5', F:'6', D:'7', M:'8' };
+    const deck = {};
+    text.split('\n').forEach(raw => {
+        const line = raw.trim();
+        const m = line.match(lineRegex);
+        if (m) {
+            const key = m[2].trim() + ' (' + m[3].toUpperCase() + ' ' + m[4].toUpperCase() + ')';
+            deck[key] = (deck[key] || 0) + parseInt(m[1]);
+            return;
+        }
+        const em = line.match(energyRegex);
+        if (em) {
+            const code = em[2].toUpperCase();
+            const key = (energyNames[code] || 'Basic Energy') + ' (SVE ' + (energyMap[code] || '1') + ')';
+            deck[key] = (deck[key] || 0) + parseInt(em[1]);
+        }
+    });
+    return deck;
+}
+
+/** Get deck object from MP menu (dropdown OR text input) */
+function mpGetSelectedDeck() {
+    const textInput = (document.getElementById('mpDeckInput') || {}).value || '';
+    if (textInput.trim()) {
+        const parsed = mpParsePTCGLText(textInput);
+        if (Object.keys(parsed).length === 0) {
+            showToast('Deckliste konnte nicht geparst werden!', 'error');
+            return null;
+        }
+        return parsed;
+    }
+    const sel = document.getElementById('mpDeckSelect');
+    const idx = sel ? sel.value : '';
+    if (idx !== '' && window.userDecks && window.userDecks[Number(idx)]) {
+        return window.userDecks[Number(idx)].cards;
+    }
+    showToast('Bitte w\u00e4hle ein Deck oder f\u00fcge eine Liste ein!', 'warning');
+    return null;
+}
+
+/**
  * Create Game Handler (UI Wrapper)
  */
 async function mpCreateGame() {
     try {
-        // Check Auth
         const user = firebase.auth().currentUser;
-        if (!user) {
-            showToast('Bitte zuerst einloggen!', 'warning');
-            return;
-        }
+        if (!user) { showToast('Bitte zuerst einloggen!', 'warning'); return; }
 
-        // Read selected deck from dropdown
-        const sel = document.getElementById('mpDeckSelect');
-        const idx = sel ? sel.value : '';
-        if (idx === '' || !window.userDecks || !window.userDecks[Number(idx)]) {
-            showToast('Bitte zuerst ein Deck auswählen!', 'warning');
-            return;
-        }
-        const deckObj = window.userDecks[Number(idx)].cards;
+        const deckObj = mpGetSelectedDeck();
+        if (!deckObj) return;
 
         toggleMultiplayerMenu();
-
-        // Create Game
         const roomCode = await createMultiplayerGame(deckObj);
-        
         console.log(`[UI] Game created with code: ${roomCode}`);
-
     } catch (error) {
         console.error('[UI] Create game failed:', error);
     }
@@ -547,35 +580,20 @@ async function mpCreateGame() {
  */
 async function mpJoinGame() {
     try {
-        // Check Auth
         const user = firebase.auth().currentUser;
-        if (!user) {
-            showToast('Bitte zuerst einloggen!', 'warning');
-            return;
-        }
+        if (!user) { showToast('Bitte zuerst einloggen!', 'warning'); return; }
 
-        // Read selected deck from dropdown
-        const sel = document.getElementById('mpDeckSelect');
-        const idx = sel ? sel.value : '';
-        if (idx === '' || !window.userDecks || !window.userDecks[Number(idx)]) {
-            showToast('Bitte zuerst ein Deck auswählen!', 'warning');
-            return;
-        }
-        const deckObj = window.userDecks[Number(idx)].cards;
+        const deckObj = mpGetSelectedDeck();
+        if (!deckObj) return;
 
-        // Prompt für Room-Code
         const roomCode = prompt('🔑 Room-Code eingeben (5 Zeichen):');
-        
         if (!roomCode || roomCode.length !== 5) {
             showToast('Ungültiger Room-Code!', 'error');
             return;
         }
 
         toggleMultiplayerMenu();
-
-        // Join Game
         await joinMultiplayerGame(roomCode, deckObj);
-
     } catch (error) {
         console.error('[UI] Join game failed:', error);
     }

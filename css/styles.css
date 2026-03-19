@@ -4050,7 +4050,7 @@ h3:first-child {
     .pt-deck-controls { display: none !important; }
     .pt-deck-popup-trigger { display: none !important; }
 
-    /* 10. Setup Phase: Karten-Überlappung + Mobile-Layout */
+    /* 10. Setup Phase: keine Überlappung, horizontal swipebar */
     #ptStartPhaseModal > div {
         padding: 12px 6px !important;
         width: 98vw !important;
@@ -4064,15 +4064,22 @@ h3:first-child {
         display: flex !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
-        gap: 0px !important;
+        -webkit-overflow-scrolling: touch;
+        gap: 8px !important;
         width: 100% !important;
-        justify-content: center !important;
+        justify-content: flex-start !important;
         padding: 10px 4px !important;
     }
-    /* Setup-Karten überlappen sich für Platzersparnis */
+    #ptStartPhaseModal .pt-hand-zone {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    /* Setup-Karten ohne negative Margins */
     #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] > div,
     #ptStartPhaseModal div[style*="flex-wrap:nowrap"] > div {
-        margin-right: -35px !important;
+        margin-right: 0 !important;
         transition: transform 0.2s ease, margin 0.2s ease;
         z-index: 1;
         flex-shrink: 0;
@@ -4083,7 +4090,7 @@ h3:first-child {
     }
     #ptStartPhaseModal div[style*="flex-wrap:wrap"][style*="justify-content:center"] > div:active,
     #ptStartPhaseModal div[style*="flex-wrap:nowrap"] > div:active {
-        margin-right: 5px !important;
+        margin-right: 0 !important;
         transform: translateY(-8px) scale(1.12);
         z-index: 100;
     }
@@ -4112,11 +4119,26 @@ h3:first-child {
         font-size: 11px !important;
     }
 
+    /* Zone-Labels in mobiler Arena ausblenden */
+    #playtester-board .zone-label,
+    #playtester-board .pt-zone-label {
+        display: none !important;
+    }
+
     /* 14. Spielfeld-Arena maximal nach oben */
     #playtester-board,
     #pt-board {
         margin-top: 0 !important;
-        padding-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 5px !important;
+    }
+
+    /* Zonen (Active/Bench) kompakter */
+    .pt-active-zone,
+    .pt-bench-zone,
+    .pt-dropzone {
+        padding: 2px !important;
+        min-height: auto !important;
     }
 
     /* 15. Compact energy/tool overlays on mobile */
@@ -4157,6 +4179,29 @@ h3:first-child {
     #ptHandZone {
         gap: 0px !important;
         justify-content: center !important;
+    }
+
+    /* Hand und Toolbar stauchen */
+    #pt-hand-zone,
+    .pt-hand-zone {
+        height: 100px !important;
+        padding: 0 !important;
+    }
+    #pt-hand-zone .pt-card-img,
+    #ptHandZone .pt-card-img,
+    #ptHandZone .pt-hand-card {
+        height: 90px !important;
+        width: auto !important;
+    }
+    .pt-controls {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        padding: 2px !important;
+    }
+    .pt-controls button {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
     }
     #ptHandZone .pt-hand-wrapper {
         margin-right: -35px !important;

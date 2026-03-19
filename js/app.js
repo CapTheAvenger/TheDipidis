@@ -6737,11 +6737,14 @@ const BASE_PATH = './data/';
             const techCards = [];
             const spicyCards = [];
             
+            // Hardcoded Ace Spec names for reliable detection (CSV is_ace_spec is buggy)
+            const _aceSpecNamesOverview = ['prime catcher','unfair stamp','master ball','maximum belt','hero\'s cape','awakening drum','reboot pod','survival brace','grand tree','neutral center','sparkling crystal','dangerous laser','scoop up cyclone','computer search','dowsing machine','rock guard','life dew','victory star','g booster','g scope','rich energy','legacy energy','secret box','hyper aroma','neo upper energy','scramble switch','deluxe bomb','megaton blower','amulet of hope','pok\u00e9 vital a'];
             data.forEach(card => {
                 // Check if card is Ace Spec (exclusive category)
-                const isAceSpec = card.is_ace_spec === 'Yes' || 
-                                  (card.type && card.type.toLowerCase().includes('ace spec')) || 
-                                  (card.rarity && card.rarity.toLowerCase().includes('ace spec'));
+                const _cn = String(card.card_name || card.name || '').trim().toLowerCase();
+                const isAceSpec = _aceSpecNamesOverview.includes(_cn) ||
+                                  (card.rarity && card.rarity.toLowerCase().includes('ace spec')) || 
+                                  (Array.isArray(card.rules) && card.rules.some(r => r.toUpperCase().includes('ACE SPEC')));
                 
                 if (isAceSpec) {
                     aceSpecCards.push(card);
@@ -9304,26 +9307,32 @@ const BASE_PATH = './data/';
 
             // ==========================================
             // 🚨 KUGELSICHERER ACE SPEC CHECKER 🚨
-            // Nutzt die zentrale isAceSpec() + Rarity/Rules
-            // CSV is_ace_spec wird IGNORIERT (fehlerhaft bei Jamming Tower etc.)
+            // Hardcoded Namensliste + Rarity/Rules-Check
+            // KEIN CSV is_ace_spec, KEIN aceSpecsList.json
             // ==========================================
+            const aceSpecNames = [
+                "Prime Catcher", "Unfair Stamp", "Master Ball", "Maximum Belt",
+                "Hero's Cape", "Awakening Drum", "Reboot Pod", "Survival Brace",
+                "Grand Tree", "Neutral Center", "Sparkling Crystal", "Dangerous Laser",
+                "Scoop Up Cyclone", "Computer Search", "Dowsing Machine", "Rock Guard",
+                "Life Dew", "Victory Star", "G Booster", "G Scope",
+                "Rich Energy", "Legacy Energy", "Secret Box", "Hyper Aroma",
+                "Neo Upper Energy", "Scramble Switch", "Deluxe Bomb", "Megaton Blower",
+                "Amulet of Hope", "Poké Vital A"
+            ];
+            const aceSpecNamesLower = aceSpecNames.map(n => n.toLowerCase());
+
             const isAceSpecCard = (c) => {
                 if (!c) return false;
-
-                // 1. Zentrale aceSpecsList aus ace_specs.json (primäre, vertrauenswürdige Quelle)
-                if (isAceSpec(c)) return true;
-
-                // 2. Rarity-Feld muss explizit "ACE SPEC" enthalten
+                const name = String(c.card_name || c.name || '').trim().toLowerCase();
+                if (aceSpecNamesLower.includes(name)) return true;
                 const rarity = String(c.rarity || '').trim().toUpperCase();
-                if (rarity === 'ACE SPEC RARE' || rarity === 'ACE SPEC') return true;
-
-                // 3. Rules-Text (z.B. "ACE SPEC rule: You can't have more than 1...")
+                if (rarity.includes('ACE SPEC')) return true;
                 if (Array.isArray(c.rules)) {
                     for (const rule of c.rules) {
                         if (String(rule).toUpperCase().includes('ACE SPEC')) return true;
                     }
                 }
-
                 return false;
             };
 
@@ -9355,9 +9364,16 @@ const BASE_PATH = './data/';
             // ==========================================
             // 🚨 1. ACE SPEC PRIORITY (Lokal) 🚨
             // ==========================================
-            const allLocalAceSpecs = deckCards.filter(c => isAceSpecCard(c)).sort((a, b) => b.sharePercent - a.sharePercent);
-            if (allLocalAceSpecs.length > 0) {
-                pushCard(allLocalAceSpecs[0], 1, '[Consistency][ACE-SPEC-Priority]');
+            // Finde die ECHTE Ace Spec unter den verfügbaren Karten (höchster Share)
+            const aceSpecSlotCard = deckCards
+                .filter(c => isAceSpecCard(c))
+                .sort((a, b) => b.sharePercent - a.sharePercent)[0] || null;
+
+            if (aceSpecSlotCard) {
+                pushCard(aceSpecSlotCard, 1, '[Consistency][ACE-SPEC-Priority]');
+                console.log(`[Consistency][ACE-SPEC-Priority] Erkannt: ${aceSpecSlotCard.card_name} (Rarity: ${aceSpecSlotCard.rarity || '?'})`);
+            } else {
+                console.log('[Consistency][ACE-SPEC-Priority] Keine echte ACE SPEC gefunden.');
             }
 
             // ==========================================
@@ -16049,11 +16065,14 @@ const BASE_PATH = './data/';
             const techCards = [];
             const spicyCards = [];
             
+            // Hardcoded Ace Spec names for reliable detection (CSV is_ace_spec is buggy)
+            const _aceSpecNamesMeta = ['prime catcher','unfair stamp','master ball','maximum belt','hero\'s cape','awakening drum','reboot pod','survival brace','grand tree','neutral center','sparkling crystal','dangerous laser','scoop up cyclone','computer search','dowsing machine','rock guard','life dew','victory star','g booster','g scope','rich energy','legacy energy','secret box','hyper aroma','neo upper energy','scramble switch','deluxe bomb','megaton blower','amulet of hope','pok\u00e9 vital a'];
             cards.forEach(card => {
                 // Check if card is Ace Spec (exclusive category)
-                const isAceSpec = card.is_ace_spec === 'Yes' || 
-                                  (card.type && card.type.toLowerCase().includes('ace spec')) || 
-                                  (card.rarity && card.rarity.toLowerCase().includes('ace spec'));
+                const _cn = String(card.card_name || card.name || '').trim().toLowerCase();
+                const isAceSpec = _aceSpecNamesMeta.includes(_cn) ||
+                                  (card.rarity && card.rarity.toLowerCase().includes('ace spec')) ||
+                                  (Array.isArray(card.rules) && card.rules.some(r => r.toUpperCase().includes('ACE SPEC')));
                 
                 if (isAceSpec) {
                     aceSpecCards.push(card);

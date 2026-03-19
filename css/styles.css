@@ -4318,7 +4318,9 @@ h3:first-child {
     }
 
     /* Mobile cleanup: actions already in floating/FAB menus */
+    #ptHandTopRow,
     #ptHandActionBar,
+    #ptExtendedActions,
     .pt-deck-controls,
     .pt-legend-box {
         display: none !important;
@@ -4375,9 +4377,6 @@ h3:first-child {
     }
 
     /* Hand header cleanup: show only compact counter above cards */
-    .pt-hand-zone > div:first-child {
-        display: none !important;
-    }
     #ptHandZone {
         position: relative !important;
         justify-content: flex-start !important;

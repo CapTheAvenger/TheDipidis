@@ -33,7 +33,7 @@ def load_existing_sets():
         return []
     
     try:
-        with open(OUTPUT_CSV, 'r', encoding='utf-8') as f:
+        with open(OUTPUT_CSV, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             sets = list(reader)
             print(f"[Set Scraper] Loaded {len(sets)} existing sets from CSV")

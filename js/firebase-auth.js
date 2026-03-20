@@ -57,7 +57,7 @@ function signInWithGoogle() {
     return;
   }
 
-  var tokenClient = google.accounts.oauth2.initTokenClient({
+  const tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: '539389580350-teldg43gkk994q8tnhd2b86ibevb6403.apps.googleusercontent.com',
     scope: 'email profile',
     callback: function(response) {
@@ -66,7 +66,7 @@ function signInWithGoogle() {
         showNotification('Google Sign-In fehlgeschlagen: ' + response.error, 'error');
         return;
       }
-      var credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
+      const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
       firebase.auth().signInWithCredential(credential)
         .then(function(result) {
           console.log('✓ Google sign-in:', result.user.email);
@@ -204,7 +204,7 @@ function setupAuthForms() {
   const resetBtn = document.getElementById('password-reset-btn');
   if (resetBtn) {
     resetBtn.addEventListener('click', async () => {
-      const email = prompt('Enter your email address:');
+      const email = await showInputModal({ title: 'Password Reset', message: 'Enter your email address:', placeholder: 'email@example.com', inputType: 'email' });
       if (email) {
         await resetPassword(email);
       }

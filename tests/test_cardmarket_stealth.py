@@ -61,7 +61,7 @@ try:
                         price_text = dd.text.strip()
                         if price_text:
                             print(f'      ✓ FOUND PRICE: {price_text}')
-                    except:
+                    except Exception:
                         pass
     else:
         print('\n⚠️ No dt elements found - likely blocked by Cloudflare')

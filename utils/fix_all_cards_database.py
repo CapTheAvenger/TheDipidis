@@ -111,7 +111,7 @@ def fix_and_sort_csv():
     print(f"\n[1/4] Loading {csv_path}...")
     cards = []
     
-    with open(csv_path, 'r', encoding='utf-8', newline='') as f:
+    with open(csv_path, 'r', encoding='utf-8-sig', newline='') as f:
         reader = csv.DictReader(f)
         for row in reader:
             cards.append(row)

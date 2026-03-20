@@ -37,7 +37,8 @@ from card_scraper_shared import (
     save_to_csv,
     normalize_archetype_name,
     load_scraped_ids,
-    save_scraped_ids
+    save_scraped_ids,
+    _get_scraper
 )
 
 # Fix Windows console encoding
@@ -135,12 +136,6 @@ def load_settings() -> Dict[str, Any]:
 # ============================================================================
 # CLOUDSCRAPER MULTITHREADING SETUP
 # ============================================================================
-_thread_local = threading.local()
-
-def _get_scraper() -> cloudscraper.CloudScraper:
-    if not hasattr(_thread_local, "scraper"):
-        _thread_local.scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
-    return _thread_local.scraper
 
 def safe_fetch_html(url: str, timeout: int, retries: int = 2) -> str:
     scraper = _get_scraper()

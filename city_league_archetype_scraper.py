@@ -29,7 +29,7 @@ except ImportError:
     sys.exit(1)
 
 # Import shared utilities
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, normalize_archetype_name
+from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, normalize_archetype_name, _get_scraper
 
 # Fix Windows console encoding for Unicode characters
 setup_console_encoding()
@@ -108,12 +108,6 @@ def parse_date(date_str: str) -> datetime:
 # ============================================================================
 # CLOUDSCRAPER / NETWORK
 # ============================================================================
-_thread_local = threading.local()
-
-def _get_scraper() -> cloudscraper.CloudScraper:
-    if not hasattr(_thread_local, "scraper"):
-        _thread_local.scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
-    return _thread_local.scraper
 
 def fetch_page_bs4(url: str, retries: int = 2):
     """Fetch URL and return parsed BeautifulSoup object."""

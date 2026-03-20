@@ -212,7 +212,7 @@ async function saveCurrentDeckToProfile(source) {
   }
   
   // Ask for deck name
-  const deckName = prompt('Enter a name for your deck:', archetype || 'My Deck');
+  const deckName = await showInputModal({ title: 'Save Deck', message: 'Enter a name for your deck:', defaultValue: archetype || 'My Deck' });
   if (!deckName || deckName.trim() === '') {
     return; // User cancelled
   }
@@ -1381,8 +1381,8 @@ function getDeckFolders() {
   return Array.from(folders).sort();
 }
 
-function createDeckFolder() {
-  const name = prompt('Enter folder name:');
+async function createDeckFolder() {
+  const name = await showInputModal({ title: 'Create Folder', message: 'Enter folder name:', placeholder: 'Folder name' });
   if (!name || !name.trim()) return;
   const trimmed = name.trim();
   const existing = getDeckFolders();
@@ -1402,10 +1402,11 @@ async function moveDeckToFolder(deckIndex) {
   
   const folders = getDeckFolders();
   const options = ['(No Folder)', ...folders, '+ New Folder'];
-  const choice = prompt(
-    'Move to folder:\n' + options.map((f, i) => `${i}: ${f}`).join('\n') + '\n\nEnter number:',
-    deck.folder ? String(folders.indexOf(deck.folder) + 1) : '0'
-  );
+  const choice = await showInputModal({
+    title: 'Move to Folder',
+    message: options.map((f, i) => `${i}: ${f}`).join('\n') + '\n\nEnter number:',
+    defaultValue: deck.folder ? String(folders.indexOf(deck.folder) + 1) : '0'
+  });
   if (choice === null) return;
   
   let folder = '';
@@ -1415,7 +1416,7 @@ async function moveDeckToFolder(deckIndex) {
   if (idx === 0) {
     folder = '';
   } else if (idx === options.length - 1) {
-    const newFolder = prompt('New folder name:');
+    const newFolder = await showInputModal({ title: 'New Folder', message: 'Enter folder name:', placeholder: 'Folder name' });
     if (!newFolder || !newFolder.trim()) return;
     folder = newFolder.trim();
   } else {
@@ -1482,7 +1483,7 @@ function filterDecksByFolder(folder) {
 // ============================================================
 // My Decks: Compare
 // ============================================================
-function openCompareSavedDeck(deckIndex) {
+async function openCompareSavedDeck(deckIndex) {
   const baseDeck = window.userDecks && window.userDecks[deckIndex];
   if (!baseDeck) return;
   
@@ -1496,9 +1497,10 @@ function openCompareSavedDeck(deckIndex) {
     .map((d, i) => i !== deckIndex ? `${i}: ${d.name}` : null)
     .filter(Boolean);
   
-  const choice = prompt(
-    `Compare "${baseDeck.name}" with:\n${options.join('\n')}\n\nEnter deck number:`
-  );
+  const choice = await showInputModal({
+    title: 'Compare Decks',
+    message: `Compare "${baseDeck.name}" with:\n${options.join('\n')}\n\nEnter deck number:`
+  });
   if (choice === null) return;
   
   const compareIdx = parseInt(choice);

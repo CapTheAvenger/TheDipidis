@@ -43,7 +43,7 @@ try:
                     try:
                         dd = dt.find_element(By.XPATH, 'following-sibling::dd[1]')
                         print(f'      → Price: {dd.text}')
-                    except:
+                    except Exception:
                         pass
 except Exception as e:
     print(f'Error finding elements: {e}')

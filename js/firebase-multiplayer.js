@@ -497,8 +497,9 @@ async function mpSyncSetupReady() {
 function generateRoomCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Ohne O, I, 0, 1
     let code = '';
+    const randomValues = crypto.getRandomValues(new Uint32Array(5));
     for (let i = 0; i < 5; i++) {
-        code += chars[Math.floor(Math.random() * chars.length)];
+        code += chars[randomValues[i] % chars.length];
     }
     return code;
 }
@@ -750,9 +751,9 @@ async function mpJoinGame() {
         const deckObj = mpGetSelectedDeck();
         if (!deckObj) return;
 
-        const roomCode = prompt('🔑 Room-Code eingeben (5 Zeichen):');
-        if (!roomCode || roomCode.length !== 5) {
-            showToast('Ungültiger Room-Code!', 'error');
+        const roomCode = await showInputModal({ title: '🔑 Room beitreten', message: 'Room-Code eingeben (5 Zeichen):', placeholder: 'ABCDE' });
+        if (!roomCode || roomCode.trim().length !== 5) {
+            if (roomCode !== null) showToast('Ungültiger Room-Code!', 'error');
             return;
         }
 

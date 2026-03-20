@@ -28,7 +28,7 @@ except ImportError:
     print("  pip install cloudscraper beautifulsoup4")
     sys.exit(1)
 
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir
+from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, _get_scraper
 
 setup_console_encoding()
 
@@ -89,7 +89,7 @@ def load_cards_to_update(csv_path: str) -> list:
         return []
 
     cards = []
-    with open(csv_path, "r", encoding="utf-8", newline="") as f:
+    with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             if not row:
@@ -113,7 +113,7 @@ def load_existing_prices(csv_path: str) -> dict:
         return {}
 
     prices = {}
-    with open(csv_path, "r", encoding="utf-8", newline="") as f:
+    with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             if not row:
@@ -133,7 +133,7 @@ def save_prices(prices: list, csv_path: str):
     """
     existing = {}
     if os.path.isfile(csv_path):
-        with open(csv_path, "r", encoding="utf-8", newline="") as f:
+        with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if not row:
@@ -167,16 +167,6 @@ def save_prices(prices: list, csv_path: str):
 
 
 # SCRAPING LOGIC
-_thread_local = threading.local()
-
-def _get_scraper() -> "cloudscraper.CloudScraper":
-    """Each thread gets its own CloudScraper instance (thread-safe)."""
-    if not hasattr(_thread_local, "scraper"):
-        _thread_local.scraper = cloudscraper.create_scraper(
-            browser={"browser": "chrome", "platform": "windows", "mobile": False}
-        )
-    return _thread_local.scraper
-
 
 def _parse_cardmarket_price(html: str, card_id: str) -> str:
     """

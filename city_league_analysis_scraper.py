@@ -31,7 +31,7 @@ except ImportError:
 from card_scraper_shared import (
     setup_console_encoding, get_app_path, get_data_dir, CardDatabaseLookup, 
     aggregate_card_data, save_to_csv, fetch_page, normalize_archetype_name,
-    load_scraped_ids, save_scraped_ids
+    load_scraped_ids, save_scraped_ids, _get_scraper
 )
 
 # Fix Windows console encoding for Unicode characters
@@ -198,12 +198,6 @@ def extract_tournament_date_from_html(tournament_html: str, fallback_date: str =
 # ============================================================================
 # CLOUDSCRAPER MULTITHREADING SETUP
 # ============================================================================
-_thread_local = threading.local()
-
-def _get_scraper() -> cloudscraper.CloudScraper:
-    if not hasattr(_thread_local, "scraper"):
-        _thread_local.scraper = cloudscraper.create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
-    return _thread_local.scraper
 
 def safe_fetch_html(url: str, timeout: int, retries: int, retry_delay: float) -> str:
     """Laedt HTML via Cloudscraper fuer Main-Threads (Turnierseiten)."""

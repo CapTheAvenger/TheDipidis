@@ -28,7 +28,7 @@ except ImportError:
     print("pip install cloudscraper beautifulsoup4")
     sys.exit(1)
 
-from card_scraper_shared import setup_console_encoding
+from card_scraper_shared import setup_console_encoding, _get_scraper
 setup_console_encoding()
 
 # ============================================================================
@@ -90,14 +90,6 @@ logger.info("=" * 80)
 # ============================================================================
 # NETWORK UTILS
 # ============================================================================
-_thread_local = threading.local()
-
-def _get_scraper() -> cloudscraper.CloudScraper:
-    if not hasattr(_thread_local, "scraper"):
-        _thread_local.scraper = cloudscraper.create_scraper(
-            browser={"browser": "chrome", "platform": "windows", "mobile": False}
-        )
-    return _thread_local.scraper
 
 def fetch_page_bs4(url: str, retries: int = 3):
     scraper = _get_scraper()
@@ -124,7 +116,7 @@ def load_existing_sets() -> Set[str]:
         return set()
     try:
         existing = set()
-        with open(csv_path, "r", encoding="utf-8") as f:
+        with open(csv_path, "r", encoding="utf-8-sig") as f:
             for row in csv.DictReader(f):
                 if row.get("set"):
                     existing.add(row["set"])

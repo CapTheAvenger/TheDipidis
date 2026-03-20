@@ -30,7 +30,7 @@ except ImportError:
     print("pip install cloudscraper beautifulsoup4")
     sys.exit(1)
 
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, load_scraped_ids, save_scraped_ids, CardDatabaseLookup, is_trainer_or_energy, is_valid_card
+from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, load_scraped_ids, save_scraped_ids, CardDatabaseLookup, is_trainer_or_energy, is_valid_card, _get_scraper
 
 setup_console_encoding()
 
@@ -112,14 +112,6 @@ def load_settings() -> Dict[str, Any]:
 # ============================================================================
 # NETWORK & HTML UTILS
 # ============================================================================
-_thread_local = threading.local()
-
-def _get_scraper() -> cloudscraper.CloudScraper:
-    if not hasattr(_thread_local, "scraper"):
-        _thread_local.scraper = cloudscraper.create_scraper(
-            browser={"browser": "chrome", "platform": "windows", "mobile": False}
-        )
-    return _thread_local.scraper
 
 def fetch_page_bs4(url: str, retries: int = 2):
     scraper = _get_scraper()

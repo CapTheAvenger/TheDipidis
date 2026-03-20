@@ -32,13 +32,23 @@ jobs:
             echo "✓ Firebase credentials injected"
           fi
 
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -r css _site/css
+          cp -r js _site/js
+          cp -r images _site/images 2>/dev/null || true
+          cp -r data _site/data
+          cp _config.yml _site/ 2>/dev/null || true
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
   deploy:
     environment:

@@ -2,23 +2,32 @@
 """Recreate CSV from JSON"""
 import json
 import csv
+import os
 
-print("Recreating CSV from JSON...")
 
-# Load JSON
-with open('data/all_cards_merged.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
-    cards = data['cards']
+def main():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_dir = os.path.join(script_dir, '..')
+    json_path = os.path.join(project_dir, 'data', 'all_cards_merged.json')
+    csv_path = os.path.join(project_dir, 'data', 'all_cards_merged.csv')
 
-print(f"Loaded {len(cards)} cards from JSON")
+    print("Recreating CSV from JSON...")
 
-# Define fieldnames in the CORRECT order (matching original CSV format)
-fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'price_last_updated']
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+        cards = data['cards']
 
-# Write CSV
-with open('data/all_cards_merged.csv', 'w', encoding='utf-8', newline='') as f:
-    writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
-    writer.writeheader()
-    writer.writerows(cards)
+    print(f"Loaded {len(cards)} cards from JSON")
 
-print(f"[✓] Saved {len(cards)} cards to CSV with correct column order")
+    fieldnames = ['name', 'set', 'number', 'type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'price_last_updated']
+
+    with open(csv_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+        writer.writeheader()
+        writer.writerows(cards)
+
+    print(f"[✓] Saved {len(cards)} cards to CSV with correct column order")
+
+
+if __name__ == "__main__":
+    main()

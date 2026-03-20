@@ -1,31 +1,33 @@
 import re
 import os
 
-path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'js', 'app.js')
-with open(path, encoding='utf-8') as f:
-    lines = f.readlines()
 
-# Find boundaries
-start_idx = None  # first line to REPLACE (after "After aggregation" log)
-end_idx = None    # first line to KEEP after the replaced block
+def main():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'js', 'app.js')
+    with open(path, encoding='utf-8') as f:
+        lines = f.readlines()
 
-for i, line in enumerate(lines):
-    if "autoCompleteConsistency] After aggregation:" in line:
-        start_idx = i + 1   # keep the log line, replace everything after it
-    if start_idx and i > start_idx and "updateDeckDisplay(source)" in line:
-        end_idx = i + 3      # include updateDeckDisplay + closing "}" x2
-        break
+    # Find boundaries
+    start_idx = None  # first line to REPLACE (after "After aggregation" log)
+    end_idx = None    # first line to KEEP after the replaced block
 
-print(f"start_idx={start_idx} (1-based line {start_idx+1})")
-print(f"end_idx={end_idx}    (1-based line {end_idx+1})")
-print("--- START LINE ---")
-print(repr(lines[start_idx]))
-print("--- LAST 3 REPLACED LINES ---")
-for l in lines[end_idx-3:end_idx]:
-    print(repr(l))
+    for i, line in enumerate(lines):
+        if "autoCompleteConsistency] After aggregation:" in line:
+            start_idx = i + 1   # keep the log line, replace everything after it
+        if start_idx and i > start_idx and "updateDeckDisplay(source)" in line:
+            end_idx = i + 3      # include updateDeckDisplay + closing "}" x2
+            break
 
-# The new algorithm block to inject (12-space indent = function body level)
-NEW_BLOCK = '''\
+    print(f"start_idx={start_idx} (1-based line {start_idx+1})")
+    print(f"end_idx={end_idx}    (1-based line {end_idx+1})")
+    print("--- START LINE ---")
+    print(repr(lines[start_idx]))
+    print("--- LAST 3 REPLACED LINES ---")
+    for l in lines[end_idx-3:end_idx]:
+        print(repr(l))
+
+    # The new algorithm block to inject (12-space indent = function body level)
+    NEW_BLOCK = '''\
             
             // Step 2: Compute per-card statistics
             deckCards.forEach(card => {
@@ -151,9 +153,13 @@ NEW_BLOCK = '''\
         }
 '''
 
-new_lines = lines[:start_idx] + [NEW_BLOCK] + lines[end_idx:]
+    new_lines = lines[:start_idx] + [NEW_BLOCK] + lines[end_idx:]
 
-with open(path, 'w', encoding='utf-8') as f:
-    f.writelines(new_lines)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.writelines(new_lines)
 
-print("Done! Wrote", len(new_lines), "lines (was", len(lines), ")")
+    print("Done! Wrote", len(new_lines), "lines (was", len(lines), ")")
+
+
+if __name__ == "__main__":
+    main()

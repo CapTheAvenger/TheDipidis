@@ -21,7 +21,7 @@ prices_csv = os.path.join(data_dir, 'price_data.csv')
 
 print(f"\n[Test] Loading first 3 cards from database...")
 test_cards = []
-with open(cards_csv, 'r', encoding='utf-8', newline='') as f:
+with open(cards_csv, 'r', encoding='utf-8-sig', newline='') as f:
     reader = csv.DictReader(f)
     for i, row in enumerate(reader):
         if i >= 3:  # Only test 3 cards

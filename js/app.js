@@ -10,6 +10,89 @@ const BASE_PATH = './data/';
         // ============================================================
         // TOAST NOTIFICATION SYSTEM
         // ============================================================
+
+        /**
+         * Show a custom modal dialog that replaces native prompt().
+         * @param {Object} opts
+         * @param {string} opts.title - Modal title
+         * @param {string} [opts.message] - Description text (supports line breaks via \n)
+         * @param {string} [opts.defaultValue] - Pre-filled value
+         * @param {string} [opts.placeholder] - Placeholder text
+         * @param {boolean} [opts.textarea] - Use textarea instead of input
+         * @param {boolean} [opts.readonly] - Make value readonly (for copy dialogs)
+         * @param {string} [opts.inputType] - Input type (text, email, number)
+         * @returns {Promise<string|null>} Resolves with input value or null if cancelled
+         */
+        function showInputModal(opts = {}) {
+            return new Promise(resolve => {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);animation:helpModalIn .2s ease-out';
+                
+                const modal = document.createElement('div');
+                modal.style.cssText = 'background:#1a1a2e;border-radius:14px;max-width:460px;width:92%;padding:24px;box-shadow:0 16px 48px rgba(0,0,0,0.5);color:#eee;font-family:inherit';
+                
+                const title = document.createElement('h3');
+                title.style.cssText = 'margin:0 0 12px;font-size:1.1em;color:#fff';
+                title.textContent = opts.title || 'Input';
+                modal.appendChild(title);
+
+                if (opts.message) {
+                    const msg = document.createElement('p');
+                    msg.style.cssText = 'margin:0 0 14px;font-size:0.9em;color:#bbb;white-space:pre-line;line-height:1.5';
+                    msg.textContent = opts.message;
+                    modal.appendChild(msg);
+                }
+
+                let input;
+                if (opts.textarea) {
+                    input = document.createElement('textarea');
+                    input.style.cssText = 'width:100%;min-height:120px;padding:10px;border:1px solid #444;border-radius:8px;background:#16213e;color:#fff;font-size:0.95em;resize:vertical;box-sizing:border-box;font-family:monospace';
+                } else {
+                    input = document.createElement('input');
+                    input.type = opts.inputType || 'text';
+                    input.style.cssText = 'width:100%;padding:10px;border:1px solid #444;border-radius:8px;background:#16213e;color:#fff;font-size:0.95em;box-sizing:border-box';
+                }
+                if (opts.defaultValue != null) input.value = opts.defaultValue;
+                if (opts.placeholder) input.placeholder = opts.placeholder;
+                if (opts.readonly) { input.readOnly = true; input.style.cursor = 'text'; }
+                modal.appendChild(input);
+
+                const btnRow = document.createElement('div');
+                btnRow.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;margin-top:16px';
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.style.cssText = 'padding:8px 20px;border:1px solid #555;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;font-size:0.9em';
+
+                const okBtn = document.createElement('button');
+                okBtn.textContent = opts.readonly ? 'Close' : 'OK';
+                okBtn.style.cssText = 'padding:8px 20px;border:none;border-radius:8px;background:#667eea;color:#fff;cursor:pointer;font-size:0.9em;font-weight:600';
+
+                if (opts.readonly) {
+                    const copyBtn = document.createElement('button');
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.style.cssText = 'padding:8px 20px;border:none;border-radius:8px;background:#28a745;color:#fff;cursor:pointer;font-size:0.9em;font-weight:600';
+                    copyBtn.onclick = () => { input.select(); navigator.clipboard.writeText(input.value).then(() => { copyBtn.textContent = 'Copied!'; setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500); }); };
+                    btnRow.appendChild(copyBtn);
+                }
+
+                function close(val) { overlay.remove(); resolve(val); }
+                cancelBtn.onclick = () => close(null);
+                okBtn.onclick = () => close(opts.readonly ? null : input.value);
+                overlay.onclick = e => { if (e.target === overlay) close(null); };
+                input.addEventListener('keydown', e => { if (e.key === 'Enter' && !opts.textarea) { e.preventDefault(); close(opts.readonly ? null : input.value); } if (e.key === 'Escape') close(null); });
+                document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { document.removeEventListener('keydown', esc); close(null); } });
+
+                if (!opts.readonly) btnRow.appendChild(cancelBtn);
+                btnRow.appendChild(okBtn);
+                modal.appendChild(btnRow);
+                overlay.appendChild(modal);
+                document.body.appendChild(overlay);
+                
+                setTimeout(() => { input.focus(); if (opts.readonly) input.select(); }, 50);
+            });
+        }
+
         function showToast(message, type = 'info', duration = 3000) {
             const container = document.getElementById('toast-container');
             if (!container) return;
@@ -540,9 +623,9 @@ const BASE_PATH = './data/';
                 const displaySetNumber = (item.set && item.number) ? `${safeSet} ${safeNumber}` : 'No print specified';
                 const imageUrl = getCardImageSource(item.name, item.set, item.number) || buildInlineCardPlaceholder(item.name);
                 const escapedImageUrl = escapeHtmlAttr(imageUrl);
-                const jsName = String(item.name || '').replace(/'/g, "\\'");
-                const jsSet = String(item.set || '').replace(/'/g, "\\'");
-                const jsNumber = String(item.number || '').replace(/'/g, "\\'");
+                const jsName = escapeJsStr(item.name || '');
+                const jsSet = escapeJsStr(item.set || '');
+                const jsNumber = escapeJsStr(item.number || '');
 
                 return `
                     <div style="display: grid; grid-template-columns: 78px 1fr auto; gap: 12px; align-items: center; background: white; border: 1px solid #e1e8ed; border-radius: 10px; padding: 10px;">
@@ -891,8 +974,12 @@ const BASE_PATH = './data/';
             if (typeof MobileDragDrop !== 'undefined' && MobileDragDrop.polyfill) {
                 MobileDragDrop.polyfill({ holdToDrag: 300 });
             }
-            // Passive touchmove listener for mobile drag support
-            window.addEventListener('touchmove', function() {}, { passive: false });
+            // Mobile Drag & Drop polyfill: prevent default scroll during drag
+            window.addEventListener('touchmove', function(e) {
+                if (e.target && e.target.closest && e.target.closest('.proxy-drag-active')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
         });
         
         // Tab switching
@@ -2168,6 +2255,15 @@ const BASE_PATH = './data/';
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        }
+
+        function escapeJsStr(value) {
+            return String(value || '')
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"')
+                .replace(/\r/g, '\\r')
+                .replace(/\n/g, '\\n');
         }
 
         function getDisplayCardName(cardName, setCode = '', cardNumber = '') {
@@ -3497,7 +3593,7 @@ const BASE_PATH = './data/';
                         </div>
                     `;
                     
-                    const archetypeEscaped = archetypeName.replace(/'/g, "\\'");
+                    const archetypeEscaped = escapeJsStr(archetypeName);
                     
                     html += `
                         <div class="deck-banner-card" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')">
@@ -3666,7 +3762,7 @@ const BASE_PATH = './data/';
                         }
                     }
                     
-                    const archetypeEscaped = archetypeName.replace(/'/g, "\\'");
+                    const archetypeEscaped = escapeJsStr(archetypeName);
                     
                     html += `
                         <div class="deck-banner-card" onclick="navigateToCurrentMetaWithDeck('${archetypeEscaped}')">
@@ -4331,7 +4427,7 @@ const BASE_PATH = './data/';
                     const change = parseInt(d.count_change || 0);
                     const placement_change = parseFloat((d.avg_placement_change || '0').replace(',', '.'));
                     const placement_color = placement_change < 0 ? '#27ae60' : '#e74c3c';
-                    const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
+                    const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
                             <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
@@ -4367,7 +4463,7 @@ const BASE_PATH = './data/';
                     const improvement = Math.abs(parseFloat((d.avg_placement_change || '0').replace(',', '.')));
                     const countChange = parseInt(d.new_count) - parseInt(d.old_count);
                     const countChangeText = countChange > 0 ? `+${countChange}` : `${countChange}`;
-                    const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
+                    const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
                             <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
@@ -4396,7 +4492,7 @@ const BASE_PATH = './data/';
                     const decline = parseFloat((d.avg_placement_change || '0').replace(',', '.'));
                     const countChange = parseInt(d.new_count) - parseInt(d.old_count);
                     const countChangeText = countChange > 0 ? `+${countChange}` : `${countChange}`;
-                    const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
+                    const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
                             <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
@@ -4555,7 +4651,7 @@ const BASE_PATH = './data/';
 
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
-                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
+                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
                             <td style="padding: 8px 4px; text-align: center; color: #555; font-size: 0.85em; font-weight: 600;">${d.variant_count}</td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
@@ -4592,7 +4688,7 @@ const BASE_PATH = './data/';
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background=''" title="${d.variants.join(', ')}">
-                            <td style="padding: 12px; font-weight: bold; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
+                            <td style="padding: 12px; font-weight: bold; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
                             <td style="padding: 12px; text-align: center; color: #555; font-weight: 600;">${d.variant_count}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-size: 0.9em;">(${changeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.9em;">(${placementText})</span></td>
@@ -4636,7 +4732,7 @@ const BASE_PATH = './data/';
                     const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
                     const placementChange = parseFloat((d.avg_placement_change || '0').replace(',', '.'));
                     const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
-                    const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
+                    const archetypeEscaped = escapeJsStr(d.archetype);
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
@@ -4668,7 +4764,7 @@ const BASE_PATH = './data/';
                     const placementChange = parseFloat((d.avg_placement_change || '0').replace(',', '.'));
                     const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
                     const placementText = placementChange > 0 ? `+${placementChange.toFixed(2)}` : placementChange.toFixed(2);
-                    const archetypeEscaped = d.archetype.replace(/'/g, "\\'");
+                    const archetypeEscaped = escapeJsStr(d.archetype);
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
@@ -5977,7 +6073,7 @@ const BASE_PATH = './data/';
                 });
                 const rawPercentage = safeParseFloat(card.percentage_in_archetype || card.share_percent || 0);
                 const maxCount = parseInt(card.max_count) || card.max_count || '?';
-                const cardNameEscaped = cardName.replace(/'/g, "\\'");
+                const cardNameEscaped = escapeJsStr(cardName);
                 const setCode = displayCard.set_code || '';
                 const setNumber = displayCard.set_number || '';
                 
@@ -6150,7 +6246,7 @@ const BASE_PATH = './data/';
                 const originalSetNumber = card.set_number || '';
                 const rawCardName = card.card_name || '';
                 const cardName = getDisplayCardName(rawCardName, originalSetCode, originalSetNumber);
-                const cardNameEscaped = cardName.replace(/'/g, "\\'");
+                const cardNameEscaped = escapeJsStr(cardName);
                 
                 // Apply rarity mode to determine which versions to show
                 let versionsToRender = [];
@@ -6296,7 +6392,7 @@ const BASE_PATH = './data/';
                 }
                 const priceDisplay = eurPrice || '0,00€';
                 const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
-                const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
+                const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
                 
                 // Determine card type category for filtering
                 const cardType = card.type || card.card_type || '';
@@ -6822,7 +6918,7 @@ const BASE_PATH = './data/';
                     html += '<tr>';
                     // Image with green badge if card is in deck
                     html += `<td class="col-image"><div style="position: relative; display: inline-block;">`;
-                    html += `<img src="${imageUrl}" alt="${cardName}" loading="lazy" style="width: 60px; border-radius: 4px; cursor: zoom-in;" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardName.replace(/'/g, "\\'")}')">`;
+                    html += `<img src="${imageUrl}" alt="${cardName}" loading="lazy" style="width: 60px; border-radius: 4px; cursor: zoom-in;" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${escapeJsStr(cardName)}')">`;
                     if (currentDeckCount > 0) {
                         html += `<div style="position: absolute; top: 2px; left: 2px; background: #28a745; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${currentDeckCount}</div>`;
                     }
@@ -6833,7 +6929,7 @@ const BASE_PATH = './data/';
                     html += `<td>${setNumber}</td>`;
                     html += `<td><strong style="color: #667eea;">${percentage}%</strong></td>`;
                     html += `<td><strong style="color: #27ae60;">${avgCount}x</strong></td>`;
-                    html += `<td style="display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick="addCardToDeck('cityLeague', '${cardName.replace(/'/g, "\\'")}')">+ Add</button><button class="btn" style="background:#e74c3c;color:white;" onclick="addCardToProxy('${cardName.replace(/'/g, "\\'")}', '${setCode}', '${setNumber}', 1)">Proxy</button></td>`;
+                    html += `<td style="display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick="addCardToDeck('cityLeague', '${escapeJsStr(cardName)}')">+ Add</button><button class="btn" style="background:#e74c3c;color:white;" onclick="addCardToProxy('${escapeJsStr(cardName)}', '${setCode}', '${setNumber}', 1)">Proxy</button></td>`;
                     html += '</tr>';
                 });
 
@@ -8073,8 +8169,8 @@ const BASE_PATH = './data/';
                 
                 const percentage = parseFloat(card.percentage_in_archetype || 0).toFixed(1);
                 const count = card.deck_count_in_selected || 1;
-                const cardNameEscaped = safeCardName.replace(/'/g, "\\'");
-                const deckKeyEscaped = (card.deck_key || safeCardName).replace(/'/g, "\\'");
+                const cardNameEscaped = escapeJsStr(safeCardName);
+                const deckKeyEscaped = escapeJsStr(card.deck_key || safeCardName);
                 
                 // Fast price lookup using index
                 let eurPrice = '';
@@ -8090,7 +8186,7 @@ const BASE_PATH = './data/';
                 const priceDisplay = eurPrice || '0,00€';
                 const priceClass = eurPrice ? 'btn-cardmarket' : 'btn-cardmarket no-price';
                 const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
-                const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
+                const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
                 
                 const baseName = safeCardName;
                 const baseCardData =
@@ -8614,7 +8710,7 @@ const BASE_PATH = './data/';
                 // Card image or placeholder
                 let imgHtml = '';
                 if (imageUrl && imageUrl.trim() !== '') {
-                    imgHtml = `<img src="${imageUrl}" alt="${card.card_name}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${card.card_name.replace(/'/g, "\\'")}');">`;
+                    imgHtml = `<img src="${imageUrl}" alt="${card.card_name}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${escapeJsStr(card.card_name)}');">`;
                 } else {
                     imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">??</div>`;
                 }
@@ -8652,7 +8748,7 @@ const BASE_PATH = './data/';
                             </div>
                             
                             <!-- Add button -->
-                            <button class="btn btn-success" style="padding: 4px 8px; font-size: 0.75em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; margin-top: 8px; width: 100%;" onclick="addCardToDeck('cityLeague', '${card.card_name.replace(/'/g, "\\'")}', '${card.set_code || ''}', '${card.set_number || ''}')" title="Add to deck">Add to Deck</button>
+                            <button class="btn btn-success" style="padding: 4px 8px; font-size: 0.75em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; margin-top: 8px; width: 100%;" onclick="addCardToDeck('cityLeague', '${escapeJsStr(card.card_name)}', '${card.set_code || ''}', '${card.set_number || ''}')" title="Add to deck">Add to Deck</button>
                         </div>
                     </div>
                 `;
@@ -8738,7 +8834,7 @@ const BASE_PATH = './data/';
                 const imageUrl = getBestCardImage(card);
                 const count = card.deck_count_in_selected || 1;
                 const cardName = card.card_name || '';
-                const cardNameEscaped = (cardName || '').replace(/'/g, "\\'");
+                const cardNameEscaped = escapeJsStr(cardName || '');
                 
                 if (imageUrl && imageUrl.trim() !== '') {
                     return `
@@ -10229,7 +10325,7 @@ const BASE_PATH = './data/';
                 
                 // Create JSON string for archetypes (escape properly for HTML attribute)
                 const archetypesJson = JSON.stringify(card.archetypes || []).replace(/"/g, '&quot;');
-                const cardNameEscaped = card.card_name.replace(/'/g, "\\'");
+                const cardNameEscaped = escapeJsStr(card.card_name);
                 
                 // Check if card is in deck
                 const currentDeck = source === 'cityLeague' ? window.cityLeagueDeck : 
@@ -10469,7 +10565,7 @@ const BASE_PATH = './data/';
             let htmlString = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px;">';
 
             cardsToRender.forEach(cardName => {
-                const cardNameEscaped = cardName.replace(/'/g, "\\'");
+                const cardNameEscaped = escapeJsStr(cardName);
                 const cardVersions = matchingCards.filter(c => c.name === cardName);
                 // Filter out Japanese versions if international versions exist
                 let displayVersions = cardVersions;
@@ -10570,7 +10666,7 @@ const BASE_PATH = './data/';
                     card_name: cardName,
                     image_url: imageUrl
                 });
-                const cardNameEscaped = cardName.replace(/'/g, "\\'");
+                const cardNameEscaped = escapeJsStr(cardName);
                 
                 html += `
                     <div style="position: relative; text-align: center; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.25)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.15)';">
@@ -10895,7 +10991,7 @@ const BASE_PATH = './data/';
                         if (deckNameCell && !deckNameCell.querySelector('.archetype-jump-link')) {
                             const archetype = String(deckNameCell.textContent || '').trim();
                             if (archetype) {
-                                const archetypeEscaped = archetype.replace(/'/g, "\\'");
+                                const archetypeEscaped = escapeJsStr(archetype);
                                 deckNameCell.innerHTML = `<a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'currentMeta')" class="archetype-jump-link">${archetype}</a>`;
                             }
                         }
@@ -11327,8 +11423,8 @@ const BASE_PATH = './data/';
                             }
                             
                             const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} games)`;
-                            const safeRow = rowDeck.replace(/'/g, "\\'");
-                            const safeCol = colDeck.replace(/'/g, "\\'");
+                            const safeRow = escapeJsStr(rowDeck);
+                            const safeCol = escapeJsStr(colDeck);
                             tableHtml += `<td style="background: ${bgColor}; color: ${textColor}; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd; cursor: help; transition: all 0.2s;" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)" onmouseover="this.style.transform='scale(1.1)'; this.style.zIndex='10'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1'; this.style.boxShadow='none'">${winRate.toFixed(1)}%</td>`;
                         }
                     });
@@ -12183,7 +12279,7 @@ const BASE_PATH = './data/';
                 html += `<td style="text-align: center; font-weight: bold; color: #2c3e50;">${count}</td>`;
                 html += `<td>${cardName}</td>`;
                 html += `<td style="text-align: center;">${isAceSpecCard ? '<span style="color: #e74c3c; font-weight: bold;">★</span>' : '-'}</td>`;
-                html += `<td style="text-align: center; display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${cardName.replace(/'/g, "\\'")}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button><button class="btn" style="padding: 6px 10px; font-size: 0.8em; background:#e74c3c; color:white;" onclick='addCardToProxy("${cardName.replace(/'/g, "\\'")}", "${proxySetCode}", "${proxySetNumber}", 1)'>Proxy</button></td>`;
+                html += `<td style="text-align: center; display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${escapeJsStr(cardName)}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button><button class="btn" style="padding: 6px 10px; font-size: 0.8em; background:#e74c3c; color:white;" onclick='addCardToProxy("${escapeJsStr(cardName)}", "${proxySetCode}", "${proxySetNumber}", 1)'>Proxy</button></td>`;
                 html += '</tr>';
             });
             
@@ -12213,7 +12309,7 @@ const BASE_PATH = './data/';
             
             sortedCards.forEach(card => {
                 const cardFullName = fixMojibake(card.full_card_name || card.card_name || 'Unknown Card');
-                const cardNameEscaped = cardFullName.replace(/'/g, "\\'");
+                const cardNameEscaped = escapeJsStr(cardFullName);
                 const avgCount = parseFloat(String(card.card_count || card.average_count_overall || 0).replace(',', '.')) || 0; // Average count across all decklists (e.g., 0.98)
                 const maxCount = getPastMetaDisplayCount(card);
                 const decklistCount = parseFloat(String(card.decklist_count || card.total_decks_in_archetype || 0).replace(',', '.')) || 0; // Total decklists in archetype
@@ -12383,7 +12479,7 @@ const BASE_PATH = './data/';
                     }
                     const priceDisplay = eurPrice || '0,00€';
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
-                    const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
+                    const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
                     
                     // Determine card type for filtering with database-based approach
                     const filterCategory = getCardType(cardName, setCode, setNumber);
@@ -13383,7 +13479,7 @@ const BASE_PATH = './data/';
                 const versions = window.allCardsData.filter(c => c.name === card.name).length;
                 
                 return `
-                    <div class="cards-autocomplete-item" onclick="selectCardFromAutocomplete('${card.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
+                    <div class="cards-autocomplete-item" onclick="selectCardFromAutocomplete('${escapeJsStr(card.name)}')">
                         <img src="${card.image_url}" alt="${card.name}" loading="lazy">
                         <div class="cards-autocomplete-item-info">
                             <div class="cards-autocomplete-item-name">${card.name}</div>
@@ -14400,8 +14496,8 @@ const BASE_PATH = './data/';
             const rarityClass = getRarityClass(card.rarity);
             
             // Escape strings for HTML attributes
-            const escapedName = (card.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            const escapedImageUrl = (card.image_url || '').replace(/'/g, "\\'");
+            const escapedName = escapeJsStr(card.name || '');
+            const escapedImageUrl = escapeJsStr(card.image_url || '');
             const displayName = card.name || 'Unknown Card';
             const displaySet = card.set || '???';
             const displayNumber = card.number || '?';
@@ -14415,7 +14511,7 @@ const BASE_PATH = './data/';
             const cardId = `${card.name}|${displaySet}|${displayNumber}`;
             item.setAttribute('data-card-id', cardId);
             // Escape single quotes for safe use inside onclick='...' JS string literals
-            const safeCardId = cardId.replace(/'/g, "\\'");
+            const safeCardId = escapeJsStr(cardId);
             
             // Check if user owns THIS SPECIFIC PRINT
             const userOwnsCard = window.userCollection && window.userCollection.has(cardId);
@@ -16083,7 +16179,7 @@ const BASE_PATH = './data/';
                 const originalSetNumber = card.set_number || '';
                 const rawCardName = card.card_name || '';
                 const cardName = getDisplayCardName(rawCardName, originalSetCode, originalSetNumber);
-                const cardNameEscaped = cardName.replace(/'/g, "\\'");
+                const cardNameEscaped = escapeJsStr(cardName);
                 
                 let versionsToRender = [];
                 
@@ -16209,7 +16305,7 @@ const BASE_PATH = './data/';
                     }
                     const priceDisplay = eurPrice || '0,00€';
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
-                    const cardmarketUrlEscaped = (cardmarketUrl || '').replace(/'/g, "\\'");
+                    const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
                     
                     // Determine card type for filtering with database-based approach
                     const filterCategory = getCardType(cardName, setCode, setNumber);
@@ -16345,7 +16441,7 @@ const BASE_PATH = './data/';
                     });
                     const rawPercentage = parseFloat(String(card.percentage_in_archetype || card.share_percent || 0).replace(',', '.'));
                     const maxCount = parseInt(card.max_count) || card.max_count || '?';
-                    const cardNameEscaped = cardName.replace(/'/g, "\\'");
+                    const cardNameEscaped = escapeJsStr(cardName);
                     const setCode = displayCard.set_code || '';
                     const setNumber = displayCard.set_number || '';
                     const avgCountUsedRaw = parseFloat(String(card.average_count || card.avg_count || 0).replace(',', '.'));
@@ -17032,9 +17128,9 @@ const BASE_PATH = './data/';
                                            group.type === 'changed' ? `${card.oldCount} ? ${card.newCount}` :
                                            `${card.newCount}`;
                         const proxyCount = group.type === 'new' ? parseProxyCount(card.newCount, 1) : 1;
-                        const cardNameEscaped = String(card.name || '').replace(/'/g, "\\'");
-                        const cardSetEscaped = String(card.set || '').replace(/'/g, "\\'");
-                        const cardNumberEscaped = String(card.number || '').replace(/'/g, "\\'");
+                        const cardNameEscaped = escapeJsStr(card.name || '');
+                        const cardSetEscaped = escapeJsStr(card.set || '');
+                        const cardNumberEscaped = escapeJsStr(card.number || '');
                         
                         const cardData = cardsBySetNumberMap[`${card.set}-${card.number}`];
                         const imageUrl = cardData ? cardData.image_url : '';
@@ -17264,7 +17360,7 @@ const BASE_PATH = './data/';
                     
                     navigator.clipboard.writeText(url.toString()).then(() => {
                         showDeckShareToast(`🔗 Short link copied! (${total} cards)`);
-                    }).catch(() => { prompt('Copy this share link:', url.toString()); });
+                    }).catch(() => { showInputModal({ title: '🔗 Share Link', message: 'Copy this share link:', defaultValue: url.toString(), readonly: true }); });
                     return;
                 } catch (err) {
                     console.warn('[shareDeck] Firebase Firestore failed, falling back to Base64:', err);
@@ -17277,7 +17373,7 @@ const BASE_PATH = './data/';
             url.searchParams.set('deck', encoded);
             navigator.clipboard.writeText(url.toString()).then(() => {
                 showDeckShareToast(`🔗 Share link copied! (${total} cards)`);
-            }).catch(() => { prompt('Copy this share link:', url.toString()); });
+            }).catch(() => { showInputModal({ title: '🔗 Share Link', message: 'Copy this share link:', defaultValue: url.toString(), readonly: true }); });
         }
 
         function generateShortId() {
@@ -17478,8 +17574,8 @@ const BASE_PATH = './data/';
             navigator.clipboard.writeText(ptcglText).then(() => {
                 showDeckShareToast(`✅ PTCGL export copied! (${total} cards)`);
             }).catch(() => {
-                // Fallback: show in prompt
-                prompt('Copy this PTCGL deck list:', ptcglText);
+                // Fallback: show in modal
+                showInputModal({ title: 'PTCGL Export', message: 'Copy this PTCGL deck list:', defaultValue: ptcglText, readonly: true, textarea: true });
             });
         }
 
@@ -17488,8 +17584,8 @@ const BASE_PATH = './data/';
          * Expects text format: "Count CardName SetCode SetNumber"
          * Parses and populates the deck builder
          */
-        function importFromPTCGL(source) {
-            const ptcglText = prompt('Paste your PTCGL deck list:\n\n(Format: "4 Charizard ex PAL 234")');
+        async function importFromPTCGL(source) {
+            const ptcglText = await showInputModal({ title: 'Import PTCGL Deck', message: 'Paste your PTCGL deck list:\n\n(Format: "4 Charizard ex PAL 234")', textarea: true, placeholder: '4 Charizard ex PAL 234\n3 Rare Candy SVI 191\n...' });
             if (!ptcglText) return;
 
             const allCardsDb = window.allCardsDatabase || [];

@@ -19,7 +19,7 @@ def load_cards_from_csv(csv_path):
         print(f"ERROR: {csv_path} not found")
         return cards
     
-    with open(csv_path, 'r', encoding='utf-8', newline='') as f:
+    with open(csv_path, 'r', encoding='utf-8-sig', newline='') as f:
         reader = csv.DictReader(f)
         for row in reader:
             cards.append(row)
@@ -86,7 +86,7 @@ def scrape_card_details_fix(cards):
                         image_url = img_elem.get_attribute('src')
                         if image_url:
                             card['image_url'] = image_url
-                    except:
+                    except Exception:
                         pass
                     
                     # Extract rarity (only for non-Basic Energy)
@@ -98,7 +98,7 @@ def scrape_card_details_fix(cards):
                                 if '·' in rarity_info:
                                     rarity = rarity_info.split('·')[1].strip()
                                     card['rarity'] = rarity
-                        except:
+                        except Exception:
                             pass
                         
                         # For Promo sets: If rarity is empty, set it to "Promo"

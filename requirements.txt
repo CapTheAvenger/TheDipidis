@@ -1,17 +1,17 @@
 # Web scraping dependencies
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-lxml>=4.9.0
-selenium>=4.15.0
-selenium-stealth>=1.0.6
-cloudscraper>=1.2.71
+requests>=2.31.0,<3
+beautifulsoup4>=4.12.0,<5
+lxml>=4.9.0,<6
+selenium>=4.15.0,<5
+selenium-stealth>=1.0.6,<2
+cloudscraper>=1.2.71,<2
 
 # Data processing
-pandas>=2.0.0
+pandas>=2.0.0,<3
 
 # Price proxy server
-flask>=3.0.0
-flask-cors>=4.0.0
+flask>=3.0.0,<4
+flask-cors>=4.0.0,<5
 
 # Optional: For better performance
-urllib3>=2.0.0
+urllib3>=2.0.0,<3

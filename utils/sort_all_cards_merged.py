@@ -29,7 +29,7 @@ def extract_number(number_str):
     try:
         match = re.match(r'(\d+)', str(number_str))
         return int(match.group(1)) if match else 0
-    except:
+    except (ValueError, AttributeError):
         return 0
 
 def sort_key(card):
@@ -56,7 +56,7 @@ def sort_csv():
     cards = []
     fieldnames = None
     
-    with open(csv_path, 'r', encoding='utf-8', newline='') as f:
+    with open(csv_path, 'r', encoding='utf-8-sig', newline='') as f:
         reader = csv.DictReader(f)
         fieldnames = reader.fieldnames
         for row in reader:

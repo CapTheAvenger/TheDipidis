@@ -17,6 +17,7 @@ import csv
 import json
 import re
 import time
+import tempfile
 import importlib
 import logging
 import threading
@@ -148,8 +149,9 @@ def _get_scraper() -> Any:
     return _thread_local.scraper
 
 def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: float = 1.0) -> str:
-    """Zentraler HTML Fetcher mit Cloudflare-Bypass."""
+    """Zentraler HTML Fetcher mit Cloudflare-Bypass und exponentiellem Backoff."""
     scraper = _get_scraper()
+    delay = retry_delay
     for attempt in range(1, retries + 2):
         try:
             resp = scraper.get(url, timeout=timeout)
@@ -158,7 +160,8 @@ def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: 
         except Exception as e:
             if attempt <= retries:
                 logger.debug("Fetch failed (attempt %s/%s) for %s: %s", attempt, retries + 1, url, e)
-                time.sleep(retry_delay)
+                time.sleep(delay)
+                delay = min(delay * 2, 30)  # exponential backoff, max 30s
             else:
                 logger.warning("Fetch failed after %s attempts for %s: %s", retries + 1, url, e)
     return ""
@@ -172,6 +175,34 @@ def fetch_page_bs4(url: str, timeout: int = 15, retries: int = 2) -> Optional[An
 def fetch_page(url: str, timeout: int = 15) -> str:
     """Legacy wrapper fuer alte Skripte."""
     return safe_fetch_html(url, timeout)
+
+
+def atomic_write_file(target_path: str, write_fn, mode: str = 'w', encoding: str = 'utf-8', newline: str = ''):
+    """Write file atomically: write to temp file first, then rename.
+    
+    Args:
+        target_path: Final destination path
+        write_fn: Callable that receives the open file handle to write to
+        mode: File mode (default 'w')
+        encoding: File encoding (default 'utf-8')
+        newline: Newline parameter for open()
+    """
+    dir_name = os.path.dirname(target_path) or '.'
+    os.makedirs(dir_name, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix='.tmp')
+    try:
+        with os.fdopen(fd, mode, encoding=encoding, newline=newline) as f:
+            write_fn(f)
+        # Atomic rename (on Windows, need to remove target first)
+        if os.path.exists(target_path):
+            os.replace(tmp_path, target_path)
+        else:
+            os.rename(tmp_path, target_path)
+    except Exception:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        raise
+
 
 # ============================================================================
 # STRING & DATE NORMALIZATION
@@ -564,8 +595,9 @@ def save_to_csv(data: List[RowDict], output_file: str, append_mode: bool = False
             reordered.append(ordered)
         data = reordered
 
-    with open(out_path, 'w', newline='', encoding='utf-8-sig') as f:
-        writer = csv.DictWriter(f, fieldnames=list(data[0].keys()), delimiter=';', extrasaction='ignore')
+    fieldnames = list(data[0].keys())
+    def _write_csv(f):
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=';', extrasaction='ignore')
         writer.writeheader()
         for r in data:
             rf = r.copy()
@@ -577,3 +609,5 @@ def save_to_csv(data: List[RowDict], output_file: str, append_mode: bool = False
             if 'average_count_overall' in rf:
                 rf['average_count_overall'] = str(rf['average_count_overall']).replace('.', ',')
             writer.writerow(rf)
+    
+    atomic_write_file(out_path, _write_csv, encoding='utf-8-sig', newline='')

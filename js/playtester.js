@@ -2858,14 +2858,14 @@ function ptShowDeckPopup(player, deckEl) {
             '<button class="pt-stepper-action" onclick="ptLookCards(\'' + player + '\',\'bottom\',parseInt(document.getElementById(\'' + player + '-pop-bot\').innerText));ptCloseDeckPopup()">BOT</button>' +
         '</div>' +
         '<button class="pt-btn-small pt-deck-popup-close" onclick="ptCloseDeckPopup()">\u2715 Close</button>';
-    var rect = deckEl.getBoundingClientRect();
+    const rect = deckEl.getBoundingClientRect();
     popup.style.left = Math.min(Math.max(rect.left - 60, 8), window.innerWidth - 190) + 'px';
     popup.style.top = Math.max(rect.top - 280, 10) + 'px';
     document.body.appendChild(popup);
 }
 
 function ptCloseDeckPopup() {
-    var popup = document.getElementById('ptDeckPopup');
+    const popup = document.getElementById('ptDeckPopup');
     if (popup) popup.remove();
 }
 
@@ -2874,8 +2874,8 @@ function ptInitMobileDeckTriggers() {
     document.querySelectorAll('.pt-deck-pile').forEach(function(pile) {
         if (pile.dataset.mobileInit) return;
         pile.dataset.mobileInit = '1';
-        var player = pile.closest('#p1-area') ? 'p1' : 'p2';
-        var trigger = document.createElement('button');
+        const player = pile.closest('#p1-area') ? 'p1' : 'p2';
+        const trigger = document.createElement('button');
         trigger.className = 'pt-btn-small pt-deck-popup-trigger';
         trigger.textContent = '\u22EE Deck Menu';
         trigger.onclick = function() { ptShowDeckPopup(player, pile); };
@@ -2884,8 +2884,8 @@ function ptInitMobileDeckTriggers() {
 }
 
 // ── Deck Menu (Mobile Tap) ──────────────────────────────────────────────
-function ptDeckMenu(player) {
-    var action = prompt('DECK MENU\n\nWähle eine Aktion:\n1 = Karte ziehen\n2 = Deck durchsuchen (Search)\n3 = Oberste Karten ansehen\n4 = Gegner mischt & zieht X', '1');
+async function ptDeckMenu(player) {
+    const action = await showInputModal({ title: 'Deck Menu', message: '1 = Karte ziehen\n2 = Deck durchsuchen (Search)\n3 = Oberste Karten ansehen\n4 = Gegner mischt & zieht X', defaultValue: '1', placeholder: '1-4' });
     if (action === '1') ptDrawCards(player, 1);
     else if (action === '2') ptOpenDeckSearch(player);
     else if (action === '3') ptLookCards(player, 'top', 5);
@@ -2894,9 +2894,9 @@ function ptDeckMenu(player) {
 window.ptDeckMenu = ptDeckMenu;
 
 // ── Quick Actions Menu (Mobile Shortcut) ─────────────────────────────────
-function ptQuickActionsMenu() {
-    var player = ptCurrentPlayer || 'p1';
-    var action = prompt('QUICK ACTIONS MENU\n\nWähle eine Aktion:\n1 = Iono (Enigmara)\n2 = Karte ziehen (Draw)\n3 = Deck durchsuchen (Search)\n4 = Oberste Karten ansehen (Look)\n5 = Gegner mischt & zieht X\n6 = Mulligan (7 neue Karten)\n7 = Hand mischen (Shuffle into Deck)\n8 = Setup Phase (Neustart)', '1');
+async function ptQuickActionsMenu() {
+    const player = ptCurrentPlayer || 'p1';
+    const action = await showInputModal({ title: 'Quick Actions', message: '1 = Iono (Enigmara)\n2 = Karte ziehen (Draw)\n3 = Deck durchsuchen (Search)\n4 = Oberste Karten ansehen (Look)\n5 = Gegner mischt & zieht X\n6 = Mulligan (7 neue Karten)\n7 = Hand mischen (Shuffle into Deck)\n8 = Setup Phase (Neustart)', defaultValue: '1', placeholder: '1-8' });
     if (action === '1') ptGlobalIono();
     else if (action === '2') ptDrawCards(player, 1);
     else if (action === '3') ptOpenDeckSearch(player);
@@ -2909,28 +2909,28 @@ function ptQuickActionsMenu() {
 window.ptQuickActionsMenu = ptQuickActionsMenu;
 
 // ── Opponent Shuffle & Draw X ───────────────────────────────────────────
-function ptOpponentShuffleAndDraw() {
-    var input = prompt('Wie viele Karten soll der Gegner ziehen?', '4');
+async function ptOpponentShuffleAndDraw() {
+    const input = await showInputModal({ title: 'Gegner zieht Karten', message: 'Wie viele Karten soll der Gegner ziehen?', defaultValue: '4', inputType: 'number' });
     if (!input || isNaN(parseInt(input))) return;
-    var num = Math.max(0, parseInt(input));
+    const num = Math.max(0, parseInt(input));
 
     ptSaveState();
-    var opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
 
     // Hand ins Deck mischen
     ptState[opp].deck.push.apply(ptState[opp].deck, ptState[opp].hand);
     ptState[opp].hand = [];
 
     // Fisher-Yates shuffle
-    var deck = ptState[opp].deck;
-    for (var i = deck.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = deck[i]; deck[i] = deck[j]; deck[j] = tmp;
+    const deck = ptState[opp].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = deck[i]; deck[i] = deck[j]; deck[j] = tmp;
     }
 
     // Draw X
-    var drawn = Math.min(num, deck.length);
-    for (var k = 0; k < drawn; k++) {
+    const drawn = Math.min(num, deck.length);
+    for (let k = 0; k < drawn; k++) {
         ptState[opp].hand.push(deck.pop());
     }
 
@@ -2939,8 +2939,8 @@ function ptOpponentShuffleAndDraw() {
 }
 
 window.executeCustomJudge = function() {
-    var p1 = parseInt(document.getElementById('inpJudgeP1')?.value) || 4;
-    var p2 = parseInt(document.getElementById('inpJudgeP2')?.value) || 4;
+    const p1 = parseInt(document.getElementById('inpJudgeP1')?.value) || 4;
+    const p2 = parseInt(document.getElementById('inpJudgeP2')?.value) || 4;
 
     ptSaveState();
 
@@ -2959,25 +2959,25 @@ window.executeCustomJudge = function() {
     if (typeof showToast === 'function') showToast('Judge gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
     else ptShowMessage('Judge gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
 
-    var modal = document.getElementById('ptDirectActionModal');
+    const modal = document.getElementById('ptDirectActionModal');
     if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
 };
 
 window.executeCustomIono = function() {
-    var p1 = parseInt(document.getElementById('inpIonoP1')?.value) || 6;
-    var p2 = parseInt(document.getElementById('inpIonoP2')?.value) || 6;
+    const p1 = parseInt(document.getElementById('inpIonoP1')?.value) || 6;
+    const p2 = parseInt(document.getElementById('inpIonoP2')?.value) || 6;
 
     ptSaveState();
 
-    // Iono: hands go to bottom of deck
-    ptState.p1.hand.sort(function() { return Math.random() - 0.5; });
+    // Iono: hands go to bottom of deck (Fisher-Yates shuffle)
+    for (let i = ptState.p1.hand.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ptState.p1.hand[i], ptState.p1.hand[j]] = [ptState.p1.hand[j], ptState.p1.hand[i]]; }
     ptState.p1.deck.unshift.apply(ptState.p1.deck, ptState.p1.hand);
     ptState.p1.hand = [];
     ptDrawCards('p1', p1);
 
-    ptState.p2.hand.sort(function() { return Math.random() - 0.5; });
+    for (let i = ptState.p2.hand.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ptState.p2.hand[i], ptState.p2.hand[j]] = [ptState.p2.hand[j], ptState.p2.hand[i]]; }
     ptState.p2.deck.unshift.apply(ptState.p2.deck, ptState.p2.hand);
     ptState.p2.hand = [];
     ptDrawCards('p2', p2);
@@ -2985,15 +2985,15 @@ window.executeCustomIono = function() {
     if (typeof showToast === 'function') showToast('Iono gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
     else ptShowMessage('Iono gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
 
-    var modal = document.getElementById('ptDirectActionModal');
+    const modal = document.getElementById('ptDirectActionModal');
     if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
 };
 
 window.executeOwnShuffleDraw = function() {
-    var count = parseInt(document.getElementById('inpOwnSD')?.value) || 6;
-    var p = ptCurrentPlayer || 'p1';
+    const count = parseInt(document.getElementById('inpOwnSD')?.value) || 6;
+    const p = ptCurrentPlayer || 'p1';
 
     ptSaveState();
     ptState[p].deck.push.apply(ptState[p].deck, ptState[p].hand);
@@ -3001,15 +3001,15 @@ window.executeOwnShuffleDraw = function() {
     ptShuffleDeck(p);
     ptDrawCards(p, count);
 
-    var modal = document.getElementById('ptDirectActionModal');
+    const modal = document.getElementById('ptDirectActionModal');
     if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
 };
 
 window.executeOppShuffleDraw = function() {
-    var count = parseInt(document.getElementById('inpOppSD')?.value) || 4;
-    var opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+    const count = parseInt(document.getElementById('inpOppSD')?.value) || 4;
+    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
 
     ptSaveState();
     ptState[opp].deck.push.apply(ptState[opp].deck, ptState[opp].hand);
@@ -3017,7 +3017,7 @@ window.executeOppShuffleDraw = function() {
     ptShuffleDeck(opp);
     ptDrawCards(opp, count);
 
-    var modal = document.getElementById('ptDirectActionModal');
+    const modal = document.getElementById('ptDirectActionModal');
     if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();

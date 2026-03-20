@@ -1443,23 +1443,49 @@ const BASE_PATH = './data/';
             }).filter(row => row && row.card_name && row.archetype);
         }
 
+        let currentMetaRowsFallbackCache = null;
+        let currentMetaRowsFallbackInFlight = null;
+
         async function loadCurrentMetaRowsWithFallback(options = {}) {
-            const primary = await loadCSV('current_meta_card_data.csv', options);
-            if (Array.isArray(primary) && primary.length > 0) {
+            const forceRefresh = Boolean(options && options.forceRefresh);
+
+            if (!forceRefresh && Array.isArray(currentMetaRowsFallbackCache)) {
+                return currentMetaRowsFallbackCache;
+            }
+
+            if (!forceRefresh && currentMetaRowsFallbackInFlight) {
+                return await currentMetaRowsFallbackInFlight;
+            }
+
+            const loadPromise = (async () => {
+                const primary = await loadCSV('current_meta_card_data.csv', options);
+                if (Array.isArray(primary) && primary.length > 0) {
+                    window.currentMetaUsingFallback = false;
+                    if (!forceRefresh) currentMetaRowsFallbackCache = primary;
+                    return primary;
+                }
+
+                const fallback = await loadCSV('tournament_cards_data_cards.csv', options);
+                if (Array.isArray(fallback) && fallback.length > 0) {
+                    const normalizedFallback = normalizeCurrentMetaFallbackRows(fallback);
+                    console.warn(`[Current Meta] Using tournament fallback dataset (${normalizedFallback.length} rows) because current_meta_card_data.csv is missing or empty.`);
+                    window.currentMetaUsingFallback = true;
+                    if (!forceRefresh) currentMetaRowsFallbackCache = normalizedFallback;
+                    return normalizedFallback;
+                }
+
                 window.currentMetaUsingFallback = false;
-                return primary;
-            }
+                if (!forceRefresh) currentMetaRowsFallbackCache = [];
+                return [];
+            })();
 
-            const fallback = await loadCSV('tournament_cards_data_cards.csv', options);
-            if (Array.isArray(fallback) && fallback.length > 0) {
-                const normalizedFallback = normalizeCurrentMetaFallbackRows(fallback);
-                console.warn(`[Current Meta] Using tournament fallback dataset (${normalizedFallback.length} rows) because current_meta_card_data.csv is missing or empty.`);
-                window.currentMetaUsingFallback = true;
-                return normalizedFallback;
-            }
+            if (!forceRefresh) currentMetaRowsFallbackInFlight = loadPromise;
 
-            window.currentMetaUsingFallback = false;
-            return [];
+            try {
+                return await loadPromise;
+            } finally {
+                if (!forceRefresh) currentMetaRowsFallbackInFlight = null;
+            }
         }
 
         const csvMemoryCache = new Map();
@@ -1494,7 +1520,19 @@ const BASE_PATH = './data/';
                     }
                     return parsed;
                 }).catch(e => {
-                    console.error(`PapaParse error loading ${filename}:`, e);
+                    const statusCode = e && (e.status || e.statusCode);
+                    const fileLower = String(filename || '').toLowerCase();
+                    const isCurrentMeta = fileLower.includes('current_meta');
+                    const is404 = statusCode === 404 || /404/.test(String(e && (e.message || e) || ''));
+
+                    if (isCurrentMeta && is404) {
+                        if (!window._currentMetaMissingWarned) {
+                            console.warn(`[Current Meta] ${filename} not found (404). Falling back to tournament_cards_data_cards.csv.`);
+                            window._currentMetaMissingWarned = true;
+                        }
+                    } else {
+                        console.error(`PapaParse error loading ${filename}:`, e);
+                    }
                     return null;
                 });
 

@@ -442,15 +442,45 @@ function getCardSetOrder(card) {
   return parseInt(map[card.set], 10) || 0;
 }
 
+function compareCardsByNewestSet(aCard, bCard, collator) {
+  const aSet = getCardSetOrder(aCard);
+  const bSet = getCardSetOrder(bCard);
+  if (aSet !== bSet) return bSet - aSet;
+
+  const aSetCode = String((aCard && aCard.set) || '').toUpperCase();
+  const bSetCode = String((bCard && bCard.set) || '').toUpperCase();
+  if (aSetCode !== bSetCode) return collator.compare(bSetCode, aSetCode);
+
+  const aNum = parseInt((aCard && aCard.number) || '', 10);
+  const bNum = parseInt((bCard && bCard.number) || '', 10);
+  if (!isNaN(aNum) && !isNaN(bNum) && aNum !== bNum) return aNum - bNum;
+
+  const aName = String((aCard && aCard.name) || '');
+  const bName = String((bCard && bCard.name) || '');
+  return collator.compare(aName, bName);
+}
+
 function getCardElementBucket(card) {
   const rawType = String((card && (card.type || card.card_type)) || '').toLowerCase();
-  const elementOrder = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'dragon', 'colorless'];
-  for (const el of elementOrder) {
-    if (rawType.includes(el)) return el;
+  const rawName = String((card && card.name) || '').toLowerCase();
+
+  const ordered = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'dragon', 'colorless'];
+  for (let i = 0; i < ordered.length; i++) {
+    const el = ordered[i];
+    if (rawType.includes(el) || rawName.includes(`${el} energy`)) {
+      return { key: el, rank: i + 1 };
+    }
   }
-  if (rawType.includes('energy')) return 'energy';
-  if (rawType.includes('trainer') || rawType.includes('item') || rawType.includes('supporter') || rawType.includes('stadium') || rawType.includes('tool')) return 'trainer';
-  return 'other';
+
+  // Fallback groups if explicit element is not present in dataset fields.
+  if (rawType.includes('energy')) return { key: 'energy', rank: 20 };
+  if (rawType.includes('trainer') || rawType.includes('item') || rawType.includes('supporter') || rawType.includes('stadium') || rawType.includes('tool')) {
+    return { key: 'trainer', rank: 30 };
+  }
+  if (rawType.includes('basic') || rawType.includes('stage') || rawType.includes('pokemon') || rawType.includes('ex')) {
+    return { key: 'pokemon', rank: 40 };
+  }
+  return { key: 'other', rank: 99 };
 }
 
 function getCardPokedexNumber(card) {
@@ -486,16 +516,10 @@ function sortCollectionEntries(entries) {
     if (mode === 'element-set-newest') {
       const aEl = getCardElementBucket(a.card);
       const bEl = getCardElementBucket(b.card);
-      if (aEl !== bEl) return collator.compare(aEl, bEl);
+      if (aEl.rank !== bEl.rank) return aEl.rank - bEl.rank;
+      if (aEl.key !== bEl.key) return collator.compare(aEl.key, bEl.key);
 
-      const aSet = getCardSetOrder(a.card);
-      const bSet = getCardSetOrder(b.card);
-      if (aSet !== bSet) return bSet - aSet;
-
-      const aNum = parseInt(a.card.number, 10);
-      const bNum = parseInt(b.card.number, 10);
-      if (!isNaN(aNum) && !isNaN(bNum) && aNum !== bNum) return aNum - bNum;
-      return collator.compare(a.card.name, b.card.name);
+      return compareCardsByNewestSet(a.card, b.card, collator);
     }
 
     if (mode === 'pokedex') {
@@ -503,21 +527,11 @@ function sortCollectionEntries(entries) {
       const bDex = getCardPokedexNumber(b.card);
       if (aDex !== bDex) return aDex - bDex;
 
-      const aSet = getCardSetOrder(a.card);
-      const bSet = getCardSetOrder(b.card);
-      if (aSet !== bSet) return bSet - aSet;
-      return collator.compare(a.card.name, b.card.name);
+      return compareCardsByNewestSet(a.card, b.card, collator);
     }
 
     // Default: newest set first
-    const aSet = getCardSetOrder(a.card);
-    const bSet = getCardSetOrder(b.card);
-    if (aSet !== bSet) return bSet - aSet;
-
-    const aNum = parseInt(a.card.number, 10);
-    const bNum = parseInt(b.card.number, 10);
-    if (!isNaN(aNum) && !isNaN(bNum) && aNum !== bNum) return aNum - bNum;
-    return collator.compare(a.card.name, b.card.name);
+    return compareCardsByNewestSet(a.card, b.card, collator);
   });
 }
 

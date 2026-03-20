@@ -1161,6 +1161,27 @@ function ptCloseTopCards() {
     ptRenderAll();
 }
 
+function ptShuffleRemainingLookedCardsIntoDeck() {
+    const p = ptLookingAtPlayer || ptCurrentPlayer;
+    if (!ptLookingAt || ptLookingAt.length === 0) {
+        ptCloseTopCards();
+        return;
+    }
+
+    ptState[p].deck.push(...ptLookingAt);
+    ptLookingAt = [];
+
+    const deck = ptState[p].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+
+    ptLog(`Shuffled the remaining looked-at cards back into ${p.toUpperCase()}'s deck.`);
+    document.getElementById('ptTopCardsModal').style.display = 'none';
+    ptRenderAll();
+}
+
 // --- BASIC ACTIONS & BOARD FLIP ---
 
 // Ensure only the ACTIVE player's area captures pointer events.

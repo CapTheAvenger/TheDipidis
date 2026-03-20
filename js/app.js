@@ -274,7 +274,7 @@ const BASE_PATH = './data/';
         }
 
         const DEFERRED_PLAYTESTER_SCRIPTS = [
-            'js/playtester.js?v=20260320-v64',
+            'js/playtester.js?v=20260320-v65',
             'js/playtester-mobile.js?v=20260315-v1',
             'js/firebase-multiplayer.js?v=20260315-v1'
         ];

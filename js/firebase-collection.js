@@ -2038,6 +2038,42 @@ function parseExternalDeckListToMap(rawText) {
   return cards;
 }
 
+function parseExternalDeckListStats(rawText) {
+  const lines = String(rawText || '').split(/\r?\n/);
+  let nonEmptyLines = 0;
+  let recognizedLines = 0;
+  let ignoredHeaderLines = 0;
+
+  lines.forEach(rawLine => {
+    const line = String(rawLine || '').trim();
+    if (!line) return;
+    nonEmptyLines += 1;
+
+    if (/^(pok[ée]mon|trainer|energy|total cards|deck list|format)\b/i.test(line)) {
+      ignoredHeaderLines += 1;
+      return;
+    }
+
+    const formatA = /^(\d+)\s+(.+?)\s+([A-Z0-9-]{2,})\s+([A-Z0-9-]+)$/i.test(line);
+    const formatB = /^(.+?)\s*\(([A-Z0-9-]{2,})\s+([A-Z0-9-]+)\)\s*x?(\d+)$/i.test(line);
+    if (formatA || formatB) recognizedLines += 1;
+  });
+
+  const cards = parseExternalDeckListToMap(rawText);
+  const totalCards = Object.values(cards).reduce((s, n) => s + (parseInt(n, 10) || 0), 0);
+  const uniqueCards = Object.keys(cards).length;
+
+  return {
+    cards,
+    nonEmptyLines,
+    recognizedLines,
+    ignoredHeaderLines,
+    totalCards,
+    uniqueCards,
+    unrecognizedLines: Math.max(0, nonEmptyLines - recognizedLines - ignoredHeaderLines)
+  };
+}
+
 async function openCompareSavedDeck(deckIndex) {
   const baseDeck = window.userDecks && window.userDecks[deckIndex];
   if (!baseDeck) return;
@@ -2093,6 +2129,7 @@ async function openCompareSavedDeck(deckIndex) {
       pane.innerHTML = `
         <label style="display:block;font-weight:600;margin:6px 0;">Deckliste einfügen (Limitless/PTCGL)</label>
         <textarea id="compare-paste-text" style="width:100%;min-height:180px;padding:10px;border:1px solid #ccc;border-radius:8px;resize:vertical;font-family:Consolas,monospace;font-size:12px;" placeholder="Beispiel:\n4 Charizard ex MEW 006\n3 Pidgeot ex OBF 164\n..."></textarea>
+        <div id="compare-paste-preview" style="margin-top:10px;padding:10px;border-radius:8px;background:#fff7e6;border:1px solid #ffe0a6;color:#7a5a00;font-size:12px;">Noch keine Liste erkannt. Füge eine Deckliste ein.</div>
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
           <button id="compare-paste-run" style="padding:8px 12px;border:none;border-radius:8px;background:#27ae60;color:white;cursor:pointer;font-weight:700;">⚖️ Vergleichen</button>
         </div>
@@ -2100,11 +2137,43 @@ async function openCompareSavedDeck(deckIndex) {
 
       const runBtn = pane.querySelector('#compare-paste-run');
       const txt = pane.querySelector('#compare-paste-text');
+      const preview = pane.querySelector('#compare-paste-preview');
+
+      function renderPastePreview() {
+        if (!preview) return;
+        const raw = txt ? txt.value : '';
+        const stats = parseExternalDeckListStats(raw);
+
+        if (!stats.nonEmptyLines) {
+          preview.style.background = '#fff7e6';
+          preview.style.border = '1px solid #ffe0a6';
+          preview.style.color = '#7a5a00';
+          preview.innerHTML = 'Noch keine Liste erkannt. Füge eine Deckliste ein.';
+          return;
+        }
+
+        const ok = stats.totalCards > 0;
+        preview.style.background = ok ? '#eaf8ea' : '#fff1f1';
+        preview.style.border = ok ? '1px solid #b9e6bd' : '1px solid #f0b9b9';
+        preview.style.color = ok ? '#1f6b2a' : '#8a1f1f';
+        preview.innerHTML = `
+          <strong>${ok ? '✅ Parser erkannt' : '⚠️ Keine gültigen Karten erkannt'}</strong><br>
+          Zeilen: ${stats.nonEmptyLines} • Erkannt: ${stats.recognizedLines} • Ignoriert (Header): ${stats.ignoredHeaderLines} • Nicht erkannt: ${stats.unrecognizedLines}<br>
+          Karten gesamt: <strong>${stats.totalCards}</strong> • Unique: <strong>${stats.uniqueCards}</strong>
+        `;
+      }
+
+      if (txt) {
+        txt.addEventListener('input', renderPastePreview);
+        renderPastePreview();
+      }
+
       if (runBtn) {
         runBtn.onclick = () => {
           const raw = txt ? txt.value : '';
-          const parsedCards = parseExternalDeckListToMap(raw);
-          const totalCards = Object.values(parsedCards).reduce((s, n) => s + (parseInt(n, 10) || 0), 0);
+          const stats = parseExternalDeckListStats(raw);
+          const parsedCards = stats.cards;
+          const totalCards = stats.totalCards;
           if (!totalCards) {
             showNotification('Keine gültigen Karten in der eingefügten Liste gefunden.', 'error');
             return;

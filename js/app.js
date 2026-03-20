@@ -4492,16 +4492,42 @@ const BASE_PATH = './data/';
             
             const isMobile = window.innerWidth <= 768;
             let tableHTML = '';
-            // ...existing code...
-                        tableHTML += `
-                            <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
-                                <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
-                                <td style="padding: 8px 4px; text-align: center; color: #555; font-size: 0.85em; font-weight: 600;">${d.variant_count}</td>
-                                <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
-                                <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
-                            </tr>`;
-                })
-                
+            if (isMobile) {
+                // Mobile: Compact Version
+                tableHTML = `
+                <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 0.68em; table-layout: fixed;">
+                    <colgroup>
+                        <col style="width: 55%;">
+                        <col style="width: 22.5%;">
+                        <col style="width: 22.5%;">
+                    </colgroup>
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <th style="padding: 8px 4px; text-align: left; font-weight: 600; font-size: 0.95em;">Main Pokemon</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Variants</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Count</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Avg. Placement</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                data.forEach(d => {
+                    const changeValue = parseInt(d.count_change || 0);
+                    const changeColor = changeValue > 0 ? '#27ae60' : changeValue < 0 ? '#e74c3c' : '#95a5a6';
+                    const placementChange = parseFloat(d.avg_placement_change || '0');
+                    const placementColor = placementChange < 0 ? '#27ae60' : placementChange > 0 ? '#e74c3c' : '#95a5a6';
+                    const displayName = d.main.charAt(0).toUpperCase() + d.main.slice(1);
+                    const variantsJson = encodeURIComponent(JSON.stringify(d.variants || []));
+
+                    tableHTML += `
+                        <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
+                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${String(d.main || '').replace(/'/g, "\\'")}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
+                            <td style="padding: 8px 4px; text-align: center; color: #555; font-size: 0.85em; font-weight: 600;">${d.variant_count}</td>
+                            <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
+                            <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
+                        </tr>`;
+                });
+
                 tableHTML += `</tbody></table>`;
             } else {
                 // Desktop: Full Version

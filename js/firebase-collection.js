@@ -1999,33 +1999,191 @@ function filterDecksByFolder(folder) {
 // ============================================================
 // My Decks: Compare
 // ============================================================
+function parseExternalDeckListToMap(rawText) {
+  const lines = String(rawText || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const cards = {};
+
+  lines.forEach(line => {
+    // Skip headers/metadata in common PTCGL/Limitless exports.
+    if (/^(pok[ée]mon|trainer|energy|total cards|deck list|format)\b/i.test(line)) return;
+
+    // Format: "4 Charizard ex MEW 006" / "1 Boss's Orders PAL 172"
+    let m = line.match(/^(\d+)\s+(.+?)\s+([A-Z0-9-]{2,})\s+([A-Z0-9-]+)$/i);
+    if (m) {
+      const count = parseInt(m[1], 10) || 0;
+      const cardName = String(m[2] || '').trim();
+      const setCode = String(m[3] || '').toUpperCase().trim();
+      const cardNum = String(m[4] || '').toUpperCase().trim();
+      if (count > 0 && cardName && setCode && cardNum) {
+        const key = `${cardName} (${setCode} ${cardNum})`;
+        cards[key] = (cards[key] || 0) + count;
+      }
+      return;
+    }
+
+    // Format fallback: "Card Name (SET NUM) x4"
+    m = line.match(/^(.+?)\s*\(([A-Z0-9-]{2,})\s+([A-Z0-9-]+)\)\s*x?(\d+)$/i);
+    if (m) {
+      const cardName = String(m[1] || '').trim();
+      const setCode = String(m[2] || '').toUpperCase().trim();
+      const cardNum = String(m[3] || '').toUpperCase().trim();
+      const count = parseInt(m[4], 10) || 0;
+      if (count > 0 && cardName && setCode && cardNum) {
+        const key = `${cardName} (${setCode} ${cardNum})`;
+        cards[key] = (cards[key] || 0) + count;
+      }
+    }
+  });
+
+  return cards;
+}
+
 async function openCompareSavedDeck(deckIndex) {
   const baseDeck = window.userDecks && window.userDecks[deckIndex];
   if (!baseDeck) return;
-  
+
   const decks = window.userDecks || [];
-  if (decks.length < 2) {
-    showNotification('Need at least 2 saved decks to compare', 'error');
-    return;
+  const compareCandidates = decks.filter((_, i) => i !== deckIndex);
+
+  let existingModal = document.getElementById('deck-compare-source-modal');
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'deck-compare-source-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+  const safeBaseDeckName = escapeHtml(baseDeck.name || 'Base Deck');
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.35);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h2 style="margin:0;font-size:1.25em;">⚖️ Compare Deck: ${safeBaseDeckName}</h2>
+        <button id="deck-compare-source-close" style="background:none;border:none;font-size:24px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <p style="margin:0 0 14px 0;color:#555;">Wähle, womit du vergleichen möchtest:</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <button id="compare-source-paste" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">📋 Limitless / PTCGL Liste einfügen</button>
+        <button id="compare-source-saved" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">💾 Gespeichertes Deck auswählen</button>
+      </div>
+
+      <div id="compare-source-pane"></div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeBtn = modal.querySelector('#deck-compare-source-close');
+  if (closeBtn) closeBtn.onclick = () => modal.remove();
+
+  const pane = modal.querySelector('#compare-source-pane');
+  const btnPaste = modal.querySelector('#compare-source-paste');
+  const btnSaved = modal.querySelector('#compare-source-saved');
+
+  function setMode(mode) {
+    if (!pane) return;
+    if (btnPaste && btnSaved) {
+      btnPaste.style.background = mode === 'paste' ? '#667eea' : '#f8f9fa';
+      btnPaste.style.color = mode === 'paste' ? 'white' : '#222';
+      btnSaved.style.background = mode === 'saved' ? '#667eea' : '#f8f9fa';
+      btnSaved.style.color = mode === 'saved' ? 'white' : '#222';
+    }
+
+    if (mode === 'paste') {
+      pane.innerHTML = `
+        <label style="display:block;font-weight:600;margin:6px 0;">Deckliste einfügen (Limitless/PTCGL)</label>
+        <textarea id="compare-paste-text" style="width:100%;min-height:180px;padding:10px;border:1px solid #ccc;border-radius:8px;resize:vertical;font-family:Consolas,monospace;font-size:12px;" placeholder="Beispiel:\n4 Charizard ex MEW 006\n3 Pidgeot ex OBF 164\n..."></textarea>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
+          <button id="compare-paste-run" style="padding:8px 12px;border:none;border-radius:8px;background:#27ae60;color:white;cursor:pointer;font-weight:700;">⚖️ Vergleichen</button>
+        </div>
+      `;
+
+      const runBtn = pane.querySelector('#compare-paste-run');
+      const txt = pane.querySelector('#compare-paste-text');
+      if (runBtn) {
+        runBtn.onclick = () => {
+          const raw = txt ? txt.value : '';
+          const parsedCards = parseExternalDeckListToMap(raw);
+          const totalCards = Object.values(parsedCards).reduce((s, n) => s + (parseInt(n, 10) || 0), 0);
+          if (!totalCards) {
+            showNotification('Keine gültigen Karten in der eingefügten Liste gefunden.', 'error');
+            return;
+          }
+          const externalDeck = {
+            name: 'Pasted Deck (Limitless/PTCGL)',
+            cards: parsedCards,
+            totalCards
+          };
+          modal.remove();
+          showDeckComparison(baseDeck, externalDeck);
+        };
+      }
+      return;
+    }
+
+    // mode === 'saved'
+    if (compareCandidates.length === 0) {
+      pane.innerHTML = '<p style="color:#b94a48;background:#fbeaea;border:1px solid #f1c0c0;padding:10px;border-radius:8px;">Es gibt kein weiteres gespeichertes Deck zum Vergleichen.</p>';
+      return;
+    }
+
+    pane.innerHTML = `
+      <label style="display:block;font-weight:600;margin:6px 0;">Gespeichertes Deck suchen</label>
+      <input id="compare-saved-search" type="text" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" placeholder="Deckname oder Archetype suchen..." />
+      <div id="compare-saved-list" style="margin-top:10px;max-height:260px;overflow:auto;border:1px solid #eee;border-radius:8px;"></div>
+    `;
+
+    const searchInput = pane.querySelector('#compare-saved-search');
+    const list = pane.querySelector('#compare-saved-list');
+
+    function renderSavedList(term) {
+      if (!list) return;
+      const q = String(term || '').trim().toLowerCase();
+      const filtered = compareCandidates.filter(d => {
+        const name = String(d.name || '').toLowerCase();
+        const arche = String(d.archetype || '').toLowerCase();
+        return !q || name.includes(q) || arche.includes(q);
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div style="padding:10px;color:#777;">Keine passenden Decks gefunden.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(d => {
+        const safeName = escapeHtml(d.name || 'Unnamed Deck');
+        const safeArche = escapeHtml(d.archetype || 'Custom');
+        const cards = d.totalCards || Object.values(d.cards || {}).reduce((s, n) => s + (parseInt(n, 10) || 0), 0);
+        const uid = escapeJsSingleQuoted(String(d.id || ''));
+        return `
+          <button data-deck-id="${uid}" style="width:100%;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid #f0f0f0;background:white;cursor:pointer;">
+            <div style="font-weight:700;color:#2c3e50;">${safeName}</div>
+            <div style="font-size:12px;color:#666;">${safeArche} • ${cards} Karten</div>
+          </button>
+        `;
+      }).join('');
+
+      list.querySelectorAll('button[data-deck-id]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.getAttribute('data-deck-id') || '';
+          const picked = compareCandidates.find(d => String(d.id || '') === id);
+          if (!picked) return;
+          modal.remove();
+          showDeckComparison(baseDeck, picked);
+        };
+      });
+    }
+
+    renderSavedList('');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => renderSavedList(searchInput.value));
+      setTimeout(() => searchInput.focus(), 0);
+    }
   }
-  
-  const options = decks
-    .map((d, i) => i !== deckIndex ? `${i}: ${d.name}` : null)
-    .filter(Boolean);
-  
-  const choice = await showInputModal({
-    title: 'Compare Decks',
-    message: `Compare "${baseDeck.name}" with:\n${options.join('\n')}\n\nEnter deck number:`
-  });
-  if (choice === null) return;
-  
-  const compareIdx = parseInt(choice);
-  if (isNaN(compareIdx) || compareIdx === deckIndex || !decks[compareIdx]) {
-    showNotification('Invalid deck selection', 'error');
-    return;
-  }
-  
-  showDeckComparison(baseDeck, decks[compareIdx]);
+
+  if (btnPaste) btnPaste.onclick = () => setMode('paste');
+  if (btnSaved) btnSaved.onclick = () => setMode('saved');
+  setMode('saved');
 }
 
 function showDeckComparison(deckA, deckB) {

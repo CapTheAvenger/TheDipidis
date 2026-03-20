@@ -2084,19 +2084,21 @@ function dexImportParseCSV(csvText) {
         const result = Papa.parse(csvText, {
             header: true,
             skipEmptyLines: true,
+        delimitersToGuess: [',', ';', '\t', '|'],
             transformHeader: h => h.toLowerCase().trim()
         });
         rows = result.data;
     } else {
         const lines = csvText.split(/\r?\n/).filter(l => l.trim());
         if (lines.length < 2) { showNotification('CSV ist leer oder ungültig', 'error'); return; }
+        const delimiter = (lines[0].split(';').length > lines[0].split(',').length) ? ';' : ',';
         function splitCSVLine(line) {
             const result = [];
             let field = '', inQuote = false;
             for (let i = 0; i < line.length; i++) {
                 const ch = line[i];
                 if (ch === '"') { inQuote = !inQuote; }
-                else if (ch === ',' && !inQuote) { result.push(field.trim()); field = ''; }
+            else if (ch === delimiter && !inQuote) { result.push(field.trim()); field = ''; }
                 else { field += ch; }
             }
             result.push(field.trim());
@@ -2122,24 +2124,69 @@ function dexImportParseCSV(csvText) {
     const nameKey = keys.find(k => k === 'name' || k === 'card name' || k === 'card_name' || k === 'cardname') || 'name';
     const setKey  = keys.find(k => k === 'set code' || k === 'set_code' || k === 'setcode' || k === 'set' || k === 'expansion') || 'set';
     const numKey  = keys.find(k => k === 'number' || k === 'card number' || k === 'card_number' || k === 'collector_number' || k === 'collector number' || k === '#') || 'number';
-    const qtyKey  = keys.find(k => k === 'qty' || k === 'quantity' || k === 'count' || k === 'amount' || k === 'owned' || k.includes('owned')) || 'qty';
+    const qtyKey  = keys.find(k =>
+      k === 'qty' || k === 'quantity' || k === 'count' || k === 'owned' ||
+      k === 'anzahl' || k === 'menge' || k === 'stueck' || k === 'stück' ||
+      k.includes('owned')
+    ) || 'qty';
+
+    function parseSetNumberToken(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return null;
+      const match = raw.match(/^([a-z0-9]{2,})\s*[-_/ ]\s*([a-z0-9]+)$/i);
+      if (!match) return null;
+      return { set: match[1].toUpperCase(), number: String(match[2]).toUpperCase() };
+    }
+
+    function parseQtyValue(value) {
+      const s = String(value || '').trim();
+      const m = s.match(/\d+/);
+      if (!m) return 1;
+      const n = parseInt(m[0], 10);
+      return isNaN(n) || n < 1 ? 1 : n;
+    }
+
+    function normalizeSetCode(v) {
+      return String(v || '').trim().toUpperCase();
+    }
+
+    function normalizeCardNumber(v) {
+      return String(v || '').trim().toUpperCase();
+    }
 
     const matched = [], unmatched = [];
     const dbMap = window.cardsBySetNumberMap || {};
 
     rows.forEach(row => {
         const rawName = (row[nameKey] || '').trim();
-        const rawSet  = (row[setKey]  || '').trim().toUpperCase();
-        const rawNum  = (row[numKey]  || '').trim();
-        const qty     = Math.max(1, parseInt(row[qtyKey] || '1', 10) || 1);
+        let rawSet  = normalizeSetCode(row[setKey]);
+        let rawNum  = normalizeCardNumber(row[numKey]);
+        const qty   = parseQtyValue(row[qtyKey]);
 
-        // Primary: set + number lookup (try with and without zero-padding)
-        let card = dbMap[`${rawSet}-${rawNum}`]
+        // Dex exports often contain a combined code like "mep-7" in one column.
+        // If set/number columns are missing, scan row values for this token.
+        if (!rawSet || !rawNum) {
+            const values = Object.values(row || {});
+            for (const value of values) {
+                const parsed = parseSetNumberToken(value);
+                if (parsed) {
+                    rawSet = rawSet || parsed.set;
+                    rawNum = rawNum || parsed.number;
+                    break;
+                }
+            }
+        }
+
+        // Primary strict match by set+number (exact card identity)
+        let card = null;
+        if (rawSet && rawNum) {
+            card = dbMap[`${rawSet}-${rawNum}`]
                 || dbMap[`${rawSet}-${rawNum.padStart(3, '0')}`]
                 || dbMap[`${rawSet}-${String(parseInt(rawNum, 10) || rawNum)}`];
+        }
 
-        // Fallback: name-based lookup
-        if (!card && rawName) {
+        // Fallback by name ONLY when no set+number info is available at all.
+        if (!card && (!rawSet || !rawNum) && rawName) {
             if (window.cardIndexMap) {
                 card = window.cardIndexMap.get(rawName) || window.cardIndexMap.get(rawName.toLowerCase());
             }
@@ -2147,7 +2194,7 @@ function dexImportParseCSV(csvText) {
                 const lower = rawName.toLowerCase();
                 card = window.allCardsDatabase.find(c => c.name && c.name.toLowerCase() === lower
                     && (!rawSet || c.set === rawSet)
-                    && (!rawNum || c.number === rawNum));
+                    && (!rawNum || String(c.number).toUpperCase() === rawNum));
             }
         }
 

@@ -383,13 +383,18 @@ async function loadSavedDeckForComparison(deckId) {
 function getCollectionStats() {
   const collection = window.userCollection || new Set();
   const allCards = window.allCardsDatabase || [];
+  const counts = window.userCollectionCounts || new Map();
   
   let totalValue = 0;
-  let cardCount = collection.size;
+  let cardCount = 0;
   
   // Calculate total value based on actual card prices
   collection.forEach(cardId => {
+    if (typeof cardId !== 'string' || !cardId.includes('|')) return;
     const [cardName, cardSet, cardNumber] = cardId.split('|');
+    const ownedCount = Math.max(1, parseInt(counts.get(cardId), 10) || 1);
+    cardCount += ownedCount;
+
     const card = allCards.find(c => 
       c.name === cardName && 
       c.set === cardSet && 
@@ -399,7 +404,7 @@ function getCollectionStats() {
     if (card && card.eur_price) {
       const price = parseFloat(card.eur_price.replace(',', '.'));
       if (!isNaN(price)) {
-        totalValue += price;
+        totalValue += price * ownedCount;
       }
     }
   });

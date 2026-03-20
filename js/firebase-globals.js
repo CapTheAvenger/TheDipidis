@@ -78,14 +78,32 @@ async function loadUserData(userId) {
     if (doc.exists) {
       const data = doc.data();
 
+      function flattenCountsObject(input, prefix = '', out = {}) {
+        if (!input || typeof input !== 'object') return out;
+        Object.entries(input).forEach(([key, value]) => {
+          const nextKey = prefix ? `${prefix}.${key}` : key;
+          if (value && typeof value === 'object' && !Array.isArray(value)) {
+            flattenCountsObject(value, nextKey, out);
+            return;
+          }
+          const parsed = parseInt(value, 10);
+          if (!isNaN(parsed) && parsed > 0) out[nextKey] = parsed;
+        });
+        return out;
+      }
+
       // Profile
       window.userProfile = data;
       window.deckFolders = Array.isArray(data.deckFolders) ? data.deckFolders.filter(Boolean) : [];
       if (typeof updateProfileUI === 'function') updateProfileUI(data);
 
       // Collection
-      window.userCollection = new Set(data.collection || []);
-      const counts = data.collectionCounts || {};
+      const rawCollection = Array.isArray(data.collection) ? data.collection.filter(v => typeof v === 'string' && v.includes('|')) : [];
+      const counts = flattenCountsObject(data.collectionCounts || {});
+      const countKeys = Object.keys(counts);
+      const mergedCollection = rawCollection.length > 0 ? rawCollection : countKeys;
+
+      window.userCollection = new Set(mergedCollection);
       window.userCollectionCounts = new Map(Object.entries(counts));
       window.userCollection.forEach(cardId => {
         if (!window.userCollectionCounts.has(cardId)) {

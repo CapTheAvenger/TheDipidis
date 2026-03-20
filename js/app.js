@@ -15001,6 +15001,14 @@ const BASE_PATH = './data/';
                 if (byNameMatch) return byNameMatch;
             }
 
+            devWarn('[RaritySwitch][resolve] target not found', {
+                cardName,
+                deckKey,
+                sourceHint,
+                parsedSet,
+                parsedNumber,
+                orderedSources
+            });
             return { source: sourceHint || '', oldKey: deckKey, count: 0 };
         }
 
@@ -15041,6 +15049,10 @@ const BASE_PATH = './data/';
                 resolvedOldKey: resolvedTarget.oldKey || deckKey,
                 resolvedCount: resolvedTarget.count || 0
             };
+            devLog('[RaritySwitch][open] resolved target', {
+                input: { cardName, deckKey, sourceHint },
+                resolved: currentRaritySwitcherCard
+            });
             
             // Find current card's data
             let currentCard = null;
@@ -15332,6 +15344,14 @@ const BASE_PATH = './data/';
             }
 
             if (!resolvedSource || resolvedCount <= 0) {
+                devWarn('[RaritySwitch][select] replacement failed - card not found in deck', {
+                    setCode,
+                    setNumber,
+                    oldDeckKey,
+                    actualCardName,
+                    sourceHint,
+                    preResolved: currentRaritySwitcherCard || null
+                });
                 showToast('Diese Karte wurde im aktuellen Deck nicht gefunden.', 'warning');
                 closeRaritySwitcher();
                 return;
@@ -15354,6 +15374,12 @@ const BASE_PATH = './data/';
 
             // Save preference and refresh complete deck UI/persistence.
             setRarityPreference(actualCardName, { mode: 'specific', set: setCode, number: setNumber });
+            devLog('[RaritySwitch][select] replacement success', {
+                source: resolvedSource,
+                oldKey: resolvedOldKey,
+                newKey,
+                movedCount: resolvedCount
+            });
             updateDeckCountAndDisplay(resolvedSource);
 
             closeRaritySwitcher();

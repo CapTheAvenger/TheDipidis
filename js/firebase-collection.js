@@ -2255,7 +2255,11 @@ async function openCompareSavedDeck(deckIndex) {
   setMode('saved');
 }
 
-function showDeckComparison(deckA, deckB) {
+function showDeckComparison(deckA, deckB, compareMode = 'functional') {
+  window._deckCompareA = deckA;
+  window._deckCompareB = deckB;
+  const mode = compareMode === 'exact' ? 'exact' : 'functional';
+
   const cardsA = deckA.cards || {};
   const cardsB = deckB.cards || {};
 
@@ -2330,7 +2334,9 @@ function showDeckComparison(deckA, deckB) {
     Object.entries(cardsMap || {}).forEach(([rawKey, rawCount]) => {
       const count = parseInt(rawCount, 10) || 0;
       if (count <= 0) return;
-      const info = getCanonicalComparisonInfo(rawKey);
+      const info = mode === 'exact'
+        ? { canonical: `raw:${rawKey}`, label: rawKey, collapsedPrints: false }
+        : getCanonicalComparisonInfo(rawKey);
       const existing = aggregated.get(info.canonical);
       if (!existing) {
         aggregated.set(info.canonical, {
@@ -2356,7 +2362,7 @@ function showDeckComparison(deckA, deckB) {
     const a = aggA.get(key) || { count: 0, label: '' };
     const b = aggB.get(key) || { count: 0, label: '' };
     const labelBase = a.label || b.label || key;
-    const label = `${escapeHtml(labelBase)}${(a.collapsedPrints || b.collapsedPrints) ? ' <span title="Int-Prints zusammengefasst" style="color:#b8860b;">(prints merged)</span>' : ''}`;
+    const label = `${escapeHtml(labelBase)}${(mode === 'functional' && (a.collapsedPrints || b.collapsedPrints)) ? ' <span title="Int-Prints zusammengefasst" style="color:#b8860b;">(prints merged)</span>' : ''}`;
 
     if (a.count > 0 && b.count === 0) {
       onlyA.push(`${label} x${a.count}`);
@@ -2387,6 +2393,12 @@ function showDeckComparison(deckA, deckB) {
         <h2 style="margin:0;font-size:1.3em;">⚖️ Deck Comparison</h2>
         <button onclick="this.closest('#deck-compare-modal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
       </div>
+      <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-bottom:12px;">
+        <span style="font-size:12px;color:#666;font-weight:700;margin-right:4px;">Compare mode:</span>
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Functional (prints merged)</button>
+        <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Exact print</button>
+      </div>
+      <div style="margin:-4px 0 12px 0;font-size:12px;color:#666;">${mode === 'functional' ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Jeder Print (set+nummer) wird einzeln verglichen.'}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
         <div style="background:#667eea;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}</div>
         <div style="background:#764ba2;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameB}</div>
@@ -2408,6 +2420,7 @@ window.moveDeckToFolder = moveDeckToFolder;
 window.renderFolderNav = renderFolderNav;
 window.filterDecksByFolder = filterDecksByFolder;
 window.openCompareSavedDeck = openCompareSavedDeck;
+window.showDeckComparison = showDeckComparison;
 window.filterMyDecks = filterMyDecks;
 window.saveCurrentDeckToProfile = saveCurrentDeckToProfile;
 

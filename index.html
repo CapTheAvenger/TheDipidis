@@ -1477,7 +1477,7 @@
                 <div class="container">
                     <div class="header">
                         <h1>📖 How to Use This Website <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help"></button></h1>
-                        <p>Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v39 (March 2026)</p>
+                        <p>Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v44 (March 2026)</p>
                     </div>
                     
                     <div style="max-width: 1200px; margin: 0 auto; padding: 30px; background: white; border-radius: 10px;">
@@ -1490,7 +1490,7 @@
                                 Access Japanese City League results, international tournament data, and detailed card statistics to build competitive decks — and test them directly in your browser.
                             </p>
                             <div style="background: #fef9e7; border-left: 4px solid #f39c12; padding: 12px 16px; border-radius: 6px; margin-top: 12px;">
-                                <strong>🆕 New in v39:</strong> <strong>Dex Import Matching Upgrade</strong> — set names from CSV (e.g. Obsidian Flames) are mapped to internal codes (OBF), ID fields like <code>sv3-27</code> resolve card number correctly, and 0-quantity rows are skipped. <strong>Exact Print Collection Counts</strong> — deck/profile badges now use strict set+number print matching. <strong>Rarity Switcher Print Swap Fix</strong> — switching prints now reliably replaces the correct deck entry across City League, Current Meta, and Past Meta builders. <strong>✨ Other Print Indicator</strong> — cards now show a strong shiny indicator when other international prints of the same card exist in your collection (Deck Builder, My Decks, and Rarity Switcher info).
+                                <strong>🆕 New in v44:</strong> <strong>My Decks Compare Upgrade</strong> — compare now supports two sources: paste a Limitless/PTCGL list or choose another saved deck via live search (no index-number input). <strong>Live Paste Parser Preview</strong> — while typing/pasting, you now see recognized lines, ignored headers, unrecognized lines, total cards, and unique cards in real time. <strong>Compare Mode Toggle</strong> — switch between <em>Functional (prints merged)</em> and <em>Exact print</em> directly in the compare modal. <strong>Functional compare</strong> treats different international prints/artworks as the same card and focuses on real card/count differences.
                             </div>
                         </section>
                         
@@ -1628,7 +1628,7 @@
                                 <!-- How to Use Tab -->
                                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #2ecc71;">
                                     <h3 style="color: #2ecc71; margin-top: 0;">📖 How to Use</h3>
-                                    <p style="line-height: 1.7;"><strong>This guide!</strong> Complete documentation for all features — updated to v38</p>
+                                    <p style="line-height: 1.7;"><strong>This guide!</strong> Complete documentation for all features — updated to v44</p>
                                 </div>
                             </div>
                         </section>
@@ -1690,8 +1690,10 @@
                                 </ul>
                                 <p style="margin-top: 15px;"><strong>🔄 Deck Comparison:</strong></p>
                                 <ul>
-                                    <li>Click "🔀 Compare with My Decks" in the Deck Builder</li>
-                                    <li>Select a saved deck — color-coded diff shows Removed / Added / Unchanged cards</li>
+                                    <li>Click ⚖️ on a saved deck card to open Compare Source</li>
+                                    <li>Choose source: <strong>Limitless/PTCGL paste</strong> or <strong>Saved deck search</strong></li>
+                                    <li>Paste mode shows a live parser preview before compare</li>
+                                    <li>Compare modal supports <strong>Functional (prints merged)</strong> vs <strong>Exact print</strong></li>
                                 </ul>
                             </div>
                         </section>
@@ -1743,7 +1745,8 @@
                             <ol style="line-height: 2;">
                                 <li>Build or generate a deck in "Your Deck" section</li>
                                 <li>Click "🔀 Compare Deck"</li>
-                                <li>Paste an old list in Pokémon TCG Live format, or choose a My Deck</li>
+                                <li>Paste a list in Limitless/PTCGL format or choose a saved deck via search</li>
+                                <li>Select compare mode: <strong>Functional (prints merged)</strong> or <strong>Exact print</strong></li>
                                 <li>Color-coded badges: <span style="background: #FFD700; padding: 2px 8px; border-radius: 4px; color: #000;">Gold = Added</span> &nbsp; <span style="background: #ee5a24; padding: 2px 8px; border-radius: 4px; color: #fff;">Red = Removed</span> &nbsp; <span style="background: #55efc4; padding: 2px 8px; border-radius: 4px; color: #000;">Green = Unchanged</span></li>
                             </ol>
                         </section>
@@ -2902,7 +2905,7 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha384-D/t0ZMqQW31H3az8ktEiNb39wyKnS82iFY52QPACM+IjKW3jDUhyIgh2PApRqJZs" crossorigin="anonymous"></script>
-    <script src="js/app.js?v=20260320-v91"></script>
+    <script src="js/app.js?v=20260320-v92"></script>
     <script src="js/draw-simulator.js?v=20260319-v2"></script>
 
     <!-- Draw Simulator Modal -->

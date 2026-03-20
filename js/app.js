@@ -156,11 +156,11 @@ const BASE_PATH = './data/';
             },
             'profile': {
                 title: '\ud83d\udc64 User Profile',
-                html: '<p>Manage your personal card collection, saved decks, and settings.</p><ul><li><strong>My Collection:</strong> Exact print counts (set+number) synced to Firebase</li><li><strong>Dex Import:</strong> CSV import supports set-name mapping and id-based number parsing</li><li><strong>My Decks:</strong> Per-card badges show exact owned count for that print</li><li><strong>\u2728 Indicator:</strong> Shows when other international prints of same card exist in your collection</li><li><strong>Rarity Switcher (\u2605):</strong> Swap print directly from saved deck cards</li><li><strong>Wishlist + Settings:</strong> Manage targets and account preferences</li></ul>'
+                html: '<p>Manage your personal card collection, saved decks, and settings.</p><ul><li><strong>My Collection:</strong> Exact print counts (set+number) synced to Firebase</li><li><strong>Dex Import:</strong> CSV import supports set-name mapping and id-based number parsing</li><li><strong>My Decks:</strong> Per-card badges show exact owned count for that print</li><li><strong>\u2728 Indicator:</strong> Shows when other international prints of same card exist in your collection</li><li><strong>Rarity Switcher (\u2605):</strong> Swap print directly from saved deck cards</li><li><strong>Compare (\u2696\ufe0f):</strong> Choose source (paste Limitless/PTCGL or search saved decks)</li><li><strong>Compare Mode:</strong> Functional (prints merged) or Exact print</li><li><strong>Wishlist + Settings:</strong> Manage targets and account preferences</li></ul>'
             },
             'tutorial': {
                 title: '\ud83d\udcd6 How to Use',
-                html: '<p>Comprehensive guide to all features of this website.</p><ul><li><strong>Tab Guides:</strong> Detailed instructions for every section</li><li><strong>Latest Changes:</strong> Includes exact-print collection badges, \u2728 other-print indicator, and robust \u2605 print swapping</li><li><strong>Import Notes:</strong> Dex CSV set-name + set-number matching behavior explained</li></ul>'
+                html: '<p>Comprehensive guide to all features of this website.</p><ul><li><strong>Tab Guides:</strong> Detailed instructions for every section</li><li><strong>Latest Changes:</strong> Includes exact-print collection badges, \u2728 other-print indicator, robust \u2605 print swapping, and upgraded deck compare</li><li><strong>Compare Notes:</strong> Paste parser live preview + Functional/Exact compare modes</li><li><strong>Import Notes:</strong> Dex CSV set-name + set-number matching behavior explained</li></ul>'
             }
         };
 

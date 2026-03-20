@@ -15073,7 +15073,14 @@ const BASE_PATH = './data/';
                 
                 let imageHtml = '';
                 const imageUrl = getUnifiedCardImage(version.set, version.number) || version.image_url || '';
-                imageHtml = `<img src="${imageUrl}" alt="${actualCardName} - ${version.rarity}" loading="lazy">`;
+
+                // Collection count badge for this exact print
+                const _rsCollId = `${actualCardName}|${version.set}|${version.number}`;
+                const _rsOwnedQty = (window.userCollectionCounts && window.userCollectionCounts.get(_rsCollId)) || 0;
+                const _rsOwnedBadge = _rsOwnedQty > 0
+                    ? `<div style="position:absolute;top:5px;left:5px;background:#4CAF50;color:white;min-width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.5);z-index:4;padding:0 3px;pointer-events:none;">${_rsOwnedQty}×</div>`
+                    : '';
+                imageHtml = `<div style="position:relative;display:block;"><img src="${imageUrl}" alt="${actualCardName} - ${version.rarity}" loading="lazy">${_rsOwnedBadge}</div>`;
                 
                 const rarityBadgeColor = getRarityColor(version.rarity);
                 
@@ -15082,12 +15089,17 @@ const BASE_PATH = './data/';
                 const cardmarketUrl = version.cardmarket_url || '';
                 const priceDisplay = eurPrice || 'Preis N/A';
                 const cardmarketBtnClass = eurPrice ? 'btn-cardmarket rarity-option-cardmarket' : 'btn-cardmarket rarity-option-cardmarket no-price';
+
+                const _rsOwnedLine = _rsOwnedQty > 0
+                    ? `<div style="font-size:11px;color:#2e7d32;font-weight:700;">&#10003; ${_rsOwnedQty}x in Sammlung</div>`
+                    : `<div style="font-size:11px;color:#999;">Nicht in Sammlung</div>`;
                 
                 optionDiv.innerHTML = `
                     ${imageHtml}
                     <div class="rarity-option-info">
                         <div><strong>${version.set} ${version.number}</strong></div>
                         <div style="font-size: 11px; color: #444; font-weight: 500;">Rarity: ${version.rarity || 'N/A'}</div>
+                        ${_rsOwnedLine}
                     </div>
                     <div class="rarity-badge" style="background-color: ${rarityBadgeColor};">
                         ${version.rarity || 'Unknown'}

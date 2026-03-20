@@ -1230,39 +1230,22 @@ function updateDecksUI() {
         const isOwned = ownedCount > 0;
         const isWishlisted = window.userWishlist && window.userWishlist.has(cardId);
         
-        // Color-coded ownership badge for My Decks
-        // Green: have enough (owned >= needed in deck)
-        // Orange: have some but less than needed
-        // Yellow: don't own this exact print but own other intl prints of same card
+        // Owned count badge — exact print only (1:1 match: name|set|number)
+        // Green: have enough for deck; Orange: have some but fewer than needed; no badge: 0 owned
         let badgeBg = '';
         let badgeText = '';
         let badgeTitle = '';
         if (ownedCount >= count) {
           badgeBg = '#4CAF50'; // green — enough
           badgeText = `${ownedCount}`;
-          badgeTitle = `Owned: ${ownedCount}/${count} (enough!)`;
+          badgeTitle = `Im Besitz: ${ownedCount}x (brauchst ${count}x — ausreichend!)`;
         } else if (ownedCount > 0) {
           badgeBg = '#FF9800'; // orange — some but not enough
           badgeText = `${ownedCount}`;
-          badgeTitle = `Owned: ${ownedCount}/${count} (need ${count - ownedCount} more)`;
-        } else {
-          // Check if user owns other international prints of this card
-          let altPrintCount = 0;
-          if (window.userCollectionCounts && window.allCardsDatabase) {
-            const altVersions = window.allCardsDatabase.filter(c => c.name === cardName && (c.set !== setCode || c.number !== setNumber));
-            altVersions.forEach(v => {
-              const altId = `${cardName}|${v.set}|${v.number}`;
-              altPrintCount += window.userCollectionCounts.get(altId) || 0;
-            });
-          }
-          if (altPrintCount > 0) {
-            badgeBg = '#FFD600'; // yellow — have other prints
-            badgeText = `${altPrintCount}`;
-            badgeTitle = `Other prints owned: ${altPrintCount} (not this exact print)`;
-          }
+          badgeTitle = `Im Besitz: ${ownedCount}x (brauchst ${count}x — noch ${count - ownedCount} fehlend)`;
         }
         const ownedBadge = badgeBg ?
-          `<div style="position: absolute; top: 5px; left: 5px; background: ${badgeBg}; color: ${badgeBg === '#FFD600' ? '#333' : 'white'}; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4; padding: 0 4px;" title="${badgeTitle}">${badgeText}</div>` : '';
+          `<div style="position: absolute; top: 5px; left: 5px; background: ${badgeBg}; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4; padding: 0 4px;" title="${badgeTitle}">${badgeText}</div>` : '';
         
         // Get price
         const eurPrice = card.eur_price || '';

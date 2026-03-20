@@ -10514,7 +10514,7 @@ const BASE_PATH = './data/';
             
             let html = '<div style="grid-column: 1 / -1; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px;">';
             html += `<div style="display: flex; justify-content: space-between; align-items: center;">`;
-            html += `<div style="font-weight: bold; color: #333;">?? ${cardName}</div>`;
+            html += `<div style="font-weight: bold; color: #333;">${cardName}</div>`;
             html += `<button onclick="window.selectedCardName=null; searchDeckCards('${source}');" style="background: #6c757d; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.85em;">← Back</button>`;
             html += '</div>';
             html += `<div style="font-size: 0.85em; color: #333; margin-top: 8px; font-weight: 600;">${versions.length} Versionen | ${totalCount}x im Deck</div>`;

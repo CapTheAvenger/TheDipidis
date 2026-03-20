@@ -14950,6 +14950,60 @@ const BASE_PATH = './data/';
         // Rarity Switcher Functions
         let currentRaritySwitcherCard = null;
 
+        function resolveRaritySwitchTarget(cardName, deckKey, sourceHint = '') {
+            const normalizedActualName = normalizeCardName(cardName || '');
+            const parsedMatch = String(deckKey || '').match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+            const parsedSet = parsedMatch ? String(parsedMatch[2] || '').toUpperCase() : '';
+            const parsedNumber = parsedMatch ? String(parsedMatch[3] || '').toUpperCase() : '';
+
+            const deckContexts = {
+                cityLeague: window.cityLeagueDeck || {},
+                currentMeta: window.currentMetaDeck || {},
+                pastMeta: window.pastMetaDeck || {}
+            };
+
+            const orderedSources = [];
+            if (sourceHint && deckContexts[sourceHint]) orderedSources.push(sourceHint);
+            ['cityLeague', 'currentMeta', 'pastMeta'].forEach(src => {
+                if (!orderedSources.includes(src)) orderedSources.push(src);
+            });
+
+            for (const source of orderedSources) {
+                const deck = deckContexts[source];
+                if (!deck || typeof deck !== 'object') continue;
+
+                const directCount = parseInt(deck[deckKey], 10) || 0;
+                if (directCount > 0) {
+                    return { source, oldKey: deckKey, count: directCount };
+                }
+
+                let bySetNumberMatch = null;
+                let byNameMatch = null;
+                for (const [key, qty] of Object.entries(deck)) {
+                    const keyQty = parseInt(qty, 10) || 0;
+                    if (keyQty <= 0) continue;
+                    const keyMatch = String(key).match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                    const keyName = keyMatch ? keyMatch[1] : key;
+                    const keySet = keyMatch ? String(keyMatch[2] || '').toUpperCase() : '';
+                    const keyNumber = keyMatch ? String(keyMatch[3] || '').toUpperCase() : '';
+
+                    if (parsedSet && parsedNumber && keySet === parsedSet && keyNumber === parsedNumber) {
+                        bySetNumberMatch = { source, oldKey: key, count: keyQty };
+                        break;
+                    }
+
+                    if (!byNameMatch && normalizeCardName(keyName) === normalizedActualName) {
+                        byNameMatch = { source, oldKey: key, count: keyQty };
+                    }
+                }
+
+                if (bySetNumberMatch) return bySetNumberMatch;
+                if (byNameMatch) return byNameMatch;
+            }
+
+            return { source: sourceHint || '', oldKey: deckKey, count: 0 };
+        }
+
         function openRaritySwitcher(cardName, deckKey, sourceHint = '') {
             if (!window.allCardsDatabase) {
                 showToast('Card database not loaded yet...', 'info');
@@ -14979,7 +15033,14 @@ const BASE_PATH = './data/';
             
             console.log(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${deckKey}, actualCardName: ${actualCardName}`);
 
-            currentRaritySwitcherCard = { cardName: actualCardName, deckKey, source: sourceHint || '' };
+            const resolvedTarget = resolveRaritySwitchTarget(actualCardName, deckKey, sourceHint);
+            currentRaritySwitcherCard = {
+                cardName: actualCardName,
+                deckKey,
+                source: resolvedTarget.source || sourceHint || '',
+                resolvedOldKey: resolvedTarget.oldKey || deckKey,
+                resolvedCount: resolvedTarget.count || 0
+            };
             
             // Find current card's data
             let currentCard = null;
@@ -15226,7 +15287,22 @@ const BASE_PATH = './data/';
             let resolvedOldKey = '';
             let resolvedCount = 0;
 
+            if (currentRaritySwitcherCard) {
+                const preSource = currentRaritySwitcherCard.source || '';
+                const preOldKey = currentRaritySwitcherCard.resolvedOldKey || '';
+                if (preSource && deckContexts[preSource]) {
+                    const preDeck = deckContexts[preSource].deck;
+                    const preCount = parseInt(preDeck[preOldKey], 10) || 0;
+                    if (preCount > 0) {
+                        resolvedSource = preSource;
+                        resolvedOldKey = preOldKey;
+                        resolvedCount = preCount;
+                    }
+                }
+            }
+
             for (const source of orderedSources) {
+                if (resolvedCount > 0) break;
                 const ctx = deckContexts[source];
                 const deck = ctx.deck;
                 if (!deck || typeof deck !== 'object') continue;

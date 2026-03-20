@@ -1446,6 +1446,7 @@ const BASE_PATH = './data/';
         async function loadCurrentMetaRowsWithFallback(options = {}) {
             const primary = await loadCSV('current_meta_card_data.csv', options);
             if (Array.isArray(primary) && primary.length > 0) {
+                window.currentMetaUsingFallback = false;
                 return primary;
             }
 
@@ -1453,9 +1454,11 @@ const BASE_PATH = './data/';
             if (Array.isArray(fallback) && fallback.length > 0) {
                 const normalizedFallback = normalizeCurrentMetaFallbackRows(fallback);
                 console.warn(`[Current Meta] Using tournament fallback dataset (${normalizedFallback.length} rows) because current_meta_card_data.csv is missing or empty.`);
+                window.currentMetaUsingFallback = true;
                 return normalizedFallback;
             }
 
+            window.currentMetaUsingFallback = false;
             return [];
         }
 
@@ -15378,7 +15381,7 @@ const BASE_PATH = './data/';
             
             // Apply format filter to data BEFORE building archetype list
             let filteredData = data;
-            if (currentMetaFormatFilter !== 'all') {
+            if (currentMetaFormatFilter !== 'all' && !window.currentMetaUsingFallback) {
                 const filterValue = currentMetaFormatFilter === 'live' ? 'Meta Live' : 'Meta Play!';
                 filteredData = data.filter(row => row.meta === filterValue);
                 console.log(`Filtered archetypes by ${currentMetaFormatFilter}: ${filteredData.length} cards`);
@@ -15508,6 +15511,10 @@ const BASE_PATH = './data/';
         
         // Format filter functions
         async function setCurrentMetaFormatFilter(format) {
+            // When using fallback data (tournament only), live/play filter is meaningless
+            if (window.currentMetaUsingFallback && format !== 'all') {
+                format = 'all';
+            }
             currentMetaFormatFilter = format;
             console.log('[Current Meta] Format filter set to:', format);
             
@@ -15519,6 +15526,18 @@ const BASE_PATH = './data/';
                         btn.className = 'btn btn-primary';
                     } else {
                         btn.className = 'btn btn-secondary';
+                    }
+                    // Disable live/play buttons when fallback data has no distinction
+                    if (window.currentMetaUsingFallback && f !== 'All') {
+                        btn.disabled = true;
+                        btn.title = 'Not available — run Current Meta scraper to get Limitless + Tournament split';
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                    } else {
+                        btn.disabled = false;
+                        btn.title = '';
+                        btn.style.opacity = '';
+                        btn.style.cursor = '';
                     }
                 }
             });

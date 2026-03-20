@@ -969,9 +969,6 @@ function updateDecksUI() {
             </div>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <button onclick="event.stopPropagation(); toggleDeckCollapse('${deckId}')" style="padding: 6px 12px; background: rgba(52, 73, 94, 0.92); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.85em; transition: all 0.2s;" onmouseover="this.style.background='#2c3e50'" onmouseout="this.style.background='rgba(52, 73, 94, 0.92)'" title="Expand/Collapse deck">
-              ▼
-            </button>
             <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(155, 89, 182, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='rgba(155, 89, 182, 0.9)'" title="Compare with another deck">
               ⚖️
             </button>

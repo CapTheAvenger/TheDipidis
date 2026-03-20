@@ -668,6 +668,16 @@ function updateCollectionUI(searchFilter = '') {
       </div>
     `;
   }
+
+  // Keep profile summary counters in sync with collection changes/reloads.
+  const profileCardsCountEl = document.getElementById('profile-cards-count');
+  if (profileCardsCountEl) {
+    profileCardsCountEl.textContent = stats.cardCount;
+  }
+  const profileCollectionValueEl = document.getElementById('profile-collection-value');
+  if (profileCollectionValueEl) {
+    profileCollectionValueEl.textContent = `${stats.totalValue.toFixed(2)}€`;
+  }
 }
 
 function setCollectionSort(mode) {

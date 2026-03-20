@@ -92,11 +92,6 @@ async function loadUserData(userId) {
         return out;
       }
 
-      // Profile
-      window.userProfile = data;
-      window.deckFolders = Array.isArray(data.deckFolders) ? data.deckFolders.filter(Boolean) : [];
-      if (typeof updateProfileUI === 'function') updateProfileUI(data);
-
       // Collection
       const rawCollection = Array.isArray(data.collection) ? data.collection.filter(v => typeof v === 'string' && v.includes('|')) : [];
       const counts = flattenCountsObject(data.collectionCounts || {});
@@ -111,6 +106,11 @@ async function loadUserData(userId) {
         }
       });
       if (typeof updateCollectionUI === 'function') updateCollectionUI();
+
+      // Profile (render after collection is loaded so cards/value are correct)
+      window.userProfile = data;
+      window.deckFolders = Array.isArray(data.deckFolders) ? data.deckFolders.filter(Boolean) : [];
+      if (typeof updateProfileUI === 'function') updateProfileUI(data);
 
       // Wishlist
       window.userWishlist = new Set(data.wishlist || []);

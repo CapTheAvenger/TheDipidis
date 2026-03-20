@@ -6856,6 +6856,71 @@ const BASE_PATH = './data/';
             console.log('Table rendered with tier grouping:', { core: coreCards.length, aceSpec: aceSpecCards.length, tech: techCards.length, spicy: spicyCards.length });
         }
         
+        function getCardShareValue(card) {
+            if (!card || typeof card !== 'object') return null;
+            const candidates = [
+                card.percentage_in_archetype,
+                card.share,
+                card.new_share,
+                card.old_share
+            ];
+            for (const candidate of candidates) {
+                const parsed = parseFloat(String(candidate ?? '').replace(',', '.'));
+                if (Number.isFinite(parsed)) return parsed;
+            }
+            return null;
+        }
+
+        function getAceSpecBonusCountForFilter(filterValue) {
+            if (filterValue === '90') return 1;
+            if (filterValue === '70') return 2;
+            if (filterValue === '50') return 3;
+            return 0;
+        }
+
+        function applyShareFilterWithAceSpecBoost(cards, filterValue) {
+            const allCards = Array.isArray(cards) ? cards : [];
+            if (filterValue === 'all') return [...allCards];
+
+            const threshold = parseInt(filterValue, 10);
+            if (!Number.isFinite(threshold)) return [...allCards];
+
+            const hasShareData = allCards.some(card => Number.isFinite(getCardShareValue(card)));
+            if (!hasShareData) return [...allCards];
+
+            const filteredSet = new Set();
+            allCards.forEach(card => {
+                const share = getCardShareValue(card);
+                if (Number.isFinite(share) && share >= threshold) {
+                    filteredSet.add(card);
+                }
+            });
+
+            const aceSpecBonusCount = getAceSpecBonusCountForFilter(filterValue);
+            if (aceSpecBonusCount > 0) {
+                const aceSpecCandidates = allCards
+                    .filter(card => {
+                        const cardName = card.card_name || card.full_card_name || card.name || '';
+                        return isAceSpec(cardName);
+                    })
+                    .sort((a, b) => {
+                        const shareA = getCardShareValue(a) ?? -1;
+                        const shareB = getCardShareValue(b) ?? -1;
+                        return shareB - shareA;
+                    });
+
+                let addedBonus = 0;
+                for (const aceCard of aceSpecCandidates) {
+                    if (filteredSet.has(aceCard)) continue;
+                    filteredSet.add(aceCard);
+                    addedBonus += 1;
+                    if (addedBonus >= aceSpecBonusCount) break;
+                }
+            }
+
+            return allCards.filter(card => filteredSet.has(card));
+        }
+
         function applyCityLeagueFilter() {
             const filterSelect = document.getElementById('cityLeagueFilterSelect');
             const archetype = document.getElementById('cityLeagueDeckSelect')?.value;
@@ -6864,12 +6929,7 @@ const BASE_PATH = './data/';
             
             const filterValue = filterSelect.value;
             const allCards = window.currentCityLeagueDeckCards;
-            let filteredCards = [...allCards];
-            
-            if (filterValue !== 'all') {
-                const threshold = parseInt(filterValue);
-                filteredCards = filteredCards.filter(card => parseFloat(card.percentage_in_archetype || 0) >= threshold);
-            }
+            const filteredCards = applyShareFilterWithAceSpecBoost(allCards, filterValue);
             
             devLog(`Filter applied: ${filterValue}, showing ${filteredCards.length} of ${allCards.length} cards`);
             
@@ -12038,11 +12098,9 @@ const BASE_PATH = './data/';
             }
             
             const filterValue = document.getElementById('pastMetaFilterSelect').value;
-            const threshold = filterValue === 'all' ? 0 : parseInt(filterValue);
-            
-            // Since tournament scraper gives average counts, we treat any card as 100% present
-            // Filter threshold doesn't really apply here, but we keep it for consistency
-            pastMetaFilteredCards = [...pastMetaCurrentCards];
+
+            // Apply share-threshold where share data exists, and include top Ace Specs by filter level.
+            pastMetaFilteredCards = applyShareFilterWithAceSpecBoost(pastMetaCurrentCards, filterValue);
             
             renderPastMetaCards();
         }
@@ -15852,14 +15910,9 @@ const BASE_PATH = './data/';
             
             const filterValue = filterSelect.value;
             const allCards = window.currentCurrentMetaDeckCards;
-            let filteredCards = [...allCards];
+            const filteredCards = applyShareFilterWithAceSpecBoost(allCards, filterValue);
             
-            if (filterValue !== 'all') {
-                const threshold = parseInt(filterValue);
-                filteredCards = filteredCards.filter(card => parseFloat(card.percentage_in_archetype || 0) >= threshold);
-            }
-            
-            console.log(`Filter applied: ${filterValue}, showing ${filteredCards.length} of ${allCards.length} cards`);
+            devLog(`Filter applied: ${filterValue}, showing ${filteredCards.length} of ${allCards.length} cards`);
             
             const filteredTotal = filteredCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
             const allTotal = allCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);

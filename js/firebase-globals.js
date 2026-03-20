@@ -138,7 +138,7 @@ async function loadUserDecks(userId) {
   try {
     const snapshot = await window.db.collection('users').doc(userId).collection('decks').get();
     window.userDecks = [];
-    snapshot.forEach(doc => window.userDecks.push({ id: doc.id, ...doc.data() }));
+    snapshot.forEach(doc => window.userDecks.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) }));
     if (typeof updateDecksUI === 'function') updateDecksUI();
   } catch (error) {
     console.error('Error loading decks:', error);

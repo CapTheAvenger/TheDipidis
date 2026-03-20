@@ -1725,3 +1725,233 @@ window.filterDecksByFolder = filterDecksByFolder;
 window.openCompareSavedDeck = openCompareSavedDeck;
 window.filterMyDecks = filterMyDecks;
 window.saveCurrentDeckToProfile = saveCurrentDeckToProfile;
+
+// ============================================================
+// DEX TCG CSV COLLECTION IMPORT
+// ============================================================
+
+function dexImportOpenFilePicker() {
+    const user = typeof auth !== 'undefined' ? auth.currentUser : null;
+    if (!user) { showNotification('Bitte zuerst einloggen', 'error'); return; }
+    document.getElementById('dexImportFileInput').click();
+}
+
+function dexImportHandleFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => dexImportParseCSV(e.target.result);
+    reader.readAsText(file, 'UTF-8');
+    input.value = ''; // reset so same file can be re-selected
+}
+
+function dexImportParseCSV(csvText) {
+    let rows;
+    if (window.Papa) {
+        const result = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+        rows = result.data;
+    } else {
+        const lines = csvText.split(/\r?\n/).filter(l => l.trim());
+        if (lines.length < 2) { showNotification('CSV ist leer oder ungültig', 'error'); return; }
+        // Handle quoted CSV fields
+        function splitCSVLine(line) {
+            const result = [];
+            let field = '', inQuote = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (ch === '"') { inQuote = !inQuote; }
+                else if (ch === ',' && !inQuote) { result.push(field.trim()); field = ''; }
+                else { field += ch; }
+            }
+            result.push(field.trim());
+            return result;
+        }
+        const headers = splitCSVLine(lines[0]).map(h => h.toLowerCase());
+        rows = lines.slice(1).map(line => {
+            const cells = splitCSVLine(line);
+            const obj = {};
+            headers.forEach((h, i) => obj[h] = (cells[i] || '').trim());
+            return obj;
+        });
+    }
+
+    if (!rows || rows.length === 0) { showNotification('CSV enthält keine Daten', 'error'); return; }
+
+    // Auto-detect relevant column names (Dex exports various header names)
+    const sampleRow = rows[0];
+    const keys = Object.keys(sampleRow).map(k => k.toLowerCase());
+    const nameKey = keys.find(k => k === 'name' || k.includes('card_name') || k.includes('cardname')) || 'name';
+    const setKey  = keys.find(k => k === 'set' || k === 'set_code' || k === 'expansion' || k === 'set code') || 'set';
+    const numKey  = keys.find(k => k === 'number' || k === 'card_number' || k === 'collector_number' || k === 'card number') || 'number';
+    const qtyKey  = keys.find(k => k === 'qty' || k === 'quantity' || k === 'count' || k === 'amount' || k.includes('owned')) || 'qty';
+
+    const matched = [], unmatched = [];
+    const dbMap = window.cardsBySetNumberMap || {};
+
+    rows.forEach(row => {
+        const rawName = (row[nameKey] || '').trim();
+        const rawSet  = (row[setKey]  || '').trim().toUpperCase();
+        const rawNum  = (row[numKey]  || '').trim();
+        const qty     = Math.max(1, parseInt(row[qtyKey] || '1', 10) || 1);
+
+        // Primary: set + number lookup (try with and without zero-padding)
+        let card = dbMap[`${rawSet}-${rawNum}`]
+                || dbMap[`${rawSet}-${rawNum.padStart(3, '0')}`]
+                || dbMap[`${rawSet}-${String(parseInt(rawNum, 10) || rawNum)}`];
+
+        // Fallback: name-based lookup
+        if (!card && rawName) {
+            if (window.cardIndexMap) {
+                card = window.cardIndexMap.get(rawName) || window.cardIndexMap.get(rawName.toLowerCase());
+            }
+            if (!card && window.allCardsDatabase) {
+                const lower = rawName.toLowerCase();
+                card = window.allCardsDatabase.find(c => c.name && c.name.toLowerCase() === lower
+                    && (!rawSet || c.set === rawSet)
+                    && (!rawNum || c.number === rawNum));
+            }
+        }
+
+        if (card) {
+            const cardId = `${card.name}|${card.set}|${card.number}`;
+            matched.push({ cardId, qty, card, rawName, rawSet, rawNum });
+        } else {
+            unmatched.push({ rawName, rawSet, rawNum, qty });
+        }
+    });
+
+    dexImportShowPreview(matched, unmatched);
+}
+
+function dexImportShowPreview(matched, unmatched) {
+    const existing = document.getElementById('dexImportModal');
+    if (existing) existing.remove();
+
+    if (matched.length === 0 && unmatched.length === 0) {
+        showNotification('CSV enthält keine lesbaren Einträge', 'error');
+        return;
+    }
+
+    const modal = document.createElement('div');
+    modal.id = 'dexImportModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+    const totalQty = matched.reduce((s, m) => s + m.qty, 0);
+    const unmatchedBlock = unmatched.length > 0 ? `
+        <details style="margin-bottom:12px;">
+            <summary style="cursor:pointer;color:#856404;font-weight:600;padding:4px 0;">⚠️ ${unmatched.length} nicht gefundene Karten (anzeigen)</summary>
+            <ul style="font-size:11px;color:#666;max-height:130px;overflow-y:auto;margin-top:8px;padding-left:18px;">
+                ${unmatched.map(u => `<li>${escapeHtml(u.rawName || '?')} (${escapeHtml(u.rawSet)} ${escapeHtml(u.rawNum)}) — ${u.qty}x</li>`).join('')}
+            </ul>
+        </details>` : '';
+
+    const tableBlock = matched.length > 0 ? `
+        <div style="max-height:220px;overflow-y:auto;border:1px solid #ddd;border-radius:8px;margin-bottom:14px;font-size:12px;">
+            <table style="width:100%;border-collapse:collapse;">
+                <thead><tr style="background:#667eea;color:#fff;position:sticky;top:0;">
+                    <th style="padding:7px 10px;text-align:left;">Karte</th>
+                    <th style="padding:7px 6px;text-align:center;">Set</th>
+                    <th style="padding:7px 6px;text-align:center;">Nr.</th>
+                    <th style="padding:7px 6px;text-align:center;">Anzahl</th>
+                </tr></thead>
+                <tbody>
+                    ${matched.map((m, i) => `<tr style="background:${i % 2 ? '#f7f7f7' : '#fff'};">
+                        <td style="padding:5px 10px;">${escapeHtml(m.card.name)}</td>
+                        <td style="padding:5px 6px;text-align:center;">${escapeHtml(m.card.set)}</td>
+                        <td style="padding:5px 6px;text-align:center;">${escapeHtml(m.card.number)}</td>
+                        <td style="padding:5px 6px;text-align:center;font-weight:700;color:#27ae60;">${m.qty}×</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+            <button onclick="dexImportExecute('merge')"
+                    style="flex:1;min-width:160px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
+                ➕ Hinzufügen (Merge)<br><small style="font-weight:400;opacity:.85;">Bestehende Karten bleiben erhalten</small>
+            </button>
+            <button onclick="dexImportExecute('replace')"
+                    style="flex:1;min-width:160px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
+                🔄 Ersetzen (Replace)<br><small style="font-weight:400;opacity:.85;">Kollektion komplett ersetzen</small>
+            </button>
+        </div>` : `<p style="color:#888;text-align:center;">Keine Karten in der Datenbank gefunden.</p>`;
+
+    modal.innerHTML = `
+        <div style="background:#fff;border-radius:14px;max-width:660px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+            <h2 style="margin-top:0;color:#667eea;margin-bottom:18px;">📥 Dex Import Vorschau</h2>
+            <div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+                <div style="background:#d4edda;border-radius:8px;padding:10px 16px;flex:1;text-align:center;min-width:100px;">
+                    <div style="font-size:1.6em;font-weight:900;color:#155724;">${matched.length}</div>
+                    <div style="font-size:12px;color:#155724;">Karten erkannt</div>
+                </div>
+                <div style="background:#d4edda;border-radius:8px;padding:10px 16px;flex:1;text-align:center;min-width:100px;">
+                    <div style="font-size:1.6em;font-weight:900;color:#155724;">${totalQty}</div>
+                    <div style="font-size:12px;color:#155724;">Exemplare gesamt</div>
+                </div>
+                ${unmatched.length > 0 ? `<div style="background:#fff3cd;border-radius:8px;padding:10px 16px;flex:1;text-align:center;min-width:100px;">
+                    <div style="font-size:1.6em;font-weight:900;color:#856404;">${unmatched.length}</div>
+                    <div style="font-size:12px;color:#856404;">Nicht gefunden</div>
+                </div>` : ''}
+            </div>
+            ${tableBlock}
+            ${unmatchedBlock}
+            <button onclick="document.getElementById('dexImportModal').remove()"
+                    style="width:100%;background:#f0f0f0;border:none;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:#555;margin-top:4px;">
+                ✕ Abbrechen
+            </button>
+        </div>`;
+
+    modal._matchedData = matched;
+    document.body.appendChild(modal);
+}
+
+async function dexImportExecute(mode) {
+    const modal = document.getElementById('dexImportModal');
+    if (!modal || !modal._matchedData) return;
+    const matched = modal._matchedData;
+    const user = typeof auth !== 'undefined' ? auth.currentUser : null;
+    if (!user) { showNotification('Bitte zuerst einloggen', 'error'); return; }
+
+    modal.remove();
+    showNotification('Importiere Kollektion…', 'info');
+
+    try {
+        // Build the new in-memory state
+        const newCollection = mode === 'replace' ? new Set() : new Set(window.userCollection || []);
+        const newCounts     = mode === 'replace' ? new Map() : new Map(window.userCollectionCounts || []);
+
+        matched.forEach(({ cardId, qty }) => {
+            newCollection.add(cardId);
+            newCounts.set(cardId, mode === 'merge'
+                ? (newCounts.get(cardId) || 0) + qty
+                : qty);
+        });
+
+        // Build Firestore update payload (use dot-notation for collectionCounts to avoid overwriting other fields)
+        const updateData = { collection: [...newCollection] };
+        if (mode === 'replace') {
+            // For replace we set the whole sub-object at once
+            const countsObj = {};
+            newCounts.forEach((v, k) => { countsObj[k] = v; });
+            updateData.collectionCounts = countsObj;
+        } else {
+            // For merge only touch the keys we're writing
+            newCounts.forEach((v, k) => { updateData[`collectionCounts.${k}`] = v; });
+        }
+
+        await db.collection('users').doc(user.uid).set(updateData, { merge: true });
+
+        window.userCollection      = newCollection;
+        window.userCollectionCounts = newCounts;
+
+        updateCollectionUI();
+        const totalQty = matched.reduce((s, m) => s + m.qty, 0);
+        showNotification(`✅ ${matched.length} Karten (${totalQty} Exemplare) importiert!`, 'success');
+    } catch (err) {
+        console.error('Dex import error:', err);
+        showNotification('Fehler beim Import: ' + err.message, 'error');
+    }
+}
+
+window.dexImportOpenFilePicker = dexImportOpenFilePicker;
+window.dexImportHandleFile     = dexImportHandleFile;
+window.dexImportExecute        = dexImportExecute;

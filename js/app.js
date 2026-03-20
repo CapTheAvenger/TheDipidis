@@ -1674,6 +1674,11 @@ const BASE_PATH = './data/';
                     if (pastMetaSearchInput && pastMetaSearchInput.value.trim()) {
                         searchDeckCards('pastMeta');
                     }
+
+                    // My Decks may load before card DB; refresh once DB is ready to render card images.
+                    if (window.userDecks && window.userDecks.length > 0 && typeof updateDecksUI === 'function') {
+                        updateDecksUI();
+                    }
                 } else {
                     console.error('? Failed to load all_cards_merged.json');
                 }

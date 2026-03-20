@@ -13448,6 +13448,18 @@ const BASE_PATH = './data/';
             
             const searchInput = document.getElementById('cardSearch');
             const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+
+            // If any print of a card name matches EN/DE search, include all prints of that name.
+            const searchMatchedCardNames = new Set();
+            if (searchTerm) {
+                window.allCardsData.forEach(card => {
+                    const nameEn = (card.name_en || card.name || '').toLowerCase();
+                    const nameDe = (card.name_de || '').toLowerCase();
+                    if (nameEn.includes(searchTerm) || nameDe.includes(searchTerm)) {
+                        searchMatchedCardNames.add((card.name || '').toLowerCase());
+                    }
+                });
+            }
             
             // Get selected values from checkboxes
             const selectedMetas = Array.from(document.querySelectorAll('#metaFormatOptions input:checked')).map(cb => cb.value);
@@ -13486,12 +13498,14 @@ const BASE_PATH = './data/';
                 if (searchTerm) {
                     const nameEn = (card.name_en || card.name || '').toLowerCase();
                     const nameDe = (card.name_de || '').toLowerCase();
+                    const baseName = (card.name || '').toLowerCase();
                     const setCode = (card.set || '').toLowerCase();
                     const cardNum = String(card.number || '').toLowerCase();
                     const dexNum = (card.pokedex_number || '').toString();
                     const setNumSpace = `${setCode} ${cardNum}`;
                     const setNumCombined = `${setCode}${cardNum}`;
-                    const matchesSearch = nameEn.includes(searchTerm) ||
+                    const matchesSearch = searchMatchedCardNames.has(baseName) ||
+                                          nameEn.includes(searchTerm) ||
                                           nameDe.includes(searchTerm) ||
                                           setNumSpace.includes(searchTerm) ||
                                           setNumCombined.includes(searchTerm) ||
@@ -13810,17 +13824,21 @@ const BASE_PATH = './data/';
             // For each card name, choose the best print
             const selectedCards = [];
 
-            const rarityOrder = {
-                'Common': 1,
-                'Uncommon': 2,
-                'Rare': 3,
-                'Holo Rare': 4,
-                'Ultra Rare': 5,
-                'Secret Rare': 6,
-                'Hyper Rare': 7,
-                'Special Rare': 8,
-                'Illustration Rare': 9,
-                'Promo': 10
+            const getBudgetRarityRank = (rarity) => {
+                const r = String(rarity || '').toLowerCase();
+                if (r.includes('uncommon')) return 2;
+                if (/\bcommon\b/.test(r)) return 1;
+                if (r.includes('holo rare')) return 4;
+                if (r.includes('double rare')) return 5;
+                if (r.includes('triple rare')) return 6;
+                if (r.includes('ultra rare')) return 7;
+                if (r.includes('special art') || r.includes('special illustration')) return 10;
+                if (r.includes('illustration rare') || r === 'art rare') return 9;
+                if (r.includes('secret rare')) return 11;
+                if (r.includes('hyper rare') || r.includes('rainbow')) return 12;
+                if (r.includes('promo')) return 13;
+                if (r.includes('rare')) return 3;
+                return 50;
             };
             
             cardsByName.forEach((prints, cardName) => {
@@ -13830,8 +13848,8 @@ const BASE_PATH = './data/';
                 }
 
                 // Budget mode: always keep the lowest rarity tier first.
-                const minRarityRank = Math.min(...prints.map(p => rarityOrder[p.rarity] || 99));
-                const budgetCandidatePrints = prints.filter(p => (rarityOrder[p.rarity] || 99) === minRarityRank);
+                const minRarityRank = Math.min(...prints.map(p => getBudgetRarityRank(p.rarity)));
+                const budgetCandidatePrints = prints.filter(p => getBudgetRarityRank(p.rarity) === minRarityRank);
                 
                 // Multiple prints exist - choose the best one based on FILTERED coverage data
                 const coverageData = window.cardDeckCoverageMap ? window.cardDeckCoverageMap.get(cardName) : null;
@@ -13936,8 +13954,8 @@ const BASE_PATH = './data/';
                 
                 // Sort prints by priority
                 const sortedPrints = budgetCandidatePrints.sort((a, b) => {
-                    const rarityA = rarityOrder[a.rarity] || 99;
-                    const rarityB = rarityOrder[b.rarity] || 99;
+                    const rarityA = getBudgetRarityRank(a.rarity);
+                    const rarityB = getBudgetRarityRank(b.rarity);
                     
                     // First priority: lowest rarity (Common/Uncommon preferred)
                     if (rarityA !== rarityB) {
@@ -14403,15 +14421,25 @@ const BASE_PATH = './data/';
             // Create unique card ID: name|set|number (tracks SPECIFIC print, not just card name)
             const cardId = `${card.name}|${displaySet}|${displayNumber}`;
             item.setAttribute('data-card-id', cardId);
-            const encodedCardId = encodeURIComponent(cardId);
-            const encodedName = encodeURIComponent(card.name || '');
-            const encodedSet = encodeURIComponent(displaySet);
-            const encodedNumber = encodeURIComponent(displayNumber);
+            const safeCardId = escapeJsStr(cardId);
+            const safeCardName = escapeJsStr(card.name || '');
+            const safeDisplaySet = escapeJsStr(displaySet);
+            const safeDisplayNumber = escapeJsStr(displayNumber);
             
             // Check if user owns THIS SPECIFIC PRINT
             const userOwnsCard = window.userCollection && window.userCollection.has(cardId);
             const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
             const userWantsCard = window.userWishlist && window.userWishlist.has(cardId);
+
+            // Also show ownership of other prints to avoid confusing "owned but not marked" states.
+            let altPrintOwnedCount = 0;
+            if (ownedCount === 0 && window.userCollectionCounts && window.allCardsData) {
+                const sameNamePrints = window.allCardsData.filter(c => c.name === card.name && (c.set !== displaySet || c.number !== displayNumber));
+                sameNamePrints.forEach(v => {
+                    const altId = `${card.name}|${v.set}|${v.number}`;
+                    altPrintOwnedCount += window.userCollectionCounts.get(altId) || 0;
+                });
+            }
             
             // Format price button
             let priceButton = '';
@@ -14467,14 +14495,15 @@ const BASE_PATH = './data/';
                 <div style="position: relative;">
                     <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
                     ${ownedCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${ownedCount}</div>` : ''}
+                    ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #FFD600; color: #333; min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="You own other prints of this card">${altPrintOwnedCount}</div>` : ''}
                     <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
-                        <button onclick="addToCollection(decodeURIComponent('${encodedCardId}'))" style="background: #fff; color: #000; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Add to collection (${ownedCount}/4)">
+                        <button onclick="addToCollection('${safeCardId}')" style="background: #fff; color: #000; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Add to collection (${ownedCount}/4)">
                             +
                         </button>
-                        <button onclick="removeFromCollection(decodeURIComponent('${encodedCardId}'))" style="background: ${ownedCount > 0 ? '#4CAF50' : '#fff'}; color: ${ownedCount > 0 ? '#fff' : '#999'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Remove from collection (${ownedCount}/4)">
+                        <button onclick="removeFromCollection('${safeCardId}')" style="background: ${ownedCount > 0 ? '#4CAF50' : '#fff'}; color: ${ownedCount > 0 ? '#fff' : '#999'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Remove from collection (${ownedCount}/4)">
                             -
                         </button>
-                        <button onclick="toggleWishlist(decodeURIComponent('${encodedCardId}'))" style="background: ${userWantsCard ? '#E91E63' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'}; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
+                        <button onclick="toggleWishlist('${safeCardId}')" style="background: ${userWantsCard ? '#E91E63' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'}; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
                             ${userWantsCard ? '&#9829;' : '&#9825;'}
                         </button>
                     </div>
@@ -14487,7 +14516,7 @@ const BASE_PATH = './data/';
                     </div>
                     <div class="card-database-button-row" style="display: flex; gap: 8px; margin-top: 8px;">
                         ${priceButton}
-                        <div class="card-database-rarity-btn ${rarityClass}" onclick="openRaritySwitcherFromDB(decodeURIComponent('${encodedName}'), decodeURIComponent('${encodedSet}'), decodeURIComponent('${encodedNumber}'))" style="display: block; padding: 8px; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View all prints for ${displayRarity}">
+                        <div class="card-database-rarity-btn ${rarityClass}" onclick="openRaritySwitcherFromDB('${safeCardName}', '${safeDisplaySet}', '${safeDisplayNumber}')" style="display: block; padding: 8px; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View all prints for ${displayRarity}">
                             ${displayRarity}
                         </div>
                         <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" style="display: block; padding: 8px; background: #e74c3c; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; border: none; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.35)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="Add to proxy queue">Proxy</button>

@@ -523,6 +523,10 @@ function getPokemonElementFromCard(card) {
     return typeToElement[cached] || 'unknown';
   }
 
+  if (window._pokemonTypeFetchDisabled) {
+    return 'unknown';
+  }
+
   if (!window._pendingPokemonTypeFetches) window._pendingPokemonTypeFetches = new Set();
   if (!window._pendingPokemonTypeFetches.has(String(dex))) {
     window._pendingPokemonTypeFetches.add(String(dex));
@@ -537,7 +541,13 @@ function getPokemonElementFromCard(card) {
         window.pokemonTypeCache[String(dex)] = typeName;
         try { localStorage.setItem('pokemonTypeCacheV1', JSON.stringify(window.pokemonTypeCache)); } catch (_) {}
       })
-      .catch(() => {})
+      .catch(error => {
+        const message = String((error && error.message) || error || '').toLowerCase();
+        if (message.includes('content security policy') || message.includes('violates the following content security policy directive') || message.includes('refused to connect')) {
+          window._pokemonTypeFetchDisabled = true;
+          console.warn('[Collection] PokéAPI type lookup disabled because CSP blocks external requests.');
+        }
+      })
       .finally(() => {
         window._pendingPokemonTypeFetches.delete(String(dex));
         updateCollectionTypeLoadingIndicator();
@@ -2345,7 +2355,28 @@ function dexImportParseCSV(csvText) {
         });
       }
 
-    dexImportShowPreview(matched, unmatched);
+    const matchedMap = new Map();
+    matched.forEach(entry => {
+      const existing = matchedMap.get(entry.cardId);
+      if (existing) {
+        existing.qty += entry.qty;
+      } else {
+        matchedMap.set(entry.cardId, { ...entry });
+      }
+    });
+
+    const unmatchedMap = new Map();
+    unmatched.forEach(entry => {
+      const key = `${entry.rawName || ''}|${entry.rawSet || ''}|${entry.rawNum || ''}`;
+      const existing = unmatchedMap.get(key);
+      if (existing) {
+        existing.qty += entry.qty;
+      } else {
+        unmatchedMap.set(key, { ...entry });
+      }
+    });
+
+    dexImportShowPreview([...matchedMap.values()], [...unmatchedMap.values()]);
 }
 
 function dexImportShowPreview(matched, unmatched) {
@@ -2392,7 +2423,7 @@ function dexImportShowPreview(matched, unmatched) {
         <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
             <button onclick="dexImportExecute('merge')"
                     style="flex:1;min-width:160px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
-                ➕ Hinzufügen (Merge)<br><small style="font-weight:400;opacity:.85;">Bestehende Karten bleiben erhalten</small>
+              🔀 Abgleichen (Merge)<br><small style="font-weight:400;opacity:.85;">Importierte Mengen ersetzen, andere Karten bleiben</small>
             </button>
             <button onclick="dexImportExecute('replace')"
                     style="flex:1;min-width:160px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
@@ -2445,27 +2476,22 @@ async function dexImportExecute(mode) {
         const newCounts     = mode === 'replace' ? new Map() : new Map(window.userCollectionCounts || []);
 
         matched.forEach(({ cardId, qty }) => {
-            newCollection.add(cardId);
-            newCounts.set(cardId, mode === 'merge'
-                ? (newCounts.get(cardId) || 0) + qty
-                : qty);
+          newCollection.add(cardId);
+          // Merge behaves as a sync for imported entries: keep other cards,
+          // but set imported card quantities to the imported value.
+          newCounts.set(cardId, qty);
         });
 
-        // Build Firestore update payload
-        const updateData = { collection: [...newCollection] };
-        if (mode === 'replace') {
-            // Replace: overwrite the whole collectionCounts sub-object
-            const countsObj = {};
-            newCounts.forEach((v, k) => { countsObj[k] = v; });
-            updateData.collectionCounts = countsObj;
-        } else {
-            // Merge: only update the imported card keys (not all existing counts)
-            matched.forEach(({ cardId }) => {
-                updateData[`collectionCounts.${cardId}`] = newCounts.get(cardId);
-            });
-            // Also make sure these cardIds appear in the collection array
-            updateData.collection = [...newCollection];
-        }
+        // Persist the full collectionCounts map so reload keeps exact imported quantities.
+        const countsObj = {};
+        newCounts.forEach((value, key) => {
+          if (Number.isFinite(value) && value > 0) countsObj[key] = value;
+        });
+
+        const updateData = {
+          collection: [...newCollection],
+          collectionCounts: countsObj
+        };
 
         await db.collection('users').doc(user.uid).set(updateData, { merge: true });
 

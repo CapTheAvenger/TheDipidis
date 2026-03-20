@@ -1136,6 +1136,35 @@ const BASE_PATH = './data/';
         }
         
         // CSV loading and parsing
+        function parseCSV(text, delimiter) {
+            const raw = String(text || '');
+            if (!raw.trim()) return [];
+
+            // Auto-detect delimiter when not provided to support legacy call sites.
+            const firstLine = raw.split(/\r?\n/, 1)[0] || '';
+            const inferredDelimiter = delimiter || ((firstLine.match(/;/g) || []).length >= (firstLine.match(/,/g) || []).length ? ';' : ',');
+
+            const results = Papa.parse(raw, {
+                header: true,
+                delimiter: inferredDelimiter,
+                skipEmptyLines: true,
+                dynamicTyping: false
+            });
+
+            const rows = Array.isArray(results.data) ? results.data : [];
+            rows.forEach(row => {
+                if (!row || typeof row !== 'object') return;
+                if (row.card_name && typeof window.fixCardNameEncoding === 'function') {
+                    row.card_name = window.fixCardNameEncoding(row.card_name);
+                }
+                if (row.full_card_name && typeof window.fixCardNameEncoding === 'function') {
+                    row.full_card_name = window.fixCardNameEncoding(row.full_card_name);
+                }
+            });
+
+            return rows;
+        }
+
         function fixCardNameEncoding(name) {
             if (!name) return name;
             return String(name)
@@ -6837,7 +6866,7 @@ const BASE_PATH = './data/';
                 filteredCards = filteredCards.filter(card => parseFloat(card.percentage_in_archetype || 0) >= threshold);
             }
             
-            console.log(`Filter applied: ${filterValue}, showing ${filteredCards.length} of ${allCards.length} cards`);
+            devLog(`Filter applied: ${filterValue}, showing ${filteredCards.length} of ${allCards.length} cards`);
             
             // Calculate total card counts (sum of max_count)
             const filteredTotal = filteredCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
@@ -6966,7 +6995,7 @@ const BASE_PATH = './data/';
                     timestamp: new Date().toISOString()
                 };
                 localStorage.setItem('cityLeagueDeck', JSON.stringify(data));
-                console.log('[saveCityLeagueDeck] Saved deck to localStorage:', deckSize, 'cards');
+                devLog('[saveCityLeagueDeck] Saved deck to localStorage:', deckSize, 'cards');
             } catch (e) {
                 console.error('[saveCityLeagueDeck] Error saving deck:', e);
             }
@@ -7196,7 +7225,7 @@ const BASE_PATH = './data/';
                     set: setCode,
                     number: setNumber
                 });
-                console.log(`[addCardToDeck] Saved specific version preference for ${cardName}: ${setCode} ${setNumber}`);
+                devLog(`[addCardToDeck] Saved specific version preference for ${cardName}: ${setCode} ${setNumber}`);
             }
             
             // CRITICAL FIX: Check if card already exists with a different key format
@@ -7302,7 +7331,7 @@ const BASE_PATH = './data/';
                 window[deckOrderKey].push(deckKey);
             }
             
-            console.log(`Added card to deck: ${deckKey} -> ${deck[deckKey]}`);
+            devLog(`Added card to deck: ${deckKey} -> ${deck[deckKey]}`);
             
             // Save to localStorage
             if (source === 'cityLeague') {
@@ -7373,6 +7402,7 @@ const BASE_PATH = './data/';
         }
 
         const pendingDeckRefreshBySource = {};
+        const pendingDeckRefreshTimeoutBySource = {};
         const pendingDeckDisplayUpdateBySource = {};
         const synergyStatsCacheBySource = {
             cityLeague: null,
@@ -7451,19 +7481,28 @@ const BASE_PATH = './data/';
                 cancelAnimationFrame(pendingDeckRefreshBySource[source]);
             }
 
-            pendingDeckRefreshBySource[source] = requestAnimationFrame(() => {
-                pendingDeckRefreshBySource[source] = null;
+            if (pendingDeckRefreshTimeoutBySource[source]) {
+                clearTimeout(pendingDeckRefreshTimeoutBySource[source]);
+            }
 
-                if (source === 'cityLeague') {
-                    applyCityLeagueFilter();
-                } else if (source === 'currentMeta') {
-                    applyCurrentMetaFilter();
-                } else if (source === 'pastMeta') {
-                    renderPastMetaCards();
-                }
+            // Debounce expensive overview rerenders while user is rapidly tapping +/-.
+            pendingDeckRefreshTimeoutBySource[source] = setTimeout(() => {
+                pendingDeckRefreshTimeoutBySource[source] = null;
 
-                updateOpeningHandStats(source);
-            });
+                pendingDeckRefreshBySource[source] = requestAnimationFrame(() => {
+                    pendingDeckRefreshBySource[source] = null;
+
+                    if (source === 'cityLeague') {
+                        applyCityLeagueFilter();
+                    } else if (source === 'currentMeta') {
+                        applyCurrentMetaFilter();
+                    } else if (source === 'pastMeta') {
+                        renderPastMetaCards();
+                    }
+
+                    updateOpeningHandStats(source);
+                });
+            }, 140);
         }
         
         function clearDeck(source) {

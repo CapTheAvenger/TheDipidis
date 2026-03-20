@@ -2163,6 +2163,71 @@ function dexImportParseCSV(csvText) {
       k === 'anzahl' || k === 'menge' || k === 'stueck' || k === 'stück' ||
       k.includes('owned')
     ) || 'qty';
+    // Dex TCG CSV has an 'id' column like "sv3-27" that encodes set+number
+    const idKey = keys.find(k => k === 'id' || k === 'card id' || k === 'card_id' || k === 'cardid') || null;
+
+    // ── Dex set-name → internal (Limitless) set code ──────────────────────────
+    // Full set names from Cardmarket/Dex CSV mapped to the codes used in the DB.
+    // Source: pokemon_sets_mapping.csv in the project root.
+    function normDexSetName(s) {
+      return String(s || '').toLowerCase()
+        .replace(/[éèê]/g, 'e').replace(/[^a-z0-9]/g, '');
+    }
+    const DEX_SET_NAME_MAP = {
+      // Scarlet & Violet era
+      'scarletviolet': 'SVI', 'scarletvioletenergy': 'SVE', 'scarletvioletpromos': 'SVP',
+      'obsidianflames': 'OBF', 'palaeevolved': 'PAL', 'paldaevolved': 'PAL',
+      'pokemon151': 'MEW', '151': 'MEW',
+      'paradoxrift': 'PAR', 'paldeanfates': 'PAF',
+      'temporalforces': 'TEF', 'twilightmasquerade': 'TWM', 'shroudedfable': 'SFA',
+      'stellarcrown': 'SCR', 'surgingsparks': 'SSP', 'prismaticevolutions': 'PRE',
+      'crownzenith': 'CRZ',
+      'journeytogether': 'JTG', 'destinedrivals': 'DRI',
+      'blackbolt': 'BLK', 'whiteflare': 'WHT',
+      'ascendedheroes': 'ASC',
+      // Mega Evolution sets
+      'phantasmalflames': 'PFL', 'megaevolution': 'MEG',
+      'megaevolutionenergy': 'MEE', 'megapromos': 'MEP',
+      // Sword & Shield era
+      'swordshield': 'SSH', 'swordshieldpromos': 'SP',
+      'brilliantstars': 'BRS', 'astralradiance': 'ASR',
+      'pokemongo': 'PGO',
+      'lostorigin': 'LOR', 'silvertempest': 'SIR',
+      'fusionstrike': 'FST', 'celebrations': 'CEL',
+      'evolvingskies': 'EVS', 'chillingreign': 'CRE',
+      'battlestyles': 'BST', 'shiningfates': 'SHF',
+      'vividvoltage': 'VIV', 'championspath': 'CPA',
+      'darknessablaze': 'DAA', 'rebelclash': 'RCL',
+      'cosmiceclipse': 'CEC', 'hiddenfates': 'HIF',
+      'unifiedminds': 'UNM', 'unbrokenbonds': 'UNB',
+      'detectivepikachu': 'DET', 'teamup': 'TEU',
+      'lostthunder': 'LOT', 'dragonmajesty': 'DRM',
+      // Sun & Moon era
+      'sunmoon': 'SUM', 'sunmoonpromos': 'SMP',
+      'celestialstorm': 'CES', 'forbiddenlight': 'FLI',
+      'ultraprism': 'UPR', 'crimsoninvasion': 'CIN',
+      'shininglegends': 'SLG', 'burningshadows': 'BUS',
+      'guardiansrising': 'GRI',
+      // XY era
+      'evolutions': 'EVO', 'steamsiege': 'STS', 'fatescollide': 'FCO',
+      'generations': 'GEN', 'breakpoint': 'BKP', 'breakthrough': 'BKT',
+      'ancientorigins': 'AOR', 'roaringskies': 'ROS', 'doublecrisis': 'DCR',
+      'primalclash': 'PRC', 'phantomforces': 'PHF', 'furiousfists': 'FFI',
+      'flashfire': 'FLF', 'xy': 'XY', 'kalosstarterset': 'KSS',
+      'xypromos': 'XYP', 'legendarytreasures': 'LTR',
+      // BW era
+      'plasmablast': 'PLB', 'plasmafreeze': 'PLF', 'plasmastorm': 'PLS',
+      'boundariescrossed': 'BCR', 'dragonvault': 'DRV', 'dragonsexalted': 'DRX',
+      'darkexplorers': 'DEX', 'nextdestinies': 'NXD', 'noblevictories': 'NVI',
+      'emergingpowers': 'EPO', 'blackwhite': 'BLW', 'blackwhitepromos': 'BWP',
+      // HGSS era
+      'calloflegends': 'CL', 'undaunted': 'UD', 'unleashed': 'UL',
+      'heartgoldsoulsilver': 'HS', 'heartgoldsoulsilverpromospromos': 'HSP',
+      'heartgoldsoulsilverpromos': 'HSP',
+      // Platinum era
+      'pokemonrumble': 'RM', 'arceus': 'AR', 'supremevictors': 'SV',
+      'risingrivals': 'RR', 'popseries9': 'P9', 'platinum': 'PL',
+    };
 
     function parseSetNumberToken(value) {
       const raw = String(value || '').trim();
@@ -2176,9 +2241,9 @@ function dexImportParseCSV(csvText) {
     function parseQtyValue(value) {
       const s = String(value || '').trim();
       const m = s.match(/\d+/);
-      if (!m) return 1;
+      if (!m) return 0;
       const n = parseInt(m[0], 10);
-      return isNaN(n) || n < 1 ? 1 : n;
+      return isNaN(n) ? 0 : Math.max(0, n);
     }
 
     function normalizeSetCode(v) {
@@ -2262,21 +2327,40 @@ function dexImportParseCSV(csvText) {
         let rawNum  = normalizeCardNumber(row[numKey]);
         const qty   = parseQtyValue(row[qtyKey]);
 
+        // Skip cards the user owns 0 of (Dex exports all variants, owned or not)
+        if (qty === 0) return;
+
+        // ── Dex TCG format: 'set' = full name (e.g. "Obsidian Flames"), 'id' = "sv3-27" ──
+        // Resolve the full set name to the internal set code, and pull the card
+        // number from the 'id' field, so "Obsidian Flames" + "sv3-27" → OBF-27.
+        const rawIdCell = idKey ? (row[idKey] || '').trim() : '';
+        const dexSetKey = normDexSetName(row[setKey] || '');
+        const resolvedCode = dexSetKey ? (DEX_SET_NAME_MAP[dexSetKey] || null) : null;
+        if (resolvedCode) {
+            // Extract trailing number/alphanumeric from id field: "sv3-27" → "27"
+            const idNumMatch = rawIdCell.match(/-([A-Za-z0-9]+)$/);
+            const numberFromId = idNumMatch ? normalizeCardNumber(idNumMatch[1]) : rawNum;
+            if (numberFromId) {
+                rawSet = resolvedCode;
+                rawNum = numberFromId;
+            }
+        }
+
         const rowMatch = findRowCardMatch(row, rawSet, rawNum);
         rawSet = rowMatch.set;
         rawNum = rowMatch.number;
         let card = rowMatch.card;
 
-        // Fallback by name ONLY when no set+number info is available at all.
-        if (!card && (!rawSet || !rawNum) && rawName) {
+        // Fallback by name ONLY when we have NO set AND NO number info at all.
+        // Never fall back to name-only if we have any identifying set/number info
+        // (even if it didn't resolve), to prevent wrong cards from accumulating qty.
+        if (!card && !rawSet && !rawNum && rawName) {
             if (window.cardIndexMap) {
                 card = window.cardIndexMap.get(rawName) || window.cardIndexMap.get(rawName.toLowerCase());
             }
             if (!card && window.allCardsDatabase) {
                 const lower = rawName.toLowerCase();
-                card = window.allCardsDatabase.find(c => c.name && c.name.toLowerCase() === lower
-                    && (!rawSet || c.set === rawSet)
-                    && (!rawNum || String(c.number).toUpperCase() === rawNum));
+                card = window.allCardsDatabase.find(c => c.name && c.name.toLowerCase() === lower);
             }
         }
 

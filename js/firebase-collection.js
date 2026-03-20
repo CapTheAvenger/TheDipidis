@@ -440,6 +440,18 @@ function getCollectionFilterMode() {
   return window.collectionFilterMode || 'all';
 }
 
+function updateCollectionTypeLoadingIndicator() {
+  const el = document.getElementById('collection-type-loading');
+  if (!el) return;
+  const pending = window._pendingPokemonTypeFetches ? window._pendingPokemonTypeFetches.size : 0;
+  if (pending > 0) {
+    el.style.display = 'block';
+    el.textContent = `Elementtypen werden geladen... (${pending})`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 function normalizePokemonNameForDexLookup(name) {
   return String(name || '')
     .toLowerCase()
@@ -514,6 +526,7 @@ function getPokemonElementFromCard(card) {
   if (!window._pendingPokemonTypeFetches) window._pendingPokemonTypeFetches = new Set();
   if (!window._pendingPokemonTypeFetches.has(String(dex))) {
     window._pendingPokemonTypeFetches.add(String(dex));
+    updateCollectionTypeLoadingIndicator();
     fetch(`https://pokeapi.co/api/v2/pokemon/${dex}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
@@ -527,6 +540,7 @@ function getPokemonElementFromCard(card) {
       .catch(() => {})
       .finally(() => {
         window._pendingPokemonTypeFetches.delete(String(dex));
+        updateCollectionTypeLoadingIndicator();
         // Re-render after async type resolution to apply element sort/filter.
         if (typeof filterCollection === 'function') filterCollection();
       });
@@ -652,6 +666,7 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
     catch (_) { window.pokemonTypeCache = {}; }
   }
   const activeFilterMode = filterMode || getCollectionFilterMode();
+  updateCollectionTypeLoadingIndicator();
 
   // Update all card elements
   if (window.userCollection) {
@@ -1666,6 +1681,7 @@ function filterCollection() {
   const searchTerm = searchInput.value.trim();
   const filterMode = filterInput ? filterInput.value : getCollectionFilterMode();
   updateCollectionUI(searchTerm, filterMode);
+  updateCollectionTypeLoadingIndicator();
 }
 
 // Filter wishlist by search term and/or set

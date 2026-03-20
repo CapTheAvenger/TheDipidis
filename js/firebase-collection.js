@@ -1255,7 +1255,34 @@ function updateDecksUI() {
         const cardmarketUrl = card.cardmarket_url || '';
         const safeCardmarketUrlJs = escapeJsSingleQuoted(cardmarketUrl);
         const safeCardIdJs = escapeJsSingleQuoted(cardId);
+        const safeDeckKeyJs = escapeJsSingleQuoted(card.deck_key || `${cardName} (${setCode} ${setNumber})`);
         const safeCardmarketTitleHtml = escapeHtml(eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available');
+        let otherPrintOwnedCount = 0;
+        if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
+          const normalizedCurrentName = (typeof normalizeCardName === 'function')
+            ? normalizeCardName(cardName)
+            : String(cardName || '').toLowerCase().trim();
+          const normalizedSet = String(setCode || '').toUpperCase();
+          const normalizedNumber = String(setNumber || '').toUpperCase();
+          window.userCollectionCounts.forEach((qty, collKey) => {
+            const ownedQty = parseInt(qty, 10) || 0;
+            if (ownedQty <= 0) return;
+            const parts = String(collKey || '').split('|');
+            if (parts.length < 3) return;
+            const keyName = parts[0];
+            const keySet = String(parts[1] || '').toUpperCase();
+            const keyNumber = String(parts[2] || '').toUpperCase();
+            const normalizedKeyName = (typeof normalizeCardName === 'function')
+              ? normalizeCardName(keyName)
+              : String(keyName || '').toLowerCase().trim();
+            if (normalizedKeyName !== normalizedCurrentName) return;
+            if (keySet === normalizedSet && keyNumber === normalizedNumber) return;
+            otherPrintOwnedCount += ownedQty;
+          });
+        }
+        const otherPrintSparkle = otherPrintOwnedCount > 0
+          ? `<div style="position: absolute; top: ${badgeBg ? '33px' : '8px'}; left: 8px; font-size: 13px; line-height: 1; z-index: 4; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));" title="Andere Int. Prints in Sammlung: ${otherPrintOwnedCount}x">✨</div>`
+          : '';
         
         cardsHtml += `
           <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -1264,11 +1291,12 @@ function updateDecksUI() {
                  onclick="showSingleCard('${safeImageJs}', '${safeCardNameJs}')">
             
             ${ownedBadge}
+            ${otherPrintSparkle}
             
             <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.75); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 3;">${count}</div>
             
             <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; z-index: 3;">
-                  <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeCardNameJs}')" 
+                    <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeDeckKeyJs}')" 
                       style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="Switch rarity/print">★</button>
                   <button onclick="event.stopPropagation(); openCardmarket('${safeCardmarketUrlJs}', '${safeCardNameJs}')" 

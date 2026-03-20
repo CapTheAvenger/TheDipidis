@@ -6485,6 +6485,27 @@ const BASE_PATH = './data/';
                 const isAceSpecCard = isAceSpec(cardName);
                 const filterCategory = isAceSpecCard ? 'Ace Spec' : cardCategory;
                 const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
+                let otherPrintOwnedCount = 0;
+                if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
+                    const normalizedCurrentName = normalizeCardName(cardName);
+                    const normalizedSet = String(setCode || '').toUpperCase();
+                    const normalizedNumber = String(setNumber || '').toUpperCase();
+                    window.userCollectionCounts.forEach((qty, collKey) => {
+                        const ownedQty = parseInt(qty, 10) || 0;
+                        if (ownedQty <= 0) return;
+                        const parts = String(collKey || '').split('|');
+                        if (parts.length < 3) return;
+                        const keyName = parts[0];
+                        const keySet = String(parts[1] || '').toUpperCase();
+                        const keyNumber = String(parts[2] || '').toUpperCase();
+                        if (normalizeCardName(keyName) !== normalizedCurrentName) return;
+                        if (keySet === normalizedSet && keyNumber === normalizedNumber) return;
+                        otherPrintOwnedCount += ownedQty;
+                    });
+                }
+                const otherPrintSparkleHtml = otherPrintOwnedCount > 0
+                    ? `<div style="position:absolute;top:${deckCount > 0 ? '28px' : '6px'};left:8px;font-size:12px;line-height:1;z-index:3;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6));" title="Andere Int. Prints in Sammlung: ${otherPrintOwnedCount}x">✨</div>`
+                    : '';
                 
                 html += `
                     <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
@@ -6498,6 +6519,7 @@ const BASE_PATH = './data/';
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
+                            ${otherPrintSparkleHtml}
                             ${showTrendOverlay ? `<div class="trend-badge-overlay">${trendIndicator}</div>` : ''}
                             
                             <!-- Card info section - Mobile Overlay -->
@@ -14928,7 +14950,7 @@ const BASE_PATH = './data/';
         // Rarity Switcher Functions
         let currentRaritySwitcherCard = null;
 
-        function openRaritySwitcher(cardName, deckKey) {
+        function openRaritySwitcher(cardName, deckKey, sourceHint = '') {
             if (!window.allCardsDatabase) {
                 showToast('Card database not loaded yet...', 'info');
                 return;
@@ -14957,7 +14979,7 @@ const BASE_PATH = './data/';
             
             console.log(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${deckKey}, actualCardName: ${actualCardName}`);
 
-            currentRaritySwitcherCard = { cardName: actualCardName, deckKey };
+            currentRaritySwitcherCard = { cardName: actualCardName, deckKey, source: sourceHint || '' };
             
             // Find current card's data
             let currentCard = null;
@@ -15107,7 +15129,7 @@ const BASE_PATH = './data/';
                     optionDiv.classList.add('selected');
                 }
                 
-                optionDiv.onclick = () => selectRarityVersion(version.set, version.number, deckKey, actualCardName);
+                optionDiv.onclick = () => selectRarityVersion(version.set, version.number, deckKey, actualCardName, (currentRaritySwitcherCard && currentRaritySwitcherCard.source) || '');
                 
                 let imageHtml = '';
                 const imageUrl = getUnifiedCardImage(version.set, version.number) || version.image_url || '';
@@ -15131,6 +15153,28 @@ const BASE_PATH = './data/';
                 const _rsOwnedLine = _rsOwnedQty > 0
                     ? `<div style="font-size:11px;color:#2e7d32;font-weight:700;">&#10003; ${_rsOwnedQty}x in Sammlung</div>`
                     : `<div style="font-size:11px;color:#999;">Nicht in Sammlung</div>`;
+
+                let _rsOtherPrintsQty = 0;
+                if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
+                    const normalizedCurrentName = normalizeCardName(actualCardName);
+                    const normalizedSet = String(version.set || '').toUpperCase();
+                    const normalizedNumber = String(version.number || '').toUpperCase();
+                    window.userCollectionCounts.forEach((qty, collKey) => {
+                        const ownedQty = parseInt(qty, 10) || 0;
+                        if (ownedQty <= 0) return;
+                        const parts = String(collKey || '').split('|');
+                        if (parts.length < 3) return;
+                        const keyName = parts[0];
+                        const keySet = String(parts[1] || '').toUpperCase();
+                        const keyNumber = String(parts[2] || '').toUpperCase();
+                        if (normalizeCardName(keyName) !== normalizedCurrentName) return;
+                        if (keySet === normalizedSet && keyNumber === normalizedNumber) return;
+                        _rsOtherPrintsQty += ownedQty;
+                    });
+                }
+                const _rsOtherPrintLine = _rsOtherPrintsQty > 0
+                    ? `<div style="font-size:11px;color:#9c27b0;font-weight:700;">✨ Andere Prints: ${_rsOtherPrintsQty}x</div>`
+                    : '';
                 
                 optionDiv.innerHTML = `
                     ${imageHtml}
@@ -15138,6 +15182,7 @@ const BASE_PATH = './data/';
                         <div><strong>${version.set} ${version.number}</strong></div>
                         <div style="font-size: 11px; color: #444; font-weight: 500;">Rarity: ${version.rarity || 'N/A'}</div>
                         ${_rsOwnedLine}
+                        ${_rsOtherPrintLine}
                     </div>
                     <div class="rarity-badge" style="background-color: ${rarityBadgeColor};">
                         ${version.rarity || 'Unknown'}
@@ -15159,42 +15204,81 @@ const BASE_PATH = './data/';
             modal.classList.add('show');
         }
 
-        function selectRarityVersion(setCode, setNumber, oldDeckKey, cardName) {
-            if (!window.cityLeagueDeck) return;
-
-            // Extract card name from oldDeckKey if needed
-            const match = oldDeckKey.match(/^(.+?)\s*\(/);
+        function selectRarityVersion(setCode, setNumber, oldDeckKey, cardName, sourceHint = '') {
+            const match = String(oldDeckKey || '').match(/^(.+?)\s*\(/);
             const actualCardName = cardName || (match ? match[1] : oldDeckKey);
-            
-            // Create new key with new version
             const newKey = `${actualCardName} (${setCode} ${setNumber})`;
-            
-            // Get current count for this card
-            const currentCount = window.cityLeagueDeck[oldDeckKey] || 0;
-            
-            if (currentCount > 0) {
-                // Remove from old key
-                delete window.cityLeagueDeck[oldDeckKey];
-                
-                // Add to new key
-                window.cityLeagueDeck[newKey] = currentCount;
+            const normalizedActualName = normalizeCardName(actualCardName);
 
-                // CRITICAL: Update order array to preserve card position
-                if (window.cityLeagueDeckOrder) {
-                    const oldKeyIndex = window.cityLeagueDeckOrder.indexOf(oldDeckKey);
-                    if (oldKeyIndex !== -1) {
-                        // Replace old key with new key at same position
-                        window.cityLeagueDeckOrder[oldKeyIndex] = newKey;
-                        console.log(`Updated deck order: ${oldDeckKey} -> ${newKey} at position ${oldKeyIndex}`);
-                    }
+            const deckContexts = {
+                cityLeague: { deck: window.cityLeagueDeck || {}, orderKey: 'cityLeagueDeckOrder' },
+                currentMeta: { deck: window.currentMetaDeck || {}, orderKey: 'currentMetaDeckOrder' },
+                pastMeta: { deck: window.pastMetaDeck || {}, orderKey: 'pastMetaDeckOrder' }
+            };
+
+            const orderedSources = [];
+            if (sourceHint && deckContexts[sourceHint]) orderedSources.push(sourceHint);
+            ['cityLeague', 'currentMeta', 'pastMeta'].forEach(src => {
+                if (!orderedSources.includes(src)) orderedSources.push(src);
+            });
+
+            let resolvedSource = '';
+            let resolvedOldKey = '';
+            let resolvedCount = 0;
+
+            for (const source of orderedSources) {
+                const ctx = deckContexts[source];
+                const deck = ctx.deck;
+                if (!deck || typeof deck !== 'object') continue;
+
+                const directCount = parseInt(deck[oldDeckKey], 10) || 0;
+                if (directCount > 0) {
+                    resolvedSource = source;
+                    resolvedOldKey = oldDeckKey;
+                    resolvedCount = directCount;
+                    break;
                 }
 
-                // Save preference
-                setRarityPreference(actualCardName, { mode: 'specific', set: setCode, number: setNumber });
-                
-                // Refresh the grid display
-                renderMyDeckGrid('cityLeague');
+                // Fallback: find matching card-name key in that deck.
+                for (const [key, qty] of Object.entries(deck)) {
+                    const keyQty = parseInt(qty, 10) || 0;
+                    if (keyQty <= 0) continue;
+                    const keyMatch = String(key).match(/^(.+?)\s*\(/);
+                    const keyName = keyMatch ? keyMatch[1] : key;
+                    if (normalizeCardName(keyName) === normalizedActualName) {
+                        resolvedSource = source;
+                        resolvedOldKey = key;
+                        resolvedCount = keyQty;
+                        break;
+                    }
+                }
+                if (resolvedCount > 0) break;
             }
+
+            if (!resolvedSource || resolvedCount <= 0) {
+                showToast('Diese Karte wurde im aktuellen Deck nicht gefunden.', 'warning');
+                closeRaritySwitcher();
+                return;
+            }
+
+            const ctx = deckContexts[resolvedSource];
+            const deck = ctx.deck;
+            delete deck[resolvedOldKey];
+            deck[newKey] = (parseInt(deck[newKey], 10) || 0) + resolvedCount;
+
+            const order = Array.isArray(window[ctx.orderKey]) ? window[ctx.orderKey] : [];
+            const oldKeyIndex = order.indexOf(resolvedOldKey);
+            if (oldKeyIndex !== -1) {
+                order[oldKeyIndex] = newKey;
+            } else if (!order.includes(newKey)) {
+                order.push(newKey);
+            }
+            // De-duplicate order entries after replacement.
+            window[ctx.orderKey] = order.filter((value, index, arr) => arr.indexOf(value) === index);
+
+            // Save preference and refresh complete deck UI/persistence.
+            setRarityPreference(actualCardName, { mode: 'specific', set: setCode, number: setNumber });
+            updateDeckCountAndDisplay(resolvedSource);
 
             closeRaritySwitcher();
         }

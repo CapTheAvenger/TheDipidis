@@ -13,6 +13,7 @@ import csv
 import re
 import time
 import json
+import html as html_mod
 import os
 import sys
 import logging
@@ -29,7 +30,7 @@ except ImportError:
     sys.exit(1)
 
 # Import shared utilities
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, normalize_archetype_name, _get_scraper
+from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, normalize_archetype_name, _get_scraper, clean_pokemon_name, fix_mega_pokemon_name
 
 # Fix Windows console encoding for Unicode characters
 setup_console_encoding()
@@ -123,24 +124,6 @@ def fetch_page_bs4(url: str, retries: int = 2):
             else:
                 logger.debug(f"Fetch failed: {url} -> {e}")
     return None
-
-# ============================================================================
-# DATA CLEANING LOGIC
-# ============================================================================
-def clean_pokemon_name(name: str) -> str:
-    variants = [' VSTAR', ' V-UNION', ' VMAX', ' V', ' EX', ' GX', ' ex']
-    name = name.strip()
-    for variant in variants:
-        if name.upper().endswith(variant.upper()):
-            name = name[:-len(variant)].strip()
-            break
-    return name
-
-def fix_mega_pokemon_name(name: str) -> str:
-    if '-mega' in name.lower():
-        name = re.sub(r'-mega$', '', name, flags=re.IGNORECASE)
-        return f"mega {name}"
-    return name
 
 # ============================================================================
 # SCRAPING LOGIC
@@ -414,7 +397,7 @@ def create_html_comparison(comparison_data: list, output_file: str):
 
     rows_html = ''.join(
         f'<tr>'
-        f'<td><strong>{deck["archetype"]}</strong></td>'
+        f'<td><strong>{html_mod.escape(deck["archetype"])}</strong></td>'
         f'<td><span class="badge badge-{deck["status"].lower()}">{deck["status"]}</span></td>'
         f'<td><span class="badge badge-{deck["trend"].lower()}">{deck["trend"]}</span></td>'
         f'<td>{deck["new_count"]}</td>'
@@ -428,10 +411,10 @@ def create_html_comparison(comparison_data: list, output_file: str):
         for deck in comparison_data[:50]
     )
 
-    new_details = '<br>'.join([f"{d['archetype']} ({d['new_count']}x)" for d in new_decks[:5]]) if new_decks else 'No new archetypes'
-    dis_details = '<br>'.join([f"{d['archetype']} (was {d['old_count']}x)" for d in disappeared_decks[:5]]) if disappeared_decks else 'No disappeared archetypes'
+    new_details = '<br>'.join([f"{html_mod.escape(d['archetype'])} ({d['new_count']}x)" for d in new_decks[:5]]) if new_decks else 'No new archetypes'
+    dis_details = '<br>'.join([f"{html_mod.escape(d['archetype'])} (was {d['old_count']}x)" for d in disappeared_decks[:5]]) if disappeared_decks else 'No disappeared archetypes'
     most_active_count = comparison_data[0]['new_count'] if comparison_data else 0
-    most_active_name = comparison_data[0]['archetype'] if comparison_data else 'No data'
+    most_active_name = html_mod.escape(comparison_data[0]['archetype']) if comparison_data else 'No data'
     most_active_avg = comparison_data[0]['new_avg_placement'] if comparison_data else 0
     total_archetypes = len(comparison_data)
     generated_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -596,5 +579,3 @@ if __name__ == "__main__":
         logger.warning("Abbruch durch Benutzer.")
     except Exception as e:
         logger.critical(f"Unerwarteter Fehler: {e}", exc_info=True)
-    finally:
-        pass

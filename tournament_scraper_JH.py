@@ -754,5 +754,3 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         logger.critical(f"Abbruch: {e}", exc_info=True)
-    finally:
-        pass

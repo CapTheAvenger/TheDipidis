@@ -357,5 +357,3 @@ if __name__ == "__main__":
         logger.warning("Abbruch durch Benutzer.")
     except Exception as e:
         logger.critical(f"Fehler aufgetreten: {e}", exc_info=True)
-    finally:
-        pass

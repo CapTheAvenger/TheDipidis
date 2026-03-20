@@ -9,7 +9,7 @@ import os
 
 def get_data_dir():
     """Get the data directory."""
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
 
 def deduplicate_city_league_data():
     """Remove duplicate entries from city league archetype data."""
@@ -54,7 +54,7 @@ def deduplicate_city_league_data():
     if duplicates > 0:
         # Backup original file
         backup_file = csv_file.replace('.csv', '_backup.csv')
-        os.rename(csv_file, backup_file)
+        os.replace(csv_file, backup_file)
         print(f"\n✓ Created backup: {backup_file}")
         
         # Save deduplicated data

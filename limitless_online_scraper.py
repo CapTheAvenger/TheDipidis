@@ -7,6 +7,7 @@ Uses cloudscraper + BeautifulSoup4 + ThreadPoolExecutor for parallel matchup scr
 import csv
 import re
 import json
+import html as html_mod
 import os
 import sys
 import logging
@@ -571,12 +572,12 @@ def create_comparison_report(old_stats: Dict[str, Any], new_stats: Dict[str, Any
     
     # Create HTML report (data/ folder)
     try:
-        print(f"[DEBUG] Creating HTML report: {comparison_html}")
-        print(f"[DEBUG] comparison_data length: {len(comparison_data)}")
-        print(f"[DEBUG] old_stats length: {len(old_stats)}")
-        print(f"[DEBUG] new_stats length: {len(new_stats)}")
-        print(f"[DEBUG] matchup_data: {type(matchup_data)}, {'has data' if matchup_data else 'is None/empty'}")
-        print(f"[DEBUG] deck_lookup: {type(deck_lookup)}, {'has data' if deck_lookup else 'is None/empty'}")
+        logger.debug(f"Creating HTML report: {comparison_html}")
+        logger.debug(f"comparison_data length: {len(comparison_data)}")
+        logger.debug(f"old_stats length: {len(old_stats)}")
+        logger.debug(f"new_stats length: {len(new_stats)}")
+        logger.debug(f"matchup_data: {type(matchup_data)}, {'has data' if matchup_data else 'is None/empty'}")
+        logger.debug(f"deck_lookup: {type(deck_lookup)}, {'has data' if deck_lookup else 'is None/empty'}")
         create_html_report(comparison_data, comparison_html, old_stats, new_stats, settings, matchup_data, deck_lookup)
         print(f"HTML comparison report saved to: {comparison_html}")
     except Exception as e:
@@ -1024,7 +1025,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                 </summary>
                 {''.join(f"""
             <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #2c3e50; margin-top: 0;">{deck_name} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
+                <h3 style="color: #2c3e50; margin-top: 0;">{html_mod.escape(deck_name)} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
@@ -1070,7 +1071,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                     <div style="position: relative;">
                         <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
                         <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
-                            {''.join(f"<div class=\"opponent-option\" data-value=\"{opponent}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{opponent.replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{opponent}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
+                            {''.join(f"<div class=\"opponent-option\" data-value=\"{html_mod.escape(opponent)}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{html_mod.escape(opponent).replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{html_mod.escape(opponent)}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
                         </div>
                     </div>
                     <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" value="">
@@ -1091,7 +1092,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                 </summary>
                 {''.join(f"""
             <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #2c3e50; margin-top: 0;">{deck_name} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
+                <h3 style="color: #2c3e50; margin-top: 0;">{html_mod.escape(deck_name)} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
@@ -1137,7 +1138,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                     <div style="position: relative;">
                         <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
                         <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
-                            {''.join(f"<div class=\"opponent-option\" data-value=\"{opponent}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{opponent.replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{opponent}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
+                            {''.join(f"<div class=\"opponent-option\" data-value=\"{html_mod.escape(opponent)}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{html_mod.escape(opponent).replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{html_mod.escape(opponent)}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
                         </div>
                     </div>
                     <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" value="">
@@ -1158,7 +1159,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                 </summary>
                 {''.join(f"""
             <div style="margin-bottom: 40px; background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <h3 style="color: #2c3e50; margin-top: 0;">{deck_name} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
+                <h3 style="color: #2c3e50; margin-top: 0;">{html_mod.escape(deck_name)} <span style="font-size: 0.8em; color: #7f8c8d;">(Rank #{deck_lookup.get(deck_name, dict()).get('rank', '?')} | Total WR: {deck_lookup.get(deck_name, dict()).get('win_rate_numeric', 0):.1f}%, Vs Top20: {matchups.get('positive_vs_top20', 0)}:{matchups.get('negative_vs_top20', 0)})</span></h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
@@ -1204,7 +1205,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                     <div style="position: relative;">
                         <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
                         <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
-                            {''.join(f"<div class=\"opponent-option\" data-value=\"{opponent}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{opponent.replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{opponent}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
+                            {''.join(f"<div class=\"opponent-option\" data-value=\"{html_mod.escape(opponent)}\" onclick=\"selectOpponent(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}', '{html_mod.escape(opponent).replace(chr(39), chr(92)+chr(39))}')\" style=\"padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;\">{html_mod.escape(opponent)}</div>" for opponent in sorted(matchups.get('all_opponent_matchups', dict()).keys()))}
                         </div>
                     </div>
                     <input type="hidden" id="opponent_selected_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" value="">

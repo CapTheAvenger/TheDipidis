@@ -165,5 +165,3 @@ if __name__ == "__main__":
         create_merged_database()
     except Exception as e:
         print(f"Fehler: {e}")
-    finally:
-        pass

@@ -1,6 +1,8 @@
 # 🤖 GitHub Actions - Automatisches Scraper-Update
 
-## ✅ Setup abgeschlossen!
+> **⚠️ Hinweis:** Der Workflow `daily-scraper.yml` ist aktuell **nicht eingerichtet**. Diese Anleitung dient als Referenz für eine zukünftige Einrichtung. Derzeit existiert nur `deploy-pages.yml` für das GitHub Pages Deployment.
+
+## Setup (noch nicht aktiv)
 
 Die Scraper laufen jetzt **automatisch jeden Tag um 0:00 Uhr UTC** (1:00 Uhr MEZ / 2:00 Uhr MESZ).
 

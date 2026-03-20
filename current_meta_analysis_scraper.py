@@ -38,7 +38,8 @@ from card_scraper_shared import (
     normalize_archetype_name,
     load_scraped_ids,
     save_scraped_ids,
-    _get_scraper
+    _get_scraper,
+    slug_to_archetype
 )
 
 # Fix Windows console encoding
@@ -150,18 +151,6 @@ def safe_fetch_html(url: str, timeout: int, retries: int = 2) -> str:
             else:
                 logger.debug(f"Fetch failed: {url} -> {e}")
     return ""
-
-def slug_to_archetype(slug: str) -> str:
-    slug = slug.strip().replace('_', '-')
-    words = re.sub(r'-+', ' ', slug).split(' ')
-    special = {'ex', 'gx', 'v', 'vmax', 'vstar', 'mega', 'tag', 'break', 'lv', 'lv.x', 'lvx', 'lv-x', 'star'}
-    def smart_title(word):
-        w = word.lower()
-        if w in special:
-            return word.upper() if w in {'ex', 'gx', 'v', 'vmax', 'vstar'} else word.title()
-        return word.title()
-    archetype = ' '.join(smart_title(w) for w in words)
-    return re.sub(r'\s+', ' ', archetype).strip()
 
 # ============================================================
 # META LIVE (play.limitlesstcg.com)
@@ -538,5 +527,3 @@ if __name__ == "__main__":
         logger.warning("Scraper durch Benutzer abgebrochen.")
     except Exception as e:
         logger.critical(f"Unerwarteter Fehler: {e}", exc_info=True)
-    finally:
-        pass

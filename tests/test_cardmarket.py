@@ -9,7 +9,7 @@ print('Starting undetected Chrome...')
 options = uc.ChromeOptions()
 # Remove headless to see what's happening
 # options.add_argument('--headless=new')
-options.add_argument('--no-sandbox')
+options.add_argument('--no-sandbox')  # Required for CI/container environments only
 options.add_argument('--disable-dev-shm-usage')
 options.add_argument('--window-size=1920,1080')
 

@@ -16,8 +16,8 @@ def extract_assets():
     print("=" * 60)
     print()
     
-    # Paths
-    project_dir = os.path.dirname(os.path.abspath(__file__))
+    # Paths — script lives in utils/, project root is one level up
+    project_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
     index_path = os.path.join(project_dir, 'index.html')
     css_dir = os.path.join(project_dir, 'css')
     js_dir = os.path.join(project_dir, 'js')

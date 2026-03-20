@@ -9,7 +9,7 @@ import os
 
 def get_data_dir():
     """Get the data directory."""
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
 
 def build_stats(data):
     """Build statistics from deck data."""

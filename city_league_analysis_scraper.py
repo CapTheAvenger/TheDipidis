@@ -31,7 +31,7 @@ except ImportError:
 from card_scraper_shared import (
     setup_console_encoding, get_app_path, get_data_dir, CardDatabaseLookup, 
     aggregate_card_data, save_to_csv, fetch_page, normalize_archetype_name,
-    load_scraped_ids, save_scraped_ids, _get_scraper
+    load_scraped_ids, save_scraped_ids, _get_scraper, resolve_date_range
 )
 
 # Fix Windows console encoding for Unicode characters
@@ -130,22 +130,6 @@ def load_settings() -> dict:
         with open(settings_path, 'w', encoding='utf-8') as f:
             json.dump(DEFAULT_SETTINGS, f, indent=4)
         return DEFAULT_SETTINGS.copy()
-
-def resolve_date_range(start_date: str, end_date: str):
-    try:
-        start_dt = datetime.strptime(start_date, "%d.%m.%Y")
-    except Exception:
-        start_dt = datetime.now() - timedelta(days=30)
-    
-    if end_date == "auto":
-        end_dt = datetime.now() - timedelta(days=2)
-    else:
-        try:
-            end_dt = datetime.strptime(end_date, "%d.%m.%Y")
-        except Exception:
-            end_dt = datetime.now() - timedelta(days=2)
-            
-    return start_dt, end_dt
 
 def parse_limitless_tournament_date(date_str: str):
     """Parses Limitless date formats like '15 Mar 26' or '15th March 2026'."""
@@ -528,5 +512,3 @@ if __name__ == "__main__":
         logger.warning("Scraper durch Benutzer abgebrochen.")
     except Exception as e:
         logger.critical(f"Unerwarteter Fehler: {e}", exc_info=True)
-    finally:
-        pass

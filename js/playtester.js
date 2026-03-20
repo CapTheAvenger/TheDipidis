@@ -910,7 +910,7 @@ function ptRenderZoomPanel(filter) {
         const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
         const safeName = (c.name || '').replace(/'/g, "\\'");
         return `<div style="cursor:pointer;text-align:center;" onclick="ptZoomViewCard('${safeImg}','${safeName}')" title="${c.name}">
-            <img src="${c.imageUrl||CARD_BACK_URL}" style="width:86px;border-radius:6px;display:block;transition:transform .12s;" onerror="this.src='${CARD_BACK_URL}'" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${c.imageUrl||CARD_BACK_URL}" loading="lazy" style="width:86px;border-radius:6px;display:block;transition:transform .12s;" onerror="this.src='${CARD_BACK_URL}'" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
             <div style="color:#ccc;font-size:8px;margin-top:2px;max-width:86px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name||''}</div>
         </div>`;
     }).join('');
@@ -1528,6 +1528,7 @@ function _ptRefreshDeckSearchGrid() {
         img.src = card.imageUrl || CARD_BACK_URL;
         img.className = 'pt-field-card';
         img.style.width = '100px';
+        img.loading = 'lazy';
         img.onerror = function() { this.src = CARD_BACK_URL; };
         img.onclick       = () => ptRouteFromDeck(card.ptId, 'hand');
         img.oncontextmenu = e  => { e.preventDefault(); ptRouteFromDeck(card.ptId, 'lost'); };

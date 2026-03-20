@@ -699,7 +699,7 @@ function updateProfileUI(profile) {
     profileEl.innerHTML = `
       <div class="profile-info">
         <p><strong>Email:</strong> ${auth.currentUser?.email || ''}</p>
-        <p><strong>Member since:</strong> ${formatDate(profile.createdAt)}</p>
+        <p><strong>Member since:</strong> ${formatProfileDate(profile.createdAt)}</p>
         <p><strong>Cards:</strong> ${stats.cardCount}</p>
         <p><strong>Decks:</strong> ${window.userDecks?.length || 0}</p>
       </div>
@@ -954,7 +954,7 @@ function updateDecksUI() {
       });
     }
     const safeFolderHtml = escapeHtml(deck.folder || '');
-    const createdStr = formatDate(deck.createdAt || deck.createdAtMs);
+    const createdStr = formatProfileDate(deck.createdAt || deck.createdAtMs);
     const safeCreatedHtml = escapeHtml(createdStr);
     
     return `
@@ -1315,7 +1315,7 @@ function toggleDeckCollapse(deckId) {
 }
 
 // Format date helper
-function formatDate(timestamp) {
+function formatProfileDate(timestamp) {
   if (!timestamp) return '—';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
   if (isNaN(date.getTime())) return '—';

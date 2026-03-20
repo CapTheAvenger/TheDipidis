@@ -2096,6 +2096,57 @@ function clearDamage(player, zoneId, event) {
     ptRenderAll();
 }
 
+function ptGetKnockedOutPokemonFromCards(cards) {
+    return [...(cards || [])].reverse().find(c => {
+        const ct = (c.cardType || c.supertype || '').toLowerCase();
+        return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer');
+    }) || cards?.[0] || null;
+}
+
+function ptGetOpponentPlayer(player) {
+    return player === 'p1' ? 'p2' : 'p1';
+}
+
+function ptKnockOutZone(player, zoneId, prizeTakerOverride) {
+    const cards = ptState[player]?.field?.[zoneId];
+    if (!cards || cards.length === 0) return;
+
+    const prizeTaker = prizeTakerOverride || ptGetOpponentPlayer(player);
+    const count = cards.length;
+    const knockedOutPokemon = ptGetKnockedOutPokemonFromCards(cards);
+
+    while (cards.length > 0) {
+        ptState[player].discard.push(cards.shift());
+    }
+
+    ptState[player].damage[zoneId] = 0;
+    if (zoneId === 'active') ptState[player].status = [];
+
+    ptLog(`☠️ ${zoneId} (${player}) K.O. → Discard (${count} Karten).`);
+    ptRenderAll();
+
+    if (player !== ptCurrentPlayer) {
+        ptRefreshOpponentField(player);
+    }
+
+    if (zoneId === 'active' && player === ptCurrentPlayer) {
+        const hasBench = ['bench0', 'bench1', 'bench2', 'bench3', 'bench4']
+            .some(benchZone => ptState[player].field[benchZone].length > 0);
+        if (hasBench) {
+            setTimeout(() => ptOpenPromoteModal(player), 120);
+        }
+    }
+
+    if (ptState[prizeTaker].prizes.length > 0) {
+        const prizeCount = ptGetPrizeCountForKnockout(knockedOutPokemon);
+        setTimeout(() => ptOpenPrizePicker(prizeTaker, prizeCount, prizeTaker), 200);
+    }
+}
+
+function ptOppKnockOutZone(opp, zoneId) {
+    ptKnockOutZone(opp, zoneId, ptCurrentPlayer);
+}
+
 function toggleStatus(player, statusType, event) {
     if (event) event.stopPropagation();
     const idx = ptState[player].status.indexOf(statusType);
@@ -2227,7 +2278,8 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
                             <button onclick="clearDamage('${opp}','${zoneId}');ptRefreshOpponentField('${opp}')"   style="background:#1a9e5b;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">💚 Heal</button>
                         </div>
                         <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.08);">
-                            <button onclick="ptOppDiscardZone('${opp}','${zoneId}')" style="background:#7d3c98;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="Zone → Discard">🗑️ KO / Discard</button>
+                            <button onclick="ptOppKnockOutZone('${opp}','${zoneId}')" style="background:#922b21;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;" title="Pokémon K.O. setzen und Prize triggern">☠️ K.O.</button>
+                            <button onclick="ptOppDiscardZone('${opp}','${zoneId}')" style="background:#7d3c98;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="Zone ohne Prize in den Discard legen">🗑️ Discard</button>
                             ${zoneId !== 'active' ? `<button onclick="ptOppSetActive('${opp}','${zoneId}')" style="background:#1a5276;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="Als Active setzen">⭐ Active setzen</button>` : ''}
                         </div>
                         ${attachedRemovableHTML ? `<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.06);"><span style="font-size:9px;color:#aaa;margin-right:2px;">⚡🔧</span>${attachedRemovableHTML}</div>` : ''}
@@ -2387,26 +2439,14 @@ function ptOppDiscardZone(opp, zoneId) {
     const cards = ptState[opp].field[zoneId];
     if (!cards || cards.length === 0) return;
     const count = cards.length;
-    const knockedOutPokemon = zoneId === 'active'
-        ? ([...cards].reverse().find(c => {
-            const ct = (c.cardType || '').toLowerCase();
-            return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer');
-        }) || cards[0])
-        : null;
-    // Move all cards in zone to opp discard
     while (cards.length > 0) {
-        const c = cards.shift();
-        ptState[opp].discard.push(c);
+        ptState[opp].discard.push(cards.shift());
     }
     ptState[opp].damage[zoneId] = 0;
+    if (zoneId === 'active') ptState[opp].status = [];
     ptLog(`🗑️ ${zoneId} (${opp}) → Discard (${count} Karten).`);
     ptRenderAll();
-    ptRenderOpponentPanel(opp, 'field');
-    // KO: when active Pokémon is knocked out, prompt current player to take a prize
-    if (zoneId === 'active' && ptState[ptCurrentPlayer].prizes.length > 0) {
-        const prizeCount = ptGetPrizeCountForKnockout(knockedOutPokemon);
-        setTimeout(() => ptOpenPrizePicker(ptCurrentPlayer, prizeCount), 200);
-    }
+    ptRefreshOpponentField(opp);
 }
 
 function ptOppSetActive(opp, zoneId) {
@@ -2727,7 +2767,7 @@ function ptGetPrizeCountForKnockout(card) {
     return 1;
 }
 
-function ptOpenPrizePicker(player, remainingPicks = 1) {
+function ptOpenPrizePicker(player, remainingPicks = 1, taker = ptCurrentPlayer) {
     const prizes = ptState[player].prizes;
     if (!prizes || prizes.length === 0) { ptShowMessage('Keine Preiskarten mehr!'); return; }
     remainingPicks = Math.max(1, Math.min(remainingPicks, prizes.length));
@@ -2753,6 +2793,7 @@ function ptOpenPrizePicker(player, remainingPicks = 1) {
         document.body.appendChild(modal);
     }
     modal.dataset.player = player;
+    modal.dataset.taker = taker;
     modal.dataset.remainingPicks = String(remainingPicks);
     modal.innerHTML = html;
     modal.style.display = 'flex';
@@ -2761,13 +2802,14 @@ function ptOpenPrizePicker(player, remainingPicks = 1) {
 function ptPickPrizeCard(player, index) {
     const card = ptState[player].prizes.splice(index, 1)[0];
     if (!card) return;
-    ptState[ptCurrentPlayer].hand.push(card);
     const modal = document.getElementById('ptPrizePickerModal');
+    const taker = modal?.dataset.taker || ptCurrentPlayer;
+    ptState[taker].hand.push(card);
     const remainingPicks = Math.max(0, (parseInt(modal?.dataset.remainingPicks || '1', 10) || 1) - 1);
-    ptLog(`🏆 Preiskarte genommen: "${card.name}". Noch ${ptState[player].prizes.length} übrig.`);
+    ptLog(`🏆 ${taker.toUpperCase()} nimmt eine Preiskarte: "${card.name}". Noch ${ptState[player].prizes.length} übrig.`);
     if (modal) {
         if (remainingPicks > 0 && ptState[player].prizes.length > 0) {
-            ptOpenPrizePicker(player, remainingPicks);
+            ptOpenPrizePicker(player, remainingPicks, taker);
         } else {
             modal.style.display = 'none';
         }
@@ -2964,7 +3006,7 @@ function ptOpenCardMenu(event, player, zoneId, forceOpen = false) {
     // Position menu centered above the hovered zone
     const rect      = event.currentTarget.getBoundingClientRect();
     const menuWidth = 178;
-    const menuHeight = 112;
+    const menuHeight = 150;
     let posX = rect.left + rect.width / 2;
     let posY = rect.top - menuHeight - 8;
 
@@ -3004,6 +3046,7 @@ function ptMenuAction(type, value) {
         if      (value === 'hand')    returnToHand(player, zoneId, null);
         else if (value === 'deck')    ptShuffleIntoDeck(player, zoneId);
         else if (value === 'discard') discardTopCard(player, zoneId, null);
+        else if (value === 'ko')      ptKnockOutZone(player, zoneId);
         else if (value === 'retreat' && zoneId !== 'active') ptSwapZones(player, zoneId, null);
         else if (value === 'retreat') ptShowMessage('↩️ Wähle ein Bankpokémon für den Retreat!');
     }

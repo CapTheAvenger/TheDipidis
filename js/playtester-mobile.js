@@ -436,13 +436,8 @@ function _ptMobileSwitchToActive(player, benchZone) {
 }
 
 function _ptMobileKnockout(player, zone) {
-    const cards = ptState[player].field[zone];
-    if (cards && cards.length > 0) {
-        cards.forEach(card => ptState[player].discard.push(card));
-        ptState[player].field[zone] = [];
-        ptState[player].damage[zone] = 0;
-        if (typeof ptLog !== 'undefined') ptLog(`${zone} K.O.!`);
-        if (typeof ptRenderAll !== 'undefined') ptRenderAll();
+    if (typeof ptKnockOutZone === 'function') {
+        ptKnockOutZone(player, zone);
     }
     ptHideContextMenu();
 }

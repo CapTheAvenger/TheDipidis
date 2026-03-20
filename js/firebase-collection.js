@@ -1086,6 +1086,18 @@ function updateDecksUI() {
   }
   
   console.log('[updateDecksUI] Building deck list with', window.userDecks.length, 'decks');
+
+  function normalizeMyDeckSetCode(value) {
+    return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  }
+
+  function normalizeMyDeckCardNumber(value) {
+    return String(value || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[?#].*$/, '')
+      .replace(/[^A-Z0-9]/g, '');
+  }
   
   decksGrid.innerHTML = window.userDecks.map((deck, deckIndex) => {
     const totalCards = deck.totalCards || Object.values(deck.cards || {}).reduce((sum, count) => sum + count, 0);
@@ -1110,14 +1122,18 @@ function updateDecksUI() {
         let cardName = deckKey;
         
         // Parse "CardName (SET NUMBER)" format - EXACT print saved in deck
-        const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+        const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([^)]+)\)$/i);
         if (setMatch) {
           cardName = setMatch[1];
-          setCode = setMatch[2];
-          setNumber = setMatch[3];
+          setCode = normalizeMyDeckSetCode(setMatch[2]);
+          setNumber = normalizeMyDeckCardNumber(setMatch[3]);
           
           // METHOD 1: Fast lookup using cardsBySetNumberMap (preferred)
-          if (window.cardsBySetNumberMap) {
+          if (!cardData && typeof window.getIndexedCardBySetNumber === 'function') {
+            cardData = window.getIndexedCardBySetNumber(setCode, setNumber);
+          }
+
+          if (!cardData && window.cardsBySetNumberMap) {
             const key = `${setCode}-${setNumber}`;
             cardData = window.cardsBySetNumberMap[key];
           }

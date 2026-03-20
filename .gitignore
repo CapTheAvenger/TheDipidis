@@ -68,5 +68,13 @@ index_OLD*.html
 # User-specific paths
 UPDATE_GITHUB_DATA.ps1
 
+# Secrets & credentials
+.env
+.env.*
+*.secret
+*.key
+*.pem
+js/firebase-credentials.js
+
 # CardMarket scraper cache (optional - large files)
 # data/cardmarket_cache/

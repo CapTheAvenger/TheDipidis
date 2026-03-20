@@ -1,6 +1,7 @@
 import re
+import os
 
-path = "c:\\Users\\haush\\OneDrive\\Desktop\\Hausi\u00b4s Pokemon TCG Analysis\\js\\app.js"
+path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'js', 'app.js')
 with open(path, encoding='utf-8') as f:
     lines = f.readlines()
 

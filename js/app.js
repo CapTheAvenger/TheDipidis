@@ -10470,12 +10470,19 @@ const BASE_PATH = './data/';
 
             cardsToRender.forEach(cardName => {
                 const cardNameEscaped = cardName.replace(/'/g, "\\'");
-                const versionsCount = matchingCards.filter(c => c.name === cardName).length;
+                const cardVersions = matchingCards.filter(c => c.name === cardName);
+                // Filter out Japanese versions if international versions exist
+                let displayVersions = cardVersions;
+                if (window.englishSetCodes && window.englishSetCodes.size > 0) {
+                    const intl = cardVersions.filter(v => window.englishSetCodes.has(v.set));
+                    if (intl.length > 0) displayVersions = intl;
+                }
+                const versionsCount = displayVersions.length;
                 const deck = source === 'cityLeague' ? (window.cityLeagueDeck || {}) : (window.currentMetaDeck || {});
                 const currentCount = deck[cardName] || 0;
                 
-                // Get first version for thumbnail image
-                const firstVersion = matchingCards.find(c => c.name === cardName);
+                // Get first version for thumbnail image (prefer international)
+                const firstVersion = displayVersions[0] || cardVersions[0];
                 const imageUrl = firstVersion ? getUnifiedCardImage(firstVersion.set, firstVersion.number) : '';
                 
                 htmlString += `
@@ -10515,7 +10522,15 @@ const BASE_PATH = './data/';
         
         function showCardVersions(cardName, container, source = 'cityLeague') {
             const allCards = window.allCardsDatabase || [];
-            const versions = allCards.filter(c => c.name === cardName);
+            let versions = allCards.filter(c => c.name === cardName);
+            
+            // Filter out Japanese versions if international versions exist
+            if (window.englishSetCodes && window.englishSetCodes.size > 0) {
+                const intlVersions = versions.filter(v => window.englishSetCodes.has(v.set));
+                if (intlVersions.length > 0) {
+                    versions = intlVersions;
+                }
+            }
             
             const deck = source === 'cityLeague' ? (window.cityLeagueDeck || {}) : (window.currentMetaDeck || {});
             
@@ -14464,7 +14479,7 @@ const BASE_PATH = './data/';
                         <button onclick="toggleCollection('${safeCardId}')" style="background: ${userOwnsCard ? '#4CAF50' : '#fff'}; color: ${userOwnsCard ? '#fff' : '#000'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userOwnsCard ? 'Remove from collection' : 'Add to collection'}">
                             ${userOwnsCard ? '&#10003;' : '+'}
                         </button>
-                        <button onclick="toggleWishlist('${safeCardId}')" style="background: ${userWantsCard ? '#FF9800' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid #FF9800; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
+                        <button onclick="toggleWishlist('${safeCardId}')" style="background: ${userWantsCard ? '#E91E63' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'}; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
                             ${userWantsCard ? '&#9829;' : '&#9825;'}
                         </button>
                     </div>

@@ -21,7 +21,7 @@ function escapeJsSingleQuoted(value) {
     .replace(/\n/g, '\\n');
 }
 
-// Add card to collection
+// Add card to collection (increment count, max 4)
 async function addToCollection(cardId) {
   const user = auth.currentUser;
   if (!user) {
@@ -29,14 +29,25 @@ async function addToCollection(cardId) {
     return;
   }
   
+  const currentCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
+  if (currentCount >= 4) {
+    showNotification('Maximum 4 copies per card (playset)', 'info');
+    return;
+  }
+  
+  const newCount = currentCount + 1;
+  
   try {
     await db.collection('users').doc(user.uid).set({
-      collection: firebase.firestore.FieldValue.arrayUnion(cardId)
+      collection: firebase.firestore.FieldValue.arrayUnion(cardId),
+      [`collectionCounts.${cardId}`]: newCount
     }, { merge: true });
     
     window.userCollection.add(cardId);
+    if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
+    window.userCollectionCounts.set(cardId, newCount);
     updateCardUI(cardId);
-    showNotification('Added to collection!', 'success');
+    showNotification(`Added to collection (${newCount}/4)`, 'success');
     
     // Update collection display and stats
     updateCollectionUI();
@@ -51,24 +62,38 @@ async function addToCollection(cardId) {
   }
 }
 
-// Remove card from collection
+// Remove card from collection (decrement count)
 async function removeFromCollection(cardId) {
   const user = auth.currentUser;
   if (!user) return;
   
+  const currentCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
+  const newCount = currentCount - 1;
+  
   try {
-    await db.collection('users').doc(user.uid).set({
-      collection: firebase.firestore.FieldValue.arrayRemove(cardId)
-    }, { merge: true });
+    if (newCount <= 0) {
+      await db.collection('users').doc(user.uid).set({
+        collection: firebase.firestore.FieldValue.arrayRemove(cardId),
+        [`collectionCounts.${cardId}`]: firebase.firestore.FieldValue.delete()
+      }, { merge: true });
+      
+      window.userCollection.delete(cardId);
+      if (window.userCollectionCounts) window.userCollectionCounts.delete(cardId);
+    } else {
+      await db.collection('users').doc(user.uid).set({
+        [`collectionCounts.${cardId}`]: newCount
+      }, { merge: true });
+      
+      if (window.userCollectionCounts) window.userCollectionCounts.set(cardId, newCount);
+    }
     
-    window.userCollection.delete(cardId);
     updateCardUI(cardId);
-    showNotification('Removed from collection', 'success');
+    showNotification(newCount > 0 ? `Collection: ${newCount}/4 copies` : 'Removed from collection', 'success');
     
     // Update collection display and stats
     updateCollectionUI();
     
-    // Re-render cards to remove green checkmark
+    // Re-render cards to update checkmark
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
       renderCardDatabase(window.filteredCardsData);
     }
@@ -78,13 +103,10 @@ async function removeFromCollection(cardId) {
   }
 }
 
-// Toggle card in collection
+// Toggle card in collection (add-only from deck views, removes handled via collection UI)
 async function toggleCollection(cardId) {
-  if (window.userCollection.has(cardId)) {
-    await removeFromCollection(cardId);
-  } else {
-    await addToCollection(cardId);
-  }
+  // Always add (increment) — never remove from the + button
+  await addToCollection(cardId);
 }
 
 // Add card to wishlist
@@ -195,12 +217,19 @@ async function saveCurrentDeckToProfile(source) {
     return; // User cancelled
   }
   
+  // Check for duplicate deck name
+  const trimmedName = deckName.trim();
+  if (window.userDecks && window.userDecks.some(d => d.name === trimmedName)) {
+    const overwrite = confirm(`A deck named "${trimmedName}" already exists. Save anyway?`);
+    if (!overwrite) return;
+  }
+  
   try {
     // Prepare deck data
     // Note: deck is saved with exact prints in format "CardName (SET NUMBER)", 
     // preserving the specific print versions selected by the user
     const deckData = {
-      name: deckName.trim(),
+      name: trimmedName,
       archetype: archetype || 'Custom',
       cards: deck, // Exact prints: "CardName (SET NUMBER)" format
       totalCards: totalCards,
@@ -213,7 +242,7 @@ async function saveCurrentDeckToProfile(source) {
     await db.collection('users').doc(user.uid)
       .collection('decks').add(deckData);
     
-    showNotification(`Deck "${deckName}" saved successfully! 🎉`, 'success');
+    showNotification(`Deck "${trimmedName}" saved successfully! 🎉`, 'success');
     
     // Reload user decks
     await loadUserDecks(user.uid);
@@ -445,12 +474,16 @@ function updateCollectionUI(searchFilter = '') {
         const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
         const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
         
+        const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 1) : 1;
+        
         collectionHtml.push(`
           <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
             <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
-            <button onclick="removeFromCollection('${safeCardIdJs}')" style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" title="Remove from collection">
-              ×
-            </button>
+            <div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${ownedCount}x owned">${ownedCount}x</div>
+            <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
+              <button onclick="addToCollection('${safeCardIdJs}')" style="background: #27ae60; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${ownedCount}/4)">+</button>
+              <button onclick="removeFromCollection('${safeCardIdJs}')" style="background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
+            </div>
             <div style="padding: 8px; background: white;">
               <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
               <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
@@ -830,12 +863,45 @@ function updateDecksUI() {
         const fallbackImageUrl = `https://via.placeholder.com/245x342/667eea/ffffff?text=${encodeURIComponent(cardName)}`;
         const safeFallbackImageAttr = escapeHtml(fallbackImageUrl);
         
-        // Check if owned
+        // Check if owned — with count + color badge
         const cardId = `${cardName}|${setCode}|${setNumber}`;
-        const isOwned = window.userCollection && window.userCollection.has(cardId);
+        const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
+        const isOwned = ownedCount > 0;
         const isWishlisted = window.userWishlist && window.userWishlist.has(cardId);
-        const ownedBadge = isOwned ? 
-          '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
+        
+        // Color-coded ownership badge for My Decks
+        // Green: have enough (owned >= needed in deck)
+        // Orange: have some but less than needed
+        // Yellow: don't own this exact print but own other intl prints of same card
+        let badgeBg = '';
+        let badgeText = '';
+        let badgeTitle = '';
+        if (ownedCount >= count) {
+          badgeBg = '#4CAF50'; // green — enough
+          badgeText = `${ownedCount}`;
+          badgeTitle = `Owned: ${ownedCount}/${count} (enough!)`;
+        } else if (ownedCount > 0) {
+          badgeBg = '#FF9800'; // orange — some but not enough
+          badgeText = `${ownedCount}`;
+          badgeTitle = `Owned: ${ownedCount}/${count} (need ${count - ownedCount} more)`;
+        } else {
+          // Check if user owns other international prints of this card
+          let altPrintCount = 0;
+          if (window.userCollectionCounts && window.allCardsDatabase) {
+            const altVersions = window.allCardsDatabase.filter(c => c.name === cardName && (c.set !== setCode || c.number !== setNumber));
+            altVersions.forEach(v => {
+              const altId = `${cardName}|${v.set}|${v.number}`;
+              altPrintCount += window.userCollectionCounts.get(altId) || 0;
+            });
+          }
+          if (altPrintCount > 0) {
+            badgeBg = '#FFD600'; // yellow — have other prints
+            badgeText = `${altPrintCount}`;
+            badgeTitle = `Other prints owned: ${altPrintCount} (not this exact print)`;
+          }
+        }
+        const ownedBadge = badgeBg ?
+          `<div style="position: absolute; top: 5px; left: 5px; background: ${badgeBg}; color: ${badgeBg === '#FFD600' ? '#333' : 'white'}; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4; padding: 0 4px;" title="${badgeTitle}">${badgeText}</div>` : '';
         
         // Get price
         const eurPrice = card.eur_price || '';
@@ -865,27 +931,39 @@ function updateDecksUI() {
                       style="background: ${priceBackground}; color: white; height: 22px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
                     title="${safeCardmarketTitleHtml}">${safePriceDisplayHtml}</button>
                   <button onclick="event.stopPropagation(); toggleCollection('${safeCardIdJs}')" 
-                      style="background: ${isOwned ? '#27ae60' : '#95a5a6'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: 13px; display: flex; align-items: center; justify-content: center; padding: 0;" 
-                      title="${isOwned ? 'Remove from collection' : 'Add to collection'}">${isOwned ? '✓' : '+'}</button>
+                      style="background: ${isOwned ? '#27ae60' : '#95a5a6'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: ${ownedCount > 0 ? '10' : '13'}px; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      title="Add to collection (${ownedCount}/4)">${ownedCount > 0 ? ownedCount + '/4' : '+'}</button>
                   <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')" 
-                      style="background: ${isWishlisted ? '#FF9800' : '#bdc3c7'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      style="background: ${isWishlisted ? '#E91E63' : '#bdc3c7'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">❤</button>
             </div>
           </div>
         `;
       });
     }
+    const safeFolderHtml = escapeHtml(deck.folder || '');
+    const createdStr = formatDate(deck.createdAt);
+    const safeCreatedHtml = escapeHtml(createdStr);
     
     return `
-      <div style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 10px;">
+      <div class="saved-deck-item" data-deck-name="${safeDeckNameHtml}" data-deck-archetype="${safeDeckArchetypeHtml}" data-deck-folder="${safeFolderHtml}" style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 10px;">
         <div onclick="toggleDeckCollapse('${deckId}')" style="padding: 15px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
           <div style="flex: 1;">
-            <h3 style="margin: 0 0 5px 0; font-size: 1.1em; font-weight: 600;">${safeDeckNameHtml}</h3>
+            <h3 style="margin: 0 0 3px 0; font-size: 1.1em; font-weight: 600;">${safeDeckNameHtml}</h3>
             <div style="font-size: 0.85em; opacity: 0.9;">
               ${safeDeckArchetypeHtml} • ${totalCards} Cards (${uniqueCards} Unique)
             </div>
+            <div style="font-size: 0.75em; opacity: 0.7; margin-top: 2px;">
+              ${deck.folder ? '📁 ' + safeFolderHtml + ' • ' : ''}🕐 ${safeCreatedHtml}
+            </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(155, 89, 182, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='rgba(155, 89, 182, 0.9)'" title="Compare with another deck">
+              ⚖️
+            </button>
+            <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" style="padding: 6px 12px; background: rgba(241, 196, 15, 0.9); color: #333; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#f39c12'" onmouseout="this.style.background='rgba(241, 196, 15, 0.9)'" title="Move to folder">
+              📁
+            </button>
             <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(52, 152, 219, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='rgba(52, 152, 219, 0.9)'" title="Copy deck list">
               📋
             </button>
@@ -899,13 +977,13 @@ function updateDecksUI() {
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
             ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
           </div>
-          <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px; font-size: 0.85em; color: #7f8c8d;">
-            Saved: ${formatDate(deck.createdAt)}
-          </div>
         </div>
       </div>
     `;
   }).join('');
+  
+  // Render folder navigation if any folders exist
+  renderFolderNav();
 }
 
 // Open modal to pick 2 decks for playtest
@@ -1271,4 +1349,217 @@ function filterWishlist() {
   const searchTerm = searchInput ? searchInput.value.trim() : '';
   const setTerm = setInput ? setInput.value : '';
   updateWishlistUI(searchTerm, setTerm);
+}
+
+// ============================================================
+// My Decks: Search / Filter
+// ============================================================
+function filterMyDecks() {
+  const searchInput = document.getElementById('decks-search');
+  if (!searchInput) return;
+  const query = searchInput.value.trim().toLowerCase();
+  
+  document.querySelectorAll('.saved-deck-item').forEach(item => {
+    const name = (item.dataset.deckName || '').toLowerCase();
+    const archetype = (item.dataset.deckArchetype || '').toLowerCase();
+    const folder = (item.dataset.deckFolder || '').toLowerCase();
+    const matches = !query || name.includes(query) || archetype.includes(query) || folder.includes(query);
+    item.style.display = matches ? '' : 'none';
+  });
+}
+
+// ============================================================
+// My Decks: Folders
+// ============================================================
+// Folder data stored as a field on each deck doc in Firestore
+window.deckFolders = window.deckFolders || []; // derived from userDecks
+
+function getDeckFolders() {
+  if (!window.userDecks) return [];
+  const folders = new Set();
+  window.userDecks.forEach(d => { if (d.folder) folders.add(d.folder); });
+  return Array.from(folders).sort();
+}
+
+function createDeckFolder() {
+  const name = prompt('Enter folder name:');
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  const existing = getDeckFolders();
+  if (existing.includes(trimmed)) {
+    showNotification('Folder already exists', 'error');
+    return;
+  }
+  showNotification(`Folder "${trimmed}" created. Use the 📁 button on a deck to move it.`, 'success');
+  renderFolderNav();
+}
+
+async function moveDeckToFolder(deckIndex) {
+  const deck = window.userDecks && window.userDecks[deckIndex];
+  if (!deck) return;
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  const folders = getDeckFolders();
+  const options = ['(No Folder)', ...folders, '+ New Folder'];
+  const choice = prompt(
+    'Move to folder:\n' + options.map((f, i) => `${i}: ${f}`).join('\n') + '\n\nEnter number:',
+    deck.folder ? String(folders.indexOf(deck.folder) + 1) : '0'
+  );
+  if (choice === null) return;
+  
+  let folder = '';
+  const idx = parseInt(choice);
+  if (isNaN(idx) || idx < 0 || idx >= options.length) return;
+  
+  if (idx === 0) {
+    folder = '';
+  } else if (idx === options.length - 1) {
+    const newFolder = prompt('New folder name:');
+    if (!newFolder || !newFolder.trim()) return;
+    folder = newFolder.trim();
+  } else {
+    folder = folders[idx - 1];
+  }
+  
+  try {
+    await db.collection('users').doc(user.uid)
+      .collection('decks').doc(deck.id)
+      .update({ folder: folder, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    
+    deck.folder = folder;
+    showNotification(folder ? `Moved to "${folder}"` : 'Removed from folder', 'success');
+    updateDecksUI();
+    renderFolderNav();
+  } catch (error) {
+    console.error('Error moving deck to folder:', error);
+    showNotification('Error moving deck', 'error');
+  }
+}
+
+function renderFolderNav() {
+  const nav = document.getElementById('decks-folder-nav');
+  if (!nav) return;
+  const folders = getDeckFolders();
+  if (folders.length === 0) {
+    nav.style.display = 'none';
+    return;
+  }
+  nav.style.display = 'flex';
+  const safeAll = '<button onclick="filterDecksByFolder(\\'\\')" style="padding: 6px 14px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">All</button>';
+  nav.innerHTML = `<button onclick="filterDecksByFolder('')" style="padding: 6px 14px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">All</button>` +
+    folders.map(f => {
+      const safe = escapeHtml(f);
+      const safeJs = escapeJsSingleQuoted(f);
+      return `<button onclick="filterDecksByFolder('${safeJs}')" style="padding: 6px 14px; background: #f0f0f0; color: #333; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">📁 ${safe}</button>`;
+    }).join('');
+}
+
+function filterDecksByFolder(folder) {
+  // Highlight active folder button
+  const nav = document.getElementById('decks-folder-nav');
+  if (nav) {
+    nav.querySelectorAll('button').forEach((btn, i) => {
+      if (i === 0 && !folder) {
+        btn.style.background = '#667eea'; btn.style.color = 'white'; btn.style.border = 'none';
+      } else if (btn.textContent.includes(folder) && folder) {
+        btn.style.background = '#667eea'; btn.style.color = 'white'; btn.style.border = 'none';
+      } else {
+        btn.style.background = '#f0f0f0'; btn.style.color = '#333'; btn.style.border = '1px solid #ddd';
+      }
+    });
+  }
+  
+  document.querySelectorAll('.saved-deck-item').forEach(item => {
+    if (!folder) {
+      item.style.display = '';
+    } else {
+      item.style.display = (item.dataset.deckFolder === folder) ? '' : 'none';
+    }
+  });
+}
+
+// ============================================================
+// My Decks: Compare
+// ============================================================
+function openCompareSavedDeck(deckIndex) {
+  const baseDeck = window.userDecks && window.userDecks[deckIndex];
+  if (!baseDeck) return;
+  
+  const decks = window.userDecks || [];
+  if (decks.length < 2) {
+    showNotification('Need at least 2 saved decks to compare', 'error');
+    return;
+  }
+  
+  const options = decks
+    .map((d, i) => i !== deckIndex ? `${i}: ${d.name}` : null)
+    .filter(Boolean);
+  
+  const choice = prompt(
+    `Compare "${baseDeck.name}" with:\n${options.join('\n')}\n\nEnter deck number:`
+  );
+  if (choice === null) return;
+  
+  const compareIdx = parseInt(choice);
+  if (isNaN(compareIdx) || compareIdx === deckIndex || !decks[compareIdx]) {
+    showNotification('Invalid deck selection', 'error');
+    return;
+  }
+  
+  showDeckComparison(baseDeck, decks[compareIdx]);
+}
+
+function showDeckComparison(deckA, deckB) {
+  const cardsA = deckA.cards || {};
+  const cardsB = deckB.cards || {};
+  const allCardKeys = new Set([...Object.keys(cardsA), ...Object.keys(cardsB)]);
+  
+  let onlyA = [], onlyB = [], different = [], same = [];
+  
+  allCardKeys.forEach(key => {
+    const countA = cardsA[key] || 0;
+    const countB = cardsB[key] || 0;
+    const safeKey = escapeHtml(key);
+    if (countA > 0 && countB === 0) {
+      onlyA.push(`${safeKey} x${countA}`);
+    } else if (countB > 0 && countA === 0) {
+      onlyB.push(`${safeKey} x${countB}`);
+    } else if (countA !== countB) {
+      different.push(`${safeKey}: ${countA} → ${countB}`);
+    } else {
+      same.push(`${safeKey} x${countA}`);
+    }
+  });
+  
+  const safeNameA = escapeHtml(deckA.name);
+  const safeNameB = escapeHtml(deckB.name);
+  
+  // Create comparison modal
+  let existingModal = document.getElementById('deck-compare-modal');
+  if (existingModal) existingModal.remove();
+  
+  const modal = document.createElement('div');
+  modal.id = 'deck-compare-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+  
+  modal.innerHTML = `
+    <div style="background:white;border-radius:12px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;padding:25px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+        <h2 style="margin:0;font-size:1.3em;">⚖️ Deck Comparison</h2>
+        <button onclick="this.closest('#deck-compare-modal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
+        <div style="background:#667eea;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}</div>
+        <div style="background:#764ba2;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameB}</div>
+      </div>
+      ${onlyA.length ? `<div style="margin-bottom:12px;"><h4 style="color:#667eea;margin:0 0 5px 0;">Only in ${safeNameA} (${onlyA.length})</h4><div style="font-size:0.9em;color:#555;">${onlyA.join('<br>')}</div></div>` : ''}
+      ${onlyB.length ? `<div style="margin-bottom:12px;"><h4 style="color:#764ba2;margin:0 0 5px 0;">Only in ${safeNameB} (${onlyB.length})</h4><div style="font-size:0.9em;color:#555;">${onlyB.join('<br>')}</div></div>` : ''}
+      ${different.length ? `<div style="margin-bottom:12px;"><h4 style="color:#e67e22;margin:0 0 5px 0;">Different counts (${different.length})</h4><div style="font-size:0.9em;color:#555;">${different.join('<br>')}</div></div>` : ''}
+      <div style="margin-bottom:12px;"><h4 style="color:#27ae60;margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color:#555;">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
 }

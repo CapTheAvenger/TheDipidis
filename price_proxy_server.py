@@ -17,11 +17,16 @@ from flask_cors import CORS
 import requests
 import time
 import re
-from functools import lru_cache
+from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, origins=["http://localhost:8000", "http://127.0.0.1:8000",
+                    "https://captheavenger.github.io"])
+
+# Allowed hosts for SSRF protection
+ALLOWED_HOSTS = {"limitlesstcg.com", "www.limitlesstcg.com",
+                 "cardmarket.com", "www.cardmarket.com"}
 
 # Rate limiting
 last_request_time = 0
@@ -69,6 +74,16 @@ def fetch_price():
     
     if not url:
         return jsonify({'error': 'Missing url parameter'}), 400
+    
+    # SSRF protection: only allow known hosts
+    try:
+        parsed = urlparse(url)
+        if parsed.hostname not in ALLOWED_HOSTS:
+            return jsonify({'error': 'URL host not allowed'}), 403
+        if parsed.scheme not in ('http', 'https'):
+            return jsonify({'error': 'Invalid URL scheme'}), 403
+    except Exception:
+        return jsonify({'error': 'Invalid URL'}), 400
     
     # Rate limiting
     now = time.time()

@@ -15,9 +15,10 @@
 window.auth = firebase.auth();
 window.db   = firebase.firestore();
 
-if (!window.userDecks)      window.userDecks      = [];
-if (!window.userCollection) window.userCollection  = new Set();
-if (!window.userWishlist)   window.userWishlist    = new Set();
+if (!window.userDecks)            window.userDecks            = [];
+if (!window.userCollection)       window.userCollection       = new Set();
+if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
+if (!window.userWishlist)         window.userWishlist         = new Set();
 
 // ---------------------------------------------------------------------------
 // Auth state handlers
@@ -42,9 +43,10 @@ function onUserSignedIn(user) {
   const emailDisplay = document.getElementById('user-email-display');
   if (emailDisplay) emailDisplay.textContent = user.displayName || user.email || '';
 
-  window.userCollection = new Set();
-  window.userWishlist   = new Set();
-  window.userDecks      = [];
+  window.userCollection       = new Set();
+  window.userCollectionCounts = new Map();
+  window.userWishlist         = new Set();
+  window.userDecks            = [];
 
   loadUserProfile(user.uid);
   loadUserCollection(user.uid);
@@ -113,7 +115,17 @@ async function loadUserCollection(userId) {
   try {
     const doc = await window.db.collection('users').doc(userId).get();
     if (doc.exists) {
-      window.userCollection = new Set(doc.data().collection || []);
+      const data = doc.data();
+      window.userCollection = new Set(data.collection || []);
+      // Load counts (new field) — migrate from legacy Set if needed
+      const counts = data.collectionCounts || {};
+      window.userCollectionCounts = new Map(Object.entries(counts));
+      // Backfill: cards in Set but not in counts get count=1
+      window.userCollection.forEach(cardId => {
+        if (!window.userCollectionCounts.has(cardId)) {
+          window.userCollectionCounts.set(cardId, 1);
+        }
+      });
       if (typeof updateCollectionUI === 'function') updateCollectionUI();
     }
   } catch (error) {
@@ -145,8 +157,9 @@ async function loadUserDecks(userId) {
 }
 
 function clearUserData() {
-  window.userProfile    = null;
-  window.userCollection = new Set();
-  window.userWishlist   = new Set();
-  window.userDecks      = [];
+  window.userProfile          = null;
+  window.userCollection       = new Set();
+  window.userCollectionCounts = new Map();
+  window.userWishlist         = new Set();
+  window.userDecks            = [];
 }

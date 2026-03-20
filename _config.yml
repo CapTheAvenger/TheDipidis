@@ -1,5 +1,20 @@
 # GitHub Pages Site Configuration
 theme: null
 plugins: []
-exclude: [build/, __pycache__/, .git/, .gitignore]
+exclude:
+  - build/
+  - __pycache__/
+  - .git/
+  - .gitignore
+  - "*.py"
+  - "*.bat"
+  - "*.ps1"
+  - "*_settings.json"
+  - requirements.txt
+  - utils/
+  - tests/
+  - "*.md"
+  - firestore.rules
+  - pokemon_sets_mapping.csv
+  - .github/
 future: false

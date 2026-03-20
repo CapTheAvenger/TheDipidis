@@ -7373,6 +7373,7 @@ const BASE_PATH = './data/';
         }
 
         const pendingDeckRefreshBySource = {};
+        const pendingDeckDisplayUpdateBySource = {};
         const synergyStatsCacheBySource = {
             cityLeague: null,
             currentMeta: null,
@@ -7431,6 +7432,19 @@ const BASE_PATH = './data/';
         }
 
         window.triggerSynergyCalculation = triggerSynergyCalculation;
+
+        function scheduleDeckDisplayUpdate(source) {
+            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
+
+            if (pendingDeckDisplayUpdateBySource[source]) {
+                return;
+            }
+
+            pendingDeckDisplayUpdateBySource[source] = requestAnimationFrame(() => {
+                pendingDeckDisplayUpdateBySource[source] = null;
+                updateDeckDisplay(source);
+            });
+        }
 
         function scheduleDeckDependentRefresh(source) {
             if (pendingDeckRefreshBySource[source]) {
@@ -9161,7 +9175,7 @@ const BASE_PATH = './data/';
                 }
                 
                 // ?? PERFORMANCE: Update display ONCE at the end (not 60 times!)
-                updateDeckDisplay(source);
+                scheduleDeckDisplayUpdate(source);
             }
         }
         
@@ -9538,7 +9552,7 @@ const BASE_PATH = './data/';
                     savePastMetaDeck();
                 }
 
-                updateDeckDisplay(source);
+                scheduleDeckDisplayUpdate(source);
 
                 if (currentTotal >= 60) {
                     if (typeof showDeckShareToast === 'function') {

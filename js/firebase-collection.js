@@ -2258,22 +2258,114 @@ async function openCompareSavedDeck(deckIndex) {
 function showDeckComparison(deckA, deckB) {
   const cardsA = deckA.cards || {};
   const cardsB = deckB.cards || {};
-  const allCardKeys = new Set([...Object.keys(cardsA), ...Object.keys(cardsB)]);
-  
+
+  function parseDeckCardKey(rawKey) {
+    const key = String(rawKey || '').trim();
+    const m = key.match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/i);
+    if (!m) {
+      return { rawKey: key, name: key, set: '', number: '' };
+    }
+    return {
+      rawKey: key,
+      name: String(m[1] || '').trim(),
+      set: String(m[2] || '').toUpperCase().trim(),
+      number: String(m[3] || '').toUpperCase().trim()
+    };
+  }
+
+  function normalizeCompareName(name) {
+    if (typeof normalizeCardName === 'function') return normalizeCardName(name);
+    return String(name || '').toLowerCase().trim();
+  }
+
+  function getCardRecordBySetNumber(setCode, setNumber) {
+    if (!setCode || !setNumber) return null;
+    if (typeof window.getIndexedCardBySetNumber === 'function') {
+      const c = window.getIndexedCardBySetNumber(setCode, setNumber);
+      if (c) return c;
+    }
+    if (window.cardsBySetNumberMap) {
+      const key = `${setCode}-${setNumber}`;
+      if (window.cardsBySetNumberMap[key]) return window.cardsBySetNumberMap[key];
+    }
+    if (Array.isArray(window.allCardsDatabase)) {
+      const c = window.allCardsDatabase.find(x => String(x.set || '').toUpperCase() === setCode && String(x.number || '').toUpperCase() === setNumber);
+      if (c) return c;
+    }
+    return null;
+  }
+
+  function getCanonicalComparisonInfo(rawKey) {
+    const parsed = parseDeckCardKey(rawKey);
+    const normalizedName = normalizeCompareName(parsed.name || parsed.rawKey);
+    const cardRecord = getCardRecordBySetNumber(parsed.set, parsed.number);
+
+    // Best-case: use Limitless international_prints table as canonical identity.
+    if (cardRecord && cardRecord.international_prints) {
+      const refs = String(cardRecord.international_prints)
+        .split(',')
+        .map(s => String(s || '').trim().toUpperCase())
+        .filter(Boolean)
+        .filter(s => s.includes('-'));
+      if (refs.length > 0) {
+        refs.sort();
+        return {
+          canonical: `intl:${refs.join('|')}`,
+          label: parsed.name || parsed.rawKey,
+          collapsedPrints: true
+        };
+      }
+    }
+
+    // Fallback: collapse by normalized name.
+    return {
+      canonical: `name:${normalizedName}`,
+      label: parsed.name || parsed.rawKey,
+      collapsedPrints: Boolean(parsed.set && parsed.number)
+    };
+  }
+
+  function aggregateDeckForComparison(cardsMap) {
+    const aggregated = new Map();
+    Object.entries(cardsMap || {}).forEach(([rawKey, rawCount]) => {
+      const count = parseInt(rawCount, 10) || 0;
+      if (count <= 0) return;
+      const info = getCanonicalComparisonInfo(rawKey);
+      const existing = aggregated.get(info.canonical);
+      if (!existing) {
+        aggregated.set(info.canonical, {
+          count,
+          label: info.label,
+          collapsedPrints: info.collapsedPrints
+        });
+      } else {
+        existing.count += count;
+        if (info.collapsedPrints) existing.collapsedPrints = true;
+      }
+    });
+    return aggregated;
+  }
+
+  const aggA = aggregateDeckForComparison(cardsA);
+  const aggB = aggregateDeckForComparison(cardsB);
+  const allCanonicalKeys = new Set([...aggA.keys(), ...aggB.keys()]);
+
   let onlyA = [], onlyB = [], different = [], same = [];
-  
-  allCardKeys.forEach(key => {
-    const countA = cardsA[key] || 0;
-    const countB = cardsB[key] || 0;
-    const safeKey = escapeHtml(key);
-    if (countA > 0 && countB === 0) {
-      onlyA.push(`${safeKey} x${countA}`);
-    } else if (countB > 0 && countA === 0) {
-      onlyB.push(`${safeKey} x${countB}`);
-    } else if (countA !== countB) {
-      different.push(`${safeKey}: ${countA} → ${countB}`);
+
+  allCanonicalKeys.forEach(key => {
+    const a = aggA.get(key) || { count: 0, label: '' };
+    const b = aggB.get(key) || { count: 0, label: '' };
+    const labelBase = a.label || b.label || key;
+    const label = `${escapeHtml(labelBase)}${(a.collapsedPrints || b.collapsedPrints) ? ' <span title="Int-Prints zusammengefasst" style="color:#b8860b;">(prints merged)</span>' : ''}`;
+
+    if (a.count > 0 && b.count === 0) {
+      onlyA.push(`${label} x${a.count}`);
+    } else if (b.count > 0 && a.count === 0) {
+      onlyB.push(`${label} x${b.count}`);
+    } else if (a.count !== b.count) {
+      different.push(`${label}: ${a.count} → ${b.count}`);
     } else {
-      same.push(`${safeKey} x${countA}`);
+      same.push(`${label} x${a.count}`);
     }
   });
   

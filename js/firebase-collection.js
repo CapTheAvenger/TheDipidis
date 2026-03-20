@@ -432,6 +432,95 @@ function updateCardUI(cardId) {
   });
 }
 
+function getCollectionSortMode() {
+  return window.collectionSortMode || 'set-newest';
+}
+
+function getCardSetOrder(card) {
+  if (!card || !card.set) return 0;
+  const map = window.setOrderMap || {};
+  return parseInt(map[card.set], 10) || 0;
+}
+
+function getCardElementBucket(card) {
+  const rawType = String((card && (card.type || card.card_type)) || '').toLowerCase();
+  const elementOrder = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'dragon', 'colorless'];
+  for (const el of elementOrder) {
+    if (rawType.includes(el)) return el;
+  }
+  if (rawType.includes('energy')) return 'energy';
+  if (rawType.includes('trainer') || rawType.includes('item') || rawType.includes('supporter') || rawType.includes('stadium') || rawType.includes('tool')) return 'trainer';
+  return 'other';
+}
+
+function getCardPokedexNumber(card) {
+  if (!card) return Number.MAX_SAFE_INTEGER;
+  const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);
+  if (!isNaN(direct) && direct > 0) return direct;
+
+  const dexMap = window.pokedexNumbers || {};
+  const rawName = String(card.name || '').trim();
+  if (!rawName) return Number.MAX_SAFE_INTEGER;
+
+  const rawLower = rawName.toLowerCase();
+  const directMap = parseInt(dexMap[rawLower], 10);
+  if (!isNaN(directMap) && directMap > 0) return directMap;
+
+  // Strip common TCG suffixes for better lookup in National Dex map.
+  const baseName = rawLower
+    .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const baseMap = parseInt(dexMap[baseName], 10);
+  if (!isNaN(baseMap) && baseMap > 0) return baseMap;
+
+  return Number.MAX_SAFE_INTEGER;
+}
+
+function sortCollectionEntries(entries) {
+  const mode = getCollectionSortMode();
+  const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
+
+  entries.sort((a, b) => {
+    if (mode === 'element-set-newest') {
+      const aEl = getCardElementBucket(a.card);
+      const bEl = getCardElementBucket(b.card);
+      if (aEl !== bEl) return collator.compare(aEl, bEl);
+
+      const aSet = getCardSetOrder(a.card);
+      const bSet = getCardSetOrder(b.card);
+      if (aSet !== bSet) return bSet - aSet;
+
+      const aNum = parseInt(a.card.number, 10);
+      const bNum = parseInt(b.card.number, 10);
+      if (!isNaN(aNum) && !isNaN(bNum) && aNum !== bNum) return aNum - bNum;
+      return collator.compare(a.card.name, b.card.name);
+    }
+
+    if (mode === 'pokedex') {
+      const aDex = getCardPokedexNumber(a.card);
+      const bDex = getCardPokedexNumber(b.card);
+      if (aDex !== bDex) return aDex - bDex;
+
+      const aSet = getCardSetOrder(a.card);
+      const bSet = getCardSetOrder(b.card);
+      if (aSet !== bSet) return bSet - aSet;
+      return collator.compare(a.card.name, b.card.name);
+    }
+
+    // Default: newest set first
+    const aSet = getCardSetOrder(a.card);
+    const bSet = getCardSetOrder(b.card);
+    if (aSet !== bSet) return bSet - aSet;
+
+    const aNum = parseInt(a.card.number, 10);
+    const bNum = parseInt(b.card.number, 10);
+    if (!isNaN(aNum) && !isNaN(bNum) && aNum !== bNum) return aNum - bNum;
+    return collator.compare(a.card.name, b.card.name);
+  });
+}
+
 // Update collection UI
 function updateCollectionUI(searchFilter = '') {
   // Update all card elements
@@ -451,6 +540,7 @@ function updateCollectionUI(searchFilter = '') {
     const collectionHtml = [];
     let totalCards = 0;
     let matchingCards = 0;
+    const entries = [];
     
     window.userCollection.forEach(cardId => {
       // cardId format: "Card Name|SET|NUMBER"
@@ -487,21 +577,26 @@ function updateCollectionUI(searchFilter = '') {
         }
         
         matchingCards++;
-
-        const safeNameHtml = escapeHtml(card.name);
-        const safeSetHtml = escapeHtml(cardSet);
-        const safeNumberHtml = escapeHtml(cardNumber);
-        const safeImageAttr = escapeHtml(card.image_url);
-        const safeImageJs = escapeJsSingleQuoted(card.image_url);
-        const safeNameJs = escapeJsSingleQuoted(card.name);
-        const safeCardIdJs = escapeJsSingleQuoted(cardId);
-        
-        const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
-        const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
-        
         const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 1) : 1;
-        
-        collectionHtml.push(`
+        entries.push({ cardId, card, cardSet, cardNumber, ownedCount });
+      }
+    });
+
+    sortCollectionEntries(entries);
+
+    entries.forEach(({ cardId, card, cardSet, cardNumber, ownedCount }) => {
+      const safeNameHtml = escapeHtml(card.name);
+      const safeSetHtml = escapeHtml(cardSet);
+      const safeNumberHtml = escapeHtml(cardNumber);
+      const safeImageAttr = escapeHtml(card.image_url);
+      const safeImageJs = escapeJsSingleQuoted(card.image_url);
+      const safeNameJs = escapeJsSingleQuoted(card.name);
+      const safeCardIdJs = escapeJsSingleQuoted(cardId);
+
+      const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+      const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
+
+      collectionHtml.push(`
           <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
             <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
             <div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${ownedCount}x owned">${ownedCount}x</div>
@@ -516,7 +611,6 @@ function updateCollectionUI(searchFilter = '') {
             </div>
           </div>
         `);
-      }
     });
     
     // Update search results display
@@ -559,6 +653,47 @@ function updateCollectionUI(searchFilter = '') {
         <span class="stat-label">Collection Value</span>
       </div>
     `;
+  }
+}
+
+function setCollectionSort(mode) {
+  window.collectionSortMode = mode || 'set-newest';
+  filterCollection();
+}
+
+async function clearCollection() {
+  const user = auth.currentUser;
+  if (!user) {
+    showNotification('Please sign in to use this feature', 'error');
+    return;
+  }
+
+  if (!window.userCollection || window.userCollection.size === 0) {
+    showNotification('Collection is already empty', 'info');
+    return;
+  }
+
+  const ok = confirm('Wirklich die gesamte Collection zuruecksetzen? Alle Karten werden auf "nicht im Besitz" gesetzt.');
+  if (!ok) return;
+
+  try {
+    await db.collection('users').doc(user.uid).set({
+      collection: [],
+      collectionCounts: {}
+    }, { merge: true });
+
+    window.userCollection = new Set();
+    window.userCollectionCounts = new Map();
+    updateCollectionUI();
+
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+      renderCardDatabase(window.filteredCardsData);
+    }
+
+    showNotification('Collection wurde geleert', 'success');
+  } catch (error) {
+    console.error('Error clearing collection:', error);
+    showNotification('Fehler beim Leeren der Collection', 'error');
   }
 }
 
@@ -1985,3 +2120,5 @@ async function dexImportExecute(mode) {
 window.dexImportOpenFilePicker = dexImportOpenFilePicker;
 window.dexImportHandleFile     = dexImportHandleFile;
 window.dexImportExecute        = dexImportExecute;
+window.setCollectionSort       = setCollectionSort;
+window.clearCollection         = clearCollection;

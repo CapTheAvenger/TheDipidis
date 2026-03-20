@@ -436,6 +436,111 @@ function getCollectionSortMode() {
   return window.collectionSortMode || 'set-newest';
 }
 
+function getCollectionFilterMode() {
+  return window.collectionFilterMode || 'all';
+}
+
+function normalizePokemonNameForDexLookup(name) {
+  return String(name || '')
+    .toLowerCase()
+    .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function getPokemonDexNumber(card) {
+  if (!card) return null;
+  const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);
+  if (!isNaN(direct) && direct > 0) return direct;
+
+  const dexMap = window.pokedexNumbers || {};
+  const normalized = normalizePokemonNameForDexLookup(card.name);
+  const mapped = parseInt(dexMap[normalized], 10);
+  if (!isNaN(mapped) && mapped > 0) return mapped;
+  return null;
+}
+
+function isPokemonLikeType(typeLower) {
+  return typeLower.includes('basic')
+    || typeLower.includes('stage')
+    || typeLower.includes('vmax')
+    || typeLower.includes('vstar')
+    || typeLower.includes('mega')
+    || typeLower.includes('break')
+    || typeLower.includes('legend')
+    || typeLower.includes('restored');
+}
+
+function getCollectionCardCategory(card) {
+  const typeLower = String((card && card.type) || '').toLowerCase();
+  if (typeLower.includes('supporter')) return 'supporter';
+  if (typeLower.includes('item')) return 'item';
+  if (typeLower.includes('tool')) return 'tool';
+  if (typeLower.includes('special energy')) return 'special-energy';
+  if (typeLower.includes('basic energy')) return 'basic-energy';
+  if (typeLower.includes('stadium')) return 'stadium';
+  if (typeLower.includes('energy')) return 'energy';
+  return 'pokemon';
+}
+
+function getPokemonElementFromCard(card) {
+  if (!card) return 'unknown';
+  const typeLower = String((card.type || '')).toLowerCase();
+
+  const explicitMap = {
+    grass: 'grass', fire: 'fire', water: 'water', lightning: 'lightning',
+    psychic: 'psychic', fighting: 'fighting', darkness: 'darkness',
+    metal: 'metal', dragon: 'dragon', colorless: 'colorless'
+  };
+  for (const [needle, mapped] of Object.entries(explicitMap)) {
+    if (typeLower.includes(needle)) return mapped;
+  }
+
+  const dex = getPokemonDexNumber(card);
+  if (!dex) return 'unknown';
+
+  const cache = window.pokemonTypeCache || (window.pokemonTypeCache = {});
+  const cached = cache[String(dex)];
+  if (cached) {
+    const typeToElement = {
+      grass: 'grass', fire: 'fire', water: 'water', electric: 'lightning',
+      psychic: 'psychic', fighting: 'fighting', dark: 'darkness', steel: 'metal',
+      dragon: 'dragon', normal: 'colorless'
+    };
+    return typeToElement[cached] || 'unknown';
+  }
+
+  if (!window._pendingPokemonTypeFetches) window._pendingPokemonTypeFetches = new Set();
+  if (!window._pendingPokemonTypeFetches.has(String(dex))) {
+    window._pendingPokemonTypeFetches.add(String(dex));
+    fetch(`https://pokeapi.co/api/v2/pokemon/${dex}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data || !Array.isArray(data.types) || data.types.length === 0) return;
+        const primary = data.types.slice().sort((a, b) => (a.slot || 99) - (b.slot || 99))[0];
+        const typeName = primary && primary.type ? String(primary.type.name || '').toLowerCase() : '';
+        if (!typeName) return;
+        window.pokemonTypeCache[String(dex)] = typeName;
+        try { localStorage.setItem('pokemonTypeCacheV1', JSON.stringify(window.pokemonTypeCache)); } catch (_) {}
+      })
+      .catch(() => {})
+      .finally(() => {
+        window._pendingPokemonTypeFetches.delete(String(dex));
+        // Re-render after async type resolution to apply element sort/filter.
+        if (typeof filterCollection === 'function') filterCollection();
+      });
+  }
+
+  return 'unknown';
+}
+
+function getCollectionPrice(card) {
+  if (!card || !card.eur_price) return 0;
+  const parsed = parseFloat(String(card.eur_price).replace(',', '.'));
+  return isNaN(parsed) ? 0 : parsed;
+}
+
 function getCardSetOrder(card) {
   if (!card || !card.set) return 0;
   const map = window.setOrderMap || {};
@@ -461,25 +566,23 @@ function compareCardsByNewestSet(aCard, bCard, collator) {
 }
 
 function getCardElementBucket(card) {
-  const rawType = String((card && (card.type || card.card_type)) || '').toLowerCase();
-  const rawName = String((card && card.name) || '').toLowerCase();
-
-  const ordered = ['grass', 'fire', 'water', 'lightning', 'psychic', 'fighting', 'darkness', 'metal', 'dragon', 'colorless'];
-  for (let i = 0; i < ordered.length; i++) {
-    const el = ordered[i];
-    if (rawType.includes(el) || rawName.includes(`${el} energy`)) {
-      return { key: el, rank: i + 1 };
-    }
+  const category = getCollectionCardCategory(card);
+  if (category === 'pokemon') {
+    const element = getPokemonElementFromCard(card);
+    const rankMap = {
+      grass: 1, fire: 2, water: 3, lightning: 4, psychic: 5,
+      fighting: 6, darkness: 7, metal: 8, dragon: 9, colorless: 10,
+      unknown: 11
+    };
+    return { key: `pokemon-${element}`, rank: rankMap[element] || 11 };
   }
-
-  // Fallback groups if explicit element is not present in dataset fields.
-  if (rawType.includes('energy')) return { key: 'energy', rank: 20 };
-  if (rawType.includes('trainer') || rawType.includes('item') || rawType.includes('supporter') || rawType.includes('stadium') || rawType.includes('tool')) {
-    return { key: 'trainer', rank: 30 };
-  }
-  if (rawType.includes('basic') || rawType.includes('stage') || rawType.includes('pokemon') || rawType.includes('ex')) {
-    return { key: 'pokemon', rank: 40 };
-  }
+  if (category === 'supporter') return { key: 'supporter', rank: 20 };
+  if (category === 'item') return { key: 'item', rank: 21 };
+  if (category === 'tool') return { key: 'tool', rank: 22 };
+  if (category === 'stadium') return { key: 'stadium', rank: 23 };
+  if (category === 'special-energy') return { key: 'special-energy', rank: 24 };
+  if (category === 'basic-energy') return { key: 'basic-energy', rank: 25 };
+  if (category === 'energy') return { key: 'energy', rank: 26 };
   return { key: 'other', rank: 99 };
 }
 
@@ -513,6 +616,13 @@ function sortCollectionEntries(entries) {
   const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
 
   entries.sort((a, b) => {
+    if (mode === 'price-desc') {
+      const aPrice = getCollectionPrice(a.card);
+      const bPrice = getCollectionPrice(b.card);
+      if (aPrice !== bPrice) return bPrice - aPrice;
+      return compareCardsByNewestSet(a.card, b.card, collator);
+    }
+
     if (mode === 'element-set-newest') {
       const aEl = getCardElementBucket(a.card);
       const bEl = getCardElementBucket(b.card);
@@ -536,7 +646,13 @@ function sortCollectionEntries(entries) {
 }
 
 // Update collection UI
-function updateCollectionUI(searchFilter = '') {
+function updateCollectionUI(searchFilter = '', filterMode = '') {
+  if (!window.pokemonTypeCache) {
+    try { window.pokemonTypeCache = JSON.parse(localStorage.getItem('pokemonTypeCacheV1') || '{}'); }
+    catch (_) { window.pokemonTypeCache = {}; }
+  }
+  const activeFilterMode = filterMode || getCollectionFilterMode();
+
   // Update all card elements
   if (window.userCollection) {
     window.userCollection.forEach(cardId => {
@@ -587,6 +703,21 @@ function updateCollectionUI(searchFilter = '') {
           
           if (!matchesName && !matchesSet && !matchesNumber) {
             return; // Skip this card
+          }
+        }
+
+        // Apply type/element filter
+        if (activeFilterMode && activeFilterMode !== 'all') {
+          const category = getCollectionCardCategory(card);
+          if (activeFilterMode.startsWith('pokemon-')) {
+            if (category !== 'pokemon') return;
+            const wantedEl = activeFilterMode.replace('pokemon-', '');
+            const cardEl = getPokemonElementFromCard(card);
+            if (cardEl !== wantedEl) return;
+          } else if (activeFilterMode === 'pokemon') {
+            if (category !== 'pokemon') return;
+          } else if (category !== activeFilterMode) {
+            return;
           }
         }
         
@@ -682,6 +813,11 @@ function updateCollectionUI(searchFilter = '') {
 
 function setCollectionSort(mode) {
   window.collectionSortMode = mode || 'set-newest';
+  filterCollection();
+}
+
+function setCollectionFilter(mode) {
+  window.collectionFilterMode = mode || 'all';
   filterCollection();
 }
 
@@ -1525,9 +1661,11 @@ function switchProfileTab(tabName) {
 function filterCollection() {
   const searchInput = document.getElementById('collection-search');
   if (!searchInput) return;
+  const filterInput = document.getElementById('collection-filter');
   
   const searchTerm = searchInput.value.trim();
-  updateCollectionUI(searchTerm);
+  const filterMode = filterInput ? filterInput.value : getCollectionFilterMode();
+  updateCollectionUI(searchTerm, filterMode);
 }
 
 // Filter wishlist by search term and/or set
@@ -2145,4 +2283,5 @@ window.dexImportOpenFilePicker = dexImportOpenFilePicker;
 window.dexImportHandleFile     = dexImportHandleFile;
 window.dexImportExecute        = dexImportExecute;
 window.setCollectionSort       = setCollectionSort;
+window.setCollectionFilter     = setCollectionFilter;
 window.clearCollection         = clearCollection;

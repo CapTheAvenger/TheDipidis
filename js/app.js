@@ -14956,6 +14956,45 @@ const BASE_PATH = './data/';
             const parsedSet = parsedMatch ? String(parsedMatch[2] || '').toUpperCase() : '';
             const parsedNumber = parsedMatch ? String(parsedMatch[3] || '').toUpperCase() : '';
 
+            const profileHintMatch = String(sourceHint || '').match(/^profile\|(.+)$/);
+            if (profileHintMatch) {
+                const profileDeckId = profileHintMatch[1];
+                const profileDeck = (window.userDecks || []).find(d => String(d && d.id) === String(profileDeckId));
+                const profileCards = profileDeck && profileDeck.cards && typeof profileDeck.cards === 'object'
+                    ? profileDeck.cards
+                    : null;
+
+                if (profileCards) {
+                    const directCount = parseInt(profileCards[deckKey], 10) || 0;
+                    if (directCount > 0) {
+                        return { source: 'profile', oldKey: deckKey, count: directCount, profileDeckId };
+                    }
+
+                    let bySetNumberMatch = null;
+                    let byNameMatch = null;
+                    for (const [key, qty] of Object.entries(profileCards)) {
+                        const keyQty = parseInt(qty, 10) || 0;
+                        if (keyQty <= 0) continue;
+                        const keyMatch = String(key).match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                        const keyName = keyMatch ? keyMatch[1] : key;
+                        const keySet = keyMatch ? String(keyMatch[2] || '').toUpperCase() : '';
+                        const keyNumber = keyMatch ? String(keyMatch[3] || '').toUpperCase() : '';
+
+                        if (parsedSet && parsedNumber && keySet === parsedSet && keyNumber === parsedNumber) {
+                            bySetNumberMatch = { source: 'profile', oldKey: key, count: keyQty, profileDeckId };
+                            break;
+                        }
+
+                        if (!byNameMatch && normalizeCardName(keyName) === normalizedActualName) {
+                            byNameMatch = { source: 'profile', oldKey: key, count: keyQty, profileDeckId };
+                        }
+                    }
+
+                    if (bySetNumberMatch) return bySetNumberMatch;
+                    if (byNameMatch) return byNameMatch;
+                }
+            }
+
             const deckContexts = {
                 cityLeague: window.cityLeagueDeck || {},
                 currentMeta: window.currentMetaDeck || {},
@@ -15047,7 +15086,8 @@ const BASE_PATH = './data/';
                 deckKey,
                 source: resolvedTarget.source || sourceHint || '',
                 resolvedOldKey: resolvedTarget.oldKey || deckKey,
-                resolvedCount: resolvedTarget.count || 0
+                resolvedCount: resolvedTarget.count || 0,
+                profileDeckId: resolvedTarget.profileDeckId || (String(sourceHint || '').startsWith('profile|') ? String(sourceHint).slice('profile|'.length) : '')
             };
             devLog('[RaritySwitch][open] resolved target', {
                 input: { cardName, deckKey, sourceHint },
@@ -15277,11 +15317,91 @@ const BASE_PATH = './data/';
             modal.classList.add('show');
         }
 
-        function selectRarityVersion(setCode, setNumber, oldDeckKey, cardName, sourceHint = '') {
+        async function selectRarityVersion(setCode, setNumber, oldDeckKey, cardName, sourceHint = '') {
             const match = String(oldDeckKey || '').match(/^(.+?)\s*\(/);
             const actualCardName = cardName || (match ? match[1] : oldDeckKey);
             const newKey = `${actualCardName} (${setCode} ${setNumber})`;
             const normalizedActualName = normalizeCardName(actualCardName);
+
+            const profileDeckId = (currentRaritySwitcherCard && currentRaritySwitcherCard.profileDeckId)
+                || ((String(sourceHint || '').startsWith('profile|')) ? String(sourceHint).slice('profile|'.length) : '');
+            if (profileDeckId) {
+                const profileDeck = (window.userDecks || []).find(d => String(d && d.id) === String(profileDeckId));
+                const profileCards = profileDeck && profileDeck.cards && typeof profileDeck.cards === 'object'
+                    ? profileDeck.cards
+                    : null;
+
+                if (!profileDeck || !profileCards) {
+                    showToast('Gespeichertes Deck konnte nicht geladen werden.', 'warning');
+                    closeRaritySwitcher();
+                    return;
+                }
+
+                let resolvedOldKey = '';
+                let resolvedCount = 0;
+
+                const preOldKey = currentRaritySwitcherCard && currentRaritySwitcherCard.resolvedOldKey;
+                if (preOldKey) {
+                    const preCount = parseInt(profileCards[preOldKey], 10) || 0;
+                    if (preCount > 0) {
+                        resolvedOldKey = preOldKey;
+                        resolvedCount = preCount;
+                    }
+                }
+
+                if (!resolvedOldKey) {
+                    const directCount = parseInt(profileCards[oldDeckKey], 10) || 0;
+                    if (directCount > 0) {
+                        resolvedOldKey = oldDeckKey;
+                        resolvedCount = directCount;
+                    }
+                }
+
+                if (!resolvedOldKey) {
+                    for (const [key, qty] of Object.entries(profileCards)) {
+                        const keyQty = parseInt(qty, 10) || 0;
+                        if (keyQty <= 0) continue;
+                        const keyMatch = String(key).match(/^(.+?)\s*\(/);
+                        const keyName = keyMatch ? keyMatch[1] : key;
+                        if (normalizeCardName(keyName) === normalizedActualName) {
+                            resolvedOldKey = key;
+                            resolvedCount = keyQty;
+                            break;
+                        }
+                    }
+                }
+
+                if (!resolvedOldKey || resolvedCount <= 0) {
+                    showToast('Diese Karte wurde im gespeicherten Deck nicht gefunden.', 'warning');
+                    closeRaritySwitcher();
+                    return;
+                }
+
+                delete profileCards[resolvedOldKey];
+                profileCards[newKey] = (parseInt(profileCards[newKey], 10) || 0) + resolvedCount;
+
+                const totalCards = Object.values(profileCards).reduce((sum, qty) => sum + (parseInt(qty, 10) || 0), 0);
+                const updatedProfileDeck = {
+                    ...profileDeck,
+                    cards: profileCards,
+                    totalCards
+                };
+
+                setRarityPreference(actualCardName, { mode: 'specific', set: setCode, number: setNumber });
+
+                if (typeof saveDeck === 'function') {
+                    await saveDeck(updatedProfileDeck);
+                } else {
+                    throw new Error('saveDeck function is not available');
+                }
+
+                if (typeof updateDecksUI === 'function') {
+                    updateDecksUI();
+                }
+
+                closeRaritySwitcher();
+                return;
+            }
 
             const deckContexts = {
                 cityLeague: { deck: window.cityLeagueDeck || {}, orderKey: 'cityLeagueDeckOrder' },

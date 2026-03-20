@@ -1256,6 +1256,7 @@ function updateDecksUI() {
         const safeCardmarketUrlJs = escapeJsSingleQuoted(cardmarketUrl);
         const safeCardIdJs = escapeJsSingleQuoted(cardId);
         const safeDeckKeyJs = escapeJsSingleQuoted(card.deck_key || `${cardName} (${setCode} ${setNumber})`);
+        const safeProfileHintJs = escapeJsSingleQuoted(`profile|${deck.id || ''}`);
         const safeCardmarketTitleHtml = escapeHtml(eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available');
         let otherPrintOwnedCount = 0;
         if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
@@ -1296,7 +1297,7 @@ function updateDecksUI() {
             <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.75); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 3;">${count}</div>
             
             <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; z-index: 3;">
-                    <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeDeckKeyJs}')" 
+                      <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeDeckKeyJs}', '${safeProfileHintJs}')" 
                       style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="Switch rarity/print">★</button>
                   <button onclick="event.stopPropagation(); openCardmarket('${safeCardmarketUrlJs}', '${safeCardNameJs}')" 

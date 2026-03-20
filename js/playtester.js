@@ -1976,8 +1976,10 @@ function returnToHand(player, zoneId, event) {
     const zoneArr = isNeutral ? (zoneId === 'stadium' ? ptState.stadium : ptState.playZone) : ptState[player].field[zoneId];
     if (zoneArr.length > 0) {
         const c = zoneArr.pop();
-        ptState[ptCurrentPlayer].hand.push(c);
+        const neutralOwner = (zoneId === 'stadium') ? (ptState.stadiumPlayedBy || ptCurrentPlayer) : ptCurrentPlayer;
+        ptState[neutralOwner].hand.push(c);
         ptLog(`Took "${c.name}" to hand.`);
+        if (zoneId === 'stadium' && zoneArr.length === 0) ptState.stadiumPlayedBy = null;
         if (!isNeutral && zoneArr.length === 0) {
             ptState[player].damage[zoneId] = 0;
             if (zoneId === 'active') ptState[player].status = [];
@@ -1992,8 +1994,10 @@ function discardTopCard(player, zoneId, event) {
     const zoneArr = isNeutral ? (zoneId === 'stadium' ? ptState.stadium : ptState.playZone) : ptState[player].field[zoneId];
     if (zoneArr.length > 0) {
         const c = zoneArr.pop();
-        ptState[ptCurrentPlayer].discard.push(c);
+        const neutralOwner = (zoneId === 'stadium') ? (ptState.stadiumPlayedBy || ptCurrentPlayer) : ptCurrentPlayer;
+        ptState[neutralOwner].discard.push(c);
         ptLog(`Discarded "${c.name}".`);
+        if (zoneId === 'stadium' && zoneArr.length === 0) ptState.stadiumPlayedBy = null;
         if (!isNeutral && zoneArr.length === 0) {
             ptState[player].damage[zoneId] = 0;
             if (zoneId === 'active') ptState[player].status = [];
@@ -2008,8 +2012,10 @@ function moveToLostZone(player, zoneId, event) {
     const zoneArr = isNeutral ? (zoneId === 'stadium' ? ptState.stadium : ptState.playZone) : ptState[player].field[zoneId];
     if (zoneArr.length > 0) {
         const c = zoneArr.pop();
-        ptState[ptCurrentPlayer].lostzone.push(c);
+        const neutralOwner = (zoneId === 'stadium') ? (ptState.stadiumPlayedBy || ptCurrentPlayer) : ptCurrentPlayer;
+        ptState[neutralOwner].lostzone.push(c);
         ptLog(`Sent "${c.name}" to the Lost Zone.`);
+        if (zoneId === 'stadium' && zoneArr.length === 0) ptState.stadiumPlayedBy = null;
         if (!isNeutral && zoneArr.length === 0) {
             ptState[player].damage[zoneId] = 0;
             if (zoneId === 'active') ptState[player].status = [];

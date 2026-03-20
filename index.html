@@ -1477,7 +1477,7 @@
                 <div class="container">
                     <div class="header">
                         <h1>📖 How to Use This Website <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help"></button></h1>
-                        <p>Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v38 (March 2026)</p>
+                        <p>Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v39 (March 2026)</p>
                     </div>
                     
                     <div style="max-width: 1200px; margin: 0 auto; padding: 30px; background: white; border-radius: 10px;">
@@ -1490,7 +1490,7 @@
                                 Access Japanese City League results, international tournament data, and detailed card statistics to build competitive decks — and test them directly in your browser.
                             </p>
                             <div style="background: #fef9e7; border-left: 4px solid #f39c12; padding: 12px 16px; border-radius: 6px; margin-top: 12px;">
-                                <strong>🆕 New in v38:</strong> <strong>Professor Oak Help Button</strong> — every tab now has a Professor Oak icon that opens context-specific help. <strong>Auto-Save Decks</strong> — your deck builder state is saved to localStorage and restored on page reload. <strong>Proxy Print Layout</strong> — @media print CSS ensures standard 6.3cm × 8.8cm card sizes for physical sleeve-fit proxies. <strong>TCG Rule Enforcement</strong> — Judge now draws exactly 4 cards, Iono draws equal to remaining prizes (per official rules). <strong>Deck Compare Fix</strong> — same cards from different prints (e.g. Boss's Orders PAL vs BRS) no longer show as false differences. <strong>Card Database Sort</strong> — sets now sort newest→oldest with unique order values for all 150+ sets.
+                                <strong>🆕 New in v39:</strong> <strong>Dex Import Matching Upgrade</strong> — set names from CSV (e.g. Obsidian Flames) are mapped to internal codes (OBF), ID fields like <code>sv3-27</code> resolve card number correctly, and 0-quantity rows are skipped. <strong>Exact Print Collection Counts</strong> — deck/profile badges now use strict set+number print matching. <strong>Rarity Switcher Print Swap Fix</strong> — switching prints now reliably replaces the correct deck entry across City League, Current Meta, and Past Meta builders. <strong>✨ Other Print Indicator</strong> — cards now show a strong shiny indicator when other international prints of the same card exist in your collection (Deck Builder, My Decks, and Rarity Switcher info).
                             </div>
                         </section>
                         
@@ -1682,6 +1682,12 @@
                                     <li>✓ <strong>Collection (green):</strong> Mark as owned / unowned</li>
                                     <li>❤️ <strong>Wishlist (orange):</strong> Add to / remove from wishlist</li>
                                 </ul>
+                                <p style="margin-top: 15px;"><strong>🧮 Collection Badge Logic (exact print):</strong></p>
+                                <ul>
+                                    <li>Top-left badge shows how many copies you own of that <strong>exact print</strong> (name + set + number)</li>
+                                    <li>🟢 Green = enough copies for deck count, 🟠 orange = partially available, no badge = 0 exact copies</li>
+                                    <li><strong>✨ Shiny badge:</strong> appears when you own <strong>other international prints</strong> of the same card</li>
+                                </ul>
                                 <p style="margin-top: 15px;"><strong>🔄 Deck Comparison:</strong></p>
                                 <ul>
                                     <li>Click "🔀 Compare with My Decks" in the Deck Builder</li>
@@ -1725,7 +1731,12 @@
                             </div>
                             
                             <h3 style="color: #555; margin-top: 25px;">⭐ Rarity Switcher (★)</h3>
-                            <p style="line-height: 1.8;">Every card in Card Overview, Deck Builder grid, and My Decks has a <strong>yellow ★ button</strong>. Click it to open a modal showing all available prints of that card — regular, reverse holo, full art, trainer gallery, promo, etc. Click any print to swap it in your deck/collection.</p>
+                            <p style="line-height: 1.8;">Every card in Card Overview, Deck Builder grid, and My Decks has a <strong>yellow ★ button</strong>. Click it to open a modal showing all available prints of that card — regular, reverse holo, full art, trainer gallery, promo, etc.</p>
+                            <ul style="line-height: 1.9;">
+                                <li>Click any version to immediately replace the print in the active deck entry</li>
+                                <li>Each switcher card shows exact owned count for that print</li>
+                                <li><strong>✨ Andere Prints</strong> line appears if you own additional international prints of the same card</li>
+                            </ul>
                             
                             <h3 style="color: #555; margin-top: 25px;">🔄 Deck Compare Feature</h3>
                             <p style="line-height: 1.8;">Compare your current deck with any saved deck or previous version:</p>
@@ -2891,7 +2902,7 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha384-D/t0ZMqQW31H3az8ktEiNb39wyKnS82iFY52QPACM+IjKW3jDUhyIgh2PApRqJZs" crossorigin="anonymous"></script>
-    <script src="js/app.js?v=20260320-v89"></script>
+    <script src="js/app.js?v=20260320-v90"></script>
     <script src="js/draw-simulator.js?v=20260319-v2"></script>
 
     <!-- Draw Simulator Modal -->

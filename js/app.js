@@ -124,27 +124,27 @@ const BASE_PATH = './data/';
         const TAB_HELP_CONTENT = {
             'city-league': {
                 title: '\ud83c\uddef\ud83c\uddf5 City League Development',
-                html: '<p>Shows archetype popularity trends from Japanese City League tournaments.</p><ul><li><strong>Chart:</strong> Tracks how each deck archetype evolves over time</li><li><strong>Format Filter:</strong> Switch between M4 (current) and M3 (archive)</li><li><strong>Click any archetype</strong> in the legend to toggle its visibility</li><li><strong>Hover</strong> over data points for exact tournament counts</li></ul>'
+                html: '<p>Shows archetype popularity trends from Japanese City League tournaments.</p><ul><li><strong>Chart:</strong> Tracks deck archetypes over time</li><li><strong>Format Filter:</strong> Switch between M4 (current) and M3 (archive)</li><li><strong>Legend Toggle:</strong> Click archetypes to show/hide lines</li><li><strong>Deck Builder Sync:</strong> Open any archetype and move to Deck Analysis for full card-level build tools</li></ul>'
             },
             'city-league-analysis': {
                 title: '\ud83e\udd85 City League Deck Analysis',
-                html: '<p>Browse and analyze individual deck lists from City League tournaments.</p><ul><li><strong>Archetype Filter:</strong> Select a deck archetype to view its lists</li><li><strong>Deck Builder:</strong> Click cards to add them to your deck</li><li><strong>Max Consistency Algorithm:</strong> Shows the statistically optimal card distribution</li><li><strong>Combined Variants:</strong> Merges similar deck variants for better analysis</li><li><strong>Copy Deck:</strong> Export any deck list for Pok\u00e9mon TCG Live</li></ul>'
+                html: '<p>Browse and analyze individual deck lists from City League tournaments.</p><ul><li><strong>Archetype + Date Filters:</strong> Narrow data quickly</li><li><strong>Deck Builder:</strong> Add/remove cards and build a 60-card list</li><li><strong>Rarity Switcher (\u2605):</strong> Swap prints directly inside deck and overview cards</li><li><strong>Exact Print Swap:</strong> Switching print updates the real deck entry (set+number)</li><li><strong>Copy Deck:</strong> Export any deck list for Pok\u00e9mon TCG Live</li></ul>'
             },
             'current-meta': {
                 title: '\ud83c\udfae Limitless Online Comparison',
-                html: '<p>Compare archetype meta shares between different tournament sources.</p><ul><li><strong>Side-by-side comparison</strong> of City League vs Limitless Online data</li><li><strong>Charts:</strong> Pie and bar charts for visual comparison</li><li><strong>Meta Share %:</strong> See how popular each deck is in different formats</li></ul>'
+                html: '<p>Compare archetype meta shares between different tournament sources.</p><ul><li><strong>Side-by-side comparison:</strong> Online vs tournament results</li><li><strong>Charts:</strong> Pie and bar visualizations</li><li><strong>Meta Share %:</strong> Fast popularity read</li><li><strong>Fallback Safety:</strong> If current_meta_card_data.csv is missing, the app auto-falls back to tournament_cards_data_cards.csv</li></ul>'
             },
             'current-analysis': {
                 title: '\ud83d\udcc8 Current Meta Deck Analysis',
-                html: '<p>Analyze deck lists from current Limitless Online tournaments.</p><ul><li><strong>Archetype Filter:</strong> Browse decks by archetype</li><li><strong>Card Distribution:</strong> See which cards appear most frequently</li><li><strong>Deck Builder:</strong> Build and modify decks interactively</li><li><strong>Max Consistency:</strong> Get the optimal 60-card build</li></ul>'
+                html: '<p>Analyze deck lists from current Limitless Online tournaments.</p><ul><li><strong>Archetype Filter:</strong> Browse decks by archetype</li><li><strong>Card Distribution:</strong> See most-played cards and usage</li><li><strong>Deck Builder:</strong> Build and modify decks interactively</li><li><strong>Rarity Switcher (\u2605):</strong> Swap to another international print in one click</li><li><strong>Max Consistency:</strong> Generate an optimized 60-card list from stats</li></ul>'
             },
             'past-meta': {
                 title: '\ud83c\udfc6 Past Tournament Deck Analysis',
-                html: '<p>Historical tournament data from major events (Regionals, EUIC, Worlds, etc.).</p><ul><li><strong>Format Filter:</strong> Filter by format code (e.g., TEF-SCR, OBF-TWM)</li><li><strong>Source Filter:</strong> Choose specific tournaments or regions</li><li><strong>Full Deck Analysis:</strong> Same powerful tools as current meta tab</li><li><strong>Historical Trends:</strong> Track how decks evolved across formats</li></ul>'
+                html: '<p>Historical tournament data from major events (Regionals, EUIC, Worlds, etc.).</p><ul><li><strong>Format Filter:</strong> Filter by format code (e.g., TEF-SCR, OBF-TWM)</li><li><strong>Source Filter:</strong> Choose tournaments/regions</li><li><strong>Full Deck Analysis:</strong> Includes builder, copy, compare and \u2605 print switch</li><li><strong>Historical Trends:</strong> Track deck evolution across formats</li></ul>'
             },
             'cards': {
                 title: '\ud83e\uddf0 Card Database',
-                html: '<p>Search and browse the complete Pok\u00e9mon TCG card database.</p><ul><li><strong>Search:</strong> Find cards by name with auto-complete</li><li><strong>Filters:</strong> Filter by set, type, rarity, and more</li><li><strong>Sort:</strong> Sets sorted newest\u2192oldest (new sets always appear first)</li><li><strong>Card Details:</strong> Click any card for full details and pricing</li><li><strong>Collection:</strong> Mark cards you own with the checkmark button</li><li><strong>Wishlist:</strong> Star cards you want to acquire</li></ul>'
+                html: '<p>Search and browse the complete Pok\u00e9mon TCG card database.</p><ul><li><strong>Search + Filters:</strong> Name, set, type, rarity, meta filters</li><li><strong>Sort:</strong> Sets sorted newest\u2192oldest</li><li><strong>Rarity Switcher (\u2605):</strong> See and choose available prints quickly</li><li><strong>Collection Count:</strong> Exact print counts are tracked via set+number</li><li><strong>Wishlist:</strong> Mark target cards with \u2764</li></ul>'
             },
             'proxy': {
                 title: '\ud83d\udda8\ufe0f Proxy Printer',
@@ -156,11 +156,11 @@ const BASE_PATH = './data/';
             },
             'profile': {
                 title: '\ud83d\udc64 User Profile',
-                html: '<p>Manage your personal card collection, saved decks, and settings.</p><ul><li><strong>Collection:</strong> Track cards you own across all sets</li><li><strong>Saved Decks:</strong> Store and manage your deck builds</li><li><strong>Wishlist:</strong> Keep a list of cards you want</li><li><strong>Settings:</strong> Configure display preferences</li></ul>'
+                html: '<p>Manage your personal card collection, saved decks, and settings.</p><ul><li><strong>My Collection:</strong> Exact print counts (set+number) synced to Firebase</li><li><strong>Dex Import:</strong> CSV import supports set-name mapping and id-based number parsing</li><li><strong>My Decks:</strong> Per-card badges show exact owned count for that print</li><li><strong>\u2728 Indicator:</strong> Shows when other international prints of same card exist in your collection</li><li><strong>Rarity Switcher (\u2605):</strong> Swap print directly from saved deck cards</li><li><strong>Wishlist + Settings:</strong> Manage targets and account preferences</li></ul>'
             },
             'tutorial': {
                 title: '\ud83d\udcd6 How to Use',
-                html: '<p>Comprehensive guide to all features of this website.</p><ul><li><strong>Tab Guides:</strong> Detailed instructions for each section</li><li><strong>FAQ:</strong> Answers to common questions</li><li><strong>Changelog:</strong> Latest features and improvements</li></ul>'
+                html: '<p>Comprehensive guide to all features of this website.</p><ul><li><strong>Tab Guides:</strong> Detailed instructions for every section</li><li><strong>Latest Changes:</strong> Includes exact-print collection badges, \u2728 other-print indicator, and robust \u2605 print swapping</li><li><strong>Import Notes:</strong> Dex CSV set-name + set-number matching behavior explained</li></ul>'
             }
         };
 

@@ -2643,7 +2643,53 @@ function ptRenderHand() {
         }
         zone.appendChild(wrapper);
     });
+
+    ptBindHandScroller();
+    ptUpdateHandScrollButtons();
 }
+
+function ptUpdateHandScrollButtons() {
+    const zone = document.getElementById('ptHandZone');
+    const leftBtn = document.getElementById('ptHandScrollLeft');
+    const rightBtn = document.getElementById('ptHandScrollRight');
+    if (!zone || !leftBtn || !rightBtn) return;
+
+    const maxScroll = Math.max(0, zone.scrollWidth - zone.clientWidth);
+    const canScroll = maxScroll > 4;
+    leftBtn.style.visibility = canScroll ? 'visible' : 'hidden';
+    rightBtn.style.visibility = canScroll ? 'visible' : 'hidden';
+    leftBtn.disabled = !canScroll || zone.scrollLeft <= 4;
+    rightBtn.disabled = !canScroll || zone.scrollLeft >= maxScroll - 4;
+}
+
+function ptBindHandScroller() {
+    const zone = document.getElementById('ptHandZone');
+    if (!zone) return;
+
+    if (zone.dataset.scrollBound !== '1') {
+        zone.dataset.scrollBound = '1';
+        zone.addEventListener('scroll', ptUpdateHandScrollButtons, { passive: true });
+        zone.addEventListener('wheel', function(event) {
+            if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+            if (zone.scrollWidth <= zone.clientWidth + 4) return;
+            event.preventDefault();
+            zone.scrollLeft += event.deltaY;
+        }, { passive: false });
+        window.addEventListener('resize', ptUpdateHandScrollButtons);
+    }
+
+    ptUpdateHandScrollButtons();
+}
+
+function ptScrollHand(direction) {
+    const zone = document.getElementById('ptHandZone');
+    if (!zone) return;
+    const firstCard = zone.querySelector('.pt-hand-wrapper');
+    const step = firstCard ? Math.max(90, firstCard.getBoundingClientRect().width * 2.4) : 180;
+    zone.scrollBy({ left: direction * step, behavior: 'smooth' });
+    setTimeout(ptUpdateHandScrollButtons, 220);
+}
+window.ptScrollHand = ptScrollHand;
 
 function ptSelectHandCard(index) {
     // Block opponent card selection in MP

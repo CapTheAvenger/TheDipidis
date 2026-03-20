@@ -264,7 +264,13 @@
         .pt-player-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 2; gap: 1vw; }
         .pt-side-panel { display: flex; gap: clamp(4px, 1vw, 8px); align-items: flex-end; width: clamp(100px, 16vw, 140px); flex-shrink: 0; }
 
-        .pt-hand-zone { background: rgba(0,0,0,0.9); border-top: 3px solid #3B4CCA; padding: 6px 15px; flex-shrink: 0; margin: 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); z-index: 100; display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px; gap: clamp(2px, 1vw, 10px); -webkit-overflow-scrolling: touch; }
+        .pt-hand-zone { background: transparent; border-top: none; padding: 4px 5px 6px 5px; margin: 0; display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 6px; min-height: 90px; align-items: flex-end; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .pt-hand-zone::-webkit-scrollbar { display: none; }
+        .pt-hand-scroll-shell { display:flex; align-items:center; gap:8px; width:100%; }
+        .pt-hand-scroll-viewport { flex:1; min-width:0; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; }
+        .pt-hand-scroll-btn { width: 34px; height: 72px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color:#fff; font-size:18px; font-weight:900; cursor:pointer; flex-shrink:0; transition: background .15s, opacity .15s, transform .15s; }
+        .pt-hand-scroll-btn:hover { background: rgba(255,255,255,0.18); transform: scale(1.03); }
+        .pt-hand-scroll-btn:disabled { opacity: 0.28; cursor: default; transform: none; }
         .pt-hand-wrapper { position: relative; display: inline-block; flex-shrink: 0; }
         .pt-hand-card { width: clamp(48px, 7vw, 62px); height: auto; aspect-ratio: 2.5 / 3.5; border-radius: 4px; cursor: pointer; display: block; transition: transform 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
         .pt-hand-card:hover { transform: translateY(-15px) scale(1.2); z-index: 5; position: relative; }
@@ -2640,7 +2646,13 @@
 
             </div>
 
-            <div id="ptHandZone" class="pt-dropzone" style="display:flex; justify-content: center; gap:6px; overflow-x:auto; padding: 4px 5px 6px 5px; min-height: 90px; align-items:flex-end;" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event, 'hand')"></div>
+            <div class="pt-hand-scroll-shell">
+                <button id="ptHandScrollLeft" class="pt-hand-scroll-btn" onclick="ptScrollHand(-1)" title="Hand nach links">❮</button>
+                <div class="pt-hand-scroll-viewport">
+                    <div id="ptHandZone" class="pt-dropzone pt-hand-zone" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event, 'hand')"></div>
+                </div>
+                <button id="ptHandScrollRight" class="pt-hand-scroll-btn" onclick="ptScrollHand(1)" title="Hand nach rechts">❯</button>
+            </div>
         </div>
 
     </div>

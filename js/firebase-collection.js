@@ -246,6 +246,7 @@ async function saveCurrentDeckToProfile(source) {
       folder: selectedFolder,
       source: source,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAtMs: Date.now(), // client-side fallback if serverTimestamp is pending
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
@@ -953,7 +954,7 @@ function updateDecksUI() {
       });
     }
     const safeFolderHtml = escapeHtml(deck.folder || '');
-    const createdStr = formatDate(deck.createdAt);
+    const createdStr = formatDate(deck.createdAt || deck.createdAtMs);
     const safeCreatedHtml = escapeHtml(createdStr);
     
     return `
@@ -1315,9 +1316,10 @@ function toggleDeckCollapse(deckId) {
 
 // Format date helper
 function formatDate(timestamp) {
-  if (!timestamp) return 'Unknown';
+  if (!timestamp) return '—';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  return date.toLocaleDateString('en-US', { 
+  if (isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString('de-DE', { 
     year: 'numeric', 
     month: 'short', 
     day: 'numeric' 

@@ -455,13 +455,21 @@ function updateCollectionUI(searchFilter = '') {
     window.userCollection.forEach(cardId => {
       // cardId format: "Card Name|SET|NUMBER"
       const [cardName, cardSet, cardNumber] = cardId.split('|');
+      if (!cardName || !cardSet || !cardNumber) return;
       
       // Find card in database
-      const card = allCards.find(c => 
+      let card = allCards.find(c => 
         c.name === cardName && 
         c.set === cardSet && 
         c.number === cardNumber
       );
+
+      // Fallback lookup via prebuilt set+number index (handles number normalization/padding differences)
+      if (!card && typeof window.getIndexedCardBySetNumber === 'function') {
+        card = window.getIndexedCardBySetNumber(cardSet, cardNumber)
+          || window.getIndexedCardBySetNumber(cardSet, String(parseInt(cardNumber, 10) || cardNumber))
+          || window.getIndexedCardBySetNumber(cardSet, String(cardNumber).padStart(3, '0'));
+      }
       
       if (card && card.image_url) {
         totalCards++;

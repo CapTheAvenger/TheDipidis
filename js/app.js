@@ -1679,6 +1679,14 @@ const BASE_PATH = './data/';
                     if (window.userDecks && window.userDecks.length > 0 && typeof updateDecksUI === 'function') {
                         updateDecksUI();
                     }
+
+                    // Collection/Wishlist can also load before card DB; re-render once card metadata is ready.
+                    if (typeof updateCollectionUI === 'function') {
+                        updateCollectionUI();
+                    }
+                    if (typeof updateWishlistUI === 'function') {
+                        updateWishlistUI();
+                    }
                 } else {
                     console.error('? Failed to load all_cards_merged.json');
                 }

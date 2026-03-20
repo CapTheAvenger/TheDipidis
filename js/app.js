@@ -899,47 +899,78 @@ const BASE_PATH = './data/';
                 return;
             }
 
-            popup.document.write(`
-                <!doctype html>
-                <html>
-                <head>
-                    <meta charset="utf-8">
-                    <title>Proxy Print</title>
-                    <style>
-                        @page { size: A4 portrait; margin: 8mm; }
-                        * { box-sizing: border-box; }
-                        body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
-                        .proxy-page { page-break-after: always; }
-                        .proxy-page:last-child { page-break-after: auto; }
-                        .proxy-grid { display: grid; grid-template-columns: repeat(3, 63mm); grid-auto-rows: 88mm; gap: 3mm; justify-content: center; }
-                        .proxy-slot { position: relative; width: 63mm; height: 88mm; }
-                        .proxy-card { position: absolute; inset: 0; overflow: hidden; border: 0.2mm solid rgba(0,0,0,0.35); border-radius: 1.8mm; background: #fff; }
-                        .proxy-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
-                        .cut { position: absolute; width: 4mm; height: 4mm; pointer-events: none; }
-                        .cut::before, .cut::after { content: ''; position: absolute; background: #000; }
-                        .cut::before { width: 4mm; height: 0.25mm; }
-                        .cut::after { width: 0.25mm; height: 4mm; }
-                        .cut-top-left { top: -1.6mm; left: -1.6mm; }
-                        .cut-top-left::before, .cut-top-left::after { top: 0; left: 0; }
-                        .cut-top-right { top: -1.6mm; right: -1.6mm; }
-                        .cut-top-right::before { top: 0; right: 0; }
-                        .cut-top-right::after { top: 0; right: 0; }
-                        .cut-bottom-left { bottom: -1.6mm; left: -1.6mm; }
-                        .cut-bottom-left::before { bottom: 0; left: 0; }
-                        .cut-bottom-left::after { bottom: 0; left: 0; }
-                        .cut-bottom-right { bottom: -1.6mm; right: -1.6mm; }
-                        .cut-bottom-right::before { bottom: 0; right: 0; }
-                        .cut-bottom-right::after { bottom: 0; right: 0; }
-                        footer { margin-top: 3mm; text-align: center; font-size: 7.5pt; color: #666; }
-                        @media print {
-                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                        }
-                    </style>
-                </head>
-                <body>${pageHtml}</body>
-                </html>
-            `);
-            popup.document.close();
+            const doc = popup.document;
+            doc.open();
+            doc.write('<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>');
+            doc.close();
+
+            const titleEl = doc.createElement('title');
+            titleEl.textContent = 'Proxy Print';
+            doc.head.appendChild(titleEl);
+
+            const style = doc.createElement('style');
+            style.textContent = [
+                '@page { size: A4 portrait; margin: 8mm; }',
+                '* { box-sizing: border-box; }',
+                'body { margin: 0; font-family: Arial, sans-serif; background: #fff; }',
+                '.proxy-page { page-break-after: always; }',
+                '.proxy-page:last-child { page-break-after: auto; }',
+                '.proxy-grid { display: grid; grid-template-columns: repeat(3, 63mm); grid-auto-rows: 88mm; gap: 3mm; justify-content: center; }',
+                '.proxy-slot { position: relative; width: 63mm; height: 88mm; }',
+                '.proxy-card { position: absolute; inset: 0; overflow: hidden; border: 0.2mm solid rgba(0,0,0,0.35); border-radius: 1.8mm; background: #fff; }',
+                '.proxy-card img { width: 100%; height: 100%; object-fit: cover; display: block; }',
+                '.cut { position: absolute; width: 4mm; height: 4mm; pointer-events: none; }',
+                '.cut::before, .cut::after { content: \'\'; position: absolute; background: #000; }',
+                '.cut::before { width: 4mm; height: 0.25mm; }',
+                '.cut::after { width: 0.25mm; height: 4mm; }',
+                '.cut-top-left { top: -1.6mm; left: -1.6mm; }',
+                '.cut-top-left::before, .cut-top-left::after { top: 0; left: 0; }',
+                '.cut-top-right { top: -1.6mm; right: -1.6mm; }',
+                '.cut-top-right::before { top: 0; right: 0; }',
+                '.cut-top-right::after { top: 0; right: 0; }',
+                '.cut-bottom-left { bottom: -1.6mm; left: -1.6mm; }',
+                '.cut-bottom-left::before { bottom: 0; left: 0; }',
+                '.cut-bottom-left::after { bottom: 0; left: 0; }',
+                '.cut-bottom-right { bottom: -1.6mm; right: -1.6mm; }',
+                '.cut-bottom-right::before { bottom: 0; right: 0; }',
+                '.cut-bottom-right::after { bottom: 0; right: 0; }',
+                'footer { margin-top: 3mm; text-align: center; font-size: 7.5pt; color: #666; }',
+                '@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }'
+            ].join('\n');
+            doc.head.appendChild(style);
+
+            pages.forEach((pageCards, pageIndex) => {
+                const section = doc.createElement('section');
+                section.className = 'proxy-page';
+                const grid = doc.createElement('div');
+                grid.className = 'proxy-grid';
+
+                pageCards.forEach(card => {
+                    const slot = doc.createElement('div');
+                    slot.className = 'proxy-slot';
+                    ['cut-top-left','cut-top-right','cut-bottom-left','cut-bottom-right'].forEach(cls => {
+                        const span = doc.createElement('span');
+                        span.className = 'cut ' + cls;
+                        slot.appendChild(span);
+                    });
+                    const cardDiv = doc.createElement('div');
+                    cardDiv.className = 'proxy-card';
+                    const img = doc.createElement('img');
+                    img.loading = 'lazy';
+                    img.src = getCardImageSource(card.name, card.set, card.number) || buildInlineCardPlaceholder(card.name);
+                    img.alt = '';
+                    cardDiv.appendChild(img);
+                    slot.appendChild(cardDiv);
+                    grid.appendChild(slot);
+                });
+
+                section.appendChild(grid);
+                const footer = doc.createElement('footer');
+                footer.textContent = `Page ${pageIndex + 1} / ${pages.length}`;
+                section.appendChild(footer);
+                doc.body.appendChild(section);
+            });
+
             popup.focus();
             popup.print();
         }

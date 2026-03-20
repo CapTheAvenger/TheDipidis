@@ -40,6 +40,7 @@ jobs:
           cp -r js _site/js
           cp -r images _site/images 2>/dev/null || true
           cp -r data _site/data
+          cp pokemon_sets_mapping.csv _site/ 2>/dev/null || true
           cp _config.yml _site/ 2>/dev/null || true
 
       - name: Setup Pages

@@ -1447,7 +1447,6 @@ function renderFolderNav() {
     return;
   }
   nav.style.display = 'flex';
-  const safeAll = '<button onclick="filterDecksByFolder(\\'\\')" style="padding: 6px 14px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">All</button>';
   nav.innerHTML = `<button onclick="filterDecksByFolder('')" style="padding: 6px 14px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">All</button>` +
     folders.map(f => {
       const safe = escapeHtml(f);

@@ -3,6 +3,11 @@
 Fix Missing URLs in all_cards_database.csv
 ==========================================
 Re-scrapes detail pages for cards that are missing image_url or rarity.
+
+DEPRECATION NOTICE:
+  This script still uses Selenium (headless Chrome). The main production
+  scrapers have been migrated to cloudscraper + BeautifulSoup.
+  Consider migrating this utility to cloudscraper as well.
 """
 
 import csv

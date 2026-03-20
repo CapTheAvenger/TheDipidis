@@ -10,6 +10,11 @@ Output: data/pokemon_sets_list.csv
 Run this whenever a new set is released to update the SET_ORDER mapping.
 
 OPTIMIZATION: Only re-scrapes full list if a new set is detected (2-3 sec vs 10-20 sec).
+
+DEPRECATION NOTICE:
+  This script still uses Selenium (headless Chrome). The main production
+  scrapers have been migrated to cloudscraper + BeautifulSoup.
+  Consider migrating this utility to cloudscraper as well.
 """
 
 import csv

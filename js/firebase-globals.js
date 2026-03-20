@@ -48,10 +48,8 @@ function onUserSignedIn(user) {
   window.userWishlist         = new Set();
   window.userDecks            = [];
 
-  loadUserProfile(user.uid);
-  loadUserCollection(user.uid);
+  loadUserData(user.uid);
   loadUserDecks(user.uid);
-  loadUserWishlist(user.uid);
 }
 
 function onUserSignedOut() {
@@ -73,24 +71,46 @@ function onUserSignedOut() {
 // Firestore data loaders
 // ---------------------------------------------------------------------------
 
-async function loadUserProfile(userId) {
+async function loadUserData(userId) {
   try {
     const doc = await window.db.collection('users').doc(userId).get();
     if (doc.exists) {
-      const profile = doc.data();
-      window.userProfile = profile;
-      if (typeof updateProfileUI === 'function') updateProfileUI(profile);
+      const data = doc.data();
+
+      // Profile
+      window.userProfile = data;
+      if (typeof updateProfileUI === 'function') updateProfileUI(data);
+
+      // Collection
+      window.userCollection = new Set(data.collection || []);
+      const counts = data.collectionCounts || {};
+      window.userCollectionCounts = new Map(Object.entries(counts));
+      window.userCollection.forEach(cardId => {
+        if (!window.userCollectionCounts.has(cardId)) {
+          window.userCollectionCounts.set(cardId, 1);
+        }
+      });
+      if (typeof updateCollectionUI === 'function') updateCollectionUI();
+
+      // Wishlist
+      window.userWishlist = new Set(data.wishlist || []);
+      if (typeof updateWishlistUI === 'function') updateWishlistUI();
     } else {
       await createUserProfile(userId);
     }
   } catch (error) {
-    console.error('Error loading profile:', error);
+    console.error('Error loading user data:', error);
     const user = window.auth.currentUser;
     if (user && typeof updateProfileUI === 'function') {
       updateProfileUI({ displayName: user.displayName || user.email || 'User', createdAt: null });
     }
   }
 }
+
+// Legacy wrappers kept for external callers
+async function loadUserProfile(userId) { return loadUserData(userId); }
+async function loadUserCollection(userId) { return loadUserData(userId); }
+async function loadUserWishlist(userId) { return loadUserData(userId); }
 
 async function createUserProfile(userId) {
   const user = window.auth.currentUser;
@@ -109,40 +129,6 @@ async function createUserProfile(userId) {
   }
   window.userProfile = newProfile;
   if (typeof updateProfileUI === 'function') updateProfileUI(newProfile);
-}
-
-async function loadUserCollection(userId) {
-  try {
-    const doc = await window.db.collection('users').doc(userId).get();
-    if (doc.exists) {
-      const data = doc.data();
-      window.userCollection = new Set(data.collection || []);
-      // Load counts (new field) — migrate from legacy Set if needed
-      const counts = data.collectionCounts || {};
-      window.userCollectionCounts = new Map(Object.entries(counts));
-      // Backfill: cards in Set but not in counts get count=1
-      window.userCollection.forEach(cardId => {
-        if (!window.userCollectionCounts.has(cardId)) {
-          window.userCollectionCounts.set(cardId, 1);
-        }
-      });
-      if (typeof updateCollectionUI === 'function') updateCollectionUI();
-    }
-  } catch (error) {
-    console.error('Error loading collection:', error);
-  }
-}
-
-async function loadUserWishlist(userId) {
-  try {
-    const doc = await window.db.collection('users').doc(userId).get();
-    if (doc.exists) {
-      window.userWishlist = new Set(doc.data().wishlist || []);
-      if (typeof updateWishlistUI === 'function') updateWishlistUI();
-    }
-  } catch (error) {
-    console.error('Error loading wishlist:', error);
-  }
 }
 
 async function loadUserDecks(userId) {

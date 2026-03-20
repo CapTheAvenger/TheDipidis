@@ -203,26 +203,48 @@ function clearComboTargets() {
 }
 
 function calculateComboChance(deck, targetCardNames) {
-    if (!targetCardNames || targetCardNames.length === 0) return 0;
+    if (!targetCardNames || targetCardNames.length === 0) return Promise.resolve(0);
 
+    // Use Web Worker if available to avoid blocking main thread
+    if (window.Worker) {
+        return new Promise((resolve) => {
+            const worker = new Worker('js/combo-worker.js');
+            worker.onmessage = function(e) {
+                resolve(e.data.chance);
+                worker.terminate();
+            };
+            worker.onerror = function() {
+                // Fallback to synchronous calculation
+                resolve(_calculateComboChanceSync(deck, targetCardNames));
+                worker.terminate();
+            };
+            worker.postMessage({
+                deck: deck.map(c => c.name),
+                targetCardNames: targetCardNames,
+                iterations: 10000
+            });
+        });
+    }
+
+    // Fallback for browsers without Web Worker support
+    return Promise.resolve(_calculateComboChanceSync(deck, targetCardNames));
+}
+
+function _calculateComboChanceSync(deck, targetCardNames) {
     const ITERATIONS = 10000;
     let successCount = 0;
 
     for (let i = 0; i < ITERATIONS; i++) {
-        // 1. Deck kopieren und mischen (Fisher-Yates)
         let simDeck = [...deck];
         for (let j = simDeck.length - 1; j > 0; j--) {
             const k = Math.floor(Math.random() * (j + 1));
             [simDeck[j], simDeck[k]] = [simDeck[k], simDeck[j]];
         }
 
-        // 2. 7 Starthandkarten ziehen
         let simHand = simDeck.slice(0, 7).map(c => c.name);
-
-        // 3. Prüfen, ob ALLE gewählten Ziel-Karten mindestens 1x in der Hand sind
-        let hasAllTargets = targetCardNames.every(target => simHand.includes(target));
-
-        if (hasAllTargets) successCount++;
+        if (targetCardNames.every(target => simHand.includes(target))) {
+            successCount++;
+        }
     }
 
     return ((successCount / ITERATIONS) * 100).toFixed(1);
@@ -237,13 +259,11 @@ function runComboCalculation() {
     const display = document.getElementById('comboResultDisplay');
     if (display) display.textContent = '⏳ Berechne...';
 
-    // Use setTimeout to let the UI update before heavy computation
-    setTimeout(() => {
-        const chance = calculateComboChance(_simulatorDeck, _comboTargets);
+    calculateComboChance(_simulatorDeck, _comboTargets).then(chance => {
         if (display) {
             const color = chance >= 50 ? '#2ecc71' : chance >= 25 ? '#f39c12' : '#e74c3c';
             display.style.color = color;
             display.textContent = `${chance}% Chance`;
         }
-    }, 50);
+    });
 }

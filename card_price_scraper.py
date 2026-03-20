@@ -32,6 +32,9 @@ from card_scraper_shared import setup_console_encoding, get_app_path, get_data_d
 
 setup_console_encoding()
 
+# Shared rate limiter: only 1 request at a time across all worker threads
+_request_semaphore = threading.Semaphore(1)
+
 # LOGGING
 data_dir = get_data_dir()
 os.makedirs(data_dir, exist_ok=True)
@@ -219,52 +222,53 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
     eur_price = ""
     cm_url   = card.get("cardmarket_url", "")
 
-    # Anti-ban: randomised delay so requests look human
-    time.sleep(base_delay + random.uniform(0.1, 0.8))
+    # Anti-ban: serialize requests through semaphore + randomised delay
+    with _request_semaphore:
+        time.sleep(base_delay + random.uniform(0.1, 0.8))
 
-    # Strategy 1: Cardmarket (direct 7-day average)
-    if cm_url:
-        try:
-            resp = scraper.get(cm_url, timeout=20)
-            if resp.status_code == 200:
-                eur_price = _parse_cardmarket_price(resp.text, card_id)
-            elif resp.status_code == 403:
-                logger.warning(f"  ! Cloudflare 403 bei CM [{card_id}] — versuche Limitless")
-            else:
-                logger.debug(f"  CM HTTP {resp.status_code} fuer {card_id}")
-        except Exception as e:
-            logger.debug(f"  CM Fehler fuer {card_id}: {e}")
+        # Strategy 1: Cardmarket (direct 7-day average)
+        if cm_url:
+            try:
+                resp = scraper.get(cm_url, timeout=20)
+                if resp.status_code == 200:
+                    eur_price = _parse_cardmarket_price(resp.text, card_id)
+                elif resp.status_code == 403:
+                    logger.warning(f"  ! Cloudflare 403 bei CM [{card_id}] — versuche Limitless")
+                else:
+                    logger.debug(f"  CM HTTP {resp.status_code} fuer {card_id}")
+            except Exception as e:
+                logger.debug(f"  CM Fehler fuer {card_id}: {e}")
 
-    # Strategy 2: Limitless TCG fallback (also refreshes CM URL if missing)
-    if not eur_price:
-        try:
-            if card.get("card_url"):
-                lt_url = (
-                    f"https://limitlesstcg.com{card['card_url']}"
-                    if card["card_url"].startswith("/")
-                    else card["card_url"]
-                )
-            else:
-                lt_url = f"https://limitlesstcg.com/cards/{card['set']}/{card['number']}"
+        # Strategy 2: Limitless TCG fallback (also refreshes CM URL if missing)
+        if not eur_price:
+            try:
+                if card.get("card_url"):
+                    lt_url = (
+                        f"https://limitlesstcg.com{card['card_url']}"
+                        if card["card_url"].startswith("/")
+                        else card["card_url"]
+                    )
+                else:
+                    lt_url = f"https://limitlesstcg.com/cards/{card['set']}/{card['number']}"
 
-            resp = scraper.get(lt_url, timeout=15)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, "html.parser")
-                table = soup.select_one("table.card-prints-versions")
-                if table:
-                    # ROBUST: Vermeidet BeautifulSoup tbody-Verschluck-Bug
-                    for row in [tr for tr in table.select("tr") if tr.find("td")]:
-                        if "current" in row.get("class", []):
-                            eur_link = row.select_one("a.card-price.eur")
-                            if eur_link:
-                                eur_price = eur_link.get_text(strip=True)
-                                # Update CM URL if we didn't have it or want to refresh
-                                if not cm_url and eur_link.has_attr("href"):
-                                    cm_url = eur_link["href"]
-                                logger.info(f"  + LT fallback [{card_id}]: {eur_price}")
-                                break
-        except Exception as e:
-            logger.debug(f"  LT Fallback Fehler fuer {card_id}: {e}")
+                resp = scraper.get(lt_url, timeout=15)
+                if resp.status_code == 200:
+                    soup = BeautifulSoup(resp.text, "html.parser")
+                    table = soup.select_one("table.card-prints-versions")
+                    if table:
+                        # ROBUST: Vermeidet BeautifulSoup tbody-Verschluck-Bug
+                        for row in [tr for tr in table.select("tr") if tr.find("td")]:
+                            if "current" in row.get("class", []):
+                                eur_link = row.select_one("a.card-price.eur")
+                                if eur_link:
+                                    eur_price = eur_link.get_text(strip=True)
+                                    # Update CM URL if we didn't have it or want to refresh
+                                    if not cm_url and eur_link.has_attr("href"):
+                                        cm_url = eur_link["href"]
+                                    logger.info(f"  + LT fallback [{card_id}]: {eur_price}")
+                                    break
+            except Exception as e:
+                logger.debug(f"  LT Fallback Fehler fuer {card_id}: {e}")
 
     if not eur_price:
         logger.debug(f"  x Kein Preis gefunden [{card_id}]")

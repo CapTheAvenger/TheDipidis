@@ -424,29 +424,33 @@ async function syncStateToFirebase(actionDescription = '') {
     try {
         const now = Date.now();
         if (now - mpLastSyncTime < MP_SYNC_DEBOUNCE) {
-            // Zu schnell, überspringe
             return;
         }
 
         mpLastSyncTime = now;
 
         const db = firebase.firestore();
-        
+        const gameRef = db.collection('games').doc(mpGameId);
         const shrunkenState = compressStateForFirebase(ptState);
 
-        // Update Firestore mit komprimiertem State
-        await db.collection('games').doc(mpGameId).update({
-            state: shrunkenState,
-            lastAction: firebase.firestore.FieldValue.serverTimestamp(),
-            lastActionDescription: actionDescription,
-            lastActionBy: mpRole
+        // Use transaction to prevent concurrent overwrites between players
+        await db.runTransaction(async (transaction) => {
+            const snap = await transaction.get(gameRef);
+            if (!snap.exists) return;
+            const version = (snap.data()._syncVersion || 0) + 1;
+            transaction.update(gameRef, {
+                state: shrunkenState,
+                _syncVersion: version,
+                lastAction: firebase.firestore.FieldValue.serverTimestamp(),
+                lastActionDescription: actionDescription,
+                lastActionBy: mpRole
+            });
         });
 
         console.log(`[Multiplayer] State synced: ${actionDescription}`);
 
     } catch (error) {
         console.error('[Multiplayer] Sync error:', error);
-        // Silent fail - kein Alert, um Spielfluss nicht zu unterbrechen
     }
 }
 

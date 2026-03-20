@@ -6,7 +6,7 @@
 
 const CARD_BACK_URL = "https://images.pokemontcg.io/card-back.png";
 
-let ptState = { p1: null, p2: null, stadium: [], playZone: [] };
+let ptState = { p1: null, p2: null, stadium: [], stadiumPlayedBy: null, playZone: [] };
 let ptCurrentPlayer = 'p1';
 let ptSelectedCardIndex = null;
 let ptActionLog = [];
@@ -137,6 +137,7 @@ function openPlaytester(source) {
     ptState.p1 = getInitialPlayerState();
     ptState.p2 = getInitialPlayerState();
     ptState.stadium  = [];
+    ptState.stadiumPlayedBy = null;
     ptState.playZone = [];
     ptCurrentPlayer  = 'p1';
     ptActionLog      = [];
@@ -374,6 +375,7 @@ function startStandalonePlaytester() {
     ptState.p1   = getInitialPlayerState();
     ptState.p2   = getInitialPlayerState();
     ptState.stadium  = [];
+    ptState.stadiumPlayedBy = null;
     ptState.playZone = [];
     ptActionLog      = [];
     ptCurrentPlayer  = 'p1';
@@ -464,6 +466,7 @@ function ptNewGame() {
     });
 
     ptState.stadium  = [];
+    ptState.stadiumPlayedBy = null;
     ptState.playZone = [];
     ptCurrentPlayer  = 'p1';
     ptActionLog      = [];
@@ -1426,7 +1429,64 @@ function ptPassTurn() {
     }
     ptLog('Turn ended.');
     ptFlipBoard();
-    ptDraw1();
+    // After turn flip: if new active player has no active Pokémon but has bench,
+    // they must promote one BEFORE drawing.
+    const newP = ptCurrentPlayer;
+    const noActive = ptState[newP].field.active.length === 0;
+    const hasBench  = ['bench0','bench1','bench2','bench3','bench4'].some(b => ptState[newP].field[b].length > 0);
+    if (noActive && hasBench) {
+        ptOpenPromoteModal(newP); // ptDraw1 is deferred to ptPromoteBench
+    } else {
+        ptDraw1();
+    }
+}
+
+function ptOpenPromoteModal(player) {
+    const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
+    const occupied   = benchZones.filter(b => ptState[player].field[b].length > 0);
+    if (occupied.length === 0) { ptDraw1(player); return; }
+    const _tp = (cards) => [...cards].reverse().find(c => { const ct = (c.cardType||'').toLowerCase(); return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer'); }) || cards[0];
+    let html = `<div style="background:#1a1a2e;border:2px solid #E3350D;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:520px;">
+        <h3 style="color:#E3350D;margin-top:0;">⭐ Neues Aktives Pokémon wählen</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:4px;">Dein Aktives Pokémon wurde besiegt! Wähle ein Bankpokémon.</p>
+        <p style="color:#f1c40f;font-size:11px;margin-bottom:16px;"><em>Du ziehst erst NACH der Wahl eine Karte.</em></p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
+    occupied.forEach(zoneId => {
+        const cards   = ptState[player].field[zoneId];
+        const topPoke = _tp(cards);
+        html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;"
+                      onclick="ptPromoteBench('${player}','${zoneId}')"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${topPoke.imageUrl||CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #E3350D;box-shadow:0 0 12px rgba(227,53,13,0.5);" onerror="this.src='${CARD_BACK_URL}'" title="${topPoke.name}">
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${topPoke.name}</div>
+        </div>`;
+    });
+    html += `</div></div>`;
+    let modal = document.getElementById('ptPromoteModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptPromoteModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.style.display = 'flex';
+    ptLog(`⭐ ${player.toUpperCase()} muss neues Aktives Pokémon wählen!`);
+}
+
+function ptPromoteBench(player, benchZone) {
+    ptState[player].field.active      = [...ptState[player].field[benchZone]];
+    ptState[player].damage.active     = ptState[player].damage[benchZone] || 0;
+    ptState[player].field[benchZone]  = [];
+    ptState[player].damage[benchZone] = 0;
+    ptState[player].status = [];
+    const _tp = (cards) => [...cards].reverse().find(c => { const ct = (c.cardType||'').toLowerCase(); return !ct.includes('energy') && ct !== 'tool'; }) || cards[0];
+    const topCard = _tp(ptState[player].field.active);
+    ptLog(`⭐ ${player.toUpperCase()}: ${topCard ? topCard.name : '?'} → Aktives Pokémon!`);
+    const modal = document.getElementById('ptPromoteModal');
+    if (modal) modal.style.display = 'none';
+    ptRenderAll();
+    ptDraw1(player); // Draw AFTER promotion
 }
 
 function ptOpenAttackView() {
@@ -1590,6 +1650,13 @@ function ptClickZone(player, zoneId) {
     const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
     const wasAttachAction = (window.pendingAttachAction === true) || ptIsAttachSelection(ptCurrentPlayer);
 
+    // Helper: show last Pokémon in a zone stack (skip energy/tools)
+    const _topCard = (cards) =>
+        [...cards].reverse().find(c => {
+            const ct = (c.cardType || '').toLowerCase();
+            return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer');
+        }) || cards[cards.length - 1];
+
     // MP safety: block playing cards as the opponent
     if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole && ptSelectedCardIndex !== null) return;
 
@@ -1597,8 +1664,8 @@ function ptClickZone(player, zoneId) {
     if (player === opp) {
         const cards = ptState[player].field[zoneId];
         if (cards && cards.length > 0) {
-            // Zoom the top card first
-            const c = cards[cards.length - 1];
+            // Zoom the top Pokémon card (not energy/tool)
+            const c = _topCard(cards);
             ptViewCard(c.imageUrl || CARD_BACK_URL, c.name || '');
             // Open opponent panel focused on field/this zone
             ptOpenOpponentPanel('field', zoneId);
@@ -1612,7 +1679,9 @@ function ptClickZone(player, zoneId) {
                     : (zoneId === 'playzone') ? ptState.playZone
                     : ptState[player].field[zoneId];
         if (cards && cards.length > 0) {
-            const c = cards[cards.length - 1];
+            const c = (zoneId === 'active' || zoneId.startsWith('bench'))
+                ? _topCard(cards)
+                : cards[cards.length - 1];
             ptViewCard(c.imageUrl || CARD_BACK_URL, c.name || '');
         }
         return;
@@ -1657,9 +1726,13 @@ function ptClickZone(player, zoneId) {
         ptState.playZone.push(card);
         ptLog(`Played Item/Supporter: "${card.name}".`);
     } else if (zoneId === 'stadium') {
-        if (ptState.stadium.length > 0) ptState[ptCurrentPlayer].discard.push(ptState.stadium.pop());
+        if (ptState.stadium.length > 0) {
+            const stadiumOwner = ptState.stadiumPlayedBy || ptCurrentPlayer;
+            ptState[stadiumOwner].discard.push(ptState.stadium.pop());
+        }
         ptState.stadium.push(card);
-        ptLog(`Played Stadium: "${card.name}".`);
+        ptState.stadiumPlayedBy = ptCurrentPlayer;
+        ptLog(`Played Stadium: "${card.name}" (${ptCurrentPlayer.toUpperCase()}).`);
     } else {
         ptState[player].field[zoneId].push(card);
         ptLog(`Placed "${card.name}" on ${player} ${zoneId}.`);
@@ -2096,6 +2169,17 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
             const attachedHTML = cards.slice(1).map(ac => {
                 const ai = (ac.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
                 return `<img src="${ai}" style="width:38px;border-radius:4px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${ai}','${ac.name}')" title="${ac.name}">`;
+            }).join(''); // legacy — superseded below
+            // Energy & tool cards with ×-remove buttons
+            const attachedWithIdx = cards
+                .map((ac, idx) => ({ ac, idx }))
+                .filter(({ ac }) => { const ct = (ac.cardType||'').toLowerCase(); return ct.includes('energy') || ct === 'tool' || (ct.includes('trainer') && ct !== 'supporter' && ct !== 'item' && ct !== 'stadium'); });
+            const attachedRemovableHTML = attachedWithIdx.map(({ ac, idx }) => {
+                const ai = (ac.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
+                return `<div style="position:relative;display:inline-block;" title="${ac.name}">
+                    <img src="${ai}" style="width:38px;border-radius:4px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${ai}','${ac.name}')">
+                    <button onclick="ptOppRemoveAttached('${opp}','${zoneId}',${idx})" style="position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#e74c3c;color:#fff;font-size:10px;line-height:15px;text-align:center;border:none;cursor:pointer;padding:0;z-index:10;" title="Entfernen">×</button>
+                </div>`;
             }).join('');
             html += `<div style="background:${isFocus ? 'rgba(231,76,60,0.18)' : 'rgba(255,255,255,0.05)'};border:${isFocus ? '2px solid #e74c3c' : '1px solid rgba(255,255,255,0.08)'};border-radius:10px;padding:12px;margin-bottom:10px;">
                 <div style="font-weight:700;font-size:11px;color:#FFCB05;margin-bottom:8px;">${label}</div>
@@ -2119,7 +2203,7 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
                             <button onclick="ptOppDiscardZone('${opp}','${zoneId}')" style="background:#7d3c98;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="Zone → Discard">🗑️ KO / Discard</button>
                             ${zoneId !== 'active' ? `<button onclick="ptOppSetActive('${opp}','${zoneId}')" style="background:#1a5276;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="Als Active setzen">⭐ Active setzen</button>` : ''}
                         </div>
-                        ${attachedHTML ? `<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;">${attachedHTML}</div>` : ''}
+                        ${attachedRemovableHTML ? `<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.06);"><span style="font-size:9px;color:#aaa;margin-right:2px;">⚡🔧</span>${attachedRemovableHTML}</div>` : ''}
                     </div>
                 </div>
             </div>`;
@@ -2276,6 +2360,12 @@ function ptOppDiscardZone(opp, zoneId) {
     const cards = ptState[opp].field[zoneId];
     if (!cards || cards.length === 0) return;
     const count = cards.length;
+    const knockedOutPokemon = zoneId === 'active'
+        ? ([...cards].reverse().find(c => {
+            const ct = (c.cardType || '').toLowerCase();
+            return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer');
+        }) || cards[0])
+        : null;
     // Move all cards in zone to opp discard
     while (cards.length > 0) {
         const c = cards.shift();
@@ -2285,6 +2375,11 @@ function ptOppDiscardZone(opp, zoneId) {
     ptLog(`🗑️ ${zoneId} (${opp}) → Discard (${count} Karten).`);
     ptRenderAll();
     ptRenderOpponentPanel(opp, 'field');
+    // KO: when active Pokémon is knocked out, prompt current player to take a prize
+    if (zoneId === 'active' && ptState[ptCurrentPlayer].prizes.length > 0) {
+        const prizeCount = ptGetPrizeCountForKnockout(knockedOutPokemon);
+        setTimeout(() => ptOpenPrizePicker(ptCurrentPlayer, prizeCount), 200);
+    }
 }
 
 function ptOppSetActive(opp, zoneId) {
@@ -2302,6 +2397,16 @@ function ptOppSetActive(opp, zoneId) {
     ptLog(`🔄 ${opp}: ${zoneId} wird neues Active-Pokémon.`);
     ptRenderAll();
     ptRenderOpponentPanel(opp, 'field');
+}
+
+function ptOppRemoveAttached(opp, zoneId, cardIndex) {
+    const cards = ptState[opp].field[zoneId];
+    if (!cards || cardIndex < 0 || cardIndex >= cards.length) return;
+    const removed = cards.splice(cardIndex, 1)[0];
+    ptState[opp].discard.push(removed);
+    ptLog(`🗑️ ${removed.name} von ${opp.toUpperCase()} ${zoneId} entfernt → Discard.`);
+    ptRenderAll();
+    ptRefreshOpponentField(opp);
 }
 
 function ptRouteFromDiscard(player, index, destination) {
@@ -2535,10 +2640,67 @@ function ptDiscardFromHand(index, event) {
 }
 
 function ptTakePrize(player, index) {
+    // Open the prize picker modal for a proper face-down selection
+    ptOpenPrizePicker(player, 1);
+}
+
+function ptGetPrizeCountForKnockout(card) {
+    const name = (card?.name || '').toLowerCase();
+    const type = (card?.cardType || card?.supertype || '').toLowerCase();
+    const haystack = `${name} ${type}`;
+    if (haystack.includes('tag team')) return 3;
+    if (haystack.includes('vmax') || haystack.includes('v-star') || haystack.includes('vstar')) return 3;
+    if (/\bex\b/.test(haystack) || /\bv\b/.test(haystack) || /\bgx\b/.test(haystack)) return 2;
+    return 1;
+}
+
+function ptOpenPrizePicker(player, remainingPicks = 1) {
+    const prizes = ptState[player].prizes;
+    if (!prizes || prizes.length === 0) { ptShowMessage('Keine Preiskarten mehr!'); return; }
+    remainingPicks = Math.max(1, Math.min(remainingPicks, prizes.length));
+    let html = `<div style="background:#1a1a2e;border:2px solid #FFCB05;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:440px;">
+        <h3 style="color:#FFCB05;margin-top:0;">🏆 Preiskarte nehmen</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle ${remainingPicks} Preiskarte${remainingPicks === 1 ? '' : 'n'} (${prizes.length} verbleiben)</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:18px;">`;
+    prizes.forEach((_, i) => {
+        html += `<div style="cursor:pointer;transition:transform .15s;" onclick="ptPickPrizeCard('${player}',${i})"
+                      onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${CARD_BACK_URL}" style="width:72px;border-radius:8px;border:2px solid #FFCB05;box-shadow:0 0 10px rgba(255,203,5,0.4);" title="Preiskarte ${i+1} nehmen">
+        </div>`;
+    });
+    html += `</div>
+        <button onclick="document.getElementById('ptPrizePickerModal').style.display='none'"
+                style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid #555;border-radius:6px;padding:6px 18px;cursor:pointer;font-size:12px;">✕ Schließen</button>
+    </div>`;
+    let modal = document.getElementById('ptPrizePickerModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptPrizePickerModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:99999;';
+        document.body.appendChild(modal);
+    }
+    modal.dataset.player = player;
+    modal.dataset.remainingPicks = String(remainingPicks);
+    modal.innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function ptPickPrizeCard(player, index) {
     const card = ptState[player].prizes.splice(index, 1)[0];
+    if (!card) return;
     ptState[ptCurrentPlayer].hand.push(card);
-    ptLog('Took a prize card.');
+    const modal = document.getElementById('ptPrizePickerModal');
+    const remainingPicks = Math.max(0, (parseInt(modal?.dataset.remainingPicks || '1', 10) || 1) - 1);
+    ptLog(`🏆 Preiskarte genommen: "${card.name}". Noch ${ptState[player].prizes.length} übrig.`);
+    if (modal) {
+        if (remainingPicks > 0 && ptState[player].prizes.length > 0) {
+            ptOpenPrizePicker(player, remainingPicks);
+        } else {
+            modal.style.display = 'none';
+        }
+    }
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Took prize: ' + card.name);
 }
 
 // --- NEUTRAL ZONE RENDER ---
@@ -2563,6 +2725,7 @@ function generateNeutralZone(zoneId, labelText, width = 82) {
              ondblclick="ptViewCard(event,'${safeImg}')"
              oncontextmenu="event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${safeName}')"
              title="${card.name} (right-click to zoom)">
+        ${zoneId === 'stadium' && ptState.stadiumPlayedBy ? `<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:${ptState.stadiumPlayedBy==='p1'?'#3B4CCA':'#E3350D'};color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:4px;white-space:nowrap;z-index:50;">${ptState.stadiumPlayedBy==='p1'?'🔵 P1':'🔴 P2'}</div>` : ''}
         <div class="pt-field-actions" style="z-index:100;bottom:-28px;">
             <button class="pt-action-btn" onclick="returnToHand('${ptCurrentPlayer}','${zoneId}',event)">⬆️</button>
             <button class="pt-action-btn" onclick="moveToLostZone('${ptCurrentPlayer}','${zoneId}',event)">🌌</button>
@@ -2768,6 +2931,8 @@ function ptMenuAction(type, value) {
         if      (value === 'hand')    returnToHand(player, zoneId, null);
         else if (value === 'deck')    ptShuffleIntoDeck(player, zoneId);
         else if (value === 'discard') discardTopCard(player, zoneId, null);
+        else if (value === 'retreat' && zoneId !== 'active') ptSwapZones(player, zoneId, null);
+        else if (value === 'retreat') ptShowMessage('↩️ Wähle ein Bankpokémon für den Retreat!');
     }
 }
 

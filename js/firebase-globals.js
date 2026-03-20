@@ -19,6 +19,7 @@ if (!window.userDecks)            window.userDecks            = [];
 if (!window.userCollection)       window.userCollection       = new Set();
 if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
 if (!window.userWishlist)         window.userWishlist         = new Set();
+if (!window.deckFolders)          window.deckFolders          = [];
 
 // ---------------------------------------------------------------------------
 // Auth state handlers
@@ -79,6 +80,7 @@ async function loadUserData(userId) {
 
       // Profile
       window.userProfile = data;
+      window.deckFolders = Array.isArray(data.deckFolders) ? data.deckFolders.filter(Boolean) : [];
       if (typeof updateProfileUI === 'function') updateProfileUI(data);
 
       // Collection
@@ -120,6 +122,7 @@ async function createUserProfile(userId) {
     collection: [],
     decks: [],
     wishlist: [],
+    deckFolders: [],
     settings: { currency: 'EUR', language: 'en' }
   };
   try {
@@ -148,4 +151,5 @@ function clearUserData() {
   window.userCollectionCounts = new Map();
   window.userWishlist         = new Set();
   window.userDecks            = [];
+  window.deckFolders          = [];
 }

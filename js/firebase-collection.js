@@ -216,6 +216,16 @@ async function saveCurrentDeckToProfile(source) {
   if (!deckName || deckName.trim() === '') {
     return; // User cancelled
   }
+
+  const selectedFolder = await chooseDeckFolderWithCreate({
+    title: 'Save Deck Folder',
+    currentFolder: '',
+    includeNoFolder: true
+  });
+
+  if (selectedFolder === null) {
+    return; // User cancelled folder selection
+  }
   
   // Check for duplicate deck name
   const trimmedName = deckName.trim();
@@ -233,6 +243,7 @@ async function saveCurrentDeckToProfile(source) {
       archetype: archetype || 'Custom',
       cards: deck, // Exact prints: "CardName (SET NUMBER)" format
       totalCards: totalCards,
+      folder: selectedFolder,
       source: source,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -958,6 +969,9 @@ function updateDecksUI() {
             </div>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="event.stopPropagation(); toggleDeckCollapse('${deckId}')" style="padding: 6px 12px; background: rgba(52, 73, 94, 0.92); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.85em; transition: all 0.2s;" onmouseover="this.style.background='#2c3e50'" onmouseout="this.style.background='rgba(52, 73, 94, 0.92)'" title="Expand/Collapse deck">
+              ▼
+            </button>
             <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(155, 89, 182, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='rgba(155, 89, 182, 0.9)'" title="Compare with another deck">
               ⚖️
             </button>
@@ -974,6 +988,9 @@ function updateDecksUI() {
           </div>
         </div>
         <div id="${deckId}" style="display: none; padding: 15px; background: #f8f9fa;">
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <button onclick="openCompareSavedDeck(${deckIndex})" style="padding: 6px 12px; background: #8e44ad; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.85em;" title="Compare this deck">⚖️ Compare</button>
+          </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
             ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
           </div>
@@ -1374,10 +1391,161 @@ function filterMyDecks() {
 // Folder data stored as a field on each deck doc in Firestore
 window.deckFolders = window.deckFolders || []; // derived from userDecks
 
+async function showDeckFolderSelectModal(options = {}) {
+  const {
+    title = 'Choose Folder',
+    folders = [],
+    currentFolder = '',
+    includeNoFolder = true,
+    includeCreateNew = true
+  } = options;
+
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);';
+
+    const modal = document.createElement('div');
+    modal.style.cssText = 'background:#1a1a2e;border-radius:14px;max-width:460px;width:92%;padding:24px;box-shadow:0 16px 48px rgba(0,0,0,0.5);color:#eee;font-family:inherit';
+
+    const titleEl = document.createElement('h3');
+    titleEl.style.cssText = 'margin:0 0 12px;font-size:1.1em;color:#fff';
+    titleEl.textContent = title;
+    modal.appendChild(titleEl);
+
+    const msg = document.createElement('p');
+    msg.style.cssText = 'margin:0 0 14px;font-size:0.9em;color:#bbb;line-height:1.5';
+    msg.textContent = 'Select a folder for this deck.';
+    modal.appendChild(msg);
+
+    const select = document.createElement('select');
+    select.style.cssText = 'width:100%;padding:10px;border:1px solid #444;border-radius:8px;background:#16213e;color:#fff;font-size:0.95em;box-sizing:border-box';
+
+    if (includeNoFolder) {
+      const noFolderOption = document.createElement('option');
+      noFolderOption.value = '__NO_FOLDER__';
+      noFolderOption.textContent = '(No Folder)';
+      select.appendChild(noFolderOption);
+    }
+
+    folders.forEach(folder => {
+      const option = document.createElement('option');
+      option.value = folder;
+      option.textContent = `📁 ${folder}`;
+      select.appendChild(option);
+    });
+
+    if (includeCreateNew) {
+      const createOption = document.createElement('option');
+      createOption.value = '__NEW_FOLDER__';
+      createOption.textContent = '+ Create New Folder';
+      select.appendChild(createOption);
+    }
+
+    if (currentFolder && folders.includes(currentFolder)) {
+      select.value = currentFolder;
+    } else if (includeNoFolder) {
+      select.value = '__NO_FOLDER__';
+    }
+
+    modal.appendChild(select);
+
+    const btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;margin-top:16px';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.cssText = 'padding:8px 20px;border:1px solid #555;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;font-size:0.9em';
+
+    const okBtn = document.createElement('button');
+    okBtn.textContent = 'OK';
+    okBtn.style.cssText = 'padding:8px 20px;border:none;border-radius:8px;background:#667eea;color:#fff;cursor:pointer;font-size:0.9em;font-weight:600';
+
+    function close(value) {
+      overlay.remove();
+      resolve(value);
+    }
+
+    cancelBtn.onclick = () => close(null);
+    okBtn.onclick = () => close(select.value);
+    overlay.onclick = e => { if (e.target === overlay) close(null); };
+    select.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        close(select.value);
+      }
+      if (e.key === 'Escape') {
+        close(null);
+      }
+    });
+
+    btnRow.appendChild(cancelBtn);
+    btnRow.appendChild(okBtn);
+    modal.appendChild(btnRow);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(() => select.focus(), 50);
+  });
+}
+
+async function chooseDeckFolderWithCreate(options = {}) {
+  const folders = getDeckFolders();
+  const selected = await showDeckFolderSelectModal({
+    title: options.title || 'Choose Folder',
+    folders,
+    currentFolder: options.currentFolder || '',
+    includeNoFolder: options.includeNoFolder !== false,
+    includeCreateNew: true
+  });
+
+  if (selected === null) {
+    return null;
+  }
+
+  if (selected === '__NO_FOLDER__') {
+    return '';
+  }
+
+  if (selected === '__NEW_FOLDER__') {
+    const newFolderName = await showInputModal({ title: 'New Folder', message: 'Enter folder name:', placeholder: 'Folder name' });
+    if (!newFolderName || !newFolderName.trim()) {
+      return null;
+    }
+    const trimmed = newFolderName.trim();
+    await persistDeckFolderName(trimmed);
+    return trimmed;
+  }
+
+  return selected;
+}
+
+async function persistDeckFolderName(folderName) {
+  const user = auth.currentUser;
+  if (!user || !folderName) return;
+
+  const trimmed = String(folderName).trim();
+  if (!trimmed) return;
+
+  try {
+    await db.collection('users').doc(user.uid).set({
+      deckFolders: firebase.firestore.FieldValue.arrayUnion(trimmed),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    if (!window.deckFolders) window.deckFolders = [];
+    if (!window.deckFolders.includes(trimmed)) {
+      window.deckFolders.push(trimmed);
+      window.deckFolders.sort((a, b) => a.localeCompare(b));
+    }
+  } catch (error) {
+    console.error('Error persisting deck folder:', error);
+  }
+}
+
 function getDeckFolders() {
-  if (!window.userDecks) return [];
+  if (!window.userDecks && !window.deckFolders) return [];
   const folders = new Set();
-  window.userDecks.forEach(d => { if (d.folder) folders.add(d.folder); });
+  (window.userDecks || []).forEach(d => { if (d.folder) folders.add(d.folder); });
+  (window.deckFolders || []).forEach(f => { if (f) folders.add(f); });
   return Array.from(folders).sort();
 }
 
@@ -1390,6 +1558,7 @@ async function createDeckFolder() {
     showNotification('Folder already exists', 'error');
     return;
   }
+  await persistDeckFolderName(trimmed);
   showNotification(`Folder "${trimmed}" created. Use the 📁 button on a deck to move it.`, 'success');
   renderFolderNav();
 }
@@ -1400,28 +1569,13 @@ async function moveDeckToFolder(deckIndex) {
   const user = auth.currentUser;
   if (!user) return;
   
-  const folders = getDeckFolders();
-  const options = ['(No Folder)', ...folders, '+ New Folder'];
-  const choice = await showInputModal({
+  const folder = await chooseDeckFolderWithCreate({
     title: 'Move to Folder',
-    message: options.map((f, i) => `${i}: ${f}`).join('\n') + '\n\nEnter number:',
-    defaultValue: deck.folder ? String(folders.indexOf(deck.folder) + 1) : '0'
+    currentFolder: deck.folder || '',
+    includeNoFolder: true
   });
-  if (choice === null) return;
-  
-  let folder = '';
-  const idx = parseInt(choice);
-  if (isNaN(idx) || idx < 0 || idx >= options.length) return;
-  
-  if (idx === 0) {
-    folder = '';
-  } else if (idx === options.length - 1) {
-    const newFolder = await showInputModal({ title: 'New Folder', message: 'Enter folder name:', placeholder: 'Folder name' });
-    if (!newFolder || !newFolder.trim()) return;
-    folder = newFolder.trim();
-  } else {
-    folder = folders[idx - 1];
-  }
+
+  if (folder === null) return;
   
   try {
     await db.collection('users').doc(user.uid)
@@ -1564,3 +1718,13 @@ function showDeckComparison(deckA, deckB) {
   
   document.body.appendChild(modal);
 }
+
+// Ensure inline onclick handlers can resolve functions consistently
+window.toggleDeckCollapse = toggleDeckCollapse;
+window.createDeckFolder = createDeckFolder;
+window.moveDeckToFolder = moveDeckToFolder;
+window.renderFolderNav = renderFolderNav;
+window.filterDecksByFolder = filterDecksByFolder;
+window.openCompareSavedDeck = openCompareSavedDeck;
+window.filterMyDecks = filterMyDecks;
+window.saveCurrentDeckToProfile = saveCurrentDeckToProfile;

@@ -2176,12 +2176,13 @@ function dexImportParseCSV(csvText) {
     const DEX_SET_NAME_MAP = {
       // Scarlet & Violet era
       'scarletviolet': 'SVI', 'scarletvioletenergy': 'SVE', 'scarletvioletpromos': 'SVP',
-      'obsidianflames': 'OBF', 'palaeevolved': 'PAL', 'paldaevolved': 'PAL',
+      'obsidianflames': 'OBF',
+      'paldeaevolved': 'PAL', 'palaeevolved': 'PAL', 'paldaevolved': 'PAL', // all spelling variants
       'pokemon151': 'MEW', '151': 'MEW',
       'paradoxrift': 'PAR', 'paldeanfates': 'PAF',
       'temporalforces': 'TEF', 'twilightmasquerade': 'TWM', 'shroudedfable': 'SFA',
       'stellarcrown': 'SCR', 'surgingsparks': 'SSP', 'prismaticevolutions': 'PRE',
-      'crownzenith': 'CRZ',
+      'crownzenith': 'CRZ', 'crownzenithgalariangallery': 'CRZ',
       'journeytogether': 'JTG', 'destinedrivals': 'DRI',
       'blackbolt': 'BLK', 'whiteflare': 'WHT',
       'ascendedheroes': 'ASC',
@@ -2190,9 +2191,12 @@ function dexImportParseCSV(csvText) {
       'megaevolutionenergy': 'MEE', 'megapromos': 'MEP',
       // Sword & Shield era
       'swordshield': 'SSH', 'swordshieldpromos': 'SP',
-      'brilliantstars': 'BRS', 'astralradiance': 'ASR',
+      'brilliantstars': 'BRS',
+      'astralradiance': 'ASR', 'astralradiancetrainergallery': 'ASR',
       'pokemongo': 'PGO',
-      'lostorigin': 'LOR', 'silvertempest': 'SIR',
+      'lostorigin': 'LOR', 'lostorigintrainergallery': 'LOR',
+      'silvertempest': 'SIR', 'silvertempesttrainergallery': 'SIR',
+      'celebrations': 'CEL', 'celebrationsclassiccollection': 'CEL',
       'fusionstrike': 'FST', 'celebrations': 'CEL',
       'evolvingskies': 'EVS', 'chillingreign': 'CRE',
       'battlestyles': 'BST', 'shiningfates': 'SHF',

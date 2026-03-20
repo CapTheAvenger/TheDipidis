@@ -6504,7 +6504,7 @@ const BASE_PATH = './data/';
                     });
                 }
                 const otherPrintSparkleHtml = otherPrintOwnedCount > 0
-                    ? `<div style="position:absolute;top:${deckCount > 0 ? '28px' : '6px'};left:8px;font-size:12px;line-height:1;z-index:3;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6));" title="Andere Int. Prints in Sammlung: ${otherPrintOwnedCount}x">✨</div>`
+                    ? `<div style="position:absolute;top:${deckCount > 0 ? '28px' : '6px'};left:8px;display:inline-flex;align-items:center;gap:3px;font-size:12px;line-height:1;z-index:3;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6));cursor:help;" title="Andere Int. Prints in Sammlung: ${otherPrintOwnedCount}x"><span>✨</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:14px;height:14px;padding:0 3px;border-radius:10px;background:rgba(255,255,255,0.9);color:#5e2ca5;font-size:9px;font-weight:700;">${otherPrintOwnedCount}</span></div>`
                     : '';
                 
                 html += `

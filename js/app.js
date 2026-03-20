@@ -14497,13 +14497,13 @@ const BASE_PATH = './data/';
                     ${ownedCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${ownedCount}</div>` : ''}
                     ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #FFD600; color: #333; min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="You own other prints of this card">${altPrintOwnedCount}</div>` : ''}
                     <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
-                        <button onclick="addToCollection('${safeCardId}')" style="background: #fff; color: #000; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Add to collection (${ownedCount}/4)">
+                        <button data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" style="background: #fff; color: #000; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Add to collection (${ownedCount}/4)">
                             +
                         </button>
-                        <button onclick="removeFromCollection('${safeCardId}')" style="background: ${ownedCount > 0 ? '#4CAF50' : '#fff'}; color: ${ownedCount > 0 ? '#fff' : '#999'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Remove from collection (${ownedCount}/4)">
+                        <button data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" style="background: ${ownedCount > 0 ? '#4CAF50' : '#fff'}; color: ${ownedCount > 0 ? '#fff' : '#999'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Remove from collection (${ownedCount}/4)">
                             -
                         </button>
-                        <button onclick="toggleWishlist('${safeCardId}')" style="background: ${userWantsCard ? '#E91E63' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'}; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
+                        <button data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" style="background: ${userWantsCard ? '#E91E63' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'}; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
                             ${userWantsCard ? '&#9829;' : '&#9825;'}
                         </button>
                     </div>
@@ -14516,7 +14516,7 @@ const BASE_PATH = './data/';
                     </div>
                     <div class="card-database-button-row" style="display: flex; gap: 8px; margin-top: 8px;">
                         ${priceButton}
-                        <div class="card-database-rarity-btn ${rarityClass}" onclick="openRaritySwitcherFromDB('${safeCardName}', '${safeDisplaySet}', '${safeDisplayNumber}')" style="display: block; padding: 8px; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View all prints for ${displayRarity}">
+                        <div class="card-database-rarity-btn ${rarityClass}" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" style="display: block; padding: 8px; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View all prints for ${displayRarity}">
                             ${displayRarity}
                         </div>
                         <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" style="display: block; padding: 8px; background: #e74c3c; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; border: none; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.35)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="Add to proxy queue">Proxy</button>
@@ -14526,6 +14526,32 @@ const BASE_PATH = './data/';
             `;
             
             return item;
+        }
+
+        function addCollectionFromCardDbButton(buttonEl) {
+            const cardId = buttonEl?.getAttribute('data-card-id') || '';
+            if (!cardId) return;
+            addToCollection(cardId);
+        }
+
+        function removeCollectionFromCardDbButton(buttonEl) {
+            const cardId = buttonEl?.getAttribute('data-card-id') || '';
+            if (!cardId) return;
+            removeFromCollection(cardId);
+        }
+
+        function toggleWishlistFromCardDbButton(buttonEl) {
+            const cardId = buttonEl?.getAttribute('data-card-id') || '';
+            if (!cardId) return;
+            toggleWishlist(cardId);
+        }
+
+        function openRarityFromCardDbButton(buttonEl) {
+            const cardName = buttonEl?.getAttribute('data-card-name') || '';
+            const cardSet = buttonEl?.getAttribute('data-card-set') || '';
+            const cardNumber = buttonEl?.getAttribute('data-card-number') || '';
+            if (!cardName) return;
+            openRaritySwitcherFromDB(cardName, cardSet, cardNumber);
         }
         
         function getRarityClass(rarity) {

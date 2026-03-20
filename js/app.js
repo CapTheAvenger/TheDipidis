@@ -7596,64 +7596,6 @@ const BASE_PATH = './data/';
         const pendingDeckRefreshBySource = {};
         const pendingDeckRefreshTimeoutBySource = {};
         const pendingDeckDisplayUpdateBySource = {};
-        const synergyStatsCacheBySource = {
-            cityLeague: null,
-            currentMeta: null,
-            pastMeta: null
-        };
-        const synergyReadyBySource = {
-            cityLeague: false,
-            currentMeta: false,
-            pastMeta: false
-        };
-        const forceSynergyRecomputeBySource = {
-            cityLeague: false,
-            currentMeta: false,
-            pastMeta: false
-        };
-
-        function getSynergyCalcButtonId(source) {
-            if (source === 'cityLeague') return 'cityLeagueSynergyCalcBtn';
-            if (source === 'currentMeta') return 'currentMetaSynergyCalcBtn';
-            if (source === 'pastMeta') return 'pastMetaSynergyCalcBtn';
-            return '';
-        }
-
-        function invalidateSynergyCache(source) {
-            if (!synergyReadyBySource.hasOwnProperty(source)) return;
-            synergyReadyBySource[source] = false;
-            forceSynergyRecomputeBySource[source] = false;
-            synergyStatsCacheBySource[source] = null;
-        }
-
-        async function triggerSynergyCalculation(source) {
-            if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
-
-            const btn = document.getElementById(getSynergyCalcButtonId(source));
-            const previousText = btn ? btn.textContent : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = '⏳ Berechne Synergien...';
-            }
-
-            // Yield to the browser so the loading state paints before heavy calculation starts.
-            await new Promise(resolve => requestAnimationFrame(resolve));
-
-            try {
-                forceSynergyRecomputeBySource[source] = true;
-                renderMyDeckGrid(source);
-                if (typeof showDeckShareToast === 'function') {
-                    showDeckShareToast('🪄 Synergien aktualisiert');
-                }
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = previousText || '🪄 Synergien berechnen (KI-Vorschläge)';
-                }
-            }
-        }
-
-        window.triggerSynergyCalculation = triggerSynergyCalculation;
 
         function scheduleDeckDisplayUpdate(source) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
@@ -7752,9 +7694,6 @@ const BASE_PATH = './data/';
                 else if (source === 'currentMeta') saveCurrentMetaDeck();
                 else if (source === 'pastMeta') savePastMetaDeck();
             }
-
-            // Deck changed: mark synergy stats stale until manually recalculated.
-            invalidateSynergyCache(source);
             
             let deck;
             if (source === 'cityLeague') {
@@ -7930,95 +7869,6 @@ const BASE_PATH = './data/';
                     }
                 }
             });
-            
-            // Build stats map before rendering grid cards so overlay has reliable share/avg values.
-            const normalizeOverlayName = (name) => normalizeCardName(
-                String(name || '')
-                    .replace(/\s*\([A-Z0-9]+\s+[A-Z0-9]+\)\s*$/i, '')
-                    .replace(/\s+[A-Z0-9]{2,4}\s+[A-Z0-9]+\s*$/i, '')
-            ).replace(/[^a-z0-9]/g, '');
-            const calculateCardStatsMap = (cardsForStats) => {
-                const aggregateMap = new Map();
-
-                cardsForStats.forEach(row => {
-                    const rowName = row.card_name || row.full_card_name || row.name || '';
-                    const key = normalizeOverlayName(rowName);
-                    if (!key) return;
-
-                    const shareRaw = safeParseFloat(row.percentage_in_archetype ?? row.share ?? row.share_percent ?? 0);
-                    const totalDecksRaw = safeParseFloat(row.total_decks_in_archetype || row.decklist_count || row.total_decks || 0);
-                    const totalDecks = Number.isFinite(totalDecksRaw) && totalDecksRaw > 0 ? Math.max(1, Math.floor(totalDecksRaw)) : 1;
-                    const totalCountRaw = safeParseFloat(row.total_count || row.card_count || 0);
-                    const deckCountRaw = safeParseFloat(row.deck_count || row.deck_inclusion_count || 0);
-                    const avgWhenUsedRaw = safeParseFloat(row.avg_count || row.average_count || '', NaN);
-                    const avgOverallRaw = safeParseFloat(row.average_count_overall || '', NaN);
-                    const inferredDeckCount = deckCountRaw > 0
-                        ? deckCountRaw
-                        : (shareRaw > 0 && totalDecks > 0 ? (shareRaw / 100) * totalDecks : 0);
-                    const inferredTotalCount = totalCountRaw > 0
-                        ? totalCountRaw
-                        : (Number.isFinite(avgWhenUsedRaw) && avgWhenUsedRaw > 0 && inferredDeckCount > 0
-                            ? avgWhenUsedRaw * inferredDeckCount
-                            : (Number.isFinite(avgOverallRaw) && avgOverallRaw > 0 && totalDecks > 0
-                                ? avgOverallRaw * totalDecks
-                                : 0));
-
-                    const prev = aggregateMap.get(key) || {
-                        cardName: rowName,
-                        totalDecks: 0,
-                        totalCount: 0,
-                        deckCount: 0,
-                        fallbackShare: 0,
-                        fallbackAvg: 0
-                    };
-
-                    prev.cardName = prev.cardName || rowName;
-                    prev.totalDecks = Math.max(prev.totalDecks, totalDecks);
-                    prev.totalCount += Math.max(0, inferredTotalCount);
-                    prev.deckCount += Math.max(0, inferredDeckCount);
-                    prev.fallbackShare = Math.max(prev.fallbackShare, Math.max(0, shareRaw));
-                    if (Number.isFinite(avgWhenUsedRaw) && avgWhenUsedRaw > 0) {
-                        prev.fallbackAvg = Math.max(prev.fallbackAvg, avgWhenUsedRaw);
-                    } else if (Number.isFinite(avgOverallRaw) && avgOverallRaw > 0) {
-                        prev.fallbackAvg = Math.max(prev.fallbackAvg, avgOverallRaw);
-                    }
-
-                    aggregateMap.set(key, prev);
-                });
-
-                const statsMap = new Map();
-                aggregateMap.forEach((entry, key) => {
-                    const legalMaxCopies = getLegalMaxCopies(entry.cardName || '', { card_name: entry.cardName || '' });
-                    const totalDecks = Math.max(1, entry.totalDecks || 1);
-                    const combinedDeckCount = Math.min(totalDecks, Math.max(0, entry.deckCount || 0));
-                    const cappedTotalCount = Math.min(
-                        Math.max(0, entry.totalCount || 0),
-                        combinedDeckCount * legalMaxCopies
-                    );
-
-                    const share = combinedDeckCount > 0
-                        ? Math.min(100, (combinedDeckCount / totalDecks) * 100)
-                        : Math.min(100, Math.max(0, entry.fallbackShare || 0));
-                    const avgCount = combinedDeckCount > 0
-                        ? Math.min(legalMaxCopies, cappedTotalCount / combinedDeckCount)
-                        : Math.min(legalMaxCopies, Math.max(0, entry.fallbackAvg || 0));
-
-                    statsMap.set(key, { share, avgCount });
-                });
-
-                return statsMap;
-            };
-
-            const shouldCalculateSynergyNow = forceSynergyRecomputeBySource[source] ||
-                (synergyReadyBySource[source] && !synergyStatsCacheBySource[source]);
-
-            let calculatedCardStats = synergyStatsCacheBySource[source];
-            if (shouldCalculateSynergyNow) {
-                calculatedCardStats = calculateCardStatsMap(allCards);
-                synergyStatsCacheBySource[source] = calculatedCardStats;
-                synergyReadyBySource[source] = true;
-                forceSynergyRecomputeBySource[source] = false;
-            }
             
             // Convert deck to array with card data
             const deckCards = [];
@@ -8263,20 +8113,13 @@ const BASE_PATH = './data/';
                 const fallbackShare = Math.max(0, fallbackShareValue).toFixed(1).replace('.', ',');
                 const fallbackAvg = Math.max(0, fallbackAvgValue).toFixed(2).replace('.', ',');
 
-                const statsKey = normalizeOverlayName(baseName);
-                const statEntry = calculatedCardStats ? calculatedCardStats.get(statsKey) : null;
                 const isM3Special = ((setCode || '').toUpperCase() === 'M3')
                     || ((card.original_set_code || '').toUpperCase() === 'M3')
                     || (typeof imageUrl === 'string' && /\/M3\//i.test(imageUrl));
 
                 let overlayText = '';
-                const resolvedShareValue = statEntry && statEntry.share > 0 ? statEntry.share : fallbackShareValue;
-                const resolvedAvgValue = statEntry && statEntry.avgCount > 0 ? statEntry.avgCount : fallbackAvgValue;
-
-                if (resolvedShareValue > 0 || resolvedAvgValue > 0) {
-                    const statShare = Math.max(0, resolvedShareValue).toFixed(1).replace('.', ',');
-                    const statAvg = Math.max(0, resolvedAvgValue || 0).toFixed(2).replace('.', ',');
-                    overlayText = `${statShare}% | Ø ${statAvg}x`;
+                if (fallbackShareValue > 0 || fallbackAvgValue > 0) {
+                    overlayText = `${fallbackShare}% | Ø ${fallbackAvg}x`;
                 } else if (isM3Special) {
                     overlayText = 'M3 Japan Exclusive';
                 } else {

@@ -4537,7 +4537,7 @@ const BASE_PATH = './data/';
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-size: 0.9em;">(${changeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.9em;">(${placementText})</span></td>
                         </tr>`;
-                });
+                })
                 
                 tableHTML += `</tbody></table>`;
             }

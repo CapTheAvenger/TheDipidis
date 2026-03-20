@@ -3323,7 +3323,7 @@ const BASE_PATH = './data/';
                     const cardsResponse = await fetch(`${BASE_PATH}city_league_analysis${formatSuffix}.csv?t=${timestamp}`);
                     if (!cardsResponse.ok) return [];
                     const cardsText = await cardsResponse.text();
-                    return await fetchAndParseCSV(`${BASE_PATH}${cardsFile}`);
+                    return parseCSV(cardsText);
                 })();
 
                 // Group cards by archetype
@@ -3959,8 +3959,9 @@ const BASE_PATH = './data/';
                 content.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Lade ' + format + ' Daten...</div>';
             }
             
-            // Load M3 comparison data if switching to M4
-            if (format === 'M4') {
+            // Load M3 comparison data only on non-mobile to avoid blocking slower devices.
+            const isMobileRuntime = !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+            if (format === 'M4' && !isMobileRuntime) {
                 await loadM3ComparisonData();
             }
             
@@ -4031,6 +4032,7 @@ const BASE_PATH = './data/';
             const content = document.getElementById('cityLeagueContent');
             try {
                 const timestamp = new Date().getTime();
+                const isMobileRuntime = !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
                 
                 // Dynamic file paths based on current format
                 const format = window.currentCityLeagueFormat || 'M4';
@@ -4065,8 +4067,8 @@ const BASE_PATH = './data/';
                         : Promise.resolve(null)
                 ];
 
-                // NEU: Lade M3-Archetypen im Hintergrund, wenn wir in M4 sind
-                if (window.currentCityLeagueFormat === 'M4') {
+                // NEU: Lade M3-Archetypen im Hintergrund, wenn wir in M4 sind (desktop only)
+                if (window.currentCityLeagueFormat === 'M4' && !isMobileRuntime) {
                     fetchPromises.push(
                         fetch(`${BASE_PATH}city_league_archetypes_M3.csv?t=${timestamp}`)
                             .then(response => response.ok ? response.text() : null)
@@ -4138,9 +4140,12 @@ const BASE_PATH = './data/';
                     console.warn(`Comparison data missing for ${format}; using derived fallback from archetypes data`);
                 }
 
-                // Load M3 comparison data if we're in M4 mode
-                if (format === 'M4') {
+                // Load M3 comparison data only on non-mobile to keep M4 load path fast and reliable.
+                if (format === 'M4' && !isMobileRuntime) {
                     await loadM3ComparisonData();
+                } else if (format === 'M4') {
+                    window.m3BaselineData = {};
+                    window.m3ArchetypeData = null;
                 }
                 
                 // Load tournament count and date range from main archetype CSV

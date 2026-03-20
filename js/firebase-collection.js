@@ -1747,13 +1747,21 @@ function dexImportHandleFile(input) {
 
 function dexImportParseCSV(csvText) {
     let rows;
+    // Remove UTF-8 BOM if present
+    if (csvText.charCodeAt(0) === 0xFEFF) csvText = csvText.slice(1);
+
     if (window.Papa) {
-        const result = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+        // transformHeader normalizes all header names to lowercase+trimmed
+        // so we can reliably detect columns regardless of Dex's casing
+        const result = Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            transformHeader: h => h.toLowerCase().trim()
+        });
         rows = result.data;
     } else {
         const lines = csvText.split(/\r?\n/).filter(l => l.trim());
         if (lines.length < 2) { showNotification('CSV ist leer oder ungültig', 'error'); return; }
-        // Handle quoted CSV fields
         function splitCSVLine(line) {
             const result = [];
             let field = '', inQuote = false;
@@ -1766,7 +1774,8 @@ function dexImportParseCSV(csvText) {
             result.push(field.trim());
             return result;
         }
-        const headers = splitCSVLine(lines[0]).map(h => h.toLowerCase());
+        // headers already lowercase via this path
+        const headers = splitCSVLine(lines[0]).map(h => h.toLowerCase().trim());
         rows = lines.slice(1).map(line => {
             const cells = splitCSVLine(line);
             const obj = {};
@@ -1777,13 +1786,15 @@ function dexImportParseCSV(csvText) {
 
     if (!rows || rows.length === 0) { showNotification('CSV enthält keine Daten', 'error'); return; }
 
-    // Auto-detect relevant column names (Dex exports various header names)
+    // At this point all row keys are lowercase (PapaParse: transformHeader; manual: map toLowerCase)
     const sampleRow = rows[0];
-    const keys = Object.keys(sampleRow).map(k => k.toLowerCase());
-    const nameKey = keys.find(k => k === 'name' || k.includes('card_name') || k.includes('cardname')) || 'name';
-    const setKey  = keys.find(k => k === 'set' || k === 'set_code' || k === 'expansion' || k === 'set code') || 'set';
-    const numKey  = keys.find(k => k === 'number' || k === 'card_number' || k === 'collector_number' || k === 'card number') || 'number';
-    const qtyKey  = keys.find(k => k === 'qty' || k === 'quantity' || k === 'count' || k === 'amount' || k.includes('owned')) || 'qty';
+    const keys = Object.keys(sampleRow); // already lowercase
+
+    // Auto-detect relevant column names — covers Dex TCG and other common export formats
+    const nameKey = keys.find(k => k === 'name' || k === 'card name' || k === 'card_name' || k === 'cardname') || 'name';
+    const setKey  = keys.find(k => k === 'set code' || k === 'set_code' || k === 'setcode' || k === 'set' || k === 'expansion') || 'set';
+    const numKey  = keys.find(k => k === 'number' || k === 'card number' || k === 'card_number' || k === 'collector_number' || k === 'collector number' || k === '#') || 'number';
+    const qtyKey  = keys.find(k => k === 'qty' || k === 'quantity' || k === 'count' || k === 'amount' || k === 'owned' || k.includes('owned')) || 'qty';
 
     const matched = [], unmatched = [];
     const dbMap = window.cardsBySetNumberMap || {};
@@ -1926,16 +1937,20 @@ async function dexImportExecute(mode) {
                 : qty);
         });
 
-        // Build Firestore update payload (use dot-notation for collectionCounts to avoid overwriting other fields)
+        // Build Firestore update payload
         const updateData = { collection: [...newCollection] };
         if (mode === 'replace') {
-            // For replace we set the whole sub-object at once
+            // Replace: overwrite the whole collectionCounts sub-object
             const countsObj = {};
             newCounts.forEach((v, k) => { countsObj[k] = v; });
             updateData.collectionCounts = countsObj;
         } else {
-            // For merge only touch the keys we're writing
-            newCounts.forEach((v, k) => { updateData[`collectionCounts.${k}`] = v; });
+            // Merge: only update the imported card keys (not all existing counts)
+            matched.forEach(({ cardId }) => {
+                updateData[`collectionCounts.${cardId}`] = newCounts.get(cardId);
+            });
+            // Also make sure these cardIds appear in the collection array
+            updateData.collection = [...newCollection];
         }
 
         await db.collection('users').doc(user.uid).set(updateData, { merge: true });

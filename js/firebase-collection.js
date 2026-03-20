@@ -2157,6 +2157,13 @@ function dexImportParseCSV(csvText) {
     const matched = [], unmatched = [];
     const dbMap = window.cardsBySetNumberMap || {};
 
+    function matchCardBySetNumber(rawSet, rawNum) {
+      if (!rawSet || !rawNum) return null;
+      return dbMap[`${rawSet}-${rawNum}`]
+        || dbMap[`${rawSet}-${String(rawNum).padStart(3, '0')}`]
+        || dbMap[`${rawSet}-${String(parseInt(rawNum, 10) || rawNum)}`];
+    }
+
     rows.forEach(row => {
         const rawName = (row[nameKey] || '').trim();
         let rawSet  = normalizeSetCode(row[setKey]);
@@ -2178,12 +2185,7 @@ function dexImportParseCSV(csvText) {
         }
 
         // Primary strict match by set+number (exact card identity)
-        let card = null;
-        if (rawSet && rawNum) {
-            card = dbMap[`${rawSet}-${rawNum}`]
-                || dbMap[`${rawSet}-${rawNum.padStart(3, '0')}`]
-                || dbMap[`${rawSet}-${String(parseInt(rawNum, 10) || rawNum)}`];
-        }
+        let card = matchCardBySetNumber(rawSet, rawNum);
 
         // Fallback by name ONLY when no set+number info is available at all.
         if (!card && (!rawSet || !rawNum) && rawName) {
@@ -2205,6 +2207,73 @@ function dexImportParseCSV(csvText) {
             unmatched.push({ rawName, rawSet, rawNum, qty });
         }
     });
+
+      // Fallback for Dex exports that come without stable headers:
+      // parse as plain rows and extract set-number token + integer quantity directly.
+      if (matched.length === 0) {
+        let plainRows = [];
+        if (window.Papa) {
+          const plainResult = Papa.parse(csvText, {
+            header: false,
+            skipEmptyLines: true,
+            delimitersToGuess: [',', ';', '\t', '|']
+          });
+          plainRows = plainResult.data || [];
+        } else {
+          const lines = csvText.split(/\r?\n/).filter(l => l.trim());
+          const delimiter = (lines[0] && lines[0].split(';').length > (lines[0].split(',').length)) ? ';' : ',';
+          plainRows = lines.map(line => {
+            const cells = [];
+            let field = '', inQuote = false;
+            for (let i = 0; i < line.length; i++) {
+              const ch = line[i];
+              if (ch === '"') inQuote = !inQuote;
+              else if (ch === delimiter && !inQuote) { cells.push(field.trim()); field = ''; }
+              else field += ch;
+            }
+            cells.push(field.trim());
+            return cells;
+          });
+        }
+
+        plainRows.forEach(rowArr => {
+          if (!Array.isArray(rowArr) || rowArr.length === 0) return;
+          const cells = rowArr.map(v => String(v || '').trim());
+
+          let rawSet = '';
+          let rawNum = '';
+          let tokenIndex = -1;
+          for (let i = 0; i < cells.length; i++) {
+            const parsed = parseSetNumberToken(cells[i]);
+            if (parsed) {
+              rawSet = parsed.set;
+              rawNum = parsed.number;
+              tokenIndex = i;
+              break;
+            }
+          }
+          if (!rawSet || !rawNum) return;
+
+          // Quantity: prefer pure integer cell close to the right side.
+          let qty = 1;
+          for (let i = cells.length - 1; i >= 0; i--) {
+            if (/^\d+$/.test(cells[i])) {
+              qty = Math.max(1, parseInt(cells[i], 10));
+              break;
+            }
+          }
+
+          const rawName = (tokenIndex >= 0 && cells[tokenIndex + 1]) ? cells[tokenIndex + 1] : '';
+          const card = matchCardBySetNumber(rawSet, rawNum);
+
+          if (card) {
+            const cardId = `${card.name}|${card.set}|${card.number}`;
+            matched.push({ cardId, qty, card, rawName, rawSet, rawNum });
+          } else {
+            unmatched.push({ rawName, rawSet, rawNum, qty });
+          }
+        });
+      }
 
     dexImportShowPreview(matched, unmatched);
 }

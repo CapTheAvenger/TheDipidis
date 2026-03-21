@@ -393,7 +393,10 @@ def scrape_card_details(
         for future in concurrent.futures.as_completed(future_to_card):
             completed += 1
             try:
-                updated_cards.append(future.result())
+                updated_cards.append(future.result(timeout=60))
+            except concurrent.futures.TimeoutError:
+                logger.warning("Thread-Timeout für Karte: %s", future_to_card[future].get('name', '?'))
+                updated_cards.append(future_to_card[future])
             except Exception as exc:
                 logger.error("Thread-Fehler: %s", exc)
                 updated_cards.append(future_to_card[future])

@@ -31,7 +31,8 @@ except ImportError:
 from card_scraper_shared import (
     setup_console_encoding, get_app_path, get_data_dir, load_scraped_ids,
     save_scraped_ids, CardDatabaseLookup, is_trainer_or_energy, is_valid_card,
-    fetch_page_bs4, setup_logging, load_settings, load_set_order
+    fetch_page_bs4, setup_logging, load_settings, load_set_order,
+    extract_cards_from_decklist_soup
 )
 
 setup_console_encoding()
@@ -393,87 +394,27 @@ def extract_single_deck(deck_url: str, card_db: CardDatabaseLookup) -> Tuple[lis
     title_elem = soup.select_one(".decklist-title")
     deck_name = title_elem.get_text(strip=True) if title_elem else "Unknown Deck"
 
+    # Use shared extraction, then enrich with tournament-specific fields
+    raw_cards = extract_cards_from_decklist_soup(soup, card_db)
+
     cards = []
     seen = set()
-
-    for col in soup.select(".decklist-column"):
-        heading = col.select_one(".decklist-column-heading")
-        if not heading:
+    for c in raw_cards:
+        name = c['name']
+        if not is_valid_card(name):
             continue
-
-        c_type = heading.get_text(strip=True).lower()
-
-        for cdiv in col.select(".decklist-card"):
-            count_span = cdiv.select_one(".card-count")
-            name_span  = cdiv.select_one(".card-name")
-
-            if not count_span or not name_span:
-                continue
-
-            try:
-                count = int(count_span.get_text(strip=True))
-            except Exception:
-                continue
-
-            name = name_span.get_text(strip=True)
-            if not is_valid_card(name):
-                continue
-
-            set_code = ""
-            card_num = ""
-            
-            # Safe check: Pokémon headers contain "pokémon" (with accent) after
-            # .lower(), so checking for plain "pokemon" would ALWAYS fail.
-            # Instead: if it's NOT trainer and NOT energy, it must be a Pokémon.
-            is_pokemon = "trainer" not in c_type and "energy" not in c_type
-
-            if is_pokemon:
-                # POKÉMON: 3-stufige Set-Erkennung (100% Genauigkeit)
-                # METHODE 1: Aus href-Link extrahieren (höchste Priorität)
-                link_elem = cdiv.find('a', href=True) or name_span.find('a', href=True)
-                if link_elem:
-                    href = link_elem.get('href', '')
-                    # Pattern: /cards/SET/NUMBER oder /cards/format/SET/NUMBER
-                    parts = href.split('/cards/')[-1].split('/')
-                    if len(parts) >= 3:
-                        set_code, card_num = parts[1].upper(), parts[2]
-                    elif len(parts) == 2:
-                        set_code, card_num = parts[0].upper(), parts[1]
-                
-                # METHODE 2: <span class="set"> oder <span class="card-set">
-                if not set_code or not card_num:
-                    set_span = cdiv.find('span', class_=['set', 'card-set'])
-                    if set_span:
-                        set_text = set_span.get_text(strip=True)
-                        match = re.match(r'([A-Z0-9]+)[\s-]+([0-9]+)', set_text, re.IGNORECASE)
-                        if match:
-                            set_code, card_num = match.group(1).upper(), match.group(2)
-                
-                # METHODE 3: data-set/data-number Attribute
-                if not set_code or not card_num:
-                    set_code = cdiv.get("data-set", "").upper()
-                    card_num = cdiv.get("data-number", "")
-                
-                # Set-Code Normalisierung
-                if set_code == "PR-SV":
-                    set_code = "SVP"
-            else:
-                # TRAINER/ENERGY: Immer via CardDB auflösen
-                db_card = card_db.get_latest_low_rarity_version(name)
-                if db_card:
-                    set_code, card_num = db_card.set_code, db_card.number
-
-            key = f"{name}|{set_code}|{card_num}".lower()
-            if key not in seen:
-                seen.add(key)
-                cards.append({
-                    "count": count,
-                    "name": name,
-                    "set_code": set_code,
-                    "card_number": card_num,
-                    "full_name": f"{name} {set_code} {card_num}".strip(),
-                    "is_ace_spec": "Yes" if card_db.is_ace_spec_by_name(name) else "No"
-                })
+        sc, sn = c['set_code'], c['set_number']
+        key = f"{name}|{sc}|{sn}".lower()
+        if key not in seen:
+            seen.add(key)
+            cards.append({
+                "count": c['count'],
+                "name": name,
+                "set_code": sc,
+                "card_number": sn,
+                "full_name": f"{name} {sc} {sn}".strip(),
+                "is_ace_spec": "Yes" if card_db.is_ace_spec_by_name(name) else "No"
+            })
 
     return cards, deck_name
 

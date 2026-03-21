@@ -24,13 +24,21 @@ service cloud.firestore {
       // ✅ UPDATE: Nur Host & Guest dürfen updaten
       allow update: if request.auth != null 
         && (request.auth.uid == resource.data.host 
-            || request.auth.uid == resource.data.guest)
-        // Verhindere, dass Host/Guest geändert werden
+            || request.auth.uid == resource.data.guest
+            // Guest-Join: Nur wenn noch kein Guest & der Schreiber sich selbst einträgt
+            || (resource.data.guest == null 
+                && request.resource.data.guest == request.auth.uid))
+        // Verhindere, dass Host geändert wird
         && request.resource.data.host == resource.data.host
+        // Guest darf nur von null -> eigene UID gesetzt werden, danach unveränderlich
         && (request.resource.data.guest == resource.data.guest 
-            || resource.data.guest == null)
+            || (resource.data.guest == null 
+                && request.resource.data.guest == request.auth.uid))
         // createdAt darf nicht verändert werden
         && request.resource.data.createdAt == resource.data.createdAt
+        // Write-Rate-Limit: min 500ms zwischen Updates
+        && (!('lastAction' in resource.data) 
+            || request.time > resource.data.lastAction + duration.value(500, 'ms'))
         && request.resource.data.size() < 50;
       
       // ✅ DELETE: Nur Host darf löschen

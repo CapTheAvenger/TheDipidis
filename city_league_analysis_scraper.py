@@ -30,7 +30,8 @@ from card_scraper_shared import (
     setup_console_encoding, get_app_path, get_data_dir, CardDatabaseLookup, 
     aggregate_card_data, save_to_csv, fetch_page, normalize_archetype_name,
     load_scraped_ids, save_scraped_ids, _get_scraper, resolve_date_range,
-    safe_fetch_html, setup_logging, load_settings, parse_tournament_date
+    safe_fetch_html, setup_logging, load_settings, parse_tournament_date,
+    extract_cards_from_decklist_soup
 )
 
 # Fix Windows console encoding for Unicode characters
@@ -132,90 +133,9 @@ def extract_tournament_date_from_html(tournament_html: str, fallback_date: str =
 # PARSING LOGIC (BeautifulSoup)
 # ============================================================================
 def extract_cards_from_deck_html(deck_html: str, card_db: CardDatabaseLookup) -> list:
-    """
-    Extrahiert Karten mit 100%iger Genauigkeit bei Set-Erkennung.
-    Priorität für Pokémon-Karten:
-    1. href-Link (/cards/twm/128 -> TWM 128)
-    2. data-set/data-number Attribute
-    3. <span class=\"set\"> oder <span class=\"card-set\">
-    Für Trainer/Energy: CardDB Lookup
-    """
+    """Delegate to shared extraction in card_scraper_shared."""
     soup = BeautifulSoup(deck_html, 'html.parser')
-    cards = []
-    
-    for column in soup.select('.decklist-column'):
-        heading_elem = column.select_one('.decklist-column-heading')
-        if not heading_elem:
-            continue
-            
-        category = heading_elem.get_text(strip=True).lower()
-        
-        # Bestimme Kartentyp (Pokémon erkennen über inverse Logik)
-        is_trainer = 'trainer' in category
-        is_energy = 'energy' in category
-        is_pokemon = not is_trainer and not is_energy
-        
-        for card_div in column.select('.decklist-card'):
-            count_elem = card_div.select_one('.card-count')
-            name_elem = card_div.select_one('.card-name')
-            
-            if not count_elem or not name_elem:
-                continue
-                
-            try:
-                count = int(count_elem.get_text(strip=True))
-                card_name = name_elem.get_text(strip=True)
-            except ValueError:
-                continue
-            
-            set_code, set_number = "", ""
-            
-            if is_pokemon:
-                # METHODE 1: Aus href-Link extrahieren (höchste Priorität)
-                link_elem = card_div.find('a', href=True) or name_elem.find('a', href=True)
-                if link_elem:
-                    href = link_elem.get('href', '')
-                    # Pattern: /cards/SET/NUMBER oder /cards/format/SET/NUMBER
-                    parts = href.split('/cards/')[-1].split('/')
-                    if len(parts) >= 3:
-                        set_code, set_number = parts[1].upper(), parts[2]
-                    elif len(parts) == 2:
-                        set_code, set_number = parts[0].upper(), parts[1]
-                
-                # METHODE 2: data-set/data-number Attribute
-                if not set_code or not set_number:
-                    set_code = card_div.get('data-set', '').strip().upper()
-                    set_number = card_div.get('data-number', '').strip()
-                
-                # METHODE 3: <span class="set"> oder <span class="card-set">
-                if not set_code or not set_number:
-                    set_span = card_div.find('span', class_=['set', 'card-set'])
-                    if set_span:
-                        set_text = set_span.get_text(strip=True)
-                        import re as re_module
-                        match = re_module.match(r'([A-Z0-9]+)[\s-]+([0-9]+)', set_text, re_module.IGNORECASE)
-                        if match:
-                            set_code, set_number = match.group(1).upper(), match.group(2)
-                
-                # Nur wenn Set gefunden wurde, Karte hinzufügen
-                if set_code and set_number:
-                    cards.append({
-                        'name': card_name,
-                        'count': count,
-                        'set_code': set_code,
-                        'set_number': set_number
-                    })
-            else:
-                # Trainer oder Energy: CardDB Lookup
-                latest_card = card_db.get_latest_low_rarity_version(card_name)
-                if latest_card:
-                    cards.append({
-                        'name': card_name,
-                        'count': count,
-                        'set_code': latest_card.set_code,
-                        'set_number': latest_card.number
-                    })
-    return cards
+    return extract_cards_from_decklist_soup(soup, card_db)
 
 def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, tournament_id: str, card_db, timeout: int) -> dict:
     """Worker Funktion fuer Multithreading."""

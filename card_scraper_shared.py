@@ -233,6 +233,14 @@ def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: 
     for attempt in range(1, retries + 2):
         try:
             resp = scraper.get(url, timeout=timeout)
+            # Rate-limit / overload: back off longer before retry
+            if resp.status_code in (429, 503):
+                retry_after = int(resp.headers.get('Retry-After', delay * 3))
+                logger.warning("HTTP %s for %s — backing off %ss", resp.status_code, url, retry_after)
+                if attempt <= retries:
+                    time.sleep(retry_after)
+                    delay = min(delay * 3, 60)
+                    continue
             resp.raise_for_status()
             return resp.text
         except Exception as e:
@@ -535,6 +543,73 @@ def is_trainer_or_energy(card_name: str) -> bool:
 def is_valid_card(card_name: str) -> bool:
     """Returns True if card exists in the database."""
     return _get_db().is_valid_card(card_name)
+
+
+# ============================================================================
+# SHARED DECK HTML EXTRACTION
+# ============================================================================
+def extract_cards_from_decklist_soup(soup, card_db: CardDatabaseLookup) -> list:
+    """Extract cards from a Limitless-style decklist HTML (BeautifulSoup object).
+
+    Uses a 3-method set-code detection for Pokémon cards:
+      1. href link  (/cards/SET/NUMBER)
+      2. data-set / data-number attributes
+      3. <span class="set"> or <span class="card-set">
+    Trainer/Energy cards are resolved via *card_db*.
+
+    Returns a list of ``{name, count, set_code, set_number}`` dicts.
+    """
+    cards: list = []
+    for column in soup.select('.decklist-column'):
+        heading_elem = column.select_one('.decklist-column-heading')
+        if not heading_elem:
+            continue
+        category = heading_elem.get_text(strip=True).lower()
+        is_pokemon = 'trainer' not in category and 'energy' not in category
+
+        for card_div in column.select('.decklist-card'):
+            count_elem = card_div.select_one('.card-count')
+            name_elem = card_div.select_one('.card-name')
+            if not count_elem or not name_elem:
+                continue
+            try:
+                count = int(count_elem.get_text(strip=True))
+                card_name = name_elem.get_text(strip=True)
+            except (ValueError, AttributeError):
+                continue
+
+            set_code, set_number = "", ""
+            if is_pokemon:
+                # METHOD 1: href link
+                link_elem = card_div.find('a', href=True) or name_elem.find('a', href=True)
+                if link_elem:
+                    parts = link_elem.get('href', '').split('/cards/')[-1].split('/')
+                    if len(parts) >= 3:
+                        set_code, set_number = parts[1].upper(), parts[2]
+                    elif len(parts) == 2:
+                        set_code, set_number = parts[0].upper(), parts[1]
+                # METHOD 2: data attributes
+                if not set_code or not set_number:
+                    set_code = card_div.get('data-set', '').strip().upper()
+                    set_number = card_div.get('data-number', '').strip()
+                # METHOD 3: span.set / span.card-set
+                if not set_code or not set_number:
+                    set_span = card_div.find('span', class_=['set', 'card-set'])
+                    if set_span:
+                        m = re.match(r'([A-Z0-9]+)[\s-]+([0-9]+)', set_span.get_text(strip=True), re.IGNORECASE)
+                        if m:
+                            set_code, set_number = m.group(1).upper(), m.group(2)
+                # Normalize known aliases
+                if set_code == 'PR-SV':
+                    set_code = 'SVP'
+                if set_code and set_number:
+                    cards.append({'name': card_name, 'count': count, 'set_code': set_code, 'set_number': set_number})
+            else:
+                latest = card_db.get_latest_low_rarity_version(card_name)
+                if latest:
+                    cards.append({'name': card_name, 'count': count, 'set_code': latest.set_code, 'set_number': latest.number})
+    return cards
+
 
 # ============================================================================
 # AGGREGATION & CSV EXPORT

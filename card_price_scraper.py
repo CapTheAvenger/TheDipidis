@@ -42,7 +42,7 @@ logger.info("=" * 80)
 
 # SETTINGS
 DEFAULT_SETTINGS = {
-    "delay_seconds": 1.5,        # Base delay per request (+ random 0.1-0.8s jitter)
+    "delay_seconds": 3.0,        # Base delay per request (+ random 0.1-0.8s jitter) — Cardmarket recommends 3-5s
     "max_workers": 2,            # KEEP LOW (2-3 max) to avoid Cardmarket IP bans
     "skip_cards_with_prices": True,
     "only_update_sets": [],      # [] = all sets, or e.g. ["TWM", "SFA"]
@@ -200,6 +200,10 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
                 resp = scraper.get(cm_url, timeout=20)
                 if resp.status_code == 200:
                     eur_price = _parse_cardmarket_price(resp.text, card_id)
+                elif resp.status_code in (429, 503):
+                    retry_after = int(resp.headers.get('Retry-After', 10))
+                    logger.warning("  ! Rate-limited %s bei CM [%s] — warte %ss", resp.status_code, card_id, retry_after)
+                    time.sleep(retry_after)
                 elif resp.status_code == 403:
                     logger.warning("  ! Cloudflare 403 bei CM [%s] — versuche Limitless", card_id)
                 else:

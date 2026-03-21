@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 # Allowed hosts for SSRF protection
 ALLOWED_HOSTS = {"limitlesstcg.com", "www.limitlesstcg.com",
+                 "play.limitlesstcg.com", "labs.limitlesstcg.com",
                  "cardmarket.com", "www.cardmarket.com"}
 
 # Rate limiting (thread-safe)

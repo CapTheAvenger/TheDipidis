@@ -12,49 +12,22 @@ Scrapes LATEST Japanese Pokemon Cards from Limitless TCG.
 import csv
 import json
 import os
-import sys
 import time
-import logging
 import threading
 import concurrent.futures
 from datetime import datetime
 from typing import List, Dict, Set, Tuple
 
-try:
-    import cloudscraper
-    from bs4 import BeautifulSoup
-except ImportError:
-    print("FEHLER: Es fehlen Bibliotheken! Bitte installiere sie mit:")
-    print("pip install cloudscraper beautifulsoup4")
-    sys.exit(1)
+from bs4 import BeautifulSoup
 
-from card_scraper_shared import setup_console_encoding, _get_scraper
-setup_console_encoding()
-
-# ============================================================================
-# LOGGING SETUP
-# ============================================================================
-def get_data_dir() -> str:
-    if getattr(sys, "frozen", False):
-        app_dir = os.path.dirname(sys.executable)
-        if app_dir.endswith("dist"):
-            return os.path.join(app_dir, "..", "data")
-    return "data"
-
-data_dir = get_data_dir()
-os.makedirs(data_dir, exist_ok=True)
-log_file = os.path.join(data_dir, "japanese_cards_scraper.log")
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.FileHandler(log_file, encoding="utf-8"),
-        logging.StreamHandler(sys.stdout)
-    ]
+from card_scraper_shared import (
+    setup_console_encoding, get_data_dir, _get_scraper,
+    setup_logging, load_settings as _shared_load_settings,
 )
-logger = logging.getLogger(__name__)
+
+setup_console_encoding()
+logger = setup_logging("japanese_cards_scraper")
+data_dir = get_data_dir()
 
 # ============================================================================
 # SETTINGS
@@ -67,21 +40,10 @@ DEFAULT_SETTINGS = {
     "skip_detail_scraping": False
 }
 
-def load_settings() -> dict:
-    settings_path = 'japanese_cards_scraper_settings.json'
-    settings = DEFAULT_SETTINGS.copy()
-    if os.path.exists(settings_path):
-        try:
-            with open(settings_path, 'r', encoding='utf-8-sig') as f:
-                settings.update(json.load(f))
-            logger.info(f"Settings geladen aus {settings_path}")
-        except Exception as e:
-            logger.warning(f"Konnte Settings nicht laden: {e}")
-    else:
-        logger.info("Nutze Standard-Settings.")
-    return settings
+def _load_settings() -> dict:
+    return _shared_load_settings("japanese_cards_scraper_settings.json", DEFAULT_SETTINGS)
 
-SETTINGS = load_settings()
+SETTINGS = _load_settings()
 
 logger.info("=" * 80)
 logger.info(f"JAPANESE CARDS SCRAPER - Lade die neusten {SETTINGS['keep_latest_sets']} JP Sets")
@@ -104,7 +66,7 @@ def fetch_page_bs4(url: str, retries: int = 3):
             if attempt < retries:
                 time.sleep(1)
             else:
-                logger.debug(f"Fetch failed nach {retries} Versuchen: {url} -> {e}")
+                logger.debug("Fetch failed nach %s Versuchen: %s -> %s", retries, url, e)
     return None
 
 # ============================================================================
@@ -122,7 +84,7 @@ def load_existing_sets() -> Set[str]:
                     existing.add(row["set"])
         return existing
     except Exception as e:
-        logger.warning(f"Konnte bestehende DB nicht lesen: {e}")
+        logger.warning("Konnte bestehende DB nicht lesen: %s", e)
         return set()
 
 def quick_check_latest_sets() -> Set[str]:
@@ -161,7 +123,7 @@ def scrape_japanese_cards_list(target_sets: Set[str]) -> List[Dict[str, str]]:
 
     for page in range(1, max_pages + 1):
         url = base_url if page == 1 else f"{base_url}&page={page}"
-        logger.info(f"Lade Seite {page}...")
+        logger.info("Lade Seite %s...", page)
 
         soup = fetch_page_bs4(url)
         if not soup:
@@ -200,13 +162,13 @@ def scrape_japanese_cards_list(target_sets: Set[str]) -> List[Dict[str, str]]:
                         })
                         added_this_page += 1
 
-        logger.info(f" -> {added_this_page} Karten extrahiert.")
+        logger.info(" -> %s Karten extrahiert.", added_this_page)
         if added_this_page == 0:
             break
 
         time.sleep(SETTINGS["list_page_delay_seconds"])
 
-    logger.info(f"Insgesamt {len(all_cards)} japanische Karten in der Liste gefunden.")
+    logger.info("Insgesamt %s japanische Karten in der Liste gefunden.", len(all_cards))
     return all_cards
 
 def filter_latest_sets(cards: List[Dict[str, str]]) -> Tuple[List[Dict[str, str]], Set[str]]:
@@ -228,14 +190,14 @@ def filter_latest_sets(cards: List[Dict[str, str]]) -> Tuple[List[Dict[str, str]
     latest_regular = {s for s, _ in regular_sets[:keep]}
     target_sets    = latest_regular | promo_sets_found
 
-    logger.info(f"Behalte die neusten {keep} regulaeren Sets + {len(promo_sets_found)} Promo-Sets:")
+    logger.info("Behalte die neusten %s regulaeren Sets + %s Promo-Sets:", keep, len(promo_sets_found))
     for s, _ in regular_sets[:keep]:
-        logger.info(f" - {s} (Regular)")
+        logger.info(" - %s (Regular)", s)
     for s in promo_sets_found:
-        logger.info(f" - {s} (Promo)")
+        logger.info(" - %s (Promo)", s)
 
     filtered = [c for c in cards if c["set"] in target_sets]
-    logger.info(f"Liste auf {len(filtered)} Karten reduziert.")
+    logger.info("Liste auf %s Karten reduziert.", len(filtered))
     return filtered, target_sets
 
 def _fetch_single_detail(card: dict) -> dict:
@@ -291,10 +253,10 @@ def scrape_card_details(cards: List[dict]) -> List[dict]:
             updated.append(future.result())
             completed += 1
             if completed % 100 == 0:
-                logger.info(f"  Fortschritt: {completed}/{len(cards)} Karten...")
+                logger.info("  Fortschritt: %s/%s Karten...", completed, len(cards))
 
     success = sum(1 for c in updated if c.get("image_url"))
-    logger.info(f"Detail-Download beendet. Bilder gefunden: {success}/{len(updated)}")
+    logger.info("Detail-Download beendet. Bilder gefunden: %s/%s", success, len(updated))
     return updated
 
 # ============================================================================
@@ -303,7 +265,7 @@ def scrape_card_details(cards: List[dict]) -> List[dict]:
 def main():
     existing_sets = load_existing_sets()
     if existing_sets:
-        logger.info(f"Lokale Datenbank enthaelt {len(existing_sets)} Sets.")
+        logger.info("Lokale Datenbank enthaelt %s Sets.", len(existing_sets))
 
     latest_online = quick_check_latest_sets()
     if latest_online:
@@ -346,7 +308,7 @@ def main():
             f, indent=2, ensure_ascii=False,
         )
 
-    logger.info(f"Erfolgreich ueberschrieben. {len(filtered_cards)} Karten in Datenbank gespeichert.")
+    logger.info("Erfolgreich ueberschrieben. %s Karten in Datenbank gespeichert.", len(filtered_cards))
     logger.info("=" * 80)
 
 

@@ -23,34 +23,23 @@ from collections import Counter
 from typing import List, Dict, Optional, Any, Set, Tuple
 
 try:
-    import cloudscraper
     from bs4 import BeautifulSoup
 except ImportError:
-    print("FEHLER: Es fehlen Bibliotheken! Bitte installiere sie mit:")
-    print("pip install cloudscraper beautifulsoup4")
+    print("FEHLER: beautifulsoup4 fehlt! pip install beautifulsoup4")
     sys.exit(1)
 
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, load_scraped_ids, save_scraped_ids, CardDatabaseLookup, is_trainer_or_energy, is_valid_card, _get_scraper
+from card_scraper_shared import (
+    setup_console_encoding, get_app_path, get_data_dir, load_scraped_ids,
+    save_scraped_ids, CardDatabaseLookup, is_trainer_or_energy, is_valid_card,
+    fetch_page_bs4, setup_logging, load_settings, load_set_order
+)
 
 setup_console_encoding()
 
 # ============================================================================
 # LOGGING SETUP
 # ============================================================================
-data_dir = get_data_dir()
-os.makedirs(data_dir, exist_ok=True)
-log_file = os.path.join(data_dir, "tournament_scraper.log")
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.FileHandler(log_file, encoding="utf-8"),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging("tournament_scraper")
 
 # ============================================================================
 # TOURNAMENT TRACKING (Incremental Scraping)
@@ -78,54 +67,15 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "append_mode": True
 }
 
-def load_settings() -> Dict[str, Any]:
-    app_path = get_app_path()
-    settings_path = os.path.join(app_path, "tournament_JH_settings.json")
-
-    if not os.path.exists(settings_path) and os.path.basename(app_path) == "dist":
-        parent_path = os.path.dirname(app_path)
-        parent_settings_path = os.path.join(parent_path, "tournament_JH_settings.json")
-        if os.path.exists(parent_settings_path):
-            settings_path = parent_settings_path
-
-    if os.path.exists(settings_path):
-        try:
-            with open(settings_path, "r", encoding="utf-8-sig") as f:
-                content = f.read().strip()
-                if not content:
-                    return DEFAULT_SETTINGS.copy()
-                settings = json.loads(content)
-                logger.info("Settings geladen.")
-                for k, v in DEFAULT_SETTINGS.items():
-                    if k not in settings:
-                        settings[k] = v
-                return settings
-        except Exception as e:
-            logger.error(f"Fehler beim Laden der Settings: {e}")
-            return DEFAULT_SETTINGS.copy()
-
-    logger.info("Settings nicht gefunden, erstelle Standardwerte.")
-    with open(settings_path, "w", encoding="utf-8") as f:
-        json.dump(DEFAULT_SETTINGS, f, indent=4)
-    return DEFAULT_SETTINGS.copy()
+def _load_settings() -> Dict[str, Any]:
+    return load_settings("tournament_JH_settings.json", DEFAULT_SETTINGS, create_if_missing=True)
 
 # ============================================================================
 # NETWORK & HTML UTILS
 # ============================================================================
 
-def fetch_page_bs4(url: str, retries: int = 2):
-    scraper = _get_scraper()
-    for attempt in range(1, retries + 2):
-        try:
-            resp = scraper.get(url, timeout=20)
-            resp.raise_for_status()
-            return BeautifulSoup(resp.text, "html.parser")
-        except Exception as e:
-            if attempt <= retries:
-                time.sleep(1)
-            else:
-                logger.debug(f"Fetch fehlgeschlagen: {url} -> {e}")
-    return None
+# fetch_page_bs4 imported from card_scraper_shared
+# Note: shared version uses timeout=15 (was 20 locally)
 
 
 FORMAT_CODE_BY_SET: Dict[str, str] = {
@@ -185,15 +135,8 @@ FORMAT_CODE_DISPLAY: Dict[str, str] = {
 
 
 def _load_set_order_map() -> Dict[str, int]:
-    sets_path = os.path.join(get_data_dir(), "sets.json")
-    try:
-        with open(sets_path, "r", encoding="utf-8") as f:
-            raw = json.load(f)
-            if isinstance(raw, dict):
-                return {str(k).upper(): int(v) for k, v in raw.items() if isinstance(v, (int, float))}
-    except Exception as e:
-        logger.warning("Could not load set order map from %s: %s", sets_path, e)
-    return {}
+    raw = load_set_order()
+    return {k.upper(): v for k, v in raw.items()}
 
 
 SET_ORDER_MAP = _load_set_order_map()
@@ -350,7 +293,7 @@ def get_tournament_links(base_url: str, start_tournament_id: Optional[int], scra
             t_id = int(t_id_str)
 
             if start_tournament_id and t_id < start_tournament_id:
-                logger.info(f"Stop-ID erreicht ({t_id} < {start_tournament_id}). Beende Suche.")
+                logger.info("Stop-ID erreicht (%s < %s). Beende Suche.", t_id, start_tournament_id)
                 return tournaments
 
             if t_id_str not in seen_ids:
@@ -654,12 +597,12 @@ def main():
     logger.info("TOURNAMENT SCRAPER JH - FAST EDITION")
     logger.info("=" * 60)
 
-    settings = load_settings()
+    settings = _load_settings()
 
     try:
         card_db = CardDatabaseLookup()
     except Exception as e:
-        logger.error(f"Konnte Karten-DB nicht laden: {e}")
+        logger.error("Konnte Karten-DB nicht laden: %s", e)
         return
 
     scraped_ids = load_scraped_tournaments()
@@ -702,7 +645,7 @@ def main():
             newly_scraped.add(t["id"])
             continue
 
-        logger.info(f"Lade {len(deck_links)} Decklisten parallel...")
+        logger.info("Lade %s Decklisten parallel...", len(deck_links))
         decks_data = []
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=settings["max_workers"]) as executor:
@@ -745,7 +688,7 @@ def main():
         logger.info(f"Gespeichert: {t['name']} ({t['total_cards']} Karten-Eintraege)")
 
     logger.info("=" * 60)
-    logger.info(f"Scraping beendet. {processed} Turniere verarbeitet.")
+    logger.info("Scraping beendet. %s Turniere verarbeitet.", processed)
     logger.info("=" * 60)
 
 

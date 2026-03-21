@@ -819,7 +819,7 @@ function _mpShowCoinResult(result, flipper) {
             box-shadow:0 8px 40px rgba(0,0,0,0.6);animation:ptCoinPop 0.4s ease-out;">
             <div style="font-size:80px;margin-bottom:12px;">${emoji}</div>
             <div style="font-size:28px;font-weight:900;margin-bottom:8px;">🪙 ${label}</div>
-            <div style="font-size:14px;opacity:0.8;">Geworfen von ${flipper.toUpperCase()}</div>
+            <div style="font-size:14px;opacity:0.8;">Geworfen von ${escapeHtml(flipper.toUpperCase())}</div>
         </div>`;
     overlay.onclick = () => overlay.remove();
     document.body.appendChild(overlay);

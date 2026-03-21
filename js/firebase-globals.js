@@ -66,6 +66,11 @@ function onUserSignedOut() {
   if (userInfoBar) userInfoBar.style.display = 'none';
 
   clearUserData();
+
+  // Cleanup any active multiplayer listeners to avoid Firestore cost leaks
+  if (typeof leaveMultiplayerGame === 'function') {
+    try { leaveMultiplayerGame(); } catch (_) { /* ignore if no active game */ }
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -83,6 +83,22 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 # OS & DIRECTORY UTILS
 # ============================================================================
+def setup_logging(log_name: str) -> logging.Logger:
+    """Configure file+console logging and return a named logger."""
+    data_dir = get_data_dir()
+    os.makedirs(data_dir, exist_ok=True)
+    log_file = os.path.join(data_dir, f"{log_name}.log")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler(log_file, encoding="utf-8"),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+    return logging.getLogger(log_name)
+
 def setup_console_encoding() -> None:
     if sys.platform == 'win32':
         for stream in (sys.stdout, sys.stderr):
@@ -134,6 +150,68 @@ def save_scraped_ids(tracking_file: str, ids: Set[str], id_key: str = 'scraped_i
             json.dump(data, f, indent=2, ensure_ascii=False)
     except Exception as e:
         logger.warning("Failed to save scraped IDs to %s: %s", tracking_file, e)
+
+def load_settings(settings_filename: str, defaults: dict,
+                  deep_merge_keys: Optional[List[str]] = None,
+                  create_if_missing: bool = False) -> dict:
+    """Load settings from JSON file, searching standard candidate paths.
+
+    For *deep_merge_keys* (e.g. ``['sources']``), nested dicts are merged
+    at the sub-key level rather than being replaced wholesale.
+    """
+    app_path = get_app_path()
+    candidates = [
+        os.path.join(app_path, settings_filename),
+        os.path.join(os.getcwd(), settings_filename),
+        os.path.join(app_path, "data", settings_filename),
+    ]
+    if os.path.basename(app_path) == "dist":
+        candidates.insert(0, os.path.join(os.path.dirname(app_path), settings_filename))
+
+    for path in candidates:
+        path = os.path.normpath(path)
+        if not os.path.isfile(path):
+            continue
+        try:
+            with open(path, "r", encoding="utf-8-sig") as f:
+                content = f.read().strip()
+            if not content:
+                continue
+            loaded = json.loads(content)
+            if not isinstance(loaded, dict):
+                continue
+            # Fill in missing top-level defaults
+            for key, value in defaults.items():
+                if key not in loaded:
+                    loaded[key] = value
+            # Deep-merge specified nested dicts
+            for dmk in (deep_merge_keys or []):
+                if dmk in defaults and isinstance(defaults[dmk], dict):
+                    loaded.setdefault(dmk, {})
+                    for sub_key, sub_defaults in defaults[dmk].items():
+                        loaded[dmk].setdefault(
+                            sub_key, {} if isinstance(sub_defaults, dict) else sub_defaults
+                        )
+                        if isinstance(sub_defaults, dict) and isinstance(loaded[dmk].get(sub_key), dict):
+                            for sk, sv in sub_defaults.items():
+                                loaded[dmk][sub_key].setdefault(sk, sv)
+            logger.info("Settings geladen: %s", path)
+            return loaded
+        except Exception as e:
+            logger.warning("Konnte Settings nicht laden: %s", e)
+
+    if create_if_missing:
+        settings_path = os.path.join(app_path, settings_filename)
+        try:
+            with open(settings_path, "w", encoding="utf-8") as f:
+                json.dump(defaults, f, indent=4)
+            logger.info("Settings-Datei erstellt: %s", settings_path)
+        except Exception as e:
+            logger.warning("Konnte Settings nicht erstellen: %s", e)
+    else:
+        logger.info("Keine Settings-Datei gefunden. Nutze Standardwerte.")
+
+    return defaults.copy()
 
 # ============================================================================
 # NETWORK UTILS (Cloudscraper + BS4)
@@ -245,12 +323,19 @@ def resolve_date_range(start_date: str, end_date: str) -> Tuple[datetime, dateti
     return start_dt, end_dt
 
 def parse_tournament_date(date_str: str) -> Optional[datetime]:
-    try: return datetime.strptime(date_str.strip(), "%d %b %y")
+    if not date_str:
+        return None
+    raw = str(date_str).strip()
+    if not raw:
+        return None
+    try:
+        return datetime.strptime(raw, "%d %b %y")
     except ValueError:
         try:
-            clean = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_str)
+            clean = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', raw, flags=re.IGNORECASE)
             return datetime.strptime(clean.strip(), "%d %B %Y")
-        except ValueError: return None
+        except ValueError:
+            return None
 
 def get_week_id(date_str: str) -> str:
     """Converts a date string to week id format YYYY-Www."""
@@ -270,6 +355,32 @@ def get_week_id(date_str: str) -> str:
                 return "Unknown-Week"
 
     return dt.strftime('%Y-W%W')
+
+
+def load_set_order() -> Dict[str, int]:
+    """Load set release order from data/sets.json (newest = highest number)."""
+    sets_path = os.path.join(get_data_dir(), 'sets.json')
+    try:
+        with open(sets_path, 'r', encoding='utf-8') as f:
+            raw = json.load(f)
+            return {str(k): int(v) for k, v in raw.items() if isinstance(v, (int, float))}
+    except Exception:
+        return {}
+
+
+def extract_number(number_str: str) -> int:
+    """Extract numeric part from card number (handles '185a', 'TG24', etc.)."""
+    if not number_str:
+        return 0
+    m = re.match(r'(\d+)', str(number_str))
+    return int(m.group(1)) if m else 0
+
+
+def card_sort_key(card: dict, set_order: Dict[str, int]) -> Tuple[int, int, str]:
+    """Sort key: newest set first (desc), then card number (asc)."""
+    set_code = card.get('set', '')
+    number_str = card.get('number', '0')
+    return (-set_order.get(set_code, 0), extract_number(number_str), str(number_str))
 
 # ============================================================================
 # UNIFIED CARD DATABASE (Replaces CardDataManager & CardTypeLookup)

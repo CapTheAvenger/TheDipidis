@@ -12,7 +12,7 @@ import os
 import re
 import sys
 from typing import List, Dict
-from card_scraper_shared import get_data_dir, setup_console_encoding
+from card_scraper_shared import get_data_dir, setup_console_encoding, load_set_order, card_sort_key
 
 setup_console_encoding()
 
@@ -25,15 +25,6 @@ def load_csv(filepath: str) -> List[Dict]:
                 if row.get('name_en') or row.get('name'):
                     cards.append(row)
     return cards
-
-def load_set_order() -> Dict[str, int]:
-    """Load set release order from data/sets.json (newest = highest number)."""
-    sets_path = os.path.join(get_data_dir(), 'sets.json')
-    try:
-        with open(sets_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
 
 def load_pokedex() -> Dict[str, int]:
     dex_path = os.path.join(get_data_dir(), 'pokemon_dex_numbers.json')
@@ -131,15 +122,7 @@ def create_merged_database():
 
     # Sort cards: newest sets first (descending set index), then by card number ascending
     set_order = load_set_order()
-    def sort_key(card):
-        set_idx = set_order.get(card.get('set', ''), 0)
-        num_str = str(card.get('number', '0'))
-        num = 0
-        m = re.search(r'\d+', num_str)
-        if m:
-            num = int(m.group())
-        return (-set_idx, num)
-    merged_cards.sort(key=sort_key)
+    merged_cards.sort(key=lambda c: card_sort_key(c, set_order))
     if set_order:
         print(f"✓ Karten sortiert nach Set-Reihenfolge ({len(set_order)} Sets geladen).")
     else:

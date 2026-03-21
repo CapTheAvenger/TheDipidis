@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.firebaseio.com https://*.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://cdn.jsdelivr.net https://*.googleapis.com https://googleapis.com https://www.googleapis.com https://www.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebase.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://limitlesstcg.com https://www.limitlesstcg.com https://pokeapi.co http://localhost:8001 wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.firebaseio.com https://*.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://cdn.jsdelivr.net https://*.googleapis.com https://googleapis.com https://www.googleapis.com https://www.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebase.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://limitlesstcg.com https://www.limitlesstcg.com https://pokeapi.co http://localhost:8001 wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com;">
     <title>Pokémon TCG Analysis</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,424 +17,11 @@
 
     <link rel="stylesheet" href="css/styles.css?v=20260318-v64">
     <link rel="stylesheet" href="css/auth-styles.css">
+    <link rel="stylesheet" href="css/pokeball-menu.css?v=20260318-v64">
 
     <!-- Mobile Drag & Drop polyfill for touch devices -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/default.css" integrity="sha384-Srk3zP8STu1+RFyFIr7rKzR0vJnlq8GYSis1oDYTAROmcW3lszSanzF9h/N5OIAZ" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js" integrity="sha384-mnsnaLTN3WEA86glMYYaTgkNJQWvG0devy3NWP2FdPyJCge1wvNuJF10+iBqRdG7" crossorigin="anonymous"></script>
-
-    <style id="pokeball-menu-styles">
-        /* Base font for the entire page */
-        body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #f0f2f5;
-            color: #2c3e50;
-        }
-
-        .pokeball-wrapper { position: relative; z-index: 1000; }
-
-        .pokeball-btn {
-            width: 55px; height: 55px; border-radius: 50%;
-            background: #fff; border: 4px solid #2c3e50; position: relative;
-            cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            overflow: hidden; flex-shrink: 0;
-        }
-        .pokeball-btn:hover { transform: scale(1.1) rotate(15deg); }
-        .pokeball-top {
-            position: absolute; top: 0; left: 0; right: 0; height: 50%;
-            background: #E3350D; border-bottom: 4px solid #2c3e50; transition: transform 0.4s;
-        }
-        .pokeball-bottom {
-            position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
-            background: #fff; transition: transform 0.4s;
-        }
-        .pokeball-center {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 16px; height: 16px; background: #fff; border: 4px solid #2c3e50;
-            border-radius: 50%; z-index: 2; transition: all 0.4s;
-        }
-        .pokeball-btn.open { transform: scale(1.1); }
-        .pokeball-btn.open .pokeball-top  { transform: translateY(-6px); }
-        .pokeball-btn.open .pokeball-bottom { transform: translateY(6px); }
-        .pokeball-btn.open .pokeball-center { width: 20px; height: 20px; background: #2ecc71; box-shadow: 0 0 12px #2ecc71; }
-
-        .main-menu-dropdown {
-            position: absolute;
-            top: 70px;
-            left: 0;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-            width: 280px;
-            z-index: 10001;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 3px solid #2c3e50;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px) scale(0.98);
-            transform-origin: top left;
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-height: calc(100vh - 90px);
-            overflow-y: auto;
-        }
-        .main-menu-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-        .menu-header {
-            background: #E3350D; color: white; padding: 12px; font-weight: 900;
-            text-align: center; font-size: 16px; letter-spacing: 1.5px; border-bottom: 3px solid #2c3e50;
-            text-transform: uppercase;
-        }
-        .menu-item {
-            padding: 12px 18px; text-align: left; border: none; background: none;
-            font-size: 15px; font-weight: 700; color: #2c3e50;
-            border-bottom: 1px solid #f0f0f0; cursor: pointer;
-            transition: all 0.2s; display: flex; align-items: center; width: 100%;
-            font-family: 'Nunito', sans-serif;
-        }
-        .menu-item:last-child { border-bottom: none; }
-        .menu-item:hover { background: #f8f9fa; color: #3B4CCA; padding-left: 26px; }
-        .menu-item.active { background: #f0f4f8; color: #3B4CCA; border-left: 5px solid #E3350D; }
-
-        .current-tab-badge {
-            font-size: 0.5em; background: #3B4CCA; color: #FFCB05; padding: 5px 12px;
-            border-radius: 20px; font-weight: 900; letter-spacing: 0.5px;
-            box-shadow: 0 2px 5px rgba(59,76,202,0.4); text-transform: uppercase;
-            border: 2px solid #fff; white-space: nowrap; vertical-align: middle; margin-left: 12px;
-        }
-
-        /* Hide old navigation bar */
-        .tab-navigation { display: none !important; }
-
-        @media (max-width: 768px) {
-            .pokeball-btn { width: 45px; height: 45px; }
-            .main-menu-dropdown { width: 260px; }
-            .header h1 { font-size: 1.4em !important; }
-        }
-
-        /* Pokémon-style color overrides */
-        .btn-primary { background-color: #3B4CCA !important; border-color: #2a52be !important; }
-        .btn-primary:hover { background-color: #2a52be !important; }
-        .btn-success { background-color: #27ae60 !important; border-color: #2ecc71 !important; }
-        .btn-success:hover { background-color: #2ecc71 !important; }
-
-        /* ── MODERN BUTTONS & ACTION BARS ── */
-        .action-bar {
-            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
-            background: #f8f9fa; padding: 12px 16px; border-radius: 8px;
-            border: 1px solid #e1e8ed; margin-bottom: 15px;
-        }
-        .action-bar.transparent { background: transparent; border: none; padding: 0; }
-        .action-group-label {
-            font-weight: 800; color: #7f8c8d; font-size: 0.85em;
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .action-divider { width: 2px; height: 24px; background: #e1e8ed; margin: 0 5px; flex-shrink: 0; }
-        .btn-modern {
-            background: white; border: 1px solid #ccd6dd; color: #2c3e50;
-            font-weight: 700; padding: 8px 14px; border-radius: 6px;
-            cursor: pointer; transition: all 0.2s ease; display: inline-flex;
-            align-items: center; gap: 6px; font-size: 0.9em; font-family: 'Nunito', sans-serif;
-        }
-        .btn-modern:hover { background: #f1f5f9; border-color: #aab8c2; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .btn-modern.primary { background: #3B4CCA; color: white; border-color: #2a52be; }
-        .btn-modern.primary:hover { background: #2a52be; color: white; }
-        .btn-modern.success { background: #27ae60; color: white; border-color: #219653; }
-        .btn-modern.success:hover { background: #219653; color: white; }
-        .btn-modern.danger { color: #e74c3c; border-color: #fbc4c4; background: #fffafb; }
-        .btn-modern.danger:hover { background: #e74c3c; color: white; border-color: #e74c3c; }
-        .btn-toggle-group { display: flex; background: #fff; border: 1px solid #ccd6dd; border-radius: 6px; overflow: hidden; }
-        .btn-toggle-item {
-            background: transparent; border: none; border-right: 1px solid #ccd6dd;
-            padding: 8px 14px; font-weight: 700; color: #555; cursor: pointer; font-size: 0.85em;
-            transition: 0.2s; font-family: 'Nunito', sans-serif;
-        }
-        .btn-toggle-item:last-child { border-right: none; }
-        .btn-toggle-item:hover { background: #f8f9fa; }
-        .btn-toggle-item.btn-success, .btn-toggle-item.active { background: #3B4CCA !important; color: white !important; }
-
-        /* ── GOLDFISHING PLAYTESTER ── */
-        #playtesterModal { font-family: 'Nunito', sans-serif !important; background: #0d2a18 !important; overflow: hidden !important; }
-
-        .pt-toolbar { background: linear-gradient(90deg, #1b3b8c 0%, #2a52be 100%); border-bottom: 3px solid #ffcb05; box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 100; }
-        .pt-btn { background: rgba(255,255,255,0.9); color: #1b3b8c; border: 2px solid #ffcb05; border-radius: 20px; padding: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space: nowrap; transition: all 0.15s ease; font-family: inherit; }
-        .pt-btn:hover { background: #ffcb05; color: #000; transform: translateY(-2px); }
-        .pt-btn.pt-danger { background: #e74c3c; color: white; border-color: #c0392b; }
-        .pt-zone-label { color: rgba(255,255,255,0.9); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
-
-        .pt-arena {
-            position: relative;
-            width: 100%; height: 100%; max-width: 900px; min-height: min(600px, 80vh);
-            background:
-                radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%),
-                repeating-linear-gradient( 55deg, rgba(255,255,255,0.013) 0px, rgba(255,255,255,0.013) 1px, transparent 1px, transparent 9px),
-                repeating-linear-gradient(-55deg, rgba(255,255,255,0.013) 0px, rgba(255,255,255,0.013) 1px, transparent 1px, transparent 9px),
-                linear-gradient(165deg, #1c7d34 0%, #145a26 45%, #0b3818 100%);
-            border: 4px solid rgba(255,255,255,0.18); border-radius: 20px;
-            box-sizing: border-box;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: center center;
-            box-shadow: inset 0 0 80px rgba(0,0,0,0.35), 0 10px 40px rgba(0,0,0,0.7);
-            flex-shrink: 0;
-        }
-        .pt-arena::before {
-            content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px;
-            background: rgba(255,255,255,0.2); transform: translateY(-50%); z-index: 0; pointer-events: none;
-        }
-        .pt-arena::after {
-            content: ''; position: absolute; top: 50%; left: 50%; width: 140px; height: 140px;
-            border: 2px solid rgba(255,255,255,0.2); border-radius: 50%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none;
-        }
-
-        .pt-empty-slot { width: clamp(45px, 7vw, 58px); height: auto; aspect-ratio: 2.5 / 3.5; border: 2px dashed rgba(255,255,255,0.28); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.32); font-size: 9px; cursor: pointer; transition: all 0.2s; text-align: center; user-select: none; box-sizing: border-box; flex-shrink: 0; background: rgba(0,0,0,0.15); position: relative; z-index: 2; }
-        .pt-empty-slot.pt-drop-target, .pt-empty-slot:hover { border-color: #ffcb05; background: rgba(255, 203, 5, 0.15); color: #ffcb05; box-shadow: 0 0 10px rgba(255,203,5,0.3); }
-        .pt-field-card { position: relative; width: clamp(45px, 7vw, 58px); height: auto; aspect-ratio: 2.5 / 3.5; cursor: pointer; border-radius: 4px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 2px 2px 6px rgba(0,0,0,0.4); user-select: none; flex-shrink: 0; z-index: 2; }
-        .pt-field-card:hover { transform: scale(1.2); z-index: 10; }
-        .pt-card-selected { outline: 3px solid #ffcb05; outline-offset: 2px; box-shadow: 0 0 15px #ffcb05; }
-
-        #ptActiveZone-p1 .pt-empty-slot, #ptActiveZone-p1 .pt-field-card,
-        #ptActiveZone-p2 .pt-empty-slot, #ptActiveZone-p2 .pt-field-card { width: clamp(60px, 9vw, 75px); height: auto; aspect-ratio: 2.5 / 3.5; }
-
-        .pt-cmd-input { background: rgba(0,0,0,0.7); border: 2px solid #3B4CCA; border-radius: 6px; color: #fff; padding: 6px 10px; font-size: 11px; width: 110px; outline: none; font-family: monospace; transition: all 0.2s; position: relative; z-index: 5; }
-        .pt-cmd-input:focus { border-color: #ffcb05; box-shadow: 0 0 10px rgba(255,203,5,0.5); }
-
-        .pt-attachment-energy { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; object-position: center 25%; left: -8px; z-index: 15; transition: transform 0.2s; }
-        .pt-attachment-energy:hover { transform: scale(2) translateX(5px); z-index: 50; }
-        .pt-attachment-tool { position: absolute; width: 22px; height: 28px; border-radius: 4px; border: 2px solid #fff; object-fit: cover; object-position: center 10%; left: -12px; top: 50%; transform: translateY(-50%); z-index: 14; transition: transform 0.2s; }
-        .pt-attachment-tool:hover { transform: translateY(-50%) scale(2) translateX(8px); z-index: 50; }
-
-        /* Ability & Stadium Used Marker — hollow default, filled when .used */
-        .pt-ability-marker, .pt-stadium-marker {
-            position: absolute;
-            width: 20px; height: 20px;
-            background: rgba(0,0,0,0.6);
-            border: 2px solid #f1c40f; color: #f1c40f;
-            border-radius: 50%; font-weight: 900; font-size: 11px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 20; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            transition: all 0.2s; user-select: none;
-        }
-        .pt-ability-marker { bottom: -6px; right: -6px; }
-        .pt-stadium-marker { top: -8px; right: -8px; border-color: #3498db; color: #3498db; }
-        .pt-ability-marker.used  { background: #f1c40f; color: #000; border-color: #fff; box-shadow: 0 0 10px #f1c40f; }
-        .pt-stadium-marker.used  { background: #3498db; color: #fff; border-color: #fff; box-shadow: 0 0 10px #3498db; }
-        /* DMG Buff Counter — hollow default, orange+glowing when .active */
-        .pt-dmg-modifier {
-            position: absolute; top: -6px; left: -6px;
-            background: rgba(0,0,0,0.7); color: #e67e22; border: 2px solid #e67e22;
-            border-radius: 4px; padding: 1px 4px; font-weight: 900; font-size: 10px;
-            cursor: pointer; z-index: 20; user-select: none; transition: all 0.2s;
-        }
-        .pt-dmg-modifier.active { background: #e67e22; color: #fff; border-color: #fff; box-shadow: 0 0 8px #e67e22; }
-        /* Drag ghost fix: dragged card becomes transparent and non-blocking */
-        .pt-field-card.dragging { opacity: 0.5; pointer-events: none; }
-        .pt-hand-wrapper.dragging .pt-hand-card { opacity: 0.5; }
-        .pt-hand-wrapper.dragging { pointer-events: none; }
-
-        /* Limitless-Style Legend — static, always visible */
-        .pt-legend-box {
-            position: absolute; top: 12px; left: 12px;
-            background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px 12px;
-            color: #ddd; font-size: 10px; z-index: 50; box-shadow: 0 4px 12px rgba(0,0,0,0.8);
-            display: flex; flex-direction: column; gap: 5px; user-select: none; pointer-events: none;
-        }
-        .pt-legend-item { display: flex; align-items: center; gap: 8px; line-height: 1.3; }
-        .pt-damage-badge { position: absolute; top: -8px; right: -8px; background: radial-gradient(circle at top left, #ff6b6b, #c0392b); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; border: 2px solid #fff; pointer-events: none; z-index: 20; }
-        .pt-damage-overlay { position: absolute; top: -10px; right: -14px; display: flex; align-items: center; gap: 0; z-index: 40; background: rgba(0,0,0,0.85); border-radius: 12px; border: 2px solid #ff6b6b; padding: 1px 2px; }
-        .pt-dmg-btn { background: none; border: none; color: #fff; font-size: 10px; font-weight: 900; cursor: pointer; width: 18px; height: 20px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
-        .pt-dmg-btn:active { transform: scale(0.85); }
-        .pt-dmg-minus { color: #2ecc71; }
-        .pt-dmg-plus { color: #ff6b6b; }
-        .pt-dmg-value { color: #fff; font-size: 10px; font-weight: 900; min-width: 22px; text-align: center; cursor: pointer; }
-
-        .pt-field-actions { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); display: none; gap: 2px; z-index: 100; background: rgba(0,0,0,0.9); padding: 4px; border-radius: 6px; border: 1px solid #444; flex-direction: column; }
-        .pt-field-card:hover ~ .pt-field-actions, .pt-field-actions:hover { display: flex; }
-        .pt-action-btn { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 2px 5px; font-size: 9px; font-weight: bold; cursor: pointer; }
-        .pt-action-btn.red { background: #e74c3c; border-color: #c0392b; }
-        .pt-action-btn:hover { background: #555; }
-
-        .pt-deck-pile { width: clamp(35px, 5.5vw, 45px); height: auto; aspect-ratio: 2.5 / 3.5; border-radius: 4px; cursor: default; display: flex; flex-direction: column; background: repeating-linear-gradient(45deg, #1b3b8c, #1b3b8c 6px, #2a52be 6px, #2a52be 12px); border: 2px solid rgba(255,255,255,0.5); user-select: none; position: relative; z-index: 2; overflow: hidden; }
-        .pt-deck-pile:hover { border-color: #ffcb05; }
-        .pt-deck-half { flex: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; transition: background .12s; }
-        .pt-deck-top { border-bottom: 1px solid rgba(255,255,255,0.25); border-radius: 2px 2px 0 0; }
-        .pt-deck-bot { border-radius: 0 0 2px 2px; }
-        .pt-deck-half:hover { background: rgba(255,255,255,0.18); }
-        .pt-prize-card { width: clamp(22px, 3.5vw, 28px); height: auto; aspect-ratio: 2.5 / 3.5; border-radius: 4px; cursor: pointer; display: block; box-shadow: 1px 1px 3px rgba(0,0,0,0.5); transition: transform 0.15s; position: relative; z-index: 2;}
-        .pt-prize-card:hover { transform: scale(1.15) translateY(-5px); border: 2px solid #ffcb05; z-index: 10;}
-
-        .pt-player-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; position: relative; z-index: 2; gap: 1vw; }
-        .pt-side-panel { display: flex; gap: clamp(4px, 1vw, 8px); align-items: flex-end; width: clamp(100px, 16vw, 140px); flex-shrink: 0; }
-
-        .pt-hand-zone { background: transparent; border-top: none; padding: 4px 5px 6px 5px; margin: 0; display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 6px; min-height: 90px; align-items: flex-end; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .pt-hand-zone::-webkit-scrollbar { display: none; }
-        .pt-hand-scroll-shell { display:flex; align-items:center; gap:8px; width:100%; }
-        .pt-hand-scroll-viewport { flex:1; min-width:0; background: rgba(0,0,0,0.15); border-radius: 10px; overflow: hidden; }
-        .pt-hand-scroll-btn { width: 34px; height: 72px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color:#fff; font-size:18px; font-weight:900; cursor:pointer; flex-shrink:0; transition: background .15s, opacity .15s, transform .15s; }
-        .pt-hand-scroll-btn:hover { background: rgba(255,255,255,0.18); transform: scale(1.03); }
-        .pt-hand-scroll-btn:disabled { opacity: 0.28; cursor: default; transform: none; }
-        .pt-hand-wrapper { position: relative; display: inline-block; flex-shrink: 0; }
-        .pt-hand-card { width: clamp(48px, 7vw, 62px); height: auto; aspect-ratio: 2.5 / 3.5; border-radius: 4px; cursor: pointer; display: block; transition: transform 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
-        .pt-hand-card:hover { transform: translateY(-15px) scale(1.2); z-index: 5; position: relative; }
-        .pt-hand-card.pt-card-selected { outline: 3px solid #ffcb05; transform: translateY(-20px) scale(1.2); z-index: 6; }
-        .pt-hand-disc-btn { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 4px; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
-        .pt-hand-wrapper:hover .pt-hand-disc-btn { display: flex; }
-
-        .pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 18px; border-radius: 4px; font-weight: 900; font-size: 9px; cursor: pointer; border: 2px solid; transition: all 0.2s; }
-        .pt-marker-vstar { background: linear-gradient(135deg, #fff, #a8e6cf); color: #000; border-color: #fff; }
-        .pt-marker-gx { background: linear-gradient(135deg, #333, #000); color: #fff; border-color: #00bcd4; }
-        .pt-marker.used { opacity: 0.3; filter: grayscale(1); transform: scale(0.95); }
-
-        #ptActionLogPanel { position: absolute; right: 15px; top: 60px; width: 240px; height: 280px; background: rgba(0, 0, 0, 0.85); border: 2px solid #3B4CCA; border-radius: 8px; color: #fff; font-family: monospace; font-size: 11px; padding: 10px; overflow-y: auto; z-index: 10000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .pt-log-entry { margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; }
-        .pt-log-p1 { color: #a8e6cf; }
-        .pt-log-p2 { color: #ff8b94; }
-        .pt-log-neutral { color: #ffcb05; }
-
-        .pt-arena.flipped { transform: rotate(180deg); }
-        .pt-arena.flipped .static-element { transform: rotate(180deg); }
-        .pt-arena.flipped .pt-stadium-anchor {
-            right: auto !important;
-            left: 14% !important;
-            transform: translate(-50%, -50%) !important;
-        }
-
-        .pt-deck-controls {
-            position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
-            background: rgba(0,0,0,0.88); border: 2px solid #2a52be; border-radius: 8px;
-            padding: 8px; display: flex; flex-direction: column; gap: 5px; width: 145px;
-            z-index: 20; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        }
-        .pt-deck-controls-row { display: flex; gap: 4px; align-items: center; }
-        .pt-cmd-input-small {
-            width: 38px; background: #222; color: #fff; border: 1px solid #555;
-            border-radius: 4px; text-align: center; font-size: 11px; font-family: monospace;
-            padding: 3px 2px;
-        }
-        .pt-btn-small {
-            flex: 1; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px;
-            font-size: 10px; font-weight: 700; cursor: pointer; padding: 3px 4px; transition: 0.15s;
-            font-family: inherit;
-        }
-        .pt-btn-small:hover { background: #2a52be; border-color: #3B4CCA; }
-
-        .pt-status-marker {
-            width: 26px; height: 26px; border-radius: 50%; background: #333; border: 2px solid #555;
-            display: flex; align-items: center; justify-content: center; font-size: 11px;
-            cursor: pointer; transition: all 0.2s; filter: grayscale(1); opacity: 0.45;
-            line-height: 1;
-        }
-        .pt-status-marker.active { filter: grayscale(0); opacity: 1; border-color: #e74c3c; background: #c0392b; box-shadow: 0 0 10px rgba(231,76,60,0.6); }
-
-        .pt-dropzone { transition: background 0.15s, border-color 0.15s; }
-        .pt-dropzone.drag-over { background: rgba(255,203,5,0.2) !important; border-color: #ffcb05 !important; box-shadow: 0 0 12px rgba(255,203,5,0.4); }
-
-        /* ── UX FIX: Hide browser number-input spinners (Chrome/Safari + Firefox) ── */
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; }
-
-        /* Better-readable bottom-bar inputs (Judge / Iono) */
-        .pt-bottom-input {
-            width: 28px; background: #fff; color: #000;
-            border: 2px solid transparent; border-radius: 4px;
-            text-align: center; font-size: 13px; font-weight: 900;
-            padding: 2px; outline: none;
-        }
-        .pt-bottom-input.blue-border { border-color: #3B4CCA; }
-        .pt-bottom-input.red-border  { border-color: #E3350D; }
-
-        /* ── Stepper groups (Draw / Top / Bot deck controls) ── */
-        .pt-stepper-group {
-            display: flex; background: #222; border: 1px solid #555;
-            border-radius: 6px; overflow: hidden; margin-bottom: 4px;
-        }
-        .pt-stepper-group:last-child { margin-bottom: 0; }
-        .pt-stepper-btn {
-            background: #333; color: #fff; border: none; width: 22px;
-            font-weight: bold; cursor: pointer; font-size: 12px; transition: background 0.15s;
-        }
-        .pt-stepper-btn:hover { background: #555; }
-        .pt-stepper-val {
-            width: 20px; text-align: center; color: #ffcb05;
-            font-size: 11px; font-weight: bold; font-family: monospace;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .pt-stepper-action {
-            flex: 1; background: #1b3b8c; color: #fff; border: none;
-            border-left: 1px solid #555; font-size: 10px; font-weight: 700;
-            cursor: pointer; padding: 4px 0; transition: background 0.15s;
-        }
-        .pt-stepper-action:hover { background: #2a52be; }
-
-        /* ── Micro-UX: Tactile click feedback ─────────────────────────────── */
-        .btn-modern:active, .pt-btn:active, .pt-stepper-btn:active, .pt-stepper-action:active {
-            transform: scale(0.95) translateY(0);
-            box-shadow: none;
-        }
-        .btn[onclick^="start"]:active {
-            transform: scale(0.98) !important;
-        }
-
-        /* ── Micro-UX: Custom scrollbars ───────────────────────────────────── */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(59,76,202,0.5); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(59,76,202,0.8); }
-
-        /* ── Micro-UX: No accidental text selection on interactive elements ─ */
-        .pt-stepper-group, .pt-bottom-input, .pt-zone-label {
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        /* ── Responsive Playtester: Small screens (laptops, tablets) ───────── */
-        @media (max-width: 1024px) {
-            .pt-arena { min-height: min(500px, 75vh); border-radius: 12px; }
-            .pt-btn { font-size: 10px; padding: 3px 8px; }
-            .pt-zone-label { font-size: 8px; }
-            .pt-deck-controls { width: 120px; padding: 6px; left: 50px; }
-            .pt-cmd-input { width: 85px; font-size: 10px; padding: 4px 6px; }
-            .pt-legend-box { font-size: 9px; padding: 6px 8px; }
-            #ptActionLogPanel { width: 180px; height: 200px; font-size: 10px; right: 8px; top: 50px; }
-        }
-
-        @media (max-width: 768px) {
-            .pt-arena { min-height: min(420px, 70vh); border-width: 2px; border-radius: 8px; }
-            .pt-legend-box { display: none; }
-            .pt-deck-controls { width: 110px; padding: 4px; left: 40px; }
-            .pt-btn { font-size: 9px; padding: 2px 6px; }
-            .pt-hand-zone { padding: 4px 8px; padding-bottom: 8px; }
-            #ptActionLogPanel { width: 150px; height: 160px; font-size: 9px; }
-        }
-
-        /* ── CARD CONTEXT MENU (HOVER OVERLAY) ── */
-        .pt-card-context-menu {
-            display: none; position: fixed; z-index: 25000; flex-direction: column;
-            background: rgba(15, 15, 15, 0.97); border: 1.5px solid #444; border-radius: 10px;
-            padding: 6px; gap: 5px; width: 174px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.85); backdrop-filter: blur(6px);
-        }
-        .pt-menu-row { display: flex; gap: 3px; justify-content: center; }
-        .pt-menu-sep { height: 1px; background: #444; width: 100%; }
-        .pt-menu-btn {
-            flex: 1; min-width: 0; background: #333; color: white; border: 1px solid #555;
-            border-radius: 5px; padding: 5px 3px; font-size: 12px; font-weight: 900;
-            cursor: pointer; transition: all 0.15s; display: flex; justify-content: center; align-items: center;
-            font-family: inherit;
-        }
-        .pt-menu-btn:hover { background: #555; border-color: #777; transform: scale(1.05); }
-        .pt-menu-btn.green { background: #27ae60; border-color: #2ecc71; }
-        .pt-menu-btn.green:hover { background: #2ecc71; }
-        .pt-menu-btn.red { background: #c0392b; border-color: #e74c3c; }
-        .pt-menu-btn.red:hover { background: #e74c3c; }
-        .pt-menu-btn.blue { background: #2980b9; border-color: #3498db; }
-        .pt-menu-btn.blue:hover { background: #3498db; }
-        .pt-status-btn {
-            width: 24px; height: 24px; border-radius: 50%; font-size: 13px; display: flex;
-            align-items: center; justify-content: center; background: #222; border: 1px solid #555;
-            cursor: pointer; user-select: none; transition: transform 0.15s;
-        }
-        .pt-status-btn:hover { transform: scale(1.2); border-color: #ffcb05; }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -511,7 +98,7 @@
             <div id="city-league" class="tab-content active">
                 <div class="city-league-container">
                     <div class="city-league-header">
-                        <h1>🇯🇵 City League Development <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help"></button></h1>
+                        <h2>🇯🇵 City League Development <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help"></button></h2>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
                             <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
                                 <option value="M4">M4 - Ninja Spinner (Aktuell)</option>
@@ -530,7 +117,7 @@
             <div id="city-league-analysis" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>🦅 City League Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help"></button></h1>
+                        <h2>🦅 City League Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help"></button></h2>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
                             <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
                                 <option value="M4">M4 - Ninja Spinner (Aktuell)</option>
@@ -606,7 +193,7 @@
                             </div>
                             
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
-                                <input type="text" id="cityLeagueOverviewSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input" oninput="filterOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                <input type="text" id="cityLeagueOverviewSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." aria-label="Search City League cards" class="card-search-input" oninput="filterOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
                                 
                                 <!-- Card Type Filter -->
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #f8f9fa;">
@@ -753,7 +340,7 @@
             <div id="current-meta" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>🎮 Limitless Online Comparison <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help"></button></h1>
+                        <h2>🎮 Limitless Online Comparison <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help"></button></h2>
                     </div>
                     <div id="currentMetaContent" style="padding: 30px; background: #ffffff;">
                         <div class="skeleton-row"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
@@ -765,7 +352,7 @@
             <div id="current-analysis" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>📈 Current Meta Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help"></button></h1>
+                        <h2>📈 Current Meta Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help"></button></h2>
                         <p>Analyze and Build Decks from Current Meta</p>
                     </div>
                     
@@ -1031,7 +618,7 @@
             <div id="past-meta" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>🏆 Past Tournament Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('past-meta')" title="Help"></button></h1>
+                        <h2>🏆 Past Tournament Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('past-meta')" title="Help"></button></h2>
                         <p>Analyze and Build Decks from Past Tournaments</p>
                     </div>
                     
@@ -1200,7 +787,7 @@
             
             <!-- Tab 6: Cards -->
             <div id="cards" class="tab-content">
-                <h1>🧰 Card Database <button class="tab-help-btn" onclick="openTabHelp('cards')" title="Help"></button></h1>
+                <h2>🧰 Card Database <button class="tab-help-btn" onclick="openTabHelp('cards')" title="Help"></button></h2>
                 
                 <!-- Filter Section -->
                 <div class="cards-filter-section filter-section-main">
@@ -1374,7 +961,7 @@
             <div id="proxy" class="tab-content">
                 <div class="container" style="background: white; padding: 25px; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.08);">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 18px;">
-                        <h1 style="margin:0; color:#2c3e50;">🖨️ Proxy Printer <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help"></button></h1>
+                        <h2 style="margin:0; color:#2c3e50;">🖨️ Proxy Printer <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help"></button></h2>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
                             <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;">Unique: <span id="proxyUniqueCount">0</span></div>
                             <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;">Copies: <span id="proxyCopiesCount">0</span></div>
@@ -1421,7 +1008,7 @@
             <div id="sandbox" class="tab-content">
                 <div class="container" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="font-size: 2.5em; color: #3B4CCA; margin-bottom: 10px;">⚔️ Battle Sandbox <button class="tab-help-btn" onclick="openTabHelp('sandbox')" title="Help"></button></h1>
+                        <h2 style="font-size: 2.5em; color: #3B4CCA; margin-bottom: 10px;">⚔️ Battle Sandbox <button class="tab-help-btn" onclick="openTabHelp('sandbox')" title="Help"></button></h2>
                         <p style="font-size: 1.1em; color: #7f8c8d; font-weight: 600;">Import decks for 2 players and start the match.</p>
                     </div>
 
@@ -1476,7 +1063,7 @@
             <div id="tutorial" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>📖 How to Use This Website <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help"></button></h1>
+                        <h2>📖 How to Use This Website <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help"></button></h2>
                         <p>Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v44 (March 2026)</p>
                     </div>
                     
@@ -1918,10 +1505,10 @@
             <div id="profile" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h1>
+                        <h2>
                             <img loading="lazy" src="images/pokeball-icon.png" alt="" style="width: 32px; height: 32px; margin-right: 10px; vertical-align: middle;">
                             User Profile <button class="tab-help-btn" onclick="openTabHelp('profile')" title="Help"></button>
-                        </h1>
+                        </h2>
                         <p>Manage your collection, decks, and settings</p>
                     </div>
                     
@@ -2124,9 +1711,9 @@
     </div>
     
     <!-- Authentication Modal -->
-    <div id="auth-modal" class="auth-modal" onclick="if(event.target === this) closeAuthModal()" style="display: none;">
+    <div id="auth-modal" class="auth-modal" role="dialog" aria-modal="true" aria-label="Authentication" onclick="if(event.target === this) closeAuthModal()" style="display: none;">
         <div class="auth-modal-content">
-            <button class="auth-modal-close" onclick="closeAuthModal()">✕</button>
+            <button class="auth-modal-close" onclick="closeAuthModal()" aria-label="Close">✕</button>
             
             <!-- Sign In Form -->
             <div id="signin-form-container">
@@ -2136,11 +1723,11 @@
                 </h2>
                 <form id="sign-in-form" style="margin-bottom: 20px;">
                     <div class="auth-input-group">
-                        <label>Email</label>
+                        <label for="signin-email">Email</label>
                         <input type="email" id="signin-email" required class="auth-input-field">
                     </div>
                     <div class="auth-input-group" style="margin-bottom: 20px;">
-                        <label>Password</label>
+                        <label for="signin-password">Password</label>
                         <input type="password" id="signin-password" required class="auth-input-field">
                     </div>
                     <button type="submit" class="auth-btn auth-btn-primary">Sign In</button>
@@ -2175,16 +1762,16 @@
                 </h2>
                 <form id="sign-up-form" style="margin-bottom: 20px;">
                     <div class="auth-input-group">
-                        <label>Email</label>
+                        <label for="signup-email">Email</label>
                         <input type="email" id="signup-email" required class="auth-input-field">
                     </div>
                     <div class="auth-input-group">
-                        <label>Password</label>
+                        <label for="signup-password">Password</label>
                         <input type="password" id="signup-password" required minlength="6" class="auth-input-field">
                         <small style="color: #666;">Minimum 6 characters</small>
                     </div>
                     <div class="auth-input-group" style="margin-bottom: 20px;">
-                        <label>Confirm Password</label>
+                        <label for="signup-password-confirm">Confirm Password</label>
                         <input type="password" id="signup-password-confirm" required class="auth-input-field">
                     </div>
                     <button type="submit" class="auth-btn auth-btn-primary">Create Account</button>
@@ -2200,7 +1787,7 @@
     </div>
     
     <!-- Image View Modal -->
-    <div id="imageViewModal" class="image-view-modal" onclick="if(event.target === this) closeImageView()">
+    <div id="imageViewModal" class="image-view-modal" role="dialog" aria-modal="true" aria-label="Card Image View" onclick="if(event.target === this) closeImageView()">
         <div class="image-view-content">
             <div class="image-view-header">
                 <h3>🎨 Deck Cards Overview</h3>
@@ -2217,7 +1804,7 @@
     </div>
     
     <!-- Single Card View Modal -->
-    <div id="singleCardModal" class="single-card-modal" onclick="if(event.target === this) closeSingleCard()">
+    <div id="singleCardModal" class="single-card-modal" role="dialog" aria-modal="true" aria-label="Card Details" onclick="if(event.target === this) closeSingleCard()">
         <div class="single-card-modal-content">
             <button class="single-card-close" onclick="closeSingleCard()">✕</button>
             <img id="singleCardImage" src="" alt="" referrerpolicy="no-referrer">
@@ -2226,7 +1813,7 @@
     </div>
 
     <!-- Rarity Switcher Modal -->
-    <div id="raritySwitcherModal" class="rarity-switcher-modal" onclick="if(event.target === this) closeRaritySwitcher()">
+    <div id="raritySwitcherModal" class="rarity-switcher-modal" role="dialog" aria-modal="true" aria-labelledby="raritySwitcherTitle" onclick="if(event.target === this) closeRaritySwitcher()">
         <div class="rarity-switcher-modal-content">
             <span class="rarity-switcher-close" onclick="closeRaritySwitcher()">✕</span>
             <h2 id="raritySwitcherTitle">Card - Rarity Switcher</h2>
@@ -2239,7 +1826,7 @@
     </div>
 
     <!-- Deck Compare Modal -->
-    <div id="deckCompareModal" class="rarity-switcher-modal" onclick="if(event.target === this) closeDeckCompare()" style="z-index: 10000;">
+    <div id="deckCompareModal" class="rarity-switcher-modal" role="dialog" aria-modal="true" aria-label="Deck Compare" onclick="if(event.target === this) closeDeckCompare()" style="z-index: 10000;">
         <div class="rarity-switcher-modal-content" style="max-width: 1400px; width: 95%; max-height: 90vh; overflow-y: auto;">
             <span class="rarity-switcher-close" onclick="closeDeckCompare()">✕</span>
             <h2>🔄 Deck Compare</h2>
@@ -2271,42 +1858,7 @@
         </div>
     </div>
 
-    <script>window.CARD_BACK_URL = "https://images.pokemontcg.io/card-back.png";</script>
-
-    <script>
-        function toggleMainMenu() {
-            document.getElementById('mainMenuDropdown').classList.toggle('show');
-            document.getElementById('mainMenuTrigger').classList.toggle('open');
-        }
-
-        function switchTabAndUpdateMenu(tabId) {
-            if (typeof switchTab === 'function') switchTab(tabId);
-
-            document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.getElementById('menu-btn-' + tabId);
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-                // Strip emoji characters for clean badge text
-                let text = activeBtn.innerText.replace(/[\u{1F300}-\u{1F9FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
-                const badge = document.getElementById('current-tab-title');
-                if (badge) badge.innerText = text || activeBtn.innerText.trim();
-            }
-
-            document.getElementById('mainMenuDropdown').classList.remove('show');
-            document.getElementById('mainMenuTrigger').classList.remove('open');
-        }
-
-        document.addEventListener('click', function(e) {
-            const menu    = document.getElementById('mainMenuDropdown');
-            const trigger = document.getElementById('mainMenuTrigger');
-            if (menu && trigger && menu.classList.contains('show')) {
-                if (!menu.contains(e.target) && !trigger.contains(e.target)) {
-                    menu.classList.remove('show');
-                    trigger.classList.remove('open');
-                }
-            }
-        });
-    </script>
+    <script src="js/inline-init.js?v=20260321-v1"></script>
 
     <div id="playtesterModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:15000; flex-direction:column;">
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
@@ -2905,7 +2457,20 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha384-D/t0ZMqQW31H3az8ktEiNb39wyKnS82iFY52QPACM+IjKW3jDUhyIgh2PApRqJZs" crossorigin="anonymous"></script>
-    <script src="js/app.js?v=20260320-v92"></script>
+    <!-- app.js split into modules for maintainability -->
+    <script src="js/app-core.js?v=20260321-v1"></script>
+    <script src="js/app-price.js?v=20260321-v1"></script>
+    <script src="js/app-utils.js?v=20260321-v1"></script>
+    <script src="js/app-tier-meta.js?v=20260321-v1"></script>
+    <script src="js/app-city-league.js?v=20260321-v1"></script>
+    <script src="js/app-deck-builder.js?v=20260321-v1"></script>
+    <script src="js/app-meta-cards.js?v=20260321-v1"></script>
+    <script src="js/app-current-meta.js?v=20260321-v1"></script>
+    <script src="js/app-past-meta.js?v=20260321-v1"></script>
+    <script src="js/app-cards-db.js?v=20260321-v1"></script>
+    <script src="js/app-init.js?v=20260321-v1"></script>
+    <script src="js/app-current-meta-analysis.js?v=20260321-v1"></script>
+    <script src="js/app-features.js?v=20260321-v1"></script>
     <script src="js/draw-simulator.js?v=20260319-v2"></script>
 
     <!-- Draw Simulator Modal -->
@@ -2944,7 +2509,7 @@
     <div id="toast-container"></div>
 
     <!-- Context Help Modal -->
-    <div id="helpModal" onclick="if(event.target===this)closeHelpModal()">
+    <div id="helpModal" role="dialog" aria-modal="true" aria-label="Help" onclick="if(event.target===this)closeHelpModal()">
         <div class="help-modal-content">
             <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
             <h2 class="help-modal-title"></h2>

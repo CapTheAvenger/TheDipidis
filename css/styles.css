@@ -1,17 +1,64 @@
 /* --- POKÉMON THEME UPGRADE --- */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap');
+/* Font loaded via <link> in index.html — no @import needed (faster) */
+
+:root {
+    /* Core Pokémon Brand */
+    --pokemon-red: #E3350D;
+    --pokemon-red-dark: #A82508;
+    --pokemon-blue: #3B4CCA;
+    --pokemon-blue-dark: #283593;
+    --pokemon-yellow: #FFCB05;
+    --pokemon-yellow-dark: #C7A008;
+
+    /* Accent gradient */
+    --accent: #667eea;
+    --accent-end: #764ba2;
+    --accent-hover: #5568d3;
+
+    /* Semantic colors */
+    --color-success: #28a745;
+    --color-danger: #dc3545;
+    --color-warning: #ffc107;
+    --color-warning-dark: #e0a800;
+    --color-error: #e74c3c;
+    --color-error-dark: #c0392b;
+    --color-info: #17a2b8;
+
+    /* Text */
+    --text-primary: #333;
+    --text-dark: #2c3e50;
+    --text-muted: #555;
+    --text-light: #666;
+
+    /* Backgrounds */
+    --bg-body: #f0f2f5;
+    --bg-light: #f8f9fa;
+    --bg-white: #ffffff;
+    --bg-muted: #ecf0f1;
+
+    /* Borders */
+    --border-color: #ddd;
+    --border-light: #e0e0e0;
+    --border-input: #ddd;
+}
 
 * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
+        /* Keyboard-navigation focus ring (only shows when using keyboard) */
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
         
         html { scroll-behavior: smooth; }
         
         body {
             font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
+            background-color: var(--bg-body);
             background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M50 10a40 40 0 1 1 0 80 40 40 0 0 1 0-80zm0 8a32 32 0 1 0 0 64 32 32 0 0 0 0-64zm0 24a8 8 0 1 1 0 16 8 8 0 0 1 0-16z" fill="rgba(0,0,0,0.03)"/></svg>');
             min-height: 100vh;
             min-height: -webkit-fill-available;
@@ -30,13 +77,13 @@
             color: white;
             margin-bottom: 30px;
             padding: 30px 20px;
-            background: linear-gradient(135deg, #E3350D 0%, #A82508 100%);
+            background: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-red-dark) 100%);
             border-bottom: 5px solid #222224;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             border-radius: 12px;
         }
         
-        .header h1 {
+        .header h1, .header h2 {
             font-size: clamp(1.5em, 6vw, 2.5em);
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -58,12 +105,11 @@
         .tab-navigation {
             display: flex;
             gap: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             padding: 15px;
             flex-wrap: nowrap;
             overflow-x: auto;
             overflow-y: hidden;
-            -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
@@ -123,7 +169,7 @@
         }
 
         .btn-gradient-compare {
-            background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+            background: linear-gradient(135deg, var(--color-info) 0%, #007bff 100%);
         }
 
         /* Form control inputs (deck search, date picker, dropdown) */
@@ -295,23 +341,23 @@
         .section-panel {
             margin-top: 30px;
             padding: 20px;
-            background: #f8f9fa;
+            background: var(--bg-light);
             border-radius: 10px;
         }
 
         /* Generate Low Rarity deck button */
         .btn-gen-low {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: linear-gradient(135deg, var(--color-success) 0%, #20c997 100%);
         }
 
         /* Generate Max Rarity deck button */
         .btn-gen-max {
-            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            background: linear-gradient(135deg, var(--color-danger) 0%, #fd7e14 100%);
         }
 
         /* Save deck to profile button */
         .btn-save-deck {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            background: linear-gradient(135deg, var(--color-success) 0%, #20c997 100%);
             font-weight: 600;
         }
 
@@ -343,14 +389,14 @@
         }
         .type-card h4 { margin-top: 0; }
         .type-card p  { margin: 0; font-size: 0.95em; }
-        .type-card-pokemon        { background: #fff3cd; border-color: #ffc107; }
-        .type-card-supporter      { background: #d4edda; border-color: #28a745; }
-        .type-card-item           { background: #f8d7da; border-color: #dc3545; }
+        .type-card-pokemon        { background: #fff3cd; border-color: var(--color-warning); }
+        .type-card-supporter      { background: #d4edda; border-color: var(--color-success); }
+        .type-card-item           { background: #f8d7da; border-color: var(--color-danger); }
         .type-card-tool           { background: #e7d4f5; border-color: #6f42c1; }
         .type-card-stadium        { background: #f8d7da; border-color: #fd7e14; }
-        .type-card-energy         { background: #d1ecf1; border-color: #17a2b8; }
+        .type-card-energy         { background: #d1ecf1; border-color: var(--color-info); }
         .type-card-special-energy { background: #d1ecf1; border-color: #20c997; }
-        .type-card-ace-spec       { background: linear-gradient(135deg, #ffe0e0, #ffc0c0); border-color: #c0392b; }
+        .type-card-ace-spec       { background: linear-gradient(135deg, #ffe0e0, #ffc0c0); border-color: var(--color-error-dark); }
 
         /* --- Draw Simulator card animation --- */
         .simulator-card {
@@ -391,7 +437,7 @@
         
         .tab-btn.active {
             background: white;
-            color: #667eea;
+            color: var(--accent);
         }
         
         .tab-content {
@@ -405,7 +451,7 @@
             display: block;
         }
         
-        .tab-content h1 {
+        .tab-content h2 {
             color: #333;
             margin-bottom: 30px;
             text-shadow: none;
@@ -432,8 +478,8 @@
         
         .error {
             background: #ffe6e6;
-            border-left: 4px solid #e74c3c;
-            color: #e74c3c;
+            border-left: 4px solid var(--color-error);
+            color: var(--color-error);
             padding: 15px;
             border-radius: 5px;
             margin: 20px 0;
@@ -456,7 +502,6 @@
             margin: 20px 0;
             display: block;
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
         
         table thead, table tbody {
@@ -466,7 +511,7 @@
         }
         
         table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
         }
         
@@ -479,16 +524,16 @@
         
         table td {
             padding: 12px;
-            border-bottom: 1px solid #ecf0f1;
+            border-bottom: 1px solid var(--bg-muted);
             font-size: max(14px, 0.9em);
         }
         
         table tbody tr:hover {
-            background: #f8f9fa;
+            background: var(--bg-light);
         }
         
         .metadata {
-            background: #ecf0f1;
+            background: var(--bg-muted);
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 30px;
@@ -497,7 +542,7 @@
         }
         
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
             padding: 20px;
             border-radius: 10px;
@@ -536,7 +581,7 @@
         }
         
         .change.positive { color: #27ae60; }
-        .change.negative { color: #e74c3c; }
+        .change.negative { color: var(--color-error); }
         
         .search-box {
             margin: 20px 0;
@@ -555,7 +600,7 @@
         
         .search-box input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
@@ -574,7 +619,7 @@
         
         .card-search-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
@@ -595,7 +640,7 @@
         }
 
         .analysis-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -614,8 +659,8 @@
 
         .controls {
             padding: 30px;
-            background: #f8f9fa;
-            border-bottom: 3px solid #667eea;
+            background: var(--bg-light);
+            border-bottom: 3px solid var(--accent);
         }
 
         .control-row {
@@ -652,13 +697,13 @@
         .control-group select:focus,
         .control-group input[type="text"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .cards-section {
             padding: 30px;
-            background: #f8f9fa;
+            background: var(--bg-light);
         }
 
         .cards-header {
@@ -680,7 +725,7 @@
 
         .card-search-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
@@ -701,13 +746,13 @@
         }
 
         .city-league-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
             padding: 30px;
             text-align: center;
         }
 
-        .city-league-header h1 {
+        .city-league-header h2 {
             font-size: 2.5em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -782,7 +827,7 @@
             position: absolute;
             top: 3px;
             right: 3px;
-            background: #dc3545;
+            background: var(--color-danger);
             color: white;
             border-radius: 50%;
             width: 24px;
@@ -800,7 +845,7 @@
         .deck-builder {
             padding: 30px;
             background: white;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid var(--accent);
         }
         
         .deck-builder h2 {
@@ -837,8 +882,8 @@
         }
 
         .rarity-pref-btn.active {
-            background: #ffc107;
-            border-color: #e0a800;
+            background: var(--color-warning);
+            border-color: var(--color-warning-dark);
             color: #333;
         }
 
@@ -858,24 +903,24 @@
         }
 
         .btn-primary {
-            background: #3B4CCA; /* Pokémon Blau */
+            background: var(--pokemon-blue); /* Pokémon Blau */
             color: white;
-            border: 2px solid #283593;
+            border: 2px solid var(--pokemon-blue-dark);
         }
 
         .btn-primary:hover {
-            background: #FFCB05; /* Pokémon Gelb */
+            background: var(--pokemon-yellow); /* Pokémon Gelb */
             color: #222;
-            border-color: #C7A008;
+            border-color: var(--pokemon-yellow-dark);
         }
 
         .btn-warning {
-            background: #ffc107;
+            background: var(--color-warning);
             color: #333;
         }
 
         .btn-warning:hover {
-            background: #e0a800;
+            background: var(--color-warning-dark);
         }
 
         .btn-secondary {
@@ -888,7 +933,7 @@
         }
 
         .btn-success {
-            background: #28a745;
+            background: var(--color-success);
             color: white;
         }
 
@@ -897,7 +942,7 @@
         }
 
         .deck-summary {
-            background: #f8f9fa;
+            background: var(--bg-light);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -918,7 +963,7 @@
 
         .cards-table-header {
             padding: 15px;
-            background: #f8f9fa;
+            background: var(--bg-light);
             border-radius: 8px;
             margin-bottom: 10px;
             cursor: pointer;
@@ -952,13 +997,13 @@
         /* Pokéball icon - open state */
         .cards-toggle::before {
             content: '⚫';
-            color: #667eea;
+            color: var(--accent);
         }
 
         /* Pokéball icon - closed state */
         .cards-toggle.collapsed::before {
             content: '⚪';
-            color: #667eea;
+            color: var(--accent);
         }
 
         /* Stats Grid */
@@ -970,7 +1015,7 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
             padding: 20px;
             border-radius: 10px;
@@ -998,7 +1043,7 @@
         
         /* Deck Visual */
         .deck-visual {
-            background: #f8f9fa;
+            background: var(--bg-light);
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
@@ -1049,7 +1094,7 @@
         }
         
         .card-count {
-            background: #667eea;
+            background: var(--accent);
             color: white;
             padding: 2px 6px;
             border-radius: 4px;
@@ -1067,7 +1112,7 @@
             position: absolute;
             top: 3px;
             right: 3px;
-            background: #dc3545;
+            background: var(--color-danger);
             color: white;
             padding: 1px 4px;
             border-radius: 50%;
@@ -1102,7 +1147,7 @@
             position: absolute;
             top: 3px;
             left: 3px;
-            background: #28a745;
+            background: var(--color-success);
             color: white;
             padding: 1px 4px;
             border-radius: 50%;
@@ -1135,7 +1180,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
             border-radius: 6px;
             cursor: pointer;
@@ -1168,7 +1213,7 @@
             padding: 10px;
             background: #fafafa;
             scrollbar-width: thin;
-            scrollbar-color: #667eea #f0f0f0;
+            scrollbar-color: var(--accent) #f0f0f0;
             transition: all 0.3s ease;
             margin-top: 5px;
         }
@@ -1191,12 +1236,12 @@
         }
         
         .cards-filter-options::-webkit-scrollbar-thumb {
-            background: #667eea;
+            background: var(--accent);
             border-radius: 4px;
         }
         
         .cards-filter-options::-webkit-scrollbar-thumb:hover {
-            background: #5568d3;
+            background: var(--accent-hover);
         }
         
         .cards-filter-options label {
@@ -1227,7 +1272,7 @@
             left: 0;
             right: 0;
             background: white;
-            border: 2px solid #667eea;
+            border: 2px solid var(--accent);
             border-top: none;
             border-radius: 0 0 6px 6px;
             max-height: 400px;
@@ -1271,7 +1316,7 @@
         
         .cards-autocomplete-item-name {
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--text-dark);
             font-size: 14px;
         }
         
@@ -1283,7 +1328,7 @@
         
         .cards-autocomplete-count {
             padding: 4px 8px;
-            background: #ecf0f1;
+            background: var(--bg-muted);
             border-radius: 4px;
             font-size: 11px;
             color: #555;
@@ -1331,7 +1376,7 @@
         .card-database-name {
             font-weight: 700;
             font-size: 14px;
-            color: #2c3e50;
+            color: var(--text-dark);
             margin: 0;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1351,7 +1396,7 @@
         
         .card-database-set {
             font-weight: 600;
-            background: #ecf0f1;
+            background: var(--bg-muted);
             padding: 2px 6px;
             border-radius: 4px;
         }
@@ -1377,18 +1422,18 @@
         .rarity-uncommon { background: #16a085; color: white; }
         .rarity-rare { background: #f39c12; color: white; }
         .rarity-holo { background: #9b59b6; color: white; }
-        .rarity-double { background: #e74c3c; color: white; }
-        .rarity-triple { background: #c0392b; color: white; }
-        .rarity-ultra { background: #2c3e50; color: white; }
-        .rarity-secret { background: linear-gradient(45deg, #f39c12, #e74c3c); color: white; }
+        .rarity-double { background: var(--color-error); color: white; }
+        .rarity-triple { background: var(--color-error-dark); color: white; }
+        .rarity-ultra { background: var(--text-dark); color: white; }
+        .rarity-secret { background: linear-gradient(45deg, #f39c12, var(--color-error)); color: white; }
         .rarity-rainbow { background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); color: white; }
         .rarity-art { background: #8e44ad; color: white; }
-        .rarity-special-art { background: #c0392b; color: white; }
+        .rarity-special-art { background: var(--color-error-dark); color: white; }
         .rarity-char-holo { background: #3498db; color: white; }
         .rarity-char-super { background: #2980b9; color: white; }
-        .rarity-radiant { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .rarity-shiny { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #2c3e50; }
-        .rarity-shiny-ultra { background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%); color: white; }
+        .rarity-radiant { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%); color: white; }
+        .rarity-shiny { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: var(--text-dark); }
+        .rarity-shiny-ultra { background: linear-gradient(135deg, #bdc3c7 0%, var(--text-dark) 100%); color: white; }
         .rarity-promo { background: #e67e22; color: white; }
         
         .card-database-actions {
@@ -1414,12 +1459,12 @@
         }
         
         .card-database-btn-rarity {
-            background: #667eea;
+            background: var(--accent);
             color: white;
         }
         
         .card-database-btn-rarity:hover {
-            background: #5568d3;
+            background: var(--accent-hover);
         }
         
         .card-database-btn-market {
@@ -1477,7 +1522,7 @@
         }
         
         .matchups-grid-container table tbody tr:hover {
-            background: #f8f9fa;
+            background: var(--bg-light);
             transform: translateX(3px);
         }
 
@@ -1593,7 +1638,7 @@
             cursor: pointer;
             color: #666;
         }
-        .auth-modal-close:hover { color: #e74c3c; }
+        .auth-modal-close:hover { color: var(--color-error); }
 
         /* Deck Compare darf breiter sein */
         #deckCompareModal .rarity-switcher-modal-content {
@@ -1635,7 +1680,7 @@
             align-items: center;
             margin-bottom: 30px;
             padding-bottom: 15px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid var(--accent);
         }
 
         .image-view-header h3 {
@@ -1645,7 +1690,7 @@
         }
 
         .image-view-close {
-            background: #e74c3c;
+            background: var(--color-error);
             color: white;
             border: none;
             font-size: 28px;
@@ -1661,7 +1706,7 @@
         }
 
         .image-view-close:hover {
-            background: #c0392b;
+            background: var(--color-error-dark);
             transform: rotate(90deg);
         }
 
@@ -1700,7 +1745,7 @@
             position: absolute;
             top: 5px;
             right: 5px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
             font-weight: bold;
             font-size: 14px;
@@ -2011,7 +2056,7 @@
         }
 
         .rarity-switcher-modal-buttons .mixed-rarity-btn {
-            background-color: #ffc107;
+            background-color: var(--color-warning);
             color: #333;
         }
 
@@ -2046,7 +2091,7 @@
         }
 
         .rarity-switcher-close:hover {
-            color: #e74c3c;
+            color: var(--color-error);
             background: rgba(231, 76, 60, 0.1);
             transform: rotate(90deg);
         }
@@ -2152,7 +2197,7 @@
                 padding: 10px;
             }
 
-            .header h1 {
+            .header h1, .header h2 {
                 font-size: 1.8em;
             }
 
@@ -2192,7 +2237,7 @@
                 margin-bottom: 15px;
             }
 
-            .header h1 {
+            .header h1, .header h2 {
                 font-size: 1.5em;
                 margin-bottom: 5px;
             }
@@ -2357,7 +2402,7 @@
 
         /* Very Small Mobile Devices (Small Phones) */
         @media (max-width: 375px) {
-            .header h1 {
+            .header h1, .header h2 {
                 font-size: 1.3em;
             }
 
@@ -2486,7 +2531,6 @@
             .tab-content table {
                 display: block;
                 overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
                 font-size: 12px;
             }
 
@@ -2506,7 +2550,7 @@
             }
 
             /* Header optimiert */
-            .header h1 {
+            .header h1, .header h2 {
                 font-size: 1.8em;
                 line-height: 1.2;
             }
@@ -2520,7 +2564,7 @@
                 padding: 12px;
             }
 
-            .tab-content h1 {
+            .tab-content h2 {
                 font-size: 1.6em;
                 margin-bottom: 20px;
             }
@@ -2615,7 +2659,7 @@
                 margin-bottom: 10px;
             }
 
-            .header h1 {
+            .header h1, .header h2 {
                 font-size: 1.5em;
             }
 
@@ -2693,7 +2737,7 @@
                 margin-bottom: 15px;
             }
 
-            .header h1 {
+            .header h1, .header h2 {
                 font-size: 1.6em;
             }
 
@@ -3105,7 +3149,7 @@
                 margin-bottom: 15px !important;
             }
             
-            .header h1 {
+            .header h1, .header h2 {
                 font-size: 1.8em !important;
             }
             
@@ -3118,7 +3162,6 @@
                 padding: 10px !important;
                 gap: 6px !important;
                 overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch !important;
             }
             
             .tab-btn {
@@ -3351,7 +3394,7 @@
             }
             
             /* Header noch kompakter */
-            .header h1 {
+            .header h1, .header h2 {
                 font-size: 1.5em !important;
             }
             
@@ -3386,7 +3429,6 @@
 
             /* Smooth scrolling für iOS */
             * {
-                -webkit-overflow-scrolling: touch;
             }
 
             /* Größere Touch-Targets */
@@ -3610,7 +3652,7 @@ h3:first-child {
 
 /* Spaltenk�pfe stylen */
 .matchup-heatmap th {
-    background-color: #f8f9fa;
+    background-color: var(--bg-light);
     color: #333333;
     font-weight: 800;
     position: sticky;
@@ -3708,7 +3750,7 @@ h3:first-child {
 
 /* Ausgew�hlte Karte Highlight */
 .pt-selected {
-    box-shadow: 0 0 0 3px #FFCB05, 0 0 20px rgba(255, 203, 5, 0.6) !important;
+    box-shadow: 0 0 0 3px var(--pokemon-yellow), 0 0 20px rgba(255, 203, 5, 0.6) !important;
     transform: scale(1.05) !important;
     z-index: 100 !important;
     position: relative;
@@ -3721,7 +3763,7 @@ h3:first-child {
     left: 0;
     right: 0;
     background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
-    border-top: 3px solid #FFCB05;
+    border-top: 3px solid var(--pokemon-yellow);
     border-radius: 20px 20px 0 0;
     padding: 20px;
     z-index: 20000;
@@ -3766,7 +3808,7 @@ h3:first-child {
 }
 
 #ptContextCardName {
-    color: #FFCB05;
+    color: var(--pokemon-yellow);
     font-size: 1.2rem;
     font-weight: 700;
 }
@@ -3792,7 +3834,7 @@ h3:first-child {
 }
 
 .pt-context-btn {
-    background: linear-gradient(135deg, #3B4CCA 0%, #2a3a9a 100%);
+    background: linear-gradient(135deg, var(--pokemon-blue) 0%, #2a3a9a 100%);
     color: white;
     border: 2px solid rgba(255, 203, 5, 0.3);
     border-radius: 12px;
@@ -3861,7 +3903,7 @@ h3:first-child {
 }
 
 .archetype-jump-link:hover {
-    color: #e74c3c;
+    color: var(--color-error);
     text-decoration: underline;
     cursor: pointer;
 }
@@ -3936,7 +3978,6 @@ h3:first-child {
         padding: 5px !important;
         gap: 5px !important; /* Karten liegen nebeneinander, keine negative Überlappung die buggy wird */
         align-items: center !important;
-        -webkit-overflow-scrolling: touch;
     }
 
     /* Handkarten zwingen, in der Reihe zu bleiben */
@@ -4103,7 +4144,7 @@ h3:first-child {
 
     /* Links (Attack & End) docken an den linken Rand an */
     .attack-btn {
-        background: #c0392b !important;
+        background: var(--color-error-dark) !important;
         border-radius: 0 8px 8px 0 !important; /* Rechts abgerundet */
     }
     .endturn-btn {
@@ -4309,7 +4350,7 @@ h3:first-child {
     }
 
     .attack-btn {
-        background: #c0392b !important;
+        background: var(--color-error-dark) !important;
         border-radius: 0 8px 8px 0 !important;
     }
 
@@ -4719,7 +4760,7 @@ details[open] > .tier-trending-summary::after {
 }
 
 .trend-down {
-    color: #e74c3c !important;
+    color: var(--color-error) !important;
     text-shadow: 0 0 6px rgba(231, 76, 60, 0.6);
 }
 
@@ -4731,7 +4772,7 @@ details[open] > .tier-trending-summary::after {
    🔥 TOP CARDS WIDGET (Format Staples)
    ========================================================================== */
 .top-cards-container {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    background: linear-gradient(135deg, #ffffff 0%, var(--bg-light) 100%);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 30px;
@@ -4746,7 +4787,6 @@ details[open] > .tier-trending-summary::after {
     overflow-y: hidden;
     padding: 10px 5px;
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
 }
 
 /* Scrollbar styling */
@@ -4817,7 +4857,7 @@ details[open] > .tier-trending-summary::after {
 .top-card-name {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--text-dark);
     margin-bottom: 5px;
     white-space: nowrap;
     overflow: hidden;
@@ -4920,7 +4960,7 @@ details[open] > .tier-trending-summary::after {
 
 .toast-success { background: #27ae60; }
 .toast-warning { background: #f39c12; color: #333; }
-.toast-error { background: #e74c3c; }
+.toast-error { background: var(--color-error); }
 .toast-info { background: #3498db; }
 
 .toast-icon {
@@ -5014,7 +5054,7 @@ details[open] > .tier-trending-summary::after {
 
 .help-modal-content h2 {
     margin-top: 0;
-    color: #2c3e50;
+    color: var(--text-dark);
     font-size: 1.4em;
     border-bottom: 2px solid #3498db;
     padding-bottom: 10px;
@@ -5190,7 +5230,6 @@ details[open] > .tier-trending-summary::after {
     .cards-header > div:nth-child(2) > div {
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         -ms-overflow-style: none;
         padding-bottom: 4px !important;
@@ -5208,7 +5247,6 @@ details[open] > .tier-trending-summary::after {
     .cards-header .btn-toggle-group {
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         -ms-overflow-style: none;
     }
@@ -5458,7 +5496,6 @@ details[open] > .tier-trending-summary::after {
     gap: 10px !important;
     padding: 10px 5px !important;
     margin-bottom: 20px !important;
-    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
 }
 .draw-sim-hand::-webkit-scrollbar { display: none; }
@@ -5639,7 +5676,7 @@ details[open] > .tier-trending-summary::after {
     }
 
     .attack-btn {
-        background: #c0392b !important;
+        background: var(--color-error-dark) !important;
         border-radius: 0 8px 8px 0 !important;
     }
 

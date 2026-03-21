@@ -21,25 +21,16 @@ from datetime import datetime
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, safe_fetch_html
+from card_scraper_shared import (
+    setup_console_encoding, get_app_path, get_data_dir, safe_fetch_html,
+    setup_logging, load_settings, load_set_order, card_sort_key
+)
 
 setup_console_encoding()
 
 # LOGGING SETUP
+logger = setup_logging("scraper")
 data_dir = get_data_dir()
-os.makedirs(data_dir, exist_ok=True)
-log_file = os.path.join(data_dir, "scraper.log")
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.FileHandler(log_file, encoding="utf-8"),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
 
 logger.info("=" * 80)
 logger.info("ALL CARDS SCRAPER - FAST EDITION (English + German)")
@@ -58,48 +49,21 @@ DEFAULT_SETTINGS = {
     "max_workers": 8,
 }
 
-def load_settings() -> dict:
-    settings = DEFAULT_SETTINGS.copy()
-    app_path = get_app_path()
-    candidates = [
-        os.path.join(app_path, "all_cards_scraper_settings.json"),
-        os.path.join(os.getcwd(), "all_cards_scraper_settings.json"),
-        os.path.join(app_path, "data", "all_cards_scraper_settings.json"),
-    ]
-    for path in candidates:
-        if os.path.isfile(path):
-            try:
-                with open(path, "r", encoding="utf-8-sig") as f:
-                    settings.update(json.loads(f.read()))
-                logger.info(f"Settings geladen: {path}")
-                return settings
-            except Exception as e:
-                logger.warning(f"Settings konnten nicht geladen werden: {e}")
-    return settings
+def _load_settings() -> dict:
+    return load_settings("all_cards_scraper_settings.json", DEFAULT_SETTINGS)
 
 
 # SET-ORDER (dynamisch aus sets.json)
-sets_json_path = os.path.join(data_dir, "sets.json")
-SET_ORDER: dict = {}
-try:
-    with open(sets_json_path, "r", encoding="utf-8") as f:
-        SET_ORDER = json.load(f)
-    logger.info(f"+ {len(SET_ORDER)} Sets fuer Sortierung geladen aus sets.json")
-except FileNotFoundError:
+SET_ORDER = load_set_order()
+if SET_ORDER:
+    logger.info("+ %s Sets fuer Sortierung geladen aus sets.json", len(SET_ORDER))
+else:
     logger.warning("! sets.json nicht gefunden! Bitte im Dashboard Update Sets (8) ausfuehren.")
     logger.warning("  Karten werden vorerst nur nach Nummer sortiert.")
 
 
 def sort_key(card: dict):
-    set_code = card.get("set", "")
-    number_str = card.get("number", "0")
-    set_order = SET_ORDER.get(set_code, 0)
-    try:
-        m = re.match(r"(\d+)", number_str)
-        card_number = int(m.group(1)) if m else 0
-    except Exception:
-        card_number = 0
-    return (-set_order, card_number, number_str)
+    return card_sort_key(card, SET_ORDER)
 
 
 # LOAD EXISTING CSV
@@ -160,7 +124,7 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
         f"({len(complete_cards)} vollstaendig, {len(incomplete_cards)} unvollstaendig)"
     )
     if incomplete_cards and rescrape_incomplete:
-        logger.info(f"! {len(incomplete_cards)} unvollstaendige Karten werden neu gescraped.")
+        logger.info("! %s unvollstaendige Karten werden neu gescraped.", len(incomplete_cards))
 
     return complete_cards, existing_keys, incomplete_cards
 
@@ -172,7 +136,7 @@ def scrape_all_cards_list(
     existing_keys: set = None,
     language: str = "en"
 ) -> list:
-    logger.info(f"Starte Listen-Scraping - Sprache: {language.upper()}")
+    logger.info("Starte Listen-Scraping - Sprache: %s", language.upper())
     all_cards_data = []
     if existing_keys is None:
         existing_keys = set()
@@ -188,18 +152,18 @@ def scrape_all_cards_list(
 
     while True:
         if max_pages and page_index > max_pages:
-            logger.info(f"max_pages-Limit erreicht ({max_pages}). Stoppe.")
+            logger.info("max_pages-Limit erreicht (%s). Stoppe.", max_pages)
             break
         if end_page and page_index > end_page:
-            logger.info(f"end_page-Limit erreicht ({end_page}). Stoppe.")
+            logger.info("end_page-Limit erreicht (%s). Stoppe.", end_page)
             break
 
         current_url = base_url if page_index == 1 else f"{base_url}&page={page_index}"
-        logger.info(f"  Seite {page_index} ({language.upper()}): {current_url}")
+        logger.info("  Seite %s (%s): %s", page_index, language.upper(), current_url)
 
         html = safe_fetch_html(current_url, timeout=15)
         if not html:
-            logger.error(f"  Fehler bei Seite {page_index}: Cloudflare Block oder Timeout")
+            logger.error("  Fehler bei Seite %s: Cloudflare Block oder Timeout", page_index)
             time.sleep(5)
             page_index += 1
             continue
@@ -258,7 +222,7 @@ def scrape_all_cards_list(
             new_on_page += 1
 
         if len(all_cards_data) % 500 == 0 and new_on_page > 0:
-            logger.info(f"  ... {len(all_cards_data)} Karten bisher")
+            logger.info("  ... %s Karten bisher", len(all_cards_data))
 
         # Pagination check
         next_tag = soup.select_one(
@@ -280,7 +244,7 @@ def scrape_all_cards_list(
 
         time.sleep(delay)
 
-    logger.info(f"+ {len(all_cards_data)} {language.upper()}-Karten aus Liste geladen.")
+    logger.info("+ %s %s-Karten aus Liste geladen.", len(all_cards_data), language.upper())
     return all_cards_data
 
 
@@ -431,10 +395,10 @@ def scrape_card_details(
             try:
                 updated_cards.append(future.result())
             except Exception as exc:
-                logger.error(f"Thread-Fehler: {exc}")
+                logger.error("Thread-Fehler: %s", exc)
                 updated_cards.append(future_to_card[future])
             if completed % 100 == 0:
-                logger.info(f"  Fortschritt: {completed}/{len(cards)} Karten gescraped ...")
+                logger.info("  Fortschritt: %s/%s Karten gescraped ...", completed, len(cards))
                 write_csv_batch(updated_cards)
 
     write_csv_batch(updated_cards)
@@ -449,14 +413,14 @@ def scrape_card_details(
 # MAIN
 def main():
     try:
-        settings    = load_settings()
+        settings    = _load_settings()
         csv_path    = os.path.join(data_dir, "all_cards_database.csv")
         json_path   = os.path.join(data_dir, "all_cards_database.json")
         append_mode = bool(settings.get("append", True))
         start_page  = int(settings.get("start_page", 1))
         rescrape    = bool(settings.get("rescrape_incomplete", True))
 
-        logger.info(f"Ausgabe-Verzeichnis: {os.path.abspath(data_dir)}")
+        logger.info("Ausgabe-Verzeichnis: %s", os.path.abspath(data_dir))
 
         if append_mode:
             existing_cards, existing_keys, incomplete_cards = load_existing_cards(csv_path, rescrape)
@@ -525,7 +489,7 @@ def main():
                 dedup_dict[key] = card
         deduplicated = list(dedup_dict.values())
 
-        logger.info(f"Sortiere {len(deduplicated)} Karten (neueste Sets zuerst) ...")
+        logger.info("Sortiere %s Karten (neueste Sets zuerst) ...", len(deduplicated))
         deduplicated.sort(key=sort_key)
 
         fieldnames = ["name_en", "name_de", "set", "number", "type", "rarity",
@@ -545,8 +509,8 @@ def main():
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(json_data, f, indent=2, ensure_ascii=False)
 
-        logger.info(f"+ CSV gespeichert:  {csv_path}")
-        logger.info(f"+ JSON gespeichert: {json_path}")
+        logger.info("+ CSV gespeichert:  %s", csv_path)
+        logger.info("+ JSON gespeichert: %s", json_path)
         logger.info("SUCCESS: All cards database ready!")
 
     except Exception as e:

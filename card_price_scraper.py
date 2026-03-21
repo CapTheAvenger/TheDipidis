@@ -21,14 +21,12 @@ import concurrent.futures
 from datetime import datetime
 
 try:
-    import cloudscraper
     from bs4 import BeautifulSoup
 except ImportError:
-    print("FEHLER: Bibliotheken fehlen! Bitte installiere:")
-    print("  pip install cloudscraper beautifulsoup4")
+    print("FEHLER: beautifulsoup4 fehlt! pip install beautifulsoup4")
     sys.exit(1)
 
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, _get_scraper
+from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, setup_logging, load_settings, _get_scraper
 
 setup_console_encoding()
 
@@ -36,20 +34,7 @@ setup_console_encoding()
 _request_semaphore = threading.Semaphore(1)
 
 # LOGGING
-data_dir = get_data_dir()
-os.makedirs(data_dir, exist_ok=True)
-log_file = os.path.join(data_dir, "price_scraper.log")
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.FileHandler(log_file, encoding="utf-8"),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging("price_scraper")
 
 logger.info("=" * 80)
 logger.info("CARD PRICE SCRAPER - FAST EDITION")
@@ -64,31 +49,14 @@ DEFAULT_SETTINGS = {
     "max_runtime_minutes": None, # Optional time cap for GitHub Actions
 }
 
-def load_settings() -> dict:
-    settings = DEFAULT_SETTINGS.copy()
-    app_path = get_app_path()
-    candidates = [
-        os.path.join(app_path, "card_price_scraper_settings.json"),
-        os.path.join(os.getcwd(), "card_price_scraper_settings.json"),
-        os.path.join(app_path, "data", "card_price_scraper_settings.json"),
-    ]
-    for path in candidates:
-        if os.path.isfile(path):
-            try:
-                with open(path, "r", encoding="utf-8-sig") as f:
-                    settings.update(json.loads(f.read()))
-                logger.info(f"Settings geladen: {path}")
-                return settings
-            except Exception as e:
-                logger.warning(f"Settings konnten nicht geladen werden: {e}")
-    logger.info("Keine Settings-Datei gefunden. Nutze Standardwerte.")
-    return settings
+def _load_settings() -> dict:
+    return load_settings("card_price_scraper_settings.json", DEFAULT_SETTINGS)
 
 
 # DATA LOADING
 def load_cards_to_update(csv_path: str) -> list:
     if not os.path.isfile(csv_path):
-        logger.error(f"{csv_path} nicht gefunden!")
+        logger.error("%s nicht gefunden!", csv_path)
         return []
 
     cards = []
@@ -107,7 +75,7 @@ def load_cards_to_update(csv_path: str) -> list:
                 "card_url": (row.get("card_url") or "").strip(),
             })
 
-    logger.info(f"Lade {len(cards)} Karten aus der Datenbank.")
+    logger.info("Lade %s Karten aus der Datenbank.", len(cards))
     return cards
 
 
@@ -166,7 +134,7 @@ def save_prices(prices: list, csv_path: str):
         for key in sorted(existing.keys()):
             writer.writerow(existing[key])
 
-    logger.info(f"+ {len(existing)} Preise gespeichert in {csv_path}")
+    logger.info("+ %s Preise gespeichert in %s", len(existing), csv_path)
 
 
 # SCRAPING LOGIC
@@ -187,7 +155,7 @@ def _parse_cardmarket_price(html: str, card_id: str) -> str:
             if dd:
                 text = dd.get_text(strip=True)
                 if "EUR" in text or "€" in text:
-                    logger.info(f"  + CM 7-day avg [{card_id}]: {text}")
+                    logger.info("  + CM 7-day avg [%s]: %s", card_id, text)
                     return text
 
     # Priority 2: 30-day average
@@ -198,7 +166,7 @@ def _parse_cardmarket_price(html: str, card_id: str) -> str:
             if dd:
                 text = dd.get_text(strip=True)
                 if "EUR" in text or "€" in text:
-                    logger.info(f"  + CM 30-day avg [{card_id}]: {text}")
+                    logger.info("  + CM 30-day avg [%s]: %s", card_id, text)
                     return text
 
     # Priority 3: From / Ab price (EUR only — not GBP/USD)
@@ -209,7 +177,7 @@ def _parse_cardmarket_price(html: str, card_id: str) -> str:
             if dd:
                 text = dd.get_text(strip=True)
                 if ("EUR" in text or "€" in text) and "£" not in text and "$" not in text:
-                    logger.info(f"  + CM From price [{card_id}]: {text}")
+                    logger.info("  + CM From price [%s]: %s", card_id, text)
                     return text
 
     return ""
@@ -233,11 +201,11 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
                 if resp.status_code == 200:
                     eur_price = _parse_cardmarket_price(resp.text, card_id)
                 elif resp.status_code == 403:
-                    logger.warning(f"  ! Cloudflare 403 bei CM [{card_id}] — versuche Limitless")
+                    logger.warning("  ! Cloudflare 403 bei CM [%s] — versuche Limitless", card_id)
                 else:
-                    logger.debug(f"  CM HTTP {resp.status_code} fuer {card_id}")
+                    logger.debug("  CM HTTP %s fuer %s", resp.status_code, card_id)
             except Exception as e:
-                logger.debug(f"  CM Fehler fuer {card_id}: {e}")
+                logger.debug("  CM Fehler fuer %s: %s", card_id, e)
 
         # Strategy 2: Limitless TCG fallback (also refreshes CM URL if missing)
         if not eur_price:
@@ -265,13 +233,13 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
                                     # Update CM URL if we didn't have it or want to refresh
                                     if not cm_url and eur_link.has_attr("href"):
                                         cm_url = eur_link["href"]
-                                    logger.info(f"  + LT fallback [{card_id}]: {eur_price}")
+                                    logger.info("  + LT fallback [%s]: %s", card_id, eur_price)
                                     break
             except Exception as e:
-                logger.debug(f"  LT Fallback Fehler fuer {card_id}: {e}")
+                logger.debug("  LT Fallback Fehler fuer %s: %s", card_id, e)
 
     if not eur_price:
-        logger.debug(f"  x Kein Preis gefunden [{card_id}]")
+        logger.debug("  x Kein Preis gefunden [%s]", card_id)
 
     return {
         "name": card["name"],
@@ -291,7 +259,7 @@ def scrape_prices(cards: list, settings: dict, existing_prices: dict, csv_path: 
     max_runtime  = settings.get("max_runtime_minutes", None)
     scrape_start = time.time()
 
-    logger.info(f"Starte Preis-Scraping ({max_workers} Thread(s), {base_delay}s Base-Delay)")
+    logger.info("Starte Preis-Scraping (%s Thread(s), %ss Base-Delay)", max_workers, base_delay)
 
     results          = []
     cards_to_process = []
@@ -359,11 +327,11 @@ def scrape_prices(cards: list, settings: dict, existing_prices: dict, csv_path: 
             try:
                 results.append(future.result())
             except Exception as exc:
-                logger.error(f"Thread-Fehler: {exc}")
+                logger.error("Thread-Fehler: %s", exc)
                 results.append(future_to_card[future])
 
             if completed % 50 == 0:
-                logger.info(f"  Fortschritt: {completed}/{len(cards_to_process)} Preise aktualisiert ...")
+                logger.info("  Fortschritt: %s/%s Preise aktualisiert ...", completed, len(cards_to_process))
                 save_prices(results, csv_path)
 
     return results
@@ -372,12 +340,12 @@ def scrape_prices(cards: list, settings: dict, existing_prices: dict, csv_path: 
 # MAIN
 def main():
     try:
-        settings   = load_settings()
+        settings   = _load_settings()
         cards_csv  = os.path.join(data_dir, "all_cards_database.csv")
         prices_csv = os.path.join(data_dir, "price_data.csv")
 
-        logger.info(f"Input:  {os.path.abspath(cards_csv)}")
-        logger.info(f"Output: {os.path.abspath(prices_csv)}")
+        logger.info("Input:  %s", os.path.abspath(cards_csv))
+        logger.info("Output: %s", os.path.abspath(prices_csv))
 
         cards = load_cards_to_update(cards_csv)
         if not cards:
@@ -385,7 +353,7 @@ def main():
             return
 
         existing_prices = load_existing_prices(prices_csv)
-        logger.info(f"Vorhandene Preise in price_data.csv: {len(existing_prices)}")
+        logger.info("Vorhandene Preise in price_data.csv: %s", len(existing_prices))
 
         logger.info("=" * 60)
         logger.info("PHASE 1: PREISE SCRAPEN")

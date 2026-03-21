@@ -20,18 +20,17 @@ from collections import defaultdict
 import re
 
 try:
-    import cloudscraper
     from bs4 import BeautifulSoup
 except ImportError:
-    print("FEHLER: Es fehlen Bibliotheken! Bitte installiere sie mit:")
-    print("pip install cloudscraper beautifulsoup4")
+    print("FEHLER: beautifulsoup4 fehlt! pip install beautifulsoup4")
     sys.exit(1)
 
 # Import shared scraper utilities
 from card_scraper_shared import (
     setup_console_encoding, get_app_path, get_data_dir, CardDatabaseLookup, 
     aggregate_card_data, save_to_csv, fetch_page, normalize_archetype_name,
-    load_scraped_ids, save_scraped_ids, _get_scraper, resolve_date_range
+    load_scraped_ids, save_scraped_ids, _get_scraper, resolve_date_range,
+    safe_fetch_html, setup_logging, load_settings, parse_tournament_date
 )
 
 # Fix Windows console encoding for Unicode characters
@@ -40,20 +39,7 @@ setup_console_encoding()
 # ============================================================================
 # LOGGING SETUP
 # ============================================================================
-data_dir = get_data_dir()
-os.makedirs(data_dir, exist_ok=True)
-log_file = os.path.join(data_dir, 'city_league_scraper.log')
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    handlers=[
-        logging.FileHandler(log_file, encoding='utf-8'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging("city_league_scraper")
 
 # Try to import city_league_module for tournament scraping
 try:
@@ -62,7 +48,7 @@ try:
 except ImportError as e:
     city_league_module = None
     _city_league_available = False
-    logger.warning(f"City League Module not available: {e}")
+    logger.warning("City League Module not available: %s", e)
 
 # ============================================================================
 # TOURNAMENT TRACKING (Incremental Scraping)
@@ -100,56 +86,17 @@ DEFAULT_SETTINGS = {
     "_comment": "Scrapes City League tournaments and extracts card data by archetype."
 }
 
-def load_settings() -> dict:
-    app_path = get_app_path()
-    settings_path = os.path.join(app_path, 'city_league_analysis_settings.json')
-    
-    if os.path.exists(settings_path):
-        try:
-            with open(settings_path, 'r', encoding='utf-8-sig') as f:
-                settings = json.load(f)
-                logger.info("Settings loaded successfully")
-                
-                # Merge defaults
-                for key, value in DEFAULT_SETTINGS.items():
-                    if key not in settings:
-                        settings[key] = value
-                if 'sources' in DEFAULT_SETTINGS:
-                    settings.setdefault('sources', {})
-                    for source_key, source_defaults in DEFAULT_SETTINGS['sources'].items():
-                        settings['sources'].setdefault(source_key, {})
-                        for s_key, s_val in source_defaults.items():
-                            if s_key not in settings['sources'][source_key]:
-                                settings['sources'][source_key][s_key] = s_val
-                return settings
-        except Exception as e:
-            logger.error(f"Error loading settings: {e}")
-            return DEFAULT_SETTINGS.copy()
-    else:
-        logger.info("Settings file not found. Creating new file with defaults.")
-        with open(settings_path, 'w', encoding='utf-8') as f:
-            json.dump(DEFAULT_SETTINGS, f, indent=4)
-        return DEFAULT_SETTINGS.copy()
+def _load_settings() -> dict:
+    return load_settings(
+        "city_league_analysis_settings.json", DEFAULT_SETTINGS,
+        deep_merge_keys=["sources"], create_if_missing=True
+    )
 
-def parse_limitless_tournament_date(date_str: str):
-    """Parses Limitless date formats like '15 Mar 26' or '15th March 2026'."""
-    if not date_str:
-        return None
-    raw = str(date_str).strip()
-    if not raw:
-        return None
-    try:
-        return datetime.strptime(raw, "%d %b %y")
-    except ValueError:
-        try:
-            clean_date = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', raw, flags=re.IGNORECASE)
-            return datetime.strptime(clean_date.strip(), "%d %B %Y")
-        except ValueError:
-            return None
+# parse_tournament_date imported from card_scraper_shared
 
 def to_iso_week_period(date_str: str) -> str:
     """Converts a tournament date string to ISO week period (YYYY-Www)."""
-    dt = parse_limitless_tournament_date(date_str)
+    dt = parse_tournament_date(date_str)
     if not dt:
         return "Unknown-Week"
     iso_year, iso_week, _ = dt.isocalendar()
@@ -167,37 +114,19 @@ def extract_tournament_date_from_html(tournament_html: str, fallback_date: str =
         if not text:
             continue
         candidate = text.split('•')[0].strip()
-        if parse_limitless_tournament_date(candidate):
+        if parse_tournament_date(candidate):
             return candidate
 
     for elem in soup.select('.tournament-header time, .tournament-header .date'):
         candidate = elem.get_text(' ', strip=True)
-        if parse_limitless_tournament_date(candidate):
+        if parse_tournament_date(candidate):
             return candidate
 
-    if parse_limitless_tournament_date(fallback_date):
+    if parse_tournament_date(fallback_date):
         return fallback_date
     return fallback_date or ""
 
-# ============================================================================
-# CLOUDSCRAPER MULTITHREADING SETUP
-# ============================================================================
-
-def safe_fetch_html(url: str, timeout: int, retries: int, retry_delay: float) -> str:
-    """Laedt HTML via Cloudscraper fuer Main-Threads (Turnierseiten)."""
-    scraper = _get_scraper()
-    for attempt in range(1, retries + 2):
-        try:
-            resp = scraper.get(url, timeout=timeout)
-            resp.raise_for_status()
-            return resp.text
-        except Exception as e:
-            if attempt <= retries:
-                logger.debug(f"Fetch failed (attempt {attempt}/{retries+1}): {url}. Retrying in {retry_delay}s...")
-                time.sleep(retry_delay)
-            else:
-                logger.warning(f"Failed to fetch {url} after {retries+1} attempts: {e}")
-    return ""
+# safe_fetch_html imported from card_scraper_shared
 
 # ============================================================================
 # PARSING LOGIC (BeautifulSoup)
@@ -306,7 +235,7 @@ def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, tour
                 'date': tournament_date
             }
     except Exception as e:
-        logger.debug(f"Decklist error ({deck_url}): {e}")
+        logger.debug("Decklist error (%s): %s", deck_url, e)
     return None
 
 def process_tournament_decklists(
@@ -343,7 +272,7 @@ def process_tournament_decklists(
     if not deck_tasks:
         return []
         
-    logger.info(f"   Starte Download von {len(deck_tasks)} Decks (Multithreading)...")
+    logger.info("   Starte Download von %s Decks (Multithreading)...", len(deck_tasks))
     
     decks = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -386,14 +315,14 @@ def scrape_city_league(settings: dict, card_db: CardDatabaseLookup) -> list:
     
     additional_ids = config.get('additional_tournament_ids', [])
     if additional_ids:
-        logger.info(f"Lade {len(additional_ids)} zusaetzliche Turniere via ID...")
+        logger.info("Lade %s zusaetzliche Turniere via ID...", len(additional_ids))
         for tid in additional_ids:
             try:
                 t_info = city_league_module.get_tournament_by_id(str(tid))
                 if t_info:
                     tournaments.append(t_info)
             except Exception as e:
-                logger.warning(f"Fehler bei zusaetzlichem Turnier {tid}: {e}")
+                logger.warning("Fehler bei zusaetzlichem Turnier %s: %s", tid, e)
 
     if not tournaments:
         logger.info("Keine Turniere gefunden.")
@@ -409,7 +338,7 @@ def scrape_city_league(settings: dict, card_db: CardDatabaseLookup) -> list:
     skipped = len(tournaments) - len(new_tournaments)
     tournaments = new_tournaments
     
-    logger.info(f"Zu verarbeiten: {len(tournaments)} neue Turniere (Uebersprungen: {skipped})")
+    logger.info("Zu verarbeiten: %s neue Turniere (Uebersprungen: %s)", len(tournaments), skipped)
     
     if not tournaments:
         logger.info("Alle Turniere wurden bereits verarbeitet!")
@@ -450,17 +379,17 @@ def scrape_city_league(settings: dict, card_db: CardDatabaseLookup) -> list:
             html, max_decklists, tournament, request_timeout, max_workers, card_db
         )
         
-        logger.info(f"   {len(decklists)} Decks extrahiert.")
+        logger.info("   %s Decks extrahiert.", len(decklists))
         all_decks.extend(decklists)
         newly_scraped_ids.add(t_id)
         
         time.sleep(delay_between)
 
-    logger.info(f"Insgesamt {len(all_decks)} Decks aus der City League gesammelt.")
+    logger.info("Insgesamt %s Decks aus der City League gesammelt.", len(all_decks))
     
     if newly_scraped_ids:
         save_scraped_tournaments(scraped_ids | newly_scraped_ids)
-        logger.info(f"{len(newly_scraped_ids)} neue Turnier-IDs gespeichert.")
+        logger.info("%s neue Turnier-IDs gespeichert.", len(newly_scraped_ids))
 
     return all_decks
 
@@ -469,13 +398,13 @@ def main():
     logger.info("CITY LEAGUE ANALYSIS SCRAPER")
     logger.info("=" * 60)
     
-    settings = load_settings()
+    settings = _load_settings()
     
     logger.info("Lade einheitliche Karten-Datenbank...")
     try:
         card_db = CardDatabaseLookup() 
     except Exception as e:
-        logger.error(f"Konnte Karten-Datenbank nicht laden: {e}")
+        logger.error("Konnte Karten-Datenbank nicht laden: %s", e)
         return
         
     if not card_db.cards:
@@ -493,7 +422,7 @@ def main():
         if 'date' not in deck:
             deck['date'] = deck.get('tournament_date', '')
         
-    logger.info(f"Aggregiere Karten-Daten von {len(all_decks)} Decks...")
+    logger.info("Aggregiere Karten-Daten von %s Decks...", len(all_decks))
     aggregated_data = aggregate_card_data(all_decks, card_db, group_by_tournament_date=True)
     
     output_file = settings.get('output_file', 'city_league_analysis.csv')

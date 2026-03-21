@@ -9,54 +9,22 @@ import re
 import json
 import html as html_mod
 import os
-import sys
-import logging
-import threading
 import urllib.parse
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Optional, Tuple, Any
 
-import cloudscraper
 from bs4 import BeautifulSoup
 
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir
+from card_scraper_shared import (
+    setup_console_encoding, get_app_path, get_data_dir, fetch_page_bs4,
+    setup_logging, load_settings as _shared_load_settings,
+)
 
 setup_console_encoding()
+logger = setup_logging("limitless_online_scraper")
 
-# ── Logging ───────────────────────────────────────────────────────────────────
-_log_dir = "data"
-os.makedirs(_log_dir, exist_ok=True)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler(
-            os.path.join(_log_dir, "limitless_online_scraper.log"), encoding="utf-8"
-        ),
-        logging.StreamHandler(sys.stdout),
-    ],
-)
-logger = logging.getLogger(__name__)
-
-# ── Thread-local cloudscraper ─────────────────────────────────────────────────
-_thread_local = threading.local()
-
-
-def _get_scraper() -> cloudscraper.CloudScraper:
-    if not hasattr(_thread_local, "scraper"):
-        _thread_local.scraper = cloudscraper.create_scraper()
-    return _thread_local.scraper
-
-
-def safe_fetch_html(url: str, timeout: int = 15) -> Optional[BeautifulSoup]:
-    try:
-        resp = _get_scraper().get(url, timeout=timeout)
-        resp.raise_for_status()
-        return BeautifulSoup(resp.text, "html.parser")
-    except Exception as e:
-        logger.warning(f"Could not fetch {url}: {e}")
-        return None
+# _get_scraper, safe_fetch_html replaced by fetch_page_bs4 from card_scraper_shared
 
 
 # ── Settings ──────────────────────────────────────────────────────────────────
@@ -79,34 +47,8 @@ def clean_deck_name(deck_name: str) -> str:
     return deck_name
 
 
-def load_settings() -> Dict[str, Any]:
-    """Load settings from limitless_online_settings.json."""
-    settings = DEFAULT_SETTINGS.copy()
-    app_path = get_app_path()
-    candidates = [
-        os.path.join(app_path, "limitless_online_settings.json"),
-        os.path.join(os.getcwd(), "limitless_online_settings.json"),
-        os.path.join(app_path, "..", "limitless_online_settings.json"),
-        os.path.join(app_path, "data", "limitless_online_settings.json"),
-    ]
-    settings_path = None
-    for path in candidates:
-        normalized_path = os.path.normpath(path)
-        if os.path.isfile(normalized_path):
-            settings_path = normalized_path
-            break
-    if settings_path:
-        try:
-            with open(settings_path, "r", encoding="utf-8-sig") as f:
-                loaded = json.loads(f.read())
-            if isinstance(loaded, dict):
-                settings.update(loaded)
-            logger.info(f"Loaded settings: {settings_path}")
-        except Exception as e:
-            logger.warning(f"Failed to load settings: {e}")
-    else:
-        logger.info("No settings file found. Using defaults.")
-    return settings
+def _load_settings() -> Dict[str, Any]:
+    return _shared_load_settings("limitless_online_settings.json", DEFAULT_SETTINGS)
 
 
 def deck_name_to_url(deck_name: str) -> str:
@@ -132,9 +74,9 @@ def scrape_deck_statistics(
         params["set"] = set_code
 
     url = f"https://play.limitlesstcg.com/decks?{urllib.parse.urlencode(params)}"
-    logger.info(f"Fetching deck statistics from: {url}")
+    logger.info("Fetching deck statistics from: %s", url)
 
-    soup = safe_fetch_html(url)
+    soup = fetch_page_bs4(url)
     if not soup:
         return []
 
@@ -151,7 +93,7 @@ def scrape_deck_statistics(
             meta_path = os.path.join("data", "limitless_meta_stats.json")
             with open(meta_path, "w", encoding="utf-8") as f:
                 json.dump(meta_stats, f, indent=2)
-            logger.info(f"Meta statistics saved: {meta_stats}")
+            logger.info("Meta statistics saved: %s", meta_stats)
             break
 
     table = soup.find("table")
@@ -224,7 +166,7 @@ def scrape_deck_statistics(
             "game": game,
         })
 
-    logger.info(f"Found {len(decks)} deck entries (Other excluded)")
+    logger.info("Found %s deck entries (Other excluded)", len(decks))
     return decks
 
 
@@ -247,9 +189,9 @@ def _scrape_single_matchup(
         f"https://play.limitlesstcg.com/decks/{deck_url}/matchups/?"
         f"{urllib.parse.urlencode(params)}"
     )
-    logger.info(f"  Fetching matchups: {url}")
+    logger.info("  Fetching matchups: %s", url)
 
-    soup = safe_fetch_html(url)
+    soup = fetch_page_bs4(url)
     if not soup:
         # Fallback without set parameter
         params_ns = {"format": format_type.lower(), "rotation": rotation}
@@ -257,8 +199,8 @@ def _scrape_single_matchup(
             f"https://play.limitlesstcg.com/decks/{deck_url}/matchups/?"
             f"{urllib.parse.urlencode(params_ns)}"
         )
-        logger.info(f"  Fallback (no set): {url_fb}")
-        soup = safe_fetch_html(url_fb)
+        logger.info("  Fallback (no set): %s", url_fb)
+        soup = fetch_page_bs4(url_fb)
         if not soup:
             return deck_name, []
 
@@ -312,7 +254,7 @@ def _scrape_single_matchup(
             "ties": ties,
         })
 
-    logger.info(f"  {deck_name}: {len(matchups)} matchups found")
+    logger.info("  %s: %s matchups found", deck_name, len(matchups))
     return deck_name, matchups
 
 
@@ -329,7 +271,7 @@ def analyze_matchups_for_top_decks(
     top_ratio_names = [d["deck_name"] for d in deck_data[:top_ratio_n]]
 
     logger.info("=" * 60)
-    logger.info(f"Analyzing matchups for Top {top_n} decks (max_workers={max_workers})...")
+    logger.info("Analyzing matchups for Top %s decks (max_workers=%s)...", top_n, max_workers)
     logger.info("=" * 60)
 
     # Scrape all matchup pages in parallel
@@ -340,7 +282,7 @@ def analyze_matchups_for_top_decks(
             dn  = deck["deck_name"]
             du  = deck.get("deck_url")
             if not du:
-                logger.warning(f"No deck_url for {dn}, skipping.")
+                logger.warning("No deck_url for %s, skipping.", dn)
                 continue
             futures[executor.submit(_scrape_single_matchup, dn, du, settings)] = dn
         for future in as_completed(futures):
@@ -354,7 +296,7 @@ def analyze_matchups_for_top_decks(
         matchups  = raw_results.get(deck_name, [])
 
         if not matchups:
-            logger.warning(f"No matchup data for {deck_name}")
+            logger.warning("No matchup data for %s", deck_name)
             matchup_analysis[deck_name] = {"best_matchups": [], "worst_matchups": []}
             continue
 
@@ -366,7 +308,7 @@ def analyze_matchups_for_top_decks(
             m for m in filtered
             if m["opponent_deck"].lower() in [td.lower() for td in top_ratio_names]
         ]
-        logger.info(f"  {deck_name}: {len(relevant)} relevant matchups vs Top 20")
+        logger.info("  %s: %s relevant matchups vs Top 20", deck_name, len(relevant))
 
         relevant.sort(key=lambda x: x["win_rate_numeric"], reverse=True)
         best_5  = [m for m in relevant if m["win_rate_numeric"] >  50][:5]
@@ -572,10 +514,10 @@ def create_comparison_report(old_stats: Dict[str, Any], new_stats: Dict[str, Any
     
     # Create HTML report (data/ folder)
     try:
-        logger.debug(f"Creating HTML report: {comparison_html}")
-        logger.debug(f"comparison_data length: {len(comparison_data)}")
-        logger.debug(f"old_stats length: {len(old_stats)}")
-        logger.debug(f"new_stats length: {len(new_stats)}")
+        logger.debug("Creating HTML report: %s", comparison_html)
+        logger.debug("comparison_data length: %s", len(comparison_data))
+        logger.debug("old_stats length: %s", len(old_stats))
+        logger.debug("new_stats length: %s", len(new_stats))
         logger.debug(f"matchup_data: {type(matchup_data)}, {'has data' if matchup_data else 'is None/empty'}")
         logger.debug(f"deck_lookup: {type(deck_lookup)}, {'has data' if deck_lookup else 'is None/empty'}")
         create_html_report(comparison_data, comparison_html, old_stats, new_stats, settings, matchup_data, deck_lookup)
@@ -1376,7 +1318,7 @@ def main():
     logger.info("Limitless Online Deck Scraper - Fast Edition")
     logger.info("=" * 60)
 
-    settings = load_settings()
+    settings = _load_settings()
     logger.info(
         f"Game: {settings['game']} | Format: {settings['format']} | "
         f"Output: {settings['output_file']}"
@@ -1399,7 +1341,7 @@ def main():
         logger.error("No data found. Please check your settings and try again.")
         return
 
-    logger.info(f"Scraping complete! Total decks found: {len(deck_data)}")
+    logger.info("Scraping complete! Total decks found: %s", len(deck_data))
     save_to_csv(deck_data, settings["output_file"])
 
     new_stats   = load_previous_stats(output_file)
@@ -1411,9 +1353,9 @@ def main():
     try:
         html_file = settings["output_file"].replace(".csv", ".html")
         create_deck_list_html(deck_data, html_file, deck_lookup)
-        logger.info(f"HTML report created: {html_file}")
+        logger.info("HTML report created: %s", html_file)
     except Exception as e:
-        logger.warning(f"Could not create HTML report: {e}")
+        logger.warning("Could not create HTML report: %s", e)
         import traceback
         traceback.print_exc()
 
@@ -1438,7 +1380,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("Scraping interrupted by user.")
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.error("Unexpected error: %s", e)
         import traceback
         traceback.print_exc()
     finally:

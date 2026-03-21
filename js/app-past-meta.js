@@ -1,0 +1,1053 @@
+// app-past-meta.js — extracted from app.js
+// Part of Hausi's Pokemon TCG Analysis
+
+        // ====================================
+        // PAST META - Deck Analysis & Builder
+        // ====================================
+        
+        let pastMetaAllData = [];
+        let pastMetaDecks = [];
+        let pastMetaTournaments = [];
+        let pastMetaCurrentDeck = null;
+        let pastMetaCurrentCards = [];
+        let pastMetaFilteredCards = [];
+        let pastMetaCurrentScope = null;
+        let pastMetaRarityMode = 'min'; // 'min', 'max', 'all'
+        let pastMetaShowGridView = true; // Default: Grid View
+
+        function sanitizePastMetaArchetypeName(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return 'Unknown Deck';
+
+            // Remove trailing price artifacts such as "58.60$41.80€" from scraped deck labels.
+            return raw
+                .replace(/\s*\d+[.,]\d+\$\d+[.,]\d+€\s*$/u, '')
+                .replace(/\s*\d+[.,]\d+€\s*$/u, '')
+                .trim() || 'Unknown Deck';
+        }
+
+        function resetSelectWithPlaceholder(selectEl, placeholderText, placeholderValue) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = placeholderValue;
+            placeholderOption.textContent = placeholderText;
+            selectEl.appendChild(placeholderOption);
+        }
+
+        function parsePastMetaNumber(value, fallback = 0) {
+            if (value === null || value === undefined || value === '') return fallback;
+            const raw = String(value).trim();
+            if (!raw) return fallback;
+            const normalized = raw.includes(',') && !raw.includes('.')
+                ? raw.replace(',', '.')
+                : raw;
+            const parsed = Number.parseFloat(normalized);
+            return Number.isFinite(parsed) ? parsed : fallback;
+        }
+
+        function normalizeCardAggregationKey(name) {
+            return String(name || '')
+                .toLowerCase()
+                .replace(/[\u2019'`]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function parsePastMetaDateMs(dateValue) {
+            if (!dateValue) return 0;
+            const raw = String(dateValue).trim();
+            if (!raw) return 0;
+
+            const direct = new Date(raw);
+            if (!Number.isNaN(direct.getTime())) {
+                return direct.getTime();
+            }
+
+            const cleaned = raw.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+            const fallback = new Date(cleaned);
+            if (!Number.isNaN(fallback.getTime())) {
+                return fallback.getTime();
+            }
+
+            return 0;
+        }
+
+        function getPastMetaSortScore(metaName, setOrderMap, latestDateMap) {
+            const normalizedMeta = String(metaName || '').trim().toUpperCase();
+            if (!normalizedMeta) return 0;
+
+            const parts = normalizedMeta.split('-').map(p => p.trim()).filter(Boolean);
+            const firstSet = parts[0] || '';
+            const lastSet = parts[parts.length - 1] || '';
+            const firstOrder = setOrderMap[firstSet] || 0;
+            const lastOrder = setOrderMap[lastSet] || 0;
+            const dateMs = latestDateMap.get(String(metaName || '').trim()) || 0;
+
+            // Primary sort by ending-set recency (e.g. SVI-ASC > SVI-PFL), fallback by latest tournament date.
+            if (lastOrder > 0 || firstOrder > 0) {
+                return (lastOrder * 1000000) + (firstOrder * 1000) + Math.floor(dateMs / 1000000000);
+            }
+
+            return dateMs;
+        }
+
+        function derivePastMetaLabelFromSetCode(setCode, setOrderMap) {
+            const code = String(setCode || '').trim().toUpperCase();
+            if (!code) return '';
+            const mapped = mapSetCodeToMetaFormat(code);
+            return mapped || code;
+        }
+
+        function getPastMetaDeckTournamentKey(deck) {
+            const tournamentId = String(deck?.tournament_id || '').trim();
+            const tournamentName = String(deck?.tournament_name || '').trim();
+            const tournamentDate = String(deck?.tournament_date || '').trim();
+            const format = String(deck?.format || '').trim();
+
+            if (tournamentId) return `id:${tournamentId}`;
+            if (tournamentName && tournamentDate) return `${format}|||${tournamentDate}|||${tournamentName}`;
+            if (tournamentDate) return `${format}|||${tournamentDate}`;
+            if (tournamentName) return `${format}|||${tournamentName}`;
+            return format || 'unknown';
+        }
+
+        function getPastMetaRepresentativeCardCopies(card) {
+            const avgOverall = parsePastMetaNumber(card?.card_count ?? card?.average_count_overall, 0);
+            const maxCount = parseInt(card?.max_count || 0, 10) || 0;
+            const deckCount = parseInt(card?.deck_count || card?.deck_inclusion_count || 0, 10) || 0;
+
+            if (!pastMetaCurrentScope || pastMetaCurrentScope.totalDecklists <= 1) {
+                return maxCount;
+            }
+
+            if (avgOverall > 0) {
+                return avgOverall;
+            }
+
+            if (deckCount > 0) {
+                return 1;
+            }
+
+            return maxCount;
+        }
+
+        function getPastMetaDisplayCount(card) {
+            const representativeCopies = getPastMetaRepresentativeCardCopies(card);
+            const maxCount = parseInt(card?.max_count || 0, 10) || 0;
+
+            if (!pastMetaCurrentScope || pastMetaCurrentScope.totalDecklists <= 1) {
+                return maxCount;
+            }
+
+            if (representativeCopies > 0) {
+                return Math.max(1, Math.round(representativeCopies));
+            }
+
+            return maxCount;
+        }
+
+        function getPastMetaSummaryTotalCount(cards) {
+            if (!Array.isArray(cards) || cards.length === 0) return 0;
+
+            if (!pastMetaCurrentScope || pastMetaCurrentScope.totalDecklists <= 1) {
+                return cards.reduce((sum, card) => sum + (parseInt(card.max_count || 0, 10) || 0), 0);
+            }
+
+            return cards.reduce((sum, card) => sum + getPastMetaRepresentativeCardCopies(card), 0);
+        }
+        
+        async function loadPastMeta() {
+            devLog('Loading Past Meta Deck Analysis...');
+            
+            // Load tournament overview and cards data
+            const [tournamentOverview, cardsData] = await Promise.all([
+                loadCSV('tournament_cards_data_overview.csv'),
+                loadCSV('tournament_cards_data_cards.csv')
+            ]);
+            
+            if (!cardsData || cardsData.length === 0) {
+                const errorMsg = 'No past tournament data found';
+                showToast(errorMsg, 'error');
+                console.error(errorMsg);
+                return;
+            }
+            
+            pastMetaAllData = cardsData;
+            
+            // Store tournament overview data
+            pastMetaTournaments = tournamentOverview || [];
+
+            // Load dynamic set order map for proper meta sorting (newest -> oldest)
+            let pastMetaSetOrderMap = {};
+            try {
+                const ts = Date.now();
+                const setOrderResponse = await fetch(`./data/sets.json?t=${ts}`);
+                if (setOrderResponse.ok) {
+                    const json = await setOrderResponse.json();
+                    if (json && typeof json === 'object') {
+                        pastMetaSetOrderMap = json;
+                    }
+                }
+            } catch (e) {
+                console.warn('[Past Meta] Could not load sets.json for format sorting, using date fallback.', e);
+            }
+            
+            // CSV structure: meta (format), tournament_date, archetype (deck name!), card_name, ...
+            // Some exports have empty meta/format columns; infer per DECK (tournament_date + archetype) from newest set_code
+            const inferredMetaByDeck = new Map();
+            cardsData.forEach(card => {
+                const tournamentId = String(card.tournament_id || '').trim();
+                const tournamentDate = String(card.tournament_date || '').trim();
+                const deckArchetype = String(card.archetype || '').trim();
+                const setCode = String(card.set_code || '').trim().toUpperCase();
+                if ((!tournamentId && !tournamentDate) || !deckArchetype || !setCode) return;
+
+                const deckPeriodKey = tournamentId || tournamentDate;
+                const deckKey = `${deckPeriodKey}|||${deckArchetype}`;
+                const nextOrder = pastMetaSetOrderMap[setCode] || 0;
+                const current = inferredMetaByDeck.get(deckKey);
+                const currentOrder = current ? (pastMetaSetOrderMap[current] || 0) : -1;
+
+                if (nextOrder > currentOrder) {
+                    inferredMetaByDeck.set(deckKey, setCode);
+                }
+            });
+
+            // Group cards by tournament_date + archetype (deck archetype)
+            const deckMap = new Map();
+            cardsData.forEach(card => {
+                const deckArchetype = sanitizePastMetaArchetypeName(card.archetype);
+                const tournamentDate = card.tournament_date || 'Unknown Date';
+                const cardTournamentId = String(card.tournament_id || '').trim();
+                const cardTournamentName = String(card.tournament_name || '').trim();
+                
+                // Infer format per deck from the newest set code in this specific deck
+                const deckPeriodKey = cardTournamentId || String(tournamentDate).trim();
+                const deckMetaLookupKey = `${deckPeriodKey}|||${String(card.archetype || '').trim()}`;
+                const inferredMetaSetCode = inferredMetaByDeck.get(deckMetaLookupKey) || '';
+                const inferredMeta = derivePastMetaLabelFromSetCode(inferredMetaSetCode, pastMetaSetOrderMap);
+                
+                const matchingTournaments = pastMetaTournaments.filter(t => {
+                    if (!t || t.tournament_date !== tournamentDate) return false;
+                    const cardMeta = String(card.meta || '').trim();
+                    const overviewFormat = String(t.format || '').trim();
+                    return !cardMeta || !overviewFormat || overviewFormat === cardMeta;
+                });
+                const tournament = matchingTournaments.length === 1 ? matchingTournaments[0] : null;
+                const resolvedFormat = String(card.meta || '').trim()
+                    || String((tournament && tournament.format) || '').trim()
+                    || inferredMeta
+                    || 'Unknown';
+                const resolvedTournamentId = cardTournamentId || String((tournament && tournament.tournament_id) || '').trim() || tournamentDate;
+                const resolvedTournamentName = cardTournamentName || String((tournament && tournament.tournament_name) || '').trim() || tournamentDate;
+                const deckKey = `${resolvedFormat}|||${resolvedTournamentId}|||${deckArchetype}`;
+                
+                if (!deckMap.has(deckKey)) {
+                    deckMap.set(deckKey, {
+                        key: deckKey,
+                        tournament_id: resolvedTournamentId,
+                        tournament_name: resolvedTournamentName,
+                        tournament_date: tournamentDate,
+                        deck_name: deckArchetype,
+                        archetype: deckArchetype,
+                        format: resolvedFormat,
+                        decklist_count: parseInt(card.total_decks_in_archetype || 1),
+                        _rawArchetypes: new Set([String(card.archetype || '').trim()]),
+                        cards: []
+                    });
+                } else {
+                    const existing = deckMap.get(deckKey);
+                    // Track max decklist count seen across all merging rows
+                    const rowDecklistCount = parseInt(card.total_decks_in_archetype || 1);
+                    existing.decklist_count = Math.max(existing.decklist_count, rowDecklistCount);
+                    // Track distinct raw archetypes (before sanitization) to detect
+                    // per-decklist rows that collapsed into one archetype
+                    existing._rawArchetypes.add(String(card.archetype || '').trim());
+                }
+                deckMap.get(deckKey).cards.push({
+                    ...card,
+                    total_count: parsePastMetaNumber(card.total_count, 0),
+                    card_count: parsePastMetaNumber(card.average_count_overall, 0),
+                    average_count: parsePastMetaNumber(card.average_count, 0),
+                    average_count_overall: parsePastMetaNumber(card.average_count_overall, 0),
+                    percentage_in_archetype: parsePastMetaNumber(card.percentage_in_archetype, 0),
+                    decklist_count: parseInt(card.total_decks_in_archetype || 1, 10) || 1,
+                    deck_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0,
+                    deck_inclusion_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0
+                });
+            });
+            
+            // Post-process: if multiple distinct raw archetypes collapsed into one
+            // sanitized name (e.g. different deck prices appended), use the raw archetype
+            // count as decklist_count when it exceeds the CSV-reported value.
+            deckMap.forEach(deck => {
+                if (deck._rawArchetypes && deck._rawArchetypes.size > deck.decklist_count) {
+                    deck.decklist_count = deck._rawArchetypes.size;
+                }
+                delete deck._rawArchetypes; // Clean up temporary tracking set
+            });
+
+            pastMetaDecks = Array.from(deckMap.values());
+            
+            // Build latest date per meta for robust fallback sorting.
+            const metaLatestDateMap = new Map();
+            cardsData.forEach(card => {
+                const metaName = String(card.meta || '').trim();
+                if (!metaName) return;
+                const dateMs = parsePastMetaDateMs(card.tournament_date);
+                const current = metaLatestDateMap.get(metaName) || 0;
+                if (dateMs > current) {
+                    metaLatestDateMap.set(metaName, dateMs);
+                }
+            });
+
+            // Populate Format Filter
+            const formats = [...new Set(pastMetaDecks.map(d => String(d.format || '').trim()).filter(f => f && f !== 'Unknown'))]
+                .sort((a, b) => {
+                    const scoreA = getPastMetaSortScore(a, pastMetaSetOrderMap, metaLatestDateMap);
+                    const scoreB = getPastMetaSortScore(b, pastMetaSetOrderMap, metaLatestDateMap);
+                    if (scoreA !== scoreB) return scoreB - scoreA;
+                    return a.localeCompare(b);
+                });
+
+            const formatSelect = document.getElementById('pastMetaFormatFilter');
+            resetSelectWithPlaceholder(formatSelect, '-- All Formats --', 'all');
+            formats.forEach(format => {
+                const option = document.createElement('option');
+                option.value = String(format);
+                option.textContent = String(format);
+                formatSelect.appendChild(option);
+            });
+            
+            // Populate Tournament Filter (will be updated dynamically)
+            const tournamentSelect = document.getElementById('pastMetaTournamentFilter');
+            
+            // Setup event listeners - Format filter triggers tournament list update
+            formatSelect.addEventListener('change', () => {
+                updatePastMetaTournamentFilter();
+                updatePastMetaDeckList();
+            });
+            tournamentSelect.addEventListener('change', updatePastMetaDeckList);
+            document.getElementById('pastMetaDeckSearch').addEventListener('input', updatePastMetaDeckList);
+            document.getElementById('pastMetaDeckSelect').addEventListener('change', onPastMetaDeckSelect);
+            document.getElementById('pastMetaFilterSelect').addEventListener('change', filterPastMetaCards);
+            
+            // Initial population
+            updatePastMetaTournamentFilter();
+            updatePastMetaDeckList();
+            
+            // Initialize rarity mode button styling
+            setPastMetaRarityMode('min');
+            
+            const tournamentCount = [...new Set(pastMetaDecks.map(d => d.tournament_id))].length;
+            devLog(`? Loaded ${pastMetaDecks.length} decks from ${tournamentCount} tournaments`);
+            window.pastMetaLoaded = true;
+        }
+        
+        function updatePastMetaTournamentFilter() {
+            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
+            const tournamentSelect = document.getElementById('pastMetaTournamentFilter');
+            const previousSelection = tournamentSelect ? tournamentSelect.value : 'all';
+            
+            // Filter decks by selected format to get relevant tournaments
+            let filteredDecks = pastMetaDecks;
+            if (formatFilter !== 'all') {
+                filteredDecks = pastMetaDecks.filter(deck => deck.format === formatFilter);
+            }
+            
+            // Get unique tournament IDs from filtered decks
+            const tournamentIds = [...new Set(filteredDecks.map(d => d.tournament_id))];
+            
+            // Get tournament details from pastMetaTournaments
+            const tournaments = tournamentIds
+                .map(id => pastMetaTournaments.find(t => t.tournament_id === id))
+                .filter(t => t) // Remove undefined entries
+                .sort((a, b) => {
+                    // Sort by date (newest first)
+                    const dateA = new Date(a.tournament_date || '1970-01-01');
+                    const dateB = new Date(b.tournament_date || '1970-01-01');
+                    return dateB - dateA;
+                });
+            
+            // Rebuild tournament filter dropdown
+            resetSelectWithPlaceholder(tournamentSelect, '-- All Tournaments --', 'all');
+            tournaments.forEach(tournament => {
+                // Clean tournament name: remove " - Limitless"
+                let cleanName = tournament.tournament_name.replace(/\s*[-|•]\s*Limitless\s*$/i, '');
+                const option = document.createElement('option');
+                option.value = String(tournament.tournament_id || '');
+                option.textContent = cleanName;
+                tournamentSelect.appendChild(option);
+            });
+
+            if (tournamentSelect) {
+                const canRestore = Array.from(tournamentSelect.options).some(opt => opt.value === previousSelection);
+                tournamentSelect.value = canRestore ? previousSelection : 'all';
+            }
+            
+            devLog(`[Past Meta] Tournament filter updated: ${tournaments.length} tournaments for format ${formatFilter}`);
+        }
+        
+        function updatePastMetaDeckList() {
+            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
+            const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
+            const searchTerm = document.getElementById('pastMetaDeckSearch').value.toLowerCase();
+            const deckSelect = document.getElementById('pastMetaDeckSelect');
+            const previousSelection = deckSelect ? deckSelect.value : '';
+            
+            // Filter decks
+            let filteredDecks = pastMetaDecks.filter(deck => {
+                const matchesFormat = formatFilter === 'all' || deck.format === formatFilter;
+                const matchesTournament = tournamentFilter === 'all' || deck.tournament_id === tournamentFilter;
+                const matchesSearch = !searchTerm || 
+                    (deck.deck_name && deck.deck_name.toLowerCase().includes(searchTerm)) ||
+                    (deck.tournament_name && deck.tournament_name.toLowerCase().includes(searchTerm));
+                return matchesFormat && matchesTournament && matchesSearch;
+            });
+            
+            // Group by archetype (deck_name) to merge across tournaments
+            const archetypeMap = new Map();
+            filteredDecks.forEach(deck => {
+                const archetype = deck.deck_name || 'Unknown';
+                if (!archetypeMap.has(archetype)) {
+                    archetypeMap.set(archetype, {
+                        archetype: archetype,
+                        tournaments: [],
+                        totalDecklists: 0
+                    });
+                }
+                const entry = archetypeMap.get(archetype);
+                entry.tournaments.push(deck);
+                entry.totalDecklists += (deck.decklist_count || 0);
+            });
+            
+            // Convert to array and sort by archetype name
+            const archetypes = Array.from(archetypeMap.values());
+            archetypes.sort((a, b) => a.archetype.localeCompare(b.archetype));
+            
+            // Populate deck select dropdown
+            resetSelectWithPlaceholder(deckSelect, '-- Select a Deck --', '');
+            
+            archetypes.forEach(entry => {
+                const tournamentCount = entry.tournaments.length;
+                const displayName = tournamentCount > 1 
+                    ? `${entry.archetype} (${tournamentCount} Tournaments)`
+                    : entry.archetype;
+                const option = document.createElement('option');
+                option.value = entry.archetype;
+                option.textContent = displayName;
+                deckSelect.appendChild(option);
+            });
+
+            if (deckSelect) {
+                const canRestore = Array.from(deckSelect.options).some(opt => opt.value === previousSelection);
+                if (canRestore) {
+                    deckSelect.value = previousSelection;
+                } else if (deckSelect.options.length > 1) {
+                    deckSelect.value = deckSelect.options[1].value;
+                } else {
+                    deckSelect.value = '';
+                }
+
+                if (deckSelect.value) {
+                    onPastMetaDeckSelect();
+                } else {
+                    pastMetaCurrentDeck = null;
+                    pastMetaCurrentCards = [];
+                    pastMetaFilteredCards = [];
+                    renderPastMetaCards();
+                }
+            }
+            
+            devLog(`Filtered to ${archetypes.length} unique archetypes from ${filteredDecks.length} tournament entries`);
+        }
+        
+        function onPastMetaDeckSelect() {
+            const selectedArchetype = document.getElementById('pastMetaDeckSelect').value;
+            
+            if (!selectedArchetype) {
+                // Hide stats and cards
+                document.getElementById('pastMetaStatsSection').style.display = 'none';
+                document.getElementById('pastMetaDeckTableView').style.display = 'none';
+                document.getElementById('pastMetaDeckVisual').style.display = 'none';
+                pastMetaCurrentDeck = null;
+                pastMetaCurrentCards = [];
+                pastMetaCurrentScope = null;
+                return;
+            }
+            
+            const formatFilter = document.getElementById('pastMetaFormatFilter').value;
+            const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
+            
+            // Find all decks with matching archetype (respecting current filters)
+            const matchingDecks = pastMetaDecks.filter(deck => {
+                const matchesArchetype = deck.deck_name === selectedArchetype;
+                const matchesFormat = formatFilter === 'all' || deck.format === formatFilter;
+                const matchesTournament = tournamentFilter === 'all' || deck.tournament_id === tournamentFilter;
+                return matchesArchetype && matchesFormat && matchesTournament;
+            });
+            
+            if (matchingDecks.length === 0) {
+                console.error('No matching decks found for archetype:', selectedArchetype);
+                return;
+            }
+
+            const uniqueTournamentKeys = new Set(matchingDecks.map(deck => getPastMetaDeckTournamentKey(deck)));
+            const uniqueTournamentCount = uniqueTournamentKeys.size;
+            
+            // Aggregate cards across all matching decks (same statistical pipeline as City/Global)
+            const selectedRows = [];
+            let totalDecklists = 0;
+            const tournamentNames = [];
+            
+            matchingDecks.forEach(deck => {
+                totalDecklists += (deck.decklist_count || 0);
+                
+                // Track tournament names for stats display
+                const cleanTournamentName = (deck.tournament_name || '').replace(/\s*[-|•]\s*Limitless\s*$/i, '');
+                if (!tournamentNames.includes(cleanTournamentName)) {
+                    tournamentNames.push(cleanTournamentName);
+                }
+                
+                // Collect rows for unified aggregation
+                deck.cards.forEach(card => {
+                    selectedRows.push({
+                        ...card,
+                        // Override raw archetype (which may contain price suffixes like
+                        // "Alakazam Dudunsparce35.27$23.60€") with the sanitized deck name
+                        // so aggregateCardStatsByDate counts all variants as ONE archetype.
+                        archetype: deck.deck_name || card.archetype || '',
+                        tournament_id: deck.tournament_id || '',
+                        tournament_date: deck.tournament_date || card.tournament_date || 'Unknown Date',
+                        total_decks_in_archetype: deck.decklist_count || card.total_decks_in_archetype || 1,
+                        deck_count: card.deck_count || card.deck_inclusion_count || 0,
+                        deck_inclusion_count: card.deck_inclusion_count || card.deck_count || 0,
+                        total_count: card.total_count || 0,
+                        max_count: card.max_count || 0
+                    });
+                });
+            });
+
+            const aggregatedCardsRaw = aggregateCardStatsByDate(selectedRows).map(card => ({
+                ...card,
+                card_count: parsePastMetaNumber(card.average_count_overall, 0),
+                decklist_count: parseInt(card.total_decks_in_archetype || totalDecklists || 1, 10) || 1,
+                deck_inclusion_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0,
+                deck_count: parseInt(card.deck_count || card.deck_inclusion_count || 0, 10) || 0,
+                max_count: parseInt(card.max_count || 0, 10) || 0
+            }));
+            const aggregatedCards = deduplicateCards(aggregatedCardsRaw);
+            pastMetaCurrentScope = {
+                format: formatFilter,
+                tournamentFilter,
+                totalDecklists,
+                uniqueTournamentCount,
+                selectedDeckEntryCount: matchingDecks.length,
+                multiTournament: uniqueTournamentCount > 1
+            };
+            
+            // Create a virtual deck object for the aggregated data
+            pastMetaCurrentDeck = {
+                deck_name: selectedArchetype,
+                archetype: selectedArchetype,
+                format: formatFilter === 'all' ? 'Multi-Format' : formatFilter,
+                tournament_name: tournamentNames.join(', '),
+                tournament_count: uniqueTournamentCount,
+                decklist_count: totalDecklists,
+                cards: aggregatedCards
+            };
+            
+            pastMetaCurrentCards = aggregatedCards;
+            
+            // Update stats
+            document.getElementById('pastMetaStatsSection').style.display = 'block';
+            const totalCards = getPastMetaSummaryTotalCount(aggregatedCards);
+            document.getElementById('pastMetaStatCards').textContent = `${aggregatedCards.length} / ${Math.round(totalCards)}`;
+            
+            // Show tournament info based on count
+            if (uniqueTournamentCount === 1) {
+                const cleanName = tournamentNames[0];
+                document.getElementById('pastMetaStatTournament').textContent = `${cleanName} (${totalDecklists} decklists)`;
+            } else {
+                document.getElementById('pastMetaStatTournament').textContent = `${uniqueTournamentCount} Tournaments (${totalDecklists} total decklists)`;
+            }
+            
+            document.getElementById('pastMetaStatFormat').textContent = pastMetaCurrentDeck.format;
+            
+            // Save to window for deck builder
+            window.pastMetaCurrentArchetype = selectedArchetype;
+            
+            // Apply filters and render
+            filterPastMetaCards();
+            
+            devLog(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${uniqueTournamentCount} tournaments, ${totalDecklists} total decklists)`);
+        }
+        
+        function filterPastMetaCards() {
+            if (!pastMetaCurrentCards || pastMetaCurrentCards.length === 0) {
+                pastMetaFilteredCards = [];
+                renderPastMetaCards();
+                return;
+            }
+            
+            const filterValue = document.getElementById('pastMetaFilterSelect').value;
+
+            // Apply share-threshold where share data exists, and include top Ace Specs by filter level.
+            pastMetaFilteredCards = applyShareFilterWithAceSpecBoost(pastMetaCurrentCards, filterValue);
+            
+            renderPastMetaCards();
+        }
+        
+        function renderPastMetaCards() {
+            if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
+                document.getElementById('pastMetaDeckTableView').style.display = 'none';
+                document.getElementById('pastMetaDeckVisual').style.display = 'none';
+                document.getElementById('pastMetaCardCount').textContent = '0 Cards';
+                document.getElementById('pastMetaCardCountSummary').textContent = '/ 0 Total';
+                return;
+            }
+            
+            const searchTerm = document.getElementById('pastMetaOverviewSearch').value.toLowerCase();
+            
+            // Apply search filter
+            let cardsToShow = pastMetaFilteredCards.filter(card => {
+                if (!searchTerm) return true;
+                const cardName = (card.full_card_name || card.card_name || '').toLowerCase();
+                return cardName.includes(searchTerm);
+            });
+            
+            // Sort cards (Pokemon, Trainer, Energy)
+            const sortedCards = sortCardsByType(cardsToShow);
+            
+            // Update counts
+            const totalCards = getPastMetaSummaryTotalCount(sortedCards);
+            document.getElementById('pastMetaCardCount').textContent = `${sortedCards.length} Cards`;
+            document.getElementById('pastMetaCardCountSummary').textContent = `/ ${Math.round(totalCards)} Total`;
+            
+            // Render based on view mode
+            if (pastMetaShowGridView) {
+                renderPastMetaGridView(sortedCards);
+            } else {
+                renderPastMetaTableView(sortedCards);
+            }
+        }
+        
+        function renderPastMetaTableView(cards) {
+            document.getElementById('pastMetaDeckTableView').style.display = 'block';
+            document.getElementById('pastMetaDeckVisual').style.display = 'none';
+            
+            const tableContainer = document.getElementById('pastMetaDeckTable');
+            
+            if (cards.length === 0) {
+                tableContainer.innerHTML = '<p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">No cards found</p>';
+                return;
+            }
+            
+            let html = '<table><thead><tr>';
+            html += '<th style="width: 60px;">Count</th>';
+            html += '<th>Card Name</th>';
+            html += '<th style="width: 100px;">ACE SPEC</th>';
+            html += '<th style="width: 120px;">Action</th>';
+            html += '</tr></thead><tbody>';
+            
+            cards.forEach(card => {
+                const cardName = card.full_card_name || card.card_name || 'Unknown Card';
+                const count = getPastMetaDisplayCount(card);
+                const isAceSpecCard = isAceSpec(cardName);
+                const proxySetCode = card.set_code || card.set || '';
+                const proxySetNumber = card.set_number || card.number || '';
+                
+                html += '<tr>';
+                html += `<td style="text-align: center; font-weight: bold; color: #2c3e50;">${count}</td>`;
+                html += `<td>${cardName}</td>`;
+                html += `<td style="text-align: center;">${isAceSpecCard ? '<span style="color: #e74c3c; font-weight: bold;">★</span>' : '-'}</td>`;
+                html += `<td style="text-align: center; display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${escapeJsStr(cardName)}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button><button class="btn" style="padding: 6px 10px; font-size: 0.8em; background:#e74c3c; color:white;" onclick='addCardToProxy("${escapeJsStr(cardName)}", "${proxySetCode}", "${proxySetNumber}", 1)'>Proxy</button></td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            tableContainer.innerHTML = html;
+        }
+        
+        function renderPastMetaGridView(cards) {
+            devLog(`[Past Meta] renderPastMetaGridView called with ${cards.length} cards, rarity mode: ${pastMetaRarityMode}`);
+            document.getElementById('pastMetaDeckTableView').style.display = 'none';
+            document.getElementById('pastMetaDeckVisual').style.display = 'block';
+            
+            const gridContainer = document.getElementById('pastMetaDeckGrid');
+            
+            if (cards.length === 0) {
+                gridContainer.innerHTML = '<p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">No cards found</p>';
+                return;
+            }
+            
+            // Sort cards by type for better organization
+            const sortedCards = sortCardsByType([...cards]);
+            
+            // Get current deck to show deck counts
+            const currentDeck = window.pastMetaDeck || {};
+            
+            let html = '';
+            
+            sortedCards.forEach(card => {
+                const cardFullName = fixMojibake(card.full_card_name || card.card_name || 'Unknown Card');
+                const cardNameEscaped = escapeJsStr(cardFullName);
+                const avgCount = parseFloat(String(card.card_count || card.average_count_overall || 0).replace(',', '.')) || 0; // Average count across all decklists (e.g., 0.98)
+                const maxCount = getPastMetaDisplayCount(card);
+                const decklistCount = parseFloat(String(card.decklist_count || card.total_decks_in_archetype || 0).replace(',', '.')) || 0; // Total decklists in archetype
+                const deckCountByStats = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0; // Number of decks containing this card
+                
+                // Prefer explicit CSV fields first; only parse from full_card_name as fallback.
+                let cardName = cardFullName;
+                let setCodeFromName = String(card.set_code || card.set || '').trim().toUpperCase();
+                let setNumberFromName = String(card.set_number || card.number || '').trim();
+
+                if ((!setCodeFromName || !setNumberFromName) && card.card_identifier) {
+                    const identifierMatch = String(card.card_identifier).trim().match(/^([A-Z0-9]{2,6})\s+([A-Z0-9-]+)$/i);
+                    if (identifierMatch) {
+                        if (!setCodeFromName) setCodeFromName = identifierMatch[1].toUpperCase();
+                        if (!setNumberFromName) setNumberFromName = identifierMatch[2];
+                    }
+                }
+                
+                // Match pattern: "Card Name SET NUMBER" (e.g., "Abra MEG 54", "Dragapult ex TWM 130")
+                if (!setCodeFromName || !setNumberFromName) {
+                    const cardMatch = cardFullName.match(/^(.+?)\s+([A-Z0-9]{2,4})\s+([A-Z0-9]+)$/);
+                    if (cardMatch) {
+                        cardName = cardMatch[1].trim();
+                        setCodeFromName = cardMatch[2];
+                        setNumberFromName = cardMatch[3];
+                        devLog(`[Past Meta] Parsed card: "${cardFullName}" -> name: "${cardName}", set: "${setCodeFromName}", number: "${setNumberFromName}"`);
+                    }
+                }
+                const rawCardName = cardName;
+                cardName = getDisplayCardName(cardName, setCodeFromName, setNumberFromName);
+                
+                // Calculate statistics
+                const rawPercentage = parseFloat(String(card.percentage_in_archetype || card.share_percent || '').replace(',', '.'));
+                const avgInUsingDecksRaw = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+
+                const resolvedPercentage = Number.isFinite(rawPercentage) && rawPercentage > 0
+                    ? rawPercentage
+                    : (decklistCount > 0 ? ((deckCountByStats / decklistCount) * 100) : 0);
+                const avgInUsingDecksValue = Number.isFinite(avgInUsingDecksRaw) && avgInUsingDecksRaw > 0
+                    ? avgInUsingDecksRaw
+                    : (deckCountByStats > 0 ? (avgCount * decklistCount / deckCountByStats) : 0);
+
+                const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
+                const avgInUsingDecks = Math.max(0, avgInUsingDecksValue).toFixed(2).replace('.', ',');
+                const avgCountOverallDisplay = Math.max(0, avgCount).toFixed(2).replace('.', ',');
+                const deckCountByStatsDisplay = Math.round(Math.max(0, deckCountByStats));
+                const decklistCountDisplay = Math.round(Math.max(0, decklistCount));
+                
+                // O(1) lookup: canonical set+number first, then robust name index
+                const cardInDb = (() => {
+                    if (setCodeFromName && setNumberFromName) {
+                        const bySetNumber = getCanonicalCardRecord(setCodeFromName, setNumberFromName);
+                        if (bySetNumber) return bySetNumber;
+                    }
+                    return getCardByNameFromIndex(cardName);
+                })();
+                
+                if (cardInDb) {
+                    devLog(`[Past Meta] ? Found in DB: ${cardName} -> ${cardInDb.set} ${cardInDb.number}, image: ${cardInDb.image_url ? 'YES' : 'NO'}`);
+                } else {
+                    devLog(`[Past Meta] ? NOT found in DB: ${cardName} (searched: set="${setCodeFromName}", number="${setNumberFromName}")`);
+                }
+                
+                // Apply rarity mode to determine which versions to show
+                let versionsToRender = [];
+                
+                devLog(`[Past Meta] Applying rarity mode "${pastMetaRarityMode}" for card: ${cardName}`);
+                
+                if (pastMetaRarityMode === 'all' && cardInDb) {
+                    // Show ALL international prints
+                    let allVersions = getInternationalPrintsForCard(cardInDb.set, cardInDb.number);
+                    devLog(`[Past Meta] ALL mode: found ${allVersions ? allVersions.length : 0} versions`);
+                    
+                    if (allVersions && allVersions.length > 0) {
+                        versionsToRender = allVersions.map(v => ({
+                            ...card,
+                            set_code: v.set,
+                            set_number: v.number,
+                            image_url: v.image_url,
+                            rarity: v.rarity
+                        }));
+                    } else {
+                        // No versions found, use original
+                        versionsToRender = [{ ...card, set_code: cardInDb?.set || '', set_number: cardInDb?.number || '', image_url: cardInDb?.image_url || '' }];
+                    }
+                } else if (cardInDb) {
+                    // 'min' or 'max' mode: Get preferred version
+                    // CRITICAL FIX: Set global rarity preference to match Past Meta mode
+                    const previousGlobalPref = globalRarityPreference;
+                    globalRarityPreference = pastMetaRarityMode; // Temporarily set global to match Past Meta
+                    
+                    const preferredVersion = getPreferredVersionForCard(cardName, cardInDb.set, cardInDb.number);
+                    devLog(`[Past Meta] MIN/MAX mode: preferred version:`, preferredVersion);
+                    
+                    globalRarityPreference = previousGlobalPref; // Restore global preference
+                    
+                    if (preferredVersion) {
+                        versionsToRender = [{
+                            ...card,
+                            set_code: preferredVersion.set,
+                            set_number: preferredVersion.number,
+                            image_url: preferredVersion.image_url,
+                            rarity: preferredVersion.rarity
+                        }];
+                    } else {
+                        // No preferred version, use original
+                        versionsToRender = [{ ...card, set_code: cardInDb.set, set_number: cardInDb.number, image_url: cardInDb.image_url }];
+                    }
+                } else {
+                    // Card not found in database, use placeholder
+                    devLog(`[Past Meta] Card not in DB - using placeholder`);
+                    versionsToRender = [{ ...card, set_code: '', set_number: '', image_url: '' }];
+                }
+                
+                // Render each version
+                versionsToRender.forEach(displayCard => {
+                    const setCode = displayCard.set_code || '';
+                    const setNumber = displayCard.set_number || '';
+                    const cardNameWarning = getNameWarningHtml(rawCardName, cardName, setCode, setNumber);
+                    let germanCardName = (displayCard.name_de || (cardInDb && cardInDb.name_de) || card.card_name_de || '').toLowerCase();
+                    
+                    const imageUrl = getBestCardImage({
+                        ...displayCard,
+                        set_code: setCode,
+                        set_number: setNumber,
+                        card_name: cardName
+                    }) || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22280%22%3E%3Crect width=%22200%22 height=%22280%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2218%22%3ENo Image%3C/text%3E%3C/svg%3E';
+                    
+                    // Check if card is in deck builder
+                    let deckCount = 0;
+                    if (Object.keys(currentDeck).length > 0 && setCode && setNumber) {
+                        // Match by set code + set number
+                        for (const deckKey in currentDeck) {
+                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                            if (match) {
+                                const deckSetCode = match[1];
+                                const deckSetNumber = match[2];
+                                
+                                if (deckSetCode === setCode && deckSetNumber === setNumber) {
+                                    deckCount = currentDeck[deckKey] || 0;
+                                    break;
+                                }
+                            }
+                        }
+                    } else if (Object.keys(currentDeck).length > 0 && !setCode && !setNumber) {
+                        // Fallback: exact card name match
+                        deckCount = currentDeck[cardName] || 0;
+                    }
+                    
+                    // Get price and Cardmarket URL
+                    let eurPrice = '';
+                    let cardmarketUrl = '';
+                    if (setCode && setNumber) {
+                        let priceCard = (cardsBySetNumberMap || {})[`${setCode}-${setNumber}`] || null;
+                        if (!priceCard) {
+                            const normalizedNumber = setNumber.replace(/^0+/, '') || '0';
+                            priceCard = (cardsBySetNumberMap || {})[`${setCode}-${normalizedNumber}`] || null;
+                        }
+                        
+                        if (priceCard) {
+                            eurPrice = priceCard.eur_price || '';
+                            cardmarketUrl = priceCard.cardmarket_url || '';
+                            if (priceCard.name_de) {
+                                germanCardName = String(priceCard.name_de).toLowerCase();
+                            }
+                        }
+                    }
+                    const priceDisplay = eurPrice || '0,00€';
+                    const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
+                    const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
+                    
+                    // Determine card type for filtering with database-based approach
+                    const filterCategory = getCardType(cardName, setCode, setNumber);
+                    const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
+                    
+                    html += `
+                        <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
+                            <div class="card-image-container" style="position: relative; width: 100%;">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
+                                
+                                <!-- Red badge: Max Count (top-right) -->
+                                <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
+                                    ${maxCount}
+                                </div>
+                                
+                                <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
+                                ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
+                                
+                                <!-- Card info section -->
+                                <div class="card-info-bottom" style="padding: 5px; background: white; font-size: 0.7em; text-align: center; min-height: 48px; display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div class="card-info-text">
+                                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">
+                                            ${cardName}${cardNameWarning}
+                                        </div>
+                                        <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">
+                                            ${setCode} ${setNumber}
+                                        </div>
+                                        <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">
+                                            ${percentage}% | Ø ${avgInUsingDecks}x (${avgCountOverallDisplay}x)
+                                        </div>
+                                        <div style="font-weight: 600; color: #333; font-size: 0.58em;">
+                                            ${deckCountByStatsDisplay} / ${decklistCountDisplay} Decks
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
+                                    <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 2px; margin-top: 4px;">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
+                                            <button onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Remove from deck">-</button>
+                                            <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">★</button>
+                                            <button onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Add to deck">+</button>
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 2px;">
+                                            ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                            <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Add to proxy">P</button>
+                                            <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }); // End of versionsToRender.forEach
+            }); // End of cards.forEach
+            
+            gridContainer.innerHTML = html;
+        }
+        
+        function filterPastMetaOverviewCards() {
+            const searchInput = document.getElementById('pastMetaOverviewSearch');
+            if (!searchInput) return;
+            
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const gridContainer = document.getElementById('pastMetaDeckGrid');
+            if (!gridContainer) return;
+            
+            const cards = gridContainer.querySelectorAll('.card-item');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const cardName = card.getAttribute('data-card-name') || '';
+                const cardNameDe = card.getAttribute('data-card-name-de') || '';
+                const cardType = card.getAttribute('data-card-type') || '';
+                const cardSet = card.getAttribute('data-card-set') || '';
+                const cardNumber = card.getAttribute('data-card-number') || '';
+
+                // Check search term filter (name, set+number)
+                const setNumSpace = `${cardSet} ${cardNumber}`;
+                const setNumCombined = `${cardSet}${cardNumber}`;
+                const matchesSearch = searchTerm === '' ||
+                    cardName.includes(searchTerm) ||
+                    cardNameDe.includes(searchTerm) ||
+                    setNumSpace.includes(searchTerm) ||
+                    setNumCombined.includes(searchTerm);
+
+                const matchesType = currentMetaOverviewCardTypeFilter === 'all' || cardType === currentMetaOverviewCardTypeFilter;
+                
+                // Show card only if it matches both filters
+                if (matchesSearch && matchesType) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Update card count
+            const countElement = document.getElementById('pastMetaCardCount');
+            if (countElement) {
+                countElement.textContent = `${visibleCount} Cards`;
+            }
+        }
+        
+        function setPastMetaRarityMode(mode) {
+            devLog(`[Past Meta] Rarity mode changed to: ${mode}`);
+            pastMetaRarityMode = mode;
+            
+            // Update button styles
+            const minBtn = document.getElementById('pastMetaRarityMin');
+            const maxBtn = document.getElementById('pastMetaRarityMax');
+            const allBtn = document.getElementById('pastMetaRarityAll');
+            
+            if (minBtn) {
+                minBtn.style.opacity = mode === 'min' ? '1' : '0.5';
+                minBtn.style.fontWeight = mode === 'min' ? 'bold' : 'normal';
+            }
+            if (maxBtn) {
+                maxBtn.style.opacity = mode === 'max' ? '1' : '0.5';
+                maxBtn.style.fontWeight = mode === 'max' ? 'bold' : 'normal';
+            }
+            if (allBtn) {
+                allBtn.style.opacity = mode === 'all' ? '1' : '0.5';
+                allBtn.style.fontWeight = mode === 'all' ? 'bold' : 'normal';
+            }
+            
+            // Re-render
+            renderPastMetaCards();
+        }
+        
+        function togglePastMetaDeckGridView() {
+            const gridViewContainer = document.getElementById('pastMetaDeckVisual');
+            const tableViewContainer = document.getElementById('pastMetaDeckTableView');
+            const gridButtons = document.querySelectorAll('button[onclick*="togglePastMetaDeckGridView"]');
+            const button = gridButtons[0];
+            
+            if (!gridViewContainer || !tableViewContainer) {
+                console.warn('?? Grid or table container not found');
+                return;
+            }
+            
+            if (!pastMetaCurrentCards || pastMetaCurrentCards.length === 0) {
+                showToast('Please select a deck first!', 'warning');
+                return;
+            }
+            
+            // Toggle between views
+            pastMetaShowGridView = !pastMetaShowGridView;
+            
+            if (pastMetaShowGridView) {
+                if (button) button.textContent = '?? List View';
+            } else {
+                if (button) button.textContent = '??? Grid View';
+            }
+            
+            // Re-render with new view
+            renderPastMetaCards();
+            
+            // Re-apply search filter
+            filterPastMetaOverviewCards();
+        }
+        
+        function copyPastMetaDeckOverview() {
+            if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
+                showToast('No cards available to copy', 'warning');
+                return;
+            }
+            
+            let deckText = '';
+            pastMetaFilteredCards.forEach(card => {
+                const cardName = card.full_card_name || card.card_name || 'Unknown Card';
+                const count = Math.round(parseFloat(card.card_count) || 0);
+                deckText += `${count} ${cardName}\n`;
+            });
+            
+            navigator.clipboard.writeText(deckText).then(() => {
+                showToast('Deck list copied!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                showToast('Error copying', 'error');
+            });
+        }
+        
+        function togglePastMetaDeckGridView() {
+            pastMetaShowGridView = !pastMetaShowGridView;
+            renderPastMetaCards();
+        }
+
+        // Generic function to render deck analysis tables

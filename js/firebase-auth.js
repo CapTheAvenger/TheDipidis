@@ -57,8 +57,14 @@ function signInWithGoogle() {
     return;
   }
 
+  const clientId = window.GOOGLE_CLIENT_ID || '';
+  if (!clientId || clientId.startsWith('PLACEHOLDER_')) {
+    showNotification('Google Client-ID ist nicht konfiguriert. Trage GOOGLE_CLIENT_ID in js/firebase-credentials.js ein.', 'error');
+    return;
+  }
+
   const tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: '539389580350-teldg43gkk994q8tnhd2b86ibevb6403.apps.googleusercontent.com',
+    client_id: clientId,
     scope: 'email profile',
     callback: function(response) {
       if (response.error) {

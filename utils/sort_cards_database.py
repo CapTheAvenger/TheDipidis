@@ -9,45 +9,21 @@ Fixes the problem where SVI/WHI/FST/MEE/SVE cards are mixed up.
 
 import csv
 import json
-import re
 import os
+import sys
 from datetime import datetime
 
-def get_set_order():
-    sets_path = os.path.join('data', 'sets.json')
-    try:
-        with open(sets_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception:
-        return {}
+# Allow importing from project root
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from card_scraper_shared import load_set_order, extract_number, card_sort_key
 
-SET_ORDER = get_set_order()
-
-def extract_number(number_str):
-    """Extract numeric part from card number (handles '185a', '185+', etc.)"""
-    if not number_str:
-        return 0
-    try:
-        match = re.match(r'(\d+)', number_str)
-        return int(match.group(1)) if match else 0
-    except (ValueError, AttributeError):
-        return 0
+SET_ORDER = load_set_order()
 
 def sort_key(card):
-    """Sort key: SET_ORDER desc (newest first), then card number asc"""
-    set_code = card.get('set', '')
-    number_str = card.get('number', '0')
-    
-    set_order = SET_ORDER.get(set_code, 0)
-    card_number = extract_number(number_str)
-    
-    # Sort by: -set_order (higher = newer, comes first), card_number, number_str
-    return (-set_order, card_number, number_str)
+    return card_sort_key(card, SET_ORDER)
 
 
 def main():
-    SET_ORDER = get_set_order()
-
     print("=" * 80)
     print("SORTING ALL_CARDS_DATABASE.CSV BY SET ORDER")
     print("=" * 80)

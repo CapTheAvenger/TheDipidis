@@ -14,7 +14,9 @@ Then access from JavaScript:
 
 from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
+import logging
 import requests
+import threading
 import time
 import re
 from urllib.parse import urlparse
@@ -24,11 +26,14 @@ app = Flask(__name__)
 CORS(app, origins=["http://localhost:8000", "http://127.0.0.1:8000",
                     "https://captheavenger.github.io"])
 
+logger = logging.getLogger(__name__)
+
 # Allowed hosts for SSRF protection
 ALLOWED_HOSTS = {"limitlesstcg.com", "www.limitlesstcg.com",
                  "cardmarket.com", "www.cardmarket.com"}
 
-# Rate limiting
+# Rate limiting (thread-safe)
+_rate_lock = threading.Lock()
 last_request_time = 0
 MIN_DELAY = 0.3
 
@@ -61,14 +66,13 @@ def extract_eur_price_from_html(html: str, source: str) -> str:
                     return text
         
         return ''
-    except Exception:
+    except Exception as e:
+        logger.warning("Price extraction failed for source=%s: %s", source, e)
         return ''
 
 @app.route('/fetch-price')
 def fetch_price():
     """Fetch and parse price from URL."""
-    global last_request_time
-    
     url = request.args.get('url')
     source = request.args.get('source', 'limitless')
     
@@ -82,15 +86,18 @@ def fetch_price():
             return jsonify({'error': 'URL host not allowed'}), 403
         if parsed.scheme not in ('http', 'https'):
             return jsonify({'error': 'Invalid URL scheme'}), 403
-    except Exception:
+    except Exception as e:
+        logger.warning("Invalid URL received: %s", e)
         return jsonify({'error': 'Invalid URL'}), 400
     
-    # Rate limiting
+    # Rate limiting (thread-safe)
     now = time.time()
-    elapsed = now - last_request_time
-    if elapsed < MIN_DELAY:
-        time.sleep(MIN_DELAY - elapsed)
-    last_request_time = time.time()
+    with _rate_lock:
+        global last_request_time
+        elapsed = now - last_request_time
+        if elapsed < MIN_DELAY:
+            time.sleep(MIN_DELAY - elapsed)
+        last_request_time = time.time()
     
     try:
         headers = {
@@ -120,6 +127,7 @@ def fetch_price():
         })
     
     except Exception as e:
+        logger.error("Fetch price failed for url=%s: %s", url, e)
         return jsonify({'error': str(e), 'success': False}), 500
 
 @app.route('/health')

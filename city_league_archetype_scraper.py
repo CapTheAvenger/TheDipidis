@@ -22,15 +22,16 @@ import concurrent.futures
 from datetime import datetime, timedelta
 
 try:
-    import cloudscraper
     from bs4 import BeautifulSoup
 except ImportError:
-    print("FEHLER: Es fehlen Bibliotheken! Bitte installiere sie mit:")
-    print("pip install cloudscraper beautifulsoup4")
+    print("FEHLER: beautifulsoup4 fehlt! pip install beautifulsoup4")
     sys.exit(1)
 
-# Import shared utilities
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, normalize_archetype_name, _get_scraper, clean_pokemon_name, fix_mega_pokemon_name
+from card_scraper_shared import (
+    setup_console_encoding, get_app_path, get_data_dir, setup_logging, load_settings,
+    normalize_archetype_name, fetch_page_bs4, clean_pokemon_name, fix_mega_pokemon_name,
+    parse_tournament_date
+)
 
 # Fix Windows console encoding for Unicode characters
 setup_console_encoding()
@@ -38,20 +39,7 @@ setup_console_encoding()
 # ============================================================================
 # LOGGING SETUP
 # ============================================================================
-data_dir = get_data_dir()
-os.makedirs(data_dir, exist_ok=True)
-log_file = os.path.join(data_dir, "archetype_scraper.log")
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.FileHandler(log_file, encoding="utf-8"),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging("archetype_scraper")
 
 
 # ============================================================================
@@ -67,28 +55,8 @@ DEFAULT_SETTINGS = {
     "additional_tournament_ids": []
 }
 
-def load_settings() -> dict:
-    settings = DEFAULT_SETTINGS.copy()
-    app_path = get_app_path()
-
-    candidates = [
-        os.path.join(app_path, "city_league_archetype_settings.json"),
-        os.path.join(os.getcwd(), "city_league_archetype_settings.json"),
-        os.path.join(app_path, "data", "city_league_archetype_settings.json")
-    ]
-
-    for path in candidates:
-        if os.path.isfile(path):
-            try:
-                with open(path, "r", encoding="utf-8-sig") as f:
-                    settings.update(json.loads(f.read()))
-                logger.info(f"Settings geladen: {path}")
-                return settings
-            except Exception as e:
-                logger.warning(f"Konnte Settings nicht laden: {e}")
-
-    logger.info("Keine Settings-Datei gefunden. Nutze Standardwerte.")
-    return settings
+def _load_settings() -> dict:
+    return load_settings("city_league_archetype_settings.json", DEFAULT_SETTINGS)
 
 def calculate_date_range(start_date: str, end_date: str):
     start_str = start_date
@@ -103,45 +71,23 @@ def parse_date(date_str: str) -> datetime:
     try:
         return datetime.strptime(date_str, "%d.%m.%Y")
     except ValueError:
-        logger.error(f"Invalid date format: {date_str}. Use DD.MM.YYYY")
+        logger.error("Invalid date format: %s. Use DD.MM.YYYY", date_str)
         raise
 
 # ============================================================================
 # CLOUDSCRAPER / NETWORK
 # ============================================================================
 
-def fetch_page_bs4(url: str, retries: int = 2):
-    """Fetch URL and return parsed BeautifulSoup object."""
-    scraper = _get_scraper()
-    for attempt in range(1, retries + 2):
-        try:
-            response = scraper.get(url, timeout=15)
-            response.raise_for_status()
-            return BeautifulSoup(response.text, 'html.parser')
-        except Exception as e:
-            if attempt <= retries:
-                time.sleep(2)
-            else:
-                logger.debug(f"Fetch failed: {url} -> {e}")
-    return None
+# fetch_page_bs4 imported from card_scraper_shared
 
 # ============================================================================
 # SCRAPING LOGIC
 # ============================================================================
-def parse_tournament_date(date_str: str):
-    """Parse Limitless date formats (e.g. '24 Jan 26' or '21st February 2026')."""
-    try:
-        return datetime.strptime(date_str.strip(), "%d %b %y")
-    except ValueError:
-        try:
-            clean_date = re.sub(r'(\d+)(st|nd|rd|th)', r'\1', date_str)
-            return datetime.strptime(clean_date.strip(), "%d %B %Y")
-        except ValueError:
-            return None
+# parse_tournament_date imported from card_scraper_shared
 
 def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: datetime) -> list:
     url = f"https://limitlesstcg.com/tournaments/{region}?show=500"
-    logger.info(f"Lade Turnierliste: {url}")
+    logger.info("Lade Turnierliste: %s", url)
 
     soup = fetch_page_bs4(url)
     if not soup:
@@ -176,7 +122,7 @@ def get_tournaments_in_date_range(region: str, start_date: datetime, end_date: d
                 'shop': link.get_text(strip=True)
             })
 
-    logger.info(f"{len(tournaments)} Turniere im Zeitraum gefunden.")
+    logger.info("%s Turniere im Zeitraum gefunden.", len(tournaments))
     return tournaments
 
 def get_tournament_by_id(tournament_id: str) -> dict:
@@ -270,7 +216,7 @@ def save_to_csv(data: list, output_file: str):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         writer.writerows(data)
-    logger.info(f"✓ {len(data)} Eintraege in {output_file} gespeichert.")
+    logger.info("✓ %s Eintraege in %s gespeichert.", len(data), output_file)
 
 def save_deck_statistics(data: list, output_file: str):
     stats_file = os.path.join(get_data_dir(), output_file.replace('.csv', '_deck_stats.csv'))
@@ -308,7 +254,7 @@ def save_deck_statistics(data: list, output_file: str):
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         writer.writerows(stats_rows)
-    logger.info(f"✓ Deck Stats gespeichert in: {stats_file}")
+    logger.info("✓ Deck Stats gespeichert in: %s", stats_file)
 
 def create_comparison_report(old_data: list, new_data: list, output_file: str):
     data_dir = get_data_dir()
@@ -388,7 +334,7 @@ def create_comparison_report(old_data: list, new_data: list, output_file: str):
             writer.writerow(rf)
 
     create_html_comparison(comparison_data, comparison_html)
-    logger.info(f"✓ HTML Report erzeugt: {comparison_html}")
+    logger.info("✓ HTML Report erzeugt: %s", comparison_html)
 
 
 def create_html_comparison(comparison_data: list, output_file: str):
@@ -501,7 +447,7 @@ def main():
     logger.info("CITY LEAGUE ARCHETYPE SCRAPER - FAST EDITION")
     logger.info("=" * 60)
 
-    settings = load_settings()
+    settings = _load_settings()
     start_date_str, end_date_str = calculate_date_range(settings['start_date'], settings['end_date'])
 
     try:
@@ -510,7 +456,7 @@ def main():
     except ValueError:
         return
 
-    logger.info(f"Zeitraum: {start_date_str} bis {end_date_str}")
+    logger.info("Zeitraum: %s bis %s", start_date_str, end_date_str)
 
     tournaments = get_tournaments_in_date_range(settings['region'], start_date, end_date)
 
@@ -518,7 +464,7 @@ def main():
         t_info = get_tournament_by_id(str(t_id))
         if t_info:
             tournaments.append(t_info)
-            logger.info(f"Zusaetzliches Turnier {t_id} geladen.")
+            logger.info("Zusaetzliches Turnier %s geladen.", t_id)
 
     if not tournaments:
         logger.info("Keine Turniere gefunden.")
@@ -540,7 +486,7 @@ def main():
         logger.info("Alle Turniere wurden bereits erfasst!")
         return
 
-    logger.info(f"Starte Multithreading Download fuer {len(new_tournaments)} Turniere...")
+    logger.info("Starte Multithreading Download fuer %s Turniere...", len(new_tournaments))
     all_data = []
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=settings.get("max_workers", 5)) as executor:
@@ -554,7 +500,7 @@ def main():
             except Exception as e:
                 logger.error(f"Fehler bei {t['tournament_id']}: {e}")
 
-    logger.info(f"Scraping beendet. {len(all_data)} neue Archetypes gefunden.")
+    logger.info("Scraping beendet. %s neue Archetypes gefunden.", len(all_data))
 
     old_data = []
     if os.path.exists(output_path):

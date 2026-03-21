@@ -1062,7 +1062,7 @@ const BASE_PATH = './data/';
         }
 
         window.jumpToCardAnalysis = function(archetype, region) {
-            console.log(`[Navigation] Jumping to ${region} analysis for: ${archetype}`);
+            devLog(`[Navigation] Jumping to ${region} analysis for: ${archetype}`);
 
             const safeArchetype = String(archetype || '').trim();
             const normalizedRegion = String(region || '').trim();
@@ -1167,7 +1167,7 @@ const BASE_PATH = './data/';
         
         // Navigate to City League Analysis with pre-selected deck
         function navigateToAnalysisWithDeck(archetypeName) {
-            console.log('🔍 Navigating to analysis with deck:', archetypeName);
+            devLog('🔍 Navigating to analysis with deck:', archetypeName);
             window.pendingCityLeagueDeckSelection = archetypeName;
             
             // Switch to City League Analysis tab
@@ -1194,7 +1194,7 @@ const BASE_PATH = './data/';
                         // Trigger change event to load the deck
                         const event = new Event('change', { bubbles: true });
                         select.dispatchEvent(event);
-                        console.log('✅ Deck selected:', matchingOption.value);
+                        devLog('✅ Deck selected:', matchingOption.value);
                     } else {
                         console.warn('⚠️ Deck not found in dropdown:', archetypeName);
                     }
@@ -1212,7 +1212,7 @@ const BASE_PATH = './data/';
         
         // Navigate to Current Meta Analysis tab and select a deck
         function navigateToCurrentMetaWithDeck(archetypeName) {
-            console.log('🔍 Navigating to Current Meta with deck:', archetypeName);
+            devLog('🔍 Navigating to Current Meta with deck:', archetypeName);
             
             // Switch to Current Meta Analysis tab
             switchTab('current-meta-analysis');
@@ -1237,7 +1237,7 @@ const BASE_PATH = './data/';
                         // Trigger change event to load the deck
                         const event = new Event('change', { bubbles: true });
                         select.dispatchEvent(event);
-                        console.log('✅ Deck selected:', matchingOption.value);
+                        devLog('✅ Deck selected:', matchingOption.value);
                     } else {
                         console.warn('⚠️ Deck not found in dropdown:', archetypeName);
                     }
@@ -1635,7 +1635,7 @@ const BASE_PATH = './data/';
                 if (resp.ok) {
                     pokedexNumbers = await resp.json();
                     window.pokedexNumbers = pokedexNumbers;
-                    console.log(`✅ Loaded ${Object.keys(pokedexNumbers).length} Pokédex entries`);
+                    devLog(`✅ Loaded ${Object.keys(pokedexNumbers).length} Pokédex entries`);
                 }
             } catch (e) {
                 console.warn('Could not load pokemon_dex_numbers.json', e);
@@ -1690,12 +1690,12 @@ const BASE_PATH = './data/';
                     });
                     invalidateCardLookupCaches();
                     window.cardIndexMap = cardIndexMap;
-                    console.log(`✅ Loaded ${allCardsDatabase.length} cards from all_cards_merged.json (with prices)`);
-                    console.log(`📊 Karten mit mehreren Versionen:`, Object.keys(cardsByNameMap).filter(k => cardsByNameMap[k].length > 1).length);
+                    devLog(`✅ Loaded ${allCardsDatabase.length} cards from all_cards_merged.json (with prices)`);
+                    devLog(`📊 Karten mit mehreren Versionen:`, Object.keys(cardsByNameMap).filter(k => cardsByNameMap[k].length > 1).length);
                     
                     // Count cards with prices
                     const cardsWithPrices = allCardsDatabase.filter(c => c.eur_price).length;
-                    console.log(`💰 Karten mit Preisen: ${cardsWithPrices} (${Math.round(100*cardsWithPrices/allCardsDatabase.length)}%)`);
+                    devLog(`💰 Karten mit Preisen: ${cardsWithPrices} (${Math.round(100*cardsWithPrices/allCardsDatabase.length)}%)`);
                     
                     // Initialisiere Suche wenn sie existiert
                     const searchInput = document.getElementById('cityLeagueDeckCardSearch');
@@ -1740,7 +1740,7 @@ const BASE_PATH = './data/';
                 if (response.ok) {
                     const jsonData = await response.json();
                     aceSpecsList = (jsonData.ace_specs || []).map(name => name.toLowerCase().trim());
-                    console.log(`? Loaded ${aceSpecsList.length} Ace Spec cards from ace_specs.json`);
+                    devLog(`? Loaded ${aceSpecsList.length} Ace Spec cards from ace_specs.json`);
                 } else {
                     console.error('? Failed to load ace_specs.json');
                 }
@@ -1870,7 +1870,7 @@ const BASE_PATH = './data/';
                 map.set(`${normalizedSet}-${normalizedNumber}`, card);
                 map.set(`${normalizedSet}-${normalizedNumber.padStart(3, '0')}`, card);
             });
-            console.log(`📇 Built Map index for ${map.size} set+number combinations`);
+            devLog(`📇 Built Map index for ${map.size} set+number combinations`);
             return map;
         }
         
@@ -1890,7 +1890,7 @@ const BASE_PATH = './data/';
                 const paddedKey = `${normalizedSet}-${normalizedNumber.padStart(3, '0')}`;
                 map[paddedKey] = card;
             });
-            console.log(`? Built index for ${Object.keys(map).length} set+number combinations`);
+            devLog(`? Built index for ${Object.keys(map).length} set+number combinations`);
             return map;
         }
 
@@ -2093,11 +2093,11 @@ const BASE_PATH = './data/';
                 const response = await fetch(`${PROXY_URL}/health`, { timeout: 2000 });
                 proxyServerAvailable = response.ok;
                 if (proxyServerAvailable) {
-                    console.log('? Live price proxy server is running');
+                    devLog('? Live price proxy server is running');
                 }
             } catch (e) {
                 proxyServerAvailable = false;
-                console.log('? Live price proxy server not running (prices from database)');
+                devLog('? Live price proxy server not running (prices from database)');
             }
             
             return proxyServerAvailable;
@@ -2483,7 +2483,7 @@ const BASE_PATH = './data/';
             }
             window[deckOrderKey] = normalizedOrder;
 
-            console.log(`[normalizeDeckEntries] ${source}: normalized ${originalKeys.length} -> ${normalizedKeys.length} keys`);
+            devLog(`[normalizeDeckEntries] ${source}: normalized ${originalKeys.length} -> ${normalizedKeys.length} keys`);
             return true;
         }
 
@@ -4110,7 +4110,7 @@ const BASE_PATH = './data/';
                             };
                         }
                     });
-                    console.log(`Loaded M3 comparison data: ${Object.keys(window.m3ArchetypeData).length} archetypes`);
+                    devLog(`Loaded M3 comparison data: ${Object.keys(window.m3ArchetypeData).length} archetypes`);
                 } else {
                     console.warn('M3 comparison data not available');
                 }
@@ -4128,7 +4128,7 @@ const BASE_PATH = './data/';
             if (selectMain) selectMain.value = format;
             if (selectAnalysis) selectAnalysis.value = format;
 
-            console.log(`Switching City League format to: ${format}`);
+            devLog(`Switching City League format to: ${format}`);
             
             // Store selection
             window.currentCityLeagueFormat = format;
@@ -4223,7 +4223,7 @@ const BASE_PATH = './data/';
                 const comparisonUrl = `${BASE_PATH}city_league_archetypes_comparison${formatSuffix}.csv`;
                 const hasComparisonFile = format !== 'M3';
 
-                console.log(`Loading City League data for format: ${format}`);
+                devLog(`Loading City League data for format: ${format}`);
 
                 const fetchPromises = [
                     fetch(`${analysisUrl}?t=${timestamp}`)
@@ -4904,7 +4904,7 @@ const BASE_PATH = './data/';
         
         // Load City League Analysis
         async function loadCityLeagueAnalysis() {
-            console.log('Loading City League Analysis...');
+            devLog('Loading City League Analysis...');
             
             const format = window.currentCityLeagueFormat || 'M4';
             const formatSuffix = format === 'M3' ? '_M3' : '';
@@ -4914,7 +4914,7 @@ const BASE_PATH = './data/';
             const comparisonUrl = `${BASE_PATH}city_league_archetypes_comparison${formatSuffix}.csv`;
             const hasComparisonFile = format !== 'M3';
             
-            console.log(`Loading City League Analysis for format: ${format}`);
+            devLog(`Loading City League Analysis for format: ${format}`);
 
             const [analysisText, archetypesText, comparisonText] = await Promise.all([
                 fetch(`${analysisUrl}?t=${timestamp}`)
@@ -4943,12 +4943,12 @@ const BASE_PATH = './data/';
             const archetypesData = archetypesText ? await fetchAndParseCSV(archetypesUrl) : null;
             const comparisonData = comparisonText ? await fetchAndParseCSV(comparisonUrl) : deriveCityLeagueComparisonData(archetypesData || []);
 
-            console.log('Loaded data:', data ? `${data.length} rows` : 'null');
-            console.log('Loaded archetypes data:', archetypesData ? `${archetypesData.length} rows` : 'null');
-            console.log('Loaded comparison data:', comparisonData ? `${comparisonData.length} rows` : 'null');
+            devLog('Loaded data:', data ? `${data.length} rows` : 'null');
+            devLog('Loaded archetypes data:', archetypesData ? `${archetypesData.length} rows` : 'null');
+            devLog('Loaded comparison data:', comparisonData ? `${comparisonData.length} rows` : 'null');
 
             if (data && data.length > 0 && archetypesData && archetypesData.length > 0) {
-                console.log('Processing archetypes...');
+                devLog('Processing archetypes...');
                 window.cityLeagueAnalysisData = data;
                 window.cityLeagueArchetypesData = archetypesData;
                 window.cityLeagueComparisonData = comparisonData;
@@ -4964,7 +4964,7 @@ const BASE_PATH = './data/';
                 window.cityLeagueAnalysisLoaded = true;
                 
                 // Load meta card analysis for consistency calculations
-                console.log('Loading meta card analysis for consistency...');
+                devLog('Loading meta card analysis for consistency...');
                 loadMetaCardAnalysis('cityLeague');
             } else {
                 const tableContainer = document.getElementById('cityLeagueAnalysisTable');
@@ -4996,7 +4996,7 @@ const BASE_PATH = './data/';
                         comparisonMap.set(row.archetype.toLowerCase(), parseInt(row.new_count || 0));
                     }
                 });
-                console.log('Loaded comparison counts for', comparisonMap.size, 'archetypes');
+                devLog('Loaded comparison counts for', comparisonMap.size, 'archetypes');
             }
             
             // Extract unique archetypes with their deck counts
@@ -5017,14 +5017,14 @@ const BASE_PATH = './data/';
             });
             
             const archetypeList = Array.from(archetypeMap.values());
-            console.log('Found archetypes:', archetypeList.length);
+            devLog('Found archetypes:', archetypeList.length);
             
             // Sort by deck count descending to get top meta decks
             const sortedByMeta = [...archetypeList].sort((a, b) => b.deckCount - a.deckCount);
             const top10 = sortedByMeta.slice(0, 10);
             const rest = sortedByMeta.slice(10).sort((a, b) => a.name.localeCompare(b.name));
             
-            console.log('Top 10 meta decks:', top10.map(d => `${d.name} (${d.deckCount})`));
+            devLog('Top 10 meta decks:', top10.map(d => `${d.name} (${d.deckCount})`));
             
             const select = document.getElementById('cityLeagueDeckSelect');
             if (!select) return;
@@ -5109,7 +5109,7 @@ const BASE_PATH = './data/';
                     select.value = matchingOption.value;
                     window.pendingCityLeagueDeckSelection = null;
                     loadCityLeagueDeckData(matchingOption.value);
-                    console.log('✅ Applied pending City League deck selection:', matchingOption.value);
+                    devLog('✅ Applied pending City League deck selection:', matchingOption.value);
                 }
             }
             
@@ -5201,7 +5201,7 @@ const BASE_PATH = './data/';
             }
             select.value = pending.value;
             loadCityLeagueDeckData(pending.value);
-            console.log('✅ Applied combined archetype:', pending.value.replace('GROUP:', '').split('|')[0]);
+            devLog('✅ Applied combined archetype:', pending.value.replace('GROUP:', '').split('|')[0]);
         }
 
         function refreshCityLeagueDeckSelect() {
@@ -5448,7 +5448,7 @@ const BASE_PATH = './data/';
                 recalculatedCards.push(row);
             });
             
-            console.log(`Recalculated stats for ${recalculatedCards.length} unique cards based on ${totalDecks} filtered tournaments`);
+            devLog(`Recalculated stats for ${recalculatedCards.length} unique cards based on ${totalDecks} filtered tournaments`);
             return recalculatedCards;
         }
         
@@ -5509,8 +5509,8 @@ const BASE_PATH = './data/';
                 }, 0);
             }
             
-            console.log('DEBUG: Tournament deck counts:', Array.from(tournamentDecksMap.entries()));
-            console.log('DEBUG: Total decks across all tournaments:', totalDecks);
+            devLog('DEBUG: Tournament deck counts:', Array.from(tournamentDecksMap.entries()));
+            devLog('DEBUG: Total decks across all tournaments:', totalDecks);
             
             filteredCards.forEach(row => {
                 const cardNameRaw = String(row.card_name || row.full_card_name || '').trim();
@@ -5628,18 +5628,18 @@ const BASE_PATH = './data/';
                 
                 // Debug: Log M3 cards
                 if (row.set_code === 'M3' || (row.image_url && row.image_url.includes('/M3/'))) {
-                    console.log(`M3 card aggregated: ${row.card_name}, set_code: ${row.set_code}, url: ${row.image_url}`);
+                    devLog(`M3 card aggregated: ${row.card_name}, set_code: ${row.set_code}, url: ${row.image_url}`);
                 }
                 
                 result.push(row);
             });
             
-            console.log(`Aggregated ${result.length} unique cards from ${totalDecks} decks across ${tournamentDecksMap.size} tournaments`);
+            devLog(`Aggregated ${result.length} unique cards from ${totalDecks} decks across ${tournamentDecksMap.size} tournaments`);
             return result;
         }
         
         function loadCityLeagueDeckData(archetype) {
-            console.log('Loading deck data for:', archetype);
+            devLog('Loading deck data for:', archetype);
             const data = window.cityLeagueAnalysisData;
             if (!data) return;
 
@@ -5657,10 +5657,10 @@ const BASE_PATH = './data/';
                     const parsed = JSON.parse(savedDeck);
                     if (parsed.archetype === archetype) {
                         // Deck matches current archetype - already loaded
-                        console.log('[loadCityLeagueDeckData] Deck already loaded for this archetype');
+                        devLog('[loadCityLeagueDeckData] Deck already loaded for this archetype');
                     } else {
                         // Different archetype - CLEAR old deck
-                        console.log('[loadCityLeagueDeckData] Clearing old deck from different archetype:', parsed.archetype);
+                        devLog('[loadCityLeagueDeckData] Clearing old deck from different archetype:', parsed.archetype);
                         window.cityLeagueDeck = {};
                         window.cityLeagueDeckOrder = [];
                         saveCityLeagueDeck();
@@ -5674,14 +5674,14 @@ const BASE_PATH = './data/';
             let deckCards = data.filter(row =>
                 selection.targetArchetypes.includes(String(row.archetype || '').trim())
             );
-            console.log('Found cards (before date filter):', deckCards.length);
+            devLog('Found cards (before date filter):', deckCards.length);
             
             // Apply date filter if active
             if (window.cityLeagueDateFilterActive) {
                 const dateFrom = window.cityLeagueDateFrom;
                 const dateTo = window.cityLeagueDateTo;
                 
-                console.log('DEBUG: Filtering by date range:', dateFrom, 'to', dateTo);
+                devLog('DEBUG: Filtering by date range:', dateFrom, 'to', dateTo);
                 
                 const dateDebugSample = [];
                 const hasParseableTournamentDates = deckCards.some(row =>
@@ -5719,22 +5719,22 @@ const BASE_PATH = './data/';
                     return tournamentDate >= dateFrom && tournamentDate <= dateTo;
                 });
                 
-                console.log('DEBUG: Date filter examples:', dateDebugSample);
-                console.log(`Date filter applied (${dateFrom} to ${dateTo}):`, deckCards.length, 'cards');
+                devLog('DEBUG: Date filter examples:', dateDebugSample);
+                devLog(`Date filter applied (${dateFrom} to ${dateTo}):`, deckCards.length, 'cards');
             }
             
-            console.log('Found cards (before deduplication):', deckCards.length);
+            devLog('Found cards (before deduplication):', deckCards.length);
             
             // Always aggregate cards stats (not just when date filter is active)
             // This ensures deck_count is correctly summed across all tournaments
             if (deckCards.length > 0) {
                 deckCards = aggregateCardStatsByDate(deckCards);
-                console.log('After aggregating by date:', deckCards.length, 'unique cards');
+                devLog('After aggregating by date:', deckCards.length, 'unique cards');
             }
             
             // Dedupliziere: Nur neueste low-rarity Version pro Karte
             deckCards = deduplicateCards(deckCards);
-            console.log('Found cards (after deduplication):', deckCards.length);
+            devLog('Found cards (after deduplication):', deckCards.length);
             
             // Store unfiltered deck cards for filter function
             window.currentCityLeagueDeckCards = deckCards;
@@ -5754,14 +5754,14 @@ const BASE_PATH = './data/';
             if (!decksCount || decksCount <= 0) {
                 decksCount = '-';
             }
-            console.log(`Using deck count from aggregated data: ${decksCount} decks`);
+            devLog(`Using deck count from aggregated data: ${decksCount} decks`);
             
             // Calculate average placement from archetypes data
             const avgPlacement = archetypeStats.avgPlacement;
             
             // Store total decks count globally for use in card displays
             window.currentCityLeagueTotalDecks = parseInt(decksCount) || 0;
-            console.log(`Stored global deck count: ${window.currentCityLeagueTotalDecks}`);
+            devLog(`Stored global deck count: ${window.currentCityLeagueTotalDecks}`);
             
             // Update stats
             document.getElementById('cityLeagueStatCards').textContent = `${uniqueCards} / ${totalCardsInDeck}`;
@@ -6007,7 +6007,7 @@ const BASE_PATH = './data/';
             }
 
             if (fallbackUrl) {
-                console.log(`🖼️ Image Error → Trying fallback: ${fallbackUrl}`);
+                devLog(`🖼️ Image Error → Trying fallback: ${fallbackUrl}`);
                 img.setAttribute('data-fallback-tried', 'true');
                 img.setAttribute('data-image-source', 'fallback-limitless');
                 img.src = fallbackUrl;
@@ -6050,7 +6050,7 @@ const BASE_PATH = './data/';
                 url = url.replace('/tpci/', '/tpc/');
                 url = url.replace(/_EN_/g, '_JP_');
                 url = url.replace(/\/M3_0+(\d+)_/g, '/M3_$1_');
-                console.log(`🇯🇵 M3 Card → Limitless JP fallback: ${originalUrl} → ${url}`);
+                devLog(`🇯🇵 M3 Card → Limitless JP fallback: ${originalUrl} → ${url}`);
                 return url;
             }
 
@@ -6060,7 +6060,7 @@ const BASE_PATH = './data/';
                 url = url.replace('/tpci/', '/tpc/');
                 url = url.replace(/_EN_/g, '_JP_');
                 url = url.replace(/\/M4_0+(\d+)_/g, '/M4_$1_');
-                console.log(`🇯🇵 M4 Card → Limitless JP fallback: ${originalUrl} → ${url}`);
+                devLog(`🇯🇵 M4 Card → Limitless JP fallback: ${originalUrl} → ${url}`);
                 return url;
             }
             
@@ -6077,7 +6077,7 @@ const BASE_PATH = './data/';
                     // Fallback: Replace /jp/ with /en/ if we don't have set/number info
                     const originalUrl = url;
                     url = url.replace('/jp/', '/en/');
-                    console.log(`🔄 Japanese → English Proxy: ${originalUrl} → ${url}`);
+                    devLog(`🔄 Japanese → English Proxy: ${originalUrl} → ${url}`);
                     return url;
                 }
             }
@@ -6785,7 +6785,7 @@ const BASE_PATH = './data/';
             
             if (hasDeck) {
                 // COPY USER'S DECK with displayed versions
-                console.log('[copyDeckOverview] Copying user deck with', Object.keys(deck).length, 'card types');
+                devLog('[copyDeckOverview] Copying user deck with', Object.keys(deck).length, 'card types');
                 
                 for (const [deckKey, count] of Object.entries(deck)) {
                     if (count <= 0) continue;
@@ -6839,7 +6839,7 @@ const BASE_PATH = './data/';
                 }
             } else {
                 // COPY ARCHETYPE CARDS with max_count
-                console.log('[copyDeckOverview] Copying archetype cards with max_count, mode:', currentRarityMode);
+                devLog('[copyDeckOverview] Copying archetype cards with max_count, mode:', currentRarityMode);
                 
                 // Process each card from archetype
                 allCards.forEach(card => {
@@ -6941,7 +6941,7 @@ const BASE_PATH = './data/';
         const parsePct = (val) => parseFloat(String(val || "0").replace(',', '.'));
 
         function renderCityLeagueAnalysisTable(data) {
-            console.log('renderCityLeagueAnalysisTable called with', data ? data.length : 0, 'rows');
+            devLog('renderCityLeagueAnalysisTable called with', data ? data.length : 0, 'rows');
             const tableContainer = document.getElementById('cityLeagueAnalysisTable');
             if (!tableContainer) {
                 console.error('Table container not found!');
@@ -7056,7 +7056,7 @@ const BASE_PATH = './data/';
             }
             
             tableContainer.innerHTML = html;
-            console.log('Table rendered with tier grouping:', { core: coreCards.length, aceSpec: aceSpecCards.length, tech: techCards.length, spicy: spicyCards.length });
+            devLog('Table rendered with tier grouping:', { core: coreCards.length, aceSpec: aceSpecCards.length, tech: techCards.length, spicy: spicyCards.length });
         }
         
         function getCardShareValue(card) {
@@ -7232,7 +7232,7 @@ const BASE_PATH = './data/';
                     window.cityLeagueDeck = parsed.deck || {};
                     window.cityLeagueDeckOrder = parsed.order || [];
                     window.currentCityLeagueArchetype = parsed.archetype || null;
-                    console.log('[loadCityLeagueDeck] Loaded deck from localStorage:', Object.keys(window.cityLeagueDeck).length, 'cards');
+                    devLog('[loadCityLeagueDeck] Loaded deck from localStorage:', Object.keys(window.cityLeagueDeck).length, 'cards');
                     return true;
                 }
             } catch (e) {
@@ -7252,7 +7252,7 @@ const BASE_PATH = './data/';
                 // If deck is empty, remove from localStorage instead of saving empty object
                 if (deckSize === 0) {
                     localStorage.removeItem('cityLeagueDeck');
-                    console.log('[saveCityLeagueDeck] Deck is empty - removed from localStorage');
+                    devLog('[saveCityLeagueDeck] Deck is empty - removed from localStorage');
                     return;
                 }
                 
@@ -7298,7 +7298,7 @@ const BASE_PATH = './data/';
         window.pastMetaDeck = {};
         window.pastMetaDeckOrder = [];
         window.pastMetaCurrentArchetype = null;
-        console.log('[Init] Starting with empty deck (localStorage cleared on page load)');
+        devLog('[Init] Starting with empty deck (localStorage cleared on page load)');
         // Check for a shared deck in the URL – runs after clearing so it wins
         setTimeout(function() { if (typeof importDeckFromUrl === 'function') importDeckFromUrl(); }, 100);
 
@@ -7518,7 +7518,7 @@ const BASE_PATH = './data/';
             
             // If we found an existing key and it's different from our new key, migrate it
             if (existingKey && existingKey !== deckKey && setCode && setNumber) {
-                console.log(`Migrating deck entry from "${existingKey}" to "${deckKey}"`);
+                devLog(`Migrating deck entry from "${existingKey}" to "${deckKey}"`);
                 deck[deckKey] = deck[existingKey];
                 delete deck[existingKey];
                 
@@ -7527,7 +7527,7 @@ const BASE_PATH = './data/';
                     const oldKeyIndex = window[deckOrderKey].indexOf(existingKey);
                     if (oldKeyIndex !== -1) {
                         window[deckOrderKey][oldKeyIndex] = deckKey;
-                        console.log(`Updated deck order during migration: ${existingKey} -> ${deckKey} at position ${oldKeyIndex}`);
+                        devLog(`Updated deck order during migration: ${existingKey} -> ${deckKey} at position ${oldKeyIndex}`);
                     }
                 }
             } else if (existingKey) {
@@ -7725,21 +7725,21 @@ const BASE_PATH = './data/';
                     window.currentCityLeagueArchetype = null;
                     // CRITICAL: Remove from localStorage completely
                     localStorage.removeItem('cityLeagueDeck');
-                    console.log('[clearDeck] City League deck cleared and removed from localStorage');
+                    devLog('[clearDeck] City League deck cleared and removed from localStorage');
                 } else if (source === 'currentMeta') {
                     window.currentMetaDeck = {};
                     window.currentMetaDeckOrder = [];
                     window.currentCurrentMetaArchetype = null;
                     // CRITICAL: Remove from localStorage completely
                     localStorage.removeItem('currentMetaDeck');
-                    console.log('[clearDeck] Current Meta deck cleared and removed from localStorage');
+                    devLog('[clearDeck] Current Meta deck cleared and removed from localStorage');
                 } else if (source === 'pastMeta') {
                     window.pastMetaDeck = {};
                     window.pastMetaDeckOrder = [];
                     window.pastMetaCurrentArchetype = null;
                     // CRITICAL: Remove from localStorage completely
                     localStorage.removeItem('pastMetaDeck');
-                    console.log('[clearDeck] Past Meta deck cleared and removed from localStorage');
+                    devLog('[clearDeck] Past Meta deck cleared and removed from localStorage');
                 }
                 
                 // CRITICAL: Clear all rarity preferences when clearing deck
@@ -8580,7 +8580,7 @@ const BASE_PATH = './data/';
                     if (!existing.set_code && existing.image_url) {
                         if (existing.image_url.includes('/M3/')) {
                             existing.set_code = 'M3';
-                            console.log(`Set code M3 extracted from URL for: ${existing.card_name}`);
+                            devLog(`Set code M3 extracted from URL for: ${existing.card_name}`);
                         }
                     }
                 }
@@ -8590,7 +8590,7 @@ const BASE_PATH = './data/';
             const result = Array.from(cardMap.values());
             const m3Cards = result.filter(c => c.set_code === 'M3' || (c.image_url && c.image_url.includes('/M3/')));
             if (m3Cards.length > 0) {
-                console.log(`After deduplicateCards: ${m3Cards.length} M3 cards. First 3:`, 
+                devLog(`After deduplicateCards: ${m3Cards.length} M3 cards. First 3:`, 
                     m3Cards.slice(0, 3).map(c => ({ name: c.card_name, set_code: c.set_code, url: c.image_url }))
                 );
             }
@@ -8617,9 +8617,9 @@ const BASE_PATH = './data/';
             const deck = window.cityLeagueDeck || {};
             
             // Log for debugging
-            console.log('RENDERED OVERVIEW CARDS - Sorted by type:');
+            devLog('RENDERED OVERVIEW CARDS - Sorted by type:');
             sortedCards.slice(0, 10).forEach((card, idx) => {
-                console.log(`${idx + 1}. ${card.card_name} (${card.type || card.card_type || 'UNKNOWN'}) - ${getCardTypeCategory(card.type || card.card_type || '')}`);
+                devLog(`${idx + 1}. ${card.card_name} (${card.type || card.card_type || 'UNKNOWN'}) - ${getCardTypeCategory(card.type || card.card_type || '')}`);
             });
             
             const overviewContainer = document.getElementById('cityLeagueDeckOverview');
@@ -8834,7 +8834,7 @@ const BASE_PATH = './data/';
         }
         
         function copyDeck(source) {
-            console.log('[copyDeck] Called with source:', source);
+            devLog('[copyDeck] Called with source:', source);
             
             if (source === 'cityLeague') {
                 copyDeckOverview();
@@ -8843,7 +8843,7 @@ const BASE_PATH = './data/';
             } else if (source === 'pastMeta') {
                 copyPastMetaDeckOverview();
             } else {
-                console.log('[copyDeck] Unsupported source:', source);
+                devLog('[copyDeck] Unsupported source:', source);
                 showToast('This function is not available for this tab!', 'warning');
             }
         }
@@ -9395,11 +9395,11 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            console.log('[autoCompleteConsistency] 🔄 Starting CONSISTENCY-based deck generation');
-            console.log('[autoCompleteConsistency] Total available cards:', cards.length);
+            devLog('[autoCompleteConsistency] 🔄 Starting CONSISTENCY-based deck generation');
+            devLog('[autoCompleteConsistency] Total available cards:', cards.length);
             
             // Clear existing deck
-            console.log('[autoCompleteConsistency] ??? Clearing existing deck...');
+            devLog('[autoCompleteConsistency] ??? Clearing existing deck...');
             if (source === 'cityLeague') {
                 window.cityLeagueDeck = {};
                 window.cityLeagueDeckOrder = [];
@@ -9572,7 +9572,7 @@ const BASE_PATH = './data/';
                 
                 consistencyDeck.push({ card: cardData, count: actualCount });
                 currentTotal += actualCount;
-                console.log(`${logPrefix} + ${actualCount}x ${cardData.card_name} (Share: ${cardData.sharePercent.toFixed(1)}%, Avg: ${cardData.avgCountWhenUsed.toFixed(2)}x) -- Total: ${currentTotal}/60`);
+                devLog(`${logPrefix} + ${actualCount}x ${cardData.card_name} (Share: ${cardData.sharePercent.toFixed(1)}%, Avg: ${cardData.avgCountWhenUsed.toFixed(2)}x) -- Total: ${currentTotal}/60`);
             };
 
             // Sortiere Karten nach Share (absteigend)
@@ -9590,9 +9590,9 @@ const BASE_PATH = './data/';
 
             if (aceSpecSlotCard) {
                 pushCard(aceSpecSlotCard, 1, '[Consistency][ACE-SPEC-Priority]');
-                console.log(`[Consistency][ACE-SPEC-Priority] Erkannt: ${aceSpecSlotCard.card_name} (Rarity: ${aceSpecSlotCard.rarity || '?'})`);
+                devLog(`[Consistency][ACE-SPEC-Priority] Erkannt: ${aceSpecSlotCard.card_name} (Rarity: ${aceSpecSlotCard.rarity || '?'})`);
             } else {
-                console.log('[Consistency][ACE-SPEC-Priority] Keine echte ACE SPEC gefunden.');
+                devLog('[Consistency][ACE-SPEC-Priority] Keine echte ACE SPEC gefunden.');
             }
 
             // ==========================================
@@ -9651,7 +9651,7 @@ const BASE_PATH = './data/';
                 }
             }
 
-            console.log(`[autoCompleteConsistency] Deck complete: ${currentTotal}/60`);
+            devLog(`[autoCompleteConsistency] Deck complete: ${currentTotal}/60`);
 
             // Altes Deck löschen und neues speichern
             let cardsToAdd = consistencyDeck.map(entry => {
@@ -10230,9 +10230,9 @@ const BASE_PATH = './data/';
                 return c.metaShare >= 30;
             });
             
-            console.log(`[renderMetaCards] After filters: ${cards.length} cards remaining (from ${metaCardData[source].length} total)`);
+            devLog(`[renderMetaCards] After filters: ${cards.length} cards remaining (from ${metaCardData[source].length} total)`);
             if (cards.length > 0) {
-                console.log(`[renderMetaCards] Top 5 cards by meta share:`, cards.slice(0, 5).map(c => `${c.card_name}: ${c.metaShare.toFixed(1)}%`));
+                devLog(`[renderMetaCards] Top 5 cards by meta share:`, cards.slice(0, 5).map(c => `${c.card_name}: ${c.metaShare.toFixed(1)}%`));
             }
             
             // Sort
@@ -10497,7 +10497,7 @@ const BASE_PATH = './data/';
             // Get unique card names
             const uniqueNames = [...new Set(matchingCards.map(c => c.name_en || c.name))].sort();
             
-            console.log(`[searchDeckCards] Search term: "${searchTerm}", found ${uniqueNames.length} unique cards (${matchingCards.length} versions)`);
+            devLog(`[searchDeckCards] Search term: "${searchTerm}", found ${uniqueNames.length} unique cards (${matchingCards.length} versions)`);
             
             if (uniqueNames.length === 0) {
                 resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #444; font-weight: 500;">No cards found</div>';
@@ -10772,11 +10772,11 @@ const BASE_PATH = './data/';
                         }
                     }
                 });
-                console.log(`?? Loaded ${scriptsExecuted} matchup data scripts`);
+                devLog(`?? Loaded ${scriptsExecuted} matchup data scripts`);
                 
                 // Verify that matchup data was loaded
                 const matchupVars = Object.keys(window).filter(k => k.startsWith('matchupData_'));
-                console.log(`? Available matchup variables: ${matchupVars.length}`);
+                devLog(`? Available matchup variables: ${matchupVars.length}`);
                 
                 // THEN: Extract the container content
                 const container = doc.querySelector('.container');
@@ -10798,7 +10798,7 @@ const BASE_PATH = './data/';
                                 grid.style.gap = '';
                                 // Add the CSS class instead
                                 grid.classList.add('matchups-grid-container');
-                                console.log('? Removed inline grid styles from matchup container');
+                                devLog('? Removed inline grid styles from matchup container');
                             }
                         }
                     });
@@ -10824,7 +10824,7 @@ const BASE_PATH = './data/';
                     // Render top cards widget (format staples)
                     await renderCurrentMetaTopCards();
                     
-                    console.log('? Current Meta data loaded successfully');
+                    devLog('? Current Meta data loaded successfully');
                 } else {
                     currentMetaContent.innerHTML = '<div style="color: #e74c3c; padding: 20px;">Error loading comparison data</div>';
                 }
@@ -10874,7 +10874,7 @@ const BASE_PATH = './data/';
                     });
                 });
             });
-            console.log('\u2705 Matchup box tables patched');
+            devLog('\u2705 Matchup box tables patched');
         }
 
         function patchLimitlessComparisonTable() {
@@ -10890,7 +10890,7 @@ const BASE_PATH = './data/';
                 
                 // Check if this is the Full Comparison Table (has Old Rank, New Rank, Rank ? columns)
                 if (headers.includes('Old Rank') && headers.includes('New Rank') && headers.includes('Rank ?')) {
-                    console.log('?? Patching Full Comparison Table...');
+                    devLog('?? Patching Full Comparison Table...');
                     
                     // Find column indices
                     const oldRankIdx = headers.indexOf('Old Rank');
@@ -10947,7 +10947,7 @@ const BASE_PATH = './data/';
                         }
                     });
                     
-                    console.log('? Full Comparison Table patched successfully');
+                    devLog('? Full Comparison Table patched successfully');
                 }
             });
         }
@@ -11029,7 +11029,7 @@ const BASE_PATH = './data/';
                             }
                         });
                         
-                        console.log('? Archetype Overview patched:', {
+                        devLog('? Archetype Overview patched:', {
                             totalArchetypes,
                             groupedArchetypes,
                             top3Count: decksByCount.map(d => d.name),
@@ -11055,7 +11055,7 @@ const BASE_PATH = './data/';
                         if (formatFilter) {
                             // formatFilter is just the set code (e.g., "ASC"), prefix with "SVI-"
                             currentFormat = `SVI-${formatFilter}`;
-                            console.log(`?? Loaded format from settings: ${currentFormat}`);
+                            devLog(`?? Loaded format from settings: ${currentFormat}`);
                         }
                     }
                 } catch (e) {
@@ -11095,7 +11095,7 @@ const BASE_PATH = './data/';
                         const valueDiv = card.querySelector('.value');
                         if (valueDiv) {
                             valueDiv.textContent = currentFormat;
-                            console.log(`? Format updated to: ${currentFormat}`);
+                            devLog(`? Format updated to: ${currentFormat}`);
                         }
                         
                         // Add tournament stats below the current format
@@ -11115,7 +11115,7 @@ const BASE_PATH = './data/';
                             existingP.insertAdjacentHTML('afterend', statsHtml);
                         }
                         
-                        console.log('? Meta stats patched:', {
+                        devLog('? Meta stats patched:', {
                             onlineStats: metaStats,
                             majorTournaments,
                             totalPlayers,
@@ -11131,7 +11131,7 @@ const BASE_PATH = './data/';
         // Render Interactive Matchup Heatmap
         function renderMatchupHeatmap() {
             try {
-                console.log('🔥 Rendering Matchup Heatmap...');
+                devLog('🔥 Rendering Matchup Heatmap...');
 
                 const activeElement = document.activeElement;
                 const activeHeatmapInputId = (activeElement && (activeElement.id === 'heatmapSearchY' || activeElement.id === 'heatmapSearchX'))
@@ -11247,7 +11247,7 @@ const BASE_PATH = './data/';
                     : xDecks;
 
                 if (rawSearchY || rawSearchX) {
-                    console.log(`🔍 Suche aktiv: Y='${rawSearchY || '-'}' (${yDecks.length}), X='${rawSearchX || '-'}' (${xDecks.length})`);
+                    devLog(`🔍 Suche aktiv: Y='${rawSearchY || '-'}' (${yDecks.length}), X='${rawSearchX || '-'}' (${xDecks.length})`);
                 }
 
                 if (yDecks.length === 0 || xDecks.length === 0) {
@@ -11281,7 +11281,7 @@ const BASE_PATH = './data/';
                     return;
                 }
                 
-                console.log(`🔥 Heatmap-Decks: X-Achse=${xDecks.length}, Y-Achse=${yDecks.length}`);
+                devLog(`🔥 Heatmap-Decks: X-Achse=${xDecks.length}, Y-Achse=${yDecks.length}`);
                 
                 // 3. HTML GENERIEREN
                 let tableHtml = '<table class="matchup-heatmap" style="border-collapse: collapse; width: 100%; font-size: 0.85em;">';
@@ -11434,7 +11434,7 @@ const BASE_PATH = './data/';
                     });
                 }
                 
-                console.log('✅ Matchup Heatmap rendered successfully');
+                devLog('✅ Matchup Heatmap rendered successfully');
                 
             } catch (error) {
                 console.error('❌ Error rendering Matchup Heatmap:', error);
@@ -11446,11 +11446,11 @@ const BASE_PATH = './data/';
         
         // Load Current Analysis
         async function loadCurrentAnalysis() {
-            console.log('?? Loading Current Meta Analysis Tab...');
+            devLog('?? Loading Current Meta Analysis Tab...');
             
             // Load Current Meta HTML (for matchup data) if not already loaded
             if (!window.currentMetaLoaded) {
-                console.log('?? Loading Current Meta HTML for matchup data...');
+                devLog('?? Loading Current Meta HTML for matchup data...');
                 await loadCurrentMeta();
             }
             
@@ -11469,13 +11469,13 @@ const BASE_PATH = './data/';
         function loadCurrentMetaDeck() {
             const saved = localStorage.getItem('currentMetaDeck');
             if (!saved) {
-                console.log('?? No saved Current Meta deck found');
+                devLog('?? No saved Current Meta deck found');
                 return;
             }
             
             try {
                 const data = JSON.parse(saved);
-                console.log('? Loaded Current Meta deck from localStorage:', data);
+                devLog('? Loaded Current Meta deck from localStorage:', data);
                 
                 if (data.deck) {
                     window.currentMetaDeck = data.deck;
@@ -11486,11 +11486,11 @@ const BASE_PATH = './data/';
                 if (data.archetype) {
                     window.currentCurrentMetaArchetype = data.archetype;
                     // Pre-select archetype in dropdown if it exists (but don't display deck yet)
-                    console.log('?? Saved archetype found:', data.archetype, '(waiting for user to select archetype)');
+                    devLog('?? Saved archetype found:', data.archetype, '(waiting for user to select archetype)');
                 }
                 
                 // DON'T automatically display deck - wait for archetype selection
-                console.log('?? Current Meta Deck loaded but not displayed (waiting for archetype selection)');
+                devLog('?? Current Meta Deck loaded but not displayed (waiting for archetype selection)');
             } catch (e) {
                 console.error('? Error loading Current Meta deck:', e);
             }
@@ -11504,7 +11504,7 @@ const BASE_PATH = './data/';
                 // If deck is empty, remove from localStorage instead of saving empty object
                 if (deckSize === 0) {
                     localStorage.removeItem('currentMetaDeck');
-                    console.log('?? Current Meta deck is empty - removed from localStorage');
+                    devLog('?? Current Meta deck is empty - removed from localStorage');
                     return;
                 }
                 
@@ -11516,7 +11516,7 @@ const BASE_PATH = './data/';
                 };
                 
                 localStorage.setItem('currentMetaDeck', JSON.stringify(data));
-                console.log('?? Current Meta deck saved to localStorage:', deckSize, 'cards');
+                devLog('?? Current Meta deck saved to localStorage:', deckSize, 'cards');
             } catch (e) {
                 console.error('? Error saving Current Meta deck:', e);
             }
@@ -11530,7 +11530,7 @@ const BASE_PATH = './data/';
                     window.pastMetaDeck = parsed.deck || {};
                     window.pastMetaDeckOrder = parsed.order || [];
                     window.pastMetaCurrentArchetype = parsed.archetype || null;
-                    console.log('?? Loaded Past Meta deck from localStorage:', Object.keys(window.pastMetaDeck).length, 'cards');
+                    devLog('?? Loaded Past Meta deck from localStorage:', Object.keys(window.pastMetaDeck).length, 'cards');
                     return true;
                 }
             } catch (e) {
@@ -11550,7 +11550,7 @@ const BASE_PATH = './data/';
                 // If deck is empty, remove from localStorage instead of saving empty object
                 if (deckSize === 0) {
                     localStorage.removeItem('pastMetaDeck');
-                    console.log('?? Past Meta deck is empty - removed from localStorage');
+                    devLog('?? Past Meta deck is empty - removed from localStorage');
                     return;
                 }
                 
@@ -11562,7 +11562,7 @@ const BASE_PATH = './data/';
                 };
                 
                 localStorage.setItem('pastMetaDeck', JSON.stringify(data));
-                console.log('?? Past Meta deck saved to localStorage:', deckSize, 'cards');
+                devLog('?? Past Meta deck saved to localStorage:', deckSize, 'cards');
             } catch (e) {
                 console.error('? Error saving Past Meta deck:', e);
             }
@@ -11725,7 +11725,7 @@ const BASE_PATH = './data/';
         }
         
         async function loadPastMeta() {
-            console.log('Loading Past Meta Deck Analysis...');
+            devLog('Loading Past Meta Deck Analysis...');
             
             // Load tournament overview and cards data
             const [tournamentOverview, cardsData] = await Promise.all([
@@ -11908,7 +11908,7 @@ const BASE_PATH = './data/';
             setPastMetaRarityMode('min');
             
             const tournamentCount = [...new Set(pastMetaDecks.map(d => d.tournament_id))].length;
-            console.log(`? Loaded ${pastMetaDecks.length} decks from ${tournamentCount} tournaments`);
+            devLog(`? Loaded ${pastMetaDecks.length} decks from ${tournamentCount} tournaments`);
             window.pastMetaLoaded = true;
         }
         
@@ -11953,7 +11953,7 @@ const BASE_PATH = './data/';
                 tournamentSelect.value = canRestore ? previousSelection : 'all';
             }
             
-            console.log(`[Past Meta] Tournament filter updated: ${tournaments.length} tournaments for format ${formatFilter}`);
+            devLog(`[Past Meta] Tournament filter updated: ${tournaments.length} tournaments for format ${formatFilter}`);
         }
         
         function updatePastMetaDeckList() {
@@ -12027,7 +12027,7 @@ const BASE_PATH = './data/';
                 }
             }
             
-            console.log(`Filtered to ${archetypes.length} unique archetypes from ${filteredDecks.length} tournament entries`);
+            devLog(`Filtered to ${archetypes.length} unique archetypes from ${filteredDecks.length} tournament entries`);
         }
         
         function onPastMetaDeckSelect() {
@@ -12148,7 +12148,7 @@ const BASE_PATH = './data/';
             // Apply filters and render
             filterPastMetaCards();
             
-            console.log(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${uniqueTournamentCount} tournaments, ${totalDecklists} total decklists)`);
+            devLog(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${uniqueTournamentCount} tournaments, ${totalDecklists} total decklists)`);
         }
         
         function filterPastMetaCards() {
@@ -12238,7 +12238,7 @@ const BASE_PATH = './data/';
         }
         
         function renderPastMetaGridView(cards) {
-            console.log(`[Past Meta] renderPastMetaGridView called with ${cards.length} cards, rarity mode: ${pastMetaRarityMode}`);
+            devLog(`[Past Meta] renderPastMetaGridView called with ${cards.length} cards, rarity mode: ${pastMetaRarityMode}`);
             document.getElementById('pastMetaDeckTableView').style.display = 'none';
             document.getElementById('pastMetaDeckVisual').style.display = 'block';
             
@@ -12285,7 +12285,7 @@ const BASE_PATH = './data/';
                         cardName = cardMatch[1].trim();
                         setCodeFromName = cardMatch[2];
                         setNumberFromName = cardMatch[3];
-                        console.log(`[Past Meta] Parsed card: "${cardFullName}" -> name: "${cardName}", set: "${setCodeFromName}", number: "${setNumberFromName}"`);
+                        devLog(`[Past Meta] Parsed card: "${cardFullName}" -> name: "${cardName}", set: "${setCodeFromName}", number: "${setNumberFromName}"`);
                     }
                 }
                 const rawCardName = cardName;
@@ -12318,20 +12318,20 @@ const BASE_PATH = './data/';
                 })();
                 
                 if (cardInDb) {
-                    console.log(`[Past Meta] ? Found in DB: ${cardName} -> ${cardInDb.set} ${cardInDb.number}, image: ${cardInDb.image_url ? 'YES' : 'NO'}`);
+                    devLog(`[Past Meta] ? Found in DB: ${cardName} -> ${cardInDb.set} ${cardInDb.number}, image: ${cardInDb.image_url ? 'YES' : 'NO'}`);
                 } else {
-                    console.log(`[Past Meta] ? NOT found in DB: ${cardName} (searched: set="${setCodeFromName}", number="${setNumberFromName}")`);
+                    devLog(`[Past Meta] ? NOT found in DB: ${cardName} (searched: set="${setCodeFromName}", number="${setNumberFromName}")`);
                 }
                 
                 // Apply rarity mode to determine which versions to show
                 let versionsToRender = [];
                 
-                console.log(`[Past Meta] Applying rarity mode "${pastMetaRarityMode}" for card: ${cardName}`);
+                devLog(`[Past Meta] Applying rarity mode "${pastMetaRarityMode}" for card: ${cardName}`);
                 
                 if (pastMetaRarityMode === 'all' && cardInDb) {
                     // Show ALL international prints
                     let allVersions = getInternationalPrintsForCard(cardInDb.set, cardInDb.number);
-                    console.log(`[Past Meta] ALL mode: found ${allVersions ? allVersions.length : 0} versions`);
+                    devLog(`[Past Meta] ALL mode: found ${allVersions ? allVersions.length : 0} versions`);
                     
                     if (allVersions && allVersions.length > 0) {
                         versionsToRender = allVersions.map(v => ({
@@ -12352,7 +12352,7 @@ const BASE_PATH = './data/';
                     globalRarityPreference = pastMetaRarityMode; // Temporarily set global to match Past Meta
                     
                     const preferredVersion = getPreferredVersionForCard(cardName, cardInDb.set, cardInDb.number);
-                    console.log(`[Past Meta] MIN/MAX mode: preferred version:`, preferredVersion);
+                    devLog(`[Past Meta] MIN/MAX mode: preferred version:`, preferredVersion);
                     
                     globalRarityPreference = previousGlobalPref; // Restore global preference
                     
@@ -12370,7 +12370,7 @@ const BASE_PATH = './data/';
                     }
                 } else {
                     // Card not found in database, use placeholder
-                    console.log(`[Past Meta] Card not in DB - using placeholder`);
+                    devLog(`[Past Meta] Card not in DB - using placeholder`);
                     versionsToRender = [{ ...card, set_code: '', set_number: '', image_url: '' }];
                 }
                 
@@ -12534,7 +12534,7 @@ const BASE_PATH = './data/';
         }
         
         function setPastMetaRarityMode(mode) {
-            console.log(`[Past Meta] Rarity mode changed to: ${mode}`);
+            devLog(`[Past Meta] Rarity mode changed to: ${mode}`);
             pastMetaRarityMode = mode;
             
             // Update button styles
@@ -12686,13 +12686,13 @@ const BASE_PATH = './data/';
             try {
                 // Ensure set mapping is loaded (for English sets)
                 if (!window.englishSetCodes || window.englishSetCodes.size === 0) {
-                    console.log('[Cards Tab] Loading set mapping for English sets...');
+                    devLog('[Cards Tab] Loading set mapping for English sets...');
                     await loadSetMapping();
                 }
                 
                 // Use already loaded cards from loadAllCardsDatabase() instead of loading again
                 if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
-                    console.log('[Cards Tab] Waiting for allCardsDatabase to load...');
+                    devLog('[Cards Tab] Waiting for allCardsDatabase to load...');
                     await loadAllCardsDatabase();
                 }
                 
@@ -12704,8 +12704,8 @@ const BASE_PATH = './data/';
                 // Store reference to cards
                 window.allCardsData = englishCards;
                 
-                console.log(`[Cards Tab] Filtered to ${window.allCardsData.length} English cards from ${window.allCardsDatabase.length} total`);
-                console.log(`[Cards Tab] First card structure:`, window.allCardsData[0]);
+                devLog(`[Cards Tab] Filtered to ${window.allCardsData.length} English cards from ${window.allCardsDatabase.length} total`);
+                devLog(`[Cards Tab] First card structure:`, window.allCardsData[0]);
                 
                 // Load playable cards (from City League, Current Meta, Tournament JH)
                 await loadPlayableCards();
@@ -12755,7 +12755,7 @@ const BASE_PATH = './data/';
                             }
                         }
                     });
-                    console.log(`Loaded ${cityLeagueCards.length} playable cards from City League, unique: ${window.cityLeagueCardsSet.size}`);
+                    devLog(`Loaded ${cityLeagueCards.length} playable cards from City League, unique: ${window.cityLeagueCardsSet.size}`);
                 } catch (err) {
                     console.warn('Could not load City League playable cards:', err);
                 }
@@ -12769,7 +12769,7 @@ const BASE_PATH = './data/';
                             if (cardNameNorm) window.playableCardsSet.add(cardNameNorm);
                         }
                     });
-                    console.log(`Loaded ${currentMetaCards.length} playable cards from Current Meta`);
+                    devLog(`Loaded ${currentMetaCards.length} playable cards from Current Meta`);
                 } catch (err) {
                     console.warn('Could not load Current Meta playable cards:', err);
                 }
@@ -12785,13 +12785,13 @@ const BASE_PATH = './data/';
                             if (cardNameNorm) window.playableCardsSet.add(cardNameNorm);
                         }
                     });
-                    console.log(`Loaded ${tournamentCards.length} playable cards from Tournament JH`);
+                    devLog(`Loaded ${tournamentCards.length} playable cards from Tournament JH`);
                 } catch (err) {
                     console.warn('Could not load Tournament JH playable cards:', err);
                 }
                 
-                console.log(`Total unique playable cards (All Playables): ${window.playableCardsSet.size}`);
-                console.log(`City League only cards: ${window.cityLeagueCardsSet.size}`);
+                devLog(`Total unique playable cards (All Playables): ${window.playableCardsSet.size}`);
+                devLog(`City League only cards: ${window.cityLeagueCardsSet.size}`);
             } catch (error) {
                 console.error('Error loading playable cards:', error);
             }
@@ -12868,7 +12868,7 @@ const BASE_PATH = './data/';
                 
                 for (const source of dataSources) {
                     try {
-                        console.log(`[Deck Coverage] Attempting to load: ${source.file}`);
+                        devLog(`[Deck Coverage] Attempting to load: ${source.file}`);
                         const response = await fetch(BASE_PATH + source.file);
                         if (!response.ok) {
                             console.error(`[Deck Coverage] Failed to fetch ${source.file}: ${response.status}`);
@@ -12877,9 +12877,9 @@ const BASE_PATH = './data/';
                         const text = await response.text();
                         const rows = parseCSV(text);
                         
-                        console.log(`[Deck Coverage] Parsed ${rows.length} rows from ${source.file}`);
+                        devLog(`[Deck Coverage] Parsed ${rows.length} rows from ${source.file}`);
                         if (rows.length > 0) {
-                            console.log(`[Deck Coverage] First row structure:`, rows[0]);
+                            devLog(`[Deck Coverage] First row structure:`, rows[0]);
                         }
                         
                         let processedRows = 0;
@@ -12888,7 +12888,7 @@ const BASE_PATH = './data/';
                             const resolvedMeta = normalizeTournamentFormatLabel(row.meta || row.format || '', row.set_code || '');
                             if (!row.card_name || !row.archetype || !resolvedMeta) {
                                 if (processedRows === 0) {
-                                    console.log(`[Deck Coverage] Skipping row - missing fields:`, { 
+                                    devLog(`[Deck Coverage] Skipping row - missing fields:`, { 
                                         has_card_name: !!row.card_name, 
                                         has_archetype: !!row.archetype, 
                                         has_meta: !!resolvedMeta,
@@ -12990,7 +12990,7 @@ const BASE_PATH = './data/';
                             
                             // Track meta
                             if (processedRows <= 3) {
-                                console.log(`[Deck Coverage] Adding meta: "${resolvedMeta}" for card: ${cardName}`);
+                                devLog(`[Deck Coverage] Adding meta: "${resolvedMeta}" for card: ${cardName}`);
                             }
                             window.allMetas.add(resolvedMeta);
                             if (!window.metaCardsMap.has(resolvedMeta)) {
@@ -12999,8 +12999,8 @@ const BASE_PATH = './data/';
                             window.metaCardsMap.get(resolvedMeta).add(cardName);
                         });
                         
-                        console.log(`[Deck Coverage] Processed ${processedRows} rows from ${source.name}`);
-                        console.log(`[Deck Coverage] Loaded from ${source.name}`);
+                        devLog(`[Deck Coverage] Processed ${processedRows} rows from ${source.name}`);
+                        devLog(`[Deck Coverage] Loaded from ${source.name}`);
                     } catch (err) {
                         console.error(`[Deck Coverage] Error loading ${source.name} deck coverage:`, err);
                     }
@@ -13009,15 +13009,15 @@ const BASE_PATH = './data/';
                 // Set total unique decks from all sources combined
                 window.totalUniqueDecks = totalDecksCount;
                 
-                console.log(`[Deck Coverage] Total unique decks: ${window.totalUniqueDecks}`);
-                console.log(`[Deck Coverage] Cards with coverage data: ${window.cardDeckCoverageMap.size}`);
-                console.log(`[Filter Data] Main Pokemons: ${window.allMainPokemons.size}, Archetypes: ${window.allArchetypes.size}, Metas: ${window.allMetas.size}`);
+                devLog(`[Deck Coverage] Total unique decks: ${window.totalUniqueDecks}`);
+                devLog(`[Deck Coverage] Cards with coverage data: ${window.cardDeckCoverageMap.size}`);
+                devLog(`[Filter Data] Main Pokemons: ${window.allMainPokemons.size}, Archetypes: ${window.allArchetypes.size}, Metas: ${window.allMetas.size}`);
                 
                 // Log metas for debugging
-                console.log(`[Filter Data] Available Metas:`, Array.from(window.allMetas).sort());
+                devLog(`[Filter Data] Available Metas:`, Array.from(window.allMetas).sort());
                 if (window.metaCardsMap.size > 0) {
                     window.metaCardsMap.forEach((cards, meta) => {
-                        console.log(`  Meta "${meta}": ${cards.size} unique cards`);
+                        devLog(`  Meta "${meta}": ${cards.size} unique cards`);
                     });
                 }
                 
@@ -13039,7 +13039,7 @@ const BASE_PATH = './data/';
                             uniqueFormats.add(format);
                         }
                     });
-                    console.log(`[Cards Tab] Loaded formats from current meta/fallback dataset`);
+                    devLog(`[Cards Tab] Loaded formats from current meta/fallback dataset`);
                 } catch (err) {
                     console.warn('[Cards Tab] Could not load current_meta_card_data.csv:', err);
                 }
@@ -13065,7 +13065,7 @@ const BASE_PATH = './data/';
                                 }
                             }
                         }
-                        console.log(`[Cards Tab] Loaded formats from tournament overview`);
+                        devLog(`[Cards Tab] Loaded formats from tournament overview`);
                     }
                 } catch (err) {
                     console.warn('[Cards Tab] Could not load tournament_cards_data_overview.csv:', err);
@@ -13093,8 +13093,8 @@ const BASE_PATH = './data/';
                 // Store mapping globally for filtering (reverse mapping too)
                 window.metaFormatMapping = formatMapping;
                 
-                console.log(`[Cards Tab] Loaded ${sortedFormats.length} total unique formats:`, sortedFormats);
-                console.log(`[Cards Tab] Format mappings applied:`, formatMapping);
+                devLog(`[Cards Tab] Loaded ${sortedFormats.length} total unique formats:`, sortedFormats);
+                devLog(`[Cards Tab] Format mappings applied:`, formatMapping);
             } catch (error) {
                 console.error('[Cards Tab] Error loading formats:', error);
                 window.cardFormatsData = { formats: [] };
@@ -13118,7 +13118,7 @@ const BASE_PATH = './data/';
                     label.innerHTML = `<input type="checkbox" value="meta:${format.code}" onchange="filterAndRenderCards()"> ${format.name}`;
                     container.appendChild(label);
                 });
-                console.log(`[Cards Tab] Populated ${window.cardFormatsData.formats.length} formats in filter`);
+                devLog(`[Cards Tab] Populated ${window.cardFormatsData.formats.length} formats in filter`);
             } else {
                 console.warn('[Cards Tab] No formats available to populate');
             }
@@ -13151,7 +13151,7 @@ const BASE_PATH = './data/';
                 // Filter ordered sets to only include those that exist in cards (and are English)
                 const setsToShow = orderedSets.filter(set => availableSets.has(set));
                 
-                console.log(`[Cards Tab] Showing ${setsToShow.length} English sets (newest first)`);
+                devLog(`[Cards Tab] Showing ${setsToShow.length} English sets (newest first)`);
                 
                 container.innerHTML = '';
                 setsToShow.forEach(set => {
@@ -13204,7 +13204,7 @@ const BASE_PATH = './data/';
                 window.mainPokemonFilterItems.push({ element: label, name: pokemon.toLowerCase() });
             });
             
-            console.log(`[Cards Tab] Populated ${sortedMainPokemons.length} main pokemons`);
+            devLog(`[Cards Tab] Populated ${sortedMainPokemons.length} main pokemons`);
         }
         
         function populateArchetypeFilter() {
@@ -13232,7 +13232,7 @@ const BASE_PATH = './data/';
                 window.allArchetypeItems.push(item);
             });
             
-            console.log(`[Cards Tab] Populated ${sortedArchetypes.length} archetypes`);
+            devLog(`[Cards Tab] Populated ${sortedArchetypes.length} archetypes`);
         }
         
         function filterArchetypesByMainPokemon() {
@@ -13282,7 +13282,7 @@ const BASE_PATH = './data/';
             // Apply current search filter
             filterArchetypeList();
             
-            console.log(`[Cards Tab] Filtered archetypes by main pokemon: ${selectedMainPokemons.join(', ')} - ${window.archetypeFilterItems.length} visible`);
+            devLog(`[Cards Tab] Filtered archetypes by main pokemon: ${selectedMainPokemons.join(', ')} - ${window.archetypeFilterItems.length} visible`);
         }
         
         function populateMetaFilter() {
@@ -13308,7 +13308,7 @@ const BASE_PATH = './data/';
                 container.appendChild(label);
             });
             
-            console.log(`[Cards Tab] Populated ${sortedMetas.length} metas in Meta/Format filter`);
+            devLog(`[Cards Tab] Populated ${sortedMetas.length} metas in Meta/Format filter`);
         }
         
         function filterMainPokemonList() {
@@ -13544,9 +13544,9 @@ const BASE_PATH = './data/';
             const selectedArchetypes = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
             const selectedMetaFilters = Array.from(document.querySelectorAll('#metaFormatOptions input:checked')).filter(cb => cb.value.startsWith('meta:')).map(cb => cb.value.replace('meta:', ''));
             
-            console.log(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}, DeckCov: ${selectedDeckCoverages.length}, MainPkm: ${selectedMainPokemons.length}, Archetypes: ${selectedArchetypes.length}, MetaFilters: ${selectedMetaFilters.length}`);
-            console.log(`[Filter Debug] Selected Meta Values:`, selectedMetas);
-            console.log(`[Filter Debug] Selected Meta Filters (meta: prefix):`, selectedMetaFilters);
+            devLog(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}, DeckCov: ${selectedDeckCoverages.length}, MainPkm: ${selectedMainPokemons.length}, Archetypes: ${selectedArchetypes.length}, MetaFilters: ${selectedMetaFilters.length}`);
+            devLog(`[Filter Debug] Selected Meta Values:`, selectedMetas);
+            devLog(`[Filter Debug] Selected Meta Filters (meta: prefix):`, selectedMetaFilters);
             
             let passedFilters = 0;
             let failedSearch = 0;
@@ -13769,14 +13769,14 @@ const BASE_PATH = './data/';
                     
                     // Debug log for first card only
                     if (passedFilters === 0 && failedMetaFilter === 0) {
-                        console.log(`[Meta Filter Debug] Checking meta filters:`, selectedMetaFilters);
-                        console.log(`[Meta Filter Debug] Available metas in metaCardsMap:`, window.metaCardsMap ? Array.from(window.metaCardsMap.keys()) : 'metaCardsMap not loaded');
+                        devLog(`[Meta Filter Debug] Checking meta filters:`, selectedMetaFilters);
+                        devLog(`[Meta Filter Debug] Available metas in metaCardsMap:`, window.metaCardsMap ? Array.from(window.metaCardsMap.keys()) : 'metaCardsMap not loaded');
                         if (window.metaCardsMap) {
                             selectedMetaFilters.forEach(meta => {
                                 if (window.metaCardsMap.has(meta)) {
-                                    console.log(`  Meta "${meta}" found with ${window.metaCardsMap.get(meta).size} cards`);
+                                    devLog(`  Meta "${meta}" found with ${window.metaCardsMap.get(meta).size} cards`);
                                 } else {
-                                    console.log(`  Meta "${meta}" NOT FOUND in metaCardsMap`);
+                                    devLog(`  Meta "${meta}" NOT FOUND in metaCardsMap`);
                                 }
                             });
                         }
@@ -13819,19 +13819,19 @@ const BASE_PATH = './data/';
                 return true;
             });
             
-            console.log(`[Cards Tab] Filter results:`);
-            console.log(`  - Passed all filters: ${passedFilters}`);
-            console.log(`  - Failed validation: ${failedValidation}`);
-            console.log(`  - Failed search: ${failedSearch}`);
-            console.log(`  - Failed meta: ${failedMeta}`);
-            console.log(`  - Failed set: ${failedSet}`);
-            console.log(`  - Failed rarity: ${failedRarity}`);
-            console.log(`  - Failed category: ${failedCategory}`);
-            console.log(`  - Failed deck coverage: ${failedDeckCoverage}`);
-            console.log(`  - Failed main pokemon: ${failedMainPokemon}`);
-            console.log(`  - Failed archetype: ${failedArchetype}`);
-            console.log(`  - Failed meta filter: ${failedMetaFilter}`);
-            console.log(`[Cards Tab] Filtered ${window.filteredCardsData.length} cards from ${window.allCardsData.length} total`);
+            devLog(`[Cards Tab] Filter results:`);
+            devLog(`  - Passed all filters: ${passedFilters}`);
+            devLog(`  - Failed validation: ${failedValidation}`);
+            devLog(`  - Failed search: ${failedSearch}`);
+            devLog(`  - Failed meta: ${failedMeta}`);
+            devLog(`  - Failed set: ${failedSet}`);
+            devLog(`  - Failed rarity: ${failedRarity}`);
+            devLog(`  - Failed category: ${failedCategory}`);
+            devLog(`  - Failed deck coverage: ${failedDeckCoverage}`);
+            devLog(`  - Failed main pokemon: ${failedMainPokemon}`);
+            devLog(`  - Failed archetype: ${failedArchetype}`);
+            devLog(`  - Failed meta filter: ${failedMetaFilter}`);
+            devLog(`[Cards Tab] Filtered ${window.filteredCardsData.length} cards from ${window.allCardsData.length} total`);
             
             // Deduplicate cards (same card name, different prints) - prefer print from coverage data
             // Only deduplicate if showOnlyOnePrint is enabled
@@ -13865,7 +13865,7 @@ const BASE_PATH = './data/';
                 }
             }
             
-            console.log(`[Print View] Toggled to: ${showOnlyOnePrint ? 'Only 1 Print' : 'All Prints'}`);
+            devLog(`[Print View] Toggled to: ${showOnlyOnePrint ? 'Only 1 Print' : 'All Prints'}`);
             
             // Re-render with new setting
             filterAndRenderCards();
@@ -13932,8 +13932,8 @@ const BASE_PATH = './data/';
                     const setCodeCounts = new Map();
                     
                     if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
-                        console.log(`[Dedup Debug] ${cardName}: Active filters - MainPokemon: [${selectedMainPokemons.join(', ')}], Archetype: [${selectedArchetypes.join(', ')}], Meta: [${selectedMetaFilters.join(', ')}]`);
-                        console.log(`[Dedup Debug] ${cardName}: Has ${coverageData.archetypesWithCard.size} archetypes in coverage data`);
+                        devLog(`[Dedup Debug] ${cardName}: Active filters - MainPokemon: [${selectedMainPokemons.join(', ')}], Archetype: [${selectedArchetypes.join(', ')}], Meta: [${selectedMetaFilters.join(', ')}]`);
+                        devLog(`[Dedup Debug] ${cardName}: Has ${coverageData.archetypesWithCard.size} archetypes in coverage data`);
                     }
                     
                     coverageData.archetypesWithCard.forEach((entry, archetypeKey) => {
@@ -13954,7 +13954,7 @@ const BASE_PATH = './data/';
                         
                         if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
                             if (matchesFilters && entry.setCode) {
-                                console.log(`[Dedup Debug] ${cardName}: Matched archetype ${archetypeKey} with setCode ${entry.setCode}`);
+                                devLog(`[Dedup Debug] ${cardName}: Matched archetype ${archetypeKey} with setCode ${entry.setCode}`);
                             }
                         }
                         
@@ -13981,28 +13981,28 @@ const BASE_PATH = './data/';
                             const matchingPrint = budgetCandidatePrints.find(p => p.set === mostCommonSet);
                             if (matchingPrint) {
                                 if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
-                                    console.log(`[Dedup Debug] ${cardName}: Selected ${mostCommonSet} print (most common in filtered archetypes)`);
+                                    devLog(`[Dedup Debug] ${cardName}: Selected ${mostCommonSet} print (most common in filtered archetypes)`);
                                 }
                                 selectedCards.push(matchingPrint);
                                 return;
                             } else {
                                 if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
-                                    console.log(`[Dedup Debug] ${cardName}: Most common set ${mostCommonSet} but no matching print found. Available sets:`, prints.map(p => p.set));
+                                    devLog(`[Dedup Debug] ${cardName}: Most common set ${mostCommonSet} but no matching print found. Available sets:`, prints.map(p => p.set));
                                 }
                             }
                         } else {
                             if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
-                                console.log(`[Dedup Debug] ${cardName}: No most common set found (setCodeCounts empty)`);
+                                devLog(`[Dedup Debug] ${cardName}: No most common set found (setCodeCounts empty)`);
                             }
                         }
                     } else {
                         if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
-                            console.log(`[Dedup Debug] ${cardName}: setCodeCounts.size = 0, no archetypes matched filters`);
+                            devLog(`[Dedup Debug] ${cardName}: setCodeCounts.size = 0, no archetypes matched filters`);
                         }
                     }
                 } else {
                     if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
-                        console.log(`[Dedup Debug] ${cardName}: No coverage data or no filters active (coverage: ${!!coverageData}, filters: ${selectedMainPokemons.length > 0 || selectedArchetypes.length > 0 || selectedMetaFilters.length > 0})`);
+                        devLog(`[Dedup Debug] ${cardName}: No coverage data or no filters active (coverage: ${!!coverageData}, filters: ${selectedMainPokemons.length > 0 || selectedArchetypes.length > 0 || selectedMetaFilters.length > 0})`);
                     }
                 }
                 
@@ -14049,7 +14049,7 @@ const BASE_PATH = './data/';
                 });
                 
                 if (cardName === 'hawlucha' || cardName === 'charmander' || cardName === 'charmeleon') {
-                    console.log(`[Dedup Debug] ${cardName}: Using fallback - selected ${sortedPrints[0].set} ${sortedPrints[0].rarity}`);
+                    devLog(`[Dedup Debug] ${cardName}: Using fallback - selected ${sortedPrints[0].set} ${sortedPrints[0].rarity}`);
                 }
                 selectedCards.push(sortedPrints[0]);
             });
@@ -14060,7 +14060,7 @@ const BASE_PATH = './data/';
             
             const uniqueCardNames = cardsByName.size;
             const totalPrintsRemoved = uniqueCardNames - selectedCards.length;
-            console.log(`[Cards Tab] Deduplicated: ${uniqueCardNames} unique cards (removed ${totalPrintsRemoved} duplicate prints)`);
+            devLog(`[Cards Tab] Deduplicated: ${uniqueCardNames} unique cards (removed ${totalPrintsRemoved} duplicate prints)`);
         }
         
         function sortCardsDatabase(cards) {
@@ -14071,7 +14071,7 @@ const BASE_PATH = './data/';
             const sortOrderSelect = document.getElementById('cardSortOrder');
             const sortOrder = sortOrderSelect ? sortOrderSelect.value : 'set';
             
-            console.log(`[Cards Tab] Sorting cards by: ${sortOrder}`);
+            devLog(`[Cards Tab] Sorting cards by: ${sortOrder}`);
             
             if (sortOrder === 'set') {
                 // Sort by SET release order DESCENDING (newest first), then SET NUMBER ascending
@@ -14787,12 +14787,12 @@ const BASE_PATH = './data/';
                     
                     if (!hasMainPokemonCard) {
                         if (cardNameLower === 'hawlucha' && archetypeKey.includes('Dragapult')) {
-                            console.log(`[Coverage Debug Hawlucha Filter] Excluding archetype ${archetypeKey} - no card with '${mainPokemon.toLowerCase()}' in name found`);
+                            devLog(`[Coverage Debug Hawlucha Filter] Excluding archetype ${archetypeKey} - no card with '${mainPokemon.toLowerCase()}' in name found`);
                         }
                         return false; // Skip archetypes with no main pokemon cards
                     } else {
                         if (cardNameLower === 'hawlucha' && archetypeKey.includes('Dragapult')) {
-                            console.log(`[Coverage Debug Hawlucha Filter] Including archetype ${archetypeKey} - has main pokemon card`);
+                            devLog(`[Coverage Debug Hawlucha Filter] Including archetype ${archetypeKey} - has main pokemon card`);
                         }
                     }
                 }
@@ -14806,18 +14806,18 @@ const BASE_PATH = './data/';
             
             if (cardNameLower === 'hawlucha') {
                 const dragapultKeys = filteredArchetypeKeys.filter(k => k.includes('Dragapult'));
-                console.log(`[Coverage Debug Hawlucha Filter] Filtered Dragapult Archetypes (${dragapultKeys.length}): ${dragapultKeys.slice(0, 5).join(', ')}${dragapultKeys.length > 5 ? ` ... and ${dragapultKeys.length - 5} more` : ''}`);
+                devLog(`[Coverage Debug Hawlucha Filter] Filtered Dragapult Archetypes (${dragapultKeys.length}): ${dragapultKeys.slice(0, 5).join(', ')}${dragapultKeys.length > 5 ? ` ... and ${dragapultKeys.length - 5} more` : ''}`);
                 
                 const hawluchaKeys = Array.from(cardStats.archetypesWithCard.keys());
                 const hawluchaDragKeys = hawluchaKeys.filter(k => k.includes('Dragapult'));
-                console.log(`[Coverage Debug Hawlucha Filter] Hawlucha's Dragapult Archetypes (${hawluchaDragKeys.length}): ${hawluchaDragKeys.join(', ')}`);
+                devLog(`[Coverage Debug Hawlucha Filter] Hawlucha's Dragapult Archetypes (${hawluchaDragKeys.length}): ${hawluchaDragKeys.join(', ')}`);
                 
                 // Check which Hawlucha archetypes are NOT in filtered keys
                 const missingKeys = hawluchaKeys.filter(k => !filteredArchetypeKeys.includes(k) && k.includes('Dragapult'));
                 if (missingKeys.length > 0) {
-                    console.log(`[Coverage Debug Hawlucha Filter] Hawlucha archetypes MISSING from filtered list (${missingKeys.length}): ${missingKeys.join(', ')}`);
+                    devLog(`[Coverage Debug Hawlucha Filter] Hawlucha archetypes MISSING from filtered list (${missingKeys.length}): ${missingKeys.join(', ')}`);
                 } else {
-                    console.log(`[Coverage Debug Hawlucha Filter] All Hawlucha Dragapult archetypes are in filtered list!`);
+                    devLog(`[Coverage Debug Hawlucha Filter] All Hawlucha Dragapult archetypes are in filtered list!`);
                 }
             }
             
@@ -14837,9 +14837,9 @@ const BASE_PATH = './data/';
             const matchingArchetypes = new Set();
             
             if (cardNameLower === 'hawlucha') {
-                console.log(`[Coverage Debug Hawlucha Count] Starting deck count. cardStats.archetypesWithCard has ${cardStats.archetypesWithCard.size} entries`);
+                devLog(`[Coverage Debug Hawlucha Count] Starting deck count. cardStats.archetypesWithCard has ${cardStats.archetypesWithCard.size} entries`);
                 const releaseDate = getCardReleaseDate(cardStats);
-                console.log(`[Coverage Debug Hawlucha Count] Card release date: ${releaseDate ? releaseDate.toISOString().split('T')[0] : 'NULL'}, setCode: ${cardStats.setCode}`);
+                devLog(`[Coverage Debug Hawlucha Count] Card release date: ${releaseDate ? releaseDate.toISOString().split('T')[0] : 'NULL'}, setCode: ${cardStats.setCode}`);
             }
             
             let hawluchaDebugInfo = [];
@@ -14862,7 +14862,7 @@ const BASE_PATH = './data/';
                     const entryReleaseDate = entrySetCode ? new Date(entryReleaseDateStr) : cardReleaseDate;
                     
                     if (cardNameLower === 'hawlucha') {
-                        console.log(`[Coverage Debug Hawlucha Count] ? ${archetypeKey}: deckCount=${deckCount}, tournamentDate=${entry.tournamentDate || 'N/A'}, entrySetCode=${entrySetCode}, releaseDate=${entryReleaseDate ? entryReleaseDate.toISOString().split('T')[0] : 'NULL'}`);
+                        devLog(`[Coverage Debug Hawlucha Count] ? ${archetypeKey}: deckCount=${deckCount}, tournamentDate=${entry.tournamentDate || 'N/A'}, entrySetCode=${entrySetCode}, releaseDate=${entryReleaseDate ? entryReleaseDate.toISOString().split('T')[0] : 'NULL'}`);
                     }
                     
                     // Temporal filtering: Use the entry's specific set code release date
@@ -14871,7 +14871,7 @@ const BASE_PATH = './data/';
                     if (entryReleaseDate && tournamentDate) {
                         if (tournamentDate < entryReleaseDate) {
                             if (cardNameLower === 'hawlucha') {
-                                console.log(`[Coverage Debug Hawlucha Count] ? FILTERED OUT: ${archetypeKey} (tournament ${tournamentDate.toISOString().split('T')[0]} < release ${entryReleaseDate.toISOString().split('T')[0]})`);
+                                devLog(`[Coverage Debug Hawlucha Count] ? FILTERED OUT: ${archetypeKey} (tournament ${tournamentDate.toISOString().split('T')[0]} < release ${entryReleaseDate.toISOString().split('T')[0]})`);
                             }
                             return; // Skip this entry
                         }
@@ -14888,13 +14888,13 @@ const BASE_PATH = './data/';
             });
             
             if (cardNameLower === 'hawlucha' && hawluchaDebugInfo.length > 0) {
-                console.log(`[Coverage Debug Hawlucha Count] Dragapult archetypes checked: ${hawluchaDebugInfo.join(' | ')}`);
+                devLog(`[Coverage Debug Hawlucha Count] Dragapult archetypes checked: ${hawluchaDebugInfo.join(' | ')}`);
             }
             
             const percentage = totalFilteredDecks > 0 ? (decksWithCard / totalFilteredDecks) * 100 : 0;
             
             if (cardNameLower === 'hawlucha') {
-                console.log(`[Coverage Debug Hawlucha] Final: ${decksWithCard}/${totalFilteredDecks} = ${percentage.toFixed(1)}%, matching archetypes: ${matchingArchetypes.size}, filtered keys: ${filteredArchetypeKeys.length}`);
+                devLog(`[Coverage Debug Hawlucha] Final: ${decksWithCard}/${totalFilteredDecks} = ${percentage.toFixed(1)}%, matching archetypes: ${matchingArchetypes.size}, filtered keys: ${filteredArchetypeKeys.length}`);
             }
             
             // Enhanced debug logging with temporal filtering info
@@ -14925,7 +14925,7 @@ const BASE_PATH = './data/';
                     debugMsg += ` | Missing from: ${archetypesWithoutCard.slice(0, 3).join(', ')}`;
                 }
                 
-                console.log(debugMsg);
+                devLog(debugMsg);
             }
             
             return {
@@ -15078,7 +15078,7 @@ const BASE_PATH = './data/';
                 currentNumber = setNumMatch[2];
             }
             
-            console.log(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${deckKey}, actualCardName: ${actualCardName}`);
+            devLog(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${deckKey}, actualCardName: ${actualCardName}`);
 
             const resolvedTarget = resolveRaritySwitchTarget(actualCardName, deckKey, sourceHint);
             currentRaritySwitcherCard = {
@@ -15124,7 +15124,7 @@ const BASE_PATH = './data/';
                     
                     currentCard = candidateCards[0];
                     const intPrintCount = (currentCard.international_prints || '').split(',').length;
-                    console.log(`[openRaritySwitcher] Using card with HIGHEST RARITY as reference: ${currentCard.set}-${currentCard.number} (${currentCard.rarity}, ${intPrintCount} prints)`);
+                    devLog(`[openRaritySwitcher] Using card with HIGHEST RARITY as reference: ${currentCard.set}-${currentCard.number} (${currentCard.rarity}, ${intPrintCount} prints)`);
                 } else {
                     // Fallback to any card with this name (for type detection)
                     let fallbackCard = (window.cardIndexMap && window.cardIndexMap.get(actualCardName)) || null;
@@ -15133,7 +15133,7 @@ const BASE_PATH = './data/';
                     }
                     if (fallbackCard) {
                         currentCard = fallbackCard;
-                        console.log(`[openRaritySwitcher] Using fallback card for type detection: ${fallbackCard.set}-${fallbackCard.number} (${fallbackCard.type})`);
+                        devLog(`[openRaritySwitcher] Using fallback card for type detection: ${fallbackCard.set}-${fallbackCard.number} (${fallbackCard.type})`);
                     }
                 }
             }
@@ -15168,8 +15168,8 @@ const BASE_PATH = './data/';
                         versions = nameMatchedVersions;
                     }
                     
-                    console.log(`[Pokemon Card] Found ${versions.length} international prints from Limitless data`);
-                    console.log(`[Pokemon Card] Int. Print IDs:`, intPrintIds);
+                    devLog(`[Pokemon Card] Found ${versions.length} international prints from Limitless data`);
+                    devLog(`[Pokemon Card] Int. Print IDs:`, intPrintIds);
                 } else {
                     // No international_prints data available - show only current card
                     versions = currentCard ? [currentCard] : [];
@@ -15180,10 +15180,10 @@ const BASE_PATH = './data/';
                 // All versions with same name are functionally identical (reprints)
                 if (window.cardsByNameMap && window.cardsByNameMap[actualCardName]) {
                     versions = window.cardsByNameMap[actualCardName].slice();
-                    console.log(`[Trainer/Energy] Found ${versions.length} reprints via name matching`);
+                    devLog(`[Trainer/Energy] Found ${versions.length} reprints via name matching`);
                 } else if (window.allCardsDatabase) {
                     versions = window.allCardsDatabase.filter(card => cardMatchesActualName(card));
-                    console.log(`[Trainer/Energy] Found ${versions.length} reprints via direct search`);
+                    devLog(`[Trainer/Energy] Found ${versions.length} reprints via direct search`);
                 } else {
                     versions = currentCard ? [currentCard] : [];
                 }
@@ -15195,9 +15195,9 @@ const BASE_PATH = './data/';
             if (!isPokemonCard && window.englishSetCodes && window.englishSetCodes.size > 0) {
                 const beforeEnglishFilter = versions.length;
                 versions = versions.filter(version => window.englishSetCodes.has(version.set));
-                console.log(`[openRaritySwitcher] English filter: ${beforeEnglishFilter} ? ${versions.length} versions (Trainer/Energy only)`);
+                devLog(`[openRaritySwitcher] English filter: ${beforeEnglishFilter} ? ${versions.length} versions (Trainer/Energy only)`);
             } else if (isPokemonCard) {
-                console.log(`[openRaritySwitcher] Skipping English filter for Pokemon cards (trust international_prints from Limitless)`);
+                devLog(`[openRaritySwitcher] Skipping English filter for Pokemon cards (trust international_prints from Limitless)`);
             }
             
             // Filter to only show cards with COMPLETE data
@@ -15213,13 +15213,13 @@ const BASE_PATH = './data/';
                     return hasRarity && hasImageUrl;
                 });
                 if (beforeCompleteFilter > versions.length) {
-                    console.log(`[Trainer/Energy Filter] Filtered out ${beforeCompleteFilter - versions.length} incomplete cards`);
-                    console.log(`[openRaritySwitcher] After complete data filter: ${versions.length} versions`);
+                    devLog(`[Trainer/Energy Filter] Filtered out ${beforeCompleteFilter - versions.length} incomplete cards`);
+                    devLog(`[openRaritySwitcher] After complete data filter: ${versions.length} versions`);
                 }
             } else {
                 // POKEMON: Trust international_prints data from Limitless - show all versions even if rarity/image missing
                 // These are functionally identical cards validated by Limitless TCG database
-                console.log(`[Pokemon Filter] Showing all ${versions.length} international prints (trusted Limitless data)`);
+                devLog(`[Pokemon Filter] Showing all ${versions.length} international prints (trusted Limitless data)`);
             }
             
             if (versions.length === 0) {
@@ -15688,7 +15688,7 @@ const BASE_PATH = './data/';
                 const nodesToRemove = new Set([...staleNodes, ...infiniteAnimatedNodes]);
                 if (nodesToRemove.size > 0) {
                     nodesToRemove.forEach(node => node.remove());
-                    console.log(`[Init] Loading watchdog removed ${nodesToRemove.size} stale loading node(s).`);
+                    devLog(`[Init] Loading watchdog removed ${nodesToRemove.size} stale loading node(s).`);
                 }
             }, delayMs);
         }
@@ -15738,7 +15738,7 @@ const BASE_PATH = './data/';
                 document.documentElement.dataset.appReady = 'true';
                 window.dispatchEvent(new CustomEvent('app:resources-settled'));
                 window.dispatchEvent(new CustomEvent('app:ui-ready'));
-                console.log('[Init] All resources settled. UI is ready.');
+                devLog('[Init] All resources settled. UI is ready.');
             } catch (e) {
                 console.error('[init] App initialization failed:', e);
             } finally {
@@ -15766,15 +15766,15 @@ const BASE_PATH = './data/';
         
         // Load Current Meta Analysis Data
         async function loadCurrentMetaAnalysis() {
-            console.log('Loading Current Meta Analysis...');
+            devLog('Loading Current Meta Analysis...');
             const data = await loadCurrentMetaRowsWithFallback();
-            console.log('Loaded data:', data ? `${data.length} rows` : 'null');
+            devLog('Loaded data:', data ? `${data.length} rows` : 'null');
             
             // Load deck stats (winrates)
             const deckStats = await loadCSV('limitless_online_decks.csv');
             if (deckStats) {
                 window.currentMetaDeckStats = deckStats;
-                console.log('Loaded deck stats:', deckStats.length, 'decks');
+                devLog('Loaded deck stats:', deckStats.length, 'decks');
                 // Phase 1: render current meta chart
                 const chartData = deckStats.map(d => ({
                     archetype: d.deck_name || d.archetype || '',
@@ -15787,7 +15787,7 @@ const BASE_PATH = './data/';
             const matchupData = await loadCSV('limitless_online_decks_matchups.csv');
             if (matchupData) {
                 window.currentMetaMatchupData = matchupData;
-                console.log('Loaded matchup data:', matchupData.length, 'matchups');
+                devLog('Loaded matchup data:', matchupData.length, 'matchups');
             }
             
             if (data && data.length > 0) {
@@ -15797,7 +15797,7 @@ const BASE_PATH = './data/';
                 window.currentMetaAnalysisLoaded = true;
                 
                 // Load meta card analysis for consistency calculations
-                console.log('Loading meta card analysis for consistency...');
+                devLog('Loading meta card analysis for consistency...');
                 loadMetaCardAnalysis('currentMeta');
             } else {
                 const content = document.getElementById('currentMetaDeckSelect');
@@ -15822,7 +15822,7 @@ const BASE_PATH = './data/';
                         });
                     }
                 });
-                console.log('Loaded comparison data for', comparisonMap.size, 'decks');
+                devLog('Loaded comparison data for', comparisonMap.size, 'decks');
             }
             
             // Apply format filter to data BEFORE building archetype list
@@ -15830,7 +15830,7 @@ const BASE_PATH = './data/';
             if (currentMetaFormatFilter !== 'all' && !window.currentMetaUsingFallback) {
                 const filterValue = currentMetaFormatFilter === 'live' ? 'Meta Live' : 'Meta Play!';
                 filteredData = data.filter(row => row.meta === filterValue);
-                console.log(`Filtered archetypes by ${currentMetaFormatFilter}: ${filteredData.length} cards`);
+                devLog(`Filtered archetypes by ${currentMetaFormatFilter}: ${filteredData.length} cards`);
             }
             
             const archetypeMap = new Map();
@@ -15871,7 +15871,7 @@ const BASE_PATH = './data/';
             });
             
             const archetypeList = Array.from(archetypeMap.values());
-            console.log('Found archetypes:', archetypeList.length);
+            devLog('Found archetypes:', archetypeList.length);
             
             // Sort by rank first (lower rank = higher position), then by deck count descending
             const sortedByMeta = [...archetypeList].sort((a, b) => {
@@ -15962,7 +15962,7 @@ const BASE_PATH = './data/';
                 format = 'all';
             }
             currentMetaFormatFilter = format;
-            console.log('[Current Meta] Format filter set to:', format);
+            devLog('[Current Meta] Format filter set to:', format);
             
             // Update button styles with null-checks
             ['All', 'Live', 'Play'].forEach(f => {
@@ -16019,7 +16019,7 @@ const BASE_PATH = './data/';
                     // Clear selection and deck view
                     currentMetaDeckSelect.value = '';
                     clearCurrentMetaDeckView();
-                    console.log('?? Previously selected archetype not available in this filter');
+                    devLog('?? Previously selected archetype not available in this filter');
                 }
             } else {
                 console.warn('?? No deck selected - filter saved for when deck is selected');
@@ -16154,7 +16154,7 @@ const BASE_PATH = './data/';
         
         // Render best/worst matchups for Current Meta - extract directly from loaded HTML (1:1 copy)
         function renderCurrentMetaMatchups(archetype) {
-            console.log('?? Rendering matchups for:', archetype);
+            devLog('?? Rendering matchups for:', archetype);
             const deckStats = window.currentMetaDeckStats || [];
             const matchupsSection = document.getElementById('currentMetaMatchupsSection');
             const bestTable = document.getElementById('currentMetaBestMatchups');
@@ -16179,7 +16179,7 @@ const BASE_PATH = './data/';
                 if (h3Text.startsWith(archetype + ' ')) {
                     // Found it! The parent div contains the matchup tables
                     matchingSection = h3.parentElement;
-                    console.log(`? Found HTML section for: ${archetype}`);
+                    devLog(`? Found HTML section for: ${archetype}`);
                     break;
                 }
             }
@@ -16212,7 +16212,7 @@ const BASE_PATH = './data/';
             const bestMatchupsTable = allTablesInGrid[0]; // First table = Best Matchups
             const worstMatchupsTable = allTablesInGrid[1]; // Second table = Worst Matchups
             
-            console.log(`? Extracted matchup tables from HTML for: ${archetype}`);
+            devLog(`? Extracted matchup tables from HTML for: ${archetype}`);
             
             // Extract title from H3 (already contains all info: "Gholdengo Lunatone (Rank #2 | Total WR: 52.2%, Vs Top20: 15:4)")
             const h3El = matchingSection.querySelector('h3');
@@ -16390,7 +16390,7 @@ const BASE_PATH = './data/';
         
         // Set overview rarity mode
         function setCurrentMetaOverviewRarityMode(mode) {
-            console.log('?? Setting Current Meta overview rarity mode to:', mode);
+            devLog('?? Setting Current Meta overview rarity mode to:', mode);
             currentMetaRarityMode = mode;
             
             if (mode === 'all') {
@@ -16861,7 +16861,7 @@ const BASE_PATH = './data/';
             
             tableContainer.innerHTML = html;
             tableViewContainer.style.display = 'block';
-            console.log('Current Meta table rendered with tier grouping:', { core: coreCards.length, aceSpec: aceSpecCards.length, tech: techCards.length, spicy: spicyCards.length });
+            devLog('Current Meta table rendered with tier grouping:', { core: coreCards.length, aceSpec: aceSpecCards.length, tech: techCards.length, spicy: spicyCards.length });
         }
         
         function filterCurrentMetaOverviewCards() {
@@ -17108,14 +17108,14 @@ const BASE_PATH = './data/';
             
             // Ensure cards database is loaded before allowing comparison
             if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
-                console.log('[Deck Compare] Loading cards database...');
+                devLog('[Deck Compare] Loading cards database...');
                 document.getElementById('deckCompareModal').style.display = 'flex';
                 document.getElementById('deckCompareResult').innerHTML = '<div class="loading">? Loading card database...</div>';
                 document.getElementById('deckCompareResult').style.display = 'block';
                 
                 try {
                     await loadAllCardsDatabase();
-                    console.log('[Deck Compare] ? Database loaded successfully');
+                    devLog('[Deck Compare] ? Database loaded successfully');
                     document.getElementById('deckCompareResult').style.display = 'none';
                 } catch (error) {
                     console.error('[Deck Compare] Failed to load database:', error);
@@ -17185,7 +17185,7 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            console.log('[compareWithSavedDeck] Comparing with saved deck:', savedDeck.name);
+            devLog('[compareWithSavedDeck] Comparing with saved deck:', savedDeck.name);
             
             // Convert saved deck to "old deck" format (same as parseDeckList output)
             // Deck format: "CardName (SET NUMBER)" with exact prints preserved
@@ -17216,7 +17216,7 @@ const BASE_PATH = './data/';
                 }
             }
             
-            console.log('[compareWithSavedDeck] Old deck (saved) parsed:', oldDeck);
+            devLog('[compareWithSavedDeck] Old deck (saved) parsed:', oldDeck);
             
             // Get current deck and convert to same format
             const deckMap = currentDeckSource === 'cityLeague' ? window.cityLeagueDeck :
@@ -17254,7 +17254,7 @@ const BASE_PATH = './data/';
                     });
                 }
             }
-            console.log('[compareWithSavedDeck] Current deck parsed:', currentDeck);
+            devLog('[compareWithSavedDeck] Current deck parsed:', currentDeck);
             
             // Perform comparison using the same logic as compareDeckLists
             performDeckComparison(oldDeck, currentDeck, savedDeck.name);
@@ -17566,7 +17566,7 @@ const BASE_PATH = './data/';
             const card2 = cardsBySetNumberMap[`${set2}-${number2}`];
             if (card1 && card2 && isBasicEnergy(card1.name) && isBasicEnergy(card2.name)) {
                 if (card1.name === card2.name) {
-                    console.log(`[areSameInternationalPrint] ? Basic Energy match: ${set1} ${number1} ? ${set2} ${number2} (${card1.name})`);
+                    devLog(`[areSameInternationalPrint] ? Basic Energy match: ${set1} ${number1} ? ${set2} ${number2} (${card1.name})`);
                     return true;
                 }
             }
@@ -17578,7 +17578,7 @@ const BASE_PATH = './data/';
             if (prints1 && prints1.length > 0) {
                 const match = prints1.some(p => p.set === set2 && p.number === number2);
                 if (match) {
-                    console.log(`[areSameInternationalPrint] ? Match found: ${set1} ${number1} ? ${set2} ${number2}`);
+                    devLog(`[areSameInternationalPrint] ? Match found: ${set1} ${number1} ? ${set2} ${number2}`);
                     return true;
                 }
             }
@@ -17588,12 +17588,12 @@ const BASE_PATH = './data/';
             if (prints2 && prints2.length > 0) {
                 const match = prints2.some(p => p.set === set1 && p.number === number1);
                 if (match) {
-                    console.log(`[areSameInternationalPrint] ? Match found (reverse): ${set1} ${number1} ? ${set2} ${number2}`);
+                    devLog(`[areSameInternationalPrint] ? Match found (reverse): ${set1} ${number1} ? ${set2} ${number2}`);
                     return true;
                 }
             }
             
-            console.log(`[areSameInternationalPrint] ? No match: ${set1} ${number1} vs ${set2} ${number2}`);
+            devLog(`[areSameInternationalPrint] ? No match: ${set1} ${number1} vs ${set2} ${number2}`);
             return false;
         }
 
@@ -17617,11 +17617,11 @@ const BASE_PATH = './data/';
                 return;
             }
             
-            console.log(`[deckCompare] cardsBySetNumberMap loaded: ${Object.keys(cardsBySetNumberMap).length} cards`);
+            devLog(`[deckCompare] cardsBySetNumberMap loaded: ${Object.keys(cardsBySetNumberMap).length} cards`);
             
             // Parse old deck (from text input)
             const oldDeck = parseDeckList(oldDeckText);
-            console.log('[deckCompare] Old deck parsed:', oldDeck);
+            devLog('[deckCompare] Old deck parsed:', oldDeck);
             
             // Get current deck and convert to same format
             const deckMap = currentDeckSource === 'cityLeague' ? window.cityLeagueDeck :
@@ -17659,7 +17659,7 @@ const BASE_PATH = './data/';
                     });
                 }
             }
-            console.log('[deckCompare] Current deck parsed:', currentDeck);
+            devLog('[deckCompare] Current deck parsed:', currentDeck);
             
             // Use common comparison logic
             performDeckComparison(oldDeck, currentDeck, 'Manual Decklist');

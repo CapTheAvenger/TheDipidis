@@ -12,7 +12,8 @@ service cloud.firestore {
       allow create: if request.auth != null 
         && request.resource.data.host == request.auth.uid
         && request.resource.data.status == 'waiting'
-        && request.resource.data.keys().hasAll(['host', 'status'])
+        && request.resource.data.keys().hasAll(['host', 'status', 'createdAt'])
+        && request.resource.data.createdAt == request.time
         && request.resource.data.size() < 50;
       
       // ✅ READ: Nur Host & Guest dürfen das Spiel lesen
@@ -28,6 +29,8 @@ service cloud.firestore {
         && request.resource.data.host == resource.data.host
         && (request.resource.data.guest == resource.data.guest 
             || resource.data.guest == null)
+        // createdAt darf nicht verändert werden
+        && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.size() < 50;
       
       // ✅ DELETE: Nur Host darf löschen

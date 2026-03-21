@@ -21,11 +21,9 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 
 try:
-    import cloudscraper
     from bs4 import BeautifulSoup
 except ImportError:
-    print("FEHLER: Es fehlen Bibliotheken! Bitte installiere sie mit:")
-    print("pip install cloudscraper beautifulsoup4")
+    print("FEHLER: beautifulsoup4 fehlt! pip install beautifulsoup4")
     sys.exit(1)
 
 from card_scraper_shared import (
@@ -38,8 +36,10 @@ from card_scraper_shared import (
     normalize_archetype_name,
     load_scraped_ids,
     save_scraped_ids,
-    _get_scraper,
-    slug_to_archetype
+    safe_fetch_html,
+    slug_to_archetype,
+    setup_logging,
+    load_settings
 )
 
 # Fix Windows console encoding
@@ -48,20 +48,7 @@ setup_console_encoding()
 # ============================================================================
 # LOGGING SETUP
 # ============================================================================
-data_dir = get_data_dir()
-os.makedirs(data_dir, exist_ok=True)
-log_file = os.path.join(data_dir, 'current_meta_scraper.log')
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    handlers=[
-        logging.FileHandler(log_file, encoding='utf-8'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging("current_meta_scraper")
 
 # ============================================================================
 # TOURNAMENT TRACKING (Incremental Scraping for Meta Play!)
@@ -103,54 +90,13 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "output_file": "current_meta_card_data.csv",
 }
 
-def load_settings() -> Dict[str, Any]:
-    app_path = get_app_path()
-    dist_path = os.path.join(app_path, "dist", "current_meta_analysis_settings.json")
-    settings_path = dist_path if os.path.exists(dist_path) else os.path.join(app_path, "current_meta_analysis_settings.json")
+def _load_settings() -> Dict[str, Any]:
+    return load_settings(
+        "current_meta_analysis_settings.json", DEFAULT_SETTINGS,
+        deep_merge_keys=["sources"], create_if_missing=True
+    )
 
-    if os.path.exists(settings_path):
-        try:
-            with open(settings_path, "r", encoding="utf-8-sig") as f:
-                settings = json.load(f)
-                logger.info("Settings erfolgreich geladen.")
-                for key, value in DEFAULT_SETTINGS.items():
-                    if key not in settings:
-                        settings[key] = value
-                if "sources" in DEFAULT_SETTINGS:
-                    settings.setdefault("sources", {})
-                    for sk, sdef in DEFAULT_SETTINGS["sources"].items():
-                        settings["sources"].setdefault(sk, {})
-                        for s_key, s_val in sdef.items():
-                            if s_key not in settings["sources"][sk]:
-                                settings["sources"][sk][s_key] = s_val
-                return settings
-        except Exception as e:
-            logger.error(f"Fehler beim Laden der Settings: {e}")
-            return DEFAULT_SETTINGS.copy()
-
-    logger.info("Keine Settings gefunden, erstelle Standardwerte.")
-    final_path = dist_path if os.path.exists(os.path.dirname(dist_path)) else os.path.join(app_path, "current_meta_analysis_settings.json")
-    with open(final_path, "w", encoding="utf-8") as f:
-        json.dump(DEFAULT_SETTINGS, f, indent=4)
-    return DEFAULT_SETTINGS.copy()
-
-# ============================================================================
-# CLOUDSCRAPER MULTITHREADING SETUP
-# ============================================================================
-
-def safe_fetch_html(url: str, timeout: int, retries: int = 2) -> str:
-    scraper = _get_scraper()
-    for attempt in range(1, retries + 2):
-        try:
-            resp = scraper.get(url, timeout=timeout)
-            resp.raise_for_status()
-            return resp.text
-        except Exception as e:
-            if attempt <= retries:
-                time.sleep(2)
-            else:
-                logger.debug(f"Fetch failed: {url} -> {e}")
-    return ""
+# safe_fetch_html imported from card_scraper_shared
 
 # ============================================================
 # META LIVE (play.limitlesstcg.com)
@@ -242,7 +188,7 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
     max_workers = settings.get("max_workers", 5)
 
     decks_url = "https://play.limitlesstcg.com/decks?game=PTCG"
-    logger.info(f"Lade Deck-Uebersicht: {decks_url}")
+    logger.info("Lade Deck-Uebersicht: %s", decks_url)
 
     html = safe_fetch_html(decks_url, timeout)
     if not html:
@@ -265,13 +211,13 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
                 deck_links.append((slug, f"https://play.limitlesstcg.com{href}"))
 
     deck_links = deck_links[:max_decks]
-    logger.info(f"{len(deck_links)} Archetypes zum Scrapen gefunden.")
+    logger.info("%s Archetypes zum Scrapen gefunden.", len(deck_links))
 
     all_decks = []
 
     for idx, (slug, url) in enumerate(deck_links, 1):
         deck_name = slug_to_archetype(slug)
-        logger.info(f"[{idx}/{len(deck_links)}] {deck_name} (Sammle Decklisten...)")
+        logger.info("[%s/%s] %s (Sammle Decklisten...)", idx, len(deck_links), deck_name)
 
         deck_html = safe_fetch_html(url, timeout)
         if not deck_html:
@@ -293,7 +239,7 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
                 if res:
                     all_decks.append(res)
 
-    logger.info(f"Meta Live: {len(all_decks)} vollstaendige Decklisten extrahiert.")
+    logger.info("Meta Live: %s vollstaendige Decklisten extrahiert.", len(all_decks))
     return all_decks
 
 # ============================================================
@@ -378,14 +324,14 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
     t_ids = sorted(list(set(re.findall(r'/(\d+)/standings', html))), key=int, reverse=True)
     new_t_ids = [tid for tid in t_ids if tid not in scraped_ids][:max_tournaments]
 
-    logger.info(f"Zu verarbeitende neue Turniere: {len(new_t_ids)} (uebersprungen: {len(t_ids) - len(new_t_ids)})")
+    logger.info("Zu verarbeitende neue Turniere: %s (uebersprungen: %s)", len(new_t_ids), len(t_ids) - len(new_t_ids))
 
     all_decks = []
     newly_scraped_ids = set()
 
     for idx, tid in enumerate(new_t_ids, 1):
         url = f"https://labs.limitlesstcg.com/{tid}/standings"
-        logger.info(f"[{idx}/{len(new_t_ids)}] Lade Turnier {tid}")
+        logger.info("[%s/%s] Lade Turnier %s", idx, len(new_t_ids), tid)
 
         t_html = safe_fetch_html(url, timeout)
         if not t_html:
@@ -399,7 +345,7 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
         t_format = 'Standard (JP)' if is_jp else ('Expanded' if 'Expanded' in t_html else 'Standard')
 
         if format_filter and t_format not in format_filter:
-            logger.info(f"   Uebersprungen (Format {t_format} nicht in Filter)")
+            logger.info("   Uebersprungen (Format %s nicht in Filter)", t_format)
             continue
 
         # Apply date filter
@@ -448,7 +394,7 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
             deck_tasks.append((deck_url, archetype))
 
         deck_tasks = deck_tasks[:max_decks_per_tourney]
-        logger.info(f"   {title} ({t_format}) -> Lade {len(deck_tasks)} Decks parallel...")
+        logger.info("   %s (%s) -> Lade %s Decks parallel...", title, t_format, len(deck_tasks))
 
         decks_before = len(all_decks)
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -462,11 +408,11 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
         if len(all_decks) > decks_before:
             newly_scraped_ids.add(tid)
         else:
-            logger.warning(f"   Keine Decks gefunden fuer Turnier {tid} – wird NICHT als erledigt markiert.")
+            logger.warning("   Keine Decks gefunden fuer Turnier %s – wird NICHT als erledigt markiert.", tid)
 
     if newly_scraped_ids:
         save_scraped_meta_tournaments(scraped_ids | newly_scraped_ids)
-        logger.info(f"{len(newly_scraped_ids)} neue Turnier-IDs gespeichert.")
+        logger.info("%s neue Turnier-IDs gespeichert.", len(newly_scraped_ids))
 
     return all_decks
 
@@ -489,13 +435,13 @@ def main():
     logger.info("CURRENT META ANALYSIS SCRAPER - FAST EDITION")
     logger.info("=" * 60)
 
-    settings = load_settings()
+    settings = _load_settings()
 
     logger.info("Lade einheitliche Karten-Datenbank...")
     try:
         card_db = CardDatabaseLookup()
     except Exception as e:
-        logger.error(f"Konnte Karten-Datenbank nicht laden: {e}")
+        logger.error("Konnte Karten-Datenbank nicht laden: %s", e)
         return
 
     if not card_db.cards:

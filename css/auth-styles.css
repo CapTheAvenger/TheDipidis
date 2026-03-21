@@ -4,7 +4,7 @@
 
 /* User Menu in Header */
 .user-btn {
-    background: #3498db;
+    background: var(--color-info);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -90,7 +90,7 @@
 }
 
 .auth-btn-primary {
-    background: #3498db;
+    background: var(--color-info);
     color: white;
 }
 
@@ -114,7 +114,7 @@
 
 /* Profile Stats Cards */
 .stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
     color: white;
     padding: 20px;
     border-radius: 10px;
@@ -147,13 +147,13 @@
 }
 
 .profile-tab-btn:hover {
-    color: #3498db;
+    color: var(--color-info);
     background: rgba(52, 152, 219, 0.05);
 }
 
 .profile-tab-btn.active {
-    color: #3498db;
-    border-bottom-color: #3498db;
+    color: var(--color-info);
+    border-bottom-color: var(--color-info);
     font-weight: 500;
 }
 

@@ -21,6 +21,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate Python syntax
+        run: |
+          python3 -m py_compile card_scraper_shared.py
+          python3 -m py_compile prepare_card_data.py
+          python3 -m py_compile price_proxy_server.py
+          for f in *_scraper*.py; do
+            python3 -m py_compile "$f" || { echo "::error::Syntax error in $f"; exit 1; }
+          done
+          echo "✓ All Python files pass syntax check"
+
+      - name: Validate JS syntax
+        run: |
+          npm install -g terser
+          for f in js/*.js; do
+            terser "$f" --parse --no-module 2>/dev/null || { echo "::error::Syntax error in $f"; exit 1; }
+          done
+          echo "✓ All JS files pass syntax check"
+
       - name: Inject Firebase Credentials
         env:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
@@ -42,6 +60,23 @@ jobs:
           cp -r data _site/data
           cp pokemon_sets_mapping.csv _site/ 2>/dev/null || true
           cp _config.yml _site/ 2>/dev/null || true
+
+      - name: Minify JS & CSS
+        run: |
+          npm install -g clean-css-cli
+          for f in _site/js/*.js; do
+            terser "$f" --compress --mangle -o "$f" || { echo "::error::Minification failed for $f"; exit 1; }
+          done
+          for f in _site/css/*.css; do
+            cleancss -o "$f" "$f" || { echo "::error::CSS minification failed for $f"; exit 1; }
+          done
+          echo "✓ Minification complete"
+
+      - name: Cache-bust asset references
+        run: |
+          HASH=$(git rev-parse --short HEAD)
+          sed -i "s/\?v=[^\"]*/\?v=${HASH}/g" _site/index.html
+          echo "✓ Cache-busted with hash ${HASH}"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

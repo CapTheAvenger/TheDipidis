@@ -4,13 +4,17 @@
  * Track owned cards, wishlist, and deck building
  */
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+// escapeHtml is now provided globally by app-utils.js (window.escapeHtml).
+// Local fallback kept for safety if load order changes.
+if (typeof escapeHtml !== 'function') {
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 }
 
 function escapeJsSingleQuoted(value) {

@@ -147,7 +147,7 @@
                         <div class="control-row">
                             <div class="control-group">
                                 <label for="cityLeagueDeckSearch">🔍 Search Deck:</label>
-                                <input type="text" id="cityLeagueDeckSearch" placeholder="Enter deck name..." class="control-input">
+                                <input type="text" id="cityLeagueDeckSearch" placeholder="Enter deck name..." class="control-input" aria-label="Search deck by name">
                             </div>
                             <div class="control-group">
                                 <label for="cityLeagueDeckSelect">🎯 Select Deck Archetype:</label>
@@ -276,7 +276,7 @@
                                     <button class="btn-modern" onclick="generateDeckGrid('cityLeague')">🖼️ Grid</button>
                                 </div>
                             </div>
-                            <input type="text" id="cityLeagueDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search" oninput="filterDeckGrid('cityLeague')">
+                            <input type="text" id="cityLeagueDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search" oninput="filterDeckGrid('cityLeague')" aria-label="Search City League deck cards">
                             <div class="deck-grid" id="cityLeagueMyDeckGrid">
                                 <p style="text-align: center; color: #666; padding: 40px;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
@@ -285,7 +285,7 @@
                         <!-- Add Card Section -->
                         <div class="section-panel">
                             <h3 style="margin-top: 0;">➕ Add Card</h3>
-                            <input type="text" id="cityLeagueDeckCardSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search">
+                            <input type="text" id="cityLeagueDeckCardSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search" aria-label="Search cards to add to City League deck">
                             <div id="cityLeagueDeckSearchResults" class="card-grid"></div>
                         </div>
                         
@@ -322,7 +322,7 @@
                                 </div>
                             </div>
                             
-                            <input type="text" id="cityLeagueMetaSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input" oninput="filterMetaCards('cityLeague')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <input type="text" id="cityLeagueMetaSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input" oninput="filterMetaCards('cityLeague')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;" aria-label="Search City League meta cards">
                             
                             <div id="cityLeagueMetaGrid" class="meta-card-grid">
                                 <p style="text-align: center; color: #666; padding: 40px; grid-column: 1 / -1;">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
@@ -369,7 +369,7 @@
                         <div class="control-row">
                             <div class="control-group">
                                 <label for="currentMetaDeckSearch">🔍 Search Deck:</label>
-                                <input type="text" id="currentMetaDeckSearch" placeholder="Enter deck name..." class="control-input">
+                                <input type="text" id="currentMetaDeckSearch" placeholder="Enter deck name..." class="control-input" aria-label="Search current meta deck by name">
                             </div>
                             <div class="control-group">
                                 <label for="currentMetaDeckSelect">🎯 Select Deck Archetype:</label>
@@ -453,7 +453,7 @@
                                     style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" 
                                     oninput="filterCurrentMetaOpponents(this)" 
                                     onfocus="document.getElementById('currentMetaOpponentDropdown').style.display = 'block';"
-                                    autocomplete="off">
+                                    autocomplete="off" aria-label="Search opponent deck for matchup">
                                 <div id="currentMetaOpponentDropdown" 
                                     style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
                                 </div>
@@ -471,7 +471,7 @@
                             </div>
                             
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
-                                <input type="text" id="currentMetaOverviewSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input" oninput="filterCurrentMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                <input type="text" id="currentMetaOverviewSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input" oninput="filterCurrentMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;" aria-label="Search current meta overview cards">
                                 
                                 <!-- Card Type Filter -->
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #f8f9fa;">
@@ -554,7 +554,7 @@
                                     <button class="btn-modern" onclick="generateDeckGrid('currentMeta')">🖼️ Grid</button>
                                 </div>
                             </div>
-                            <input type="text" id="currentMetaDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search" oninput="filterDeckGrid('currentMeta')">
+                            <input type="text" id="currentMetaDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search" oninput="filterDeckGrid('currentMeta')" aria-label="Search current meta deck cards">
                             <div class="deck-grid" id="currentMetaMyDeckGrid">
                                 <p style="text-align: center; color: #555; padding: 40px; font-size: 1.05em; font-weight: 500;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
@@ -563,7 +563,7 @@
                         <!-- Add Card Section -->
                         <div class="section-panel">
                             <h3 style="margin-top: 0;">➕ Add Card</h3>
-                            <input type="text" id="currentMetaDeckCardSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search">
+                            <input type="text" id="currentMetaDeckCardSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search" aria-label="Search cards to add to current meta deck">
                             <div id="currentMetaDeckSearchResults" class="card-grid"></div>
                         </div>
                         
@@ -600,7 +600,7 @@
                                 </div>
                             </div>
                             
-                            <input type="text" id="currentMetaMetaSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input" oninput="filterMetaCards('currentMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                            <input type="text" id="currentMetaMetaSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input" oninput="filterMetaCards('currentMeta')" style="margin-bottom: 15px; width: 100%; max-width: 500px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;" aria-label="Search current meta top archetypes cards">
                             
                             <div id="currentMetaMetaGrid" class="meta-card-grid">
                                 <p style="text-align: center; color: #555; padding: 40px; grid-column: 1 / -1; font-size: 1.05em; font-weight: 500;">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
@@ -640,7 +640,7 @@
                         <div class="control-row">
                             <div class="control-group">
                                 <label for="pastMetaDeckSearch">🔍 Search Deck:</label>
-                                <input type="text" id="pastMetaDeckSearch" placeholder="Enter deck name..." class="control-input">
+                                <input type="text" id="pastMetaDeckSearch" placeholder="Enter deck name..." class="control-input" aria-label="Search past meta deck by name">
                             </div>
                             <div class="control-group">
                                 <label for="pastMetaDeckSelect">🎯 Select Deck Archetype:</label>
@@ -686,7 +686,7 @@
                             </div>
                             
                             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
-                                <input type="text" id="pastMetaOverviewSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input" oninput="filterPastMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;">
+                                <input type="text" id="pastMetaOverviewSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input" oninput="filterPastMetaOverviewCards()" style="flex: 1; min-width: 200px; max-width: 400px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em;" aria-label="Search past meta overview cards">
                                 
                                 <!-- Card Type Filter -->
                                 <div style="display: flex; gap: 5px; flex-wrap: wrap; border: 1px solid #ddd; padding: 5px; border-radius: 6px; background: #f8f9fa;">
@@ -769,7 +769,7 @@
                                     <button class="btn-modern" onclick="generateDeckGrid('pastMeta')">🖼️ Grid</button>
                                 </div>
                             </div>
-                            <input type="text" id="pastMetaDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search" oninput="filterDeckGrid('pastMeta')">
+                            <input type="text" id="pastMetaDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search" oninput="filterDeckGrid('pastMeta')" aria-label="Search past meta deck cards">
                             <div class="deck-grid" id="pastMetaMyDeckGrid">
                                 <p style="text-align: center; color: #555; padding: 40px; font-size: 1.05em; font-weight: 500;">Create a deck using the buttons above or add cards manually...</p>
                             </div>
@@ -778,7 +778,7 @@
                         <!-- Add Card Section -->
                         <div class="section-panel">
                             <h3 style="margin-top: 0;">➕ Add Card</h3>
-                            <input type="text" id="pastMetaDeckCardSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search">
+                            <input type="text" id="pastMetaDeckCardSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search" aria-label="Search cards to add to past meta deck">
                             <div id="pastMetaDeckSearchResults" class="card-grid"></div>
                         </div>
                     </div>
@@ -794,7 +794,7 @@
                     <!-- Search with Autocomplete -->
                     <div style="margin-bottom: 20px; position: relative;">
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px;">🔍 Search card name</label>
-                        <input type="text" id="cardSearch" placeholder="e.g. Charizard, Pikachu..." autocomplete="off" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        <input type="text" id="cardSearch" placeholder="e.g. Charizard, Pikachu..." autocomplete="off" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 16px;" aria-label="Search card database by name">
                         <div id="cardSearchAutocomplete" class="cards-autocomplete-dropdown" style="display: none;"></div>
                     </div>
                     
@@ -891,7 +891,7 @@
                                 <span class="toggle-icon">▼</span>
                             </div>
                             <div class="cards-filter-options collapsed" id="mainPokemonFilterOptions">
-                                <input type="text" id="mainPokemonSearch" placeholder="Search Pokemon..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterMainPokemonList()">
+                                <input type="text" id="mainPokemonSearch" placeholder="Search Pokemon..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterMainPokemonList()" aria-label="Search Pokemon filter list">
                                 <div id="mainPokemonList" class="filter-dropdown-content">
                                     <!-- Will be populated dynamically -->
                                 </div>
@@ -905,7 +905,7 @@
                                 <span class="toggle-icon">▼</span>
                             </div>
                             <div class="cards-filter-options collapsed" id="archetypeFilterOptions">
-                                <input type="text" id="archetypeSearch" placeholder="Search archetype..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterArchetypeList()">
+                                <input type="text" id="archetypeSearch" placeholder="Search archetype..." style="width: 100%; padding: 8px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;" oninput="filterArchetypeList()" aria-label="Search deck archetype filter list">
                                 <div id="archetypeList" class="filter-dropdown-content">
                                     <!-- Will be populated dynamically -->
                                 </div>
@@ -1620,7 +1620,7 @@
                             <div style="margin-bottom: 15px;">
                                 <input type="text" id="collection-search" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." 
                                     style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #667eea; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
-                                    oninput="filterCollection()">
+                                    oninput="filterCollection()" aria-label="Search collection by card name or set">
                                 <div id="collection-search-results" style="margin-top: 8px; font-size: 14px; color: #555; font-weight: 500;"></div>
                             </div>
                             
@@ -1644,7 +1644,7 @@
                             <div style="margin-bottom: 15px;">
                                 <input type="text" id="decks-search" placeholder="🔍 Search decks by name or archetype..." 
                                     style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #667eea; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
-                                    oninput="filterMyDecks()">
+                                    oninput="filterMyDecks()" aria-label="Search saved decks by name or archetype">
                             </div>
                             
                             <!-- Folder Navigation -->
@@ -1665,7 +1665,7 @@
                             <div style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                                 <input type="text" id="wishlist-search" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." 
                                     style="flex: 1; min-width: 200px; padding: 12px; font-size: 16px; border: 2px solid #FF9800; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
-                                    oninput="filterWishlist()">
+                                    oninput="filterWishlist()" aria-label="Search wishlist by card name or set">
                                 <select id="wishlist-set-filter" onchange="filterWishlist()"
                                     style="padding: 12px; font-size: 15px; border: 2px solid #FF9800; border-radius: 8px; background: white; cursor: pointer; min-width: 160px;">
                                     <option value="">📦 All Sets</option>
@@ -1685,7 +1685,7 @@
                                 <div style="margin-bottom: 30px;">
                                     <label style="display: block; font-weight: bold; margin-bottom: 5px;">Display Name</label>
                                     <div style="display: flex; gap: 10px; align-items: center;">
-                                        <input type="text" id="settings-display-name" placeholder="Enter your name" maxlength="50" style="padding: 10px; border: 2px solid #ddd; border-radius: 6px; flex: 1; font-size: 16px;">
+                                        <input type="text" id="settings-display-name" placeholder="Enter your name" maxlength="50" style="padding: 10px; border: 2px solid #ddd; border-radius: 6px; flex: 1; font-size: 16px;" aria-label="Enter your display name">
                                         <button onclick="saveDisplayName()" style="background: #4CAF50; color: white; border: none; padding: 10px 25px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; white-space: nowrap;">
                                             💾 Save
                                         </button>
@@ -1798,7 +1798,7 @@
     </div>
     
     <!-- Fullscreen Card Modal -->
-    <div id="fullscreenCardModal" class="fullscreen-card-modal" onclick="closeFullscreenCard()">
+    <div id="fullscreenCardModal" class="fullscreen-card-modal" onclick="closeFullscreenCard()" role="dialog" aria-modal="true" aria-label="Fullscreen card view">
         <button class="fullscreen-close" onclick="event.stopPropagation(); closeFullscreenCard()">✕</button>
         <img id="fullscreenCardImage" src="" alt="" onclick="event.stopPropagation()">
     </div>
@@ -1860,24 +1860,24 @@
 
     <script src="js/inline-init.js?v=20260321-v1"></script>
 
-    <div id="playtesterModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:15000; flex-direction:column;">
+    <div id="playtesterModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:15000; flex-direction:column;" role="dialog" aria-modal="true" aria-label="Playtester simulator">
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
 
         <div class="pt-controls" style="display:flex; justify-content:space-around; align-items:center; flex-wrap:nowrap; overflow:visible; padding:5px; background:#fff; border-bottom:1px solid #ccc; width: 100%; position:relative; z-index:1000;">
-            <button title="Multiplayer" onclick="openMultiplayerMenu()" style="font-size:20px; padding:5px; border:none; background:transparent;">👥</button>
-            <button title="Start / Reset" onclick="startPlaytesterSetup()" style="font-size:20px; padding:5px; border:none; background:transparent;">▶️</button>
-            <button title="Flip Board" onclick="ptFlipBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;">🔄</button>
-            <button title="Log" onclick="ptToggleLog()" style="font-size:20px; padding:5px; border:none; background:transparent;">📝</button>
-            <button title="Münze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" style="font-size:20px; padding:5px; border:none; background:transparent;">🪙</button>
-            <button title="Zoom" onclick="ptZoomBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;">🔍</button>
+            <button title="Multiplayer" onclick="openMultiplayerMenu()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Open multiplayer menu">👥</button>
+            <button title="Start / Reset" onclick="startPlaytesterSetup()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Start or reset playtester">▶️</button>
+            <button title="Flip Board" onclick="ptFlipBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Flip board to opponent view">🔄</button>
+            <button title="Log" onclick="ptToggleLog()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Toggle action log">📝</button>
+            <button title="Münze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Flip coin">🪙</button>
+            <button title="Zoom" onclick="ptZoomBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Zoom board">🔍</button>
 
-            <button title="Undo" onclick="ptUndo()" style="font-size:20px; padding:5px; border:none; background:transparent;">↩️</button>
-            <button title="Mulligan" onclick="ptMulligan(ptCurrentPlayer)" style="font-size:20px; padding:5px; border:none; background:transparent;">🃏</button>
-            <button id="ptVstarMarker" title="V Marker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;">V</button>
-            <button id="ptGxMarker" title="GX Marker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;">GX</button>
+            <button title="Undo" onclick="ptUndo()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Undo last action">↩️</button>
+            <button title="Mulligan" onclick="ptMulligan(ptCurrentPlayer)" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Mulligan hand">🃏</button>
+            <button id="ptVstarMarker" title="V Marker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;" aria-label="Toggle V marker">V</button>
+            <button id="ptGxMarker" title="GX Marker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;" aria-label="Toggle GX marker">GX</button>
         </div>
 
-        <div id="ptDirectActionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10001; align-items:center; justify-content:center;">
+        <div id="ptDirectActionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10001; align-items:center; justify-content:center;" role="dialog" aria-modal="true" aria-label="Game actions">
             <div style="background:#fff; padding:15px; border-radius:12px; width:90%; max-width:350px; display:flex; flex-direction:column; gap:12px;">
                 <h3 style="margin:0; text-align:center; font-size:16px;">Spiel-Aktionen</h3>
 
@@ -1885,34 +1885,34 @@
 
                 <div style="display:flex; gap:10px;">
                     <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="ptDrawCards(document.getElementById('inpDraw').value); document.getElementById('ptDirectActionModal').style.display='none'">🃏 Draw</button>
-                    <input type="number" id="inpDraw" value="1" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;">
+                    <input type="number" id="inpDraw" value="1" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Number of cards to draw">
                 </div>
 
                 <div style="display:flex; gap:10px;">
                     <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="ptLookCards(document.getElementById('inpLook').value); document.getElementById('ptDirectActionModal').style.display='none'">👀 Look Top</button>
-                    <input type="number" id="inpLook" value="5" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;">
+                    <input type="number" id="inpLook" value="5" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Number of cards to look at">
                 </div>
 
                 <div style="display:flex; gap:5px; align-items:center;">
-                    <input type="number" id="inpJudgeP1" value="4" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;">
+                    <input type="number" id="inpJudgeP1" value="4" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 1 Judge hand size">
                     <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px; background:#f39c12; color:#fff; border:none;" onclick="executeCustomJudge()">⚖️ Judge</button>
-                    <input type="number" id="inpJudgeP2" value="4" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;">
+                    <input type="number" id="inpJudgeP2" value="4" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 2 Judge hand size">
                 </div>
 
                 <div style="display:flex; gap:10px;">
                     <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="executeOwnShuffleDraw()">🔄 Own Shuffle</button>
-                    <input type="number" id="inpOwnSD" value="6" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;">
+                    <input type="number" id="inpOwnSD" value="6" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Own shuffle and draw count">
                 </div>
 
                 <div style="display:flex; gap:10px;">
                     <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="executeOppShuffleDraw()">🔄 Opp Shuffle</button>
-                    <input type="number" id="inpOppSD" value="4" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;">
+                    <input type="number" id="inpOppSD" value="4" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Opponent shuffle and draw count">
                 </div>
 
                 <div style="display:flex; gap:5px; align-items:center;">
-                    <input type="number" id="inpIonoP1" value="6" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;">
+                    <input type="number" id="inpIonoP1" value="6" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 1 Iono hand size">
                     <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px; background:#e74c3c; color:#fff; border:none;" onclick="executeCustomIono()">🌪️ Iono</button>
-                    <input type="number" id="inpIonoP2" value="6" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;">
+                    <input type="number" id="inpIonoP2" value="6" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 2 Iono hand size">
                 </div>
 
                 <button onclick="document.getElementById('ptDirectActionModal').style.display='none'" style="margin-top:5px; padding:12px; border-radius:6px; border:none; background:#eee; font-weight:bold;">Schließen</button>
@@ -1922,7 +1922,7 @@
         <!-- ── MULTIPLAYER MENU ── -->
         <div id="mpMenu" style="display:none; position:absolute; top:60px; right:12px; z-index:16000; 
             background:rgba(20,20,20,0.98); border:2px solid #FFCB05; border-radius:12px; padding:20px; 
-            min-width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.8);">
+            min-width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.8);" role="dialog" aria-modal="true" aria-label="Online multiplayer menu">
             <div style="color:#FFCB05; font-weight:900; font-size:1.3rem; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
                 🌐 Online Multiplayer
             </div>
@@ -2179,23 +2179,23 @@
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
                     <span style="color: #ccc; font-size: 10px; font-weight: bold;">Self:</span>
-                    <input type="number" id="ptHandDrawAmt" value="1" style="width: 30px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;">
+                    <input type="number" id="ptHandDrawAmt" value="1" style="width: 30px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;" aria-label="Number of cards to draw">
                     <button class="pt-btn" style="padding: 4px 8px; font-size: 10px;" onclick="ptHandAction('shuffle_deck')">🔀 Deck</button>
                     <button class="pt-btn" style="padding: 4px 8px; font-size: 10px;" onclick="ptHandAction('shuffle_bottom')">⬇️ Bot</button>
 
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
                     <span style="color: #2ecc71; font-size: 10px; font-weight: bold; margin-left: 2px;">Judge:</span>
-                    <input type="number" id="ptJudgeDrawP1" value="4" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1">
+                    <input type="number" id="ptJudgeDrawP1" value="4" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1" aria-label="Player 1 Judge draw count">
                     <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#27ae60; color:white; border-color:#2ecc71;" onclick="ptGlobalJudge()" title="Beide mischen Hand INS Deck und ziehen X">⚖️</button>
-                    <input type="number" id="ptJudgeDrawP2" value="4" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2">
+                    <input type="number" id="ptJudgeDrawP2" value="4" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2" aria-label="Player 2 Judge draw count">
 
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
                     <span style="color: #f1c40f; font-size: 10px; font-weight: bold; margin-left: 2px;">Iono:</span>
-                    <input type="number" id="ptIonoDrawP1" value="6" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1">
+                    <input type="number" id="ptIonoDrawP1" value="6" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1" aria-label="Player 1 Iono draw count">
                     <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#f39c12; color:white; border-color:#e67e22;" onclick="ptGlobalIono()" title="Beide legen Hand UNTER das Deck und ziehen X">⚡</button>
-                    <input type="number" id="ptIonoDrawP2" value="6" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2">
+                    <input type="number" id="ptIonoDrawP2" value="6" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2" aria-label="Player 2 Iono draw count">
 
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
@@ -2206,7 +2206,7 @@
 
                     <span style="color: #ccc; font-size: 10px; font-weight: bold;">Cmd:</span>
                     <input type="text" id="ptCommandInput-p1" class="pt-cmd-input" placeholder="/draw 3…" style="width: 80px;" onkeydown="if(event.key==='Enter'){ptRunCommand();event.preventDefault();}"
-                           title="Commands: /draw N  /mill N  /top N  /iono N  /roxanne N  /shuffle  /coin N  /dice  /attach [active|bench0-4]">
+                           title="Commands: /draw N  /mill N  /top N  /iono N  /roxanne N  /shuffle  /coin N  /dice  /attach [active|bench0-4]" aria-label="Playtester command input">
                     </div>
                 </div>
 
@@ -2224,10 +2224,10 @@
     </div>
 
     <!-- ── Start Phase Modal (coin flip + active selection) ── -->
-    <div id="ptStartPhaseModal" style="display:none;position:fixed;inset:0;z-index:22000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;overflow-y:auto;padding:20px;box-sizing:border-box;"></div>
+    <div id="ptStartPhaseModal" style="display:none;position:fixed;inset:0;z-index:22000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;overflow-y:auto;padding:20px;box-sizing:border-box;" role="dialog" aria-modal="true" aria-label="Playtester start phase"></div>
 
     <!-- ── Opponent Full View Panel ── -->
-    <div id="ptOppPanel" style="display:none;position:fixed;inset:0;z-index:21000;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+    <div id="ptOppPanel" style="display:none;position:fixed;inset:0;z-index:21000;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'" role="dialog" aria-modal="true" aria-label="Opponent panel">
         <div style="background:#1a1a2e;border:2px solid #e74c3c;border-radius:14px;padding:20px;width:min(98vw,680px);max-height:90vh;overflow-y:auto;color:#fff;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                 <h3 style="margin:0;color:#e74c3c;" id="ptOppPanelTitle">⚔️ Gegner</h3>
@@ -2262,7 +2262,7 @@
     </div>
 
     <!-- Attack View Modal -->
-    <div id="ptAttackModal" style="display:none;position:fixed;inset:0;z-index:23000;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;flex-direction:column;gap:12px;overflow-y:auto;padding:16px 8px;">
+    <div id="ptAttackModal" style="display:none;position:fixed;inset:0;z-index:23000;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;flex-direction:column;gap:12px;overflow-y:auto;padding:16px 8px;" role="dialog" aria-modal="true" aria-label="Attack view">
         <div style="color:#FFCB05;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;opacity:0.8;flex-shrink:0;">⚔️ Angriff</div>
         <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center;width:100%;max-width:960px;">
             <!-- My active Pokémon large -->
@@ -2281,7 +2281,7 @@
         <div style="color:#888;font-size:11px;flex-shrink:0;">Zug wird beendet &amp; Gegner zieht eine Karte</div>
     </div>
 
-    <div id="ptCardViewer" style="display:none;position:fixed;inset:0;z-index:22000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;cursor:pointer;" onclick="this.style.display='none'" >
+    <div id="ptCardViewer" style="display:none;position:fixed;inset:0;z-index:22000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;cursor:pointer;" onclick="this.style.display='none'"  role="dialog" aria-modal="true" aria-label="Card viewer">
         <div onclick="event.stopPropagation()" style="text-align:center;">
             <img id="ptCardViewerImg" src="" loading="lazy" style="max-width:min(95vw,420px);max-height:min(90vh,600px);border-radius:10px;display:block;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.9);">
             <div id="ptCardViewerName" style="color:#fff;margin-top:10px;font-weight:700;font-size:14px;"></div>
@@ -2289,7 +2289,7 @@
         </div>
     </div>
 
-    <div id="ptHotkeyModal" style="display:none;position:fixed;top:50%;left:50%; transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e; border:2px solid #3B4CCA;border-radius:12px;padding:24px;color:#fff; font-family:monospace;font-size:13px;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+    <div id="ptHotkeyModal" style="display:none;position:fixed;top:50%;left:50%; transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e; border:2px solid #3B4CCA;border-radius:12px;padding:24px;color:#fff; font-family:monospace;font-size:13px;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.8);" role="dialog" aria-modal="true" aria-label="Hotkey reference">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
             <h3 style="margin:0;color:#FFCB05;">⌨️ Hotkeys</h3>
             <button class="pt-btn pt-danger" onclick="document.getElementById('ptHotkeyModal').style.display='none'">✕</button>
@@ -2315,7 +2315,7 @@
         </table>
     </div>
 
-    <div id="ptTopCardsModal" style="display:none;position:fixed;top:50%;left:50%; transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e; border:2px solid #FFCB05;border-radius:12px;padding:20px; min-width:360px;max-width:95vw;max-height:80vh;overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.9);">
+    <div id="ptTopCardsModal" style="display:none;position:fixed;top:50%;left:50%; transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e; border:2px solid #FFCB05;border-radius:12px;padding:20px; min-width:360px;max-width:95vw;max-height:80vh;overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.9);" role="dialog" aria-modal="true" aria-label="Top deck control">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
             <h3 style="margin:0;color:#FFCB05;">&#128301; Top Deck Control</h3>
             <button class="pt-btn pt-danger" onclick="ptCloseTopCards()">✕</button>
@@ -2327,7 +2327,7 @@
         </div>
     </div>
 
-    <div id="ptDeckSearchModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.85); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDeckSearch()">
+    <div id="ptDeckSearchModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.85); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDeckSearch()" role="dialog" aria-modal="true" aria-label="Deck search">
         <div style="background:#2a2a2a;border-radius:12px;padding:20px;max-width:90vw;width:860px;max-height:90vh;overflow-y:auto;border:2px solid #3B4CCA;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
                 <h3 style="color:#fff;margin:0;">🔍 Deck durchsuchen</h3>
@@ -2346,7 +2346,7 @@
         </div>
     </div>
 
-    <div id="ptDiscardModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.82); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDiscardModal()">
+    <div id="ptDiscardModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.82); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDiscardModal()" role="dialog" aria-modal="true" aria-label="Discard pile">
         <div style="background:#2a2a2a;border-radius:12px;padding:20px; max-width:90vw;max-height:85vh;overflow-y:auto;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
                 <h3 id="ptDiscardModalTitle" style="color:#fff;margin:0;">🗑️ Discard Pile</h3>
@@ -2362,7 +2362,7 @@
     </div>
 
     <!-- My Decks Playtest Modal -->
-    <div id="myDecksPlaytestModal" class="rarity-switcher-modal" onclick="if(event.target===this)closeMyDecksPlaytest()" style="z-index: 20000; display: none;">
+    <div id="myDecksPlaytestModal" class="rarity-switcher-modal" onclick="if(event.target===this)closeMyDecksPlaytest()" style="z-index: 20000; display: none;" role="dialog" aria-modal="true" aria-label="My Decks playtest selector">
         <div class="rarity-switcher-modal-content" style="max-width: 500px; background: #f8f9fa;">
             <span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()">✕</span>
             <h2 style="margin-top: 0; color: #27ae60; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">⚔️ Playtest – My Decks</h2>
@@ -2383,7 +2383,7 @@
     </div>
 
     <!-- Playtester Setup Modal -->
-    <div id="playtesterSetupModal" class="rarity-switcher-modal" onclick="if(event.target === this) closePlaytesterSetup()" style="z-index: 20000; display: none;">
+    <div id="playtesterSetupModal" class="rarity-switcher-modal" onclick="if(event.target === this) closePlaytesterSetup()" style="z-index: 20000; display: none;" role="dialog" aria-modal="true" aria-label="Playtester setup">
         <div class="rarity-switcher-modal-content" style="max-width: 600px; background: #f8f9fa;">
             <span class="rarity-switcher-close" onclick="closePlaytesterSetup()">✕</span>
             <h2 style="margin-top: 0; color: #3B4CCA; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">⚔️ Playtester Setup</h2>
@@ -2474,7 +2474,7 @@
     <script src="js/draw-simulator.js?v=20260319-v2"></script>
 
     <!-- Draw Simulator Modal -->
-    <div id="drawSimulatorModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;" onclick="if(event.target===this)closeDrawSimulator()">
+    <div id="drawSimulatorModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" aria-label="Starting hand simulator">
         <div id="drawSimModal" style="background:#1a1a2e;border-radius:16px;max-width:800px;width:95%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:helpModalIn 0.25s ease-out;position:relative;color:#eee;">
             <button onclick="closeDrawSimulator()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:4px 8px;border-radius:8px;line-height:1;">&times;</button>
             <h2 style="margin-top:0;color:#FFCB05;font-size:1.4em;border-bottom:2px solid #3B4CCA;padding-bottom:10px;margin-bottom:16px;">🎲 Starthand Simulator</h2>

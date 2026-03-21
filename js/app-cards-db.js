@@ -498,7 +498,7 @@
                     label.style.padding = '6px';
                     label.style.cursor = 'pointer';
                     label.style.borderRadius = '4px';
-                    label.innerHTML = `<input type="checkbox" value="meta:${format.code}" onchange="filterAndRenderCards()"> ${format.name}`;
+                    label.innerHTML = `<input type="checkbox" value="meta:${escapeHtml(format.code)}" onchange="filterAndRenderCards()"> ${escapeHtml(format.name)}`;
                     container.appendChild(label);
                 });
                 devLog(`[Cards Tab] Populated ${window.cardFormatsData.formats.length} formats in filter`);
@@ -542,7 +542,7 @@
                     label.style.display = 'block';
                     label.style.padding = '6px';
                     label.style.cursor = 'pointer';
-                    label.innerHTML = `<input type="checkbox" value="${set}"> ${set}`;
+                    label.innerHTML = `<input type="checkbox" value="${escapeHtml(set)}"> ${escapeHtml(set)}`;
                     container.appendChild(label);
                 });
             } catch (error) {
@@ -559,7 +559,7 @@
                     label.style.display = 'block';
                     label.style.padding = '6px';
                     label.style.cursor = 'pointer';
-                    label.innerHTML = `<input type="checkbox" value="${set}"> ${set}`;
+                    label.innerHTML = `<input type="checkbox" value="${escapeHtml(set)}"> ${escapeHtml(set)}`;
                     container.appendChild(label);
                 });
             }
@@ -582,7 +582,7 @@
                 label.style.padding = '6px';
                 label.style.cursor = 'pointer';
                 label.style.borderRadius = '4px';
-                label.innerHTML = `<input type="checkbox" value="${pokemon}" onchange="filterArchetypesByMainPokemon(); filterAndRenderCards()"> ${pokemon}`;
+                label.innerHTML = `<input type="checkbox" value="${escapeHtml(pokemon)}" onchange="filterArchetypesByMainPokemon(); filterAndRenderCards()"> ${escapeHtml(pokemon)}`;
                 container.appendChild(label);
                 window.mainPokemonFilterItems.push({ element: label, name: pokemon.toLowerCase() });
             });
@@ -608,7 +608,7 @@
                 label.style.padding = '6px';
                 label.style.cursor = 'pointer';
                 label.style.borderRadius = '4px';
-                label.innerHTML = `<input type="checkbox" value="${archetype}" onchange="filterAndRenderCards()"> ${archetype}`;
+                label.innerHTML = `<input type="checkbox" value="${escapeHtml(archetype)}" onchange="filterAndRenderCards()"> ${escapeHtml(archetype)}`;
                 container.appendChild(label);
                 const item = { element: label, name: archetype.toLowerCase(), archetype: archetype };
                 window.archetypeFilterItems.push(item);
@@ -687,7 +687,7 @@
                 label.style.padding = '6px';
                 label.style.cursor = 'pointer';
                 label.style.borderRadius = '4px';
-                label.innerHTML = `<input type="checkbox" value="meta:${meta}" onchange="filterAndRenderCards()"> ${meta}`;
+                label.innerHTML = `<input type="checkbox" value="meta:${escapeHtml(meta)}" onchange="filterAndRenderCards()"> ${escapeHtml(meta)}`;
                 container.appendChild(label);
             });
             
@@ -825,10 +825,10 @@
                 
                 return `
                     <div class="cards-autocomplete-item" onclick="selectCardFromAutocomplete('${escapeJsStr(card.name)}')">
-                        <img src="${card.image_url}" alt="${card.name}" loading="lazy">
+                        <img src="${card.image_url}" alt="${escapeHtml(card.name)}" loading="lazy">
                         <div class="cards-autocomplete-item-info">
-                            <div class="cards-autocomplete-item-name">${card.name}</div>
-                            <div class="cards-autocomplete-item-meta">${card.set} ${card.number} · ${card.type || 'Unknown'}</div>
+                            <div class="cards-autocomplete-item-name">${escapeHtml(card.name)}</div>
+                            <div class="cards-autocomplete-item-meta">${escapeHtml(card.set)} ${escapeHtml(card.number)} · ${escapeHtml(card.type || 'Unknown')}</div>
                         </div>
                         <div class="cards-autocomplete-count">${versions} version${versions > 1 ? 's' : ''}</div>
                     </div>

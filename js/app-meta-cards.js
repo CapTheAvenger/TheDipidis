@@ -571,7 +571,7 @@
                 return `
                     <div class="card-item" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; background: white;">
                         <div class="card-image-container" style="position: relative; width: 100%;">
-                            <img src="${imageUrl}" alt="${card.card_name}" loading="lazy" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}', '${fallbackUrl}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
+                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}', '${fallbackUrl}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
                                  onmouseover="showMetaCardTooltip(event, '${cardNameEscaped}', '${archetypesJson}')" 
                                  onmouseout="hideMetaCardTooltip()">
                             

@@ -87,7 +87,7 @@
             // Show loading indicator
             const content = document.getElementById('cityLeagueContent');
             if (content) {
-                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Lade ' + format + ' Daten...</div>';
+                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Lade ' + escapeHtml(format) + ' Daten...</div>';
             }
             
             // Load M3 comparison data only on non-mobile to avoid blocking slower devices.
@@ -771,7 +771,7 @@
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
+                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;" title="Go to analysis of ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${escapeHtml(d.archetype)}</a></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
                         </tr>`;
@@ -803,7 +803,7 @@
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
+                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${escapeHtml(d.archetype)}</a></td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-size: 0.9em;">(${changeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.9em;">(${placementText})</span></td>
                         </tr>`;

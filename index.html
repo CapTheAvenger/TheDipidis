@@ -8,6 +8,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
+    <meta name="description" content="Pokémon TCG Meta Analysis – Deck Archetypes, City League Stats, Card Prices &amp; Playtester">
+    <meta name="theme-color" content="#3B4CCA">
+    <meta property="og:title" content="Pokémon TCG Analysis">
+    <meta property="og:description" content="Live meta statistics, deck archetypes, card prices and an online playtester for the Pokémon Trading Card Game.">
+    <meta property="og:type" content="website">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.firebaseio.com https://*.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://cdn.jsdelivr.net https://*.googleapis.com https://googleapis.com https://www.googleapis.com https://www.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebase.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://limitlesstcg.com https://www.limitlesstcg.com https://pokeapi.co http://localhost:8001 wss://*.firebaseio.com; frame-src https://*.firebaseapp.com https://accounts.google.com;">
     <title>Pokémon TCG Analysis</title>
 
@@ -1858,7 +1863,7 @@
         </div>
     </div>
 
-    <script src="js/inline-init.js?v=20260321-v1"></script>
+    <script src="js/inline-init.js?v=20260321-v1" defer></script>
 
     <div id="playtesterModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:15000; flex-direction:column;" role="dialog" aria-modal="true" aria-label="Playtester simulator">
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
@@ -2446,32 +2451,31 @@
     </div>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-credentials.js?v=20260311-v2"></script>
-    <script src="js/firebase-collection.js?v=20260320-v44"></script>
-    <script src="js/firebase-config.js?v=20260318-v10"></script>
-    <script src="js/firebase-globals.js?v=20260320-v6"></script>
-    <script src="js/firebase-auth.js?v=20260314-v15"></script>
-    <script src="js/auth-ui-helpers.js?v=20260310-v3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha384-D/t0ZMqQW31H3az8ktEiNb39wyKnS82iFY52QPACM+IjKW3jDUhyIgh2PApRqJZs" crossorigin="anonymous"></script>
-    <!-- app.js split into modules for maintainability -->
-    <script src="js/app-core.js?v=20260321-v1"></script>
-    <script src="js/app-price.js?v=20260321-v1"></script>
-    <script src="js/app-utils.js?v=20260321-v1"></script>
-    <script src="js/app-tier-meta.js?v=20260321-v1"></script>
-    <script src="js/app-city-league.js?v=20260321-v1"></script>
-    <script src="js/app-deck-builder.js?v=20260321-v1"></script>
-    <script src="js/app-meta-cards.js?v=20260321-v1"></script>
-    <script src="js/app-current-meta.js?v=20260321-v1"></script>
-    <script src="js/app-past-meta.js?v=20260321-v1"></script>
-    <script src="js/app-cards-db.js?v=20260321-v1"></script>
-    <script src="js/app-init.js?v=20260321-v1"></script>
-    <script src="js/app-current-meta-analysis.js?v=20260321-v1"></script>
-    <script src="js/app-features.js?v=20260321-v1"></script>
-    <script src="js/draw-simulator.js?v=20260319-v2"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+    <script src="js/firebase-credentials.js?v=20260311-v2" defer></script>
+    <script src="js/firebase-collection.js?v=20260320-v44" defer></script>
+    <script src="js/firebase-config.js?v=20260318-v10" defer></script>
+    <script src="js/firebase-globals.js?v=20260320-v6" defer></script>
+    <script src="js/firebase-auth.js?v=20260314-v15" defer></script>
+    <script src="js/auth-ui-helpers.js?v=20260310-v3" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha384-D/t0ZMqQW31H3az8ktEiNb39wyKnS82iFY52QPACM+IjKW3jDUhyIgh2PApRqJZs" crossorigin="anonymous" defer></script>
+    <script src="js/app-core.js?v=20260321-v1" defer></script>
+    <script src="js/app-price.js?v=20260321-v1" defer></script>
+    <script src="js/app-utils.js?v=20260321-v1" defer></script>
+    <script src="js/app-tier-meta.js?v=20260321-v1" defer></script>
+    <script src="js/app-city-league.js?v=20260321-v1" defer></script>
+    <script src="js/app-deck-builder.js?v=20260321-v1" defer></script>
+    <script src="js/app-meta-cards.js?v=20260321-v1" defer></script>
+    <script src="js/app-current-meta.js?v=20260321-v1" defer></script>
+    <script src="js/app-past-meta.js?v=20260321-v1" defer></script>
+    <script src="js/app-cards-db.js?v=20260321-v1" defer></script>
+    <script src="js/app-init.js?v=20260321-v1" defer></script>
+    <script src="js/app-current-meta-analysis.js?v=20260321-v1" defer></script>
+    <script src="js/app-features.js?v=20260321-v1" defer></script>
+    <script src="js/draw-simulator.js?v=20260319-v2" defer></script>
 
     <!-- Draw Simulator Modal -->
     <div id="drawSimulatorModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" aria-label="Starting hand simulator">

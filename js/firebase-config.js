@@ -27,12 +27,13 @@ function initFirebaseRuntime() {
   }
 
   // Auth state observer — handlers are defined in firebase-globals.js.
+  const _fbDev = typeof DEV_MODE !== 'undefined' ? DEV_MODE : false;
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
-      console.log('✓ User signed in:', user.email);
+      if (_fbDev) console.log('✓ User signed in:', user.email);
       if (typeof onUserSignedIn === 'function') onUserSignedIn(user);
     } else {
-      console.log('✗ User signed out');
+      if (_fbDev) console.log('✗ User signed out');
       if (typeof onUserSignedOut === 'function') onUserSignedOut();
     }
   });

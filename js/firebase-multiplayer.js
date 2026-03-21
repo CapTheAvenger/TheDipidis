@@ -5,6 +5,12 @@
  * Online 2-Player Mode mit Realtime Sync über Firestore
  */
 
+// ── Dev logging (matches app-core.js DEV_MODE) ──
+const _mpDev = typeof DEV_MODE !== 'undefined' ? DEV_MODE : false;
+function mpLog(...a) { if (_mpDev) console.log(...a); }
+function mpWarn(...a) { if (_mpDev) console.warn(...a); }
+function mpError(...a) { console.error(...a); } // errors always logged
+
 // ══════════════════════════════════════════════════════════════════════════
 // MULTIPLAYER STATE
 // ══════════════════════════════════════════════════════════════════════════
@@ -74,7 +80,7 @@ async function createMultiplayerGame(deckObject) {
         mpRole = 'host';
         mpIsHost = true;
 
-        console.log(`[Multiplayer] Game created: ${mpRoomCode} (ID: ${mpGameId})`);
+        mpLog(`[Multiplayer] Game created: ${mpRoomCode} (ID: ${mpGameId})`);
         
         // UI Update
         showMultiplayerLobby(mpRoomCode, 'waiting');
@@ -85,7 +91,7 @@ async function createMultiplayerGame(deckObject) {
         return mpRoomCode;
 
     } catch (error) {
-        console.error('[Multiplayer] Create game error:', error);
+        mpError('[Multiplayer] Create game error:', error);
         showToast('Fehler beim Erstellen des Spiels: ' + error.message, 'error');
         throw error;
     }
@@ -167,7 +173,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
         mpRole = 'guest';
         mpIsHost = false;
 
-        console.log(`[Multiplayer] Joined game: ${mpRoomCode} (ID: ${mpGameId})`);
+        mpLog(`[Multiplayer] Joined game: ${mpRoomCode} (ID: ${mpGameId})`);
 
         // UI Update
         showMultiplayerLobby(mpRoomCode, 'playing');
@@ -176,7 +182,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
         listenToGameState(mpGameId);
 
     } catch (error) {
-        console.error('[Multiplayer] Join game error:', error);
+        mpError('[Multiplayer] Join game error:', error);
         showToast('Fehler beim Beitreten: ' + error.message, 'error');
         throw error;
     }
@@ -209,10 +215,10 @@ async function leaveMultiplayerGame() {
         mpIsHost = false;
         mpSyncEnabled = false;
 
-        console.log('[Multiplayer] Left game');
+        mpLog('[Multiplayer] Left game');
 
     } catch (error) {
-        console.error('[Multiplayer] Leave game error:', error);
+        mpError('[Multiplayer] Leave game error:', error);
     }
 }
 
@@ -231,7 +237,7 @@ function listenToGameState(gameId) {
     
     mpUnsubscribe = db.collection('games').doc(gameId).onSnapshot((doc) => {
         if (!doc.exists) {
-            console.warn('[Multiplayer] Game document deleted');
+            mpWarn('[Multiplayer] Game document deleted');
             leaveMultiplayerGame();
             showToast('Das Spiel wurde beendet.', 'info');
             return;
@@ -243,7 +249,7 @@ function listenToGameState(gameId) {
         if (data.status === 'playing' && !mpSyncEnabled) {
             // Spiel hat gestartet
             mpSyncEnabled = true;
-            console.log('[Multiplayer] Game started - Sync enabled');
+            mpLog('[Multiplayer] Game started - Sync enabled');
             
             // Verstecke Lobby, zeige Spielfeld
             hideMultiplayerLobby();
@@ -262,15 +268,15 @@ function listenToGameState(gameId) {
             const lr = ptState.localRole;
             const localHand = ptState[lr] && ptState[lr].hand ? ptState[lr].hand : [];
             const localDeck = ptState[lr] && ptState[lr].deck ? ptState[lr].deck : [];
-            console.log(`[MP-DIAG] Role: ${lr}, Hand: ${localHand.length}, Deck: ${localDeck.length}`);
+            mpLog(`[MP-DIAG] Role: ${lr}, Hand: ${localHand.length}, Deck: ${localDeck.length}`);
             if (localHand.length > 0) {
                 const sample = localHand[0];
-                console.log(`[MP-DIAG] Sample card: name="${sample.name}", imageUrl="${(sample.imageUrl||'').substring(0,60)}...", cardType="${sample.cardType}"`);
+                mpLog(`[MP-DIAG] Sample card: name="${sample.name}", imageUrl="${(sample.imageUrl||'').substring(0,60)}...", cardType="${sample.cardType}"`);
             } else {
-                console.warn('[MP-DIAG] ⚠️ Hand ist LEER! Firebase-State p1.hand:', data.state.p1?.hand?.length, 'p2.hand:', data.state.p2?.hand?.length);
+                mpWarn('[MP-DIAG] ⚠️ Hand ist LEER! Firebase-State p1.hand:', data.state.p1?.hand?.length, 'p2.hand:', data.state.p2?.hand?.length);
                 // Safety: If hand is empty but deck has cards, redraw 7
                 if (localDeck.length > 0) {
-                    console.log('[MP-DIAG] Safety redraw: shuffling deck and drawing 7 cards');
+                    mpLog('[MP-DIAG] Safety redraw: shuffling deck and drawing 7 cards');
                     const deck = ptState[lr].deck;
                     for (let i = deck.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
@@ -300,7 +306,7 @@ function listenToGameState(gameId) {
             if (typeof setupDragAndDrop === 'function') setupDragAndDrop();
             if (typeof setupHotkeys === 'function') setupHotkeys();
 
-            console.log(`[Multiplayer] Setup phase started. Local role: ${ptState.localRole}, Hand: ${ptState[ptState.localRole].hand.length} cards`);
+            mpLog(`[Multiplayer] Setup phase started. Local role: ${ptState.localRole}, Hand: ${ptState[ptState.localRole].hand.length} cards`);
         }
 
         if (data.status === 'finished') {
@@ -315,7 +321,7 @@ function listenToGameState(gameId) {
             const now = Date.now();
             // Verhindere Sync-Loop: Nur externe Updates verarbeiten
             if (now - mpLastSyncTime > MP_SYNC_DEBOUNCE) {
-                console.log('[Multiplayer] Syncing remote state...');
+                mpLog('[Multiplayer] Syncing remote state...');
                 
                 if (typeof ptState !== 'undefined') {
                     // Bewahre lokale Rolle
@@ -329,7 +335,7 @@ function listenToGameState(gameId) {
                 // Prüfe ob beide Spieler Setup abgeschlossen haben
                 const setupReady = data.state.mpSetupReady;
                 if (setupReady && setupReady.p1 && setupReady.p2 && typeof ptStartPhase !== 'undefined' && ptStartPhase) {
-                    console.log('[Multiplayer] Both players ready — finalizing setup');
+                    mpLog('[Multiplayer] Both players ready — finalizing setup');
                     // Beide bereit: Preiskarten verteilen & Spiel starten
                     ['p1', 'p2'].forEach(p => {
                         if (ptState[p].prizes.length === 0) {
@@ -372,7 +378,7 @@ function listenToGameState(gameId) {
         }
 
     }, (error) => {
-        console.error('[Multiplayer] Snapshot error:', error);
+        mpError('[Multiplayer] Snapshot error:', error);
         showToast('Verbindungsfehler: ' + error.message, 'error');
     });
 }
@@ -447,10 +453,10 @@ async function syncStateToFirebase(actionDescription = '') {
             });
         });
 
-        console.log(`[Multiplayer] State synced: ${actionDescription}`);
+        mpLog(`[Multiplayer] State synced: ${actionDescription}`);
 
     } catch (error) {
-        console.error('[Multiplayer] Sync error:', error);
+        mpError('[Multiplayer] Sync error:', error);
     }
 }
 
@@ -484,9 +490,9 @@ async function mpSyncSetupReady() {
             lastActionDescription: `${localRole} setup complete`,
             lastActionBy: mpRole
         });
-        console.log(`[Multiplayer] Setup synced for ${localRole}`);
+        mpLog(`[Multiplayer] Setup synced for ${localRole}`);
     } catch (error) {
-        console.error('[Multiplayer] Setup sync error:', error);
+        mpError('[Multiplayer] Setup sync error:', error);
     }
 }
 
@@ -557,7 +563,7 @@ function convertDeckObjectToCards(deckObject) {
         }
     }
     
-    console.log(`[Multiplayer] convertDeckObjectToCards: ${cards.length} Karten, davon ${cards.filter(c => c.imageUrl !== 'https://images.pokemontcg.io/card-back.png').length} mit Bild, ${cards.filter(c => c.cardType).length} mit Typ`);
+    mpLog(`[Multiplayer] convertDeckObjectToCards: ${cards.length} Karten, davon ${cards.filter(c => c.imageUrl !== 'https://images.pokemontcg.io/card-back.png').length} mit Bild, ${cards.filter(c => c.cardType).length} mit Typ`);
     return cards;
 }
 
@@ -738,9 +744,9 @@ async function mpCreateGame() {
 
         toggleMultiplayerMenu();
         const roomCode = await createMultiplayerGame(deckObj);
-        console.log(`[UI] Game created with code: ${roomCode}`);
+        mpLog(`[UI] Game created with code: ${roomCode}`);
     } catch (error) {
-        console.error('[UI] Create game failed:', error);
+        mpError('[UI] Create game failed:', error);
     }
 }
 
@@ -764,7 +770,7 @@ async function mpJoinGame() {
         toggleMultiplayerMenu();
         await joinMultiplayerGame(roomCode, deckObj);
     } catch (error) {
-        console.error('[UI] Join game failed:', error);
+        mpError('[UI] Join game failed:', error);
     }
 }
 
@@ -795,7 +801,7 @@ async function mpFlipCoin() {
             lastActionBy: flipper
         });
     } catch (error) {
-        console.error('[Multiplayer] Coin flip sync error:', error);
+        mpError('[Multiplayer] Coin flip sync error:', error);
     }
 
     _mpShowCoinResult(result, flipper);
@@ -849,4 +855,4 @@ if (typeof window !== 'undefined') {
     window.mpFlipCoin = mpFlipCoin;
 }
 
-console.log('[Multiplayer] Module loaded');
+mpLog('[Multiplayer] Module loaded');

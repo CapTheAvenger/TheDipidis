@@ -1999,6 +1999,113 @@ function ptSwapZones(player, benchZone, event) {
     ptRenderAll();
 }
 
+function ptEnergyDiscard(player, zoneId) {
+    const cards = ptState[player].field[zoneId];
+    if (!cards || cards.length === 0) return;
+    const energies = cards.map((c, i) => ({ card: c, idx: i }))
+        .filter(e => (e.card.cardType || '').toLowerCase().includes('energy'));
+    if (energies.length === 0) {
+        ptShowMessage('Keine Energy auf diesem Pokémon!');
+        return;
+    }
+    if (energies.length === 1) {
+        const removed = cards.splice(energies[0].idx, 1)[0];
+        ptState[player].discard.push(removed);
+        ptLog(`⚡🗑️ ${_ptEscHtml(removed.name)} → Discard`);
+        ptSaveState(); ptRenderAll();
+        return;
+    }
+    // Multiple energies – show pick modal
+    let html = `<div style="background:#1a1a2e;border:2px solid #f39c12;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:520px;">
+        <h3 style="color:#f39c12;margin-top:0;">⚡🗑️ Energy ablegen</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle eine Energy-Karte zum Ablegen.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
+    energies.forEach(e => {
+        const safeImg = (e.card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;"
+                      onclick="ptFinishEnergyDiscard('${player}','${zoneId}',${e.idx})"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${e.card.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #f39c12;box-shadow:0 0 12px rgba(243,156,18,0.5);" onerror="this.src='${CARD_BACK_URL}'" title="${_ptEscHtml(e.card.name)}">
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(e.card.name)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button onclick="document.getElementById('ptEnergyDiscardModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">Abbrechen</button>
+    </div>`;
+    let modal = document.getElementById('ptEnergyDiscardModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptEnergyDiscardModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function ptFinishEnergyDiscard(player, zoneId, idx) {
+    const modal = document.getElementById('ptEnergyDiscardModal');
+    if (modal) modal.style.display = 'none';
+    const cards = ptState[player].field[zoneId];
+    if (!cards || idx >= cards.length) return;
+    const removed = cards.splice(idx, 1)[0];
+    ptState[player].discard.push(removed);
+    ptLog(`⚡🗑️ ${_ptEscHtml(removed.name)} → Discard`);
+    ptSaveState(); ptRenderAll();
+}
+
+function ptRetreat(player, zoneId) {
+    if (zoneId !== 'active') {
+        // Bench → swap directly with active
+        ptSwapZones(player, zoneId, null);
+        return;
+    }
+    // Active → show modal to pick bench Pokémon
+    const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
+    const occupied = benchZones.filter(b => ptState[player].field[b].length > 0);
+    if (occupied.length === 0) {
+        ptShowMessage('Keine Pokémon auf der Bank!');
+        return;
+    }
+    if (occupied.length === 1) {
+        ptSwapZones(player, occupied[0], null);
+        return;
+    }
+    const _tp = (cards) => [...cards].reverse().find(c => { const ct = (c.cardType||'').toLowerCase(); return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer'); }) || cards[0];
+    let html = `<div style="background:#1a1a2e;border:2px solid #3498db;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:520px;">
+        <h3 style="color:#3498db;margin-top:0;">↩️ Retreat – Bankpokémon wählen</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle ein Bankpokémon als neues Aktives.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
+    occupied.forEach(bz => {
+        const topPoke = _tp(ptState[player].field[bz]);
+        html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;"
+                      onclick="ptFinishRetreat('${player}','${bz}')"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${topPoke.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #3498db;box-shadow:0 0 12px rgba(52,152,219,0.5);" onerror="this.src='${CARD_BACK_URL}'" title="${_ptEscHtml(topPoke.name)}">
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(topPoke.name)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button onclick="document.getElementById('ptRetreatModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">Abbrechen</button>
+    </div>`;
+    let modal = document.getElementById('ptRetreatModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptRetreatModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.style.display = 'flex';
+    ptLog(`↩️ ${player.toUpperCase()} wählt Retreat-Ziel…`);
+}
+
+function ptFinishRetreat(player, benchZone) {
+    const modal = document.getElementById('ptRetreatModal');
+    if (modal) modal.style.display = 'none';
+    ptSwapZones(player, benchZone, null);
+}
+
 // --- ACTION COMMANDS ---
 
 function returnToHand(player, zoneId, event) {
@@ -3181,8 +3288,8 @@ function ptMenuAction(type, value) {
         else if (value === 'deck')    ptShuffleIntoDeck(player, zoneId);
         else if (value === 'discard') discardTopCard(player, zoneId, null);
         else if (value === 'ko')      ptKnockOutZone(player, zoneId);
-        else if (value === 'retreat' && zoneId !== 'active') ptSwapZones(player, zoneId, null);
-        else if (value === 'retreat') ptShowMessage('↩️ Wähle ein Bankpokémon für den Retreat!');
+        else if (value === 'energy-discard') ptEnergyDiscard(player, zoneId);
+        else if (value === 'retreat') ptRetreat(player, zoneId);
     }
 }
 

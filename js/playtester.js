@@ -2919,6 +2919,12 @@ function ptPlayFromHand(index, event) {
     const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
     if (_tFn) {
         setTimeout(() => _tFn(player, card), 50);
+    } else if (ct !== 'stadium') {
+        // No registered effect → move from playzone to discard
+        const pzIdx = ptState.playZone.indexOf(card);
+        if (pzIdx >= 0) ptState.playZone.splice(pzIdx, 1);
+        ptState[player].discard.push(card);
+        ptRenderAll();
     }
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
 }

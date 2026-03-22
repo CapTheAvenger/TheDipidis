@@ -120,6 +120,14 @@
       "triggerZone": "playzone",
       "prints": ["ASC-196", "MEG-173", "SFA-61", "SSP-251"],
       "description": "Put a Pokémon or Basic Energy from discard into hand"
+    },
+    {
+      "id": "fighting-gong",
+      "cardName": "Fighting Gong",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": ["ASC-187", "MEG-116", "MEG-168"],
+      "description": "Search deck for Basic Fighting Energy or Basic Fighting Pokémon"
     }
   ]
 }

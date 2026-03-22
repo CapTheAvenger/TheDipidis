@@ -2989,6 +2989,10 @@ function ptPickPrizeCard(player, index) {
     }
     ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Took prize: ' + card.name);
+    // Win check: all prizes taken
+    if (ptState[taker].prizes.length === 0) {
+        setTimeout(() => ptShowWinScreen(taker), 350);
+    }
 }
 
 // --- NEUTRAL ZONE RENDER ---
@@ -3166,6 +3170,7 @@ const _PT_TRAINER_ACTIONS = {
     'carmine':              ptTrainerCarmine,
     'energy-switch':        ptTrainerEnergySwitch,
     'secret-box':           ptTrainerSecretBox,
+    'unfair-stamp':         ptTrainerUnfairStamp,
 };
 
 let _ptCardActionsLoaded = false;
@@ -3773,6 +3778,74 @@ function ptSBFinish(player) {
     delete window._ptSBSelected;
     ptSaveState(); ptRenderAll();
     setTimeout(() => ptOpenDeckSearch(player), 100);
+}
+
+// === UNFAIR STAMP ===
+function ptTrainerUnfairStamp(player, card) {
+    ptSaveState();
+    const opp = player === 'p1' ? 'p2' : 'p1';
+    // Shuffle both hands into decks
+    [player, opp].forEach(p => {
+        ptState[p].deck.push(...ptState[p].hand);
+        ptState[p].hand = [];
+        // Shuffle deck
+        for (let i = ptState[p].deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [ptState[p].deck[i], ptState[p].deck[j]] = [ptState[p].deck[j], ptState[p].deck[i]];
+        }
+    });
+    // You draw 5, opponent draws 2
+    for (let i = 0; i < 5; i++) if (ptState[player].deck.length > 0) ptState[player].hand.push(ptState[player].deck.pop());
+    for (let i = 0; i < 2; i++) if (ptState[opp].deck.length > 0) ptState[opp].hand.push(ptState[opp].deck.pop());
+    ptLog(`📜 Unfair Stamp: Beide mischen Hand ins Deck. ${player.toUpperCase()} zieht 5, ${opp.toUpperCase()} zieht 2.`);
+    ptRenderAll();
+    return false;
+}
+
+// === WIN SCREEN ===
+function ptShowWinScreen(winner) {
+    const label = winner.toUpperCase();
+    let modal = document.getElementById('ptWinModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptWinModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:100000;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+        <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:3px solid #FFCB05;border-radius:18px;padding:36px 44px;text-align:center;color:#fff;max-width:420px;box-shadow:0 12px 48px rgba(0,0,0,0.7);">
+            <div style="font-size:52px;margin-bottom:12px;">🏆</div>
+            <h2 style="color:#FFCB05;margin:0 0 8px;font-size:1.6rem;">${label} hat gewonnen!</h2>
+            <p style="color:#ccc;font-size:14px;margin-bottom:24px;">Alle Prize-Karten genommen.</p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <button onclick="ptRematch('p1')" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#3B4CCA,#2a3aab);color:#fff;box-shadow:0 3px 10px rgba(59,76,202,0.4);">🔄 Rematch — P1 first</button>
+                <button onclick="ptRematch('p2')" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;box-shadow:0 3px 10px rgba(231,76,60,0.4);">🔄 Rematch — P2 first</button>
+                <button onclick="ptQuitGame()" style="padding:10px;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:#555;color:#fff;">🚪 Quit</button>
+            </div>
+        </div>`;
+    modal.style.display = 'flex';
+    ptLog(`🏆🏆🏆 ${label} gewinnt das Spiel! 🏆🏆🏆`);
+}
+
+function ptRematch(firstPlayer) {
+    const modal = document.getElementById('ptWinModal');
+    if (modal) modal.style.display = 'none';
+    ptNewGame();
+    ptCurrentPlayer = firstPlayer;
+    const ind = document.getElementById('activePlayerIndicator');
+    if (ind) ind.innerText = firstPlayer === 'p1' ? '1' : '2';
+    const handZone = document.querySelector('.pt-hand-zone');
+    if (handZone) handZone.style.borderTopColor = firstPlayer === 'p1' ? '#3B4CCA' : '#e74c3c';
+    ptUpdateAreaPointerEvents();
+    ptLog(`🔄 Rematch! ${firstPlayer.toUpperCase()} beginnt.`);
+    ptRenderAll();
+}
+
+function ptQuitGame() {
+    const modal = document.getElementById('ptWinModal');
+    if (modal) modal.style.display = 'none';
+    const playtesterModal = document.getElementById('playtesterModal');
+    if (playtesterModal) playtesterModal.style.display = 'none';
 }
 
 function _ptShowAbilityPickModal(player, cards, pickCount, pickDest, restDest, title) {

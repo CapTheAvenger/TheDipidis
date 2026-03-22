@@ -258,6 +258,14 @@
       "triggerZone": "playzone",
       "prints": ["TWM-163"],
       "description": "Discard 3 cards from hand, search deck for Item + Tool + Supporter + Stadium"
+    },
+    {
+      "id": "unfair-stamp",
+      "cardName": "Unfair Stamp",
+      "action": "unfair-stamp",
+      "triggerZone": "playzone",
+      "prints": ["TWM-165"],
+      "description": "Both players shuffle hand into deck. You draw 5, opponent draws 2."
     }
   ]
 }

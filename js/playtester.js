@@ -70,7 +70,7 @@ function ptLog(msg) {
     const pName = ptCurrentPlayer === 'p1' ? 'P1' : 'P2';
     const colorClass = ptCurrentPlayer === 'p1' ? 'pt-log-p1' : 'pt-log-p2';
     const time = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const entry = `<div class="pt-log-entry ${colorClass}">[${time}] ${pName}: ${msg}</div>`;
+    const entry = `<div class="pt-log-entry ${colorClass}">[${time}] ${pName}: ${_ptEscHtml(msg)}</div>`;
     ptActionLog.push(entry);
     const logEl = document.getElementById('ptActionLogContent');
     if (logEl) {
@@ -665,7 +665,7 @@ function ptRenderStartHandHTML(player) {
                 onclick="${isBasic ? `ptStartCardClick('${player}',${i})` : ''}"
                 ondblclick="ptStartZoomCard('${(card.imageUrl||CARD_BACK_URL).replace(/'/g,"\\'")}','${card.name.replace(/'/g,"\\'")}')"
             >
-            <span style="font-size:8px;max-width:72px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:${isBasic?'#ddd':'#666'};">${card.name}</span>
+            <span style="font-size:8px;max-width:72px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:${isBasic?'#ddd':'#666'};">${_ptEscHtml(card.name)}</span>
         </div>`;
     }).join('');
 
@@ -673,7 +673,7 @@ function ptRenderStartHandHTML(player) {
         ? `<div style="background:#e74c3c;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;margin-bottom:8px;text-align:center;">⚠️ No Basic Pokémon! Do a Mulligan.</div>` : '';
 
     const statusMsg = activeIdx !== null
-        ? `✅ Active: <strong>${ptState[player].hand[activeIdx]?.name||'?'}</strong>${benchIdxs.length ? ` &nbsp;|&nbsp; Bench: ${benchIdxs.length}` : ''}`
+        ? `✅ Active: <strong>${_ptEscHtml(ptState[player].hand[activeIdx]?.name||'?')}</strong>${benchIdxs.length ? ` &nbsp;|&nbsp; Bench: ${benchIdxs.length}` : ''}`
         : `<span style="color:#f1c40f;">⬆️ Click a Basic to set as Active</span>`;
 
     const mulBtnStyle = `padding:5px 14px;background:#8e44ad;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;`;
@@ -1126,8 +1126,8 @@ function ptRenderTopCards() {
             <img src="${c.imageUrl || CARD_BACK_URL}" class="pt-field-card"
                  style="width:100px;height:auto;margin:0 auto;"
                  onerror="this.src='${CARD_BACK_URL}'"
-                 ondblclick="ptViewCard(event,'${safeImg}')" title="${c.name || ''}">
-            <div style="color:#fff;font-size:10px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.name || ''}</div>
+                 ondblclick="ptViewCard(event,'${safeImg}')" title="${_ptEscHtml(c.name)}">
+            <div style="color:#fff;font-size:10px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_ptEscHtml(c.name)}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
                 <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'hand')">⬆️ Hand</button>
                 <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'lost')">🌌 Lost</button>
@@ -1483,8 +1483,8 @@ function ptOpenPromoteModal(player) {
         html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;"
                       onclick="ptPromoteBench('${player}','${zoneId}')"
                       onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
-            <img src="${topPoke.imageUrl||CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #E3350D;box-shadow:0 0 12px rgba(227,53,13,0.5);" onerror="this.src='${CARD_BACK_URL}'" title="${topPoke.name}">
-            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${topPoke.name}</div>
+            <img src="${topPoke.imageUrl||CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #E3350D;box-shadow:0 0 12px rgba(227,53,13,0.5);" onerror="this.src='${CARD_BACK_URL}'" title="${_ptEscHtml(topPoke.name)}">
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(topPoke.name)}</div>
         </div>`;
     });
     html += `</div></div>`;
@@ -2426,14 +2426,14 @@ function ptOpenLostZone(player) {
     if (!grid) return;
     grid.innerHTML = lz.map((c, i) => {
         const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        return `<div style="position:relative;cursor:pointer;" title="${c.name}">
+        return `<div style="position:relative;cursor:pointer;" title="${_ptEscHtml(c.name)}">
             <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;filter:grayscale(0.6);"
                  onerror="this.src='${CARD_BACK_URL}'"
                  onclick="ptTakeFromLostZone('${player}',${i})"
                  ondblclick="ptViewCard(event,'${safeImg}')">
             <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(80,0,80,0.8);
                         color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;
-                        overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
+                        overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(c.name)}</div>
         </div>`;
     }).join('');
     document.getElementById('ptDiscardModal').style.display = 'flex';
@@ -2846,7 +2846,7 @@ function generateNeutralZone(zoneId, labelText, width = 82) {
              onerror="this.src='${CARD_BACK_URL}'"
              ondblclick="ptViewCard(event,'${safeImg}')"
              oncontextmenu="event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${safeName}')"
-             title="${card.name} (right-click to zoom)">
+             title="${_ptEscHtml(card.name)} (right-click to zoom)">
         ${zoneId === 'stadium' && ptState.stadiumPlayedBy ? `<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:${ptState.stadiumPlayedBy==='p1'?'#3B4CCA':'#E3350D'};color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:4px;white-space:nowrap;z-index:50;">${ptState.stadiumPlayedBy==='p1'?'🔵 P1':'🔴 P2'}</div>` : ''}
         <div class="pt-field-actions" style="z-index:100;bottom:-28px;">
             <button class="pt-action-btn" onclick="returnToHand('${ptCurrentPlayer}','${zoneId}',event)">⬆️</button>
@@ -2903,7 +2903,7 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                       style="position:absolute;top:0;left:0;z-index:${10 + index};width:${width}px;border-radius:7px;display:block;"
                       onerror="this.src='${CARD_BACK_URL}'"
                       ondblclick="ptViewCard(event,'${safeImg}')"
-                      title="${card.name} (Doppelklick = Zoom)">`;
+                      title="${_ptEscHtml(card.name)} (Doppelklick = Zoom)">`;
         // Ability marker only on the top-most (last) Pokémon
         if (index === pokemonCards.length - 1) {
             const isUsed = !!(ptState[player].abilityUsed && ptState[player].abilityUsed[zoneId]);
@@ -2922,7 +2922,7 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                       onerror="this.src='${CARD_BACK_URL}'"
                       ondblclick="ptViewCard(event,'${safeImg}')"
                       oncontextmenu="${zoomCtx}"
-                      title="${card.name} (right-click to zoom)">`;
+                      title="${_ptEscHtml(card.name)} (right-click to zoom)">`;
     });
 
     // 3. Render Energies — horizontal fan near bottom of the Pokémon card (inside)
@@ -2936,7 +2936,7 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
                           onerror="this.src='${CARD_BACK_URL}'"
                           ondblclick="ptViewCard(event,'${safeImg}')"
                           oncontextmenu="${zoomCtx}"
-                          title="${card.name} (right-click to zoom)">`;
+                          title="${_ptEscHtml(card.name)} (right-click to zoom)">`;
         });
         html += `</div>`;
     }
@@ -3074,12 +3074,12 @@ function ptOpenZoneStack(player, zoneId) {
         const isEnergy  = (c.cardType || '').toLowerCase().includes('energy');
         const isTool    = (c.cardType || '').toLowerCase().includes('trainer') || (c.cardType || '') === 'tool';
         const badge     = isEnergy ? '⚡' : isTool ? '🔧' : i === 0 ? '🐾 Basis' : `🔼 Stufe ${i}`;
-        return `<div style="position:relative;cursor:pointer;text-align:center;" title="${c.name}">
+        return `<div style="position:relative;cursor:pointer;text-align:center;" title="${_ptEscHtml(c.name)}">
             <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;"
                  onerror="this.src='${CARD_BACK_URL}'"
                  onclick="ptViewCard(event,'${safeImg}')">
             <div style="position:absolute;top:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#FFCB05;font-size:8px;font-weight:700;padding:2px 3px;border-radius:6px 6px 0 0;">${badge}</div>
-            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
+            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(c.name)}</div>
         </div>`;
     }).join('');
     document.getElementById('ptDiscardModal').style.display = 'flex';

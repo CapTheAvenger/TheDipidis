@@ -3809,22 +3809,115 @@ function ptShowWinScreen(winner) {
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'ptWinModal';
-        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:100000;';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:100000;overflow-y:auto;padding:20px;';
         document.body.appendChild(modal);
     }
+    // Build My Decks options
+    const decks = window.userDecks || [];
+    let deckOptions = '<option value="">-- Deck wählen --</option>';
+    decks.forEach((d, i) => { deckOptions += `<option value="${i}">${_ptEscHtml(d.name || 'Deck ' + (i + 1))}</option>`; });
+    const hasDecks = decks.length > 0;
+
     modal.innerHTML = `
-        <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:3px solid #FFCB05;border-radius:18px;padding:36px 44px;text-align:center;color:#fff;max-width:420px;box-shadow:0 12px 48px rgba(0,0,0,0.7);">
+        <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:3px solid #FFCB05;border-radius:18px;padding:36px 44px;text-align:center;color:#fff;max-width:520px;width:100%;box-shadow:0 12px 48px rgba(0,0,0,0.7);">
             <div style="font-size:52px;margin-bottom:12px;">🏆</div>
             <h2 style="color:#FFCB05;margin:0 0 8px;font-size:1.6rem;">${label} hat gewonnen!</h2>
             <p style="color:#ccc;font-size:14px;margin-bottom:24px;">Alle Prize-Karten genommen.</p>
             <div style="display:flex;flex-direction:column;gap:10px;">
                 <button onclick="ptRematch('p1')" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#3B4CCA,#2a3aab);color:#fff;box-shadow:0 3px 10px rgba(59,76,202,0.4);">🔄 Rematch — P1 first</button>
                 <button onclick="ptRematch('p2')" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;box-shadow:0 3px 10px rgba(231,76,60,0.4);">🔄 Rematch — P2 first</button>
+                <button onclick="ptToggleNewDecks()" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;box-shadow:0 3px 10px rgba(243,156,18,0.4);">🃏 Rematch — Neue Decks</button>
+                <div id="ptNewDecksPanel" style="display:none;text-align:left;background:rgba(0,0,0,0.3);border-radius:10px;padding:16px;margin-top:4px;">
+                    ${hasDecks ? `
+                    <div style="margin-bottom:12px;">
+                        <label style="color:#FFCB05;font-weight:700;font-size:13px;display:block;margin-bottom:4px;">📂 My Decks</label>
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+                            <span style="color:#aaa;font-size:12px;min-width:22px;">P1:</span>
+                            <select id="ptWinDeckP1" style="flex:1;padding:8px;border-radius:6px;border:1px solid #555;background:#1a1a2e;color:#fff;font-size:13px;">${deckOptions}</select>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <span style="color:#aaa;font-size:12px;min-width:22px;">P2:</span>
+                            <select id="ptWinDeckP2" style="flex:1;padding:8px;border-radius:6px;border:1px solid #555;background:#1a1a2e;color:#fff;font-size:13px;">${deckOptions}</select>
+                        </div>
+                        <button onclick="ptRematchMyDecks()" style="width:100%;margin-top:10px;padding:10px;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;">▶ Start mit My Decks</button>
+                        <div style="color:#666;font-size:11px;text-align:center;margin:10px 0 6px;font-weight:700;">— ODER —</div>
+                    ` : ''}
+                    <label style="color:#FFCB05;font-weight:700;font-size:13px;display:block;margin-bottom:4px;">📋 Deck-Liste einfügen</label>
+                    <div style="display:flex;gap:6px;margin-bottom:6px;">
+                        <span style="color:#aaa;font-size:12px;min-width:22px;padding-top:6px;">P1:</span>
+                        <textarea id="ptWinListP1" placeholder="4 Comfey LOR 79&#10;..." style="flex:1;height:70px;padding:8px;border-radius:6px;border:1px solid #555;background:#1a1a2e;color:#fff;font-family:monospace;font-size:11px;resize:vertical;"></textarea>
+                    </div>
+                    <div style="display:flex;gap:6px;margin-bottom:10px;">
+                        <span style="color:#aaa;font-size:12px;min-width:22px;padding-top:6px;">P2:</span>
+                        <textarea id="ptWinListP2" placeholder="4 Comfey LOR 79&#10;..." style="flex:1;height:70px;padding:8px;border-radius:6px;border:1px solid #555;background:#1a1a2e;color:#fff;font-family:monospace;font-size:11px;resize:vertical;"></textarea>
+                    </div>
+                    <button onclick="ptRematchPasteDecks()" style="width:100%;padding:10px;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;">▶ Start mit Deck-Listen</button>
+                </div>
                 <button onclick="ptQuitGame()" style="padding:10px;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:#555;color:#fff;">🚪 Quit</button>
             </div>
         </div>`;
     modal.style.display = 'flex';
     ptLog(`🏆🏆🏆 ${label} gewinnt das Spiel! 🏆🏆🏆`);
+}
+
+function ptToggleNewDecks() {
+    const panel = document.getElementById('ptNewDecksPanel');
+    if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function ptRematchMyDecks() {
+    const p1Idx = parseInt(document.getElementById('ptWinDeckP1')?.value);
+    const p2Idx = parseInt(document.getElementById('ptWinDeckP2')?.value);
+    const decks = window.userDecks || [];
+    const deck1 = decks[p1Idx], deck2 = decks[p2Idx];
+    if (!deck1?.cards || !deck2?.cards) { ptShowMessage('⛔ Bitte beide Decks auswählen!'); return; }
+    if (typeof startMyDecksPlaytest !== 'undefined') {
+        document.getElementById('ptWinModal').style.display = 'none';
+        // Use the existing buildDeck logic from startMyDecksPlaytest
+        const keyRx = /^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9/a-z-]+)\)$/;
+        const backUrl = typeof CARD_BACK_URL !== 'undefined' ? CARD_BACK_URL : '';
+        function buildDeck(deckObj) {
+            const result = [];
+            for (const [deckKey, count] of Object.entries(deckObj)) {
+                if (!count || count <= 0) continue;
+                let cardName = deckKey, imageUrl = backUrl, cardType = '', setCode = '', number = '';
+                const m = deckKey.match(keyRx);
+                if (m) {
+                    cardName = m[1]; setCode = m[2]; number = m[3];
+                    let cd = null;
+                    if (window.cardsBySetNumberMap) cd = window.cardsBySetNumberMap[`${setCode}-${number}`] || null;
+                    if (!cd && window.allCardsDatabase) cd = window.allCardsDatabase.find(c => c.set === setCode && c.number === number) || null;
+                    if (!cd && window.allCardsDatabase) cd = window.allCardsDatabase.find(c => c.name === cardName) || null;
+                    if (cd) { imageUrl = cd.image_url || backUrl; cardType = cd.card_type || cd.type || ''; }
+                } else {
+                    const cd = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
+                    if (cd) { imageUrl = cd.image_url || backUrl; cardType = cd.card_type || cd.type || ''; setCode = cd.set || ''; number = cd.number || ''; }
+                }
+                for (let i = 0; i < count; i++) result.push({ name: cardName, imageUrl, cardType, setCode, number });
+            }
+            return result;
+        }
+        standaloneDecks.p1 = buildDeck(deck1.cards);
+        standaloneDecks.p2 = buildDeck(deck2.cards);
+        ptNewGame();
+        ptLog(`🃏 Neue Decks geladen: "${deck1.name}" vs "${deck2.name}"`);
+    }
+}
+
+function ptRematchPasteDecks() {
+    const p1Text = document.getElementById('ptWinListP1')?.value?.trim();
+    const p2Text = document.getElementById('ptWinListP2')?.value?.trim();
+    if (!p1Text || !p2Text) { ptShowMessage('⛔ Bitte beide Deck-Listen einfügen!'); return; }
+    document.getElementById('ptWinModal').style.display = 'none';
+    // Use the sandbox import textareas to trigger the existing parse logic
+    const ta1 = document.getElementById('sandboxImportP1');
+    const ta2 = document.getElementById('sandboxImportP2');
+    if (ta1) ta1.value = p1Text;
+    if (ta2) ta2.value = p2Text;
+    parseSandboxDeckToExactPrints(p1Text, 'p1');
+    parseSandboxDeckToExactPrints(p2Text, 'p2');
+    ptNewGame();
+    ptLog('🃏 Neue Deck-Listen geladen!');
 }
 
 function ptRematch(firstPlayer) {

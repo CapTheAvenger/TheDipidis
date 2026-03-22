@@ -5659,6 +5659,57 @@ details[open] > .tier-trending-summary::after {
     }
 }
 
+/* ===================================================
+   DESKTOP BATTLE BUTTONS (bottom-left of board)
+   =================================================== */
+#pt-side-buttons-left {
+    position: absolute;
+    bottom: 10px;
+    left: 130px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.pt-side-btn {
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    padding: 9px 16px;
+    font-size: 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.pt-side-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.55);
+    filter: brightness(1.12);
+}
+
+.pt-side-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+.attack-btn {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.endturn-btn {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.oppview-btn {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
 #fab-action-btn {
     display: none;
 }

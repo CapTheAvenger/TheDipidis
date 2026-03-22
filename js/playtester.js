@@ -492,10 +492,60 @@ function ptNewGame() {
     if (handZone) handZone.style.borderTopColor = '#3B4CCA';
     ptUpdateAreaPointerEvents();
 
+    localStorage.removeItem('ptGameSave');
     ptRenderAll();
     ptOpenStartPhase();
     ptInitMobileDeckTriggers();
 }
+
+/* ── Save / Load (single slot) ──────────────────────────────────────────── */
+function ptSaveGame() {
+    try {
+        const save = {
+            ts: Date.now(),
+            ptState: JSON.parse(JSON.stringify(ptState)),
+            ptCurrentPlayer,
+            ptActionLog,
+            ptStartPhase
+        };
+        localStorage.setItem('ptGameSave', JSON.stringify(save));
+        if (typeof showToast === 'function') showToast('💾 Spiel gespeichert', 'success', 2000);
+    } catch (e) {
+        console.error('ptSaveGame error', e);
+        if (typeof showToast === 'function') showToast('❌ Speichern fehlgeschlagen', 'error', 3000);
+    }
+}
+
+function ptLoadGame() {
+    try {
+        const raw = localStorage.getItem('ptGameSave');
+        if (!raw) { if (typeof showToast === 'function') showToast('ℹ️ Kein Spielstand vorhanden', 'info', 2500); return; }
+        const save = JSON.parse(raw);
+        ptState = save.ptState;
+        ptCurrentPlayer = save.ptCurrentPlayer;
+        ptActionLog = save.ptActionLog || [];
+        ptStartPhase = save.ptStartPhase || false;
+
+        // Restore UI indicators
+        const ind = document.getElementById('activePlayerIndicator');
+        if (ind) ind.innerText = ptCurrentPlayer === 'p1' ? '1' : '2';
+        const handZone = document.querySelector('.pt-hand-zone');
+        if (handZone) handZone.style.borderTopColor = ptCurrentPlayer === 'p1' ? '#3B4CCA' : '#CC0000';
+        const board = document.getElementById('playtester-board');
+        if (board) board.classList.toggle('flipped', ptCurrentPlayer === 'p2');
+
+        ptUpdateAreaPointerEvents();
+        ptRenderAll();
+        const d = new Date(save.ts);
+        const stamp = d.toLocaleString('de-DE', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+        if (typeof showToast === 'function') showToast(`📂 Spielstand geladen (${stamp})`, 'success', 3000);
+    } catch (e) {
+        console.error('ptLoadGame error', e);
+        if (typeof showToast === 'function') showToast('❌ Laden fehlgeschlagen', 'error', 3000);
+    }
+}
+
+function ptHasSavedGame() { return !!localStorage.getItem('ptGameSave'); }
 
 // ── Start Phase: coin flip → hand display → active selection ─────────────
 
@@ -2921,6 +2971,9 @@ function ptPlayFromHand(index, event) {
     const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
     if (_tFn) {
         setTimeout(() => _tFn(player, card), 50);
+        if (typeof showToast === 'function') showToast(`✅ "${card.name}" — Effekt wird ausgeführt`, 'success', 2500);
+    } else if ((card.cardType || '').toLowerCase().includes('trainer')) {
+        if (typeof showToast === 'function') showToast(`ℹ️ "${card.name}" — kein Auto-Effekt, manuell ausführen`, 'warning', 3000);
     }
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
 }
@@ -3993,6 +4046,7 @@ function ptToggleAbilityUsed(player, zoneId, event) {
                 const executed = abilityFn(player, zoneId);
                 if (executed) {
                     ptState[player].abilityUsed[zoneId] = true;
+                    if (typeof showToast === 'function') showToast(`✅ "${topPoke.name}" Ability ausgeführt`, 'success', 2500);
                     ptSaveState();
                     ptRenderAll();
                     return;
@@ -4000,6 +4054,7 @@ function ptToggleAbilityUsed(player, zoneId, event) {
                 // If ability couldn't execute (e.g. no energy), don't mark as used
                 return;
             }
+            if (typeof showToast === 'function') showToast(`ℹ️ "${topPoke.name}" — kein Auto-Effekt, manuell ausführen`, 'warning', 3000);
         }
     }
 

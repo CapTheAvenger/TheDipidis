@@ -116,6 +116,8 @@ function openPlaytester(source) {
         let cardName = deckKey;
         let imageUrl = CARD_BACK_URL;
         let cardType = '';
+        let cardSetCode = '';
+        let cardNumber = '';
         const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
         if (m) {
             cardName = m[1];
@@ -128,13 +130,15 @@ function openPlaytester(source) {
             if (!cd) cd = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
             if (cd && cd.image_url) imageUrl = cd.image_url;
             if (cd) cardType = cd.type || cd.card_type || cd.supertype || '';
+            cardSetCode = setCode;
+            cardNumber = number;
         } else {
             const cd = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
             if (cd && cd.image_url) imageUrl = cd.image_url;
             if (cd) cardType = cd.type || cd.card_type || cd.supertype || '';
         }
         for (let i = 0; i < count; i++) {
-            baseCards.push({ name: cardName, imageUrl, cardType });
+            baseCards.push({ name: cardName, imageUrl, cardType, setCode: cardSetCode, number: cardNumber });
         }
     }
 
@@ -352,7 +356,7 @@ function parseSandboxDeck(player) {
             console.warn(`[Sandbox] No local data for ${name} (${ptcgoCode} ${number})`);
         }
 
-        return { name, count, imageUrl, cardType };
+        return { name, count, imageUrl, cardType, setCode: ptcgoCode, number };
     });
 
     standaloneDecks[player] = results;
@@ -2970,9 +2974,132 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     return html;
 }
 
+// ─── ABILITY REGISTRY ───────────────────────────────────────────────
+// Map set+number keys to automated ability functions.
+// Each function receives (player, zoneId) and returns true if executed.
+// Include all international prints so the ability fires regardless of version.
+const PT_ABILITY_REGISTRY = {
+    // Lunatone — Sol Calc (Ascended Heroes 105 + int prints MEG-74, MEP-4)
+    'ASC-105': ptAbilityLunatone, 'MEG-74': ptAbilityLunatone, 'MEP-4': ptAbilityLunatone,
+
+    // Drakloak — Sol Reading (ASC 159 + ASC 248 art variant)
+    'ASC-159': ptAbilityDrakloak, 'ASC-248': ptAbilityDrakloak,
+};
+
+function _ptGetTopPokemon(player, zoneId) {
+    const cards = ptState[player].field[zoneId];
+    if (!cards || cards.length === 0) return null;
+    return [...cards].reverse().find(c => {
+        const ct = (c.cardType || '').toLowerCase();
+        return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer');
+    }) || cards[0];
+}
+
+function _ptGetAbilityKey(card) {
+    if (card.setCode && card.number) return `${card.setCode}-${card.number}`;
+    return null;
+}
+
+// Lunatone — Sol Calc: discard a Basic Energy from hand, draw 3 cards
+function ptAbilityLunatone(player, zoneId) {
+    const hand = ptState[player].hand;
+    const energyIdx = hand.findIndex(c => (c.cardType || '').toLowerCase() === 'basic energy');
+    if (energyIdx === -1) {
+        ptShowMessage('⛔ Keine Basic Energy auf der Hand zum Ablegen!');
+        return false;
+    }
+    const discarded = hand.splice(energyIdx, 1)[0];
+    ptState[player].discard.push(discarded);
+    ptLog(`✨ Lunatone Ability: "${discarded.name}" → Discard.`);
+    // Draw 3
+    for (let i = 0; i < 3; i++) {
+        if (ptState[player].deck.length === 0) break;
+        ptState[player].hand.push(ptState[player].deck.pop());
+    }
+    ptLog(`✨ Lunatone Ability: 3 Karten gezogen.`);
+    return true;
+}
+
+// Drakloak — Trickster: look at top 2 cards, take 1 to hand, put other on bottom
+function ptAbilityDrakloak(player, zoneId) {
+    if (ptState[player].deck.length === 0) {
+        ptShowMessage('⛔ Deck ist leer!');
+        return false;
+    }
+    const topCards = [];
+    for (let i = 0; i < Math.min(2, ptState[player].deck.length); i++) {
+        topCards.push(ptState[player].deck.pop());
+    }
+    ptLog(`✨ Drakloak Ability: Top ${topCards.length} Karten anschauen...`);
+    // Show pick modal
+    _ptShowAbilityPickModal(player, topCards, 1, 'hand', 'bottom',
+        'Drakloak — Wähle 1 Karte für die Hand (die andere geht unter das Deck)');
+    return true;
+}
+
+function _ptShowAbilityPickModal(player, cards, pickCount, pickDest, restDest, title) {
+    let existing = document.getElementById('ptAbilityPickModal');
+    if (existing) existing.remove();
+    const modal = document.createElement('div');
+    modal.id = 'ptAbilityPickModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99999;';
+    const safeTitle = _ptEscHtml(title);
+    let html = `<div style="background:#1a1a2e;border:2px solid #FFCB05;border-radius:14px;padding:24px;max-width:90vw;color:#fff;text-align:center;">
+        <h3 style="color:#FFCB05;margin-top:0;">${safeTitle}</h3>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0;">`;
+    cards.forEach((c, i) => {
+        html += `<div style="cursor:pointer;transition:transform .15s;" onclick="window._ptAbilityPick(${i})"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${c.imageUrl || CARD_BACK_URL}" style="width:100px;border-radius:8px;" onerror="this.src='${CARD_BACK_URL}'">
+            <div style="font-size:10px;margin-top:4px;">${_ptEscHtml(c.name)}</div>
+        </div>`;
+    });
+    html += `</div></div>`;
+    modal.innerHTML = html;
+    document.body.appendChild(modal);
+
+    window._ptAbilityPick = function(idx) {
+        const picked = cards.splice(idx, 1)[0];
+        if (pickDest === 'hand') ptState[player].hand.push(picked);
+        ptLog(`✨ "${picked.name}" → Hand genommen.`);
+        // Remaining cards go to restDest
+        cards.forEach(c => {
+            if (restDest === 'bottom') ptState[player].deck.unshift(c);
+            else if (restDest === 'discard') ptState[player].discard.push(c);
+            ptLog(`✨ "${c.name}" → ${restDest === 'bottom' ? 'Unter das Deck' : 'Discard'}.`);
+        });
+        modal.remove();
+        delete window._ptAbilityPick;
+        ptSaveState();
+        ptRenderAll();
+    };
+}
+
 function ptToggleAbilityUsed(player, zoneId, event) {
     if (event) event.stopPropagation();
     if (!ptState[player].abilityUsed) ptState[player].abilityUsed = {};
+
+    // If marking as USED, check for registered ability automation
+    if (!ptState[player].abilityUsed[zoneId]) {
+        const topPoke = _ptGetTopPokemon(player, zoneId);
+        if (topPoke) {
+            const key = _ptGetAbilityKey(topPoke);
+            const abilityFn = key && PT_ABILITY_REGISTRY[key];
+            if (abilityFn) {
+                const executed = abilityFn(player, zoneId);
+                if (executed) {
+                    ptState[player].abilityUsed[zoneId] = true;
+                    ptSaveState();
+                    ptRenderAll();
+                    return;
+                }
+                // If ability couldn't execute (e.g. no energy), don't mark as used
+                return;
+            }
+        }
+    }
+
+    // Fallback: simple toggle for unregistered abilities
     ptState[player].abilityUsed[zoneId] = !ptState[player].abilityUsed[zoneId];
     const state = ptState[player].abilityUsed[zoneId];
     ptLog(`✨ Ability auf ${zoneId} ${state ? 'benutzt (✅)' : 'zurückgesetzt'}`);

@@ -2896,7 +2896,7 @@ function ptPlayFromHand(index, event) {
     const card = ptState[player].hand[index];
     if (!card) return;
     ptSaveState();
-    // Determine target zone: stadium cards go to stadium, rest to playzone
+    // Determine target zone: stadium cards go to stadium, rest straight to discard
     const ct = (card.cardType || '').toLowerCase();
     ptState[player].hand.splice(index, 1);
     if (ct === 'stadium') {
@@ -2908,8 +2908,8 @@ function ptPlayFromHand(index, event) {
         ptState.stadiumPlayedBy = player;
         ptLog(`Played Stadium: "${card.name}".`);
     } else {
-        ptState.playZone.push(card);
-        ptLog(`Played: "${card.name}".`);
+        ptState[player].discard.push(card);
+        ptLog(`Played: "${card.name}" → Discard.`);
     }
     ptSelectedCardIndex = null;
     ptSetAttachMode(false);
@@ -2919,12 +2919,6 @@ function ptPlayFromHand(index, event) {
     const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
     if (_tFn) {
         setTimeout(() => _tFn(player, card), 50);
-    } else if (ct !== 'stadium') {
-        // No registered effect → move from playzone to discard
-        const pzIdx = ptState.playZone.indexOf(card);
-        if (pzIdx >= 0) ptState.playZone.splice(pzIdx, 1);
-        ptState[player].discard.push(card);
-        ptRenderAll();
     }
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
 }

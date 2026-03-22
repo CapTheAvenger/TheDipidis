@@ -1444,12 +1444,15 @@ const BASE_PATH = './data/';
         }
 
         let currentMetaRowsFallbackCache = null;
+        let currentMetaRowsFallbackCacheTime = 0;
         let currentMetaRowsFallbackInFlight = null;
+        const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
         async function loadCurrentMetaRowsWithFallback(options = {}) {
             const forceRefresh = Boolean(options && options.forceRefresh);
 
-            if (!forceRefresh && Array.isArray(currentMetaRowsFallbackCache)) {
+            // Check TTL expiry
+            if (!forceRefresh && Array.isArray(currentMetaRowsFallbackCache) && (Date.now() - currentMetaRowsFallbackCacheTime) < CACHE_TTL_MS) {
                 return currentMetaRowsFallbackCache;
             }
 
@@ -1461,7 +1464,7 @@ const BASE_PATH = './data/';
                 const primary = await loadCSV('current_meta_card_data.csv', options);
                 if (Array.isArray(primary) && primary.length > 0) {
                     window.currentMetaUsingFallback = false;
-                    if (!forceRefresh) currentMetaRowsFallbackCache = primary;
+                    if (!forceRefresh) { currentMetaRowsFallbackCache = primary; currentMetaRowsFallbackCacheTime = Date.now(); }
                     return primary;
                 }
 
@@ -1470,12 +1473,12 @@ const BASE_PATH = './data/';
                     const normalizedFallback = normalizeCurrentMetaFallbackRows(fallback);
                     console.warn(`[Current Meta] Using tournament fallback dataset (${normalizedFallback.length} rows) because current_meta_card_data.csv is missing or empty.`);
                     window.currentMetaUsingFallback = true;
-                    if (!forceRefresh) currentMetaRowsFallbackCache = normalizedFallback;
+                    if (!forceRefresh) { currentMetaRowsFallbackCache = normalizedFallback; currentMetaRowsFallbackCacheTime = Date.now(); }
                     return normalizedFallback;
                 }
 
                 window.currentMetaUsingFallback = false;
-                if (!forceRefresh) currentMetaRowsFallbackCache = [];
+                if (!forceRefresh) { currentMetaRowsFallbackCache = []; currentMetaRowsFallbackCacheTime = Date.now(); }
                 return [];
             })();
 

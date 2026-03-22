@@ -349,35 +349,48 @@
             }
         }
         
+        // Cached city league sort results (invalidated when data changes)
+        let _cityLeagueSortCache = null;
+        let _cityLeagueSortDataRef = null;
+
+        function getCityLeagueSortedSections(data) {
+            // Return cached result if data reference hasn't changed
+            if (_cityLeagueSortCache && _cityLeagueSortDataRef === data) return _cityLeagueSortCache;
+            
+            const newArchetypes = data.filter(d => d.status === 'NEU');
+            const disappeared = data.filter(d => d.status === 'VERSCHWUNDEN');
+            const increased = data.filter(d => d.status !== 'NEU' && parseInt(d.count_change || 0) > 0)
+                .sort((a, b) => parseInt(b.count_change) - parseInt(a.count_change));
+            const decreased = data.filter(d => parseInt(d.count_change || 0) < 0)
+                .sort((a, b) => parseInt(a.count_change) - parseInt(b.count_change));
+            
+            const maxCountForThreshold = Math.max(...data.map(d => parseInt(d.new_count || 0)));
+            const countThreshold = maxCountForThreshold * 0.1;
+            
+            const improvers = data
+                .filter(d => parseFloat((d.avg_placement_change || '0').replace(',', '.')) < 0 && parseInt(d.new_count || 0) >= countThreshold)
+                .sort((a, b) => parseFloat((a.avg_placement_change || '0').replace(',', '.')) - parseFloat((b.avg_placement_change || '0').replace(',', '.')))
+                .slice(0, 10);
+            
+            const decliners = data
+                .filter(d => parseFloat((d.avg_placement_change || '0').replace(',', '.')) > 0 && parseInt(d.new_count || 0) >= countThreshold)
+                .sort((a, b) => parseFloat((b.avg_placement_change || '0').replace(',', '.')) - parseFloat((a.avg_placement_change || '0').replace(',', '.')))
+                .slice(0, 10);
+            
+            const sorted = [...data].sort((a, b) => parseInt(b.new_count || 0) - parseInt(a.new_count || 0));
+            
+            _cityLeagueSortDataRef = data;
+            _cityLeagueSortCache = { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted };
+            return _cityLeagueSortCache;
+        }
+        
         // Render City League table with full structure matching original HTML
         function renderCityLeagueTable(tournamentCount = 0, dateRange = '') {
             const content = document.getElementById('cityLeagueContent');
             if (!content || !cityLeagueData || cityLeagueData.length === 0) return;
             
-            // Separate data by status and trend
-            const newArchetypes = cityLeagueData.filter(d => d.status === 'NEU');
-            const disappeared = cityLeagueData.filter(d => d.status === 'VERSCHWUNDEN');
-            const increased = cityLeagueData.filter(d => d.status !== 'NEU' && parseInt(d.count_change || 0) > 0)
-                .sort((a, b) => parseInt(b.count_change) - parseInt(a.count_change));
-            const decreased = cityLeagueData.filter(d => parseInt(d.count_change || 0) < 0)
-                .sort((a, b) => parseInt(a.count_change) - parseInt(b.count_change));
-            
-            // Get max count for threshold filtering
-            const maxCountForThreshold = Math.max(...cityLeagueData.map(d => parseInt(d.new_count || 0)));
-            const countThreshold = maxCountForThreshold * 0.1;
-            
-            // Performance improvers/decliners
-            const improvers = cityLeagueData
-                .filter(d => parseFloat((d.avg_placement_change || '0').replace(',', '.')) < 0 && parseInt(d.new_count || 0) >= countThreshold)
-                .sort((a, b) => parseFloat((a.avg_placement_change || '0').replace(',', '.')) - parseFloat((b.avg_placement_change || '0').replace(',', '.')))
-                .slice(0, 10);
-            
-            const decliners = cityLeagueData
-                .filter(d => parseFloat((d.avg_placement_change || '0').replace(',', '.')) > 0 && parseInt(d.new_count || 0) >= countThreshold)
-                .sort((a, b) => parseFloat((b.avg_placement_change || '0').replace(',', '.')) - parseFloat((a.avg_placement_change || '0').replace(',', '.')))
-                .slice(0, 10);
-            
-            const sorted = [...cityLeagueData].sort((a, b) => parseInt(b.new_count || 0) - parseInt(a.new_count || 0));
+            // Use cached sort results
+            const { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted } = getCityLeagueSortedSections(cityLeagueData);
             const totalArchetypes = cityLeagueData.length;
             
             // Generate timestamp

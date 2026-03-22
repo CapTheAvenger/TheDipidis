@@ -21,6 +21,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js with cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Validate Python syntax
         run: |
           python3 -m py_compile card_scraper_shared.py
@@ -31,9 +36,11 @@ jobs:
           done
           echo "✓ All Python files pass syntax check"
 
+      - name: Install npm tools
+        run: npm install -g terser clean-css-cli html-minifier-terser
+
       - name: Validate JS syntax
         run: |
-          npm install -g terser
           for f in js/*.js; do
             terser "$f" --no-module -o /dev/null 2>/dev/null || { echo "::error::Syntax error in $f"; exit 1; }
           done
@@ -62,15 +69,15 @@ jobs:
           cp current_meta_analysis_settings.json _site/ 2>/dev/null || true
           cp _config.yml _site/ 2>/dev/null || true
 
-      - name: Minify JS & CSS
+      - name: Minify JS, CSS & HTML
         run: |
-          npm install -g clean-css-cli
           for f in _site/js/*.js; do
             terser "$f" --compress --mangle -o "$f" || { echo "::error::Minification failed for $f"; exit 1; }
           done
           for f in _site/css/*.css; do
             cleancss -o "$f" "$f" || { echo "::error::CSS minification failed for $f"; exit 1; }
           done
+          html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true -o _site/index.html _site/index.html || echo "::warning::HTML minification skipped"
           echo "✓ Minification complete"
 
       - name: Cache-bust asset references

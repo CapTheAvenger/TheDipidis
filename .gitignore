@@ -68,6 +68,10 @@ index_OLD*.html
 # User-specific paths
 UPDATE_GITHUB_DATA.ps1
 
+# Windows NUL device artifacts
+_UL
+NUL
+
 # Node.js (only used for CI tooling tests)
 node_modules/
 package.json

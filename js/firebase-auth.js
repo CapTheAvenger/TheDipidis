@@ -7,7 +7,7 @@
 async function signUp(email, password) {
   try {
     const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-    console.log('✓ User created:', userCredential.user.email);
+    if (typeof devLog === 'function') devLog('✓ User created:', userCredential.user.email);
     showNotification('Account created successfully!', 'success');
     return userCredential.user;
   } catch (error) {
@@ -21,7 +21,7 @@ async function signUp(email, password) {
 async function signIn(email, password) {
   try {
     const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-    console.log('✓ User signed in:', userCredential.user.email);
+    if (typeof devLog === 'function') devLog('✓ User signed in:', userCredential.user.email);
     showNotification('Signed in successfully!', 'success');
     return userCredential.user;
   } catch (error) {
@@ -75,7 +75,7 @@ function signInWithGoogle() {
       const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
       firebase.auth().signInWithCredential(credential)
         .then(function(result) {
-          console.log('✓ Google sign-in:', result.user.email);
+          if (typeof devLog === 'function') devLog('✓ Google sign-in:', result.user.email);
           showNotification('Mit Google angemeldet!', 'success');
         })
         .catch(function(err) {
@@ -92,7 +92,7 @@ function signInWithGoogle() {
 async function signOut() {
   try {
     await firebase.auth().signOut();
-    console.log('✓ User signed out');
+    if (typeof devLog === 'function') devLog('✓ User signed out');
     showNotification('Signed out successfully!', 'success');
   } catch (error) {
     console.error('Sign out error:', error);

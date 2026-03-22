@@ -30,7 +30,7 @@ const PT_MAX_HISTORY = 20;
 
 function ptSaveState() {
     try {
-        ptStateHistory.push(JSON.parse(JSON.stringify(ptState)));
+        ptStateHistory.push(structuredClone(ptState));
         if (ptStateHistory.length > PT_MAX_HISTORY) ptStateHistory.shift();
     } catch(e) { /* ignore serialisation errors for non-critical state */ }
 }

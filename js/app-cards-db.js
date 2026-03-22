@@ -745,11 +745,18 @@
 
             const searchInput = document.getElementById('cardSearch');
             
+            // Debounced autocomplete to avoid excessive DOM updates per keystroke
+            let _autocompleteDebounce = null;
+            function scheduleAutocomplete(value) {
+                clearTimeout(_autocompleteDebounce);
+                _autocompleteDebounce = setTimeout(() => showCardAutocomplete(value), 120);
+            }
+            
             // Search input with autocomplete
             if (searchInput) {
-                // Show autocomplete on input
+                // Show autocomplete on input (debounced)
                 searchInput.addEventListener('input', (e) => {
-                    showCardAutocomplete(e.target.value);
+                    scheduleAutocomplete(e.target.value);
                     window.scheduleFilterAndRenderCards();
                 });
                 

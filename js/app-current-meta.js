@@ -1,6 +1,18 @@
 // app-current-meta.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
+        // Debounce timer for heatmap search inputs
+        let _heatmapDebounceTimer = null;
+        function debouncedRenderHeatmap() {
+            clearTimeout(_heatmapDebounceTimer);
+            _heatmapDebounceTimer = setTimeout(() => {
+                if (typeof renderMatchupHeatmap === 'function') renderMatchupHeatmap();
+            }, 200);
+        }
+
+        // Matchup data registry (avoids Object.keys(window) scan)
+        window._matchupRegistry = window._matchupRegistry || {};
+
         // Render Interactive Matchup Heatmap
         function renderMatchupHeatmap() {
             try {
@@ -22,20 +34,23 @@
                     window.heatmapExpanded = false;
                 }
                 
-                // Collect all matchup data from window.matchupData_* variables
-                const matchupVars = Object.keys(window).filter(k => k.startsWith('matchupData_'));
+                // Collect matchup data from registry (fast path) or fallback to window scan
+                const registry = window._matchupRegistry || {};
+                let matchupData = {};
+                if (Object.keys(registry).length > 0) {
+                    matchupData = registry;
+                } else {
+                    const matchupVars = Object.keys(window).filter(k => k.startsWith('matchupData_'));
+                    matchupVars.forEach(varName => {
+                        const deckName = varName.replace('matchupData_', '').replace(/_/g, ' ');
+                        matchupData[deckName] = window[varName];
+                    });
+                }
                 
-                if (matchupVars.length === 0) {
+                if (Object.keys(matchupData).length === 0) {
                     console.warn('⚠️ No matchup data available');
                     return;
                 }
-                
-                // Build matchup data object (key = deckName)
-                const matchupData = {};
-                matchupVars.forEach(varName => {
-                    const deckName = varName.replace('matchupData_', '').replace(/_/g, ' ');
-                    matchupData[deckName] = window[varName];
-                });
                 
                 // Normalisierungs-Helfer für Namen (entfernt Apostrophe, Leerzeichen, Bindestriche)
                 const normalizeName = (name) => name ? name.toLowerCase().replace(/[''`\s-]/g, '') : '';
@@ -59,11 +74,11 @@
                         <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
                             <label style="display: flex; flex-direction: column; gap: 4px; color: #2c3e50; font-size: 0.85rem; font-weight: 700; min-width: 240px; flex: 1;">
                                 Y-axis (Your deck)
-                                <input type="text" id="heatmapSearchY" value="${escapeAttr(rawSearchY)}" placeholder="z.B. N's Zoroark" oninput="if(typeof renderMatchupHeatmap === 'function') renderMatchupHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                <input type="text" id="heatmapSearchY" value="${escapeAttr(rawSearchY)}" placeholder="z.B. N's Zoroark" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                             </label>
                             <label style="display: flex; flex-direction: column; gap: 4px; color: #2c3e50; font-size: 0.85rem; font-weight: 700; min-width: 240px; flex: 1;">
                                 X-axis (Opponents, optional)
-                                <input type="text" id="heatmapSearchX" value="${escapeAttr(rawSearchX)}" placeholder="z.B. Dragapult" oninput="if(typeof renderMatchupHeatmap === 'function') renderMatchupHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                <input type="text" id="heatmapSearchX" value="${escapeAttr(rawSearchX)}" placeholder="z.B. Dragapult" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                             </label>
                         </div>
                     </div>

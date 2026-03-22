@@ -27,7 +27,7 @@
     /* Text */
     --text-primary: #333;
     --text-dark: #2c3e50;
-    --text-muted: #555;
+    --text-muted: #4a4a4a;
     --text-light: #666;
 
     /* Backgrounds */
@@ -5271,7 +5271,7 @@ details[open] > .tier-trending-summary::after {
 
     /* --- Fix 5: Deck-card action buttons → bigger touch targets --- */
     .deck-card button {
-        min-height: 36px !important;
+        min-height: 44px !important;
         height: auto !important;
         font-size: 13px !important;
     }

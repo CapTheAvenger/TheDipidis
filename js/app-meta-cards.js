@@ -1059,7 +1059,14 @@
                 
                 // Verify that matchup data was loaded
                 const matchupVars = Object.keys(window).filter(k => k.startsWith('matchupData_'));
-                devLog(`? Available matchup variables: ${matchupVars.length}`);
+                devLog(`✅ Available matchup variables: ${matchupVars.length}`);
+                
+                // Populate matchup registry for fast access (avoids repeated window scan)
+                window._matchupRegistry = window._matchupRegistry || {};
+                matchupVars.forEach(varName => {
+                    const deckName = varName.replace('matchupData_', '').replace(/_/g, ' ');
+                    window._matchupRegistry[deckName] = window[varName];
+                });
                 
                 // THEN: Extract the container content
                 const container = doc.querySelector('.container');

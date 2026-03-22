@@ -1,0 +1,42 @@
+{
+  "_comment": "Playtester Card-Action-Datenbank. 'prints' = alle SetCode-Number Kombinationen (inkl. int Prints). 'action' = ID der JS-Funktion die ausgeführt wird.",
+
+  "abilities": [
+    {
+      "id": "lunatone-sol-calc",
+      "cardName": "Lunatone",
+      "abilityName": "Sol Calc",
+      "action": "lunatone",
+      "prints": ["ASC-105", "MEG-74", "MEP-4"],
+      "description": "Discard a Basic Energy from hand, draw 3 cards"
+    },
+    {
+      "id": "drakloak-trickster",
+      "cardName": "Drakloak",
+      "abilityName": "Trickster",
+      "action": "drakloak",
+      "prints": ["ASC-159", "ASC-248", "PRE-72", "TWM-129"],
+      "description": "Look at top 2 cards, take 1 to hand, put other on bottom"
+    }
+  ],
+
+  "trainers": [
+    {
+      "id": "boss-orders",
+      "cardName": "Boss's Orders",
+      "action": "boss-orders",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-183", "ASC-256",
+        "PAL-172", "PAL-248", "PAL-265",
+        "BRS-132",
+        "LOR-TG24",
+        "MEG-114",
+        "RCL-154", "RCL-189", "RCL-200",
+        "SHF-58",
+        "SP-251"
+      ],
+      "description": "Switch opponent's bench Pokémon to active position"
+    }
+  ]
+}

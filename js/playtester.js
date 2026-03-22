@@ -458,6 +458,7 @@ function getExportStringFromBuilder(type) {
 // --- End Playtester Setup Modal ---
 
 function ptNewGame() {
+    _ptLoadCardActions();   // ensure ability + trainer registries are populated
     ['p1', 'p2'].forEach(p => {
         let allCards = [...ptState[p].deck, ...ptState[p].hand, ...ptState[p].discard,
                         ...(ptState[p].lostzone || []), ...ptState[p].prizes];
@@ -1756,6 +1757,12 @@ function ptClickZone(player, zoneId) {
     if (zoneId === 'playzone') {
         ptState.playZone.push(card);
         ptLog(`Played Item/Supporter: "${card.name}".`);
+        // Check trainer registry for automated effects
+        const _tKey = _ptGetAbilityKey(card);
+        const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
+        if (_tFn) {
+            setTimeout(() => _tFn(ptCurrentPlayer, card), 50);
+        }
     } else if (zoneId === 'stadium') {
         if (ptState.stadium.length > 0) {
             const stadiumOwner = ptState.stadiumPlayedBy || ptCurrentPlayer;
@@ -3081,17 +3088,50 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     return html;
 }
 
-// ─── ABILITY REGISTRY ───────────────────────────────────────────────
-// Map set+number keys to automated ability functions.
-// Each function receives (player, zoneId) and returns true if executed.
-// Include all international prints so the ability fires regardless of version.
-const PT_ABILITY_REGISTRY = {
-    // Lunatone — Sol Calc (Ascended Heroes 105 + int prints MEG-74, MEP-4)
-    'ASC-105': ptAbilityLunatone, 'MEG-74': ptAbilityLunatone, 'MEP-4': ptAbilityLunatone,
+// ─── ABILITY & TRAINER REGISTRIES ───────────────────────────────────
+// Built at runtime from data/card_actions.json.
+// Ability functions receive (player, zoneId) and return true if executed.
+// Trainer functions receive (player, card) and return true if a modal was shown.
+const PT_ABILITY_REGISTRY = {};   // populated by _ptLoadCardActions
+const PT_TRAINER_REGISTRY = {};   // populated by _ptLoadCardActions
 
-    // Drakloak — Sol Reading (ASC 159 + ASC 248 art variant)
-    'ASC-159': ptAbilityDrakloak, 'ASC-248': ptAbilityDrakloak,
+// Map action-id → JS implementation
+const _PT_ABILITY_ACTIONS = {
+    'lunatone':  ptAbilityLunatone,
+    'drakloak':  ptAbilityDrakloak,
 };
+const _PT_TRAINER_ACTIONS = {
+    'boss-orders': ptTrainerBossOrders,
+};
+
+let _ptCardActionsLoaded = false;
+
+function _ptLoadCardActions() {
+    if (_ptCardActionsLoaded) return Promise.resolve();
+    const ts = Date.now();
+    return fetch(`data/card_actions.json?_=${ts}`)
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(data => {
+            (data.abilities || []).forEach(a => {
+                const fn = _PT_ABILITY_ACTIONS[a.action];
+                if (!fn) return;
+                (a.prints || []).forEach(p => { PT_ABILITY_REGISTRY[p] = fn; });
+            });
+            (data.trainers || []).forEach(t => {
+                const fn = _PT_TRAINER_ACTIONS[t.action];
+                if (!fn) return;
+                (t.prints || []).forEach(p => { PT_TRAINER_REGISTRY[p] = fn; });
+            });
+            _ptCardActionsLoaded = true;
+            console.log('[Playtester] Card actions loaded:',
+                Object.keys(PT_ABILITY_REGISTRY).length, 'abilities,',
+                Object.keys(PT_TRAINER_REGISTRY).length, 'trainers');
+        })
+        .catch(e => {
+            console.warn('[Playtester] card_actions.json not loaded, using empty registries:', e);
+            _ptCardActionsLoaded = true;
+        });
+}
 
 function _ptGetTopPokemon(player, zoneId) {
     const cards = ptState[player].field[zoneId];
@@ -3142,6 +3182,60 @@ function ptAbilityDrakloak(player, zoneId) {
     _ptShowAbilityPickModal(player, topCards, 1, 'hand', 'bottom',
         'Drakloak — Wähle 1 Karte für die Hand (die andere geht unter das Deck)');
     return true;
+}
+
+// ── TRAINER ACTIONS ─────────────────────────────────────────────────
+
+// Boss's Orders: pick one of opponent's bench Pokémon → force it into active
+function ptTrainerBossOrders(player, card) {
+    const opp = player === 'p1' ? 'p2' : 'p1';
+    const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
+    const occupied = benchZones.filter(b => ptState[opp].field[b].length > 0);
+    if (occupied.length === 0) {
+        ptShowMessage('⛔ Gegner hat keine Pokémon auf der Bank!');
+        return false;
+    }
+    if (occupied.length === 1) {
+        ptSwapZones(opp, occupied[0], null);
+        ptLog(`📋 Boss's Orders: ${opp.toUpperCase()} ${_ptEscHtml(_ptGetTopPokemon(opp, 'active')?.name || '?')} → Aktiv erzwungen!`);
+        return true;
+    }
+    const _tp = (cards) => [...cards].reverse().find(c => { const ct = (c.cardType||'').toLowerCase(); return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer'); }) || cards[0];
+    let html = `<div style="background:#1a1a2e;border:2px solid #E3350D;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:520px;">
+        <h3 style="color:#E3350D;margin-top:0;">📋 Boss's Orders</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle ein gegnerisches Bankpokémon das in die Aktive Position gezwungen wird.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
+    occupied.forEach(bz => {
+        const topPoke = _tp(ptState[opp].field[bz]);
+        html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;"
+                      onclick="ptFinishBossOrders('${opp}','${bz}')"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${topPoke.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #E3350D;box-shadow:0 0 12px rgba(227,53,13,0.5);" onerror="this.src='${CARD_BACK_URL}'" title="${_ptEscHtml(topPoke.name)}">
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(topPoke.name)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button onclick="document.getElementById('ptBossModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">Abbrechen</button>
+    </div>`;
+    let modal = document.getElementById('ptBossModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptBossModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.style.display = 'flex';
+    ptLog(`📋 Boss's Orders: Wähle gegnerisches Bankpokémon…`);
+    return true;
+}
+
+function ptFinishBossOrders(oppPlayer, benchZone) {
+    const modal = document.getElementById('ptBossModal');
+    if (modal) modal.style.display = 'none';
+    ptSwapZones(oppPlayer, benchZone, null);
+    const newActive = _ptGetTopPokemon(oppPlayer, 'active');
+    ptLog(`📋 Boss's Orders: ${oppPlayer.toUpperCase()} ${_ptEscHtml(newActive?.name || '?')} → Aktiv erzwungen!`);
 }
 
 function _ptShowAbilityPickModal(player, cards, pickCount, pickDest, restDest, title) {

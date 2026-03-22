@@ -1607,6 +1607,7 @@ function _ptRefreshDeckSearchGrid() {
 
         const img = document.createElement('img');
         img.src = card.imageUrl || CARD_BACK_URL;
+        img.alt = card.name || 'Card';
         img.className = 'pt-field-card';
         img.style.width = '100px';
         img.loading = 'lazy';
@@ -2659,6 +2660,7 @@ function ptRenderHand() {
 
         const img = document.createElement('img');
         img.src       = card.imageUrl || CARD_BACK_URL;
+        img.alt       = card.name || 'Card';
         img.className = 'pt-hand-card' + (i === ptSelectedCardIndex ? ' pt-card-selected' : '');
         img.title     = card.name;
         img.draggable = false; // prevent native img drag — wrapper handles drag

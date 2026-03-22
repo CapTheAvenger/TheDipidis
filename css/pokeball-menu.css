@@ -70,7 +70,8 @@ body {
     font-family: 'Nunito', sans-serif;
 }
 .menu-item:last-child { border-bottom: none; }
-.menu-item:hover { background: var(--bg-light); color: var(--pokemon-blue); padding-left: 26px; }
+.menu-item:hover,
+.menu-item:focus-visible { background: var(--bg-light); color: var(--pokemon-blue); padding-left: 26px; outline: 2px solid var(--pokemon-blue); outline-offset: -2px; }
 .menu-item.active { background: #f0f4f8; color: var(--pokemon-blue); border-left: 5px solid var(--pokemon-red); }
 
 .current-tab-badge {
@@ -289,7 +290,7 @@ body {
 .pt-btn-small {
     flex: 1; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px;
     font-size: 10px; font-weight: 700; cursor: pointer; padding: 3px 4px; transition: 0.15s;
-    font-family: inherit;
+    font-family: inherit; min-height: 44px;
 }
 .pt-btn-small:hover { background: #2a52be; border-color: var(--pokemon-blue); }
 
@@ -406,7 +407,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .pt-menu-btn.blue { background: #2980b9; border-color: #3498db; }
 .pt-menu-btn.blue:hover { background: #3498db; }
 .pt-status-btn {
-    width: 24px; height: 24px; border-radius: 50%; font-size: 13px; display: flex;
+    width: 44px; height: 44px; border-radius: 50%; font-size: 13px; display: flex;
     align-items: center; justify-content: center; background: #222; border: 1px solid #555;
     cursor: pointer; user-select: none; transition: transform 0.15s;
 }

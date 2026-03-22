@@ -127,6 +127,7 @@
                 // Load City League Analysis CSV
                 try {
                     const cityLeagueResponse = await fetch(BASE_PATH + 'city_league_analysis.csv');
+                    if (!cityLeagueResponse.ok) throw new Error(`HTTP ${cityLeagueResponse.status}`);
                     const cityLeagueText = await cityLeagueResponse.text();
                     const cityLeagueCards = parseCSV(cityLeagueText);
                     cityLeagueCards.forEach(card => {
@@ -160,6 +161,7 @@
                 // Load Tournament Scraper JH CSV
                 try {
                     const tournamentResponse = await fetch(BASE_PATH + 'tournament_cards_data_cards.csv');
+                    if (!tournamentResponse.ok) throw new Error(`HTTP ${tournamentResponse.status}`);
                     const tournamentText = await tournamentResponse.text();
                     const tournamentCards = parseCSV(tournamentText);
                     tournamentCards.forEach(card => {
@@ -430,6 +432,7 @@
                 // 2. Load formats from tournament scraper JH overview
                 try {
                     const response = await fetch(BASE_PATH + 'tournament_cards_data_overview.csv');
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     const csvText = await response.text();
                     
                     // Parse CSV (semicolon separated)
@@ -514,6 +517,7 @@
             try {
                 // Load pokemon_sets_mapping.csv to get proper set order (newest first)
                 const response = await fetch('pokemon_sets_mapping.csv');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const csvText = await response.text();
                 const lines = csvText.split('\n').filter(line => line.trim() && !line.startsWith('set_code'));
                 

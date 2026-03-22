@@ -145,7 +145,7 @@
 
         .tab-subtitle {
             font-size: 10px;
-            opacity: 0.7;
+            color: rgba(255,255,255,0.85);
             display: block;
             margin-top: 2px;
             line-height: 1;
@@ -606,24 +606,7 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
-        /* Card Search Input - einheitliches Styling */
-        .card-search-input {
-            width: 100%;
-            max-width: 500px;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: max(16px, 1em);
-            -webkit-appearance: none;
-            appearance: none;
-            box-sizing: border-box;
-        }
-        
-        .card-search-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+        /* Card Search Input - see .cards-section .card-search-input below */
         
         .footer {
             text-align: center;

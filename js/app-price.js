@@ -4,7 +4,7 @@
         // ==================== LIVE PRICE FETCHING ====================
         
         let proxyServerAvailable = null;  // null = not checked, true/false = checked
-        const PROXY_URL = 'http://localhost:8001';
+        const PROXY_URL = (typeof PRICE_PROXY_URL !== 'undefined' && PRICE_PROXY_URL) || 'http://localhost:8001';
         const livePriceCache = new Map();  // Cache fuer Live-Preise
         
         async function checkProxyServer() {

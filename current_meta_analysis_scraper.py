@@ -280,8 +280,8 @@ def _fetch_meta_play_decklist(url: str, archetype: str, card_db: CardDatabaseLoo
                                 'set_number': set_num
                             })
                 break
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("JSON parse attempt failed: %s", exc)
 
     if cards and sum(c['count'] for c in cards) == 60:
         return {

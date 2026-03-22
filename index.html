@@ -105,7 +105,7 @@
                     <div class="city-league-header">
                         <h2>🇯🇵 City League Development <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help"></button></h2>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-                            <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
+                            <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" aria-label="City League format" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
                                 <option value="M4">M4 - Ninja Spinner (Aktuell)</option>
                                 <option value="M3">M3 - Perfect Order (Archiv)</option>
                             </select>
@@ -124,7 +124,7 @@
                     <div class="header">
                         <h2>🦅 City League Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help"></button></h2>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-                            <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
+                            <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" aria-label="City League analysis format" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
                                 <option value="M4">M4 - Ninja Spinner (Aktuell)</option>
                                 <option value="M3">M3 - Perfect Order (Archiv)</option>
                             </select>
@@ -1584,14 +1584,14 @@
                             </div>
 
                             <div style="display:flex;gap:10px;align-items:center;margin-bottom:15px;flex-wrap:wrap;">
-                                <select id="collection-sort" onchange="setCollectionSort(this.value)"
+                                <select id="collection-sort" onchange="setCollectionSort(this.value)" aria-label="Collection sort order"
                                     style="padding:10px 12px;border:2px solid #667eea;border-radius:8px;font-size:14px;background:#fff;color:#333;min-width:260px;">
                                     <option value="set-newest" selected>Sort: Neueste Sets zuerst</option>
                                     <option value="element-set-newest">Sort: Element (innerhalb: neuestes Set zuerst)</option>
                                     <option value="pokedex">Sort: Pokedex Nummer</option>
                                     <option value="price-desc">Sort: Teuer nach guenstig</option>
                                 </select>
-                                <select id="collection-filter" onchange="setCollectionFilter(this.value)"
+                                <select id="collection-filter" onchange="setCollectionFilter(this.value)" aria-label="Collection filter"
                                     style="padding:10px 12px;border:2px solid #667eea;border-radius:8px;font-size:14px;background:#fff;color:#333;min-width:280px;">
                                     <option value="all" selected>Filter: Alle Karten</option>
                                     <option value="pokemon">Pokemon: Alle</option>
@@ -1671,7 +1671,7 @@
                                 <input type="text" id="wishlist-search" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." 
                                     style="flex: 1; min-width: 200px; padding: 12px; font-size: 16px; border: 2px solid #FF9800; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                                     oninput="filterWishlist()" aria-label="Search wishlist by card name or set">
-                                <select id="wishlist-set-filter" onchange="filterWishlist()"
+                                <select id="wishlist-set-filter" onchange="filterWishlist()" aria-label="Wishlist set filter"
                                     style="padding: 12px; font-size: 15px; border: 2px solid #FF9800; border-radius: 8px; background: white; cursor: pointer; min-width: 160px;">
                                     <option value="">📦 All Sets</option>
                                 </select>
@@ -1748,14 +1748,14 @@
                 </button>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <a href="#" onclick="showAuthModal('signup'); return false;" style="color: #3498db;">
+                    <button type="button" onclick="showAuthModal('signup')" style="color: #3498db; background: none; border: none; cursor: pointer; font: inherit;">
                         Don't have an account? <strong>Sign Up</strong>
-                    </a>
+                    </button>
                 </div>
                 <div style="text-align: center; margin-top: 10px;">
-                    <a href="#" id="password-reset-btn" style="color: #999; font-size: 14px;">
+                    <button type="button" id="password-reset-btn" style="color: #999; font-size: 14px; background: none; border: none; cursor: pointer; font: inherit;">
                         Forgot password?
-                    </a>
+                    </button>
                 </div>
             </div>
             
@@ -1783,9 +1783,9 @@
                 </form>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <a href="#" onclick="showAuthModal('signin'); return false;" style="color: #3498db;">
+                    <button type="button" onclick="showAuthModal('signin')" style="color: #3498db; background: none; border: none; cursor: pointer; font: inherit;">
                         Already have an account? <strong>Sign In</strong>
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1851,7 +1851,7 @@
             <div style="margin-bottom: 20px; padding: 20px; background: #e7f3ff; border-radius: 8px; border: 2px solid #b3d9ff;">
                 <h3 style="margin: 0 0 15px 0; color: #004085; font-size: 1.1em;">💾 Option 2: Compare with Own Saved Deck</h3>
                 <p style="color: #004085; margin-bottom: 10px; font-size: 0.95em;">Select a deck from your saved decks:</p>
-                <select id="savedDeckSelect" style="width: 100%; padding: 10px; border: 1px solid #b3d9ff; border-radius: 6px; font-size: 0.95em; margin-bottom: 10px;">
+                <select id="savedDeckSelect" aria-label="Select a saved deck" style="width: 100%; padding: 10px; border: 1px solid #b3d9ff; border-radius: 6px; font-size: 0.95em; margin-bottom: 10px;">
                     <option value="">-- Select a saved deck --</option>
                 </select>
                 <button class="btn btn-primary" onclick="compareWithSavedDeck()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">🎯 Compare with Selected Deck</button>
@@ -1932,7 +1932,7 @@
                 🌐 Online Multiplayer
             </div>
             <div style="display:flex; flex-direction:column; gap:12px;">
-                <select id="mpDeckSelect" class="control-input" style="width:100%; margin-bottom:4px; padding:10px; font-size:1rem; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05;">
+                <select id="mpDeckSelect" class="control-input" aria-label="Select deck for match" style="width:100%; margin-bottom:4px; padding:10px; font-size:1rem; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05;">
                     <option value="">-- Wähle ein Deck für das Match --</option>
                 </select>
                 <div style="margin:10px 0; text-align:center; font-weight:900; font-size:13px; color:#888; letter-spacing:1px;">ODER</div>
@@ -2373,11 +2373,11 @@
             <h2 style="margin-top: 0; color: #27ae60; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">⚔️ Playtest – My Decks</h2>
             <p style="color: #555; margin-bottom: 20px;">Choose a deck for each player, then start the match!</p>
             <div style="margin-bottom: 16px;">
-                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #3B4CCA;">Player 1 🔵</label>
+                <label for="myDeckSelectP1" style="display: block; font-weight: 700; margin-bottom: 6px; color: #3B4CCA;">Player 1 🔵</label>
                 <select id="myDeckSelectP1" style="width: 100%; padding: 10px 12px; border: 2px solid #3B4CCA; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
             </div>
             <div style="margin-bottom: 24px;">
-                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;">Player 2 🔴</label>
+                <label for="myDeckSelectP2" style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;">Player 2 🔴</label>
                 <select id="myDeckSelectP2" style="width: 100%; padding: 10px 12px; border: 2px solid #E3350D; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
             </div>
             <div style="display: flex; gap: 12px;">
@@ -2495,10 +2495,10 @@
                 <p style="font-size:12px;color:#888;margin:0 0 10px 0;">Wähle bis zu 4 Karten — Berechnung per Monte-Carlo-Simulation (10.000 Iterationen)</p>
                 <div id="comboTargetBadges" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;margin-bottom:10px;"></div>
                 <div class="combo-grid" style="margin-bottom:12px;">
-                    <select id="comboTarget1" onchange="onComboDropdownChange()"></select>
-                    <select id="comboTarget2" onchange="onComboDropdownChange()"></select>
-                    <select id="comboTarget3" onchange="onComboDropdownChange()"></select>
-                    <select id="comboTarget4" onchange="onComboDropdownChange()"></select>
+                    <select id="comboTarget1" aria-label="Combo target 1" onchange="onComboDropdownChange()"></select>
+                    <select id="comboTarget2" aria-label="Combo target 2" onchange="onComboDropdownChange()"></select>
+                    <select id="comboTarget3" aria-label="Combo target 3" onchange="onComboDropdownChange()"></select>
+                    <select id="comboTarget4" aria-label="Combo target 4" onchange="onComboDropdownChange()"></select>
                 </div>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                     <button class="btn-modern btn-primary" onclick="runComboCalculation()" style="font-weight:700;">📊 Berechne Chance</button>

@@ -4323,6 +4323,9 @@ h3:first-child {
     display: none;
 }
 
+/* Desktop: hide play drop zone (only visible on mobile) */
+.pt-play-drop { display: none; }
+
 /* ===================================================
    FIX: SCHWEBENDE KAMPF-BUTTONS (MOBILE)
    =================================================== */
@@ -4461,6 +4464,31 @@ h3:first-child {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+    }
+
+    /* ── Mobile Play Drop Zone (split discard) ── */
+    .pt-play-drop {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        min-width: 48px;
+        min-height: 52px;
+        background: rgba(0, 180, 50, 0.12);
+        border: 2px dashed rgba(0, 200, 60, 0.55);
+        border-radius: 8px;
+        margin-bottom: 4px;
+        color: rgba(0, 220, 60, 0.85);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        cursor: default;
+        transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .pt-play-drop.drag-over {
+        background: rgba(0, 200, 60, 0.32) !important;
+        border-color: #00c83c !important;
+        box-shadow: 0 0 14px rgba(0, 200, 60, 0.5);
+        color: #fff;
     }
 
     /* Bench slots/cards: about one-third smaller on mobile */

@@ -185,6 +185,8 @@ function _ptTouchTargetZoneFromElement(el) {
     if (id === 'ptStadiumZone') return 'stadium';
     if (id === 'ptPlayZone') return 'playzone';
     if (id === 'ptHandZone') return 'hand';
+    if (id === 'ptPlayDrop-p1') return 'p1-play';
+    if (id === 'ptPlayDrop-p2') return 'p2-play';
     if (id === 'ptDiscardPile-p1') return 'p1-discard';
     if (id === 'ptDiscardPile-p2') return 'p2-discard';
     if (id === 'ptLostPile-p1') return 'p1-lost';
@@ -245,7 +247,9 @@ function _ptMobileDropHandCard(handIndex, targetZone, clientX) {
     else if (targetZone === 'p2-bench2') ptClickZone('p2', 'bench2');
     else if (targetZone === 'p2-bench3') ptClickZone('p2', 'bench3');
     else if (targetZone === 'p2-bench4') ptClickZone('p2', 'bench4');
-    else if (targetZone === 'p1-discard') {
+    else if (targetZone === 'p1-play' || targetZone === 'p2-play') {
+        if (typeof ptPlayFromHand === 'function') ptPlayFromHand(handIndex, null);
+    } else if (targetZone === 'p1-discard') {
         const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
         if (c) { ptState.p1.discard.push(c); if (typeof ptLog === 'function') ptLog(`Discarded "${c.name}".`); }
         ptSelectedCardIndex = null;

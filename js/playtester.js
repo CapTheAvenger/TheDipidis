@@ -1908,7 +1908,9 @@ function ptHandleDrop(event, targetZone) {
         else if (targetZone === 'p2-bench2') ptClickZone('p2', 'bench2');
         else if (targetZone === 'p2-bench3') ptClickZone('p2', 'bench3');
         else if (targetZone === 'p2-bench4') ptClickZone('p2', 'bench4');
-        else if (targetZone === 'p1-discard') {
+        else if (targetZone === 'p1-play' || targetZone === 'p2-play') {
+            ptPlayFromHand(ptSelectedCardIndex, null);
+        } else if (targetZone === 'p1-discard') {
             const c = ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1)[0];
             if (c) { ptState['p1'].discard.push(c); ptLog(`Discarded "${c.name}".`); }
             ptSelectedCardIndex = null; ptRenderAll();

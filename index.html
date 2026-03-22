@@ -2026,7 +2026,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <div style="text-align:center;">
+                            <div style="text-align:center;" class="pt-discard-column">
+                                <div id="ptPlayDrop-p2" class="pt-dropzone pt-play-drop"
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-play')">▶ Play</div>
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p2">0</span>)</div>
                                 <div id="ptDiscardPile-p2" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-discard')" onclick="ptOpenOpponentPanel('discard')"></div>
@@ -2110,7 +2112,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <div style="text-align:center;">
+                            <div style="text-align:center;" class="pt-discard-column">
+                                <div id="ptPlayDrop-p1" class="pt-dropzone pt-play-drop"
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-play')">▶ Play</div>
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p1">0</span>)</div>
                                 <div id="ptDiscardPile-p1" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-discard')" onclick="ptOpenDiscard('p1')"></div>

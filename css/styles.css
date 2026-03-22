@@ -268,6 +268,24 @@
             padding: 10px;
         }
 
+        /* Skip-to-content link (N1 accessibility) */
+        .skip-to-content {
+            position: absolute;
+            top: -100%;
+            left: 16px;
+            z-index: 100000;
+            padding: 12px 24px;
+            background: var(--pokemon-blue, #3B4CCA);
+            color: #fff;
+            font-weight: 700;
+            border-radius: 0 0 8px 8px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .skip-to-content:focus {
+            top: 0;
+        }
+
         .card-skeleton {
             border-radius: 12px;
             overflow: hidden;
@@ -280,9 +298,19 @@
         .card-skeleton-image,
         .card-skeleton-line,
         .card-skeleton-actions span {
-            background: linear-gradient(90deg, #e7ecf3 0%, #f6f9fc 45%, #e7ecf3 100%);
-            background-size: 220% 100%;
-            animation: skeletonShimmer 1.2s linear infinite;
+            background: #e7ecf3;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-skeleton-image::after,
+        .card-skeleton-line::after,
+        .card-skeleton-actions span::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 45%, transparent 100%);
+            transform: translateX(-100%);
+            animation: skeletonShimmer 1.2s ease-in-out infinite;
         }
 
         .card-skeleton-image {
@@ -339,11 +367,8 @@
         }
 
         @keyframes skeletonShimmer {
-            from {
-                background-position: 100% 0;
-            }
             to {
-                background-position: -100% 0;
+                transform: translateX(100%);
             }
         }
 

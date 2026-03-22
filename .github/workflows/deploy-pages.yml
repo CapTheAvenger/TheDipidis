@@ -80,6 +80,12 @@ jobs:
           html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true -o _site/index.html _site/index.html || echo "::warning::HTML minification skipped"
           echo "✓ Minification complete"
 
+      - name: Optimize images
+        run: |
+          sudo apt-get install -y -qq optipng > /dev/null 2>&1
+          find _site/images -name '*.png' -exec optipng -o2 -quiet {} + 2>/dev/null || true
+          echo "✓ Image optimization complete"
+
       - name: Cache-bust asset references
         run: |
           HASH=$(git rev-parse --short HEAD)

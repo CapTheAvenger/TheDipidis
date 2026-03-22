@@ -4,6 +4,10 @@
  * ============================================================================
  */
 
+// XSS-safe escaping helpers (use global escapeHtml/escapeJsStr from app-utils if available)
+const _ptEscHtml = (v) => typeof escapeHtml === 'function' ? escapeHtml(v) : String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const _ptEscJs = (v) => typeof escapeJsStr === 'function' ? escapeJsStr(v) : String(v||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');
+
 const CARD_BACK_URL = "https://images.pokemontcg.io/card-back.png";
 
 let ptState = { p1: null, p2: null, stadium: [], stadiumPlayedBy: null, playZone: [] };
@@ -911,10 +915,11 @@ function ptRenderZoomPanel(filter) {
     const unique = all.filter(c => { if (seen.has(c.name)) return false; seen.add(c.name); return true; });
     grid.innerHTML = unique.map(c => {
         const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
-        const safeName = (c.name || '').replace(/'/g, "\\'");
-        return `<div style="cursor:pointer;text-align:center;" onclick="ptZoomViewCard('${safeImg}','${safeName}')" title="${c.name}">
+        const safeName = _ptEscJs(c.name);
+        const htmlName = _ptEscHtml(c.name);
+        return `<div style="cursor:pointer;text-align:center;" onclick="ptZoomViewCard('${safeImg}','${safeName}')" title="${htmlName}">
             <img src="${c.imageUrl||CARD_BACK_URL}" loading="lazy" style="width:86px;border-radius:6px;display:block;transition:transform .12s;" onerror="this.src='${CARD_BACK_URL}'" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
-            <div style="color:#ccc;font-size:8px;margin-top:2px;max-width:86px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name||''}</div>
+            <div style="color:#ccc;font-size:8px;margin-top:2px;max-width:86px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${htmlName}</div>
         </div>`;
     }).join('');
 }
@@ -2247,7 +2252,7 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
             // Also show all attached cards (energy/tools)
             const attachedHTML = cards.slice(1).map(ac => {
                 const ai = (ac.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
-                return `<img src="${ai}" style="width:38px;border-radius:4px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${ai}','${ac.name}')" title="${ac.name}">`;
+                return `<img src="${ai}" style="width:38px;border-radius:4px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${ai}','${_ptEscJs(ac.name)}')" title="${_ptEscHtml(ac.name)}">`;
             }).join(''); // legacy — superseded below
             // Energy & tool cards with ×-remove buttons
             const attachedWithIdx = cards
@@ -2255,8 +2260,8 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
                 .filter(({ ac }) => { const ct = (ac.cardType||'').toLowerCase(); return ct.includes('energy') || ct === 'tool' || (ct.includes('trainer') && ct !== 'supporter' && ct !== 'item' && ct !== 'stadium'); });
             const attachedRemovableHTML = attachedWithIdx.map(({ ac, idx }) => {
                 const ai = (ac.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
-                return `<div style="position:relative;display:inline-block;" title="${ac.name}">
-                    <img src="${ai}" style="width:38px;border-radius:4px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${ai}','${ac.name}')">
+                return `<div style="position:relative;display:inline-block;" title="${_ptEscHtml(ac.name)}">
+                    <img src="${ai}" style="width:38px;border-radius:4px;cursor:pointer;" onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${ai}','${_ptEscJs(ac.name)}')">
                     <button onclick="ptOppRemoveAttached('${opp}','${zoneId}',${idx})" style="position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#e74c3c;color:#fff;font-size:10px;line-height:15px;text-align:center;border:none;cursor:pointer;padding:0;z-index:10;" title="Entfernen">×</button>
                 </div>`;
             }).join('');
@@ -2264,9 +2269,9 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
                 <div style="font-weight:700;font-size:11px;color:#FFCB05;margin-bottom:8px;">${label}</div>
                 <div style="display:flex;gap:10px;align-items:flex-start;">
                     <img src="${safeImg}" style="width:80px;border-radius:7px;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.5);"
-                         onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${safeImg}','${card.name}')" title="Klick zum Vergrößern">
+                         onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${safeImg}','${_ptEscJs(card.name)}')" title="Klick zum Vergrößern">
                     <div style="flex:1;">
-                        <div style="font-weight:700;font-size:12px;margin-bottom:4px;">${card.name}</div>
+                        <div style="font-weight:700;font-size:12px;margin-bottom:4px;">${_ptEscHtml(card.name)}</div>
                         <div style="font-size:16px;font-weight:900;color:#ff6b6b;margin-bottom:6px;">💥 ${dmg} Schaden</div>
                         ${statusBtns}
                         <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:5px;">
@@ -2298,9 +2303,9 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
         el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">` +
             discard.map((c, i) => {
                 const si = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
-                return `<div style="position:relative;cursor:pointer;" title="${c.name}" onclick="ptViewCard('${si}','${c.name}')">
+                return `<div style="position:relative;cursor:pointer;" title="${_ptEscHtml(c.name)}" onclick="ptViewCard('${si}','${_ptEscJs(c.name)}')">
                     <img src="${c.imageUrl || CARD_BACK_URL}" style="width:80px;border-radius:6px;display:block;" onerror="this.src='${CARD_BACK_URL}'">
-                    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;padding:2px 3px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
+                    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);color:#fff;font-size:8px;padding:2px 3px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(c.name)}</div>
                 </div>`;
             }).join('') + '</div>';
 
@@ -2311,9 +2316,9 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
         el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">` +
             lz.map((c, i) => {
                 const si = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
-                return `<div style="position:relative;cursor:pointer;" title="${c.name}" onclick="ptViewCard('${si}','${c.name}')">
+                return `<div style="position:relative;cursor:pointer;" title="${_ptEscHtml(c.name)}" onclick="ptViewCard('${si}','${_ptEscJs(c.name)}')">
                     <img src="${c.imageUrl || CARD_BACK_URL}" style="width:80px;border-radius:6px;display:block;filter:grayscale(0.5);" onerror="this.src='${CARD_BACK_URL}'">
-                    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(80,0,80,0.8);color:#fff;font-size:8px;padding:2px 3px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
+                    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(80,0,80,0.8);color:#fff;font-size:8px;padding:2px 3px;border-radius:0 0 6px 6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(c.name)}</div>
                 </div>`;
             }).join('') + '</div>';
     }
@@ -2375,7 +2380,7 @@ function _ptRefreshDiscardGrid(player) {
                 html += `<div style="width:100%;font-size:10px;font-weight:900;color:#FFCB05;padding:4px 0 2px 2px;">${groupLabels[g] || '🃏 Andere'}</div>`;
             }
         }
-        html += `<div style="position:relative;cursor:pointer;" title="${c.name}">
+        html += `<div style="position:relative;cursor:pointer;" title="${_ptEscHtml(c.name)}">
             <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;"
                  onerror="this.src='${CARD_BACK_URL}'"
                  onclick="ptRouteFromDiscard('${player}',${i},'hand')"
@@ -2383,7 +2388,7 @@ function _ptRefreshDiscardGrid(player) {
                  oncontextmenu="event.preventDefault();ptRouteFromDiscard('${player}',${i},'lost')">
             <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);
                         color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;
-                        overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${c.name}</div>
+                        overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(c.name)}</div>
         </div>`;
     });
     grid.innerHTML = html;

@@ -29,7 +29,8 @@
     <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js" integrity="sha384-mnsnaLTN3WEA86glMYYaTgkNJQWvG0devy3NWP2FdPyJCge1wvNuJF10+iBqRdG7" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="container">
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
+    <div class="container" id="main-content">
         <div class="header" style="background: white; padding: 15px 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e1e8ed;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
 
@@ -2510,7 +2511,7 @@
     </div>
 
     <!-- Toast Notification Container -->
-    <div id="toast-container"></div>
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Context Help Modal -->
     <div id="helpModal" role="dialog" aria-modal="true" aria-label="Help" onclick="if(event.target===this)closeHelpModal()">

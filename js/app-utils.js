@@ -1,6 +1,12 @@
 // app-utils.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
+        const INTL_PRINTS_CACHE_MAX = 500;
+
+        function _intlCacheSet(key, value) {
+            if (internationalPrintsCache.size >= INTL_PRINTS_CACHE_MAX) internationalPrintsCache.clear();
+            internationalPrintsCache.set(key, value);
+        }
 
         // Get international prints for a specific card (set + number)
         function getInternationalPrintsForCard(set, number) {
@@ -23,14 +29,14 @@
             const baseCard = getIndexedCardBySetNumber(normalizedSet, normalizedNumber);
             
             if (!baseCard) {
-                internationalPrintsCache.set(cacheKey, []);
+                _intlCacheSet(cacheKey, []);
                 debugVersionSelectionLog(`[getInternationalPrintsForCard] Card not found: ${normalizedSet} ${normalizedNumber}`);
                 return [];
             }
             
             if (!baseCard.international_prints) {
                 const result = [baseCard];
-                internationalPrintsCache.set(cacheKey, result);
+                _intlCacheSet(cacheKey, result);
                 debugVersionSelectionLog(`[getInternationalPrintsForCard] No international prints for ${normalizedSet} ${normalizedNumber}, returning base card only`);
                 return result;
             }
@@ -65,7 +71,7 @@
             });
 
             const intPrintCards = Array.from(uniqueCards.values());
-            internationalPrintsCache.set(cacheKey, intPrintCards);
+            _intlCacheSet(cacheKey, intPrintCards);
             debugVersionSelectionLog(
                 `[getInternationalPrintsForCard] Found ${intPrintCards.length} international prints for ${baseCard.name_en || baseCard.name} (${normalizedSet} ${normalizedNumber}):`,
                 intPrintCards.map(c => `${c.set} ${c.number} (${c.rarity || 'NO RARITY'})`).join(', ')

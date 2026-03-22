@@ -127,12 +127,14 @@ def save_prices(prices: list, csv_path: str):
         elif key not in existing:
             existing[key] = price           # add entry even without price
 
-    with open(csv_path, "w", encoding="utf-8", newline="") as f:
+    tmp_path = csv_path + '.tmp'
+    with open(tmp_path, "w", encoding="utf-8", newline="") as f:
         fieldnames = ["name", "set", "number", "eur_price", "cardmarket_url", "last_updated"]
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         for key in sorted(existing.keys()):
             writer.writerow(existing[key])
+    os.replace(tmp_path, csv_path)
 
     logger.info("+ %s Preise gespeichert in %s", len(existing), csv_path)
 
@@ -144,7 +146,7 @@ def _parse_cardmarket_price(html: str, card_id: str) -> str:
     Extract EUR price from Cardmarket HTML.
     Priority: 7-day average > 30-day average > From price (EUR only).
     """
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, "lxml")
     dt_elements = soup.find_all("dt")
 
     # Priority 1: 7-day average (German or English label)
@@ -225,7 +227,7 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
 
                 resp = scraper.get(lt_url, timeout=15)
                 if resp.status_code == 200:
-                    soup = BeautifulSoup(resp.text, "html.parser")
+                    soup = BeautifulSoup(resp.text, "lxml")
                     table = soup.select_one("table.card-prints-versions")
                     if table:
                         # ROBUST: Vermeidet BeautifulSoup tbody-Verschluck-Bug

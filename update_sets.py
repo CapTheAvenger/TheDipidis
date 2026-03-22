@@ -101,7 +101,7 @@ def scrape_live_sets() -> dict:
             if not html:
                 print(f"[Update Sets]   No response from {url}")
                 continue
-            soup = BeautifulSoup(html, 'html.parser')
+            soup = BeautifulSoup(html, 'lxml')
 
             # Strategy 1: Look for <select> or <option> elements with set codes
             for select in soup.find_all('select'):

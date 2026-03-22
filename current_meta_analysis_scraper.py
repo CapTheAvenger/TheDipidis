@@ -113,7 +113,7 @@ def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, car
     if not html:
         return None
 
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, 'lxml')
     cards = []
 
     for a in soup.select('a[href*="/cards/"]'):
@@ -194,7 +194,7 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
     if not html:
         return []
 
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, 'lxml')
     deck_links = []
     seen_slugs = set()
 
@@ -223,7 +223,7 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
         if not deck_html:
             continue
 
-        dsoup = BeautifulSoup(deck_html, 'html.parser')
+        dsoup = BeautifulSoup(deck_html, 'lxml')
         list_hrefs = list(dict.fromkeys([a['href'] for a in dsoup.select('a[href*="/decklist"]')]))[:max_lists_per_deck]
 
         if not list_hrefs:
@@ -252,7 +252,7 @@ def _fetch_meta_play_decklist(url: str, archetype: str, card_db: CardDatabaseLoo
     if not html:
         return None
 
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, 'lxml')
     cards = []
 
     for script in soup.find_all('script'):
@@ -337,7 +337,7 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
         if not t_html:
             continue
 
-        tsoup = BeautifulSoup(t_html, 'html.parser')
+        tsoup = BeautifulSoup(t_html, 'lxml')
 
         title_tag = tsoup.find('title')
         title = title_tag.get_text(strip=True).replace('| Limitless', '').strip() if title_tag else "Unknown"

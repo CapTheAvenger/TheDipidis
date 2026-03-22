@@ -168,7 +168,7 @@ def scrape_all_cards_list(
             page_index += 1
             continue
 
-        soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html, "lxml")
         # Limitless does not use <tbody>, so select all <tr> that contain <td>
         rows = [tr for tr in soup.select("table tr") if tr.find("td")]
 
@@ -276,7 +276,7 @@ def _fetch_single_card(card: dict) -> dict:
         card["international_prints"] = f"{card['set']}-{card['number']}"
         return card
 
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, "lxml")
 
     # Image URL
     img = soup.select_one("img.card.shadow.resp-w")

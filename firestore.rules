@@ -1,7 +1,19 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // ══════════════════════════════════════════════════════════════════════
+    // HELPER FUNCTIONS (DRY)
+    // ══════════════════════════════════════════════════════════════════════
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isValidSize(maxBytes) {
+      return request.resource.size < maxBytes;
+    }
+
     // ══════════════════════════════════════════════════════════════════════
     // MULTIPLAYER PLAYTESTER GAMES
     // ══════════════════════════════════════════════════════════════════════
@@ -13,6 +25,7 @@ service cloud.firestore {
         && request.resource.data.host == request.auth.uid
         && request.resource.data.status == 'waiting'
         && request.resource.data.keys().hasAll(['host', 'status', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['roomCode', 'host', 'hostName', 'guest', 'guestName', 'state', 'status', 'createdAt', 'lastAction', '_syncVersion', 'lastActionDescription', 'lastActionBy', 'format', 'settings'])
         && request.resource.data.createdAt == request.time
         && request.resource.data.size() < 50;
       
@@ -36,7 +49,10 @@ service cloud.firestore {
                 && request.resource.data.guest == request.auth.uid))
         // createdAt darf nicht verändert werden
         && request.resource.data.createdAt == resource.data.createdAt
-        // Write-Rate-Limit: min 500ms zwischen Updates
+        // Nur erlaubte Felder
+        && request.resource.data.keys().hasOnly(['roomCode', 'host', 'hostName', 'guest', 'guestName', 'state', 'status', 'createdAt', 'lastAction', '_syncVersion', 'lastActionDescription', 'lastActionBy', 'endedAt', 'lastCoinFlip', 'format', 'settings'])
+        // Write-Rate-Limit: min 500ms zwischen Updates + Client muss lastAction setzen
+        && request.resource.data.lastAction == request.time
         && (!('lastAction' in resource.data) 
             || request.time > resource.data.lastAction + duration.value(500, 'ms'))
         && request.resource.data.size() < 50;
@@ -51,21 +67,18 @@ service cloud.firestore {
     // ══════════════════════════════════════════════════════════════════════
     
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId
-        && request.resource.size < 1048576; // 1MB max document size
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize(1048576); // 1MB max
     }
     
     match /users/{userId}/decks/{deckId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId
-        && request.resource.size < 524288; // 512KB max
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize(524288); // 512KB max
     }
     
     match /users/{userId}/favorites/{favoriteId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId
-        && request.resource.size < 524288;
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize(524288);
     }
 
     // ══════════════════════════════════════════════════════════════════════
@@ -73,21 +86,18 @@ service cloud.firestore {
     // ══════════════════════════════════════════════════════════════════════
 
     match /profiles/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId
-        && request.resource.size < 524288;
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize(524288);
     }
 
     match /collections/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId
-        && request.resource.size < 1048576;
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize(1048576);
     }
 
     match /wishlists/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId
-        && request.resource.size < 1048576;
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize(1048576);
     }
     
     // ══════════════════════════════════════════════════════════════════════

@@ -108,7 +108,7 @@ def extract_tournament_date_from_html(tournament_html: str, fallback_date: str =
     if not tournament_html:
         return fallback_date
 
-    soup = BeautifulSoup(tournament_html, 'html.parser')
+    soup = BeautifulSoup(tournament_html, 'lxml')
 
     for info in soup.select('.infobox-line'):
         text = info.get_text(' ', strip=True)
@@ -134,7 +134,7 @@ def extract_tournament_date_from_html(tournament_html: str, fallback_date: str =
 # ============================================================================
 def extract_cards_from_deck_html(deck_html: str, card_db: CardDatabaseLookup) -> list:
     """Delegate to shared extraction in card_scraper_shared."""
-    soup = BeautifulSoup(deck_html, 'html.parser')
+    soup = BeautifulSoup(deck_html, 'lxml')
     return extract_cards_from_decklist_soup(soup, card_db)
 
 def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, tournament_id: str, card_db, timeout: int) -> dict:
@@ -167,7 +167,7 @@ def process_tournament_decklists(
     card_db: CardDatabaseLookup
 ) -> list:
     tournament_date = tournament_info.get('date') or tournament_info.get('date_str', '')
-    soup = BeautifulSoup(tournament_html, 'html.parser')
+    soup = BeautifulSoup(tournament_html, 'lxml')
     deck_tasks = []
     
     rows = [tr for tr in soup.select('table tr') if tr.find('td')]

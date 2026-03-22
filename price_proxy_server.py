@@ -41,7 +41,7 @@ MIN_DELAY = 0.3
 def extract_eur_price_from_html(html: str, source: str) -> str:
     """Extract EUR price from HTML."""
     try:
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, 'lxml')
         
         if source == 'limitless':
             table = soup.find('table', class_='card-prints-versions')
@@ -112,7 +112,7 @@ def fetch_price():
         # Extract Cardmarket URL if from Limitless
         cardmarket_url = ''
         if source == 'limitless' and price:
-            soup = BeautifulSoup(response.text, 'html.parser')
+            soup = BeautifulSoup(response.text, 'lxml')
             table = soup.find('table', class_='card-prints-versions')
             if table:
                 current_row = table.find('tr', class_='current')

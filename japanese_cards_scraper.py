@@ -61,7 +61,7 @@ def fetch_page_bs4(url: str, retries: int = 3):
             resp.raise_for_status()
             if "Just a moment..." in resp.text or "cf-browser-verification" in resp.text:
                 raise Exception("Cloudflare Challenge Page detected")
-            return BeautifulSoup(resp.text, "html.parser")
+            return BeautifulSoup(resp.text, "lxml")
         except Exception as e:
             if attempt < retries:
                 time.sleep(1)

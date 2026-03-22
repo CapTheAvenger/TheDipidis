@@ -31,6 +31,7 @@ jobs:
           python3 -m py_compile card_scraper_shared.py
           python3 -m py_compile prepare_card_data.py
           python3 -m py_compile price_proxy_server.py
+          shopt -s nullglob
           for f in *_scraper*.py; do
             python3 -m py_compile "$f" || { echo "::error::Syntax error in $f"; exit 1; }
           done
@@ -41,6 +42,7 @@ jobs:
 
       - name: Validate JS syntax
         run: |
+          shopt -s nullglob
           for f in js/*.js; do
             terser "$f" --no-module -o /dev/null 2>/dev/null || { echo "::error::Syntax error in $f"; exit 1; }
           done
@@ -71,11 +73,12 @@ jobs:
 
       - name: Minify JS, CSS & HTML
         run: |
+          shopt -s nullglob
           for f in _site/js/*.js; do
-            terser "$f" --compress --mangle -o "$f" || { echo "::error::Minification failed for $f"; exit 1; }
+            terser "$f" --compress --mangle -o "${f}.min" && mv "${f}.min" "$f" || { echo "::error::Minification failed for $f"; exit 1; }
           done
           for f in _site/css/*.css; do
-            cleancss -o "$f" "$f" || { echo "::error::CSS minification failed for $f"; exit 1; }
+            cleancss -o "${f}.min" "$f" && mv "${f}.min" "$f" || { echo "::error::CSS minification failed for $f"; exit 1; }
           done
           html-minifier-terser --collapse-whitespace --remove-comments --minify-css true --minify-js true -o _site/index.html _site/index.html || echo "::warning::HTML minification skipped"
           echo "✓ Minification complete"
@@ -90,6 +93,9 @@ jobs:
         run: |
           HASH=$(git rev-parse --short HEAD)
           sed -i "s/\?v=[^\"]*/\?v=${HASH}/g" _site/index.html
+          for f in _site/js/*.js; do
+            sed -i "s/\?v=[^'\"]*/\?v=${HASH}/g" "$f"
+          done
           echo "✓ Cache-busted with hash ${HASH}"
 
       - name: Setup Pages

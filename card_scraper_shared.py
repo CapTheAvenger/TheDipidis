@@ -256,7 +256,7 @@ def fetch_page_bs4(url: str, timeout: int = 15, retries: int = 2) -> Optional[An
     html = safe_fetch_html(url, timeout, retries)
     if BeautifulSoup is None:
         return None
-    return BeautifulSoup(html, 'html.parser') if html else None
+    return BeautifulSoup(html, 'lxml') if html else None
 
 def fetch_page(url: str, timeout: int = 15) -> str:
     """Legacy wrapper fuer alte Skripte."""

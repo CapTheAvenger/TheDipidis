@@ -44,6 +44,13 @@ function ptShowContextMenu(cardInfo) {
     
     if (zone === 'hand') {
         // Karte auf der Hand
+        // Play-Button für Trainer-Karten (Supporter, Item, Tool, Stadium)
+        const ct = (card.cardType || card.supertype || '').toLowerCase();
+        const isTrainer = ct === 'supporter' || ct === 'item' || ct === 'tool' || ct === 'stadium'
+            || ct.includes('trainer') || ct.includes('supporter') || ct.includes('item');
+        if (isTrainer) {
+            buttons.push({ text: '▶ Karte spielen', action: () => { if (typeof ptPlayFromHand === 'function') ptPlayFromHand(index, null); } });
+        }
         buttons.push({ text: '🎯 Als Aktives spielen', action: () => _ptMobilePlayToActive(player, index) });
         buttons.push({ text: '🪑 Auf die Bank', action: () => _ptMobilePlayToBench(player, index) });
         buttons.push({ text: '🗑️ Ablegen', action: () => _ptMobileDiscard(player, index) });

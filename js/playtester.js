@@ -2799,6 +2799,18 @@ function ptRenderHand() {
         wrapper.appendChild(img);
         const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
         if (!isMobileViewport) {
+            // Play button (trainers: Supporter, Item, Tool, Stadium)
+            const ct = (card.cardType || '').toLowerCase();
+            const isTrainer = ct === 'supporter' || ct === 'item' || ct === 'tool' || ct === 'stadium'
+                || ct.includes('trainer') || ct.includes('supporter') || ct.includes('item');
+            if (isTrainer) {
+                const playBtn = document.createElement('button');
+                playBtn.className = 'pt-hand-play-btn';
+                playBtn.innerHTML = '▶';
+                playBtn.title     = 'Play Card';
+                playBtn.onclick   = e => ptPlayFromHand(i, e);
+                wrapper.appendChild(playBtn);
+            }
             const discBtn = document.createElement('button');
             discBtn.className = 'pt-hand-disc-btn';
             discBtn.innerHTML = '🗑️';
@@ -2875,6 +2887,40 @@ function ptDiscardFromHand(index, event) {
     ptLog(`Discarded "${card.name}" from hand.`);
     ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Discarded ' + card.name);
+}
+
+function ptPlayFromHand(index, event) {
+    if (event) event.stopPropagation();
+    if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole) return;
+    const player = ptCurrentPlayer;
+    const card = ptState[player].hand[index];
+    if (!card) return;
+    ptSaveState();
+    // Determine target zone: stadium cards go to stadium, rest to playzone
+    const ct = (card.cardType || '').toLowerCase();
+    ptState[player].hand.splice(index, 1);
+    if (ct === 'stadium') {
+        if (ptState.stadium.length > 0) {
+            const stadiumOwner = ptState.stadiumPlayedBy || player;
+            ptState[stadiumOwner].discard.push(ptState.stadium.pop());
+        }
+        ptState.stadium.push(card);
+        ptState.stadiumPlayedBy = player;
+        ptLog(`Played Stadium: "${card.name}".`);
+    } else {
+        ptState.playZone.push(card);
+        ptLog(`Played: "${card.name}".`);
+    }
+    ptSelectedCardIndex = null;
+    ptSetAttachMode(false);
+    ptRenderAll();
+    // Check trainer registry for automated effects
+    const _tKey = _ptGetAbilityKey(card);
+    const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
+    if (_tFn) {
+        setTimeout(() => _tFn(player, card), 50);
+    }
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
 }
 
 function ptTakePrize(player, index) {

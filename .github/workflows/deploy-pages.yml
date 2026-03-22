@@ -35,7 +35,7 @@ jobs:
         run: |
           npm install -g terser
           for f in js/*.js; do
-            terser "$f" --parse --no-module 2>/dev/null || { echo "::error::Syntax error in $f"; exit 1; }
+            terser "$f" --no-module -o /dev/null 2>/dev/null || { echo "::error::Syntax error in $f"; exit 1; }
           done
           echo "✓ All JS files pass syntax check"
 

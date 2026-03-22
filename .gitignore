@@ -68,6 +68,11 @@ index_OLD*.html
 # User-specific paths
 UPDATE_GITHUB_DATA.ps1
 
+# Node.js (only used for CI tooling tests)
+node_modules/
+package.json
+package-lock.json
+
 # Secrets & credentials
 .env
 .env.*

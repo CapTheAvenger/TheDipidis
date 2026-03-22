@@ -4418,7 +4418,7 @@ h3:first-child {
     }
     #p1-area > div > div[style*="bottom: 20px"][style*="left: 20px"],
     #p2-area > div > div[style*="bottom: 20px"][style*="left: 20px"] {
-        bottom: 170px !important;
+        bottom: 220px !important;
     }
 
     /* Shift bench slightly left to free right-side space */

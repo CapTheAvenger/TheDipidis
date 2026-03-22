@@ -3097,11 +3097,16 @@ const PT_TRAINER_REGISTRY = {};   // populated by _ptLoadCardActions
 
 // Map action-id → JS implementation
 const _PT_ABILITY_ACTIONS = {
-    'lunatone':  ptAbilityLunatone,
-    'drakloak':  ptAbilityDrakloak,
+    'lunatone':     ptAbilityLunatone,
+    'drakloak':     ptAbilityDrakloak,
+    'fezandipiti':  ptAbilityFezandipiti,
 };
 const _PT_TRAINER_ACTIONS = {
-    'boss-orders': ptTrainerBossOrders,
+    'boss-orders':      ptTrainerBossOrders,
+    'deck-search':      ptTrainerDeckSearch,
+    'lillie':           ptTrainerLillie,
+    'ultra-ball':       ptTrainerUltraBall,
+    'discard-retrieve': ptTrainerDiscardRetrieve,
 };
 
 let _ptCardActionsLoaded = false;
@@ -3236,6 +3241,132 @@ function ptFinishBossOrders(oppPlayer, benchZone) {
     ptSwapZones(oppPlayer, benchZone, null);
     const newActive = _ptGetTopPokemon(oppPlayer, 'active');
     ptLog(`📋 Boss's Orders: ${oppPlayer.toUpperCase()} ${_ptEscHtml(newActive?.name || '?')} → Aktiv erzwungen!`);
+}
+
+// Fezandipiti ex — Adrenaline Flush: draw 3 cards
+function ptAbilityFezandipiti(player, zoneId) {
+    let drawn = 0;
+    for (let i = 0; i < 3; i++) {
+        if (ptState[player].deck.length === 0) break;
+        ptState[player].hand.push(ptState[player].deck.pop());
+        drawn++;
+    }
+    if (drawn === 0) {
+        ptShowMessage('⛔ Deck ist leer!');
+        return false;
+    }
+    ptLog(`✨ Fezandipiti ex Ability: ${drawn} Karten gezogen.`);
+    return true;
+}
+
+// Trainer: open deck search (Dawn, Hilda, Poké Pad, Crispin, Buddy-Buddy Poffin)
+function ptTrainerDeckSearch(player, card) {
+    ptLog(`🔍 ${_ptEscHtml(card.name)}: Deck Search…`);
+    ptOpenDeckSearch(player);
+    return true;
+}
+
+// Lillie's Determination: shuffle hand into deck, draw 6 (or 8 if 6 prizes)
+function ptTrainerLillie(player, card) {
+    const hand = ptState[player].hand;
+    while (hand.length > 0) {
+        ptState[player].deck.push(hand.pop());
+    }
+    // Shuffle deck
+    const deck = ptState[player].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    const prizesLeft = ptState[player].prizes.length;
+    const drawCount = prizesLeft === 6 ? 8 : 6;
+    let drawn = 0;
+    for (let i = 0; i < drawCount; i++) {
+        if (deck.length === 0) break;
+        ptState[player].hand.push(deck.pop());
+        drawn++;
+    }
+    ptLog(`📖 Lillie's Determination: Hand ins Deck gemischt, ${drawn} Karten gezogen${prizesLeft === 6 ? ' (6 Prizes → 8!)' : ''}.`);
+    ptSaveState(); ptRenderAll();
+    return true;
+}
+
+// Ultra Ball: discard 2 cards from hand, then open deck search
+function ptTrainerUltraBall(player, card) {
+    const hand = ptState[player].hand;
+    if (hand.length < 2) {
+        ptShowMessage('⛔ Nicht genug Karten auf der Hand zum Ablegen!');
+        return false;
+    }
+    // Show modal to pick 2 cards to discard
+    let html = `<div style="background:#1a1a2e;border:2px solid #f39c12;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
+        <h3 style="color:#f39c12;margin-top:0;">🔴 Ultra Ball — 2 Karten ablegen</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle 2 Karten aus deiner Hand zum Ablegen.</p>
+        <div id="ptUBCards" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;">`;
+    hand.forEach((c, i) => {
+        html += `<div class="pt-ub-card" data-idx="${i}" style="cursor:pointer;text-align:center;transition:transform .15s;border:3px solid transparent;border-radius:8px;padding:2px;"
+                      onclick="ptUBToggle(this,${i})">
+            <img src="${c.imageUrl || CARD_BACK_URL}" style="width:62px;border-radius:6px;display:block;" onerror="this.src='${CARD_BACK_URL}'">
+            <div style="color:#fff;font-size:8px;margin-top:2px;max-width:62px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(c.name)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button id="ptUBConfirm" onclick="ptUBFinish('${player}')" disabled style="background:#f39c12;color:#fff;border:none;padding:8px 24px;border-radius:8px;cursor:pointer;font-weight:700;opacity:0.4;">Ablegen & Suchen (0/2)</button>
+        <button onclick="document.getElementById('ptUBModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;margin-left:8px;">Abbrechen</button>
+    </div>`;
+    let modal = document.getElementById('ptUBModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptUBModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.style.display = 'flex';
+    window._ptUBSelected = [];
+    ptLog(`🔴 Ultra Ball: Wähle 2 Karten zum Ablegen…`);
+    return true;
+}
+
+function ptUBToggle(el, idx) {
+    const sel = window._ptUBSelected;
+    const pos = sel.indexOf(idx);
+    if (pos >= 0) {
+        sel.splice(pos, 1);
+        el.style.borderColor = 'transparent';
+    } else if (sel.length < 2) {
+        sel.push(idx);
+        el.style.borderColor = '#f39c12';
+    }
+    const btn = document.getElementById('ptUBConfirm');
+    if (btn) {
+        btn.disabled = sel.length !== 2;
+        btn.style.opacity = sel.length === 2 ? '1' : '0.4';
+        btn.textContent = `Ablegen & Suchen (${sel.length}/2)`;
+    }
+}
+
+function ptUBFinish(player) {
+    const modal = document.getElementById('ptUBModal');
+    if (modal) modal.style.display = 'none';
+    const sel = (window._ptUBSelected || []).sort((a, b) => b - a);
+    sel.forEach(idx => {
+        const removed = ptState[player].hand.splice(idx, 1)[0];
+        if (removed) {
+            ptState[player].discard.push(removed);
+            ptLog(`🔴 Ultra Ball: ${_ptEscHtml(removed.name)} → Discard`);
+        }
+    });
+    delete window._ptUBSelected;
+    ptSaveState(); ptRenderAll();
+    setTimeout(() => ptOpenDeckSearch(player), 100);
+}
+
+// Night Stretcher: open discard pile to retrieve a card
+function ptTrainerDiscardRetrieve(player, card) {
+    ptLog(`♻️ ${_ptEscHtml(card.name)}: Discard durchsuchen…`);
+    ptOpenDiscard(player);
+    return true;
 }
 
 function _ptShowAbilityPickModal(player, cards, pickCount, pickDest, restDest, title) {

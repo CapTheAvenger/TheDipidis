@@ -17,6 +17,14 @@
       "action": "drakloak",
       "prints": ["ASC-159", "ASC-248", "PRE-72", "TWM-129"],
       "description": "Look at top 2 cards, take 1 to hand, put other on bottom"
+    },
+    {
+      "id": "fezandipiti-draw3",
+      "cardName": "Fezandipiti ex",
+      "abilityName": "Adrenaline Flush",
+      "action": "fezandipiti",
+      "prints": ["ASC-142", "ASC-288", "SFA-38", "SFA-84", "SFA-92", "MC-489", "M2A-114", "M2A-244"],
+      "description": "Draw 3 cards"
     }
   ],
 
@@ -29,14 +37,89 @@
       "prints": [
         "ASC-183", "ASC-256",
         "PAL-172", "PAL-248", "PAL-265",
-        "BRS-132",
-        "LOR-TG24",
-        "MEG-114",
+        "BRS-132", "LOR-TG24", "MEG-114",
         "RCL-154", "RCL-189", "RCL-200",
-        "SHF-58",
-        "SP-251"
+        "SHF-58", "SP-251"
       ],
       "description": "Switch opponent's bench Pokémon to active position"
+    },
+    {
+      "id": "dawn",
+      "cardName": "Dawn",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": ["PFL-87", "PFL-118", "PFL-129", "M2-77", "M2-106", "M2-115"],
+      "description": "Search deck for Basic + Stage 1 + Stage 2 Pokémon"
+    },
+    {
+      "id": "lillie-determination",
+      "cardName": "Lillie's Determination",
+      "action": "lillie",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-192", "MEG-119", "MEG-169", "MEG-184",
+        "MP1-23", "MC-729", "MP-7", "MBD-20", "MBG-21",
+        "M1L-62", "M1L-86", "M1L-91", "M2A-175"
+      ],
+      "description": "Shuffle hand into deck, draw 6 (or 8 if 6 prizes remain)"
+    },
+    {
+      "id": "hilda",
+      "cardName": "Hilda",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": ["WHT-84", "WHT-164", "WHT-171", "MC-718", "MP-51", "M2A-172"],
+      "description": "Search deck for Evolution Pokémon + Energy card"
+    },
+    {
+      "id": "poke-pad",
+      "cardName": "Poké Pad",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": ["ASC-198", "MP1-15", "M3-70", "M3-103", "MC-662"],
+      "description": "Search deck for a Pokémon without Rule Box"
+    },
+    {
+      "id": "ultra-ball",
+      "cardName": "Ultra Ball",
+      "action": "ultra-ball",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-213", "ASC-264", "MEG-131", "PAF-91",
+        "SVI-196", "SVP-245", "SVP-275", "CRZ-146",
+        "BRS-150", "BRS-186", "SLG-68", "SLG-68a",
+        "SUM-135", "SUM-161", "FCO-113", "ROS-93",
+        "FLF-99", "PLB-90", "PLF-122", "DEX-102", "MP1-14"
+      ],
+      "description": "Discard 2 cards from hand, then search deck for a Pokémon"
+    },
+    {
+      "id": "crispin",
+      "cardName": "Crispin",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": ["PRE-105", "PRE-171", "SCR-133", "SCR-164", "SVP-191", "MC-696"],
+      "description": "Search deck for up to 2 Basic Energy of different types"
+    },
+    {
+      "id": "buddy-buddy-poffin",
+      "cardName": "Buddy-Buddy Poffin",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-184", "MEG-167", "PRE-101", "TEF-144",
+        "TWM-223", "SVP-237", "SVP-244", "MC-648",
+        "MBD-10", "MBG-10", "M1S-81", "M2A-153"
+      ],
+      "description": "Search deck for up to 2 Basic Pokémon with 70 HP or less"
+    },
+    {
+      "id": "night-stretcher",
+      "cardName": "Night Stretcher",
+      "action": "discard-retrieve",
+      "triggerZone": "playzone",
+      "prints": ["ASC-196", "MEG-173", "SFA-61", "SSP-251"],
+      "description": "Put a Pokémon or Basic Energy from discard into hand"
     }
   ]
 }

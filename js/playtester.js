@@ -584,7 +584,7 @@ function ptRenderStartPhaseModal() {
     const modal = document.getElementById('ptStartPhaseModal');
     if (!modal) return;
 
-    let html = `<div style="background:#1a1a2e;border:2px solid #3B4CCA;border-radius:14px;padding:24px;width:min(98vw,960px);max-height:92vh;overflow-y:auto;color:#fff;">`;
+    let html = `<div style="background:#1a1a2e;border:2px solid #3B4CCA;border-radius:14px;padding:24px;width:min(98vw,720px);max-height:92vh;overflow-y:auto;color:#fff;">`;
     const isMP = ptState.isMultiplayer;
     const localRole = ptState.localRole;
     const mpHeaderText = isMP
@@ -596,7 +596,7 @@ function ptRenderStartPhaseModal() {
     html += `
         <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🃏 Setup Phase</h2>
         <p style="text-align:center;color:#ccc;margin-bottom:8px;">${mpHeaderText}</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+        <div class="pt-setup-players" style="display:flex;flex-direction:column;gap:20px;margin-bottom:20px;">
             ${ptRenderStartHandHTML('p1')}
             ${ptRenderStartHandHTML('p2')}
         </div>

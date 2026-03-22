@@ -25,6 +25,71 @@
       "action": "fezandipiti",
       "prints": ["ASC-142", "ASC-288", "SFA-38", "SFA-84", "SFA-92", "MC-489", "M2A-114", "M2A-244"],
       "description": "Draw 3 cards"
+    },
+    {
+      "id": "dudunsparce-run-away-draw",
+      "cardName": "Dudunsparce",
+      "abilityName": "Run Away Draw",
+      "action": "dudunsparce",
+      "prints": ["PRE-80", "TEF-129", "PAL-157", "PAL-229"],
+      "description": "Draw 3 cards, then shuffle this Pokémon and all attached cards into deck"
+    },
+    {
+      "id": "kadabra-psychic-draw",
+      "cardName": "Kadabra",
+      "abilityName": "Psychic Draw",
+      "action": "draw-2",
+      "prints": ["MEG-55"],
+      "description": "Draw 2 cards"
+    },
+    {
+      "id": "alakazam-psychic-draw",
+      "cardName": "Alakazam",
+      "abilityName": "Psychic Draw",
+      "action": "fezandipiti",
+      "prints": ["MEG-56", "MEP-3", "MEP-9"],
+      "description": "Draw 3 cards"
+    },
+    {
+      "id": "fan-rotom-fan-call",
+      "cardName": "Fan Rotom",
+      "abilityName": "Fan Call",
+      "action": "ability-deck-search",
+      "prints": ["ASC-171", "ASC-250", "PRE-85", "SCR-118"],
+      "description": "Search deck for up to 3 Colorless Pokémon with 100 HP or less"
+    },
+    {
+      "id": "mega-kangaskhan-run-errand",
+      "cardName": "Mega Kangaskhan ex",
+      "abilityName": "Run Errand",
+      "action": "draw-2",
+      "prints": ["MEG-104", "MEG-164", "MEG-182", "MEP-25"],
+      "description": "Draw 2 cards (Active Spot only)"
+    },
+    {
+      "id": "tatsugiri-attract-customers",
+      "cardName": "Tatsugiri",
+      "abilityName": "Attract Customers",
+      "action": "look-top-supporter",
+      "actionParam": 6,
+      "prints": ["PAF-127", "PAR-141", "SVI-62", "SVP-118", "TWM-131", "TWM-186"],
+      "description": "Look at top 6 cards, pick a Supporter to hand, shuffle rest back"
+    },
+    {
+      "id": "cynthias-gabite-champions-call",
+      "cardName": "Cynthia's Gabite",
+      "abilityName": "Champion's Call",
+      "action": "ability-deck-search",
+      "prints": ["ASC-110", "DRI-103"],
+      "description": "Search deck for a Cynthia's Pokémon"
+    },
+    {
+      "id": "ns-zoroark-trade",
+      "cardName": "N's Zoroark ex",
+      "abilityName": "Trade",
+      "action": "zoroark-trade",
+      "prints": ["ASC-137", "ASC-286", "JTG-175", "JTG-185", "JTG-189", "JTG-98"],
+      "description": "Discard 1 card from hand, draw 2 cards"
     }
   ],
 
@@ -128,6 +193,71 @@
       "triggerZone": "playzone",
       "prints": ["ASC-187", "MEG-116", "MEG-168"],
       "description": "Search deck for Basic Fighting Energy or Basic Fighting Pokémon"
+    },
+    {
+      "id": "team-rockets-petrel",
+      "cardName": "Team Rocket's Petrel",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": ["ASC-207", "DRI-176", "DRI-226"],
+      "description": "Search deck for a Trainer card"
+    },
+    {
+      "id": "ciphermaniacs-codebreaking",
+      "cardName": "Ciphermaniac's Codebreaking",
+      "action": "ciphermaniac",
+      "triggerZone": "playzone",
+      "prints": ["PRE-104", "TEF-145", "TEF-198"],
+      "description": "Search deck for 2 cards, put on top of deck"
+    },
+    {
+      "id": "wondrous-patch",
+      "cardName": "Wondrous Patch",
+      "action": "discard-retrieve",
+      "triggerZone": "playzone",
+      "prints": ["PFL-94"],
+      "description": "Attach Basic Psychic Energy from discard to benched Psychic Pokémon"
+    },
+    {
+      "id": "tool-scrapper",
+      "cardName": "Tool Scrapper",
+      "action": "tool-scrapper",
+      "triggerZone": "playzone",
+      "prints": ["ASC-212", "DRX-116", "RCL-168", "RCL-208", "WHT-85"],
+      "description": "Choose up to 2 Pokémon Tool cards in play and discard them"
+    },
+    {
+      "id": "pokegear-30",
+      "cardName": "Pokégear 3.0",
+      "action": "look-top-supporter",
+      "actionParam": 7,
+      "triggerZone": "playzone",
+      "prints": ["BLK-84", "HS-96", "SSH-174", "SVI-186", "UNB-182", "UNB-182a", "UNB-182b", "UNB-233"],
+      "description": "Look at top 7 cards, pick a Supporter to hand, shuffle rest back"
+    },
+    {
+      "id": "carmine",
+      "cardName": "Carmine",
+      "action": "carmine",
+      "triggerZone": "playzone",
+      "prints": ["PRE-103", "TWM-145", "TWM-204", "TWM-217"],
+      "description": "Discard hand, draw 5 cards"
+    },
+    {
+      "id": "energy-switch",
+      "cardName": "Energy Switch",
+      "action": "energy-switch",
+      "triggerZone": "playzone",
+      "prints": ["BLW-94", "CES-129", "CRZ-129", "DP-107", "E2-120", "FFI-89", "GEN-61", "HS-91", "LTR-112", "MEG-115", "PK-75", "RG-90", "ROS-109", "RS-82", "SF-84", "SIT-212", "SSH-162", "SUM-117", "SVI-173", "UF-84"],
+      "description": "Move a basic Energy from one of your Pokémon to another"
+    },
+    {
+      "id": "secret-box",
+      "cardName": "Secret Box",
+      "action": "secret-box",
+      "triggerZone": "playzone",
+      "prints": ["TWM-163"],
+      "description": "Discard 3 cards from hand, search deck for Item + Tool + Supporter + Stadium"
     }
   ]
 }

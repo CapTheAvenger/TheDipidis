@@ -3145,16 +3145,27 @@ const PT_TRAINER_REGISTRY = {};   // populated by _ptLoadCardActions
 
 // Map action-id → JS implementation
 const _PT_ABILITY_ACTIONS = {
-    'lunatone':     ptAbilityLunatone,
-    'drakloak':     ptAbilityDrakloak,
-    'fezandipiti':  ptAbilityFezandipiti,
+    'lunatone':             ptAbilityLunatone,
+    'drakloak':             ptAbilityDrakloak,
+    'fezandipiti':          ptAbilityFezandipiti,
+    'draw-2':               ptAbilityDraw2,
+    'dudunsparce':          ptAbilityDudunsparce,
+    'ability-deck-search':  ptAbilityDeckSearch,
+    'look-top-supporter':   ptAbilityLookTopSupporter,
+    'zoroark-trade':        ptAbilityZoroarkTrade,
 };
 const _PT_TRAINER_ACTIONS = {
-    'boss-orders':      ptTrainerBossOrders,
-    'deck-search':      ptTrainerDeckSearch,
-    'lillie':           ptTrainerLillie,
-    'ultra-ball':       ptTrainerUltraBall,
-    'discard-retrieve': ptTrainerDiscardRetrieve,
+    'boss-orders':          ptTrainerBossOrders,
+    'deck-search':          ptTrainerDeckSearch,
+    'lillie':               ptTrainerLillie,
+    'ultra-ball':           ptTrainerUltraBall,
+    'discard-retrieve':     ptTrainerDiscardRetrieve,
+    'ciphermaniac':         ptTrainerCiphermaniac,
+    'tool-scrapper':        ptTrainerToolScrapper,
+    'look-top-supporter':   ptTrainerLookTopSupporter,
+    'carmine':              ptTrainerCarmine,
+    'energy-switch':        ptTrainerEnergySwitch,
+    'secret-box':           ptTrainerSecretBox,
 };
 
 let _ptCardActionsLoaded = false;
@@ -3165,6 +3176,8 @@ function _ptLoadCardActions() {
     return fetch(`data/card_actions.json?_=${ts}`)
         .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(data => {
+            // Store raw JSON data for actionParam lookup
+            window._ptCardActionsData = data;
             (data.abilities || []).forEach(a => {
                 const fn = _PT_ABILITY_ACTIONS[a.action];
                 if (!fn) return;
@@ -3198,6 +3211,19 @@ function _ptGetTopPokemon(player, zoneId) {
 function _ptGetAbilityKey(card) {
     if (card.setCode && card.number) return `${card.setCode}-${card.number}`;
     return null;
+}
+
+// Lookup actionParam from card_actions.json for a given print key
+function _ptGetActionParam(printKey) {
+    const data = window._ptCardActionsData;
+    if (!data) return undefined;
+    const all = (data.abilities || []).concat(data.trainers || []);
+    for (const entry of all) {
+        if ((entry.prints || []).includes(printKey) && entry.actionParam !== undefined) {
+            return entry.actionParam;
+        }
+    }
+    return undefined;
 }
 
 // Lunatone — Sol Calc: discard a Basic Energy from hand, draw 3 cards
@@ -3305,6 +3331,154 @@ function ptAbilityFezandipiti(player, zoneId) {
     }
     ptLog(`✨ Fezandipiti ex Ability: ${drawn} Karten gezogen.`);
     return true;
+}
+
+// Draw 2 cards (Kadabra, Mega Kangaskhan ex)
+function ptAbilityDraw2(player, zoneId) {
+    let drawn = 0;
+    for (let i = 0; i < 2; i++) {
+        if (ptState[player].deck.length === 0) break;
+        ptState[player].hand.push(ptState[player].deck.pop());
+        drawn++;
+    }
+    if (drawn === 0) { ptShowMessage('⛔ Deck ist leer!'); return false; }
+    const topPoke = _ptGetTopPokemon(player, zoneId);
+    ptLog(`✨ ${_ptEscHtml(topPoke?.name || 'Ability')}: ${drawn} Karten gezogen.`);
+    return true;
+}
+
+// Dudunsparce — Run Away Draw: draw 3, then shuffle this Pokémon + attached into deck
+function ptAbilityDudunsparce(player, zoneId) {
+    if (ptState[player].deck.length === 0) { ptShowMessage('⛔ Deck ist leer!'); return false; }
+    let drawn = 0;
+    for (let i = 0; i < 3; i++) {
+        if (ptState[player].deck.length === 0) break;
+        ptState[player].hand.push(ptState[player].deck.pop());
+        drawn++;
+    }
+    ptLog(`✨ Dudunsparce Ability: ${drawn} Karten gezogen.`);
+    // Shuffle this Pokémon and all attached cards into deck
+    const cards = ptState[player].field[zoneId];
+    const count = cards.length;
+    while (cards.length > 0) {
+        ptState[player].deck.push(cards.pop());
+    }
+    ptState[player].damage[zoneId] = 0;
+    if (zoneId === 'active') ptState[player].status = [];
+    // Shuffle deck
+    const deck = ptState[player].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    ptLog(`✨ Dudunsparce + ${count - 1} Karten ins Deck gemischt.`);
+    return true;
+}
+
+// Ability: open deck search (Fan Rotom, Cynthia's Gabite)
+function ptAbilityDeckSearch(player, zoneId) {
+    const topPoke = _ptGetTopPokemon(player, zoneId);
+    ptLog(`🔍 ${_ptEscHtml(topPoke?.name || 'Ability')}: Deck Search…`);
+    ptOpenDeckSearch(player);
+    return true;
+}
+
+// Ability: Look at top N cards, pick Supporter (Tatsugiri)
+function ptAbilityLookTopSupporter(player, zoneId) {
+    const topPoke = _ptGetTopPokemon(player, zoneId);
+    const key = topPoke ? _ptGetAbilityKey(topPoke) : null;
+    const count = (key && _ptGetActionParam(key)) || 6;
+    _ptLookTopSupporterImpl(player, count, topPoke?.name || 'Ability');
+    return true;
+}
+
+// N's Zoroark ex — Trade: discard 1 from hand, draw 2
+function ptAbilityZoroarkTrade(player, zoneId) {
+    const hand = ptState[player].hand;
+    if (hand.length === 0) { ptShowMessage('⛔ Keine Karten auf der Hand!'); return false; }
+    // Show pick modal to choose 1 card to discard
+    let html = `<div style="background:#1a1a2e;border:2px solid #9b59b6;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
+        <h3 style="color:#9b59b6;margin-top:0;">🌑 N's Zoroark ex — Trade</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle 1 Karte zum Ablegen, dann ziehst du 2 Karten.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;">`;
+    hand.forEach((c, i) => {
+        html += `<div style="cursor:pointer;transition:transform .15s;" onclick="ptFinishZoroarkTrade('${player}',${i})"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${c.imageUrl || CARD_BACK_URL}" style="width:62px;border-radius:6px;display:block;" onerror="this.src='${CARD_BACK_URL}'">
+            <div style="color:#fff;font-size:8px;margin-top:2px;max-width:62px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(c.name)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button onclick="document.getElementById('ptZoroarkModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">Abbrechen</button>
+    </div>`;
+    let modal = document.getElementById('ptZoroarkModal');
+    if (!modal) { modal = document.createElement('div'); modal.id = 'ptZoroarkModal'; modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;'; document.body.appendChild(modal); }
+    modal.innerHTML = html; modal.style.display = 'flex';
+    ptLog(`🌑 N's Zoroark ex: Wähle 1 Karte zum Ablegen…`);
+    return true;
+}
+
+function ptFinishZoroarkTrade(player, handIdx) {
+    const modal = document.getElementById('ptZoroarkModal');
+    if (modal) modal.style.display = 'none';
+    const removed = ptState[player].hand.splice(handIdx, 1)[0];
+    if (removed) { ptState[player].discard.push(removed); ptLog(`🌑 Trade: "${removed.name}" → Discard.`); }
+    let drawn = 0;
+    for (let i = 0; i < 2; i++) {
+        if (ptState[player].deck.length === 0) break;
+        ptState[player].hand.push(ptState[player].deck.pop());
+        drawn++;
+    }
+    ptLog(`🌑 Trade: ${drawn} Karten gezogen.`);
+    ptSaveState(); ptRenderAll();
+}
+
+// Shared: Look at top N cards, highlight Supporters for selection
+function _ptLookTopSupporterImpl(player, count, sourceName) {
+    const deck = ptState[player].deck;
+    const take = Math.min(count, deck.length);
+    if (take === 0) { ptShowMessage('⛔ Deck ist leer!'); return; }
+    const topCards = deck.splice(deck.length - take, take).reverse();
+    let html = `<div style="background:#1a1a2e;border:2px solid #3498db;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:92vw;max-height:85vh;overflow-y:auto;">
+        <h3 style="color:#3498db;margin-top:0;">🔎 ${_ptEscHtml(sourceName)} — Top ${take} Karten</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle einen Supporter für die Hand. Alle anderen Karten werden ins Deck zurückgemischt.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:18px;">`;
+    topCards.forEach((c, i) => {
+        const ct = (c.cardType || c.supertype || '').toLowerCase();
+        const isSup = ct === 'supporter' || ct.includes('supporter');
+        const border = isSup ? '3px solid #27ae60' : '3px solid rgba(255,255,255,0.15)';
+        const glow = isSup ? 'box-shadow:0 0 14px rgba(39,174,96,0.6);' : 'filter:grayscale(0.5);opacity:0.6;';
+        const click = isSup ? `onclick="window._ptFinishLookTopSup(${i})"` : '';
+        const cursor = isSup ? 'cursor:pointer;' : 'cursor:default;';
+        html += `<div style="${cursor}transition:transform .15s;text-align:center;" ${click}
+                      ${isSup ? `onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"` : ''}>
+            <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:8px;border:${border};${glow}display:block;" onerror="this.src='${CARD_BACK_URL}'">
+            <div style="color:${isSup ? '#27ae60' : '#888'};font-size:9px;margin-top:3px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:${isSup ? '700' : '400'};">${_ptEscHtml(c.name)}${isSup ? ' ✅' : ''}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button onclick="window._ptFinishLookTopSup(-1)" style="background:#555;color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;">Keinen Supporter nehmen</button>
+    </div>`;
+    let modal = document.getElementById('ptLookTopSupModal');
+    if (!modal) { modal = document.createElement('div'); modal.id = 'ptLookTopSupModal'; modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99998;'; document.body.appendChild(modal); }
+    modal.innerHTML = html; modal.style.display = 'flex';
+
+    window._ptFinishLookTopSup = function(idx) {
+        modal.style.display = 'none';
+        if (idx >= 0 && idx < topCards.length) {
+            const picked = topCards.splice(idx, 1)[0];
+            ptState[player].hand.push(picked);
+            ptLog(`🔎 ${_ptEscHtml(sourceName)}: "${picked.name}" → Hand!`);
+        } else {
+            ptLog(`🔎 ${_ptEscHtml(sourceName)}: Kein Supporter gewählt.`);
+        }
+        // Shuffle remaining back into deck
+        topCards.forEach(c => deck.push(c));
+        for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+        ptLog(`🔎 Restliche Karten ins Deck zurückgemischt.`);
+        delete window._ptFinishLookTopSup;
+        ptSaveState(); ptRenderAll();
+    };
 }
 
 // Trainer: open deck search (Dawn, Hilda, Poké Pad, Crispin, Buddy-Buddy Poffin)
@@ -3415,6 +3589,190 @@ function ptTrainerDiscardRetrieve(player, card) {
     ptLog(`♻️ ${_ptEscHtml(card.name)}: Discard durchsuchen…`);
     ptOpenDiscard(player);
     return true;
+}
+
+// Ciphermaniac's Codebreaking: search deck for 2 cards, put on top
+function ptTrainerCiphermaniac(player, card) {
+    ptLog(`🔮 ${_ptEscHtml(card.name)}: Deck durchsuchen – 2 Karten oben drauf legen…`);
+    ptOpenDeckSearch(player);
+    return true;
+}
+
+// Tool Scrapper: open opponent panel (field tab) to remove tools
+function ptTrainerToolScrapper(player, card) {
+    ptLog(`🔧 ${_ptEscHtml(card.name)}: Gegner-Feld öffnen – Tools entfernen…`);
+    ptOpenOpponentPanel('field');
+    return true;
+}
+
+// Trainer: Look at top N cards, pick Supporter (Pokégear 3.0)
+function ptTrainerLookTopSupporter(player, card) {
+    const key = _ptGetAbilityKey(card);
+    const count = (key && _ptGetActionParam(key)) || 7;
+    _ptLookTopSupporterImpl(player, count, card.name || 'Trainer');
+    return true;
+}
+
+// Carmine: discard entire hand, draw 5
+function ptTrainerCarmine(player, card) {
+    const hand = ptState[player].hand;
+    const discCount = hand.length;
+    while (hand.length > 0) {
+        ptState[player].discard.push(hand.pop());
+    }
+    let drawn = 0;
+    for (let i = 0; i < 5; i++) {
+        if (ptState[player].deck.length === 0) break;
+        ptState[player].hand.push(ptState[player].deck.pop());
+        drawn++;
+    }
+    ptLog(`🔥 Carmine: ${discCount} Karten abgelegt, ${drawn} Karten gezogen.`);
+    ptSaveState(); ptRenderAll();
+    return true;
+}
+
+// Energy Switch: move a basic energy from one Pokémon to another
+function ptTrainerEnergySwitch(player, card) {
+    // Collect all zones that have energy attached
+    const zones = ['active','bench0','bench1','bench2','bench3','bench4'];
+    const withEnergy = [];
+    zones.forEach(z => {
+        const cards = ptState[player].field[z];
+        if (!cards || cards.length === 0) return;
+        const hasBasicEnergy = cards.some(c => (c.cardType || '').toLowerCase() === 'basic energy');
+        if (hasBasicEnergy) {
+            const topPoke = _ptGetTopPokemon(player, z);
+            withEnergy.push({ zone: z, poke: topPoke, cards });
+        }
+    });
+    if (withEnergy.length === 0) { ptShowMessage('⛔ Keine Pokémon mit Basic Energy!'); return false; }
+
+    // Step 1: pick source Pokémon
+    let html = `<div style="background:#1a1a2e;border:2px solid #f1c40f;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
+        <h3 style="color:#f1c40f;margin-top:0;">⚡ Energy Switch — Quelle wählen</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Von welchem Pokémon soll die Energy verschoben werden?</p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
+    withEnergy.forEach(({ zone, poke }) => {
+        html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;"
+                      onclick="window._ptESPickSource('${zone}')"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${poke?.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #f1c40f;" onerror="this.src='${CARD_BACK_URL}'">
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(poke?.name || zone)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button onclick="document.getElementById('ptESModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">Abbrechen</button>
+    </div>`;
+    let modal = document.getElementById('ptESModal');
+    if (!modal) { modal = document.createElement('div'); modal.id = 'ptESModal'; modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;'; document.body.appendChild(modal); }
+    modal.innerHTML = html; modal.style.display = 'flex';
+
+    window._ptESPickSource = function(srcZone) {
+        // Collect energy cards in source zone
+        const srcCards = ptState[player].field[srcZone];
+        const energies = srcCards.map((c, i) => ({ c, i })).filter(({ c }) => (c.cardType || '').toLowerCase() === 'basic energy');
+        if (energies.length === 1) {
+            _ptESPickTarget(player, srcZone, energies[0].i);
+        } else {
+            // Pick which energy
+            let eHtml = `<div style="background:#1a1a2e;border:2px solid #f1c40f;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
+                <h3 style="color:#f1c40f;margin-top:0;">⚡ Welche Energy verschieben?</h3>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:18px;">`;
+            energies.forEach(({ c, i }) => {
+                eHtml += `<div style="cursor:pointer;transition:transform .15s;" onclick="window._ptESPickEnergy(${i})"
+                              onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+                    <img src="${c.imageUrl || CARD_BACK_URL}" style="width:62px;border-radius:6px;" onerror="this.src='${CARD_BACK_URL}'">
+                    <div style="color:#fff;font-size:8px;margin-top:2px;">${_ptEscHtml(c.name)}</div>
+                </div>`;
+            });
+            eHtml += `</div></div>`;
+            modal.innerHTML = eHtml;
+            window._ptESPickEnergy = function(cardIdx) { _ptESPickTarget(player, srcZone, cardIdx); };
+        }
+    };
+    return true;
+}
+
+function _ptESPickTarget(player, srcZone, energyIdx) {
+    const zones = ['active','bench0','bench1','bench2','bench3','bench4'];
+    const targets = zones.filter(z => z !== srcZone && ptState[player].field[z].length > 0);
+    if (targets.length === 0) { ptShowMessage('⛔ Kein anderes Pokémon als Ziel!'); return; }
+    const modal = document.getElementById('ptESModal');
+    let html = `<div style="background:#1a1a2e;border:2px solid #27ae60;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
+        <h3 style="color:#27ae60;margin-top:0;">⚡ Energy Switch — Ziel wählen</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
+    targets.forEach(z => {
+        const poke = _ptGetTopPokemon(player, z);
+        html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;"
+                      onclick="window._ptESFinish('${srcZone}',${energyIdx},'${z}')"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${poke?.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #27ae60;" onerror="this.src='${CARD_BACK_URL}'">
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;">${_ptEscHtml(poke?.name || z)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button onclick="document.getElementById('ptESModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">Abbrechen</button>
+    </div>`;
+    if (modal) { modal.innerHTML = html; }
+
+    window._ptESFinish = function(sz, eIdx, tz) {
+        if (modal) modal.style.display = 'none';
+        const energy = ptState[player].field[sz].splice(eIdx, 1)[0];
+        if (energy) {
+            ptState[player].field[tz].push(energy);
+            ptLog(`⚡ Energy Switch: "${energy.name}" von ${sz} → ${tz}.`);
+        }
+        ptSaveState(); ptRenderAll();
+    };
+}
+
+// Secret Box: discard 3 from hand, then open deck search
+function ptTrainerSecretBox(player, card) {
+    const hand = ptState[player].hand;
+    if (hand.length < 3) { ptShowMessage('⛔ Nicht genug Karten auf der Hand (min. 3)!'); return false; }
+    let html = `<div style="background:#1a1a2e;border:2px solid #8e44ad;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
+        <h3 style="color:#8e44ad;margin-top:0;">📦 Secret Box — 3 Karten ablegen</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle 3 Karten aus deiner Hand zum Ablegen.</p>
+        <div id="ptSBCards" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;">`;
+    hand.forEach((c, i) => {
+        html += `<div class="pt-sb-card" data-idx="${i}" style="cursor:pointer;text-align:center;transition:transform .15s;border:3px solid transparent;border-radius:8px;padding:2px;"
+                      onclick="ptSBToggle(this,${i})">
+            <img src="${c.imageUrl || CARD_BACK_URL}" style="width:62px;border-radius:6px;display:block;" onerror="this.src='${CARD_BACK_URL}'">
+            <div style="color:#fff;font-size:8px;margin-top:2px;max-width:62px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(c.name)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button id="ptSBConfirm" onclick="ptSBFinish('${player}')" disabled style="background:#8e44ad;color:#fff;border:none;padding:8px 24px;border-radius:8px;cursor:pointer;font-weight:700;opacity:0.4;">Ablegen & Suchen (0/3)</button>
+        <button onclick="document.getElementById('ptSBModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;margin-left:8px;">Abbrechen</button>
+    </div>`;
+    let modal = document.getElementById('ptSBModal');
+    if (!modal) { modal = document.createElement('div'); modal.id = 'ptSBModal'; modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;'; document.body.appendChild(modal); }
+    modal.innerHTML = html; modal.style.display = 'flex';
+    window._ptSBSelected = [];
+    ptLog(`📦 Secret Box: Wähle 3 Karten zum Ablegen…`);
+    return true;
+}
+
+function ptSBToggle(el, idx) {
+    const sel = window._ptSBSelected;
+    const pos = sel.indexOf(idx);
+    if (pos >= 0) { sel.splice(pos, 1); el.style.borderColor = 'transparent'; }
+    else if (sel.length < 3) { sel.push(idx); el.style.borderColor = '#8e44ad'; }
+    const btn = document.getElementById('ptSBConfirm');
+    if (btn) { btn.disabled = sel.length !== 3; btn.style.opacity = sel.length === 3 ? '1' : '0.4'; btn.textContent = `Ablegen & Suchen (${sel.length}/3)`; }
+}
+
+function ptSBFinish(player) {
+    const modal = document.getElementById('ptSBModal');
+    if (modal) modal.style.display = 'none';
+    const sel = (window._ptSBSelected || []).sort((a, b) => b - a);
+    sel.forEach(idx => {
+        const removed = ptState[player].hand.splice(idx, 1)[0];
+        if (removed) { ptState[player].discard.push(removed); ptLog(`📦 Secret Box: ${_ptEscHtml(removed.name)} → Discard`); }
+    });
+    delete window._ptSBSelected;
+    ptSaveState(); ptRenderAll();
+    setTimeout(() => ptOpenDeckSearch(player), 100);
 }
 
 function _ptShowAbilityPickModal(player, cards, pickCount, pickDest, restDest, title) {

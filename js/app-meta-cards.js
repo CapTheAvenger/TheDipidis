@@ -1329,7 +1329,7 @@
         async function patchMetaStats() {
             try {
                 // Load format from settings
-                let currentFormat = 'SVI-PFL'; // Default fallback
+                let currentFormat = 'SVI-ASC'; // Default fallback
                 try {
                     const settingsResponse = await fetch('./current_meta_analysis_settings.json?t=' + Date.now());
                     if (settingsResponse.ok) {

@@ -460,10 +460,10 @@
                 // 3. Guarantee baseline known formats are available when data exists but misses labels.
                 KNOWN_META_FORMAT_CODES.forEach(formatCode => uniqueFormats.add(formatCode));
                 
-                // Map Meta Play! and Meta Live to SVI-PFL (don't show them separately)
+                // Map Meta Play! and Meta Live to SVI-ASC (don't show them separately)
                 const formatMapping = {
-                    'Meta Play!': 'SVI-PFL',
-                    'Meta Live': 'SVI-PFL'
+                    'Meta Play!': 'SVI-ASC',
+                    'Meta Live': 'SVI-ASC'
                 };
                 
                 // Create formats array sorted (newest to oldest - reverse alphabetical for SVI-XXX format)

@@ -523,34 +523,51 @@ function ptShowRadialMenu(touch, player, zone) {
     const hasCards = ptState[player] && ptState[player].field[zone] && ptState[player].field[zone].length > 0;
     if (!hasCards) { return; }
 
-    // Check if hand has energy cards
-    const hasEnergy = ptState[player].hand.some(c => {
-        const ct = (c.cardType || c.supertype || '').toLowerCase();
-        return ct.includes('energy');
-    });
-    // Check if hand has tool cards
-    const hasTool = ptState[player].hand.some(c => {
-        const ct = (c.cardType || c.supertype || '').toLowerCase();
-        return ct === 'tool' || ct.includes('tool');
-    });
-    // Check if zone has energy cards (for energy discard)
-    const zoneHasEnergy = ptState[player].field[zone].some(c => {
-        const ct = (c.cardType || c.supertype || '').toLowerCase();
-        return ct.includes('energy');
-    });
+    const isOpp = (typeof ptCurrentPlayer !== 'undefined') && player !== ptCurrentPlayer;
 
-    if (hasEnergy) actions.push({ icon: '⚡', label: 'Energy', action: () => _ptRadialAttachEnergy(player, zone) });
-    if (hasTool) actions.push({ icon: '🔧', label: 'Tool', action: () => _ptRadialAttachTool(player, zone) });
-    if (zoneHasEnergy) actions.push({ icon: '⚡🗑️', label: 'E.Disc', action: () => { if (typeof ptEnergyDiscard === 'function') ptEnergyDiscard(player, zone); } });
-    actions.push({ icon: '💥', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); } });
-    if (zone === 'active') {
-        actions.push({ icon: '↩️', label: 'Retreat', action: () => { if (typeof ptRetreat === 'function') ptRetreat(player, zone); } });
+    if (isOpp) {
+        // ── Opponent zone: damage, KO, discard, switch, energy discard ──
+        const zoneHasEnergy = ptState[player].field[zone].some(c => {
+            const ct = (c.cardType || c.supertype || '').toLowerCase();
+            return ct.includes('energy');
+        });
+        actions.push({ icon: '💥', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Dmg +10 opp'); } });
+        actions.push({ icon: '☠️', label: 'K.O.', action: () => { if (typeof ptOppKnockOutZone === 'function') ptOppKnockOutZone(player, zone); } });
+        actions.push({ icon: '🗑️', label: 'Discard', action: () => { if (typeof ptOppDiscardZone === 'function') ptOppDiscardZone(player, zone); } });
+        if (zoneHasEnergy) actions.push({ icon: '⚡🗑️', label: 'E.Disc', action: () => { if (typeof ptEnergyDiscard === 'function') ptEnergyDiscard(player, zone); } });
+        if (zone !== 'active') {
+            actions.push({ icon: '⭐', label: 'Aktiv', action: () => { if (typeof ptOppSetActive === 'function') ptOppSetActive(player, zone); } });
+        }
+        actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
+        actions.push({ icon: '⚙️', label: 'Menü', action: () => { if (typeof ptOpenOpponentPanel === 'function') ptOpenOpponentPanel('field', zone); } });
     } else {
-        actions.push({ icon: '🔄', label: 'Aktiv', action: () => { _ptMobileSwitchToActive(player, zone); } });
+        // ── Own zone: attach, damage, retreat, hand, discard, menu ──
+        const hasEnergy = ptState[player].hand.some(c => {
+            const ct = (c.cardType || c.supertype || '').toLowerCase();
+            return ct.includes('energy');
+        });
+        const hasTool = ptState[player].hand.some(c => {
+            const ct = (c.cardType || c.supertype || '').toLowerCase();
+            return ct === 'tool' || ct.includes('tool');
+        });
+        const zoneHasEnergy = ptState[player].field[zone].some(c => {
+            const ct = (c.cardType || c.supertype || '').toLowerCase();
+            return ct.includes('energy');
+        });
+
+        if (hasEnergy) actions.push({ icon: '⚡', label: 'Energy', action: () => _ptRadialAttachEnergy(player, zone) });
+        if (hasTool) actions.push({ icon: '🔧', label: 'Tool', action: () => _ptRadialAttachTool(player, zone) });
+        if (zoneHasEnergy) actions.push({ icon: '⚡🗑️', label: 'E.Disc', action: () => { if (typeof ptEnergyDiscard === 'function') ptEnergyDiscard(player, zone); } });
+        actions.push({ icon: '💥', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); } });
+        if (zone === 'active') {
+            actions.push({ icon: '↩️', label: 'Retreat', action: () => { if (typeof ptRetreat === 'function') ptRetreat(player, zone); } });
+        } else {
+            actions.push({ icon: '🔄', label: 'Aktiv', action: () => { _ptMobileSwitchToActive(player, zone); } });
+        }
+        actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
+        actions.push({ icon: '🗑️', label: 'Ablegen', action: () => { discardTopCard(player, zone, null); } });
+        actions.push({ icon: '⚙️', label: 'Menü', action: () => _ptRadialOpenContextMenu(player, zone) });
     }
-    actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
-    actions.push({ icon: '🗑️', label: 'Ablegen', action: () => { discardTopCard(player, zone, null); } });
-    actions.push({ icon: '⚙️', label: 'Menü', action: () => _ptRadialOpenContextMenu(player, zone) });
 
     // Arrange in a circle
     const radius = 65;

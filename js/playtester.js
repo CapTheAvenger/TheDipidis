@@ -1327,20 +1327,12 @@ function ptShuffleRemainingLookedCardsIntoDeck() {
 // Ensure only the ACTIVE player's area captures pointer events.
 // In MP: local player can only interact with their own side when it's their turn.
 function ptUpdateAreaPointerEvents() {
+    // Allow interaction with both player areas at all times for maximum game flow.
+    // Guards in ptClickZone / ptPlayFromHand / ptDraw1 etc. still prevent illegal moves.
     const p1Inner = document.querySelector('#p1-area > div');
     const p2Inner = document.querySelector('#p2-area > div');
-
-    if (ptState.isMultiplayer && ptState.localRole) {
-        const myTurn = ptCurrentPlayer === ptState.localRole;
-        const lr = ptState.localRole;
-        // Local player's area: enabled only on their turn. Opponent area: always disabled.
-        if (p1Inner) p1Inner.style.pointerEvents = (lr === 'p1' && myTurn) ? 'auto' : 'none';
-        if (p2Inner) p2Inner.style.pointerEvents = (lr === 'p2' && myTurn) ? 'auto' : 'none';
-    } else {
-        // Singleplayer: active player's area enabled, other disabled
-        if (p1Inner) p1Inner.style.pointerEvents = ptCurrentPlayer === 'p1' ? 'auto' : 'none';
-        if (p2Inner) p2Inner.style.pointerEvents = ptCurrentPlayer === 'p2' ? 'auto' : 'none';
-    }
+    if (p1Inner) p1Inner.style.pointerEvents = 'auto';
+    if (p2Inner) p2Inner.style.pointerEvents = 'auto';
 }
 
 function ptDraw1(playerOverride = null) {
@@ -1867,15 +1859,17 @@ function ptClickZone(player, zoneId) {
     // MP safety: block playing cards as the opponent
     if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole && ptSelectedCardIndex !== null) return;
 
-    // Clicking on opponent's zone
+    // Clicking on opponent's zone — ptMobileCardTap handles radial menu on mobile
     if (player === opp) {
         const cards = ptState[player].field[zoneId];
         if (cards && cards.length > 0) {
-            // Zoom the top Pokémon card (not energy/tool)
-            const c = _topCard(cards);
-            ptViewCard(c.imageUrl || CARD_BACK_URL, c.name || '');
-            // Open opponent panel focused on field/this zone
-            ptOpenOpponentPanel('field', zoneId);
+            // Desktop: zoom + open opponent panel
+            if (!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches)) {
+                const c = _topCard(cards);
+                ptViewCard(c.imageUrl || CARD_BACK_URL, c.name || '');
+                ptOpenOpponentPanel('field', zoneId);
+            }
+            // Mobile: ptMobileCardTap (called next in onclick chain) will handle the radial menu
         }
         return;
     }
@@ -2934,6 +2928,7 @@ function ptOppDiscardZone(opp, zoneId) {
     ptLog(`🗑️ ${zoneId} (${opp}) → Discard (${count} Karten).`);
     ptRenderAll();
     ptRefreshOpponentField(opp);
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp discard: ' + zoneId);
 }
 
 function ptOppSetActive(opp, zoneId) {
@@ -2951,6 +2946,7 @@ function ptOppSetActive(opp, zoneId) {
     ptLog(`🔄 ${opp}: ${zoneId} wird neues Active-Pokémon.`);
     ptRenderAll();
     ptRenderOpponentPanel(opp, 'field');
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp set active: ' + zoneId);
 }
 
 function ptOppRemoveAttached(opp, zoneId, cardIndex) {
@@ -2961,6 +2957,7 @@ function ptOppRemoveAttached(opp, zoneId, cardIndex) {
     ptLog(`🗑️ ${removed.name} von ${opp.toUpperCase()} ${zoneId} entfernt → Discard.`);
     ptRenderAll();
     ptRefreshOpponentField(opp);
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp remove: ' + removed.name);
 }
 
 function ptRouteFromDiscard(player, index, destination) {
@@ -3025,7 +3022,7 @@ function ptRenderAll() {
         const pileEl = document.getElementById(`ptDiscardPile-${p}`);
         if (pileEl) {
             const isOpp = p !== ptCurrentPlayer;
-            const discardClick = isOpp ? `ptOpenOpponentPanel('discard');event.stopPropagation()` : `ptOpenDiscard('${p}');event.stopPropagation()`;
+            const discardClick = `ptOpenDiscard('${p}');event.stopPropagation()`;
             if (ptState[p].discard.length > 0) {
                 const top = ptState[p].discard[ptState[p].discard.length - 1];
                 pileEl.innerHTML = `<img src="${top.imageUrl || CARD_BACK_URL}" class="pt-field-card"

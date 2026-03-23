@@ -425,6 +425,14 @@ function listenToGameState(gameId) {
                     }
                 }
 
+                // Prize pick needed: if opponent KO'd a Pokémon and we need to take prizes
+                if (ptState.mpPrizePickNeeded && ptState.mpPrizePickNeeded.player === ptState.localRole && data.lastActionBy !== mpRole) {
+                    const ppn = ptState.mpPrizePickNeeded;
+                    if (ptState[ppn.player].prizes.length > 0 && typeof ptOpenPrizePicker === 'function') {
+                        setTimeout(() => ptOpenPrizePicker(ppn.player, ppn.count, ppn.player), 250);
+                    }
+                }
+
                 // Re-render UI
                 if (typeof ptRenderAll === 'function') {
                     ptRenderAll();

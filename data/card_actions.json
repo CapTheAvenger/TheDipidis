@@ -266,6 +266,30 @@
       "triggerZone": "playzone",
       "prints": ["TWM-165"],
       "description": "Both players shuffle hand into deck. You draw 5, opponent draws 2."
+    },
+    {
+      "id": "judge",
+      "cardName": "Judge",
+      "action": "judge",
+      "triggerZone": "playzone",
+      "prints": [
+        "BKT-143", "BKT-143a", "LOT-209", "UPR-209", "SVI-176",
+        "FST-235", "GEN-108", "PAL-236",
+        "M2-77", "M2-106", "M2-115"
+      ],
+      "description": "Both players shuffle hand into deck, then draw 4 cards each."
+    },
+    {
+      "id": "iono",
+      "cardName": "Iono",
+      "action": "iono",
+      "triggerZone": "playzone",
+      "prints": [
+        "PAL-185", "PAL-254", "PAL-269",
+        "SVP-76", "SVP-172", "MEG-174",
+        "M1L-68", "M1L-93"
+      ],
+      "description": "Both players shuffle hand to bottom of deck, then draw cards equal to remaining prizes."
     }
   ]
 }

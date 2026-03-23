@@ -443,6 +443,7 @@ function _ptMobileSwitchToActive(player, benchZone) {
     
     if (typeof ptLog !== 'undefined') ptLog(`Aktives getauscht mit ${benchZone}.`);
     if (typeof ptRenderAll !== 'undefined') ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && typeof ptState !== 'undefined' && ptState.isMultiplayer) syncStateToFirebase('Switch to Active');
     ptHideContextMenu();
 }
 
@@ -532,22 +533,24 @@ function ptShowRadialMenu(touch, player, zone) {
         const ct = (c.cardType || c.supertype || '').toLowerCase();
         return ct === 'tool' || ct.includes('tool');
     });
-    // Check if hand has evolution cards
-    const hasEvolution = ptState[player].hand.some(c => {
+    // Check if zone has energy cards (for energy discard)
+    const zoneHasEnergy = ptState[player].field[zone].some(c => {
         const ct = (c.cardType || c.supertype || '').toLowerCase();
-        return ct.includes('stage') || ct.includes('evolution') || ct.includes('break') || ct.includes('mega') || ct.includes('level');
+        return ct.includes('energy');
     });
 
     if (hasEnergy) actions.push({ icon: '⚡', label: 'Energy', action: () => _ptRadialAttachEnergy(player, zone) });
     if (hasTool) actions.push({ icon: '🔧', label: 'Tool', action: () => _ptRadialAttachTool(player, zone) });
-    actions.push({ icon: '🗑️', label: 'Ablegen', action: () => { discardTopCard(player, zone, null); } });
-    if (hasEvolution) actions.push({ icon: '🔼', label: 'Evolve', action: () => _ptRadialEvolve(player, zone) });
-    actions.push({ icon: '⚙️', label: 'Menü', action: () => _ptRadialOpenContextMenu(player, zone) });
-    actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
+    if (zoneHasEnergy) actions.push({ icon: '⚡🗑️', label: 'E.Disc', action: () => { if (typeof ptEnergyDiscard === 'function') ptEnergyDiscard(player, zone); } });
     actions.push({ icon: '💥', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); } });
-    if (zone !== 'active') {
+    if (zone === 'active') {
+        actions.push({ icon: '↩️', label: 'Retreat', action: () => { if (typeof ptRetreat === 'function') ptRetreat(player, zone); } });
+    } else {
         actions.push({ icon: '🔄', label: 'Aktiv', action: () => { _ptMobileSwitchToActive(player, zone); } });
     }
+    actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
+    actions.push({ icon: '🗑️', label: 'Ablegen', action: () => { discardTopCard(player, zone, null); } });
+    actions.push({ icon: '⚙️', label: 'Menü', action: () => _ptRadialOpenContextMenu(player, zone) });
 
     // Arrange in a circle
     const radius = 65;
@@ -625,6 +628,7 @@ function _ptRadialAttachEnergy(player, zone) {
     ptState[player].field[zone].push(energyCard);
     if (typeof ptLog === 'function') ptLog(`⚡ Attached "${energyCard.name}" to ${zone}.`);
     if (typeof ptRenderAll === 'function') ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && typeof ptState !== 'undefined' && ptState.isMultiplayer) syncStateToFirebase('Attach Energy');
 }
 
 function _ptRadialAttachTool(player, zone) {
@@ -637,6 +641,7 @@ function _ptRadialAttachTool(player, zone) {
     ptState[player].field[zone].push(toolCard);
     if (typeof ptLog === 'function') ptLog(`🔧 Attached "${toolCard.name}" to ${zone}.`);
     if (typeof ptRenderAll === 'function') ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && typeof ptState !== 'undefined' && ptState.isMultiplayer) syncStateToFirebase('Attach Tool');
 }
 
 function _ptRadialEvolve(player, zone) {

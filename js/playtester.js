@@ -2250,7 +2250,164 @@ function ptRetreat(player, zoneId) {
         ptSwapZones(player, zoneId, null);
         return;
     }
-    // Active → show modal to pick bench Pokémon
+    // Active → first ask how many energy to discard (retreat cost 0-4)
+    const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
+    const occupied = benchZones.filter(b => ptState[player].field[b].length > 0);
+    if (occupied.length === 0) {
+        ptShowMessage('Keine Pokémon auf der Bank!');
+        return;
+    }
+
+    // Count available energies on active
+    const activeCards = ptState[player].field.active;
+    const energyCount = activeCards.filter(c => (c.cardType || '').toLowerCase().includes('energy')).length;
+
+    // Show retreat cost picker
+    let html = `<div style="background:#1a1a2e;border:2px solid #3498db;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:400px;">
+        <h3 style="color:#3498db;margin-top:0;">↩️ Retreat – Energiekosten</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wie viele Energy ablegen? (${energyCount} vorhanden)</p>
+        <div style="display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;">`;
+    for (let i = 0; i <= 4; i++) {
+        const disabled = i > energyCount;
+        html += `<button onclick="${disabled ? '' : `_ptRetreatCostSelected('${player}',${i})`}"
+                    style="width:48px;height:48px;border-radius:50%;font-size:20px;font-weight:bold;border:3px solid ${i === 0 ? '#2ecc71' : '#3498db'};
+                    background:${disabled ? '#333' : (i === 0 ? 'rgba(46,204,113,0.2)' : 'rgba(52,152,219,0.2)')};
+                    color:${disabled ? '#666' : '#fff'};cursor:${disabled ? 'not-allowed' : 'pointer'};
+                    transition:transform .15s,background .2s;"
+                    ${disabled ? '' : `onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'"`}>${i}</button>`;
+    }
+    html += `</div>
+        <button onclick="document.getElementById('ptRetreatModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">Abbrechen</button>
+    </div>`;
+    let modal = document.getElementById('ptRetreatModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptRetreatModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.style.display = 'flex';
+    ptLog(`↩️ ${player.toUpperCase()} wählt Retreat-Kosten…`);
+}
+
+let _ptRetreatEnergySelection = new Set();
+
+function _ptRetreatCostSelected(player, cost) {
+    const modal = document.getElementById('ptRetreatModal');
+    if (modal) modal.style.display = 'none';
+    if (cost === 0) {
+        _ptShowRetreatBenchPicker(player);
+        return;
+    }
+    // Show energy picker for retreat cost
+    const activeCards = ptState[player].field.active;
+    const energies = activeCards.map((c, i) => ({ card: c, idx: i }))
+        .filter(e => (e.card.cardType || '').toLowerCase().includes('energy'));
+    if (energies.length < cost) {
+        ptShowMessage(`Nicht genug Energy! (${energies.length} vorhanden, ${cost} benötigt)`);
+        return;
+    }
+    if (energies.length === cost) {
+        // Exact match — discard all automatically
+        const indices = energies.map(e => e.idx).sort((a, b) => b - a);
+        indices.forEach(idx => {
+            const removed = activeCards.splice(idx, 1)[0];
+            ptState[player].discard.push(removed);
+        });
+        ptLog(`↩️ ${cost} Energy für Retreat abgelegt.`);
+        ptRenderAll();
+        _ptShowRetreatBenchPicker(player);
+        return;
+    }
+    // Multiple energies — show multi-select picker
+    _ptRetreatEnergySelection = new Set();
+    let html = `<div style="background:#1a1a2e;border:2px solid #e67e22;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:520px;">
+        <h3 style="color:#e67e22;margin-top:0;">↩️⚡ Retreat — ${cost} Energy ablegen</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:6px;">Wähle ${cost} Energy zum Ablegen.</p>
+        <p id="ptRetreatECounter" style="color:#e67e22;font-size:14px;font-weight:bold;margin:4px 0 14px;">0 / ${cost} gewählt</p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
+    energies.forEach((e, i) => {
+        const safeImg = (e.card.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        html += `<div id="ptRetreatESlot${i}" style="cursor:pointer;text-align:center;transition:transform .15s;position:relative;"
+                      onclick="_ptToggleRetreatEnergy(${i},${energies.length},${cost})"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${e.card.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #555;box-shadow:0 0 6px rgba(0,0,0,0.4);transition:border-color .2s,box-shadow .2s;" onerror="this.src='${CARD_BACK_URL}'" title="${_ptEscHtml(e.card.name)}">
+            <div id="ptRetreatECheck${i}" style="display:none;position:absolute;top:-6px;right:-6px;background:#e67e22;color:#fff;border-radius:50%;width:22px;height:22px;font-size:14px;font-weight:bold;line-height:22px;">✓</div>
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(e.card.name)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <div style="display:flex;gap:10px;justify-content:center;align-items:center;">
+            <button id="ptRetreatEOkBtn" onclick="_ptConfirmRetreatEnergy('${player}',${cost})" disabled
+                    style="background:linear-gradient(135deg,#e67e22,#d35400);color:#fff;border:none;border-radius:8px;padding:10px 28px;cursor:pointer;font-size:14px;font-weight:bold;opacity:0.5;transition:opacity .2s;">
+                ✅ OK — Ablegen
+            </button>
+            <button onclick="document.getElementById('ptRetreatModal').style.display='none'"
+                    style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid #555;border-radius:6px;padding:8px 18px;cursor:pointer;font-size:12px;">✕ Abbrechen</button>
+        </div>
+    </div>`;
+    let rModal = document.getElementById('ptRetreatModal');
+    if (!rModal) {
+        rModal = document.createElement('div');
+        rModal.id = 'ptRetreatModal';
+        rModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;';
+        document.body.appendChild(rModal);
+    }
+    // Store energy indices mapping for confirmation
+    rModal.dataset.energyMap = JSON.stringify(energies.map(e => e.idx));
+    rModal.innerHTML = html;
+    rModal.style.display = 'flex';
+}
+
+function _ptToggleRetreatEnergy(slotIdx, total, cost) {
+    if (_ptRetreatEnergySelection.has(slotIdx)) {
+        _ptRetreatEnergySelection.delete(slotIdx);
+    } else {
+        if (_ptRetreatEnergySelection.size >= cost) return; // max reached
+        _ptRetreatEnergySelection.add(slotIdx);
+    }
+    for (let i = 0; i < total; i++) {
+        const slot = document.getElementById('ptRetreatESlot' + i);
+        const check = document.getElementById('ptRetreatECheck' + i);
+        if (!slot || !check) continue;
+        const selected = _ptRetreatEnergySelection.has(i);
+        const img = slot.querySelector('img');
+        if (img) {
+            img.style.borderColor = selected ? '#e67e22' : '#555';
+            img.style.boxShadow = selected ? '0 0 12px rgba(230,126,34,0.7)' : '0 0 6px rgba(0,0,0,0.4)';
+        }
+        check.style.display = selected ? 'block' : 'none';
+    }
+    const counter = document.getElementById('ptRetreatECounter');
+    if (counter) counter.textContent = `${_ptRetreatEnergySelection.size} / ${cost} gewählt`;
+    const okBtn = document.getElementById('ptRetreatEOkBtn');
+    if (okBtn) {
+        const ready = _ptRetreatEnergySelection.size === cost;
+        okBtn.disabled = !ready;
+        okBtn.style.opacity = ready ? '1' : '0.5';
+    }
+}
+
+function _ptConfirmRetreatEnergy(player, cost) {
+    const rModal = document.getElementById('ptRetreatModal');
+    if (!rModal || _ptRetreatEnergySelection.size !== cost) return;
+    const energyMap = JSON.parse(rModal.dataset.energyMap || '[]');
+    // Convert slot indices to actual card indices, sort descending for safe splicing
+    const cardIndices = [..._ptRetreatEnergySelection].map(s => energyMap[s]).sort((a, b) => b - a);
+    const activeCards = ptState[player].field.active;
+    cardIndices.forEach(idx => {
+        const removed = activeCards.splice(idx, 1)[0];
+        if (removed) ptState[player].discard.push(removed);
+    });
+    ptLog(`↩️ ${cost} Energy für Retreat abgelegt.`);
+    _ptRetreatEnergySelection = new Set();
+    rModal.style.display = 'none';
+    ptRenderAll();
+    _ptShowRetreatBenchPicker(player);
+}
+
+function _ptShowRetreatBenchPicker(player) {
     const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
     const occupied = benchZones.filter(b => ptState[player].field[b].length > 0);
     if (occupied.length === 0) {
@@ -2258,7 +2415,7 @@ function ptRetreat(player, zoneId) {
         return;
     }
     if (occupied.length === 1) {
-        ptSwapZones(player, occupied[0], null);
+        ptFinishRetreat(player, occupied[0]);
         return;
     }
     const _tp = (cards) => [...cards].reverse().find(c => { const ct = (c.cardType||'').toLowerCase(); return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer'); }) || cards[0];
@@ -2287,7 +2444,6 @@ function ptRetreat(player, zoneId) {
     }
     modal.innerHTML = html;
     modal.style.display = 'flex';
-    ptLog(`↩️ ${player.toUpperCase()} wählt Retreat-Ziel…`);
 }
 
 function ptFinishRetreat(player, benchZone) {
@@ -2458,7 +2614,15 @@ function ptKnockOutZone(player, zoneId, prizeTakerOverride) {
 
     if (ptState[prizeTaker].prizes.length > 0) {
         const prizeCount = ptGetPrizeCountForKnockout(knockedOutPokemon);
-        setTimeout(() => ptOpenPrizePicker(prizeTaker, prizeCount, prizeTaker), 200);
+        if (ptState.isMultiplayer) {
+            // In MP: set flag so the prize taker's machine shows the prize picker after sync
+            ptState.mpPrizePickNeeded = { player: prizeTaker, count: prizeCount };
+            if (ptState.localRole === prizeTaker) {
+                setTimeout(() => ptOpenPrizePicker(prizeTaker, prizeCount, prizeTaker), 200);
+            }
+        } else {
+            setTimeout(() => ptOpenPrizePicker(prizeTaker, prizeCount, prizeTaker), 200);
+        }
     }
 
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('KO: ' + zoneId + ' (' + player + ')');
@@ -3239,6 +3403,8 @@ function ptConfirmPrizeSelection() {
     });
     ptLog(`🏆 ${taker.toUpperCase()} nimmt ${taken.length} Preiskarte${taken.length === 1 ? '' : 'n'}: ${taken.join(', ')}. Noch ${ptState[player].prizes.length} übrig.`);
     _ptPrizeSelection = new Set();
+    // Clear MP prize pick flag
+    if (ptState.mpPrizePickNeeded) ptState.mpPrizePickNeeded = null;
     modal.style.display = 'none';
     ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Took ' + taken.length + ' prize(s)');
@@ -3424,6 +3590,8 @@ const _PT_TRAINER_ACTIONS = {
     'energy-switch':        ptTrainerEnergySwitch,
     'secret-box':           ptTrainerSecretBox,
     'unfair-stamp':         ptTrainerUnfairStamp,
+    'judge':                ptTrainerJudge,
+    'iono':                 ptTrainerIono,
 };
 
 let _ptCardActionsLoaded = false;
@@ -4059,6 +4227,16 @@ function ptTrainerUnfairStamp(player, card) {
     for (let i = 0; i < 2; i++) if (ptState[opp].deck.length > 0) ptState[opp].hand.push(ptState[opp].deck.pop());
     ptLog(`📜 Unfair Stamp: Beide mischen Hand ins Deck. ${player.toUpperCase()} zieht 5, ${opp.toUpperCase()} zieht 2.`);
     ptRenderAll();
+    return false;
+}
+
+function ptTrainerJudge(player, card) {
+    ptGlobalJudge();
+    return false;
+}
+
+function ptTrainerIono(player, card) {
+    ptGlobalIono();
     return false;
 }
 

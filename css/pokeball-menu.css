@@ -254,7 +254,9 @@ body {
 .pt-hand-card:hover { transform: translateY(-15px) scale(1.2); z-index: 5; position: relative; }
 .pt-hand-card.pt-card-selected { outline: 3px solid var(--pokemon-yellow); transform: translateY(-20px) scale(1.2); z-index: 6; }
 .pt-hand-disc-btn { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 4px; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
-.pt-hand-wrapper:hover .pt-hand-disc-btn { display: flex; }
+.pt-hand-play-btn { position: absolute; top: 2px; left: 2px; background: rgba(46,204,113,0.85); color: #fff; border: none; border-radius: 4px; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+.pt-hand-wrapper:hover .pt-hand-disc-btn,
+.pt-hand-wrapper:hover .pt-hand-play-btn { display: flex; }
 
 .pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 18px; border-radius: 4px; font-weight: 900; font-size: 9px; cursor: pointer; border: 2px solid; transition: all 0.2s; }
 .pt-marker-vstar { background: linear-gradient(135deg, #fff, #a8e6cf); color: #000; border-color: #fff; }
@@ -380,7 +382,22 @@ input[type="number"] { -moz-appearance: textfield; }
     .pt-legend-box { display: none; }
     .pt-deck-controls { width: 110px; padding: 4px; left: 40px; }
     .pt-btn { font-size: 9px; padding: 2px 6px; }
-    .pt-hand-zone { padding: 4px 8px; padding-bottom: 8px; }
+    .pt-hand-zone { padding: 2px 4px 3px 4px; min-height: 60px; gap: 2px; }
+    .pt-hand-scroll-btn { height: 56px; width: 24px; font-size: 14px; }
+    .pt-hand-card { width: clamp(42px, 12vw, 56px) !important; }
+    .pt-hand-play-btn,
+    .pt-hand-disc-btn {
+        display: flex !important;
+        position: absolute !important;
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 10px !important;
+        padding: 0 !important;
+        border-radius: 5px !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.5) !important;
+    }
+    .pt-hand-play-btn { top: 2px !important; left: 2px !important; }
+    .pt-hand-disc-btn { top: 2px !important; right: 2px !important; }
     #ptActionLogPanel { width: 150px; height: 160px; font-size: 9px; }
 }
 

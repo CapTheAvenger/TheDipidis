@@ -857,6 +857,7 @@ function ptStartMulligan(player) {
     ptMulliganCount[player] = (ptMulliganCount[player] || 0) + 1;
     ptLog(`🃏 ${player.toUpperCase()} mulligan #${ptMulliganCount[player]} — new 7-card hand.`);
     ptRenderStartPhaseModal();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Mulligan #' + ptMulliganCount[player] + ' ' + player.toUpperCase());
 }
 
 function ptDoStartCoinFlip() {
@@ -1512,6 +1513,7 @@ function ptToggleDmgMod(element, amount) {
 
 // --- MULLIGAN ---
 function ptMulligan(player) {
+    if (ptState.isMultiplayer && player !== ptState.localRole) return;
     ptSaveState();
     ptState[player].deck.push(...ptState[player].hand);
     ptState[player].hand = [];
@@ -1523,6 +1525,7 @@ function ptMulligan(player) {
     for (let i = 0; i < 7; i++) if (deck.length > 0) ptState[player].hand.push(deck.pop());
     ptLog(`🃏 ${player} nimmt einen Mulligan — 7 neue Karten.`);
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Mulligan ' + player.toUpperCase());
 }
 
 function ptFlipCoin() {

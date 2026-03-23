@@ -1846,8 +1846,10 @@ function ptCloseDeckSearch() {
 // --- ZONE INTERACTION ---
 
 function ptClickZone(player, zoneId) {
-    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
-    const wasAttachAction = (window.pendingAttachAction === true) || ptIsAttachSelection(ptCurrentPlayer);
+    // Determine "local" player: in MP use localRole, in SP use current player
+    const localPlayer = (ptState.isMultiplayer && ptState.localRole) ? ptState.localRole : ptCurrentPlayer;
+    const opp = localPlayer === 'p1' ? 'p2' : 'p1';
+    const wasAttachAction = (window.pendingAttachAction === true) || ptIsAttachSelection(localPlayer);
 
     // Helper: show last Pokémon in a zone stack (skip energy/tools)
     const _topCard = (cards) =>
@@ -1860,7 +1862,8 @@ function ptClickZone(player, zoneId) {
     if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole && ptSelectedCardIndex !== null) return;
 
     // Clicking on opponent's zone — ptMobileCardTap handles radial menu on mobile
-    if (player === opp) {
+    // (stadium / playzone are shared neutral zones, never block them)
+    if (player === opp && zoneId !== 'stadium' && zoneId !== 'playzone') {
         const cards = ptState[player].field[zoneId];
         if (cards && cards.length > 0) {
             // Desktop: zoom + open opponent panel
@@ -1889,7 +1892,7 @@ function ptClickZone(player, zoneId) {
     }
 
     // Hand card selected → place it on the target zone
-    const card = ptState[ptCurrentPlayer].hand[ptSelectedCardIndex];
+    const card = ptState[localPlayer].hand[ptSelectedCardIndex];
     if (!card) {
         ptSetAttachMode(false);
         return;
@@ -1931,23 +1934,23 @@ function ptClickZone(player, zoneId) {
         const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
         if (_tFn) {
             setTimeout(() => {
-                _tFn(ptCurrentPlayer, card);
+                _tFn(localPlayer, card);
                 if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name + ' (effect)');
             }, 50);
         }
     } else if (zoneId === 'stadium') {
         if (ptState.stadium.length > 0) {
-            const stadiumOwner = ptState.stadiumPlayedBy || ptCurrentPlayer;
+            const stadiumOwner = ptState.stadiumPlayedBy || localPlayer;
             ptState[stadiumOwner].discard.push(ptState.stadium.pop());
         }
         ptState.stadium.push(card);
-        ptState.stadiumPlayedBy = ptCurrentPlayer;
-        ptLog(`Played Stadium: "${card.name}" (${ptCurrentPlayer.toUpperCase()}).`);
+        ptState.stadiumPlayedBy = localPlayer;
+        ptLog(`Played Stadium: "${card.name}" (${localPlayer.toUpperCase()}).`);
     } else {
         ptState[player].field[zoneId].push(card);
         ptLog(`Placed "${card.name}" on ${player} ${zoneId}.`);
     }
-    ptState[ptCurrentPlayer].hand.splice(ptSelectedCardIndex, 1);
+    ptState[localPlayer].hand.splice(ptSelectedCardIndex, 1);
     ptSelectedCardIndex = null;
     if (wasAttachAction) {
         setTimeout(() => ptSetAttachMode(false), 0);
@@ -3274,20 +3277,27 @@ function ptPlayFromHand(index, event) {
     ptSetAttachMode(false);
     ptRenderAll();
     // Check trainer registry for automated effects
-    const _tKey = _ptGetAbilityKey(card);
-    const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
-    if (_tFn) {
-        // Let the effect run first, then sync the complete result in one go
-        setTimeout(() => {
-            _tFn(player, card);
+    const _runTrainerEffect = () => {
+        const _tKey = _ptGetAbilityKey(card);
+        const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
+        if (_tFn) {
+            setTimeout(() => {
+                _tFn(player, card);
+                if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
+            }, 50);
+            if (typeof showToast === 'function') showToast(`✅ "${card.name}" — Effekt wird ausgeführt`, 'success', 2500);
+        } else {
             if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
-        }, 50);
-        if (typeof showToast === 'function') showToast(`✅ "${card.name}" — Effekt wird ausgeführt`, 'success', 2500);
-    } else {
-        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
-        if ((card.cardType || '').toLowerCase().includes('trainer')) {
-            if (typeof showToast === 'function') showToast(`ℹ️ "${card.name}" — kein Auto-Effekt, manuell ausführen`, 'warning', 3000);
+            if ((card.cardType || '').toLowerCase().includes('trainer') && _tKey) {
+                if (typeof showToast === 'function') showToast(`ℹ️ "${card.name}" (${_tKey}) — kein Auto-Effekt, manuell ausführen`, 'warning', 3000);
+            }
         }
+    };
+    // If registry not yet loaded, wait for it before checking
+    if (!_ptCardActionsLoaded) {
+        _ptLoadCardActions().then(_runTrainerEffect);
+    } else {
+        _runTrainerEffect();
     }
 }
 
@@ -4808,6 +4818,9 @@ window.startPlaytesterSetup = function() {
 
 window.renderPlaytester = window.renderPlaytester || ptRenderAll;
 window.savePtState = window.savePtState || ptSaveState;
+
+// Pre-load card actions registry as early as possible
+_ptLoadCardActions();
 
 window.ptOpponentShuffleAndDraw = ptOpponentShuffleAndDraw;
 window.startStandalonePlaytester = startStandalonePlaytester;

@@ -523,7 +523,8 @@ function ptShowRadialMenu(touch, player, zone) {
     const hasCards = ptState[player] && ptState[player].field[zone] && ptState[player].field[zone].length > 0;
     if (!hasCards) { return; }
 
-    const isOpp = (typeof ptCurrentPlayer !== 'undefined') && player !== ptCurrentPlayer;
+    const _localP = (typeof ptState !== 'undefined' && ptState.isMultiplayer && ptState.localRole) ? ptState.localRole : ptCurrentPlayer;
+    const isOpp = (typeof ptCurrentPlayer !== 'undefined') && player !== _localP;
 
     if (isOpp) {
         // ── Opponent zone: damage, KO, discard, switch, energy discard ──

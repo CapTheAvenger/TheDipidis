@@ -2910,6 +2910,9 @@ function ptRenderAll() {
             }
         }
     }
+
+    // Always refresh pointer events after rendering
+    ptUpdateAreaPointerEvents();
 }
 
 function ptRenderHand() {

@@ -318,10 +318,9 @@ function listenToGameState(gameId) {
 
         // State Sync (nur wenn Sync aktiv und nicht eigene Änderung)
         if (mpSyncEnabled && data.state) {
-            const now = Date.now();
             const isSelfSync = data.lastActionBy === mpRole;
-            // Verhindere Sync-Loop: Nur externe Updates verarbeiten
-            if (now - mpLastSyncTime > MP_SYNC_DEBOUNCE && !isSelfSync) {
+            // Nur externe Updates verarbeiten (isSelfSync-Guard reicht gegen Loops)
+            if (!isSelfSync) {
                 mpLog('[Multiplayer] Syncing remote state...');
                 
                 if (typeof ptState !== 'undefined') {

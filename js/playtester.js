@@ -1141,17 +1141,18 @@ function ptRunCommand(playerOverride) {
     const parts = cmd.replace(/^\//, '').split(/\s+/);
     const action = parts[0];
     const n = parseInt(parts[1]) || 1;
+    let needsSync = false;
 
     if (action === 'draw' || action === 'd') {
         let drawn = 0;
         for (let i = 0; i < n; i++) if (ptState[p].deck.length > 0) { ptState[p].hand.push(ptState[p].deck.pop()); drawn++; }
         ptLog(`Drew ${drawn} card(s).`);
-        ptRenderAll();
+        ptRenderAll(); needsSync = true;
     } else if (action === 'mill' || action === 'm') {
         let milled = 0;
         for (let i = 0; i < n; i++) if (ptState[p].deck.length > 0) { ptState[p].discard.push(ptState[p].deck.pop()); milled++; }
         ptLog(`Milled ${milled} card(s) to discard.`);
-        ptRenderAll();
+        ptRenderAll(); needsSync = true;
     } else if (action === 'top' || action === 't') {
         ptOpenTopCards(n);
     } else if (action === 'coin') {
@@ -1173,7 +1174,7 @@ function ptRunCommand(playerOverride) {
             for (let i = 0; i < n; i++) if (deck.length > 0) ptState[pp].hand.push(deck.pop());
         });
         ptLog(`🔄 Iono/Judge: Both players drew ${n} card(s).`);
-        ptRenderAll();
+        ptRenderAll(); needsSync = true;
     } else if (action === 'roxanne' || action === 'marnie') {
         ['p1', 'p2'].forEach(pp => {
             ptState[pp].deck.unshift(...ptState[pp].hand);
@@ -1181,11 +1182,10 @@ function ptRunCommand(playerOverride) {
             for (let i = 0; i < n; i++) if (ptState[pp].deck.length > 0) ptState[pp].hand.push(ptState[pp].deck.pop());
         });
         ptLog(`⬇️ Marnie/Roxanne: Both players drew ${n} card(s).`);
-        ptRenderAll();
+        ptRenderAll(); needsSync = true;
     } else if (action === 'shuffle' || action === 'sh') {
-        ptShuffleDeck(p);
+        ptShuffleDeck(p); needsSync = true;
     } else if (action === 'attach') {
-        // /attach [active|bench0-4]  — attach first energy from hand to a field slot
         const slotArg   = parts[1] || 'active';
         const validZones = ['active', 'bench0', 'bench1', 'bench2', 'bench3', 'bench4'];
         const zone       = validZones.includes(slotArg) ? slotArg : 'active';
@@ -1204,10 +1204,11 @@ function ptRunCommand(playerOverride) {
         const [energyCard] = ptState[p].hand.splice(energyIdx, 1);
         ptState[p].field[zone].push(energyCard);
         ptLog(`⚡ Attached "${energyCard.name}" to ${p} ${zone}.`);
-        ptRenderAll();
+        ptRenderAll(); needsSync = true;
     } else {
         ptShowMessage('Unknown! Try: /draw 3  /iono 6  /roxanne 2  /top 5  /mill 2  /attach active');
     }
+    if (needsSync && typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Command: /' + action + ' ' + n);
 }
 
 // --- TOP DECK CONTROL ---
@@ -1436,6 +1437,7 @@ function ptHandAction(type) {
         ptLog(`Moved hand to bottom of deck, drew ${drew} card(s).`);
     }
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Hand action: ' + type);
 }
 
 // --- GLOBAL TWO-PLAYER ACTIONS ---
@@ -1456,6 +1458,7 @@ function ptGlobalJudge() {
     });
     ptLog(`⚖️ Judge: Beide mischen Hand ins Deck, shufflen, ziehen je ${JUDGE_DRAW}.`);
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Judge: both draw ' + JUDGE_DRAW);
 }
 
 // IONO: Hand in zufälliger Reihenfolge UNTER das Deck, ziehen = Anzahl verbleibender Prizes (TCG-Regel)
@@ -1480,9 +1483,8 @@ function ptGlobalIono() {
     });
     ptLog(`⚡ Iono: Hände unter das Deck gelegt. P1 zieht ${draws.p1} (Prizes), P2 zieht ${draws.p2} (Prizes).`);
     ptRenderAll();
-}
-
-// --- DMG BUFF COUNTER (Muscle Band, Choice Belt, etc.) ---
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Iono: P1 drew ' + draws.p1 + ', P2 drew ' + draws.p2);
+} (Muscle Band, Choice Belt, etc.) ---
 // Works directly on the DOM element; accumulates +amount per L-click, resets on R-click.
 function ptToggleDmgMod(element, amount) {
     if (element.classList.contains('active') && amount > 0) {
@@ -1630,12 +1632,15 @@ function ptPromoteBench(player, benchZone) {
     ptState[player].field[benchZone]  = [];
     ptState[player].damage[benchZone] = 0;
     ptState[player].status = [];
+    // Clear promote flag
+    if (ptState.mpPromoteNeeded === player) ptState.mpPromoteNeeded = null;
     const _tp = (cards) => [...cards].reverse().find(c => { const ct = (c.cardType||'').toLowerCase(); return !ct.includes('energy') && ct !== 'tool'; }) || cards[0];
     const topCard = _tp(ptState[player].field.active);
     ptLog(`⭐ ${player.toUpperCase()}: ${topCard ? topCard.name : '?'} → Aktives Pokémon!`);
     const modal = document.getElementById('ptPromoteModal');
     if (modal) modal.style.display = 'none';
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Promoted: ' + (topCard ? topCard.name : ''));
     ptDraw1(player); // Draw AFTER promotion
 }
 
@@ -2385,11 +2390,19 @@ function ptKnockOutZone(player, zoneId, prizeTakerOverride) {
         ptRefreshOpponentField(player);
     }
 
-    if (zoneId === 'active' && player === ptCurrentPlayer) {
+    if (zoneId === 'active') {
         const hasBench = ['bench0', 'bench1', 'bench2', 'bench3', 'bench4']
             .some(benchZone => ptState[player].field[benchZone].length > 0);
         if (hasBench) {
-            setTimeout(() => ptOpenPromoteModal(player), 120);
+            if (ptState.isMultiplayer) {
+                // In MP: set flag so the KO'd player's machine shows the promote modal after sync
+                ptState.mpPromoteNeeded = player;
+                if (ptState.localRole === player) {
+                    setTimeout(() => ptOpenPromoteModal(player), 120);
+                }
+            } else {
+                setTimeout(() => ptOpenPromoteModal(player), 120);
+            }
         }
     }
 
@@ -2397,6 +2410,8 @@ function ptKnockOutZone(player, zoneId, prizeTakerOverride) {
         const prizeCount = ptGetPrizeCountForKnockout(knockedOutPokemon);
         setTimeout(() => ptOpenPrizePicker(prizeTaker, prizeCount, prizeTaker), 200);
     }
+
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('KO: ' + zoneId + ' (' + player + ')');
 }
 
 function ptOppKnockOutZone(opp, zoneId) {
@@ -2410,6 +2425,7 @@ function toggleStatus(player, statusType, event) {
     else ptState[player].status.push(statusType);
     ptLog(`Status "${statusType}" updated.`);
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Status: ' + statusType);
 }
 
 function ptToggleLock(player, type) {
@@ -4402,6 +4418,7 @@ async function ptOpponentShuffleAndDraw() {
 
     ptLog('\uD83D\uDD04 Opponent Shuffle & Draw: ' + opp.toUpperCase() + ' mischt Hand ins Deck und zieht ' + drawn + '.');
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp Shuffle & Draw: ' + drawn);
 }
 
 window.executeCustomJudge = function() {
@@ -4429,6 +4446,7 @@ window.executeCustomJudge = function() {
     if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Judge: P1 drew ' + p1 + ', P2 drew ' + p2);
 };
 
 window.executeCustomIono = function() {
@@ -4455,6 +4473,7 @@ window.executeCustomIono = function() {
     if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Iono: P1 drew ' + p1 + ', P2 drew ' + p2);
 };
 
 window.executeOwnShuffleDraw = function() {
@@ -4471,6 +4490,7 @@ window.executeOwnShuffleDraw = function() {
     if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Own Shuffle & Draw: ' + count);
 };
 
 window.executeOppShuffleDraw = function() {
@@ -4487,6 +4507,7 @@ window.executeOppShuffleDraw = function() {
     if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp Shuffle & Draw: ' + count);
 };
 
 window.openMultiplayerMenu = function() {

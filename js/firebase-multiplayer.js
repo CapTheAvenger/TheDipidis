@@ -390,6 +390,16 @@ function listenToGameState(gameId) {
                     }
                 }
 
+                // Promote needed: if opponent KO'd our active, show promote modal
+                if (ptState.mpPromoteNeeded && ptState.mpPromoteNeeded === ptState.localRole && data.lastActionBy !== mpRole) {
+                    const promotePlayer = ptState.mpPromoteNeeded;
+                    const hasBench = ['bench0','bench1','bench2','bench3','bench4']
+                        .some(b => ptState[promotePlayer].field[b].length > 0);
+                    if (hasBench && typeof ptOpenPromoteModal === 'function') {
+                        setTimeout(() => ptOpenPromoteModal(promotePlayer), 150);
+                    }
+                }
+
                 // Re-render UI
                 if (typeof ptRenderAll === 'function') {
                     ptRenderAll();

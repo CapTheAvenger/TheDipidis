@@ -153,6 +153,8 @@ function openPlaytester(source) {
     ptState.stadium  = [];
     ptState.stadiumPlayedBy = null;
     ptState.playZone = [];
+    ptState.isMultiplayer = false;
+    ptState.localRole = null;
     ptCurrentPlayer  = 'p1';
     ptActionLog      = [];
 
@@ -391,6 +393,8 @@ function startStandalonePlaytester() {
     ptState.stadium  = [];
     ptState.stadiumPlayedBy = null;
     ptState.playZone = [];
+    ptState.isMultiplayer = false;
+    ptState.localRole = null;
     ptActionLog      = [];
     ptCurrentPlayer  = 'p1';
 
@@ -465,6 +469,14 @@ function getExportStringFromBuilder(type) {
 
 function ptNewGame() {
     _ptLoadCardActions();   // ensure ability + trainer registries are populated
+
+    // Reset MP flags so singleplayer is never blocked by leftover MP state
+    ptState.isMultiplayer = false;
+    ptState.localRole = null;
+    ptState.mpSetupReady = null;
+    ptState.mpPromoteNeeded = null;
+    ptState.mpPrizePickNeeded = null;
+
     ['p1', 'p2'].forEach(p => {
         let allCards = [...ptState[p].deck, ...ptState[p].hand, ...ptState[p].discard,
                         ...(ptState[p].lostzone || []), ...ptState[p].prizes];
@@ -529,6 +541,9 @@ function ptLoadGame() {
         if (!raw) { if (typeof showToast === 'function') showToast('ℹ️ Kein Spielstand vorhanden', 'info', 2500); return; }
         const save = JSON.parse(raw);
         ptState = save.ptState;
+        // Sanitize: loaded games are always singleplayer
+        ptState.isMultiplayer = false;
+        ptState.localRole = null;
         ptCurrentPlayer = save.ptCurrentPlayer;
         ptActionLog = save.ptActionLog || [];
         ptStartPhase = save.ptStartPhase || false;

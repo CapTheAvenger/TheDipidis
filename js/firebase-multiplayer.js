@@ -218,6 +218,12 @@ async function leaveMultiplayerGame() {
         mpIsHost = false;
         mpSyncEnabled = false;
 
+        // Reset ptState MP flags so singleplayer works clean afterwards
+        if (typeof ptState !== 'undefined') {
+            ptState.isMultiplayer = false;
+            ptState.localRole = null;
+        }
+
         mpLog('[Multiplayer] Left game');
 
     } catch (error) {

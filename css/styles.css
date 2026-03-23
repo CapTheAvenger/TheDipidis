@@ -5682,23 +5682,18 @@ details[open] > .tier-trending-summary::after {
 }
 
 /* ===================================================
-   DESKTOP BATTLE BUTTONS (left side of board, vertical)
+   DESKTOP BATTLE BUTTONS (fixed left side, unaffected by board flip)
    =================================================== */
 #pt-side-buttons-left {
-    position: absolute;
-    left: 22%;
+    position: fixed;
+    left: 12px;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     gap: 10px;
-    z-index: 100;
+    z-index: 9998;
     pointer-events: auto;
-}
-
-/* Counter-rotate so P2 can read the buttons when board is flipped */
-.pt-arena.flipped #pt-side-buttons-left {
-    transform: translate(-50%, -50%) rotate(180deg);
 }
 
 .pt-side-btn {

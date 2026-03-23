@@ -1398,7 +1398,9 @@ function ptShuffleDeck(player) {
     ptLog(`Deck shuffled [${p}]!`);
     ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Shuffled deck');
-}(player, position, amount) {
+}
+
+function ptLookCards(player, position, amount) {
     // Compatibility: ptLookCards(amount)
     if (position === undefined && amount === undefined && !isNaN(parseInt(player))) {
         amount = parseInt(player);
@@ -1489,7 +1491,9 @@ function ptGlobalIono() {
     ptLog(`⚡ Iono: Hände unter das Deck gelegt. P1 zieht ${draws.p1} (Prizes), P2 zieht ${draws.p2} (Prizes).`);
     ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Iono: P1 drew ' + draws.p1 + ', P2 drew ' + draws.p2);
-} (Muscle Band, Choice Belt, etc.) ---
+}
+
+// --- Damage Modifier (Muscle Band, Choice Belt, etc.) ---
 // Works directly on the DOM element; accumulates +amount per L-click, resets on R-click.
 function ptToggleDmgMod(element, amount) {
     if (element.classList.contains('active') && amount > 0) {

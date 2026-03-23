@@ -5686,7 +5686,7 @@ details[open] > .tier-trending-summary::after {
    =================================================== */
 #pt-side-buttons-left {
     position: absolute;
-    left: 22%;
+    left: 25%;
     top: 50%;
     transform: translate(-50%, -50%);
     display: flex;

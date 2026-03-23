@@ -304,6 +304,7 @@ function listenToGameState(gameId) {
             if (typeof ptMulliganCount !== 'undefined') ptMulliganCount = data.state.mulliganCount || { p1: 0, p2: 0 };
 
             // Render Board + Setup-Modal öffnen (KEIN ptNewGame — Hände sind bereits gezogen)
+            if (typeof _ptLoadCardActions === 'function') _ptLoadCardActions(); // Load trainer/ability registries for MP
             if (typeof ptRenderAll === 'function') ptRenderAll();
             if (typeof ptOpenStartPhase === 'function') ptOpenStartPhase();
             if (typeof setupDragAndDrop === 'function') setupDragAndDrop();

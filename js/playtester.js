@@ -1970,22 +1970,6 @@ function ptClickZone(player, zoneId) {
     // MP safety: block playing cards as the opponent
     if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole && ptSelectedCardIndex !== null) return;
 
-    // Clicking on opponent's zone — ptMobileCardTap handles radial menu on mobile
-    // (stadium / playzone are shared neutral zones, never block them)
-    if (player === opp && zoneId !== 'stadium' && zoneId !== 'playzone') {
-        const cards = ptState[player].field[zoneId];
-        if (cards && cards.length > 0) {
-            // Desktop: zoom + open opponent panel
-            if (!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches)) {
-                const c = _topCard(cards);
-                ptViewCard(c.imageUrl || CARD_BACK_URL, c.name || '');
-                ptOpenOpponentPanel('field', zoneId);
-            }
-            // Mobile: ptMobileCardTap (called next in onclick chain) will handle the radial menu
-        }
-        return;
-    }
-
     // No hand card selected → zoom the top card of this zone
     if (ptSelectedCardIndex === null) {
         const cards = (zoneId === 'stadium') ? ptState.stadium
@@ -2567,7 +2551,7 @@ function returnToHand(player, zoneId, event) {
     const zoneArr = isNeutral ? (zoneId === 'stadium' ? ptState.stadium : ptState.playZone) : ptState[player].field[zoneId];
     if (zoneArr.length > 0) {
         const c = zoneArr.pop();
-        const neutralOwner = (zoneId === 'stadium') ? (ptState.stadiumPlayedBy || ptCurrentPlayer) : ptCurrentPlayer;
+        const neutralOwner = (zoneId === 'stadium') ? (ptState.stadiumPlayedBy || ptCurrentPlayer) : player;
         ptState[neutralOwner].hand.push(c);
         ptLog(`Took "${c.name}" to hand.`);
         if (zoneId === 'stadium' && zoneArr.length === 0) ptState.stadiumPlayedBy = null;
@@ -2586,7 +2570,7 @@ function discardTopCard(player, zoneId, event) {
     const zoneArr = isNeutral ? (zoneId === 'stadium' ? ptState.stadium : ptState.playZone) : ptState[player].field[zoneId];
     if (zoneArr.length > 0) {
         const c = zoneArr.pop();
-        const neutralOwner = (zoneId === 'stadium') ? (ptState.stadiumPlayedBy || ptCurrentPlayer) : ptCurrentPlayer;
+        const neutralOwner = (zoneId === 'stadium') ? (ptState.stadiumPlayedBy || ptCurrentPlayer) : player;
         ptState[neutralOwner].discard.push(c);
         ptLog(`Discarded "${c.name}".`);
         if (zoneId === 'stadium' && zoneArr.length === 0) ptState.stadiumPlayedBy = null;
@@ -2605,7 +2589,7 @@ function moveToLostZone(player, zoneId, event) {
     const zoneArr = isNeutral ? (zoneId === 'stadium' ? ptState.stadium : ptState.playZone) : ptState[player].field[zoneId];
     if (zoneArr.length > 0) {
         const c = zoneArr.pop();
-        const neutralOwner = (zoneId === 'stadium') ? (ptState.stadiumPlayedBy || ptCurrentPlayer) : ptCurrentPlayer;
+        const neutralOwner = (zoneId === 'stadium') ? (ptState.stadiumPlayedBy || ptCurrentPlayer) : player;
         ptState[neutralOwner].lostzone.push(c);
         ptLog(`Sent "${c.name}" to the Lost Zone.`);
         if (zoneId === 'stadium' && zoneArr.length === 0) ptState.stadiumPlayedBy = null;
@@ -3075,22 +3059,24 @@ function ptOppRemoveAttached(opp, zoneId, cardIndex) {
 function ptRouteFromDiscard(player, index, destination) {
     const c = ptState[player].discard.splice(index, 1)[0];
     if (destination === 'hand') {
-        ptState[ptCurrentPlayer].hand.push(c);
+        ptState[player].hand.push(c);
         ptLog(`Returned "${c.name}" from discard to hand.`);
     } else {
-        ptState[ptCurrentPlayer].lostzone.push(c);
+        ptState[player].lostzone.push(c);
         ptLog(`Sent "${c.name}" from discard to Lost Zone.`);
     }
     ptCloseDiscardModal();
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Route from discard');
 }
 
 function ptTakeFromLostZone(player, index) {
     const c = ptState[player].lostzone.splice(index, 1)[0];
-    ptState[ptCurrentPlayer].hand.push(c);
+    ptState[player].hand.push(c);
     ptCloseDiscardModal();
     ptLog(`Retrieved "${c.name}" from Lost Zone to hand.`);
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Take from lost zone');
 }
 
 function ptCloseDiscardModal() {
@@ -3148,8 +3134,7 @@ function ptRenderAll() {
 
         const lostPileEl = document.getElementById(`ptLostPile-${p}`);
         if (lostPileEl) {
-            const isOpp = p !== ptCurrentPlayer;
-            const lostClick = isOpp ? `ptOpenOpponentPanel('lostzone');event.stopPropagation()` : `ptOpenLostZone('${p}');event.stopPropagation()`;
+            const lostClick = `ptOpenLostZone('${p}');event.stopPropagation()`;
             if (ptState[p].lostzone.length > 0) {
                 const top = ptState[p].lostzone[ptState[p].lostzone.length - 1];
                 lostPileEl.innerHTML = `<img src="${top.imageUrl || CARD_BACK_URL}" class="pt-field-card"

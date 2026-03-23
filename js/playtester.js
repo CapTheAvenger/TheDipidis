@@ -834,33 +834,47 @@ function ptUpdateStartBtn() {
 }
 
 function ptStartMulligan(player) {
-    // Block opponent mulligan in MP mode
-    if (ptState.isMultiplayer && player !== ptState.localRole) return;
-    if (ptState.isMultiplayer && ptState.mpSetupReady && ptState.mpSetupReady[ptState.localRole]) return;
+    try {
+        // Block opponent mulligan in MP mode
+        if (ptState.isMultiplayer && player !== ptState.localRole) {
+            console.warn('[Mulligan] Blocked: player=' + player + ' localRole=' + ptState.localRole);
+            return;
+        }
+        if (ptState.isMultiplayer && ptState.mpSetupReady && ptState.mpSetupReady[player]) {
+            console.warn('[Mulligan] Blocked: already ready');
+            return;
+        }
 
-    // Reset ALL setup selections before reshuffling
-    ptStartChoices[player] = { active: null, bench: [] };
-    ptState[player].field.active = [];
-    ptState[player].field.bench0 = [];
-    ptState[player].field.bench1 = [];
-    ptState[player].field.bench2 = [];
-    ptState[player].field.bench3 = [];
-    ptState[player].field.bench4 = [];
+        // Reset ALL setup selections before reshuffling
+        ptStartChoices[player] = { active: null, bench: [] };
+        if (ptState[player].field) {
+            ptState[player].field.active = [];
+            ptState[player].field.bench0 = [];
+            ptState[player].field.bench1 = [];
+            ptState[player].field.bench2 = [];
+            ptState[player].field.bench3 = [];
+            ptState[player].field.bench4 = [];
+        }
 
-    ptState[player].deck.push(...ptState[player].hand);
-    ptState[player].hand = [];
-    const deck = ptState[player].deck;
-    for (let i = deck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [deck[i], deck[j]] = [deck[j], deck[i]];
-    }
-    for (let i = 0; i < 7; i++) if (deck.length > 0) ptState[player].hand.push(deck.pop());
-    ptMulliganCount[player] = (ptMulliganCount[player] || 0) + 1;
-    ptLog(`🃏 ${player.toUpperCase()} mulligan #${ptMulliganCount[player]} — new 7-card hand.`);
-    ptRenderStartPhaseModal();
-    // During setup: sync only OWN player state (not full state) to avoid overwriting opponent's hand
-    if (typeof mpSyncSetupMulligan === 'function' && ptState.isMultiplayer) {
-        mpSyncSetupMulligan(player, ptMulliganCount[player]);
+        ptState[player].deck.push(...ptState[player].hand);
+        ptState[player].hand = [];
+        const deck = ptState[player].deck;
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        for (let i = 0; i < 7; i++) if (deck.length > 0) ptState[player].hand.push(deck.pop());
+        if (!ptMulliganCount) ptMulliganCount = { p1: 0, p2: 0 };
+        ptMulliganCount[player] = (ptMulliganCount[player] || 0) + 1;
+        ptLog(`🃏 ${player.toUpperCase()} mulligan #${ptMulliganCount[player]} — new 7-card hand.`);
+        ptRenderStartPhaseModal();
+        // During setup: sync only OWN player state (not full state) to avoid overwriting opponent's hand
+        if (typeof mpSyncSetupMulligan === 'function' && ptState.isMultiplayer) {
+            mpSyncSetupMulligan(player, ptMulliganCount[player]);
+        }
+    } catch (err) {
+        console.error('[Mulligan] Error:', err);
+        if (typeof showToast === 'function') showToast('Mulligan-Fehler: ' + err.message, 'error', 5000);
     }
 }
 

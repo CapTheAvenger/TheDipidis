@@ -1353,12 +1353,19 @@ function ptShuffleRemainingLookedCardsIntoDeck() {
 // Ensure only the ACTIVE player's area captures pointer events.
 // In MP: local player can only interact with their own side when it's their turn.
 function ptUpdateAreaPointerEvents() {
-    // Allow interaction with both player areas at all times for maximum game flow.
-    // Guards in ptClickZone / ptPlayFromHand / ptDraw1 etc. still prevent illegal moves.
     const p1Inner = document.querySelector('#p1-area > div');
     const p2Inner = document.querySelector('#p2-area > div');
-    if (p1Inner) p1Inner.style.pointerEvents = 'auto';
-    if (p2Inner) p2Inner.style.pointerEvents = 'auto';
+    if (ptState.isMultiplayer && ptState.localRole) {
+        // MP: only local player's area is interactive on their turn
+        const myTurn = ptCurrentPlayer === ptState.localRole;
+        const lr = ptState.localRole;
+        if (p1Inner) { p1Inner.style.pointerEvents = (lr === 'p1' && myTurn) ? 'auto' : 'none'; p1Inner.classList.remove('pt-area-passthrough'); }
+        if (p2Inner) { p2Inner.style.pointerEvents = (lr === 'p2' && myTurn) ? 'auto' : 'none'; p2Inner.classList.remove('pt-area-passthrough'); }
+    } else {
+        // SP: inner divs are transparent; only zone children capture events via .pt-area-passthrough CSS
+        if (p1Inner) { p1Inner.style.pointerEvents = 'none'; p1Inner.classList.add('pt-area-passthrough'); }
+        if (p2Inner) { p2Inner.style.pointerEvents = 'none'; p2Inner.classList.add('pt-area-passthrough'); }
+    }
 }
 
 function ptDraw1(playerOverride = null) {

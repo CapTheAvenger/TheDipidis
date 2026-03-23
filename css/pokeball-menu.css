@@ -1,4 +1,4 @@
-/* ── Pokeball Menu & Playtester Arena Styles ── */
+﻿/* â”€â”€ Pokeball Menu & Playtester Arena Styles â”€â”€ */
 
 /* Base font for the entire page */
 body {
@@ -90,13 +90,13 @@ body {
     .header h1 { font-size: 1.4em !important; }
 }
 
-/* Pokémon-style color overrides */
+/* PokÃ©mon-style color overrides */
 .btn-primary { background-color: var(--pokemon-blue) !important; border-color: #2a52be !important; }
 .btn-primary:hover { background-color: #2a52be !important; }
 .btn-success { background-color: var(--color-success) !important; border-color: #2ecc71 !important; }
 .btn-success:hover { background-color: #2ecc71 !important; }
 
-/* ── MODERN BUTTONS & ACTION BARS ── */
+/* â”€â”€ MODERN BUTTONS & ACTION BARS â”€â”€ */
 .action-bar {
     display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
     background: var(--bg-light); padding: 12px 16px; border-radius: 8px;
@@ -131,7 +131,7 @@ body {
 .btn-toggle-item:hover { background: var(--bg-light); }
 .btn-toggle-item.btn-success, .btn-toggle-item.active { background: var(--pokemon-blue) !important; color: white !important; }
 
-/* ── GOLDFISHING PLAYTESTER ── */
+/* â”€â”€ GOLDFISHING PLAYTESTER â”€â”€ */
 #playtesterModal { font-family: 'Nunito', sans-serif !important; background: #0d2a18 !important; overflow: hidden !important; }
 
 .pt-toolbar { background: linear-gradient(90deg, #1b3b8c 0%, #2a52be 100%); border-bottom: 3px solid var(--pokemon-yellow); box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 100; }
@@ -180,7 +180,7 @@ body {
 .pt-attachment-tool { position: absolute; width: 22px; height: 28px; border-radius: 4px; border: 2px solid #fff; object-fit: cover; object-position: center 10%; left: -12px; top: 50%; transform: translateY(-50%); z-index: 14; transition: transform 0.2s; }
 .pt-attachment-tool:hover { transform: translateY(-50%) scale(2) translateX(8px); z-index: 50; }
 
-/* Ability & Stadium Used Marker — hollow default, filled when .used */
+/* Ability & Stadium Used Marker â€” hollow default, filled when .used */
 .pt-ability-marker, .pt-stadium-marker {
     position: absolute;
     width: 20px; height: 20px;
@@ -195,7 +195,7 @@ body {
 .pt-stadium-marker { top: -8px; right: -8px; border-color: #3498db; color: #3498db; }
 .pt-ability-marker.used  { background: #f1c40f; color: #000; border-color: #fff; box-shadow: 0 0 10px #f1c40f; }
 .pt-stadium-marker.used  { background: #3498db; color: #fff; border-color: #fff; box-shadow: 0 0 10px #3498db; }
-/* DMG Buff Counter — hollow default, orange+glowing when .active */
+/* DMG Buff Counter â€” hollow default, orange+glowing when .active */
 .pt-dmg-modifier {
     position: absolute; top: -6px; left: -6px;
     background: rgba(0,0,0,0.7); color: #e67e22; border: 2px solid #e67e22;
@@ -208,7 +208,7 @@ body {
 .pt-hand-wrapper.dragging .pt-hand-card { opacity: 0.5; }
 .pt-hand-wrapper.dragging { pointer-events: none; }
 
-/* Limitless-Style Legend — static, always visible */
+/* Limitless-Style Legend â€” static, always visible */
 .pt-legend-box {
     position: absolute; top: 12px; left: 12px;
     background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px 12px;
@@ -269,6 +269,9 @@ body {
 .pt-log-p2 { color: #ff8b94; }
 .pt-log-neutral { color: var(--pokemon-yellow); }
 
+/* Let zone children capture events while the full-size inner div is transparent */
+.pt-area-passthrough > * { pointer-events: auto; }
+
 .pt-arena.flipped { transform: rotate(180deg); }
 .pt-arena.flipped .static-element { transform: rotate(180deg); }
 .pt-arena.flipped .pt-stadium-anchor {
@@ -307,7 +310,7 @@ body {
 .pt-dropzone { transition: background 0.15s, border-color 0.15s; }
 .pt-dropzone.drag-over { background: rgba(255,203,5,0.2) !important; border-color: var(--pokemon-yellow) !important; box-shadow: 0 0 12px rgba(255,203,5,0.4); }
 
-/* ── UX FIX: Hide browser number-input spinners (Chrome/Safari + Firefox) ── */
+/* â”€â”€ UX FIX: Hide browser number-input spinners (Chrome/Safari + Firefox) â”€â”€ */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"] { -moz-appearance: textfield; }
@@ -322,7 +325,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .pt-bottom-input.blue-border { border-color: var(--pokemon-blue); }
 .pt-bottom-input.red-border  { border-color: var(--pokemon-red); }
 
-/* ── Stepper groups (Draw / Top / Bot deck controls) ── */
+/* â”€â”€ Stepper groups (Draw / Top / Bot deck controls) â”€â”€ */
 .pt-stepper-group {
     display: flex; background: #222; border: 1px solid #555;
     border-radius: 6px; overflow: hidden; margin-bottom: 4px;
@@ -345,7 +348,7 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 .pt-stepper-action:hover { background: #2a52be; }
 
-/* ── Micro-UX: Tactile click feedback ─────────────────────────────── */
+/* â”€â”€ Micro-UX: Tactile click feedback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .btn-modern:active, .pt-btn:active, .pt-stepper-btn:active, .pt-stepper-action:active {
     transform: scale(0.95) translateY(0);
     box-shadow: none;
@@ -354,19 +357,19 @@ input[type="number"] { -moz-appearance: textfield; }
     transform: scale(0.98) !important;
 }
 
-/* ── Micro-UX: Custom scrollbars ───────────────────────────────────── */
+/* â”€â”€ Micro-UX: Custom scrollbars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
 ::-webkit-scrollbar-thumb { background: rgba(59,76,202,0.5); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(59,76,202,0.8); }
 
-/* ── Micro-UX: No accidental text selection on interactive elements ─ */
+/* â”€â”€ Micro-UX: No accidental text selection on interactive elements â”€ */
 .pt-stepper-group, .pt-bottom-input, .pt-zone-label {
     user-select: none;
     -webkit-user-select: none;
 }
 
-/* ── Responsive Playtester: Small screens (laptops, tablets) ───────── */
+/* â”€â”€ Responsive Playtester: Small screens (laptops, tablets) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 1024px) {
     .pt-arena { min-height: min(500px, 75vh); border-radius: 12px; }
     .pt-btn { font-size: 10px; padding: 3px 8px; }
@@ -401,7 +404,7 @@ input[type="number"] { -moz-appearance: textfield; }
     #ptActionLogPanel { width: 150px; height: 160px; font-size: 9px; }
 }
 
-/* ── CARD CONTEXT MENU (HOVER OVERLAY) ── */
+/* â”€â”€ CARD CONTEXT MENU (HOVER OVERLAY) â”€â”€ */
 .pt-card-context-menu {
     display: none; position: fixed; z-index: 25000; flex-direction: column;
     background: rgba(15, 15, 15, 0.97); border: 1.5px solid #444; border-radius: 10px;

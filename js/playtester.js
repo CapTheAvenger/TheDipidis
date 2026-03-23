@@ -87,6 +87,139 @@ function ptToggleLog() {
     panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
 }
 
+function ptShowManual() {
+    const existing = document.getElementById('ptManualOverlay');
+    if (existing) { existing.remove(); return; }
+    const ov = document.createElement('div');
+    ov.id = 'ptManualOverlay';
+    Object.assign(ov.style, {
+        position:'fixed', inset:'0', zIndex:'100000', background:'rgba(0,0,0,0.85)',
+        display:'flex', alignItems:'center', justifyContent:'center', padding:'20px'
+    });
+    ov.onclick = e => { if (e.target === ov) ov.remove(); };
+    const box = document.createElement('div');
+    Object.assign(box.style, {
+        background:'#1e1e2e', color:'#cdd6f4', borderRadius:'16px', padding:'28px 32px',
+        maxWidth:'720px', width:'100%', maxHeight:'85vh', overflowY:'auto',
+        fontFamily:'system-ui, sans-serif', fontSize:'14px', lineHeight:'1.6',
+        boxShadow:'0 8px 32px rgba(0,0,0,0.6)'
+    });
+    box.innerHTML = `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <h2 style="margin:0;color:#f5c542;font-size:22px">📖 Playtester – Bedienungsanleitung</h2>
+  <button onclick="document.getElementById('ptManualOverlay').remove()" style="background:none;border:none;color:#cdd6f4;font-size:24px;cursor:pointer">&times;</button>
+</div>
+
+<details open><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">⌨️ Tastenkürzel</summary>
+<table style="width:100%;border-collapse:collapse;margin:6px 0 12px">
+<tr><td style="padding:3px 8px;color:#f5c542;width:60px"><b>D</b></td><td>Karte ziehen</td></tr>
+<tr><td style="padding:3px 8px;color:#f5c542"><b>S</b></td><td>Deck mischen</td></tr>
+<tr><td style="padding:3px 8px;color:#f5c542"><b>C</b></td><td>Münze werfen</td></tr>
+<tr><td style="padding:3px 8px;color:#f5c542"><b>P</b></td><td>Zug beenden</td></tr>
+<tr><td style="padding:3px 8px;color:#f5c542"><b>F</b></td><td>Feld drehen (nur Singleplayer)</td></tr>
+</table>
+</details>
+
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🎮 Spielablauf</summary>
+<ul style="padding-left:18px;margin:6px 0 12px">
+<li><b>Start:</b> Klicke den Play ▶ Button → 7 Karten werden gezogen, 6 Preiskarten gelegt</li>
+<li><b>Aufstellung:</b> Wähle dein Aktives Pokémon und optionale Bank-Pokémon</li>
+<li><b>Münzwurf:</b> Bestimmt wer anfängt</li>
+<li><b>Mulligan:</b> Hast du kein Basis-Pokémon? → Mulligan: Hand neu mischen, Gegner darf Bonuskarten ziehen</li>
+<li><b>Zug beenden:</b> "End Turn" Button oder <b>P</b> → Gift/Verbrennung wird angewendet, Perspektive wechselt</li>
+<li><b>Sieg:</b> Alle Preiskarten genommen oder Gegner hat kein Pokémon im Spiel</li>
+</ul>
+</details>
+
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🃏 Karten-Interaktionen</summary>
+<ul style="padding-left:18px;margin:6px 0 12px">
+<li><b>Karte spielen:</b> Handkarte anklicken (auswählen) → Zielzone auf dem Feld anklicken</li>
+<li><b>Drag & Drop:</b> Karten aus der Hand oder dem Feld auf Zielzonen ziehen</li>
+<li><b>Zoom:</b> Besetzte Zone anklicken (ohne Auswahl) → Vollbild-Ansicht</li>
+<li><b>Handkarte entsorgen:</b> 🗑️ Button auf der Handkarte</li>
+<li><b>Handkarte spielen:</b> ▶ Button – spielt Trainer automatisch (falls registriert)</li>
+</ul>
+</details>
+
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">📋 Hover-Menü (Feldkarten)</summary>
+<p style="margin:4px 0">Fahre mit der Maus über eine besetzte Zone → Kontextmenü erscheint:</p>
+<ul style="padding-left:18px;margin:6px 0 12px">
+<li><b>Schaden:</b> +10 / +20 / +30 / +50 / +100 / −10 / Schaden löschen</li>
+<li><b>Status:</b> Gift ☠️ · Verbrennung 🔥 · Schlaf 💤 · Paralyse ⚡ · Verwirrung 💫</li>
+<li><b>Aktionen:</b> Zurück auf Hand ⬆️ · Ins Deck mischen · Ablagestapel 🗑️ · K.O. · Energie ablegen · Rückzug</li>
+</ul>
+</details>
+
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">📦 Deck-Kontrollen</summary>
+<p style="margin:4px 0">Fahre mit der Maus über das Deck → Buttons erscheinen:</p>
+<ul style="padding-left:18px;margin:6px 0 12px">
+<li><b>Karte ziehen</b> – Oberste Karte auf die Hand nehmen</li>
+<li><b>Suchen</b> – Gesamtes Deck durchsuchen und Karte wählen</li>
+<li><b>Mischen</b> – Deck neu mischen</li>
+<li><b>Top N ansehen</b> – Oberste N Karten anschauen (Hand / Lost Zone / Deck-Unterseite)</li>
+</ul>
+</details>
+
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">⚡ Seitenleiste-Buttons</summary>
+<ul style="padding-left:18px;margin:6px 0 12px">
+<li><b>Attack:</b> Zeigt Angriffs-Ansicht (Aktives vs Gegner) → Schließen = Zug beenden</li>
+<li><b>End Turn:</b> Zug beenden mit Gift-/Verbrennungseffekten</li>
+<li><b>👁️ Opp. View:</b> Gegner-Panel öffnen → Feld, Ablagestapel, Lost Zone einsehen & bearbeiten</li>
+<li><b>⚡ Actions:</b> Aktionsmenü → Iono, Judge, Shuffle & Draw, Mulligan u.v.m.</li>
+</ul>
+</details>
+
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🎯 Top-Leiste Buttons</summary>
+<ul style="padding-left:18px;margin:6px 0 12px">
+<li><b>MP:</b> Multiplayer-Modus starten</li>
+<li><b>▶ Start:</b> Neues Spiel starten</li>
+<li><b>🔄 Flip:</b> Feld drehen (Singleplayer)</li>
+<li><b>🚪 Quit:</b> Playtester verlassen</li>
+<li><b>🪙 Coin:</b> Münze werfen</li>
+<li><b>🔍 Zoom:</b> Zoom-Panel (alle Karten auf dem Feld)</li>
+<li><b>↩️ Undo:</b> Letzten Zug rückgängig machen</li>
+<li><b>🔀 Mulligan:</b> Mulligan-Phase starten</li>
+<li><b>V / GX:</b> VSTAR-Power / GX-Angriff als benutzt markieren</li>
+<li><b>💾 Save / Load:</b> Spielstand speichern und laden</li>
+<li><b>ℹ️ Info:</b> Diese Anleitung anzeigen</li>
+</ul>
+</details>
+
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🗂️ Ablagestapel & Lost Zone</summary>
+<ul style="padding-left:18px;margin:6px 0 12px">
+<li><b>Ablagestapel öffnen:</b> Klick auf Ablagestapel-Zone → Rasteransicht</li>
+<li><b>Karte zurück auf Hand:</b> Karte anklicken</li>
+<li><b>In Lost Zone senden:</b> Rechtsklick auf Karte</li>
+<li><b>Sortierung:</b> Nach Reihenfolge oder nach Typ (Pokémon / Supporter / Item / Tool / Stadium / Energie)</li>
+</ul>
+</details>
+
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🏷️ Markierungen & Anzeigen</summary>
+<ul style="padding-left:18px;margin:6px 0 12px">
+<li><b>Schadensbadge:</b> Rotes Badge auf der Karte zeigt aktuellen Schaden</li>
+<li><b>Ability-Marker "A":</b> Rechts unten auf dem Pokémon – Klick = Fähigkeit benutzt/reset</li>
+<li><b>Statusicons:</b> Unter dem Aktiven: Gift/Verbrennung/Schlaf/Paralyse/Verwirrung</li>
+<li><b>Energie-Anhänge:</b> Kleine Kreise am unteren Kartenrand</li>
+<li><b>Tool-Anhänge:</b> Kleine Kartenminiatur am linken Rand</li>
+<li><b>Stack-Badge 🃏:</b> Zeigt Evolutionsstufen – Klick öffnet alle Karten im Stapel</li>
+<li><b>DMG-Modifikator:</b> Bonusschaden pro Spieler (über Aktionsmenü einstellbar)</li>
+</ul>
+</details>
+
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🔄 Preiskarten</summary>
+<ul style="padding-left:18px;margin:6px 0 12px">
+<li><b>K.O.:</b> Nach einem K.O. öffnet sich der Preiskarten-Wähler</li>
+<li><b>Anzahl:</b> 1 Preis für normale Pokémon, 2 für V/ex, 3 für VMAX/VSTAR</li>
+<li><b>Preise neu mischen:</b> Über Aktionsmenü möglich</li>
+</ul>
+</details>
+
+<p style="text-align:center;margin-top:16px;color:#6c7086;font-size:12px">Klicke außerhalb oder ✕ zum Schließen</p>
+`;
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+}
+
 function ptQuitPlaytester() {
     if (!confirm('Quit Playtester and return to the main page?')) return;
     document.getElementById('playtesterModal').style.display = 'none';

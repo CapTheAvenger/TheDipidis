@@ -1883,6 +1883,7 @@
             <button id="ptGxMarker" title="GX Marker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;" aria-label="Toggle GX marker">GX</button>
             <button title="Save Game" onclick="ptSaveGame()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Save game">💾</button>
             <button title="Load Game" onclick="ptLoadGame()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Load game">📂</button>
+            <button title="Info / Anleitung" onclick="ptShowManual()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Show playtester manual">ℹ️</button>
         </div>
 
         <div id="ptDirectActionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10001; align-items:center; justify-content:center;" role="dialog" aria-modal="true" aria-label="Game actions">
@@ -1959,19 +1960,7 @@
 
         <div style="flex:1; display:flex; justify-content:center; align-items:center; padding: 15px; overflow: hidden; box-sizing:border-box; position: relative;">
 
-            <!-- ── LEGEND — static, left-centre ── -->
-            <div class="pt-legend-box" style="position:absolute; top:50%; left:8px; transform:translateY(-50%); z-index:200;
-                background:rgba(10,10,10,0.88); border:1px solid #333; border-radius:6px;
-                padding:8px 10px; color:#ddd; font-size:9px; box-shadow:0 4px 12px rgba(0,0,0,0.8);
-                display:flex; flex-direction:column; gap:4px; user-select:none; pointer-events:none; width:155px;">
-                <div style="color:#FFCB05; font-weight:900; font-size:10px; display:flex; align-items:center; gap:4px; margin-bottom:1px;">📖 LEGEND</div>
-                <div class="pt-legend-item"><div style="width:12px; height:12px; background:#ff6b6b; border-radius:50%; border:1px solid #fff; flex-shrink:0;"></div><span>DMG-Badge: Klick +10 | Shift -10</span></div>
-                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">🖱️</span><span>Rechtsklick auf Karte: Menü</span></div>
-                <div class="pt-legend-item"><div style="width:14px; height:14px; background:transparent; border:1px solid #f1c40f; color:#f1c40f; border-radius:50%; font-weight:900; font-size:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">A</div><span>Ability (gelb = used)</span></div>
-                <div class="pt-legend-item"><div style="width:8px; height:13px; background:#ccc; border-radius:2px; border:1px solid #fff; flex-shrink:0;"></div><span>Tool — linke Seite</span></div>
-                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">🤚</span><span>Auf Hand: In "Hand"-Zone ziehen</span></div>
-                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">🚀</span><span>Drag &amp; Drop</span></div>
-            </div>
+
 
             <div id="playtester-board" class="pt-arena">
 
@@ -1999,7 +1988,9 @@
                                 <div id="ptLostPile-p2" class="pt-empty-slot pt-dropzone" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-lost')" onclick="ptOpenOpponentPanel('lostzone')">&#127744;</div>
                             </div>
-                            <div style="text-align:center; position: relative;">
+                            <div style="text-align:center; position: relative;"
+                                 onmouseenter="this.querySelector('.pt-deck-controls').style.display='flex'"
+                                 onmouseleave="this.querySelector('.pt-deck-controls').style.display='none'">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDeckMenu('p2')">
                                     <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p2', 1)" title="⬆️ Karte ziehen">⬆️</div>
@@ -2085,7 +2076,9 @@
                                 <div id="ptLostPile-p1" class="pt-empty-slot pt-dropzone" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-lost')" onclick="ptOpenLostZone('p1')">&#127744;</div>
                             </div>
-                            <div style="text-align:center; position: relative;">
+                            <div style="text-align:center; position: relative;"
+                                 onmouseenter="this.querySelector('.pt-deck-controls').style.display='flex'"
+                                 onmouseleave="this.querySelector('.pt-deck-controls').style.display='none'">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDeckMenu('p1')">
                                     <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p1', 1)" title="⬆️ Karte ziehen">⬆️</div>
@@ -2168,8 +2161,8 @@
             <div id="pt-side-buttons-left">
                 <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">⚔️ Attack</button>
                 <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">⏭️ End Turn</button>
-                <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">⚔️ Opp. View</button>
-                <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡ Actions</button>
+                <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">👁️ Opp. View</button>
+                <button class="pt-side-btn actions-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡ Actions</button>
             </div>
 
         </div>
@@ -2184,8 +2177,6 @@
                 <div id="ptHandActionBar" style="display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
 
                     <button class="pt-btn" style="padding: 4px 8px; background:#e67e22; color:white; border-color:#d35400;" onclick="ptUndo()" title="Letzte Aktion rückgängig machen">↩️ Undo</button>
-
-                        <button class="pt-btn" style="padding: 4px 8px; background:#8e44ad; color:white; border-color:#9b59b6;" onclick="ptMulligan(ptCurrentPlayer)" title="Hand ins Deck, 7 neue ziehen">🃏 Mulligan</button>
 
                     <button class="pt-btn pt-mobile-toggle" style="padding: 4px 8px; background:#555; color:white; border-color:#777;" onclick="ptToggleMobileActions()" title="More actions">⚙️</button>
 
@@ -2216,11 +2207,6 @@
                     <span style="color: #e74c3c; font-size: 10px; font-weight: bold;">Opp:</span>
                     <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#c0392b; color:white; border-color:#e74c3c;" onclick="ptOpponentShuffleAndDraw()" title="Gegner mischt Hand ins Deck und zieht X Karten">🔄 S&amp;D</button>
 
-                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
-
-                    <span style="color: #ccc; font-size: 10px; font-weight: bold;">Cmd:</span>
-                    <input type="text" id="ptCommandInput-p1" class="pt-cmd-input" placeholder="/draw 3…" style="width: 80px;" onkeydown="if(event.key==='Enter'){ptRunCommand();event.preventDefault();}"
-                           title="Commands: /draw N  /mill N  /top N  /iono N  /roxanne N  /shuffle  /coin N  /dice  /attach [active|bench0-4]" aria-label="Playtester command input">
                     </div>
                 </div>
 

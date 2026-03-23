@@ -5733,8 +5733,8 @@ details[open] > .tier-trending-summary::after {
     background: linear-gradient(135deg, #9b59b6, #8e44ad);
 }
 
-#fab-action-btn {
-    display: none;
+.actions-btn {
+    background: linear-gradient(135deg, #e67e22, #d35400);
 }
 
 /* ===================================================

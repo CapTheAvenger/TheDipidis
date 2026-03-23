@@ -1092,6 +1092,17 @@ function updateStepper(id, change) {
 }
 
 // --- HOTKEYS ---
+/**
+ * Central MP turn guard: returns true if the current action should be BLOCKED.
+ * In singleplayer always returns false. In MP, blocks actions that require
+ * it to be your turn (draw, shuffle, pass). View-only actions bypass this.
+ */
+function _ptMpBlocked(allowOutOfTurn) {
+    if (!ptState.isMultiplayer || !ptState.localRole) return false;
+    if (allowOutOfTurn) return false;
+    return ptCurrentPlayer !== ptState.localRole;
+}
+
 function setupHotkeys() {
     if (document._ptHotkeyListener) document.removeEventListener('keydown', document._ptHotkeyListener);
     document._ptHotkeyListener = function(e) {
@@ -1099,12 +1110,12 @@ function setupHotkeys() {
         if (!modal || modal.style.display === 'none') return;
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         switch(e.key.toLowerCase()) {
-            case 'd': ptDraw1(); break;
-            case 's': ptShuffle(); break;
-            case 'c': ptFlipCoin(); break;
-            case 'p': ptPassTurn(); break;
-            case 'f': ptFlipBoard(); break;
-            case '`': ptToggleLog(); break;
+            case 'd': if (!_ptMpBlocked()) ptDraw1(); break;
+            case 's': if (!_ptMpBlocked()) ptShuffle(); break;
+            case 'c': ptFlipCoin(); break;  // coin flip always allowed
+            case 'p': if (!_ptMpBlocked()) ptPassTurn(); break;
+            case 'f': if (!ptState.isMultiplayer) ptFlipBoard(); break;  // flip only in SP
+            case '`': ptToggleLog(); break;  // read-only, always allowed
             case '/':
                 e.preventDefault();
                 let input = document.getElementById('ptCommandInput-' + ptCurrentPlayer)
@@ -1466,6 +1477,28 @@ function ptHandAction(type) {
 function ptGlobalJudge() {
     ptSaveState();
     const JUDGE_DRAW = 4; // TCG Rule: Judge always draws exactly 4
+
+    // In Multiplayer: nur eigene Karten lokal mischen, Gegner-Effekt per pendingEffect
+    if (ptState.isMultiplayer && ptState.localRole) {
+        const me = ptState.localRole;
+        // Process own hand → deck → shuffle → draw 4
+        ptState[me].deck.push(...ptState[me].hand);
+        ptState[me].hand = [];
+        const deck = ptState[me].deck;
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        for (let i = 0; i < JUDGE_DRAW; i++) if (deck.length > 0) ptState[me].hand.push(deck.pop());
+        ptLog(`⚖️ Judge: ${me.toUpperCase()} mischt Hand ins Deck, zieht ${JUDGE_DRAW}.`);
+        ptRenderAll();
+        if (typeof syncGlobalEffect === 'function') {
+            syncGlobalEffect('JUDGE', { drawCount: JUDGE_DRAW }, 'Judge: both draw ' + JUDGE_DRAW);
+        }
+        return;
+    }
+
+    // Singleplayer: beide lokal verarbeiten
     ['p1', 'p2'].forEach(p => {
         ptState[p].deck.push(...ptState[p].hand);
         ptState[p].hand = [];
@@ -1478,24 +1511,64 @@ function ptGlobalJudge() {
     });
     ptLog(`⚖️ Judge: Beide mischen Hand ins Deck, shufflen, ziehen je ${JUDGE_DRAW}.`);
     ptRenderAll();
-    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Judge: both draw ' + JUDGE_DRAW);
+}
+
+/**
+ * Local-only Judge handler called by the opponent's client when pendingEffect "JUDGE" is received.
+ * Shuffles OWN hand into deck and draws 4.
+ */
+function _ptLocalJudge(myRole) {
+    const JUDGE_DRAW = 4;
+    ptSaveState();
+    ptState[myRole].deck.push(...ptState[myRole].hand);
+    ptState[myRole].hand = [];
+    const deck = ptState[myRole].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    for (let i = 0; i < JUDGE_DRAW; i++) if (deck.length > 0) ptState[myRole].hand.push(deck.pop());
+    ptLog(`⚖️ Judge (Gegner): Hand ins Deck gemischt, ${JUDGE_DRAW} gezogen.`);
+    if (typeof showToast === 'function') showToast(`⚖️ Gegner hat Judge gespielt! Du ziehst ${JUDGE_DRAW} Karten.`, 'info', 4000);
 }
 
 // IONO: Hand in zufälliger Reihenfolge UNTER das Deck, ziehen = Anzahl verbleibender Prizes (TCG-Regel)
 function ptGlobalIono() {
     ptSaveState();
+
+    // In Multiplayer: nur eigene Karten lokal verarbeiten
+    if (ptState.isMultiplayer && ptState.localRole) {
+        const me = ptState.localRole;
+        const amt = ptState[me].prizes.length;
+        if (ptState[me].hand.length > 0) {
+            const handCards = [...ptState[me].hand];
+            for (let i = handCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [handCards[i], handCards[j]] = [handCards[j], handCards[i]];
+            }
+            ptState[me].deck.unshift(...handCards);
+            ptState[me].hand = [];
+        }
+        for (let i = 0; i < amt; i++) if (ptState[me].deck.length > 0) ptState[me].hand.push(ptState[me].deck.pop());
+        ptLog(`⚡ Iono: ${me.toUpperCase()} legt Hand unter Deck, zieht ${amt} (Prizes).`);
+        ptRenderAll();
+        if (typeof syncGlobalEffect === 'function') {
+            syncGlobalEffect('IONO', {}, 'Iono played');
+        }
+        return;
+    }
+
+    // Singleplayer
     const draws = {};
     ['p1', 'p2'].forEach(p => {
-        const amt = ptState[p].prizes.length; // TCG Rule: draw = remaining prize cards
+        const amt = ptState[p].prizes.length;
         draws[p] = amt;
         if (ptState[p].hand.length > 0) {
-            // Handkarten in zufälliger Reihenfolge UNTER das Deck legen (nicht ins Deck mischen)
             const handCards = [...ptState[p].hand];
             for (let i = handCards.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [handCards[i], handCards[j]] = [handCards[j], handCards[i]];
             }
-            // Unter das Deck legen (Anfang des Arrays = unterste Karte)
             ptState[p].deck.unshift(...handCards);
             ptState[p].hand = [];
         }
@@ -1503,7 +1576,26 @@ function ptGlobalIono() {
     });
     ptLog(`⚡ Iono: Hände unter das Deck gelegt. P1 zieht ${draws.p1} (Prizes), P2 zieht ${draws.p2} (Prizes).`);
     ptRenderAll();
-    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Iono: P1 drew ' + draws.p1 + ', P2 drew ' + draws.p2);
+}
+
+/**
+ * Local-only Iono handler: hand → bottom of deck, draw = prize count
+ */
+function _ptLocalIono(myRole) {
+    ptSaveState();
+    const amt = ptState[myRole].prizes.length;
+    if (ptState[myRole].hand.length > 0) {
+        const handCards = [...ptState[myRole].hand];
+        for (let i = handCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [handCards[i], handCards[j]] = [handCards[j], handCards[i]];
+        }
+        ptState[myRole].deck.unshift(...handCards);
+        ptState[myRole].hand = [];
+    }
+    for (let i = 0; i < amt; i++) if (ptState[myRole].deck.length > 0) ptState[myRole].hand.push(ptState[myRole].deck.pop());
+    ptLog(`⚡ Iono (Gegner): Hand unter Deck gelegt, ${amt} Karten gezogen.`);
+    if (typeof showToast === 'function') showToast(`⚡ Gegner hat Iono gespielt! Du ziehst ${amt} Karten.`, 'info', 4000);
 }
 
 // --- Damage Modifier (Muscle Band, Choice Belt, etc.) ---
@@ -1815,6 +1907,7 @@ function ptOpenDeckSearch(player) {
     if (btnType) { btnType.style.background = '#333';    btnType.style.color = '#ccc'; btnType.style.borderColor = '#555'; }
     _ptRefreshDeckSearchGrid();
     document.getElementById('ptDeckSearchModal').style.display = 'flex';
+    if (typeof mpSetPlayerStatus === 'function' && ptState.isMultiplayer) mpSetPlayerStatus('searching_deck');
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Searching deck...');
 }
 
@@ -1839,6 +1932,7 @@ function ptRouteFromDeck(cardId, destination) {
 
 function ptCloseDeckSearch() {
     document.getElementById('ptDeckSearchModal').style.display = 'none';
+    if (typeof mpSetPlayerStatus === 'function' && ptState.isMultiplayer) mpSetPlayerStatus(null);
     ptShuffleDeck(_ptDeckSearchPlayer || ptCurrentPlayer); // Shuffle deck after player finishes searching
     _ptDeckSearchPlayer = null;
 }
@@ -4219,22 +4313,74 @@ function ptSBFinish(player) {
 function ptTrainerUnfairStamp(player, card) {
     ptSaveState();
     const opp = player === 'p1' ? 'p2' : 'p1';
-    // Shuffle both hands into decks
+
+    // In Multiplayer: nur eigene Karten verarbeiten, Gegner per pendingEffect
+    if (ptState.isMultiplayer && ptState.localRole) {
+        const me = ptState.localRole;
+        ptState[me].deck.push(...ptState[me].hand);
+        ptState[me].hand = [];
+        for (let i = ptState[me].deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [ptState[me].deck[i], ptState[me].deck[j]] = [ptState[me].deck[j], ptState[me].deck[i]];
+        }
+        // Initiator draws 5
+        const myDraw = (me === player) ? 5 : 2;
+        for (let i = 0; i < myDraw; i++) if (ptState[me].deck.length > 0) ptState[me].hand.push(ptState[me].deck.pop());
+        ptLog(`📜 Unfair Stamp: ${me.toUpperCase()} mischt Hand ins Deck, zieht ${myDraw}.`);
+        ptRenderAll();
+        if (typeof syncGlobalEffect === 'function') {
+            syncGlobalEffect('UNFAIR_STAMP', { initiator: player, drawCount: (me === player) ? 2 : 5 }, 'Unfair Stamp played');
+        }
+        return false;
+    }
+
+    // Singleplayer: beide lokal verarbeiten
     [player, opp].forEach(p => {
         ptState[p].deck.push(...ptState[p].hand);
         ptState[p].hand = [];
-        // Shuffle deck
         for (let i = ptState[p].deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [ptState[p].deck[i], ptState[p].deck[j]] = [ptState[p].deck[j], ptState[p].deck[i]];
         }
     });
-    // You draw 5, opponent draws 2
     for (let i = 0; i < 5; i++) if (ptState[player].deck.length > 0) ptState[player].hand.push(ptState[player].deck.pop());
     for (let i = 0; i < 2; i++) if (ptState[opp].deck.length > 0) ptState[opp].hand.push(ptState[opp].deck.pop());
     ptLog(`📜 Unfair Stamp: Beide mischen Hand ins Deck. ${player.toUpperCase()} zieht 5, ${opp.toUpperCase()} zieht 2.`);
     ptRenderAll();
     return false;
+}
+
+/**
+ * Local-only Unfair Stamp handler for opponent's client.
+ */
+function _ptLocalUnfairStamp(myRole, drawCount) {
+    ptSaveState();
+    ptState[myRole].deck.push(...ptState[myRole].hand);
+    ptState[myRole].hand = [];
+    for (let i = ptState[myRole].deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ptState[myRole].deck[i], ptState[myRole].deck[j]] = [ptState[myRole].deck[j], ptState[myRole].deck[i]];
+    }
+    for (let i = 0; i < drawCount; i++) if (ptState[myRole].deck.length > 0) ptState[myRole].hand.push(ptState[myRole].deck.pop());
+    ptLog(`📜 Unfair Stamp (Gegner): Hand ins Deck gemischt, ${drawCount} gezogen.`);
+    if (typeof showToast === 'function') showToast(`📜 Gegner hat Unfair Stamp gespielt! Du ziehst ${drawCount} Karten.`, 'info', 4000);
+}
+
+// MP-local handler for Opponent Shuffle & Draw (opponent requested you shuffle hand into deck and draw)
+function _ptLocalOppShuffleDraw(myRole, drawCount) {
+    ptSaveState();
+    ptState[myRole].deck.push(...ptState[myRole].hand);
+    ptState[myRole].hand = [];
+    // Fisher-Yates shuffle
+    const deck = ptState[myRole].deck;
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    const drawn = Math.min(drawCount, deck.length);
+    for (let k = 0; k < drawn; k++) ptState[myRole].hand.push(deck.pop());
+    ptLog(`🔄 Gegner: Shuffle & Draw – Hand ins Deck gemischt, ${drawn} gezogen.`);
+    if (typeof showToast === 'function') showToast(`🔄 Gegner hat Shuffle & Draw gespielt! Du ziehst ${drawn} Karten.`, 'info', 4000);
 }
 
 function ptTrainerJudge(player, card) {
@@ -4695,20 +4841,27 @@ async function ptOpponentShuffleAndDraw() {
     const num = Math.max(0, parseInt(input));
 
     ptSaveState();
-    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
 
-    // Hand ins Deck mischen
+    // In MP: send pendingEffect so opponent processes their own shuffle & draw
+    if (ptState.isMultiplayer && ptState.localRole) {
+        if (typeof syncGlobalEffect === 'function') {
+            syncGlobalEffect('OPP_SHUFFLE_DRAW', { drawCount: num }, 'Opp Shuffle & Draw: ' + num);
+        }
+        if (typeof showToast === 'function') showToast('Gegner mischt Hand ein und zieht ' + num, 'info', 2500);
+        return;
+    }
+
+    // Singleplayer
+    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
     ptState[opp].deck.push.apply(ptState[opp].deck, ptState[opp].hand);
     ptState[opp].hand = [];
 
-    // Fisher-Yates shuffle
     const deck = ptState[opp].deck;
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         const tmp = deck[i]; deck[i] = deck[j]; deck[j] = tmp;
     }
 
-    // Draw X
     const drawn = Math.min(num, deck.length);
     for (let k = 0; k < drawn; k++) {
         ptState[opp].hand.push(deck.pop());
@@ -4716,76 +4869,101 @@ async function ptOpponentShuffleAndDraw() {
 
     ptLog('\uD83D\uDD04 Opponent Shuffle & Draw: ' + opp.toUpperCase() + ' mischt Hand ins Deck und zieht ' + drawn + '.');
     ptRenderAll();
-    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp Shuffle & Draw: ' + drawn);
 }
 
 window.executeCustomJudge = function() {
-    const p1 = parseInt(document.getElementById('inpJudgeP1')?.value) || 4;
-    const p2 = parseInt(document.getElementById('inpJudgeP2')?.value) || 4;
-
+    const p1draws = parseInt(document.getElementById('inpJudgeP1')?.value) || 4;
+    const p2draws = parseInt(document.getElementById('inpJudgeP2')?.value) || 4;
+    const modal = document.getElementById('ptDirectActionModal');
+    if (modal) modal.style.display = 'none';
     ptSaveState();
 
-    // P1 Shuffle & Draw
+    // In MP: only process own cards, send pendingEffect for opponent
+    if (ptState.isMultiplayer && ptState.localRole) {
+        const me = ptState.localRole;
+        const myDraw = me === 'p1' ? p1draws : p2draws;
+        const oppDraw = me === 'p1' ? p2draws : p1draws;
+        ptState[me].deck.push(...ptState[me].hand);
+        ptState[me].hand = [];
+        ptShuffleDeck(me);
+        ptDrawCards(me, myDraw);
+        ptRenderAll();
+        ptSaveState();
+        if (typeof syncGlobalEffect === 'function') {
+            syncGlobalEffect('JUDGE', { drawCount: oppDraw }, 'Custom Judge: ' + myDraw + '/' + oppDraw);
+        }
+        if (typeof showToast === 'function') showToast('Judge gespielt! Du ziehst ' + myDraw, 'info', 2500);
+        return;
+    }
+
+    // Singleplayer
     ptState.p1.deck.push.apply(ptState.p1.deck, ptState.p1.hand);
     ptState.p1.hand = [];
     ptShuffleDeck('p1');
-    ptDrawCards('p1', p1);
-
-    // P2 Shuffle & Draw
+    ptDrawCards('p1', p1draws);
     ptState.p2.deck.push.apply(ptState.p2.deck, ptState.p2.hand);
     ptState.p2.hand = [];
     ptShuffleDeck('p2');
-    ptDrawCards('p2', p2);
-
-    if (typeof showToast === 'function') showToast('Judge gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
-    else ptShowMessage('Judge gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
-
-    const modal = document.getElementById('ptDirectActionModal');
-    if (modal) modal.style.display = 'none';
+    ptDrawCards('p2', p2draws);
+    if (typeof showToast === 'function') showToast('Judge gespielt! P1 zieht ' + p1draws + ', P2 zieht ' + p2draws);
+    else ptShowMessage('Judge gespielt! P1 zieht ' + p1draws + ', P2 zieht ' + p2draws);
     ptRenderAll();
     ptSaveState();
-    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Judge: P1 drew ' + p1 + ', P2 drew ' + p2);
 };
 
 window.executeCustomIono = function() {
-    const p1 = parseInt(document.getElementById('inpIonoP1')?.value) || 6;
-    const p2 = parseInt(document.getElementById('inpIonoP2')?.value) || 6;
-
+    const p1draws = parseInt(document.getElementById('inpIonoP1')?.value) || 6;
+    const p2draws = parseInt(document.getElementById('inpIonoP2')?.value) || 6;
+    const modal = document.getElementById('ptDirectActionModal');
+    if (modal) modal.style.display = 'none';
     ptSaveState();
 
-    // Iono: hands go to bottom of deck (Fisher-Yates shuffle)
+    // In MP: only process own cards, send pendingEffect for opponent
+    if (ptState.isMultiplayer && ptState.localRole) {
+        const me = ptState.localRole;
+        const myDraw = me === 'p1' ? p1draws : p2draws;
+        const oppDraw = me === 'p1' ? p2draws : p1draws;
+        // Iono: hand goes to bottom of deck (shuffled)
+        for (let i = ptState[me].hand.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ptState[me].hand[i], ptState[me].hand[j]] = [ptState[me].hand[j], ptState[me].hand[i]]; }
+        ptState[me].deck.unshift(...ptState[me].hand);
+        ptState[me].hand = [];
+        ptDrawCards(me, myDraw);
+        ptRenderAll();
+        ptSaveState();
+        if (typeof syncGlobalEffect === 'function') {
+            syncGlobalEffect('IONO', { drawCount: oppDraw }, 'Custom Iono: ' + myDraw + '/' + oppDraw);
+        }
+        if (typeof showToast === 'function') showToast('Iono gespielt! Du ziehst ' + myDraw, 'info', 2500);
+        return;
+    }
+
+    // Singleplayer
     for (let i = ptState.p1.hand.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ptState.p1.hand[i], ptState.p1.hand[j]] = [ptState.p1.hand[j], ptState.p1.hand[i]]; }
     ptState.p1.deck.unshift.apply(ptState.p1.deck, ptState.p1.hand);
     ptState.p1.hand = [];
-    ptDrawCards('p1', p1);
-
+    ptDrawCards('p1', p1draws);
     for (let i = ptState.p2.hand.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ptState.p2.hand[i], ptState.p2.hand[j]] = [ptState.p2.hand[j], ptState.p2.hand[i]]; }
     ptState.p2.deck.unshift.apply(ptState.p2.deck, ptState.p2.hand);
     ptState.p2.hand = [];
-    ptDrawCards('p2', p2);
-
-    if (typeof showToast === 'function') showToast('Iono gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
-    else ptShowMessage('Iono gespielt! P1 zieht ' + p1 + ', P2 zieht ' + p2);
-
-    const modal = document.getElementById('ptDirectActionModal');
-    if (modal) modal.style.display = 'none';
+    ptDrawCards('p2', p2draws);
+    if (typeof showToast === 'function') showToast('Iono gespielt! P1 zieht ' + p1draws + ', P2 zieht ' + p2draws);
+    else ptShowMessage('Iono gespielt! P1 zieht ' + p1draws + ', P2 zieht ' + p2draws);
     ptRenderAll();
     ptSaveState();
-    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Iono: P1 drew ' + p1 + ', P2 drew ' + p2);
 };
 
 window.executeOwnShuffleDraw = function() {
     const count = parseInt(document.getElementById('inpOwnSD')?.value) || 6;
-    const p = ptCurrentPlayer || 'p1';
+    const modal = document.getElementById('ptDirectActionModal');
+    if (modal) modal.style.display = 'none';
 
+    // In MP: use localRole; In SP: use ptCurrentPlayer
+    const p = (ptState.isMultiplayer && ptState.localRole) ? ptState.localRole : (ptCurrentPlayer || 'p1');
     ptSaveState();
     ptState[p].deck.push.apply(ptState[p].deck, ptState[p].hand);
     ptState[p].hand = [];
     ptShuffleDeck(p);
     ptDrawCards(p, count);
-
-    const modal = document.getElementById('ptDirectActionModal');
-    if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Own Shuffle & Draw: ' + count);
@@ -4793,19 +4971,28 @@ window.executeOwnShuffleDraw = function() {
 
 window.executeOppShuffleDraw = function() {
     const count = parseInt(document.getElementById('inpOppSD')?.value) || 4;
-    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
+    const modal = document.getElementById('ptDirectActionModal');
+    if (modal) modal.style.display = 'none';
 
     ptSaveState();
+
+    // In MP: send pendingEffect so opponent processes their own shuffle & draw
+    if (ptState.isMultiplayer && ptState.localRole) {
+        if (typeof syncGlobalEffect === 'function') {
+            syncGlobalEffect('OPP_SHUFFLE_DRAW', { drawCount: count }, 'Opp Shuffle & Draw: ' + count);
+        }
+        if (typeof showToast === 'function') showToast('Gegner mischt Hand ein und zieht ' + count, 'info', 2500);
+        return;
+    }
+
+    // Singleplayer
+    const opp = ptCurrentPlayer === 'p1' ? 'p2' : 'p1';
     ptState[opp].deck.push.apply(ptState[opp].deck, ptState[opp].hand);
     ptState[opp].hand = [];
     ptShuffleDeck(opp);
     ptDrawCards(opp, count);
-
-    const modal = document.getElementById('ptDirectActionModal');
-    if (modal) modal.style.display = 'none';
     ptRenderAll();
     ptSaveState();
-    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp Shuffle & Draw: ' + count);
 };
 
 window.openMultiplayerMenu = function() {

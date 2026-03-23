@@ -23,6 +23,8 @@ let mpIsHost = false;          // Shortcut für Rolle
 let mpSyncEnabled = false;     // Flag: Synchronisation aktiv/inaktiv
 let mpLastSyncTime = 0;        // Verhindert Sync-Loops
 let _mpLastSeenFlip = '';      // De-dup coin flip notifications
+let _mpSyncLocked = false;     // Blocks sync during multi-step actions (debounce)
+let _mpLastProcessedEffect = ''; // De-dup pending effect processing
 const MP_SYNC_DEBOUNCE = 100;  // Min. 100ms zwischen Syncs
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -453,6 +455,43 @@ function listenToGameState(gameId) {
                 }
             }
 
+            // ── Global Effect Handler (Request & Acknowledge) ──
+            // When opponent plays Judge/Iono/Unfair Stamp, they write a pendingEffect.
+            // This client processes it locally (shuffles own deck, draws own cards).
+            const pe = data.state && data.state.pendingEffect;
+            if (pe && pe.initiator && pe.initiator !== (ptState.localRole || (mpIsHost ? 'p1' : 'p2'))) {
+                const peKey = `${pe.type}_${pe.timestamp}`;
+                if (peKey !== _mpLastProcessedEffect) {
+                    _mpLastProcessedEffect = peKey;
+                    const myRole = ptState.localRole || (mpIsHost ? 'p1' : 'p2');
+                    mpLog(`[MP] Processing pending effect: ${pe.type} from ${pe.initiator}`);
+
+                    if (pe.type === 'JUDGE' && typeof _ptLocalJudge === 'function') {
+                        _ptLocalJudge(myRole);
+                    } else if (pe.type === 'IONO' && typeof _ptLocalIono === 'function') {
+                        _ptLocalIono(myRole);
+                    } else if (pe.type === 'UNFAIR_STAMP' && typeof _ptLocalUnfairStamp === 'function') {
+                        _ptLocalUnfairStamp(myRole, pe.params.drawCount || 2);
+                    } else if (pe.type === 'OPP_SHUFFLE_DRAW' && typeof _ptLocalOppShuffleDraw === 'function') {
+                        _ptLocalOppShuffleDraw(myRole, pe.params.drawCount || 4);
+                    }
+
+                    // Re-render after local processing
+                    if (typeof ptRenderAll === 'function') ptRenderAll();
+                    // Sync own processed state back, then clear the flag
+                    syncStateToFirebase('Processed ' + pe.type).then(() => mpClearPendingEffect());
+                }
+            }
+
+            // ── Opponent Status Indicator ──
+            const ps = data.state && data.state.playerStatus;
+            if (ps) {
+                const myRole = ptState.localRole || (mpIsHost ? 'p1' : 'p2');
+                const oppRole = myRole === 'p1' ? 'p2' : 'p1';
+                const oppStatus = ps[oppRole];
+                _mpShowOpponentStatus(oppStatus);
+            }
+
             // Setup ready check — runs even for self-syncs so both-ready is detected immediately
             const setupReady = data.state.mpSetupReady;
             if (isSelfSync && setupReady && setupReady.p1 && setupReady.p2 && typeof ptStartPhase !== 'undefined' && ptStartPhase) {
@@ -540,39 +579,137 @@ function compressStateForFirebase(state) {
 }
 
 /**
- * Synchronisiert lokalen State zu Firestore
+ * Synchronisiert lokalen State zu Firestore (State-Splitting).
+ * Jeder Spieler schreibt NUR seinen eigenen State + gemeinsame Zonen.
+ * Verhindert Race Conditions durch getrennte Schreibbereiche.
  * @param {string} actionDescription - Beschreibung der Aktion (optional)
  */
 async function syncStateToFirebase(actionDescription = '') {
     if (!mpSyncEnabled || !mpGameId) return;
+    if (_mpSyncLocked) { mpLog('[MP] Sync blocked (locked)'); return; }
 
     try {
         mpLastSyncTime = Date.now();
 
         const db = firebase.firestore();
         const gameRef = db.collection('games').doc(mpGameId);
-        const shrunkenState = compressStateForFirebase(ptState);
-        // Include ptCurrentPlayer in synced state so opponent knows whose turn it is
-        shrunkenState.currentPlayer = (typeof ptCurrentPlayer !== 'undefined') ? ptCurrentPlayer : 'p1';
+        const localRole = ptState.localRole || (mpIsHost ? 'p1' : 'p2');
+        const compressed = compressStateForFirebase(ptState);
 
-        // Use transaction to prevent concurrent overwrites between players
-        await db.runTransaction(async (transaction) => {
-            const snap = await transaction.get(gameRef);
-            if (!snap.exists) return;
-            const version = (snap.data()._syncVersion || 0) + 1;
-            transaction.update(gameRef, {
-                state: shrunkenState,
-                _syncVersion: version,
-                lastAction: firebase.firestore.FieldValue.serverTimestamp(),
-                lastActionDescription: actionDescription,
-                lastActionBy: mpRole
-            });
-        });
+        // Shared zones that any player can modify
+        const sharedFields = {
+            [`state.stadium`]:         compressed.stadium || [],
+            [`state.playZone`]:        compressed.playZone || [],
+            [`state.currentPlayer`]:   (typeof ptCurrentPlayer !== 'undefined') ? ptCurrentPlayer : 'p1',
+            [`state.activeBuffs`]:     compressed.activeBuffs || { p1: 0, p2: 0 },
+            [`state.isMultiplayer`]:   true,
+        };
+        // Propagate game-phase flags (promote, prize-pick, setup)
+        if (compressed.mpPromoteNeeded !== undefined) sharedFields[`state.mpPromoteNeeded`] = compressed.mpPromoteNeeded;
+        if (compressed.mpPrizePickNeeded !== undefined) sharedFields[`state.mpPrizePickNeeded`] = compressed.mpPrizePickNeeded;
+        if (compressed.mpSetupReady !== undefined) sharedFields[`state.mpSetupReady`] = compressed.mpSetupReady;
+        if (compressed.mulliganCount !== undefined) sharedFields[`state.mulliganCount`] = compressed.mulliganCount;
+        if (compressed.stadiumPlayedBy !== undefined) sharedFields[`state.stadiumPlayedBy`] = compressed.stadiumPlayedBy;
+        if (compressed.pendingEffect !== undefined) sharedFields[`state.pendingEffect`] = compressed.pendingEffect;
+        if (compressed.playerStatus !== undefined) sharedFields[`state.playerStatus`] = compressed.playerStatus;
+        if (compressed.gameState !== undefined) sharedFields[`state.gameState`] = compressed.gameState;
 
-        mpLog(`[Multiplayer] State synced: ${actionDescription}`);
+        // Build update: local player's state + shared zones
+        const updateData = {
+            [`state.${localRole}`]: compressed[localRole],
+            ...sharedFields,
+            _syncVersion: firebase.firestore.FieldValue.increment(1),
+            lastAction: firebase.firestore.FieldValue.serverTimestamp(),
+            lastActionDescription: actionDescription,
+            lastActionBy: mpRole
+        };
+
+        await gameRef.update(updateData);
+
+        mpLog(`[Multiplayer] State-split sync (${localRole}): ${actionDescription}`);
 
     } catch (error) {
         mpError('[Multiplayer] Sync error:', error);
+    }
+}
+
+/**
+ * Sync-Lock: Blockiert weitere Syncs während einer Multi-Step-Aktion.
+ * Verhindert, dass Teil-Zustände hochgeladen werden (z.B. während Drag & Drop).
+ */
+function mpLockSync() { _mpSyncLocked = true; mpLog('[MP] Sync locked'); }
+function mpUnlockSync() { _mpSyncLocked = false; mpLog('[MP] Sync unlocked'); }
+
+/**
+ * Global-Effect Sync: Schreibt den pendingEffect-Flag UND den lokalen State.
+ * Der gegnerische Client empfängt das Event und führt den Effekt lokal aus.
+ * @param {string} effectType - z.B. 'JUDGE', 'IONO', 'UNFAIR_STAMP'
+ * @param {Object} params - Zusätzliche Parameter für den Effekt
+ * @param {string} actionDescription - Beschreibung für Log
+ */
+async function syncGlobalEffect(effectType, params, actionDescription) {
+    if (!mpSyncEnabled || !mpGameId) return;
+    try {
+        mpLastSyncTime = Date.now();
+        const db = firebase.firestore();
+        const gameRef = db.collection('games').doc(mpGameId);
+        const localRole = ptState.localRole || (mpIsHost ? 'p1' : 'p2');
+        const compressed = compressStateForFirebase(ptState);
+
+        const updateData = {
+            [`state.${localRole}`]: compressed[localRole],
+            [`state.stadium`]: compressed.stadium || [],
+            [`state.playZone`]: compressed.playZone || [],
+            [`state.currentPlayer`]: (typeof ptCurrentPlayer !== 'undefined') ? ptCurrentPlayer : 'p1',
+            [`state.pendingEffect`]: {
+                type: effectType,
+                initiator: localRole,
+                params: params || {},
+                timestamp: Date.now()
+            },
+            _syncVersion: firebase.firestore.FieldValue.increment(1),
+            lastAction: firebase.firestore.FieldValue.serverTimestamp(),
+            lastActionDescription: actionDescription,
+            lastActionBy: mpRole
+        };
+
+        await gameRef.update(updateData);
+        mpLog(`[MP] Global effect synced: ${effectType} by ${localRole}`);
+    } catch (error) {
+        mpError('[MP] Global effect sync error:', error);
+    }
+}
+
+/**
+ * Clears the pendingEffect flag after it has been processed.
+ */
+async function mpClearPendingEffect() {
+    if (!mpSyncEnabled || !mpGameId) return;
+    try {
+        const db = firebase.firestore();
+        await db.collection('games').doc(mpGameId).update({
+            [`state.pendingEffect`]: null
+        });
+    } catch (e) {
+        mpError('[MP] Clear pending effect error:', e);
+    }
+}
+
+/**
+ * Writes opponent status indicator to Firebase.
+ * Shows opponent what the local player is doing.
+ * @param {string} status - e.g. 'searching_deck', 'thinking', null (clear)
+ */
+async function mpSetPlayerStatus(status) {
+    if (!mpSyncEnabled || !mpGameId) return;
+    try {
+        const localRole = ptState.localRole || (mpIsHost ? 'p1' : 'p2');
+        const db = firebase.firestore();
+        await db.collection('games').doc(mpGameId).update({
+            [`state.playerStatus.${localRole}`]: status
+        });
+    } catch (e) {
+        mpError('[MP] Player status sync error:', e);
     }
 }
 
@@ -978,6 +1115,34 @@ function _mpShowCoinResult(result, flipper) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+// OPPONENT STATUS INDICATOR
+// ══════════════════════════════════════════════════════════════════════════
+
+const _mpStatusLabels = {
+    'searching_deck': '🔍 Gegner durchsucht sein Deck...',
+    'searching_discard': '🔍 Gegner durchsucht seinen Ablagestapel...',
+    'choosing_prizes': '🏆 Gegner wählt Preiskarten...',
+    'thinking': '🤔 Gegner überlegt...',
+    'promoting': '⭐ Gegner wählt neues aktives Pokémon...',
+};
+
+function _mpShowOpponentStatus(status) {
+    let banner = document.getElementById('mpOpponentStatusBanner');
+    if (!status) {
+        if (banner) banner.remove();
+        return;
+    }
+    const label = _mpStatusLabels[status] || `⏳ Gegner: ${status}`;
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'mpOpponentStatusBanner';
+        banner.style.cssText = 'position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:28000;background:rgba(44,62,80,0.95);color:#ecf0f1;padding:8px 24px;border-radius:12px;font-size:14px;font-weight:700;font-family:Nunito,sans-serif;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity 0.3s;';
+        document.body.appendChild(banner);
+    }
+    banner.textContent = label;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 // PUBLIC API EXPORT
 // ══════════════════════════════════════════════════════════════════════════
 
@@ -986,6 +1151,11 @@ if (typeof window !== 'undefined') {
     window.joinMultiplayerGame = joinMultiplayerGame;
     window.leaveMultiplayerGame = leaveMultiplayerGame;
     window.syncStateToFirebase = syncStateToFirebase;
+    window.syncGlobalEffect = syncGlobalEffect;
+    window.mpClearPendingEffect = mpClearPendingEffect;
+    window.mpSetPlayerStatus = mpSetPlayerStatus;
+    window.mpLockSync = mpLockSync;
+    window.mpUnlockSync = mpUnlockSync;
     window.mpAction = mpAction;
     window.mpIsMultiplayer = () => mpSyncEnabled;
     window.mpSyncSetupReady = mpSyncSetupReady;

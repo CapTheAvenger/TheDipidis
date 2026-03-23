@@ -1245,13 +1245,22 @@ function ptShuffleRemainingLookedCardsIntoDeck() {
 // --- BASIC ACTIONS & BOARD FLIP ---
 
 // Ensure only the ACTIVE player's area captures pointer events.
-// P1-area is later in the DOM (higher z-order) and would otherwise swallow all
-// clicks/drops that belong to P2's zones when it's P2's turn.
+// In MP: local player can only interact with their own side when it's their turn.
 function ptUpdateAreaPointerEvents() {
     const p1Inner = document.querySelector('#p1-area > div');
     const p2Inner = document.querySelector('#p2-area > div');
-    if (p1Inner) p1Inner.style.pointerEvents = ptCurrentPlayer === 'p1' ? 'auto' : 'none';
-    if (p2Inner) p2Inner.style.pointerEvents = ptCurrentPlayer === 'p2' ? 'auto' : 'none';
+
+    if (ptState.isMultiplayer && ptState.localRole) {
+        const myTurn = ptCurrentPlayer === ptState.localRole;
+        const lr = ptState.localRole;
+        // Local player's area: enabled only on their turn. Opponent area: always disabled.
+        if (p1Inner) p1Inner.style.pointerEvents = (lr === 'p1' && myTurn) ? 'auto' : 'none';
+        if (p2Inner) p2Inner.style.pointerEvents = (lr === 'p2' && myTurn) ? 'auto' : 'none';
+    } else {
+        // Singleplayer: active player's area enabled, other disabled
+        if (p1Inner) p1Inner.style.pointerEvents = ptCurrentPlayer === 'p1' ? 'auto' : 'none';
+        if (p2Inner) p2Inner.style.pointerEvents = ptCurrentPlayer === 'p2' ? 'auto' : 'none';
+    }
 }
 
 function ptDraw1(playerOverride = null) {
@@ -1469,12 +1478,18 @@ function ptFlipBoard() {
     const ind      = document.getElementById('activePlayerIndicator');
     if (!board) return;
     const flipping = ptCurrentPlayer === 'p1';
-    // In MP mode, only flip if it's your turn (you are the current player)
+
+    // In MP mode, only the current player can end their turn
     if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole) {
         ptShowMessage('Nicht dein Zug!');
         return;
     }
-    board.classList.toggle('flipped', flipping);
+
+    // In MP: do NOT rotate the board — each player has a fixed perspective
+    if (!ptState.isMultiplayer) {
+        board.classList.toggle('flipped', flipping);
+    }
+
     ptCurrentPlayer = flipping ? 'p2' : 'p1';
     // Reset ability markers for the newly active player at the start of their turn
     if (ptState[ptCurrentPlayer] && ptState[ptCurrentPlayer].abilityUsed) {
@@ -2787,32 +2802,29 @@ function ptRenderHand() {
     const zone = document.getElementById('ptHandZone');
     const cnt  = document.getElementById('ptHandCount');
     if (!zone) return;
-    const handCount = ptState[ptCurrentPlayer].hand.length;
-    if (cnt) cnt.innerText = handCount;
-    zone.dataset.handCount = String(handCount);
-    zone.dataset.activePlayer = (ptCurrentPlayer === 'p1') ? '1' : '2';
-    zone.innerHTML = '';
 
-    // In MP mode, check if we're rendering our own hand or the opponent's
+    // In MP: always show local player's hand, never the opponent's
     const isMP = ptState.isMultiplayer;
     const localRole = ptState.localRole;
-    const isOpponentHand = isMP && ptCurrentPlayer !== localRole;
+    const handPlayer = (isMP && localRole) ? localRole : ptCurrentPlayer;
+    const handCount = ptState[handPlayer].hand.length;
+    if (cnt) cnt.innerText = handCount;
+    zone.dataset.handCount = String(handCount);
+    zone.dataset.activePlayer = (handPlayer === 'p1') ? '1' : '2';
+    zone.innerHTML = '';
 
-    ptState[ptCurrentPlayer].hand.forEach((card, i) => {
+    // In MP: disable hand interaction when it's not your turn
+    const isOpponentHand = false; // Never show card backs — each player always sees own hand
+    const mpDisabled = isMP && ptCurrentPlayer !== localRole;
+
+    ptState[handPlayer].hand.forEach((card, i) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'pt-hand-wrapper';
 
-        if (isOpponentHand) {
-            // Opponent hand in MP → show card backs, no interaction
-            const img = document.createElement('img');
-            img.src = CARD_BACK_URL;
-            img.className = 'pt-hand-card';
-            img.title = 'Verdeckte Karte';
-            img.draggable = false;
-            img.style.opacity = '0.7';
-            wrapper.appendChild(img);
-            zone.appendChild(wrapper);
-            return;
+        // In MP when not your turn: show cards but disable interaction
+        if (mpDisabled) {
+            wrapper.style.opacity = '0.6';
+            wrapper.style.pointerEvents = 'none';
         }
 
         wrapper.draggable = true;
@@ -4048,6 +4060,7 @@ function ptToggleAbilityUsed(player, zoneId, event) {
                     if (typeof showToast === 'function') showToast(`✅ "${topPoke.name}" Ability ausgeführt`, 'success', 2500);
                     ptSaveState();
                     ptRenderAll();
+                    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Ability: ' + topPoke.name);
                     return;
                 }
                 // If ability couldn't execute (e.g. no energy), don't mark as used
@@ -4062,6 +4075,7 @@ function ptToggleAbilityUsed(player, zoneId, event) {
     const state = ptState[player].abilityUsed[zoneId];
     ptLog(`✨ Ability auf ${zoneId} ${state ? 'benutzt (✅)' : 'zurückgesetzt'}`);
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Ability toggled on ' + zoneId);
 }
 
 // --- CARD CONTEXT MENU ---

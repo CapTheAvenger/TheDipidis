@@ -332,6 +332,18 @@ function listenToGameState(gameId) {
                     if (savedLocalRole) ptState.localRole = savedLocalRole;
                 }
 
+                // Restore ptCurrentPlayer from synced state
+                if (data.state.currentPlayer && typeof ptCurrentPlayer !== 'undefined') {
+                    ptCurrentPlayer = data.state.currentPlayer;
+                }
+
+                // Update pointer events and UI indicators for the new current player
+                if (typeof ptUpdateAreaPointerEvents === 'function') ptUpdateAreaPointerEvents();
+                const ind = document.getElementById('activePlayerIndicator');
+                if (ind) ind.innerText = ptCurrentPlayer === 'p1' ? '1' : '2';
+                const handZone = document.querySelector('.pt-hand-zone');
+                if (handZone) handZone.style.borderTopColor = ptCurrentPlayer === 'p1' ? '#3B4CCA' : '#E3350D';
+
                 // Prüfe ob beide Spieler Setup abgeschlossen haben
                 const setupReady = data.state.mpSetupReady;
                 if (setupReady && setupReady.p1 && setupReady.p2 && typeof ptStartPhase !== 'undefined' && ptStartPhase) {
@@ -438,6 +450,8 @@ async function syncStateToFirebase(actionDescription = '') {
         const db = firebase.firestore();
         const gameRef = db.collection('games').doc(mpGameId);
         const shrunkenState = compressStateForFirebase(ptState);
+        // Include ptCurrentPlayer in synced state so opponent knows whose turn it is
+        shrunkenState.currentPlayer = (typeof ptCurrentPlayer !== 'undefined') ? ptCurrentPlayer : 'p1';
 
         // Use transaction to prevent concurrent overwrites between players
         await db.runTransaction(async (transaction) => {

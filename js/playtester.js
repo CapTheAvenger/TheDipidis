@@ -3131,7 +3131,7 @@ function ptPlayFromHand(index, event) {
 }
 
 function ptTakePrize(player, index) {
-    // Open the prize picker modal for a proper face-down selection
+    // Open the prize picker modal for manual selection
     ptOpenPrizePicker(player, 1);
 }
 
@@ -3141,27 +3141,44 @@ function ptGetPrizeCountForKnockout(card) {
     const haystack = `${name} ${type}`;
     if (haystack.includes('tag team')) return 3;
     if (haystack.includes('vmax') || haystack.includes('v-star') || haystack.includes('vstar')) return 3;
+    if (haystack.includes('mega') || /\bm\s/.test(name)) {
+        if (/\bex\b/.test(haystack)) return 3;
+    }
     if (/\bex\b/.test(haystack) || /\bv\b/.test(haystack) || /\bgx\b/.test(haystack)) return 2;
     return 1;
 }
 
-function ptOpenPrizePicker(player, remainingPicks = 1, taker = ptCurrentPlayer) {
+// --- Prize selection state ---
+let _ptPrizeSelection = new Set();
+
+function ptOpenPrizePicker(player, suggestedPicks = 1, taker = ptCurrentPlayer) {
     const prizes = ptState[player].prizes;
     if (!prizes || prizes.length === 0) { ptShowMessage('Keine Preiskarten mehr!'); return; }
-    remainingPicks = Math.max(1, Math.min(remainingPicks, prizes.length));
-    let html = `<div style="background:#1a1a2e;border:2px solid #FFCB05;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:440px;">
-        <h3 style="color:#FFCB05;margin-top:0;">🏆 Preiskarte nehmen</h3>
-        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle ${remainingPicks} Preiskarte${remainingPicks === 1 ? '' : 'n'} (${prizes.length} verbleiben)</p>
+    suggestedPicks = Math.max(1, Math.min(suggestedPicks, prizes.length));
+    _ptPrizeSelection = new Set();
+
+    let html = `<div style="background:#1a1a2e;border:2px solid #FFCB05;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:480px;">
+        <h3 style="color:#FFCB05;margin-top:0;">🏆 Preiskarten nehmen</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:6px;">Markiere die Preiskarten die du nehmen möchtest (Empfehlung: ${suggestedPicks})</p>
+        <p id="ptPrizeCounter" style="color:#FFCB05;font-size:14px;font-weight:bold;margin:4px 0 14px;">0 / ${prizes.length} ausgewählt</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:18px;">`;
     prizes.forEach((_, i) => {
-        html += `<div style="cursor:pointer;transition:transform .15s;" onclick="ptPickPrizeCard('${player}',${i})"
+        html += `<div id="ptPrizeSlot${i}" style="cursor:pointer;transition:transform .15s;position:relative;"
+                      onclick="ptTogglePrizeSelection(${i}, ${prizes.length})"
                       onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-            <img src="${CARD_BACK_URL}" style="width:72px;border-radius:8px;border:2px solid #FFCB05;box-shadow:0 0 10px rgba(255,203,5,0.4);" title="Preiskarte ${i+1} nehmen">
+            <img src="${CARD_BACK_URL}" style="width:72px;border-radius:8px;border:3px solid #555;box-shadow:0 0 6px rgba(0,0,0,0.4);transition:border-color .2s,box-shadow .2s;" title="Preiskarte ${i+1}">
+            <div id="ptPrizeCheck${i}" style="display:none;position:absolute;top:-6px;right:-6px;background:#FFCB05;color:#1a1a2e;border-radius:50%;width:22px;height:22px;font-size:14px;font-weight:bold;line-height:22px;">✓</div>
         </div>`;
     });
     html += `</div>
-        <button onclick="document.getElementById('ptPrizePickerModal').style.display='none'"
-                style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid #555;border-radius:6px;padding:6px 18px;cursor:pointer;font-size:12px;">✕ Schließen</button>
+        <div style="display:flex;gap:10px;justify-content:center;align-items:center;">
+            <button id="ptPrizeOkBtn" onclick="ptConfirmPrizeSelection()" disabled
+                    style="background:linear-gradient(135deg,#FFCB05,#e6b800);color:#1a1a2e;border:none;border-radius:8px;padding:10px 28px;cursor:pointer;font-size:14px;font-weight:bold;opacity:0.5;transition:opacity .2s;">
+                ✅ OK — Nehmen
+            </button>
+            <button onclick="document.getElementById('ptPrizePickerModal').style.display='none'"
+                    style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid #555;border-radius:6px;padding:8px 18px;cursor:pointer;font-size:12px;">✕ Abbrechen</button>
+        </div>
     </div>`;
     let modal = document.getElementById('ptPrizePickerModal');
     if (!modal) {
@@ -3172,29 +3189,60 @@ function ptOpenPrizePicker(player, remainingPicks = 1, taker = ptCurrentPlayer) 
     }
     modal.dataset.player = player;
     modal.dataset.taker = taker;
-    modal.dataset.remainingPicks = String(remainingPicks);
     modal.innerHTML = html;
     modal.style.display = 'flex';
 }
 
-function ptPickPrizeCard(player, index) {
-    const card = ptState[player].prizes.splice(index, 1)[0];
-    if (!card) return;
-    const modal = document.getElementById('ptPrizePickerModal');
-    const taker = modal?.dataset.taker || ptCurrentPlayer;
-    ptState[taker].hand.push(card);
-    const remainingPicks = Math.max(0, (parseInt(modal?.dataset.remainingPicks || '1', 10) || 1) - 1);
-    ptLog(`🏆 ${taker.toUpperCase()} nimmt eine Preiskarte: "${card.name}". Noch ${ptState[player].prizes.length} übrig.`);
-    if (modal) {
-        if (remainingPicks > 0 && ptState[player].prizes.length > 0) {
-            ptOpenPrizePicker(player, remainingPicks, taker);
-        } else {
-            modal.style.display = 'none';
-        }
+function ptTogglePrizeSelection(index, total) {
+    if (_ptPrizeSelection.has(index)) {
+        _ptPrizeSelection.delete(index);
+    } else {
+        _ptPrizeSelection.add(index);
     }
+    // Update visuals
+    for (let i = 0; i < total; i++) {
+        const slot = document.getElementById('ptPrizeSlot' + i);
+        const check = document.getElementById('ptPrizeCheck' + i);
+        if (!slot || !check) continue;
+        const selected = _ptPrizeSelection.has(i);
+        const img = slot.querySelector('img');
+        if (img) {
+            img.style.borderColor = selected ? '#FFCB05' : '#555';
+            img.style.boxShadow = selected ? '0 0 12px rgba(255,203,5,0.7)' : '0 0 6px rgba(0,0,0,0.4)';
+        }
+        check.style.display = selected ? 'block' : 'none';
+    }
+    // Update counter + OK button
+    const counter = document.getElementById('ptPrizeCounter');
+    if (counter) counter.textContent = `${_ptPrizeSelection.size} / ${total} ausgewählt`;
+    const okBtn = document.getElementById('ptPrizeOkBtn');
+    if (okBtn) {
+        okBtn.disabled = _ptPrizeSelection.size === 0;
+        okBtn.style.opacity = _ptPrizeSelection.size > 0 ? '1' : '0.5';
+    }
+}
+
+function ptConfirmPrizeSelection() {
+    const modal = document.getElementById('ptPrizePickerModal');
+    if (!modal || _ptPrizeSelection.size === 0) return;
+    const player = modal.dataset.player;
+    const taker = modal.dataset.taker || ptCurrentPlayer;
+    // Take selected prizes (sort descending so splice indices stay valid)
+    const indices = [..._ptPrizeSelection].sort((a, b) => b - a);
+    const taken = [];
+    indices.forEach(idx => {
+        const card = ptState[player].prizes.splice(idx, 1)[0];
+        if (card) {
+            ptState[taker].hand.push(card);
+            taken.push(card.name);
+        }
+    });
+    ptLog(`🏆 ${taker.toUpperCase()} nimmt ${taken.length} Preiskarte${taken.length === 1 ? '' : 'n'}: ${taken.join(', ')}. Noch ${ptState[player].prizes.length} übrig.`);
+    _ptPrizeSelection = new Set();
+    modal.style.display = 'none';
     ptRenderAll();
-    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Took prize: ' + card.name);
-    // Win check: all prizes taken
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Took ' + taken.length + ' prize(s)');
+    // Win check
     if (ptState[taker].prizes.length === 0) {
         setTimeout(() => ptShowWinScreen(taker), 350);
     }

@@ -2849,8 +2849,7 @@ function ptRenderHand() {
         img.ondblclick = () => ptViewCard(card.imageUrl, card.name);
 
         wrapper.appendChild(img);
-        const isMobileViewport = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-        if (!isMobileViewport) {
+        {
             // Play button (trainers: Supporter, Item, Tool, Stadium)
             const ct = (card.cardType || '').toLowerCase();
             const isTrainer = ct === 'supporter' || ct === 'item' || ct === 'tool' || ct === 'stadium'

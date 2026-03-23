@@ -4323,8 +4323,30 @@ h3:first-child {
     display: none;
 }
 
-/* Desktop: hide play drop zone (only visible on mobile) */
-.pt-play-drop { display: none; }
+/* Desktop: play drop zone visible on board */
+.pt-play-drop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    min-height: 56px;
+    background: rgba(0, 180, 50, 0.10);
+    border: 2px dashed rgba(0, 200, 60, 0.45);
+    border-radius: 8px;
+    margin-bottom: 4px;
+    color: rgba(0, 220, 60, 0.75);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: default;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.pt-play-drop.drag-over {
+    background: rgba(0, 200, 60, 0.32) !important;
+    border-color: #00c83c !important;
+    box-shadow: 0 0 14px rgba(0, 200, 60, 0.5);
+    color: #fff;
+}
 
 /* ===================================================
    FIX: SCHWEBENDE KAMPF-BUTTONS (MOBILE)

@@ -615,13 +615,13 @@ function _ptIsBasic(card) {
     // (Rettung für den Fall, dass card data nicht geladen wurde)
     if (!t) {
         const name = (card.name || '').toLowerCase();
-        // Nicht-Pokémon erkennen und ausschließen
+        // Nicht-Pokémon (Energy & Trainer) erkennen und hart ausschließen
         if (/\benergy\b/i.test(name)) return false;
         if (/^(professor|boss|arven|iono|judge|penny|cynthia|marnie|roxanne|irida|colress|n |research|nest ball|ultra ball|rare candy|switch|escape rope|battle vip|trekking shoes|pal pad|super rod|energy recycler|pokégear|exp\. share|forest seal|choice belt|tool scrapper|lost vacuum|counter catcher|crushing hammer|enhanced hammer|field blower|gust|lysandre|acerola|guzma|boss.s orders|temple|artazon|beach court|collapsed|mesagoza|jamming tower|path to the peak|tower of darkness|magma basin|chaotic swell|training court)/i.test(name)) return false;
-        // Pokémon-typische Namensmuster (Ex, V, ex, GX, VSTAR, etc.)
-        if (/\bex\b|\bv\b|\bvmax\b|\bvstar\b|\bgx\b|\btag team\b/i.test(name)) return true;
-        // Einsilbige Pokémon-Namen ohne Trainer-Indikatoren: wahrscheinlich ein Basic
-        // Aber wir können hier nicht sicher sein, also false
+        
+        // Wenn es weder Energie noch ein bekannter Trainer ist, 
+        // geben wir der Karte den "Benefit of the Doubt" und erlauben sie als Basic.
+        return true;
     }
     return false;
 }

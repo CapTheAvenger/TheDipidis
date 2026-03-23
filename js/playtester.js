@@ -857,7 +857,10 @@ function ptStartMulligan(player) {
     ptMulliganCount[player] = (ptMulliganCount[player] || 0) + 1;
     ptLog(`🃏 ${player.toUpperCase()} mulligan #${ptMulliganCount[player]} — new 7-card hand.`);
     ptRenderStartPhaseModal();
-    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Mulligan #' + ptMulliganCount[player] + ' ' + player.toUpperCase());
+    // During setup: sync only OWN player state (not full state) to avoid overwriting opponent's hand
+    if (typeof mpSyncSetupMulligan === 'function' && ptState.isMultiplayer) {
+        mpSyncSetupMulligan(player, ptMulliganCount[player]);
+    }
 }
 
 function ptDoStartCoinFlip() {
@@ -3075,16 +3078,18 @@ function ptPlayFromHand(index, event) {
     const _tKey = _ptGetAbilityKey(card);
     const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
     if (_tFn) {
+        // Sync BEFORE the effect timeout so the card move is visible, then the effect will sync again when it completes
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
         setTimeout(() => {
             _tFn(player, card);
-            // Sync after effect executes (for immediate effects; modal effects sync in their callbacks)
-            if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name + ' (effect)');
         }, 50);
         if (typeof showToast === 'function') showToast(`✅ "${card.name}" — Effekt wird ausgeführt`, 'success', 2500);
-    } else if ((card.cardType || '').toLowerCase().includes('trainer')) {
-        if (typeof showToast === 'function') showToast(`ℹ️ "${card.name}" — kein Auto-Effekt, manuell ausführen`, 'warning', 3000);
+    } else {
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
+        if ((card.cardType || '').toLowerCase().includes('trainer')) {
+            if (typeof showToast === 'function') showToast(`ℹ️ "${card.name}" — kein Auto-Effekt, manuell ausführen`, 'warning', 3000);
+        }
     }
-    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
 }
 
 function ptTakePrize(player, index) {

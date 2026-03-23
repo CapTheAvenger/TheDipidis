@@ -319,8 +319,9 @@ function listenToGameState(gameId) {
         // State Sync (nur wenn Sync aktiv und nicht eigene Änderung)
         if (mpSyncEnabled && data.state) {
             const now = Date.now();
+            const isSelfSync = data.lastActionBy === mpRole;
             // Verhindere Sync-Loop: Nur externe Updates verarbeiten
-            if (now - mpLastSyncTime > MP_SYNC_DEBOUNCE) {
+            if (now - mpLastSyncTime > MP_SYNC_DEBOUNCE && !isSelfSync) {
                 mpLog('[Multiplayer] Syncing remote state...');
                 
                 if (typeof ptState !== 'undefined') {
@@ -404,12 +405,49 @@ function listenToGameState(gameId) {
                 if (typeof ptRenderAll === 'function') {
                     ptRenderAll();
                 }
+                // During setup, also re-render the setup modal so opponent's status updates
+                if (typeof ptStartPhase !== 'undefined' && ptStartPhase && typeof ptRenderStartPhaseModal === 'function') {
+                    ptRenderStartPhaseModal();
+                }
                 
                 // Update Message
                 if (typeof ptShowMessage === 'function') {
                     const action = data.lastActionDescription || 'Gegner hat gezogen';
                     ptShowMessage(`🌐 ${action}`);
                 }
+            }
+
+            // Setup ready check — runs even for self-syncs so both-ready is detected immediately
+            const setupReady = data.state.mpSetupReady;
+            if (isSelfSync && setupReady && setupReady.p1 && setupReady.p2 && typeof ptStartPhase !== 'undefined' && ptStartPhase) {
+                mpLog('[Multiplayer] Both players ready (self-sync) — finalizing setup');
+                ['p1', 'p2'].forEach(p => {
+                    if (ptState[p].prizes.length === 0) {
+                        for (let i = 0; i < 6; i++) {
+                            if (ptState[p].deck.length > 0) ptState[p].prizes.push(ptState[p].deck.pop());
+                        }
+                    }
+                });
+                ptStartPhase = false;
+                if (typeof ptStartChoices !== 'undefined') {
+                    ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
+                }
+                const fpModal2 = document.getElementById('ptStartPhaseModal');
+                if (fpModal2) fpModal2.style.display = 'none';
+                if (typeof ptLog === 'function') ptLog('✅ Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!');
+
+                const p1m2 = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p1 || 0) : 0;
+                const p2m2 = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p2 || 0) : 0;
+                const myRole2 = ptState.localRole;
+                const myMull2 = myRole2 === 'p1' ? p1m2 : p2m2;
+                const oppMull2 = myRole2 === 'p1' ? p2m2 : p1m2;
+                const bonus2 = oppMull2 - myMull2;
+                if (bonus2 > 0 && typeof ptShowMulliganDrawModal === 'function') {
+                    ptShowMulliganDrawModal(myRole2, bonus2);
+                } else if (myRole2 === 'p1' && typeof ptDraw1 === 'function') {
+                    ptDraw1('p1');
+                }
+                syncStateToFirebase('Game started — both players ready');
             }
         }
 
@@ -540,6 +578,30 @@ async function mpSyncSetupReady() {
         mpLog(`[Multiplayer] Setup synced for ${localRole}`);
     } catch (error) {
         mpError('[Multiplayer] Setup sync error:', error);
+    }
+}
+
+/**
+ * Sync Mulligan during setup: Writes ONLY the local player's state (hand/deck)
+ * Prevents overwriting opponent's hand with stale data
+ */
+async function mpSyncSetupMulligan(player, mulliganCount) {
+    if (!mpGameId) return;
+    const localRole = ptState.localRole || (mpIsHost ? 'p1' : 'p2');
+    if (player !== localRole) return;
+    try {
+        const db = firebase.firestore();
+        mpLastSyncTime = Date.now();
+        const shrunkenLocalState = compressStateForFirebase(ptState[localRole]);
+        await db.collection('games').doc(mpGameId).update({
+            [`state.${localRole}`]: shrunkenLocalState,
+            lastAction: firebase.firestore.FieldValue.serverTimestamp(),
+            lastActionDescription: `Mulligan #${mulliganCount} ${localRole.toUpperCase()}`,
+            lastActionBy: mpRole
+        });
+        mpLog(`[Multiplayer] Mulligan synced for ${localRole}`);
+    } catch (error) {
+        mpError('[Multiplayer] Mulligan sync error:', error);
     }
 }
 
@@ -895,6 +957,7 @@ if (typeof window !== 'undefined') {
     window.mpAction = mpAction;
     window.mpIsMultiplayer = () => mpSyncEnabled;
     window.mpSyncSetupReady = mpSyncSetupReady;
+    window.mpSyncSetupMulligan = mpSyncSetupMulligan;
     window.toggleMultiplayerMenu = toggleMultiplayerMenu;
     window.openMultiplayerFromSandbox = openMultiplayerFromSandbox;
     window.mpCreateGame = mpCreateGame;

@@ -86,6 +86,11 @@ function ptToggleLog() {
     panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
 }
 
+function ptQuitPlaytester() {
+    if (!confirm('Quit Playtester and return to the main page?')) return;
+    document.getElementById('playtesterModal').style.display = 'none';
+}
+
 // --- INITIALIZATION ---
 
 function openPlaytester(source) {

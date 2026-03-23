@@ -37,3 +37,9 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+
+document.addEventListener('languageChanged', function() {
+    const activeBtn = document.querySelector('.menu-item.active');
+    const badge = document.getElementById('current-tab-title');
+    if (activeBtn && badge) badge.innerText = activeBtn.innerText.trim();
+});

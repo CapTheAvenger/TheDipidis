@@ -43,41 +43,44 @@
                             <div class="pokeball-center"></div>
                         </div>
                         <div id="mainMenuDropdown" class="main-menu-dropdown">
-                            <div class="menu-header">Main Menu</div>
-                            <button id="menu-btn-city-league"          class="menu-item active" onclick="switchTabAndUpdateMenu('city-league')">🇯🇵 City League Meta</button>
-                            <button id="menu-btn-city-league-analysis" class="menu-item"        onclick="switchTabAndUpdateMenu('city-league-analysis')">📊 Deck Analysis (Japan)</button>
-                            <button id="menu-btn-current-meta"         class="menu-item"        onclick="switchTabAndUpdateMenu('current-meta')">🎮 Current Meta (Global)</button>
-                            <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')">📈 Deck Analysis (Global)</button>
-                            <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')">🏆 Past Meta</button>
-                            <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')">🧰 Card Database</button>
-                            <button id="menu-btn-proxy"                class="menu-item"        onclick="switchTabAndUpdateMenu('proxy')">🖨️ Proxy Printer</button>
-                            <button id="menu-btn-sandbox"              class="menu-item"        onclick="switchTabAndUpdateMenu('sandbox')">⚔️ Playtester Sandbox</button>
-                            <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')">👤 My Profile</button>
-                            <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')">📖 How to Use</button>
+                            <div class="menu-header" data-i18n="menu.title">Main Menu</div>
+                            <button id="menu-btn-city-league"          class="menu-item active" onclick="switchTabAndUpdateMenu('city-league')" data-i18n="menu.cityLeague">🇯🇵 City League Meta</button>
+                            <button id="menu-btn-city-league-analysis" class="menu-item"        onclick="switchTabAndUpdateMenu('city-league-analysis')" data-i18n="menu.cityLeagueAnalysis">📊 Deck Analysis (Japan)</button>
+                            <button id="menu-btn-current-meta"         class="menu-item"        onclick="switchTabAndUpdateMenu('current-meta')" data-i18n="menu.currentMeta">🎮 Current Meta (Global)</button>
+                            <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')" data-i18n="menu.currentMetaAnalysis">📈 Deck Analysis (Global)</button>
+                            <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')" data-i18n="menu.pastMeta">🏆 Past Meta</button>
+                            <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')" data-i18n="menu.cardDatabase">🧰 Card Database</button>
+                            <button id="menu-btn-proxy"                class="menu-item"        onclick="switchTabAndUpdateMenu('proxy')" data-i18n="menu.proxyPrinter">🖨️ Proxy Printer</button>
+                            <button id="menu-btn-sandbox"              class="menu-item"        onclick="switchTabAndUpdateMenu('sandbox')" data-i18n="menu.playtester">⚔️ Playtester Sandbox</button>
+                            <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')" data-i18n="menu.profile">👤 My Profile</button>
+                            <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')" data-i18n="menu.howToUse">📖 How to Use</button>
                         </div>
                     </div>
 
                     <div>
                         <h1 style="margin: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 1.8em; font-weight: 900; color: #2c3e50;">
-                            🎴 Pokémon TCG Hub
-                            <span id="current-tab-title" class="current-tab-badge">🇯🇵 City League Meta</span>
+                            <span data-i18n="app.title">🎴 Pokémon TCG Hub</span>
+                            <span id="current-tab-title" class="current-tab-badge" data-i18n="tab.cityLeague">🇯🇵 City League Meta</span>
                         </h1>
-                        <p style="margin: 5px 0 0 0; color: #7f8c8d; font-weight: 600; font-size: 0.95em;">Your Portal for Meta Analysis &amp; Deck Building</p>
+                        <p style="margin: 5px 0 0 0; color: #7f8c8d; font-weight: 600; font-size: 0.95em;" data-i18n="app.subtitle">Your Portal for Meta Analysis &amp; Deck Building</p>
                     </div>
                 </div>
 
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button id="langToggleBtn" onclick="switchLanguage(getLang() === 'en' ? 'de' : 'en')" style="background: #f0f0f0; border: 2px solid #ddd; padding: 6px 14px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px; transition: all 0.2s;" title="Switch language">🇩🇪 DE</button>
                 <div id="user-menu">
                     <button id="signin-btn" class="user-btn" onclick="showAuthModal('signin')" style="display: none; background: #f8f9fa; border: 2px solid #ddd; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer;">
                         <img loading="lazy" src="images/pokeball-icon.png" alt="Sign In" width="18" height="18" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
-                        Sign In
+                        <span data-i18n="header.signIn">Sign In</span>
                     </button>
                     <div id="user-info" class="user-info" style="display: none; align-items: center; gap: 15px;">
                         <span id="user-email-display" style="color: #7f8c8d; font-weight: 600; font-size: 0.9em;"></span>
                         <button class="user-btn" onclick="switchTabAndUpdateMenu('profile')" style="background: #e8f4fd; color: #3B4CCA; border: 2px solid #3B4CCA; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
                             <img loading="lazy" src="images/pokeball-icon.png" alt="My Profile" width="18" height="18" style="width: 18px; height: 18px; margin-right: 6px; vertical-align: middle;">
-                            My Profile
+                            <span data-i18n="header.myProfile">My Profile</span>
                         </button>
                     </div>
+                </div>
                 </div>
 
             </div>
@@ -85,19 +88,19 @@
         
         <div class="tabs-container">
             <div class="tab-navigation">
-                <button class="tab-btn active" onclick="switchTab('city-league')">🇯🇵 City League Meta<br><span class="tab-subtitle">(Japanische Turniere)</span></button>
-                <button class="tab-btn" onclick="switchTab('city-league-analysis')">📊 City League Deck Analysis</button>
-                <button class="tab-btn" onclick="switchTab('current-meta')">🎮 Current Meta<br><span class="tab-subtitle">(Globales Meta &amp; Online)</span></button>
-                <button class="tab-btn" onclick="switchTab('current-analysis')">📈 Current Meta Deck Analysis</button>
-                <button class="tab-btn" onclick="switchTab('past-meta')">🏆 Past Meta</button>
-                <button class="tab-btn" onclick="switchTab('cards')">🧰 Cards</button>
-                <button class="tab-btn" onclick="switchTab('proxy')">🖨️ Proxy Printer</button>
-                <button class="tab-btn" onclick="switchTab('sandbox')">⚔️ Playtester</button>
-                <button class="tab-btn" onclick="switchTab('profile')">
+                <button class="tab-btn active" onclick="switchTab('city-league')" data-i18n="tab.cityLeague">🇯🇵 City League Meta</button>
+                <button class="tab-btn" onclick="switchTab('city-league-analysis')" data-i18n="tab.cityLeagueAnalysis">📊 City League Deck Analysis</button>
+                <button class="tab-btn" onclick="switchTab('current-meta')" data-i18n="tab.currentMeta">🎮 Current Meta</button>
+                <button class="tab-btn" onclick="switchTab('current-analysis')" data-i18n="tab.currentMetaAnalysis">📈 Current Meta Deck Analysis</button>
+                <button class="tab-btn" onclick="switchTab('past-meta')" data-i18n="tab.pastMeta">🏆 Past Meta</button>
+                <button class="tab-btn" onclick="switchTab('cards')" data-i18n="tab.cards">🧰 Cards</button>
+                <button class="tab-btn" onclick="switchTab('proxy')" data-i18n="tab.proxyPrinter">🖨️ Proxy Printer</button>
+                <button class="tab-btn" onclick="switchTab('sandbox')" data-i18n="tab.playtester">⚔️ Playtester</button>
+                <button class="tab-btn" onclick="switchTab('profile')" data-i18n="tab.profile">
                     <img loading="lazy" src="images/pokeball-icon.png" alt="Profile" width="16" height="16" style="width: 16px; height: 16px; margin-right: 5px; vertical-align: middle;">
                     Profile
                 </button>
-                <button class="tab-btn" onclick="switchTab('tutorial')">📖 How to Use</button>
+                <button class="tab-btn" onclick="switchTab('tutorial')" data-i18n="tab.howToUse">📖 How to Use</button>
             </div>
             
             <!-- Tab 1: City League Meta -->
@@ -967,16 +970,16 @@
             <div id="proxy" class="tab-content">
                 <div class="container" style="background: white; padding: 25px; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.08);">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 18px;">
-                        <h2 style="margin:0; color:#2c3e50;">🖨️ Proxy Printer <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help"></button></h2>
+                        <h2 style="margin:0; color:#2c3e50;"><span data-i18n="tab.proxyPrinter">🖨️ Proxy Printer</span> <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help"></button></h2>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;">Unique: <span id="proxyUniqueCount">0</span></div>
-                            <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;">Copies: <span id="proxyCopiesCount">0</span></div>
+                            <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;"><span data-i18n="misc.unique">Unique:</span> <span id="proxyUniqueCount">0</span></div>
+                            <div style="background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:8px 12px; font-weight:700; color:#2c3e50;"><span data-i18n="misc.copies">Copies:</span> <span id="proxyCopiesCount">0</span></div>
                         </div>
                     </div>
 
                     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 16px;">
                         <div style="border:1px solid #dee2e6; border-radius:10px; padding:14px;">
-                            <h3 style="margin:0 0 10px 0; color:#2c3e50;">📋 Import Decklist</h3>
+                            <h3 style="margin:0 0 10px 0; color:#2c3e50;" data-i18n="section.importDecklist">📋 Import Decklist</h3>
                             <textarea id="proxyDecklistInput" placeholder="4 Buddy-Buddy Poffin SVI 186&#10;2 Rare Candy PAF 89" style="width:100%; min-height:140px; resize:vertical; border:1px solid #ced4da; border-radius:8px; padding:10px; font-family: Consolas, monospace; font-size: 13px;"></textarea>
                             <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
                                 <button class="btn-modern" onclick="importDecklistToProxy()" style="background:#e74c3c; border-color:#c0392b; color:white;">Add Decklist to Queue</button>
@@ -984,7 +987,7 @@
                         </div>
 
                         <div style="border:1px solid #dee2e6; border-radius:10px; padding:14px;">
-                            <h3 style="margin:0 0 10px 0; color:#2c3e50;">🎯 Add Single Card</h3>
+                            <h3 style="margin:0 0 10px 0; color:#2c3e50;" data-i18n="section.addSingleCard">🎯 Add Single Card</h3>
                             <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 80px; gap:8px;">
                                 <input id="proxyManualName" type="text" placeholder="Card name (search...)" autocomplete="off" list="proxyManualNameSuggestions" style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
                                 <input id="proxyManualSet" type="text" placeholder="Set" style="border:1px solid #ced4da; border-radius:8px; padding:10px;">
@@ -1023,7 +1026,7 @@
                         <div style="background: #f8f9fa; padding: 25px; border-radius: 16px; border: 3px solid #3B4CCA; box-shadow: 0 5px 15px rgba(59,76,202,0.15); position: relative; overflow: hidden;">
                             <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: #3B4CCA;"></div>
                             <h2 style="margin-top: 0; color: #3B4CCA; display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 20px; height: 20px; background: #3B4CCA; border-radius: 50%;"></div> Player 1
+                                <div style="width: 20px; height: 20px; background: #3B4CCA; border-radius: 50%;"></div> <span data-i18n="misc.player1">Player 1</span>
                             </h2>
                             <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">Paste your Pokémon TCG Live deck code here:</p>
                             <textarea id="sandboxImportP1" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 180px; padding: 15px; border-radius: 8px; border: 2px solid #e1e8ed; font-family: monospace; font-size: 13px; resize: vertical; margin-bottom: 15px; box-sizing: border-box; background: #fff;"></textarea>
@@ -1036,7 +1039,7 @@
                         <div style="background: #f8f9fa; padding: 25px; border-radius: 16px; border: 3px solid #E3350D; box-shadow: 0 5px 15px rgba(227,53,13,0.15); position: relative; overflow: hidden;">
                             <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: #E3350D;"></div>
                             <h2 style="margin-top: 0; color: #E3350D; display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 20px; height: 20px; background: #E3350D; border-radius: 50%;"></div> Player 2
+                                <div style="width: 20px; height: 20px; background: #E3350D; border-radius: 50%;"></div> <span data-i18n="misc.player2">Player 2</span>
                             </h2>
                             <p style="color: #666; font-size: 0.9em; margin-bottom: 10px;">Paste your Pokémon TCG Live deck code here:</p>
                             <textarea id="sandboxImportP2" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." style="width: 100%; height: 180px; padding: 15px; border-radius: 8px; border: 2px solid #e1e8ed; font-family: monospace; font-size: 13px; resize: vertical; margin-bottom: 15px; box-sizing: border-box; background: #fff;"></textarea>
@@ -1054,10 +1057,10 @@
                         </p>
                         <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
                             <button class="btn" style="font-size: 24px; padding: 20px 60px; border-radius: 50px; font-weight: 900; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); border: 3px solid #fff; box-shadow: 0 8px 25px rgba(39, 174, 96, 0.5); color: white; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="startStandalonePlaytester()">
-                                🚀 START SIMULATOR
+                                <span data-i18n="misc.startSimulator">🚀 START SIMULATOR</span>
                             </button>
                             <button class="btn" style="font-size: 24px; padding: 20px 60px; border-radius: 50px; font-weight: 900; background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); border: 3px solid #fff; box-shadow: 0 8px 25px rgba(156, 39, 176, 0.5); color: white; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="openMultiplayerFromSandbox()">
-                                🌐 MULTIPLAYER
+                                <span data-i18n="misc.multiplayer">🌐 MULTIPLAYER</span>
                             </button>
                         </div>
                     </div>
@@ -1712,7 +1715,7 @@
         </div>
         
         <div class="footer">
-            <p>📅 Last Update: <span id="last-update">Loading...</span></p>
+            <p><span data-i18n="footer.lastUpdate">📅 Last Update:</span> <span id="last-update">Loading...</span></p>
         </div>
     </div>
     
@@ -1725,18 +1728,18 @@
             <div id="signin-form-container">
                 <h2 style="margin-bottom: 20px;">
                     <img loading="lazy" src="images/pokeball-icon.png" alt="" style="width: 28px; height: 28px; margin-right: 10px; vertical-align: middle;">
-                    Sign In
+                    <span data-i18n="auth.signIn">Sign In</span>
                 </h2>
                 <form id="sign-in-form" style="margin-bottom: 20px;">
                     <div class="auth-input-group">
-                        <label for="signin-email">Email</label>
+                        <label for="signin-email" data-i18n="auth.email">Email</label>
                         <input type="email" id="signin-email" required class="auth-input-field">
                     </div>
                     <div class="auth-input-group" style="margin-bottom: 20px;">
-                        <label for="signin-password">Password</label>
+                        <label for="signin-password" data-i18n="auth.password">Password</label>
                         <input type="password" id="signin-password" required class="auth-input-field">
                     </div>
-                    <button type="submit" class="auth-btn auth-btn-primary">Sign In</button>
+                    <button type="submit" class="auth-btn auth-btn-primary" data-i18n="auth.signIn">Sign In</button>
                 </form>
                 
                 <div style="text-align: center; margin: 20px 0; color: #666;">
@@ -1745,16 +1748,16 @@
                 </div>
                 
                 <button id="google-signin-btn" class="auth-btn auth-btn-google">
-                    <span style="margin-right: 10px;">🔐</span> Sign in with Google
+                    <span style="margin-right: 10px;">🔐</span> <span data-i18n="auth.googleSignIn">Sign in with Google</span>
                 </button>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <button type="button" onclick="showAuthModal('signup')" style="color: #3498db; background: none; border: none; cursor: pointer; font: inherit;">
+                    <button type="button" onclick="showAuthModal('signup')" style="color: #3498db; background: none; border: none; cursor: pointer; font: inherit;" data-i18n="auth.noAccount">
                         Don't have an account? <strong>Sign Up</strong>
                     </button>
                 </div>
                 <div style="text-align: center; margin-top: 10px;">
-                    <button type="button" id="password-reset-btn" style="color: #999; font-size: 14px; background: none; border: none; cursor: pointer; font: inherit;">
+                    <button type="button" id="password-reset-btn" style="color: #999; font-size: 14px; background: none; border: none; cursor: pointer; font: inherit;" data-i18n="auth.forgotPassword">
                         Forgot password?
                     </button>
                 </div>
@@ -1764,23 +1767,23 @@
             <div id="signup-form-container" style="display: none;">
                 <h2 style="margin-bottom: 20px;">
                     <img loading="lazy" src="images/pokeball-icon.png" alt="" style="width: 28px; height: 28px; margin-right: 10px; vertical-align: middle;">
-                    Create Account
+                    <span data-i18n="auth.createAccount">Create Account</span>
                 </h2>
                 <form id="sign-up-form" style="margin-bottom: 20px;">
                     <div class="auth-input-group">
-                        <label for="signup-email">Email</label>
+                        <label for="signup-email" data-i18n="auth.email">Email</label>
                         <input type="email" id="signup-email" required class="auth-input-field">
                     </div>
                     <div class="auth-input-group">
-                        <label for="signup-password">Password</label>
+                        <label for="signup-password" data-i18n="auth.password">Password</label>
                         <input type="password" id="signup-password" required minlength="6" class="auth-input-field">
                         <small style="color: #666;">Minimum 6 characters</small>
                     </div>
                     <div class="auth-input-group" style="margin-bottom: 20px;">
-                        <label for="signup-password-confirm">Confirm Password</label>
+                        <label for="signup-password-confirm" data-i18n="auth.confirmPassword">Confirm Password</label>
                         <input type="password" id="signup-password-confirm" required class="auth-input-field">
                     </div>
-                    <button type="submit" class="auth-btn auth-btn-primary">Create Account</button>
+                    <button type="submit" class="auth-btn auth-btn-primary" data-i18n="auth.createAccount">Create Account</button>
                 </form>
                 
                 <div style="text-align: center; margin-top: 20px;">
@@ -2458,6 +2461,7 @@
     <script src="js/auth-ui-helpers.js?v=20260310-v3" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha384-D/t0ZMqQW31H3az8ktEiNb39wyKnS82iFY52QPACM+IjKW3jDUhyIgh2PApRqJZs" crossorigin="anonymous" defer></script>
+    <script src="js/i18n.js?v=20260324-v1" defer></script>
     <script src="js/app-core.js?v=20260321-v1" defer></script>
     <script src="js/app-price.js?v=20260321-v1" defer></script>
     <script src="js/app-utils.js?v=20260321-v1" defer></script>

@@ -53,7 +53,8 @@ async function createMultiplayerGame(deckObject) {
             stadium: [],
             playZone: [],
             currentPlayer: 'p1',
-            activeBuffs: { p1: 0, p2: 0 }
+            activeBuffs: { p1: 0, p2: 0 },
+            mulliganCount: { p1: 0, p2: 0 }
         };
 
         // Host-Deck laden
@@ -299,6 +300,8 @@ function listenToGameState(gameId) {
             }
             if (typeof ptCurrentPlayer !== 'undefined') ptCurrentPlayer = 'p1';
             if (typeof ptActionLog !== 'undefined') ptActionLog = [];
+            // Mulligan Zähler aus dem State übernehmen
+            if (typeof ptMulliganCount !== 'undefined') ptMulliganCount = data.state.mulliganCount || { p1: 0, p2: 0 };
 
             // Render Board + Setup-Modal öffnen (KEIN ptNewGame — Hände sind bereits gezogen)
             if (typeof ptRenderAll === 'function') ptRenderAll();
@@ -335,6 +338,11 @@ function listenToGameState(gameId) {
                 // Restore ptCurrentPlayer from synced state
                 if (data.state.currentPlayer && typeof ptCurrentPlayer !== 'undefined') {
                     ptCurrentPlayer = data.state.currentPlayer;
+                }
+
+                // Mulligan Count syncen
+                if (data.state.mulliganCount && typeof ptMulliganCount !== 'undefined') {
+                    ptMulliganCount = data.state.mulliganCount;
                 }
 
                 // Win-screen sync: if opponent took last prize, show win screen locally
@@ -603,6 +611,7 @@ async function mpSyncSetupMulligan(player, mulliganCount) {
         const shrunkenLocalState = compressStateForFirebase(ptState[localRole]);
         await db.collection('games').doc(mpGameId).update({
             [`state.${localRole}`]: shrunkenLocalState,
+            [`state.mulliganCount`]: ptMulliganCount,
             lastAction: firebase.firestore.FieldValue.serverTimestamp(),
             lastActionDescription: `Mulligan #${mulliganCount} ${localRole.toUpperCase()}`,
             lastActionBy: mpRole

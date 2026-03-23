@@ -24,6 +24,7 @@ window.pendingAttachAction = false;
 // ── Game-start phase state ──────────────────────────────────────────────
 let ptStartPhase = false;   // true while coin-flip / active-selection is running
 let ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };  // selected active/bench card indices per player
+let ptMulliganCount = { p1: 0, p2: 0 };
 
 // ── Card Zoom / Search panel state ─────────────────────────────────────
 let ptZoomPanelOpen = false;

@@ -806,13 +806,15 @@ function convertDeckObjectToCards(deckObject) {
         let cardName = deckKey;
         let imageUrl = 'https://images.pokemontcg.io/card-back.png';
         let cardType = '';
+        let setCode = '';
+        let number = '';
         
         // Parse Set+Number aus Key
         const m = deckKey.match(/^(.+?)\s+\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
         if (m) {
             cardName = m[1];
-            const setCode = m[2];
-            const number = m[3];
+            setCode = m[2];
+            number = m[3];
             
             // 3-Tier Lookup (identisch mit openPlaytester)
             let cd = (window.cardsBySetNumberMap || {})[`${setCode}-${number}`] || null;
@@ -832,12 +834,14 @@ function convertDeckObjectToCards(deckObject) {
                 if (cd) {
                     imageUrl = cd.image_url || imageUrl;
                     cardType = cd.type || cd.card_type || cd.supertype || '';
+                    setCode = cd.set || '';
+                    number = cd.number || '';
                 }
             }
         }
         
         for (let i = 0; i < count; i++) {
-            cards.push({ name: cardName, imageUrl, cardType });
+            cards.push({ name: cardName, imageUrl, cardType, setCode, number });
         }
     }
     

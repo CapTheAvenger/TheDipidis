@@ -993,8 +993,10 @@ function ptDoMulliganDraw(player, count) {
         if (typeof showToast === 'function') showToast(`🃏 ${count} Mulligan-Draw${count > 1 ? 's' : ''}`, 'info', 2500);
     }
     ptRenderAll();
-    // Now P1 draws first card
-    ptDraw1('p1');
+    // In MP: P1's first-card draw is handled by the setup-ready listener, not here
+    if (!ptState.isMultiplayer) {
+        ptDraw1('p1');
+    }
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Mulligan draw: ' + count);
 }
 
@@ -1806,6 +1808,7 @@ function ptOpenDeckSearch(player) {
     if (btnType) { btnType.style.background = '#333';    btnType.style.color = '#ccc'; btnType.style.borderColor = '#555'; }
     _ptRefreshDeckSearchGrid();
     document.getElementById('ptDeckSearchModal').style.display = 'flex';
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Searching deck...');
 }
 
 function ptRouteFromDeck(cardId, destination) {

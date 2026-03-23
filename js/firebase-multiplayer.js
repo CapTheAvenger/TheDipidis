@@ -337,6 +337,15 @@ function listenToGameState(gameId) {
                     ptCurrentPlayer = data.state.currentPlayer;
                 }
 
+                // Win-screen sync: if opponent took last prize, show win screen locally
+                if (typeof ptStartPhase !== 'undefined' && !ptStartPhase) {
+                    if (data.state.p1 && data.state.p1.prizes && data.state.p1.prizes.length === 0 && typeof ptShowWinScreen === 'function') {
+                        ptShowWinScreen('p1');
+                    } else if (data.state.p2 && data.state.p2.prizes && data.state.p2.prizes.length === 0 && typeof ptShowWinScreen === 'function') {
+                        ptShowWinScreen('p2');
+                    }
+                }
+
                 // Update pointer events and UI indicators for the new current player
                 if (typeof ptUpdateAreaPointerEvents === 'function') ptUpdateAreaPointerEvents();
                 const ind = document.getElementById('activePlayerIndicator');
@@ -373,8 +382,8 @@ function listenToGameState(gameId) {
                     const bonusForMe = oppMulligans - myMulligans;
                     if (bonusForMe > 0 && typeof ptShowMulliganDrawModal === 'function') {
                         ptShowMulliganDrawModal(myRole, bonusForMe);
-                    } else if (myRole === 'p1' && typeof ptDraw1 === 'function') {
-                        // P1 draws first card
+                    } else if (ptState.localRole === 'p1' && typeof ptDraw1 === 'function') {
+                        // Only P1's local machine draws the first card
                         ptDraw1('p1');
                     }
 
@@ -383,7 +392,8 @@ function listenToGameState(gameId) {
                 }
                 
                 // Auto draw for turn in MP: if the turn just passed to the local player, draw a card
-                if (data.lastActionDescription && data.lastActionDescription.startsWith('Turn passed') && ptCurrentPlayer === ptState.localRole && data.lastActionBy !== mpRole) {
+                // BUT skip if a promote is pending (draw happens after promote in ptPromoteBench)
+                if (data.lastActionDescription && data.lastActionDescription.startsWith('Turn passed') && ptCurrentPlayer === ptState.localRole && data.lastActionBy !== mpRole && (!ptState.mpPromoteNeeded || ptState.mpPromoteNeeded !== ptState.localRole)) {
                     if (typeof ptDraw1 === 'function') {
                         ptDraw1(ptState.localRole);
                         if (typeof showToast === 'function') showToast('🃏 Draw for Turn', 'info', 2000);
@@ -413,6 +423,10 @@ function listenToGameState(gameId) {
                 if (typeof ptShowMessage === 'function') {
                     const action = data.lastActionDescription || 'Gegner hat gezogen';
                     ptShowMessage(`🌐 ${action}`);
+                }
+                // Deck search indicator: show persistent hint while opponent searches
+                if (data.lastActionDescription === 'Searching deck...' && typeof showToast === 'function') {
+                    showToast('🔍 Gegner durchsucht sein Deck...', 'info', 8000);
                 }
             }
 

@@ -304,13 +304,19 @@ function listenToGameState(gameId) {
             if (typeof ptMulliganCount !== 'undefined') ptMulliganCount = data.state.mulliganCount || { p1: 0, p2: 0 };
 
             // Render Board + Setup-Modal öffnen (KEIN ptNewGame — Hände sind bereits gezogen)
-            if (typeof _ptLoadCardActions === 'function') _ptLoadCardActions(); // Load trainer/ability registries for MP
-            if (typeof ptRenderAll === 'function') ptRenderAll();
-            if (typeof ptOpenStartPhase === 'function') ptOpenStartPhase();
-            if (typeof setupDragAndDrop === 'function') setupDragAndDrop();
-            if (typeof setupHotkeys === 'function') setupHotkeys();
-
-            mpLog(`[Multiplayer] Setup phase started. Local role: ${ptState.localRole}, Hand: ${ptState[ptState.localRole].hand.length} cards`);
+            // Await card actions load before rendering (registries must be filled first)
+            const _mpInitBoard = () => {
+                if (typeof ptRenderAll === 'function') ptRenderAll();
+                if (typeof ptOpenStartPhase === 'function') ptOpenStartPhase();
+                if (typeof setupDragAndDrop === 'function') setupDragAndDrop();
+                if (typeof setupHotkeys === 'function') setupHotkeys();
+                mpLog(`[Multiplayer] Setup phase started. Local role: ${ptState.localRole}, Hand: ${ptState[ptState.localRole].hand.length} cards`);
+            };
+            if (typeof _ptLoadCardActions === 'function') {
+                _ptLoadCardActions().then(_mpInitBoard).catch(_mpInitBoard);
+            } else {
+                _mpInitBoard();
+            }
         }
 
         if (data.status === 'finished') {

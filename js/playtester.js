@@ -3405,7 +3405,7 @@ function _ptLoadCardActions() {
         })
         .catch(e => {
             console.warn('[Playtester] card_actions.json not loaded, using empty registries:', e);
-            _ptCardActionsLoaded = true;
+            // Do NOT set _ptCardActionsLoaded = true here, so retry is possible
         });
 }
 
@@ -4201,7 +4201,17 @@ function ptToggleAbilityUsed(player, zoneId, event) {
         const topPoke = _ptGetTopPokemon(player, zoneId);
         if (topPoke) {
             const key = _ptGetAbilityKey(topPoke);
-            const abilityFn = key && PT_ABILITY_REGISTRY[key];
+            let abilityFn = key && PT_ABILITY_REGISTRY[key];
+            // Fallback: lookup by card name if key-based lookup fails
+            if (!abilityFn && topPoke.name && window._ptCardActionsData) {
+                const match = (window._ptCardActionsData.abilities || []).find(a => a.cardName === topPoke.name);
+                if (match) {
+                    abilityFn = _PT_ABILITY_ACTIONS[match.action];
+                    // Auto-register for future lookups
+                    if (abilityFn && key) PT_ABILITY_REGISTRY[key] = abilityFn;
+                }
+            }
+            if (!abilityFn) console.warn('[Ability] Not found:', key, 'name:', topPoke.name, 'registry size:', Object.keys(PT_ABILITY_REGISTRY).length);
             if (abilityFn) {
                 const executed = abilityFn(player, zoneId);
                 if (executed) {

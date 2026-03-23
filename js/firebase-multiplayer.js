@@ -420,7 +420,7 @@ function listenToGameState(gameId) {
             // Setup ready check — runs even for self-syncs so both-ready is detected immediately
             const setupReady = data.state.mpSetupReady;
             if (isSelfSync && setupReady && setupReady.p1 && setupReady.p2 && typeof ptStartPhase !== 'undefined' && ptStartPhase) {
-                mpLog('[Multiplayer] Both players ready (self-sync) — finalizing setup');
+                mpLog('[Multiplayer] Both players ready (self-sync) — preparing UI, remote sync handles finalization');
                 ['p1', 'p2'].forEach(p => {
                     if (ptState[p].prizes.length === 0) {
                         for (let i = 0; i < 6; i++) {
@@ -444,10 +444,10 @@ function listenToGameState(gameId) {
                 const bonus2 = oppMull2 - myMull2;
                 if (bonus2 > 0 && typeof ptShowMulliganDrawModal === 'function') {
                     ptShowMulliganDrawModal(myRole2, bonus2);
-                } else if (myRole2 === 'p1' && typeof ptDraw1 === 'function') {
-                    ptDraw1('p1');
                 }
-                syncStateToFirebase('Game started — both players ready');
+                // Do NOT draw or sync here — the remote player's !isSelfSync handler
+                // will finalize (including P1's draw) and sync the authoritative state.
+                if (typeof ptRenderAll === 'function') ptRenderAll();
             }
         }
 
@@ -511,12 +511,7 @@ async function syncStateToFirebase(actionDescription = '') {
     if (!mpSyncEnabled || !mpGameId) return;
 
     try {
-        const now = Date.now();
-        if (now - mpLastSyncTime < MP_SYNC_DEBOUNCE) {
-            return;
-        }
-
-        mpLastSyncTime = now;
+        mpLastSyncTime = Date.now();
 
         const db = firebase.firestore();
         const gameRef = db.collection('games').doc(mpGameId);

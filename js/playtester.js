@@ -3095,10 +3095,10 @@ function ptPlayFromHand(index, event) {
     const _tKey = _ptGetAbilityKey(card);
     const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
     if (_tFn) {
-        // Sync BEFORE the effect timeout so the card move is visible, then the effect will sync again when it completes
-        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
+        // Let the effect run first, then sync the complete result in one go
         setTimeout(() => {
             _tFn(player, card);
+            if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
         }, 50);
         if (typeof showToast === 'function') showToast(`✅ "${card.name}" — Effekt wird ausgeführt`, 'success', 2500);
     } else {

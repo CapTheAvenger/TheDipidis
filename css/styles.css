@@ -5682,17 +5682,17 @@ details[open] > .tier-trending-summary::after {
 }
 
 /* ===================================================
-   DESKTOP BATTLE BUTTONS (fixed left side, unaffected by board flip)
+   DESKTOP BATTLE BUTTONS (inside arena, counter-rotates via .static-element)
    =================================================== */
 #pt-side-buttons-left {
-    position: fixed;
-    left: 12px;
+    position: absolute;
+    left: 22%;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
     gap: 10px;
-    z-index: 9998;
+    z-index: 100;
     pointer-events: auto;
 }
 

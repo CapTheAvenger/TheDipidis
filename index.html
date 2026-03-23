@@ -2161,17 +2161,16 @@
                     </div>
                 </div>
 
-                <!-- Battle Buttons moved outside arena so board rotates under them -->
+                <!-- Battle Buttons (inside arena, counter-rotates with static-element) -->
+                <div id="pt-side-buttons-left" class="static-element">
+                    <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">⚔️ Attack</button>
+                    <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">⏭️ End Turn</button>
+                    <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">⚔️ Opp. View</button>
+                    <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡ Actions</button>
+                </div>
 
             </div>
 
-        </div>
-
-        <div id="pt-side-buttons-left">
-            <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">⚔️ Attack</button>
-            <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">⏭️ End Turn</button>
-            <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">⚔️ Opp. View</button>
-            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡ Actions</button>
         </div>
 
         <div class="pt-hand-zone">

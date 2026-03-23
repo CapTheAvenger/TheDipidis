@@ -1600,7 +1600,14 @@ function ptPassTurn() {
     const noActive = ptState[newP].field.active.length === 0;
     const hasBench  = ['bench0','bench1','bench2','bench3','bench4'].some(b => ptState[newP].field[b].length > 0);
     if (noActive && hasBench) {
-        ptOpenPromoteModal(newP); // ptDraw1 is deferred to ptPromoteBench
+        if (ptState.isMultiplayer) {
+            // In MP: only the local player should see the promote modal
+            if (ptState.localRole === newP) {
+                ptOpenPromoteModal(newP);
+            }
+        } else {
+            ptOpenPromoteModal(newP); // ptDraw1 is deferred to ptPromoteBench
+        }
     } else if (!ptState.isMultiplayer) {
         // In single-player, draw for the new player immediately.
         // In MP, the receiving player draws via Firebase listener.
@@ -1609,23 +1616,33 @@ function ptPassTurn() {
 }
 
 function ptOpenPromoteModal(player) {
+    // In MP: only the KO'd player may pick their new active
+    if (ptState.isMultiplayer && ptState.localRole !== player) return;
     const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
     const occupied   = benchZones.filter(b => ptState[player].field[b].length > 0);
     if (occupied.length === 0) { ptDraw1(player); return; }
     const _tp = (cards) => [...cards].reverse().find(c => { const ct = (c.cardType||'').toLowerCase(); return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer'); }) || cards[0];
-    let html = `<div style="background:#1a1a2e;border:2px solid #E3350D;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:520px;">
+    let html = `<div style="background:#1a1a2e;border:2px solid #E3350D;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:560px;">
         <h3 style="color:#E3350D;margin-top:0;">⭐ Neues Aktives Pokémon wählen</h3>
         <p style="color:#ccc;font-size:12px;margin-bottom:4px;">Dein Aktives Pokémon wurde besiegt! Wähle ein Bankpokémon.</p>
         <p style="color:#f1c40f;font-size:11px;margin-bottom:16px;"><em>Du ziehst erst NACH der Wahl eine Karte.</em></p>
-        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
+        <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:18px;">`;
     occupied.forEach(zoneId => {
         const cards   = ptState[player].field[zoneId];
         const topPoke = _tp(cards);
-        html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;"
+        const dmg = ptState[player].damage[zoneId] || 0;
+        const energyCards = cards.filter(c => (c.cardType||'').toLowerCase().includes('energy'));
+        const toolCards = cards.filter(c => { const ct = (c.cardType||'').toLowerCase(); return ct === 'tool' || (ct.includes('trainer') && !ct.includes('supporter') && !ct.includes('stadium')); });
+        let infoHTML = '';
+        if (dmg > 0) infoHTML += `<span style="color:#e74c3c;font-weight:900;">${dmg} DMG</span> `;
+        if (energyCards.length > 0) infoHTML += `<span style="color:#f39c12;">⚡${energyCards.length}</span> `;
+        if (toolCards.length > 0) infoHTML += `<span style="color:#3498db;">🛠️ ${_ptEscHtml(toolCards[0].name)}</span>`;
+        html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;max-width:100px;"
                       onclick="ptPromoteBench('${player}','${zoneId}')"
                       onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
             <img src="${topPoke.imageUrl||CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #E3350D;box-shadow:0 0 12px rgba(227,53,13,0.5);" onerror="this.src='${CARD_BACK_URL}'" title="${_ptEscHtml(topPoke.name)}">
-            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(topPoke.name)}</div>
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:100px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(topPoke.name)}</div>
+            ${infoHTML ? '<div style="font-size:9px;margin-top:2px;">' + infoHTML + '</div>' : ''}
         </div>`;
     });
     html += `</div></div>`;
@@ -4177,7 +4194,7 @@ function ptToggleAbilityUsed(player, zoneId, event) {
                 // If ability couldn't execute (e.g. no energy), don't mark as used
                 return;
             }
-            if (typeof showToast === 'function') showToast(`ℹ️ "${topPoke.name}" — kein Auto-Effekt, manuell ausführen`, 'warning', 3000);
+            if (typeof showToast === 'function') showToast(`ℹ️ "${topPoke.name}" — Ability nicht registriert, nutze manuell`, 'info', 3000);
         }
     }
 

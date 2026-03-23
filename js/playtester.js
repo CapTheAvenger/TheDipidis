@@ -481,6 +481,7 @@ function ptNewGame() {
     ptActionLog      = [];
     ptStartPhase     = true;
     ptStartChoices   = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
+    ptMulliganCount  = { p1: 0, p2: 0 };
 
     const logContent = document.getElementById('ptActionLogContent');
     if (logContent) logContent.innerHTML = '';
@@ -848,7 +849,8 @@ function ptStartMulligan(player) {
         [deck[i], deck[j]] = [deck[j], deck[i]];
     }
     for (let i = 0; i < 7; i++) if (deck.length > 0) ptState[player].hand.push(deck.pop());
-    ptLog(`🃏 ${player.toUpperCase()} mulligan — new 7-card hand.`);
+    ptMulliganCount[player] = (ptMulliganCount[player] || 0) + 1;
+    ptLog(`🃏 ${player.toUpperCase()} mulligan #${ptMulliganCount[player]} — new 7-card hand.`);
     ptRenderStartPhaseModal();
 }
 
@@ -932,8 +934,59 @@ function ptConfirmStartActives() {
     if (fpModal) fpModal.style.display = 'none';
     ptLog(`✅ Spiel gestartet! P1 geht zuerst. Preiskarten verteilt. Viel Spaß!`);
     ptRenderAll();
-    // P1 draws first card at game start
+
+    // Check mulligan draws: if one player had mulligans and the other didn't,
+    // offer the non-mulligan player bonus draws
+    const p1m = ptMulliganCount.p1 || 0;
+    const p2m = ptMulliganCount.p2 || 0;
+    const p1bonus = p2m - p1m; // P1 gets bonus if P2 had more mulligans
+    const p2bonus = p1m - p2m; // P2 gets bonus if P1 had more mulligans
+
+    if (p1bonus > 0 || p2bonus > 0) {
+        const bonusPlayer = p1bonus > 0 ? 'p1' : 'p2';
+        const bonusCount = Math.max(p1bonus, p2bonus);
+        ptShowMulliganDrawModal(bonusPlayer, bonusCount);
+    } else {
+        // No mulligan draws needed — P1 draws first card
+        ptDraw1('p1');
+    }
+}
+
+/* ── Mulligan Bonus Draw Modal ────────────────────────────────────────────── */
+function ptShowMulliganDrawModal(player, maxDraws) {
+    // Build options: 0 to maxDraws
+    let btns = '';
+    for (let i = 0; i <= maxDraws; i++) {
+        btns += `<button onclick="ptDoMulliganDraw('${player}',${i})" style="padding:10px 18px;font-size:15px;font-weight:700;border:none;border-radius:8px;cursor:pointer;
+            background:${i === 0 ? '#95a5a6' : 'linear-gradient(135deg,#3498db,#2980b9)'};color:#fff;min-width:50px;">${i}</button>`;
+    }
+    const overlay = document.createElement('div');
+    overlay.id = 'ptMulliganDrawModal';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10002;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = `<div style="background:#1a1a2e;border:2px solid #3498db;border-radius:14px;padding:20px 28px;text-align:center;color:#fff;max-width:400px;">
+        <h3 style="margin:0 0 8px;">🃏 Mulligan Draw</h3>
+        <p style="margin:0 0 14px;font-size:14px;">${player.toUpperCase()} darf bis zu <b>${maxDraws}</b> Extra-Karte${maxDraws > 1 ? 'n' : ''} ziehen<br><span style="font-size:12px;color:#aaa;">(Gegner hatte ${maxDraws} Mulligan${maxDraws > 1 ? 's' : ''})</span></p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">${btns}</div>
+    </div>`;
+    document.body.appendChild(overlay);
+}
+
+function ptDoMulliganDraw(player, count) {
+    const modal = document.getElementById('ptMulliganDrawModal');
+    if (modal) modal.remove();
+    for (let i = 0; i < count; i++) {
+        if (ptState[player].deck.length > 0) {
+            ptState[player].hand.push(ptState[player].deck.pop());
+        }
+    }
+    if (count > 0) {
+        ptLog(`🃏 ${player.toUpperCase()} zieht ${count} Mulligan-Bonus-Karte${count > 1 ? 'n' : ''}.`);
+        if (typeof showToast === 'function') showToast(`🃏 ${count} Mulligan-Draw${count > 1 ? 's' : ''}`, 'info', 2500);
+    }
+    ptRenderAll();
+    // Now P1 draws first card
     ptDraw1('p1');
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Mulligan draw: ' + count);
 }
 
 // ── Card Zoom / Search Side Panel ──────────────────────────────────────────
@@ -1325,7 +1378,7 @@ function ptDrawCards(player, amount) {
     for (let i = 0; i < amount; i++) {
         if (ptState[p].deck.length > 0) { ptState[p].hand.push(ptState[p].deck.pop()); drawn++; }
     }
-    if (drawn > 0) { ptLog(`Drew ${drawn} card(s) [${p}].`); ptRenderAll(); }
+    if (drawn > 0) { ptLog(`Drew ${drawn} card(s) [${p}].`); ptRenderAll(); if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Drew ' + drawn + ' cards'); }
     else ptShowMessage('Deck is empty!');
 }
 
@@ -1338,9 +1391,8 @@ function ptShuffleDeck(player) {
     }
     ptLog(`Deck shuffled [${p}]!`);
     ptRenderAll();
-}
-
-function ptLookCards(player, position, amount) {
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Shuffled deck');
+}(player, position, amount) {
     // Compatibility: ptLookCards(amount)
     if (position === undefined && amount === undefined && !isNaN(parseInt(player))) {
         amount = parseInt(player);
@@ -1532,7 +1584,9 @@ function ptPassTurn() {
     const hasBench  = ['bench0','bench1','bench2','bench3','bench4'].some(b => ptState[newP].field[b].length > 0);
     if (noActive && hasBench) {
         ptOpenPromoteModal(newP); // ptDraw1 is deferred to ptPromoteBench
-    } else {
+    } else if (!ptState.isMultiplayer) {
+        // In single-player, draw for the new player immediately.
+        // In MP, the receiving player draws via Firebase listener.
         ptDraw1();
     }
 }
@@ -1732,6 +1786,7 @@ function ptRouteFromDeck(cardId, destination) {
         // Refresh the grid so the taken card disappears — modal stays open
         _ptRefreshDeckSearchGrid();
         ptRenderAll();
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Deck search pick');
     }
 }
 
@@ -1826,7 +1881,10 @@ function ptClickZone(player, zoneId) {
         const _tKey = _ptGetAbilityKey(card);
         const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
         if (_tFn) {
-            setTimeout(() => _tFn(ptCurrentPlayer, card), 50);
+            setTimeout(() => {
+                _tFn(ptCurrentPlayer, card);
+                if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name + ' (effect)');
+            }, 50);
         }
     } else if (zoneId === 'stadium') {
         if (ptState.stadium.length > 0) {
@@ -2071,6 +2129,7 @@ function ptSwapZones(player, benchZone, event) {
     ptState[player].status = [];
     ptLog('Retreat!');
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Swap zones');
 }
 
 function ptEnergyDiscard(player, zoneId) {
@@ -2087,6 +2146,7 @@ function ptEnergyDiscard(player, zoneId) {
         ptState[player].discard.push(removed);
         ptLog(`⚡🗑️ ${_ptEscHtml(removed.name)} → Discard`);
         ptSaveState(); ptRenderAll();
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Energy discard');
         return;
     }
     // Multiple energies – show pick modal
@@ -2126,6 +2186,7 @@ function ptFinishEnergyDiscard(player, zoneId, idx) {
     ptState[player].discard.push(removed);
     ptLog(`⚡🗑️ ${_ptEscHtml(removed.name)} → Discard`);
     ptSaveState(); ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Energy discard');
 }
 
 function ptRetreat(player, zoneId) {
@@ -2178,6 +2239,7 @@ function ptFinishRetreat(player, benchZone) {
     const modal = document.getElementById('ptRetreatModal');
     if (modal) modal.style.display = 'none';
     ptSwapZones(player, benchZone, null);
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Retreat');
 }
 
 // --- ACTION COMMANDS ---
@@ -2197,6 +2259,7 @@ function returnToHand(player, zoneId, event) {
             if (zoneId === 'active') ptState[player].status = [];
         }
         ptRenderAll();
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Return to hand');
     }
 }
 
@@ -2215,6 +2278,7 @@ function discardTopCard(player, zoneId, event) {
             if (zoneId === 'active') ptState[player].status = [];
         }
         ptRenderAll();
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Discard card');
     }
 }
 
@@ -2233,6 +2297,7 @@ function moveToLostZone(player, zoneId, event) {
             if (zoneId === 'active') ptState[player].status = [];
         }
         ptRenderAll();
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Move to lost zone');
     }
 }
 
@@ -2353,6 +2418,7 @@ function ptToggleLock(player, type) {
     const state = ptState[player][type] ? 'AN 🔴' : 'AUS 🟢';
     ptLog(`${label} für ${player.toUpperCase()}: ${state}`);
     ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase(label + ' ' + state);
     // Refresh opponent panel if open
     const panel = document.getElementById('ptOppPanel');
     if (panel && panel.style.display !== 'none') ptOppSwitchTab('field');
@@ -2981,7 +3047,11 @@ function ptPlayFromHand(index, event) {
     const _tKey = _ptGetAbilityKey(card);
     const _tFn = _tKey && PT_TRAINER_REGISTRY[_tKey];
     if (_tFn) {
-        setTimeout(() => _tFn(player, card), 50);
+        setTimeout(() => {
+            _tFn(player, card);
+            // Sync after effect executes (for immediate effects; modal effects sync in their callbacks)
+            if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name + ' (effect)');
+        }, 50);
         if (typeof showToast === 'function') showToast(`✅ "${card.name}" — Effekt wird ausgeführt`, 'success', 2500);
     } else if ((card.cardType || '').toLowerCase().includes('trainer')) {
         if (typeof showToast === 'function') showToast(`ℹ️ "${card.name}" — kein Auto-Effekt, manuell ausführen`, 'warning', 3000);
@@ -3384,6 +3454,8 @@ function ptFinishBossOrders(oppPlayer, benchZone) {
     ptSwapZones(oppPlayer, benchZone, null);
     const newActive = _ptGetTopPokemon(oppPlayer, 'active');
     ptLog(`📋 Boss's Orders: ${oppPlayer.toUpperCase()} ${_ptEscHtml(newActive?.name || '?')} → Aktiv erzwungen!`);
+    ptSaveState(); ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Boss Orders: forced ' + (newActive?.name || ''));
 }
 
 // Fezandipiti ex — Adrenaline Flush: draw 3 cards
@@ -3500,6 +3572,7 @@ function ptFinishZoroarkTrade(player, handIdx) {
     }
     ptLog(`🌑 Trade: ${drawn} Karten gezogen.`);
     ptSaveState(); ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Zoroark Trade');
 }
 
 // Shared: Look at top N cards, highlight Supporters for selection
@@ -3547,6 +3620,7 @@ function _ptLookTopSupporterImpl(player, count, sourceName) {
         ptLog(`🔎 Restliche Karten ins Deck zurückgemischt.`);
         delete window._ptFinishLookTopSup;
         ptSaveState(); ptRenderAll();
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Look top cards');
     };
 }
 
@@ -3650,6 +3724,7 @@ function ptUBFinish(player) {
     });
     delete window._ptUBSelected;
     ptSaveState(); ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Ultra Ball discard');
     setTimeout(() => ptOpenDeckSearch(player), 100);
 }
 
@@ -3792,6 +3867,7 @@ function _ptESPickTarget(player, srcZone, energyIdx) {
             ptLog(`⚡ Energy Switch: "${energy.name}" von ${sz} → ${tz}.`);
         }
         ptSaveState(); ptRenderAll();
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Energy Switch');
     };
 }
 
@@ -3841,6 +3917,7 @@ function ptSBFinish(player) {
     });
     delete window._ptSBSelected;
     ptSaveState(); ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Secret Box discard');
     setTimeout(() => ptOpenDeckSearch(player), 100);
 }
 
@@ -4040,6 +4117,7 @@ function _ptShowAbilityPickModal(player, cards, pickCount, pickDest, restDest, t
         delete window._ptAbilityPick;
         ptSaveState();
         ptRenderAll();
+        if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Ability pick');
     };
 }
 

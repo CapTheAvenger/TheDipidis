@@ -363,10 +363,33 @@ function listenToGameState(gameId) {
                     const fpModal = document.getElementById('ptStartPhaseModal');
                     if (fpModal) fpModal.style.display = 'none';
                     if (typeof ptLog === 'function') ptLog('✅ Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!');
+
+                    // Mulligan draw offer after MP setup
+                    const p1m = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p1 || 0) : 0;
+                    const p2m = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p2 || 0) : 0;
+                    const myRole = ptState.localRole;
+                    const myMulligans = myRole === 'p1' ? p1m : p2m;
+                    const oppMulligans = myRole === 'p1' ? p2m : p1m;
+                    const bonusForMe = oppMulligans - myMulligans;
+                    if (bonusForMe > 0 && typeof ptShowMulliganDrawModal === 'function') {
+                        ptShowMulliganDrawModal(myRole, bonusForMe);
+                    } else if (myRole === 'p1' && typeof ptDraw1 === 'function') {
+                        // P1 draws first card
+                        ptDraw1('p1');
+                    }
+
                     // Sync final state
                     syncStateToFirebase('Game started — both players ready');
                 }
                 
+                // Auto draw for turn in MP: if the turn just passed to the local player, draw a card
+                if (data.lastActionDescription && data.lastActionDescription.startsWith('Turn passed') && ptCurrentPlayer === ptState.localRole && data.lastActionBy !== mpRole) {
+                    if (typeof ptDraw1 === 'function') {
+                        ptDraw1(ptState.localRole);
+                        if (typeof showToast === 'function') showToast('🃏 Draw for Turn', 'info', 2000);
+                    }
+                }
+
                 // Re-render UI
                 if (typeof ptRenderAll === 'function') {
                     ptRenderAll();

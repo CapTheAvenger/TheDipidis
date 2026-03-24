@@ -15960,10 +15960,6 @@ const BASE_PATH = './data/';
         
         // Format filter functions
         async function setCurrentMetaFormatFilter(format) {
-            // When using fallback data (tournament only), live/play filter is meaningless
-            if (window.currentMetaUsingFallback && format !== 'all') {
-                format = 'all';
-            }
             currentMetaFormatFilter = format;
             devLog('[Current Meta] Format filter set to:', format);
             
@@ -15976,18 +15972,10 @@ const BASE_PATH = './data/';
                     } else {
                         btn.className = 'btn btn-secondary';
                     }
-                    // Disable live/play buttons when fallback data has no distinction
-                    if (window.currentMetaUsingFallback && f !== 'All') {
-                        btn.disabled = true;
-                        btn.title = 'Not available — run Current Meta scraper to get Limitless + Tournament split';
-                        btn.style.opacity = '0.5';
-                        btn.style.cursor = 'not-allowed';
-                    } else {
-                        btn.disabled = false;
-                        btn.title = '';
-                        btn.style.opacity = '';
-                        btn.style.cursor = '';
-                    }
+                    btn.disabled = false;
+                    btn.title = '';
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
                 }
             });
             

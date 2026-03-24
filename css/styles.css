@@ -5873,3 +5873,133 @@ details[open] > .tier-trending-summary::after {
   color: #a8e6cf;
   font-weight: bold;
 }
+
+/* ===================================================
+   COMPARISON TABLE — Sticky first column
+   =================================================== */
+.tab-content table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: 0.85em;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.tab-content table th,
+.tab-content table td {
+    padding: 8px 6px;
+}
+
+.tab-content table th:first-child,
+.tab-content table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background-color: #ffffff;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.tab-content table th:first-child {
+    background-color: var(--bg-light);
+    z-index: 3;
+}
+
+/* ===================================================
+   MOBILE MAKEOVER — Meta cards, Card DB, Proxy Printer
+   =================================================== */
+@media (max-width: 768px) {
+    /* Meta Card Analysis Grid: 3 cards side by side */
+    .meta-card-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        padding: 5px !important;
+    }
+
+    .meta-card-grid .card-info-bottom {
+        font-size: 0.65em !important;
+        padding: 3px !important;
+    }
+
+    .meta-card-grid button {
+        height: 18px !important;
+        font-size: 9px !important;
+    }
+
+    /* Card Database: 2 columns on mobile */
+    .card-database-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        padding: 5px !important;
+    }
+
+    .card-database-item {
+        flex-direction: column !important;
+    }
+
+    .card-database-info {
+        padding: 8px !important;
+        gap: 4px !important;
+    }
+
+    .card-database-name {
+        font-size: 12px !important;
+        line-height: 1.2;
+    }
+
+    .card-database-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        font-size: 10px !important;
+    }
+
+    /* Proxy Printer */
+    #proxy .container {
+        padding: 10px !important;
+    }
+
+    #proxy .controls {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px !important;
+    }
+
+    #proxyImportTextarea,
+    #proxyCardSearch {
+        font-size: 14px !important;
+        padding: 10px !important;
+    }
+
+    #proxy .action-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    #proxy .action-bar button {
+        width: 100%;
+        margin: 0 !important;
+        padding: 10px 5px !important;
+        font-size: 12px !important;
+    }
+
+    .proxy-list-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    .proxy-card-item {
+        font-size: 10px !important;
+    }
+
+    .proxy-card-item img {
+        border-radius: 4px !important;
+    }
+
+    .proxy-card-controls button {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 14px !important;
+    }
+}

@@ -1988,6 +1988,7 @@
                         </div>
                         <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" style="display: block; padding: 8px; background: #e74c3c; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; border: none; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.35)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="Add to proxy queue">Proxy</button>
                     </div>
+                    ${(card.set && card.number) ? `<button onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" style="display: block; padding: 6px 8px; background: #6c3dc5; color: white; border: none; border-radius: 6px; text-align: center; font-weight: 700; font-size: 12px; cursor: pointer; margin-top: 6px; width: 100%; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(108, 61, 197, 0.35)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">L Limitless</button>` : ''}
                     ${coverageDisplay}
                 </div>
             `;

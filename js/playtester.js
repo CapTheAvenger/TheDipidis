@@ -3236,6 +3236,14 @@ function ptShowMessage(msg) {
 
 // --- RENDER ---
 
+/* Update opponent hand-card count overlay */
+function ptUpdateOpponentHandCountDisplay() {
+    const opp = (ptCurrentPlayer === 'p1') ? 'p2' : 'p1';
+    const handCount = (ptState[opp] && ptState[opp].hand) ? ptState[opp].hand.length : 0;
+    const el = document.getElementById('ptOpponentHandCountValue');
+    if (el) el.innerText = handCount;
+}
+
 function ptRenderAll() {
     ['p1', 'p2'].forEach(p => {
         const deckEl = document.getElementById(`ptDeckCount-${p}`);
@@ -3329,6 +3337,7 @@ function ptRenderAll() {
 
     // Always refresh pointer events after rendering
     ptUpdateAreaPointerEvents();
+    ptUpdateOpponentHandCountDisplay();
 }
 
 function ptRenderHand() {

@@ -1967,18 +1967,7 @@
 
             <div id="playtester-board" class="pt-arena">
 
-                <!-- ── CENTER: Stadium (right) + Action Buttons (left) — always stay upright ── -->
-                <div class="pt-stadium-anchor" style="position: absolute; top: 50%; right: 14%; transform: translate(50%, -50%); z-index: 5;">
-                    <div class="static-element" style="background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center; position: relative;">
-                        <div class="pt-zone-label" style="color:#a8e6cf; margin-bottom: 6px;">🏟️ Stadium</div>
-                        <div style="position: relative; display: inline-block;">
-                            <div id="ptStadiumZone" class="pt-empty-slot pt-dropzone"
-                                 ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'stadium')"
-                                 style="width:82px;height:114px;"></div>
-                            <div class="pt-stadium-marker" title="Stadium-Effekt benutzt" onclick="this.classList.toggle('used')">S</div>
-                        </div>
-                    </div>
-                </div>
+                <!-- ── CENTER: Stadium — moved outside arena below ── -->
 
                 <!-- ── P2 AREA (rotated 180° so P2 sees their side correctly) ── -->
                 <div id="p2-area" style="position: absolute; inset: 0; pointer-events: none;">
@@ -2160,12 +2149,28 @@
 
             </div>
 
+            <!-- Stadium Block — outside arena so board flip doesn't rotate it -->
+            <div id="ptStadiumBlock" class="static-element" style="background:rgba(0,0,0,.6);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);text-align:center;position:relative">
+                <div class="pt-zone-label" style="color:#a8e6cf;margin-bottom:6px">🏟️ Stadium</div>
+                <div style="position:relative;display:inline-block">
+                    <div id="ptStadiumZone" class="pt-empty-slot pt-dropzone" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'stadium')" style="width:82px;height:114px">
+                        <div class="pt-empty-slot" style="width:82px;height:113px;" onclick="ptClickZone('p1','stadium')">Stadium</div>
+                    </div>
+                    <div class="pt-stadium-marker" title="Stadium-Effekt benutzt" onclick="this.classList.toggle('used')">S</div>
+                </div>
+            </div>
+
             <!-- Battle Buttons — outside arena so board flip doesn't move them -->
             <div id="pt-side-buttons-left">
                 <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">⚔️ Attack</button>
                 <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">⏭️ End Turn</button>
                 <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">👁️ Opp. View</button>
                 <button class="pt-side-btn actions-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡ Actions</button>
+            </div>
+
+            <!-- Opponent hand card count overlay -->
+            <div id="ptOpponentHandCountOverlay" class="pt-overlay-info">
+                Gegner-Hand: <span id="ptOpponentHandCountValue">0</span>
             </div>
 
         </div>

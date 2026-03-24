@@ -389,6 +389,120 @@ const translations = {
     'cl.trainer':               'Trainer:',
     'cl.energy':                'Energy:',
 
+    // ── CL/CM/PM shared deck UI keys ─────────────────────────
+    'cl.cardOverview':          '🃏 Card Overview',
+    'cl.deckBuilder':           '🛠️ Deck Builder',
+    'cl.yourDeck':              '🎴 Your Deck',
+    'cl.addCard':               '➕ Add Card',
+    'cl.metaCardAnalysis':      '🌍 Meta Card Analysis',
+    'cl.deckStats':             '📊 Deck Stats',
+    'cl.deckLabel':             'Deck:',
+    'cl.cardsInDeck':           'Cards in Deck:',
+    'cl.of60Cards':             'of 60 Cards',
+    'cl.unique':                'Unique:',
+    'cl.searchDeck':            '🔍 Search Deck...',
+    'cl.searchDeckPlaceholder': 'Search deck...',
+    'cl.selectDeckOption':      '-- Select a Deck --',
+    'cl.selectArchetype':       '-- Select Archetype --',
+    'cl.searchCardsPlaceholder':'Search cards...',
+    'cl.cardShareFilter':       'Card Share Filter:',
+    'cl.allCards':              'All Cards',
+    'cl.cards90':               '≥ 90%',
+    'cl.cards70':               '≥ 70%',
+    'cl.cards50':               '≥ 50%',
+    'cl.typeAll':               'All',
+    'cl.typePokemon':           'Pokémon',
+    'cl.typeSupporter':         'Supporter',
+    'cl.typeItem':              'Item',
+    'cl.typeTool':              'Tool',
+    'cl.typeStadium':           'Stadium',
+    'cl.typeEnergy':            'Energy',
+    'cl.typeSpecEnergy':        'Spec. Energy',
+    'cl.typeAceSpec':           'Ace Spec',
+    'cl.rarityAll':             '🌍 All Prints',
+    'cl.rarityLow':             '⬇️ Low Rarity',
+    'cl.rarityMax':             '⬆️ Max Rarity',
+    'cl.onePrint':              '🎯 1 Print',
+    'cl.sortByShare':           'Sort: Share',
+    'cl.sortByType':            'Sort: Type',
+    'cl.sortByAvg':             'Sort: Avg',
+    'cl.generate':              'Generate:',
+    'cl.genConsistency':        '🎯 Max Consistency',
+    'cl.genConsistencyTitle':   'Auto-generate deck with max consistency',
+    'cl.genLow':                '⬇️ Low',
+    'cl.genLowTitle':           'Generate with low rarity prints',
+    'cl.genMax':                '⬆️ Max',
+    'cl.genMaxTitle':           'Generate with max rarity prints',
+    'cl.playtest':              '🃏 Playtest',
+    'cl.testDraw':              '🎲 Test Draw',
+    'cl.clear':                 '🗑️ Clear',
+    'cl.btnSave':               '💾 Save',
+    'cl.btnCompare':            '🔀 Compare',
+    'cl.btnCopy':               '📋 Copy Deck',
+    'cl.btnGrid':               '🖼️ Grid',
+    'cl.btnShare':              '📤 Share',
+    'cl.btnProxy':              '🖨️ Proxy',
+    'cl.btnProxyTitle':         'Print as proxy cards',
+    'cl.btnExportTitle':        'Export deck',
+    'cl.btnImportTitle':        'Import deck',
+    'cl.createDeckHint':        'Start by selecting an archetype above, or add cards manually below.',
+    'cl.metaShare90':           '≥ 90%',
+    'cl.metaShare70':           '≥ 70%',
+    'cl.metaShare50':           '≥ 50%',
+    'cl.metaShareAll':          'All',
+    'cl.metaTypeAll':           'All',
+    'cl.metaTypePokemon':       'Pokémon',
+    'cl.metaTypeTrainer':       'Trainer',
+    'cl.metaTypeEnergy':        'Energy',
+
+    // ── Cards DB aria keys ───────────────────────────────────
+    'cards.searchAria':         'Search cards',
+    'cards.searchPokemonAria':  'Search main Pokémon',
+    'cards.searchArchetypeAria':'Search archetype',
+    'cards.onePrint':           '🎯 1 Print',
+
+    // ── CM/PM aria keys ──────────────────────────────────────
+    'cm.searchDeckAria':        'Search deck',
+    'cm.searchOverviewAria':    'Search card overview',
+    'cm.searchDeckCardsAria':   'Search deck cards',
+    'cm.searchAddCardAria':     'Search card to add',
+    'cm.searchMetaAria':        'Search meta cards',
+    'pm.searchDeckAria':        'Search deck',
+    'pm.searchOverviewAria':    'Search card overview',
+    'pm.searchDeckCardsAria':   'Search deck cards',
+    'pm.searchAddCardAria':     'Search card to add',
+
+    // ── Matchup extras ───────────────────────────────────────
+    'matchup.searchOpponent':   'Search opponent...',
+
+    // ── Meta analysis extras ─────────────────────────────────
+    'meta.loadBtn':             '📊 Load Meta Card Analysis',
+
+    // ── Compare extras ───────────────────────────────────────
+    'compare.pasteDesc':        'Paste your old decklist (Pokémon TCG Live Format):',
+    'compare.selectDesc':       'Select a deck from your saved decks:',
+    'compare.selectDefault':    '-- Select a saved deck --',
+    'compare.compareSelectedBtn':'🎯 Compare with Selected Deck',
+
+    // ── Profile extras ───────────────────────────────────────
+    'profile.myCollection':     '🗂️ My Collection',
+    'profile.myDecks':          '🎮 My Decks',
+    'profile.wishlist':         '❤️ Wishlist',
+    'profile.settings':         '⚙️ Settings',
+    'profile.playtest':         '⚔️ Playtest',
+    'profile.dexImport':        '📥 Dex Import',
+    'profile.save':             '💾 Save',
+    'profile.nameAria':         'Display name',
+
+    // ── My Decks Playtest Modal extras ───────────────────────
+    'myDecks.heading':          '⚔️ Playtest – My Decks',
+    'myDecks.description':      'Choose a deck for each player, then start the match!',
+    'myDecks.player1Label':     'Player 1 🔵',
+    'myDecks.player2Label':     'Player 2 🔴',
+
+    // ── Setup extras ─────────────────────────────────────────
+    'setup.description':        'Your current deck <strong>(Player 1)</strong> is ready. What should <strong>Player 2</strong> play?',
+
     // ── Meta Chart ───────────────────────────────────────────
     'chart.metaShareTitle':     '📊 Meta Share Chart – Top Archetypes',
     'chart.toggle':             '▼ toggle',
@@ -547,6 +661,172 @@ const translations = {
     'meta.sortByShare':         '📈 Sort by Share%',
     'meta.sortByAvgCount':      '🔢 Sort by Avg Count',
     'meta.loadHint':            'Click "Load Meta Analysis" to see cards from Top 10 Archetypes...',
+
+    // ── Tab 1: City League Meta ──────────────────────────────
+    'cl.cityLeagueDev':         '🇯🇵 City League Development',
+
+    // ── Tab 3: Current Meta ──────────────────────────────────
+    'cm.limitlessHeading':      '🎮 Limitless Online Comparison',
+
+    // ── Tab 4: Current Meta Deck Analysis ────────────────────
+    'cm.analysisHeading':       '📈 Current Meta Deck Analysis',
+    'cm.analyzeAndBuild':       'Analyze and Build Decks from Current Meta',
+    'cm.formatFilter':          '🎮 Tournament Format Filter:',
+    'cm.filterAll':             '📊 All',
+    'cm.filterLive':            '🌐 Limitless Decks',
+    'cm.filterPlay':            '🏆 Major Tournament Decks',
+    'stats.totalWinrate':       'Total Winrate Limitless Online Tournaments',
+    'stats.matchupTop20':       'Matchup vs Top 20',
+    'matchup.title':            'Deck Matchups',
+    'matchup.best':             '✅ Best Matchups',
+    'matchup.worst':            '❌ Worst Matchups',
+    'matchup.opponent':         'Opponent',
+    'matchup.winRate':          'Win Rate',
+    'matchup.record':           'Record',
+    'matchup.noData':           'No data available',
+    'matchup.selectTitle':      '🔍 Select & Analyze Opponent Matchup',
+    'matchup.searchLabel':      'Search Opponent:',
+    'matchup.searchPlaceholder':'Type to search deck...',
+
+    // ── Tab 5: Past Meta ─────────────────────────────────────
+    'pm.analysisHeading':       '🏆 Past Tournament Deck Analysis',
+    'pm.analyzeAndBuild':       'Analyze and Build Decks from Past Tournaments',
+    'pm.formatFilter':          '🎴 Meta/Format Filter:',
+    'pm.allFormats':            '-- All Formats --',
+    'pm.tournamentFilter':      '🏆 Tournament Filter:',
+    'pm.allTournaments':        '-- All Tournaments --',
+    'stats.tournament':         'Tournament',
+    'stats.format':             'Format',
+
+    // ── Tab 6: Cards Database ────────────────────────────────
+    'cards.heading':            '🧰 Card Database',
+    'cards.searchLabel':        '🔍 Search card name',
+    'cards.searchPlaceholder':  'e.g. Charizard, Pikachu...',
+    'cards.filterMeta':         '📊 Meta / Format',
+    'cards.filterSet':          '📦 Set',
+    'cards.filterRarity':       '💎 Rarity',
+    'cards.filterCategory':     '🎴 Category',
+    'cards.filterPokemon':      '🐲 Main Pokemon',
+    'cards.filterArchetype':    '🎯 Archetype',
+    'cards.filterCoverage':     '📊 Deck Coverage',
+    'cards.totalAll':           'Total (All Cards)',
+    'cards.allPlayables':       'All Playables',
+    'cards.cityLeague':         'City League',
+    'cards.searchPokemon':      'Search Pokemon...',
+    'cards.searchArchetype':    'Search archetype...',
+    'cards.coverage100':        '💯 In 100% of all Decks',
+    'cards.coverage90':         '🔥 In ≥90% of Decks',
+    'cards.coverage70':         '⭐ In ≥70% of Decks',
+    'cards.coverage50':         '📈 In ≥50% of Decks',
+    'cards.resetFilters':       '🔄 Reset Filters',
+    'cards.sortOrder':          '🔀 Sort Order:',
+    'cards.sortBySet':          'By Set (Default)',
+    'cards.sortLikeDeck':       'Like Deck Overview',
+    'cards.sortByCoverage':     'By Coverage',
+    'cards.viewMode':           '🖼️ View Mode:',
+    'cards.onePrintLow':        '📦 Only 1 Print (Low Rarity)',
+    'cards.loading':            'Loading cards...',
+
+    // ── Tab 7: Proxy Printer ─────────────────────────────────
+    'proxy.addDecklistBtn':     'Add Decklist to Queue',
+    'proxy.addCardBtn':         'Add Card',
+    'proxy.namePlaceholder':    'Card name (search...)',
+    'proxy.setPlaceholder':     'Set',
+    'proxy.numberPlaceholder':  'No.',
+    'proxy.addCLDeck':          '➕ Add City League Deck',
+    'proxy.addCMDeck':          '➕ Add Current Meta Deck',
+    'proxy.addPMDeck':          '➕ Add Past Meta Deck',
+    'proxy.printQueue':         '🖨️ Print Queue',
+
+    // ── Tab 8: Sandbox Playtester ────────────────────────────
+    'sandbox.heading':          '⚔️ Battle Sandbox',
+    'sandbox.subtitle':         'Import decks for 2 players and start the match.',
+    'sandbox.pasteHint':        'Paste your Pokémon TCG Live deck code here:',
+    'sandbox.waitingInput':     'Waiting for input...',
+    'sandbox.loadDeck':         '📥 Load Deck',
+    'sandbox.mirrorTip':        '💡 Tip: If you only import a deck for Player 1, it will automatically be copied for Player 2 (Mirror Match).',
+
+    // ── Profile ──────────────────────────────────────────────
+    'profile.heading':          'User Profile',
+    'profile.subtitle':         'Manage your collection, decks, and settings',
+    'profile.signInPrompt':     'Sign in to unlock all features',
+    'profile.signInDesc':       'Track your card collection, save custom decks, and sync across devices',
+    'profile.signInBtn':        'Sign In / Sign Up',
+    'profile.name':             '👤 Name',
+    'profile.cardsOwned':       '🎴 Cards Owned',
+    'profile.collectionValue':  '💰 Collection Value',
+    'profile.savedDecks':       '🎮 Saved Decks',
+    'profile.tabCollection':    '🎴 My Collection',
+    'profile.tabDecks':         '🎮 My Decks',
+    'profile.tabWishlist':      '⭐ Wishlist',
+    'profile.tabSettings':      '⚙️ Settings',
+    'profile.collectionHeading':'🎴 My Collection',
+    'profile.collectionNote':   'Cards you own are marked with a green checkmark throughout the site',
+    'profile.clearCollection':  'Clear Collection',
+    'profile.noCards':          'No cards in collection yet. Start adding cards by clicking the "+" button on card images!',
+    'profile.decksHeading':     '🎮 My Decks',
+    'profile.decksNote':        'Your saved decks are synced across all devices',
+    'profile.newFolder':        '📁 New Folder',
+    'profile.noDecks':          'No saved decks yet. Build a deck and save it to see it here!',
+    'profile.wishlistHeading':  '⭐ Wishlist',
+    'profile.wishlistNote':     'Cards you want to get',
+    'profile.allSets':          '📦 All Sets',
+    'profile.noWishlist':       'No cards in wishlist yet',
+    'profile.settingsHeading':  '⚙️ Settings',
+    'profile.displayName':      'Display Name',
+    'profile.namePlaceholder':  'Enter your name',
+    'profile.nameNote':         'This name will be displayed in your profile',
+    'profile.signOut':          '🚪 Sign Out',
+    'profile.playtestBtn':      '⚔️ Playtest',
+
+    // ── Deck Compare Modal ───────────────────────────────────
+    'compare.heading':          '🔄 Deck Compare',
+    'compare.option1':          '📝 Option 1: Compare with Manual Decklist',
+    'compare.option1Desc':      'Paste your old decklist (Pokémon TCG Live Format):',
+    'compare.compareBtn':       '🔍 Compare',
+    'compare.clearBtn':         '🗑️ Clear',
+    'compare.option2':          '💾 Option 2: Compare with Own Saved Deck',
+    'compare.option2Desc':      'Select a deck from your saved decks:',
+    'compare.selectDeck':       '-- Select a saved deck --',
+    'compare.compareSelected':  '🎯 Compare with Selected Deck',
+
+    // ── Image/Grid View Modal ────────────────────────────────
+    'modal.deckCardsOverview':  '🎨 Deck Cards Overview',
+
+    // ── Rarity Switcher ──────────────────────────────────────
+    'modal.raritySwitcher':     'Card - Rarity Switcher',
+
+    // ── Playtester Setup Modal ───────────────────────────────
+    'setup.heading':            '⚔️ Playtester Setup',
+    'setup.p1Ready':            'Your current deck <strong>(Player 1)</strong> is ready. What should <strong>Player 2</strong> play?',
+    'setup.opponentLabel':      "Opponent's Deck (PTCG Live Format):",
+    'setup.opponentPlaceholder':"Paste Player 2's deck list here (e.g. from Limitless)...",
+    'setup.mirrorBtn':          '🪞 Mirror Match (Same Deck)',
+    'setup.startBtn':           '🚀 Start vs. Opponent',
+
+    // ── My Decks Playtest Modal ──────────────────────────────
+    'myDecks.playtestHeading':  '⚔️ Playtest – My Decks',
+    'myDecks.playtestDesc':     'Choose a deck for each player, then start the match!',
+    'myDecks.player1':          'Player 1 🔵',
+    'myDecks.player2':          'Player 2 🔴',
+    'myDecks.cancelBtn':        'Cancel',
+    'myDecks.startBtn':         '🚀 Start Playtest',
+
+    // ── Tutorial heading ─────────────────────────────────────
+    'tutorial.heading':         '📖 How to Use This Website',
+    'tutorial.subtitle':        'Complete Guide to Pokemon TCG Analysis, Deck Building & Playtester — v44 (March 2026)',
+
+    // ── Misc shared ──────────────────────────────────────────
+    'misc.loading':             'Loading...',
+
+    // ── Multiplayer Menu ─────────────────────────────────────
+    'mp.heading':               '🌐 Online Multiplayer',
+    'mp.firebaseHint':          'ℹ️ Requires Firebase Login',
+
+    // ── Auth: already have sign in for modal ─────────────────
+    'auth.hasAccount':          'Already have an account? <strong>Sign In</strong>',
+    'auth.minChars':            'Minimum 6 characters',
+    'auth.or':                  'or',
   },
 
   de: {
@@ -930,6 +1210,120 @@ const translations = {
     'cl.trainer':               'Trainer:',
     'cl.energy':                'Energie:',
 
+    // ── CL/CM/PM gemeinsame Deck-UI-Keys ─────────────────────
+    'cl.cardOverview':          '🃏 Kartenübersicht',
+    'cl.deckBuilder':           '🛠️ Deck Builder',
+    'cl.yourDeck':              '🎴 Dein Deck',
+    'cl.addCard':               '➕ Karte hinzufügen',
+    'cl.metaCardAnalysis':      '🌍 Meta-Karten-Analyse',
+    'cl.deckStats':             '📊 Deck-Statistiken',
+    'cl.deckLabel':             'Deck:',
+    'cl.cardsInDeck':           'Karten im Deck:',
+    'cl.of60Cards':             'von 60 Karten',
+    'cl.unique':                'Einzigartig:',
+    'cl.searchDeck':            '🔍 Deck suchen...',
+    'cl.searchDeckPlaceholder': 'Deck suchen...',
+    'cl.selectDeckOption':      '-- Deck auswählen --',
+    'cl.selectArchetype':       '-- Archetyp auswählen --',
+    'cl.searchCardsPlaceholder':'Karten suchen...',
+    'cl.cardShareFilter':       'Karten-Share-Filter:',
+    'cl.allCards':              'Alle Karten',
+    'cl.cards90':               '≥ 90%',
+    'cl.cards70':               '≥ 70%',
+    'cl.cards50':               '≥ 50%',
+    'cl.typeAll':               'Alle',
+    'cl.typePokemon':           'Pokémon',
+    'cl.typeSupporter':         'Unterstützer',
+    'cl.typeItem':              'Item',
+    'cl.typeTool':              'Werkzeug',
+    'cl.typeStadium':           'Stadion',
+    'cl.typeEnergy':            'Energie',
+    'cl.typeSpecEnergy':        'Spez. Energie',
+    'cl.typeAceSpec':           'Ace Spec',
+    'cl.rarityAll':             '🌍 Alle Prints',
+    'cl.rarityLow':             '⬇️ Niedrige Seltenheit',
+    'cl.rarityMax':             '⬆️ Max. Seltenheit',
+    'cl.onePrint':              '🎯 1 Print',
+    'cl.sortByShare':           'Sort.: Share',
+    'cl.sortByType':            'Sort.: Typ',
+    'cl.sortByAvg':             'Sort.: Ø',
+    'cl.generate':              'Generieren:',
+    'cl.genConsistency':        '🎯 Max. Konsistenz',
+    'cl.genConsistencyTitle':   'Deck mit max. Konsistenz automatisch generieren',
+    'cl.genLow':                '⬇️ Niedrig',
+    'cl.genLowTitle':           'Mit niedrigen Seltenheits-Prints generieren',
+    'cl.genMax':                '⬆️ Max',
+    'cl.genMaxTitle':           'Mit max. Seltenheits-Prints generieren',
+    'cl.playtest':              '🃏 Playtesten',
+    'cl.testDraw':              '🎲 Testziehung',
+    'cl.clear':                 '🗑️ Leeren',
+    'cl.btnSave':               '💾 Speichern',
+    'cl.btnCompare':            '🔀 Vergleichen',
+    'cl.btnCopy':               '📋 Deck kopieren',
+    'cl.btnGrid':               '🖼️ Grid',
+    'cl.btnShare':              '📤 Teilen',
+    'cl.btnProxy':              '🖨️ Proxy',
+    'cl.btnProxyTitle':         'Als Proxy-Karten drucken',
+    'cl.btnExportTitle':        'Deck exportieren',
+    'cl.btnImportTitle':        'Deck importieren',
+    'cl.createDeckHint':        'Wähle oben einen Archetyp oder füge unten manuell Karten hinzu.',
+    'cl.metaShare90':           '≥ 90%',
+    'cl.metaShare70':           '≥ 70%',
+    'cl.metaShare50':           '≥ 50%',
+    'cl.metaShareAll':          'Alle',
+    'cl.metaTypeAll':           'Alle',
+    'cl.metaTypePokemon':       'Pokémon',
+    'cl.metaTypeTrainer':       'Trainer',
+    'cl.metaTypeEnergy':        'Energie',
+
+    // ── Cards DB Aria-Keys ───────────────────────────────────
+    'cards.searchAria':         'Karten suchen',
+    'cards.searchPokemonAria':  'Haupt-Pokémon suchen',
+    'cards.searchArchetypeAria':'Archetyp suchen',
+    'cards.onePrint':           '🎯 1 Print',
+
+    // ── CM/PM Aria-Keys ──────────────────────────────────────
+    'cm.searchDeckAria':        'Deck suchen',
+    'cm.searchOverviewAria':    'Kartenübersicht suchen',
+    'cm.searchDeckCardsAria':   'Deck-Karten suchen',
+    'cm.searchAddCardAria':     'Karte zum Hinzufügen suchen',
+    'cm.searchMetaAria':        'Meta-Karten suchen',
+    'pm.searchDeckAria':        'Deck suchen',
+    'pm.searchOverviewAria':    'Kartenübersicht suchen',
+    'pm.searchDeckCardsAria':   'Deck-Karten suchen',
+    'pm.searchAddCardAria':     'Karte zum Hinzufügen suchen',
+
+    // ── Matchup extras ───────────────────────────────────────
+    'matchup.searchOpponent':   'Gegner suchen...',
+
+    // ── Meta-Analyse extras ──────────────────────────────────
+    'meta.loadBtn':             '📊 Meta-Karten-Analyse laden',
+
+    // ── Vergleich extras ─────────────────────────────────────
+    'compare.pasteDesc':        'Alte Deckliste einfügen (Pokémon TCG Live Format):',
+    'compare.selectDesc':       'Wähle ein Deck aus deinen gespeicherten Decks:',
+    'compare.selectDefault':    '-- Gespeichertes Deck auswählen --',
+    'compare.compareSelectedBtn':'🎯 Mit ausgewähltem Deck vergleichen',
+
+    // ── Profil extras ────────────────────────────────────────
+    'profile.myCollection':     '🗂️ Meine Sammlung',
+    'profile.myDecks':          '🎮 Meine Decks',
+    'profile.wishlist':         '❤️ Wunschliste',
+    'profile.settings':         '⚙️ Einstellungen',
+    'profile.playtest':         '⚔️ Playtesten',
+    'profile.dexImport':        '📥 Dex Import',
+    'profile.save':             '💾 Speichern',
+    'profile.nameAria':         'Anzeigename',
+
+    // ── Meine Decks Playtest Modal extras ────────────────────
+    'myDecks.heading':          '⚔️ Playtesten – Meine Decks',
+    'myDecks.description':      'Wähle ein Deck für jeden Spieler, dann starte das Match!',
+    'myDecks.player1Label':     'Spieler 1 🔵',
+    'myDecks.player2Label':     'Spieler 2 🔴',
+
+    // ── Setup extras ─────────────────────────────────────────
+    'setup.description':        'Dein aktuelles Deck <strong>(Spieler 1)</strong> ist bereit. Was soll <strong>Spieler 2</strong> spielen?',
+
     // ── Meta Chart ───────────────────────────────────────────
     'chart.metaShareTitle':     '📊 Meta Share Chart – Top Archetypen',
     'chart.toggle':             '▼ umschalten',
@@ -1088,6 +1482,172 @@ const translations = {
     'meta.sortByShare':         '📈 Nach Anteil% sortieren',
     'meta.sortByAvgCount':      '🔢 Nach Ø Anzahl sortieren',
     'meta.loadHint':            '„Meta-Analyse laden" klicken, um Karten der Top 10 Archetypen zu sehen...',
+
+    // ── Tab 1: City League Meta ──────────────────────────────
+    'cl.cityLeagueDev':         '🇯🇵 City League Entwicklung',
+
+    // ── Tab 3: Current Meta ──────────────────────────────────
+    'cm.limitlessHeading':      '🎮 Limitless Online Vergleich',
+
+    // ── Tab 4: Current Meta Deck Analysis ────────────────────
+    'cm.analysisHeading':       '📈 Aktuelle Meta Deck-Analyse',
+    'cm.analyzeAndBuild':       'Decks aus der aktuellen Meta analysieren & bauen',
+    'cm.formatFilter':          '🎮 Turnierformat-Filter:',
+    'cm.filterAll':             '📊 Alle',
+    'cm.filterLive':            '🌐 Limitless Decks',
+    'cm.filterPlay':            '🏆 Große Turnier-Decks',
+    'stats.totalWinrate':       'Gesamte Winrate Limitless Online Turniere',
+    'stats.matchupTop20':       'Matchup gegen Top 20',
+    'matchup.title':            'Deck Matchups',
+    'matchup.best':             '✅ Beste Matchups',
+    'matchup.worst':            '❌ Schlechteste Matchups',
+    'matchup.opponent':         'Gegner',
+    'matchup.winRate':          'Winrate',
+    'matchup.record':           'Bilanz',
+    'matchup.noData':           'Keine Daten verfügbar',
+    'matchup.selectTitle':      '🔍 Gegner-Matchup auswählen & analysieren',
+    'matchup.searchLabel':      'Gegner suchen:',
+    'matchup.searchPlaceholder':'Deckname eingeben...',
+
+    // ── Tab 5: Past Meta ─────────────────────────────────────
+    'pm.analysisHeading':       '🏆 Vergangene Turnier-Deckanalyse',
+    'pm.analyzeAndBuild':       'Decks aus vergangenen Turnieren analysieren & bauen',
+    'pm.formatFilter':          '🎴 Meta/Format-Filter:',
+    'pm.allFormats':            '-- Alle Formate --',
+    'pm.tournamentFilter':      '🏆 Turnier-Filter:',
+    'pm.allTournaments':        '-- Alle Turniere --',
+    'stats.tournament':         'Turnier',
+    'stats.format':             'Format',
+
+    // ── Tab 6: Kartendatenbank ───────────────────────────────
+    'cards.heading':            '🧰 Kartendatenbank',
+    'cards.searchLabel':        '🔍 Kartenname suchen',
+    'cards.searchPlaceholder':  'z.B. Glurak, Pikachu...',
+    'cards.filterMeta':         '📊 Meta / Format',
+    'cards.filterSet':          '📦 Set',
+    'cards.filterRarity':       '💎 Seltenheit',
+    'cards.filterCategory':     '🎴 Kategorie',
+    'cards.filterPokemon':      '🐲 Haupt-Pokémon',
+    'cards.filterArchetype':    '🎯 Archetyp',
+    'cards.filterCoverage':     '📊 Deckabdeckung',
+    'cards.totalAll':           'Gesamt (Alle Karten)',
+    'cards.allPlayables':       'Alle Spielbaren',
+    'cards.cityLeague':         'City League',
+    'cards.searchPokemon':      'Pokémon suchen...',
+    'cards.searchArchetype':    'Archetyp suchen...',
+    'cards.coverage100':        '💯 In 100% aller Decks',
+    'cards.coverage90':         '🔥 In ≥90% der Decks',
+    'cards.coverage70':         '⭐ In ≥70% der Decks',
+    'cards.coverage50':         '📈 In ≥50% der Decks',
+    'cards.resetFilters':       '🔄 Filter zurücksetzen',
+    'cards.sortOrder':          '🔀 Sortierung:',
+    'cards.sortBySet':          'Nach Set (Standard)',
+    'cards.sortLikeDeck':       'Wie Decübersicht',
+    'cards.sortByCoverage':     'Nach Abdeckung',
+    'cards.viewMode':           '🖼️ Ansicht:',
+    'cards.onePrintLow':        '📦 Nur 1 Druck (Niedrige Seltenheit)',
+    'cards.loading':            'Karten werden geladen...',
+
+    // ── Tab 7: Proxy Printer ─────────────────────────────────
+    'proxy.addDecklistBtn':     'Deckliste zur Warteschlange',
+    'proxy.addCardBtn':         'Karte hinzufügen',
+    'proxy.namePlaceholder':    'Kartenname (suchen...)',
+    'proxy.setPlaceholder':     'Set',
+    'proxy.numberPlaceholder':  'Nr.',
+    'proxy.addCLDeck':          '➕ City League Deck hinzufügen',
+    'proxy.addCMDeck':          '➕ Aktuelles Meta Deck hinzufügen',
+    'proxy.addPMDeck':          '➕ Vergangenes Meta Deck hinzufügen',
+    'proxy.printQueue':         '🖨️ Warteschlange drucken',
+
+    // ── Tab 8: Sandbox-Playtester ────────────────────────────
+    'sandbox.heading':          '⚔️ Kampf-Sandbox',
+    'sandbox.subtitle':         'Importiere Decks für 2 Spieler und starte das Match.',
+    'sandbox.pasteHint':        'Pokémon TCG Live Deckcode hier einfügen:',
+    'sandbox.waitingInput':     'Warte auf Eingabe...',
+    'sandbox.loadDeck':         '📥 Deck laden',
+    'sandbox.mirrorTip':        '💡 Tipp: Wenn du nur ein Deck für Spieler 1 importierst, wird es automatisch für Spieler 2 kopiert (Spiegelmatch).',
+
+    // ── Profil ───────────────────────────────────────────────
+    'profile.heading':          'Benutzerprofil',
+    'profile.subtitle':         'Verwalte deine Sammlung, Decks und Einstellungen',
+    'profile.signInPrompt':     'Anmelden, um alle Funktionen freizuschalten',
+    'profile.signInDesc':       'Verfolge deine Kartensammlung, speichere Decks und synchronisiere geräteübergreifend',
+    'profile.signInBtn':        'Anmelden / Registrieren',
+    'profile.name':             '👤 Name',
+    'profile.cardsOwned':       '🎴 Karten im Besitz',
+    'profile.collectionValue':  '💰 Sammlungswert',
+    'profile.savedDecks':       '🎮 Gespeicherte Decks',
+    'profile.tabCollection':    '🎴 Meine Sammlung',
+    'profile.tabDecks':         '🎮 Meine Decks',
+    'profile.tabWishlist':      '⭐ Wunschliste',
+    'profile.tabSettings':      '⚙️ Einstellungen',
+    'profile.collectionHeading':'🎴 Meine Sammlung',
+    'profile.collectionNote':   'Karten in deinem Besitz sind überall auf der Seite mit einem grünen Häkchen markiert',
+    'profile.clearCollection':  'Sammlung leeren',
+    'profile.noCards':          'Noch keine Karten in der Sammlung. Füge Karten hinzu, indem du auf den „+" Button klickst!',
+    'profile.decksHeading':     '🎮 Meine Decks',
+    'profile.decksNote':        'Deine gespeicherten Decks werden auf allen Geräten synchronisiert',
+    'profile.newFolder':        '📁 Neuer Ordner',
+    'profile.noDecks':          'Noch keine gespeicherten Decks. Baue ein Deck und speichere es, um es hier zu sehen!',
+    'profile.wishlistHeading':  '⭐ Wunschliste',
+    'profile.wishlistNote':     'Karten, die du haben möchtest',
+    'profile.allSets':          '📦 Alle Sets',
+    'profile.noWishlist':       'Noch keine Karten auf der Wunschliste',
+    'profile.settingsHeading':  '⚙️ Einstellungen',
+    'profile.displayName':      'Anzeigename',
+    'profile.namePlaceholder':  'Deinen Namen eingeben',
+    'profile.nameNote':         'Dieser Name wird in deinem Profil angezeigt',
+    'profile.signOut':          '🚪 Abmelden',
+    'profile.playtestBtn':      '⚔️ Playtesten',
+
+    // ── Deck-Vergleich Modal ─────────────────────────────────
+    'compare.heading':          '🔄 Deck-Vergleich',
+    'compare.option1':          '📝 Option 1: Mit manueller Deckliste vergleichen',
+    'compare.option1Desc':      'Alte Deckliste einfügen (Pokémon TCG Live Format):',
+    'compare.compareBtn':       '🔍 Vergleichen',
+    'compare.clearBtn':         '🗑️ Leeren',
+    'compare.option2':          '💾 Option 2: Mit eigenem gespeichertem Deck vergleichen',
+    'compare.option2Desc':      'Wähle ein Deck aus deinen gespeicherten Decks:',
+    'compare.selectDeck':       '-- Gespeichertes Deck auswählen --',
+    'compare.compareSelected':  '🎯 Mit ausgewähltem Deck vergleichen',
+
+    // ── Bild/Grid-Ansicht Modal ──────────────────────────────
+    'modal.deckCardsOverview':  '🎨 Deck-Kartenübersicht',
+
+    // ── Seltenheits-Wechsler ─────────────────────────────────
+    'modal.raritySwitcher':     'Karte - Seltenheits-Wechsler',
+
+    // ── Playtester-Setup Modal ───────────────────────────────
+    'setup.heading':            '⚔️ Playtester Setup',
+    'setup.p1Ready':            'Dein aktuelles Deck <strong>(Spieler 1)</strong> ist bereit. Was soll <strong>Spieler 2</strong> spielen?',
+    'setup.opponentLabel':      'Gegner-Deck (PTCG Live Format):',
+    'setup.opponentPlaceholder':'Deckliste von Spieler 2 hier einfügen (z.B. von Limitless)...',
+    'setup.mirrorBtn':          '🪞 Spiegelmatch (Gleiches Deck)',
+    'setup.startBtn':           '🚀 Gegen Gegner starten',
+
+    // ── Meine Decks Playtest Modal ───────────────────────────
+    'myDecks.playtestHeading':  '⚔️ Playtesten – Meine Decks',
+    'myDecks.playtestDesc':     'Wähle ein Deck für jeden Spieler, dann starte das Match!',
+    'myDecks.player1':          'Spieler 1 🔵',
+    'myDecks.player2':          'Spieler 2 🔴',
+    'myDecks.cancelBtn':        'Abbrechen',
+    'myDecks.startBtn':         '🚀 Playtest starten',
+
+    // ── Tutorial ─────────────────────────────────────────────
+    'tutorial.heading':         '📖 So funktioniert diese Website',
+    'tutorial.subtitle':        'Vollständige Anleitung für Pokémon TCG Analyse, Deckbau & Playtester — v44 (März 2026)',
+
+    // ── Sonstiges ────────────────────────────────────────────
+    'misc.loading':             'Laden...',
+
+    // ── Multiplayer-Menü ─────────────────────────────────────
+    'mp.heading':               '🌐 Online Multiplayer',
+    'mp.firebaseHint':          'ℹ️ Firebase-Login erforderlich',
+
+    // ── Auth ─────────────────────────────────────────────────
+    'auth.hasAccount':          'Bereits ein Konto? <strong>Anmelden</strong>',
+    'auth.minChars':            'Mindestens 6 Zeichen',
+    'auth.or':                  'oder',
   }
 };
 
@@ -1119,6 +1679,7 @@ function switchLanguage(lang) {
   if (!I18N_SUPPORTED.includes(lang)) return;
   currentLang = lang;
   localStorage.setItem(I18N_STORAGE_KEY, lang);
+  document.documentElement.lang = lang;
   updateTranslationsInDOM();
   document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
 }
@@ -1166,5 +1727,6 @@ function updateTranslationsInDOM() {
 
 /* ── auto-init on load ───────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  document.documentElement.lang = currentLang;
   updateTranslationsInDOM();
 });

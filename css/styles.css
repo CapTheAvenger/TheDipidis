@@ -6003,3 +6003,10 @@ details[open] > .tier-trending-summary::after {
         font-size: 14px !important;
     }
 }
+
+/* ============================================================ */
+/* LANGUAGE-CONDITIONAL BLOCKS (Tutorial / prose content)        */
+/* ============================================================ */
+html[lang="de"] .lang-en { display: none !important; }
+html[lang="en"] .lang-de { display: none !important; }
+html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }

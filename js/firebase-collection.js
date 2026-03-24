@@ -234,7 +234,7 @@ async function saveCurrentDeckToProfile(source) {
   // Check for duplicate deck name
   const trimmedName = deckName.trim();
   if (window.userDecks && window.userDecks.some(d => d.name === trimmedName)) {
-    const overwrite = confirm(`A deck named "${trimmedName}" already exists. Save anyway?`);
+    const overwrite = confirm(t('deck.duplicateConfirm').replace('${name}', trimmedName));
     if (!overwrite) return;
   }
   
@@ -352,7 +352,7 @@ async function deleteDeck(deckId) {
   const user = auth.currentUser;
   if (!user) return;
   
-  if (!confirm('Delete this deck?')) return;
+  if (!confirm(t('deck.deleteConfirm'))) return;
   
   try {
     await db.collection('users').doc(user.uid)

@@ -924,7 +924,7 @@
         
         function buildCardImageUrl(setCode, setNumber, rarity) {
             if (!setCode || !setNumber) {
-                return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22245%22 height=%22342%22%3E%3Crect fill=%22%23667eea%22 width=%22245%22 height=%22342%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22%3E${t('heatmap.noData')}%3C/text%3E%3C/svg%3E';
+                return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22245%22 height=%22342%22%3E%3Crect fill=%22%23667eea%22 width=%22245%22 height=%22342%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22%3E' + t('heatmap.noData') + '%3C/text%3E%3C/svg%3E';
             }
 
             return getUnifiedCardImage(setCode, setNumber);

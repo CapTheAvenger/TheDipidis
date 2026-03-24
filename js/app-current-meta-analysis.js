@@ -472,9 +472,9 @@
                 bestRows.forEach(row => {
                     bestHtml += row.outerHTML;
                 });
-                bestTable.innerHTML = bestHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">${t('heatmap.noData')}</td></tr>';
+                bestTable.innerHTML = bestHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">' + t('heatmap.noData') + '</td></tr>';
             } else {
-                bestTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">${t('heatmap.noData')}</td></tr>';
+                bestTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">' + t('heatmap.noData') + '</td></tr>';
             }
             
             if (worstTbody) {
@@ -484,9 +484,9 @@
                 worstRows.forEach(row => {
                     worstHtml += row.outerHTML;
                 });
-                worstTable.innerHTML = worstHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">${t('heatmap.noData')}</td></tr>';
+                worstTable.innerHTML = worstHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">' + t('heatmap.noData') + '</td></tr>';
             } else {
-                worstTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">${t('heatmap.noData')}</td></tr>';
+                worstTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">' + t('heatmap.noData') + '</td></tr>';
             }
             
             // Populate opponent dropdown from window.matchupData (for search feature)
@@ -512,7 +512,7 @@
                     total_games: data.total_games
                 }));
             } else {
-                dropdown.innerHTML = '<div style="padding: 10px; color: #444; font-weight: 500;">${t('heatmap.noData')}</div>';
+                dropdown.innerHTML = '<div style="padding: 10px; color: #444; font-weight: 500;">' + t('heatmap.noData') + '</div>';
                 window.currentMetaDeckMatchups = [];
             }
             

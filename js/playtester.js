@@ -3112,13 +3112,13 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
                 </div>
             </div>`;
         });
-        if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">${getLang()==='de' ? 'Keine Pokémon im Spiel.' : 'No Pokémon in play.'}</div>';
+        if (!html) html = '<div style="color:#aaa;text-align:center;padding:20px;">' + (getLang()==='de' ? 'Keine Pokémon im Spiel.' : 'No Pokémon in play.') + '</div>';
         el.innerHTML = html;
 
     } else if (tab === 'discard') {
         // ─ Discard pile (view-only, click to zoom)
         const discard = ptState[opp].discard;
-        if (discard.length === 0) { el.innerHTML = '<div style="color:#aaa;text-align:center;padding:30px;">🗑️ ${getLang()==='de' ? 'Ablagestapel ist leer.' : 'Discard pile is empty.'}</div>'; return; }
+        if (discard.length === 0) { el.innerHTML = '<div style="color:#aaa;text-align:center;padding:30px;">🗑️ ' + (getLang()==='de' ? 'Ablagestapel ist leer.' : 'Discard pile is empty.') + '</div>'; return; }
         el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">` +
             discard.map((c, i) => {
                 const si = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");

@@ -2132,7 +2132,7 @@ async function openCompareSavedDeck(deckIndex) {
     if (mode === 'paste') {
       pane.innerHTML = `
         <label style="display:block;font-weight:600;margin:6px 0;">${getLang()==='de' ? 'Deckliste einfügen (Limitless/PTCGL)' : 'Paste deck list (Limitless/PTCGL)'}</label>
-        <textarea id="compare-paste-text" style="width:100%;min-height:180px;padding:10px;border:1px solid #ccc;border-radius:8px;resize:vertical;font-family:Consolas,monospace;font-size:12px;" placeholder="${getLang()==='de' ? 'Beispiel:' : 'Example:}\n4 Charizard ex MEW 006\n3 Pidgeot ex OBF 164\n..."></textarea>
+        <textarea id="compare-paste-text" style="width:100%;min-height:180px;padding:10px;border:1px solid #ccc;border-radius:8px;resize:vertical;font-family:Consolas,monospace;font-size:12px;" placeholder="${getLang()==='de' ? 'Beispiel:' : 'Example:'}\n4 Charizard ex MEW 006\n3 Pidgeot ex OBF 164\n..."></textarea>
         <div id="compare-paste-preview" style="margin-top:10px;padding:10px;border-radius:8px;background:#fff7e6;border:1px solid #ffe0a6;color:#7a5a00;font-size:12px;">${getLang()==='de' ? 'Noch keine Liste erkannt. Füge eine Deckliste ein.' : 'No list detected yet. Paste a deck list.'}</div>
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
           <button id="compare-paste-run" style="padding:8px 12px;border:none;border-radius:8px;background:#27ae60;color:white;cursor:pointer;font-weight:700;">${getLang()==='de' ? '⚖️ Vergleichen' : '⚖️ Compare'}</button>
@@ -2152,7 +2152,7 @@ async function openCompareSavedDeck(deckIndex) {
           preview.style.background = '#fff7e6';
           preview.style.border = '1px solid #ffe0a6';
           preview.style.color = '#7a5a00';
-          preview.innerHTML = '${getLang()==='de' ? 'Noch keine Liste erkannt. Füge eine Deckliste ein.' : 'No list detected yet. Paste a deck list.'}';
+          preview.innerHTML = (getLang()==='de' ? 'Noch keine Liste erkannt. Füge eine Deckliste ein.' : 'No list detected yet. Paste a deck list.');
           return;
         }
 
@@ -2196,7 +2196,7 @@ async function openCompareSavedDeck(deckIndex) {
 
     // mode === 'saved'
     if (compareCandidates.length === 0) {
-      pane.innerHTML = '<p style="color:#b94a48;background:#fbeaea;border:1px solid #f1c0c0;padding:10px;border-radius:8px;">${getLang()==='de' ? 'Es gibt kein weiteres gespeichertes Deck zum Vergleichen.' : 'No other saved deck available for comparison.'}</p>';
+      pane.innerHTML = '<p style="color:#b94a48;background:#fbeaea;border:1px solid #f1c0c0;padding:10px;border-radius:8px;">' + (getLang()==='de' ? 'Es gibt kein weiteres gespeichertes Deck zum Vergleichen.' : 'No other saved deck available for comparison.') + '</p>';
       return;
     }
 
@@ -2219,7 +2219,7 @@ async function openCompareSavedDeck(deckIndex) {
       });
 
       if (filtered.length === 0) {
-        list.innerHTML = '<div style="padding:10px;color:#777;">${getLang()==='de' ? 'Keine passenden Decks gefunden.' : 'No matching decks found.'}</div>';
+        list.innerHTML = '<div style="padding:10px;color:#777;">' + (getLang()==='de' ? 'Keine passenden Decks gefunden.' : 'No matching decks found.') + '</div>';
         return;
       }
 

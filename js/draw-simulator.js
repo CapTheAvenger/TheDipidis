@@ -17,7 +17,7 @@ function openDrawSimulator(source) {
 
     const totalCards = Object.values(deckObj).reduce((s, c) => s + c, 0);
     if (totalCards === 0) {
-        showToast('Dein Deck ist leer! Füge erst Karten hinzu.', 'warning');
+        showToast(t('pt.deckEmpty'), 'warning');
         return;
     }
 
@@ -84,7 +84,7 @@ function drawNewHand() {
 
 function drawExtraCard() {
     if (_simulatorHand.length >= _simulatorDeck.length) {
-        showToast('Keine Karten mehr im Deck!', 'warning');
+        showToast(t('draw.noCardsLeft'), 'warning');
         return;
     }
     _simulatorHand.push(_simulatorDeck[_simulatorHand.length]);
@@ -124,7 +124,7 @@ function _renderSimulatorHand() {
 }
 
 // -------------------------------------------------------
-// Combo-Wahrscheinlichkeit (Monte-Carlo)
+// Combo probability (Monte Carlo)
 // -------------------------------------------------------
 
 function _getUniqueDeckCardNames() {
@@ -140,7 +140,7 @@ function _populateComboDropdowns() {
         if (!select) continue;
 
         const currentValue = select.value;
-        select.innerHTML = '<option value="">-- Zielkarte wählen --</option>';
+        select.innerHTML = `<option value="">-- ${t('draw.selectTarget')} --</option>`;
         cardNames.forEach(name => {
             const option = document.createElement('option');
             option.value = name;
@@ -164,7 +164,7 @@ function onComboDropdownChange() {
     }
 
     if (selected.length > 4) {
-        showToast('Maximal 4 Karten auswählbar!', 'warning');
+        showToast(t('draw.max4Cards'), 'warning');
         return;
     }
 
@@ -178,14 +178,14 @@ function _renderComboTargets() {
     container.innerHTML = '';
 
     if (_comboTargets.length === 0) {
-        container.innerHTML = '<span style="font-size:12px;color:#666;font-style:italic;">Keine Karten ausgewählt — klicke unten, um Ziel-Karten zu wählen</span>';
+        container.innerHTML = `<span style="font-size:12px;color:#666;font-style:italic;">${t('draw.noCardsSelected')}</span>`;
         return;
     }
 
     _comboTargets.forEach(name => {
         const badge = document.createElement('span');
         badge.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:#2ecc71;color:#000;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;';
-        badge.title = 'Klick zum Entfernen';
+        badge.title = t('draw.clickToRemove');
         badge.textContent = name + ' ✕';
         badge.onclick = () => _toggleComboTarget(name);
         container.appendChild(badge);
@@ -252,12 +252,12 @@ function _calculateComboChanceSync(deck, targetCardNames) {
 
 function runComboCalculation() {
     if (_comboTargets.length === 0) {
-        showToast('Wähle mindestens eine Ziel-Karte aus!', 'warning');
+        showToast(t('draw.selectAtLeastOne'), 'warning');
         return;
     }
 
     const display = document.getElementById('comboResultDisplay');
-    if (display) display.textContent = '⏳ Berechne...';
+    if (display) display.textContent = `⏳ ${t('draw.calculating')}`;
 
     calculateComboChance(_simulatorDeck, _comboTargets).then(chance => {
         if (display) {

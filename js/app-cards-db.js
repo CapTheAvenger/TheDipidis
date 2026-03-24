@@ -25,7 +25,7 @@
             const countEl = document.getElementById(countElementId);
             const summaryEl = document.getElementById(summaryElementId);
             if (countEl && summaryEl) {
-                countEl.textContent = `${data.length} Karten`;
+                countEl.textContent = `${data.length} ${t('deck.cards')}`;
                 summaryEl.textContent = `/ ${data.length} Total`;
             }
         }
@@ -2727,7 +2727,7 @@
                     : null;
 
                 if (!profileDeck || !profileCards) {
-                    showToast('Gespeichertes Deck konnte nicht geladen werden.', 'warning');
+                    showToast(t('cardsDb.savedDeckLoadError'), 'warning');
                     closeRaritySwitcher();
                     return;
                 }
@@ -2767,7 +2767,7 @@
                 }
 
                 if (!resolvedOldKey || resolvedCount <= 0) {
-                    showToast('Diese Karte wurde im gespeicherten Deck nicht gefunden.', 'warning');
+                    showToast(t('cardsDb.cardNotInSavedDeck'), 'warning');
                     closeRaritySwitcher();
                     return;
                 }
@@ -2867,7 +2867,7 @@
                     sourceHint,
                     preResolved: currentRaritySwitcherCard || null
                 });
-                showToast('Diese Karte wurde im aktuellen Deck nicht gefunden.', 'warning');
+                showToast(t('cardsDb.cardNotInCurrentDeck'), 'warning');
                 closeRaritySwitcher();
                 return;
             }

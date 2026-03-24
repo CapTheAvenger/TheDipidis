@@ -110,8 +110,8 @@
                         <h2>🇯🇵 City League Development <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help"></button></h2>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
                             <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" aria-label="City League format" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
-                                <option value="M4">M4 - Ninja Spinner (Aktuell)</option>
-                                <option value="M3">M3 - Perfect Order (Archiv)</option>
+                                <option value="M4" data-i18n="format.m4current">M4 - Ninja Spinner (Current)</option>
+                                <option value="M3" data-i18n="format.m3archive">M3 - Perfect Order (Archive)</option>
                             </select>
                         </div>
                     </div>
@@ -129,8 +129,8 @@
                         <h2>🦅 City League Deck Analysis <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help"></button></h2>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
                             <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" aria-label="City League analysis format" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
-                                <option value="M4">M4 - Ninja Spinner (Aktuell)</option>
-                                <option value="M3">M3 - Perfect Order (Archiv)</option>
+                                <option value="M4" data-i18n="format.m4current">M4 - Ninja Spinner (Current)</option>
+                                <option value="M3" data-i18n="format.m3archive">M3 - Perfect Order (Archive)</option>
                             </select>
                         </div>
                         <p>Analyze and Build Decks</p>
@@ -947,7 +947,7 @@
                                 <option value="set">By Set (Default)</option>
                                 <option value="deck">Like Deck Overview</option>
                                 <option value="coverage">By Coverage</option>
-                                <option value="pokedex">🔢 Nach Pokédex-Nr.</option>
+                                <option value="pokedex" data-i18n="sort.pokedex">🔢 By Pokédex No.</option>
                             </select>
                         </div>
                         <div style="display: flex; align-items: center; gap: 10px;">
@@ -1583,21 +1583,21 @@
                                         onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
                                     📥 Dex Import
                                 </button>
-                                <span style="font-size:12px;color:#888;">Importiere deine Dex TCG Kollektion via CSV-Export</span>
+                                <span style="font-size:12px;color:#888;" data-i18n="profile.dexImportHint">Import your Dex TCG collection via CSV export</span>
                                 <input type="file" id="dexImportFileInput" accept=".csv" style="display:none;" onchange="dexImportHandleFile(this)">
                             </div>
 
                             <div style="display:flex;gap:10px;align-items:center;margin-bottom:15px;flex-wrap:wrap;">
                                 <select id="collection-sort" onchange="setCollectionSort(this.value)" aria-label="Collection sort order"
                                     style="padding:10px 12px;border:2px solid #667eea;border-radius:8px;font-size:14px;background:#fff;color:#333;min-width:260px;">
-                                    <option value="set-newest" selected>Sort: Neueste Sets zuerst</option>
-                                    <option value="element-set-newest">Sort: Element (innerhalb: neuestes Set zuerst)</option>
-                                    <option value="pokedex">Sort: Pokedex Nummer</option>
-                                    <option value="price-desc">Sort: Teuer nach guenstig</option>
+                                    <option value="set-newest" selected data-i18n="profile.sortNewest">Sort: Newest Sets First</option>
+                                    <option value="element-set-newest" data-i18n="profile.sortElement">Sort: Element (within: newest set first)</option>
+                                    <option value="pokedex" data-i18n="profile.sortPokedex">Sort: Pokédex Number</option>
+                                    <option value="price-desc" data-i18n="profile.sortPrice">Sort: Most to Least Expensive</option>
                                 </select>
                                 <select id="collection-filter" onchange="setCollectionFilter(this.value)" aria-label="Collection filter"
                                     style="padding:10px 12px;border:2px solid #667eea;border-radius:8px;font-size:14px;background:#fff;color:#333;min-width:280px;">
-                                    <option value="all" selected>Filter: Alle Karten</option>
+                                    <option value="all" selected data-i18n="profile.filterAll">Filter: All Cards</option>
                                     <option value="pokemon">Pokemon: Alle</option>
                                     <option value="pokemon-grass">Pokemon: Grass</option>
                                     <option value="pokemon-fire">Pokemon: Fire</option>
@@ -1621,8 +1621,8 @@
                                     Clear Collection
                                 </button>
                             </div>
-                            <div id="collection-type-loading" style="display:none;margin-top:-6px;margin-bottom:10px;font-size:12px;color:#6c7a89;">
-                                Elementtypen werden geladen...
+                            <div id="collection-type-loading" style="display:none;margin-top:-6px;margin-bottom:10px;font-size:12px;color:#6c7a89;" data-i18n="profile.loadingTypes">
+                                Loading element types...
                             </div>
 
                             <!-- Collection Search -->
@@ -1877,7 +1877,7 @@
             <button title="Start / Reset" onclick="startPlaytesterSetup()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Start or reset playtester">▶️</button>
             <button title="Flip Board" onclick="ptFlipBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Flip board to opponent view">🔄</button>
             <button title="Quit" onclick="ptQuitPlaytester()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Quit playtester">❌</button>
-            <button title="Münze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Flip coin">🪙</button>
+            <button title="Coin" onclick="mpFlipCoin ? mpFlipCoin() : showToast(t('pt.mpOnly'))" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Flip coin">🪙</button>
             <button title="Zoom" onclick="ptZoomBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Zoom board">🔍</button>
 
             <button title="Undo" onclick="ptUndo()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Undo last action">↩️</button>
@@ -1891,7 +1891,7 @@
 
         <div id="ptDirectActionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10001; align-items:center; justify-content:center;" role="dialog" aria-modal="true" aria-label="Game actions">
             <div style="background:#fff; padding:15px; border-radius:12px; width:90%; max-width:350px; display:flex; flex-direction:column; gap:12px;">
-                <h3 style="margin:0; text-align:center; font-size:16px;">Spiel-Aktionen</h3>
+                <h3 style="margin:0; text-align:center; font-size:16px;" data-i18n="pt.gameActions">Game Actions</h3>
 
                 <button class="btn-primary" style="padding:10px; border-radius:6px;" onclick="ptOpenDeckSearch(); document.getElementById('ptDirectActionModal').style.display='none'">🔍 Deck Search</button>
 
@@ -1927,7 +1927,7 @@
                     <input type="number" id="inpIonoP2" value="6" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 2 Iono hand size">
                 </div>
 
-                <button onclick="document.getElementById('ptDirectActionModal').style.display='none'" style="margin-top:5px; padding:12px; border-radius:6px; border:none; background:#eee; font-weight:bold;">Schließen</button>
+                <button onclick="document.getElementById('ptDirectActionModal').style.display='none'" style="margin-top:5px; padding:12px; border-radius:6px; border:none; background:#eee; font-weight:bold;" data-i18n="btn.close">Close</button>
             </div>
         </div>
 
@@ -1940,9 +1940,9 @@
             </div>
             <div style="display:flex; flex-direction:column; gap:12px;">
                 <select id="mpDeckSelect" class="control-input" aria-label="Select deck for match" style="width:100%; margin-bottom:4px; padding:10px; font-size:1rem; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05;">
-                    <option value="">-- Wähle ein Deck für das Match --</option>
+                    <option value="" data-i18n="pt.mpSelectDeck">-- Select a deck for the match --</option>
                 </select>
-                <div style="margin:10px 0; text-align:center; font-weight:900; font-size:13px; color:#888; letter-spacing:1px;">ODER</div>
+                <div style="margin:10px 0; text-align:center; font-weight:900; font-size:13px; color:#888; letter-spacing:1px;" data-i18n="pt.mpOr">OR</div>
                 <textarea id="mpDeckInput" rows="4" style="width:100%; padding:10px; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05; font-family:monospace; font-size:12px; resize:vertical; box-sizing:border-box;" placeholder="Pokémon: 10&#10;4 Comfey LOR 79&#10;..."></textarea>
                 <button class="pt-btn" style="width:100%; font-size:1.1rem; padding:12px;" onclick="mpCreateGame()">
                     🎮 Create Game (Host)
@@ -1985,8 +1985,8 @@
                                  onmouseleave="this.querySelector('.pt-deck-controls').style.display='none'">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDeckMenu('p2')">
-                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p2', 1)" title="⬆️ Karte ziehen">⬆️</div>
-                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p2')" title="🔍 Deck durchsuchen">🔍</div>
+                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p2', 1)" title="⬆️ Draw card">⬆️</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p2')" title="🔍 Search deck">🔍</div>
                                 </div>
                                 <div class="pt-deck-controls">
                                     <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p2')">🔍 Search</button>
@@ -2047,10 +2047,10 @@
                                 <div id="ptActiveZone-p2" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-active')"
                                      style="min-height: clamp(84px, 12vw, 105px); min-width: clamp(60px, 9vw, 75px);"></div>
-                                <div id="ptActiveModifier-p2" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
+                                <div id="ptActiveModifier-p2" class="pt-dmg-modifier" title="L-click: +10 DMG Buff | R-click: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
-                                    <button id="ptItemLock-p2" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','itemLock')">🚫</button>
-                                    <button id="ptToolLock-p2" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','toolLock')">🔧</button>
+                                    <button id="ptItemLock-p2" class="pt-status-marker" title="Item Lock (click to toggle)" onclick="ptToggleLock('p2','itemLock')">🚫</button>
+                                    <button id="ptToolLock-p2" class="pt-status-marker" title="Tool Lock (click to toggle)" onclick="ptToggleLock('p2','toolLock')">🔧</button>
                                 </div>
                             </div>
                         </div>
@@ -2073,8 +2073,8 @@
                                  onmouseleave="this.querySelector('.pt-deck-controls').style.display='none'">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDeckMenu('p1')">
-                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p1', 1)" title="⬆️ Karte ziehen">⬆️</div>
-                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p1')" title="🔍 Deck durchsuchen">🔍</div>
+                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p1', 1)" title="⬆️ Draw card">⬆️</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p1')" title="🔍 Search deck">🔍</div>
                                 </div>
                                 <div class="pt-deck-controls">
                                     <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p1')">🔍 Search</button>
@@ -2135,10 +2135,10 @@
                                 <div id="ptActiveZone-p1" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-active')"
                                      style="min-height: clamp(84px, 12vw, 105px); min-width: clamp(60px, 9vw, 75px);"></div>
-                                <div id="ptActiveModifier-p1" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
+                                <div id="ptActiveModifier-p1" class="pt-dmg-modifier" title="L-click: +10 DMG Buff | R-click: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
-                                    <button id="ptItemLock-p1" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','itemLock')">🚫</button>
-                                    <button id="ptToolLock-p1" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','toolLock')">🔧</button>
+                                    <button id="ptItemLock-p1" class="pt-status-marker" title="Item Lock (click to toggle)" onclick="ptToggleLock('p1','itemLock')">🚫</button>
+                                    <button id="ptToolLock-p1" class="pt-status-marker" title="Tool Lock (click to toggle)" onclick="ptToggleLock('p1','toolLock')">🔧</button>
                                 </div>
                             </div>
                         </div>
@@ -2156,7 +2156,7 @@
                     <div id="ptStadiumZone" class="pt-empty-slot pt-dropzone" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'stadium')" style="width:82px;height:114px">
                         <div class="pt-empty-slot" style="width:82px;height:113px;" onclick="ptClickZone('p1','stadium')">Stadium</div>
                     </div>
-                    <div class="pt-stadium-marker" title="Stadium-Effekt benutzt" onclick="this.classList.toggle('used')">S</div>
+                    <div class="pt-stadium-marker" title="Stadium effect used" onclick="this.classList.toggle('used')">S</div>
                 </div>
             </div>
 
@@ -2170,7 +2170,7 @@
 
             <!-- Opponent hand card count overlay -->
             <div id="ptOpponentHandCountOverlay" class="pt-overlay-info">
-                Gegner-Hand: <span id="ptOpponentHandCountValue">0</span>
+                Opponent hand: <span id="ptOpponentHandCountValue">0</span>
             </div>
 
         </div>
@@ -2184,7 +2184,7 @@
 
                 <div id="ptHandActionBar" style="display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
 
-                    <button class="pt-btn" style="padding: 4px 8px; background:#e67e22; color:white; border-color:#d35400;" onclick="ptUndo()" title="Letzte Aktion rückgängig machen">↩️ Undo</button>
+                    <button class="pt-btn" style="padding: 4px 8px; background:#e67e22; color:white; border-color:#d35400;" onclick="ptUndo()" title="Undo last action">↩️ Undo</button>
 
                     <button class="pt-btn pt-mobile-toggle" style="padding: 4px 8px; background:#555; color:white; border-color:#777;" onclick="ptToggleMobileActions()" title="More actions">⚙️</button>
 
@@ -2200,20 +2200,20 @@
 
                     <span style="color: #2ecc71; font-size: 10px; font-weight: bold; margin-left: 2px;">Judge:</span>
                     <input type="number" id="ptJudgeDrawP1" value="4" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1" aria-label="Player 1 Judge draw count">
-                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#27ae60; color:white; border-color:#2ecc71;" onclick="ptGlobalJudge()" title="Beide mischen Hand INS Deck und ziehen X">⚖️</button>
+                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#27ae60; color:white; border-color:#2ecc71;" onclick="ptGlobalJudge()" title="Both shuffle hand INTO deck and draw X">⚖️</button>
                     <input type="number" id="ptJudgeDrawP2" value="4" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2" aria-label="Player 2 Judge draw count">
 
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
                     <span style="color: #f1c40f; font-size: 10px; font-weight: bold; margin-left: 2px;">Iono:</span>
                     <input type="number" id="ptIonoDrawP1" value="6" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1" aria-label="Player 1 Iono draw count">
-                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#f39c12; color:white; border-color:#e67e22;" onclick="ptGlobalIono()" title="Beide legen Hand UNTER das Deck und ziehen X">⚡</button>
+                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#f39c12; color:white; border-color:#e67e22;" onclick="ptGlobalIono()" title="Both put hand UNDER deck and draw X">⚡</button>
                     <input type="number" id="ptIonoDrawP2" value="6" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2" aria-label="Player 2 Iono draw count">
 
                     <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
                     <span style="color: #e74c3c; font-size: 10px; font-weight: bold;">Opp:</span>
-                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#c0392b; color:white; border-color:#e74c3c;" onclick="ptOpponentShuffleAndDraw()" title="Gegner mischt Hand ins Deck und zieht X Karten">🔄 S&amp;D</button>
+                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#c0392b; color:white; border-color:#e74c3c;" onclick="ptOpponentShuffleAndDraw()" title="Opponent shuffles hand into deck and draws X cards">🔄 S&amp;D</button>
 
                     </div>
                 </div>
@@ -2221,11 +2221,11 @@
             </div>
 
             <div class="pt-hand-scroll-shell">
-                <button id="ptHandScrollLeft" class="pt-hand-scroll-btn" onclick="ptScrollHand(-1)" title="Hand nach links">❮</button>
+                <button id="ptHandScrollLeft" class="pt-hand-scroll-btn" onclick="ptScrollHand(-1)" title="Scroll hand left">❮</button>
                 <div class="pt-hand-scroll-viewport">
                     <div id="ptHandZone" class="pt-dropzone pt-hand-zone" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event, 'hand')"></div>
                 </div>
-                <button id="ptHandScrollRight" class="pt-hand-scroll-btn" onclick="ptScrollHand(1)" title="Hand nach rechts">❯</button>
+                <button id="ptHandScrollRight" class="pt-hand-scroll-btn" onclick="ptScrollHand(1)" title="Scroll hand right">❯</button>
             </div>
         </div>
 
@@ -2238,7 +2238,7 @@
     <div id="ptOppPanel" style="display:none;position:fixed;inset:0;z-index:21000;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'" role="dialog" aria-modal="true" aria-label="Opponent panel">
         <div style="background:#1a1a2e;border:2px solid #e74c3c;border-radius:14px;padding:20px;width:min(98vw,680px);max-height:90vh;overflow-y:auto;color:#fff;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <h3 style="margin:0;color:#e74c3c;" id="ptOppPanelTitle">⚔️ Gegner</h3>
+                <h3 style="margin:0;color:#e74c3c;" id="ptOppPanelTitle">⚔️ Opponent</h3>
                 <button class="pt-btn pt-danger" onclick="document.getElementById('ptOppPanel').style.display='none'">✕</button>
             </div>
             <!-- Tabs -->
@@ -2271,29 +2271,29 @@
 
     <!-- Attack View Modal -->
     <div id="ptAttackModal" style="display:none;position:fixed;inset:0;z-index:23000;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;flex-direction:column;gap:12px;overflow-y:auto;padding:16px 8px;" role="dialog" aria-modal="true" aria-label="Attack view">
-        <div style="color:#FFCB05;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;opacity:0.8;flex-shrink:0;">⚔️ Angriff</div>
+        <div style="color:#FFCB05;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;opacity:0.8;flex-shrink:0;">⚔️ Attack</div>
         <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center;width:100%;max-width:960px;">
             <!-- My active Pokémon large -->
             <div style="text-align:center;flex-shrink:0;">
-                <div style="color:#3B4CCA;font-size:11px;font-weight:700;margin-bottom:6px;">⚔️ Mein Aktives</div>
+                <div style="color:#3B4CCA;font-size:11px;font-weight:700;margin-bottom:6px;">⚔️ My Active</div>
                 <img id="ptAttackMyImg" src="" style="max-width:min(44vw,320px);max-height:min(65vh,460px);border-radius:10px;display:block;box-shadow:0 8px 40px rgba(59,76,202,0.6);border:2px solid #3B4CCA;" onerror="this.src=''">
                 <div id="ptAttackMyName" style="color:#fff;margin-top:6px;font-weight:700;font-size:13px;"></div>
             </div>
             <!-- Opp panel -->
             <div style="flex:1;min-width:280px;max-width:440px;max-height:min(75vh,560px);overflow-y:auto;background:rgba(20,20,30,0.9);border-radius:10px;border:1px solid rgba(231,76,60,0.45);padding:10px;">
-                <div style="color:#e74c3c;font-size:11px;font-weight:700;margin-bottom:8px;">🛡️ Gegner Feld</div>
+                <div style="color:#e74c3c;font-size:11px;font-weight:700;margin-bottom:8px;">🛡️ Opponent Field</div>
                 <div id="ptAttackOppContent"></div>
             </div>
         </div>
-        <button onclick="ptCloseAttackView()" style="flex-shrink:0;background:#c0392b;color:#fff;border:2px solid #e74c3c;border-radius:8px;padding:10px 28px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:.5px;">⚔️ Angriff &amp; Zug beenden</button>
-        <div style="color:#888;font-size:11px;flex-shrink:0;">Zug wird beendet &amp; Gegner zieht eine Karte</div>
+        <button onclick="ptCloseAttackView()" style="flex-shrink:0;background:#c0392b;color:#fff;border:2px solid #e74c3c;border-radius:8px;padding:10px 28px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:.5px;">⚔️ Attack &amp; End Turn</button>
+        <div style="color:#888;font-size:11px;flex-shrink:0;">Turn ends &amp; opponent draws a card</div>
     </div>
 
     <div id="ptCardViewer" style="display:none;position:fixed;inset:0;z-index:22000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;cursor:pointer;" onclick="this.style.display='none'"  role="dialog" aria-modal="true" aria-label="Card viewer">
         <div onclick="event.stopPropagation()" style="text-align:center;">
             <img id="ptCardViewerImg" src="" loading="lazy" style="max-width:min(95vw,420px);max-height:min(90vh,600px);border-radius:10px;display:block;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.9);">
             <div id="ptCardViewerName" style="color:#fff;margin-top:10px;font-weight:700;font-size:14px;"></div>
-            <div style="color:#888;font-size:11px;margin-top:4px;">Klick irgendwo zum Schließen</div>
+            <div style="color:#888;font-size:11px;margin-top:4px;">Click anywhere to close</div>
         </div>
     </div>
 
@@ -2338,17 +2338,17 @@
     <div id="ptDeckSearchModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.85); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDeckSearch()" role="dialog" aria-modal="true" aria-label="Deck search">
         <div style="background:#2a2a2a;border-radius:12px;padding:20px;max-width:90vw;width:860px;max-height:90vh;overflow-y:auto;border:2px solid #3B4CCA;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
-                <h3 style="color:#fff;margin:0;">🔍 Deck durchsuchen</h3>
+                <h3 style="color:#fff;margin:0;" data-i18n="pt.deckSearchTitle">🔍 Search Deck</h3>
                 <div style="display:flex;gap:8px;align-items:center;">
-                    <span style="color:#aaa;font-size:12px;">Klick = Hand | Rechtsklick = Lost Zone</span>
+                    <span style="color:#aaa;font-size:12px;" data-i18n="pt.deckSearchHint">Click = Hand | Right-click = Lost Zone</span>
                     <button class="pt-btn pt-danger" onclick="ptCloseDeckSearch()">✕</button>
                 </div>
             </div>
             <!-- Sort toolbar -->
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
-                <span style="color:#aaa;font-size:11px;flex-shrink:0;">Sortierung:</span>
-                <button id="ptDSortDeck" onclick="_ptSetDeckSort('deck')" style="padding:4px 10px;font-size:11px;border:1px solid #3B4CCA;border-radius:5px;cursor:pointer;background:#2a52be;color:#fff;">🃏 Deck-Reihenfolge</button>
-                <button id="ptDSortType" onclick="_ptSetDeckSort('type')" style="padding:4px 10px;font-size:11px;border:1px solid #555;border-radius:5px;cursor:pointer;background:#333;color:#ccc;">🏦 Pokémon → Supporter → Item → Tool → Stadion → Energie</button>
+                <span style="color:#aaa;font-size:11px;flex-shrink:0;">Sort:</span>
+                <button id="ptDSortDeck" onclick="_ptSetDeckSort('deck')" style="padding:4px 10px;font-size:11px;border:1px solid #3B4CCA;border-radius:5px;cursor:pointer;background:#2a52be;color:#fff;">🃏 Deck Order</button>
+                <button id="ptDSortType" onclick="_ptSetDeckSort('type')" style="padding:4px 10px;font-size:11px;border:1px solid #555;border-radius:5px;cursor:pointer;background:#333;color:#ccc;">🏦 Pokémon → Supporter → Item → Tool → Stadium → Energy</button>
             </div>
             <div id="ptDeckSearchGrid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;"></div>
         </div>
@@ -2361,9 +2361,9 @@
                 <button class="pt-btn pt-danger" onclick="ptCloseDiscardModal()">✕</button>
             </div>
             <div id="ptDiscardSortBar" style="display:none;align-items:center;gap:6px;margin-bottom:12px;">
-                <span style="font-size:11px;color:#aaa;">Sortierung:</span>
-                <button id="ptDscSortOrder" onclick="ptSetDiscardSort('order')" style="border:1px solid #3B4CCA;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#2a52be;color:#fff;">🃏 Reihenfolge</button>
-                <button id="ptDscSortType"  onclick="ptSetDiscardSort('type')"  style="border:1px solid #555;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#333;color:#ccc;">📋 Typ</button>
+                <span style="font-size:11px;color:#aaa;">Sort:</span>
+                <button id="ptDscSortOrder" onclick="ptSetDiscardSort('order')" style="border:1px solid #3B4CCA;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#2a52be;color:#fff;">🃏 Order</button>
+                <button id="ptDscSortType"  onclick="ptSetDiscardSort('type')"  style="border:1px solid #555;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#333;color:#ccc;">📋 Type</button>
             </div>
             <div id="ptDiscardGrid" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
         </div>
@@ -2424,30 +2424,30 @@
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
-            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',10)"  title="+10 Schaden">+10</button>
-            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',50)"  title="+50 Schaden">+50</button>
-            <button class="pt-menu-btn green" onclick="ptMenuAction('damage',-10)" title="Heilen 10">-10</button>
-            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',0)"   title="Voll heilen">0</button>
+            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',10)"  title="+10 Damage">+10</button>
+            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',50)"  title="+50 Damage">+50</button>
+            <button class="pt-menu-btn green" onclick="ptMenuAction('damage',-10)" title="Heal 10">-10</button>
+            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',0)"   title="Full heal">0</button>
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
-            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','hand')"    title="Auf die Hand">✋</button>
-            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','deck')"    title="Ins Deck mischen">🔄</button>
-            <button class="pt-menu-btn red"  onclick="ptMenuAction('utility','discard')" title="Ablagestapel">🗑️</button>
-            <button class="pt-menu-btn" style="background:#e67e22;color:#fff;" onclick="ptMenuAction('utility','energy-discard')" title="Energy in den Discard legen">⚡🗑️</button>
+            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','hand')"    title="To hand">✋</button>
+            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','deck')"    title="Shuffle into deck">🔄</button>
+            <button class="pt-menu-btn red"  onclick="ptMenuAction('utility','discard')" title="Discard pile">🗑️</button>
+            <button class="pt-menu-btn" style="background:#e67e22;color:#fff;" onclick="ptMenuAction('utility','energy-discard')" title="Discard energy">⚡🗑️</button>
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
-            <button class="pt-menu-btn" style="background:#c0392b;color:#fff;" onclick="ptMenuAction('utility','retreat')" title="Bench ↔ Aktiv tauschen (Retreat)">↩️ Retreat</button>
-            <button class="pt-menu-btn red" style="flex:1;font-weight:800;" onclick="ptMenuAction('utility','ko')" title="Pokémon sofort K.O. setzen">☠️ K.O.</button>
+            <button class="pt-menu-btn" style="background:#c0392b;color:#fff;" onclick="ptMenuAction('utility','retreat')" title="Swap Bench ↔ Active (Retreat)">↩️ Retreat</button>
+            <button class="pt-menu-btn red" style="flex:1;font-weight:800;" onclick="ptMenuAction('utility','ko')" title="Knock Out Pokémon">☠️ K.O.</button>
         </div>
     </div>
 
     <!-- Mobile Context Action Menu (Bottom Sheet) -->
     <div id="ptContextMenu">
         <div id="ptContextHeader">
-            <span id="ptContextCardName">Karte</span>
-            <button id="ptContextClose" onclick="ptHideContextMenu()" aria-label="Schließen">×</button>
+            <span id="ptContextCardName">Card</span>
+            <button id="ptContextClose" onclick="ptHideContextMenu()" aria-label="Close">×</button>
         </div>
         <div id="ptContextActions">
             <!-- Buttons werden dynamisch erstellt -->
@@ -2486,18 +2486,18 @@
     <div id="drawSimulatorModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" aria-label="Starting hand simulator">
         <div id="drawSimModal" style="background:#1a1a2e;border-radius:16px;max-width:800px;width:95%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:helpModalIn 0.25s ease-out;position:relative;color:#eee;">
             <button onclick="closeDrawSimulator()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:4px 8px;border-radius:8px;line-height:1;">&times;</button>
-            <h2 style="margin-top:0;color:#FFCB05;font-size:1.4em;border-bottom:2px solid #3B4CCA;padding-bottom:10px;margin-bottom:16px;">🎲 Starthand Simulator</h2>
+            <h2 style="margin-top:0;color:#FFCB05;font-size:1.4em;border-bottom:2px solid #3B4CCA;padding-bottom:10px;margin-bottom:16px;" data-i18n="draw.title">🎲 Starting Hand Simulator</h2>
             <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
-                <button class="btn-modern btn-primary" onclick="drawNewHand()">🔄 Neue Hand</button>
-                <button class="btn-modern btn-primary" onclick="drawExtraCard()">➕ Karte ziehen</button>
-                <span style="margin-left:auto;font-size:13px;color:#aaa;align-self:center;">Deck: <strong id="simulatorDeckCount" style="color:#FFCB05;">0</strong> verbleibend</span>
+                <button class="btn-modern btn-primary" onclick="drawNewHand()" data-i18n="draw.newHand">🔄 New Hand</button>
+                <button class="btn-modern btn-primary" onclick="drawExtraCard()" data-i18n="draw.drawCard">➕ Draw Card</button>
+                <span style="margin-left:auto;font-size:13px;color:#aaa;align-self:center;"><span data-i18n="draw.deckLabel">Deck:</span> <strong id="simulatorDeckCount" style="color:#FFCB05;">0</strong> <span data-i18n="draw.remaining">remaining</span></span>
             </div>
             <div id="simulatorHandGrid" class="draw-sim-hand" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:160px;margin-bottom:24px;"></div>
 
             <!-- Combo Calculator Section -->
             <div style="border-top:2px solid #333;padding-top:18px;">
-                <h3 style="margin:0 0 12px 0;color:#FFCB05;font-size:1.1em;">🎯 Combo-Wahrscheinlichkeit</h3>
-                <p style="font-size:12px;color:#888;margin:0 0 10px 0;">Wähle bis zu 4 Karten — Berechnung per Monte-Carlo-Simulation (10.000 Iterationen)</p>
+                <h3 style="margin:0 0 12px 0;color:#FFCB05;font-size:1.1em;" data-i18n="draw.comboTitle">🎯 Combo Probability</h3>
+                <p style="font-size:12px;color:#888;margin:0 0 10px 0;" data-i18n="draw.comboDesc">Select up to 4 cards — Calculated via Monte Carlo simulation (10,000 iterations)</p>
                 <div id="comboTargetBadges" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;margin-bottom:10px;"></div>
                 <div class="combo-grid" style="margin-bottom:12px;">
                     <select id="comboTarget1" aria-label="Combo target 1" onchange="onComboDropdownChange()"></select>
@@ -2506,8 +2506,8 @@
                     <select id="comboTarget4" aria-label="Combo target 4" onchange="onComboDropdownChange()"></select>
                 </div>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                    <button class="btn-modern btn-primary" onclick="runComboCalculation()" style="font-weight:700;">📊 Berechne Chance</button>
-                    <button class="btn-modern btn-primary" onclick="clearComboTargets()">🗑️ Auswahl löschen</button>
+                    <button class="btn-modern btn-primary" onclick="runComboCalculation()" style="font-weight:700;" data-i18n="draw.calculate">📊 Calculate Chance</button>
+                    <button class="btn-modern btn-primary" onclick="clearComboTargets()" data-i18n="draw.clearSelection">🗑️ Clear Selection</button>
                     <span id="comboResultDisplay" style="margin-left:auto;font-size:1.1em;font-weight:700;color:#2ecc71;"></span>
                 </div>
             </div>

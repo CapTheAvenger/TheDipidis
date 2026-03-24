@@ -862,7 +862,7 @@ async function clearCollection() {
     return;
   }
 
-  const ok = confirm('Wirklich die gesamte Collection zuruecksetzen? Alle Karten werden auf "nicht im Besitz" gesetzt.');
+  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Collection zuruecksetzen? Alle Karten werden auf "nicht im Besitz" gesetzt.' : 'Really reset the entire collection? All cards will be set to "not owned".');
   if (!ok) return;
 
   try {
@@ -882,7 +882,7 @@ async function clearCollection() {
     showNotification('Collection wurde geleert', 'success');
   } catch (error) {
     console.error('Error clearing collection:', error);
-    showNotification('Fehler beim Leeren der Collection', 'error');
+    showNotification(getLang()==='de' ? 'Fehler beim Leeren der Collection' : 'Error clearing the collection', 'error');
   }
 }
 
@@ -2100,11 +2100,11 @@ async function openCompareSavedDeck(deckIndex) {
         <h2 style="margin:0;font-size:1.25em;">⚖️ Compare Deck: ${safeBaseDeckName}</h2>
         <button id="deck-compare-source-close" style="background:none;border:none;font-size:24px;cursor:pointer;line-height:1;">✕</button>
       </div>
-      <p style="margin:0 0 14px 0;color:#555;">Wähle, womit du vergleichen möchtest:</p>
+      <p style="margin:0 0 14px 0;color:#555;">${getLang()==='de' ? 'Wähle, womit du vergleichen möchtest:' : 'Choose what to compare with:'}</p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-        <button id="compare-source-paste" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">📋 Limitless / PTCGL Liste einfügen</button>
-        <button id="compare-source-saved" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">💾 Gespeichertes Deck auswählen</button>
+        <button id="compare-source-paste" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">${getLang()==='de' ? '📋 Limitless / PTCGL Liste einfügen' : '📋 Paste Limitless / PTCGL list'}</button>
+        <button id="compare-source-saved" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">${getLang()==='de' ? '💾 Gespeichertes Deck auswählen' : '💾 Choose saved deck'}</button>
       </div>
 
       <div id="compare-source-pane"></div>
@@ -2131,11 +2131,11 @@ async function openCompareSavedDeck(deckIndex) {
 
     if (mode === 'paste') {
       pane.innerHTML = `
-        <label style="display:block;font-weight:600;margin:6px 0;">Deckliste einfügen (Limitless/PTCGL)</label>
-        <textarea id="compare-paste-text" style="width:100%;min-height:180px;padding:10px;border:1px solid #ccc;border-radius:8px;resize:vertical;font-family:Consolas,monospace;font-size:12px;" placeholder="Beispiel:\n4 Charizard ex MEW 006\n3 Pidgeot ex OBF 164\n..."></textarea>
-        <div id="compare-paste-preview" style="margin-top:10px;padding:10px;border-radius:8px;background:#fff7e6;border:1px solid #ffe0a6;color:#7a5a00;font-size:12px;">Noch keine Liste erkannt. Füge eine Deckliste ein.</div>
+        <label style="display:block;font-weight:600;margin:6px 0;">${getLang()==='de' ? 'Deckliste einfügen (Limitless/PTCGL)' : 'Paste deck list (Limitless/PTCGL)'}</label>
+        <textarea id="compare-paste-text" style="width:100%;min-height:180px;padding:10px;border:1px solid #ccc;border-radius:8px;resize:vertical;font-family:Consolas,monospace;font-size:12px;" placeholder="${getLang()==='de' ? 'Beispiel:' : 'Example:}\n4 Charizard ex MEW 006\n3 Pidgeot ex OBF 164\n..."></textarea>
+        <div id="compare-paste-preview" style="margin-top:10px;padding:10px;border-radius:8px;background:#fff7e6;border:1px solid #ffe0a6;color:#7a5a00;font-size:12px;">${getLang()==='de' ? 'Noch keine Liste erkannt. Füge eine Deckliste ein.' : 'No list detected yet. Paste a deck list.'}</div>
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
-          <button id="compare-paste-run" style="padding:8px 12px;border:none;border-radius:8px;background:#27ae60;color:white;cursor:pointer;font-weight:700;">⚖️ Vergleichen</button>
+          <button id="compare-paste-run" style="padding:8px 12px;border:none;border-radius:8px;background:#27ae60;color:white;cursor:pointer;font-weight:700;">${getLang()==='de' ? '⚖️ Vergleichen' : '⚖️ Compare'}</button>
         </div>
       `;
 
@@ -2152,7 +2152,7 @@ async function openCompareSavedDeck(deckIndex) {
           preview.style.background = '#fff7e6';
           preview.style.border = '1px solid #ffe0a6';
           preview.style.color = '#7a5a00';
-          preview.innerHTML = 'Noch keine Liste erkannt. Füge eine Deckliste ein.';
+          preview.innerHTML = '${getLang()==='de' ? 'Noch keine Liste erkannt. Füge eine Deckliste ein.' : 'No list detected yet. Paste a deck list.'}';
           return;
         }
 
@@ -2161,9 +2161,9 @@ async function openCompareSavedDeck(deckIndex) {
         preview.style.border = ok ? '1px solid #b9e6bd' : '1px solid #f0b9b9';
         preview.style.color = ok ? '#1f6b2a' : '#8a1f1f';
         preview.innerHTML = `
-          <strong>${ok ? '✅ Parser erkannt' : '⚠️ Keine gültigen Karten erkannt'}</strong><br>
-          Zeilen: ${stats.nonEmptyLines} • Erkannt: ${stats.recognizedLines} • Ignoriert (Header): ${stats.ignoredHeaderLines} • Nicht erkannt: ${stats.unrecognizedLines}<br>
-          Karten gesamt: <strong>${stats.totalCards}</strong> • Unique: <strong>${stats.uniqueCards}</strong>
+          <strong>${ok ? (getLang()==='de' ? '✅ Parser erkannt' : '✅ Parser recognized') : (getLang()==='de' ? '⚠️ Keine gültigen Karten erkannt' : '⚠️ No valid cards recognized')}</strong><br>
+          ${getLang()==='de' ? `Zeilen: ${stats.nonEmptyLines} • Erkannt: ${stats.recognizedLines} • Ignoriert (Header): ${stats.ignoredHeaderLines} • Nicht erkannt: ${stats.unrecognizedLines}` : `Lines: ${stats.nonEmptyLines} • Recognized: ${stats.recognizedLines} • Ignored (Header): ${stats.ignoredHeaderLines} • Unrecognized: ${stats.unrecognizedLines}`}<br>
+          ${getLang()==='de' ? 'Karten gesamt' : 'Total cards'}: <strong>${stats.totalCards}</strong> • Unique: <strong>${stats.uniqueCards}</strong>
         `;
       }
 
@@ -2179,7 +2179,7 @@ async function openCompareSavedDeck(deckIndex) {
           const parsedCards = stats.cards;
           const totalCards = stats.totalCards;
           if (!totalCards) {
-            showNotification('Keine gültigen Karten in der eingefügten Liste gefunden.', 'error');
+            showNotification(getLang()==='de' ? 'Keine gültigen Karten in der eingefügten Liste gefunden.' : 'No valid cards found in the pasted list.', 'error');
             return;
           }
           const externalDeck = {
@@ -2196,13 +2196,13 @@ async function openCompareSavedDeck(deckIndex) {
 
     // mode === 'saved'
     if (compareCandidates.length === 0) {
-      pane.innerHTML = '<p style="color:#b94a48;background:#fbeaea;border:1px solid #f1c0c0;padding:10px;border-radius:8px;">Es gibt kein weiteres gespeichertes Deck zum Vergleichen.</p>';
+      pane.innerHTML = '<p style="color:#b94a48;background:#fbeaea;border:1px solid #f1c0c0;padding:10px;border-radius:8px;">${getLang()==='de' ? 'Es gibt kein weiteres gespeichertes Deck zum Vergleichen.' : 'No other saved deck available for comparison.'}</p>';
       return;
     }
 
     pane.innerHTML = `
-      <label style="display:block;font-weight:600;margin:6px 0;">Gespeichertes Deck suchen</label>
-      <input id="compare-saved-search" type="text" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" placeholder="Deckname oder Archetype suchen..." />
+      <label style="display:block;font-weight:600;margin:6px 0;">${getLang()==='de' ? 'Gespeichertes Deck suchen' : 'Search saved deck'}</label>
+      <input id="compare-saved-search" type="text" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;" placeholder="${getLang()==='de'? 'Deckname oder Archetype suchen...' : 'Search deck name or archetype...'}" />
       <div id="compare-saved-list" style="margin-top:10px;max-height:260px;overflow:auto;border:1px solid #eee;border-radius:8px;"></div>
     `;
 
@@ -2219,7 +2219,7 @@ async function openCompareSavedDeck(deckIndex) {
       });
 
       if (filtered.length === 0) {
-        list.innerHTML = '<div style="padding:10px;color:#777;">Keine passenden Decks gefunden.</div>';
+        list.innerHTML = '<div style="padding:10px;color:#777;">${getLang()==='de' ? 'Keine passenden Decks gefunden.' : 'No matching decks found.'}</div>';
         return;
       }
 
@@ -2231,7 +2231,7 @@ async function openCompareSavedDeck(deckIndex) {
         return `
           <button data-deck-id="${uid}" style="width:100%;text-align:left;padding:10px 12px;border:none;border-bottom:1px solid #f0f0f0;background:white;cursor:pointer;">
             <div style="font-weight:700;color:#2c3e50;">${safeName}</div>
-            <div style="font-size:12px;color:#666;">${safeArche} • ${cards} Karten</div>
+            <div style="font-size:12px;color:#666;">${safeArche} • ${cards} ${getLang()==='de' ? 'Karten' : 'Cards'}</div>
           </button>
         `;
       }).join('');
@@ -2378,7 +2378,41 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional') {
       same.push(`${label} x${a.count}`);
     }
   });
-  
+
+  // Collect cards the user needs to add (only in B + increased counts in B)
+  const proxyCards = [];
+  allCanonicalKeys.forEach(key => {
+    const a = aggA.get(key) || { count: 0 };
+    const b = aggB.get(key) || { count: 0 };
+    let needed = 0;
+    if (a.count === 0 && b.count > 0) {
+      needed = b.count;
+    } else if (b.count > a.count) {
+      needed = b.count - a.count;
+    }
+    if (needed > 0) {
+      const rawCardsForKey = [];
+      Object.entries(cardsB).forEach(([rawKey, rawCount]) => {
+        const info = mode === 'exact'
+          ? { canonical: `raw:${rawKey}` }
+          : getCanonicalComparisonInfo(rawKey);
+        if (info.canonical === key) {
+          const parsed = parseDeckCardKey(rawKey);
+          rawCardsForKey.push({ name: parsed.name || parsed.rawKey, set: parsed.set, number: parsed.number, count: parseInt(rawCount, 10) || 0 });
+        }
+      });
+      let remaining = needed;
+      rawCardsForKey.forEach(rc => {
+        if (remaining <= 0) return;
+        const toAdd = Math.min(remaining, rc.count);
+        proxyCards.push({ name: rc.name, set: rc.set, number: rc.number, count: toAdd });
+        remaining -= toAdd;
+      });
+    }
+  });
+  window._deckCompareProxyCards = proxyCards;
+  const totalProxyCopies = proxyCards.reduce((s, c) => s + c.count, 0);
+
   const safeNameA = escapeHtml(deckA.name);
   const safeNameB = escapeHtml(deckB.name);
   
@@ -2402,7 +2436,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional') {
         <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'functional')" style="padding:6px 10px;border-radius:999px;border:${mode === 'functional' ? 'none' : '1px solid #ccc'};background:${mode === 'functional' ? '#2e7d32' : '#f5f5f5'};color:${mode === 'functional' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Functional (prints merged)</button>
         <button onclick="showDeckComparison(window._deckCompareA, window._deckCompareB, 'exact')" style="padding:6px 10px;border-radius:999px;border:${mode === 'exact' ? 'none' : '1px solid #ccc'};background:${mode === 'exact' ? '#1565c0' : '#f5f5f5'};color:${mode === 'exact' ? 'white' : '#333'};font-size:12px;font-weight:700;cursor:pointer;">Exact print</button>
       </div>
-      <div style="margin:-4px 0 12px 0;font-size:12px;color:#666;">${mode === 'functional' ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Jeder Print (set+nummer) wird einzeln verglichen.'}</div>
+      <div style="margin:-4px 0 12px 0;font-size:12px;color:#666;">${mode === 'functional' ? (getLang()==='de' ? 'Artwork- und Set-Varianten derselben Karte werden zusammengefasst.' : 'Artwork and set variants of the same card are merged.') : (getLang()==='de' ? 'Jeder Print (set+nummer) wird einzeln verglichen.' : 'Each print (set+number) is compared individually.')}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px;">
         <div style="background:#667eea;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameA}</div>
         <div style="background:#764ba2;color:white;padding:10px;border-radius:8px;text-align:center;font-weight:700;">${safeNameB}</div>
@@ -2411,10 +2445,31 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional') {
       ${onlyB.length ? `<div style="margin-bottom:12px;"><h4 style="color:#764ba2;margin:0 0 5px 0;">Only in ${safeNameB} (${onlyB.length})</h4><div style="font-size:0.9em;color:#555;">${onlyB.join('<br>')}</div></div>` : ''}
       ${different.length ? `<div style="margin-bottom:12px;"><h4 style="color:#e67e22;margin:0 0 5px 0;">Different counts (${different.length})</h4><div style="font-size:0.9em;color:#555;">${different.join('<br>')}</div></div>` : ''}
       <div style="margin-bottom:12px;"><h4 style="color:#27ae60;margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color:#555;">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>
+      ${totalProxyCopies > 0 ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid #eee;text-align:center;"><button onclick="addCompareNewCardsToProxy()" style="padding:10px 20px;border:none;border-radius:8px;background:#e74c3c;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#c0392b';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.35)'" onmouseout="this.style.background='#e74c3c';this.style.transform='';this.style.boxShadow=''">🖨️ ${getLang()==='de' ? 'Alle neuen Karten zum Proxy Printer hinzufügen' : 'Add all new cards to Proxy Printer'} (${totalProxyCopies})</button></div>` : ''}
     </div>
   `;
   
   document.body.appendChild(modal);
+}
+
+function addCompareNewCardsToProxy() {
+  const cards = window._deckCompareProxyCards;
+  if (!Array.isArray(cards) || cards.length === 0) return;
+  let total = 0;
+  cards.forEach(c => {
+    addCardToProxy(c.name, c.set, c.number, c.count, true);
+    total += c.count;
+  });
+  if (typeof showToast === 'function') {
+    showToast(getLang()==='de' ? `${total} Karte(n) zum Proxy Printer hinzugefügt` : `${total} card(s) added to Proxy Printer`, 'success');
+  }
+  if (typeof switchTabAndUpdateMenu === 'function') {
+    switchTabAndUpdateMenu('proxy');
+  } else if (typeof switchTab === 'function') {
+    switchTab('proxy');
+  }
+  const modal = document.getElementById('deck-compare-modal');
+  if (modal) modal.remove();
 }
 
 // Ensure inline onclick handlers can resolve functions consistently
@@ -2425,6 +2480,7 @@ window.renderFolderNav = renderFolderNav;
 window.filterDecksByFolder = filterDecksByFolder;
 window.openCompareSavedDeck = openCompareSavedDeck;
 window.showDeckComparison = showDeckComparison;
+window.addCompareNewCardsToProxy = addCompareNewCardsToProxy;
 window.filterMyDecks = filterMyDecks;
 window.saveCurrentDeckToProfile = saveCurrentDeckToProfile;
 
@@ -2434,7 +2490,7 @@ window.saveCurrentDeckToProfile = saveCurrentDeckToProfile;
 
 function dexImportOpenFilePicker() {
     const user = typeof auth !== 'undefined' ? auth.currentUser : null;
-    if (!user) { showNotification('Bitte zuerst einloggen', 'error'); return; }
+    if (!user) { showNotification(getLang()==='de' ? 'Bitte zuerst einloggen' : 'Please log in first', 'error'); return; }
     document.getElementById('dexImportFileInput').click();
 }
 
@@ -2464,7 +2520,7 @@ function dexImportParseCSV(csvText) {
         rows = result.data;
     } else {
         const lines = csvText.split(/\r?\n/).filter(l => l.trim());
-        if (lines.length < 2) { showNotification('CSV ist leer oder ungültig', 'error'); return; }
+        if (lines.length < 2) { showNotification(getLang()==='de' ? 'CSV ist leer oder ungültig' : 'CSV is empty or invalid', 'error'); return; }
         const delimiter = (lines[0].split(';').length > lines[0].split(',').length) ? ';' : ',';
         function splitCSVLine(line) {
             const result = [];
@@ -2488,7 +2544,7 @@ function dexImportParseCSV(csvText) {
         });
     }
 
-    if (!rows || rows.length === 0) { showNotification('CSV enthält keine Daten', 'error'); return; }
+    if (!rows || rows.length === 0) { showNotification(getLang()==='de' ? 'CSV enthält keine Daten' : 'CSV contains no data', 'error'); return; }
 
     // At this point all row keys are lowercase (PapaParse: transformHeader; manual: map toLowerCase)
     const sampleRow = rows[0];
@@ -2498,7 +2554,7 @@ function dexImportParseCSV(csvText) {
     const dbIndex = window.cardIndexBySetNumber instanceof Map ? window.cardIndexBySetNumber : null;
     const hasDbIndex = (dbIndex && dbIndex.size > 0) || Object.keys(dbMap).length > 0;
     if (!hasDbIndex && (!Array.isArray(window.allCardsDatabase) || window.allCardsDatabase.length === 0)) {
-      showNotification('Kartendatenbank lädt noch. Bitte kurz warten und den Dex-Import erneut öffnen.', 'warning');
+      showNotification(getLang()==='de' ? 'Kartendatenbank lädt noch. Bitte kurz warten und den Dex-Import erneut öffnen.' : 'Card database is still loading. Please wait and reopen the Dex import.', 'warning');
       return;
     }
 
@@ -2820,7 +2876,7 @@ function dexImportShowPreview(matched, unmatched) {
     if (existing) existing.remove();
 
     if (matched.length === 0 && unmatched.length === 0) {
-        showNotification('CSV enthält keine lesbaren Einträge', 'error');
+        showNotification(getLang()==='de' ? 'CSV enthält keine lesbaren Einträge' : 'CSV contains no readable entries', 'error');
         return;
     }
 
@@ -2831,7 +2887,7 @@ function dexImportShowPreview(matched, unmatched) {
     const totalQty = matched.reduce((s, m) => s + m.qty, 0);
     const unmatchedBlock = unmatched.length > 0 ? `
         <details style="margin-bottom:12px;">
-            <summary style="cursor:pointer;color:#856404;font-weight:600;padding:4px 0;">⚠️ ${unmatched.length} nicht gefundene Karten (anzeigen)</summary>
+            <summary style="cursor:pointer;color:#856404;font-weight:600;padding:4px 0;">⚠️ ${unmatched.length} ${getLang()==='de' ? 'nicht gefundene Karten (anzeigen)' : 'unmatched cards (show)'}</summary>
             <ul style="font-size:11px;color:#666;max-height:130px;overflow-y:auto;margin-top:8px;padding-left:18px;">
                 ${unmatched.map(u => `<li>${escapeHtml(u.rawName || '?')} (${escapeHtml(u.rawSet)} ${escapeHtml(u.rawNum)}) — ${u.qty}x</li>`).join('')}
             </ul>
@@ -2841,10 +2897,10 @@ function dexImportShowPreview(matched, unmatched) {
         <div style="max-height:220px;overflow-y:auto;border:1px solid #ddd;border-radius:8px;margin-bottom:14px;font-size:12px;">
             <table style="width:100%;border-collapse:collapse;">
                 <thead><tr style="background:#667eea;color:#fff;position:sticky;top:0;">
-                    <th style="padding:7px 10px;text-align:left;">Karte</th>
+                    <th style="padding:7px 10px;text-align:left;">${getLang()==='de' ? 'Karte' : 'Card'}</th>
                     <th style="padding:7px 6px;text-align:center;">Set</th>
-                    <th style="padding:7px 6px;text-align:center;">Nr.</th>
-                    <th style="padding:7px 6px;text-align:center;">Anzahl</th>
+                    <th style="padding:7px 6px;text-align:center;">${getLang()==='de' ? 'Nr.' : 'No.'}</th>
+                    <th style="padding:7px 6px;text-align:center;">${getLang()==='de' ? 'Anzahl' : 'Qty'}</th>
                 </tr></thead>
                 <tbody>
                     ${matched.map((m, i) => `<tr style="background:${i % 2 ? '#f7f7f7' : '#fff'};">
@@ -2859,36 +2915,36 @@ function dexImportShowPreview(matched, unmatched) {
         <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
             <button onclick="dexImportExecute('merge')"
                     style="flex:1;min-width:160px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
-              🔀 Abgleichen (Merge)<br><small style="font-weight:400;opacity:.85;">Importierte Mengen ersetzen, andere Karten bleiben</small>
+              ${getLang()==='de' ? '🔀 Abgleichen (Merge)' : '🔀 Merge'}<br><small style="font-weight:400;opacity:.85;">${getLang()==='de' ? 'Importierte Mengen ersetzen, andere Karten bleiben' : 'Imported quantities replace existing, other cards remain'}</small>
             </button>
             <button onclick="dexImportExecute('replace')"
                     style="flex:1;min-width:160px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
-                🔄 Ersetzen (Replace)<br><small style="font-weight:400;opacity:.85;">Kollektion komplett ersetzen</small>
+                ${getLang()==='de' ? '🔄 Ersetzen (Replace)' : '🔄 Replace'}<br><small style="font-weight:400;opacity:.85;">${getLang()==='de' ? 'Kollektion komplett ersetzen' : 'Completely replace collection'}</small>
             </button>
-        </div>` : `<p style="color:#888;text-align:center;">Keine Karten in der Datenbank gefunden.</p>`;
+        </div>` : `<p style="color:#888;text-align:center;">${getLang()==='de' ? 'Keine Karten in der Datenbank gefunden.' : 'No cards found in the database.'}</p>`;
 
     modal.innerHTML = `
         <div style="background:#fff;border-radius:14px;max-width:660px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
-            <h2 style="margin-top:0;color:#667eea;margin-bottom:18px;">📥 Dex Import Vorschau</h2>
+            <h2 style="margin-top:0;color:#667eea;margin-bottom:18px;">${getLang()==='de' ? '📥 Dex Import Vorschau' : '📥 Dex Import Preview'}</h2>
             <div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
                 <div style="background:#d4edda;border-radius:8px;padding:10px 16px;flex:1;text-align:center;min-width:100px;">
                     <div style="font-size:1.6em;font-weight:900;color:#155724;">${matched.length}</div>
-                    <div style="font-size:12px;color:#155724;">Karten erkannt</div>
+                    <div style="font-size:12px;color:#155724;">${getLang()==='de' ? 'Karten erkannt' : 'Cards recognized'}</div>
                 </div>
                 <div style="background:#d4edda;border-radius:8px;padding:10px 16px;flex:1;text-align:center;min-width:100px;">
                     <div style="font-size:1.6em;font-weight:900;color:#155724;">${totalQty}</div>
-                    <div style="font-size:12px;color:#155724;">Exemplare gesamt</div>
+                    <div style="font-size:12px;color:#155724;">${getLang()==='de' ? 'Exemplare gesamt' : 'Total copies'}</div>
                 </div>
                 ${unmatched.length > 0 ? `<div style="background:#fff3cd;border-radius:8px;padding:10px 16px;flex:1;text-align:center;min-width:100px;">
                     <div style="font-size:1.6em;font-weight:900;color:#856404;">${unmatched.length}</div>
-                    <div style="font-size:12px;color:#856404;">Nicht gefunden</div>
+                    <div style="font-size:12px;color:#856404;">${getLang()==='de' ? 'Nicht gefunden' : 'Not found'}</div>
                 </div>` : ''}
             </div>
             ${tableBlock}
             ${unmatchedBlock}
             <button onclick="document.getElementById('dexImportModal').remove()"
                     style="width:100%;background:#f0f0f0;border:none;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;color:#555;margin-top:4px;">
-                ✕ Abbrechen
+                ${getLang()==='de' ? '✕ Abbrechen' : '✕ Cancel'}
             </button>
         </div>`;
 
@@ -2901,10 +2957,10 @@ async function dexImportExecute(mode) {
     if (!modal || !modal._matchedData) return;
     const matched = modal._matchedData;
     const user = typeof auth !== 'undefined' ? auth.currentUser : null;
-    if (!user) { showNotification('Bitte zuerst einloggen', 'error'); return; }
+    if (!user) { showNotification(getLang()==='de' ? 'Bitte zuerst einloggen' : 'Please log in first', 'error'); return; }
 
     modal.remove();
-    showNotification('Importiere Kollektion…', 'info');
+    showNotification(getLang()==='de' ? 'Importiere Kollektion…' : 'Importing collection…', 'info');
 
     try {
         // Build the new in-memory state
@@ -2936,10 +2992,10 @@ async function dexImportExecute(mode) {
 
         updateCollectionUI();
         const totalQty = matched.reduce((s, m) => s + m.qty, 0);
-        showNotification(`✅ ${matched.length} Karten (${totalQty} Exemplare) importiert!`, 'success');
+        showNotification(getLang()==='de' ? `✅ ${matched.length} Karten (${totalQty} Exemplare) importiert!` : `✅ ${matched.length} cards (${totalQty} copies) imported!`, 'success');
     } catch (err) {
         console.error('Dex import error:', err);
-        showNotification('Fehler beim Import: ' + err.message, 'error');
+        showNotification((getLang()==='de' ? 'Fehler beim Import: ' : 'Import error: ') + err.message, 'error');
     }
 }
 

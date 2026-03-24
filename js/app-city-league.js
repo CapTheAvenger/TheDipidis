@@ -313,6 +313,8 @@
                     console.warn('Could not load tournament data:', e);
                 }
                 
+                window._cityLeagueTournamentCount = tournamentCount;
+                window._cityLeagueDateRange = dateRange;
                 renderCityLeagueTable(tournamentCount, dateRange);
 
                 // Keep the analysis dropdown in sync with the freshly loaded format data
@@ -3161,7 +3163,7 @@
             if (window.cityLeagueLoaded) {
                 // Re-render the comparison tables if data is available
                 if (window.cityLeagueSortedData) {
-                    renderCityLeagueTable(window.cityLeagueSortedData);
+                    renderCityLeagueTable(window._cityLeagueTournamentCount || 0, window._cityLeagueDateRange || '');
                 }
                 // Re-populate the deck dropdown
                 if (typeof populateCityLeagueDeckSelect === 'function') {

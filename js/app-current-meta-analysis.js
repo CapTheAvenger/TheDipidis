@@ -389,7 +389,7 @@
             document.getElementById('currentMetaMatchupsSection').style.display = 'none';
             document.getElementById('currentMetaDeckVisual').style.display = 'none';
             document.getElementById('currentMetaDeckTableView').style.display = 'none';
-            document.getElementById('currentMetaCardCount').textContent = '0 Karten';
+            document.getElementById('currentMetaCardCount').textContent = t('cl.cards').replace(/^/, '0 ');
             document.getElementById('currentMetaCardCountSummary').textContent = '/ 0 Total';
         }
         
@@ -472,9 +472,9 @@
                 bestRows.forEach(row => {
                     bestHtml += row.outerHTML;
                 });
-                bestTable.innerHTML = bestHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfuegbar</td></tr>';
+                bestTable.innerHTML = bestHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">${t('heatmap.noData')}</td></tr>';
             } else {
-                bestTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfuegbar</td></tr>';
+                bestTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">${t('heatmap.noData')}</td></tr>';
             }
             
             if (worstTbody) {
@@ -484,9 +484,9 @@
                 worstRows.forEach(row => {
                     worstHtml += row.outerHTML;
                 });
-                worstTable.innerHTML = worstHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfuegbar</td></tr>';
+                worstTable.innerHTML = worstHtml || '<tr><td colspan="3" style="text-align: center; padding: 20px;">${t('heatmap.noData')}</td></tr>';
             } else {
-                worstTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">Keine Daten verfuegbar</td></tr>';
+                worstTable.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px;">${t('heatmap.noData')}</td></tr>';
             }
             
             // Populate opponent dropdown from window.matchupData (for search feature)
@@ -512,7 +512,7 @@
                     total_games: data.total_games
                 }));
             } else {
-                dropdown.innerHTML = '<div style="padding: 10px; color: #444; font-weight: 500;">Keine Opponents verfuegbar</div>';
+                dropdown.innerHTML = '<div style="padding: 10px; color: #444; font-weight: 500;">${t('heatmap.noData')}</div>';
                 window.currentMetaDeckMatchups = [];
             }
             
@@ -625,7 +625,7 @@
             const countEl = document.getElementById('currentMetaCardCount');
             const summaryEl = document.getElementById('currentMetaCardCountSummary');
             
-            if (countEl) countEl.textContent = `${uniqueCount} Karten`;
+            if (countEl) countEl.textContent = `${uniqueCount} ${t('deck.cards')}`;
             if (summaryEl) summaryEl.textContent = `/ ${filteredTotal} Total`;
         }
         
@@ -1132,7 +1132,7 @@
                     setNumSpace.includes(searchTerm) ||
                     setNumCombined.includes(searchTerm);
 
-                const matchesType = pastMetaOverviewCardTypeFilter === 'all' || cardType === pastMetaOverviewCardTypeFilter;
+                const matchesType = currentMetaOverviewCardTypeFilter === 'all' || cardType === currentMetaOverviewCardTypeFilter;
                 
                 // Show card only if it matches both filters
                 if (matchesSearch && matchesType) {

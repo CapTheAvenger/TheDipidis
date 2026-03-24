@@ -20,19 +20,21 @@ if errorlevel 1 (
 )
 
 git remote get-url %REMOTE% >nul 2>&1
-if errorlevel 1 (
-    echo [WARN] Remote '%REMOTE%' not found.
-    git remote get-url origin >nul 2>&1
-    if not errorlevel 1 (
-        set "REMOTE=origin"
-        echo [INFO] Fallback remote selected: !REMOTE!
-    ) else (
-        echo [ERROR] No usable remote found (neither 'dipidis' nor 'origin').
-        echo [INFO] Configure a remote first, then run this script again.
-        goto :end
-    )
-)
+if errorlevel 1 goto :no_preferred_remote
+goto :remote_ok
 
+:no_preferred_remote
+echo [WARN] Remote '%REMOTE%' not found.
+git remote get-url origin >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] No usable remote found - neither 'dipidis' nor 'origin'.
+    echo [INFO] Configure a remote first, then run this script again.
+    goto :end
+)
+set "REMOTE=origin"
+echo [INFO] Fallback remote selected: !REMOTE!
+
+:remote_ok
 echo [1/7] Fetching latest remote refs...
 git fetch !REMOTE! --prune
 if errorlevel 1 (
@@ -59,14 +61,14 @@ if errorlevel 1 (
 
 echo [4/7] Checking staged changes...
 git diff --cached --quiet
-if not errorlevel 1 goto has_changes
+if errorlevel 1 goto :has_changes
 echo [INFO] No staged changes. Nothing to commit.
 goto :end
 
 :has_changes
 echo.
-echo [INFO] Changed files (staged):
-git diff --cached --name-status
+echo [INFO] Changed files:
+git --no-pager diff --cached --name-status
 echo.
 
 set "COMMIT_MSG="
@@ -80,30 +82,30 @@ if errorlevel 1 (
     goto :end
 )
 
-echo [6/7] Pushing safely (no force)...
+echo [6/7] Pushing safely...
 git push -u !REMOTE! %BRANCH%
-if errorlevel 1 (
-    echo [ERROR] Normal push failed.
-    echo [INFO] Most common reason: remote has newer commits.
-    echo [INFO] Run: git pull --rebase !REMOTE! %BRANCH%
-    echo [INFO] Then run this script again.
-    goto :end
-)
+if not errorlevel 1 goto :push_ok
 
-echo [7/7] Done.
-echo [SUCCESS] Changes pushed to !REMOTE!/%BRANCH%.
-
+echo [ERROR] Normal push failed.
+echo [INFO] Most common reason: remote has newer commits.
 echo.
-choice /M "Force push anyway (DANGEROUS)"
+choice /M "Try force push with --force-with-lease"
 if errorlevel 2 goto :end
 
 echo [WARN] Force pushing to !REMOTE!/%BRANCH% ...
 git push --force-with-lease !REMOTE! %BRANCH%
 if errorlevel 1 (
-    echo [ERROR] Force push failed.
+    echo [ERROR] Force push also failed.
+    echo [INFO] Try: git pull --rebase !REMOTE! %BRANCH%
+    echo [INFO] Then run this script again.
     goto :end
 )
-echo [SUCCESS] Force push completed with --force-with-lease.
+echo [SUCCESS] Force push completed.
+goto :end
+
+:push_ok
+echo [7/7] Done.
+echo [SUCCESS] Changes pushed to !REMOTE!/%BRANCH%.
 
 :end
 echo.

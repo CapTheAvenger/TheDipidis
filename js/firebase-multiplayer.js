@@ -41,7 +41,7 @@ async function createMultiplayerGame(deckObject) {
         // Firebase Auth Check
         const user = firebase.auth().currentUser;
         if (!user) {
-            showToast('Bitte zuerst einloggen!', 'warning');
+            showToast(getLang()==='de' ? 'Bitte zuerst einloggen!' : 'Please log in first!', 'warning');
             throw new Error('Not authenticated');
         }
 
@@ -95,7 +95,7 @@ async function createMultiplayerGame(deckObject) {
 
     } catch (error) {
         mpError('[Multiplayer] Create game error:', error);
-        showToast('Fehler beim Erstellen des Spiels: ' + error.message, 'error');
+        showToast((getLang()==='de' ? 'Fehler beim Erstellen des Spiels: ' : 'Error creating game: ') + error.message, 'error');
         throw error;
     }
 }
@@ -110,7 +110,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
     try {
         const user = firebase.auth().currentUser;
         if (!user) {
-            showToast('Bitte zuerst einloggen!', 'warning');
+            showToast(getLang()==='de' ? 'Bitte zuerst einloggen!' : 'Please log in first!', 'warning');
             throw new Error('Not authenticated');
         }
 
@@ -123,7 +123,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
             .get();
 
         if (gamesSnapshot.empty) {
-            showToast('Spiel nicht gefunden oder bereits gestartet!', 'warning');
+            showToast(getLang()==='de' ? 'Spiel nicht gefunden oder bereits gestartet!' : 'Game not found or already started!', 'warning');
             throw new Error('Game not found');
         }
 
@@ -133,7 +133,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
 
         // Check: Nicht dem eigenen Spiel beitreten
         if (gameData.host === user.uid) {
-            showToast('Du kannst nicht deinem eigenen Spiel beitreten!', 'warning');
+            showToast(getLang()==='de' ? 'Du kannst nicht deinem eigenen Spiel beitreten!' : 'You cannot join your own game!', 'warning');
             throw new Error('Cannot join own game');
         }
 
@@ -186,7 +186,7 @@ async function joinMultiplayerGame(roomCode, deckObject) {
 
     } catch (error) {
         mpError('[Multiplayer] Join game error:', error);
-        showToast('Fehler beim Beitreten: ' + error.message, 'error');
+        showToast((getLang()==='de' ? 'Fehler beim Beitreten: ' : 'Error joining game: ') + error.message, 'error');
         throw error;
     }
 }
@@ -248,7 +248,7 @@ function listenToGameState(gameId) {
         if (!doc.exists) {
             mpWarn('[Multiplayer] Game document deleted');
             leaveMultiplayerGame();
-            showToast('Das Spiel wurde beendet.', 'info');
+            showToast(getLang()==='de' ? 'Das Spiel wurde beendet.' : 'The game has ended.', 'info');
             return;
         }
 
@@ -330,7 +330,7 @@ function listenToGameState(gameId) {
         if (data.status === 'finished') {
             mpSyncEnabled = false;
             leaveMultiplayerGame();
-            showToast('Das Spiel wurde beendet.', 'info');
+            showToast(getLang()==='de' ? 'Das Spiel wurde beendet.' : 'The game has ended.', 'info');
             return;
         }
 
@@ -394,7 +394,7 @@ function listenToGameState(gameId) {
                     }
                     const fpModal = document.getElementById('ptStartPhaseModal');
                     if (fpModal) fpModal.style.display = 'none';
-                    if (typeof ptLog === 'function') ptLog('✅ Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!');
+                    if (typeof ptLog === 'function') ptLog(getLang()==='de' ? '✅ Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!' : '✅ Both players ready! Prize cards dealt. Have fun!');
 
                     // Mulligan draw offer after MP setup
                     const p1m = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p1 || 0) : 0;
@@ -452,12 +452,12 @@ function listenToGameState(gameId) {
                 
                 // Update Message
                 if (typeof ptShowMessage === 'function') {
-                    const action = data.lastActionDescription || 'Gegner hat gezogen';
+                    const action = data.lastActionDescription || (getLang()==='de' ? 'Gegner hat gezogen' : 'Opponent made a move');
                     ptShowMessage(`🌐 ${action}`);
                 }
                 // Deck search indicator: show persistent hint while opponent searches
                 if (data.lastActionDescription === 'Searching deck...' && typeof showToast === 'function') {
-                    showToast('🔍 Gegner durchsucht sein Deck...', 'info', 8000);
+                    showToast(getLang()==='de' ? '🔍 Gegner durchsucht sein Deck...' : '🔍 Opponent is searching their deck...', 'info', 8000);
                 }
             }
 
@@ -515,7 +515,7 @@ function listenToGameState(gameId) {
                 }
                 const fpModal2 = document.getElementById('ptStartPhaseModal');
                 if (fpModal2) fpModal2.style.display = 'none';
-                if (typeof ptLog === 'function') ptLog('✅ Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!');
+                if (typeof ptLog === 'function') ptLog(getLang()==='de' ? '✅ Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!' : '✅ Both players ready! Prize cards dealt. Have fun!');
 
                 const p1m2 = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p1 || 0) : 0;
                 const p2m2 = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p2 || 0) : 0;
@@ -892,13 +892,13 @@ function showMultiplayerLobby(roomCode, status) {
         lobby.innerHTML = `
             <div style="text-align: center; max-width: 500px; padding: 40px; background: #1a1a1a; border-radius: 20px; border: 3px solid #FFCB05;">
                 <h2 style="color: #FFCB05; font-size: 2.5rem; margin-bottom: 20px;">🎮 Multiplayer Lobby</h2>
-                <p style="font-size: 1.2rem; margin-bottom: 30px;">Warte auf Gegner...</p>
+                <p style="font-size: 1.2rem; margin-bottom: 30px;">${getLang()==='de' ? 'Warte auf Gegner...' : 'Waiting for opponent...'}</p>
                 <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                     <p style="color: #aaa; margin-bottom: 10px;">Room Code:</p>
                     <p style="font-size: 3rem; font-weight: 900; letter-spacing: 8px; color: #FFCB05;">${safeRoomCode}</p>
                 </div>
-                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">Teile diesen Code mit deinem Gegner</p>
-                <button id="mpCancelBtn" style="background: #c0392b; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;">Abbrechen</button>
+                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">${getLang()==='de' ? 'Teile diesen Code mit deinem Gegner' : 'Share this code with your opponent'}</p>
+                <button id="mpCancelBtn" style="background: #c0392b; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;">${getLang()==='de' ? 'Abbrechen' : 'Cancel'}</button>
             </div>
         `;
 
@@ -912,8 +912,8 @@ function showMultiplayerLobby(roomCode, status) {
     } else if (status === 'playing') {
         lobby.innerHTML = `
             <div style="text-align: center; max-width: 500px; padding: 40px; background: #1a1a1a; border-radius: 20px; border: 3px solid #27ae60;">
-                <h2 style="color: #27ae60; font-size: 2.5rem; margin-bottom: 20px;">✅ Spiel startet...</h2>
-                <p style="font-size: 1.2rem;">Gegner gefunden!</p>
+                <h2 style="color: #27ae60; font-size: 2.5rem; margin-bottom: 20px;">${getLang()==='de' ? '✅ Spiel startet...' : '✅ Game starting...'}</h2>
+                <p style="font-size: 1.2rem;">${getLang()==='de' ? 'Gegner gefunden!' : 'Opponent found!'}</p>
             </div>
         `;
         
@@ -962,7 +962,7 @@ function openMultiplayerFromSandbox() {
 function mpPopulateDeckSelect() {
     const sel = document.getElementById('mpDeckSelect');
     if (!sel) return;
-    sel.innerHTML = '<option value="">-- Wähle ein Deck für das Match --</option>';
+    sel.innerHTML = '<option value="">' + (getLang()==='de' ? '-- Wähle ein Deck für das Match --' : '-- Choose a deck for the match --') + '</option>';
     const decks = window.userDecks || [];
     decks.forEach((d, i) => {
         const opt = document.createElement('option');
@@ -1005,7 +1005,7 @@ function mpGetSelectedDeck() {
     if (textInput.trim()) {
         const parsed = mpParsePTCGLText(textInput);
         if (Object.keys(parsed).length === 0) {
-            showToast('Deckliste konnte nicht geparst werden!', 'error');
+            showToast(getLang()==='de' ? 'Deckliste konnte nicht geparst werden!' : 'Could not parse deck list!', 'error');
             return null;
         }
         return parsed;
@@ -1015,7 +1015,7 @@ function mpGetSelectedDeck() {
     if (idx !== '' && window.userDecks && window.userDecks[Number(idx)]) {
         return window.userDecks[Number(idx)].cards;
     }
-    showToast('Bitte w\u00e4hle ein Deck oder f\u00fcge eine Liste ein!', 'warning');
+    showToast(getLang()==='de' ? 'Bitte w\u00e4hle ein Deck oder f\u00fcge eine Liste ein!' : 'Please choose a deck or paste a list!', 'warning');
     return null;
 }
 
@@ -1025,7 +1025,7 @@ function mpGetSelectedDeck() {
 async function mpCreateGame() {
     try {
         const user = firebase.auth().currentUser;
-        if (!user) { showToast('Bitte zuerst einloggen!', 'warning'); return; }
+        if (!user) { showToast(getLang()==='de' ? 'Bitte zuerst einloggen!' : 'Please log in first!', 'warning'); return; }
 
         const deckObj = mpGetSelectedDeck();
         if (!deckObj) return;
@@ -1044,14 +1044,14 @@ async function mpCreateGame() {
 async function mpJoinGame() {
     try {
         const user = firebase.auth().currentUser;
-        if (!user) { showToast('Bitte zuerst einloggen!', 'warning'); return; }
+        if (!user) { showToast(getLang()==='de' ? 'Bitte zuerst einloggen!' : 'Please log in first!', 'warning'); return; }
 
         const deckObj = mpGetSelectedDeck();
         if (!deckObj) return;
 
-        const roomCode = await showInputModal({ title: '🔑 Room beitreten', message: 'Room-Code eingeben (5 Zeichen):', placeholder: 'ABCDE' });
+        const roomCode = await showInputModal({ title: getLang()==='de' ? '🔑 Room beitreten' : '🔑 Join Room', message: getLang()==='de' ? 'Room-Code eingeben (5 Zeichen):' : 'Enter room code (5 characters):', placeholder: 'ABCDE' });
         if (!roomCode || roomCode.trim().length !== 5) {
-            if (roomCode !== null) showToast('Ungültiger Room-Code!', 'error');
+            if (roomCode !== null) showToast(getLang()==='de' ? 'Ungültiger Room-Code!' : 'Invalid room code!', 'error');
             return;
         }
 
@@ -1101,7 +1101,7 @@ async function mpFlipCoin() {
 function _mpShowCoinResult(result, flipper) {
     const isHeads = result === 'heads';
     const emoji = isHeads ? '🟡' : '⚫';
-    const label = isHeads ? 'KOPF (Heads)' : 'ZAHL (Tails)';
+    const label = isHeads ? (getLang()==='de' ? 'KOPF (Heads)' : 'HEADS') : (getLang()==='de' ? 'ZAHL (Tails)' : 'TAILS');
     const bgColor = isHeads ? 'rgba(241,196,15,0.95)' : 'rgba(52,73,94,0.95)';
     const textColor = isHeads ? '#000' : '#fff';
 
@@ -1113,7 +1113,7 @@ function _mpShowCoinResult(result, flipper) {
             box-shadow:0 8px 40px rgba(0,0,0,0.6);animation:ptCoinPop 0.4s ease-out;">
             <div style="font-size:80px;margin-bottom:12px;">${emoji}</div>
             <div style="font-size:28px;font-weight:900;margin-bottom:8px;">🪙 ${label}</div>
-            <div style="font-size:14px;opacity:0.8;">Geworfen von ${escapeHtml(flipper.toUpperCase())}</div>
+            <div style="font-size:14px;opacity:0.8;">${getLang()==='de' ? 'Geworfen von' : 'Flipped by'} ${escapeHtml(flipper.toUpperCase())}</div>
         </div>`;
     overlay.onclick = () => overlay.remove();
     document.body.appendChild(overlay);
@@ -1121,20 +1121,12 @@ function _mpShowCoinResult(result, flipper) {
     // Auto-dismiss after 3 seconds
     setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 3000);
 
-    if (typeof ptLog === 'function') ptLog(`🪙 Münzwurf: ${label} (von ${flipper.toUpperCase()})`);
+    if (typeof ptLog === 'function') ptLog(getLang()==='de' ? `🪙 Münzwurf: ${label} (von ${flipper.toUpperCase()})` : `🪙 Coin flip: ${label} (by ${flipper.toUpperCase()})`);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
 // OPPONENT STATUS INDICATOR
 // ══════════════════════════════════════════════════════════════════════════
-
-const _mpStatusLabels = {
-    'searching_deck': '🔍 Gegner durchsucht sein Deck...',
-    'searching_discard': '🔍 Gegner durchsucht seinen Ablagestapel...',
-    'choosing_prizes': '🏆 Gegner wählt Preiskarten...',
-    'thinking': '🤔 Gegner überlegt...',
-    'promoting': '⭐ Gegner wählt neues aktives Pokémon...',
-};
 
 function _mpShowOpponentStatus(status) {
     let banner = document.getElementById('mpOpponentStatusBanner');
@@ -1142,7 +1134,20 @@ function _mpShowOpponentStatus(status) {
         if (banner) banner.remove();
         return;
     }
-    const label = _mpStatusLabels[status] || `⏳ Gegner: ${status}`;
+    const _labels = getLang()==='de' ? {
+        'searching_deck': '🔍 Gegner durchsucht sein Deck...',
+        'searching_discard': '🔍 Gegner durchsucht seinen Ablagestapel...',
+        'choosing_prizes': '🏆 Gegner wählt Preiskarten...',
+        'thinking': '🤔 Gegner überlegt...',
+        'promoting': '⭐ Gegner wählt neues aktives Pokémon...',
+    } : {
+        'searching_deck': '🔍 Opponent is searching their deck...',
+        'searching_discard': '🔍 Opponent is searching their discard pile...',
+        'choosing_prizes': '🏆 Opponent is choosing prize cards...',
+        'thinking': '🤔 Opponent is thinking...',
+        'promoting': '⭐ Opponent is choosing a new active Pokémon...',
+    };
+    const label = _labels[status] || (getLang()==='de' ? `⏳ Gegner: ${status}` : `⏳ Opponent: ${status}`);
     if (!banner) {
         banner = document.createElement('div');
         banner.id = 'mpOpponentStatusBanner';

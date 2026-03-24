@@ -832,8 +832,8 @@
             if (totalFound > MAX_RENDER) {
                 htmlString += `
                     <div style="text-align: center; padding: 20px; color: #7f8c8d; font-size: 14px; width: 100%; grid-column: 1 / -1;">
-                        ⚠️ <b>+ ${totalFound - MAX_RENDER} weitere Karten gefunden.</b><br>
-                        Bitte tippe mehr Text in die Suche, um die Ergebnisse einzugrenzen.
+                        ⚠️ <b>+ ${totalFound - MAX_RENDER} ${t('metaCards.moreCardsFound')}</b><br>
+                        ${t('metaCards.typeMoreToFilter')}
                     </div>
                 `;
             }
@@ -924,7 +924,7 @@
         
         function buildCardImageUrl(setCode, setNumber, rarity) {
             if (!setCode || !setNumber) {
-                return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22245%22 height=%22342%22%3E%3Crect fill=%22%23667eea%22 width=%22245%22 height=%22342%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22%3EKeine Daten%3C/text%3E%3C/svg%3E';
+                return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22245%22 height=%22342%22%3E%3Crect fill=%22%23667eea%22 width=%22245%22 height=%22342%22/%3E%3Ctext fill=%22white%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22%3E${t('heatmap.noData')}%3C/text%3E%3C/svg%3E';
             }
 
             return getUnifiedCardImage(setCode, setNumber);
@@ -993,7 +993,7 @@
 
             const countEl = document.getElementById('currentCardCount');
             if (countEl) {
-                countEl.textContent = `${visibleCount} Karten`;
+                countEl.textContent = `${visibleCount} ${t('deck.cards')}`;
             }
         }
 
@@ -1011,7 +1011,7 @@
 
             const countEl = document.getElementById('pastCardCount');
             if (countEl) {
-                countEl.textContent = `${visibleCount} Karten`;
+                countEl.textContent = `${visibleCount} ${t('deck.cards')}`;
             }
         }
 

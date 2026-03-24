@@ -8,7 +8,7 @@ async function signUp(email, password) {
   try {
     const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
     if (typeof devLog === 'function') devLog('✓ User created:', userCredential.user.email);
-    showNotification('Account created successfully!', 'success');
+    showNotification(getLang()==='de' ? 'Account erfolgreich erstellt!' : 'Account created successfully!', 'success');
     return userCredential.user;
   } catch (error) {
     console.error('Sign up error:', error);
@@ -22,7 +22,7 @@ async function signIn(email, password) {
   try {
     const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
     if (typeof devLog === 'function') devLog('✓ User signed in:', userCredential.user.email);
-    showNotification('Signed in successfully!', 'success');
+    showNotification(getLang()==='de' ? 'Erfolgreich angemeldet!' : 'Signed in successfully!', 'success');
     return userCredential.user;
   } catch (error) {
     console.error('Sign in error:', error);
@@ -48,18 +48,18 @@ function hasValidFirebaseCredentials() {
 
 function signInWithGoogle() {
   if (!hasValidFirebaseCredentials()) {
-    showNotification('Firebase Auth ist lokal nicht konfiguriert. Trage echte FIREBASE_CREDS in js/firebase-credentials.js ein.', 'error');
+    showNotification(getLang()==='de' ? 'Firebase Auth ist lokal nicht konfiguriert. Trage echte FIREBASE_CREDS in js/firebase-credentials.js ein.' : 'Firebase Auth is not configured locally. Enter real FIREBASE_CREDS in js/firebase-credentials.js.', 'error');
     return;
   }
 
   if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
-    showNotification('Google Sign-In nicht verfügbar. Bitte Seite neu laden.', 'error');
+    showNotification(getLang()==='de' ? 'Google Sign-In nicht verfügbar. Bitte Seite neu laden.' : 'Google Sign-In not available. Please reload the page.', 'error');
     return;
   }
 
   const clientId = window.GOOGLE_CLIENT_ID || '';
   if (!clientId || clientId.startsWith('PLACEHOLDER_')) {
-    showNotification('Google Client-ID ist nicht konfiguriert. Trage GOOGLE_CLIENT_ID in js/firebase-credentials.js ein.', 'error');
+    showNotification(getLang()==='de' ? 'Google Client-ID ist nicht konfiguriert. Trage GOOGLE_CLIENT_ID in js/firebase-credentials.js ein.' : 'Google Client-ID is not configured. Enter GOOGLE_CLIENT_ID in js/firebase-credentials.js.', 'error');
     return;
   }
 
@@ -69,14 +69,14 @@ function signInWithGoogle() {
     callback: function(response) {
       if (response.error) {
         console.error('Google OAuth error:', response.error);
-        showNotification('Google Sign-In fehlgeschlagen: ' + response.error, 'error');
+        showNotification((getLang()==='de' ? 'Google Sign-In fehlgeschlagen: ' : 'Google Sign-In failed: ') + response.error, 'error');
         return;
       }
       const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
       firebase.auth().signInWithCredential(credential)
         .then(function(result) {
           if (typeof devLog === 'function') devLog('✓ Google sign-in:', result.user.email);
-          showNotification('Mit Google angemeldet!', 'success');
+          showNotification(getLang()==='de' ? 'Mit Google angemeldet!' : 'Signed in with Google!', 'success');
         })
         .catch(function(err) {
           console.error('Firebase credential error:', err);
@@ -93,10 +93,10 @@ async function signOut() {
   try {
     await firebase.auth().signOut();
     if (typeof devLog === 'function') devLog('✓ User signed out');
-    showNotification('Signed out successfully!', 'success');
+    showNotification(getLang()==='de' ? 'Erfolgreich abgemeldet!' : 'Signed out successfully!', 'success');
   } catch (error) {
     console.error('Sign out error:', error);
-    showNotification('Error signing out', 'error');
+    showNotification(getLang()==='de' ? 'Fehler beim Abmelden' : 'Error signing out', 'error');
   }
 }
 
@@ -104,7 +104,7 @@ async function signOut() {
 async function resetPassword(email) {
   try {
     await firebase.auth().sendPasswordResetEmail(email);
-    showNotification('Password reset email sent!', 'success');
+    showNotification(getLang()==='de' ? 'E-Mail zum Zurücksetzen des Passworts gesendet!' : 'Password reset email sent!', 'success');
   } catch (error) {
     console.error('Password reset error:', error);
     showNotification(getErrorMessage(error.code), 'error');
@@ -179,7 +179,7 @@ function setupAuthForms() {
       const confirmPassword = document.getElementById('signup-password-confirm').value;
       
       if (password !== confirmPassword) {
-        showNotification('Passwords do not match', 'error');
+        showNotification(getLang()==='de' ? 'Passwörter stimmen nicht überein' : 'Passwords do not match', 'error');
         return;
       }
       

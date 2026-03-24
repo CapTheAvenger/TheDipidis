@@ -37,7 +37,7 @@ function ptShowContextMenu(cardInfo) {
     
     // Zeige Karten-Info
     const cardNameEl = document.getElementById('ptContextCardName');
-    if (cardNameEl) cardNameEl.textContent = card.name || 'Karte';
+    if (cardNameEl) cardNameEl.textContent = card.name || (getLang()==='de' ? 'Karte' : 'Card');
     
     // Erstelle dynamische Buttons basierend auf Zone
     const buttons = [];
@@ -49,26 +49,26 @@ function ptShowContextMenu(cardInfo) {
         const isTrainer = ct === 'supporter' || ct === 'item' || ct === 'tool' || ct === 'stadium'
             || ct.includes('trainer') || ct.includes('supporter') || ct.includes('item');
         if (isTrainer) {
-            buttons.push({ text: '▶ Karte spielen', action: () => { if (typeof ptPlayFromHand === 'function') ptPlayFromHand(index, null); } });
+            buttons.push({ text: getLang()==='de' ? '▶ Karte spielen' : '▶ Play card', action: () => { if (typeof ptPlayFromHand === 'function') ptPlayFromHand(index, null); } });
         }
-        buttons.push({ text: '🎯 Als Aktives spielen', action: () => _ptMobilePlayToActive(player, index) });
-        buttons.push({ text: '🪑 Auf die Bank', action: () => _ptMobilePlayToBench(player, index) });
-        buttons.push({ text: '🗑️ Ablegen', action: () => _ptMobileDiscard(player, index) });
-        buttons.push({ text: '🔀 Ins Deck mischen', action: () => _ptMobileShuffleIntoDeck(player, index) });
+        buttons.push({ text: getLang()==='de' ? '🎯 Als Aktives spielen' : '🎯 Play as Active', action: () => _ptMobilePlayToActive(player, index) });
+        buttons.push({ text: getLang()==='de' ? '🪑 Auf die Bank' : '🪑 Play to Bench', action: () => _ptMobilePlayToBench(player, index) });
+        buttons.push({ text: getLang()==='de' ? '🗑️ Ablegen' : '🗑️ Discard', action: () => _ptMobileDiscard(player, index) });
+        buttons.push({ text: getLang()==='de' ? '🔀 Ins Deck mischen' : '🔀 Shuffle into deck', action: () => _ptMobileShuffleIntoDeck(player, index) });
     } else if (zone === 'active') {
         // Aktives Pokémon
-        buttons.push({ text: '🤚 Zurück auf die Hand', action: () => _ptMobileReturnToHand(player, 'active') });
-        buttons.push({ text: '🗑️ Ablegen', action: () => _ptMobileDiscardFromField(player, 'active') });
-        buttons.push({ text: '➕ Schaden +10', action: () => _ptMobileAdjustDamage(player, 'active', 10) });
-        buttons.push({ text: '➖ Schaden -10', action: () => _ptMobileAdjustDamage(player, 'active', -10) });
+        buttons.push({ text: getLang()==='de' ? '🤚 Zurück auf die Hand' : '🤚 Return to hand', action: () => _ptMobileReturnToHand(player, 'active') });
+        buttons.push({ text: getLang()==='de' ? '🗑️ Ablegen' : '🗑️ Discard', action: () => _ptMobileDiscardFromField(player, 'active') });
+        buttons.push({ text: getLang()==='de' ? '➕ Schaden +10' : '➕ Damage +10', action: () => _ptMobileAdjustDamage(player, 'active', 10) });
+        buttons.push({ text: getLang()==='de' ? '➖ Schaden -10' : '➖ Damage -10', action: () => _ptMobileAdjustDamage(player, 'active', -10) });
         buttons.push({ text: '💥 K.O.', action: () => _ptMobileKnockout(player, 'active') });
     } else if (zone.startsWith('bench')) {
         // Bank-Pokémon
-        buttons.push({ text: '🔄 Tausch zu Aktiv', action: () => _ptMobileSwitchToActive(player, zone) });
-        buttons.push({ text: '🤚 Zurück auf die Hand', action: () => _ptMobileReturnToHand(player, zone) });
-        buttons.push({ text: '🗑️ Ablegen', action: () => _ptMobileDiscardFromField(player, zone) });
-        buttons.push({ text: '➕ Schaden +10', action: () => _ptMobileAdjustDamage(player, zone, 10) });
-        buttons.push({ text: '➖ Schaden -10', action: () => _ptMobileAdjustDamage(player, zone, -10) });
+        buttons.push({ text: getLang()==='de' ? '🔄 Tausch zu Aktiv' : '🔄 Switch to Active', action: () => _ptMobileSwitchToActive(player, zone) });
+        buttons.push({ text: getLang()==='de' ? '🤚 Zurück auf die Hand' : '🤚 Return to hand', action: () => _ptMobileReturnToHand(player, zone) });
+        buttons.push({ text: getLang()==='de' ? '🗑️ Ablegen' : '🗑️ Discard', action: () => _ptMobileDiscardFromField(player, zone) });
+        buttons.push({ text: getLang()==='de' ? '➕ Schaden +10' : '➕ Damage +10', action: () => _ptMobileAdjustDamage(player, zone, 10) });
+        buttons.push({ text: getLang()==='de' ? '➖ Schaden -10' : '➖ Damage -10', action: () => _ptMobileAdjustDamage(player, zone, -10) });
         buttons.push({ text: '💥 K.O.', action: () => _ptMobileKnockout(player, zone) });
     }
     
@@ -109,7 +109,7 @@ function ptShowContextMenu(cardInfo) {
         limitlessBtn.style.transition = 'background 0.2s';
 
         const label = document.createElement('span');
-        label.textContent = '📊 Auf Limitless ansehen';
+        label.textContent = getLang()==='de' ? '📊 Auf Limitless ansehen' : '📊 View on Limitless';
         const arrow = document.createElement('span');
         arrow.style.fontSize = '1.2em';
         arrow.textContent = '↗';
@@ -369,9 +369,9 @@ function _ptMobilePlayToBench(player, handIndex) {
     if (typeof ptUpdateAttachModeFromSelection === 'function') ptUpdateAttachModeFromSelection(player);
     if (typeof ptRenderHand === 'function') ptRenderHand();
     if (typeof ptShowMessage === 'function') {
-        ptShowMessage('Wähle jetzt dein gewünschtes Bank-Pokémon oder einen freien Bank-Slot.');
+        ptShowMessage(getLang()==='de' ? 'Wähle jetzt dein gewünschtes Bank-Pokémon oder einen freien Bank-Slot.' : 'Now select a Bench Pokémon or an empty Bench slot.');
     } else if (typeof showToast === 'function') {
-        showToast('Wähle jetzt dein gewünschtes Bank-Pokémon oder einen freien Bank-Slot.', 'info');
+        showToast(getLang()==='de' ? 'Wähle jetzt dein gewünschtes Bank-Pokémon oder einen freien Bank-Slot.' : 'Now select a Bench Pokémon or an empty Bench slot.', 'info');
     }
     ptHideContextMenu();
 }
@@ -380,7 +380,7 @@ function _ptMobileDiscard(player, handIndex) {
     const card = ptState[player].hand.splice(handIndex, 1)[0];
     if (card) {
         ptState[player].discard.push(card);
-        if (typeof ptLog !== 'undefined') ptLog(`"${card.name}" abgelegt.`);
+        if (typeof ptLog !== 'undefined') ptLog(getLang()==='de' ? `"${card.name}" abgelegt.` : `"${card.name}" discarded.`);
         if (typeof ptRenderAll !== 'undefined') ptRenderAll();
     }
     ptHideContextMenu();
@@ -391,7 +391,7 @@ function _ptMobileShuffleIntoDeck(player, handIndex) {
     if (card) {
         ptState[player].deck.push(card);
         if (typeof ptShuffleDeck !== 'undefined') ptShuffleDeck(player);
-        if (typeof ptLog !== 'undefined') ptLog(`"${card.name}" zurück ins Deck gemischt.`);
+        if (typeof ptLog !== 'undefined') ptLog(getLang()==='de' ? `"${card.name}" zurück ins Deck gemischt.` : `"${card.name}" shuffled back into deck.`);
         if (typeof ptRenderAll !== 'undefined') ptRenderAll();
     }
     ptHideContextMenu();
@@ -409,7 +409,7 @@ function _ptMobileDiscardFromField(player, zone) {
     if (cards && cards.length > 0) {
         const card = cards.pop();
         ptState[player].discard.push(card);
-        if (typeof ptLog !== 'undefined') ptLog(`"${card.name}" vom Feld abgelegt.`);
+        if (typeof ptLog !== 'undefined') ptLog(getLang()==='de' ? `"${card.name}" vom Feld abgelegt.` : `"${card.name}" discarded from field.`);
         if (typeof ptRenderAll !== 'undefined') ptRenderAll();
     }
     ptHideContextMenu();
@@ -441,7 +441,7 @@ function _ptMobileSwitchToActive(player, benchZone) {
     ptState[player].damage.active = ptState[player].damage[benchZone];
     ptState[player].damage[benchZone] = tempDmg;
     
-    if (typeof ptLog !== 'undefined') ptLog(`Aktives getauscht mit ${benchZone}.`);
+    if (typeof ptLog !== 'undefined') ptLog(getLang()==='de' ? `Aktives getauscht mit ${benchZone}.` : `Active swapped with ${benchZone}.`);
     if (typeof ptRenderAll !== 'undefined') ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && typeof ptState !== 'undefined' && ptState.isMultiplayer) syncStateToFirebase('Switch to Active');
     ptHideContextMenu();
@@ -537,10 +537,10 @@ function ptShowRadialMenu(touch, player, zone) {
         actions.push({ icon: '🗑️', label: 'Discard', action: () => { if (typeof ptOppDiscardZone === 'function') ptOppDiscardZone(player, zone); } });
         if (zoneHasEnergy) actions.push({ icon: '⚡🗑️', label: 'E.Disc', action: () => { if (typeof ptEnergyDiscard === 'function') ptEnergyDiscard(player, zone); } });
         if (zone !== 'active') {
-            actions.push({ icon: '⭐', label: 'Aktiv', action: () => { if (typeof ptOppSetActive === 'function') ptOppSetActive(player, zone); } });
+            actions.push({ icon: '⭐', label: getLang()==='de' ? 'Aktiv' : 'Active', action: () => { if (typeof ptOppSetActive === 'function') ptOppSetActive(player, zone); } });
         }
         actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
-        actions.push({ icon: '⚙️', label: 'Menü', action: () => { if (typeof ptOpenOpponentPanel === 'function') ptOpenOpponentPanel('field', zone); } });
+        actions.push({ icon: '⚙️', label: getLang()==='de' ? 'Menü' : 'Menu', action: () => { if (typeof ptOpenOpponentPanel === 'function') ptOpenOpponentPanel('field', zone); } });
     } else {
         // ── Own zone: attach, damage, retreat, hand, discard, menu ──
         const hasEnergy = ptState[player].hand.some(c => {
@@ -563,11 +563,11 @@ function ptShowRadialMenu(touch, player, zone) {
         if (zone === 'active') {
             actions.push({ icon: '↩️', label: 'Retreat', action: () => { if (typeof ptRetreat === 'function') ptRetreat(player, zone); } });
         } else {
-            actions.push({ icon: '🔄', label: 'Aktiv', action: () => { _ptMobileSwitchToActive(player, zone); } });
+            actions.push({ icon: '🔄', label: getLang()==='de' ? 'Aktiv' : 'Active', action: () => { _ptMobileSwitchToActive(player, zone); } });
         }
         actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
-        actions.push({ icon: '🗑️', label: 'Ablegen', action: () => { discardTopCard(player, zone, null); } });
-        actions.push({ icon: '⚙️', label: 'Menü', action: () => _ptRadialOpenContextMenu(player, zone) });
+        actions.push({ icon: '🗑️', label: getLang()==='de' ? 'Ablegen' : 'Discard', action: () => { discardTopCard(player, zone, null); } });
+        actions.push({ icon: '⚙️', label: getLang()==='de' ? 'Menü' : 'Menu', action: () => _ptRadialOpenContextMenu(player, zone) });
     }
 
     // Arrange in a circle

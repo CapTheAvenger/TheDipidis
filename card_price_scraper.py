@@ -347,6 +347,7 @@ def scrape_prices(cards: list, settings: dict, existing_prices: dict, csv_path: 
 def main():
     try:
         settings   = _load_settings()
+        data_dir   = get_data_dir()
         cards_csv  = os.path.join(data_dir, "all_cards_database.csv")
         prices_csv = os.path.join(data_dir, "price_data.csv")
 

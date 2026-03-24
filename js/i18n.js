@@ -842,7 +842,7 @@ const translations = {
     'menu.cityLeagueAnalysis':'📊 Deck-Analyse (Japan)',
     'menu.currentMeta':       '🎮 Aktuelles Meta (Global)',
     'menu.currentMetaAnalysis':'📈 Deck-Analyse (Global)',
-    'menu.pastMeta':          '🏆 Vergangenes Meta',
+    'menu.pastMeta':          '🏆 Letztes Meta',
     'menu.cardDatabase':      '🧰 Kartendatenbank',
     'menu.proxyPrinter':      '🖨️ Proxy-Drucker',
     'menu.playtester':        '⚔️ Playtester Sandbox',
@@ -856,7 +856,7 @@ const translations = {
     'tab.currentMeta':        '🎮 Aktuelles Meta',
     'tab.currentMetaSub':     '(Globales Meta & Online)',
     'tab.currentMetaAnalysis':'📈 Aktuelle Meta Deck-Analyse',
-    'tab.pastMeta':           '🏆 Vergangenes Meta',
+    'tab.pastMeta':           '🏆 Letztes Meta',
     'tab.cards':              '🧰 Karten',
     'tab.proxyPrinter':       '🖨️ Proxy-Drucker',
     'tab.playtester':         '⚔️ Playtester',
@@ -1510,8 +1510,8 @@ const translations = {
     'matchup.searchPlaceholder':'Deckname eingeben...',
 
     // ── Tab 5: Past Meta ─────────────────────────────────────
-    'pm.analysisHeading':       '🏆 Vergangene Turnier-Deckanalyse',
-    'pm.analyzeAndBuild':       'Decks aus vergangenen Turnieren analysieren & bauen',
+    'pm.analysisHeading':       '🏆 Letzte Turnier-Deckanalyse',
+    'pm.analyzeAndBuild':       'Decks aus letzten Turnieren analysieren & bauen',
     'pm.formatFilter':          '🎴 Meta/Format-Filter:',
     'pm.allFormats':            '-- Alle Formate --',
     'pm.tournamentFilter':      '🏆 Turnier-Filter:',
@@ -1556,7 +1556,7 @@ const translations = {
     'proxy.numberPlaceholder':  'Nr.',
     'proxy.addCLDeck':          '➕ City League Deck hinzufügen',
     'proxy.addCMDeck':          '➕ Aktuelles Meta Deck hinzufügen',
-    'proxy.addPMDeck':          '➕ Vergangenes Meta Deck hinzufügen',
+    'proxy.addPMDeck':          '➕ Letztes Meta Deck hinzufügen',
     'proxy.printQueue':         '🖨️ Warteschlange drucken',
 
     // ── Tab 8: Sandbox-Playtester ────────────────────────────

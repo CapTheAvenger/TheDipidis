@@ -1720,9 +1720,9 @@ function updateTranslationsInDOM() {
     if (key) el.setAttribute('aria-label', t(key));
   });
 
-  // Update the language toggle button label
+  // Update the language toggle button label (show active language)
   const toggle = document.getElementById('langToggleBtn');
-  if (toggle) toggle.textContent = currentLang === 'de' ? '🇬🇧 EN' : '🇩🇪 DE';
+  if (toggle) toggle.textContent = currentLang === 'de' ? '🇩🇪 DE' : '🇬🇧 EN';
 }
 
 /* ── auto-init on load ───────────────────────────────────────── */

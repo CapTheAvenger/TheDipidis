@@ -64,18 +64,18 @@ const BASE_PATH = './data/';
                 btnRow.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;margin-top:16px';
 
                 const cancelBtn = document.createElement('button');
-                cancelBtn.textContent = 'Cancel';
+                cancelBtn.textContent = t('modal.cancel');
                 cancelBtn.style.cssText = 'padding:8px 20px;border:1px solid #555;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;font-size:0.9em';
 
                 const okBtn = document.createElement('button');
-                okBtn.textContent = opts.readonly ? 'Close' : 'OK';
+                okBtn.textContent = opts.readonly ? t('btn.close') : t('modal.ok');
                 okBtn.style.cssText = 'padding:8px 20px;border:none;border-radius:8px;background:#667eea;color:#fff;cursor:pointer;font-size:0.9em;font-weight:600';
 
                 if (opts.readonly) {
                     const copyBtn = document.createElement('button');
-                    copyBtn.textContent = 'Copy';
+                    copyBtn.textContent = t('modal.copy');
                     copyBtn.style.cssText = 'padding:8px 20px;border:none;border-radius:8px;background:#28a745;color:#fff;cursor:pointer;font-size:0.9em;font-weight:600';
-                    copyBtn.onclick = () => { input.select(); navigator.clipboard.writeText(input.value).then(() => { copyBtn.textContent = 'Copied!'; setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500); }); };
+                    copyBtn.onclick = () => { input.select(); navigator.clipboard.writeText(input.value).then(() => { copyBtn.textContent = t('modal.copied'); setTimeout(() => { copyBtn.textContent = t('modal.copy'); }, 1500); }); };
                     btnRow.appendChild(copyBtn);
                 }
 
@@ -356,7 +356,7 @@ const BASE_PATH = './data/';
 
             if (!deferredPlaytesterScriptsPromise) {
                 if (notify && typeof showNotification === 'function') {
-                    showNotification('Playtester wird geladen...', 'info', 1800);
+                    showNotification(t('notify.playtesterLoading'), 'info', 1800);
                 }
 
                 deferredPlaytesterScriptsPromise = (async () => {
@@ -387,7 +387,7 @@ const BASE_PATH = './data/';
                 } catch (error) {
                     console.error(`[Playtester] Could not load ${functionName}:`, error);
                     if (typeof showNotification === 'function') {
-                        showNotification('Playtester konnte nicht geladen werden.', 'error');
+                        showNotification(t('notify.playtesterError'), 'error');
                     }
                 }
             };
@@ -625,7 +625,7 @@ const BASE_PATH = './data/';
 
             const queue = window.proxyQueue || [];
             if (queue.length === 0) {
-                list.innerHTML = '<div style="padding: 20px; text-align: center; color: #555; background: #fff; border: 2px dashed #d0d7de; border-radius: 10px;">No cards in proxy queue yet. Use the new "Proxy" buttons in Overview, Deck, Meta Cards, Cards DB or Comparison.</div>';
+                list.innerHTML = '<div style="padding: 20px; text-align: center; color: #555; background: #fff; border: 2px dashed #d0d7de; border-radius: 10px;">' + t('proxy.queueEmpty') + '</div>';
                 return;
             }
 
@@ -633,7 +633,7 @@ const BASE_PATH = './data/';
                 const safeName = escapeHtmlAttr(item.name);
                 const safeSet = escapeHtmlAttr(item.set || 'N/A');
                 const safeNumber = escapeHtmlAttr(item.number || 'N/A');
-                const displaySetNumber = (item.set && item.number) ? `${safeSet} ${safeNumber}` : 'No print specified';
+                const displaySetNumber = (item.set && item.number) ? `${safeSet} ${safeNumber}` : t('proxy.noPrint');
                 const imageUrl = getCardImageSource(item.name, item.set, item.number) || buildInlineCardPlaceholder(item.name);
                 const escapedImageUrl = escapeHtmlAttr(imageUrl);
                 const jsName = escapeJsStr(item.name || '');
@@ -651,7 +651,7 @@ const BASE_PATH = './data/';
                             <button onclick="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', ${parseProxyCount(item.count, 1) - 1})" style="height: 30px; border: none; border-radius: 6px; background: #dc3545; color: white; font-weight: bold; cursor: pointer;">-</button>
                             <input type="number" min="1" value="${parseProxyCount(item.count, 1)}" onchange="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', this.value)" style="height: 30px; width: 44px; text-align: center; border: 1px solid #ccd6dd; border-radius: 6px; font-weight: 700;">
                             <button onclick="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', ${parseProxyCount(item.count, 1) + 1})" style="height: 30px; border: none; border-radius: 6px; background: #28a745; color: white; font-weight: bold; cursor: pointer;">+</button>
-                            <button onclick="removeCardFromProxy('${jsName}', '${jsSet}', '${jsNumber}')" style="grid-column: 1 / span 3; height: 28px; border: none; border-radius: 6px; background: #6c757d; color: white; font-size: 0.8em; cursor: pointer;">Remove</button>
+                            <button onclick="removeCardFromProxy('${jsName}', '${jsSet}', '${jsNumber}')" style="grid-column: 1 / span 3; height: 28px; border: none; border-radius: 6px; background: #6c757d; color: white; font-size: 0.8em; cursor: pointer;">${t('proxy.remove')}</button>
                         </div>
                     </div>
                 `;
@@ -705,7 +705,7 @@ const BASE_PATH = './data/';
 
             if (!suppressToast) {
                 const setPart = normalizedSet && normalizedNumber ? ` (${normalizedSet} ${normalizedNumber})` : '';
-                showProxyToast(`Added to proxy queue: ${name}${setPart} x${normalizedCount}`);
+                showProxyToast(`${t('proxy.addedToQueue')} ${name}${setPart} x${normalizedCount}`);
             }
 
             return normalizedCount;
@@ -737,7 +737,7 @@ const BASE_PATH = './data/';
 
         function clearProxyQueue() {
             if (!window.proxyQueue || window.proxyQueue.length === 0) return;
-            if (!confirm('Clear complete proxy queue?')) return;
+            if (!confirm(t('proxy.clearConfirm'))) return;
             window.proxyQueue = [];
             saveProxyQueue();
             renderProxyQueue();
@@ -750,7 +750,7 @@ const BASE_PATH = './data/';
             if (source === 'pastMeta') deckMap = window.pastMetaDeck;
 
             if (!deckMap || Object.keys(deckMap).length === 0) {
-                showToast('No deck cards found for this source.', 'warning');
+                showToast(t('proxy.noDeckCards'), 'warning');
                 return;
             }
 
@@ -770,7 +770,7 @@ const BASE_PATH = './data/';
 
             saveProxyQueue();
             renderProxyQueue();
-            showProxyToast(`Added ${addedCopies} deck cards to proxy queue`);
+            showProxyToast(`${addedCopies} ${t('proxy.deckCardsAdded')}`);
         }
 
         function sendCurrentDeckToProxyPrinter(source) {
@@ -789,7 +789,7 @@ const BASE_PATH = './data/';
 
             const text = String(input.value || '').trim();
             if (!text) {
-                showToast('Paste a decklist first.', 'warning');
+                showToast(t('proxy.pasteFirst'), 'warning');
                 return;
             }
 
@@ -811,7 +811,7 @@ const BASE_PATH = './data/';
             }
 
             if (entries.length === 0) {
-                showToast('Could not parse decklist. Use format: 4 Buddy-Buddy Poffin SVI 186', 'error');
+                showToast(t('proxy.parseError'), 'error');
                 return;
             }
 
@@ -824,7 +824,7 @@ const BASE_PATH = './data/';
 
             saveProxyQueue();
             renderProxyQueue();
-            showProxyToast(`Imported ${addedCopies} cards into proxy queue`);
+            showProxyToast(`${addedCopies} ${t('proxy.cardsImported')}`);
         }
 
         function addManualProxyCard() {
@@ -835,7 +835,7 @@ const BASE_PATH = './data/';
 
             const cardNameRaw = String(nameInput?.value || '').trim();
             if (!cardNameRaw) {
-                showToast('Please enter a card name.', 'warning');
+                showToast(t('proxy.enterCardName'), 'warning');
                 return;
             }
 
@@ -863,7 +863,7 @@ const BASE_PATH = './data/';
         function printProxyQueue() {
             const queue = window.proxyQueue || [];
             if (queue.length === 0) {
-                showToast('Proxy queue is empty.', 'warning');
+                showToast(t('proxy.queueEmptyToast'), 'warning');
                 return;
             }
 
@@ -901,14 +901,14 @@ const BASE_PATH = './data/';
                 return `
                     <section class="proxy-page">
                         <div class="proxy-grid">${cardsHtml}</div>
-                        <footer>Page ${pageIndex + 1} / ${pages.length}</footer>
+                        <footer>${t('proxy.pageFooter')} ${pageIndex + 1} / ${pages.length}</footer>
                     </section>
                 `;
             }).join('');
 
             const popup = window.open('', '_blank');
             if (!popup) {
-                showToast('Unable to open print window. Please allow popups for this site.', 'error');
+                showToast(t('proxy.printBlocked'), 'error');
                 return;
             }
 
@@ -918,7 +918,7 @@ const BASE_PATH = './data/';
             doc.close();
 
             const titleEl = doc.createElement('title');
-            titleEl.textContent = 'Proxy Print';
+            titleEl.textContent = t('proxy.printTitle');
             doc.head.appendChild(titleEl);
 
             const style = doc.createElement('style');
@@ -979,7 +979,7 @@ const BASE_PATH = './data/';
 
                 section.appendChild(grid);
                 const footer = doc.createElement('footer');
-                footer.textContent = `Page ${pageIndex + 1} / ${pages.length}`;
+                footer.textContent = `${t('proxy.pageFooter')} ${pageIndex + 1} / ${pages.length}`;
                 section.appendChild(footer);
                 doc.body.appendChild(section);
             });
@@ -993,7 +993,7 @@ const BASE_PATH = './data/';
             const newCards = comparisonCards.filter(card => card.changeType === 'new' && parseProxyCount(card.newCount, 0) > 0);
 
             if (newCards.length === 0) {
-                showToast('No newly added cards found in comparison results.', 'warning');
+                showToast(t('proxy.noNewCards'), 'warning');
                 return;
             }
 
@@ -1005,7 +1005,8 @@ const BASE_PATH = './data/';
             });
 
             renderProxyQueue();
-            showProxyToast(`Added ${newCards.length} new cards (${addedCopies} copies) to proxy queue`);
+            showProxyToast(`${newCards.length} ${t('proxy.compCardsAdded')} (${addedCopies})`);
+
         }
 
         loadProxyQueue();

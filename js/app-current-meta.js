@@ -73,12 +73,12 @@
                     <div id="heatmapSearchWrapper" style="margin: 0 0 15px 0;">
                         <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
                             <label style="display: flex; flex-direction: column; gap: 4px; color: #2c3e50; font-size: 0.85rem; font-weight: 700; min-width: 240px; flex: 1;">
-                                Y-axis (Your deck)
-                                <input type="text" id="heatmapSearchY" value="${escapeAttr(rawSearchY)}" placeholder="z.B. N's Zoroark" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                ${t('heatmap.yLabel')}
+                                <input type="text" id="heatmapSearchY" value="${escapeAttr(rawSearchY)}" placeholder="${t('heatmap.placeholderY')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                             </label>
                             <label style="display: flex; flex-direction: column; gap: 4px; color: #2c3e50; font-size: 0.85rem; font-weight: 700; min-width: 240px; flex: 1;">
-                                X-axis (Opponents, optional)
-                                <input type="text" id="heatmapSearchX" value="${escapeAttr(rawSearchX)}" placeholder="z.B. Dragapult" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                ${t('heatmap.xLabel')}
+                                <input type="text" id="heatmapSearchX" value="${escapeAttr(rawSearchX)}" placeholder="${t('heatmap.placeholderX')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                             </label>
                         </div>
                     </div>
@@ -141,16 +141,16 @@
                 if (yDecks.length === 0 || xDecks.length === 0) {
                     const safeSearchDisplayY = rawSearchY.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                     const safeSearchDisplayX = rawSearchX.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    let emptyReason = 'No decks found.';
+                    let emptyReason = t('heatmap.noDecks');
                     if (yDecks.length === 0 && rawSearchY) {
-                        emptyReason = `No decks found on Y-axis for '${safeSearchDisplayY}'.`;
+                        emptyReason = `${t('heatmap.noDecksY')} '${safeSearchDisplayY}'.`;
                     } else if (xDecks.length === 0 && rawSearchX) {
-                        emptyReason = `No decks found on X-axis for '${safeSearchDisplayX}'.`;
+                        emptyReason = `${t('heatmap.noDecksX')} '${safeSearchDisplayX}'.`;
                     }
                     const emptyHtml = `
                         <div id="matchupHeatmapContainer" class="matchup-heatmap-container" style="margin: 30px 0; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                             <h2 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 1.5em; display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 1.2em;">🔥</span> Matchup Heatmap
+                                <span style="font-size: 1.2em;">🔥</span> ${t('heatmap.title')}
                             </h2>
                             ${searchControlsHtml}
                             <p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">${emptyReason}</p>
@@ -175,7 +175,7 @@
                 let tableHtml = '<table class="matchup-heatmap" style="border-collapse: collapse; width: 100%; font-size: 0.85em;">';
                 
                 // Tabellenkopf (X-Achse mit Zeilenumbrüchen)
-                tableHtml += '<thead><tr><th style="position: sticky; left: 0; z-index: 3; background: #34495e; color: white; padding: 12px 8px; text-align: left; font-weight: 600; border: 1px solid #2c3e50; min-width: 150px;">Your Deck ⚔</th>';
+                tableHtml += '<thead><tr><th style="position: sticky; left: 0; z-index: 3; background: #34495e; color: white; padding: 12px 8px; text-align: left; font-weight: 600; border: 1px solid #2c3e50; min-width: 150px;">' + t('heatmap.yourDeck') + '</th>';
                 xDecks.forEach(colDeck => {
                     // KEIN Substring mehr → CSS word-wrap für Zeilenumbrüche
                     tableHtml += `<th title="${colDeck}" style="background: #34495e; color: white; padding: 8px 4px; text-align: center; font-weight: 600; border: 1px solid #2c3e50; min-width: 80px; max-width: 100px; white-space: normal; word-wrap: break-word; font-size: 0.8rem; line-height: 1.2;">${colDeck}</th>`;
@@ -189,7 +189,7 @@
                     xDecks.forEach(colDeck => {
                         // Mirror Match
                         if (normalizeName(rowDeck) === normalizeName(colDeck)) {
-                            tableHtml += '<td style="background: rgba(52, 73, 94, 0.1); color: #7f8c8d; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd;" title="Mirror match">\\</td>';
+                            tableHtml += '<td style="background: rgba(52, 73, 94, 0.1); color: #7f8c8d; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd;" title="' + t('heatmap.mirror') + '">\\</td>';
                             return;
                         }
                         
@@ -211,7 +211,7 @@
                         }
                         
                         if (!cellData) {
-                            tableHtml += '<td style="background: rgba(149, 165, 166, 0.15); color: #95a5a6; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd;" title="No data available">-</td>';
+                            tableHtml += '<td style="background: rgba(149, 165, 166, 0.15); color: #95a5a6; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd;" title="' + t('heatmap.noData') + '">-</td>';
                             return;
                         }
                         
@@ -260,7 +260,7 @@
                                 textColor = '#7f8c8d';
                             }
                             
-                            const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} games)`;
+                            const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} ${t('heatmap.games')})`;
                             const safeRow = escapeJsStr(rowDeck);
                             const safeCol = escapeJsStr(colDeck);
                             tableHtml += `<td style="background: ${bgColor}; color: ${textColor}; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd; cursor: help; transition: all 0.2s;" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)" onmouseover="this.style.transform='scale(1.1)'; this.style.zIndex='10'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1'; this.style.boxShadow='none'">${winRate.toFixed(1)}%</td>`;
@@ -274,24 +274,24 @@
                 let html = `
                     <div id="matchupHeatmapContainer" class="matchup-heatmap-container" style="margin: 30px 0; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                         <h2 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 1.5em; display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.2em;">🔥</span> Matchup Heatmap
+                            <span style="font-size: 1.2em;">🔥</span> ${t('heatmap.title')}
                         </h2>
                         <p style="color: #7f8c8d; margin: 0 0 20px 0; font-size: 0.9em;">
-                            Interactive win rate matrix. <span style="color: #27ae60; font-weight: 600;">Green</span> = Favorable (≥55%), 
-                            <span style="color: #7f8c8d; font-weight: 600;">Gray</span> = Even (45-54.9%), 
-                            <span style="color: #e74c3c; font-weight: 600;">Red</span> = Unfavorable (≤45%)
+                            ${t('heatmap.desc')} <span style="color: #27ae60; font-weight: 600;">Green</span> = ${t('heatmap.favorable')} (≥55%), 
+                            <span style="color: #7f8c8d; font-weight: 600;">Gray</span> = ${t('heatmap.even')} (45-54.9%), 
+                            <span style="color: #e74c3c; font-weight: 600;">Red</span> = ${t('heatmap.unfavorable')} (≤45%)
                         </p>
                         ${searchControlsHtml}
                         <div style="overflow-x: auto;">
                             ${tableHtml}
                             <div style="text-align: center; margin-top: 15px;">
                                 <button class="action-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
-                                    ${window.heatmapExpanded ? '▲ Show top 10 only' : '▼ Show all decks'}
+                                    ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
                                 </button>
                             </div>
                         </div>
                         <p style="color: #95a5a6; margin: 15px 0 0 0; font-size: 0.8em; font-style: italic;">
-                            💡 Hover over cells to see detailed game counts. Data from Limitless Online.
+                            ${t('heatmap.hint')}
                         </p>
                     </div>
                 `;
@@ -455,4 +455,9 @@
                 console.error('? Error saving Past Meta deck:', e);
             }
         }
+
+        // ── i18n: re-render on language change ──────────────────
+        document.addEventListener('languageChanged', () => {
+            if (typeof renderMatchupHeatmap === 'function') renderMatchupHeatmap();
+        });
         

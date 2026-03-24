@@ -992,7 +992,7 @@
                 section.innerHTML = `
                     <details open style="border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-top:10px;">
                         <summary style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:12px 20px;cursor:pointer;font-weight:700;font-size:1em;list-style:none;display:flex;justify-content:space-between;align-items:center;">
-                            📊 Meta Share Chart &ndash; Top Archetypes <span style="font-size:0.8em;opacity:0.8;">▼ toggle</span>
+                            ${t('chart.metaShareTitle')} <span style="font-size:0.8em;opacity:0.8;">${t('chart.toggle')}</span>
                         </summary>
                         <div style="padding:20px;display:flex;gap:20px;flex-wrap:wrap;justify-content:center;align-items:center;">
                             <div style="position:relative;width:260px;height:260px;flex-shrink:0;"><canvas id="${sourceKey}DonutChart"></canvas></div>
@@ -1038,7 +1038,7 @@
             if (barCtx) {
                 window._metaChartInstances[sourceKey + 'Bar'] = new Chart(barCtx, {
                     type: 'bar',
-                    data: { labels, datasets: [{ label: 'Deck Count', data: counts, backgroundColor: PALETTE, borderRadius: 4, borderSkipped: false }] },
+                    data: { labels, datasets: [{ label: t('chart.deckCount'), data: counts, backgroundColor: PALETTE, borderRadius: 4, borderSkipped: false }] },
                     options: {
                         indexAxis: 'y',
                         responsive: true,
@@ -1052,3 +1052,12 @@
                 });
             }
         }
+
+        // ── i18n: re-render meta charts on language change ──────
+        document.addEventListener('languageChanged', () => {
+            ['cityLeague', 'currentMeta'].forEach(key => {
+                const container = document.getElementById(key + 'MetaChartSection');
+                if (container) container.remove();
+            });
+            // Charts will be recreated next time the tab is rendered or data displayed
+        });

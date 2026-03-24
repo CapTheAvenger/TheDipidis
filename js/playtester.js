@@ -41,7 +41,7 @@ function ptSaveState() {
 }
 
 function ptUndo() {
-    if (ptStateHistory.length === 0) { ptShowMessage('Nothing to undo.'); return; }
+    if (ptStateHistory.length === 0) { ptShowMessage(t('pt.nothingToUndo')); return; }
     ptState = ptStateHistory.pop();
     ptRenderAll();
     ptLog('↩️ Undone.');
@@ -221,7 +221,7 @@ function ptShowManual() {
 }
 
 function ptQuitPlaytester() {
-    if (!confirm('Quit Playtester and return to the main page?')) return;
+    if (!confirm(t('pt.quitConfirm'))) return;
     document.getElementById('playtesterModal').style.display = 'none';
 }
 
@@ -235,17 +235,17 @@ function openPlaytester(source) {
     const totalCards = Object.values(deckObj).reduce((s, c) => s + c, 0);
     if (totalCards === 0) {
         if (typeof showNotification === 'function') {
-            showNotification('Your deck is empty. Add some cards first.', 'error');
+            showNotification(t('pt.deckEmpty'), 'error');
         } else {
-            showToast('Your deck is empty! Add some cards first.', 'warning');
+            showToast(t('pt.deckEmpty'), 'warning');
         }
         return;
     }
     if (totalCards < 60) {
         if (typeof showNotification === 'function') {
-            showNotification(`⚠️ Deck has only ${totalCards}/60 cards. You can still play!`, 'warning');
+            showNotification(t('pt.deckIncomplete').replace('{n}', totalCards), 'warning');
         } else if (typeof showToast === 'function') {
-            showToast(`Deck has only ${totalCards}/60 cards.`, 'warning');
+            showToast(t('pt.deckIncomplete').replace('{n}', totalCards), 'warning');
         }
     }
 
@@ -303,7 +303,7 @@ function openPlaytester(source) {
 }
 
 function closePlaytester() {
-    if (confirm('Really quit the playtester? All progress will be lost.')) {
+    if (confirm(t('pt.quitConfirmFull'))) {
         document.getElementById('playtesterModal').style.display = 'none';
     }
 }
@@ -317,7 +317,7 @@ function closePlaytester() {
 function parseSandboxDeckToExactPrints(textInput, player) {
     const statusEl = document.getElementById(player === 'p1' ? 'sandboxStatusP1' : 'sandboxStatusP2');
     if (!textInput || !textInput.trim()) {
-        if (statusEl) { statusEl.innerText = 'Please paste a deck code first!'; statusEl.style.color = 'red'; }
+        if (statusEl) { statusEl.innerText = t('pt.pasteCode'); statusEl.style.color = 'red'; }
         return;
     }
     if (statusEl) { statusEl.innerText = 'Loading...'; statusEl.style.color = '#007bff'; }
@@ -410,10 +410,10 @@ function parseSandboxDeckToExactPrints(textInput, player) {
     const total = newDeck.length;
     if (statusEl) {
         if (total > 0) {
-            statusEl.innerText = `${total}/60 cards loaded ✅` + (notFound.length ? ` (${notFound.length} missing)` : '');
+            statusEl.innerText = `${total}/60 ${t('pt.cardsLoaded')}` + (notFound.length ? ` (${notFound.length} ${t('pt.missing')})` : '');
             statusEl.style.color = notFound.length ? '#e67e22' : 'green';
         } else {
-            statusEl.innerText = 'No valid cards found.';
+            statusEl.innerText = t('pt.noValidCards');
             statusEl.style.color = 'red';
         }
     }
@@ -426,12 +426,12 @@ function parseSandboxDeck(player) {
     const rawText  = inputEl.value;
 
     if (!rawText.trim()) {
-        statusEl.innerText = 'Please paste a deck code first!';
+        statusEl.innerText = t('pt.pasteCode');
         statusEl.style.color = 'red';
         return;
     }
 
-    statusEl.innerText = 'Loading card data...';
+    statusEl.innerText = t('pt.loadingCards');
     statusEl.style.color = '#007bff';
 
     // TCG Live format: "4 Pikachu SVI 001" or "4 Pikachu SVI 001 PH"
@@ -468,7 +468,7 @@ function parseSandboxDeck(player) {
     }
 
     if (entries.length === 0) {
-        statusEl.innerText = 'No valid deck format detected.';
+        statusEl.innerText = t('pt.invalidFormat');
         statusEl.style.color = 'red';
         return;
     }
@@ -504,10 +504,10 @@ function parseSandboxDeck(player) {
     const totalCards = results.reduce((s, c) => s + c.count, 0);
 
     if (totalCards > 0) {
-        statusEl.innerText = `${totalCards} / 60 cards loaded ✅`;
+        statusEl.innerText = `${totalCards} / 60 ${t('pt.cardsLoaded')}`;
         statusEl.style.color = 'green';
     } else {
-        statusEl.innerText = 'No valid cards found.';
+        statusEl.innerText = t('pt.noValidCards');
         statusEl.style.color = 'red';
     }
 }
@@ -517,7 +517,7 @@ function startStandalonePlaytester() {
     const p2Count = standaloneDecks.p2.reduce((s, c) => s + c.count, 0);
 
     if (p1Count === 0 && p2Count === 0) {
-        showToast('Please import at least one deck for Player 1!', 'warning');
+        showToast(t('pt.importP1'), 'warning');
         return;
     }
 
@@ -570,9 +570,9 @@ function startPlaytesterWithOpponent() {
     const opponentString = document.getElementById('playtesterOpponentDeck').value.trim();
     if (!opponentString) {
         if (typeof showNotification === 'function') {
-            showNotification('Bitte füge ein Deck für den Gegner ein oder wähle Mirror Match.', 'error');
+            showNotification(t('pt.addOpponentOrMirror'), 'error');
         } else {
-            showToast('Bitte füge ein Deck für den Gegner ein oder wähle Mirror Match.', 'warning');
+            showToast(t('pt.addOpponentOrMirror'), 'warning');
         }
         return;
     }
@@ -661,17 +661,17 @@ function ptSaveGame() {
             ptStartPhase
         };
         localStorage.setItem('ptGameSave', JSON.stringify(save));
-        if (typeof showToast === 'function') showToast('💾 Spiel gespeichert', 'success', 2000);
+        if (typeof showToast === 'function') showToast(t('pt.gameSaved'), 'success', 2000);
     } catch (e) {
         console.error('ptSaveGame error', e);
-        if (typeof showToast === 'function') showToast('❌ Speichern fehlgeschlagen', 'error', 3000);
+        if (typeof showToast === 'function') showToast(t('pt.saveFailed'), 'error', 3000);
     }
 }
 
 function ptLoadGame() {
     try {
         const raw = localStorage.getItem('ptGameSave');
-        if (!raw) { if (typeof showToast === 'function') showToast('ℹ️ Kein Spielstand vorhanden', 'info', 2500); return; }
+        if (!raw) { if (typeof showToast === 'function') showToast(t('pt.noSaveAvailable'), 'info', 2500); return; }
         const save = JSON.parse(raw);
         ptState = save.ptState;
         // Sanitize: loaded games are always singleplayer
@@ -693,10 +693,10 @@ function ptLoadGame() {
         ptRenderAll();
         const d = new Date(save.ts);
         const stamp = d.toLocaleString('de-DE', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
-        if (typeof showToast === 'function') showToast(`📂 Spielstand geladen (${stamp})`, 'success', 3000);
+        if (typeof showToast === 'function') showToast(`${t('pt.gameLoaded')} (${stamp})`, 'success', 3000);
     } catch (e) {
         console.error('ptLoadGame error', e);
-        if (typeof showToast === 'function') showToast('❌ Laden fehlgeschlagen', 'error', 3000);
+        if (typeof showToast === 'function') showToast(t('pt.loadFailed'), 'error', 3000);
     }
 }
 
@@ -911,7 +911,7 @@ function ptStartCardClick(player, index) {
     // Setup: only Basic Pokémon allowed
     const setupCard = ptState[player].hand[index];
     if (!setupCard || !_ptIsBasic(setupCard)) {
-        ptShowMessage('⛔ Im Setup nur Basic Pokémon erlaubt!');
+        ptShowMessage(t('pt.errSetupOnlyBasic'));
         return;
     }
     const choices = ptStartChoices[player] || { active: null, bench: [] };
@@ -928,7 +928,7 @@ function ptStartCardClick(player, index) {
         // Bench this card (max 5)
         choices.bench.push(index);
     } else {
-        ptShowMessage('Bench full (max 5)!');
+        ptShowMessage(t('pt.errBenchFull'));
         return;
     }
     ptStartChoices[player] = choices;
@@ -1375,7 +1375,7 @@ function ptRunCommand(playerOverride) {
         const validZones = ['active', 'bench0', 'bench1', 'bench2', 'bench3', 'bench4'];
         const zone       = validZones.includes(slotArg) ? slotArg : 'active';
         if (ptState[p].field[zone].length === 0) {
-            ptShowMessage(`No Pokémon in ${zone}!`);
+            ptShowMessage(t('pt.errNoPokemonInZone'));
             return;
         }
         const energyIdx = ptState[p].hand.findIndex(c =>
@@ -1383,7 +1383,7 @@ function ptRunCommand(playerOverride) {
             (c.supertype || '').toLowerCase() === 'energy'
         );
         if (energyIdx === -1) {
-            ptShowMessage('No Energy card in hand!');
+            ptShowMessage(t('pt.errNoEnergy'));
             return;
         }
         const [energyCard] = ptState[p].hand.splice(energyIdx, 1);
@@ -1391,7 +1391,7 @@ function ptRunCommand(playerOverride) {
         ptLog(`⚡ Attached "${energyCard.name}" to ${p} ${zone}.`);
         ptRenderAll(); needsSync = true;
     } else {
-        ptShowMessage('Unknown! Try: /draw 3  /iono 6  /roxanne 2  /top 5  /mill 2  /attach active');
+        ptShowMessage(t('pt.errUnknownCmd'));
     }
     if (needsSync && typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Command: /' + action + ' ' + n);
 }
@@ -1403,7 +1403,7 @@ function ptOpenTopCards(num) {
     ptLookingAtPlayer     = p;
     ptLookingAtIsBottom   = false;
     const take = Math.min(num || 5, ptState[p].deck.length);
-    if (take === 0) { ptShowMessage('Deck is empty!'); return; }
+    if (take === 0) { ptShowMessage(t('pt.errDeckEmpty')); return; }
     ptLookingAt = ptState[p].deck.splice(ptState[p].deck.length - take, take).reverse();
     ptLog(`Looking at the top ${take} card(s).`);
     ptRenderTopCards();
@@ -1511,7 +1511,7 @@ function ptDraw1(playerOverride = null) {
         ptLog('Drew a card.');
         if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Drew a card');
     } else {
-        ptShowMessage('Deck is empty!');
+        ptShowMessage(t('pt.errDeckEmpty'));
     }
 }
 
@@ -1530,8 +1530,8 @@ function ptShuffle() {
 function ptRedrawPrizes(player) {
     const p = player || ptCurrentPlayer;
     const count = ptState[p].prizes.length;
-    if (count === 0) { ptShowMessage('No prize cards to redraw!'); return; }
-    if (!confirm(`Shuffle ${count} prize card(s) back into ${p.toUpperCase()}'s deck and re-deal?`)) return;
+    if (count === 0) { ptShowMessage(t('pt.redrawPrizesConfirm').split('?')[0] + '!'); return; }
+    if (!confirm(t('pt.redrawPrizesConfirm'))) return;
     // Return prizes to deck
     ptState[p].deck.push(...ptState[p].prizes);
     ptState[p].prizes = [];
@@ -1564,7 +1564,7 @@ function ptDrawCards(player, amount) {
         if (ptState[p].deck.length > 0) { ptState[p].hand.push(ptState[p].deck.pop()); drawn++; }
     }
     if (drawn > 0) { ptLog(`Drew ${drawn} card(s) [${p}].`); ptRenderAll(); if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Drew ' + drawn + ' cards'); }
-    else ptShowMessage('Deck is empty!');
+    else ptShowMessage(t('pt.errDeckEmpty'));
 }
 
 function ptShuffleDeck(player) {
@@ -1593,7 +1593,7 @@ function ptLookCards(player, position, amount) {
     ptLookingAtIsBottom = (position === 'bottom');
     const deck = ptState[p].deck;
     const take = Math.min(amount, deck.length);
-    if (take === 0) { ptShowMessage('Deck is empty!'); return; }
+    if (take === 0) { ptShowMessage(t('pt.errDeckEmpty')); return; }
     if (ptLookingAtIsBottom) {
         ptLookingAt = deck.splice(0, take);
     } else {
@@ -1806,7 +1806,7 @@ function ptFlipBoard() {
 
     // In MP mode, only the current player can end their turn
     if (ptState.isMultiplayer && ptCurrentPlayer !== ptState.localRole) {
-        ptShowMessage('Nicht dein Zug!');
+        ptShowMessage(t('pt.errNotYourTurn'));
         return;
     }
 
@@ -2141,7 +2141,7 @@ function ptClickZone(player, zoneId) {
         const isAttach = _ptIsEnergy(card) || _ptIsTool(card);
 
         if (!isPokemon && !isAttach) {
-            ptShowMessage('⛔ Nur Pokémon, Energy oder Tools dürfen auf Active/Bench!');
+            ptShowMessage(t('pt.errInvalidCardType'));
             ptSelectedCardIndex = null;
             ptSetAttachMode(false);
             ptRenderHand();
@@ -2149,7 +2149,7 @@ function ptClickZone(player, zoneId) {
         }
 
         if (isAttach && (!targetStack || targetStack.length === 0)) {
-            ptShowMessage('⛔ Energy/Tool kann nur an ein vorhandenes Pokémon angelegt werden!');
+            ptShowMessage(t('pt.errAttachNoPokemon'));
             ptSelectedCardIndex = null;
             ptSetAttachMode(false);
             ptRenderHand();
@@ -2423,7 +2423,7 @@ function ptEnergyDiscard(player, zoneId) {
     const energies = cards.map((c, i) => ({ card: c, idx: i }))
         .filter(e => (e.card.cardType || '').toLowerCase().includes('energy'));
     if (energies.length === 0) {
-        ptShowMessage('Keine Energy auf diesem Pokémon!');
+        ptShowMessage(t('pt.errNoEnergyOnPokemon'));
         return;
     }
     if (energies.length === 1) {
@@ -2484,7 +2484,7 @@ function ptRetreat(player, zoneId) {
     const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
     const occupied = benchZones.filter(b => ptState[player].field[b].length > 0);
     if (occupied.length === 0) {
-        ptShowMessage('Keine Pokémon auf der Bank!');
+        ptShowMessage(t('pt.errNoBenchPokemon'));
         return;
     }
 
@@ -2535,7 +2535,7 @@ function _ptRetreatCostSelected(player, cost) {
     const energies = activeCards.map((c, i) => ({ card: c, idx: i }))
         .filter(e => (e.card.cardType || '').toLowerCase().includes('energy'));
     if (energies.length < cost) {
-        ptShowMessage(`Nicht genug Energy! (${energies.length} vorhanden, ${cost} benötigt)`);
+        ptShowMessage(t('pt.errNotEnoughEnergy') + ` (${energies.length} ${t('pt.errAvailable')}, ${cost} ${t('pt.errNeeded')})`);
         return;
     }
     if (energies.length === cost) {
@@ -2641,7 +2641,7 @@ function _ptShowRetreatBenchPicker(player) {
     const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
     const occupied = benchZones.filter(b => ptState[player].field[b].length > 0);
     if (occupied.length === 0) {
-        ptShowMessage('Keine Pokémon auf der Bank!');
+        ptShowMessage(t('pt.errNoBenchPokemon'));
         return;
     }
     if (occupied.length === 1) {
@@ -3108,7 +3108,7 @@ function _ptRefreshDiscardGrid(player) {
 function ptOpenDiscard(player) {
     const title = document.getElementById('ptDiscardModalTitle');
     if (title) title.textContent = `🗑️ Discard (${player.toUpperCase()}) – Klick=Hand | Rechtsklick=Lost Zone`;
-    if (!ptState[player] || ptState[player].discard.length === 0) { ptShowMessage('Discard pile is empty.'); return; }
+    if (!ptState[player] || ptState[player].discard.length === 0) { ptShowMessage(t('pt.errDiscardEmpty')); return; }
     // Inject sort toolbar
     const sortBar = document.getElementById('ptDiscardSortBar');
     if (sortBar) {
@@ -3128,7 +3128,7 @@ function ptOpenDiscard(player) {
 
 function ptOpenLostZone(player) {
     const lz = ptState[player].lostzone || [];
-    if (lz.length === 0) { ptShowMessage('Lost Zone is empty.'); return; }
+    if (lz.length === 0) { ptShowMessage(t('pt.errLostZoneEmpty')); return; }
     const title = document.getElementById('ptDiscardModalTitle');
     if (title) title.textContent = `🌌 Lost Zone (${player.toUpperCase()}) – Click = Return to hand`;
     const sortBar = document.getElementById('ptDiscardSortBar');
@@ -3519,11 +3519,11 @@ function ptPlayFromHand(index, event) {
                 _tFn(player, card);
                 if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
             }, 50);
-            if (typeof showToast === 'function') showToast(`✅ "${card.name}" — Effekt wird ausgeführt`, 'success', 2500);
+            if (typeof showToast === 'function') showToast(`${t('pt.effectExecuting')} — "${card.name}"`, 'success', 2500);
         } else {
             if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Played ' + card.name);
             if ((card.cardType || '').toLowerCase().includes('trainer') && _tKey) {
-                if (typeof showToast === 'function') showToast(`ℹ️ "${card.name}" (${_tKey}) — kein Auto-Effekt, manuell ausführen`, 'warning', 3000);
+                if (typeof showToast === 'function') showToast(`${t('pt.noAutoEffect')} — "${card.name}" (${_tKey})`, 'warning', 3000);
             }
         }
     };
@@ -3558,7 +3558,7 @@ let _ptPrizeSelection = new Set();
 
 function ptOpenPrizePicker(player, suggestedPicks = 1, taker = ptCurrentPlayer) {
     const prizes = ptState[player].prizes;
-    if (!prizes || prizes.length === 0) { ptShowMessage('Keine Preiskarten mehr!'); return; }
+    if (!prizes || prizes.length === 0) { ptShowMessage(t('pt.errNoPrizes')); return; }
     suggestedPicks = Math.max(1, Math.min(suggestedPicks, prizes.length));
     _ptPrizeSelection = new Set();
 
@@ -3898,7 +3898,7 @@ function ptAbilityLunatone(player, zoneId) {
     const hand = ptState[player].hand;
     const energyIdx = hand.findIndex(c => (c.cardType || '').toLowerCase() === 'basic energy');
     if (energyIdx === -1) {
-        ptShowMessage('⛔ Keine Basic Energy auf der Hand zum Ablegen!');
+        ptShowMessage(t('pt.errNoBasicEnergyHand'));
         return false;
     }
     const discarded = hand.splice(energyIdx, 1)[0];
@@ -3916,7 +3916,7 @@ function ptAbilityLunatone(player, zoneId) {
 // Drakloak — Trickster: look at top 2 cards, take 1 to hand, put other on bottom
 function ptAbilityDrakloak(player, zoneId) {
     if (ptState[player].deck.length === 0) {
-        ptShowMessage('⛔ Deck ist leer!');
+        ptShowMessage(t('pt.errDeckEmpty'));
         return false;
     }
     const topCards = [];
@@ -3938,7 +3938,7 @@ function ptTrainerBossOrders(player, card) {
     const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
     const occupied = benchZones.filter(b => ptState[opp].field[b].length > 0);
     if (occupied.length === 0) {
-        ptShowMessage('⛔ Gegner hat keine Pokémon auf der Bank!');
+        ptShowMessage(t('pt.errOpponentNoBench'));
         return false;
     }
     if (occupied.length === 1) {
@@ -3995,7 +3995,7 @@ function ptAbilityFezandipiti(player, zoneId) {
         drawn++;
     }
     if (drawn === 0) {
-        ptShowMessage('⛔ Deck ist leer!');
+        ptShowMessage(t('pt.errDeckEmpty'));
         return false;
     }
     ptLog(`✨ Fezandipiti ex Ability: ${drawn} Karten gezogen.`);
@@ -4018,7 +4018,7 @@ function ptAbilityDraw2(player, zoneId) {
 
 // Dudunsparce — Run Away Draw: draw 3, then shuffle this Pokémon + attached into deck
 function ptAbilityDudunsparce(player, zoneId) {
-    if (ptState[player].deck.length === 0) { ptShowMessage('⛔ Deck ist leer!'); return false; }
+    if (ptState[player].deck.length === 0) { ptShowMessage(t('pt.errDeckEmpty')); return false; }
     let drawn = 0;
     for (let i = 0; i < 3; i++) {
         if (ptState[player].deck.length === 0) break;
@@ -4064,7 +4064,7 @@ function ptAbilityLookTopSupporter(player, zoneId) {
 // N's Zoroark ex — Trade: discard 1 from hand, draw 2
 function ptAbilityZoroarkTrade(player, zoneId) {
     const hand = ptState[player].hand;
-    if (hand.length === 0) { ptShowMessage('⛔ Keine Karten auf der Hand!'); return false; }
+    if (hand.length === 0) { ptShowMessage(t('pt.errNoHandCards')); return false; }
     // Show pick modal to choose 1 card to discard
     let html = `<div style="background:#1a1a2e;border:2px solid #9b59b6;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
         <h3 style="color:#9b59b6;margin-top:0;">🌑 N's Zoroark ex — Trade</h3>
@@ -4107,7 +4107,7 @@ function ptFinishZoroarkTrade(player, handIdx) {
 function _ptLookTopSupporterImpl(player, count, sourceName) {
     const deck = ptState[player].deck;
     const take = Math.min(count, deck.length);
-    if (take === 0) { ptShowMessage('⛔ Deck ist leer!'); return; }
+    if (take === 0) { ptShowMessage(t('pt.errDeckEmpty')); return; }
     const topCards = deck.splice(deck.length - take, take).reverse();
     let html = `<div style="background:#1a1a2e;border:2px solid #3498db;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:92vw;max-height:85vh;overflow-y:auto;">
         <h3 style="color:#3498db;margin-top:0;">🔎 ${_ptEscHtml(sourceName)} — Top ${take} Karten</h3>
@@ -4188,7 +4188,7 @@ function ptTrainerLillie(player, card) {
 function ptTrainerUltraBall(player, card) {
     const hand = ptState[player].hand;
     if (hand.length < 2) {
-        ptShowMessage('⛔ Nicht genug Karten auf der Hand zum Ablegen!');
+        ptShowMessage(t('pt.errNotEnoughHandCards'));
         return false;
     }
     // Show modal to pick 2 cards to discard
@@ -4317,7 +4317,7 @@ function ptTrainerEnergySwitch(player, card) {
             withEnergy.push({ zone: z, poke: topPoke, cards });
         }
     });
-    if (withEnergy.length === 0) { ptShowMessage('⛔ Keine Pokémon mit Basic Energy!'); return false; }
+    if (withEnergy.length === 0) { ptShowMessage(t('pt.errNoPokemonWithEnergy')); return false; }
 
     // Step 1: pick source Pokémon
     let html = `<div style="background:#1a1a2e;border:2px solid #f1c40f;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
@@ -4368,7 +4368,7 @@ function ptTrainerEnergySwitch(player, card) {
 function _ptESPickTarget(player, srcZone, energyIdx) {
     const zones = ['active','bench0','bench1','bench2','bench3','bench4'];
     const targets = zones.filter(z => z !== srcZone && ptState[player].field[z].length > 0);
-    if (targets.length === 0) { ptShowMessage('⛔ Kein anderes Pokémon als Ziel!'); return; }
+    if (targets.length === 0) { ptShowMessage(t('pt.errNoOtherTarget')); return; }
     const modal = document.getElementById('ptESModal');
     let html = `<div style="background:#1a1a2e;border:2px solid #27ae60;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
         <h3 style="color:#27ae60;margin-top:0;">⚡ Energy Switch — Ziel wählen</h3>
@@ -4402,7 +4402,7 @@ function _ptESPickTarget(player, srcZone, energyIdx) {
 // Secret Box: discard 3 from hand, then open deck search
 function ptTrainerSecretBox(player, card) {
     const hand = ptState[player].hand;
-    if (hand.length < 3) { ptShowMessage('⛔ Nicht genug Karten auf der Hand (min. 3)!'); return false; }
+    if (hand.length < 3) { ptShowMessage(t('pt.errMinThreeHandCards')); return false; }
     let html = `<div style="background:#1a1a2e;border:2px solid #8e44ad;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
         <h3 style="color:#8e44ad;margin-top:0;">📦 Secret Box — 3 Karten ablegen</h3>
         <p style="color:#ccc;font-size:12px;margin-bottom:16px;">Wähle 3 Karten aus deiner Hand zum Ablegen.</p>
@@ -4601,7 +4601,7 @@ function ptRematchMyDecks() {
     const p2Idx = parseInt(document.getElementById('ptWinDeckP2')?.value);
     const decks = window.userDecks || [];
     const deck1 = decks[p1Idx], deck2 = decks[p2Idx];
-    if (!deck1?.cards || !deck2?.cards) { ptShowMessage('⛔ Bitte beide Decks auswählen!'); return; }
+    if (!deck1?.cards || !deck2?.cards) { ptShowMessage(t('pt.errSelectBothDecks')); return; }
     if (typeof startMyDecksPlaytest !== 'undefined') {
         document.getElementById('ptWinModal').style.display = 'none';
         // Use the existing buildDeck logic from startMyDecksPlaytest
@@ -4638,7 +4638,7 @@ function ptRematchMyDecks() {
 function ptRematchPasteDecks() {
     const p1Text = document.getElementById('ptWinListP1')?.value?.trim();
     const p2Text = document.getElementById('ptWinListP2')?.value?.trim();
-    if (!p1Text || !p2Text) { ptShowMessage('⛔ Bitte beide Deck-Listen einfügen!'); return; }
+    if (!p1Text || !p2Text) { ptShowMessage(t('pt.errPasteBothDecks')); return; }
     document.getElementById('ptWinModal').style.display = 'none';
     // Use the sandbox import textareas to trigger the existing parse logic
     const ta1 = document.getElementById('sandboxImportP1');

@@ -87,7 +87,7 @@
             // Show loading indicator
             const content = document.getElementById('cityLeagueContent');
             if (content) {
-                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Lade ' + escapeHtml(format) + ' Daten...</div>';
+                content.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">' + t('cl.loading') + ' ' + escapeHtml(format) + ' ' + t('cl.loadingData') + '</div>';
             }
             
             // Load M3 comparison data only on non-mobile to avoid blocking slower devices.
@@ -428,29 +428,29 @@
                 <div id="cityLeagueTierSections"></div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">📊 Archetype Overview</h3>
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">${t('cl.archetypeOverview')}</h3>
                         <div style="font-size: 2.5em; font-weight: bold; margin: 10px 0;">${totalArchetypes}</div>
                         <div style="font-size: 0.85em; opacity: 0.9; margin-top: 15px; text-align: left;">
-                            <strong>Top 3 by Count:</strong><br>
+                            <strong>${t('cl.top3Count')}</strong><br>
                             ${topByCount.map(d => `${d.archetype}: ${d.new_count}x`).join('<br>')}
                             <br><br>
-                            <strong>Top 3 by Avg Placement:</strong><br>
+                            <strong>${t('cl.top3Placement')}</strong><br>
                             ${topByPlacement.map(d => `${d.archetype}: ${d.new_avg_placement}`).join('<br>')}
                         </div>
                     </div>
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">🔝 Top 10 Changes</h3>
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">${t('cl.top10Changes')}</h3>
                         <div style="font-size: 0.85em; opacity: 0.9; margin-top: 10px; text-align: left;">
-                            ${entries.length > 0 ? `<strong style="color: #7fff7f;">➕ Entries:</strong><br>${entries.map(arch => `${arch}`).join('<br>')}<br><br>` : ''}
-                            ${exits.length > 0 ? `<strong style="color: #ff6b6b;">➖ Exits:</strong><br>${exits.map(arch => `${arch}`).join('<br>')}<br>` : ''}
-                            ${entries.length === 0 && exits.length === 0 ? 'No changes in top 10' : ''}
+                            ${entries.length > 0 ? `<strong style="color: #7fff7f;">➕ ${t('cl.entries')}</strong><br>${entries.map(arch => `${arch}`).join('<br>')}<br><br>` : ''}
+                            ${exits.length > 0 ? `<strong style="color: #ff6b6b;">➖ ${t('cl.exits')}</strong><br>${exits.map(arch => `${arch}`).join('<br>')}<br>` : ''}
+                            ${entries.length === 0 && exits.length === 0 ? t('cl.noTop10Changes') : ''}
                         </div>
                     </div>
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">📁 Data Source</h3>
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.1em; opacity: 0.9;">${t('cl.dataSource')}</h3>
                         <div style="font-size: 0.85em; opacity: 0.9; margin-top: 10px;">
-                            <strong>Period:</strong><br>${dateRange || 'N/A'}<br><br>
-                            <strong>Tournaments:</strong><br>${tournamentCount || 0}
+                            <strong>${t('cl.period')}</strong><br>${dateRange || 'N/A'}<br><br>
+                            <strong>${t('cl.tournaments')}</strong><br>${tournamentCount || 0}
                         </div>
                     </div>
                 </div>`;
@@ -459,15 +459,15 @@
             if (decreased.length > 0) {
                 html += `
                     <div style="margin-bottom: 40px;">
-                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📉 Popularity Decreases</h2>
+                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">${t('cl.popDecreases')}</h2>
                         <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <thead>
                                 <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Archetype</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Old Count</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">New Count</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Change</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Avg Placement</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">${t('cl.thArchetype')}</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thOldCount')}</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thNewCount')}</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thChange')}</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thAvgPlacement')}</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -478,7 +478,7 @@
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
+                            <td style="padding: 12px; font-weight: bold;" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
                             <td style="padding: 12px; text-align: center;">${d.old_count}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count}</td>
                             <td style="padding: 12px; text-align: center; color: #e74c3c; font-weight: bold;">${change}</td>
@@ -497,13 +497,13 @@
                 // Performance Improvers
                 html += `
                     <div style="flex: 1; min-width: 300px;">
-                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">? Performance Improvers (Better Avg Placement)</h2>
+                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">? ${t('cl.perfImprovers')}</h2>
                         <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <thead>
                                 <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Archetype</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Count</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Avg. Placement</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">${t('cl.thArchetype')}</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thCount')}</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thAvgPlacementShort')}</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -514,7 +514,7 @@
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
+                            <td style="padding: 12px; font-weight: bold;" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #555; font-size: 0.9em; font-weight: 600;">(${countChangeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: #27ae60; font-weight: bold;">(-${improvement.toFixed(2)})</span></td>
                         </tr>`;
@@ -526,13 +526,13 @@
                 // Performance Decliners
                 html += `
                     <div style="flex: 1; min-width: 300px;">
-                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📉 Performance Decliners (Worse Avg Placement)</h2>
+                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">${t('cl.perfDecliners')}</h2>
                         <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <thead>
                                 <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                    <th style="padding: 12px; text-align: left; font-weight: 600;">Archetype</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Count</th>
-                                    <th style="padding: 12px; text-align: center; font-weight: 600;">Avg. Placement</th>
+                                    <th style="padding: 12px; text-align: left; font-weight: 600;">${t('cl.thArchetype')}</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thCount')}</th>
+                                    <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thAvgPlacementShort')}</th>
                                 </tr>
                             </thead>
                             <tbody>`;
@@ -543,7 +543,7 @@
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
+                            <td style="padding: 12px; font-weight: bold;" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: #555; font-size: 0.9em; font-weight: 600;">(${countChangeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: #e74c3c; font-weight: bold;">(+${decline.toFixed(2)})</span></td>
                         </tr>`;
@@ -561,9 +561,9 @@
                 <div style="display: flex; gap: 20px; margin-bottom: 40px; flex-wrap: wrap;">
                     <!-- Full Comparison Table (Detailed) -->
                     <div style="flex: 1; min-width: 350px;">
-                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📋 Full Comparison Table (Top 30)</h2>
+                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">${t('cl.fullComparison')}</h2>
                         <div style="margin-bottom: 15px;">
-                            <input type="text" id="cityLeagueSearchFilter" placeholder="Search e.g.: draga, luca" 
+                            <input type="text" id="cityLeagueSearchFilter" placeholder="${t('cl.searchPlaceholder')}" 
                                 style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #3498db; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                                 oninput="filterCityLeagueTable()">
                             <div id="cityLeagueSearchResults" style="margin-top: 8px; font-size: 14px; color: #555; font-weight: 500;"></div>
@@ -573,17 +573,17 @@
                     
                     <!-- Grouped by Main Pokemon -->
                     <div style="flex: 1; min-width: 350px;">
-                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">📚 Archetype Combined (Top 20)</h2>
+                        <h2 style="color: #34495e; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">${t('cl.archetypeCombined')}</h2>
                         <div style="margin-bottom: 15px; padding: 12px; background: #ecf0f1; border-radius: 5px; font-size: 0.9em; color: #333; font-weight: 500;">
-                            Kumulierte Zahlen aller Varianten eines Haupt-Pokemons (z.B. alle "dragapult *" Decks)
+                            ${t('cl.combinedExplanation')}
                         </div>
                         <div id="cityLeagueCombinedTable"></div>
                     </div>
                 </div>
                 
                 <div style="background: #ecf0f1; padding: 15px; border-radius: 5px; margin-top: 30px; text-align: center;">
-                    <span style="display: inline-block; margin: 0 15px; font-weight: bold;">📅 Generated: ${generatedDate}</span>
-                    <span style="display: inline-block; margin: 0 15px; font-weight: bold;">📋 Total Archetypes Tracked: ${totalArchetypes}</span>
+                    <span style="display: inline-block; margin: 0 15px; font-weight: bold;">📅 ${t('cl.generated')} ${generatedDate}</span>
+                    <span style="display: inline-block; margin: 0 15px; font-weight: bold;">📋 ${t('cl.totalTracked')} ${totalArchetypes}</span>
                 </div>`;
             
             content.innerHTML = html;
@@ -681,10 +681,10 @@
                     </colgroup>
                     <thead>
                         <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <th style="padding: 8px 4px; text-align: left; font-weight: 600; font-size: 0.95em;">Main Pokemon</th>
-                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Variants</th>
-                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Count</th>
-                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Avg. Placement</th>
+                            <th style="padding: 8px 4px; text-align: left; font-weight: 600; font-size: 0.95em;">${t('cl.thMainPokemon')}</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">${t('cl.thVariants')}</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">${t('cl.thCount')}</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">${t('cl.thAvgPlacementShort')}</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -699,7 +699,7 @@
 
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" title="${d.variants.join(', ')}">
-                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
+                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="${t('cl.analyzeVariants')}">${displayName}</td>
                             <td style="padding: 8px 4px; text-align: center; color: #555; font-size: 0.85em; font-weight: 600;">${d.variant_count}</td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
@@ -713,10 +713,10 @@
                 <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                     <thead>
                         <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <th style="padding: 12px; text-align: left; font-weight: 600;">Main Pokemon</th>
-                            <th style="padding: 12px; text-align: center; font-weight: 600;">Variants</th>
-                            <th style="padding: 12px; text-align: center; font-weight: 600;">Count</th>
-                            <th style="padding: 12px; text-align: center; font-weight: 600;">Avg. Placement</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 600;">${t('cl.thMainPokemon')}</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thVariants')}</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thCount')}</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thAvgPlacementShort')}</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -736,7 +736,7 @@
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background=''" title="${d.variants.join(', ')}">
-                            <td style="padding: 12px; font-weight: bold; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="Analyze all variants">${displayName}</td>
+                            <td style="padding: 12px; font-weight: bold; color: #3498db; cursor: pointer; text-decoration: underline;" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="${t('cl.analyzeVariants')}">${displayName}</td>
                             <td style="padding: 12px; text-align: center; color: #555; font-weight: 600;">${d.variant_count}</td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-size: 0.9em;">(${changeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.9em;">(${placementText})</span></td>
@@ -768,9 +768,9 @@
                     </colgroup>
                     <thead>
                         <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <th style="padding: 8px 4px; text-align: left; font-weight: 600; font-size: 0.95em;">Deck</th>
-                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Count</th>
-                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">Avg. Placement</th>
+                            <th style="padding: 8px 4px; text-align: left; font-weight: 600; font-size: 0.95em;">${t('cl.thDeck')}</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">${t('cl.thCount')}</th>
+                            <th style="padding: 8px 4px; text-align: center; font-weight: 600; font-size: 0.95em;">${t('cl.thAvgPlacementShort')}</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -784,7 +784,7 @@
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;" title="Go to analysis of ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${escapeHtml(d.archetype)}</a></td>
+                            <td style="padding: 8px 4px; font-weight: bold; font-size: 0.85em; word-wrap: break-word; overflow-wrap: break-word;" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${escapeHtml(d.archetype)}</a></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_count} <span style="color: ${changeColor}; font-weight: bold; font-size: 0.8em;">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td style="padding: 8px 4px; text-align: center; font-size: 0.85em;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.8em;">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
                         </tr>`;
@@ -797,9 +797,9 @@
                 <table style="width: 100%; border-collapse: collapse; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                     <thead>
                         <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <th style="padding: 12px; text-align: left; font-weight: 600;">Archetype</th>
-                            <th style="padding: 12px; text-align: center; font-weight: 600;">Count</th>
-                            <th style="padding: 12px; text-align: center; font-weight: 600;">Avg. Placement</th>
+                            <th style="padding: 12px; text-align: left; font-weight: 600;">${t('cl.thArchetype')}</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thCount')}</th>
+                            <th style="padding: 12px; text-align: center; font-weight: 600;">${t('cl.thAvgPlacementShort')}</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -816,7 +816,7 @@
                     
                     tableHTML += `
                         <tr style="border-bottom: 1px solid #ecf0f1;" onmouseover="this.style.background='#f0f8ff'; this.style.cursor='pointer'" onmouseout="this.style.background=''">
-                            <td style="padding: 12px; font-weight: bold;" title="Go to analysis of ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${escapeHtml(d.archetype)}</a></td>
+                            <td style="padding: 12px; font-weight: bold;" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${escapeHtml(d.archetype)}</a></td>
                             <td style="padding: 12px; text-align: center;">${d.new_count} <span style="color: ${changeColor}; font-size: 0.9em;">(${changeText})</span></td>
                             <td style="padding: 12px; text-align: center;">${d.new_avg_placement} <span style="color: ${placementColor}; font-weight: bold; font-size: 0.9em;">(${placementText})</span></td>
                         </tr>`;
@@ -857,10 +857,10 @@
             
             // Update results info
             if (filtered.length === 0) {
-                resultsDiv.textContent = 'No results found';
+                resultsDiv.textContent = t('cl.noResults');
                 resultsDiv.style.color = '#e74c3c';
             } else {
-                resultsDiv.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} found`;
+                resultsDiv.textContent = `${filtered.length} ${t('cl.resultsFound')}`;
                 resultsDiv.style.color = '#27ae60';
             }
         }
@@ -993,16 +993,16 @@
             if (!select) return;
             
             // Clear and repopulate
-            select.innerHTML = '<option value="">-- Select a Deck --</option>';
+            select.innerHTML = '<option value="">' + t('cl.selectDeck') + '</option>';
             
             // Add top 10 meta decks
             if (top10.length > 0) {
                 const topGroup = document.createElement('optgroup');
-                topGroup.label = '🏆 Top 10 Meta Decks';
+                topGroup.label = t('cl.topMetaDecks');
                 top10.forEach(archetype => {
                     const option = document.createElement('option');
                     option.value = archetype.name;
-                    option.textContent = `${archetype.name} (${archetype.deckCount} Decks)`;
+                    option.textContent = `${archetype.name} (${archetype.deckCount} ${t('cl.decks')})`;
                     topGroup.appendChild(option);
                 });
                 select.appendChild(topGroup);
@@ -1011,11 +1011,11 @@
             // Add remaining decks alphabetically
             if (rest.length > 0) {
                 const restGroup = document.createElement('optgroup');
-                restGroup.label = '🎴 All Other Decks (A-Z)';
+                restGroup.label = t('cl.allOtherDecks');
                 rest.forEach(archetype => {
                     const option = document.createElement('option');
                     option.value = archetype.name;
-                    option.textContent = `${archetype.name} (${archetype.deckCount} Decks)`;
+                    option.textContent = `${archetype.name} (${archetype.deckCount} ${t('cl.decks')})`;
                     restGroup.appendChild(option);
                 });
                 select.appendChild(restGroup);
@@ -1040,11 +1040,11 @@
                 .sort((a, b) => a.main.localeCompare(b.main));
             if (combinedGroups.length > 0) {
                 const combinedOptGroup = document.createElement('optgroup');
-                combinedOptGroup.label = '🧩 Combined Archetypes (A–Z)';
+                combinedOptGroup.label = t('cl.combinedArchetypes');
                 combinedGroups.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = 'GROUP:' + g.variants.join('|');
-                    opt.textContent = `🧩 ${g.main.charAt(0).toUpperCase() + g.main.slice(1)} — All Variants (${g.totalDecks} Decks)`;
+                    opt.textContent = `🧩 ${g.main.charAt(0).toUpperCase() + g.main.slice(1)} — ${t('cl.allVariants')} (${g.totalDecks} ${t('cl.decks')})`;
                     combinedOptGroup.appendChild(opt);
                 });
                 select.appendChild(combinedOptGroup);
@@ -1230,16 +1230,16 @@
             const dateTo = document.getElementById('cityLeagueDateTo').value;
             
             if (dateFrom && dateTo) {
-                statusEl.textContent = `Filtered: ${formatDate(dateFrom)} to ${formatDate(dateTo)}`;
+                statusEl.textContent = `${t('cl.filteredRange')} ${formatDate(dateFrom)} to ${formatDate(dateTo)}`;
                 statusEl.style.color = 'rgba(255,255,255,1)';
             } else if (dateFrom) {
-                statusEl.textContent = `Filtered: From ${formatDate(dateFrom)}`;
+                statusEl.textContent = `${t('cl.filteredFrom')} ${formatDate(dateFrom)}`;
                 statusEl.style.color = 'rgba(255,255,255,1)';
             } else if (dateTo) {
-                statusEl.textContent = `Filtered: Until ${formatDate(dateTo)}`;
+                statusEl.textContent = `${t('cl.filteredUntil')} ${formatDate(dateTo)}`;
                 statusEl.style.color = 'rgba(255,255,255,1)';
             } else {
-                statusEl.textContent = 'Showing all tournaments';
+                statusEl.textContent = t('cl.showingAll');
                 statusEl.style.color = 'rgba(255,255,255,0.8)';
             }
         }
@@ -1747,8 +1747,8 @@
             document.getElementById('cityLeagueStatsSection').style.display = 'none';
             document.getElementById('cityLeagueDeckVisual').style.display = 'none';
             document.getElementById('cityLeagueDeckTableView').style.display = 'none';
-            document.getElementById('cityLeagueCardCount').textContent = '0 Cards';
-            document.getElementById('cityLeagueCardCountSummary').textContent = '/ 0 Total';
+            document.getElementById('cityLeagueCardCount').textContent = '0 ' + t('cl.cards');
+            document.getElementById('cityLeagueCardCountSummary').textContent = '/ 0 ' + t('cl.total');
             
             // Reset button text
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
@@ -1887,7 +1887,7 @@
         }
 
         function getEmptyStateHtml() {
-            return '<div class="empty-state"><h3>Keine Daten gefunden</h3><p>Für diese Filterkombination liegen aktuell keine Turnierdaten vor.</p></div>';
+            return '<div class="empty-state"><h3>' + t('cl.noDataFound') + '</h3><p>' + t('cl.noDataFoundDesc') + '</p></div>';
         }
 
         // Universal image URL resolver used across grids, analysis, and deckbuilder.
@@ -2181,23 +2181,23 @@
                             <div style="color: #333; font-size: 0.9em; margin-bottom: 10px; font-weight: 600;">${setCode} ${setNumber}</div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Usage Share:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">${t('cl.usageShare')}</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${percentage}%</span>
                                   </div>
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø avg. (used decks):</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">${t('cl.avgUsedDecks')}</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${avgCountInUsedDecks}x</span>
                                 </div>
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Ø avg. (all decks):</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">${t('cl.avgAllDecks')}</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${avgCountOverall}x</span>
                                 </div>
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Deck Count:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">${t('cl.deckCount')}</span>
                                     <span style="font-weight: 600; color: #333; margin-left: 5px; font-size: 0.95em;">${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)</span>
                                 </div>
                                 <div>
-                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">Max Count:</span>
+                                    <span style="color: #555; font-size: 0.85em; font-weight: 600;">${t('cl.maxCount')}</span>
                                     <span style="font-weight: 600; color: #dc3545; margin-left: 5px; font-size: 0.95em;">${maxCount}</span>
                                 </div>
                             </div>
@@ -2205,8 +2205,8 @@
                         
                         <!-- Add Button -->
                         <div style="flex-shrink: 0; display: flex; flex-direction: column; gap: 6px;">
-                            <button class="btn btn-success" style="padding: 10px 20px; font-size: 0.95em; white-space: nowrap;" onclick="addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="Add to deck">Add to Deck</button>
-                            <button class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9em; white-space: nowrap; background: #e74c3c; border-color: #c0392b;" onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" title="Add to proxy">Proxy</button>
+                            <button class="btn btn-success" style="padding: 10px 20px; font-size: 0.95em; white-space: nowrap;" onclick="addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">${t('cl.addToDeck')}</button>
+                            <button class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9em; white-space: nowrap; background: #e74c3c; border-color: #c0392b;" onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" title="${t('cl.proxyTooltip')}">${t('cl.proxy')}</button>
                         </div>
                     </div>
                 `;
@@ -2467,7 +2467,7 @@
                     });
                 }
                 const otherPrintSparkleHtml = otherPrintOwnedCount > 0
-                    ? `<div style="position:absolute;top:${deckCount > 0 ? '29px' : '7px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Andere Int. Prints in Sammlung: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));">✨</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
+                    ? `<div style="position:absolute;top:${deckCount > 0 ? '29px' : '7px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="${t('cl.otherPrints')} ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));">✨</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
                     : '';
                 
                 html += `
@@ -2505,14 +2505,14 @@
                                 <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
                                 <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 2px; margin-top: 4px;">
                                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
-                                        <button onclick="event.stopPropagation(); removeCardFromDeck('cityLeague', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Remove from deck">-</button>
-                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">★</button>
-                                        <button onclick="event.stopPropagation(); addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Add to deck">+</button>
+                                        <button onclick="event.stopPropagation(); removeCardFromDeck('cityLeague', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="${t('cl.removeFromDeck')}">-</button>
+                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="${t('cl.switchPrint')}">★</button>
+                                        <button onclick="event.stopPropagation(); addCardToDeck('cityLeague', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="${t('cl.addToDeckTooltip')}">+</button>
                                     </div>
                                     <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 2px;">
-                                        ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
-                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Add to proxy">P</button>
-                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                        ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}
+                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="${t('cl.proxyTooltip')}">P</button>
+                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;" title="${eurPrice ? t('cl.buyCardmarket') + ' ' + eurPrice : t('cl.priceNA')}">${priceDisplay}</button>
                                     </div>
                                 </div>
                             </div>
@@ -2567,7 +2567,7 @@
             // Update card count
             const countElement = document.getElementById('cityLeagueCardCount');
             if (countElement) {
-                countElement.textContent = `${visibleCount} Karten`;
+                countElement.textContent = `${visibleCount} ${t('cl.cards')}`;
             }
         }
         
@@ -2687,7 +2687,7 @@
             
             const cards = window.currentCityLeagueDeckCards;
             if (!cards || cards.length === 0) {
-                showToast('Please select a deck first!', 'warning');
+                showToast(t('cl.selectDeckFirst'), 'warning');
                 return;
             }
             
@@ -2720,7 +2720,7 @@
             
             // If no deck AND no archetype cards, show error
             if (!hasDeck && allCards.length === 0) {
-                showToast('No cards to copy! Please select an archetype first.', 'warning');
+                showToast(t('cl.noCopyCards'), 'warning');
                 return;
             }
             
@@ -2877,26 +2877,26 @@
             let output = '';
             
             if (pokemon.length > 0) {
-                output += `Pokémon: ${pokemonCount}\n`;
+                output += `${t('cl.pokemon')} ${pokemonCount}\n`;
                 output += pokemon.join('\n') + '\n\n';
             }
             
             if (trainer.length > 0) {
-                output += `Trainer: ${trainerCount}\n`;
+                output += `${t('cl.trainer')} ${trainerCount}\n`;
                 output += trainer.join('\n') + '\n\n';
             }
             
             if (energy.length > 0) {
-                output += `Energy: ${energyCount}\n`;
+                output += `${t('cl.energy')} ${energyCount}\n`;
                 output += energy.join('\n');
             }
             
             // Copy to clipboard
             navigator.clipboard.writeText(output).then(() => {
-                showToast('Deck copied to clipboard!', 'success');
+                showToast(t('cl.deckCopied'), 'success');
             }).catch(err => {
                 console.error('Error copying:', err);
-                showToast('Error copying to clipboard!', 'error');
+                showToast(t('cl.copyError'), 'error');
             });
         }
 
@@ -2912,7 +2912,7 @@
             }
             if (!data || data.length === 0) {
                 console.warn('No data to render');
-                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #444; font-weight: 500;">Please select a deck...</p>';
+                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #444; font-weight: 500;">' + t('cl.selectDeckPlaceholder') + '</p>';
                 return;
             }
 
@@ -2960,14 +2960,14 @@
                 let html = `<div style="margin-bottom: 30px;">`;
                 html += `<h3 style="margin: 20px 0 15px 0; color: #2c3e50; font-size: 1.3em; display: flex; align-items: center; gap: 10px;"><span>${tierEmoji}</span> ${tierTitle}</h3>`;
                 html += '<table><thead><tr>';
-                html += '<th class="col-image">Image</th>';
-                html += '<th>Cards in Deck</th>';
-                html += '<th>Card Name</th>';
-                html += '<th>Set</th>';
-                html += '<th>Number</th>';
-                html += '<th>% in Archetype</th>';
-                html += '<th>Ø Count (if used)</th>';
-                html += '<th>Action</th>';
+                html += `<th class="col-image">${t('cl.thImage')}</th>`;
+                html += `<th>${t('cl.thCardsInDeck')}</th>`;
+                html += `<th>${t('cl.thCardName')}</th>`;
+                html += `<th>${t('cl.thSet')}</th>`;
+                html += `<th>${t('cl.thNumber')}</th>`;
+                html += `<th>${t('cl.thPctArchetype')}</th>`;
+                html += `<th>${t('cl.thAvgCountUsed')}</th>`;
+                html += `<th>${t('cl.thAction')}</th>`;
                 html += '</tr></thead><tbody>';
 
                 tierCards.forEach(row => {
@@ -2999,7 +2999,7 @@
                     html += `<td>${setNumber}</td>`;
                     html += `<td><strong style="color: #667eea;">${percentage}%</strong></td>`;
                     html += `<td><strong style="color: #27ae60;">${avgCount}x</strong></td>`;
-                    html += `<td style="display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick="addCardToDeck('cityLeague', '${escapeJsStr(cardName)}')">+ Add</button><button class="btn" style="background:#e74c3c;color:white;" onclick="addCardToProxy('${escapeJsStr(cardName)}', '${setCode}', '${setNumber}', 1)">Proxy</button></td>`;
+                    html += `<td style="display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick="addCardToDeck('cityLeague', '${escapeJsStr(cardName)}')">${t('cl.addBtn')}</button><button class="btn" style="background:#e74c3c;color:white;" onclick="addCardToProxy('${escapeJsStr(cardName)}', '${setCode}', '${setNumber}', 1)">${t('cl.proxy')}</button></td>`;
                     html += '</tr>';
                 });
 
@@ -3009,13 +3009,13 @@
             
             // Render all FOUR tiers
             let html = '';
-            html += renderTier(coreCards, 'Core Cards (80% - 100%)', '🔥');
-            html += renderTier(aceSpecCards, 'Ace Spec (Max 1 per Deck)', '💎');
-            html += renderTier(techCards, 'Tech Cards (15% - 79%)', '🛠️');
-            html += renderTier(spicyCards, 'Spicy Techs (< 15%)', '🌶️');
+            html += renderTier(coreCards, t('cl.tierCore'), '🔥');
+            html += renderTier(aceSpecCards, t('cl.tierAceSpec'), '💎');
+            html += renderTier(techCards, t('cl.tierTech'), '🛠️');
+            html += renderTier(spicyCards, t('cl.tierSpicy'), '🌶️');
             
             if (html === '') {
-                html = '<p style="text-align: center; padding: 20px; color: #444;">No cards found</p>';
+                html = '<p style="text-align: center; padding: 20px; color: #444;">' + t('cl.noCardsFound') + '</p>';
             }
             
             tableContainer.innerHTML = html;
@@ -3123,10 +3123,10 @@
             const summaryEl = document.getElementById('cityLeagueCardCountSummary');
             
             if (countEl) {
-                countEl.textContent = `${uniqueCount} Cards`;
+                countEl.textContent = `${uniqueCount} ${t('cl.cards')}`;
             }
             if (summaryEl) {
-                summaryEl.textContent = `/ ${filteredTotal} Total`;
+                summaryEl.textContent = `/ ${filteredTotal} ${t('cl.total')}`;
             }
         }
         
@@ -3152,6 +3152,28 @@
 
             const countEl = document.getElementById('cityLeagueCardCount');
             if (countEl) {
-                countEl.textContent = `${visibleCount} Karten`;
+                countEl.textContent = `${visibleCount} ${t('cl.cards')}`;
             }
         }
+
+        // ── i18n: re-render on language change ──────────────────
+        document.addEventListener('languageChanged', () => {
+            if (window.cityLeagueLoaded) {
+                // Re-render the comparison tables if data is available
+                if (window.cityLeagueSortedData) {
+                    renderCityLeagueTable(window.cityLeagueSortedData);
+                }
+                // Re-populate the deck dropdown
+                if (typeof populateCityLeagueDeckSelect === 'function') {
+                    populateCityLeagueDeckSelect();
+                }
+                // Re-render analysis table if a deck is selected
+                if (window.currentCityLeagueDeckCards) {
+                    renderCityLeagueAnalysisTable(window.currentCityLeagueDeckCards);
+                }
+                // Re-render deck grid/table if visible
+                if (typeof refreshCityLeagueDeckDisplay === 'function') {
+                    refreshCityLeagueDeckDisplay();
+                }
+            }
+        });

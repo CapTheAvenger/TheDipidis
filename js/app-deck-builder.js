@@ -123,7 +123,7 @@
                 if (anyDeck > 0) return;
 
                 const ts = data.timestamp ? new Date(data.timestamp).toLocaleString() : '';
-                if (confirm('Ein ungespeichertes Deck wurde gefunden' + (ts ? ' (' + ts + ')' : '') + '.\nMöchtest du es wiederherstellen?')) {
+                if (confirm(t('deck.restorePrompt') + (ts ? ' (' + ts + ')' : '') + '\n' + t('deck.autoCompleteContinue'))) {
                     ['cityLeague', 'currentMeta', 'pastMeta'].forEach(src => {
                         const saved = data[src];
                         if (!saved || !saved.deck || Object.keys(saved.deck).length === 0) return;
@@ -142,7 +142,7 @@
                         }
                         if (typeof updateDeckDisplay === 'function') updateDeckDisplay(src);
                     });
-                    if (typeof showToast === 'function') showToast('Deck wiederhergestellt!', 'success');
+                    if (typeof showToast === 'function') showToast(t('deck.restored'), 'success');
                 } else {
                     localStorage.removeItem('autosave_deck');
                 }
@@ -348,7 +348,7 @@
             
             const currentTotal = Object.values(deck).reduce((sum, count) => sum + count, 0);
             if (currentTotal >= 70) {
-                showToast('Deck has reached maximum (70 cards)!', 'warning');
+                showToast(t('deck.maxReached'), 'warning');
                 return;
             }
             
@@ -372,30 +372,30 @@
             
             // Check if card already has 4 copies (only applies to non-energy, non-ace-spec cards)
             if (!isBaseEnergy && !isAceSpecCard && deck[deckKey] >= 4) {
-                showToast('Maximum 4 copies per card!', 'warning');
+                showToast(t('deck.maxCopies'), 'warning');
                 return;
             }
             
             // Ace Spec cards can only have 1 copy in deck
             if (isAceSpecCard && deck[deckKey] >= 1) {
-                showToast('Ace Spec cards may only be in deck once!', 'warning');
+                showToast(t('deck.aceSpecOnce'), 'warning');
                 return;
             }
             
             // DECK-WIDE Ace Spec limit: only 1 Ace Spec card total in entire deck
             if (isAceSpecCard && getTotalAceSpecCopiesInDeck(deck) >= 1) {
-                showToast('Only 1 Ace Spec card allowed per deck! Remove the existing one first.', 'warning');
+                showToast(t('deck.aceSpecLimit'), 'warning');
                 return;
             }
             
             // Radiant Pokémon: max 1 copy, and only 1 Radiant total in deck
             if (isRadiantPokemon(cardName)) {
                 if (deck[deckKey] >= 1) {
-                    showToast('Radiant Pokémon may only be in deck once!', 'warning');
+                    showToast(t('deck.radiantOnce'), 'warning');
                     return;
                 }
                 if (getTotalRadiantCopiesInDeck(deck) >= 1) {
-                    showToast('Only 1 Radiant Pokémon allowed per deck! Remove the existing one first.', 'warning');
+                    showToast(t('deck.radiantLimit'), 'warning');
                     return;
                 }
             }
@@ -526,7 +526,7 @@
         function clearDeck(source) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             
-            if (confirm('Do you really want to remove all cards from the deck?')) {
+            if (confirm(t('deck.clearConfirm'))) {
                 if (source === 'cityLeague') {
                     window.cityLeagueDeck = {};
                     window.cityLeagueDeckOrder = [];
@@ -616,7 +616,7 @@
                     countEl.parentElement.style.color = '';
                 }
             }
-            if (uniqueEl) uniqueEl.textContent = `(${unique} Unique)`;
+            if (uniqueEl) uniqueEl.textContent = `(${unique} ${t('deck.uniqueLabel')})`;
 
             // --- Price calculation ---
             let priceElId;
@@ -643,7 +643,7 @@
                         if (!isNaN(p)) { totalPrice += p * (parseInt(count) || 0); hasAnyPrice = true; }
                     }
                 }
-                priceEl.textContent = hasAnyPrice ? (isNaN(totalPrice) ? '0.00' : totalPrice.toFixed(2)) + ' \u20ac' : 'N/A';
+                priceEl.textContent = hasAnyPrice ? (isNaN(totalPrice) ? '0.00' : totalPrice.toFixed(2)) + ' \u20ac' : t('deck.priceNA');
             }
 
             // Add visual warning to deck container if over 60 cards
@@ -1005,7 +1005,7 @@
                 if (fallbackShareValue > 0 || fallbackAvgValue > 0) {
                     overlayText = `${fallbackShare}% | Ø ${fallbackAvg}x`;
                 } else if (isM3Special) {
-                    overlayText = 'M3 Japan Exclusive';
+                    overlayText = t('deck.m3Exclusive');
                 } else {
                     overlayText = `${fallbackShare}% | Ø ${fallbackAvg}x`;
                 }
@@ -1015,7 +1015,7 @@
                 const isOwned = window.userCollection && window.userCollection.has(cardId);
                 const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
                 const prob = getOpeningHandProbability(count, 60);
-                const probBadge = `<div class="start-hand-prob" title="Wahrscheinlichkeit auf der Starthand (7 Karten)">✋ ${prob}%</div>`;
+                const probBadge = `<div class="start-hand-prob" title="${t('deck.openHandProb')}">✋ ${prob}%</div>`;
                 
                 html += `
                     <div class="deck-card" style="position: relative;" title="${safeCardName} (${count}x) - ${percentage}%">
@@ -1037,9 +1037,9 @@
                                 <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">+</button>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 2px;">
-                                ${setCode && setNumber ? `<button onclick="openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 9px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center;" title="Open on Limitless">L</button>` : '<span></span>'}
-                                <button onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 9px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center;" title="Add to proxy">P</button>
-                                <button class="${priceClass}" onclick="openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 20px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4);" title="${eurPrice ? 'Auf Cardmarket kaufen: ' + eurPrice : 'Preis nicht verfuegbar'}">${priceDisplay}</button>
+                                ${setCode && setNumber ? `<button onclick="openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 9px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center;" title="${t('deck.openLimitless')}">L</button>` : '<span></span>'}
+                                <button onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 9px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center;" title="${t('deck.addToProxy')}">P</button>
+                                <button class="${priceClass}" onclick="openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 20px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4);" title="${eurPrice ? t('deck.buyCardmarket') + ' ' + eurPrice : t('deck.priceUnavailable')}">${priceDisplay}</button>
                             </div>
                         </div>
                     </div>
@@ -1048,7 +1048,7 @@
             
             const gridContainer = document.getElementById(gridContainerId);
             if (gridContainer) {
-                gridContainer.innerHTML = html || '<p style="text-align: center; color: #444; padding: 40px; font-weight: 500;">Create a deck using the buttons above or add cards manually...</p>';
+                gridContainer.innerHTML = html || '<p style="text-align: center; color: #444; padding: 40px; font-weight: 500;">' + t('deck.emptyPlaceholder') + '</p>';
             }
         }
         
@@ -1506,7 +1506,7 @@
                             </div>
                             
                             <!-- Add button -->
-                            <button class="btn btn-success" style="padding: 4px 8px; font-size: 0.75em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; margin-top: 8px; width: 100%;" onclick="addCardToDeck('cityLeague', '${escapeJsStr(card.card_name)}', '${card.set_code || ''}', '${card.set_number || ''}')" title="Add to deck">Add to Deck</button>
+                            <button class="btn btn-success" style="padding: 4px 8px; font-size: 0.75em; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; transition: all 0.2s; margin-top: 8px; width: 100%;" onclick="addCardToDeck('cityLeague', '${escapeJsStr(card.card_name)}', '${card.set_code || ''}', '${card.set_number || ''}')" title="${t('deck.addToDeck')}">${t('deck.addToDeck')}</button>
                         </div>
                     </div>
                 `;
@@ -1531,7 +1531,7 @@
             }
             
             if (!deck || Object.keys(deck).length === 0) {
-                showToast('Your deck is empty!', 'warning');
+                showToast(t('deck.empty'), 'warning');
                 return;
             }
             
@@ -1652,7 +1652,7 @@
                 copyPastMetaDeckOverview();
             } else {
                 devLog('[copyDeck] Unsupported source:', source);
-                showToast('This function is not available for this tab!', 'warning');
+                showToast(t('deck.notAvailable'), 'warning');
             }
         }
         
@@ -1834,7 +1834,7 @@
             }
             
             if (!cards || cards.length === 0) {
-                showToast('No cards to add!', 'warning');
+                showToast(t('deck.noCardsToAdd'), 'warning');
                 return;
             }
             
@@ -2079,7 +2079,7 @@
             devLog('[autoComplete] Total cards to add:', currentTotal, 'in', cardsToAdd.length, 'unique entries');
             
             // Show summary grouped by type
-            let summary = `Auto-Complete will add ${currentTotal} cards:\n\n`;
+            let summary = `${t('deck.autoCompleteHeader')} ${currentTotal} ${t('deck.cards')}:\n\n`;
             let pokemon = [], trainer = [], energy = [];
             
             cardsToAdd.forEach(card => {
@@ -2092,11 +2092,11 @@
                 else trainer.push(line);
             });
             
-            if (pokemon.length > 0) summary += `Pokémon:\n${pokemon.join('\n')}\n\n`;
-            if (trainer.length > 0) summary += `Trainer:\n${trainer.join('\n')}\n\n`;
-            if (energy.length > 0) summary += `Energy:\n${energy.join('\n')}`;
+            if (pokemon.length > 0) summary += `${t('deck.pokemon')}\n${pokemon.join('\n')}\n\n`;
+            if (trainer.length > 0) summary += `${t('deck.trainer')}\n${trainer.join('\n')}\n\n`;
+            if (energy.length > 0) summary += `${t('deck.energy')}\n${energy.join('\n')}`;
             
-            if (confirm(summary + '\n\nContinue?')) {
+            if (confirm(summary + '\n\n' + t('deck.autoCompleteContinue'))) {
                 // Add all cards to deck using PREFERRED versions (newest low-rarity)
                 cardsToAdd.forEach(card => {
                     // CRITICAL: Get preferred version for this card to match Grid View display
@@ -2199,7 +2199,7 @@
             }
             
             if (!cards || cards.length === 0) {
-                showToast('No cards to add!', 'warning');
+                showToast(t('deck.noCardsToAdd'), 'warning');
                 return;
             }
             
@@ -2473,12 +2473,12 @@
             });
 
             // Build confirm summary
-            let summary = `MAX CONSISTENCY Deck (${currentTotal} cards):\n`;
+            let summary = `MAX CONSISTENCY Deck (${currentTotal} ${t('deck.cards')}):\n`;
             summary += `Algorithm: ACE SPEC Priority -> Stage 1 (>=80%) -> Stage 2 (>=30%) -> Energy Fill\n\n`;
             cardsToAdd.forEach(c => {
                 summary += `${c.addCount}x ${c.card_name} (${c.sharePercent.toFixed(0)}% archetype)\n`;
             });
-            summary += `\nContinue?`;
+            summary += `\n${t('deck.autoCompleteContinue')}`;
 
             if (confirm(summary)) {
                 cardsToAdd.forEach(card => {
@@ -2514,9 +2514,9 @@
 
                 if (currentTotal >= 60) {
                     if (typeof showDeckShareToast === 'function') {
-                        showDeckShareToast('✅ Optimale Liste generiert! (Consistency-Build)');
+                        showDeckShareToast(t('deck.consistencySuccess'));
                     } else {
-                        showToast('Optimale Liste generiert! (Consistency-Build)', 'success');
+                        showToast(t('deck.consistencySuccess'), 'success');
                     }
                 }
             }

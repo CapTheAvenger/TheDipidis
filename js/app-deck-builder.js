@@ -1434,7 +1434,7 @@
                 const percentageStr = (card.percentage_in_archetype || '0').toString().replace(',', '.');
                 let percentage = parseFloat(percentageStr);
                 // FIX: Zuerst Durchschnitt berechnen, dann Max-Wert absichern
-                const totalCount = parseFloat(String(card.total_count || 0).replace(',', '.')) || 0;
+                // totalCount already declared above, do not redeclare here.
                 const decksWithCard = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0;
                 const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
                 const avgCountValue = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
@@ -1463,7 +1463,7 @@
                 }
                 
                 // Prefer "average in decks that use this card" for UI consistency.
-                const totalCount = parseFloat(String(card.total_count || 0).replace(',', '.')) || 0;
+                // totalCount already declared above, do not redeclare here.
                 const decksWithCard = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0;
                 const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
                 const avgCountValue = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0

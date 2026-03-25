@@ -1466,10 +1466,7 @@
                 // totalCount already declared above, do not redeclare here.
                 // decksWithCard already declared above, do not redeclare here.
                 // avgCountFromRow already declared above, do not redeclare here.
-                const avgCountValue = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
-                    ? avgCountFromRow
-                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
-                const avgCount = Math.max(0, avgCountValue).toFixed(2).replace('.', ',');
+                // ...existing code...
                 
                 // Card image or placeholder
                 let imgHtml = '';

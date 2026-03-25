@@ -8,7 +8,7 @@ Card Price Scraper - FULL EDITION (SeleniumBase UC Mode + IPRoyal)
 
 
 
-def _load_settings() -> dict:
+
 
 #!/usr/bin/env python3
 """

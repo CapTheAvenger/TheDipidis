@@ -1,9 +1,9 @@
 {
-  "delay_seconds": 0.1,
+  "delay_seconds": 3.0,
+  "max_workers": 2,
   "headless": false,
-  "max_workers": 4,
   "batch_size": 100,
   "skip_cards_with_prices": false,
   "only_update_sets": ["ASC", "PFL", "MEG"],
-  "_comment": "TURBO UPDATE - Nutzt IPRoyal Proxies mit 10 Workers"
+  "_comment": "FULL UPDATE - Nutzt echte Chrome Fenster (Selenium) + IPRoyal Proxies"
 }

@@ -2358,9 +2358,7 @@
                 const totalCount = safeParseFloat(card.total_count || 0);
                 const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
                 const avgCountFromRow = safeParseFloat(card.average_count || card.avg_count || '', NaN);
-                const avgCountInUsedValue = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
-                    ? avgCountFromRow
-                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
+                // avgCountInUsedValue is declared later in the statistics block, do not redeclare here.
                 const roundedAvgUsed = Math.round(avgCountInUsedValue);
                 const improvedMaxCount = Math.max(rawMaxCount, roundedAvgUsed);
                 const finalMaxCount = improvedMaxCount > 0
@@ -2398,6 +2396,7 @@
                 // Use global total decks count instead of per-date total_decks_in_archetype
                 const totalDecksInArchetype = safeParseFloat(window.currentCityLeagueTotalDecks || card.total_decks_in_archetype || 0);
                 // Get average count statistics
+
                 const avgCountOverallRaw = safeParseFloat(card.average_count_overall || '', NaN);
                 const avgCountInUsedRaw = safeParseFloat(card.average_count || card.avg_count || '', NaN);
 

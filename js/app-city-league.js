@@ -2410,9 +2410,7 @@
                     ? avgCountInUsedRaw
                     : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
 
-                const finalMaxCount = rawMaxCount > 0
-                    ? Math.min(legalMaxCopies, Math.max(1, rawMaxCount))
-                    : 0;
+                // finalMaxCount already declared above, do not redeclare here.
                 const finalAvgUsed = Math.min(legalMaxCopies, avgCountInUsedValue);
                 const finalAvgOverall = Math.min(legalMaxCopies, avgCountOverallValue);
                 const maxCount = finalMaxCount;

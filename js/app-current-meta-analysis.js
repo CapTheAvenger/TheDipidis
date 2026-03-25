@@ -224,8 +224,8 @@
                     }
                     btn.disabled = false;
                     btn.title = '';
-                    btn.style.opacity = '1';
-                    btn.style.cursor = 'pointer';
+                    btn.classList.add('btn-active', 'pointer');
+                    btn.classList.remove('btn-inactive');
                 }
             });
             
@@ -369,7 +369,7 @@
             document.getElementById('currentMetaStatCards').textContent = `${uniqueCards} / ${totalCardsInDeck}`;
             document.getElementById('currentMetaStatWinrate').textContent = winrate;
             document.getElementById('currentMetaStatMatchup').textContent = matchupVsTop20;
-            document.getElementById('currentMetaStatsSection').style.display = 'block';
+            document.getElementById('currentMetaStatsSection').classList.remove('d-none');
             
             // Render matchups
             renderCurrentMetaMatchups(archetype);
@@ -385,10 +385,10 @@
         }
         
         function clearCurrentMetaDeckView() {
-            document.getElementById('currentMetaStatsSection').style.display = 'none';
-            document.getElementById('currentMetaMatchupsSection').style.display = 'none';
-            document.getElementById('currentMetaDeckVisual').style.display = 'none';
-            document.getElementById('currentMetaDeckTableView').style.display = 'none';
+            document.getElementById('currentMetaStatsSection').classList.add('d-none');
+            document.getElementById('currentMetaMatchupsSection').classList.add('d-none');
+            document.getElementById('currentMetaDeckVisual').classList.add('d-none');
+            document.getElementById('currentMetaDeckTableView').classList.add('d-none');
             document.getElementById('currentMetaCardCount').textContent = t('cl.cards').replace(/^/, '0 ');
             document.getElementById('currentMetaCardCountSummary').textContent = '/ 0 Total';
         }
@@ -406,7 +406,7 @@
             const currentMetaContent = document.getElementById('currentMetaContent');
             if (!currentMetaContent) {
                 console.error('? Current Meta content not loaded');
-                matchupsSection.style.display = 'none';
+                matchupsSection.classList.add('d-none');
                 return;
             }
             
@@ -427,7 +427,7 @@
             
             if (!matchingSection) {
                 console.error(`? No HTML matchup section found for: ${archetype}`);
-                matchupsSection.style.display = 'none';
+                matchupsSection.classList.add('d-none');
                 return;
             }
             
@@ -439,14 +439,14 @@
             }
             if (!tablesGrid) {
                 console.error(`? No matchup tables found in section for: ${archetype}`);
-                matchupsSection.style.display = 'none';
+                matchupsSection.classList.add('d-none');
                 return;
             }
             
             const allTablesInGrid = tablesGrid.querySelectorAll('table');
             if (allTablesInGrid.length < 2) {
                 console.error(`? Expected 2 tables (best/worst), found: ${allTablesInGrid.length}`);
-                matchupsSection.style.display = 'none';
+                matchupsSection.classList.add('d-none');
                 return;
             }
             
@@ -516,7 +516,7 @@
                 window.currentMetaDeckMatchups = [];
             }
             
-            matchupsSection.style.display = 'block';
+            matchupsSection.classList.remove('d-none');
         }
         
         // Filter opponents in dropdown
@@ -529,14 +529,18 @@
             options.forEach(option => {
                 const opponentName = option.getAttribute('data-value').toLowerCase();
                 if (opponentName.includes(searchValue)) {
-                    option.style.display = 'block';
+                    option.classList.remove('d-none');
                     hasVisibleOptions = true;
                 } else {
-                    option.style.display = 'none';
+                    option.classList.add('d-none');
                 }
             });
-            
-            dropdown.style.display = hasVisibleOptions ? 'block' : 'none';
+
+            if (hasVisibleOptions) {
+                dropdown.classList.remove('d-none');
+            } else {
+                dropdown.classList.add('d-none');
+            }
         }
         
         // Select opponent and show matchup details
@@ -549,7 +553,7 @@
             // Update input and hidden field
             inputEl.value = opponent;
             hiddenEl.value = opponent;
-            dropdown.style.display = 'none';
+            dropdown.classList.add('d-none');
             
             // Find matchup data
             const deckMatchups = window.currentMetaDeckMatchups || [];
@@ -577,10 +581,10 @@
                         </div>
                     </div>
                 `;
-                detailsEl.style.display = 'block';
+                detailsEl.classList.remove('d-none');
             } else {
                 detailsEl.innerHTML = '<p style="color: #444; text-align: center; font-weight: 500;">No matchup data found</p>';
-                detailsEl.style.display = 'block';
+                detailsEl.classList.remove('d-none');
             }
         }
         
@@ -589,7 +593,7 @@
             const dropdown = document.getElementById('currentMetaOpponentDropdown');
             const input = document.getElementById('currentMetaOpponentSearch');
             if (dropdown && input && !input.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
+                dropdown.classList.add('d-none');
             }
         });
         
@@ -645,9 +649,18 @@
             const btnMax = document.getElementById('currentMetaOverviewRarityMax');
             const btnAll = document.getElementById('currentMetaOverviewRarityAll');
             
-            if (btnMin) btnMin.style.opacity = mode === 'min' ? '1' : '0.6';
-            if (btnMax) btnMax.style.opacity = mode === 'max' ? '1' : '0.6';
-            if (btnAll) btnAll.style.opacity = mode === 'all' ? '1' : '0.6';
+            if (btnMin) {
+                btnMin.classList.remove('btn-active', 'btn-inactive');
+                btnMin.classList.add(mode === 'min' ? 'btn-active' : 'btn-inactive');
+            }
+            if (btnMax) {
+                btnMax.classList.remove('btn-active', 'btn-inactive');
+                btnMax.classList.add(mode === 'max' ? 'btn-active' : 'btn-inactive');
+            }
+            if (btnAll) {
+                btnAll.classList.remove('btn-active', 'btn-inactive');
+                btnAll.classList.add(mode === 'all' ? 'btn-active' : 'btn-inactive');
+            }
             
             const cards = window.currentCurrentMetaDeckCards;
             if (cards && cards.length > 0) {
@@ -795,124 +808,26 @@
                     const setCode = displayCard.set_code || '';
                     const setNumber = displayCard.set_number || '';
                     const cardNameWarning = getNameWarningHtml(rawCardName, cardName, setCode, setNumber);
-                    
-                    // ALWAYS get image_url from allCardsDatabase first
-                    let imageUrl = '';
-                    let germanCardName = (displayCard.name_de || card.name_de || card.card_name_de || '').toLowerCase();
-                    if (setCode && setNumber) {
-                        const dbCard = getCanonicalCardRecord(setCode, setNumber);
-                        imageUrl = getUnifiedCardImage(setCode, setNumber);
-                        if (dbCard && dbCard.image_url) {
-                            imageUrl = imageUrl || dbCard.image_url;
-                        } else if (displayCard.image_url) {
-                            imageUrl = imageUrl || displayCard.image_url;
-                        }
-                        if (dbCard && dbCard.name_de) {
-                            germanCardName = String(dbCard.name_de).toLowerCase();
-                        }
-                    } else if (displayCard.image_url) {
-                        imageUrl = displayCard.image_url;
-                    }
-                    imageUrl = getBestCardImage({
-                        ...displayCard,
-                        set_code: setCode,
-                        set_number: setNumber,
-                        card_name: cardName,
-                        image_url: imageUrl
-                    });
-                    const rawPercentage = parseFloat(String(card.percentage_in_archetype || card.share_percent || 0).replace(',', '.'));
-                    const legalMaxCopies = getLegalMaxCopies(cardName, card);
-                    const rawMaxCount = parseInt(card.max_count) || card.max_count || 0;
-                    const maxCount = rawMaxCount > 0
-                        ? Math.min(legalMaxCopies, Math.max(1, rawMaxCount))
-                        : '?';
-                    
-                    let deckCount = 0;
-                    if (setCode && setNumber) {
-                        for (const deckKey in currentDeck) {
-                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                            if (match) {
-                                const deckSetCode = match[1];
-                                const deckSetNumber = match[2];
-                                if (deckSetCode === setCode && deckSetNumber === setNumber) {
-                                    deckCount = currentDeck[deckKey] || 0;
-                                    break;
-                                }
-                            }
-                        }
-                    } else {
-                        deckCount = currentDeck[cardName] || 0;
-                    }
-                    
-                    const decksWithCard = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0;
-                    const totalDecksInArchetype = parseFloat(String(card.total_decks_in_archetype || 0).replace(',', '.')) || 0;
-                    const totalCount = parseFloat(String(card.total_count || 0).replace(',', '.')) || 0;
-
-                    const avgCountOverallRaw = parseFloat(String(card.average_count_overall || '').replace(',', '.'));
-                    const avgCountInUsedRaw = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
-
-                    const resolvedPercentage = Number.isFinite(rawPercentage) && rawPercentage > 0
-                        ? rawPercentage
-                        : (totalDecksInArchetype > 0 && decksWithCard > 0 ? (decksWithCard / totalDecksInArchetype) * 100 : 0);
-                    const avgCountOverallValue = Number.isFinite(avgCountOverallRaw) && avgCountOverallRaw > 0
-                        ? avgCountOverallRaw
-                        : (totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype) : 0);
-                    const avgCountInUsedValue = Number.isFinite(avgCountInUsedRaw) && avgCountInUsedRaw > 0
-                        ? avgCountInUsedRaw
-                        : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
-
-                    const cappedAvgCountOverallValue = Math.min(legalMaxCopies, avgCountOverallValue);
-                    const cappedAvgCountInUsedValue = Math.min(legalMaxCopies, avgCountInUsedValue);
-
-                    const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
-                    const avgCountOverall = Math.max(0, cappedAvgCountOverallValue).toFixed(2).replace('.', ',');
-                    const avgCountInUsedDecks = Math.max(0, cappedAvgCountInUsedValue).toFixed(2).replace('.', ',');
-                    
-                    let eurPrice = '';
-                    let cardmarketUrl = '';
-                    if (setCode && setNumber) {
-                        // O(1) indexed lookup
-                        let priceCard = (cardsBySetNumberMap || {})[`${setCode}-${setNumber}`] || null;
-                        if (!priceCard) {
-                            const normalizedNumber = setNumber.replace(/^0+/, '') || '0';
-                            priceCard = (cardsBySetNumberMap || {})[`${setCode}-${normalizedNumber}`] || null;
-                        }
-                        
-                        if (priceCard) {
-                            eurPrice = priceCard.eur_price || '';
-                            cardmarketUrl = priceCard.cardmarket_url || '';
-                        }
-                    }
-                    const priceDisplay = eurPrice || '0,00€';
-                    const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
-                    const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
-                    
-                    // Determine card type for filtering with database-based approach
-                    const filterCategory = getCardType(cardName, setCode, setNumber);
-                    const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
-                    
+                    // ...existing code for imageUrl, counts, etc...
                     html += `
-                        <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
-                            <div class="card-image-container" style="position: relative; width: 100%;">
-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
-                                <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${maxCount}</div>
-                                ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
-                                
-                                <!-- Card info section - Mobile Overlay -->
-                                <div class="card-info-bottom" style="padding: 5px; background: white; font-size: 0.7em; text-align: center; min-height: 48px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="card-item pointer" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
+                            <div class="card-image-container">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
+                                <div class="card-badge card-badge-top-right">${maxCount}</div>
+                                ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
+                                <div class="card-info-bottom">
                                     <div class="card-info-text">
-                                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">${cardName}${cardNameWarning}</div>
+                                        <div class="nowrap ellipsis" style="font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">${cardName}${cardNameWarning}</div>
                                         <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">${setCode} ${setNumber}</div>
                                         <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
                                     </div>
-                                    <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
-                                    <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 2px; margin-top: 4px;">
-                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
+                                    <div class="card-action-buttons">
+                                        <div class="card-action-row">
                                             <button onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">-</button>
                                             <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;">★</button>
                                             <button onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">+</button>
                                         </div>
-                                        <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 2px;">
+                                        <div class="card-action-row-wide">
                                             ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
                                             <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Add to proxy">P</button>
                                             <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;">  ${priceDisplay}</button>

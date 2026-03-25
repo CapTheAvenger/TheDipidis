@@ -1,0 +1,13 @@
+/*
+ * Modular CSS for display toggles in city league stats and deck views
+ */
+
+.city-league-stats-section-hidden {
+    display: none !important;
+}
+.city-league-deck-table-view-hidden {
+    display: none !important;
+}
+.city-league-deck-visual-hidden {
+    display: none !important;
+}

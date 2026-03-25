@@ -1,0 +1,51 @@
+/*
+ * Modular CSS for Deck Building Full Guide block
+ * Extracted from inline styles in index.html
+ */
+
+.deck-building-guide-section {
+    margin-bottom: 40px;
+}
+.deck-building-guide-title {
+    color: #2c3e50;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.deck-building-guide-quickstart-title,
+.deck-building-guide-section h3 {
+    color: #555;
+}
+.deck-building-guide-quickstart-list {
+    line-height: 2;
+    font-size: 1.05em;
+}
+.deck-building-guide-algo-block {
+    background: #d1ecf1;
+    border-left: 4px solid #17a2b8;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+.deck-building-guide-algo-block p {
+    margin: 0 0 8px 0;
+}
+.deck-building-guide-algo-block ul {
+    line-height: 1.8;
+    margin: 0;
+}
+.deck-building-guide-rarity-block {
+    background: #ecf0f1;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+.deck-building-guide-rarity-block p {
+    margin: 5px 0;
+}
+.deck-building-guide-rarity-switcher-desc {
+    line-height: 1.8;
+}
+.deck-building-guide-rarity-switcher-list {
+    line-height: 1.9;
+}

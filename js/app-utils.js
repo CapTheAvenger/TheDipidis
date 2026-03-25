@@ -183,7 +183,7 @@
             }
             const title = escapeHtmlAttr(infoParts.join(' | '));
 
-            return `<span title="${title}" style="display: inline-flex; align-items: center; justify-content: center; margin-left: 4px; width: 12px; height: 12px; border-radius: 50%; background: #fff3cd; color: #8a6d3b; border: 1px solid #f0ad4e; font-size: 9px; line-height: 1; vertical-align: middle; cursor: help;">!</span>`;
+            return `<span title="${title}" class="name-warning-icon">!</span>`;
         }
 
         function getCanonicalDeckKey(cardName, setCode, setNumber) {
@@ -409,8 +409,14 @@
 
             const exactBtn = document.getElementById('avgModeExactBtn');
             const recommendedBtn = document.getElementById('avgModeRecommendedBtn');
-            if (exactBtn) exactBtn.style.opacity = averageDisplayMode === 'exact' ? '1' : '0.65';
-            if (recommendedBtn) recommendedBtn.style.opacity = averageDisplayMode === 'recommended' ? '1' : '0.65';
+            if (exactBtn) {
+                exactBtn.classList.toggle('btn-active', averageDisplayMode === 'exact');
+                exactBtn.classList.toggle('btn-inactive', averageDisplayMode !== 'exact');
+            }
+            if (recommendedBtn) {
+                recommendedBtn.classList.toggle('btn-active', averageDisplayMode === 'recommended');
+                recommendedBtn.classList.toggle('btn-inactive', averageDisplayMode !== 'recommended');
+            }
 
             if (window.currentCityLeagueDeckCards && window.currentCityLeagueDeckCards.length > 0) {
                 applyCityLeagueFilter();
@@ -433,11 +439,11 @@
 
             const wrap = document.createElement('div');
             wrap.id = 'avgModeToggleBar';
-            wrap.style.cssText = 'display:flex; gap:8px; justify-content:flex-end; align-items:center; margin-top:12px; flex-wrap:wrap;';
+            wrap.className = 'avg-mode-toggle-bar';
             wrap.innerHTML = `
-                <span style="font-size:0.82em; font-weight:700; color:#fef3c7; background:rgba(0,0,0,0.22); padding:4px 10px; border-radius:999px;">Average Anzeige</span>
-                <button id="avgModeExactBtn" type="button" class="btn-modern" onclick="setAverageDisplayMode('exact')" style="padding:6px 10px; font-size:0.82em;">Exakt (2,60)</button>
-                <button id="avgModeRecommendedBtn" type="button" class="btn-modern" onclick="setAverageDisplayMode('recommended')" style="padding:6px 10px; font-size:0.82em;">Empfohlen (3)</button>
+                <span class="avg-mode-label">Average Anzeige</span>
+                <button id="avgModeExactBtn" type="button" class="btn-modern avg-mode-btn" onclick="setAverageDisplayMode('exact')">Exakt (2,60)</button>
+                <button id="avgModeRecommendedBtn" type="button" class="btn-modern avg-mode-btn" onclick="setAverageDisplayMode('recommended')">Empfohlen (3)</button>
             `;
 
             host.appendChild(wrap);

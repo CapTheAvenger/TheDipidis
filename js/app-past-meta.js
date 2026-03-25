@@ -468,9 +468,9 @@
             
             if (!selectedArchetype) {
                 // Hide stats and cards
-                document.getElementById('pastMetaStatsSection').style.display = 'none';
-                document.getElementById('pastMetaDeckTableView').style.display = 'none';
-                document.getElementById('pastMetaDeckVisual').style.display = 'none';
+                document.getElementById('pastMetaStatsSection').classList.add('d-none');
+                document.getElementById('pastMetaDeckTableView').classList.add('d-none');
+                document.getElementById('pastMetaDeckVisual').classList.add('d-none');
                 pastMetaCurrentDeck = null;
                 pastMetaCurrentCards = [];
                 pastMetaCurrentScope = null;
@@ -561,7 +561,7 @@
             pastMetaCurrentCards = aggregatedCards;
             
             // Update stats
-            document.getElementById('pastMetaStatsSection').style.display = 'block';
+            document.getElementById('pastMetaStatsSection').classList.remove('d-none');
             const totalCards = getPastMetaSummaryTotalCount(aggregatedCards);
             document.getElementById('pastMetaStatCards').textContent = `${aggregatedCards.length} / ${Math.round(totalCards)}`;
             
@@ -601,8 +601,8 @@
         
         function renderPastMetaCards() {
             if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
-                document.getElementById('pastMetaDeckTableView').style.display = 'none';
-                document.getElementById('pastMetaDeckVisual').style.display = 'none';
+                document.getElementById('pastMetaDeckTableView').classList.add('d-none');
+                document.getElementById('pastMetaDeckVisual').classList.add('d-none');
                 document.getElementById('pastMetaCardCount').textContent = '0 Cards';
                 document.getElementById('pastMetaCardCountSummary').textContent = '/ 0 Total';
                 return;
@@ -634,8 +634,8 @@
         }
         
         function renderPastMetaTableView(cards) {
-            document.getElementById('pastMetaDeckTableView').style.display = 'block';
-            document.getElementById('pastMetaDeckVisual').style.display = 'none';
+            document.getElementById('pastMetaDeckTableView').classList.remove('d-none');
+            document.getElementById('pastMetaDeckVisual').classList.add('d-none');
             
             const tableContainer = document.getElementById('pastMetaDeckTable');
             
@@ -672,8 +672,8 @@
         
         function renderPastMetaGridView(cards) {
             devLog(`[Past Meta] renderPastMetaGridView called with ${cards.length} cards, rarity mode: ${pastMetaRarityMode}`);
-            document.getElementById('pastMetaDeckTableView').style.display = 'none';
-            document.getElementById('pastMetaDeckVisual').style.display = 'block';
+            document.getElementById('pastMetaDeckTableView').classList.add('d-none');
+            document.getElementById('pastMetaDeckVisual').classList.remove('d-none');
             
             const gridContainer = document.getElementById('pastMetaDeckGrid');
             
@@ -869,46 +869,32 @@
                     const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
                     
                     html += `
-                        <div class="card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
-                            <div class="card-image-container" style="position: relative; width: 100%;">
-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
-                                
+                        <div class="card-item card-item-shadow" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
+                            <div class="card-image-container pos-rel">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="card-img-std" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
                                 <!-- Red badge: Max Count (top-right) -->
-                                <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
-                                    ${maxCount}
-                                </div>
-                                
+                                <div class="card-badge card-badge-red pos-abs top-right">${maxCount}</div>
                                 <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
-                                ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.7em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
-                                
+                                ${deckCount > 0 ? `<div class="card-badge card-badge-green pos-abs top-left">${deckCount}</div>` : ''}
                                 <!-- Card info section -->
-                                <div class="card-info-bottom" style="padding: 5px; background: white; font-size: 0.7em; text-align: center; min-height: 48px; display: flex; flex-direction: column; justify-content: space-between;">
+                                <div class="card-info-bottom card-info-bottom-std">
                                     <div class="card-info-text">
-                                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">
-                                            ${cardName}${cardNameWarning}
-                                        </div>
-                                        <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">
-                                            ${setCode} ${setNumber}
-                                        </div>
-                                        <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">
-                                            ${percentage}% | Ø ${avgInUsingDecks}x (${avgCountOverallDisplay}x)
-                                        </div>
-                                        <div style="font-weight: 600; color: #333; font-size: 0.58em;">
-                                            ${deckCountByStatsDisplay} / ${decklistCountDisplay} Decks
-                                        </div>
+                                        <div class="card-info-name">${cardName}${cardNameWarning}</div>
+                                        <div class="card-info-set">${setCode} ${setNumber}</div>
+                                        <div class="card-info-meta">${percentage}% | Ø ${avgInUsingDecks}x (${avgCountOverallDisplay}x)</div>
+                                        <div class="card-info-decks">${deckCountByStatsDisplay} / ${decklistCountDisplay} Decks</div>
                                     </div>
-                                    
                                     <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
-                                    <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 2px; margin-top: 4px;">
-                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
-                                            <button onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Remove from deck">-</button>
-                                            <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Switch rarity/print">★</button>
-                                            <button onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;" title="Add to deck">+</button>
+                                    <div class="card-action-buttons card-action-buttons-col">
+                                        <div class="card-action-row">
+                                            <button onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" class="btn-red card-action-btn" title="Remove from deck">-</button>
+                                            <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="btn-yellow card-action-btn" title="Switch rarity/print">★</button>
+                                            <button onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="btn-green card-action-btn" title="Add to deck">+</button>
                                         </div>
-                                        <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 2px;">
-                                            ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
-                                            <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Add to proxy">P</button>
-                                            <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                        <div class="card-action-row card-action-row-wide">
+                                            ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" class="btn-purple card-action-btn btn-xs" title="Open on Limitless">L</button>` : '<span></span>'}
+                                            <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" class="btn-gradient-red card-action-btn btn-xs" title="Add to proxy">P</button>
+                                            <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" class="btn-gradient-orange card-action-btn btn-xs" style="background: ${priceBackground}; cursor: ${eurPrice ? 'pointer' : 'not-allowed'};" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -952,10 +938,10 @@
                 
                 // Show card only if it matches both filters
                 if (matchesSearch && matchesType) {
-                    card.style.display = '';
+                    card.classList.remove('d-none');
                     visibleCount++;
                 } else {
-                    card.style.display = 'none';
+                    card.classList.add('d-none');
                 }
             });
             
@@ -976,16 +962,16 @@
             const allBtn = document.getElementById('pastMetaRarityAll');
             
             if (minBtn) {
-                minBtn.style.opacity = mode === 'min' ? '1' : '0.5';
-                minBtn.style.fontWeight = mode === 'min' ? 'bold' : 'normal';
+                minBtn.classList.remove('btn-active', 'btn-inactive');
+                minBtn.classList.add(mode === 'min' ? 'btn-active' : 'btn-inactive');
             }
             if (maxBtn) {
-                maxBtn.style.opacity = mode === 'max' ? '1' : '0.5';
-                maxBtn.style.fontWeight = mode === 'max' ? 'bold' : 'normal';
+                maxBtn.classList.remove('btn-active', 'btn-inactive');
+                maxBtn.classList.add(mode === 'max' ? 'btn-active' : 'btn-inactive');
             }
             if (allBtn) {
-                allBtn.style.opacity = mode === 'all' ? '1' : '0.5';
-                allBtn.style.fontWeight = mode === 'all' ? 'bold' : 'normal';
+                allBtn.classList.remove('btn-active', 'btn-inactive');
+                allBtn.classList.add(mode === 'all' ? 'btn-active' : 'btn-inactive');
             }
             
             // Re-render

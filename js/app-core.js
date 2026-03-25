@@ -29,19 +29,19 @@ const BASE_PATH = './data/';
         function showInputModal(opts = {}) {
             return new Promise(resolve => {
                 const overlay = document.createElement('div');
-                overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);animation:helpModalIn .2s ease-out';
+                overlay.className = 'modal-overlay';
                 
                 const modal = document.createElement('div');
-                modal.style.cssText = 'background:#1a1a2e;border-radius:14px;max-width:460px;width:92%;padding:24px;box-shadow:0 16px 48px rgba(0,0,0,0.5);color:#eee;font-family:inherit';
+                modal.className = 'modal-dialog';
                 
                 const title = document.createElement('h3');
-                title.style.cssText = 'margin:0 0 12px;font-size:1.1em;color:#fff';
+                // Use .modal-dialog h3 for styling
                 title.textContent = opts.title || 'Input';
                 modal.appendChild(title);
 
                 if (opts.message) {
                     const msg = document.createElement('p');
-                    msg.style.cssText = 'margin:0 0 14px;font-size:0.9em;color:#bbb;white-space:pre-line;line-height:1.5';
+                    // Use .modal-dialog p for styling
                     msg.textContent = opts.message;
                     modal.appendChild(msg);
                 }
@@ -49,32 +49,35 @@ const BASE_PATH = './data/';
                 let input;
                 if (opts.textarea) {
                     input = document.createElement('textarea');
-                    input.style.cssText = 'width:100%;min-height:120px;padding:10px;border:1px solid #444;border-radius:8px;background:#16213e;color:#fff;font-size:0.95em;resize:vertical;box-sizing:border-box;font-family:monospace';
+                    // Use .modal-dialog textarea for styling
                 } else {
                     input = document.createElement('input');
                     input.type = opts.inputType || 'text';
-                    input.style.cssText = 'width:100%;padding:10px;border:1px solid #444;border-radius:8px;background:#16213e;color:#fff;font-size:0.95em;box-sizing:border-box';
+                    // Use .modal-dialog input for styling
                 }
                 if (opts.defaultValue != null) input.value = opts.defaultValue;
                 if (opts.placeholder) input.placeholder = opts.placeholder;
-                if (opts.readonly) { input.readOnly = true; input.style.cursor = 'text'; }
+                if (opts.readonly) {
+                    input.readOnly = true;
+                    input.classList.add('cursor-text');
+                }
                 modal.appendChild(input);
 
                 const btnRow = document.createElement('div');
-                btnRow.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;margin-top:16px';
+                btnRow.className = 'modal-btn-row';
 
                 const cancelBtn = document.createElement('button');
                 cancelBtn.textContent = t('modal.cancel');
-                cancelBtn.style.cssText = 'padding:8px 20px;border:1px solid #555;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;font-size:0.9em';
+                cancelBtn.className = 'modal-btn-cancel';
 
                 const okBtn = document.createElement('button');
                 okBtn.textContent = opts.readonly ? t('btn.close') : t('modal.ok');
-                okBtn.style.cssText = 'padding:8px 20px;border:none;border-radius:8px;background:#667eea;color:#fff;cursor:pointer;font-size:0.9em;font-weight:600';
+                okBtn.className = 'modal-btn-ok';
 
                 if (opts.readonly) {
                     const copyBtn = document.createElement('button');
                     copyBtn.textContent = t('modal.copy');
-                    copyBtn.style.cssText = 'padding:8px 20px;border:none;border-radius:8px;background:#28a745;color:#fff;cursor:pointer;font-size:0.9em;font-weight:600';
+                    copyBtn.className = 'modal-btn-copy';
                     copyBtn.onclick = () => { input.select(); navigator.clipboard.writeText(input.value).then(() => { copyBtn.textContent = t('modal.copied'); setTimeout(() => { copyBtn.textContent = t('modal.copy'); }, 1500); }); };
                     btnRow.appendChild(copyBtn);
                 }
@@ -555,14 +558,14 @@ const BASE_PATH = './data/';
             if (!toast) {
                 toast = document.createElement('div');
                 toast.id = 'proxyToast';
-                toast.style.cssText = 'position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 12px 16px; border-radius: 10px; font-weight: 700; box-shadow: 0 8px 22px rgba(0,0,0,0.25); z-index: 99999; opacity: 0; transition: opacity 0.25s; pointer-events: none; max-width: 380px;';
+                toast.className = 'proxy-toast active';
                 document.body.appendChild(toast);
             }
             toast.textContent = message;
-            toast.style.opacity = '1';
+            toast.classList.add('active');
             clearTimeout(toast._timeout);
             toast._timeout = setTimeout(() => {
-                toast.style.opacity = '0';
+                toast.classList.remove('active');
             }, 2200);
         }
 
@@ -625,7 +628,7 @@ const BASE_PATH = './data/';
 
             const queue = window.proxyQueue || [];
             if (queue.length === 0) {
-                list.innerHTML = '<div style="padding: 20px; text-align: center; color: #555; background: #fff; border: 2px dashed #d0d7de; border-radius: 10px;">' + t('proxy.queueEmpty') + '</div>';
+                list.innerHTML = '<div class="proxy-queue-empty">' + t('proxy.queueEmpty') + '</div>';
                 return;
             }
 
@@ -641,17 +644,17 @@ const BASE_PATH = './data/';
                 const jsNumber = escapeJsStr(item.number || '');
 
                 return `
-                    <div style="display: grid; grid-template-columns: 78px 1fr auto; gap: 12px; align-items: center; background: white; border: 1px solid #e1e8ed; border-radius: 10px; padding: 10px;">
-                        <img loading="lazy" src="${escapedImageUrl}" alt="${safeName}" style="width: 78px; height: 108px; object-fit: cover; border-radius: 6px; border: 1px solid #d0d7de;" onerror="this.src='${buildInlineCardPlaceholder('Proxy')}';">
-                        <div style="min-width: 0;">
-                            <div style="font-weight: 800; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeName}</div>
-                            <div style="font-size: 0.9em; color: #555; margin-top: 2px;">${displaySetNumber}</div>
+                    <div class="proxy-queue-card">
+                        <img loading="lazy" src="${escapedImageUrl}" alt="${safeName}" class="proxy-queue-card-img" onerror="this.src='${buildInlineCardPlaceholder('Proxy')}';">
+                        <div class="proxy-queue-card-info">
+                            <div class="proxy-queue-card-title">${safeName}</div>
+                            <div class="proxy-queue-card-print">${displaySetNumber}</div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 32px 44px 32px; gap: 4px; align-items: center;">
-                            <button onclick="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', ${parseProxyCount(item.count, 1) - 1})" style="height: 30px; border: none; border-radius: 6px; background: #dc3545; color: white; font-weight: bold; cursor: pointer;">-</button>
-                            <input type="number" min="1" value="${parseProxyCount(item.count, 1)}" onchange="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', this.value)" style="height: 30px; width: 44px; text-align: center; border: 1px solid #ccd6dd; border-radius: 6px; font-weight: 700;">
-                            <button onclick="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', ${parseProxyCount(item.count, 1) + 1})" style="height: 30px; border: none; border-radius: 6px; background: #28a745; color: white; font-weight: bold; cursor: pointer;">+</button>
-                            <button onclick="removeCardFromProxy('${jsName}', '${jsSet}', '${jsNumber}')" style="grid-column: 1 / span 3; height: 28px; border: none; border-radius: 6px; background: #6c757d; color: white; font-size: 0.8em; cursor: pointer;">${t('proxy.remove')}</button>
+                        <div class="proxy-queue-card-controls">
+                            <button class="btn-minus" onclick="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', ${parseProxyCount(item.count, 1) - 1})">-</button>
+                            <input type="number" min="1" value="${parseProxyCount(item.count, 1)}" onchange="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', this.value)">
+                            <button class="btn-plus" onclick="setProxyCardCount('${jsName}', '${jsSet}', '${jsNumber}', ${parseProxyCount(item.count, 1) + 1})">+</button>
+                            <button class="btn-remove" onclick="removeCardFromProxy('${jsName}', '${jsSet}', '${jsNumber}')">${t('proxy.remove')}</button>
                         </div>
                     </div>
                 `;

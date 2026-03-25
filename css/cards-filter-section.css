@@ -1,0 +1,75 @@
+/* Accessibility helper class for screen readers */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.cards-filter-search-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+.cards-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+.cards-filter-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.btn-reset-filters {
+    padding: 12px 24px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+}
+.cards-filter-sort label,
+.cards-filter-view-mode label {
+    font-weight: 600;
+    color: #555;
+}
+.cards-filter-sort select {
+    padding: 10px 15px;
+    border: 2px solid #3498db;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+}
+.cards-filter-view-mode button {
+    padding: 10px 20px;
+    border: 2px solid #9b59b6;
+    background: #9b59b6;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+.cards-filter-results-info {
+    flex: 1;
+    padding: 12px;
+    background: #ecf0f1;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 15px;
+}

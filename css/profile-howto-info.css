@@ -1,0 +1,41 @@
+/*
+ * Modular CSS for Profile and How to Use Info blocks
+ * Extracted from inline styles in index.html
+ */
+
+.profile-info-block {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    margin-bottom: 16px;
+}
+.profile-info-block .profile-info-title {
+    color: #3498db;
+    margin-top: 0;
+}
+
+.profile-info-block p,
+.profile-info-block ul {
+    line-height: 1.7;
+}
+
+.profile-info-block ul {
+    margin-bottom: 0;
+}
+
+.how-to-use-info-block {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #2ecc71;
+    margin-bottom: 16px;
+}
+.how-to-use-info-block .how-to-use-info-title {
+    color: #2ecc71;
+    margin-top: 0;
+}
+
+.how-to-use-info-block p {
+    line-height: 1.7;
+}

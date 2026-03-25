@@ -1,0 +1,43 @@
+/*
+ * Modular CSS for Tutorial Tab Info and Current Meta Info blocks
+ * Extracted from inline styles in index.html
+ */
+
+.tutorial-tab-info p,
+.tutorial-tab-info ul,
+.tutorial-tab-info ol {
+    line-height: 1.7;
+}
+
+.tutorial-tab-info ul,
+.tutorial-tab-info ol {
+    margin-bottom: 0;
+}
+
+.tutorial-tab-info-features-list {
+    line-height: 1.7;
+}
+
+.current-meta-info-block {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #9b59b6;
+    margin-bottom: 16px;
+}
+.current-meta-info-block .current-meta-info-title {
+    color: #9b59b6;
+    margin-top: 0;
+}
+
+.current-meta-deck-analysis-block {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #f39c12;
+    margin-bottom: 16px;
+}
+.current-meta-deck-analysis-block .current-meta-deck-analysis-title {
+    color: #f39c12;
+    margin-top: 0;
+}

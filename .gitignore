@@ -87,3 +87,16 @@ js/firebase-credentials.js
 
 # CardMarket scraper cache (optional - large files)
 # data/cardmarket_cache/
+
+# Problem files that OneDrive and Git stören
+*.lock
+*.cloud
+*.sync-conflict*
+.ipynb_checkpoints/
+node_modules/
+*.pyo
+*.pyd
+.env
+ENV/
+.mypy_cache/
+.pytest_cache/

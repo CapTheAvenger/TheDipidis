@@ -1,0 +1,67 @@
+/*
+ * Modular CSS for Current Meta Matchups block
+ * Extracted from inline styles in index.html
+ */
+
+.current-meta-matchups-table.best-matchups thead tr {
+    background: #d4edda;
+}
+.current-meta-matchups-table.best-matchups th {
+    background: #27ae60;
+    text-align: left;
+    padding: 12px 8px;
+    width: 50%;
+    vertical-align: middle;
+}
+.current-meta-matchups-table.best-matchups th[data-i18n="matchup.winRate"] {
+    text-align: center;
+    width: 25%;
+}
+.current-meta-matchups-table.best-matchups th[data-i18n="matchup.record"] {
+    text-align: right;
+    padding: 12px 15px;
+    width: 25%;
+}
+.current-meta-matchups-table.best-matchups td[colspan="3"] {
+    text-align: center;
+    padding: 20px;
+}
+
+.current-meta-matchups-table.worst-matchups thead tr {
+    background: #f8d7da;
+}
+.current-meta-matchups-table.worst-matchups th {
+    background: #e74c3c;
+    text-align: left;
+    padding: 12px 8px;
+    width: 50%;
+    vertical-align: middle;
+}
+.current-meta-matchups-table.worst-matchups th[data-i18n="matchup.winRate"] {
+    text-align: center;
+    width: 25%;
+}
+.current-meta-matchups-table.worst-matchups th[data-i18n="matchup.record"] {
+    text-align: right;
+    padding: 12px 15px;
+    width: 25%;
+}
+.current-meta-matchups-table.worst-matchups td[colspan="3"] {
+    text-align: center;
+    padding: 20px;
+}
+
+.current-meta-matchups-best-title {
+    color: #27ae60;
+}
+.current-meta-matchups-worst-title {
+    color: #e74c3c;
+}
+
+.current-meta-matchup-select-container {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    border: 2px solid #3498db;
+    margin-top: 20px;
+}

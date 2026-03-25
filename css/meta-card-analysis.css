@@ -1,0 +1,121 @@
+/*
+ * Modular CSS for Meta Card Analysis block (City League)
+ * Extracted from inline styles in index.html
+ */
+
+.meta-card-analysis-container {
+    margin-top: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    border: 2px solid #dee2e6;
+}
+
+.meta-card-analysis-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.meta-card-analysis-title {
+    margin: 0;
+}
+
+.meta-card-analysis-count {
+    font-size: 1em;
+    color: #333;
+    font-weight: 600;
+}
+
+.meta-card-analysis-filters-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.meta-card-analysis-share-filter,
+.meta-card-analysis-type-filter {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.meta-card-analysis-share-btn,
+.meta-card-analysis-type-btn {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.6;
+    transition: background 0.2s, opacity 0.2s;
+}
+.meta-card-analysis-share-btn.active,
+.meta-card-analysis-type-btn.active {
+    opacity: 1;
+}
+
+#cityLeagueMetaShare90 { background: #28a745; }
+#cityLeagueMetaShare70 { background: #ffc107; color: #333; }
+#cityLeagueMetaShare50 { background: #17a2b8; }
+#cityLeagueMetaTypeTrainer { background: #28a745; }
+#cityLeagueMetaTypePokemon { background: #ffc107; color: #333; }
+#cityLeagueMetaTypeEnergy { background: #20c997; }
+
+.meta-card-analysis-sort-filter {
+    display: flex;
+    gap: 5px;
+}
+
+.meta-card-analysis-sort-btn {
+    padding: 8px 14px;
+    font-size: 0.9em;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.7;
+    transition: background 0.2s, opacity 0.2s;
+}
+.meta-card-analysis-sort-btn.active {
+    opacity: 1;
+}
+#cityLeagueMetaGrid.meta-card-analysis-grid {
+    /* Additional grid styles if needed */
+}
+
+.meta-card-analysis-search {
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 500px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1em;
+}
+
+.meta-card-analysis-empty {
+    text-align: center;
+    color: #666;
+    padding: 40px;
+    grid-column: 1 / -1;
+}
+
+.meta-card-analysis-btn-row {
+    margin-top: 15px;
+    text-align: center;
+}

@@ -1,0 +1,24 @@
+/*
+ * Modular CSS for Support Section (footer call-to-action)
+ * Extracted from inline styles in index.html
+ */
+
+.support-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+}
+.support-title {
+    color: white;
+    margin-top: 0;
+}
+.support-desc-main {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+.support-desc-secondary {
+    font-size: 0.95em;
+    opacity: 0.9;
+}

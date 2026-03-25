@@ -583,32 +583,32 @@
                                  (currentDeck && currentDeck[card.card_name]) ? currentDeck[card.card_name] : 0;
                 
                 return `
-                    <div class="card-item" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; background: white;">
-                        <div class="card-image-container" style="position: relative; width: 100%;">
-                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}', '${fallbackUrl}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
+                    <div class="card-item">
+                        <div class="card-image-container">
+                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-image" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}', '${fallbackUrl}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
                                  onmouseover="showMetaCardTooltip(event, '${cardNameEscaped}', '${archetypesJson}')" 
                                  onmouseout="hideMetaCardTooltip()">
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
-                            ${deckCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">${deckCount}</div>` : ''}
-                            
+                            ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
+
                             <!-- Card info section -->
-                            <div class="card-info-bottom" style="padding: 6px; background: white; font-size: 0.75em; text-align: center;">
-                                <div class="card-info-text" style="margin-bottom: 6px;">
-                                    <div style="font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${card.card_name}</div>
-                                    ${card.metaShare > 0 ? `<div style="color: #ffd700; font-weight: 600; margin-bottom: 1px;">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div><div style="color: #555; font-size: 0.9em; font-weight: 500;">(${Math.round(card.avgCountWhenUsed)}x when used)</div>` : ''}
+                            <div class="card-info-bottom card-info-bottom-meta">
+                                <div class="card-info-text mb-6">
+                                    <div class="fw-bold mb-2 nowrap ellipsis">${card.card_name}</div>
+                                    ${card.metaShare > 0 ? `<div class="color-yellow fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div><div class="color-grey fs-09 fw-500">(${Math.round(card.avgCountWhenUsed)}x when used)</div>` : ''}
                                 </div>
                                 
                                 <!-- Card Actions: Row 1 = - ★ + | Row 2 = L (full-width) -->
                                 <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 3px;">
-                                    <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 3px;">
-                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'" title="Remove from deck">-</button>
-                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${card.set_code} ${card.set_number})')" style="background: #ffc107; color: #333; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#e0a800'" onmouseout="this.style.background='#ffc107'" title="Switch rarity/print">★</button>
-                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" style="background: #28a745; color: white; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'" title="Add to deck">+</button>
+                                    <div class="card-action-row">
+                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" class="btn btn-danger card-action-btn card-action-remove" title="Remove from deck">-</button>
+                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${card.set_code} ${card.set_number})')" class="btn btn-warning card-action-btn card-action-rarity" title="Switch rarity/print">★</button>
+                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" class="btn btn-success card-action-btn card-action-add" title="Add to deck">+</button>
                                     </div>
-                                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 3px;">
-                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${card.set_code}', '${card.set_number}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-weight: bold; font-size: 11px; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e74c3c'" title="Add to proxy">Proxy</button>
-                                        <button onclick="event.stopPropagation(); openLimitlessCard('${card.set_code}', '${card.set_number}')" style="background: #6c3dc5; color: white; border: none; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-weight: bold; font-size: 11px; width: 100%; transition: all 0.2s;" onmouseover="this.style.background='#5a32a3'" onmouseout="this.style.background='#6c3dc5'" title="Open on Limitless (${card.set_code} ${card.set_number})">Limitless — ${card.set_code} ${card.set_number}</button>
+                                    <div class="card-action-row-wide">
+                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${card.set_code}', '${card.set_number}', 1)" class="btn btn-danger card-action-btn card-action-proxy" title="Add to proxy">Proxy</button>
+                                        <button onclick="event.stopPropagation(); openLimitlessCard('${card.set_code}', '${card.set_number}')" class="btn btn-purple card-action-btn card-action-limitless" title="Open on Limitless (${card.set_code} ${card.set_number})">Limitless — ${card.set_code} ${card.set_number}</button>
                                     </div>
                                 </div>
                             </div>
@@ -627,8 +627,8 @@
                 const btn = document.getElementById(prefix + t);
                 if (btn) {
                     const isActive = (t === 'All' && threshold === 'all') || (t === String(threshold));
-                    btn.style.opacity = isActive ? '1' : '0.6';
-                    btn.style.fontWeight = isActive ? 'bold' : 'normal';
+                    btn.classList.remove('btn-active', 'btn-inactive');
+                    btn.classList.add(isActive ? 'btn-active' : 'btn-inactive');
                 }
             });
             
@@ -644,8 +644,8 @@
                 const btn = document.getElementById(prefix + t);
                 if (btn) {
                     const isActive = (t.toLowerCase() === type.toLowerCase());
-                    btn.style.opacity = isActive ? '1' : '0.6';
-                    btn.style.fontWeight = isActive ? 'bold' : 'normal';
+                    btn.classList.remove('btn-active', 'btn-inactive');
+                    btn.classList.add(isActive ? 'btn-active' : 'btn-inactive');
                 }
             });
             
@@ -659,8 +659,8 @@
             const buttons = document.querySelectorAll(`button[onclick*="sortMetaCards('${source}'"]`);
             buttons.forEach(btn => {
                 const isActive = btn.getAttribute('onclick').includes(`'${sortBy}'`);
-                btn.style.fontWeight = isActive ? 'bold' : 'normal';
-                btn.style.opacity = isActive ? '1' : '0.7';
+                btn.classList.remove('btn-active', 'btn-inactive');
+                btn.classList.add(isActive ? 'btn-active' : 'btn-inactive');
             });
             
             renderMetaCards(source);
@@ -686,19 +686,7 @@
             if (!metaCardTooltip) {
                 metaCardTooltip = document.createElement('div');
                 metaCardTooltip.id = 'metaCardTooltip';
-                metaCardTooltip.style.cssText = `
-                    position: fixed;
-                    background: rgba(0, 0, 0, 0.95);
-                    color: white;
-                    padding: 12px 16px;
-                    border-radius: 8px;
-                    font-size: 0.85em;
-                    z-index: 10000;
-                    pointer-events: none;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                    max-width: 300px;
-                    border: 1px solid rgba(255,255,255,0.2);
-                `;
+                metaCardTooltip.className = 'meta-card-tooltip';
                 document.body.appendChild(metaCardTooltip);
             }
             
@@ -707,14 +695,15 @@
             const archetypeItems = archetypes
                 .sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage))
                 .map(a => `
-                    <div style="padding: 4px 0; display: flex; justify-content: space-between; gap: 15px;">
-                        <span style="color: #ddd;">${escapeHtml(a.name)}</span>
-                        <span style="color: #ffd700; font-weight: bold;">${escapeHtml(a.percentage)}%</span>
+                    <div class="meta-card-tooltip-archetype-row">
+                        <span class="meta-card-tooltip-archetype-name">${escapeHtml(a.name)}</span>
+                        <span class="meta-card-tooltip-archetype-pct">${escapeHtml(a.percentage)}%</span>
                     </div>
                 `).join('');
             
             metaCardTooltip.innerHTML = title + '<div style="font-size: 0.9em; color: #aaa; margin-bottom: 6px;">Used in archetypes:</div>' + archetypeItems;
-            metaCardTooltip.style.display = 'block';
+                        metaCardTooltip.innerHTML = `<div class="meta-card-tooltip-title">${escapeHtml(cardName)}</div><div class="meta-card-tooltip-desc">Used in archetypes:</div>${archetypeItems}`;
+            metaCardTooltip.classList.remove('d-none');
             
             // Position tooltip near mouse
             const x = event.clientX + 15;
@@ -726,7 +715,7 @@
         
         function hideMetaCardTooltip() {
             if (metaCardTooltip) {
-                metaCardTooltip.style.display = 'none';
+                metaCardTooltip.classList.add('d-none');
             }
         }
         
@@ -809,7 +798,7 @@
             const cardsToRender = uniqueNames.slice(0, MAX_RENDER);
 
             // 3. Generate HTML only for capped list
-            let htmlString = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px;">';
+            let htmlString = '<div class="meta-card-list-grid">';
 
             cardsToRender.forEach(cardName => {
                 const cardNameEscaped = escapeJsStr(cardName);
@@ -829,15 +818,15 @@
                 const imageUrl = firstVersion ? getUnifiedCardImage(firstVersion.set, firstVersion.number) : '';
                 
                 htmlString += `
-                    <div onclick="selectCardName('${cardNameEscaped}', '${source}')" style="background: white; padding: 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; border-left: 2px solid #667eea; display: flex; gap: 8px; align-items: center;" onmouseover="this.style.background='#f9f9f9'; this.style.transform='translateX(3px)';" onmouseout="this.style.background='white'; this.style.transform='translateX(0)';">
-                        <div style="width: 40px; height: 50px; background: #f5f5f5; border-radius: 3px; overflow: hidden; flex-shrink: 0;">
-                            <img src="${imageUrl}" alt="${cardName}" style="width: 100%; height: 100%; object-fit: contain; cursor: zoom-in;" onerror="handleCardImageError(this, '${firstVersion ? firstVersion.set : ''}', '${firstVersion ? firstVersion.number : ''}')" loading="lazy">
+                    <div onclick="selectCardName('${cardNameEscaped}', '${source}')" class="meta-card-list-item">
+                        <div class="meta-card-list-thumb">
+                            <img src="${imageUrl}" alt="${cardName}" class="meta-card-list-img" onerror="handleCardImageError(this, '${firstVersion ? firstVersion.set : ''}', '${firstVersion ? firstVersion.number : ''}')" loading="lazy">
                         </div>
-                        <div style="flex: 1; min-width: 0;">
-                            <div style="font-weight: 600; color: #333; font-size: 0.9em; line-height: 1.2; white-space: normal; word-break: break-word;">${cardName}</div>
-                            <div style="font-size: 0.75em; color: #444; font-weight: 500;">${versionsCount} Version${versionsCount > 1 ? 'en' : ''}</div>
+                        <div class="meta-card-list-info">
+                            <div class="meta-card-list-name">${cardName}</div>
+                            <div class="meta-card-list-versions">${versionsCount} Version${versionsCount > 1 ? 'en' : ''}</div>
                         </div>
-                        ${currentCount > 0 ? `<div style="background: #28a745; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.75em; font-weight: bold; flex-shrink: 0;">${currentCount}x</div>` : ''}
+                        ${currentCount > 0 ? `<div class="meta-card-list-badge">${currentCount}x</div>` : ''}
                     </div>
                 `;
             });
@@ -885,12 +874,12 @@
                 }
             }
             
-            let html = '<div style="grid-column: 1 / -1; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 10px;">';
-            html += `<div style="display: flex; justify-content: space-between; align-items: center;">`;
-            html += `<div style="font-weight: bold; color: #333;">${cardName}</div>`;
-            html += `<button onclick="window.selectedCardName=null; searchDeckCards('${source}');" style="background: #6c757d; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.85em;">← Back</button>`;
+            let html = '<div class="meta-card-detail-panel">';
+            html += `<div class="meta-card-detail-row">`;
+            html += `<div class="meta-card-detail-title">${cardName}</div>`;
+            html += `<button onclick="window.selectedCardName=null; searchDeckCards('${source}');" class="btn btn-secondary meta-card-detail-back">← Back</button>`;
             html += '</div>';
-            html += `<div style="font-size: 0.85em; color: #333; margin-top: 8px; font-weight: 600;">${versions.length} Versionen | ${totalCount}x im Deck</div>`;
+            html += `<div class="meta-card-detail-info">${versions.length} Versionen | ${totalCount}x im Deck</div>`;
             html += '</div>';
             
             // Add card versions directly - they will be grid items in the parent grid
@@ -916,18 +905,18 @@
                 const cardNameEscaped = escapeJsStr(cardName);
                 
                 html += `
-                    <div style="position: relative; text-align: center; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.25)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.15)';">
-                        <div style="position: relative; cursor: zoom-in; background: #f5f5f5;" onclick="showSingleCard(this.querySelector('img').src, '${cardNameEscaped} (${setCode} ${setNumber})')">
-                            <img src="${imageUrl}" alt="${cardName}" style="width: 100%; height: 160px; object-fit: contain;" onerror="handleCardImageError(this, '${setCode}', '${setNumber}'); this.nextElementSibling.style.display='flex';" loading="lazy">
-                            <div style="display: none; width: 100%; height: 160px; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; flex-direction: column; padding: 8px;">
-                                <div style="font-size: 2em; margin-bottom: 5px;">??</div>
-                                <div style="font-size: 0.7em; text-align: center;">${setCode}<br>${setNumber}</div>
+                    <div class="meta-card-list-item" onmouseover="this.classList.add('meta-card-list-item-hover')" onmouseout="this.classList.remove('meta-card-list-item-hover')">
+                        <div class="meta-card-list-thumb pointer bg-grey" onclick="showSingleCard(this.querySelector('img').src, '${cardNameEscaped} (${setCode} ${setNumber})')">
+                            <img src="${imageUrl}" alt="${cardName}" class="meta-card-list-img" onerror="handleCardImageError(this, '${setCode}', '${setNumber}'); this.nextElementSibling.classList.remove('d-none');" loading="lazy">
+                            <div class="meta-card-list-img-fallback d-none d-flex align-center justify-center color-white bg-blue-dark flex-col p-8" style="height:160px;">
+                                <div class="fs-2em mb-5">??</div>
+                                <div class="fs-07em ta-center">${setCode}<br>${setNumber}</div>
                             </div>
                         </div>
-                        ${versionCount > 0 ? `<div style="position: absolute; top: 4px; left: 4px; background: #28a745; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75em; font-weight: bold; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${versionCount}</div>` : ''}
-                        <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="position: absolute; top: 4px; right: 4px; background: #28a745; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 10; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.1)'; this.style.background='#218838';" onmouseout="this.style.transform='scale(1)'; this.style.background='#28a745';" title="Add to Deck">+</button>
-                        <div style="padding: 8px; background: white; border-top: 1px solid #f0f0f0;">
-                            <div style="font-size: 0.7em; color: #333; font-weight: 600;">${setCode} ${setNumber}</div>
+                        ${versionCount > 0 ? `<div class="card-badge card-badge-top-left">${versionCount}</div>` : ''}
+                        <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="card-badge card-badge-top-right pointer" title="Add to Deck">+</button>
+                        <div class="card-info-bottom">
+                            <div class="fs-11 color-grey fw-700">${setCode} ${setNumber}</div>
                         </div>
                     </div>
                 `;
@@ -969,10 +958,10 @@
             const toggle = document.getElementById('currentCardsToggle');
             if (content && toggle) {
                 if (content.style.display === 'none') {
-                    content.style.display = 'block';
+                    content.classList.remove('d-none');
                     toggle.classList.remove('collapsed');
                 } else {
-                    content.style.display = 'none';
+                    content.classList.add('d-none');
                     toggle.classList.add('collapsed');
                 }
             }
@@ -983,10 +972,10 @@
             const toggle = document.getElementById('pastCardsToggle');
             if (content && toggle) {
                 if (content.style.display === 'none') {
-                    content.style.display = 'block';
+                    content.classList.remove('d-none');
                     toggle.classList.remove('collapsed');
                 } else {
-                    content.style.display = 'none';
+                    content.classList.add('d-none');
                     toggle.classList.add('collapsed');
                 }
             }
@@ -1097,10 +1086,7 @@
                             const hasMatchupTables = grid.querySelectorAll('table').length >= 2;
                             if (hasMatchupTables) {
                                 // Remove inline grid style, let CSS take over
-                                grid.style.display = '';
-                                grid.style.gridTemplateColumns = '';
-                                grid.style.gap = '';
-                                // Add the CSS class instead
+                                grid.classList.add('meta-card-list-grid');
                                 grid.classList.add('matchups-grid-container');
                                 devLog('? Removed inline grid styles from matchup container');
                             }
@@ -1153,28 +1139,22 @@
                 const tables = grid.querySelectorAll('table');
                 tables.forEach(table => {
                     // Ensure table fills its container with fixed layout
-                    table.style.width = '100%';
-                    table.style.tableLayout = 'fixed';
-                    table.style.borderCollapse = 'collapse';
+                    table.classList.add('meta-matchup-table');
 
                     // Set column widths via the header row (table-layout:fixed uses first row)
                     const firstRow = table.querySelector('tr');
                     if (firstRow) {
                         const ths = firstRow.querySelectorAll('th');
                         if (ths.length === 3) {
-                            ths[0].style.width = '55%'; // Opponent name
-                            ths[1].style.width = '20%'; // Win Rate
-                            ths[2].style.width = '25%'; // Record
+                            ths[0].classList.add('meta-matchup-th-opponent');
+                            ths[1].classList.add('meta-matchup-th-winrate');
+                            ths[2].classList.add('meta-matchup-th-record');
                         }
                     }
 
                     // Allow opponent name cells to wrap (not truncate)
                     table.querySelectorAll('tr td:first-child').forEach(td => {
-                        td.style.whiteSpace = 'normal';
-                        td.style.wordWrap = 'break-word';
-                        td.style.overflowWrap = 'break-word';
-                        td.style.overflow = 'visible';
-                        td.style.maxWidth = 'none';
+                        td.classList.add('meta-matchup-td-opponent');
                     });
                 });
             });

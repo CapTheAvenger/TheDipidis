@@ -70,15 +70,15 @@
                 const normalizedSearchY = rawSearchY.replace(/['’\s-]/g, '');
                 const normalizedSearchX = rawSearchX.replace(/['’\s-]/g, '');
                 const searchControlsHtml = `
-                    <div id="heatmapSearchWrapper" style="margin: 0 0 15px 0;">
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
-                            <label style="display: flex; flex-direction: column; gap: 4px; color: #2c3e50; font-size: 0.85rem; font-weight: 700; min-width: 240px; flex: 1;">
+                    <div id="heatmapSearchWrapper" class="heatmap-search-wrapper">
+                        <div class="heatmap-search-row">
+                            <label class="heatmap-search-label">
                                 ${t('heatmap.yLabel')}
-                                <input type="text" id="heatmapSearchY" value="${escapeAttr(rawSearchY)}" placeholder="${t('heatmap.placeholderY')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                <input type="text" id="heatmapSearchY" value="${escapeAttr(rawSearchY)}" placeholder="${t('heatmap.placeholderY')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" class="heatmap-search-input">
                             </label>
-                            <label style="display: flex; flex-direction: column; gap: 4px; color: #2c3e50; font-size: 0.85rem; font-weight: 700; min-width: 240px; flex: 1;">
+                            <label class="heatmap-search-label">
                                 ${t('heatmap.xLabel')}
-                                <input type="text" id="heatmapSearchX" value="${escapeAttr(rawSearchX)}" placeholder="${t('heatmap.placeholderX')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" style="padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 0.95rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                <input type="text" id="heatmapSearchX" value="${escapeAttr(rawSearchX)}" placeholder="${t('heatmap.placeholderX')}" oninput="if(typeof debouncedRenderHeatmap === 'function') debouncedRenderHeatmap();" class="heatmap-search-input">
                             </label>
                         </div>
                     </div>
@@ -148,12 +148,10 @@
                         emptyReason = `${t('heatmap.noDecksX')} '${safeSearchDisplayX}'.`;
                     }
                     const emptyHtml = `
-                        <div id="matchupHeatmapContainer" class="matchup-heatmap-container" style="margin: 30px 0; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                            <h2 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 1.5em; display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 1.2em;">🔥</span> ${t('heatmap.title')}
-                            </h2>
+                        <div id="matchupHeatmapContainer" class="matchup-heatmap-container heatmap-container-std">
+                            <h2 class="heatmap-title heatmap-title-std"><span class="heatmap-title-icon">🔥</span> ${t('heatmap.title')}</h2>
                             ${searchControlsHtml}
-                            <p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">${emptyReason}</p>
+                            <p class="heatmap-empty-reason">${emptyReason}</p>
                         </div>
                     `;
 
@@ -172,24 +170,24 @@
                 devLog(`🔥 Heatmap-Decks: X-Achse=${xDecks.length}, Y-Achse=${yDecks.length}`);
                 
                 // 3. HTML GENERIEREN
-                let tableHtml = '<table class="matchup-heatmap" style="border-collapse: collapse; width: 100%; font-size: 0.85em;">';
+                let tableHtml = '<table class="heatmap-table">';
                 
                 // Tabellenkopf (X-Achse mit Zeilenumbrüchen)
-                tableHtml += '<thead><tr><th style="position: sticky; left: 0; z-index: 3; background: #34495e; color: white; padding: 12px 8px; text-align: left; font-weight: 600; border: 1px solid #2c3e50; min-width: 150px;">' + t('heatmap.yourDeck') + '</th>';
+                tableHtml += '<thead><tr><th class="heatmap-th-x">' + t('heatmap.yourDeck') + '</th>';
                 xDecks.forEach(colDeck => {
                     // KEIN Substring mehr → CSS word-wrap für Zeilenumbrüche
-                    tableHtml += `<th title="${colDeck}" style="background: #34495e; color: white; padding: 8px 4px; text-align: center; font-weight: 600; border: 1px solid #2c3e50; min-width: 80px; max-width: 100px; white-space: normal; word-wrap: break-word; font-size: 0.8rem; line-height: 1.2;">${colDeck}</th>`;
+                    tableHtml += `<th title="${colDeck}" class="heatmap-th-y">${colDeck}</th>`;
                 });
                 tableHtml += '</tr></thead><tbody>';
                 
                 // Tabellenzeilen (Y-Achse)
                 yDecks.forEach(rowDeck => {
-                    tableHtml += `<tr><th style="position: sticky; left: 0; z-index: 2; background: #ecf0f1; color: #2c3e50; padding: 10px 8px; text-align: left; font-weight: bold; border: 1px solid #bdc3c7; white-space: normal; word-wrap: break-word; max-width: 120px; font-size: 0.9rem; line-height: 1.3;">${rowDeck}</th>`;
+                    tableHtml += `<tr><th class="heatmap-th-row">${rowDeck}</th>`;
                     
                     xDecks.forEach(colDeck => {
                         // Mirror Match
                         if (normalizeName(rowDeck) === normalizeName(colDeck)) {
-                            tableHtml += '<td style="background: rgba(52, 73, 94, 0.1); color: #7f8c8d; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd;" title="' + t('heatmap.mirror') + '">\\</td>';
+                            tableHtml += '<td class="heatmap-td heatmap-td-mirror" title="' + t('heatmap.mirror') + '">\\</td>';
                             return;
                         }
                         
@@ -211,7 +209,7 @@
                         }
                         
                         if (!cellData) {
-                            tableHtml += '<td style="background: rgba(149, 165, 166, 0.15); color: #95a5a6; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd;" title="' + t('heatmap.noData') + '">-</td>';
+                            tableHtml += '<td class="heatmap-td heatmap-td-nodata" title="' + t('heatmap.noData') + '">-</td>';
                             return;
                         }
                         
@@ -242,7 +240,7 @@
                         }
                         
                         if (isNaN(winRate)) {
-                            tableHtml += '<td style="background: rgba(149, 165, 166, 0.15); color: #95a5a6; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd;">-</td>';
+                            tableHtml += '<td class="heatmap-td heatmap-td-nodata">-</td>';
                         } else {
                             const totalGames = parseInt(cellData.total_games) || (parsedWins + parsedLosses + parsedDraws);
                             let bgColor, textColor;
@@ -251,19 +249,21 @@
                                 const intensity = Math.min((winRate - 55) / 20, 1);
                                 bgColor = `rgba(76, 175, 80, ${0.3 + intensity * 0.4})`;
                                 textColor = winRate >= 65 ? 'white' : '#27ae60';
+                                var tdClass = 'heatmap-td heatmap-td-fav';
                             } else if (winRate <= 45.0) {
                                 const intensity = Math.min((45 - winRate) / 20, 1);
                                 bgColor = `rgba(244, 67, 54, ${0.3 + intensity * 0.4})`;
                                 textColor = winRate <= 35 ? 'white' : '#e74c3c';
+                                var tdClass = 'heatmap-td heatmap-td-unfav';
                             } else {
                                 bgColor = 'rgba(241, 196, 15, 0.2)';
                                 textColor = '#7f8c8d';
+                                var tdClass = 'heatmap-td heatmap-td-even';
                             }
-                            
                             const tooltip = `${parsedWins}W - ${parsedLosses}L (${totalGames} ${t('heatmap.games')})`;
                             const safeRow = escapeJsStr(rowDeck);
                             const safeCol = escapeJsStr(colDeck);
-                            tableHtml += `<td style="background: ${bgColor}; color: ${textColor}; padding: 10px 6px; text-align: center; font-weight: 600; border: 1px solid #ddd; cursor: help; transition: all 0.2s;" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)" onmouseover="this.style.transform='scale(1.1)'; this.style.zIndex='10'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1'; this.style.boxShadow='none'">${winRate.toFixed(1)}%</td>`;
+                            tableHtml += `<td class="${tdClass} heatmap-td-dyn" style="--heatmap-bg: ${bgColor}; --heatmap-color: ${textColor};" title="${tooltip}" onclick="showToast('${safeRow} vs ${safeCol}: ${tooltip}', 'info', 3000)">${winRate.toFixed(1)}%</td>`;
                         }
                     });
                     tableHtml += '</tr>';
@@ -272,25 +272,23 @@
                 
                 // Wrapper HTML
                 let html = `
-                    <div id="matchupHeatmapContainer" class="matchup-heatmap-container" style="margin: 30px 0; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                        <h2 style="margin: 0 0 20px 0; color: #2c3e50; font-size: 1.5em; display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.2em;">🔥</span> ${t('heatmap.title')}
-                        </h2>
-                        <p style="color: #7f8c8d; margin: 0 0 20px 0; font-size: 0.9em;">
-                            ${t('heatmap.desc')} <span style="color: #27ae60; font-weight: 600;">Green</span> = ${t('heatmap.favorable')} (≥55%), 
-                            <span style="color: #7f8c8d; font-weight: 600;">Gray</span> = ${t('heatmap.even')} (45-54.9%), 
-                            <span style="color: #e74c3c; font-weight: 600;">Red</span> = ${t('heatmap.unfavorable')} (≤45%)
+                    <div id="matchupHeatmapContainer" class="heatmap-container">
+                        <h2 class="heatmap-title"><span style="font-size: 1.2em;">🔥</span> ${t('heatmap.title')}</h2>
+                        <p class="heatmap-desc">
+                            ${t('heatmap.desc')} <span class="color-green fw-600">Green</span> = ${t('heatmap.favorable')} (≥55%), 
+                            <span class="color-grey fw-600">Gray</span> = ${t('heatmap.even')} (45-54.9%), 
+                            <span class="color-red fw-600">Red</span> = ${t('heatmap.unfavorable')} (≤45%)
                         </p>
                         ${searchControlsHtml}
-                        <div style="overflow-x: auto;">
+                        <div class="heatmap-table-scroll">
                             ${tableHtml}
-                            <div style="text-align: center; margin-top: 15px;">
+                            <div class="heatmap-btn-row">
                                 <button class="action-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
                                     ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
                                 </button>
                             </div>
                         </div>
-                        <p style="color: #95a5a6; margin: 15px 0 0 0; font-size: 0.8em; font-style: italic;">
+                        <p class="heatmap-hint">
                             ${t('heatmap.hint')}
                         </p>
                     </div>

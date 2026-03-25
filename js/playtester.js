@@ -92,22 +92,17 @@ function ptShowManual() {
     if (existing) { existing.remove(); return; }
     const ov = document.createElement('div');
     ov.id = 'ptManualOverlay';
-    Object.assign(ov.style, {
-        position:'fixed', inset:'0', zIndex:'100000', background:'rgba(0,0,0,0.85)',
-        display:'flex', alignItems:'center', justifyContent:'center', padding:'20px'
-    });
+    ov.className = 'pos-fixed inset-0 z-20000 bg-black-085 d-flex align-center justify-center p-20';
     ov.onclick = e => { if (e.target === ov) ov.remove(); };
     const box = document.createElement('div');
-    Object.assign(box.style, {
-        background:'#1e1e2e', color:'#cdd6f4', borderRadius:'16px', padding:'28px 32px',
-        maxWidth:'720px', width:'100%', maxHeight:'85vh', overflowY:'auto',
-        fontFamily:'system-ui, sans-serif', fontSize:'14px', lineHeight:'1.6',
-        boxShadow:'0 8px 32px rgba(0,0,0,0.6)'
-    });
+    box.className = 'bg-blue-dark color-white br-12 p-24 maxw-95vw maxh-80vh overflow-y-auto box-shadow-dark';
+    box.style.fontFamily = 'system-ui, sans-serif';
+    box.style.fontSize = '14px';
+    box.style.lineHeight = '1.6';
     box.innerHTML = `
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-  <h2 style="margin:0;color:#f5c542;font-size:22px">${getLang()==='de' ? '📖 Playtester – Bedienungsanleitung' : '📖 Playtester – User Guide'}</h2>
-  <button onclick="document.getElementById('ptManualOverlay').remove()" style="background:none;border:none;color:#cdd6f4;font-size:24px;cursor:pointer">&times;</button>
+<div class="d-flex justify-space-between align-center mb-14">
+  <h2 class="m-0 color-yellow" style="font-size:22px">${getLang()==='de' ? '📖 Playtester – Bedienungsanleitung' : '📖 Playtester – User Guide'}</h2>
+  <button onclick="document.getElementById('ptManualOverlay').remove()" class="bg-none border-none color-white fs-24 pointer">&times;</button>
 </div>
 
 ${getLang()==='de' ? `
@@ -425,10 +420,18 @@ function closePlaytester() {
 function parseSandboxDeckToExactPrints(textInput, player) {
     const statusEl = document.getElementById(player === 'p1' ? 'sandboxStatusP1' : 'sandboxStatusP2');
     if (!textInput || !textInput.trim()) {
-        if (statusEl) { statusEl.innerText = t('pt.pasteCode'); statusEl.style.color = 'red'; }
+        if (statusEl) {
+            statusEl.innerText = t('pt.pasteCode');
+            statusEl.classList.remove('color-blue', 'color-orange', 'color-green');
+            statusEl.classList.add('color-red');
+        }
         return;
     }
-    if (statusEl) { statusEl.innerText = 'Loading...'; statusEl.style.color = '#007bff'; }
+    if (statusEl) {
+        statusEl.innerText = 'Loading...';
+        statusEl.classList.remove('color-red', 'color-orange', 'color-green');
+        statusEl.classList.add('color-blue');
+    }
 
     const lineRegex = /^(\d+)\s+(.+?)\s+([A-Za-z0-9-]+)\s+(\d+[A-Za-z]?)(?:\s+.*)?$/;
     let newDeck = [];
@@ -535,12 +538,14 @@ function parseSandboxDeck(player) {
 
     if (!rawText.trim()) {
         statusEl.innerText = t('pt.pasteCode');
-        statusEl.style.color = 'red';
+        statusEl.classList.remove('color-blue', 'color-orange', 'color-green');
+        statusEl.classList.add('color-red');
         return;
     }
 
     statusEl.innerText = t('pt.loadingCards');
-    statusEl.style.color = '#007bff';
+    statusEl.classList.remove('color-red', 'color-orange', 'color-green');
+    statusEl.classList.add('color-blue');
 
     // TCG Live format: "4 Pikachu SVI 001" or "4 Pikachu SVI 001 PH"
     const lineRegex = /^(\d+)\s+(.+?)\s+([A-Za-z0-9-]+)\s+(\d+[A-Za-z]?)(?:\s+.*)?$/;
@@ -1600,12 +1605,22 @@ function ptUpdateAreaPointerEvents() {
         // MP: only local player's area is interactive on their turn
         const myTurn = ptCurrentPlayer === ptState.localRole;
         const lr = ptState.localRole;
-        if (p1Inner) { p1Inner.style.pointerEvents = (lr === 'p1' && myTurn) ? 'auto' : 'none'; p1Inner.classList.remove('pt-area-passthrough'); }
-        if (p2Inner) { p2Inner.style.pointerEvents = (lr === 'p2' && myTurn) ? 'auto' : 'none'; p2Inner.classList.remove('pt-area-passthrough'); }
+        if (p1Inner) {
+            p1Inner.classList.toggle('pe-none', !(lr === 'p1' && myTurn));
+            p1Inner.classList.remove('pt-area-passthrough');
+        }
+        if (p2Inner) {
+            p2Inner.classList.toggle('pe-none', !(lr === 'p2' && myTurn));
+            p2Inner.classList.remove('pt-area-passthrough');
+        }
     } else {
         // SP: inner divs are transparent; only zone children capture events via .pt-area-passthrough CSS
-        if (p1Inner) { p1Inner.style.pointerEvents = 'none'; p1Inner.classList.add('pt-area-passthrough'); }
-        if (p2Inner) { p2Inner.style.pointerEvents = 'none'; p2Inner.classList.add('pt-area-passthrough'); }
+        if (p1Inner) {
+            p1Inner.classList.add('pe-none', 'pt-area-passthrough');
+        }
+        if (p2Inner) {
+            p2Inner.classList.add('pe-none', 'pt-area-passthrough');
+        }
     }
 }
 
@@ -2090,8 +2105,22 @@ function _ptSetDeckSort(sort) {
     _ptDeckSearchSort = sort;
     const btnDeck = document.getElementById('ptDSortDeck');
     const btnType = document.getElementById('ptDSortType');
-    if (btnDeck) { btnDeck.style.background = sort === 'deck' ? '#2a52be' : '#333'; btnDeck.style.color = sort === 'deck' ? '#fff' : '#ccc'; btnDeck.style.borderColor = sort === 'deck' ? '#3B4CCA' : '#555'; }
-    if (btnType) { btnType.style.background = sort === 'type' ? '#2a52be' : '#333'; btnType.style.color = sort === 'type' ? '#fff' : '#ccc'; btnType.style.borderColor = sort === 'type' ? '#3B4CCA' : '#555'; }
+    if (btnDeck) {
+        btnDeck.classList.toggle('bg-blue', sort === 'deck');
+        btnDeck.classList.toggle('color-white', sort === 'deck');
+        btnDeck.classList.toggle('border-blue-dark', sort === 'deck');
+        btnDeck.classList.toggle('bg-grey-dark', sort !== 'deck');
+        btnDeck.classList.toggle('color-grey', sort !== 'deck');
+        btnDeck.classList.toggle('border-grey-dark', sort !== 'deck');
+    }
+    if (btnType) {
+        btnType.classList.toggle('bg-blue', sort === 'type');
+        btnType.classList.toggle('color-white', sort === 'type');
+        btnType.classList.toggle('border-blue-dark', sort === 'type');
+        btnType.classList.toggle('bg-grey-dark', sort !== 'type');
+        btnType.classList.toggle('color-grey', sort !== 'type');
+        btnType.classList.toggle('border-grey-dark', sort !== 'type');
+    }
     _ptRefreshDeckSearchGrid();
 }
 
@@ -2125,21 +2154,20 @@ function _ptRefreshDeckSearchGrid() {
                 lastGroup = group;
                 const groupLabel = ['🐾 Pokémon', '🧑‍⚕️ Supporter', '🧰 Item', '🔧 Tool', '🏟️ Stadion', '✨ Special Energy', '⚡ Basic Energy', '🃏 Trainer'][group] || '';
                 const sep = document.createElement('div');
-                sep.style.cssText = 'width:100%;text-align:left;color:#FFCB05;font-size:10px;font-weight:900;padding:4px 0 2px 2px;letter-spacing:.5px;';
+                sep.className = 'w-100 ta-left color-yellow fs-10 fw-900 px-4';
                 sep.textContent = groupLabel;
                 grid.appendChild(sep);
             }
         }
 
         const wrap = document.createElement('div');
-        wrap.style.cssText = 'position:relative;cursor:pointer;';
+        wrap.className = 'pos-rel pointer';
         wrap.title = card.name;
 
         const img = document.createElement('img');
         img.src = card.imageUrl || CARD_BACK_URL;
         img.alt = card.name || 'Card';
-        img.className = 'pt-field-card';
-        img.style.width = '100px';
+        img.className = 'pt-field-card w-100';
         img.loading = 'lazy';
         img.onerror = function() { this.src = CARD_BACK_URL; };
         img.onclick       = () => ptRouteFromDeck(card.ptId, 'hand');
@@ -2147,7 +2175,7 @@ function _ptRefreshDeckSearchGrid() {
         img.ondblclick    = e  => ptViewCard(img.src, card.name);
 
         const lbl = document.createElement('div');
-        lbl.style.cssText = 'position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 4px 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;';
+        lbl.className = 'pos-abs bottom-0 left-0 right-0 bg-black-70 color-white fs-9 px-4 br-bottom-6 overflow-hidden nowrap ellipsis';
         lbl.textContent = card.name;
 
         wrap.appendChild(img);
@@ -2166,8 +2194,14 @@ function ptOpenDeckSearch(player) {
     // Reset sort button visuals
     const btnDeck = document.getElementById('ptDSortDeck');
     const btnType = document.getElementById('ptDSortType');
-    if (btnDeck) { btnDeck.style.background = '#2a52be'; btnDeck.style.color = '#fff'; btnDeck.style.borderColor = '#3B4CCA'; }
-    if (btnType) { btnType.style.background = '#333';    btnType.style.color = '#ccc'; btnType.style.borderColor = '#555'; }
+    if (btnDeck) {
+        btnDeck.classList.add('bg-blue', 'color-white', 'border-blue-dark');
+        btnDeck.classList.remove('bg-grey-dark', 'color-grey', 'border-grey-dark');
+    }
+    if (btnType) {
+        btnType.classList.add('bg-grey-dark', 'color-grey', 'border-grey-dark');
+        btnType.classList.remove('bg-blue', 'color-white', 'border-blue-dark');
+    }
     _ptRefreshDeckSearchGrid();
     document.getElementById('ptDeckSearchModal').style.display = 'flex';
     if (typeof mpSetPlayerStatus === 'function' && ptState.isMultiplayer) mpSetPlayerStatus('searching_deck');
@@ -2712,10 +2746,13 @@ function _ptToggleRetreatEnergy(slotIdx, total, cost) {
         const selected = _ptRetreatEnergySelection.has(i);
         const img = slot.querySelector('img');
         if (img) {
-            img.style.borderColor = selected ? '#e67e22' : '#555';
-            img.style.boxShadow = selected ? '0 0 12px rgba(230,126,34,0.7)' : '0 0 6px rgba(0,0,0,0.4)';
+            img.classList.toggle('border-orange-dark', selected);
+            img.classList.toggle('border-grey', !selected);
+            img.classList.toggle('box-shadow-orange', selected);
+            img.classList.toggle('box-shadow-grey', !selected);
         }
-        check.style.display = selected ? 'block' : 'none';
+        check.classList.toggle('d-block', selected);
+        check.classList.toggle('d-none', !selected);
     }
     const counter = document.getElementById('ptRetreatECounter');
     if (counter) counter.textContent = `${_ptRetreatEnergySelection.size} / ${cost} ${getLang()==='de' ? 'gewählt' : 'selected'}`;
@@ -3220,18 +3257,36 @@ function ptOpenDiscard(player) {
     // Inject sort toolbar
     const sortBar = document.getElementById('ptDiscardSortBar');
     if (sortBar) {
-        sortBar.style.display = 'flex';
-        const on  = ';background:#2a52be;color:#fff;border-color:#3B4CCA;';
-        const off = ';background:#333;color:#ccc;border-color:#555;';
+        sortBar.classList.remove('d-none');
+        sortBar.classList.add('d-flex');
         const btnOrder = document.getElementById('ptDscSortOrder');
         const btnType  = document.getElementById('ptDscSortType');
-        if (btnOrder) btnOrder.setAttribute('style', 'border:1px solid;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;' + (_ptDiscardSort === 'order' ? on : off));
-        if (btnType)  btnType.setAttribute('style',  'border:1px solid;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;' + (_ptDiscardSort === 'type'  ? on : off));
+        if (btnOrder) {
+            btnOrder.className = 'border-blue-dark br-5 p-3-9 fs-11 pointer bg-blue color-white';
+            if (_ptDiscardSort === 'order') {
+                btnOrder.classList.add('bg-blue', 'color-white', 'border-blue-dark');
+                btnOrder.classList.remove('bg-grey-dark', 'color-grey', 'border-grey-dark');
+            } else {
+                btnOrder.classList.add('bg-grey-dark', 'color-grey', 'border-grey-dark');
+                btnOrder.classList.remove('bg-blue', 'color-white', 'border-blue-dark');
+            }
+        }
+        if (btnType) {
+            btnType.className = 'border-blue-dark br-5 p-3-9 fs-11 pointer bg-blue color-white';
+            if (_ptDiscardSort === 'type') {
+                btnType.classList.add('bg-blue', 'color-white', 'border-blue-dark');
+                btnType.classList.remove('bg-grey-dark', 'color-grey', 'border-grey-dark');
+            } else {
+                btnType.classList.add('bg-grey-dark', 'color-grey', 'border-grey-dark');
+                btnType.classList.remove('bg-blue', 'color-white', 'border-blue-dark');
+            }
+        }
     }
     const modal = document.getElementById('ptDiscardModal');
     modal._ptPlayer = player;
     _ptRefreshDiscardGrid(player);
-    modal.style.display = 'flex';
+    modal.classList.remove('d-none');
+    modal.classList.add('d-flex');
 }
 
 function ptOpenLostZone(player) {
@@ -3240,22 +3295,24 @@ function ptOpenLostZone(player) {
     const title = document.getElementById('ptDiscardModalTitle');
     if (title) title.textContent = `🌌 Lost Zone (${player.toUpperCase()}) – Click = Return to hand`;
     const sortBar = document.getElementById('ptDiscardSortBar');
-    if (sortBar) sortBar.style.display = 'none';
+    if (sortBar) {
+        sortBar.classList.remove('d-flex');
+        sortBar.classList.add('d-none');
+    }
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
     grid.innerHTML = lz.map((c, i) => {
         const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-        return `<div style="position:relative;cursor:pointer;" title="${_ptEscHtml(c.name)}">
-            <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;filter:grayscale(0.6);"
+        return `<div class="pos-rel pointer" title="${_ptEscHtml(c.name)}">
+            <img src="${c.imageUrl || CARD_BACK_URL}" class="w-82 br-6 d-block grayscale-60"
                  onerror="this.src='${CARD_BACK_URL}'"
                  onclick="ptTakeFromLostZone('${player}',${i})"
                  ondblclick="ptViewCard(event,'${safeImg}')">
-            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(80,0,80,0.8);
-                        color:#fff;font-size:9px;padding:2px 4px;border-radius:0 0 6px 6px;
-                        overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(c.name)}</div>
+            <div class="pos-abs bottom-0 left-0 right-0 bg-purple-dark-08 color-white fs-9 px-4 py-2 br-bottom-6 overflow-hidden nowrap ellipsis">${_ptEscHtml(c.name)}</div>
         </div>`;
     }).join('');
-    document.getElementById('ptDiscardModal').style.display = 'flex';
+    document.getElementById('ptDiscardModal').classList.remove('d-none');
+    document.getElementById('ptDiscardModal').classList.add('d-flex');
 }
 
 // --- OPP PANEL ACTIONS ---
@@ -3433,12 +3490,12 @@ function ptRenderAll() {
             const p2Inner = p2Area.querySelector('div'); // The child div with rotate(180deg)
             if (ptState.localRole === 'p2') {
                 // P2 perspective: P2 area normal (bottom), P1 area rotated (top)
-                if (p2Inner) p2Inner.style.transform = 'rotate(0deg)';
-                p1Area.style.transform = 'rotate(180deg)';
+                if (p2Inner) p2Inner.classList.remove('rotate-180');
+                p1Area.classList.add('rotate-180');
             } else {
                 // P1 perspective (default): P1 normal, P2 rotated
-                if (p2Inner) p2Inner.style.transform = 'rotate(180deg)';
-                p1Area.style.transform = '';
+                if (p2Inner) p2Inner.classList.add('rotate-180');
+                p1Area.classList.remove('rotate-180');
             }
         }
     }
@@ -4198,8 +4255,14 @@ function ptAbilityZoroarkTrade(player, zoneId) {
         <button onclick="document.getElementById('ptZoroarkModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">${getLang()==='de' ? 'Abbrechen' : 'Cancel'}</button>
     </div>`;
     let modal = document.getElementById('ptZoroarkModal');
-    if (!modal) { modal = document.createElement('div'); modal.id = 'ptZoroarkModal'; modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;'; document.body.appendChild(modal); }
-    modal.innerHTML = html; modal.style.display = 'flex';
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptZoroarkModal';
+        modal.className = 'pos-fixed inset-0 bg-black-80 d-flex align-center justify-center z-20000';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.classList.remove('d-none');
     ptLog(getLang()==='de' ? `🌑 N's Zoroark ex: Wähle 1 Karte zum Ablegen…` : `🌑 N's Zoroark ex: Choose 1 card to discard…`);
     return true;
 }
@@ -4248,10 +4311,13 @@ function _ptLookTopSupporterImpl(player, count, sourceName) {
     </div>`;
     let modal = document.getElementById('ptLookTopSupModal');
     if (!modal) { modal = document.createElement('div'); modal.id = 'ptLookTopSupModal'; modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99998;'; document.body.appendChild(modal); }
-    modal.innerHTML = html; modal.style.display = 'flex';
+    modal.innerHTML = html;
+    modal.classList.remove('d-none');
+    modal.classList.add('d-flex');
 
     window._ptFinishLookTopSup = function(idx) {
-        modal.style.display = 'none';
+        modal.classList.remove('d-flex');
+        modal.classList.add('d-none');
         if (idx >= 0 && idx < topCards.length) {
             const picked = topCards.splice(idx, 1)[0];
             ptState[player].hand.push(picked);
@@ -4453,8 +4519,14 @@ function ptTrainerEnergySwitch(player, card) {
         <button onclick="document.getElementById('ptESModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">${getLang()==='de' ? 'Abbrechen' : 'Cancel'}</button>
     </div>`;
     let modal = document.getElementById('ptESModal');
-    if (!modal) { modal = document.createElement('div'); modal.id = 'ptESModal'; modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;'; document.body.appendChild(modal); }
-    modal.innerHTML = html; modal.style.display = 'flex';
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptESModal';
+        modal.className = 'pos-fixed inset-0 bg-black-80 d-flex align-center justify-center z-20000';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.classList.remove('d-none');
 
     window._ptESPickSource = function(srcZone) {
         // Collect energy cards in source zone
@@ -4536,8 +4608,14 @@ function ptTrainerSecretBox(player, card) {
         <button onclick="document.getElementById('ptSBModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;margin-left:8px;">${getLang()==='de' ? 'Abbrechen' : 'Cancel'}</button>
     </div>`;
     let modal = document.getElementById('ptSBModal');
-    if (!modal) { modal = document.createElement('div'); modal.id = 'ptSBModal'; modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;'; document.body.appendChild(modal); }
-    modal.innerHTML = html; modal.style.display = 'flex';
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptSBModal';
+        modal.className = 'pos-fixed inset-0 bg-black-80 d-flex align-center justify-center z-20000';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.classList.remove('d-none');
     window._ptSBSelected = [];
     ptLog(getLang()==='de' ? `📦 Secret Box: Wähle 3 Karten zum Ablegen…` : `📦 Secret Box: Choose 3 cards to discard…`);
     return true;
@@ -4917,11 +4995,10 @@ function ptOpenCardMenu(event, player, zoneId, forceOpen = false) {
     if (posX + menuWidth / 2 > window.innerWidth) posX = window.innerWidth - menuWidth / 2 - 6;
     if (posX - menuWidth / 2 < 6)                 posX = menuWidth / 2 + 6;
 
-    menu.style.display   = 'flex';
-    menu.style.position  = 'fixed';
-    menu.style.left      = posX + 'px';
-    menu.style.top       = posY + 'px';
-    menu.style.transform = 'translateX(-50%)';
+    menu.classList.remove('d-none');
+    menu.classList.add('d-flex', 'pos-fixed', 'translate-x--50');
+    menu.style.left = posX + 'px';
+    menu.style.top = posY + 'px';
 }
 
 document.addEventListener('click', function(e) {

@@ -1,0 +1,87 @@
+.cards-header {
+    background: white;
+    padding: 15px 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+    border: 1px solid #e1e8ed;
+}
+.header-flex-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+.header-flex-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.header-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 1.8em;
+    font-weight: 900;
+    color: #2c3e50;
+}
+.header-subtitle {
+    margin: 5px 0 0 0;
+    color: #7f8c8d;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+.header-flex-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.lang-toggle-btn {
+    background: #f0f0f0;
+    border: 2px solid #ddd;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+.user-btn {
+    background: #f8f9fa;
+    border: 2px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+.user-btn-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.user-email-display {
+    color: #7f8c8d;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+.profile-btn {
+    background: #e8f4fd;
+    color: #3B4CCA;
+    border: 2px solid #3B4CCA;
+}
+.signin-btn {
+    background: #f8f9fa;
+}

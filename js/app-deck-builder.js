@@ -525,11 +525,11 @@
                 countEl.textContent = total;
                 // Highlight in red if over 60 cards
                 if (total > 60) {
-                    countEl.style.color = '#dc3545';
-                    countEl.parentElement.style.color = '#dc3545';
+                    countEl.classList.add('color-red');
+                    countEl.parentElement.classList.add('color-red');
                 } else {
-                    countEl.style.color = '';
-                    countEl.parentElement.style.color = '';
+                    countEl.classList.remove('color-red');
+                    countEl.parentElement.classList.remove('color-red');
                 }
             }
             if (uniqueEl) uniqueEl.textContent = `(${unique} ${t('deck.uniqueLabel')})`;
@@ -574,11 +574,10 @@
             const deckVisualEl = document.getElementById(deckVisualId);
             if (deckVisualEl) {
                 if (total > 60) {
-                    deckVisualEl.style.border = '3px solid #dc3545';
-                    deckVisualEl.style.background = '#fff5f5';
+                    deckVisualEl.classList.add('border-3-red', 'bg-red-light');
                 } else {
-                    deckVisualEl.style.border = '';
-                    deckVisualEl.style.background = '#f8f9fa';
+                    deckVisualEl.classList.remove('border-3-red', 'bg-red-light');
+                    deckVisualEl.classList.add('bg-grey-light');
                 }
             }
             
@@ -934,20 +933,14 @@
                 const probBadge = `<div class="start-hand-prob" title="${t('deck.openHandProb')}">✋ ${prob}%</div>`;
                 
                 html += `
-                    <div class="deck-card" style="position: relative;" title="${safeCardName} (${count}x) - ${percentage}%">
-                        <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" style="cursor: zoom-in;" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped}')">
-                        
+                    <div class="deck-card pos-rel" title="${safeCardName} (${count}x) - ${percentage}%">
+                        <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" class="card-img-std cursor-zoom" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped}')">
                         ${probBadge}
                         ${ownedBadge}
-                        
                         <div class="card-max-count">${count}</div>
-                        
-                        <div style="position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: white; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; white-space: nowrap; z-index: 5; pointer-events: none;">
-                            ${overlayText}
-                        </div>
-                        
-                        <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: flex; flex-direction: column; gap: 2px; z-index: 3;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
+                        <div class="deck-card-overlay">${overlayText}</div>
+                        <div class="deck-card-actions">
+                            <div class="deck-card-action-row">
                                 <button onclick="removeCardFromDeck('${source}', '${deckKeyEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">-</button>
                                 <button onclick="openRaritySwitcher('${cardNameEscaped}', '${deckKeyEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-size: 11px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center;">★</button>
                                 <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 20px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px;">+</button>
@@ -1393,21 +1386,13 @@
                 }
                 
                 return `
-                    <div class="card-item" style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white;">
-                        <div style="position: relative; width: 100%;">
+                    <div class="card-item card-item-shadow">
+                        <div class="pos-rel w-100">
                             ${imgHtml}
-                            
                             <!-- Red badge: Max Count (top-right) -->
-                            <div style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
-                                ${maxCount}
-                            </div>
-                            
+                            <div class="card-badge card-badge-red pos-abs top-right">${maxCount}</div>
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
-                            ${deckCount > 0 ? `
-                            <div style="position: absolute; top: 5px; left: 5px; background: #28a745; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8em; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 2;">
-                                ${deckCount}
-                            </div>
-                            ` : ''}
+                            ${deckCount > 0 ? `<div class="card-badge card-badge-green pos-abs top-left">${deckCount}</div>` : ''}
                         </div>
                         
                         <!-- Card info section -->
@@ -1654,7 +1639,8 @@
             overlay.classList.remove('show');
             overlay.classList.remove('active');
             img.classList.remove('active');
-            overlay.style.display = 'flex';
+            overlay.classList.remove('d-none');
+            overlay.classList.add('d-flex');
             overlay.style.opacity = '';  // let CSS handle opacity via .active class
             setTimeout(() => {
                 overlay.classList.add('active');

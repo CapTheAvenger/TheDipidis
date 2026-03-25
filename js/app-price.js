@@ -102,14 +102,9 @@
             
             // Update button text
             buttonElement.textContent = price;
-            
-            // Update button style (make it green/highlighted)
-            buttonElement.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-            buttonElement.style.cursor = 'pointer';
+            // Add modular class for live price state
+            buttonElement.classList.add('price-btn-live');
             buttonElement.title = `Live Price: ${price} (Click to buy on Cardmarket)`;
-            
-            // Add visual indicator that this is live
-            buttonElement.style.boxShadow = '0 0 8px rgba(16, 185, 129, 0.5)';
         }
         
         // Auto-fetch live prices for visible cards (call this when rendering cards)

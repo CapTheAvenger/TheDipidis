@@ -497,10 +497,7 @@
             if (window.cardFormatsData && window.cardFormatsData.formats && window.cardFormatsData.formats.length > 0) {
                 window.cardFormatsData.formats.forEach(format => {
                     const label = document.createElement('label');
-                    label.style.display = 'block';
-                    label.style.padding = '6px';
-                    label.style.cursor = 'pointer';
-                    label.style.borderRadius = '4px';
+                    label.className = 'label-block';
                     label.innerHTML = `<input type="checkbox" value="meta:${escapeHtml(format.code)}" onchange="filterAndRenderCards()"> ${escapeHtml(format.name)}`;
                     container.appendChild(label);
                 });
@@ -543,9 +540,7 @@
                 container.innerHTML = '';
                 setsToShow.forEach(set => {
                     const label = document.createElement('label');
-                    label.style.display = 'block';
-                    label.style.padding = '6px';
-                    label.style.cursor = 'pointer';
+                    label.className = 'label-block';
                     label.innerHTML = `<input type="checkbox" value="${escapeHtml(set)}"> ${escapeHtml(set)}`;
                     container.appendChild(label);
                 });
@@ -560,9 +555,7 @@
                 container.innerHTML = '';
                 sets.forEach(set => {
                     const label = document.createElement('label');
-                    label.style.display = 'block';
-                    label.style.padding = '6px';
-                    label.style.cursor = 'pointer';
+                    label.className = 'label-block';
                     label.innerHTML = `<input type="checkbox" value="${escapeHtml(set)}"> ${escapeHtml(set)}`;
                     container.appendChild(label);
                 });
@@ -582,10 +575,7 @@
             container.innerHTML = '';
             sortedMainPokemons.forEach(pokemon => {
                 const label = document.createElement('label');
-                label.style.display = 'block';
-                label.style.padding = '6px';
-                label.style.cursor = 'pointer';
-                label.style.borderRadius = '4px';
+                label.className = 'label-block';
                 label.innerHTML = `<input type="checkbox" value="${escapeHtml(pokemon)}" onchange="filterArchetypesByMainPokemon(); filterAndRenderCards()"> ${escapeHtml(pokemon)}`;
                 container.appendChild(label);
                 window.mainPokemonFilterItems.push({ element: label, name: pokemon.toLowerCase() });
@@ -608,10 +598,7 @@
             container.innerHTML = '';
             sortedArchetypes.forEach(archetype => {
                 const label = document.createElement('label');
-                label.style.display = 'block';
-                label.style.padding = '6px';
-                label.style.cursor = 'pointer';
-                label.style.borderRadius = '4px';
+                label.className = 'label-block';
                 label.innerHTML = `<input type="checkbox" value="${escapeHtml(archetype)}" onchange="filterAndRenderCards()"> ${escapeHtml(archetype)}`;
                 container.appendChild(label);
                 const item = { element: label, name: archetype.toLowerCase(), archetype: archetype };
@@ -632,7 +619,7 @@
             if (selectedMainPokemons.length === 0) {
                 window.archetypeFilterItems = window.allArchetypeItems.slice();
                 window.allArchetypeItems.forEach(item => {
-                    item.element.style.display = 'block';
+                    item.element.classList.remove('d-none');
                 });
                 // Reset search filter
                 filterArchetypeList();
@@ -652,9 +639,9 @@
                 }
                 
                 if (matches) {
-                    item.element.style.display = 'block';
+                    item.element.classList.remove('d-none');
                 } else {
-                    item.element.style.display = 'none';
+                    item.element.classList.add('d-none');
                     // Uncheck if hidden
                     const checkbox = item.element.querySelector('input[type="checkbox"]');
                     if (checkbox && checkbox.checked) {
@@ -664,7 +651,7 @@
             });
             
             // Update archetypeFilterItems to only include visible items for search
-            window.archetypeFilterItems = window.allArchetypeItems.filter(item => item.element.style.display !== 'none');
+            window.archetypeFilterItems = window.allArchetypeItems.filter(item => !item.element.classList.contains('d-none'));
             
             // Apply current search filter
             filterArchetypeList();
@@ -681,16 +668,13 @@
             
             // Add separator before metas
             const separator = document.createElement('div');
-            separator.style.cssText = 'border-top: 2px solid #ddd; margin: 10px 0; padding-top: 10px;';
-            separator.innerHTML = '<strong style="display: block; padding: 6px; color: #555;">🗓️ Tournament Formats:</strong>';
+            separator.className = 'meta-filter-separator';
+            separator.innerHTML = '<strong class="label-block meta-filter-title">🗓️ Tournament Formats:</strong>';
             container.appendChild(separator);
             
             sortedMetas.forEach(meta => {
                 const label = document.createElement('label');
-                label.style.display = 'block';
-                label.style.padding = '6px';
-                label.style.cursor = 'pointer';
-                label.style.borderRadius = '4px';
+                label.className = 'label-block';
                 label.innerHTML = `<input type="checkbox" value="meta:${escapeHtml(meta)}" onchange="filterAndRenderCards()"> ${escapeHtml(meta)}`;
                 container.appendChild(label);
             });
@@ -706,9 +690,9 @@
             
             window.mainPokemonFilterItems.forEach(item => {
                 if (searchTerm === '' || item.name.includes(searchTerm)) {
-                    item.element.style.display = 'block';
+                    item.element.classList.remove('d-none');
                 } else {
-                    item.element.style.display = 'none';
+                    item.element.classList.add('d-none');
                 }
             });
         }
@@ -723,9 +707,9 @@
             // Filter within currently visible items (after main pokemon filter)
             itemsToFilter.forEach(item => {
                 if (searchTerm === '' || item.name.includes(searchTerm)) {
-                    item.element.style.display = 'block';
+                    item.element.classList.remove('d-none');
                 } else {
-                    item.element.style.display = 'none';
+                    item.element.classList.add('d-none');
                 }
             });
         }
@@ -846,13 +830,13 @@
                 `;
             }).join('');
             
-            dropdown.style.display = 'block';
+                dropdown.classList.remove('d-none');
         }
         
         function hideCardAutocomplete() {
             const dropdown = document.getElementById('cardSearchAutocomplete');
             if (dropdown) {
-                dropdown.style.display = 'none';
+                dropdown.classList.add('d-none');
             }
         }
         
@@ -1250,12 +1234,12 @@
             if (toggleBtn) {
                 if (showOnlyOnePrint) {
                     toggleBtn.textContent = '📦 1 Print per Card (Budget)';
-                    toggleBtn.style.background = '#9b59b6';
-                    toggleBtn.style.borderColor = '#9b59b6';
+                    toggleBtn.classList.remove('btn-blue');
+                    toggleBtn.classList.add('btn-purple');
                 } else {
                     toggleBtn.textContent = '🖼️ All Prints';
-                    toggleBtn.style.background = '#3498db';
-                    toggleBtn.style.borderColor = '#3498db';
+                    toggleBtn.classList.remove('btn-purple');
+                    toggleBtn.classList.add('btn-blue');
                 }
             }
             
@@ -1713,26 +1697,23 @@
         
         function createPaginationControls(totalCards, totalPages) {
             const container = document.createElement('div');
-            container.style.cssText = 'display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 20px; flex-wrap: wrap;';
-            
+            container.className = 'pagination-controls';
             // Left side: Copy button
             const leftControls = document.createElement('div');
-            leftControls.style.cssText = 'display: flex; gap: 10px;';
+            leftControls.className = 'pagination-left-controls';
             
             const copyBtn = document.createElement('button');
             copyBtn.textContent = '📋 Copy Names';
             copyBtn.title = 'Copy all filtered card names to clipboard';
-            copyBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #27ae60; background: white; color: #27ae60; border-radius: 8px; cursor: pointer; font-weight: 600;';
+            copyBtn.className = 'btn-green btn-outline btn-lg';
             copyBtn.onclick = () => {
                 const cardNames = window.filteredCardsData.map(c => c.name).join('\n');
                 navigator.clipboard.writeText(cardNames).then(() => {
                     copyBtn.textContent = '✅ Copied!';
-                    copyBtn.style.background = '#27ae60';
-                    copyBtn.style.color = 'white';
+                    copyBtn.classList.add('btn-success');
                     setTimeout(() => {
                         copyBtn.textContent = '📋 Copy Names';
-                        copyBtn.style.background = 'white';
-                        copyBtn.style.color = '#27ae60';
+                        copyBtn.classList.remove('btn-success');
                     }, 2000);
                 }).catch(err => {
                     console.error('Copy failed:', err);
@@ -1743,16 +1724,15 @@
             
             // Center: Pagination controls
             const centerControls = document.createElement('div');
-            centerControls.style.cssText = 'display: flex; gap: 10px; align-items: center;';
+            centerControls.className = 'pagination-center-controls';
             
             // Previous button
             const prevBtn = document.createElement('button');
             prevBtn.textContent = '← Previous';
-            prevBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; font-weight: 600;';
+            prevBtn.className = 'btn-blue btn-outline btn-lg';
             prevBtn.disabled = currentCardsPage === 1 || showAllCards;
             if (prevBtn.disabled) {
-                prevBtn.style.opacity = '0.5';
-                prevBtn.style.cursor = 'not-allowed';
+                prevBtn.classList.add('btn-disabled');
             }
             prevBtn.onclick = () => {
                 if (currentCardsPage > 1 && !showAllCards) {
@@ -1763,7 +1743,7 @@
             
             // Page numbers
             const pageInfo = document.createElement('div');
-            pageInfo.style.cssText = 'display: flex; gap: 5px; align-items: center;';
+            pageInfo.className = 'pagination-page-info';
             
             // Show first page, current page area, and last page
             const pagesToShow = [];
@@ -1795,17 +1775,15 @@
                 if (i > 0 && page - pagesToShow[i-1] > 1) {
                     const ellipsis = document.createElement('span');
                     ellipsis.textContent = '...';
-                    ellipsis.style.cssText = 'padding: 0 5px; color: #555; font-weight: 500;';
+                    ellipsis.className = 'pagination-ellipsis';
                     pageInfo.appendChild(ellipsis);
                 }
                 
                 const pageBtn = document.createElement('button');
                 pageBtn.textContent = page;
-                pageBtn.style.cssText = 'padding: 8px 12px; font-size: 14px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; min-width: 40px; font-weight: 600;';
-                
+                pageBtn.className = 'btn-blue btn-outline btn-sm pagination-page-btn';
                 if (page === currentCardsPage) {
-                    pageBtn.style.background = '#3498db';
-                    pageBtn.style.color = 'white';
+                    pageBtn.classList.add('btn-active');
                 }
                 
                 pageBtn.onclick = () => {
@@ -1819,11 +1797,10 @@
             // Next button
             const nextBtn = document.createElement('button');
             nextBtn.textContent = 'Next →';
-            nextBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 8px; cursor: pointer; font-weight: 600;';
+            nextBtn.className = 'btn-blue btn-outline btn-lg';
             nextBtn.disabled = currentCardsPage === totalPages || showAllCards;
             if (nextBtn.disabled) {
-                nextBtn.style.opacity = '0.5';
-                nextBtn.style.cursor = 'not-allowed';
+                nextBtn.classList.add('btn-disabled');
             }
             nextBtn.onclick = () => {
                 if (currentCardsPage < totalPages && !showAllCards) {
@@ -1840,12 +1817,12 @@
             
             // Right side: Show All / Show Paginated button
             const rightControls = document.createElement('div');
-            rightControls.style.cssText = 'display: flex; gap: 10px;';
+            rightControls.className = 'pagination-right-controls';
             
             const toggleShowAllBtn = document.createElement('button');
             toggleShowAllBtn.textContent = showAllCards ? '📄 Paginated' : '📋 Show All';
             toggleShowAllBtn.title = showAllCards ? 'Switch back to paginated view' : 'Show all cards at once';
-            toggleShowAllBtn.style.cssText = 'padding: 10px 20px; font-size: 14px; border: 2px solid #9b59b6; background: white; color: #9b59b6; border-radius: 8px; cursor: pointer; font-weight: 600;';
+            toggleShowAllBtn.className = 'btn-purple btn-outline btn-lg';
             toggleShowAllBtn.onclick = () => {
                 showAllCards = !showAllCards;
                 if (!showAllCards) {
@@ -1913,7 +1890,7 @@
             if (card.eur_price && card.eur_price !== '' && card.eur_price !== '0' && card.eur_price !== 'N/A') {
                 const price = parseFloat(card.eur_price.replace(',', '.'));
                 if (!isNaN(price)) {
-                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" class="card-database-price-btn" style="display: block; padding: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; text-decoration: none; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View on CardMarket">
+                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" class="card-database-price-btn" title="View on CardMarket">
                         Ø ${price.toFixed(2).replace('.', ',')} €
                     </a>`;
                 }
@@ -1922,20 +1899,16 @@
             // Calculate DYNAMIC Deck Coverage based on active filters
             let coverageDisplay = '';
             const coverageStats = calculateDynamicCoverage(card.name);
-            
             if (coverageStats && coverageStats.totalDecks > 0) {
                 const percentage = coverageStats.percentage || 0;
                 const deckCount = coverageStats.deckCount || 0;
                 const archetypeCount = coverageStats.archetypeCount || 0;
-                
                 // Get max count from cardDeckCoverageMap
                 const cardNameNorm = normalizeCardName(card.name);
                 const cardCoverageData = window.cardDeckCoverageMap ? window.cardDeckCoverageMap.get(cardNameNorm) : null;
                 const maxCount = cardCoverageData ? (cardCoverageData.maxCountOverall || 0) : 0;
-                
                 let coverageColor = '#95a5a6'; // Gray for < 50%
                 let coverageIcon = '\u{1F4CA}'; // bar chart
-                
                 if (percentage >= 99.5) {
                     coverageColor = '#e74c3c'; // Red for 100%
                     coverageIcon = '\uD83D\uDD25'; // fire
@@ -1949,30 +1922,22 @@
                     coverageColor = '#3498db'; // Blue for >=50%
                     coverageIcon = '\u{1F4CA}'; // bar chart
                 }
-                
                 // Format the display with max count
                 const maxCountText = maxCount > 0 ? ` · Max: ${maxCount}x` : '';
-                
-                coverageDisplay = `<div class="card-database-coverage" style="margin-top: 8px; padding: 8px; background: ${coverageColor}; color: white; border-radius: 6px; text-align: center; font-weight: 600; font-size: 13px;" title="${deckCount} Decks / ${archetypeCount} Archetypes${maxCount > 0 ? ' · Max: ' + maxCount + 'x copies per deck' : ''}">
+                coverageDisplay = `<div class="card-database-coverage" style="background: ${coverageColor};" title="${deckCount} Decks / ${archetypeCount} Archetypes${maxCount > 0 ? ' · Max: ' + maxCount + 'x copies per deck' : ''}">
                     ${coverageIcon} ${percentage.toFixed(1)}% Coverage${maxCountText}
                 </div>`;
             }
             
             item.innerHTML = `
-                <div style="position: relative;">
+                <div class="pos-rel">
                     <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
-                    ${ownedCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${ownedCount}</div>` : ''}
-                    ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div style="position: absolute; top: 5px; left: 5px; background: #FFD600; color: #333; min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="You own other prints of this card">${altPrintOwnedCount}</div>` : ''}
-                    <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
-                        <button data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" style="background: #fff; color: #000; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Add to collection (${ownedCount}/4)">
-                            +
-                        </button>
-                        <button data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" style="background: ${ownedCount > 0 ? '#4CAF50' : '#fff'}; color: ${ownedCount > 0 ? '#fff' : '#999'}; border: 2px solid #4CAF50; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="Remove from collection (${ownedCount}/4)">
-                            -
-                        </button>
-                        <button data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" style="background: ${userWantsCard ? '#E91E63' : '#fff'}; color: ${userWantsCard ? '#fff' : '#000'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'}; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">
-                            ${userWantsCard ? '&#9829;' : '&#9825;'}
-                        </button>
+                    ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
+                    ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="You own other prints of this card">${altPrintOwnedCount}</div>` : ''}
+                    <div class="pos-abs card-action-row-wide" style="top: 5px; right: 5px;">
+                        <button data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)">+</button>
+                        <button data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-green card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#4CAF50' : '#fff'};" title="Remove from collection (${ownedCount}/4)">-</button>
+                        <button data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                     </div>
                 </div>
                 <div class="card-database-info">
@@ -1981,14 +1946,14 @@
                         <span class="card-database-set">${displaySet} ${displayNumber}</span>
                         <span class="card-database-type">${displayType}</span>
                     </div>
-                    <div class="card-database-button-row" style="display: flex; gap: 8px; margin-top: 8px;">
+                    <div class="card-database-button-row">
                         ${priceButton}
-                        <div class="card-database-rarity-btn ${rarityClass}" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" style="display: block; padding: 8px; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="View all prints for ${displayRarity}">
+                        <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}">
                             ${displayRarity}
                         </div>
-                        <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" style="display: block; padding: 8px; background: #e74c3c; color: white; border-radius: 6px; text-align: center; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; border: none; flex: 1;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(231, 76, 60, 0.35)';" onmouseout="this.style.transform=''; this.style.boxShadow='';" title="Add to proxy queue">Proxy</button>
+                        <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn" title="Add to proxy queue">Proxy</button>
                     </div>
-                    ${(card.set && card.number) ? `<button onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" style="display: block; padding: 6px 8px; background: #6c3dc5; color: white; border: none; border-radius: 6px; text-align: center; font-weight: 700; font-size: 12px; cursor: pointer; margin-top: 6px; width: 100%; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(108, 61, 197, 0.35)';" onmouseout="this.style.transform=''; this.style.boxShadow='';">L Limitless</button>` : ''}
+                    ${(card.set && card.number) ? `<button onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn" title="View on Limitless">L Limitless</button>` : ''}
                     ${coverageDisplay}
                 </div>
             `;
@@ -2646,7 +2611,7 @@
                 const _rsCollId = `${actualCardName}|${version.set}|${version.number}`;
                 const _rsOwnedQty = (window.userCollectionCounts && window.userCollectionCounts.get(_rsCollId)) || 0;
                 const _rsOwnedBadge = _rsOwnedQty > 0
-                    ? `<div style="position:absolute;top:5px;left:5px;background:#4CAF50;color:white;min-width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.5);z-index:4;padding:0 3px;pointer-events:none;">${_rsOwnedQty}×</div>`
+                    ? `<div class="card-database-owned-badge-alt">${_rsOwnedQty}×</div>`
                     : '';
                 imageHtml = `<div style="position:relative;display:block;"><img src="${imageUrl}" alt="${actualCardName} - ${version.rarity}" loading="lazy">${_rsOwnedBadge}</div>`;
                 
@@ -2659,8 +2624,8 @@
                 const cardmarketBtnClass = eurPrice ? 'btn-cardmarket rarity-option-cardmarket' : 'btn-cardmarket rarity-option-cardmarket no-price';
 
                 const _rsOwnedLine = _rsOwnedQty > 0
-                    ? `<div style="font-size:11px;color:#2e7d32;font-weight:700;">&#10003; ${_rsOwnedQty}x in Sammlung</div>`
-                    : `<div style="font-size:11px;color:#999;">Nicht in Sammlung</div>`;
+                    ? `<div class="card-database-owned-line">&#10003; ${_rsOwnedQty}x in Sammlung</div>`
+                    : `<div class="card-database-not-owned-line">Nicht in Sammlung</div>`;
 
                 let _rsOtherPrintsQty = 0;
                 if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
@@ -2681,22 +2646,22 @@
                     });
                 }
                 const _rsOtherPrintLine = _rsOtherPrintsQty > 0
-                    ? `<div style="font-size:11px;color:#9c27b0;font-weight:700;">✨ Andere Prints: ${_rsOtherPrintsQty}x</div>`
+                    ? `<div class="card-database-other-prints-line">✨ Andere Prints: ${_rsOtherPrintsQty}x</div>`
                     : '';
                 
                 optionDiv.innerHTML = `
                     ${imageHtml}
                     <div class="rarity-option-info">
                         <div><strong>${version.set} ${version.number}</strong></div>
-                        <div style="font-size: 11px; color: #444; font-weight: 500;">Rarity: ${version.rarity || 'N/A'}</div>
+                        <div class="rarity-option-rarity">Rarity: ${version.rarity || 'N/A'}</div>
                         ${_rsOwnedLine}
                         ${_rsOtherPrintLine}
                     </div>
-                    <div class="rarity-badge" style="background-color: ${rarityBadgeColor};">
+                    <div class="rarity-badge" style="--rarity-badge-bg: ${rarityBadgeColor};">
                         ${version.rarity || 'Unknown'}
                     </div>
                     ${cardmarketUrl ? `
-                        <button class="${cardmarketBtnClass}" 
+                        <button class="${cardmarketBtnClass} card-database-price-btn" 
                                 onclick="event.stopPropagation(); window.open('${cardmarketUrl}', '_blank');" 
                                 title="Auf Cardmarket kaufen: ${priceDisplay}">
                             ${priceDisplay}
@@ -2933,13 +2898,13 @@
             }
             // Image View Modal
             const imgModal = document.getElementById('imageViewModal');
-            if (imgModal && target === imgModal && imgModal.style.display !== 'none') {
+            if (imgModal && target === imgModal && !imgModal.classList.contains('d-none')) {
                 if (typeof closeImageView === 'function') closeImageView();
                 return;
             }
             // Deck Compare Modal
             const dcModal = document.getElementById('deckCompareModal');
-            if (dcModal && target === dcModal && dcModal.style.display !== 'none') {
+            if (dcModal && target === dcModal && !dcModal.classList.contains('d-none')) {
                 if (typeof closeDeckCompare === 'function') closeDeckCompare();
                 return;
             }

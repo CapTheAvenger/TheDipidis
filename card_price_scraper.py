@@ -68,6 +68,7 @@ def _fetch_single_price(card: dict, base_delay: float, is_headless: bool, force_
     proxy_host_port = "geo.iproyal.com:12321"
 
 
+
     with _request_semaphore:
         if not force_limitless and cm_url:
             target_url = cm_url + ("&language=1,3" if "?" in cm_url else "?language=1,3")
@@ -87,6 +88,7 @@ def _fetch_single_price(card: dict, base_delay: float, is_headless: bool, force_
                         if driver:
                             driver.quit()
 
+        # Now outside the for/try scope
         if not eur_price:
             try:
                 lt_url = f"https://limitlesstcg.com{card['card_url']}" if card.get("card_url") else f"https://limitlesstcg.com/cards/{card['set']}/{card['number']}"

@@ -110,7 +110,8 @@ def _fetch_single_price(card: dict, base_delay: float, is_headless: bool, force_
                     if not eur_price:
                         first_price = soup.select_one("a.card-price.eur")
                         if first_price: eur_price = first_price.get_text(strip=True)
-            except: pass
+            except Exception as e:
+                logger.error("Limitless TCG fetch error: %s", e)
 
     return {**card, "eur_price": eur_price, "last_updated": datetime.now().isoformat()}
 

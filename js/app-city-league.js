@@ -3144,7 +3144,7 @@
             if (filterSelect) {
                 filterSelect.onchange = applyCityLeagueFilter;
             }
-        });
+        })
 
         function filterCityLeagueAnalysisCards() {
             const searchTerm = (document.getElementById('cityLeagueCardSearchInput')?.value || '').toLowerCase();

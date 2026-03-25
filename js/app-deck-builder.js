@@ -1358,33 +1358,28 @@
             cards.forEach(card => {
                 const cardName = normalizeCardAggregationKey(card.card_name);
                 if (!cardName) return;
-                
                 if (!cardMap.has(cardName)) {
-                    cardMap.set(cardName, card);
+                    cardMap.set(cardName, { ...card });
                 } else {
                     const existing = cardMap.get(cardName);
                     const existingSetPriority = setOrder[existing.set_code] || 0;
                     const newSetPriority = setOrder[card.set_code] || 0;
                     const existingRarityPriority = rarityOrder[existing.rarity] || 99;
                     const newRarityPriority = rarityOrder[card.rarity] || 99;
-                    
                     // Bevorzuge: 1. Low Rarity (Common/Uncommon), 2. Neuestes Set
                     if (newRarityPriority < existingRarityPriority) {
-                        // Niedrigere Rarity gewinnt - aber behalte aggregierte Daten
-                        // Nur ueberschreiben wenn neue Werte nicht leer sind
                         if (card.image_url) existing.image_url = card.image_url;
                         if (card.set_code) existing.set_code = card.set_code;
                         if (card.rarity) existing.rarity = card.rarity;
                         if (card.set_number) existing.set_number = card.set_number;
                     } else if (newRarityPriority === existingRarityPriority && newSetPriority > existingSetPriority) {
-                        // Gleiche Rarity, aber neueres Set - behalte aggregierte Daten
-                        // Nur ueberschreiben wenn neue Werte nicht leer sind
                         if (card.image_url) existing.image_url = card.image_url;
                         if (card.set_code) existing.set_code = card.set_code;
                         if (card.rarity) existing.rarity = card.rarity;
                         if (card.set_number) existing.set_number = card.set_number;
                     }
-                    // Falls set_code fehlt aber image_url das Set zeigt, extrahiere es
+                    // Aggregiere max_count (höchsten Wert behalten)
+                    existing.max_count = Math.max(parseInt(existing.max_count || 0), parseInt(card.max_count || 0));
                     if (!existing.set_code && existing.image_url) {
                         if (existing.image_url.includes('/M3/')) {
                             existing.set_code = 'M3';
@@ -1438,7 +1433,18 @@
                 // Konvertiere Komma zu Punkt fuer parseFloat (CSV verwendet Komma als Dezimaltrennzeichen)
                 const percentageStr = (card.percentage_in_archetype || '0').toString().replace(',', '.');
                 let percentage = parseFloat(percentageStr);
-                const maxCount = parseInt(card.max_count) || card.max_count || '-';
+                // FIX: Zuerst Durchschnitt berechnen, dann Max-Wert absichern
+                const totalCount = parseFloat(String(card.total_count || 0).replace(',', '.')) || 0;
+                const decksWithCard = parseFloat(String(card.deck_count || card.deck_inclusion_count || 0).replace(',', '.')) || 0;
+                const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                const avgCountValue = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
+                    ? avgCountFromRow
+                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
+                const avgCount = Math.max(0, avgCountValue).toFixed(2).replace('.', ',');
+                // Max Count sichern (darf nicht kleiner sein als gerundeter Durchschnitt)
+                const rawMaxCount = parseInt(card.max_count) || 0;
+                const roundedAvg = Math.round(avgCountValue);
+                const maxCount = Math.max(rawMaxCount, roundedAvg) || '-';
                 
                 // Get actual deck count from window.cityLeagueDeck
                 // Try both: card name only AND "CardName (SET NUM)" format
@@ -1888,16 +1894,19 @@
                 const cardName = card.card_name;
                 
                 if (!uniqueCards[cardName]) {
-                    // First occurrence - initialize with this card's data
                     uniqueCards[cardName] = {
                         ...card,
                         deck_count: parseInt(card.deck_count || 0),
-                        total_count: parseFloat(card.total_count || 0)
+                        total_count: parseFloat(card.total_count || 0),
+                        max_count: parseInt(card.max_count || 0)
                     };
                 } else {
-                    // Aggregate: sum deck_count and total_count across tournaments
                     uniqueCards[cardName].deck_count += parseInt(card.deck_count || 0);
                     uniqueCards[cardName].total_count += parseFloat(card.total_count || 0);
+                    uniqueCards[cardName].max_count = Math.max(
+                        parseInt(uniqueCards[cardName].max_count || 0),
+                        parseInt(card.max_count || 0)
+                    );
                 }
             }
             
@@ -2017,63 +2026,80 @@
                     devLog('[autoComplete] Deck complete (60 cards) - stopping');
                     break;
                 }
-                
                 const cardName = card.card_name;
-                
-                // Skip if already added
                 if (addedNames.has(cardName)) continue;
-                
-                // Skip Ace Spec cards (the best one was already added in Step 3)
-                if (isAceSpec(card)) {
-                    devLog('[autoComplete] Skipping Ace Spec (already added):', cardName);
-                    continue;
-                }
-                
-                // Deck-wide Radiant limit: only 1 Radiant Pokémon total
-                if (isRadiantPokemon(cardName)) {
-                    if (radiantAdded) {
-                        devLog('[autoComplete] Skipping Radiant (deck already has one):', cardName);
-                        continue;
-                    }
-                    radiantAdded = true;
-                }
-                
-                // Get percentage for logging
+                if (isAceSpec(card)) { devLog('[autoComplete] Skipping Ace Spec (already added):', cardName); continue; }
+                if (isRadiantPokemon(cardName)) { if (radiantAdded) { devLog('[autoComplete] Skipping Radiant (deck already has one):', cardName); continue; } radiantAdded = true; }
                 const percentage = parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.'));
-
-                // Use Combined Variants recommendedCount when available
+                // --- LARGEST REMAINDER METHOD ---
                 let addCount;
+                let exactAvg = 0;
                 if (card._recommendedCount != null) {
                     addCount = card._recommendedCount;
+                    exactAvg = card.avgCountWhenUsed || card._recommendedCount;
                 } else {
-                    // Fallback: Calculate average copies per deck WHEN USED.
                     const totalCount = parseFloat(card.total_count) || 0;
                     const decksWithCard = parseFloat(card.deck_count || card.deck_inclusion_count) || 0;
                     const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
-                    
                     const avgWhenUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0 ? avgCountFromRow : (decksWithCard > 0 ? (totalCount / decksWithCard) : 1);
-                    
+                    exactAvg = avgWhenUsed;
                     addCount = Math.round(avgWhenUsed);
                 }
-                
-                // Cap at legal max for this card
                 const legalMax = card._legalMax || getLegalMaxCopies(cardName, card);
                 if (!isBasicEnergy(cardName)) {
                     addCount = Math.max(1, Math.min(addCount, legalMax));
                 } else {
                     addCount = Math.max(1, addCount);
                 }
-                
-                // Don't exceed deck limit (60 total cards)
                 addCount = Math.min(addCount, 60 - currentTotal);
-                
                 if (addCount > 0) {
-                    cardsToAdd.push({ ...card, addCount: addCount });
+                    cardsToAdd.push({ ...card, addCount: addCount, exactAvg: exactAvg });
                     addedNames.add(cardName);
                     currentTotal += addCount;
-                    devLog(`[autoComplete] ${addCount}x ${cardName} (${percentage.toFixed(1)}%, avg: ${(card.avgCountWhenUsed || addCount).toFixed ? (card.avgCountWhenUsed || addCount).toFixed(1) : addCount}x) - Total: ${currentTotal}/60`);
                 }
             }
+            // --- FEHLENDE KARTEN INTELLIGENT AUFFÜLLEN ---
+            // ===================================================================
+            // 🚨 FIX: FALLBACK - Deck auf exakt 60 Karten auffüllen
+            // ===================================================================
+            if (currentTotal < 60) {
+                devLog(`[autoComplete] Deck has only ${currentTotal} cards. Filling up to 60...`);
+                // 1. Priorität: Largest Remainder (Nachkommastelle) für Trainer/Pokémon
+                cardsToAdd.sort((a, b) => {
+                    const remA = (a.exactAvg || 0) % 1;
+                    const remB = (b.exactAvg || 0) % 1;
+                    return remB - remA;
+                });
+                for (let i = 0; i < cardsToAdd.length && currentTotal < 60; i++) {
+                    const cardToAdd = cardsToAdd[i];
+                    const legalMax = cardToAdd._legalMax || getLegalMaxCopies(cardToAdd.card_name, cardToAdd);
+                    if (cardToAdd.addCount < legalMax || isBasicEnergy(cardToAdd.card_name)) {
+                        cardToAdd.addCount++;
+                        currentTotal++;
+                    }
+                }
+                // 2. absolute Notfall-Priorität: Basis-Energie reindrücken
+                if (currentTotal < 60) {
+                    const topBasicEnergy = deckCards.find(c => {
+                        const typeStr = String(c.type || c.card_type || '').toLowerCase();
+                        const nameStr = String(c.card_name || '').toLowerCase();
+                        return typeStr.includes('basis-energie') || typeStr === 'basic energy' || nameStr.includes('energy');
+                    });
+                    if (topBasicEnergy) {
+                        const spaceLeft = 60 - currentTotal;
+                        const existing = cardsToAdd.find(c => c.card_name === topBasicEnergy.card_name);
+                        if (existing) {
+                            existing.addCount += spaceLeft;
+                        } else {
+                            cardsToAdd.push({ ...topBasicEnergy, addCount: spaceLeft });
+                            addedNames.add(topBasicEnergy.card_name);
+                        }
+                        currentTotal += spaceLeft;
+                        devLog(`[autoComplete] Fallback: Added ${spaceLeft}x ${topBasicEnergy.card_name} to reach 60`);
+                    }
+                }
+            }
+            // --- ENDE FIX ---
             
             
             devLog('[autoComplete] Total cards to add:', currentTotal, 'in', cardsToAdd.length, 'unique entries');
@@ -2248,13 +2274,18 @@
                 if (!uniqueCards[cardName]) {
                     uniqueCards[cardName] = { 
                         ...card, card_name: cardName, deck_count: deckCountValue, total_count: totalCountValue,
-                        sum_avg_count: avgCountValue, count_entries: 1
+                        sum_avg_count: avgCountValue, count_entries: 1,
+                        max_count: parseInt(card.max_count || 0)
                     };
                 } else {
                     uniqueCards[cardName].deck_count += deckCountValue;
                     uniqueCards[cardName].total_count += totalCountValue;
                     uniqueCards[cardName].sum_avg_count += avgCountValue;
                     uniqueCards[cardName].count_entries += 1;
+                    uniqueCards[cardName].max_count = Math.max(
+                        parseInt(uniqueCards[cardName].max_count || 0),
+                        parseInt(card.max_count || 0)
+                    );
                 }
             }
             
@@ -2455,7 +2486,15 @@
             if (currentTotal < 60) {
                 const topBasicEnergy = deckCards.filter(c => isBasicEnergyCardEntry(c)).sort((a, b) => b.sharePercent - a.sharePercent)[0];
                 if (topBasicEnergy) {
-                    pushCard(topBasicEnergy, 60 - currentTotal, '[Consistency][Fallback-Energy]');
+                    const spaceLeft = 60 - currentTotal;
+                    const existingEntry = consistencyDeck.find(e => e.card.card_name === topBasicEnergy.card_name);
+                    if (existingEntry) {
+                        existingEntry.count += spaceLeft;
+                        currentTotal += spaceLeft;
+                        devLog(`[Consistency][Fallback-Energy] + ${spaceLeft}x ${topBasicEnergy.card_name} (merged) -- Total: ${currentTotal}/60`);
+                    } else {
+                        pushCard(topBasicEnergy, spaceLeft, '[Consistency][Fallback-Energy]');
+                    }
                 }
             }
 

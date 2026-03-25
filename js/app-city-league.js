@@ -2354,6 +2354,19 @@
                 
                 const legalMaxCopies = getLegalMaxCopies(cardName, card);
                 const rawMaxCount = parseInt(card.max_count) || card.max_count || 0;
+                // --- FIX: Max Count muss mindestens dem gerundeten Durchschnitt entsprechen! (Verhindert 3.59 -> 3) ---
+                const totalCount = safeParseFloat(card.total_count || 0);
+                const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
+                const avgCountFromRow = safeParseFloat(card.average_count || card.avg_count || '', NaN);
+                const avgCountInUsedValue = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
+                    ? avgCountFromRow
+                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
+                const roundedAvgUsed = Math.round(avgCountInUsedValue);
+                const improvedMaxCount = Math.max(rawMaxCount, roundedAvgUsed);
+                const finalMaxCount = improvedMaxCount > 0
+                    ? Math.min(legalMaxCopies, Math.max(1, improvedMaxCount))
+                    : 0;
+                // --- ENDE FIX ---
                 
                 // CRITICAL: ALWAYS show green marker ONLY on the exact version that is in the deck
                 // Match by SET CODE + SET NUMBER only (not by card name, which may differ in different languages)

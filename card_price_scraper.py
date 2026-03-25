@@ -1,12 +1,11 @@
 ﻿#!/usr/bin/env python3
 """
-Card Price Scraper - FAST EDITION
-==================================
-- Fetches 7-day average prices directly from Cardmarket using targeted HTML parsing.
-- Uses cloudscraper to bypass basic Cloudflare protection without Selenium.
-- Multithreaded, but rate-limited to prevent IP bans (default: 2 workers).
+Card Price Scraper - FAST EDITION (curl_cffi + IPRoyal)
+========================================================
+- Fetches prices directly from Cardmarket using targeted HTML parsing.
+- Uses curl_cffi to perfectly impersonate a Chrome browser and bypass Cloudflare.
+- Routes traffic through IPRoyal Residential Proxies.
 - Fallback: Limitless TCG if Cardmarket is blocked or unavailable.
-- Supports name_en/name_de CSV format from the new all_cards_scraper.
 """
 
 import csv
@@ -26,27 +25,33 @@ except ImportError:
     print("FEHLER: beautifulsoup4 fehlt! pip install beautifulsoup4")
     sys.exit(1)
 
-from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, setup_logging, load_settings, _get_scraper
+try:
+    from curl_cffi import requests as curl_requests
+except ImportError:
+    print("FEHLER: curl_cffi fehlt! pip install curl_cffi")
+    sys.exit(1)
+
+from card_scraper_shared import setup_console_encoding, get_app_path, get_data_dir, setup_logging, load_settings
 
 setup_console_encoding()
 
-# Shared rate limiter: only 1 request at a time across all worker threads
-_request_semaphore = threading.Semaphore(1)
+# Shared rate limiter: Auf 10 erhoeht, da wir rotierende Proxies nutzen
+_request_semaphore = threading.Semaphore(10)
 
 # LOGGING
 logger = setup_logging("price_scraper")
 
 logger.info("=" * 80)
-logger.info("CARD PRICE SCRAPER - FAST EDITION")
+logger.info("CARD PRICE SCRAPER - FAST EDITION (STEALTH MODE)")
 logger.info("=" * 80)
 
 # SETTINGS
 DEFAULT_SETTINGS = {
-    "delay_seconds": 3.0,        # Base delay per request (+ random 0.1-0.8s jitter) — Cardmarket recommends 3-5s
-    "max_workers": 2,            # KEEP LOW (2-3 max) to avoid Cardmarket IP bans
+    "delay_seconds": 3.0,        
+    "max_workers": 2,            
     "skip_cards_with_prices": True,
-    "only_update_sets": [],      # [] = all sets, or e.g. ["TWM", "SFA"]
-    "max_runtime_minutes": None, # Optional time cap for GitHub Actions
+    "only_update_sets": [],      
+    "max_runtime_minutes": None, 
 }
 
 def _load_settings() -> dict:
@@ -65,7 +70,6 @@ def load_cards_to_update(csv_path: str) -> list:
         for row in reader:
             if not row:
                 continue
-            # Compatible with both old (name) and new (name_en) CSV formats
             name = (row.get("name_en") or row.get("name") or "").strip()
             cards.append({
                 "name": name,
@@ -100,7 +104,6 @@ def load_existing_prices(csv_path: str) -> dict:
 def save_prices(prices: list, csv_path: str):
     """
     Merge new prices into existing price_data.csv.
-    Only overwrites a row when a non-empty price was found; otherwise keeps existing data.
     """
     existing = {}
     if os.path.isfile(csv_path):
@@ -123,9 +126,9 @@ def save_prices(prices: list, csv_path: str):
         key = f"{price.get('set', '')}_{price.get('number', '')}"
         new_price = (price.get("eur_price") or "").strip()
         if new_price:
-            existing[key] = price          # overwrite with fresh data
+            existing[key] = price          
         elif key not in existing:
-            existing[key] = price           # add entry even without price
+            existing[key] = price           
 
     tmp_path = csv_path + '.tmp'
     with open(tmp_path, "w", encoding="utf-8", newline="") as f:
@@ -140,16 +143,26 @@ def save_prices(prices: list, csv_path: str):
 
 
 # SCRAPING LOGIC
-
 def _parse_cardmarket_price(html: str, card_id: str) -> str:
     """
     Extract EUR price from Cardmarket HTML.
-    Priority: 7-day average > 30-day average > From price (EUR only).
+    Priority 1: From / Ab price (gefiltert nach EN/DE).
     """
     soup = BeautifulSoup(html, "lxml")
     dt_elements = soup.find_all("dt")
 
-    # Priority 1: 7-day average (German or English label)
+    # Priority 1: From / Ab price 
+    for dt in dt_elements:
+        label = dt.get_text(strip=True).lower()
+        if label in ("from", "ab"):
+            dd = dt.find_next_sibling("dd")
+            if dd:
+                text = dd.get_text(strip=True)
+                if ("EUR" in text or "€" in text) and "£" not in text and "$" not in text:
+                    logger.info("  + CM Ab-Preis (EN/DE) [%s]: %s", card_id, text)
+                    return text
+
+    # Priority 2: 7-day average 
     for dt in dt_elements:
         label = dt.get_text(strip=True).lower()
         if "7-tages" in label or "7-days" in label or "7-day" in label:
@@ -160,7 +173,7 @@ def _parse_cardmarket_price(html: str, card_id: str) -> str:
                     logger.info("  + CM 7-day avg [%s]: %s", card_id, text)
                     return text
 
-    # Priority 2: 30-day average
+    # Priority 3: 30-day average
     for dt in dt_elements:
         label = dt.get_text(strip=True).lower()
         if "30-tages" in label or "30-days" in label or "30-day" in label:
@@ -171,49 +184,61 @@ def _parse_cardmarket_price(html: str, card_id: str) -> str:
                     logger.info("  + CM 30-day avg [%s]: %s", card_id, text)
                     return text
 
-    # Priority 3: From / Ab price (EUR only — not GBP/USD)
-    for dt in dt_elements:
-        label = dt.get_text(strip=True).lower()
-        if label in ("from", "ab"):
-            dd = dt.find_next_sibling("dd")
-            if dd:
-                text = dd.get_text(strip=True)
-                if ("EUR" in text or "€" in text) and "£" not in text and "$" not in text:
-                    logger.info("  + CM From price [%s]: %s", card_id, text)
-                    return text
-
     return ""
 
 
 def _fetch_single_price(card: dict, base_delay: float) -> dict:
-    """Fetch price for one card: tries Cardmarket first, then Limitless as fallback."""
-    scraper  = _get_scraper()
+    """Fetch price for one card using curl_cffi and IPRoyal with retry loop."""
     card_id  = f"{card['set']}-{card['number']}"
     eur_price = ""
     cm_url   = card.get("cardmarket_url", "")
+    max_retries = 3 # Wir versuchen es bis zu 3 Mal mit verschiedenen IPs!
 
-    # Anti-ban: serialize requests through semaphore + randomised delay
+    # DEINE IPROYAL RESIDENTIAL PROXY DATEN
+    proxy_url = "http://SUdFKMiObiweTnv4:cMWlX3fJZjRohu7K@geo.iproyal.com:12321"
+    proxies = {
+        "http": proxy_url,
+        "https": proxy_url
+    }
+
     with _request_semaphore:
-        time.sleep(base_delay + random.uniform(0.1, 0.8))
-
-        # Strategy 1: Cardmarket (direct 7-day average)
+        # Strategy 1: Cardmarket via curl_cffi (Chrome Stealth) + Proxy
         if cm_url:
-            try:
-                resp = scraper.get(cm_url, timeout=20)
-                if resp.status_code == 200:
-                    eur_price = _parse_cardmarket_price(resp.text, card_id)
-                elif resp.status_code in (429, 503):
-                    retry_after = int(resp.headers.get('Retry-After', 10))
-                    logger.warning("  ! Rate-limited %s bei CM [%s] — warte %ss", resp.status_code, card_id, retry_after)
-                    time.sleep(retry_after)
-                elif resp.status_code == 403:
-                    logger.warning("  ! Cloudflare 403 bei CM [%s] — versuche Limitless", card_id)
-                else:
-                    logger.debug("  CM HTTP %s fuer %s", resp.status_code, card_id)
-            except Exception as e:
-                logger.debug("  CM Fehler fuer %s: %s", card_id, e)
+            if "?" in cm_url:
+                target_url = cm_url + "&language=1,3"
+            else:
+                target_url = cm_url + "?language=1,3"
 
-        # Strategy 2: Limitless TCG fallback (also refreshes CM URL if missing)
+            for attempt in range(max_retries):
+                # Kleines Delay, damit wir Cloudflare nicht überrennen
+                time.sleep(random.uniform(0.5, 1.5))
+                
+                try:
+                    # MAGIC: Spezifische, stabile Chrome Version vortäuschen
+                    resp = curl_requests.get(
+                        target_url, 
+                        proxies=proxies, 
+                        impersonate="chrome120", 
+                        timeout=20
+                    )
+                    
+                    if resp.status_code == 200:
+                        eur_price = _parse_cardmarket_price(resp.text, card_id)
+                        if eur_price:
+                            break # ERFOLG! Wir springen aus der Retry-Schleife raus.
+                    elif resp.status_code in (429, 503):
+                        retry_after = int(resp.headers.get('Retry-After', 5))
+                        time.sleep(retry_after)
+                    elif resp.status_code == 403:
+                        if attempt < max_retries - 1:
+                            logger.debug("  ~ 403 bei CM [%s] (Versuch %s/%s) - Hole neue IP...", card_id, attempt+1, max_retries)
+                        else:
+                            logger.warning("  ! Cloudflare 403 bei CM [%s] nach %s Versuchen — Limitless Fallback", card_id, max_retries)
+                except Exception as e:
+                    if attempt >= max_retries - 1:
+                        logger.debug("  CM Fehler fuer %s: %s", card_id, e)
+
+        # Strategy 2: Limitless TCG fallback (no proxy)
         if not eur_price:
             try:
                 if card.get("card_url"):
@@ -225,18 +250,18 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
                 else:
                     lt_url = f"https://limitlesstcg.com/cards/{card['set']}/{card['number']}"
 
-                resp = scraper.get(lt_url, timeout=15)
+                import requests as std_requests
+                resp = std_requests.get(lt_url, timeout=15) 
+                
                 if resp.status_code == 200:
                     soup = BeautifulSoup(resp.text, "lxml")
                     table = soup.select_one("table.card-prints-versions")
                     if table:
-                        # ROBUST: Vermeidet BeautifulSoup tbody-Verschluck-Bug
                         for row in [tr for tr in table.select("tr") if tr.find("td")]:
                             if "current" in row.get("class", []):
                                 eur_link = row.select_one("a.card-price.eur")
                                 if eur_link:
                                     eur_price = eur_link.get_text(strip=True)
-                                    # Update CM URL if we didn't have it or want to refresh
                                     if not cm_url and eur_link.has_attr("href"):
                                         cm_url = eur_link["href"]
                                     logger.info("  + LT fallback [%s]: %s", card_id, eur_price)
@@ -273,7 +298,6 @@ def scrape_prices(cards: list, settings: dict, existing_prices: dict, csv_path: 
     for card in cards:
         key = f"{card['set']}_{card['number']}"
 
-        # Set filter: keep/skip cards not in only_sets
         if only_sets and card["set"] not in only_sets:
             if key in existing_prices:
                 results.append({
@@ -286,7 +310,6 @@ def scrape_prices(cards: list, settings: dict, existing_prices: dict, csv_path: 
                 })
             continue
 
-        # Skip if price already exists
         if skip_existing and key in existing_prices and existing_prices[key].get("eur_price"):
             results.append({
                 "name": card["name"],
@@ -318,7 +341,6 @@ def scrape_prices(cards: list, settings: dict, existing_prices: dict, csv_path: 
         for future in concurrent.futures.as_completed(future_to_card):
             completed += 1
 
-            # Graceful time-limit (for GitHub Actions)
             if max_runtime:
                 elapsed = (time.time() - scrape_start) / 60
                 if elapsed >= max_runtime:
@@ -343,7 +365,6 @@ def scrape_prices(cards: list, settings: dict, existing_prices: dict, csv_path: 
     return results
 
 
-# MAIN
 def main():
     try:
         settings   = _load_settings()

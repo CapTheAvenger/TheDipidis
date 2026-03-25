@@ -178,7 +178,9 @@ def _fetch_single_price(card: dict, base_delay: float, is_headless: bool) -> dic
     cm_url   = card.get("cardmarket_url", "")
 
     # DEINE IPROYAL PROXY DATEN FÜR SELENIUM
-    proxy_string = "SUdFKMiObiweTnv4:cMWlX3fJZjRohu7K@geo.iproyal.com:12321"
+    proxy_host_port = "geo.iproyal.com:12321"
+    proxy_user = "SUdFKMiObiweTnv4"
+    proxy_pass = "cMWlX3fJZjRohu7K"
 
     with _request_semaphore:
         if cm_url:
@@ -189,11 +191,18 @@ def _fetch_single_price(card: dict, base_delay: float, is_headless: bool) -> dic
 
             driver = None
             try:
+                # Proxy Credentials aufsplitten für SeleniumBase
+                proxy_host_port = "geo.iproyal.com:12321"
+                proxy_user = "SUdFKMiObiweTnv4"
+                proxy_pass = "cMWlX3fJZjRohu7K"
+
                 # Echten Browser im Hintergrund starten (UC Mode)
                 driver = Driver(
                     uc=True, 
-                    proxy=proxy_string, 
-                    headless=is_headless, # Steuerung über die JSON Datei
+                    proxy=proxy_host_port, 
+                    proxy_user=proxy_user,
+                    proxy_pass=proxy_pass,
+                    headless=is_headless, 
                     page_load_strategy="normal"
                 )
                 

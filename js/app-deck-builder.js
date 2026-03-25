@@ -1465,7 +1465,7 @@
                 // Prefer "average in decks that use this card" for UI consistency.
                 // totalCount already declared above, do not redeclare here.
                 // decksWithCard already declared above, do not redeclare here.
-                const avgCountFromRow = parseFloat(String(card.average_count || card.avg_count || '').replace(',', '.'));
+                // avgCountFromRow already declared above, do not redeclare here.
                 const avgCountValue = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
                     ? avgCountFromRow
                     : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);

@@ -179,8 +179,6 @@ def _fetch_single_price(card: dict, base_delay: float, is_headless: bool) -> dic
 
     # DEINE IPROYAL PROXY DATEN FÜR SELENIUM
     proxy_host_port = "geo.iproyal.com:12321"
-    proxy_user = "SUdFKMiObiweTnv4"
-    proxy_pass = "cMWlX3fJZjRohu7K"
 
     with _request_semaphore:
         if cm_url:
@@ -191,18 +189,15 @@ def _fetch_single_price(card: dict, base_delay: float, is_headless: bool) -> dic
 
             driver = None
             try:
-                # Proxy Credentials aufsplitten für SeleniumBase
+                # Da deine IP jetzt bei IPRoyal gewhitelistet ist,
+                # brauchen wir kein Passwort mehr! Nur noch Server & Port:
                 proxy_host_port = "geo.iproyal.com:12321"
-                proxy_user = "SUdFKMiObiweTnv4"
-                proxy_pass = "cMWlX3fJZjRohu7K"
 
                 # Echten Browser im Hintergrund starten (UC Mode)
                 driver = Driver(
-                    uc=True, 
-                    proxy=proxy_host_port, 
-                    proxy_user=proxy_user,
-                    proxy_pass=proxy_pass,
-                    headless=is_headless, 
+                    uc=True,
+                    proxy=proxy_host_port,
+                    headless=is_headless,
                     page_load_strategy="normal"
                 )
                 

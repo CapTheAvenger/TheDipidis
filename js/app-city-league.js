@@ -2395,12 +2395,9 @@
                 }
                 
                 // Get deck statistics: how many decks use this card vs total decks in archetype
-                const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
                 // Use global total decks count instead of per-date total_decks_in_archetype
                 const totalDecksInArchetype = safeParseFloat(window.currentCityLeagueTotalDecks || card.total_decks_in_archetype || 0);
-                
                 // Get average count statistics
-                const totalCount = safeParseFloat(card.total_count || 0);
                 const avgCountOverallRaw = safeParseFloat(card.average_count_overall || '', NaN);
                 const avgCountInUsedRaw = safeParseFloat(card.average_count || card.avg_count || '', NaN);
 

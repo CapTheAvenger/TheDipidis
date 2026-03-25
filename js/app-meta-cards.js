@@ -326,16 +326,29 @@
                     variantGroups[baseName].push(card);
                 });
 
+
                 const mergedMetaCards = [];
                 Object.entries(variantGroups).forEach(([baseName, variants]) => {
+                    // Finde das Maximum aller max_count/maxCount/max_used Werte über alle Varianten
+                    let maxUsed = 0;
+                    variants.forEach(v => {
+                        // Suche nach verschiedenen möglichen Feldern
+                        const maxFields = [v.max_count, v.maxCount, v.max_used];
+                        maxFields.forEach(val => {
+                            if (typeof val === 'number' && val > maxUsed) maxUsed = val;
+                            if (typeof val === 'string' && !isNaN(parseInt(val)) && parseInt(val) > maxUsed) maxUsed = parseInt(val);
+                        });
+                    });
+
                     if (variants.length <= 1) {
-                        // Single print – keep as-is but still cap values
+                        // Single print – keep as-is aber max_count setzen
                         const card = variants[0];
                         const legalMax = getLegalMaxCopies(card.card_name, card);
                         card.metaShare = Math.min(100, card.metaShare);
                         card.avgCountWhenUsed = Math.min(legalMax, card.avgCountWhenUsed);
                         card.avgCount = Math.min(legalMax, card.avgCount);
                         card.recommendedCount = Math.min(legalMax, Math.max(1, Math.round(card.avgCountWhenUsed)));
+                        card.max_count = maxUsed;
                         mergedMetaCards.push(card);
                         return;
                     }
@@ -383,6 +396,7 @@
                         avgCountWhenUsed: combined.combinedAvgWhenUsed,
                         recommendedCount: combined.recommendedCount,
                         archetypes: mergedArchetypes,
+                        max_count: maxUsed,
                         _combinedVariants: variants.length // marker for debugging
                     });
                 });

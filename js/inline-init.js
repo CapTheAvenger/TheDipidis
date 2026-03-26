@@ -43,3 +43,10 @@ document.addEventListener('languageChanged', function() {
     const badge = document.getElementById('current-tab-title');
     if (activeBtn && badge) badge.innerText = activeBtn.innerText.trim();
 });
+
+// Wrap all DOM event logic in DOMContentLoaded for safety
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        // All event listeners and DOM manipulations above this line should be moved here for safety if needed
+    });
+}

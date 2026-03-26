@@ -1,3 +1,6 @@
+if (!window.__firebaseRuntimeInitialized) {
+  throw new Error('Firebase not initialized! Ensure firebase-config.js is loaded first.');
+}
 /**
  * User Collection Management
  * ==========================

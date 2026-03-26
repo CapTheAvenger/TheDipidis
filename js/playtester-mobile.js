@@ -619,6 +619,19 @@ function ptHideRadialMenu() {
     if (menu) menu.remove();
 }
 
+// Expose playtester-mobile handler functions globally
+window.ptShowContextMenu = ptShowContextMenu;
+window.ptHideContextMenu = ptHideContextMenu;
+window.ptFieldTouchStart = ptFieldTouchStart;
+window.ptFieldTouchEnd = ptFieldTouchEnd;
+window.ptFieldTouchMove = ptFieldTouchMove;
+window.ptShowRadialMenu = ptShowRadialMenu;
+window.ptHideRadialMenu = ptHideRadialMenu;
+window.ptMobileHandTouchStart = ptMobileHandTouchStart;
+window.ptMobileHandTouchMove = ptMobileHandTouchMove;
+window.ptMobileHandTouchEnd = ptMobileHandTouchEnd;
+window.ptMobileCardTap = ptMobileCardTap;
+
 function _ptGetZoneElement(player, zone) {
     if (zone === 'active') return document.getElementById(`ptActiveZone-${player}`);
     if (zone && zone.startsWith('bench')) {

@@ -111,66 +111,57 @@
             <link rel="stylesheet" href="css/city-league.css">
             <link rel="stylesheet" href="css/meta-card-analysis.css">
             <link rel="stylesheet" href="css/current-meta-matchups.css">
-            <link rel="stylesheet" href="css/tutorial-tab-info.css">
-            <link rel="stylesheet" href="css/info-blocks.css">
-            <link rel="stylesheet" href="css/profile-howto-info.css">
-            <link rel="stylesheet" href="css/collection-wishlist-guide.css">
-            <link rel="stylesheet" href="css/my-decks-guide.css">
-            <link rel="stylesheet" href="css/deck-building-guide.css">
-            <link rel="stylesheet" href="css/deck-compare-playtester-guide.css">
-            <link rel="stylesheet" href="css/playtester-toolbar-cardtype-guide.css">
-            <link rel="stylesheet" href="css/tips-tricks-faq.css">
-            <link rel="stylesheet" href="css/support-section.css">
+            <!-- Guide/section/info CSS files removed: now consolidated in styles.css and ui-components.css -->
             <link rel="stylesheet" href="css/city-league-display-toggles.css">
-            <div id="city-league" class="tab-content active">
-                <div class="city-league-container">
-                    <div class="city-league-header">
-                        <h2><span data-i18n="cl.cityLeagueDev">🇯🇵 City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
-                        <div class="format-toggle-container">
-                            <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" aria-label="City League format" class="format-toggle-select">
-                                <option value="M4" data-i18n="format.m4current">M4 - Ninja Spinner (Current)</option>
-                                <option value="M3" data-i18n="format.m3archive">M3 - Perfect Order (Archive)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="cityLeagueContent" class="city-league-content">
-                        <div id="cityLeagueTierSections"></div>
-                        <div class="city-league-loading" data-i18n="misc.loading">Loading...</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Tab 2: City League Deck Analysis -->
-            <div id="city-league-analysis" class="tab-content">
-                <div class="container">
-                    <div class="header">
-                        <h2><span data-i18n="cl.analysisHeading">🦅 City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
-                        <div class="format-toggle-container">
-                            <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" aria-label="City League analysis format" class="format-toggle-select">
-                                <option value="M4" data-i18n="format.m4current">M4 - Ninja Spinner (Current)</option>
-                                <option value="M3" data-i18n="format.m3archive">M3 - Perfect Order (Archive)</option>
-                            </select>
-                        </div>
-                        <p data-i18n="cl.analyzeAndBuild">Analyze and Build Decks</p>
-                    </div>
-                    
-                    <div class="controls">
-                        <div class="control-group control-group-dates">
-                            <div class="control-row-dates">
-                                <label class="control-label" data-i18n="filter.tournamentPeriod">📅 Tournament Period Filter:</label>
-                                <button onclick="resetCityLeagueDateFilter()" class="btn-reset-date" title="Show All Data" data-i18n-title="filter.showAllDataTitle">🔄</button>
-                            </div>
-                            <div class="section-grid-container">
-                                <div>
-                                    <label for="cityLeagueDateFrom" class="date-label" data-i18n="filter.from">From:</label>
-                                    <input type="date" id="cityLeagueDateFrom" onchange="applyCityLeagueDateFilter()" class="control-input">
-                                </div>
-                                <div>
-                                    <label for="cityLeagueDateTo" class="date-label" data-i18n="filter.to">To:</label>
-                                    <input type="date" id="cityLeagueDateTo" onchange="applyCityLeagueDateFilter()" class="control-input">
-                                </div>
-                            </div>
-                        </div>
+<section class="guide-section">
+<h2 class="guide-title">
+<p class="info-panel">
+<div class="info-panel">
+<section class="guide-section">
+<h2 class="guide-title">
+<p class="info-panel">
+<div class="info-panel">
+<section class="guide-section">
+<h2 class="guide-title">
+<h3 class="guide-title">
+<ol class="info-panel">
+<h3 class="guide-title">
+<div class="info-panel">
+<ul class="info-panel">
+<div class="info-panel">
+<p class="info-panel">
+<ul class="info-panel">
+<h3 class="guide-title">
+<p class="info-panel">
+<ol class="info-panel">
+<section class="guide-section">
+<h2 class="guide-title">
+<p class="info-panel">
+<h3 class="guide-title">
+<div class="info-panel">
+<h3 class="guide-title">
+<div class="info-panel">
+<div class="info-panel"><strong>Active (135px wide)</strong><br><small>Your attacking Pokémon. Drag from bench or hand.</small></div>
+<div class="info-panel"><strong>Bench (5 slots)</strong><br><small>Drag Pokémon from hand to bench. Drag bench ↔ active to swap.</small></div>
+<div class="info-panel"><strong>Discard</strong><br><small>Click to view discards. Drag to move cards here.</small></div>
+<div class="info-panel"><strong>Prize Cards</strong><br><small>6 face-down prizes. Click to take a prize. Stepper shows count.</small></div>
+<div class="info-panel"><strong>Stadium</strong><br><small>S-marker shown on card. Drag to discard or replace with new stadium.</small></div>
+<div class="info-panel"><strong>Hand</strong><br><small>Drawn cards. Drag to field. Click to zoom.</small></div>
+<h3 class="guide-title">
+<div class="info-panel">
+<section class="guide-section">
+<h2 class="guide-title">
+<div class="info-panel">
+<section class="guide-section">
+<h2 class="guide-title">
+<div class="info-panel">
+<section class="guide-section">
+<h2 class="guide-title mb-20">
+<div class="info-panel">
+<section class="guide-section">
+<h2 class="guide-title mb-15">
+<p class="info-panel mb-5">
+<p class="info-panel color-grey">
                         <div class="control-row">
                             <div class="control-group">
                                 <label for="cityLeagueDeckSearch" data-i18n="filter.searchDeck">🔍 Search Deck:</label>

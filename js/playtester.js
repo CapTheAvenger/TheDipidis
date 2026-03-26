@@ -1690,6 +1690,59 @@ function ptDrawCards(player, amount) {
     else ptShowMessage(t('pt.errDeckEmpty'));
 }
 
+// Expose playtester handler functions globally (for HTML event handlers)
+window.ptSaveState = ptSaveState;
+window.ptUndo = ptUndo;
+window.ptLog = ptLog;
+window.ptToggleLog = ptToggleLog;
+window.ptShowManual = ptShowManual;
+window.ptQuitPlaytester = ptQuitPlaytester;
+window.openPlaytester = openPlaytester;
+window.closePlaytester = closePlaytester;
+window.parseSandboxDeckToExactPrints = parseSandboxDeckToExactPrints;
+window.parseSandboxDeck = parseSandboxDeck;
+window.startStandalonePlaytester = startStandalonePlaytester;
+window.openPlaytesterSetup = openPlaytesterSetup;
+window.closePlaytesterSetup = closePlaytesterSetup;
+window.startPlaytesterWithMirror = startPlaytesterWithMirror;
+window.startPlaytesterWithOpponent = startPlaytesterWithOpponent;
+window.ptNewGame = ptNewGame;
+window.ptSaveGame = ptSaveGame;
+window.ptLoadGame = ptLoadGame;
+window.ptHasSavedGame = ptHasSavedGame;
+window.ptOpenStartPhase = ptOpenStartPhase;
+window.ptRenderStartPhaseModal = ptRenderStartPhaseModal;
+window.ptRenderStartHandHTML = ptRenderStartHandHTML;
+window.ptStartCardClick = ptStartCardClick;
+window.ptStartClearBench = ptStartClearBench;
+window.ptStartZoomCard = ptStartZoomCard;
+window.ptUpdateStartBtn = ptUpdateStartBtn;
+window.ptStartMulligan = ptStartMulligan;
+window.ptDoStartCoinFlip = ptDoStartCoinFlip;
+window.ptConfirmStartActives = ptConfirmStartActives;
+window.ptShowMulliganDrawModal = ptShowMulliganDrawModal;
+window.ptDoMulliganDraw = ptDoMulliganDraw;
+window.ptToggleZoomPanel = ptToggleZoomPanel;
+window.ptZoomBoard = ptZoomBoard;
+window.ptRenderZoomPanel = ptRenderZoomPanel;
+window.ptZoomViewCard = ptZoomViewCard;
+window.ptZoomClose = ptZoomClose;
+window.updateStepper = updateStepper;
+window.setupHotkeys = setupHotkeys;
+window.ptToggleMarker = ptToggleMarker;
+window.ptViewCard = ptViewCard;
+window.ptRunCommand = ptRunCommand;
+window.ptOpenTopCards = ptOpenTopCards;
+window.ptRenderTopCards = ptRenderTopCards;
+window.ptRouteTopCard = ptRouteTopCard;
+window.ptCloseTopCards = ptCloseTopCards;
+window.ptShuffleRemainingLookedCardsIntoDeck = ptShuffleRemainingLookedCardsIntoDeck;
+window.ptUpdateAreaPointerEvents = ptUpdateAreaPointerEvents;
+window.ptDraw1 = ptDraw1;
+window.ptShuffle = ptShuffle;
+window.ptRedrawPrizes = ptRedrawPrizes;
+window.ptDrawCards = ptDrawCards;
+
 function ptShuffleDeck(player) {
     const p    = player || ptCurrentPlayer;
     const deck = ptState[p].deck;

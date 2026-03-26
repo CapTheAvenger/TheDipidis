@@ -1729,6 +1729,12 @@ function updateTranslationsInDOM() {
   if (toggle) toggle.textContent = currentLang === 'de' ? '🇩🇪 DE' : '🇬🇧 EN';
 }
 
+// Expose i18n functions globally
+window.t = t;
+window.switchLanguage = switchLanguage;
+window.getLang = getLang;
+window.updateTranslationsInDOM = updateTranslationsInDOM;
+
 /* ── auto-init on load ───────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   document.documentElement.lang = currentLang;

@@ -1,3 +1,7 @@
+// --- Bulk expose all utility functions to window (for non-module environments) ---
+(function() {
+  ['showAuthModal', 'closeAuthModal'].forEach(fn => { if (typeof window[fn] !== 'function' && typeof eval(fn) === 'function') window[fn] = eval(fn); });
+})();
 /**
  * UI Helper Functions for Authentication & Profile
  * =================================================

@@ -1,3 +1,17 @@
+// --- Bulk expose all utility functions to window (for non-module environments) ---
+(function() {
+    const utils = [
+        'getInternationalPrintsForCard', 'fixMojibake', 'hasMojibake', 'escapeHtmlAttr', 'escapeJsStr',
+        'getDisplayCardName', 'getNameWarningHtml', 'getCanonicalDeckKey', 'normalizeDeckEntries',
+        'normalizeCardName', 'getSafeCardIdentityName', 'isBasicEnergy', 'isRadiantPokemon',
+        'isPrismStarCard', 'getDeckCopiesForCardName', 'getTotalAceSpecCopiesInDeck',
+        'getTotalRadiantCopiesInDeck', 'getLegalMaxCopies', 'getOpeningHandProbability',
+        'formatAverageValueForUi', 'getAverageValueSuffix', 'setAverageDisplayMode',
+        'ensureAverageDisplayToggleUi', 'sanitizeDeckDependencies', 'getStrictBaseCardName',
+        'calculateCombinedVariantStats', 'safeParseFloat', 'getPreferredVersionForCard'
+    ];
+    utils.forEach(fn => { if (typeof window[fn] !== 'function' && typeof eval(fn) === 'function') window[fn] = eval(fn); });
+})();
 // app-utils.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 

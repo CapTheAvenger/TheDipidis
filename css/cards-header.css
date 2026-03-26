@@ -1,38 +1,50 @@
+/* ── Main Site Header ──────────────────────────────────────────
+   Overrides the generic .header (red gradient, white text) from
+   styles.css so the top-bar gets a clean, modern look inspired
+   by championships.pokemon.com.
+   ─────────────────────────────────────────────────────────────── */
 .cards-header {
-    background: white;
-    padding: 15px 25px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    padding: 18px 28px;
     border-radius: 16px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
     margin-bottom: 25px;
-    border: 1px solid #e1e8ed;
+    border: none;
+    border-bottom: 4px solid var(--pokemon-yellow, #FFCB05);
+    /* Override .header defaults */
+    text-align: left;
+    color: #fff;
 }
-.header-flex-row {
+.cards-header .header-flex-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
 }
-.header-flex-group {
+.cards-header .header-flex-group {
     display: flex;
     align-items: center;
     gap: 20px;
 }
-.header-title {
+.cards-header .header-title {
     margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
-    font-size: 1.8em;
+    font-size: 1.7em;
     font-weight: 900;
-    color: #2c3e50;
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    letter-spacing: -0.3px;
 }
-.header-subtitle {
-    margin: 5px 0 0 0;
-    color: #7f8c8d;
+.cards-header .header-subtitle {
+    margin: 4px 0 0 0;
+    color: rgba(255,255,255,0.7);
     font-weight: 600;
-    font-size: 0.95em;
+    font-size: 0.92em;
+    text-shadow: none;
 }
 .header-flex-user {
     display: flex;
@@ -40,8 +52,9 @@
     gap: 10px;
 }
 .lang-toggle-btn {
-    background: #f0f0f0;
-    border: 2px solid #ddd;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.25);
+    color: #fff;
     padding: 6px 14px;
     border-radius: 20px;
     font-weight: bold;
@@ -49,9 +62,15 @@
     font-size: 14px;
     transition: all 0.2s;
 }
+.lang-toggle-btn:hover {
+    background: rgba(255,255,255,0.22);
+    border-color: var(--pokemon-yellow, #FFCB05);
+    color: var(--pokemon-yellow, #FFCB05);
+}
 .user-btn {
-    background: #f8f9fa;
-    border: 2px solid #ddd;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.25);
+    color: #fff;
     padding: 8px 16px;
     border-radius: 20px;
     font-weight: bold;
@@ -61,11 +80,16 @@
     gap: 6px;
     transition: all 0.2s;
 }
+.user-btn:hover {
+    background: rgba(255,255,255,0.22);
+    border-color: var(--pokemon-yellow, #FFCB05);
+}
 .user-btn-icon {
     width: 18px;
     height: 18px;
     margin-right: 6px;
     vertical-align: middle;
+    filter: brightness(0) invert(1);
 }
 .user-info {
     display: flex;
@@ -73,15 +97,30 @@
     gap: 15px;
 }
 .user-email-display {
-    color: #7f8c8d;
+    color: rgba(255,255,255,0.8);
     font-weight: 600;
     font-size: 0.9em;
 }
 .profile-btn {
-    background: #e8f4fd;
-    color: #3B4CCA;
-    border: 2px solid #3B4CCA;
+    background: rgba(59,76,202,0.3);
+    color: #fff;
+    border: 2px solid var(--pokemon-blue, #3B4CCA);
+}
+.profile-btn:hover {
+    background: var(--pokemon-blue, #3B4CCA);
 }
 .signin-btn {
-    background: #f8f9fa;
+    background: rgba(255,255,255,0.1);
+}
+.signin-btn-hidden { display: none; }
+.user-info-hidden { display: none; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .cards-header {
+        padding: 14px 16px;
+    }
+    .cards-header .header-title {
+        font-size: 1.3em;
+    }
 }

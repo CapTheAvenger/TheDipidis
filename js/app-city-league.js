@@ -2215,12 +2215,6 @@
             html += '</div>';
             tableContainer.innerHTML = html;
             if (tableViewContainer) tableViewContainer.classList.remove('d-none');
-        } // Funktion korrekt geschlossen
-            });
-            html += '</div>';
-            
-            tableContainer.innerHTML = html;
-            if (tableViewContainer) tableViewContainer.classList.remove('d-none');
         }
         
         // Get all versions of a card from allCardsDatabase

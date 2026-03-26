@@ -2594,18 +2594,16 @@
                 'Ace Spec': document.getElementById('overviewTypeAceSpec')
             };
             
-            // Reset all button styles
+            // Reset all button styles to match actual markup/CSS classes
             Object.values(buttons).forEach(btn => {
                 if (btn) {
-                    btn.classList.remove('btn-active', 'btn-inactive');
-                    btn.classList.add('btn-inactive');
+                    btn.classList.remove('active');
                 }
             });
-            
+
             // Highlight active button
             if (buttons[type]) {
-                buttons[type].classList.remove('btn-inactive');
-                buttons[type].classList.add('btn-active');
+                buttons[type].classList.add('active');
             }
             
             // Apply filter

@@ -1099,7 +1099,10 @@
     border: 1px dashed rgba(59, 76, 202, 0.15);
 }
 /* Override dark gradient from cards-header.css inside card sections */
-.cards-section > .cards-header {
+.cards-section > .cards-header,
+.cards-section .current-meta-cards-header,
+.cards-section .past-meta-cards-header,
+.cards-section .city-league-cards-header {
     background: transparent;
     padding: 0;
     border-radius: 0;

@@ -1,3 +1,37 @@
+<section class="tech-radar-section">
+	<div class="section-header">
+		<h2><i class="fa fa-radar"></i> Meta Tech-Radar</h2>
+		<p class="subtitle">Karten, die aktuell die Turnierszene infiltrieren</p>
+	</div>
+	<div id="tech-radar-grid" class="modern-grid">
+	</div>
+</section>
+
+<style>
+	.modern-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+		gap: 20px;
+		margin-top: 20px;
+	}
+	.tech-card-item {
+		background: var(--bg-dark);
+		border: 1px solid var(--primary-blue);
+		border-radius: 10px;
+		padding: 10px;
+		text-align: center;
+		transition: transform 0.3s;
+	}
+	.tech-card-item:hover {
+		transform: translateY(-5px);
+		box-shadow: 0 5px 15px rgba(0,210,255,0.3);
+	}
+	.trend-indicator {
+		color: var(--success);
+		font-weight: bold;
+		font-size: 0.8rem;
+	}
+</style>
 <div id="sidebar-container"></div>
 <!-- ...rest of city-league-analysis tab content... -->
 <!-- This is a placeholder. Please copy the full content from the original block as needed. -->

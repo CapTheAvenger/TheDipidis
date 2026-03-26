@@ -29,12 +29,8 @@ jobs:
       - name: Validate Python syntax
         run: |
           python3 -m py_compile backend/core/card_scraper_shared.py
-          python3 -m py_compile prepare_card_data.py
-          python3 -m py_compile price_proxy_server.py
-          shopt -s nullglob
-          for f in *_scraper*.py; do
-            python3 -m py_compile "$f" || { echo "::error::Syntax error in $f"; exit 1; }
-          done
+          python3 -m py_compile backend/scrapers/city_league_analysis_scraper.py
+          python3 -m py_compile backend/scrapers/current_meta_analysis_scraper.py
           echo "✓ All Python files pass syntax check"
 
       - name: Install npm tools

@@ -1,6 +1,4 @@
-﻿                <!-- Accessibility and filter section styles moved to external CSS -->
-                <link rel="stylesheet" href="css/cards-filter-section.css">
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <link rel="icon" href="data:,">
@@ -22,14 +20,24 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/styles.css?v=20260318-v64">
-    <link rel="stylesheet" href="css/ui-components.css?v=20260325-v1">
-    <link rel="stylesheet" href="css/auth-styles.css?v=20260322-v1">
-    <link rel="stylesheet" href="css/pokeball-menu.css?v=20260318-v64">
+    <!-- Load all CSS files in correct order -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/ui-components.css">
+    <link rel="stylesheet" href="css/auth-styles.css">
+    <link rel="stylesheet" href="css/pokeball-menu.css">
+    <link rel="stylesheet" href="css/cards-header.css">
+    <link rel="stylesheet" href="css/cards-filter-section.css">
+    <link rel="stylesheet" href="css/cards-tabs.css">
+    <link rel="stylesheet" href="css/city-league.css">
+    <link rel="stylesheet" href="css/meta-card-analysis.css">
+    <link rel="stylesheet" href="css/current-meta-matchups.css">
+    <link rel="stylesheet" href="css/city-league-display-toggles.css">
+    <link rel="stylesheet" href="css/de-overview-tabs.css">
+    <link rel="stylesheet" href="css/profile-howto-info.css">
 
     <!-- Mobile Drag & Drop polyfill for touch devices -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/default.css" integrity="sha384-Srk3zP8STu1+RFyFIr7rKzR0vJnlq8GYSis1oDYTAROmcW3lszSanzF9h/N5OIAZ" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js" integrity="sha384-mnsnaLTN3WEA86glMYYaTgkNJQWvG0devy3NWP2FdPyJCge1wvNuJF10+iBqRdG7" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/default.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <a href="#main-content" class="skip-to-content">Skip to content</a>
@@ -2195,7 +2203,38 @@
         </div>
     </div>
 
-    <script src="js/inline-init.js?v=20260321-v1" defer></script>
+    <!-- JS: Firebase scripts (order matters) -->
+    <script src="js/firebase-credentials.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-globals.js"></script>
+    <script src="js/firebase-auth.js"></script>
+    <script src="js/firebase-collection.js"></script>
+
+    <!-- JS: Core utilities -->
+    <script src="js/app-core.js"></script>
+    <script src="js/app-utils.js"></script>
+    <script src="js/i18n.js"></script>
+
+    <!-- JS: Feature modules -->
+    <script src="js/app-cards-db.js"></script>
+    <script src="js/app-deck-builder.js"></script>
+    <script src="js/app-city-league.js"></script>
+    <script src="js/app-current-meta.js"></script>
+    <script src="js/app-current-meta-analysis.js"></script>
+    <script src="js/app-features.js"></script>
+    <script src="js/app-init.js"></script>
+    <script src="js/app-meta-cards.js"></script>
+    <script src="js/app-past-meta.js"></script>
+    <script src="js/app-price.js"></script>
+    <script src="js/app-tier-meta.js"></script>
+    <script src="js/auth-ui-helpers.js"></script>
+    <script src="js/combo-worker.js"></script>
+    <script src="js/draw-simulator.js"></script>
+    <script src="js/playtester-mobile.js"></script>
+    <script src="js/playtester.js"></script>
+
+    <!-- JS: Initialization (must be last) -->
+    <script src="js/inline-init.js"></script>
 
     <div id="playtesterModal" class="d-none pos-fixed top-0 left-0 right-0 bottom-0 z-15000 flex-col" role="dialog" aria-modal="true" aria-label="Playtester simulator">
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>

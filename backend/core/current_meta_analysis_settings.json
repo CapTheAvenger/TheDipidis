@@ -1,0 +1,27 @@
+{
+    "sources": {
+        "limitless_online": {
+            "enabled": true,
+            "max_decks": 60,
+            "max_lists_per_deck": 20,
+            "format_filter": "PFL"
+        },
+        "tournaments": {
+            "enabled": true,
+            "start_date": "",
+            "max_tournaments": 60,
+            "max_decks_per_tournament": 128,
+            "format_filter": [
+                "Standard",
+                "Standard (JP)"
+            ],
+            "tournament_types": []
+        }
+    },
+    "delay_between_requests": 1.5,
+    "max_workers": 5,
+    "request_timeout": 20,
+    "max_retries": 2,
+    "append_mode": true,
+    "output_file": "current_meta_card_data.csv"
+}

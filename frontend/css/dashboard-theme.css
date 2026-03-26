@@ -1,0 +1,69 @@
+:root {
+    /* Ein modernes Dark-Theme Farbschema */
+    --bg-dark: #121212;
+    --bg-card: #1e1e1e;
+    --primary-blue: #3498db;
+    --accent-neon: #00d2ff;
+    --text-main: #e0e0e0;
+    --text-muted: #888888;
+    --border-color: #333333;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* Karten-Design für Tabellen und Container */
+.tab-content, .card-container {
+    background: var(--bg-card);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+/* Modernes Tabellen-Design */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th {
+    background: rgba(52, 152, 219, 0.1);
+    color: var(--primary-blue);
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+}
+
+tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Buttons & Inputs */
+button {
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.3s;
+}
+
+input[type="text"], select {
+    background: #252525;
+    border: 1px solid var(--border-color);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+}

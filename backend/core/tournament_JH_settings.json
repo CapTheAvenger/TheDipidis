@@ -1,0 +1,21 @@
+{
+    "max_tournaments": 150,
+    "delay_between_tournaments": 1.0,
+    "max_workers": 5,
+    "start_tournament_id": 391,
+    "output_file": "tournament_cards_data.csv",
+    "format_filter": [
+        "Standard"
+    ],
+    "tournament_types": [
+        "Regional",
+        "Special Event",
+        "LAIC",
+        "EUIC",
+        "NAIC",
+        "Worlds",
+        "International",
+        "Championship"
+    ],
+    "append_mode": true
+}

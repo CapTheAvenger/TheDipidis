@@ -1,0 +1,20 @@
+{
+    "sources": {
+        "city_league": {
+            "enabled": true,
+            "start_date": "24.01.2026",
+            "end_date": "auto",
+            "max_decklists_per_league": 16,
+            "max_tournaments": 0,
+            "additional_tournament_ids": [],
+            "max_workers": 5,
+            "request_timeout": 20,
+            "max_retries": 2,
+            "retry_delay": 1.0
+        }
+    },
+    "output_file": "city_league_analysis.csv",
+    "append_mode": true,
+    "delay_between_requests": 1.5,
+    "_comment": "Scrapes City League tournaments and extracts card data by archetype."
+}

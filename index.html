@@ -2799,11 +2799,11 @@
     <!-- Chart.js and PapaParse -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous"></script>
-    <!-- App modules (order matches working backup + new i18n) -->
-    <script src="js/app-core.js"></script>
-    <script src="js/app-price.js"></script>
+    <!-- App modules (utils must load before core) -->
     <script src="js/app-utils.js"></script>
     <script src="js/i18n.js"></script>
+    <script src="js/app-core.js"></script>
+    <script src="js/app-price.js"></script>
     <script src="js/app-tier-meta.js"></script>
     <script src="js/app-city-league.js"></script>
     <script src="js/app-deck-builder.js"></script>

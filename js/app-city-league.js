@@ -2210,7 +2210,12 @@
                             <button class="btn btn-primary city-league-card-proxy-btn" onclick="addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" title="${t('cl.proxyTooltip')}">${t('cl.proxy')}</button>
                         </div>
                     </div>`;
-                `;
+                // ...existing code...
+            }); // Ende der forEach-Schleife
+            html += '</div>';
+            tableContainer.innerHTML = html;
+            if (tableViewContainer) tableViewContainer.classList.remove('d-none');
+        } // Funktion korrekt geschlossen
             });
             html += '</div>';
             

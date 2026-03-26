@@ -147,6 +147,7 @@
 
         // Global alias so every module can use the same function
         window.escapeHtml = escapeHtmlAttr;
+        window.escapeHtmlAttr = escapeHtmlAttr;
 
         function escapeJsStr(value) {
             return String(value || '')

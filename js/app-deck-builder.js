@@ -1,15 +1,21 @@
 // app-deck-builder.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
-                    const totalCards = Object.values(data.cityLeague?.deck || {}).reduce((s,c)=>s+c,0)
-                                   + Object.values(data.currentMeta?.deck || {}).reduce((s,c)=>s+c,0)
-                                   + Object.values(data.pastMeta?.deck || {}).reduce((s,c)=>s+c,0);
-                    if (totalCards > 0) {
-                        window._pendingAutosave = data;
-                    }
-                }
-            } catch(e) { /* ignore */ }
-        })();
+// Autosave beim Laden der Seite prüfen
+(function() {
+    try {
+        const saved = localStorage.getItem('autosave_deck');
+        if (saved) {
+            const data = JSON.parse(saved);
+            const totalCards = Object.values(data.cityLeague?.deck || {}).reduce((s,c)=>s+c,0)
+                           + Object.values(data.currentMeta?.deck || {}).reduce((s,c)=>s+c,0)
+                           + Object.values(data.pastMeta?.deck || {}).reduce((s,c)=>s+c,0);
+            if (totalCards > 0) {
+                window._pendingAutosave = data;
+            }
+        }
+    } catch(e) { /* ignore */ }
+})();
         localStorage.removeItem('cityLeagueDeck');
         localStorage.removeItem('currentMetaDeck');
         localStorage.removeItem('pastMetaDeck');

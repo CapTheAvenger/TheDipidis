@@ -115,17 +115,17 @@
             <div id="city-league" class="tab-content active">
                 <div class="city-league-container">
                     <div class="city-league-header">
-                        <h2><span data-i18n="cl.development">🇯🇵 City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="cl.cityLeagueDev">🇯🇵 City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
                             <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
-                                <option value="M4" data-i18n="format.m4">M4 - Ninja Spinner (Aktuell)</option>
-                                <option value="M3" data-i18n="format.m3">M3 - Perfect Order (Archiv)</option>
+                                <option value="M4" data-i18n="format.m4current">Current Meta</option>
+                                <option value="M3" data-i18n="format.m3archive">Past Meta</option>
                             </select>
                         </div>
                     </div>
-                    <div id="cityLeagueContent" style="padding: 30px; background: #ffffff;">
+                    <div id="cityLeagueContent" style="padding: 12px; background: #ffffff;">
                         <div id="cityLeagueTierSections"></div>
-                        <div style="text-align: center; padding: 40px; color: #999;" data-i18n="common.loading">Loading...</div>
+                        <div style="text-align: center; padding: 20px; color: #999;" data-i18n="misc.loading">Loading...</div>
                     </div>
                 </div>
             </div>
@@ -134,11 +134,11 @@
             <div id="city-league-analysis" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="cl.deckAnalysis">🦅 City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="cl.analysisHeading">🦅 City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
                             <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: #1e3c72; color: white; cursor: pointer;">
-                                <option value="M4" data-i18n="format.m4">M4 - Ninja Spinner (Aktuell)</option>
-                                <option value="M3" data-i18n="format.m3">M3 - Perfect Order (Archiv)</option>
+                                <option value="M4" data-i18n="format.m4current">Current Meta</option>
+                                <option value="M3" data-i18n="format.m3archive">Past Meta</option>
                             </select>
                         </div>
                         <p data-i18n="cl.analyzeAndBuild">Analyze and Build Decks</p>
@@ -563,33 +563,32 @@
                         <div class="city-league-meta-card-panel">
                             <div class="current-meta-meta-card-header">
                                 <h3 class="current-meta-meta-card-title" data-i18n="section.metaCards">🌍 Meta Card Analysis (Top 10 Archetypes)</h3>
-                                <span class="current-meta-meta-card-count"><span id="cityLeagueMetaCardCount">0 Cards</span></span>
+                                <span class="current-meta-meta-card-count"><span id="currentMetaMetaCardCount">0 Cards</span></span>
                             </div>
                             <div class="current-meta-meta-card-filters">
                                 <div class="current-meta-meta-share-filter">
-                                    <button id="cityLeagueMetaShareAll" onclick="setMetaShareFilter('cityLeague', 'all')" class="current-meta-meta-share-btn active" data-i18n="meta.filterAll">📊 All</button>
-                                    <button id="cityLeagueMetaShare90" onclick="setMetaShareFilter('cityLeague', 90)" class="current-meta-meta-share-btn" data-i18n="meta.filter90">🔥 >90%</button>
-                                    <button id="cityLeagueMetaShare70" onclick="setMetaShareFilter('cityLeague', 70)" class="current-meta-meta-share-btn" data-i18n="meta.filter70">⚡ >70%</button>
-                                    <button id="cityLeagueMetaShare50" onclick="setMetaShareFilter('cityLeague', 50)" class="current-meta-meta-share-btn" data-i18n="meta.filter50">💧 >50%</button>
+                                    <button id="currentMetaMetaShareAll" onclick="setMetaShareFilter('currentMeta', 'all')" class="current-meta-meta-share-btn active" data-i18n="meta.filterAll">📊 All</button>
+                                    <button id="currentMetaMetaShare90" onclick="setMetaShareFilter('currentMeta', 90)" class="current-meta-meta-share-btn" data-i18n="meta.filter90">🔥 >90%</button>
+                                    <button id="currentMetaMetaShare70" onclick="setMetaShareFilter('currentMeta', 70)" class="current-meta-meta-share-btn" data-i18n="meta.filter70">⚡ >70%</button>
+                                    <button id="currentMetaMetaShare50" onclick="setMetaShareFilter('currentMeta', 50)" class="current-meta-meta-share-btn" data-i18n="meta.filter50">💧 >50%</button>
                                 </div>
                                 <div class="current-meta-meta-type-filter">
-                                    <button id="cityLeagueMetaTypeAll" onclick="setMetaCardTypeFilter('cityLeague', 'all')" class="current-meta-meta-type-btn active" data-i18n="meta.typeAll">🔵 All</button>
-                                    <button id="cityLeagueMetaTypeTrainer" onclick="setMetaCardTypeFilter('cityLeague', 'Trainer')" class="current-meta-meta-type-btn" data-i18n="meta.typeTrainer">🎴 Trainer</button>
-                                    <button id="cityLeagueMetaTypePokemon" onclick="setMetaCardTypeFilter('cityLeague', 'Pokemon')" class="current-meta-meta-type-btn" data-i18n="meta.typePokemon">🟡 Pokémon</button>
-                                    <button id="cityLeagueMetaTypeEnergy" onclick="setMetaCardTypeFilter('cityLeague', 'Energy')" class="current-meta-meta-type-btn" data-i18n="meta.typeEnergy">⚡ Energy</button>
+                                    <button id="currentMetaMetaTypeAll" onclick="setMetaCardTypeFilter('currentMeta', 'all')" class="current-meta-meta-type-btn active" data-i18n="meta.typeAll">🔵 All</button>
+                                    <button id="currentMetaMetaTypeTrainer" onclick="setMetaCardTypeFilter('currentMeta', 'Trainer')" class="current-meta-meta-type-btn" data-i18n="meta.typeTrainer">🎴 Trainer</button>
+                                    <button id="currentMetaMetaTypePokemon" onclick="setMetaCardTypeFilter('currentMeta', 'Pokemon')" class="current-meta-meta-type-btn" data-i18n="meta.typePokemon">🟡 Pokémon</button>
+                                    <button id="currentMetaMetaTypeEnergy" onclick="setMetaCardTypeFilter('currentMeta', 'Energy')" class="current-meta-meta-type-btn" data-i18n="meta.typeEnergy">⚡ Energy</button>
                                 </div>
                                 <div class="current-meta-meta-sort-filter">
-                                    <button onclick="sortMetaCards('cityLeague', 'type')" class="current-meta-meta-sort-btn active" data-i18n="meta.sortByType">🎯 Sort by Type</button>
-                                    <button onclick="sortMetaCards('cityLeague', 'share')" class="current-meta-meta-sort-btn" data-i18n="meta.sortByShare">📈 Sort by Share%</button>
-                                    <button onclick="sortMetaCards('cityLeague', 'avgCount')" class="current-meta-meta-sort-btn" data-i18n="meta.sortByAvgCount">🔢 Sort by Avg Count</button>
+                                    <button onclick="sortMetaCards('currentMeta', 'type')" class="current-meta-meta-sort-btn active" data-i18n="meta.sortByType">🎯 Sort by Type</button>
+                                    <button onclick="sortMetaCards('currentMeta', 'share')" class="current-meta-meta-sort-btn" data-i18n="meta.sortByShare">📈 Sort by Share%</button>
+                                    <button onclick="sortMetaCards('currentMeta', 'avgCount')" class="current-meta-meta-sort-btn" data-i18n="meta.sortByAvgCount">🔢 Sort by Avg Count</button>
                                 </div>
                             </div>
-                            <input type="text" id="cityLeagueMetaSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input city-league-meta-search current-meta-meta-search" oninput="filterMetaCards('cityLeague')" aria-label="Search City League meta cards" data-i18n-placeholder="filter.searchCardPlaceholder" data-i18n-aria="filter.searchCardAria">
-                            <div id="cityLeagueMetaGrid" class="meta-card-grid city-league-meta-grid current-meta-meta-grid">
+                            <input type="text" id="currentMetaMetaSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input city-league-meta-search current-meta-meta-search" oninput="filterMetaCards('currentMeta')" aria-label="Search current meta cards" data-i18n-placeholder="filter.searchCardPlaceholder" data-i18n-aria="filter.searchCardAria">
+                            <div id="currentMetaMetaGrid" class="meta-card-grid city-league-meta-grid current-meta-meta-grid">
                                 <p class="current-meta-meta-empty" data-i18n="meta.loadHint">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
                             </div>
                             <div class="current-meta-meta-load-btn-row">
-                                <button class="btn-gradient-primary" onclick="loadMetaCardAnalysis('cityLeague')" data-i18n="btn.loadMetaAnalysis">🔄 Load Meta Analysis</button>
                                 <button class="btn-gradient-primary" onclick="loadMetaCardAnalysis('currentMeta')" data-i18n="meta.loadBtn">🔄 Load Meta Analysis</button>
                             </div>
                         </div>

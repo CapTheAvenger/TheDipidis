@@ -45,7 +45,7 @@
 
 .auth-modal-content {
     background: white;
-    padding: 40px;
+    padding: 24px;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     max-width: 450px;
@@ -276,7 +276,7 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .auth-modal-content {
-        padding: 30px 20px;
+        padding: 20px 16px;
     }
     
     .stat-card p {

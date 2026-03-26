@@ -2365,8 +2365,10 @@
                 const totalCount = safeParseFloat(card.total_count || 0);
                 const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
                 const avgCountFromRow = safeParseFloat(card.average_count || card.avg_count || '', NaN);
-                // avgCountInUsedValue is declared later in the statistics block, do not redeclare here.
-                const roundedAvgUsed = Math.round(avgCountInUsedValue);
+                const earlyAvgInUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
+                    ? avgCountFromRow
+                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
+                const roundedAvgUsed = Math.round(earlyAvgInUsed);
                 const improvedMaxCount = Math.max(rawMaxCount, roundedAvgUsed);
                 const finalMaxCount = improvedMaxCount > 0
                     ? Math.min(legalMaxCopies, Math.max(1, improvedMaxCount))

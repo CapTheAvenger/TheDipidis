@@ -59,9 +59,10 @@
 }
 
 .current-meta-matchup-select-container {
-    background: white;
-    padding: 15px;
-    border-radius: 5px;
-    border: 2px solid #3498db;
-    margin-top: 20px;
+    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(59, 76, 202, 0.12);
+    margin-top: 16px;
+    box-shadow: 0 2px 8px rgba(59, 76, 202, 0.06);
 }

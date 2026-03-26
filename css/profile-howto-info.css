@@ -4,15 +4,17 @@
  */
 
 .profile-info-block {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    border-left: 4px solid #3498db;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f0fe 100%);
+    padding: 18px 20px;
+    border-radius: 10px;
+    border-left: 4px solid var(--pokemon-blue, #3B4CCA);
     margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(59, 76, 202, 0.06);
 }
 .profile-info-block .profile-info-title {
-    color: #3498db;
+    color: var(--pokemon-blue, #3B4CCA);
     margin-top: 0;
+    font-weight: 800;
 }
 
 .profile-info-block p,
@@ -25,15 +27,17 @@
 }
 
 .how-to-use-info-block {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    border-left: 4px solid #2ecc71;
+    background: linear-gradient(135deg, #f0faf4 0%, #e8f5e9 100%);
+    padding: 18px 20px;
+    border-radius: 10px;
+    border-left: 4px solid #22c55e;
     margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.06);
 }
 .how-to-use-info-block .how-to-use-info-title {
-    color: #2ecc71;
+    color: #16a34a;
     margin-top: 0;
+    font-weight: 800;
 }
 
 .how-to-use-info-block p {

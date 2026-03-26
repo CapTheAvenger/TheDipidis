@@ -489,8 +489,8 @@ const BASE_PATH = './data/';
             const suggestions = getProxyManualNameSuggestions(nameInput.value || '');
             datalist.innerHTML = suggestions.map(entry => {
                 const printInfo = entry.set && entry.number ? `${entry.set} ${entry.number}` : 'unknown print';
-                const value = escapeHtmlAttr(entry.name);
-                const label = escapeHtmlAttr(printInfo);
+                const value = window.escapeHtmlAttr(entry.name);
+                const label = window.escapeHtmlAttr(printInfo);
                 return `<option value="${value}" label="${label}"></option>`;
             }).join('');
         }
@@ -633,12 +633,12 @@ const BASE_PATH = './data/';
             }
 
             const html = queue.map(item => {
-                const safeName = escapeHtmlAttr(item.name);
-                const safeSet = escapeHtmlAttr(item.set || 'N/A');
-                const safeNumber = escapeHtmlAttr(item.number || 'N/A');
+                const safeName = window.escapeHtmlAttr(item.name);
+                const safeSet = window.escapeHtmlAttr(item.set || 'N/A');
+                const safeNumber = window.escapeHtmlAttr(item.number || 'N/A');
                 const displaySetNumber = (item.set && item.number) ? `${safeSet} ${safeNumber}` : t('proxy.noPrint');
                 const imageUrl = getCardImageSource(item.name, item.set, item.number) || buildInlineCardPlaceholder(item.name);
-                const escapedImageUrl = escapeHtmlAttr(imageUrl);
+                const escapedImageUrl = window.escapeHtmlAttr(imageUrl);
                 const jsName = escapeJsStr(item.name || '');
                 const jsSet = escapeJsStr(item.set || '');
                 const jsNumber = escapeJsStr(item.number || '');
@@ -886,7 +886,7 @@ const BASE_PATH = './data/';
             const pageHtml = pages.map((pageCards, pageIndex) => {
                 const cardsHtml = pageCards.map(card => {
                     const imageUrl = getCardImageSource(card.name, card.set, card.number) || buildInlineCardPlaceholder(card.name);
-                    const safeImage = escapeHtmlAttr(imageUrl);
+                    const safeImage = window.escapeHtmlAttr(imageUrl);
 
                     return `
                         <div class="proxy-slot">

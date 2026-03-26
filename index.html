@@ -34,17 +34,8 @@
     <link rel="stylesheet" href="css/profile-howto-info.css" type="text/css">
     <!-- Mobile Drag & Drop polyfill for touch devices -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/default.css" type="text/css" crossorigin="anonymous">
-    <!-- Chart.js and PapaParse (restore if missing) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" type="text/javascript" crossorigin="anonymous" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" type="text/javascript" crossorigin="anonymous" defer></script>
-    <!-- Google Identity Services (restore if missing) -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- Firebase (restore if missing) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <!-- Mobile Drag & Drop polyfill JS -->
-    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js" type="text/javascript" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <a href="#main-content" class="skip-to-content">Skip to content</a>
@@ -2210,10 +2201,6 @@
         </div>
     </div>
 
-    <!-- JS: Firebase scripts (order matters) -->
-    <script src="js/firebase-credentials.js"></script>
-
-    <!-- JS: Initialization (must be last) -->
     <script src="js/inline-init.js"></script>
 
     <div id="playtesterModal" class="d-none pos-fixed top-0 left-0 right-0 bottom-0 z-15000 flex-col" role="dialog" aria-modal="true" aria-label="Playtester simulator">
@@ -2797,20 +2784,40 @@
         </div>
     </div>
 
-    <!-- JS: Firebase scripts (order matters) -->
+    <!-- External libraries -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase own modules -->
     <script src="js/firebase-credentials.js"></script>
+    <script src="js/firebase-collection.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-globals.js"></script>
     <script src="js/firebase-auth.js"></script>
-    <script src="js/firebase-collection.js"></script>
-    <!-- JS: Core utilities -->
+    <script src="js/auth-ui-helpers.js"></script>
+    <!-- Chart.js and PapaParse -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous"></script>
+    <!-- App modules (order matches working backup + new i18n) -->
     <script src="js/app-core.js"></script>
-    <script src="js/combo-worker.js"></script>
+    <script src="js/app-price.js"></script>
+    <script src="js/app-utils.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/app-tier-meta.js"></script>
+    <script src="js/app-city-league.js"></script>
+    <script src="js/app-deck-builder.js"></script>
+    <script src="js/app-meta-cards.js"></script>
+    <script src="js/app-current-meta.js"></script>
+    <script src="js/app-past-meta.js"></script>
+    <script src="js/app-cards-db.js"></script>
+    <script src="js/app-init.js"></script>
+    <script src="js/app-current-meta-analysis.js"></script>
+    <script src="js/app-features.js"></script>
     <script src="js/draw-simulator.js"></script>
+    <script src="js/combo-worker.js"></script>
     <script src="js/playtester-mobile.js"></script>
     <script src="js/playtester.js"></script>
-    <!-- JS: Initialization (must be last) -->
-    <script src="js/inline-init.js"></script>
 
     <!-- Draw Simulator Modal -->
     <div id="drawSimulatorModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" aria-label="Starting hand simulator">
@@ -2857,6 +2864,4 @@
     </div>
 
 </body>
-    <!-- Utils: Muss vor allen anderen eigenen Skripten geladen werden! -->
-    <script src="js/app-utils.js"></script>
 </html>

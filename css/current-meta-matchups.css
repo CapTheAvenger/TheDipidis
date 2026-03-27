@@ -66,3 +66,160 @@
     margin-top: 16px;
     box-shadow: 0 2px 8px rgba(59, 76, 202, 0.06);
 }
+
+/* ============================================================
+ * Styles for the scraped Limitless HTML loaded into
+ * #currentMetaContent — replaces lost <style> block CSS
+ * ============================================================ */
+
+/* Stat cards grid (top overview) */
+#currentMetaContent .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+}
+#currentMetaContent .stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 22px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(102,126,234,0.3);
+}
+#currentMetaContent .stat-card h3 {
+    margin: 0 0 6px 0;
+    font-size: 1em;
+    opacity: 0.88;
+    font-weight: 700;
+    color: white;
+}
+#currentMetaContent .stat-card .value {
+    font-size: 2em;
+    font-weight: 800;
+    margin: 8px 0 4px;
+    color: white;
+}
+#currentMetaContent .stat-card p {
+    font-size: 0.86em;
+    margin: 4px 0 0;
+    opacity: 0.88;
+    color: white;
+}
+
+/* Section headings (h2) */
+#currentMetaContent .section > h2 {
+    color: #2c3e50;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+    font-size: 1.2em;
+    font-weight: 800;
+}
+
+/* Climbers / Fallers grid — proper 2-col layout preserved */
+#currentMetaContent .stats-grid + div[style*="grid"] {
+    gap: 24px;
+}
+
+/* Table base styling for unthemed tables (Climbers/Fallers) */
+#currentMetaContent .section table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-top: 0;
+}
+#currentMetaContent .section table th {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.9em;
+}
+#currentMetaContent .section table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #f0f2f5;
+    font-size: 0.9em;
+    vertical-align: middle;
+}
+#currentMetaContent .section table tbody tr:nth-child(even) {
+    background: rgba(59, 76, 202, 0.03);
+}
+#currentMetaContent .section table tbody tr:hover {
+    background: rgba(59, 76, 202, 0.07);
+    transition: background 0.15s;
+}
+
+/* Matchup deck section cards */
+#currentMetaContent > .section > div > div[style*="background: #f8f9fa"] {
+    border-radius: 10px;
+    border: 1px solid #e8eaf0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Matchup analysis individual deck section */
+#currentMetaContent [style*="background: #f8f9fa"][style*="padding: 20px"] {
+    border-radius: 10px;
+    border: 1px solid #e8eaf0;
+}
+
+/* Matchup tables (Best/Worst) in loaded HTML */
+#currentMetaContent .matchups-grid-container table th {
+    padding: 10px 12px;
+    font-weight: 700;
+    font-size: 0.88em;
+}
+#currentMetaContent .matchups-grid-container table td {
+    padding: 8px 12px;
+    font-size: 0.88em;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f2f5;
+}
+#currentMetaContent .matchups-grid-container table tbody tr:nth-child(even) {
+    background: rgba(0,0,0,0.02);
+}
+#currentMetaContent .matchups-grid-container table tbody tr:hover {
+    background: rgba(0,0,0,0.04);
+}
+
+/* details/summary (Top 10 Decks collapsible) */
+#currentMetaContent details > summary {
+    list-style: none;
+    user-select: none;
+}
+#currentMetaContent details > summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Opponent search sections in loaded HTML */
+#currentMetaContent [style*="border: 2px solid #3498db"] {
+    border-radius: 8px !important;
+}
+
+/* Rank badges */
+#currentMetaContent .rank-up {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.85em;
+}
+#currentMetaContent .rank-down {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.85em;
+}
+#currentMetaContent .positive {
+    color: #27ae60;
+    font-weight: 700;
+}
+#currentMetaContent .negative {
+    color: #e74c3c;
+    font-weight: 700;
+}

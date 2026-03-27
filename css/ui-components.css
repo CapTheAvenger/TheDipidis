@@ -73,6 +73,15 @@
 .bg-grey-light { background: #f8f9fa !important; }
 .cursor-text { cursor: text !important; }
 /* Modular meta matchup table styles (used in app-meta-cards.js) */
+.matchups-grid-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    align-items: start !important;
+}
+.matchups-grid-container > * {
+    min-width: 0 !important;
+}
 .meta-matchup-table {
     width: 100% !important;
     table-layout: fixed !important;

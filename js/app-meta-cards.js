@@ -1107,7 +1107,6 @@
                             const hasMatchupTables = grid.querySelectorAll('table').length >= 2;
                             if (hasMatchupTables) {
                                 // Remove inline grid style, let CSS take over
-                                grid.classList.add('meta-card-list-grid');
                                 grid.classList.add('matchups-grid-container');
                                 devLog('? Removed inline grid styles from matchup container');
                             }

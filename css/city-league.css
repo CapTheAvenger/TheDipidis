@@ -701,6 +701,10 @@
     flex-wrap: wrap;
     margin-bottom: 18px;
 }
+.current-meta-matchups-grid-container > div {
+    flex: 1 1 0%;
+    min-width: 0;
+}
 .current-meta-matchups-table {
     width: 100%;
     box-shadow: none;

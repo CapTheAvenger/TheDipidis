@@ -602,21 +602,21 @@
                 const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
                 
                 return `
-                    <div class="card-item card-item-shadow">
-                        <div class="card-image-container pos-rel">
-                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-img-std" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
+                    <div class="card-item">
+                        <div class="card-image-container">
+                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
                                  onmouseover="showMetaCardTooltip(event, '${cardNameEscaped}', '${archetypesJson}')" 
                                  onmouseout="hideMetaCardTooltip()">
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
-                            ${deckCount > 0 ? `<div class="card-badge card-badge-green pos-abs top-left">${deckCount}</div>` : ''}
+                            ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
 
                             <!-- Card info section -->
-                            <div class="card-info-bottom card-info-bottom-std">
-                                <div class="card-info-text">
-                                    <div class="card-info-name">${card.card_name}</div>
-                                    <div class="card-info-set">${setCode} ${setNumber}</div>
-                                    ${card.metaShare > 0 ? `<div class="card-info-meta">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
+                            <div class="card-info-bottom">
+                                <div class="card-info-text mb-6">
+                                    <div class="fw-bold mb-2 nowrap ellipsis">${card.card_name}</div>
+                                    <div class="color-grey fs-09">${setCode} ${setNumber}</div>
+                                    ${card.metaShare > 0 ? `<div class="color-yellow fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
                                 </div>
                                 
                                 <!-- Card Actions: Row 1 = - ★ + | Row 2 = L P price -->

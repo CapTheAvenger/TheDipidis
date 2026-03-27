@@ -1742,6 +1742,10 @@ const BASE_PATH = './data/';
                     if (typeof updateWishlistUI === 'function') {
                         updateWishlistUI();
                     }
+                    // Profile stats (value, card count) also depend on card prices from DB; refresh stats.
+                    if (window.userProfile && typeof updateProfileUI === 'function') {
+                        updateProfileUI(window.userProfile);
+                    }
                 } else {
                     console.error('? Failed to load all_cards_merged.json');
                 }

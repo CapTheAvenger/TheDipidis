@@ -374,10 +374,7 @@
             // Render matchups
             renderCurrentMetaMatchups(archetype);
             
-            // Show deck visual
-            renderCurrentMetaDeckGrid(deckCards);
-            
-            // Apply current filter
+            // Render cards using current active view (defaults to table when both are hidden)
             applyCurrentMetaFilter();
             
             // DON'T auto-display deck here - let the caller decide
@@ -614,7 +611,8 @@
             
             const tableViewContainer = document.getElementById('currentMetaDeckTableView');
             const gridViewContainer = document.getElementById('currentMetaDeckVisual');
-            const isTableViewActive = tableViewContainer && tableViewContainer.style.display !== 'none';
+            // Active view = the one NOT hidden (d-none); default to table when both are hidden
+            const isTableViewActive = !gridViewContainer || gridViewContainer.classList.contains('d-none');
             
             if (isTableViewActive) {
                 renderCurrentMetaDeckTable(filteredCards);
@@ -759,7 +757,10 @@
 
             if (!Array.isArray(cards) || cards.length === 0) {
                 gridContainer.innerHTML = getEmptyStateHtml();
-                if (visualContainer) visualContainer.style.display = 'block';
+                if (visualContainer) {
+                    document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');
+                    visualContainer.classList.remove('d-none');
+                }
                 return;
             }
             
@@ -841,7 +842,8 @@
             });
             
             gridContainer.innerHTML = html;
-            visualContainer.style.display = 'block';
+            document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');
+            visualContainer.classList.remove('d-none');
         }
         
         function renderCurrentMetaDeckTable(cards) {
@@ -1016,7 +1018,8 @@
             }
             
             tableContainer.innerHTML = html;
-            tableViewContainer.style.display = 'block';
+            document.getElementById('currentMetaDeckVisual')?.classList.add('d-none');
+            tableViewContainer.classList.remove('d-none');
             devLog('Current Meta table rendered with tier grouping:', { core: coreCards.length, aceSpec: aceSpecCards.length, tech: techCards.length, spicy: spicyCards.length });
         }
         
@@ -1084,14 +1087,14 @@
                 return;
             }
             
-            const isGridViewActive = gridViewContainer.style.display !== 'none';
+            const isGridViewActive = !gridViewContainer.classList.contains('d-none');
             
             if (isGridViewActive) {
-                gridViewContainer.style.display = 'none';
-                if (button) button.textContent = '??? Grid View';
+                gridViewContainer.classList.add('d-none');
+                if (button) button.textContent = '🖼️ Grid View';
             } else {
-                tableViewContainer.style.display = 'none';
-                if (button) button.textContent = '?? List View';
+                tableViewContainer.classList.add('d-none');
+                if (button) button.textContent = '📋 List View';
             }
             
             // Re-apply filter to preserve percentage filter and render correct view

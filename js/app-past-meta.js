@@ -364,9 +364,9 @@
                 .map(id => pastMetaTournaments.find(t => t.tournament_id === id))
                 .filter(t => t) // Remove undefined entries
                 .sort((a, b) => {
-                    // Sort by date (newest first)
-                    const dateA = new Date(a.tournament_date || '1970-01-01');
-                    const dateB = new Date(b.tournament_date || '1970-01-01');
+                    // Sort by date (newest first); use parser that handles "14th March 2026" ordinal format
+                    const dateA = parsePastMetaDateMs(a.tournament_date);
+                    const dateB = parsePastMetaDateMs(b.tournament_date);
                     return dateB - dateA;
                 });
             

@@ -563,7 +563,6 @@
             // Render cards (similar to card overview grid)
             grid.innerHTML = cards.map(card => {
                 const imageUrl = getBestCardImage(card) || buildInlineCardPlaceholder(card.card_name);
-                const fallbackUrl = buildInlineCardPlaceholder(card.card_name);
                 const selectedArchetype = source === 'cityLeague'
                     ? (document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all')
                     : (document.getElementById('currentMetaArchetypeSelect')?.value || 'all');
@@ -581,34 +580,56 @@
                 const deckKey = `${card.card_name} (${card.set_code} ${card.set_number})`;
                 const deckCount = (currentDeck && currentDeck[deckKey]) ? currentDeck[deckKey] : 
                                  (currentDeck && currentDeck[card.card_name]) ? currentDeck[card.card_name] : 0;
+
+                // Price lookup
+                const setCode = card.set_code || '';
+                const setNumber = card.set_number || '';
+                let eurPrice = '';
+                let cardmarketUrl = '';
+                if (setCode && setNumber) {
+                    let priceCard = (cardsBySetNumberMap || {})[`${setCode}-${setNumber}`] || null;
+                    if (!priceCard) {
+                        const normalizedNumber = setNumber.replace(/^0+/, '') || '0';
+                        priceCard = (cardsBySetNumberMap || {})[`${setCode}-${normalizedNumber}`] || null;
+                    }
+                    if (priceCard) {
+                        eurPrice = priceCard.eur_price || '';
+                        cardmarketUrl = priceCard.cardmarket_url || '';
+                    }
+                }
+                const priceDisplay = eurPrice || '0,00€';
+                const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
+                const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
                 
                 return `
-                    <div class="card-item">
-                        <div class="card-image-container">
-                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-image" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}', '${fallbackUrl}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
+                    <div class="card-item card-item-shadow">
+                        <div class="card-image-container pos-rel">
+                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-img-std" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
                                  onmouseover="showMetaCardTooltip(event, '${cardNameEscaped}', '${archetypesJson}')" 
                                  onmouseout="hideMetaCardTooltip()">
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
-                            ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
+                            ${deckCount > 0 ? `<div class="card-badge card-badge-green pos-abs top-left">${deckCount}</div>` : ''}
 
                             <!-- Card info section -->
-                            <div class="card-info-bottom card-info-bottom-meta">
-                                <div class="card-info-text mb-6">
-                                    <div class="fw-bold mb-2 nowrap ellipsis">${card.card_name}</div>
-                                    ${card.metaShare > 0 ? `<div class="color-yellow fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div><div class="color-grey fs-09 fw-500">(${Math.round(card.avgCountWhenUsed)}x when used)</div>` : ''}
+                            <div class="card-info-bottom card-info-bottom-std">
+                                <div class="card-info-text">
+                                    <div class="card-info-name">${card.card_name}</div>
+                                    <div class="card-info-set">${setCode} ${setNumber}</div>
+                                    ${card.metaShare > 0 ? `<div class="card-info-meta">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
                                 </div>
                                 
-                                <!-- Card Actions: Row 1 = - ★ + | Row 2 = L (full-width) -->
-                                <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 3px;">
+                                <!-- Card Actions: Row 1 = - ★ + | Row 2 = L P price -->
+                                <div class="card-action-buttons card-action-buttons-col">
                                     <div class="card-action-row">
-                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" class="btn btn-danger card-action-btn card-action-remove" title="Remove from deck">-</button>
-                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${card.set_code} ${card.set_number})')" class="btn btn-warning card-action-btn card-action-rarity" title="Switch rarity/print">★</button>
-                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" class="btn btn-success card-action-btn card-action-add" title="Add to deck">+</button>
+                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" class="btn-red card-action-btn" title="Remove from deck">-</button>
+                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="btn-yellow card-action-btn" title="Switch rarity/print">★</button>
+                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="btn-green card-action-btn" title="Add to deck">+</button>
                                     </div>
-                                    <div class="card-action-row-wide">
-                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${card.set_code}', '${card.set_number}', 1)" class="btn btn-danger card-action-btn card-action-proxy" title="Add to proxy">Proxy</button>
-                                        <button onclick="event.stopPropagation(); openLimitlessCard('${card.set_code}', '${card.set_number}')" class="btn btn-purple card-action-btn card-action-limitless" title="Open on Limitless (${card.set_code} ${card.set_number})">Limitless — ${card.set_code} ${card.set_number}</button>
+                                    <div class="card-action-row card-action-row-wide">
+                                        ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" class="btn-purple card-action-btn btn-xs" title="Open on Limitless">L</button>` : '<span></span>'}
+                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" class="btn-gradient-red card-action-btn btn-xs" title="Add to proxy">P</button>
+                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" class="btn-gradient-orange card-action-btn btn-xs" style="background: ${priceBackground}; cursor: ${eurPrice ? 'pointer' : 'not-allowed'};" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
                                     </div>
                                 </div>
                             </div>

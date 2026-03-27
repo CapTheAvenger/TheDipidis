@@ -934,7 +934,8 @@
                     setNumSpace.includes(searchTerm) ||
                     setNumCombined.includes(searchTerm);
 
-                const matchesType = pastMetaOverviewCardTypeFilter === 'all' || cardType === pastMetaOverviewCardTypeFilter;
+                const matchesType = pastMetaOverviewCardTypeFilter === 'all' || cardType === pastMetaOverviewCardTypeFilter
+                    || (pastMetaOverviewCardTypeFilter === 'Energy' && cardType === 'Basic Energy');
                 
                 // Show card only if it matches both filters
                 if (matchesSearch && matchesType) {

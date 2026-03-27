@@ -1147,8 +1147,6 @@
     margin-bottom: 10px;
 }
 .city-league-mydeck-grid {
-    display: flex;
-    flex-wrap: wrap;
     gap: 12px;
 }
 .city-league-mydeck-empty {

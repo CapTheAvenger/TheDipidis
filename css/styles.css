@@ -1273,7 +1273,44 @@
             backdrop-filter: blur(2px);
             pointer-events: none;
         }
-        
+
+        .deck-card-overlay {
+            position: absolute;
+            bottom: 45px;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+            color: #fff;
+            font-size: 7px;
+            font-weight: 700;
+            padding: 1px 4px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 3;
+            height: 14px;
+            line-height: 14px;
+            pointer-events: none;
+        }
+
+        .deck-card-actions {
+            position: absolute;
+            bottom: 5px;
+            left: 3px;
+            right: 3px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 3;
+        }
+
+        .deck-card-action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2px;
+        }
+
         .card-in-deck-count {
             position: absolute;
             top: 3px;
@@ -3365,9 +3402,9 @@
             }
 
             /* Mobile Deck Builder - stats badge */
-            #cityLeagueMyDeckGrid .deck-card div[style*="bottom: 30px"],
-            #currentMetaMyDeckGrid .deck-card div[style*="bottom: 30px"],
-            #pastMetaMyDeckGrid .deck-card div[style*="bottom: 30px"] {
+            #cityLeagueMyDeckGrid .deck-card-overlay,
+            #currentMetaMyDeckGrid .deck-card-overlay,
+            #pastMetaMyDeckGrid .deck-card-overlay {
                 bottom: 18px !important;
                 font-size: 6px !important;
                 padding: 1px 3px !important;
@@ -3384,22 +3421,21 @@
             }
 
             /* Mobile Deck Builder - buttons angepasst an Kartengröße (63px breit x 15px hoch) */
-            #cityLeagueMyDeckGrid .deck-card div[style*="bottom: 5px"],
-            #currentMetaMyDeckGrid .deck-card div[style*="bottom: 5px"],
-            #pastMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] {
+            #cityLeagueMyDeckGrid .deck-card-actions,
+            #currentMetaMyDeckGrid .deck-card-actions,
+            #pastMetaMyDeckGrid .deck-card-actions {
                 left: 3px !important;
                 right: 3px !important;
                 gap: 2px !important;
-                height: 15px !important;
             }
 
-            #cityLeagueMyDeckGrid .deck-card div[style*="bottom: 5px"] button,
-            #currentMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] button,
-            #pastMetaMyDeckGrid .deck-card div[style*="bottom: 5px"] button {
+            #cityLeagueMyDeckGrid .deck-card-actions button,
+            #currentMetaMyDeckGrid .deck-card-actions button,
+            #pastMetaMyDeckGrid .deck-card-actions button {
                 height: 15px !important;
-                width: 14.5px !important;
-                min-width: 14.5px !important;
-                max-width: 14.5px !important;
+                width: auto !important;
+                min-width: unset !important;
+                max-width: unset !important;
                 min-height: 15px !important;
                 font-size: 7px !important;
                 border-radius: 2px !important;

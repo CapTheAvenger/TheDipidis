@@ -1745,6 +1745,18 @@
                 margin-bottom: 8px !important;
                 margin-top: 0 !important;
             }
+
+            /* Keep date range From/To side-by-side on mobile */
+            .date-range-container {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                flex-direction: unset !important;
+                gap: 10px !important;
+            }
+            .date-range-container > * {
+                width: auto !important;
+                padding: 0 !important;
+            }
         }
 
         @media (max-width: 768px) {

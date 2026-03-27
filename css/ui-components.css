@@ -1510,6 +1510,33 @@
     border-color: #c0392b;
 }
 
+/* Mobile: rotate heatmap column headers to be readable */
+@media (max-width: 768px) {
+    .heatmap-th-y {
+        writing-mode: vertical-rl !important;
+        transform: rotate(180deg) !important;
+        white-space: nowrap !important;
+        word-wrap: normal !important;
+        min-width: 30px !important;
+        max-width: 38px !important;
+        padding: 6px 3px !important;
+        font-size: 0.7rem !important;
+        height: 90px !important;
+        vertical-align: bottom !important;
+    }
+    .heatmap-th-row {
+        max-width: 90px !important;
+        min-width: 70px !important;
+        font-size: 0.8rem !important;
+        line-height: 1.2 !important;
+    }
+    .heatmap-td {
+        padding: 7px 4px !important;
+        font-size: 0.8rem !important;
+        min-width: 30px !important;
+    }
+}
+
 @media (max-width: 768px) {
     .city-league-card-info-bottom {
         padding: 4px;

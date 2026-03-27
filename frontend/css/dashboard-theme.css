@@ -1,3 +1,38 @@
+/* Der Tech-Radar Card Style */
+.tech-card-item {
+    position: relative;
+    background: rgba(16, 18, 27, 0.9);
+    border: 1px solid var(--primary-blue);
+    border-radius: 12px;
+    padding: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+/* Der Neon-Effekt für ECHTE Newcomer */
+.tech-card-item.newcomer {
+    border-color: #00f2ff;
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.4), inset 0 0 10px rgba(0, 242, 255, 0.2);
+    animation: neon-pulse 2s infinite alternate;
+}
+
+@keyframes neon-pulse {
+    from { box-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
+    to { box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); }
+}
+
+/* Badge für die Zunahme */
+.trend-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #00ff88;
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
 :root {
     /* Ein modernes Dark-Theme Farbschema */
     --bg-dark: #121212;

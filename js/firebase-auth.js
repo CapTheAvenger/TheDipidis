@@ -51,6 +51,7 @@ function hasValidFirebaseCredentials() {
 
 function signInWithGoogle() {
   if (!hasValidFirebaseCredentials()) {
+    console.warn('[Auth] Google Sign-In blocked: FIREBASE_CREDS in js/firebase-credentials.js still use PLACEHOLDER values');
     showNotification(getLang()==='de' ? 'Firebase Auth ist lokal nicht konfiguriert. Trage echte FIREBASE_CREDS in js/firebase-credentials.js ein.' : 'Firebase Auth is not configured locally. Enter real FIREBASE_CREDS in js/firebase-credentials.js.', 'error');
     return;
   }
@@ -62,6 +63,7 @@ function signInWithGoogle() {
 
   const clientId = window.GOOGLE_CLIENT_ID || '';
   if (!clientId || clientId.startsWith('PLACEHOLDER_')) {
+    console.warn('[Auth] Google Sign-In blocked: GOOGLE_CLIENT_ID in js/firebase-credentials.js is missing or placeholder');
     showNotification(getLang()==='de' ? 'Google Client-ID ist nicht konfiguriert. Trage GOOGLE_CLIENT_ID in js/firebase-credentials.js ein.' : 'Google Client-ID is not configured. Enter GOOGLE_CLIENT_ID in js/firebase-credentials.js.', 'error');
     return;
   }
@@ -117,6 +119,17 @@ async function resetPassword(email) {
 
 // Get friendly error messages
 function getErrorMessage(errorCode) {
+  const code = String(errorCode || '');
+
+  // Firebase may return referer-specific auth codes like:
+  // auth/requests-from-referer-http://localhost:8000-are-blocked.
+  if (code.startsWith('auth/requests-from-referer-')) {
+    if (getLang() === 'de') {
+      return 'Google Sign-In ist für diese Domain blockiert. Bitte in Firebase Auth > Einstellungen > Autorisierte Domains mindestens localhost hinzufügen.';
+    }
+    return 'Google sign-in is blocked for this domain. In Firebase Auth > Settings > Authorized domains, add at least localhost.';
+  }
+
   const messages = {
     'auth/email-already-in-use': 'This email is already registered',
     'auth/invalid-email': 'Invalid email address',
@@ -132,7 +145,7 @@ function getErrorMessage(errorCode) {
     'auth/popup-blocked': 'Popup was blocked by the browser',
     'auth/popup-closed-by-user': 'Google popup was closed before sign-in finished'
   };
-  return messages[errorCode] || 'Authentication error occurred';
+  return messages[code] || 'Authentication error occurred';
 }
 
 // Show notification
@@ -193,14 +206,15 @@ function setupAuthForms() {
   // Google Sign In
   const googleBtn = document.getElementById('google-signin-btn');
   if (googleBtn) {
-    if (!hasValidFirebaseCredentials()) {
-      googleBtn.disabled = true;
-      googleBtn.title = 'Firebase Credentials fehlen lokal';
-      googleBtn.style.opacity = '0.6';
-      googleBtn.style.cursor = 'not-allowed';
-    } else {
-      googleBtn.addEventListener('click', () => signInWithGoogle());
-    }
+    // Always keep button clickable so users receive an explicit toast/log instead of silent no-op.
+    googleBtn.disabled = false;
+    googleBtn.style.opacity = '';
+    googleBtn.style.cursor = '';
+    googleBtn.title = hasValidFirebaseCredentials()
+      ? ''
+      : 'Firebase Credentials fehlen lokal - Klick zeigt Details';
+
+    googleBtn.addEventListener('click', () => signInWithGoogle());
   }
   
   // Sign Out

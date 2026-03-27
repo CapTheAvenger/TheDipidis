@@ -42,11 +42,11 @@ SCRIPTS = {
     "2": "all_cards_scraper.py",
     "3": "japanese_cards_scraper.py",
     "4": "card_price_scraper.py",
-    "5": "current_meta_analysis_scraper.py",
-    "6": "limitless_online_scraper.py",
-    "7": "city_league_analysis_scraper.py",
-    "8": "city_league_archetype_scraper.py",
-    "9": "tournament_scraper_JH.py",
+    "5": "scrapers/current_meta_analysis_scraper.py",
+    "6": "scrapers/limitless_online_scraper.py",
+    "7": "scrapers/city_league_analysis_scraper.py",
+    "8": "scrapers/city_league_archetype_scraper.py",
+    "9": "scrapers/tournament_scraper_JH.py",
     "10": "prepare_card_data.py"
 }
 
@@ -54,15 +54,40 @@ BATCH_BASE = ["1", "2", "3", "4", "10"]
 BATCH_META = ["5", "6", "7", "8", "9", "10"]
 BATCH_FULL = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 
+def resolve_script_path(script_filename: str) -> str:
+    backend_root = os.path.abspath(os.path.dirname(__file__))
+    project_root = os.path.abspath(os.path.dirname(backend_root))
+
+    direct_path = os.path.abspath(script_filename)
+    if os.path.exists(direct_path):
+        return direct_path
+
+    backend_relative_path = os.path.join(backend_root, script_filename)
+    if os.path.exists(backend_relative_path):
+        return backend_relative_path
+
+    project_relative_path = os.path.join(project_root, script_filename)
+    if os.path.exists(project_relative_path):
+        return project_relative_path
+
+    basename_project_path = os.path.join(project_root, os.path.basename(script_filename))
+    if os.path.exists(basename_project_path):
+        return basename_project_path
+
+    return backend_relative_path
+
 def run_script(script_filename: str, wait_at_end: bool = True) -> None:
-    script_path = os.path.join(os.path.dirname(__file__), script_filename)
+    script_path = resolve_script_path(script_filename)
     if not os.path.exists(script_path):
         print(f"\n  [ERROR] Script not found: {script_filename}")
         time.sleep(2)
         return
 
     print(f"\n  Launching {script_filename} ...\n")
-    subprocess.run([sys.executable, script_path], check=False)
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    env = os.environ.copy()
+    env["PYTHONPATH"] = project_root
+    subprocess.run([sys.executable, script_path], check=False, cwd=project_root, env=env)
     print(f"\n  {script_filename} finished.")
     if wait_at_end:
         input("\n  Press Enter to return to menu...")

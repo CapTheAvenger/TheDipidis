@@ -1208,11 +1208,11 @@
     font-weight: 800;
 }
 .city-league-deck-table-view {
-    display: none;
+    display: block;
     margin-bottom: 18px;
 }
 .city-league-deck-visual {
-    display: none;
+    display: block;
     margin-bottom: 18px;
 }
 .city-league-deck-grid {
@@ -1245,18 +1245,19 @@
     letter-spacing: -0.3px;
 }
 .city-league-cards-count {
-    font-size: 0.92em;
-    color: #fff;
-    font-weight: 700;
-    background: var(--pokemon-blue, #3B4CCA);
-    padding: 4px 14px;
+    font-size: 0.9em;
+    color: var(--pokemon-blue, #3B4CCA);
+    font-weight: 800;
+    background: #fff;
+    border: 1px solid rgba(59, 76, 202, 0.22);
+    padding: 5px 12px;
     border-radius: 20px;
     letter-spacing: 0.2px;
 }
 .city-league-cards-count-summary {
-    margin-left: 6px;
+    margin-left: 4px;
     font-weight: 600;
-    opacity: 0.85;
+    opacity: 0.72;
 }
 .city-league-cards-controls {
     display: flex;
@@ -1319,20 +1320,22 @@
     margin-bottom: 24px;
 }
 .city-league-stats-grid {
-    display: flex;
-    gap: 18px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
 }
 .city-league-stat-card {
     background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
     border-radius: 10px;
-    padding: 14px 20px;
-    min-width: 160px;
+    padding: 12px 16px;
+    min-width: 0;
     box-shadow: 0 2px 10px rgba(59, 76, 202, 0.08);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    justify-content: center;
     border-left: 3px solid var(--pokemon-blue, #3B4CCA);
+    min-height: 84px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .city-league-stat-card:hover {
@@ -1340,15 +1343,16 @@
     box-shadow: 0 4px 16px rgba(59, 76, 202, 0.14);
 }
 .city-league-stat-label {
-    font-size: 0.85em;
+    font-size: 0.78em;
     color: #6b7280;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
 }
 .city-league-stat-value {
-    font-size: 1.3em;
+    font-size: 1.9em;
+    line-height: 1;
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
 }

@@ -1,4 +1,94 @@
-﻿#!/usr/bin/env python3
+﻿import json
+from datetime import datetime, timedelta
+
+# ===================== TECH-RADAR FEATURE =====================
+def calculate_tech_trends():
+    db_path = "backend/data/unified_card_database.json"
+    city_league_path = "backend/data/city_league_data.json"
+    limitless_path = "backend/data/limitless_meta_data.json"
+    output_path = "backend/data/tech_radar_data.json"
+
+    def load_json(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return []
+
+    card_db = {c["name"]: c for c in load_json(db_path)}
+    city_league = load_json(city_league_path)
+    limitless = load_json(limitless_path)
+    all_decks = city_league + limitless
+
+    now = datetime.utcnow()
+    week_ago = now - timedelta(days=7)
+    def parse_date(d):
+        try:
+            return datetime.strptime(d, "%Y-%m-%d")
+        except Exception:
+            return now
+
+    card_counts = {}
+    for deck in all_decks:
+        seen = set()
+        for c in deck.get("cards", []):
+            if c["name"] not in seen:
+                card_counts[c["name"]] = card_counts.get(c["name"], 0) + 1
+                seen.add(c["name"])
+    total_decks = len(all_decks)
+    staple_blacklist = {name for name, count in card_counts.items() if count / total_decks > 0.6}
+
+    archetype_decks = {}
+    for deck in all_decks:
+        arch = deck.get("archetype", "Unknown")
+        date = parse_date(deck.get("date", deck.get("tournament_date", "")))
+        archetype_decks.setdefault(arch, []).append((date, deck))
+
+    tech_cards = []
+    for arch, decks in archetype_decks.items():
+        decks = sorted(decks, key=lambda x: x[0], reverse=True)
+        recent_decks = [d for dt, d in decks if dt >= week_ago]
+        prev_week_decks = [d for dt, d in decks if week_ago - timedelta(days=7) <= dt < week_ago]
+
+        card_freq = {}
+        for deck in recent_decks:
+            for c in deck.get("cards", []):
+                card_freq.setdefault(c["name"], []).append(deck)
+
+        prev_freq = {}
+        for deck in prev_week_decks:
+            for c in deck.get("cards", []):
+                prev_freq.setdefault(c["name"], []).append(deck)
+
+        for card, decks_with_card in card_freq.items():
+            if card in staple_blacklist:
+                continue
+            presence = len(decks_with_card) / max(1, len(recent_decks))
+            if presence >= 0.3:
+                continue
+            top_decks = [d for d in recent_decks if d.get("placement", 99) <= 8]
+            top4_decks = [d for d in recent_decks if d.get("placement", 99) <= 4]
+            in_top8 = any(card in [c["name"] for c in d.get("cards", [])] for d in top_decks)
+            in_top4 = any(card in [c["name"] for c in d.get("cards", [])] for d in top4_decks)
+            if not in_top8:
+                continue
+            prev_presence = len(prev_freq.get(card, [])) / max(1, len(prev_week_decks)) if prev_week_decks else 0
+            increase = round((presence - prev_presence) * 100, 1)
+            if increase <= 0:
+                continue
+            tech_cards.append({
+                "name": card,
+                "image_url": card_db.get(card, {}).get("image_url", ""),
+                "increase": increase,
+                "found_in": arch,
+                "highlight": in_top4,
+                "newcomer": prev_presence == 0
+            })
+
+    tech_cards = sorted(tech_cards, key=lambda x: (not x["highlight"], -x["increase"]))
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(tech_cards, f, indent=2, ensure_ascii=False)
+#!/usr/bin/env python3
 """
 Current Meta Analysis Scraper - FAST EDITION
 ============================================
@@ -458,12 +548,20 @@ def main():
     aggregated_data.extend(aggregate_with_meta(limitless_decks, card_db, "Meta Live"))
     aggregated_data.extend(aggregate_with_meta(tournament_decks, card_db, "Meta Play!"))
 
+
     if not aggregated_data:
         logger.info("Keine Daten gesammelt. Vorgang beendet.")
         return
 
     append_mode = settings.get('append_mode', False)
     save_to_csv(aggregated_data, settings["output_file"], append_mode=append_mode)
+
+    # Tech-Radar berechnen
+    try:
+        calculate_tech_trends()
+        logger.info("Tech-Radar Daten erfolgreich generiert.")
+    except Exception as e:
+        logger.error(f"Tech-Radar Fehler: {e}")
 
     logger.info("=" * 60)
     logger.info("SCRAPING KOMPLETT!")

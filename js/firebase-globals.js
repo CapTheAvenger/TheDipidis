@@ -38,8 +38,8 @@ function onUserSignedIn(user) {
   // Toggle header auth UI: hide sign-in button, show user-info bar
   const signinBtn = document.getElementById('signin-btn');
   const userInfoBar = document.getElementById('user-info');
-  if (signinBtn) signinBtn.style.display = 'none';
-  if (userInfoBar) userInfoBar.style.display = 'flex';
+  if (signinBtn) signinBtn.classList.add('signin-btn-hidden');
+  if (userInfoBar) { userInfoBar.classList.remove('user-info-hidden'); userInfoBar.style.display = 'flex'; }
 
   const emailDisplay = document.getElementById('user-email-display');
   if (emailDisplay) emailDisplay.textContent = user.displayName || user.email || '';
@@ -62,8 +62,8 @@ function onUserSignedOut() {
   // Toggle header auth UI: show sign-in button, hide user-info bar
   const signinBtn = document.getElementById('signin-btn');
   const userInfoBar = document.getElementById('user-info');
-  if (signinBtn) signinBtn.style.display = '';
-  if (userInfoBar) userInfoBar.style.display = 'none';
+  if (signinBtn) signinBtn.classList.remove('signin-btn-hidden');
+  if (userInfoBar) { userInfoBar.classList.add('user-info-hidden'); userInfoBar.style.display = ''; }
 
   clearUserData();
 
@@ -175,4 +175,35 @@ function clearUserData() {
   window.userWishlist         = new Set();
   window.userDecks            = [];
   window.deckFolders          = [];
+}
+
+function syncAuthUiFromPendingOrCurrentState() {
+  // Prefer queued auth state from firebase-config.js callback if handlers were not ready yet.
+  if (window.__pendingAuthUser !== undefined) {
+    const pendingUser = window.__pendingAuthUser;
+    if (pendingUser) {
+      onUserSignedIn(pendingUser);
+    } else {
+      onUserSignedOut();
+    }
+    console.info('[Auth] Applied queued auth state in firebase-globals');
+    delete window.__pendingAuthUser;
+    return;
+  }
+
+  // Fallback: synchronize once from current Firebase auth state.
+  const currentUser = window.auth?.currentUser || null;
+  if (currentUser) {
+    onUserSignedIn(currentUser);
+    console.info('[Auth] Synced header UI from current signed-in user');
+  } else {
+    onUserSignedOut();
+    console.info('[Auth] Synced header UI for signed-out state');
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', syncAuthUiFromPendingOrCurrentState, { once: true });
+} else {
+  syncAuthUiFromPendingOrCurrentState();
 }

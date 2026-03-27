@@ -46,7 +46,7 @@
                 const response = await fetch(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}`);
                 if (response.ok) {
                     const text = await response.text();
-                    const m3Data = await fetchAndParseCSV(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}`);
+                    const m3Data = parseCSV(text);
                     
                     // Convert to Map for quick lookup by archetype name
                     window.m3ArchetypeData = {};
@@ -219,9 +219,9 @@
                     return;
                 }
 
-                const analysisData = await fetchAndParseCSV(analysisUrl);
-                const archetypesData = await fetchAndParseCSV(archetypesUrl);
-                const comparisonData = comparisonText ? await fetchAndParseCSV(comparisonUrl) : null;
+                const analysisData = parseCSV(analysisText);
+                const archetypesData = parseCSV(archetypesText);
+                const comparisonData = comparisonText ? parseCSV(comparisonText) : null;
                 const placementStatsMap = buildCityLeaguePlacementStatsMap(archetypesData);
 
                 // NEU: M3 Daten parsen und im globalen Objekt speichern
@@ -381,8 +381,21 @@
             
             const sorted = [...data].sort((a, b) => parseInt(b.new_count || 0) - parseInt(a.new_count || 0));
             
+            // PERFORMANCE: compute and cache all derived sorts here so renderCityLeagueTable never re-sorts
+            const topByCount = sorted.slice(0, 3);
+            const maxCount = parseInt(topByCount[0]?.new_count || 0);
+            const minCountThreshold = maxCount * 0.1;
+            const topByPlacement = [...data]
+                .filter(d => parseInt(d.new_count || 0) >= minCountThreshold)
+                .sort((a, b) => parseFloat((a.new_avg_placement || '0').replace(',', '.')) - parseFloat((b.new_avg_placement || '0').replace(',', '.')))
+                .slice(0, 3);
+            const top10New = sorted.slice(0, 10).map(d => d.archetype);
+            const top10Old = [...data]
+                .sort((a, b) => parseInt(b.old_count || 0) - parseInt(a.old_count || 0))
+                .slice(0, 10).map(d => d.archetype);
+            
             _cityLeagueSortDataRef = data;
-            _cityLeagueSortCache = { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted };
+            _cityLeagueSortCache = { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted, topByCount, topByPlacement, top10New, top10Old };
             return _cityLeagueSortCache;
         }
         
@@ -392,7 +405,7 @@
             if (!content || !cityLeagueData || cityLeagueData.length === 0) return;
             
             // Use cached sort results
-            const { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted } = getCityLeagueSortedSections(cityLeagueData);
+            const { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted, topByCount, topByPlacement, top10New, top10Old } = getCityLeagueSortedSections(cityLeagueData);
             const totalArchetypes = cityLeagueData.length;
             
             // Generate timestamp
@@ -402,26 +415,7 @@
                 hour: '2-digit', minute: '2-digit', second: '2-digit' 
             });
             
-            // Get top 3 by count and placement
-            const topByCount = [...cityLeagueData]
-                .sort((a, b) => parseInt(b.new_count || 0) - parseInt(a.new_count || 0))
-                .slice(0, 3);
-            
             const maxCount = parseInt(topByCount[0]?.new_count || 0);
-            const minCountThreshold = maxCount * 0.1;
-            const topByPlacement = [...cityLeagueData]
-                .filter(d => parseInt(d.new_count || 0) >= minCountThreshold)
-                .sort((a, b) => parseFloat((a.new_avg_placement || '0').replace(',', '.')) - parseFloat((b.new_avg_placement || '0').replace(',', '.')))
-                .slice(0, 3);
-            
-            const top10New = [...cityLeagueData]
-                .sort((a, b) => parseInt(b.new_count || 0) - parseInt(a.new_count || 0))
-                .slice(0, 10)
-                .map(d => d.archetype);
-            const top10Old = [...cityLeagueData]
-                .sort((a, b) => parseInt(b.old_count || 0) - parseInt(a.old_count || 0))
-                .slice(0, 10)
-                .map(d => d.archetype);
             
             const entries = top10New.filter(arch => !top10Old.includes(arch));
             const exits = top10Old.filter(arch => !top10New.includes(arch));
@@ -1383,16 +1377,10 @@
                 // Recalculate deck_count (how many decks contain this card)
                 const deck_count = stats.tournaments.size;
                 
-                // Recalculate max_count (most common count)
+                // max_count = actual maximum copies in any single deck
                 let max_count = 0;
                 if (stats.counts.length > 0) {
-                    const countFrequency = {};
-                    stats.counts.forEach(c => {
-                        countFrequency[c] = (countFrequency[c] || 0) + 1;
-                    });
-                    max_count = parseInt(Object.keys(countFrequency).reduce((a, b) => 
-                        countFrequency[a] > countFrequency[b] ? a : b
-                    ));
+                    max_count = Math.max(...stats.counts);
                 }
                 
                 // Recalculate percentage
@@ -1527,16 +1515,10 @@
                 const row = { ...data.sampleRow };
                 const legalMaxCopies = getLegalMaxCopies(data.sampleRow?.card_name || cardName, data.sampleRow);
                 
-                // Calculate aggregated max_count (most common value)
+                // max_count = actual maximum across all tournament periods
                 let max_count = 0;
                 if (data.maxCountValues.length > 0) {
-                    const countFreq = {};
-                    data.maxCountValues.forEach(val => {
-                        countFreq[val] = (countFreq[val] || 0) + 1;
-                    });
-                    max_count = parseInt(Object.keys(countFreq).reduce((a, b) => 
-                        countFreq[a] > countFreq[b] ? a : b
-                    ));
+                    max_count = Math.max(...data.maxCountValues);
                 }
 
                 // Recalculate deckCounts per tournament with cap (prevents split-print double counting).
@@ -1602,6 +1584,36 @@
             devLog(`Aggregated ${result.length} unique cards from ${totalDecks} decks across ${tournamentDecksMap.size} tournaments`);
             return result;
         }
+
+        // Persist City League deck state to localStorage
+        function saveCityLeagueDeck() {
+            try {
+                const deck = window.cityLeagueDeck || {};
+                const deckSize = Object.keys(deck).length;
+
+                // Avoid storing empty deck payloads
+                if (deckSize === 0) {
+                    localStorage.removeItem('cityLeagueDeck');
+                    devLog('[City League] Deck is empty - removed from localStorage');
+                    return;
+                }
+
+                const data = {
+                    deck: deck,
+                    order: window.cityLeagueDeckOrder || [],
+                    archetype: window.currentCityLeagueArchetype || null,
+                    timestamp: new Date().toISOString()
+                };
+
+                localStorage.setItem('cityLeagueDeck', JSON.stringify(data));
+                devLog('[City League] Deck saved to localStorage:', deckSize, 'cards');
+            } catch (e) {
+                console.error('[City League] Error saving deck:', e);
+            }
+        }
+
+        // Ensure cross-file callers (e.g. app-deck-builder.js) can always access it.
+        window.saveCityLeagueDeck = saveCityLeagueDeck;
         
         function loadCityLeagueDeckData(archetype) {
             devLog('Loading deck data for:', archetype);
@@ -1733,7 +1745,7 @@
             document.getElementById('cityLeagueStatDecksUsed').textContent = decksCount;
             document.getElementById('cityLeagueStatAvgPlacement').textContent = avgPlacement !== '-' ? avgPlacement : '-';
             const statsSection = document.getElementById('cityLeagueStatsSection');
-            if (statsSection) statsSection.classList.remove('d-none');
+            if (statsSection) statsSection.classList.remove('d-none', 'city-league-stats-section-hidden');
             
             // Reset button text to show list view option
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
@@ -2214,7 +2226,7 @@
             }); // Ende der forEach-Schleife
             html += '</div>';
             tableContainer.innerHTML = html;
-            if (tableViewContainer) tableViewContainer.classList.remove('d-none');
+            if (tableViewContainer) tableViewContainer.classList.remove('d-none', 'city-league-deck-table-view-hidden');
         }
         
         // Get all versions of a card from allCardsDatabase
@@ -2281,11 +2293,18 @@
             debugVersionSelectionLog('?? renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
             const visualContainer = document.getElementById('cityLeagueDeckVisual');
             const gridContainer = document.getElementById('cityLeagueDeckGrid');
-            if (!gridContainer) return;
+            if (!gridContainer) {
+                console.warn('[CityLeague] cityLeagueDeckGrid container not found - cannot render card overview grid');
+                return;
+            }
 
             if (!Array.isArray(cards) || cards.length === 0) {
+                console.info('[CityLeague] Rendering empty card overview state (0 cards after filtering)');
                 gridContainer.innerHTML = getEmptyStateHtml();
-                if (visualContainer) visualContainer.classList.remove('d-none');
+                if (visualContainer) {
+                    visualContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
+                    visualContainer.style.display = 'block';
+                }
                 return;
             }
             
@@ -2295,6 +2314,10 @@
             // Get current deck to show deck counts
             const currentDeck = window.cityLeagueDeck || {};
             const priceMap = getOverviewPriceLookupCache();
+            
+            // PERFORMANCE: Resolve once outside render loop (avoids repeated DOM query + N*M data scans)
+            const selectedArchetypeForTrend = document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all';
+            const trendHistoryCache = new Map();
             
             let html = '';
             sortedCards.forEach(card => {
@@ -2360,20 +2383,13 @@
                 const rawPercentage = safeParseFloat(card.percentage_in_archetype || card.share_percent || 0);
                 
                 const legalMaxCopies = getLegalMaxCopies(cardName, card);
-                const rawMaxCount = parseInt(card.max_count) || card.max_count || 0;
-                // --- FIX: Max Count muss mindestens dem gerundeten Durchschnitt entsprechen! (Verhindert 3.59 -> 3) ---
+                const rawMaxCount = parseInt(card.max_count) || 0;
                 const totalCount = safeParseFloat(card.total_count || 0);
                 const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
-                const avgCountFromRow = safeParseFloat(card.average_count || card.avg_count || '', NaN);
-                const earlyAvgInUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
-                    ? avgCountFromRow
-                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
-                const roundedAvgUsed = Math.round(earlyAvgInUsed);
-                const improvedMaxCount = Math.max(rawMaxCount, roundedAvgUsed);
-                const finalMaxCount = improvedMaxCount > 0
-                    ? Math.min(legalMaxCopies, Math.max(1, improvedMaxCount))
+                // finalMaxCount = highest copies of this card (across all int prints) used in any single deck
+                const finalMaxCount = rawMaxCount > 0
+                    ? Math.min(legalMaxCopies, rawMaxCount)
                     : 0;
-                // --- ENDE FIX ---
                 
                 // CRITICAL: ALWAYS show green marker ONLY on the exact version that is in the deck
                 // Match by SET CODE + SET NUMBER only (not by card name, which may differ in different languages)
@@ -2429,8 +2445,12 @@
                 const avgCountInUsedDecks = Math.max(0, finalAvgUsed).toFixed(2).replace('.', ',');  // Average in decks that use this card
                 const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
                 const totalDecksDisplay = Math.round(Math.max(0, totalDecksInArchetype));
-                const selectedArchetype = document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all';
-                const trendHistory = getCityLeagueCardShareHistory(cardName, selectedArchetype);
+                const selectedArchetype = selectedArchetypeForTrend;
+                const trendCacheKey = cardName + '||' + selectedArchetype;
+                if (!trendHistoryCache.has(trendCacheKey)) {
+                    trendHistoryCache.set(trendCacheKey, getCityLeagueCardShareHistory(cardName, selectedArchetype));
+                }
+                const trendHistory = trendHistoryCache.get(trendCacheKey);
                 const trendIndicator = getTrendIndicator(trendHistory);
                 const showTrendOverlay = trendIndicator && !trendIndicator.includes('trend-stable');
                 
@@ -2530,7 +2550,11 @@
             }); // End of sortedCards.forEach
             
             gridContainer.innerHTML = html;
-            if (visualContainer) visualContainer.classList.remove('d-none');
+            if (visualContainer) {
+                visualContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
+                visualContainer.style.display = 'block';
+            }
+            console.info(`[CityLeague] Rendered ${sortedCards.length} overview cards`);
         }
         
         function filterOverviewCards() {
@@ -2701,12 +2725,12 @@
             if (isGridViewActive) {
                 // Switch to list/table view
                 gridViewContainer.classList.add('d-none');
-                tableViewContainer.classList.remove('d-none');
+                tableViewContainer.classList.remove('d-none', 'city-league-deck-table-view-hidden');
                 if (button) button.textContent = '📊 Grid View';
             } else {
                 // Switch back to grid view
                 tableViewContainer.classList.add('d-none');
-                gridViewContainer.classList.remove('d-none');
+                gridViewContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
                 if (button) button.textContent = '📋 List View';
             }
             
@@ -3099,7 +3123,18 @@
             const filterSelect = document.getElementById('cityLeagueFilterSelect');
             const archetype = document.getElementById('cityLeagueDeckSelect')?.value;
             
-            if (!filterSelect || !archetype || !window.currentCityLeagueDeckCards) return;
+            if (!filterSelect) {
+                console.warn('[CityLeague] cityLeagueFilterSelect not found - card overview cannot be rendered');
+                return;
+            }
+            if (!archetype) {
+                console.info('[CityLeague] No archetype selected - skipping card overview render');
+                return;
+            }
+            if (!window.currentCityLeagueDeckCards) {
+                console.warn('[CityLeague] No deck cards loaded yet for selected archetype');
+                return;
+            }
             
             const filterValue = filterSelect.value;
             const allCards = window.currentCityLeagueDeckCards;
@@ -3119,6 +3154,13 @@
                 renderCityLeagueDeckTable(filteredCards);
             } else {
                 renderCityLeagueDeckGrid(filteredCards);
+            }
+
+            if (gridViewContainer && !isTableViewActive) {
+                gridViewContainer.style.display = 'block';
+            }
+            if (tableViewContainer && isTableViewActive) {
+                tableViewContainer.style.display = 'block';
             }
             
             // Update card counts (unique filtered cards / total cards in deck)

@@ -98,24 +98,34 @@ service cloud.firestore {
 
 ---
 
-## Step 5: Update Firebase Config in Your Code 📝
+## Step 5: Add Credentials in the Correct File 📝
 
-1. Open the file: `js/firebase-config.js`
-2. **Find this section** (at the top):
+This project reads credentials from `js/firebase-credentials.js` (NOT from `js/firebase-config.js`).
+
+1. Open the file: `js/firebase-credentials.js`
+2. Replace all `PLACEHOLDER_*` values with your real Firebase Web App config
+3. Add your Google OAuth client ID to `window.GOOGLE_CLIENT_ID`
+4. Save the file
+
+Expected local format:
 
 ```javascript
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123"
+window.FIREBASE_CREDS = {
+   apiKey: "AIzaSy...",
+   authDomain: "your-project.firebaseapp.com",
+   projectId: "your-project-id",
+   storageBucket: "your-project.appspot.com",
+   messagingSenderId: "123456789",
+   appId: "1:123456789:web:abc123",
+   measurementId: "G-XXXXXXXX"
 };
+
+window.GOOGLE_CLIENT_ID = "1234567890-xxxx.apps.googleusercontent.com";
 ```
 
-3. **Replace it** with your actual config from Step 2
-4. **Save the file**
+Important:
+- `firebase-config.js` contains runtime logic and should not store secrets directly.
+- In GitHub Pages deploy, `js/firebase-credentials.js` is overwritten by the `FIREBASE_CONFIG` GitHub secret.
 
 ---
 
@@ -136,6 +146,12 @@ const firebaseConfig = {
    ```
 
 2. Your site will automatically update on GitHub Pages
+
+### Configure GitHub Secret (required for production):
+1. GitHub Repo → **Settings** → **Secrets and variables** → **Actions**
+2. Create secret named **`FIREBASE_CONFIG`**
+3. Paste the full JavaScript content for `js/firebase-credentials.js` (including both `window.FIREBASE_CREDS` and `window.GOOGLE_CLIENT_ID`)
+4. Re-run deployment workflow
 
 ---
 
@@ -201,9 +217,18 @@ users/
 ## Troubleshooting 🔧
 
 ### "Firebase not defined" error:
-- Make sure `firebase-config.js` has your actual config
+- Make sure Firebase SDK scripts are loaded before app scripts
 - Check browser console for errors
 - Verify Firebase SDK is loaded (Network tab)
+
+### "Google Sign-In does nothing" / blocked:
+- Check `js/firebase-credentials.js` for any `PLACEHOLDER_*` values
+- Verify `window.GOOGLE_CLIENT_ID` is not placeholder
+- In Google Cloud OAuth client, add authorized JavaScript origins:
+   - `http://localhost:8000`
+   - `http://127.0.0.1:8000`
+   - your GitHub Pages URL (e.g. `https://<username>.github.io`)
+- In Firebase Console → Authentication → Sign-in method, Google provider must be enabled
 
 ### "Insufficient permissions" error:
 - Check Firestore security rules (Step 4)

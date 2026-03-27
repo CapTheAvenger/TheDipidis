@@ -1189,10 +1189,7 @@
     top: 29px;
 }
 
-/*
-    Note: The background and cursor for .city-league-card-market-btn are now set via data attributes (data-market-bg, data-market-cursor).
-    You can use a script or attribute selector CSS to apply these styles if needed.
-*/
+/* Cardmarket button uses data-market-cursor for state styling (available vs unavailable). */
 /* City League Card Item Modular Styles */
 .city-league-card-item {
     position: relative;
@@ -1315,30 +1312,35 @@
 .city-league-card-action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 1px;
-    margin-top: 2px;
+    gap: 3px;
+    margin-top: 5px;
 }
 .city-league-card-action-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 1px;
+    gap: 3px;
 }
 .city-league-card-action-row:last-child {
-    grid-template-columns: 1fr 1fr 2fr;
+    grid-template-columns: 1fr 1fr 1.7fr;
 }
 .city-league-card-action-btn {
     border: none;
-    border-radius: 3px;
-    height: 14px;
+    border-radius: 5px;
+    height: 20px;
     cursor: pointer;
     font-weight: 700;
-    padding: 0;
+    padding: 0 3px;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: unset;
     min-width: unset;
+    line-height: 1;
     transition: filter 0.15s, transform 0.15s;
+}
+.city-league-card-action-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 1px;
 }
 .city-league-card-action-btn:hover {
     filter: brightness(1.1);
@@ -1347,45 +1349,58 @@
 .city-league-card-remove-btn {
     background: #ef4444;
     color: white;
-    font-size: 10px;
+    font-size: 11px;
 }
 .city-league-card-rarity-btn {
     background: #f59e0b;
     color: #333;
-    font-size: 9px;
+    font-size: 10px;
     text-align: center;
 }
 .city-league-card-add-btn {
     background: #22c55e;
     color: white;
-    font-size: 10px;
+    font-size: 11px;
 }
 .city-league-card-limitless-btn {
-    background: #8b5cf6;
+    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
     color: white;
-    font-size: 6px;
+    font-size: 10px;
 }
 .city-league-card-proxy-btn {
-    background: #ef4444;
+    background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
     color: white;
-    font-size: 6px;
+    font-size: 10px;
 }
 .city-league-card-market-btn {
-    color: white;
-    height: 14px;
-    border-radius: 3px;
-    font-size: 6px;
-    font-weight: 700;
-    padding: 0 2px;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.24);
+    height: 20px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 0 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    text-shadow: none;
+    letter-spacing: 0.1px;
     min-height: unset;
     min-width: unset;
+}
+.city-league-card-market-btn[data-market-cursor="pointer"] {
+    background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+    color: #ffffff;
+    cursor: pointer;
+}
+.city-league-card-market-btn[data-market-cursor="not-allowed"] {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: #f3f4f6;
+    cursor: not-allowed;
 }
 /* City League Card Table Row Modular Styles */
 .city-league-card-table-row {
@@ -1398,7 +1413,7 @@
     gap: 20px;
 }
 
-.city-league-card-image-container {
+.city-league-card-table-row .city-league-card-image-container {
     flex-shrink: 0;
     position: relative;
     width: 120px;
@@ -1481,18 +1496,80 @@
     gap: 6px;
 }
 
-.city-league-card-add-btn {
+.city-league-card-actions .city-league-card-add-btn {
     padding: 10px 20px;
     font-size: 0.95em;
     white-space: nowrap;
 }
 
-.city-league-card-proxy-btn {
+.city-league-card-actions .city-league-card-proxy-btn {
     padding: 10px 20px;
     font-size: 0.9em;
     white-space: nowrap;
     background: #e74c3c;
     border-color: #c0392b;
+}
+
+@media (max-width: 768px) {
+    .city-league-card-info-bottom {
+        padding: 4px;
+    }
+    .city-league-card-action-buttons {
+        gap: 2px;
+        margin-top: 4px;
+    }
+    .city-league-card-action-row {
+        gap: 2px;
+    }
+    .city-league-card-action-btn,
+    .city-league-card-market-btn {
+        height: 18px;
+        border-radius: 4px;
+    }
+    .city-league-card-market-btn {
+        font-size: 8px;
+        padding: 0 3px;
+    }
+}
+
+@media (max-width: 420px) {
+    .city-league-card-info-bottom {
+        padding: 3px;
+    }
+    .city-league-card-title-mobile {
+        font-size: 0.55em;
+    }
+    .city-league-card-set-mobile,
+    .city-league-card-stats-mobile,
+    .city-league-card-deck-stats-mobile {
+        font-size: 0.5em;
+    }
+    .city-league-card-action-buttons {
+        gap: 1px;
+        margin-top: 3px;
+    }
+    .city-league-card-action-row {
+        gap: 1px;
+    }
+    .city-league-card-action-row:last-child {
+        grid-template-columns: 1fr 1fr 1.5fr;
+    }
+    .city-league-card-action-btn,
+    .city-league-card-market-btn {
+        height: 16px;
+        border-radius: 3px;
+        padding: 0 2px;
+    }
+    .city-league-card-remove-btn,
+    .city-league-card-add-btn,
+    .city-league-card-rarity-btn,
+    .city-league-card-limitless-btn,
+    .city-league-card-proxy-btn {
+        font-size: 9px;
+    }
+    .city-league-card-market-btn {
+        font-size: 7px;
+    }
 }
 /* Card table row list container */
 .city-league-card-table-list {

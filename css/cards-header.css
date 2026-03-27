@@ -89,7 +89,7 @@
     height: 18px;
     margin-right: 6px;
     vertical-align: middle;
-    filter: brightness(0) invert(1);
+    filter: none;
 }
 .user-info {
     display: flex;

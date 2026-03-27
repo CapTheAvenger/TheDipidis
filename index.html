@@ -19,20 +19,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" type="text/css">
     <!-- CSS: All relative paths, styles.css first -->
-    <link rel="stylesheet" href="css/styles.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/ui-components.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/auth-styles.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/pokeball-menu.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/cards-header.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/cards-filter-section.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/cards-tabs.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/city-league.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/meta-card-analysis.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/current-meta-matchups.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/city-league-display-toggles.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/de-overview-tabs.css?v=20260326-2" type="text/css">
-    <link rel="stylesheet" href="css/profile-howto-info.css?v=20260326-2" type="text/css">
-        <link rel="stylesheet" href="css/dashboard-theme.css?v=20260327" type="text/css">
+    <link rel="stylesheet" href="css/styles.css" type="text/css">
+    <link rel="stylesheet" href="css/ui-components.css" type="text/css">
+    <link rel="stylesheet" href="css/auth-styles.css" type="text/css">
+    <link rel="stylesheet" href="css/pokeball-menu.css" type="text/css">
+    <link rel="stylesheet" href="css/cards-header.css" type="text/css">
+    <link rel="stylesheet" href="css/cards-filter-section.css" type="text/css">
+    <link rel="stylesheet" href="css/cards-tabs.css" type="text/css">
+    <link rel="stylesheet" href="css/city-league.css" type="text/css">
+    <link rel="stylesheet" href="css/meta-card-analysis.css" type="text/css">
+    <link rel="stylesheet" href="css/current-meta-matchups.css" type="text/css">
+    <link rel="stylesheet" href="css/city-league-display-toggles.css" type="text/css">
+    <link rel="stylesheet" href="css/de-overview-tabs.css" type="text/css">
+    <link rel="stylesheet" href="css/profile-howto-info.css" type="text/css">
+    <link rel="stylesheet" href="css/dashboard-theme.css" type="text/css">
     <!-- Mobile Drag & Drop polyfill for touch devices -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/default.css" type="text/css" crossorigin="anonymous">
     <!-- Mobile Drag & Drop polyfill JS -->
@@ -42,6 +42,62 @@
     <a href="#main-content" class="skip-to-content">Skip to content</a>
     <div class="container" id="main-content">
         <div id="header-container"></div>
+        <div id="sidebar-container"></div>
+
+        <div class="header cards-header">
+            <div class="header-flex-row">
+                <div class="header-flex-group">
+                    <!-- Pokeball Menu Trigger -->
+                    <div class="pokeball-wrapper">
+                        <div id="mainMenuTrigger" class="pokeball-btn" onclick="toggleMainMenu()" title="Open Menu" aria-label="Open navigation menu" aria-haspopup="true" aria-expanded="false">
+                            <div class="pokeball-top"></div>
+                            <div class="pokeball-bottom"></div>
+                            <div class="pokeball-center"></div>
+                        </div>
+                        <div id="mainMenuDropdown" class="main-menu-dropdown" role="menu" aria-label="Navigation menu">
+                            <div class="menu-header" data-i18n="menu.title">Main Menu</div>
+                            <button id="menu-btn-city-league"          class="menu-item active" onclick="switchTabAndUpdateMenu('city-league')"          data-i18n="menu.cityLeague"          role="menuitem">🇯🇵 City League Meta</button>
+                            <button id="menu-btn-city-league-analysis" class="menu-item"        onclick="switchTabAndUpdateMenu('city-league-analysis')" data-i18n="menu.cityLeagueAnalysis" role="menuitem">📊 Deck Analysis (Japan)</button>
+                            <button id="menu-btn-current-meta"         class="menu-item"        onclick="switchTabAndUpdateMenu('current-meta')"         data-i18n="menu.currentMeta"         role="menuitem">🎮 Current Meta (Global)</button>
+                            <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')"     data-i18n="menu.currentMetaAnalysis" role="menuitem">📈 Deck Analysis (Global)</button>
+                            <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')"            data-i18n="menu.pastMeta"            role="menuitem">🏆 Past Meta</button>
+                            <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')"                data-i18n="menu.cardDatabase"        role="menuitem">🧰 Card Database</button>
+                            <button id="menu-btn-proxy"                class="menu-item"        onclick="switchTabAndUpdateMenu('proxy')"                data-i18n="menu.proxyPrinter"        role="menuitem">🖨️ Proxy Printer</button>
+                            <button id="menu-btn-sandbox"              class="menu-item"        onclick="switchTabAndUpdateMenu('sandbox')"              data-i18n="menu.playtester"          role="menuitem">⚔️ Playtester Sandbox</button>
+                            <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')"              data-i18n="menu.profile"             role="menuitem">🎴 My Profile</button>
+                            <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')"             data-i18n="menu.howToUse"            role="menuitem">📖 How to Use</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h1 class="header-title">
+                            <span data-i18n="app.title">🎴 Pokémon TCG Hub</span>
+                            <span id="current-tab-title" class="current-tab-badge" data-i18n="tab.cityLeague">🇯🇵 City League Meta</span>
+                        </h1>
+                        <p class="header-subtitle" data-i18n="app.subtitle">Your Portal for Meta Analysis &amp; Deck Building</p>
+                    </div>
+                </div>
+
+                <div class="header-flex-user">
+                    <button id="langToggleBtn" onclick="switchLanguage(getLang() === 'en' ? 'de' : 'en')" class="lang-toggle-btn" title="Switch language">🇩🇪 DE</button>
+                    <div id="user-menu">
+                        <button id="signin-btn" class="user-btn signin-btn" onclick="showAuthModal('signin')">
+                            <img loading="lazy" src="images/pokeball-icon.png" alt="Sign In" class="user-btn-icon">
+                            <span data-i18n="header.signIn">Sign In</span>
+                        </button>
+                        <div id="user-info" class="user-info user-info-hidden">
+                            <span id="user-email-display" class="user-email-display"></span>
+                            <button class="user-btn profile-btn" onclick="switchTabAndUpdateMenu('profile')">
+                                <img loading="lazy" src="images/pokeball-icon.png" alt="My Profile" class="user-btn-icon">
+                                <span data-i18n="header.myProfile">My Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
         <div class="tabs-container">
             <div class="tab-navigation cards-tab-navigation">
                 <button class="tab-btn active" onclick="switchTab('city-league')" data-i18n="tab.cityLeague">🇯🇵 City League Meta</button>
@@ -61,17 +117,215 @@
             
             <!-- Tab 1: City League Meta -->
             <div id="city-league" class="tab-content active">
-                <div id="city-league-component-container"></div>
+                <div id="city-league-component-container">
+                    <div class="city-league-container">
+                        <div class="city-league-header">
+                            <h2><span data-i18n="cl.cityLeagueDev">🇯🇵 City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                            <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                                <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); font-weight: bold; background: var(--primary-blue); color: var(--text-main); cursor: pointer;">
+                                    <option value="M4" data-i18n="format.m4current">Current Meta</option>
+                                    <option value="M3" data-i18n="format.m3archive">Past Meta</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="cityLeagueContent" style="padding: 12px; background: #ffffff;">
+                            <div id="cityLeagueTierSections"></div>
+                            <div style="text-align: center; padding: 20px; color: var(--text-muted);" data-i18n="misc.loading">Loading...</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Tab 2: City League Deck Analysis -->
             <div id="city-league-analysis" class="tab-content">
-                <div id="city-league-analysis-component-container"></div>
+                <div id="city-league-analysis-component-container">
+                    <!-- City League Deck Analysis Tab Content -->
+                    <div id="tab-decks">
+                        <div class="section-grid-container">
+                            <div>
+                                <label for="cityLeagueDateFrom" style="font-size: 0.95em; color: var(--text-main); font-weight: 600; display: block; margin-bottom: 5px;" data-i18n="filter.from">From:</label>
+                                <input type="date" id="cityLeagueDateFrom" onchange="applyCityLeagueDateFilter()" class="control-input">
+                            </div>
+                            <div>
+                                <label for="cityLeagueDateTo" style="font-size: 0.95em; color: var(--text-main); font-weight: 600; display: block; margin-bottom: 5px;" data-i18n="filter.to">To:</label>
+                                <input type="date" id="cityLeagueDateTo" onchange="applyCityLeagueDateFilter()" class="control-input">
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-group">
+                                <label for="cityLeagueDeckSearch" data-i18n="filter.searchDeck">🔍 Search Deck:</label>
+                                <input type="text" id="cityLeagueDeckSearch" placeholder="Enter deck name..." class="control-input" aria-label="Search deck by name" data-i18n-placeholder="filter.searchDeckPlaceholder" data-i18n-aria="filter.searchDeckAria">
+                            </div>
+                            <div class="control-group">
+                                <label for="cityLeagueDeckSelect" data-i18n="filter.selectArchetype">🎯 Select Deck Archetype:</label>
+                                <select id="cityLeagueDeckSelect" autocomplete="off" class="control-input">
+                                    <option value="" data-i18n="cl.pleaseSelectDeck">-- Please Select Deck --</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="cityLeagueFilterSelect" data-i18n="filter.cardShareFilter">🦂 Card Share Filter:</label>
+                                <select id="cityLeagueFilterSelect">
+                                    <option value="all" data-i18n="filter.allCards">All Cards</option>
+                                    <option value="90" data-i18n="filter.cards90core">Cards in &gt;90% of Decks (Core)</option>
+                                    <option value="70" data-i18n="filter.cards70">Cards in &gt;70% of Decks</option>
+                                    <option value="50" data-i18n="filter.cards50">Cards in &gt;50% of Decks</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="stats-section city-league-stats-section city-league-stats-section-hidden" id="cityLeagueStatsSection">
+                            <h2 data-i18n="section.deckStats">📊 Deck Statistics</h2>
+                            <div class="stats-grid city-league-stats-grid">
+                                <div class="stat-card city-league-stat-card">
+                                    <div class="label city-league-stat-label" data-i18n="stats.cardsInDeck">Cards in Deck (Unique / Total)</div>
+                                    <div class="value city-league-stat-value" id="cityLeagueStatCards">-</div>
+                                </div>
+                                <div class="stat-card city-league-stat-card">
+                                    <div class="label city-league-stat-label" data-i18n="stats.decksUsed">Decks Used</div>
+                                    <div class="value city-league-stat-value" id="cityLeagueStatDecksUsed">-</div>
+                                </div>
+                                <div class="stat-card city-league-stat-card">
+                                    <div class="label city-league-stat-label" data-i18n="stats.avgPlacement">Avg Placement</div>
+                                    <div class="value city-league-stat-value" id="cityLeagueStatAvgPlacement">-</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cards-section">
+                            <div class="cards-header city-league-cards-header">
+                                <div class="city-league-cards-header-row">
+                                    <h2 class="city-league-cards-title" data-i18n="section.cardOverview">🃏 Card Overview</h2>
+                                    <span class="city-league-cards-count"><span id="cityLeagueCardCount">0 Cards</span><span id="cityLeagueCardCountSummary" class="city-league-cards-count-summary">/ 0 Total</span></span>
+                                </div>
+                                <div class="city-league-cards-controls">
+                                    <input type="text" id="cityLeagueOverviewSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." aria-label="Search City League cards" class="card-search-input city-league-cards-search" oninput="filterOverviewCards()" data-i18n-placeholder="filter.searchCardPlaceholder" data-i18n-aria="filter.searchCardAria">
+                                    <div class="city-league-card-type-filter">
+                                        <button id="overviewTypeAll" onclick="setOverviewCardTypeFilter('all')" class="city-league-type-btn active" data-i18n="filter.typeAll">🔵 All</button>
+                                        <button id="overviewTypePokemon" onclick="setOverviewCardTypeFilter('Pokemon')" class="city-league-type-btn" data-i18n="filter.typePokemon">🟡 Pokémon</button>
+                                        <button id="overviewTypeSupporter" onclick="setOverviewCardTypeFilter('Supporter')" class="city-league-type-btn" data-i18n="filter.typeSupporter">🟢 Supporter</button>
+                                        <button id="overviewTypeItem" onclick="setOverviewCardTypeFilter('Item')" class="city-league-type-btn" data-i18n="filter.typeItem">🟠 Item</button>
+                                        <button id="overviewTypeTool" onclick="setOverviewCardTypeFilter('Tool')" class="city-league-type-btn" data-i18n="filter.typeTool">🟣 Tool</button>
+                                        <button id="overviewTypeStadium" onclick="setOverviewCardTypeFilter('Stadium')" class="city-league-type-btn" data-i18n="filter.typeStadium">🔴 Stadium</button>
+                                        <button id="overviewTypeEnergy" onclick="setOverviewCardTypeFilter('Energy')" class="city-league-type-btn" data-i18n="filter.typeEnergy">⚡ Energy</button>
+                                        <button id="overviewTypeSpecialEnergy" onclick="setOverviewCardTypeFilter('Special Energy')" class="city-league-type-btn" data-i18n="filter.typeSpecEnergy">💎 Spec. Energy</button>
+                                        <button id="overviewTypeAceSpec" onclick="setOverviewCardTypeFilter('Ace Spec')" class="city-league-type-btn" data-i18n="filter.typeAceSpec">🌟 Ace Spec</button>
+                                    </div>
+                                    <div class="btn-toggle-group">
+                                        <button class="btn-toggle-item btn-success" onclick="setOverviewRarityMode('min')" id="overviewRarityMin" data-i18n="filter.lowRarity">⬇️ Low Rarity</button>
+                                        <button class="btn-toggle-item" onclick="setOverviewRarityMode('max')" id="overviewRarityMax" data-i18n="filter.maxRarity">⬆️ Max Rarity</button>
+                                        <button class="btn-toggle-item" onclick="setOverviewRarityMode('all')" id="overviewRarityAll" data-i18n="filter.allPrints">🌍 All Prints</button>
+                                    </div>
+                                    <div class="action-divider"></div>
+                                    <button class="btn-modern" onclick="copyDeckOverview()" data-i18n="btn.copy">📋 Copy</button>
+                                    <button class="btn-modern" onclick="toggleDeckGridView()" data-i18n="btn.gridView">🖼️ Grid</button>
+                                </div>
+                            </div>
+                            <div class="deck-table-view city-league-deck-table-view city-league-deck-table-view-hidden" id="cityLeagueDeckTableView">
+                                <div id="cityLeagueDeckTable"></div>
+                            </div>
+                            <div class="deck-visual city-league-deck-visual city-league-deck-visual-hidden" id="cityLeagueDeckVisual">
+                                <div class="deck-grid city-league-deck-grid" id="cityLeagueDeckGrid"></div>
+                            </div>
+                        </div>
+                        <div class="deck-builder">
+                            <h2 data-i18n="section.deckBuilder">🛠️ Deck Builder</h2>
+                            <div class="action-bar city-league-action-bar">
+                                <div class="city-league-action-group">
+                                    <span class="action-group-label" data-i18n="deck.generateLabel">🪄 Generate:</span>
+                                    <button class="btn-modern" onclick="autoComplete('cityLeague', 'min')" title="Fill deck with lowest rarity cards" data-i18n="deck.genLow" data-i18n-title="deck.genLowTitle">⬇️ Low</button>
+                                    <button class="btn-modern" onclick="autoComplete('cityLeague', 'max')" title="Fill deck with highest rarity cards" data-i18n="deck.genMax" data-i18n-title="deck.genMaxTitle">⬆️ Max</button>
+                                    <button class="btn-modern primary" onclick="autoCompleteConsistency('cityLeague', 'min')" title="Uses tournament data for optimal card counts" data-i18n="btn.consistency" data-i18n-title="deck.genConsistencyTitle">🎯 Consistency</button>
+                                </div>
+                                <div class="action-divider"></div>
+                                <div class="city-league-action-group">
+                                    <button class="btn-modern" onclick="openDrawSimulator('cityLeague')" data-i18n="btn.testDraw">🎲 Test Draw</button>
+                                    <button class="btn-modern success" onclick="openPlaytesterSetup('cityLeague')" data-i18n="btn.playtest">🃏 Playtest</button>
+                                    <button class="btn-modern danger city-league-clear-btn" onclick="clearDeck('cityLeague')" data-i18n="btn.clear">🗑️ Clear</button>
+                                </div>
+                            </div>
+                            <div class="deck-summary city-league-deck-summary">
+                                <h3 class="city-league-deck-summary-title">
+                                    <span data-i18n="deck.deckLabel">Deck:</span> <span id="cityLeagueDeckCount" class="city-league-deck-count">0</span> <span data-i18n="deck.of60Cards">/ 60 Cards</span>
+                                    <span id="cityLeagueDeckCountUnique" class="city-league-deck-count-unique">(0 Unique)</span>
+                                </h3>
+                                <div class="city-league-deck-price">
+                                    💰 <span id="cityLeagueDeckPrice">0.00 €</span>
+                                </div>
+                            </div>
+                            <div id="cityLeagueHandStats" class="city-league-hand-stats display-none"></div>
+                            <div id="cityLeagueMyDeckVisual" class="section-panel city-league-mydeck-visual">
+                                <div class="city-league-mydeck-header">
+                                    <h3 class="city-league-mydeck-title" data-i18n="section.yourDeck">🎴 Your Deck</h3>
+                                    <div class="city-league-mydeck-actions">
+                                        <button class="btn-modern success" onclick="saveCurrentDeckToProfile('cityLeague')" data-i18n="btn.save">💾 Save</button>
+                                        <button class="btn-modern" onclick="openDeckCompare('cityLeague')" data-i18n="btn.compare">🔄 Compare</button>
+                                        <button class="btn-modern" onclick="copyDeck('cityLeague')" data-i18n="btn.copy">📋 Copy</button>
+                                        <button class="btn-modern" onclick="sendCurrentDeckToProxyPrinter('cityLeague')" title="Add complete deck to proxy queue and open Proxy Printer" data-i18n="btn.deckToProxy" data-i18n-title="deck.proxyBtnTitle">🖨️ Deck → Proxy</button>
+                                        <button class="btn-modern" onclick="shareDeck('cityLeague')" data-i18n="btn.share">🔗 Share</button>
+                                        <button class="btn-modern" onclick="importFromPTCGL('cityLeague')" title="Import from Pokémon TCG Live" data-i18n="btn.importPTCGL" data-i18n-title="deck.importPTCGLTitle">📥 PTCGL</button>
+                                        <button class="btn-modern" onclick="exportToPTCGL('cityLeague')" title="Export to Pokémon TCG Live" data-i18n="btn.exportPTCGL" data-i18n-title="deck.exportPTCGLTitle">📤 PTCGL</button>
+                                        <button class="btn-modern" onclick="generateDeckGrid('cityLeague')" data-i18n="btn.gridView">🖼️ Grid</button>
+                                    </div>
+                                </div>
+                                <input type="text" id="cityLeagueDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search city-league-mydeck-search" oninput="filterDeckGrid('cityLeague')" aria-label="Search City League deck cards" data-i18n-placeholder="filter.searchCardPlaceholder" data-i18n-aria="filter.searchCardAria">
+                                <div class="deck-grid city-league-mydeck-grid" id="cityLeagueMyDeckGrid">
+                                    <p class="city-league-mydeck-empty" data-i18n="deck.emptyPlaceholder">Create a deck using the buttons above or add cards manually...</p>
+                                </div>
+                            </div>
+                            <div class="section-panel city-league-add-card-panel">
+                                <h3 class="city-league-add-card-title" data-i18n="section.addCard">➕ Add Card</h3>
+                                <input type="text" id="cityLeagueDeckCardSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search city-league-add-card-search" aria-label="Search cards to add to City League deck" data-i18n-placeholder="filter.searchCardPlaceholder" data-i18n-aria="filter.searchCardAria">
+                                <div id="cityLeagueDeckSearchResults" class="card-grid city-league-add-card-grid"></div>
+                            </div>
+                            <div class="meta-card-analysis-block">
+                                <div class="meta-card-analysis-container">
+                                    <div class="meta-card-analysis-header-row">
+                                        <h3 class="meta-card-analysis-title" data-i18n="section.metaCards">🌍 Meta Card Analysis (Top 10 Archetypes)</h3>
+                                        <span class="meta-card-analysis-count"><span id="cityLeagueMetaCardCount">0 Cards</span></span>
+                                    </div>
+                                    <div class="meta-card-analysis-filters-row">
+                                        <div class="meta-card-analysis-share-filter">
+                                            <button id="cityLeagueMetaShareAll" onclick="setMetaShareFilter('cityLeague', 'all')" class="meta-card-analysis-share-btn active" data-i18n="meta.filterAll">📊 All</button>
+                                            <button id="cityLeagueMetaShare90" onclick="setMetaShareFilter('cityLeague', 90)" class="meta-card-analysis-share-btn" data-i18n="meta.filter90">🔥 &gt;90%</button>
+                                            <button id="cityLeagueMetaShare70" onclick="setMetaShareFilter('cityLeague', 70)" class="meta-card-analysis-share-btn" data-i18n="meta.filter70">⚡ &gt;70%</button>
+                                            <button id="cityLeagueMetaShare50" onclick="setMetaShareFilter('cityLeague', 50)" class="meta-card-analysis-share-btn" data-i18n="meta.filter50">💧 &gt;50%</button>
+                                        </div>
+                                        <div class="meta-card-analysis-type-filter">
+                                            <button id="cityLeagueMetaTypeAll" onclick="setMetaCardTypeFilter('cityLeague', 'all')" class="meta-card-analysis-type-btn active" data-i18n="meta.typeAll">🔵 All</button>
+                                            <button id="cityLeagueMetaTypeTrainer" onclick="setMetaCardTypeFilter('cityLeague', 'Trainer')" class="meta-card-analysis-type-btn" data-i18n="meta.typeTrainer">🎴 Trainer</button>
+                                            <button id="cityLeagueMetaTypePokemon" onclick="setMetaCardTypeFilter('cityLeague', 'Pokemon')" class="meta-card-analysis-type-btn" data-i18n="meta.typePokemon">🟡 Pokémon</button>
+                                            <button id="cityLeagueMetaTypeEnergy" onclick="setMetaCardTypeFilter('cityLeague', 'Energy')" class="meta-card-analysis-type-btn" data-i18n="meta.typeEnergy">⚡ Energy</button>
+                                        </div>
+                                        <div class="meta-card-analysis-sort-filter">
+                                            <button onclick="sortMetaCards('cityLeague', 'type')" class="meta-card-analysis-sort-btn active" data-i18n="meta.sortByType">🎯 Sort by Type</button>
+                                            <button onclick="sortMetaCards('cityLeague', 'share')" class="meta-card-analysis-sort-btn" data-i18n="meta.sortByShare">📈 Sort by Share%</button>
+                                            <button onclick="sortMetaCards('cityLeague', 'avgCount')" class="meta-card-analysis-sort-btn" data-i18n="meta.sortByAvgCount">🔢 Sort by Avg Count</button>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="cityLeagueMetaSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input meta-card-analysis-search" oninput="filterMetaCards('cityLeague')" aria-label="Search City League meta cards" data-i18n-placeholder="filter.searchCardPlaceholder" data-i18n-aria="filter.searchCardAria">
+                                    <div id="cityLeagueMetaGrid" class="meta-card-grid meta-card-analysis-grid">
+                                        <p class="meta-card-analysis-empty" data-i18n="meta.loadHint">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
+                                    </div>
+                                    <div class="meta-card-analysis-btn-row">
+                                        <button class="btn-gradient-primary" onclick="loadMetaCardAnalysis('cityLeague')" data-i18n="btn.loadMetaAnalysis">🔄 Load Meta Analysis</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Tab 3: Current Meta -->
             <div id="current-meta" class="tab-content">
-                <div id="current-meta-component-container"></div>
+                <div id="current-meta-component-container">
+                    <div class="container">
+                        <div class="header current-meta-header">
+                            <h2><span data-i18n="cm.limitlessHeading">🎮 Limitless Online Comparison</span> <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        </div>
+                        <div id="currentMetaContent" class="current-meta-content">
+                            <div class="skeleton-row"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Tab 4: Current Analysis -->
@@ -2025,10 +2279,6 @@
                         <!-- P2 Left column: Lost Zone / Deck (with controls) / Discard -->
                         <div class="pos-abs bottom-20 right-20 flex flex-col gap-12 align-center">
                             <div class="ta-center">
-                                    <div id="decks-container"></div>
-                                    <div id="archetypes-container"></div>
-                                    <div id="analysis-container"></div>
-                                    <div id="market-container"></div>
                                         <button class="pt-stepper-btn" onclick="updateStepper('p2-draw-val',-1)">-</button>
                                         <span id="p2-draw-val" class="pt-stepper-val">1</span>
                                         <button class="pt-stepper-btn" onclick="updateStepper('p2-draw-val',1)">+</button>
@@ -2182,8 +2432,6 @@
                 </div>
 
 
-            </div>
-
             <!-- Stadium Block — outside arena so board flip doesn't rotate it -->
             <div id="ptStadiumBlock" class="static-element bg-black-60 p-10 br-10 border-1-white-20 ta-center pos-rel">
                 <div class="pt-zone-label color-green-light mb-6">🏟️ Stadium</div>
@@ -2207,8 +2455,6 @@
             <div id="ptOpponentHandCountOverlay" class="pt-overlay-info">
                 Opponent hand: <span id="ptOpponentHandCountValue">0</span>
             </div>
-
-        </div>
 
         <div class="pt-hand-zone">
             <div id="ptHandTopRow" class="flex justify-start align-center mb-6 gap-15">
@@ -2413,6 +2659,7 @@
             <div style="margin-bottom: 16px;">
                                 <div class="mb-15">
                 <select id="myDeckSelectP1" style="width: 100%; padding: 10px 12px; border: 2px solid #3B4CCA; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
+            </div>
             </div>
             <div style="margin-bottom: 24px;">
                 <label for="myDeckSelectP2" style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;" data-i18n="myDecks.player2Label">Player 2 🔴</label>
@@ -2698,42 +2945,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-async function loadComponent(targetSelector, componentPath, callback = null) {
-// Nach dem Header auch die "Sidebar" (Tab-Nav) laden
-// Decks laden und DANACH die Daten-Initialisierung triggern (falls nötig)
-// Load modularized tab components at app start
-async function loadComponent(targetSelector, componentPath) {
-    try {
-        const response = await fetch(componentPath);
-        if (!response.ok) throw new Error(`Fehler beim Laden: ${componentPath}`);
-        const html = await response.text();
-        document.querySelector(targetSelector).innerHTML = html;
-    } catch (err) {
-        console.error(err);
-        document.querySelector(targetSelector).innerHTML = "<div style='color:red'>Komponente konnte nicht geladen werden.</div>";
-    }
-}
-
-async function initApp() {
-    // 1. Basis-Layout laden
-    await loadComponent('#header-container', '/frontend/components/Header.html');
-    await loadComponent('#sidebar-container', '/frontend/components/Sidebar.html');
-
-    // 2. Alle Tabs parallel laden
-    await Promise.all([
-        loadComponent('#decks-container', '/frontend/components/TabContent_Decks.html'),
-        loadComponent('#archetypes-container', '/frontend/components/TabContent_Archetypes.html'),
-        loadComponent('#analysis-container', '/frontend/components/TabContent_Analysis.html'),
-        loadComponent('#market-container', '/frontend/components/TabContent_Market.html')
-    ]);
-
-    console.log("Struktur bereit. Initialisiere Daten-Logik...");
-    // 3. Erst hier die Funktionen aus deiner card_scraper_shared.py/JS-Logik triggern
-    if (typeof initializeCharts === "function") initializeCharts();
-    if (typeof loadTableData === "function") loadTableData();
-}
-
-initApp();
+// Content is rendered inline — no dynamic component loading needed.
 </script>
 </body>
 </html>

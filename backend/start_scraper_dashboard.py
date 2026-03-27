@@ -38,16 +38,16 @@ def print_menu() -> None:
     print("=" * 52)
 
 SCRIPTS = {
-    "1": "update_sets.py",
-    "2": "all_cards_scraper.py",
-    "3": "japanese_cards_scraper.py",
-    "4": "card_price_scraper.py",
+    "1": "core/update_sets.py",
+    "2": "scrapers/all_cards_scraper.py",
+    "3": "scrapers/japanese_cards_scraper.py",
+    "4": "scrapers/card_price_scraper.py",
     "5": "scrapers/current_meta_analysis_scraper.py",
     "6": "scrapers/limitless_online_scraper.py",
     "7": "scrapers/city_league_analysis_scraper.py",
     "8": "scrapers/city_league_archetype_scraper.py",
     "9": "scrapers/tournament_scraper_JH.py",
-    "10": "prepare_card_data.py"
+    "10": "core/prepare_card_data.py"
 }
 
 BATCH_BASE = ["1", "2", "3", "4", "10"]

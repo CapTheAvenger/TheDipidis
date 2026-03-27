@@ -47,12 +47,19 @@ jobs:
       - name: Inject Firebase Credentials
         env:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         run: |
           if [ -z "$FIREBASE_CONFIG" ]; then
             echo "::warning::FIREBASE_CONFIG secret is not set – deploying with placeholder credentials"
           else
             echo "$FIREBASE_CONFIG" > js/firebase-credentials.js
             echo "✓ Firebase credentials injected"
+          fi
+          if [ -n "$GOOGLE_CLIENT_ID" ]; then
+            echo "window.GOOGLE_CLIENT_ID = \"${GOOGLE_CLIENT_ID}\";" >> js/firebase-credentials.js
+            echo "✓ Google Client ID injected"
+          else
+            echo "::warning::GOOGLE_CLIENT_ID secret is not set – Google Sign-In will be disabled"
           fi
 
       - name: Prepare deployment directory

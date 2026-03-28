@@ -1323,21 +1323,21 @@ const BASE_PATH = './data/';
         }
 
         const KNOWN_META_FORMAT_CODES = [
-            'SVI-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
+            'TEF-POR', 'TEF-ASC', 'TEF-PFL', 'TEF-MEG', 'TEF-BLK', 'TEF-DRI', 'TEF-JTG',
             'BRS-PRE', 'BRS-SSP', 'BRS-SCR', 'BRS-SFA', 'BRS-TWM', 'BRS-TEF',
             'BST-PAR', 'SVI-PAF'
         ];
 
         const TOURNAMENT_FORMAT_NAME_TO_CODE = {
-            'scarlet & violet - perfect order': 'SVI-POR',
-            'scarlet & violet - ascended heroes': 'SVI-ASC',
-            'scarlet & violet - phantasmal flames': 'SVI-PFL',
-            'scarlet & violet - mega evolution': 'SVI-MEG',
-            'scarlet & violet - black bolt': 'SVI-BLK',
-            'scarlet & violet - white flare': 'SVI-BLK',
-            'scarlet & violet - black bolt / white flare': 'SVI-BLK',
-            'scarlet & violet - destined rivals': 'SVI-DRI',
-            'scarlet & violet - journey together': 'SVI-JTG',
+            'scarlet & violet - perfect order': 'TEF-POR',
+            'scarlet & violet - ascended heroes': 'TEF-ASC',
+            'scarlet & violet - phantasmal flames': 'TEF-PFL',
+            'scarlet & violet - mega evolution': 'TEF-MEG',
+            'scarlet & violet - black bolt': 'TEF-BLK',
+            'scarlet & violet - white flare': 'TEF-BLK',
+            'scarlet & violet - black bolt / white flare': 'TEF-BLK',
+            'scarlet & violet - destined rivals': 'TEF-DRI',
+            'scarlet & violet - journey together': 'TEF-JTG',
             'brilliant stars - prismatic evolutions': 'BRS-PRE',
             'brilliant stars - surging sparks': 'BRS-SSP',
             'brilliant stars - stellar crown': 'BRS-SCR',
@@ -1353,15 +1353,26 @@ const BASE_PATH = './data/';
             const code = String(setCode || '').trim().toUpperCase();
             if (!code) return '';
 
+            const legacyToRotationCode = {
+                'SVI-POR': 'TEF-POR',
+                'SVI-ASC': 'TEF-ASC',
+                'SVI-PFL': 'TEF-PFL',
+                'SVI-MEG': 'TEF-MEG',
+                'SVI-BLK': 'TEF-BLK',
+                'SVI-DRI': 'TEF-DRI',
+                'SVI-JTG': 'TEF-JTG'
+            };
+            if (legacyToRotationCode[code]) return legacyToRotationCode[code];
+
             const explicit = {
-                POR: 'SVI-POR',
-                ASC: 'SVI-ASC',
-                PFL: 'SVI-PFL',
-                MEG: 'SVI-MEG',
-                BLK: 'SVI-BLK',
-                WHT: 'SVI-BLK',
-                DRI: 'SVI-DRI',
-                JTG: 'SVI-JTG',
+                POR: 'TEF-POR',
+                ASC: 'TEF-ASC',
+                PFL: 'TEF-PFL',
+                MEG: 'TEF-MEG',
+                BLK: 'TEF-BLK',
+                WHT: 'TEF-BLK',
+                DRI: 'TEF-DRI',
+                JTG: 'TEF-JTG',
                 PRE: 'BRS-PRE',
                 SSP: 'BRS-SSP',
                 SCR: 'BRS-SCR',
@@ -1373,10 +1384,14 @@ const BASE_PATH = './data/';
             };
 
             if (explicit[code]) return explicit[code];
-            if (code.includes('-')) return code;
+            if (code.includes('-')) return legacyToRotationCode[code] || code;
 
             const sviOrder = setOrderMap.SVI || setOrderMap.SVE || 0;
+            const tefOrder = setOrderMap.TEF || 0;
             const codeOrder = setOrderMap[code] || 0;
+            if (tefOrder > 0 && codeOrder > 0 && codeOrder >= tefOrder) {
+                return `TEF-${code}`;
+            }
             if (sviOrder > 0 && codeOrder > 0 && codeOrder >= sviOrder) {
                 return `SVI-${code}`;
             }
@@ -1387,7 +1402,9 @@ const BASE_PATH = './data/';
         function normalizeTournamentFormatLabel(rawFormat, fallbackSetCode = '') {
             const raw = String(rawFormat || '').trim();
             if (!raw) return mapSetCodeToMetaFormat(fallbackSetCode);
-            if (KNOWN_META_FORMAT_CODES.includes(raw) || raw === 'Meta Live' || raw === 'Meta Play!') return raw;
+            const normalizedRawCode = mapSetCodeToMetaFormat(raw);
+            if (KNOWN_META_FORMAT_CODES.includes(normalizedRawCode)) return normalizedRawCode;
+            if (raw === 'Meta Live' || raw === 'Meta Play!') return raw;
 
             const normalized = raw.toLowerCase();
             if (TOURNAMENT_FORMAT_NAME_TO_CODE[normalized]) {

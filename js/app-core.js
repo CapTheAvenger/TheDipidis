@@ -1323,12 +1323,13 @@ const BASE_PATH = './data/';
         }
 
         const KNOWN_META_FORMAT_CODES = [
-            'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
+            'SVI-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
             'BRS-PRE', 'BRS-SSP', 'BRS-SCR', 'BRS-SFA', 'BRS-TWM', 'BRS-TEF',
             'BST-PAR', 'SVI-PAF'
         ];
 
         const TOURNAMENT_FORMAT_NAME_TO_CODE = {
+            'scarlet & violet - perfect order': 'SVI-POR',
             'scarlet & violet - ascended heroes': 'SVI-ASC',
             'scarlet & violet - phantasmal flames': 'SVI-PFL',
             'scarlet & violet - mega evolution': 'SVI-MEG',
@@ -1353,6 +1354,7 @@ const BASE_PATH = './data/';
             if (!code) return '';
 
             const explicit = {
+                POR: 'SVI-POR',
                 ASC: 'SVI-ASC',
                 PFL: 'SVI-PFL',
                 MEG: 'SVI-MEG',

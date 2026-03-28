@@ -337,6 +337,7 @@
         // Set release dates for temporal filtering (format: YYYY-MM-DD)
         const SET_RELEASE_DATES = {
             // 2026 Sets
+            'POR': '2026-04-01',
             'M3': '2026-03-01',
             'ASC': '2026-02-21',
             'PFL': '2026-01-24',  // Pok Pad is in this set
@@ -432,7 +433,12 @@
                             // Skip basic energies from coverage tracking
                             if (isBasicEnergy(row.card_name)) return;
                             
-                            const archetypeKey = `${resolvedMeta}|${row.archetype}`;
+                            const cleanedArchetype = (typeof sanitizeTournamentArchetypeName === 'function')
+                                ? sanitizeTournamentArchetypeName(row.archetype)
+                                : String(row.archetype || '').trim();
+                            if (!cleanedArchetype) return;
+
+                            const archetypeKey = `${resolvedMeta}|${cleanedArchetype}`;
                             const tournamentDate = row.tournament_date || null; // e.g., "13th February 2026"
                             
                             // Extract the actual counts from CSV
@@ -496,11 +502,11 @@
                                 maxCount: Math.max(maxCountInDeck, currentEntry ? currentEntry.maxCount : 0),
                                 setCode: row.set_code || (currentEntry ? currentEntry.setCode : null)
                             });
-                            cardStats.archetypes.add(row.archetype);
+                            cardStats.archetypes.add(cleanedArchetype);
                             
                             // NEW: Populate filter maps
                             // Extract main Pokemon (first word of archetype)
-                            const mainPokemon = row.archetype.split(' ')[0].trim();
+                            const mainPokemon = cleanedArchetype.split(' ')[0].trim();
                             if (mainPokemon) {
                                 window.allMainPokemons.add(mainPokemon);
                                 if (!window.mainPokemonCardsMap.has(mainPokemon)) {
@@ -510,11 +516,11 @@
                             }
                             
                             // Track archetype
-                            window.allArchetypes.add(row.archetype);
-                            if (!window.archetypeCardsMap.has(row.archetype)) {
-                                window.archetypeCardsMap.set(row.archetype, new Set());
+                            window.allArchetypes.add(cleanedArchetype);
+                            if (!window.archetypeCardsMap.has(cleanedArchetype)) {
+                                window.archetypeCardsMap.set(cleanedArchetype, new Set());
                             }
-                            window.archetypeCardsMap.get(row.archetype).add(cardName);
+                            window.archetypeCardsMap.get(cleanedArchetype).add(cardName);
                             
                             // Track meta
                             if (processedRows <= 3) {
@@ -2192,10 +2198,7 @@
                 const percentage = coverageStats.percentage || 0;
                 const deckCount = coverageStats.deckCount || 0;
                 const archetypeCount = coverageStats.archetypeCount || 0;
-                // Get max count from cardDeckCoverageMap
-                const cardNameNorm = normalizeCardName(card.name);
-                const cardCoverageData = window.cardDeckCoverageMap ? window.cardDeckCoverageMap.get(cardNameNorm) : null;
-                const maxCount = cardCoverageData ? (cardCoverageData.maxCountOverall || 0) : 0;
+                const maxCount = coverageStats.maxCount || 0;
                 let coverageColor = '#95a5a6'; // Gray for < 50%
                 let coverageIcon = '\u{1F4CA}'; // bar chart
                 if (percentage >= 99.5) {
@@ -2372,8 +2375,10 @@
             // If no filters are active, use all decks from the global calculation
             if (selectedMainPokemons.length === 0 && selectedArchetypes.length === 0 && selectedMetaFilters.length === 0) {
                 let totalDecksWithCard = 0;
+                let filteredMaxCount = 0;
                 cardStats.archetypesWithCard.forEach((entry, archetypeKey) => {
                     const deckCount = typeof entry === 'number' ? entry : (entry.deckCount || 0);
+                    const maxCount = typeof entry === 'number' ? 0 : (entry.maxCount || 0);
                     const tournamentDate = parseTournamentDate(entry.tournamentDate || null);
                     const [meta, archetype] = archetypeKey.split('|');
                     
@@ -2388,6 +2393,7 @@
                     // If no tournament date (like City League), we DON'T filter - assume it's current
                     
                     totalDecksWithCard += deckCount;
+                    filteredMaxCount = Math.max(filteredMaxCount, maxCount);
                 });
                 
                 if (window.totalUniqueDecks) {
@@ -2396,7 +2402,8 @@
                         percentage: percentage,
                         deckCount: totalDecksWithCard,
                         archetypeCount: cardStats.archetypes.size,
-                        totalDecks: window.totalUniqueDecks
+                        totalDecks: window.totalUniqueDecks,
+                        maxCount: filteredMaxCount
                     };
                 }
                 return null;
@@ -2488,6 +2495,7 @@
             
             // Count how many decks have this card
             let decksWithCard = 0;
+            let filteredMaxCount = 0;
             const matchingArchetypes = new Set();
             
             if (cardNameLower === 'hawlucha') {
@@ -2533,6 +2541,7 @@
                     // If no tournament date, we DON'T filter - assume it's current
                     
                     decksWithCard += deckCount;
+                    filteredMaxCount = Math.max(filteredMaxCount, (typeof entry === 'number' ? 0 : (entry.maxCount || 0)));
                     // Extract archetype from archetypeKey (format: meta|archetype)
                     const archetype = archetypeKey.split('|')[1];
                     if (archetype) {
@@ -2586,7 +2595,8 @@
                 percentage: percentage,
                 deckCount: decksWithCard,
                 archetypeCount: matchingArchetypes.size,
-                totalDecks: totalFilteredDecks
+                totalDecks: totalFilteredDecks,
+                maxCount: filteredMaxCount
             };
         }
         

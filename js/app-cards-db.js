@@ -748,7 +748,7 @@
             ];
 
             container.innerHTML = thresholds.map(threshold => (
-                `<label class="label-block"><input type="radio" name="deckCoverageFilter" value="${threshold.value}"> ${threshold.label}</label>`
+                `<label class="label-block"><input type="radio" name="deckCoverageFilter" value="${threshold.value}" onchange="filterAndRenderCards()"> ${threshold.label}</label>`
             )).join('');
         }
         
@@ -1651,7 +1651,7 @@
                 // Prefer: Common/Uncommon from newest set
                 const setOrder = {
                     // 2026 Sets (newest first)
-                    'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
+                    'POR': 117, 'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
                     'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
                     // 2024-2025 Sets
                     'SCR': 104, 'SFA': 103, 'TWM': 102, 'TEF': 101, 'PAF': 100, 'PAR': 99,
@@ -1837,8 +1837,8 @@
             } else if (sortOrder === 'coverage') {
                 // Sort by deck coverage (highest first)
                 cards.sort((a, b) => {
-                    const coverageA = calculateDynamicCoverage(a.name.toLowerCase()).percentage;
-                    const coverageB = calculateDynamicCoverage(b.name.toLowerCase()).percentage;
+                    const coverageA = (calculateDynamicCoverage(a.name.toLowerCase()) || {}).percentage || 0;
+                    const coverageB = (calculateDynamicCoverage(b.name.toLowerCase()) || {}).percentage || 0;
                     
                     // Sort by coverage descending
                     if (coverageB !== coverageA) {

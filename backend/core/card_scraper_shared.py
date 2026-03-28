@@ -744,7 +744,8 @@ def save_to_csv(data: List[RowDict], output_file: str, append_mode: bool = False
         def row_period_key(row: Mapping[str, Any]) -> str:
             tournament_id = row.get('tournament_id', '')
             period = row.get('period', '') or row.get('date', '') or row.get('tournament_date', '')
-            return f"{tournament_id}|{period}|{row.get('archetype','')}|{row.get('card_name','')}"
+            meta = row.get('meta', '')
+            return f"{tournament_id}|{period}|{row.get('archetype','')}|{row.get('card_name','')}|{meta}"
 
         new_keys = {row_period_key(r) for r in data}
         merged = [r for r in existing if row_period_key(r) not in new_keys]

@@ -190,6 +190,98 @@
             
             return true; // Success
         }
+
+        function getDeckRefBySource(source) {
+            if (source === 'cityLeague') return window.cityLeagueDeck;
+            if (source === 'currentMeta') return window.currentMetaDeck;
+            if (source === 'pastMeta') return window.pastMetaDeck;
+            return null;
+        }
+
+        function getDeckTotalCards(deck) {
+            return Object.values(deck || {}).reduce((sum, count) => sum + (parseInt(count, 10) || 0), 0);
+        }
+
+        function isBasicEnergyName(cardName) {
+            const name = String(cardName || '').toLowerCase().trim();
+            return name === 'grass energy'
+                || name === 'fire energy'
+                || name === 'water energy'
+                || name === 'lightning energy'
+                || name === 'psychic energy'
+                || name === 'fighting energy'
+                || name === 'darkness energy'
+                || name === 'metal energy';
+        }
+
+        function normalizeGeneratedDeckTo60(source, plannedCards, fallbackCards) {
+            const deck = getDeckRefBySource(source);
+            if (!deck) return 0;
+
+            let total = getDeckTotalCards(deck);
+            if (total >= 60) return total;
+
+            const byName = new Map();
+            const ingest = (card) => {
+                if (!card || !card.card_name) return;
+                const key = String(card.card_name).trim().toLowerCase();
+                if (!key) return;
+                if (!byName.has(key)) byName.set(key, card);
+            };
+
+            (plannedCards || []).forEach(ingest);
+            (fallbackCards || []).forEach(ingest);
+
+            const candidates = Array.from(byName.values()).sort((a, b) => {
+                const shareA = parseFloat(String(a.sharePercent || a.percentage_in_archetype || 0).replace(',', '.')) || 0;
+                const shareB = parseFloat(String(b.sharePercent || b.percentage_in_archetype || 0).replace(',', '.')) || 0;
+                return shareB - shareA;
+            });
+
+            let guard = 0;
+            while (total < 60 && guard < 180) {
+                guard++;
+                let added = false;
+
+                for (const card of candidates) {
+                    const cardName = String(card.card_name || '').trim();
+                    if (!cardName) continue;
+
+                    const originalSetCode = card.set_code || '';
+                    const originalSetNumber = card.set_number || '';
+                    const preferredVersion = getPreferredVersionForCard(cardName, originalSetCode, originalSetNumber);
+                    const setCode = preferredVersion ? preferredVersion.set : originalSetCode;
+                    const setNumber = preferredVersion ? preferredVersion.number : originalSetNumber;
+
+                    const success = addCardToDeckBatch(source, cardName, setCode, setNumber);
+                    if (success) {
+                        total++;
+                        added = true;
+                        if (total >= 60) break;
+                    }
+                }
+
+                // Absolute fallback: try adding basic energy if normal candidates are blocked by limits.
+                if (!added) {
+                    const basicEnergy = candidates.find(card => isBasicEnergyName(card.card_name));
+                    if (basicEnergy) {
+                        const success = addCardToDeckBatch(source, basicEnergy.card_name, basicEnergy.set_code || '', basicEnergy.set_number || '');
+                        if (success) {
+                            total++;
+                            added = true;
+                        }
+                    }
+                }
+
+                if (!added) break;
+            }
+
+            if (total < 60) {
+                console.warn(`[DeckBuilder] Could not normalize deck to 60 for ${source}. Current total: ${total}`);
+            }
+
+            return total;
+        }
         
         // ---------------------------------------------------------------
         // SINGLE ADD FUNCTION - For Manual Card Addition
@@ -2052,6 +2144,9 @@
                         addCardToDeckBatch(source, card.card_name, setCode, setNumber);
                     }
                 });
+
+                const normalizedTotal = normalizeGeneratedDeckTo60(source, cardsToAdd, deckCards);
+                devLog(`[autoComplete] Final normalized deck size: ${normalizedTotal}`);
                 devLog('[autoComplete] Deck completed with rarity mode:', globalRarityPreference);
                 
                 // Save deck to localStorage
@@ -2444,6 +2539,9 @@
                     }
                 });
 
+                const normalizedTotal = normalizeGeneratedDeckTo60(source, cardsToAdd, deckCards);
+                devLog(`[autoCompleteConsistency] Final normalized deck size: ${normalizedTotal}`);
+
                 devLog('[autoCompleteConsistency] Consistency deck completed with rarity mode:', globalRarityPreference);
 
                 if (source === 'cityLeague') {
@@ -2456,7 +2554,7 @@
 
                 scheduleDeckDisplayUpdate(source);
 
-                if (currentTotal >= 60) {
+                if (normalizedTotal >= 60) {
                     if (typeof showDeckShareToast === 'function') {
                         showDeckShareToast(t('deck.consistencySuccess'));
                     } else {

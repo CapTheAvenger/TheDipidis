@@ -589,8 +589,17 @@
             // Initial render
             renderFullComparisonTable(sorted.slice(0, 30));
             renderCombinedTable(groupedData.slice(0, 20));
+            ensureCityLeagueSearchFilterBinding();
             // Phase 1: render meta share chart
             renderMetaChart('cityLeague', sorted);
+        }
+
+        function ensureCityLeagueSearchFilterBinding() {
+            const searchInput = document.getElementById('cityLeagueSearchFilter');
+            if (!searchInput) return;
+
+            // Keep an explicit runtime hook in addition to inline HTML handlers.
+            searchInput.oninput = filterCityLeagueTable;
         }
         
         // Group archetypes by main Pokemon (first word/words before space)
@@ -859,6 +868,10 @@
                 resultsDiv.classList.add('results-success');
             }
         }
+
+        // Explicit window bindings for deterministic E2E and inline event compatibility.
+        window.filterCityLeagueTable = filterCityLeagueTable;
+        window.switchCityLeagueFormat = switchCityLeagueFormat;
         
         // Load City League Analysis
         async function loadCityLeagueAnalysis() {

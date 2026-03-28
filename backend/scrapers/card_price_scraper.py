@@ -130,13 +130,14 @@ def _fetch_cardmarket(card: dict, base_delay: float, is_headless: bool, proxy_st
         for attempt in range(2):
             driver = None
             try:
-                # FIX: "headless" anstelle von "headless2"
                 driver = Driver(uc=True, proxy=proxy_str, headless=is_headless) if proxy_str else Driver(uc=True, headless=is_headless)
                 driver.get(target_url)
                 time.sleep(base_delay + random.uniform(2.0, 4.0))
                 
+                html = driver.page_source
+                soup = BeautifulSoup(html, "lxml")
+                
                 # Preis parsen
-                soup = BeautifulSoup(driver.page_source, "lxml")
                 for dt in soup.find_all("dt"):
                     if dt.get_text(strip=True).lower() in ("from", "ab"):
                         dd = dt.find_next_sibling("dd")
@@ -144,11 +145,15 @@ def _fetch_cardmarket(card: dict, base_delay: float, is_headless: bool, proxy_st
                             new_price = dd.get_text(strip=True)
                             logger.info("  [P2] CM OVERWRITE [%s]: %s (vorher: %s)", card_id, new_price, card.get('eur_price', 'N/A'))
                             break
-                if new_price: break
+                
+                if new_price: 
+                    break
                 else:
-                    logger.warning("  [P2] CM Warnung [%s]: Seite geladen, aber kein Preis gefunden.", card_id)
+                    if "Just a moment" in html or "Bitte warten" in html or "cloudflare" in html.lower():
+                        logger.warning("  [P2] CM Warnung [%s]: Cloudflare blockiert (Versuch %s/2)", card_id, attempt+1)
+                    else:
+                        logger.warning("  [P2] CM Warnung [%s]: Seite geladen, aber Preis nicht gefunden.", card_id)
             except Exception as e:
-                # FIX: Jetzt wird ein Absturz rot ins Terminal gedruckt!
                 logger.error("  [P2] CM ABSTURZ [%s]: %s", card_id, e)
             finally:
                 if driver: driver.quit()
@@ -184,12 +189,17 @@ def main():
     proxy_str = None
     if settings.get("proxy"):
         p = settings["proxy"]
-        # Wir suchen gezielt nach den Schlüsseln aus deiner Datei
         host = p.get("proxy_host") or p.get("host") or "geo.iproyal.com"
         port = p.get("proxy_port") or p.get("port") or "12321"
+        user = p.get("proxy_user") or p.get("user")
+        pwd = p.get("proxy_pass") or p.get("pass")
         
-        # Da deine IP auf der Whitelist steht, übergeben wir ABSICHTLICH KEIN Passwort!
-        proxy_str = f"{host}:{port}"
+        # MAGIC: Wir bauen den String genau so zusammen, dass SeleniumBase
+        # das Popup automatisch im Hintergrund ausfüllt!
+        if user and pwd and "DEIN_" not in user:
+            proxy_str = f"{user}:{pwd}@{host}:{port}"
+        else:
+            proxy_str = f"{host}:{port}"
 
     # ==========================================
     # PHASE 1: LIMITLESS BASELINE
@@ -222,7 +232,6 @@ def main():
     cm_vip_cards = []
     for card in phase1_results:
         c_set = card.get('set', '').upper()
-        # Filter 1: Ist das Set überhaupt für Cardmarket zugelassen?
         if cm_sets and c_set not in cm_sets:
             continue
             
@@ -230,16 +239,24 @@ def main():
         c_num = card['number'].upper()
         rarity = card.get('rarity', '').lower()
         
-        # Filter 2: Ist es eine High-Rare oder spielbare Karte?
+        # 1. Ist es eine teure Rarität? (Double Rare, Secret, Illustration etc.)
         is_high_rare = (
             any(x in c_num for x in ["SIR", "GG", "TG", "SV", "AR", "FA", "EX", "VSTAR", "PROMO"]) or
             (c_num.count('/') > 0 and int(c_num.split('/')[0]) > 160) or
             any(x in c_name for x in [' ex', '-ex', ' gx', ' v', ' vmax', ' vstar']) or
             any(x in rarity for x in ['secret', 'illustration', 'ultra', 'hyper', 'promo', 'double', 'amazing'])
         )
+        
+        # 2. Ist sie Meta/Playable?
         is_playable = c_name in playable_names
+        
+        # 3. NEU: Ist es klassischer "Bulk"? 
+        is_bulk_rarity = rarity in ["common", "uncommon", "rare", "rare holo"]
 
-        if is_high_rare or is_playable:
+        # ENTSCHEIDUNG: 
+        # High-Rares gehen IMMER zu Cardmarket.
+        # Playables gehen NUR zu Cardmarket, wenn sie KEIN Bulk sind!
+        if is_high_rare or (is_playable and not is_bulk_rarity):
             cm_vip_cards.append(card)
 
     urls_present = sum(1 for c in cm_vip_cards if c.get('cardmarket_url'))

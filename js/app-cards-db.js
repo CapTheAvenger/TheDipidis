@@ -39,7 +39,9 @@
         // Toggle card filter visibility
         function toggleCardFilter(filterId) {
             const filterOptions = document.getElementById(filterId);
-            const header = filterOptions.previousElementSibling;
+            if (!filterOptions) return;
+            const group = filterOptions.closest('.cards-filter-group');
+            const header = group ? group.querySelector('.cards-filter-header') : null;
             
             if (filterOptions && header) {
                 const isCollapsed = filterOptions.classList.contains('collapsed');
@@ -48,10 +50,16 @@
                     // Expand
                     filterOptions.classList.remove('collapsed');
                     header.classList.remove('collapsed');
+                    // Show search input if present
+                    const searchInput = group.querySelector('.cards-filter-search-input');
+                    if (searchInput) searchInput.style.display = '';
                 } else {
                     // Collapse
                     filterOptions.classList.add('collapsed');
                     header.classList.add('collapsed');
+                    // Hide search input if present
+                    const searchInput = group.querySelector('.cards-filter-search-input');
+                    if (searchInput) searchInput.style.display = 'none';
                 }
             }
         }
@@ -62,11 +70,11 @@
                     groupId: 'filter-meta-format',
                     targetId: 'metaFormatOptions',
                     html: `
-                        <div class="cards-filter-header" onclick="toggleCardFilter('metaFormatOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('metaFormatOptions')">
                             <span>Meta / Format</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <div class="cards-filter-options" id="metaFormatOptions">
+                        <div class="cards-filter-options collapsed" id="metaFormatOptions">
                             <label class="label-block"><input type="checkbox" value="total" checked> Total (All Cards)</label>
                             <label class="label-block"><input type="checkbox" value="all_playables"> All Playables</label>
                             <label class="label-block"><input type="checkbox" value="city_league"> City League Only</label>
@@ -77,68 +85,68 @@
                     groupId: 'filter-set',
                     targetId: 'setFilterOptions',
                     html: `
-                        <div class="cards-filter-header" onclick="toggleCardFilter('setFilterOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('setFilterOptions')">
                             <span>Set</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <div class="cards-filter-options" id="setFilterOptions"></div>
+                        <div class="cards-filter-options collapsed" id="setFilterOptions"></div>
                     `
                 },
                 {
                     groupId: 'filter-rarity',
                     targetId: 'rarityFilterOptions',
                     html: `
-                        <div class="cards-filter-header" onclick="toggleCardFilter('rarityFilterOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('rarityFilterOptions')">
                             <span>Rarity</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <div class="cards-filter-options" id="rarityFilterOptions"></div>
+                        <div class="cards-filter-options collapsed" id="rarityFilterOptions"></div>
                     `
                 },
                 {
                     groupId: 'filter-category',
                     targetId: 'categoryFilterOptions',
                     html: `
-                        <div class="cards-filter-header" onclick="toggleCardFilter('categoryFilterOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('categoryFilterOptions')">
                             <span>Category</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <div class="cards-filter-options" id="categoryFilterOptions"></div>
+                        <div class="cards-filter-options collapsed" id="categoryFilterOptions"></div>
                     `
                 },
                 {
                     groupId: 'filter-main-pokemon',
                     targetId: 'mainPokemonList',
                     html: `
-                        <div class="cards-filter-header" onclick="toggleCardFilter('mainPokemonList')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('mainPokemonList')">
                             <span>Main Pokemon</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <input type="text" id="mainPokemonSearch" class="cards-filter-search-input" placeholder="Search main Pokemon..." oninput="filterMainPokemonList()" aria-label="Search main Pokemon filter list">
-                        <div class="cards-filter-options" id="mainPokemonList"></div>
+                        <input type="text" id="mainPokemonSearch" class="cards-filter-search-input" placeholder="Search main Pokemon..." oninput="filterMainPokemonList()" aria-label="Search main Pokemon filter list" style="display:none">
+                        <div class="cards-filter-options collapsed" id="mainPokemonList"></div>
                     `
                 },
                 {
                     groupId: 'filter-archetype',
                     targetId: 'archetypeList',
                     html: `
-                        <div class="cards-filter-header" onclick="toggleCardFilter('archetypeList')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('archetypeList')">
                             <span>Archetype</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <input type="text" id="archetypeSearch" class="cards-filter-search-input" placeholder="Search archetype..." oninput="filterArchetypeList()" aria-label="Search archetype filter list">
-                        <div class="cards-filter-options" id="archetypeList"></div>
+                        <input type="text" id="archetypeSearch" class="cards-filter-search-input" placeholder="Search archetype..." oninput="filterArchetypeList()" aria-label="Search archetype filter list" style="display:none">
+                        <div class="cards-filter-options collapsed" id="archetypeList"></div>
                     `
                 },
                 {
                     groupId: 'filter-deck-coverage',
                     targetId: 'deckCoverageFilterOptions',
                     html: `
-                        <div class="cards-filter-header" onclick="toggleCardFilter('deckCoverageFilterOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('deckCoverageFilterOptions')">
                             <span>Deck Coverage</span>
                             <span class="toggle-icon">▼</span>
                         </div>
-                        <div class="cards-filter-options" id="deckCoverageFilterOptions"></div>
+                        <div class="cards-filter-options collapsed" id="deckCoverageFilterOptions"></div>
                     `
                 }
             ];
@@ -153,7 +161,7 @@
         
         // Pagination for Cards Tab
         let currentCardsPage = 1;
-        const cardsPerPage = 300;
+        const cardsPerPage = 60;
         let showAllCards = false;
         let showOnlyOnePrint = true; // Toggle for deduplication: true = only show 1 print per card (low rarity, newest)
         let _loadCardsRunning = false;
@@ -1902,9 +1910,20 @@
             // Create pagination controls
             const paginationTop = createPaginationControls(cards.length, totalPages);
             
-            // Create card grid
+            // Pre-build name→prints index for fast altPrint lookup (once per render, not per card)
+            const namePrintsIndex = new Map();
+            if (window.userCollectionCounts && window.allCardsData) {
+                window.allCardsData.forEach(c => {
+                    if (!c.name) return;
+                    if (!namePrintsIndex.has(c.name)) namePrintsIndex.set(c.name, []);
+                    namePrintsIndex.get(c.name).push(c);
+                });
+            }
+            
+            // Create card grid with DocumentFragment for batch DOM insert
             const grid = document.createElement('div');
             grid.className = 'card-database-grid';
+            const fragment = document.createDocumentFragment();
             
             let renderedCount = 0;
             let skippedNoName = 0;
@@ -1915,14 +1934,15 @@
                     skippedNoName++;
                     return;
                 }
-                const cardEl = createCardDatabaseItem(card);
+                const cardEl = createCardDatabaseItem(card, namePrintsIndex);
                 if (cardEl) {
-                    grid.appendChild(cardEl);
+                    fragment.appendChild(cardEl);
                     renderedCount++;
                 } else {
                     skippedNullEl++;
                 }
             });
+            grid.appendChild(fragment);
             
             // Create pagination controls for bottom
             const paginationBottom = createPaginationControls(cards.length, totalPages);
@@ -2081,7 +2101,7 @@
             return container;
         }
         
-        function createCardDatabaseItem(card) {
+        function createCardDatabaseItem(card, namePrintsIndex) {
             // Validate essential fields
             if (!card.name) {
                 return null;
@@ -2119,11 +2139,13 @@
 
             // Also show ownership of other prints to avoid confusing "owned but not marked" states.
             let altPrintOwnedCount = 0;
-            if (ownedCount === 0 && window.userCollectionCounts && window.allCardsData) {
-                const sameNamePrints = window.allCardsData.filter(c => c.name === card.name && (c.set !== displaySet || c.number !== displayNumber));
+            if (ownedCount === 0 && window.userCollectionCounts && namePrintsIndex) {
+                const sameNamePrints = namePrintsIndex.get(card.name) || [];
                 sameNamePrints.forEach(v => {
-                    const altId = `${card.name}|${v.set}|${v.number}`;
-                    altPrintOwnedCount += window.userCollectionCounts.get(altId) || 0;
+                    if (v.set !== displaySet || v.number !== displayNumber) {
+                        const altId = `${card.name}|${v.set}|${v.number}`;
+                        altPrintOwnedCount += window.userCollectionCounts.get(altId) || 0;
+                    }
                 });
             }
             

@@ -517,8 +517,9 @@
 }
 .card-database-button-row {
     display: flex !important;
-    gap: 8px !important;
-    margin-top: 8px !important;
+    gap: 5px !important;
+    margin-top: 4px !important;
+    flex-wrap: wrap !important;
 }
 .card-database-owned-badge {
     position: absolute !important;
@@ -568,13 +569,13 @@
     font-weight: 700 !important;
 }
 .card-database-coverage {
-    margin-top: 8px !important;
-    padding: 8px !important;
+    margin-top: 4px !important;
+    padding: 5px !important;
     color: white !important;
-    border-radius: 6px !important;
+    border-radius: 5px !important;
     text-align: center !important;
     font-weight: 600 !important;
-    font-size: 13px !important;
+    font-size: 11px !important;
 }
 .card-item {
     position: relative !important;

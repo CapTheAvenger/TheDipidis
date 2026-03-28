@@ -1,9 +1,9 @@
 {
-  "delay_seconds": 3.0,
+  "delay_seconds": 6.0,
   "max_workers": 2,
-  "headless": false,
+  "headless": true,
   "batch_size": 100,
   "skip_cards_with_prices": false,
-  "only_update_sets": ["ASC", "PFL", "MEG"],
-  "_comment": "FULL UPDATE - Nutzt echte Chrome Fenster (Selenium) + IPRoyal Proxies"
+  "only_update_sets": ["POR", "ASC", "PFL", "MEG"],
+  "_comment": "FULL UPDATE - Chrome läuft unsichtbar (headless2=new) + IPRoyal Proxies"
 }

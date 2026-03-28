@@ -137,7 +137,8 @@ def scrape_all_cards_list(
     settings: dict,
     start_page: int = 1,
     existing_keys: set = None,
-    language: str = "en"
+    language: str = "en",
+    target_keys: set = None,
 ) -> list:
     logger.info("Starte Listen-Scraping - Sprache: %s", language.upper())
     all_cards_data = []
@@ -207,6 +208,8 @@ def scrape_all_cards_list(
                 continue
 
             key = f"{set_code}::{set_number}"
+            if target_keys is not None and key not in target_keys:
+                continue
             if key in seen_keys or key in existing_keys:
                 continue
             seen_keys.add(key)
@@ -240,6 +243,10 @@ def scrape_all_cards_list(
                 has_next = True
 
         page_index += 1
+
+        if target_keys is not None and len(seen_keys) >= len(target_keys):
+            logger.info("  Alle angeforderten %s-Karten gefunden. Stoppe fruehzeitig.", language.upper())
+            break
 
         if not has_next and new_on_page == 0:
             logger.info("  Keine neuen Karten - Ende der Liste.")
@@ -441,12 +448,35 @@ def main():
             settings, start_page=start_page, existing_keys=existing_keys, language="en"
         )
 
-        logger.info("=" * 60)
-        logger.info("PHASE 1b: Deutsche Liste scrapen (name_de) ...")
-        logger.info("=" * 60)
-        de_cards = scrape_all_cards_list(
-            settings, start_page=start_page, existing_keys=set(), language="de"
-        )
+        # Zielmenge fuer DE-Namen:
+        # 1) neue EN-Karten, 2) unvollstaendige Karten, 3) bestehende Karten ohne name_de
+        new_en_keys = {f"{c['set']}::{c['number']}" for c in en_cards}
+        incomplete_keys = {
+            f"{c.get('set','')}::{c.get('number','')}"
+            for c in incomplete_cards
+            if c.get('set') and c.get('number')
+        }
+        missing_de_keys = {
+            f"{c.get('set','')}::{c.get('number','')}"
+            for c in existing_cards
+            if c.get('set') and c.get('number') and not (c.get('name_de') or '').strip()
+        }
+        de_target_keys = {k for k in (new_en_keys | incomplete_keys | missing_de_keys) if "::" in k}
+
+        de_cards = []
+        if de_target_keys:
+            logger.info("=" * 60)
+            logger.info("PHASE 1b: Deutsche Liste scrapen (gezielt fuer %s Karten) ...", len(de_target_keys))
+            logger.info("=" * 60)
+            de_cards = scrape_all_cards_list(
+                settings,
+                start_page=start_page,
+                existing_keys=set(),
+                language="de",
+                target_keys=de_target_keys,
+            )
+        else:
+            logger.info("PHASE 1b uebersprungen: Keine Karten mit fehlendem DE-Namen oder neuen Schluesseln.")
 
         # Merge German names into EN cards
         de_lookup = {f"{c['set']}::{c['number']}": c["name"] for c in de_cards}
@@ -454,6 +484,17 @@ def main():
             key = f"{card['set']}::{card['number']}"
             card["name_en"] = card.pop("name")
             card["name_de"] = de_lookup.get(key, "")
+
+        # Falls DE-Namen fuer bestehende / unvollstaendige Karten nachgeladen wurden, direkt uebernehmen.
+        for card in existing_cards:
+            key = f"{card.get('set','')}::{card.get('number','')}"
+            if key in de_lookup and not (card.get("name_de") or "").strip():
+                card["name_de"] = de_lookup[key]
+
+        for card in incomplete_cards:
+            key = f"{card.get('set','')}::{card.get('number','')}"
+            if key in de_lookup and not (card.get("name_de") or "").strip():
+                card["name_de"] = de_lookup[key]
 
         # Prepare incomplete cards for re-scrape
         for ic in incomplete_cards:

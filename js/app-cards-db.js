@@ -1446,17 +1446,20 @@
             devLog(`  - Failed main pokemon: ${failedMainPokemon}`);
             devLog(`  - Failed archetype: ${failedArchetype}`);
             devLog(`  - Failed meta filter: ${failedMetaFilter}`);
-            devLog(`[Cards Tab] Filtered ${window.filteredCardsData.length} cards from ${window.allCardsData.length} total`);
+            console.log(`[Cards Tab] Filter results: ${passedFilters} passed, ${failedValidation} failedValidation, ${failedMeta} failedMeta, ${failedSet} failedSet, ${failedRarity} failedRarity, ${failedCategory} failedCategory`);
+            console.log(`[Cards Tab] Filtered ${window.filteredCardsData.length} cards from ${window.allCardsData.length} total`);
             
             // Deduplicate cards (same card name, different prints) - prefer print from coverage data
             // Only deduplicate if showOnlyOnePrint is enabled
             if (showOnlyOnePrint) {
                 deduplicateCardsForDisplay(window.filteredCardsData);
+                console.log(`[Cards Tab] After dedup: ${window.filteredCardsData.length} cards`);
             }
             
             // Apply sorting based on user selection
             sortCardsDatabase(window.filteredCardsData);
             
+            console.log(`[Cards Tab] Calling renderCardDatabase with ${window.filteredCardsData.length} cards`);
             renderCardDatabase(window.filteredCardsData);
           } catch (err) {
             console.error('[Cards Tab] filterAndRenderCards error:', err);
@@ -1886,6 +1889,7 @@
         }
         
         function renderCardDatabase(cards) {
+            console.log('[Cards Tab] renderCardDatabase called, cards:', cards.length, 'content el:', !!document.getElementById('cardsContent'));
             const content = document.getElementById('cardsContent');
             const resultsInfo = document.getElementById('cardResultsInfo');
             
@@ -1919,16 +1923,24 @@
             const grid = document.createElement('div');
             grid.className = 'card-database-grid';
             
+            let renderedCount = 0;
+            let skippedNoName = 0;
+            let skippedNullEl = 0;
             cardsToShow.forEach(card => {
                 // Skip cards with missing name
                 if (!card.name) {
+                    skippedNoName++;
                     return;
                 }
                 const cardEl = createCardDatabaseItem(card);
                 if (cardEl) {
                     grid.appendChild(cardEl);
+                    renderedCount++;
+                } else {
+                    skippedNullEl++;
                 }
             });
+            console.log(`[Cards Tab] Rendered ${renderedCount} cards, skippedNoName=${skippedNoName}, skippedNullEl=${skippedNullEl}`);
             
             // Create pagination controls for bottom
             const paginationBottom = createPaginationControls(cards.length, totalPages);

@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python3
 """
-Card Price Scraper - TWO-PHASE EDITION (V5)
-===========================================
+Card Price Scraper - TWO-PHASE EDITION (V5.1 - Fix)
+===================================================
 PHASE 1: Fast Limitless TCG Baseline für ALLE Karten.
 PHASE 2: Premium Overwrite via Cardmarket (nur Playables & High-Rares).
 """
@@ -112,7 +112,9 @@ def _fetch_cardmarket(card: dict, base_delay: float, is_headless: bool, proxy_st
     cm_url = card.get("cardmarket_url", "")
     new_price = ""
 
-    if not cm_url: return card
+    if not cm_url: 
+        logger.warning("  [P2] Ueberspringe [%s]: Keine Cardmarket-URL vorhanden.", card_id)
+        return card
 
     target_url = cm_url + ("&language=1,3" if "?" in cm_url else "?language=1,3")
     
@@ -120,7 +122,8 @@ def _fetch_cardmarket(card: dict, base_delay: float, is_headless: bool, proxy_st
         for attempt in range(2):
             driver = None
             try:
-                driver = Driver(uc=True, proxy=proxy_str, headless2=is_headless) if proxy_str else Driver(uc=True, headless2=is_headless)
+                # FIX: "headless" anstelle von "headless2"
+                driver = Driver(uc=True, proxy=proxy_str, headless=is_headless) if proxy_str else Driver(uc=True, headless=is_headless)
                 driver.get(target_url)
                 time.sleep(base_delay + random.uniform(2.0, 4.0))
                 
@@ -134,15 +137,18 @@ def _fetch_cardmarket(card: dict, base_delay: float, is_headless: bool, proxy_st
                             logger.info("  [P2] CM OVERWRITE [%s]: %s (vorher: %s)", card_id, new_price, card.get('eur_price', 'N/A'))
                             break
                 if new_price: break
+                else:
+                    logger.warning("  [P2] CM Warnung [%s]: Seite geladen, aber kein Preis gefunden.", card_id)
             except Exception as e:
-                logger.debug("  CM Fehler [%s]: %s", card_id, e)
+                # FIX: Jetzt wird ein Absturz rot ins Terminal gedruckt!
+                logger.error("  [P2] CM ABSTURZ [%s]: %s", card_id, e)
             finally:
                 if driver: driver.quit()
 
     if new_price:
         return {**card, "eur_price": new_price, "last_updated": datetime.now().isoformat()}
     else:
-        logger.debug("  [P2] CM failed [%s] - behalte LT Preis: %s", card_id, card.get('eur_price', ''))
+        logger.warning("  [P2] CM Fehler [%s] - behalte LT Preis: %s", card_id, card.get('eur_price', ''))
         return card
 
 def main():
@@ -210,7 +216,8 @@ def main():
         if is_high_rare or is_playable:
             cm_vip_cards.append(card)
 
-    logger.info("-> %s VIP Karten identifiziert. Starte CM Stealth Modus.", len(cm_vip_cards))
+    urls_present = sum(1 for c in cm_vip_cards if c.get('cardmarket_url'))
+    logger.info("-> %s VIP Karten identifiziert (%s davon haben eine CM-URL!). Starte CM Stealth Modus.", len(cm_vip_cards), urls_present)
     
     final_results = []
     # Nur 2 Workers für den Browser-Modus, um RAM/Cloudflare nicht zu triggern

@@ -1966,22 +1966,19 @@
             // === DEBUG: measure layout after browser paint ===
             setTimeout(function() {
                 try {
-                    var tabEl = document.getElementById('cards');
-                    var tabCS = tabEl ? getComputedStyle(tabEl) : null;
-                    var contentCS = getComputedStyle(content);
-                    var gridCS = getComputedStyle(grid);
-                    var firstItem = grid.children[0];
-                    var itemCS = firstItem ? getComputedStyle(firstItem) : null;
-                    var info = [
-                        'DEBUG: ' + renderedCount + ' cards rendered',
-                        '#cards — display:' + (tabCS ? tabCS.display : 'N/A') + ' class:"' + (tabEl ? tabEl.className : 'N/A') + '" W×H:' + (tabEl ? tabEl.offsetWidth + '×' + tabEl.offsetHeight : 'N/A'),
-                        '#cardsContent — display:' + contentCS.display + ' W×H:' + content.offsetWidth + '×' + content.offsetHeight,
-                        '.card-database-grid — display:' + gridCS.display + ' cols:' + gridCS.gridTemplateColumns.split(' ').length + ' W×H:' + grid.offsetWidth + '×' + grid.offsetHeight,
-                        'First item — display:' + (itemCS ? itemCS.display : 'N/A') + ' visibility:' + (itemCS ? itemCS.visibility : 'N/A') + ' opacity:' + (itemCS ? itemCS.opacity : 'N/A') + ' W×H:' + (firstItem ? firstItem.offsetWidth + '×' + firstItem.offsetHeight : 'N/A'),
-                        'Grid children: ' + grid.children.length
-                    ];
+                    var info = ['DEBUG: ' + renderedCount + ' cards rendered'];
+                    // Walk up the DOM from #cardsContent to <body>
+                    var el = content;
+                    while (el && el !== document.documentElement) {
+                        var cs = getComputedStyle(el);
+                        var tag = el.tagName.toLowerCase();
+                        var id = el.id ? '#' + el.id : '';
+                        var cls = el.className ? '.' + String(el.className).split(' ').slice(0,3).join('.') : '';
+                        info.push(tag + id + cls + ' — display:' + cs.display + ' overflow:' + cs.overflow + ' W×H:' + el.offsetWidth + '×' + el.offsetHeight);
+                        el = el.parentElement;
+                    }
                     debugBanner.innerHTML = info.join('<br>');
-                    console.log('[Cards Tab] DEBUG layout:', info.join(' | '));
+                    console.log('[Cards Tab] DEBUG ancestors:', info.join(' | '));
                 } catch (e) {
                     debugBanner.textContent = 'DEBUG ERROR: ' + e.message;
                 }

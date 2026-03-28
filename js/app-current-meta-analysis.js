@@ -19,6 +19,7 @@
         
         // Load Current Meta Analysis Data
         async function loadCurrentMetaAnalysis() {
+          try {
             devLog('Loading Current Meta Analysis...');
             const data = await loadCurrentMetaRowsWithFallback();
             devLog('Loaded data:', data ? `${data.length} rows` : 'null');
@@ -61,6 +62,13 @@
                     content.innerHTML = '<option value="">Error loading data</option>';
                 }
             }
+          } catch (error) {
+            console.error('[Current Meta Analysis] Error loading:', error);
+            const content = document.getElementById('currentMetaDeckSelect');
+            if (content) {
+                content.innerHTML = '<option value="">Error loading analysis data</option>';
+            }
+          }
         }
         
         // Populate deck select dropdown
@@ -386,12 +394,14 @@
         }
         
         function clearCurrentMetaDeckView() {
-            document.getElementById('currentMetaStatsSection').classList.add('d-none');
-            document.getElementById('currentMetaMatchupsSection').classList.add('d-none');
-            document.getElementById('currentMetaDeckVisual').classList.add('d-none');
-            document.getElementById('currentMetaDeckTableView').classList.add('d-none');
-            document.getElementById('currentMetaCardCount').textContent = t('cl.cards').replace(/^/, '0 ');
-            document.getElementById('currentMetaCardCountSummary').textContent = '/ 0 Total';
+            ['currentMetaStatsSection', 'currentMetaMatchupsSection', 'currentMetaDeckVisual', 'currentMetaDeckTableView'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('d-none');
+            });
+            const countEl = document.getElementById('currentMetaCardCount');
+            if (countEl) countEl.textContent = '0 ' + t('cl.cards');
+            const summaryEl = document.getElementById('currentMetaCardCountSummary');
+            if (summaryEl) summaryEl.textContent = '/ 0 Total';
         }
         
         // Render best/worst matchups for Current Meta - extract directly from loaded HTML (1:1 copy)
@@ -407,7 +417,7 @@
             const currentMetaContent = document.getElementById('currentMetaContent');
             if (!currentMetaContent) {
                 console.error('? Current Meta content not loaded');
-                matchupsSection.classList.add('d-none');
+                if (matchupsSection) matchupsSection.classList.add('d-none');
                 return;
             }
             

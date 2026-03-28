@@ -1195,8 +1195,10 @@
         }
         
         function applyCityLeagueDateFilter() {
-            const dateFrom = document.getElementById('cityLeagueDateFrom').value;
-            const dateTo = document.getElementById('cityLeagueDateTo').value;
+            const dateFromEl = document.getElementById('cityLeagueDateFrom');
+            const dateToEl = document.getElementById('cityLeagueDateTo');
+            const dateFrom = dateFromEl ? dateFromEl.value : '';
+            const dateTo = dateToEl ? dateToEl.value : '';
             
             // Set filter active if at least one date is set
             if (dateFrom || dateTo) {
@@ -1222,8 +1224,10 @@
             const statusEl = document.getElementById('cityLeagueDateFilterStatus');
             if (!statusEl) return;
             
-            const dateFrom = document.getElementById('cityLeagueDateFrom').value;
-            const dateTo = document.getElementById('cityLeagueDateTo').value;
+            const dateFromEl = document.getElementById('cityLeagueDateFrom');
+            const dateToEl = document.getElementById('cityLeagueDateTo');
+            const dateFrom = dateFromEl ? dateFromEl.value : '';
+            const dateTo = dateToEl ? dateToEl.value : '';
             
             if (dateFrom && dateTo) {
                 statusEl.textContent = `${t('cl.filteredRange')} ${formatDate(dateFrom)} to ${formatDate(dateTo)}`;
@@ -1759,11 +1763,14 @@
         }
         
         function clearCityLeagueDeckView() {
-            document.getElementById('cityLeagueStatsSection').classList.add('d-none');
-            document.getElementById('cityLeagueDeckVisual').classList.add('d-none');
-            document.getElementById('cityLeagueDeckTableView').classList.add('d-none');
-            document.getElementById('cityLeagueCardCount').textContent = '0 ' + t('cl.cards');
-            document.getElementById('cityLeagueCardCountSummary').textContent = '/ 0 ' + t('cl.total');
+            ['cityLeagueStatsSection', 'cityLeagueDeckVisual', 'cityLeagueDeckTableView'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('d-none');
+            });
+            const countEl = document.getElementById('cityLeagueCardCount');
+            if (countEl) countEl.textContent = '0 ' + t('cl.cards');
+            const summaryEl = document.getElementById('cityLeagueCardCountSummary');
+            if (summaryEl) summaryEl.textContent = '/ 0 ' + t('cl.total');
             
             // Reset button text
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');

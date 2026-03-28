@@ -1052,9 +1052,6 @@
             });
         }
         
-        function togglePastMetaDeckGridView() {
-            pastMetaShowGridView = !pastMetaShowGridView;
-            renderPastMetaCards();
-        }
+        // (removed duplicate togglePastMetaDeckGridView — full version above)
 
         // Generic function to render deck analysis tables

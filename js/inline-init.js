@@ -23,8 +23,10 @@ function switchTabAndUpdateMenu(tabId) {
         if (badge) badge.innerText = text || activeBtn.innerText.trim();
     }
 
-    document.getElementById('mainMenuDropdown').classList.remove('show');
-    document.getElementById('mainMenuTrigger').classList.remove('open');
+    const menuDd = document.getElementById('mainMenuDropdown');
+    const menuTr = document.getElementById('mainMenuTrigger');
+    if (menuDd) menuDd.classList.remove('show');
+    if (menuTr) menuTr.classList.remove('open');
 }
 
 document.addEventListener('click', function(e) {

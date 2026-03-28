@@ -1352,7 +1352,7 @@
                 // Load format from settings
                 let currentFormat = 'SVI-ASC'; // Default fallback
                 try {
-                    const settingsResponse = await fetch('./current_meta_analysis_settings.json?t=' + Date.now());
+                    const settingsResponse = await fetch('./config/current_meta_analysis_settings.json?t=' + Date.now());
                     if (settingsResponse.ok) {
                         const settings = await settingsResponse.json();
                         const formatFilter = settings?.sources?.limitless_online?.format_filter;
@@ -1363,7 +1363,7 @@
                         }
                     }
                 } catch (e) {
-                    console.warn('Could not load current_meta_analysis_settings.json:', e);
+                    console.warn('Could not load config/current_meta_analysis_settings.json:', e);
                 }
                 
                 // Load Limitless meta statistics from JSON file

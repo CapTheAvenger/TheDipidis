@@ -184,7 +184,12 @@ def main():
     proxy_str = None
     if settings.get("proxy"):
         p = settings["proxy"]
-        proxy_str = f"{p.get('user')}:{p.get('pass')}@{p.get('host')}:{p.get('port')}" if p.get('user') else f"{p.get('host')}:{p.get('port')}"
+        # Wir suchen gezielt nach den Schlüsseln aus deiner Datei
+        host = p.get("proxy_host") or p.get("host") or "geo.iproyal.com"
+        port = p.get("proxy_port") or p.get("port") or "12321"
+        
+        # Da deine IP auf der Whitelist steht, übergeben wir ABSICHTLICH KEIN Passwort!
+        proxy_str = f"{host}:{port}"
 
     # ==========================================
     # PHASE 1: LIMITLESS BASELINE

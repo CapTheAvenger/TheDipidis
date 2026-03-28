@@ -1,9 +1,9 @@
 ﻿#!/usr/bin/env python3
 """
-Card Price Scraper - TWO-PHASE EDITION (V5.1 - Fix)
-===================================================
-PHASE 1: Fast Limitless TCG Baseline für ALLE Karten.
-PHASE 2: Premium Overwrite via Cardmarket (nur Playables & High-Rares).
+Card Price Scraper - TWO-PHASE EDITION (V6 - Set Filters)
+=========================================================
+PHASE 1: Fast Limitless Baseline für definierte Limitless-Sets.
+PHASE 2: Premium Overwrite via Cardmarket (nur Playables/High-Rares aus CM-Sets).
 """
 
 import csv
@@ -33,7 +33,15 @@ _cm_semaphore = threading.Semaphore(2) # Max 2 Browser gleichzeitig
 logger = setup_logging("price_scraper")
 
 def _load_settings() -> dict:
-    settings = load_settings("card_price_scraper_settings.json", {"delay_seconds": 5.0, "max_workers": 10, "headless": True})
+    default_settings = {
+        "delay_seconds": 5.0, 
+        "max_workers": 10, 
+        "headless": True,
+        "only_update_sets": ["POR", "ASC", "PFL", "MEG"],
+        "limitless_update_sets": ["POR", "ASC", "PFL", "MEG", "MEE", "MEP", "BLK", "WHT", "DRI", "JTG", "PRE", "SSP", "SCR", "SFA", "TWM", "TEF"]
+    }
+    settings = load_settings("card_price_scraper_settings.json", default_settings)
+    
     proxy_path = get_config_path("proxy_settings.json")
     if os.path.exists(proxy_path):
         try:
@@ -159,7 +167,10 @@ def main():
     
     if not cards: return
 
-    # --- SETUP: Meta und Proxy vorbereiten ---
+    # --- SETUP: Listen aus Settings laden ---
+    limitless_sets = [s.upper() for s in settings.get("limitless_update_sets", [])]
+    cm_sets = [s.upper() for s in settings.get("only_update_sets", [])]
+
     playable_names = set()
     meta_path = get_data_path("meta_data.json")
     if os.path.exists(meta_path):
@@ -178,17 +189,21 @@ def main():
     # ==========================================
     # PHASE 1: LIMITLESS BASELINE
     # ==========================================
+    cards_for_phase1 = []
+    for c in cards:
+        if not limitless_sets or c['set'].upper() in limitless_sets:
+            cards_for_phase1.append(c)
+
     logger.info("="*60)
-    logger.info("PHASE 1: Lade Limitless Baseline fuer ALLE %s Karten...", len(cards))
+    logger.info("PHASE 1: Lade Limitless Baseline fuer %s gueltige Karten...", len(cards_for_phase1))
     logger.info("="*60)
     
     phase1_results = []
-    # Hier können wir Gas geben: 10 Workers für normales Web-Scraping
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [executor.submit(_fetch_limitless, c) for c in cards]
+        futures = [executor.submit(_fetch_limitless, c) for c in cards_for_phase1]
         for i, f in enumerate(concurrent.futures.as_completed(futures)):
             phase1_results.append(f.result())
-            if (i+1) % 500 == 0: logger.info("  ... %s/%s Baseline-Preise gecheckt", i+1, len(cards))
+            if (i+1) % 500 == 0: logger.info("  ... %s/%s Baseline-Preise gecheckt", i+1, len(cards_for_phase1))
             
     save_prices(phase1_results, prices_csv)
 
@@ -201,10 +216,16 @@ def main():
 
     cm_vip_cards = []
     for card in phase1_results:
+        c_set = card.get('set', '').upper()
+        # Filter 1: Ist das Set überhaupt für Cardmarket zugelassen?
+        if cm_sets and c_set not in cm_sets:
+            continue
+            
         c_name = card['name'].lower()
         c_num = card['number'].upper()
         rarity = card.get('rarity', '').lower()
         
+        # Filter 2: Ist es eine High-Rare oder spielbare Karte?
         is_high_rare = (
             any(x in c_num for x in ["SIR", "GG", "TG", "SV", "AR", "FA", "EX", "VSTAR", "PROMO"]) or
             (c_num.count('/') > 0 and int(c_num.split('/')[0]) > 160) or
@@ -217,19 +238,20 @@ def main():
             cm_vip_cards.append(card)
 
     urls_present = sum(1 for c in cm_vip_cards if c.get('cardmarket_url'))
-    logger.info("-> %s VIP Karten identifiziert (%s davon haben eine CM-URL!). Starte CM Stealth Modus.", len(cm_vip_cards), urls_present)
+    logger.info("-> %s VIP Karten aus %s Sets identifiziert (%s davon haben eine CM-URL!).", len(cm_vip_cards), len(cm_sets), urls_present)
     
     final_results = []
-    # Nur 2 Workers für den Browser-Modus, um RAM/Cloudflare nicht zu triggern
     cm_workers = int(settings.get('max_workers', 2)) if int(settings.get('max_workers', 2)) <= 4 else 2 
     
-    with concurrent.futures.ThreadPoolExecutor(max_workers=cm_workers) as executor:
-        futures = [executor.submit(_fetch_cardmarket, c, float(settings['delay_seconds']), bool(settings['headless']), proxy_str) for c in cm_vip_cards]
-        for i, f in enumerate(concurrent.futures.as_completed(futures)):
-            final_results.append(f.result())
-            if (i+1) % 50 == 0: save_prices(final_results, prices_csv)
-            
-    save_prices(final_results, prices_csv)
+    if cm_vip_cards:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=cm_workers) as executor:
+            futures = [executor.submit(_fetch_cardmarket, c, float(settings['delay_seconds']), bool(settings['headless']), proxy_str) for c in cm_vip_cards]
+            for i, f in enumerate(concurrent.futures.as_completed(futures)):
+                final_results.append(f.result())
+                if (i+1) % 50 == 0: save_prices(final_results, prices_csv)
+                
+        save_prices(final_results, prices_csv)
+        
     logger.info("="*60)
     logger.info("SUCCESS: Two-Phase Price Update complete!")
     logger.info("="*60)

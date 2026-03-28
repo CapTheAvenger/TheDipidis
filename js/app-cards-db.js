@@ -159,9 +159,8 @@
         let _loadCardsRunning = false;
         
         async function loadCards() {
-            if (_loadCardsRunning) { console.log('[Cards Tab] Already running, skipping'); return; }
+            if (_loadCardsRunning) return;
             _loadCardsRunning = true;
-            console.log('[Cards Tab] loadCards() started');
             const content = document.getElementById('cardsContent');
             const resultsInfo = document.getElementById('cardResultsInfo');
             const setProgress = (msg) => {
@@ -174,18 +173,14 @@
 
                 // Ensure set mapping is loaded (for English sets)
                 if (!window.englishSetCodes || window.englishSetCodes.size === 0) {
-                    console.log('[Cards Tab] Loading set mapping...');
                     await loadSetMapping();
                 }
-                console.log('[Cards Tab] englishSetCodes:', window.englishSetCodes ? window.englishSetCodes.size : 'null');
                 
                 // Use already loaded cards from loadAllCardsDatabase() instead of loading again
                 if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
                     setProgress('Loading card database (this may take a moment)...');
-                    console.log('[Cards Tab] Loading allCardsDatabase...');
                     await loadAllCardsDatabase();
                 }
-                console.log('[Cards Tab] allCardsDatabase:', window.allCardsDatabase ? window.allCardsDatabase.length : 'null');
                 
                 // Filter to only English cards
                 let englishCards = [];
@@ -194,8 +189,6 @@
                         window.englishSetCodes.has(card.set)
                     );
                 }
-                console.log('[Cards Tab] English cards after filter:', englishCards.length);
-
                 // Fallback: if set mapping failed or no matches, keep card database usable.
                 if (englishCards.length === 0 && Array.isArray(window.allCardsDatabase) && window.allCardsDatabase.length > 0) {
                     console.warn('[Cards Tab] No English sets matched. Falling back to all cards database.');
@@ -212,18 +205,14 @@
                     return;
                 }
                 
-                console.log('[Cards Tab] Rendering', window.allCardsData.length, 'English cards from', window.allCardsDatabase.length, 'total');
-
                 // --- PHASE 1: Render cards immediately with basic filters ---
                 try { populateRarityFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateRarityFilter error:', e); }
                 try { populateCategoryFilter(); } catch (e) { console.error('[Cards Tab] populateCategoryFilter error:', e); }
                 try { await populateSetFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateSetFilter error:', e); }
                 try { setupCardFilters(); } catch (e) { console.error('[Cards Tab] setupCardFilters error:', e); }
 
-                console.log('[Cards Tab] Calling filterAndRenderCards...');
                 filterAndRenderCards();
                 window.cardsLoaded = true;
-                console.log('[Cards Tab] Phase 1 complete, cardsLoaded=true');
 
                 // --- PHASE 2: Load enrichment data (playable cards, coverage, formats) in background ---
                 // This avoids blocking initial render on ~200MB of CSV downloads
@@ -1446,20 +1435,15 @@
             devLog(`  - Failed main pokemon: ${failedMainPokemon}`);
             devLog(`  - Failed archetype: ${failedArchetype}`);
             devLog(`  - Failed meta filter: ${failedMetaFilter}`);
-            console.log(`[Cards Tab] Filter results: ${passedFilters} passed, ${failedValidation} failedValidation, ${failedMeta} failedMeta, ${failedSet} failedSet, ${failedRarity} failedRarity, ${failedCategory} failedCategory`);
-            console.log(`[Cards Tab] Filtered ${window.filteredCardsData.length} cards from ${window.allCardsData.length} total`);
-            
             // Deduplicate cards (same card name, different prints) - prefer print from coverage data
             // Only deduplicate if showOnlyOnePrint is enabled
             if (showOnlyOnePrint) {
                 deduplicateCardsForDisplay(window.filteredCardsData);
-                console.log(`[Cards Tab] After dedup: ${window.filteredCardsData.length} cards`);
             }
             
             // Apply sorting based on user selection
             sortCardsDatabase(window.filteredCardsData);
             
-            console.log(`[Cards Tab] Calling renderCardDatabase with ${window.filteredCardsData.length} cards`);
             renderCardDatabase(window.filteredCardsData);
           } catch (err) {
             console.error('[Cards Tab] filterAndRenderCards error:', err);
@@ -1889,7 +1873,6 @@
         }
         
         function renderCardDatabase(cards) {
-            console.log('[Cards Tab] renderCardDatabase called, cards:', cards.length, 'content el:', !!document.getElementById('cardsContent'));
             const content = document.getElementById('cardsContent');
             const resultsInfo = document.getElementById('cardResultsInfo');
             
@@ -1940,49 +1923,18 @@
                     skippedNullEl++;
                 }
             });
-            console.log(`[Cards Tab] Rendered ${renderedCount} cards, skippedNoName=${skippedNoName}, skippedNullEl=${skippedNullEl}`);
             
             // Create pagination controls for bottom
             const paginationBottom = createPaginationControls(cards.length, totalPages);
             
             // Clear and add all elements
             content.innerHTML = '';
-            
-            // === DEBUG BANNER — shows computed dimensions after layout ===
-            const debugBanner = document.createElement('div');
-            debugBanner.id = 'cardsDebugBanner';
-            debugBanner.style.cssText = 'background:#e00;color:#fff;padding:16px 20px;font-size:18px;font-weight:bold;z-index:9999;position:relative;border:4px solid #ff0;text-align:left;line-height:1.6;margin-bottom:12px;';
-            debugBanner.textContent = 'DEBUG: ' + renderedCount + ' cards rendered — measuring layout…';
-            content.appendChild(debugBanner);
-            // === END DEBUG BANNER ===
-            
             content.appendChild(paginationTop);
             content.appendChild(grid);
             content.appendChild(paginationBottom);
             
             // Scroll to top of cards section
             document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
-            // === DEBUG: measure layout after browser paint ===
-            setTimeout(function() {
-                try {
-                    var info = ['DEBUG: ' + renderedCount + ' cards rendered'];
-                    // Walk up the DOM from #cardsContent to <body>
-                    var el = content;
-                    while (el && el !== document.documentElement) {
-                        var cs = getComputedStyle(el);
-                        var tag = el.tagName.toLowerCase();
-                        var id = el.id ? '#' + el.id : '';
-                        var cls = el.className ? '.' + String(el.className).split(' ').slice(0,3).join('.') : '';
-                        info.push(tag + id + cls + ' — display:' + cs.display + ' overflow:' + cs.overflow + ' W×H:' + el.offsetWidth + '×' + el.offsetHeight);
-                        el = el.parentElement;
-                    }
-                    debugBanner.innerHTML = info.join('<br>');
-                    console.log('[Cards Tab] DEBUG ancestors:', info.join(' | '));
-                } catch (e) {
-                    debugBanner.textContent = 'DEBUG ERROR: ' + e.message;
-                }
-            }, 200);
         }
         
         function createPaginationControls(totalCards, totalPages) {

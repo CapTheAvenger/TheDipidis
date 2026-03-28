@@ -444,7 +444,12 @@
                             // Extract the actual counts from CSV
                             // deck_count = how many decks of this archetype play THIS CARD
                             // total_decks_in_archetype = total number of decks in this archetype
-                            const deckCountWithThisCard = parseInt(row.deck_count) || 0;
+                            const parsedDeckCount = parseInt(row.deck_count) || 0;
+                            const parsedDeckInclusion = parseInt(row.deck_inclusion_count) || 0;
+                            const parsedMaxCount = parseInt(row.max_count) || 0;
+                            // Some rows miss deck_count but still provide max_count/deck_inclusion_count.
+                            // In that case infer at least 1 deck so coverage and max-copy badges stay consistent.
+                            const deckCountWithThisCard = parsedDeckCount || parsedDeckInclusion || (parsedMaxCount > 0 ? 1 : 0);
                             const totalDecksInArchetype = parseInt(row.total_decks_in_archetype) || deckCountWithThisCard;
                             
                             // Store total deck count for this archetype (only once per archetype)
@@ -908,8 +913,33 @@
             const container = document.getElementById('metaFormatOptions');
             if (!container || !window.allMetas) return;
             
-            // Sort by meta name (reverse chronological for date-based metas)
-            const sortedMetas = Array.from(window.allMetas).sort().reverse();
+            const normalizeMetaCode = (meta) => String(meta || '').trim().toUpperCase();
+            const isValidMetaCode = (meta) => {
+                const code = normalizeMetaCode(meta);
+                if (!/^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(code)) return false;
+                const parts = code.split('-');
+                if (parts.length !== 2) return false;
+                if (parts[0] === parts[1]) return false; // e.g. SVI-SVI
+                return true;
+            };
+
+            const getMetaTimestamp = (meta) => {
+                const code = normalizeMetaCode(meta);
+                const latest = code.includes('-') ? code.split('-').pop() : code;
+                const dateStr = SET_RELEASE_DATES[latest] || SET_RELEASE_DATES[code] || SET_RELEASE_DATES.DEFAULT;
+                const ts = Date.parse(dateStr || '');
+                return Number.isNaN(ts) ? 0 : ts;
+            };
+
+            // Keep only valid tournament windows and sort newest -> oldest.
+            const sortedMetas = Array.from(window.allMetas)
+                .map(normalizeMetaCode)
+                .filter(isValidMetaCode)
+                .sort((a, b) => {
+                    const tsDiff = getMetaTimestamp(b) - getMetaTimestamp(a);
+                    if (tsDiff !== 0) return tsDiff;
+                    return b.localeCompare(a);
+                });
             
             // Add separator before metas
             const separator = document.createElement('div');
@@ -2216,8 +2246,9 @@
                 }
                 // Format the display with max count
                 const maxCountText = maxCount > 0 ? ` · Max: ${maxCount}x` : '';
+                const coveragePctLabel = (percentage > 0 && percentage < 0.1) ? '<0.1' : percentage.toFixed(1);
                 coverageDisplay = `<div class="card-database-coverage" style="background: ${coverageColor};" title="${deckCount} Decks / ${archetypeCount} Archetypes${maxCount > 0 ? ' · Max: ' + maxCount + 'x copies per deck' : ''}">
-                    ${coverageIcon} ${percentage.toFixed(1)}% Coverage${maxCountText}
+                    ${coverageIcon} ${coveragePctLabel}% Coverage${maxCountText}
                 </div>`;
             }
             if (!coverageDisplay) {

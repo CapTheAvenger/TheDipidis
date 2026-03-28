@@ -770,6 +770,7 @@
             
             const sortedCards = sortCardsByType([...cards]);
             const currentDeck = window.currentMetaDeck || {};
+            const priceMap = getOverviewPriceLookupCache();
             
             let html = '';
             sortedCards.forEach(card => {
@@ -813,29 +814,137 @@
                     const setCode = displayCard.set_code || '';
                     const setNumber = displayCard.set_number || '';
                     const cardNameWarning = getNameWarningHtml(rawCardName, cardName, setCode, setNumber);
-                    // ...existing code for imageUrl, counts, etc...
+
+                    const imageUrl = getBestCardImage({
+                        ...displayCard,
+                        set_code: setCode,
+                        set_number: setNumber,
+                        card_name: cardName
+                    });
+                    const rawPercentage = safeParseFloat(card.percentage_in_archetype || card.share_percent || 0);
+                    
+                    const legalMaxCopies = getLegalMaxCopies(cardName, card);
+                    const rawMaxCount = parseInt(card.max_count) || 0;
+                    const totalCount = safeParseFloat(card.total_count || 0);
+                    const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
+                    const finalMaxCount = rawMaxCount > 0
+                        ? Math.min(legalMaxCopies, rawMaxCount)
+                        : 0;
+                    
+                    let deckCount = 0;
+                    if (Object.keys(currentDeck).length > 0 && setCode && setNumber) {
+                        for (const deckKey in currentDeck) {
+                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                            if (match) {
+                                if (match[1] === setCode && match[2] === setNumber) {
+                                    deckCount = currentDeck[deckKey] || 0;
+                                    break;
+                                }
+                            }
+                        }
+                    } else if (Object.keys(currentDeck).length > 0 && !setCode && !setNumber) {
+                        deckCount = currentDeck[cardName] || 0;
+                    }
+                    
+                    const totalDecksInArchetype = safeParseFloat(card.total_decks_in_archetype || 0);
+                    const avgCountOverallRaw = safeParseFloat(card.average_count_overall || '', NaN);
+                    const avgCountInUsedRaw = safeParseFloat(card.average_count || card.avg_count || '', NaN);
+
+                    const resolvedPercentage = Number.isFinite(rawPercentage) && rawPercentage > 0
+                        ? rawPercentage
+                        : (totalDecksInArchetype > 0 && decksWithCard > 0 ? (decksWithCard / totalDecksInArchetype) * 100 : 0);
+                    const avgCountOverallValue = Number.isFinite(avgCountOverallRaw) && avgCountOverallRaw > 0
+                        ? avgCountOverallRaw
+                        : (totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype) : 0);
+                    const avgCountInUsedValue = Number.isFinite(avgCountInUsedRaw) && avgCountInUsedRaw > 0
+                        ? avgCountInUsedRaw
+                        : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
+
+                    const finalAvgUsed = Math.min(legalMaxCopies, avgCountInUsedValue);
+                    const finalAvgOverall = Math.min(legalMaxCopies, avgCountOverallValue);
+                    const maxCount = finalMaxCount;
+
+                    const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
+                    const avgCountOverall = Math.max(0, finalAvgOverall).toFixed(2).replace('.', ',');
+                    const avgCountInUsedDecks = Math.max(0, finalAvgUsed).toFixed(2).replace('.', ',');
+                    const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
+                    const totalDecksDisplay = Math.round(Math.max(0, totalDecksInArchetype));
+                    
+                    // Price lookup
+                    let eurPrice = '';
+                    let cardmarketUrl = '';
+                    let germanCardName = (displayCard.name_de || card.name_de || card.card_name_de || '').toLowerCase();
+                    if (setCode && setNumber) {
+                        const normalizedSet = normalizeSetCode(setCode);
+                        const normalizedNumber = normalizeCardNumber(setNumber);
+                        let priceCard = priceMap.get(`${normalizedSet}-${normalizedNumber}`);
+                        if (!priceCard && /^\d+$/.test(normalizedNumber)) {
+                            priceCard = priceMap.get(`${normalizedSet}-${normalizedNumber.padStart(3, '0')}`);
+                        }
+                        if (priceCard) {
+                            eurPrice = priceCard.eur_price || '';
+                            cardmarketUrl = priceCard.cardmarket_url || '';
+                            if (priceCard.name_de) germanCardName = String(priceCard.name_de).toLowerCase();
+                        }
+                    }
+                    const priceDisplay = eurPrice || '0,00€';
+                    const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
+                    const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
+                    
+                    // Card type category
+                    const cardType = card.type || card.card_type || '';
+                    const cardCategory = getCardTypeCategory(cardType);
+                    const isAceSpecCard = isAceSpec(cardName);
+                    const filterCategory = isAceSpecCard ? 'Ace Spec' : cardCategory;
+                    const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
+                    
+                    // Collection badge
+                    let otherPrintOwnedCount = 0;
+                    if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
+                        const normalizedCurrentName = normalizeCardName(cardName);
+                        const normalizedSet = String(setCode || '').toUpperCase();
+                        const normalizedNumber = String(setNumber || '').toUpperCase();
+                        window.userCollectionCounts.forEach((qty, collKey) => {
+                            const ownedQty = parseInt(qty, 10) || 0;
+                            if (ownedQty <= 0) return;
+                            const parts = String(collKey || '').split('|');
+                            if (parts.length < 3) return;
+                            if (normalizeCardName(parts[0]) !== normalizedCurrentName) return;
+                            if (String(parts[1] || '').toUpperCase() === normalizedSet && String(parts[2] || '').toUpperCase() === normalizedNumber) return;
+                            otherPrintOwnedCount += ownedQty;
+                        });
+                    }
+                    const otherPrintSparkleHtml = otherPrintOwnedCount > 0
+                        ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}">
+                            <span class="city-league-other-print-sparkle-icon">✨</span>
+                            <span class="city-league-other-print-sparkle-count">${otherPrintOwnedCount}</span>
+                        </div>`
+                        : '';
+                    
                     html += `
-                        <div class="card-item pointer" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
-                            <div class="card-image-container">
-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
-                                <div class="card-badge card-badge-top-right">${maxCount}</div>
-                                ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
-                                <div class="card-info-bottom">
-                                    <div class="card-info-text">
-                                        <div class="nowrap ellipsis" style="font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">${cardName}${cardNameWarning}</div>
-                                        <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">${setCode} ${setNumber}</div>
-                                        <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
+                        <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
+                            <div class="card-image-container city-league-card-image-container">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
+                                <div class="city-league-card-badge city-league-card-badge-max">${maxCount}</div>
+                                ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
+                                ${otherPrintSparkleHtml}
+                                <div class="card-info-bottom city-league-card-info-bottom">
+                                    <div class="card-info-text city-league-card-info-text">
+                                        <div class="city-league-card-title-mobile">${cardName}${cardNameWarning}</div>
+                                        <div class="city-league-card-set-mobile">${setCode} ${setNumber}</div>
+                                        <div class="city-league-card-stats-mobile">${resolvedPercentage > 0 ? `${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)` : ''}</div>
+                                        <div class="city-league-card-deck-stats-mobile">${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)</div>
                                     </div>
-                                    <div class="card-action-buttons">
-                                        <div class="card-action-row">
-                                            <button onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">-</button>
-                                            <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;">★</button>
-                                            <button onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">+</button>
+                                    <div class="card-action-buttons city-league-card-action-buttons">
+                                        <div class="city-league-card-action-row">
+                                            <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
+                                            <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
+                                            <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                         </div>
-                                        <div class="card-action-row-wide">
-                                            ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
-                                            <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Add to proxy">P</button>
-                                            <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;">  ${priceDisplay}</button>
+                                        <div class="city-league-card-action-row">
+                                            ${setCode && setNumber ? `<button class="city-league-card-action-btn city-league-card-limitless-btn" onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}
+                                            <button class="city-league-card-action-btn city-league-card-proxy-btn" onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" title="${t('cl.proxyTooltip')}">P</button>
+                                            <button class="city-league-card-action-btn city-league-card-market-btn" onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" data-market-bg="${priceBackground}" data-market-cursor="${eurPrice ? 'pointer' : 'not-allowed'}" title="${eurPrice ? t('cl.buyCardmarket') + ' ' + eurPrice : t('cl.priceNA')}">${priceDisplay}</button>
                                         </div>
                                     </div>
                                 </div>

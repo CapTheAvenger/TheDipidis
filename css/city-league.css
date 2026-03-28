@@ -1217,10 +1217,14 @@
     display: block;
     margin-bottom: 18px;
 }
-.city-league-deck-grid {
+/* Shared grid layout for ALL deck card overview grids (City League, Current Meta, Past Meta) */
+.deck-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
     gap: 10px;
+}
+.city-league-deck-grid {
+    /* inherits from .deck-grid — keep for backwards compat */
 }
 .city-league-cards-header {
     display: block;

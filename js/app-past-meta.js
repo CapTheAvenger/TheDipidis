@@ -868,33 +868,53 @@
                     const filterCategory = getCardType(cardName, setCode, setNumber);
                     const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
                     
+                    // Collection badge
+                    let otherPrintOwnedCount = 0;
+                    if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
+                        const normalizedCurrentName = normalizeCardName(cardName);
+                        const normalizedSet = String(setCode || '').toUpperCase();
+                        const normalizedNumber = String(setNumber || '').toUpperCase();
+                        window.userCollectionCounts.forEach((qty, collKey) => {
+                            const ownedQty = parseInt(qty, 10) || 0;
+                            if (ownedQty <= 0) return;
+                            const parts = String(collKey || '').split('|');
+                            if (parts.length < 3) return;
+                            if (normalizeCardName(parts[0]) !== normalizedCurrentName) return;
+                            if (String(parts[1] || '').toUpperCase() === normalizedSet && String(parts[2] || '').toUpperCase() === normalizedNumber) return;
+                            otherPrintOwnedCount += ownedQty;
+                        });
+                    }
+                    const otherPrintSparkleHtml = otherPrintOwnedCount > 0
+                        ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}">
+                            <span class="city-league-other-print-sparkle-icon">✨</span>
+                            <span class="city-league-other-print-sparkle-count">${otherPrintOwnedCount}</span>
+                        </div>`
+                        : '';
+                    
                     html += `
-                        <div class="card-item card-item-shadow" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
-                            <div class="card-image-container pos-rel">
-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="card-img-std" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
-                                <!-- Red badge: Max Count (top-right) -->
-                                <div class="card-badge card-badge-red pos-abs top-right">${maxCount}</div>
-                                <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
-                                ${deckCount > 0 ? `<div class="card-badge card-badge-green pos-abs top-left">${deckCount}</div>` : ''}
-                                <!-- Card info section -->
-                                <div class="card-info-bottom card-info-bottom-std">
-                                    <div class="card-info-text">
-                                        <div class="card-info-name">${cardName}${cardNameWarning}</div>
-                                        <div class="card-info-set">${setCode} ${setNumber}</div>
-                                        <div class="card-info-meta">${percentage}% | Ø ${avgInUsingDecks}x (${avgCountOverallDisplay}x)</div>
-                                        <div class="card-info-decks">${deckCountByStatsDisplay} / ${decklistCountDisplay} Decks</div>
+                        <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
+                            <div class="card-image-container city-league-card-image-container">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
+                                <div class="city-league-card-badge city-league-card-badge-max">${maxCount}</div>
+                                ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
+                                ${otherPrintSparkleHtml}
+                                <div class="card-info-bottom city-league-card-info-bottom">
+                                    <div class="card-info-text city-league-card-info-text">
+                                        <div class="city-league-card-title-mobile">${cardName}${cardNameWarning}</div>
+                                        <div class="city-league-card-set-mobile">${setCode} ${setNumber}</div>
+                                        <div class="city-league-card-stats-mobile">${percentage}% | Ø ${avgInUsingDecks}x (${avgCountOverallDisplay}x)</div>
+                                        <div class="city-league-card-deck-stats-mobile">${deckCountByStatsDisplay} / ${decklistCountDisplay} Decks</div>
                                     </div>
-                                    <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
-                                    <div class="card-action-buttons card-action-buttons-col">
-                                        <div class="card-action-row">
-                                            <button onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" class="btn-red card-action-btn" title="Remove from deck">-</button>
-                                            <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="btn-yellow card-action-btn" title="Switch rarity/print">★</button>
-                                            <button onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="btn-green card-action-btn" title="Add to deck">+</button>
+                                    <div class="card-action-buttons city-league-card-action-buttons">
+                                        <div class="city-league-card-action-row">
+                                            <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
+                                            <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
+                                            <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                         </div>
-                                        <div class="card-action-row card-action-row-wide">
-                                            ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" class="btn-purple card-action-btn btn-xs" title="Open on Limitless">L</button>` : '<span></span>'}
-                                            <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" class="btn-gradient-red card-action-btn btn-xs" title="Add to proxy">P</button>
-                                            <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" class="btn-gradient-orange card-action-btn btn-xs" style="background: ${priceBackground}; cursor: ${eurPrice ? 'pointer' : 'not-allowed'};" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                        <div class="city-league-card-action-row">
+                                            ${setCode && setNumber ? `<button class="city-league-card-action-btn city-league-card-limitless-btn" onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}
+                                            <button class="city-league-card-action-btn city-league-card-proxy-btn" onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" title="${t('cl.proxyTooltip')}">P</button>
+                                            <button class="city-league-card-action-btn city-league-card-market-btn" onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" data-market-bg="${priceBackground}" data-market-cursor="${eurPrice ? 'pointer' : 'not-allowed'}" title="${eurPrice ? t('cl.buyCardmarket') + ' ' + eurPrice : t('cl.priceNA')}">${priceDisplay}</button>
                                         </div>
                                     </div>
                                 </div>

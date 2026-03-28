@@ -170,7 +170,6 @@
             
             try {
                 ensureCardsFilterMarkup();
-                setProgress('Loading set mapping...');
 
                 // Ensure set mapping is loaded (for English sets)
                 if (!window.englishSetCodes || window.englishSetCodes.size === 0) {
@@ -178,9 +177,9 @@
                     await loadSetMapping();
                 }
                 
-                setProgress('Loading card database (this may take a moment)...');
                 // Use already loaded cards from loadAllCardsDatabase() instead of loading again
                 if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
+                    setProgress('Loading card database (this may take a moment)...');
                     devLog('[Cards Tab] Waiting for allCardsDatabase to load...');
                     await loadAllCardsDatabase();
                 }
@@ -210,40 +209,19 @@
                 }
                 
                 devLog(`[Cards Tab] Filtered to ${window.allCardsData.length} English cards from ${window.allCardsDatabase.length} total`);
-                devLog(`[Cards Tab] First card structure:`, window.allCardsData[0]);
-                
-                setProgress(`Loaded ${window.allCardsData.length} cards. Loading playable cards...`);
-                // Load playable cards (from City League, Current Meta, Tournament JH)
-                await loadPlayableCards();
-                
-                setProgress(`Loading deck coverage statistics...`);
-                // Load deck coverage statistics
-                await loadDeckCoverageStats();
-                
-                setProgress(`Loading format data...`);
-                // Load formats from current meta data
-                await loadFormatsForCards();
 
-                setProgress(`Populating filters...`);
-                // Populate static filter sections
+                // --- PHASE 1: Render cards immediately with basic filters ---
                 try { populateRarityFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateRarityFilter error:', e); }
                 try { populateCategoryFilter(); } catch (e) { console.error('[Cards Tab] populateCategoryFilter error:', e); }
-                try { populateDeckCoverageFilter(); } catch (e) { console.error('[Cards Tab] populateDeckCoverageFilter error:', e); }
-                
-                // Populate filters
                 try { await populateSetFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateSetFilter error:', e); }
-                try { populateMainPokemonFilter(); } catch (e) { console.error('[Cards Tab] populateMainPokemonFilter error:', e); }
-                try { populateArchetypeFilter(); } catch (e) { console.error('[Cards Tab] populateArchetypeFilter error:', e); }
-                try { populateMetaFilter(); } catch (e) { console.error('[Cards Tab] populateMetaFilter error:', e); }
-                
-                // Setup filter event listeners
                 try { setupCardFilters(); } catch (e) { console.error('[Cards Tab] setupCardFilters error:', e); }
-                
-                // Initial render
-                setProgress(`Rendering ${window.allCardsData.length} cards...`);
+
                 filterAndRenderCards();
-                
                 window.cardsLoaded = true;
+
+                // --- PHASE 2: Load enrichment data (playable cards, coverage, formats) in background ---
+                // This avoids blocking initial render on ~200MB of CSV downloads
+                _loadCardsEnrichment();
             } catch (error) {
                 console.error('[Cards Tab] Error loading card database:', error);
                 content.innerHTML = '<div class="error" style="padding: 20px; color: #c00;">' +
@@ -256,7 +234,46 @@
                 _loadCardsRunning = false;
             }
         }
+
+        // Phase 2: Load enrichment data after cards are already visible.
+        // Runs asynchronously — does not block the initial card render.
+        async function _loadCardsEnrichment() {
+            try {
+                devLog('[Cards Tab] Phase 2: Loading enrichment data...');
+                await loadPlayableCards();
+                await loadDeckCoverageStats();
+                await loadFormatsForCards();
+
+                // Populate enrichment-dependent filters
+                try { populateDeckCoverageFilter(); } catch (e) { console.error('[Cards Tab] populateDeckCoverageFilter error:', e); }
+                try { populateMainPokemonFilter(); } catch (e) { console.error('[Cards Tab] populateMainPokemonFilter error:', e); }
+                try { populateArchetypeFilter(); } catch (e) { console.error('[Cards Tab] populateArchetypeFilter error:', e); }
+                try { populateMetaFilter(); } catch (e) { console.error('[Cards Tab] populateMetaFilter error:', e); }
+
+                // Re-render so coverage badges and enrichment filters take effect
+                filterAndRenderCards();
+                devLog('[Cards Tab] Phase 2: Enrichment complete.');
+            } catch (error) {
+                console.error('[Cards Tab] Enrichment loading failed (cards still visible):', error);
+            }
+        }
         
+        // Cached parsed CSV rows to avoid re-downloading & re-parsing large files
+        let _cachedCityLeagueRows = null;
+        let _cachedTournamentRows = null;
+
+        async function _fetchAndParseCsvCached(file, cacheRef) {
+            if (cacheRef === 'cityLeague' && _cachedCityLeagueRows) return _cachedCityLeagueRows;
+            if (cacheRef === 'tournament' && _cachedTournamentRows) return _cachedTournamentRows;
+            const response = await fetch(BASE_PATH + file);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const text = await response.text();
+            const rows = parseCSV(text);
+            if (cacheRef === 'cityLeague') _cachedCityLeagueRows = rows;
+            if (cacheRef === 'tournament') _cachedTournamentRows = rows;
+            return rows;
+        }
+
         async function loadPlayableCards() {
             window.playableCardsSet = new Set(); // All playables (City League + Current Meta + Tournament)
             window.cityLeagueCardsSet = new Set(); // Only City League cards
@@ -264,10 +281,7 @@
             try {
                 // Load City League Analysis CSV
                 try {
-                    const cityLeagueResponse = await fetch(BASE_PATH + 'city_league_analysis.csv');
-                    if (!cityLeagueResponse.ok) throw new Error(`HTTP ${cityLeagueResponse.status}`);
-                    const cityLeagueText = await cityLeagueResponse.text();
-                    const cityLeagueCards = parseCSV(cityLeagueText);
+                    const cityLeagueCards = await _fetchAndParseCsvCached('city_league_analysis.csv', 'cityLeague');
                     cityLeagueCards.forEach(card => {
                         if (card.card_name) {
                             const cardNameNorm = normalizeCardName(card.card_name);
@@ -296,12 +310,9 @@
                     console.warn('Could not load Current Meta playable cards:', err);
                 }
                 
-                // Load Tournament Scraper JH CSV
+                // Load Tournament Scraper JH CSV (cached — also used by loadDeckCoverageStats)
                 try {
-                    const tournamentResponse = await fetch(BASE_PATH + 'tournament_cards_data_cards.csv');
-                    if (!tournamentResponse.ok) throw new Error(`HTTP ${tournamentResponse.status}`);
-                    const tournamentText = await tournamentResponse.text();
-                    const tournamentCards = parseCSV(tournamentText);
+                    const tournamentCards = await _fetchAndParseCsvCached('tournament_cards_data_cards.csv', 'tournament');
                     tournamentCards.forEach(card => {
                         if (card.card_name) {
                             const cardNameNorm = normalizeCardName(card.card_name);
@@ -385,25 +396,16 @@
             try {
                 // Load both City League and Tournament data for comprehensive coverage
                 const dataSources = [
-                    { file: 'city_league_analysis.csv', name: 'City League' },
-                    { file: 'tournament_cards_data_cards.csv', name: 'Tournament' }
+                    { file: 'city_league_analysis.csv', name: 'City League', cache: 'cityLeague' },
+                    { file: 'tournament_cards_data_cards.csv', name: 'Tournament', cache: 'tournament' }
                 ];
                 
                 for (const source of dataSources) {
                     try {
-                        devLog(`[Deck Coverage] Attempting to load: ${source.file}`);
-                        const response = await fetch(BASE_PATH + source.file);
-                        if (!response.ok) {
-                            console.error(`[Deck Coverage] Failed to fetch ${source.file}: ${response.status}`);
-                            continue;
-                        }
-                        const text = await response.text();
-                        const rows = parseCSV(text);
+                        devLog(`[Deck Coverage] Loading: ${source.file}`);
+                        const rows = await _fetchAndParseCsvCached(source.file, source.cache);
                         
                         devLog(`[Deck Coverage] Parsed ${rows.length} rows from ${source.file}`);
-                        if (rows.length > 0) {
-                            devLog(`[Deck Coverage] First row structure:`, rows[0]);
-                        }
                         
                         let processedRows = 0;
                         

@@ -156,13 +156,21 @@
         const cardsPerPage = 300;
         let showAllCards = false;
         let showOnlyOnePrint = true; // Toggle for deduplication: true = only show 1 print per card (low rarity, newest)
+        let _loadCardsRunning = false;
         
         async function loadCards() {
+            if (_loadCardsRunning) return; // Prevent concurrent calls
+            _loadCardsRunning = true;
             const content = document.getElementById('cardsContent');
-            content.innerHTML = '<div class="loading">Loading card database...</div>';
+            const resultsInfo = document.getElementById('cardResultsInfo');
+            const setProgress = (msg) => {
+                if (content) content.innerHTML = `<div class="loading">${msg}</div>`;
+            };
+            setProgress('Loading card database...');
             
             try {
                 ensureCardsFilterMarkup();
+                setProgress('Loading set mapping...');
 
                 // Ensure set mapping is loaded (for English sets)
                 if (!window.englishSetCodes || window.englishSetCodes.size === 0) {
@@ -170,6 +178,7 @@
                     await loadSetMapping();
                 }
                 
+                setProgress('Loading card database (this may take a moment)...');
                 // Use already loaded cards from loadAllCardsDatabase() instead of loading again
                 if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
                     devLog('[Cards Tab] Waiting for allCardsDatabase to load...');
@@ -177,11 +186,14 @@
                 }
                 
                 // Filter to only English cards
-                let englishCards = window.allCardsDatabase.filter(card => 
-                    window.englishSetCodes && window.englishSetCodes.has(card.set)
-                );
+                let englishCards = [];
+                if (window.englishSetCodes && window.englishSetCodes.size > 0) {
+                    englishCards = window.allCardsDatabase.filter(card => 
+                        window.englishSetCodes.has(card.set)
+                    );
+                }
 
-                // Fallback: if set mapping failed, keep card database usable with all known cards.
+                // Fallback: if set mapping failed or no matches, keep card database usable.
                 if (englishCards.length === 0 && Array.isArray(window.allCardsDatabase) && window.allCardsDatabase.length > 0) {
                     console.warn('[Cards Tab] No English sets matched. Falling back to all cards database.');
                     englishCards = window.allCardsDatabase.filter(card => card && (card.name || card.name_en));
@@ -191,8 +203,7 @@
                 window.allCardsData = englishCards;
 
                 if (!window.allCardsData || window.allCardsData.length === 0) {
-                    content.innerHTML = '<div class="error">No card data available.</div>';
-                    const resultsInfo = document.getElementById('cardResultsInfo');
+                    content.innerHTML = '<div class="error">No card data available. allCardsDatabase: ' + (window.allCardsDatabase ? window.allCardsDatabase.length : 'null') + ', englishSetCodes: ' + (window.englishSetCodes ? window.englishSetCodes.size : 'null') + '</div>';
                     if (resultsInfo) resultsInfo.textContent = '0 cards found';
                     window.cardsLoaded = false;
                     return;
@@ -201,37 +212,48 @@
                 devLog(`[Cards Tab] Filtered to ${window.allCardsData.length} English cards from ${window.allCardsDatabase.length} total`);
                 devLog(`[Cards Tab] First card structure:`, window.allCardsData[0]);
                 
+                setProgress(`Loaded ${window.allCardsData.length} cards. Loading playable cards...`);
                 // Load playable cards (from City League, Current Meta, Tournament JH)
                 await loadPlayableCards();
                 
+                setProgress(`Loading deck coverage statistics...`);
                 // Load deck coverage statistics
                 await loadDeckCoverageStats();
                 
+                setProgress(`Loading format data...`);
                 // Load formats from current meta data
                 await loadFormatsForCards();
 
+                setProgress(`Populating filters...`);
                 // Populate static filter sections
-                populateRarityFilter(window.allCardsData);
-                populateCategoryFilter();
-                populateDeckCoverageFilter();
+                try { populateRarityFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateRarityFilter error:', e); }
+                try { populateCategoryFilter(); } catch (e) { console.error('[Cards Tab] populateCategoryFilter error:', e); }
+                try { populateDeckCoverageFilter(); } catch (e) { console.error('[Cards Tab] populateDeckCoverageFilter error:', e); }
                 
                 // Populate filters
-                await populateSetFilter(window.allCardsData);
-                // populateMetaFormatFilter(); // Disabled - using populateMetaFilter() instead for more complete data
-                populateMainPokemonFilter();
-                populateArchetypeFilter();
-                populateMetaFilter();
+                try { await populateSetFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateSetFilter error:', e); }
+                try { populateMainPokemonFilter(); } catch (e) { console.error('[Cards Tab] populateMainPokemonFilter error:', e); }
+                try { populateArchetypeFilter(); } catch (e) { console.error('[Cards Tab] populateArchetypeFilter error:', e); }
+                try { populateMetaFilter(); } catch (e) { console.error('[Cards Tab] populateMetaFilter error:', e); }
                 
                 // Setup filter event listeners
-                setupCardFilters();
+                try { setupCardFilters(); } catch (e) { console.error('[Cards Tab] setupCardFilters error:', e); }
                 
                 // Initial render
+                setProgress(`Rendering ${window.allCardsData.length} cards...`);
                 filterAndRenderCards();
                 
                 window.cardsLoaded = true;
             } catch (error) {
                 console.error('[Cards Tab] Error loading card database:', error);
-                content.innerHTML = '<div class="error">? Error loading card database</div>';
+                content.innerHTML = '<div class="error" style="padding: 20px; color: #c00;">' +
+                    '<h3>Error loading card database</h3>' +
+                    '<p><strong>' + (error.message || String(error)) + '</strong></p>' +
+                    '<pre style="font-size:11px; white-space:pre-wrap; color:#666;">' + (error.stack || '') + '</pre>' +
+                    '<p style="margin-top:12px;"><button onclick="window.cardsLoaded=false;_loadCardsRunning=false;loadCards()" class="btn-blue">Retry</button></p>' +
+                    '</div>';
+            } finally {
+                _loadCardsRunning = false;
             }
         }
         
@@ -1086,6 +1108,7 @@
         }
         
         function filterAndRenderCards() {
+          try {
             if (!window.allCardsData || window.allCardsData.length === 0) {
                 console.warn('[Cards Tab] No cards loaded yet');
                 const content = document.getElementById('cardsContent');
@@ -1427,6 +1450,17 @@
             sortCardsDatabase(window.filteredCardsData);
             
             renderCardDatabase(window.filteredCardsData);
+          } catch (err) {
+            console.error('[Cards Tab] filterAndRenderCards error:', err);
+            const content = document.getElementById('cardsContent');
+            if (content) {
+                content.innerHTML = '<div class="error" style="padding:20px;color:#c00;">' +
+                    '<h3>Error rendering cards</h3>' +
+                    '<p>' + (err.message || String(err)) + '</p>' +
+                    '<pre style="font-size:11px;white-space:pre-wrap;color:#666;">' + (err.stack || '') + '</pre>' +
+                    '</div>';
+            }
+          }
         }
         
         function togglePrintView() {
@@ -1878,8 +1912,8 @@
             grid.className = 'card-database-grid';
             
             cardsToShow.forEach(card => {
-                // Skip cards with missing essential data
-                if (!card.name || !card.image_url) {
+                // Skip cards with missing name
+                if (!card.name) {
                     return;
                 }
                 const cardEl = createCardDatabaseItem(card);
@@ -2047,7 +2081,7 @@
         
         function createCardDatabaseItem(card) {
             // Validate essential fields
-            if (!card.name || !card.image_url) {
+            if (!card.name) {
                 return null;
             }
             

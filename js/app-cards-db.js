@@ -159,8 +159,9 @@
         let _loadCardsRunning = false;
         
         async function loadCards() {
-            if (_loadCardsRunning) return; // Prevent concurrent calls
+            if (_loadCardsRunning) { console.log('[Cards Tab] Already running, skipping'); return; }
             _loadCardsRunning = true;
+            console.log('[Cards Tab] loadCards() started');
             const content = document.getElementById('cardsContent');
             const resultsInfo = document.getElementById('cardResultsInfo');
             const setProgress = (msg) => {
@@ -173,16 +174,18 @@
 
                 // Ensure set mapping is loaded (for English sets)
                 if (!window.englishSetCodes || window.englishSetCodes.size === 0) {
-                    devLog('[Cards Tab] Loading set mapping for English sets...');
+                    console.log('[Cards Tab] Loading set mapping...');
                     await loadSetMapping();
                 }
+                console.log('[Cards Tab] englishSetCodes:', window.englishSetCodes ? window.englishSetCodes.size : 'null');
                 
                 // Use already loaded cards from loadAllCardsDatabase() instead of loading again
                 if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
                     setProgress('Loading card database (this may take a moment)...');
-                    devLog('[Cards Tab] Waiting for allCardsDatabase to load...');
+                    console.log('[Cards Tab] Loading allCardsDatabase...');
                     await loadAllCardsDatabase();
                 }
+                console.log('[Cards Tab] allCardsDatabase:', window.allCardsDatabase ? window.allCardsDatabase.length : 'null');
                 
                 // Filter to only English cards
                 let englishCards = [];
@@ -191,6 +194,7 @@
                         window.englishSetCodes.has(card.set)
                     );
                 }
+                console.log('[Cards Tab] English cards after filter:', englishCards.length);
 
                 // Fallback: if set mapping failed or no matches, keep card database usable.
                 if (englishCards.length === 0 && Array.isArray(window.allCardsDatabase) && window.allCardsDatabase.length > 0) {
@@ -208,7 +212,7 @@
                     return;
                 }
                 
-                devLog(`[Cards Tab] Filtered to ${window.allCardsData.length} English cards from ${window.allCardsDatabase.length} total`);
+                console.log('[Cards Tab] Rendering', window.allCardsData.length, 'English cards from', window.allCardsDatabase.length, 'total');
 
                 // --- PHASE 1: Render cards immediately with basic filters ---
                 try { populateRarityFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateRarityFilter error:', e); }
@@ -216,8 +220,10 @@
                 try { await populateSetFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateSetFilter error:', e); }
                 try { setupCardFilters(); } catch (e) { console.error('[Cards Tab] setupCardFilters error:', e); }
 
+                console.log('[Cards Tab] Calling filterAndRenderCards...');
                 filterAndRenderCards();
                 window.cardsLoaded = true;
+                console.log('[Cards Tab] Phase 1 complete, cardsLoaded=true');
 
                 // --- PHASE 2: Load enrichment data (playable cards, coverage, formats) in background ---
                 // This avoids blocking initial render on ~200MB of CSV downloads

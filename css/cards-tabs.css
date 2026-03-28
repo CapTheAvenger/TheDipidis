@@ -84,10 +84,13 @@
 }
 
 #cards .card-database-top-actions .card-badge {
+    position: relative !important;
     width: 22px !important;
     height: 22px !important;
     font-size: 12px !important;
     line-height: 1 !important;
+    cursor: pointer !important;
+    border: 1.5px solid rgba(0,0,0,0.15) !important;
 }
 
 #cards .card-database-info {

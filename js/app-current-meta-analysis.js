@@ -44,6 +44,9 @@
             }
             
             if (data && data.length > 0) {
+                // Fix card name encoding issues (e.g. PokÃ© → Poké) in-place so
+                // all subsequent deck lookups use correctly encoded names.
+                healCurrentMetaCardRows(data);
                 window.currentMetaAnalysisData = data;
                 await populateCurrentMetaDeckSelect(data);
                 setCurrentMetaFormatFilter('all'); // Set default filter
@@ -295,8 +298,9 @@
                 row.archetype && row.archetype.toLowerCase() === archetype.toLowerCase()
             );
             
-            // Apply format filter
-            if (currentMetaFormatFilter !== 'all') {
+            // Apply format filter (only when primary CSV is loaded; fallback data is
+            // already all 'Meta Play!' so the live-filter guard must be skipped).
+            if (currentMetaFormatFilter !== 'all' && !window.currentMetaUsingFallback) {
                 const filterValue = currentMetaFormatFilter === 'live' ? 'Meta Live' : 'Meta Play!';
                 deckCards = deckCards.filter(row => row.meta === filterValue);
             }
@@ -307,10 +311,10 @@
                 return;
             }
             
-            // Current Meta currently falls back to tournament_cards_data_cards.csv when
-            // current_meta_card_data.csv is missing. In that mode, rows are per tournament
-            // and per print, so we must aggregate stats before choosing a display print.
-            if (deckCards.length > 0) {
+            // Fallback CSV (tournament_cards_data_cards.csv) stores one row per tournament
+            // per print, so stats must be aggregated before deduplication.
+            // Primary CSV is already pre-aggregated — skip the expensive aggregation pass.
+            if (window.currentMetaUsingFallback && deckCards.length > 0) {
                 deckCards = aggregateCardStatsByDate(deckCards);
             }
 

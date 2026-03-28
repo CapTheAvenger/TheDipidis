@@ -55,6 +55,101 @@
                 }
             }
         }
+
+        function ensureCardsFilterMarkup() {
+            const sections = [
+                {
+                    groupId: 'filter-meta-format',
+                    targetId: 'metaFormatOptions',
+                    html: `
+                        <div class="cards-filter-header" onclick="toggleCardFilter('metaFormatOptions')">
+                            <span>Meta / Format</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options" id="metaFormatOptions">
+                            <label class="label-block"><input type="checkbox" value="total" checked> Total (All Cards)</label>
+                            <label class="label-block"><input type="checkbox" value="all_playables"> All Playables</label>
+                            <label class="label-block"><input type="checkbox" value="city_league"> City League Only</label>
+                        </div>
+                    `
+                },
+                {
+                    groupId: 'filter-set',
+                    targetId: 'setFilterOptions',
+                    html: `
+                        <div class="cards-filter-header" onclick="toggleCardFilter('setFilterOptions')">
+                            <span>Set</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options" id="setFilterOptions"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-rarity',
+                    targetId: 'rarityFilterOptions',
+                    html: `
+                        <div class="cards-filter-header" onclick="toggleCardFilter('rarityFilterOptions')">
+                            <span>Rarity</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options" id="rarityFilterOptions"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-category',
+                    targetId: 'categoryFilterOptions',
+                    html: `
+                        <div class="cards-filter-header" onclick="toggleCardFilter('categoryFilterOptions')">
+                            <span>Category</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options" id="categoryFilterOptions"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-main-pokemon',
+                    targetId: 'mainPokemonList',
+                    html: `
+                        <div class="cards-filter-header" onclick="toggleCardFilter('mainPokemonList')">
+                            <span>Main Pokemon</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <input type="text" id="mainPokemonSearch" class="cards-filter-search-input" placeholder="Search main Pokemon..." oninput="filterMainPokemonList()" aria-label="Search main Pokemon filter list">
+                        <div class="cards-filter-options" id="mainPokemonList"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-archetype',
+                    targetId: 'archetypeList',
+                    html: `
+                        <div class="cards-filter-header" onclick="toggleCardFilter('archetypeList')">
+                            <span>Archetype</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <input type="text" id="archetypeSearch" class="cards-filter-search-input" placeholder="Search archetype..." oninput="filterArchetypeList()" aria-label="Search archetype filter list">
+                        <div class="cards-filter-options" id="archetypeList"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-deck-coverage',
+                    targetId: 'deckCoverageFilterOptions',
+                    html: `
+                        <div class="cards-filter-header" onclick="toggleCardFilter('deckCoverageFilterOptions')">
+                            <span>Deck Coverage</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options" id="deckCoverageFilterOptions"></div>
+                    `
+                }
+            ];
+
+            sections.forEach(section => {
+                const group = document.getElementById(section.groupId);
+                if (!group) return;
+                if (group.querySelector(`#${section.targetId}`)) return;
+                group.innerHTML = section.html;
+            });
+        }
         
         // Pagination for Cards Tab
         let currentCardsPage = 1;
@@ -67,6 +162,8 @@
             content.innerHTML = '<div class="loading">Loading card database...</div>';
             
             try {
+                ensureCardsFilterMarkup();
+
                 // Ensure set mapping is loaded (for English sets)
                 if (!window.englishSetCodes || window.englishSetCodes.size === 0) {
                     devLog('[Cards Tab] Loading set mapping for English sets...');
@@ -80,12 +177,26 @@
                 }
                 
                 // Filter to only English cards
-                const englishCards = window.allCardsDatabase.filter(card => 
+                let englishCards = window.allCardsDatabase.filter(card => 
                     window.englishSetCodes && window.englishSetCodes.has(card.set)
                 );
+
+                // Fallback: if set mapping failed, keep card database usable with all known cards.
+                if (englishCards.length === 0 && Array.isArray(window.allCardsDatabase) && window.allCardsDatabase.length > 0) {
+                    console.warn('[Cards Tab] No English sets matched. Falling back to all cards database.');
+                    englishCards = window.allCardsDatabase.filter(card => card && (card.name || card.name_en));
+                }
                 
                 // Store reference to cards
                 window.allCardsData = englishCards;
+
+                if (!window.allCardsData || window.allCardsData.length === 0) {
+                    content.innerHTML = '<div class="error">No card data available.</div>';
+                    const resultsInfo = document.getElementById('cardResultsInfo');
+                    if (resultsInfo) resultsInfo.textContent = '0 cards found';
+                    window.cardsLoaded = false;
+                    return;
+                }
                 
                 devLog(`[Cards Tab] Filtered to ${window.allCardsData.length} English cards from ${window.allCardsDatabase.length} total`);
                 devLog(`[Cards Tab] First card structure:`, window.allCardsData[0]);
@@ -98,6 +209,11 @@
                 
                 // Load formats from current meta data
                 await loadFormatsForCards();
+
+                // Populate static filter sections
+                populateRarityFilter(window.allCardsData);
+                populateCategoryFilter();
+                populateDeckCoverageFilter();
                 
                 // Populate filters
                 await populateSetFilter(window.allCardsData);
@@ -506,6 +622,88 @@
                 console.warn('[Cards Tab] No formats available to populate');
             }
         }
+
+        function populateRarityFilter(cards) {
+            const container = document.getElementById('rarityFilterOptions');
+            if (!container) return;
+
+            const preferredOrder = [
+                'Common',
+                'Uncommon',
+                'Rare',
+                'Holo Rare',
+                'Double Rare',
+                'Triple Rare',
+                'Ultra Rare',
+                'Illustration Rare',
+                'Special Illustration Rare',
+                'Secret Rare',
+                'Hyper Rare',
+                'Promo'
+            ];
+
+            const uniqueRarities = Array.from(new Set((cards || [])
+                .map(card => String(card?.rarity || '').trim())
+                .filter(rarity => rarity && rarity.toLowerCase() !== 'rarity')));
+
+            uniqueRarities.sort((a, b) => {
+                const idxA = preferredOrder.findIndex(v => v.toLowerCase() === a.toLowerCase());
+                const idxB = preferredOrder.findIndex(v => v.toLowerCase() === b.toLowerCase());
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.localeCompare(b);
+            });
+
+            container.innerHTML = uniqueRarities.map(rarity => (
+                `<label class="label-block"><input type="checkbox" value="${escapeHtml(rarity)}"> ${escapeHtml(rarity)}</label>`
+            )).join('');
+        }
+
+        function populateCategoryFilter() {
+            const container = document.getElementById('categoryFilterOptions');
+            if (!container) return;
+
+            const categories = [
+                { value: 'pokemon_all', label: 'Pokemon (All Types)' },
+                { value: 'pokemon_grass', label: 'Pokemon - Grass' },
+                { value: 'pokemon_fire', label: 'Pokemon - Fire' },
+                { value: 'pokemon_water', label: 'Pokemon - Water' },
+                { value: 'pokemon_lightning', label: 'Pokemon - Lightning' },
+                { value: 'pokemon_psychic', label: 'Pokemon - Psychic' },
+                { value: 'pokemon_fighting', label: 'Pokemon - Fighting' },
+                { value: 'pokemon_darkness', label: 'Pokemon - Darkness' },
+                { value: 'pokemon_metal', label: 'Pokemon - Metal' },
+                { value: 'pokemon_dragon', label: 'Pokemon - Dragon' },
+                { value: 'pokemon_colorless', label: 'Pokemon - Colorless' },
+                { value: 'pokemon_fairy', label: 'Pokemon - Fairy' },
+                { value: 'supporter', label: 'Supporter' },
+                { value: 'item', label: 'Item' },
+                { value: 'tool', label: 'Pokemon Tool' },
+                { value: 'stadium', label: 'Stadium' },
+                { value: 'special_energy', label: 'Special Energy' }
+            ];
+
+            container.innerHTML = categories.map(category => (
+                `<label class="label-block"><input type="checkbox" value="${category.value}"> ${category.label}</label>`
+            )).join('');
+        }
+
+        function populateDeckCoverageFilter() {
+            const container = document.getElementById('deckCoverageFilterOptions');
+            if (!container) return;
+
+            const thresholds = [
+                { value: '50', label: '>= 50%' },
+                { value: '70', label: '>= 70%' },
+                { value: '90', label: '>= 90%' },
+                { value: '100', label: '100%' }
+            ];
+
+            container.innerHTML = thresholds.map(threshold => (
+                `<label class="label-block"><input type="radio" name="deckCoverageFilter" value="${threshold.value}"> ${threshold.label}</label>`
+            )).join('');
+        }
         
         async function populateSetFilter(cards) {
             const container = document.getElementById('setFilterOptions');
@@ -890,6 +1088,14 @@
         function filterAndRenderCards() {
             if (!window.allCardsData || window.allCardsData.length === 0) {
                 console.warn('[Cards Tab] No cards loaded yet');
+                const content = document.getElementById('cardsContent');
+                const resultsInfo = document.getElementById('cardResultsInfo');
+                if (content) {
+                    content.innerHTML = '<div style="text-align: center; padding: 40px; color: #444;"><h2>No Cards Loaded</h2><p style="font-weight: 500;">Check data files or reload the page.</p></div>';
+                }
+                if (resultsInfo) {
+                    resultsInfo.textContent = '0 cards found';
+                }
                 return;
             }
             

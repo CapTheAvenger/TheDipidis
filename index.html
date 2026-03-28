@@ -864,7 +864,6 @@
                     </div>
 
                     <div id="proxyQueueList" class="proxy-queue-list"></div>
-                                    <div id="proxyQueueList" class="proxy-queue-list"></div>
                 </div>
             </div>
 
@@ -921,7 +920,7 @@
                 <div class="container">
                     <div class="header">
                         <h2><span data-i18n="tutorial.heading">📖 How to Use This Website</span> <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
-                        <p data-i18n="tutorial.subtitle">Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v44 (March 2026)</p>
+                        <p data-i18n="tutorial.subtitle">Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v45 (March 2026)</p>
                     </div>
                     
                     <div class="tutorial-main-container">
@@ -936,7 +935,7 @@
                                 Access Japanese City League results, international tournament data, and detailed card statistics to build competitive decks — and test them directly in your browser.
                             </p>
                             <div class="tutorial-info-box tutorial-info-new">
-                                <strong>🆕 New in v44:</strong> <strong>My Decks Compare Upgrade</strong> — compare now supports two sources: paste a Limitless/PTCGL list or choose another saved deck via live search (no index-number input). <strong>Live Paste Parser Preview</strong> — while typing/pasting, you now see recognized lines, ignored headers, unrecognized lines, total cards, and unique cards in real time. <strong>Compare Mode Toggle</strong> — switch between <em>Functional (prints merged)</em> and <em>Exact print</em> directly in the compare modal. <strong>Functional compare</strong> treats different international prints/artworks as the same card and focuses on real card/count differences.
+                                <strong>🆕 New in v45:</strong> <strong>Card Database Reliability</strong> — filter panel wiring was rebuilt; all filter groups now populate correctly and loading has a safe fallback if English set mapping cannot be resolved. <strong>Proxy Queue Fix</strong> — removed duplicate proxy queue container; proxy rendering is reliable again. <strong>Multiplayer Playtester Script</strong> — firebase-multiplayer.js now loads before playtester so online multiplayer actions are available. <strong>Rarity / Category / Deck Coverage Filters</strong> — were missing; these panels are now auto-generated at load time.
                             </div>
                         </section>
                         
@@ -1378,7 +1377,7 @@
                                 Greife auf japanische City League Ergebnisse, internationale Turnierdaten und detaillierte Kartenstatistiken zu, um kompetitive Decks zu bauen — und teste sie direkt in deinem Browser.
                             </p>
                             <div class="de-overview-highlight">
-                                <strong>🆕 Neu in v44:</strong> <strong>Meine Decks Vergleich Upgrade</strong> — Vergleich unterstützt jetzt zwei Quellen: eine Limitless/PTCGL-Liste einfügen oder ein anderes gespeichertes Deck per Live-Suche auswählen. <strong>Live Paste Parser Vorschau</strong> — beim Tippen/Einfügen siehst du erkannte Zeilen, ignorierte Header, unbekannte Zeilen, Gesamtkarten und einzigartige Karten in Echtzeit. <strong>Vergleichsmodus-Umschalter</strong> — wechsle zwischen <em>Funktional (Prints zusammengeführt)</em> und <em>Exakter Print</em> direkt im Vergleichs-Modal. <strong>Funktionaler Vergleich</strong> behandelt verschiedene internationale Prints/Artworks als dieselbe Karte und fokussiert sich auf echte Karten-/Anzahl-Unterschiede.
+                                <strong>🆕 Neu in v45:</strong> <strong>Karten-Datenbank Zuverlässigkeit</strong> — Filter-Panel-Verdrahtung wurde neu gebaut; alle Filter-Gruppen befüllen sich jetzt korrekt. <strong>Proxy-Warteschlange Fix</strong> — doppeltes Proxy-Container-Element entfernt; Proxy-Rendering ist wieder zuverlässig. <strong>Multiplayer Playtester Script</strong> — firebase-multiplayer.js wird jetzt vor dem Playtester geladen, sodass Online-Multiplayer-Aktionen verfügbar sind. <strong>Seltenheit / Kategorie / Deck-Abdeckung Filter</strong> — fehlten bisher; diese Panels werden jetzt beim Laden automatisch generiert.
                             </div>
                         </section>
 
@@ -2769,6 +2768,7 @@
     <script src="js/app-features.js?v=1"></script>
     <script src="js/draw-simulator.js?v=1"></script>
     <script src="js/combo-worker.js?v=1"></script>
+    <script src="js/firebase-multiplayer.js?v=1"></script>
     <script src="js/playtester-mobile.js?v=1"></script>
     <script src="js/playtester.js?v=1"></script>
 

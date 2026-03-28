@@ -598,6 +598,32 @@
     object-fit: cover !important;
     cursor: zoom-in !important;
 }
+/* Standard card image class used in Past Meta and Deck Builder card grids */
+.card-img-std {
+    width: 100% !important;
+    aspect-ratio: 2.5 / 3.5 !important;
+    object-fit: cover !important;
+    display: block !important;
+    cursor: zoom-in !important;
+}
+/* Badge colour variants */
+.card-badge-red {
+    background: #dc3545 !important;
+    color: white !important;
+}
+.card-badge-green {
+    background: #28a745 !important;
+    color: white !important;
+}
+/* Absolute-position helpers for card badges (top-right / top-left) */
+.top-right {
+    top: 5px !important;
+    right: 5px !important;
+}
+.top-left {
+    top: 5px !important;
+    left: 5px !important;
+}
 /* Utility classes for playtester discard/lost zone dynamic styles */
 .pointer { cursor: pointer !important; }
 .w-82 { width: 82px !important; }

@@ -2154,10 +2154,13 @@
             if (card.eur_price && card.eur_price !== '' && card.eur_price !== '0' && card.eur_price !== 'N/A') {
                 const price = parseFloat(card.eur_price.replace(',', '.'));
                 if (!isNaN(price)) {
-                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" class="card-database-price-btn" title="View on CardMarket">
-                        Ø ${price.toFixed(2).replace('.', ',')} €
+                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="View on CardMarket">
+                        <span class="card-database-price-value">Ø ${price.toFixed(2).replace('.', ',')} €</span>
                     </a>`;
                 }
+            }
+            if (!priceButton) {
+                priceButton = `<div class="card-database-price-placeholder" title="No CardMarket price found">No Price</div>`;
             }
             
             // Calculate DYNAMIC Deck Coverage based on active filters
@@ -2192,13 +2195,18 @@
                     ${coverageIcon} ${percentage.toFixed(1)}% Coverage${maxCountText}
                 </div>`;
             }
+            if (!coverageDisplay) {
+                coverageDisplay = `<div class="card-database-coverage card-database-coverage-empty" title="No deck coverage data for this card">
+                    -- No Coverage Data --
+                </div>`;
+            }
             
             item.innerHTML = `
-                <div class="pos-rel">
+                <div class="pos-rel card-database-image-wrap">
                     <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
                     ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="You own other prints of this card">${altPrintOwnedCount}</div>` : ''}
-                    <div class="pos-abs card-action-row-wide" style="top: 5px; right: 5px;">
+                    <div class="pos-abs card-action-row-wide card-database-top-actions">
                         <button data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)">+</button>
                         <button data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-green card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#4CAF50' : '#fff'};" title="Remove from collection (${ownedCount}/4)">-</button>
                         <button data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
@@ -2215,9 +2223,9 @@
                         <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}">
                             ${displayRarity}
                         </div>
-                        <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn" title="Add to proxy queue">Proxy</button>
+                        <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add to proxy queue">Proxy</button>
                     </div>
-                    ${(card.set && card.number) ? `<button onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn" title="View on Limitless">L Limitless</button>` : ''}
+                    ${(card.set && card.number) ? `<button onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless">L Limitless</button>` : '<div class="card-database-limitless-placeholder">No Limitless Link</div>'}
                     ${coverageDisplay}
                 </div>
             `;

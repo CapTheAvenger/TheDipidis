@@ -34,3 +34,392 @@
     margin-right: 5px;
     vertical-align: middle;
 }
+
+/* Card Database visual refresh (scoped to cards tab only) */
+#cards .card-database-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)) !important;
+    gap: 14px !important;
+    padding: 10px !important;
+    align-items: stretch !important;
+}
+
+#cards .card-database-item {
+    border-radius: 12px !important;
+    border: 1px solid #d8deea !important;
+    box-shadow: 0 7px 18px rgba(16, 24, 40, 0.09) !important;
+    overflow: hidden !important;
+    display: grid !important;
+    grid-template-rows: auto 1fr !important;
+    height: 100% !important;
+    background: #fff !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease !important;
+}
+
+#cards .card-database-item:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 22px rgba(19, 33, 68, 0.16) !important;
+    border-color: #9fb1e0 !important;
+}
+
+#cards .card-database-image-wrap {
+    position: relative !important;
+    background: linear-gradient(180deg, #f5f8ff 0%, #edf3ff 100%) !important;
+}
+
+#cards .card-database-image-wrap img {
+    width: 100% !important;
+    aspect-ratio: 2.5 / 3.5 !important;
+    height: auto !important;
+    display: block !important;
+    object-fit: cover !important;
+}
+
+#cards .card-database-top-actions {
+    top: 6px !important;
+    right: 6px !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 22px) !important;
+    gap: 3px !important;
+}
+
+#cards .card-database-top-actions .card-badge {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+}
+
+#cards .card-database-info {
+    padding: 10px !important;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%) !important;
+    border-top: 1px solid #e3e8f5 !important;
+    display: grid !important;
+    grid-template-rows: minmax(34px, auto) minmax(24px, auto) 42px 32px 30px !important;
+    align-content: start !important;
+    gap: 6px !important;
+}
+
+#cards .card-database-name {
+    margin: 0 !important;
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+    color: #1b2537 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+}
+
+#cards .card-database-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    margin: 0 !important;
+}
+
+#cards .card-database-set,
+#cards .card-database-type {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 20px !important;
+    border-radius: 999px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 2px 9px !important;
+    white-space: nowrap !important;
+}
+
+#cards .card-database-set {
+    color: #2e436f !important;
+    background: #e8eefc !important;
+}
+
+#cards .card-database-type {
+    color: #116449 !important;
+    background: #dff6ec !important;
+}
+
+#cards .card-database-button-row {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-top: 0 !important;
+    align-items: stretch !important;
+}
+
+#cards .card-database-price-btn,
+#cards .card-database-rarity-btn,
+#cards .card-database-proxy-btn,
+#cards .card-database-price-placeholder {
+    min-height: 42px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.1px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    line-height: 1.15 !important;
+    padding: 4px 6px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: normal !important;
+}
+
+#cards .card-database-price-btn {
+    text-decoration: none !important;
+    color: #fff !important;
+    box-shadow: 0 4px 10px rgba(85, 94, 238, 0.28) !important;
+}
+
+#cards .card-database-price-value {
+    display: block !important;
+}
+
+#cards .card-database-price-placeholder {
+    background: #e6ebf4 !important;
+    color: #5f6e87 !important;
+    border: 1px dashed #b8c4da !important;
+}
+
+#cards .card-database-rarity-btn {
+    cursor: pointer !important;
+    padding-inline: 8px !important;
+}
+
+#cards .card-database-proxy-btn {
+    color: #fff !important;
+    border: 0 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.22) !important;
+}
+
+#cards .card-database-limitless-btn,
+#cards .card-database-limitless-placeholder {
+    width: 100% !important;
+    min-height: 32px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 4px 8px !important;
+    line-height: 1.1 !important;
+}
+
+#cards .card-database-limitless-btn {
+    color: #fff !important;
+    border: 0 !important;
+    cursor: pointer !important;
+}
+
+#cards .card-database-limitless-placeholder {
+    background: #eef2fb !important;
+    color: #75829c !important;
+    border: 1px dashed #c0cadc !important;
+}
+
+#cards .card-database-coverage {
+    margin-top: 0 !important;
+    min-height: 30px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 4px 8px !important;
+    line-height: 1.1 !important;
+}
+
+#cards .card-database-coverage-empty {
+    background: #ebeff7 !important;
+    color: #66758f !important;
+    border: 1px dashed #bcc8da !important;
+}
+
+#cards .pagination-controls {
+    display: grid !important;
+    grid-template-columns: minmax(150px, 1fr) auto minmax(150px, 1fr) !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 8px 0 10px !important;
+    padding: 10px 8px !important;
+}
+
+#cards .pagination-left-controls {
+    justify-self: start !important;
+}
+
+#cards .pagination-right-controls {
+    justify-self: end !important;
+}
+
+#cards .pagination-center-controls {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+}
+
+#cards .pagination-page-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+}
+
+#cards .pagination-ellipsis {
+    color: #74829b !important;
+    font-weight: 700 !important;
+}
+
+#cards .pagination-controls button {
+    border-radius: 8px !important;
+    border: 1px solid transparent !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
+}
+
+#cards .pagination-controls button:hover:not(:disabled) {
+    transform: translateY(-1px) !important;
+}
+
+#cards .pagination-controls .btn-lg {
+    min-height: 36px !important;
+    padding: 8px 13px !important;
+    font-size: 13px !important;
+}
+
+#cards .pagination-controls .btn-sm {
+    min-height: 34px !important;
+    min-width: 34px !important;
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+}
+
+#cards .pagination-controls .btn-blue {
+    color: #fff !important;
+    background: linear-gradient(135deg, #4158d0 0%, #3f6ac8 100%) !important;
+    border-color: #3654be !important;
+    box-shadow: 0 4px 10px rgba(43, 72, 196, 0.22) !important;
+}
+
+#cards .pagination-controls .btn-green {
+    color: #fff !important;
+    background: linear-gradient(135deg, #12a863 0%, #0f8c55 100%) !important;
+    border-color: #0f9155 !important;
+    box-shadow: 0 4px 10px rgba(16, 154, 93, 0.24) !important;
+}
+
+#cards .pagination-controls .btn-purple {
+    color: #fff !important;
+    background: linear-gradient(135deg, #6c56ce 0%, #7f42c8 100%) !important;
+    border-color: #6144bd !important;
+    box-shadow: 0 4px 10px rgba(107, 70, 193, 0.24) !important;
+}
+
+#cards .pagination-controls .btn-outline {
+    border-width: 1px !important;
+    border-style: solid !important;
+}
+
+#cards .pagination-controls .btn-active {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 0 0 4px rgba(63, 86, 197, 0.45) !important;
+}
+
+#cards .pagination-controls .btn-disabled,
+#cards .pagination-controls button:disabled {
+    opacity: 0.48 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+@media (max-width: 1100px) {
+    #cards .card-database-grid {
+        grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)) !important;
+        gap: 12px !important;
+    }
+
+    #cards .pagination-controls {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        justify-items: center !important;
+    }
+
+    #cards .pagination-left-controls,
+    #cards .pagination-right-controls {
+        justify-self: center !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #cards .card-database-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        padding: 8px !important;
+    }
+
+    #cards .card-database-info {
+        padding: 8px !important;
+        grid-template-rows: minmax(32px, auto) minmax(24px, auto) 38px 30px 28px !important;
+        gap: 5px !important;
+    }
+
+    #cards .card-database-name {
+        font-size: 12px !important;
+    }
+
+    #cards .card-database-button-row {
+        gap: 4px !important;
+    }
+
+    #cards .card-database-price-btn,
+    #cards .card-database-rarity-btn,
+    #cards .card-database-proxy-btn,
+    #cards .card-database-price-placeholder {
+        min-height: 38px !important;
+        font-size: 10px !important;
+        padding: 3px 4px !important;
+    }
+
+    #cards .card-database-limitless-btn,
+    #cards .card-database-limitless-placeholder {
+        min-height: 28px !important;
+        font-size: 10px !important;
+    }
+
+    #cards .card-database-coverage {
+        min-height: 26px !important;
+        font-size: 10px !important;
+    }
+
+    #cards .pagination-controls .btn-lg {
+        min-height: 34px !important;
+        font-size: 12px !important;
+    }
+
+    #cards .pagination-controls .btn-sm {
+        min-height: 30px !important;
+        min-width: 30px !important;
+        font-size: 11px !important;
+    }
+}
+
+@media (max-width: 430px) {
+    #cards .card-database-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+}

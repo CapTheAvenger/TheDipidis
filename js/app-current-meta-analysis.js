@@ -625,13 +625,20 @@
             
             const tableViewContainer = document.getElementById('currentMetaDeckTableView');
             const gridViewContainer = document.getElementById('currentMetaDeckVisual');
-            // Active view = the one NOT hidden (d-none); default to table when both are hidden
-            const isTableViewActive = !gridViewContainer || gridViewContainer.classList.contains('d-none');
+            // Active view = the one NOT hidden; default to grid when both are hidden
+            const isTableViewActive = tableViewContainer && !tableViewContainer.classList.contains('d-none');
             
             if (isTableViewActive) {
                 renderCurrentMetaDeckTable(filteredCards);
             } else {
                 renderCurrentMetaDeckGrid(filteredCards);
+            }
+
+            if (gridViewContainer && !isTableViewActive) {
+                gridViewContainer.classList.remove('d-none');
+            }
+            if (tableViewContainer && isTableViewActive) {
+                tableViewContainer.classList.remove('d-none');
             }
             
             updateCurrentMetaCardCounts(filteredCards.length, filteredTotal, allTotal);

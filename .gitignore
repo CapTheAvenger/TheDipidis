@@ -100,3 +100,8 @@ node_modules/
 ENV/
 .mypy_cache/
 .pytest_cache/
+
+# Temporary debug/fix scripts
+debug_check.py
+fix_meta_play_data.py
+screenshot/

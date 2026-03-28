@@ -61,7 +61,7 @@ async function addToCollection(cardId) {
     
     // Re-render cards to show green checkmark
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData);
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
     }
   } catch (error) {
     console.error('Error adding to collection:', error);
@@ -102,7 +102,7 @@ async function removeFromCollection(cardId) {
     
     // Re-render cards to update checkmark
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData);
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
     }
   } catch (error) {
     console.error('Error removing from collection:', error);
@@ -140,7 +140,7 @@ async function addToWishlist(cardId) {
     
     // Re-render cards to update wishlist button
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData);
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
     }
   } catch (error) {
     console.error('Error adding to wishlist:', error);
@@ -166,7 +166,7 @@ async function removeFromWishlist(cardId) {
     
     // Re-render cards to update wishlist button
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData);
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
     }
   } catch (error) {
     console.error('Error removing from wishlist:', error);

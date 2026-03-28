@@ -609,8 +609,22 @@
                     'Meta Live': 'SVI-ASC'
                 };
                 
-                // Create formats array sorted (newest to oldest - reverse alphabetical for SVI-XXX format)
-                const sortedFormats = Array.from(uniqueFormats).sort((a, b) => b.localeCompare(a));
+                // Sort newest -> oldest by the latest set code in the format label.
+                const getFormatSortTimestamp = (formatCode) => {
+                    const code = String(formatCode || '').trim().toUpperCase();
+                    if (!code) return 0;
+
+                    const latestCode = code.includes('-') ? code.split('-').pop() : code;
+                    const releaseDate = SET_RELEASE_DATES[latestCode] || SET_RELEASE_DATES[code] || SET_RELEASE_DATES.DEFAULT;
+                    const ts = Date.parse(releaseDate || '');
+                    return Number.isNaN(ts) ? 0 : ts;
+                };
+
+                const sortedFormats = Array.from(uniqueFormats).sort((a, b) => {
+                    const tsDiff = getFormatSortTimestamp(b) - getFormatSortTimestamp(a);
+                    if (tsDiff !== 0) return tsDiff;
+                    return b.localeCompare(a);
+                });
                 window.cardFormatsData = {
                     formats: sortedFormats.map(format => ({
                         code: format,
@@ -1880,9 +1894,10 @@
             }
         }
         
-        function renderCardDatabase(cards) {
+        function renderCardDatabase(cards, options = {}) {
             const content = document.getElementById('cardsContent');
             const resultsInfo = document.getElementById('cardResultsInfo');
+            const shouldScrollToTop = options.scrollToTop !== false;
             
             if (cards.length === 0) {
                 content.innerHTML = '<div style="text-align: center; padding: 40px; color: #444;"><h2>No Cards Found</h2><p style="font-weight: 500;">Try adjusting your filter settings</p></div>';
@@ -1953,8 +1968,10 @@
             content.appendChild(grid);
             content.appendChild(paginationBottom);
             
-            // Scroll to top of cards section
-            document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (shouldScrollToTop) {
+                // Scroll to top of cards section for filter/pagination changes.
+                document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
         
         function createPaginationControls(totalCards, totalPages) {
@@ -1965,6 +1982,7 @@
             leftControls.className = 'pagination-left-controls';
             
             const copyBtn = document.createElement('button');
+            copyBtn.type = 'button';
             copyBtn.textContent = '📋 Copy Names';
             copyBtn.title = 'Copy all filtered card names to clipboard';
             copyBtn.className = 'btn-green btn-outline btn-lg';
@@ -1990,6 +2008,7 @@
             
             // Previous button
             const prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
             prevBtn.textContent = '← Previous';
             prevBtn.className = 'btn-blue btn-outline btn-lg';
             prevBtn.disabled = currentCardsPage === 1 || showAllCards;
@@ -2042,6 +2061,7 @@
                 }
                 
                 const pageBtn = document.createElement('button');
+                pageBtn.type = 'button';
                 pageBtn.textContent = page;
                 pageBtn.className = 'btn-blue btn-outline btn-sm pagination-page-btn';
                 if (page === currentCardsPage) {
@@ -2058,6 +2078,7 @@
             
             // Next button
             const nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
             nextBtn.textContent = 'Next →';
             nextBtn.className = 'btn-blue btn-outline btn-lg';
             nextBtn.disabled = currentCardsPage === totalPages || showAllCards;
@@ -2082,6 +2103,7 @@
             rightControls.className = 'pagination-right-controls';
             
             const toggleShowAllBtn = document.createElement('button');
+            toggleShowAllBtn.type = 'button';
             toggleShowAllBtn.textContent = showAllCards ? '📄 Paginated' : '📋 Show All';
             toggleShowAllBtn.title = showAllCards ? 'Switch back to paginated view' : 'Show all cards at once';
             toggleShowAllBtn.className = 'btn-purple btn-outline btn-lg';
@@ -2207,9 +2229,9 @@
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
                     ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="You own other prints of this card">${altPrintOwnedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
-                        <button data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)">+</button>
-                        <button data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-green card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#4CAF50' : '#fff'};" title="Remove from collection (${ownedCount}/4)">-</button>
-                        <button data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)">+</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-green card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#4CAF50' : '#fff'};" title="Remove from collection (${ownedCount}/4)">-</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                     </div>
                 </div>
                 <div class="card-database-info">
@@ -2223,9 +2245,9 @@
                         <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}">
                             ${displayRarity}
                         </div>
-                        <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add to proxy queue">Proxy</button>
+                        <button type="button" onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add to proxy queue">Proxy</button>
                     </div>
-                    ${(card.set && card.number) ? `<button onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless">L Limitless</button>` : '<div class="card-database-limitless-placeholder">No Limitless Link</div>'}
+                    ${(card.set && card.number) ? `<button type="button" onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless">L Limitless</button>` : '<div class="card-database-limitless-placeholder">No Limitless Link</div>'}
                     ${coverageDisplay}
                 </div>
             `;

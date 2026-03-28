@@ -196,7 +196,18 @@ def scrape_all_cards_list(
                 raw_type = raw_type[len(type_span.get_text()):].strip()
             card_type   = raw_type
             # Rarity is in column 4 on the list page
-            card_rarity = cells[4].get_text(strip=True) if len(cells) > 4 else ""
+            raw_rarity = cells[4].get_text(strip=True) if len(cells) > 4 else ""
+            
+            # Übersetzer für Limitless-Abkürzungen in saubere Namen
+            rarity_map = {
+                "C": "Common", "U": "Uncommon", "R": "Rare", "H": "Holo Rare",
+                "RR": "Double Rare", "DR": "Double Rare", "UR": "Ultra Rare",
+                "IR": "Illustration Rare", "AR": "Illustration Rare", 
+                "SIR": "Special Illustration Rare", "SAR": "Special Illustration Rare",
+                "HR": "Hyper Rare", "PR": "Promo", "ACE": "ACE SPEC Rare",
+                "SH": "Shiny Rare", "SSR": "Shiny Ultra Rare"
+            }
+            card_rarity = rarity_map.get(raw_rarity.upper(), raw_rarity)
 
             if set_filter and set_code not in set_filter:
                 continue

@@ -239,24 +239,27 @@ def main():
         c_num = card['number'].upper()
         rarity = card.get('rarity', '').lower()
         
-        # 1. Ist es eine teure Rarität? (Double Rare, Secret, Illustration etc.)
-        is_high_rare = (
-            any(x in c_num for x in ["SIR", "GG", "TG", "SV", "AR", "FA", "EX", "VSTAR", "PROMO"]) or
+        # 1. Absolute Chase-Karten (Alt Arts, Secret Rares, Gold, Promos -> IMMER Cardmarket wegen Sammlerwert)
+        is_chase_card = (
+            any(x in c_num for x in ["SIR", "GG", "TG", "SV", "AR", "FA", "PROMO"]) or
             (c_num.count('/') > 0 and int(c_num.split('/')[0]) > 160) or
-            any(x in c_name for x in [' ex', '-ex', ' gx', ' v', ' vmax', ' vstar']) or
-            any(x in rarity for x in ['secret', 'illustration', 'ultra', 'hyper', 'promo', 'double', 'amazing'])
+            any(x in rarity for x in ['secret', 'illustration', 'hyper', 'special'])
         )
-        
-        # 2. Ist sie Meta/Playable?
-        is_playable = c_name in playable_names
-        
-        # 3. NEU: Ist es klassischer "Bulk"? 
-        is_bulk_rarity = rarity in ["common", "uncommon", "rare", "rare holo"]
 
-        # ENTSCHEIDUNG: 
-        # High-Rares gehen IMMER zu Cardmarket.
-        # Playables gehen NUR zu Cardmarket, wenn sie KEIN Bulk sind!
-        if is_high_rare or (is_playable and not is_bulk_rarity):
+        # 2. Double Rares & Ultra Rares (Erkannt am Namen ODER exakt an der Rarität)
+        is_double_or_ultra = (
+            any(x in c_name for x in [' ex', '-ex', ' gx', ' v', ' vmax', ' vstar']) or
+            any(x in rarity for x in ['double', 'ultra', 'amazing', 'radiant', 'shiny', 'ur', 'dr', 'rr', 'hr', 'sr'])
+        )
+
+        # 3. Ist sie Meta/Playable?
+        is_playable = c_name in playable_names
+
+        # ENTSCHEIDUNG:
+        # - Chase-Karten (Alt Arts, Gold) gehen immer zu CM.
+        # - Double/Ultra Rares gehen NUR zu CM, wenn sie auch in Decks gespielt werden.
+        # - Normale Rares, Uncommons, Commons fallen komplett durch (auch wenn sie spielbar sind).
+        if is_chase_card or (is_double_or_ultra and is_playable):
             cm_vip_cards.append(card)
 
     urls_present = sum(1 for c in cm_vip_cards if c.get('cardmarket_url'))

@@ -1947,12 +1947,45 @@
             
             // Clear and add all elements
             content.innerHTML = '';
+            
+            // === DEBUG BANNER — shows computed dimensions after layout ===
+            const debugBanner = document.createElement('div');
+            debugBanner.id = 'cardsDebugBanner';
+            debugBanner.style.cssText = 'background:#e00;color:#fff;padding:16px 20px;font-size:18px;font-weight:bold;z-index:9999;position:relative;border:4px solid #ff0;text-align:left;line-height:1.6;margin-bottom:12px;';
+            debugBanner.textContent = 'DEBUG: ' + renderedCount + ' cards rendered — measuring layout…';
+            content.appendChild(debugBanner);
+            // === END DEBUG BANNER ===
+            
             content.appendChild(paginationTop);
             content.appendChild(grid);
             content.appendChild(paginationBottom);
             
             // Scroll to top of cards section
             document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // === DEBUG: measure layout after browser paint ===
+            setTimeout(function() {
+                try {
+                    var tabEl = document.getElementById('cards');
+                    var tabCS = tabEl ? getComputedStyle(tabEl) : null;
+                    var contentCS = getComputedStyle(content);
+                    var gridCS = getComputedStyle(grid);
+                    var firstItem = grid.children[0];
+                    var itemCS = firstItem ? getComputedStyle(firstItem) : null;
+                    var info = [
+                        'DEBUG: ' + renderedCount + ' cards rendered',
+                        '#cards — display:' + (tabCS ? tabCS.display : 'N/A') + ' class:"' + (tabEl ? tabEl.className : 'N/A') + '" W×H:' + (tabEl ? tabEl.offsetWidth + '×' + tabEl.offsetHeight : 'N/A'),
+                        '#cardsContent — display:' + contentCS.display + ' W×H:' + content.offsetWidth + '×' + content.offsetHeight,
+                        '.card-database-grid — display:' + gridCS.display + ' cols:' + gridCS.gridTemplateColumns.split(' ').length + ' W×H:' + grid.offsetWidth + '×' + grid.offsetHeight,
+                        'First item — display:' + (itemCS ? itemCS.display : 'N/A') + ' visibility:' + (itemCS ? itemCS.visibility : 'N/A') + ' opacity:' + (itemCS ? itemCS.opacity : 'N/A') + ' W×H:' + (firstItem ? firstItem.offsetWidth + '×' + firstItem.offsetHeight : 'N/A'),
+                        'Grid children: ' + grid.children.length
+                    ];
+                    debugBanner.innerHTML = info.join('<br>');
+                    console.log('[Cards Tab] DEBUG layout:', info.join(' | '));
+                } catch (e) {
+                    debugBanner.textContent = 'DEBUG ERROR: ' + e.message;
+                }
+            }, 200);
         }
         
         function createPaginationControls(totalCards, totalPages) {

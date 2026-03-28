@@ -1323,21 +1323,21 @@ const BASE_PATH = './data/';
         }
 
         const KNOWN_META_FORMAT_CODES = [
-            'TEF-POR', 'TEF-ASC', 'TEF-PFL', 'TEF-MEG', 'TEF-BLK', 'TEF-DRI', 'TEF-JTG',
+            'TEF-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
             'BRS-PRE', 'BRS-SSP', 'BRS-SCR', 'BRS-SFA', 'BRS-TWM', 'BRS-TEF',
             'BST-PAR', 'SVI-PAF'
         ];
 
         const TOURNAMENT_FORMAT_NAME_TO_CODE = {
             'scarlet & violet - perfect order': 'TEF-POR',
-            'scarlet & violet - ascended heroes': 'TEF-ASC',
-            'scarlet & violet - phantasmal flames': 'TEF-PFL',
-            'scarlet & violet - mega evolution': 'TEF-MEG',
-            'scarlet & violet - black bolt': 'TEF-BLK',
-            'scarlet & violet - white flare': 'TEF-BLK',
-            'scarlet & violet - black bolt / white flare': 'TEF-BLK',
-            'scarlet & violet - destined rivals': 'TEF-DRI',
-            'scarlet & violet - journey together': 'TEF-JTG',
+            'scarlet & violet - ascended heroes': 'SVI-ASC',
+            'scarlet & violet - phantasmal flames': 'SVI-PFL',
+            'scarlet & violet - mega evolution': 'SVI-MEG',
+            'scarlet & violet - black bolt': 'SVI-BLK',
+            'scarlet & violet - white flare': 'SVI-BLK',
+            'scarlet & violet - black bolt / white flare': 'SVI-BLK',
+            'scarlet & violet - destined rivals': 'SVI-DRI',
+            'scarlet & violet - journey together': 'SVI-JTG',
             'brilliant stars - prismatic evolutions': 'BRS-PRE',
             'brilliant stars - surging sparks': 'BRS-SSP',
             'brilliant stars - stellar crown': 'BRS-SCR',
@@ -1354,25 +1354,19 @@ const BASE_PATH = './data/';
             if (!code) return '';
 
             const legacyToRotationCode = {
-                'SVI-POR': 'TEF-POR',
-                'SVI-ASC': 'TEF-ASC',
-                'SVI-PFL': 'TEF-PFL',
-                'SVI-MEG': 'TEF-MEG',
-                'SVI-BLK': 'TEF-BLK',
-                'SVI-DRI': 'TEF-DRI',
-                'SVI-JTG': 'TEF-JTG'
+                'SVI-POR': 'TEF-POR'
             };
             if (legacyToRotationCode[code]) return legacyToRotationCode[code];
 
             const explicit = {
                 POR: 'TEF-POR',
-                ASC: 'TEF-ASC',
-                PFL: 'TEF-PFL',
-                MEG: 'TEF-MEG',
-                BLK: 'TEF-BLK',
-                WHT: 'TEF-BLK',
-                DRI: 'TEF-DRI',
-                JTG: 'TEF-JTG',
+                ASC: 'SVI-ASC',
+                PFL: 'SVI-PFL',
+                MEG: 'SVI-MEG',
+                BLK: 'SVI-BLK',
+                WHT: 'SVI-BLK',
+                DRI: 'SVI-DRI',
+                JTG: 'SVI-JTG',
                 PRE: 'BRS-PRE',
                 SSP: 'BRS-SSP',
                 SCR: 'BRS-SCR',

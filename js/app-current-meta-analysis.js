@@ -16,6 +16,12 @@
         if (!window.currentMetaDeckOrder) {
             window.currentMetaDeckOrder = [];
         }
+
+        function normalizeCurrentMetaTournamentArchetypeName(value) {
+            return String(value || '')
+                .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
+                .trim();
+        }
         
         // Load Current Meta Analysis Data
         async function loadCurrentMetaAnalysis() {
@@ -24,14 +30,8 @@
             const data = await loadCurrentMetaRowsWithFallback();
             devLog('Loaded data:', data ? `${data.length} rows` : 'null');
             
-            // Load Major Tournament data separately for use when "Major Tournament Decks" filter is applied
-            // This ensures that when user filters to Major Tournament, they see ONLY Top 256 data (31 cards)
-            // not the full Limitless meta filtered to "Meta Play!" (85 cards)
-            const majorTournamentData = await loadCSV('tournament_cards_data_cards.csv');
-            if (majorTournamentData) {
-                window.currentMetaTournamentCardsData = majorTournamentData;
-                devLog('Loaded Major Tournament data:', majorTournamentData.length, 'card rows');
-            }
+            // Note: Major Tournament data (tournament_cards_data_cards.csv) is VERY LARGE (50MB+)
+            // and will be loaded lazily only when a deck is actually opened in Major Tournament mode.
             
             // Load deck stats (winrates)
             const deckStats = await loadCSV('limitless_online_decks.csv');
@@ -82,78 +82,69 @@
         
         // Populate deck select dropdown
         async function populateCurrentMetaDeckSelect(data) {
-            // Load comparison data for correct ranking
             const comparisonData = await loadCSV('limitless_online_decks_comparison.csv');
             const comparisonMap = new Map();
-            
+
             if (comparisonData && comparisonData.length > 0) {
                 comparisonData.forEach(row => {
                     if (row.deck_name && row.new_count) {
                         comparisonMap.set(row.deck_name.toLowerCase(), {
-                            count: parseInt(row.new_count || 0),
-                            rank: parseInt(row.new_rank || 999)
+                            count: parseInt(row.new_count || 0, 10),
+                            rank: parseInt(row.new_rank || 999, 10)
                         });
                     }
                 });
                 devLog('Loaded comparison data for', comparisonMap.size, 'decks');
             }
-            
-            // Apply format filter to data BEFORE building archetype list
-            // NOTE: When currentMetaFormatFilter === 'play', the data is ALREADY from tournament_cards_data_cards.csv
-            // (which has no 'meta' column), so this filter will be skipped automatically
+
             let filteredData = data;
             if (currentMetaFormatFilter === 'live') {
-                // Filter Limitless data to only "Meta Live" entries
                 filteredData = data.filter(row => row.meta === 'Meta Live');
                 devLog(`Filtered archetypes to Limitless only: ${filteredData.length} rows`);
             } else if (currentMetaFormatFilter === 'all') {
-                // Keep all data as-is
                 devLog(`Keeping all archetype data: ${filteredData.length} rows`);
             } else if (currentMetaFormatFilter === 'play') {
-                // Data is already from tournament_cards_data_cards.csv (Top 256 only), no meta filter needed
-                devLog(`Using tournament cards data for Major Tournament filter: ${filteredData.length} rows`);
+                filteredData = data.filter(row => row.meta === 'Meta Play!');
+                devLog(`Filtered archetypes to Major Tournament only: ${filteredData.length} rows`);
             }
-            
+
+            devLog(`Building archetype list from ${filteredData.length} rows...`);
             const archetypeMap = new Map();
+
             filteredData.forEach(row => {
-                const archetype = row.archetype;
+                const archetype = String(row.archetype || '').trim();
                 if (!archetype) return;
-                
+
                 if (!archetypeMap.has(archetype)) {
-                    // Use comparison data for deck count if available
                     const comparisonInfo = comparisonMap.get(archetype.toLowerCase());
-                    const deckCount = comparisonInfo ? comparisonInfo.count : parseInt(row.total_decks_in_archetype || 0);
+                    const deckCount = currentMetaFormatFilter === 'play'
+                        ? parseInt(row.total_decks_in_archetype || 0, 10)
+                        : (comparisonInfo ? comparisonInfo.count : parseInt(row.total_decks_in_archetype || 0, 10));
                     const rank = comparisonInfo ? comparisonInfo.rank : 999;
-                    
+
                     archetypeMap.set(archetype, {
                         name: archetype,
-                        deckCount: deckCount,
-                        rank: rank,
+                        deckCount,
+                        rank,
                         limitlessCount: 0,
                         majorCount: 0
                     });
                 }
             });
-            
-            // Calculate split between Limitless and Major for each archetype
-            // (Skip this when using tournament_cards_data which only has one type)
+
             archetypeMap.forEach((archetypeInfo, archetypeName) => {
-                const archetypeDecks = data.filter(row => row.archetype === archetypeName);
-                
-                // Only calculate split if the data has 'meta' column (current_meta_card_data.csv)
+                const archetypeDecks = filteredData.filter(row => row.archetype === archetypeName);
+
                 if (archetypeDecks.length > 0 && archetypeDecks[0].meta) {
-                    // Find an entry with Meta Live to get total_decks_in_archetype
                     const liveEntry = archetypeDecks.find(row => row.meta === 'Meta Live');
-                    const limitlessCount = liveEntry ? parseInt(liveEntry.total_decks_in_archetype || 0) : 0;
-                    
-                    // Find an entry with Meta Play! to get total_decks_in_archetype
+                    const limitlessCount = liveEntry ? parseInt(liveEntry.total_decks_in_archetype || 0, 10) : 0;
+
                     const playEntry = archetypeDecks.find(row => row.meta === 'Meta Play!');
-                    const majorCount = playEntry ? parseInt(playEntry.total_decks_in_archetype || 0) : 0;
-                    
+                    const majorCount = playEntry ? parseInt(playEntry.total_decks_in_archetype || 0, 10) : 0;
+
                     archetypeInfo.limitlessCount = limitlessCount;
                     archetypeInfo.majorCount = majorCount;
                 }
-                // For tournament_cards_data, these counts don't apply
             });
             
             const archetypeList = Array.from(archetypeMap.values());
@@ -276,15 +267,9 @@
             // Refresh dropdown list to show only archetypes matching the filter
             const currentMetaDeckSelect = document.getElementById('currentMetaDeckSelect');
             const previouslySelected = currentMetaDeckSelect ? currentMetaDeckSelect.value : null;
-            
-            // Use correct data source based on filter
-            let dataToUse = null;
-            if (format === 'play') {
-                dataToUse = window.currentMetaTournamentCardsData || window.currentMetaAnalysisData;
-            } else {
-                dataToUse = window.currentMetaAnalysisData;
-            }
-            
+
+            const dataToUse = window.currentMetaAnalysisData;
+
             if (dataToUse) {
                 await populateCurrentMetaDeckSelect(dataToUse);
             }
@@ -309,7 +294,7 @@
         }
         
         // Load deck data with format filtering
-        function loadCurrentMetaDeckData(archetype) {
+        async function loadCurrentMetaDeckData(archetype) {
             // CRITICAL: Use different data sources based on filter to ensure correct numbers:
             // - 'play' (Major Tournament Decks): tournament_cards_data_cards.csv (Top 256 only, ~31 cards for Alakazam)
             // - 'live' (Limitless Decks): current_meta_card_data.csv with Meta Live rows (~47 cards)
@@ -320,6 +305,10 @@
             
             if (currentMetaFormatFilter === 'play') {
                 // Use Major Tournament data (Top 256 only)
+                if (!window.currentMetaTournamentCardsData) {
+                    showToast('Lade Major-Tournament-Kartendaten...', 'info');
+                    window.currentMetaTournamentCardsData = await loadCSV('tournament_cards_data_cards.csv');
+                }
                 data = window.currentMetaTournamentCardsData;
                 needsAggregation = true;
             } else {
@@ -353,9 +342,13 @@
             }
             
             // Filter by archetype
-            let deckCards = data.filter(row => 
-                row.archetype && row.archetype.toLowerCase() === archetype.toLowerCase()
-            );
+            let deckCards = data.filter(row => {
+                const rowArchetype = currentMetaFormatFilter === 'play'
+                    ? normalizeCurrentMetaTournamentArchetypeName(row.archetype)
+                    : String(row.archetype || '').trim();
+
+                return rowArchetype && rowArchetype.toLowerCase() === archetype.toLowerCase();
+            });
             
             // Apply format filter only when using current_meta data with 'live' or 'all'
             // (tournament_cards_data is already filtered to Top 256, should NOT be filtered further by meta)
@@ -370,86 +363,91 @@
                 return;
             }
             
-            // Tournament cards data stores one row per tournament per card print,
-            // so stats must be aggregated before deduplication (like Past Meta).
-            // Current meta data is already pre-aggregated — skip aggregation for that.
-            if (needsAggregation && deckCards.length > 0) {
-                deckCards = aggregateCardStatsByDate(deckCards);
+            // Show loading indicator for aggregation work
+            if (needsAggregation && deckCards.length > 100) {
+                showToast(`Processing ${deckCards.length} card entries... This may take a moment`, 'info');
             }
+            
+            // Use setTimeout to allow UI to update and prevent complete freezing
+            setTimeout(() => {
+                // Tournament cards data stores one row per tournament per card print,
+                // so stats must be aggregated before deduplication (like Past Meta).
+                // Current meta data is already pre-aggregated — skip aggregation for that.
+                if (needsAggregation && deckCards.length > 0) {
+                    deckCards = aggregateCardStatsByDate(deckCards);
+                }
 
-            // Deduplicate only after statistics have been merged across tournaments/prints.
-            deckCards = deduplicateCards(deckCards);
+                // Deduplicate only after statistics have been merged across tournaments/prints.
+                deckCards = deduplicateCards(deckCards);
             
-            window.currentCurrentMetaDeckCards = deckCards;
-            
-            // Calculate stats
-            // Use average_count_overall (like Past Meta) so the total reflects a realistic
-            // ~60-card deck rather than the inflated sum of maximums across all variants.
-            const totalCardsInDeck = Math.round(deckCards.reduce((sum, card) => {
-                const avg = parseFloat(String(card.average_count_overall || '0').replace(',', '.'));
-                return sum + (avg > 0 ? avg : parseInt(card.max_count || 0, 10));
-            }, 0));
-            const uniqueCards = deckCards.length;
-            
-            // Get winrate from deck stats
-            let winrate = '-';
-            const deckStats = window.currentMetaDeckStats || [];
-            const deckStatEntry = deckStats.find(d => d.deck_name && d.deck_name.toLowerCase() === archetype.toLowerCase());
-            if (deckStatEntry && deckStatEntry.win_rate) {
-                winrate = deckStatEntry.win_rate;
-            }
-            
-            // Calculate matchup vs Top 20
-            let matchupVsTop20 = '-';
-            const matchupData = window.currentMetaMatchupData || [];
-            if (deckStats.length > 0 && matchupData.length > 0) {
-                // Get top 20 decks by rank
-                const top20Decks = deckStats
-                    .filter(d => d.rank && parseInt(d.rank) <= 20)
-                    .map(d => d.deck_name);
+                window.currentCurrentMetaDeckCards = deckCards;
                 
-                // Get matchups against top 20
-                const relevantMatchups = matchupData.filter(m => 
-                    m.deck_name && m.deck_name.toLowerCase() === archetype.toLowerCase() &&
-                    m.opponent && top20Decks.some(deck => deck && deck.toLowerCase() === m.opponent.toLowerCase())
-                );
+                // Calculate stats
+                // Use max_count to match the filter view calculations for consistency
+                // (both must use the same base to avoid logical impossibilities like "87 unique / 75 total")
+                const totalCardsInDeck = deckCards.reduce((sum, card) => sum + parseInt(card.max_count || 0, 10), 0);
+                const uniqueCards = deckCards.length;
                 
-                if (relevantMatchups.length > 0) {
-                    // Calculate weighted average winrate
-                    let totalGames = 0;
-                    let totalWins = 0;
+                // Get winrate from deck stats
+                let winrate = '-';
+                const deckStats = window.currentMetaDeckStats || [];
+                const deckStatEntry = deckStats.find(d => d.deck_name && d.deck_name.toLowerCase() === archetype.toLowerCase());
+                if (deckStatEntry && deckStatEntry.win_rate) {
+                    winrate = deckStatEntry.win_rate;
+                }
+                
+                // Calculate matchup vs Top 20
+                let matchupVsTop20 = '-';
+                const matchupData = window.currentMetaMatchupData || [];
+                if (deckStats.length > 0 && matchupData.length > 0) {
+                    // Get top 20 decks by rank
+                    const top20Decks = deckStats
+                        .filter(d => d.rank && parseInt(d.rank) <= 20)
+                        .map(d => d.deck_name);
                     
-                    relevantMatchups.forEach(m => {
-                        const games = parseInt(m.total_games) || 0;
-                        const winRate = parseFloat((m.win_rate || '0').replace(',', '.'));
-                        totalGames += games;
-                        totalWins += (games * winRate / 100);
-                    });
+                    // Get matchups against top 20
+                    const relevantMatchups = matchupData.filter(m => 
+                        m.deck_name && m.deck_name.toLowerCase() === archetype.toLowerCase() &&
+                        m.opponent && top20Decks.some(deck => deck && deck.toLowerCase() === m.opponent.toLowerCase())
+                    );
                     
-                    if (totalGames > 0) {
-                        const avgWinrate = (totalWins / totalGames * 100).toFixed(2);
-                        matchupVsTop20 = `${avgWinrate}% (${relevantMatchups.length} MU)`;
+                    if (relevantMatchups.length > 0) {
+                        // Calculate weighted average winrate
+                        let totalGames = 0;
+                        let totalWins = 0;
+                        
+                        relevantMatchups.forEach(m => {
+                            const games = parseInt(m.total_games) || 0;
+                            const winRate = parseFloat((m.win_rate || '0').replace(',', '.'));
+                            totalGames += games;
+                            totalWins += (games * winRate / 100);
+                        });
+                        
+                        if (totalGames > 0) {
+                            const avgWinrate = (totalWins / totalGames * 100).toFixed(2);
+                            matchupVsTop20 = `${avgWinrate}% (${relevantMatchups.length} MU)`;
+                        }
                     }
                 }
-            }
-            
-            // Update stats  
-            document.getElementById('currentMetaStatCards').textContent = `${uniqueCards} / ${totalCardsInDeck}`;
-            document.getElementById('currentMetaStatWinrate').textContent = winrate;
-            document.getElementById('currentMetaStatMatchup').textContent = matchupVsTop20;
-            document.getElementById('currentMetaStatsSection').classList.remove('d-none');
-            
-            // Render matchups
-            renderCurrentMetaMatchups(archetype);
-            
-            // Render Top 256 tournament breakdown (only visible on Major Tournament filter)
-            renderCurrentMetaTop256(archetype);
-            
-            // Render cards using current active view (defaults to table when both are hidden)
-            applyCurrentMetaFilter();
-            
-            // DON'T auto-display deck here - let the caller decide
-            // (only display when user actively selects archetype from dropdown)
+                
+                // Update stats  
+                document.getElementById('currentMetaStatCards').textContent = `${uniqueCards} / ${totalCardsInDeck}`;
+                document.getElementById('currentMetaStatWinrate').textContent = winrate;
+                document.getElementById('currentMetaStatMatchup').textContent = matchupVsTop20;
+                document.getElementById('currentMetaStatsSection').classList.remove('d-none');
+                
+                // Render matchups
+                renderCurrentMetaMatchups(archetype);
+                
+                // Render Top 256 tournament breakdown (only visible on Major Tournament filter)
+                renderCurrentMetaTop256(archetype);
+                
+                // Render cards using current active view (defaults to table when both are hidden)
+                applyCurrentMetaFilter();
+                
+                // DON'T auto-display deck here - let the caller decide
+                // (only display when user actively selects archetype from dropdown)
+            }, 100);  // Delay to allow UI to update
         }
         
         function clearCurrentMetaDeckView() {
@@ -481,16 +479,26 @@
             const tourData = window.currentMetaTournamentCardsData || [];
 
             // Collect unique tournament entries for this archetype
+            // Use the maximum total_decks_in_archetype across all rows for the same
+            // tournament, because price-variant rows can carry different counts.
             const tourMap = new Map();
             tourData.forEach(row => {
-                if (!row.archetype || row.archetype.toLowerCase() !== archetype.toLowerCase()) return;
+                const rowArchetype = normalizeCurrentMetaTournamentArchetypeName(row.archetype);
+                if (!rowArchetype || rowArchetype.toLowerCase() !== archetype.toLowerCase()) return;
                 const key = row.tournament_name || String(row.tournament_id);
+                const rowCount = parseInt(row.total_decks_in_archetype || 0, 10);
                 if (!tourMap.has(key)) {
                     tourMap.set(key, {
                         name: row.tournament_name || key,
                         date: row.tournament_date || '',
-                        count: parseInt(row.total_decks_in_archetype || 0, 10)
+                        count: rowCount
                     });
+                } else {
+                    // Keep the highest count seen across all rows for this tournament
+                    const existing = tourMap.get(key);
+                    if (rowCount > existing.count) {
+                        existing.count = rowCount;
+                    }
                 }
             });
 

@@ -56,16 +56,59 @@
                         </div>
                         <div id="mainMenuDropdown" class="main-menu-dropdown" role="menu" aria-label="Navigation menu">
                             <div class="menu-header" data-i18n="menu.title">Main Menu</div>
-                            <button id="menu-btn-city-league"          class="menu-item active" onclick="switchTabAndUpdateMenu('city-league')"          data-i18n="menu.cityLeague"          role="menuitem">🇯🇵 City League Meta</button>
-                            <button id="menu-btn-city-league-analysis" class="menu-item"        onclick="switchTabAndUpdateMenu('city-league-analysis')" data-i18n="menu.cityLeagueAnalysis" role="menuitem">📊 Deck Analysis (Japan)</button>
-                            <button id="menu-btn-current-meta"         class="menu-item"        onclick="switchTabAndUpdateMenu('current-meta')"         data-i18n="menu.currentMeta"         role="menuitem">🎮 Current Meta (Global)</button>
-                            <button id="menu-btn-current-analysis"     class="menu-item"        onclick="switchTabAndUpdateMenu('current-analysis')"     data-i18n="menu.currentMetaAnalysis" role="menuitem">📈 Deck Analysis (Global)</button>
-                            <button id="menu-btn-past-meta"            class="menu-item"        onclick="switchTabAndUpdateMenu('past-meta')"            data-i18n="menu.pastMeta"            role="menuitem">🏆 Past Meta</button>
-                            <button id="menu-btn-cards"                class="menu-item"        onclick="switchTabAndUpdateMenu('cards')"                data-i18n="menu.cardDatabase"        role="menuitem">🧰 Card Database</button>
-                            <button id="menu-btn-proxy"                class="menu-item"        onclick="switchTabAndUpdateMenu('proxy')"                data-i18n="menu.proxyPrinter"        role="menuitem">🖨️ Proxy Printer</button>
-                            <button id="menu-btn-sandbox"              class="menu-item"        onclick="switchTabAndUpdateMenu('sandbox')"              data-i18n="menu.playtester"          role="menuitem">⚔️ Playtester Sandbox</button>
-                            <button id="menu-btn-profile"              class="menu-item"        onclick="switchTabAndUpdateMenu('profile')"              data-i18n="menu.profile"             role="menuitem">🎴 My Profile</button>
-                            <button id="menu-btn-tutorial"             class="menu-item"        onclick="switchTabAndUpdateMenu('tutorial')"             data-i18n="menu.howToUse"            role="menuitem">📖 How to Use</button>
+
+                            <button id="menu-group-meta" class="menu-group-toggle" type="button" onclick="toggleMenuCluster('meta')" aria-expanded="true" aria-controls="menu-submenu-meta">
+                                <span class="menu-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>
+                                </span>
+                                <span class="menu-item-label">Meta & Tier Lists</span>
+                                <span class="menu-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                </span>
+                            </button>
+                            <div id="menu-submenu-meta" class="menu-submenu open" role="group" aria-label="Meta and Tier Lists">
+                                <button id="menu-btn-city-league" class="menu-item menu-subitem active" data-tab-id="city-league" onclick="switchTabAndUpdateMenu('city-league')" data-i18n="menu.cityLeague" role="menuitem">
+                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><path d="m5.6 5.6 12.8 12.8"/><path d="m18.4 5.6-12.8 12.8"/></svg></span>
+                                    <span class="menu-item-label">City League Meta</span>
+                                </button>
+                                <button id="menu-btn-city-league-analysis" class="menu-item menu-subitem" data-tab-id="city-league-analysis" onclick="switchTabAndUpdateMenu('city-league-analysis')" data-i18n="menu.cityLeagueAnalysis" role="menuitem">
+                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg></span>
+                                    <span class="menu-item-label">Deck Analysis (Japan)</span>
+                                </button>
+                                <button id="menu-btn-current-meta" class="menu-item menu-subitem" data-tab-id="current-meta" onclick="switchTabAndUpdateMenu('current-meta')" data-i18n="menu.currentMeta" role="menuitem">
+                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14.5 14.5 0 0 1 0 18"/><path d="M12 3a14.5 14.5 0 0 0 0 18"/></svg></span>
+                                    <span class="menu-item-label">Current Meta (Global)</span>
+                                </button>
+                                <button id="menu-btn-current-analysis" class="menu-item menu-subitem" data-tab-id="current-analysis" onclick="switchTabAndUpdateMenu('current-analysis')" data-i18n="menu.currentMetaAnalysis" role="menuitem">
+                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg></span>
+                                    <span class="menu-item-label">Deck Analysis (Global)</span>
+                                </button>
+                                <button id="menu-btn-past-meta" class="menu-item menu-subitem" data-tab-id="past-meta" onclick="switchTabAndUpdateMenu('past-meta')" data-i18n="menu.pastMeta" role="menuitem">
+                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10"/><path d="M17 4v4a5 5 0 0 1-10 0V4"/></svg></span>
+                                    <span class="menu-item-label">Past Meta</span>
+                                </button>
+                            </div>
+
+                            <button id="menu-btn-cards" class="menu-item" data-tab-id="cards" onclick="switchTabAndUpdateMenu('cards')" data-i18n="menu.cardDatabase" role="menuitem">
+                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg></span>
+                                <span class="menu-item-label">Card Database</span>
+                            </button>
+                            <button id="menu-btn-proxy" class="menu-item" data-tab-id="proxy" onclick="switchTabAndUpdateMenu('proxy')" data-i18n="menu.proxyPrinter" role="menuitem">
+                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></span>
+                                <span class="menu-item-label">Proxy Printer</span>
+                            </button>
+                            <button id="menu-btn-sandbox" class="menu-item" data-tab-id="sandbox" onclick="switchTabAndUpdateMenu('sandbox')" data-i18n="menu.playtester" role="menuitem">
+                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span>
+                                <span class="menu-item-label">Playtester Sandbox</span>
+                            </button>
+                            <button id="menu-btn-profile" class="menu-item" data-tab-id="profile" onclick="switchTabAndUpdateMenu('profile')" data-i18n="menu.profile" role="menuitem">
+                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="5"/></svg></span>
+                                <span class="menu-item-label">My Profile</span>
+                            </button>
+                            <button id="menu-btn-tutorial" class="menu-item" data-tab-id="tutorial" onclick="switchTabAndUpdateMenu('tutorial')" data-i18n="menu.howToUse" role="menuitem">
+                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+                                <span class="menu-item-label">How to Use</span>
+                            </button>
                         </div>
                     </div>
 
@@ -158,13 +201,13 @@
                             </div>
                             <div class="control-group">
                                 <label for="cityLeagueDeckSelect" data-i18n="filter.selectArchetype">🎯 Select Deck Archetype:</label>
-                                <select id="cityLeagueDeckSelect" autocomplete="off" class="control-input">
+                                <select id="cityLeagueDeckSelect" autocomplete="off" class="control-input modern-select">
                                     <option value="" data-i18n="cl.pleaseSelectDeck">-- Please Select Deck --</option>
                                 </select>
                             </div>
                             <div class="control-group">
                                 <label for="cityLeagueFilterSelect" data-i18n="filter.cardShareFilter">🦂 Card Share Filter:</label>
-                                <select id="cityLeagueFilterSelect">
+                                <select id="cityLeagueFilterSelect" class="control-input modern-select">
                                     <option value="all" data-i18n="filter.allCards">All Cards</option>
                                     <option value="90" data-i18n="filter.cards90core">Cards in &gt;90% of Decks (Core)</option>
                                     <option value="70" data-i18n="filter.cards70">Cards in &gt;70% of Decks</option>
@@ -227,27 +270,32 @@
                         </div>
                         <div class="deck-builder">
                             <h2 data-i18n="section.deckBuilder">🛠️ Deck Builder</h2>
-                            <div class="action-bar city-league-action-bar">
-                                <div class="city-league-action-group">
-                                    <span class="action-group-label" data-i18n="deck.generateLabel">🪄 Generate:</span>
-                                    <button class="btn-modern" onclick="autoComplete('cityLeague', 'min')" title="Fill deck with lowest rarity cards" data-i18n="deck.genLow" data-i18n-title="deck.genLowTitle">⬇️ Low</button>
-                                    <button class="btn-modern" onclick="autoComplete('cityLeague', 'max')" title="Fill deck with highest rarity cards" data-i18n="deck.genMax" data-i18n-title="deck.genMaxTitle">⬆️ Max</button>
-                                    <button class="btn-modern primary" onclick="autoCompleteConsistency('cityLeague', 'min')" title="Uses tournament data for optimal card counts" data-i18n="btn.consistency" data-i18n-title="deck.genConsistencyTitle">🎯 Consistency</button>
+                            <div class="action-bar city-league-action-bar deck-builder-toolbar">
+                                <div class="city-league-action-group deck-builder-primary-actions">
+                                    <span class="action-group-label" data-i18n="deck.generateLabel">Generate</span>
+                                    <button class="btn-modern primary deck-builder-main-cta" onclick="autoCompleteConsistency('cityLeague', 'min')" title="Uses tournament data for optimal card counts" data-i18n="btn.consistency" data-i18n-title="deck.genConsistencyTitle">Consistency Generate</button>
+                                    <button class="btn-modern" onclick="autoComplete('cityLeague', 'min')" title="Fill deck with lowest rarity cards" data-i18n="deck.genLow" data-i18n-title="deck.genLowTitle">Low</button>
+                                    <button class="btn-modern" onclick="autoComplete('cityLeague', 'max')" title="Fill deck with highest rarity cards" data-i18n="deck.genMax" data-i18n-title="deck.genMaxTitle">Max</button>
                                 </div>
                                 <div class="action-divider"></div>
-                                <div class="city-league-action-group">
-                                    <button class="btn-modern" onclick="openDrawSimulator('cityLeague')" data-i18n="btn.testDraw">🎲 Test Draw</button>
-                                    <button class="btn-modern success" onclick="openPlaytesterSetup('cityLeague')" data-i18n="btn.playtest">🃏 Playtest</button>
-                                    <button class="btn-modern danger city-league-clear-btn" onclick="clearDeck('cityLeague')" data-i18n="btn.clear">🗑️ Clear</button>
+                                <div class="city-league-action-group deck-builder-secondary-actions">
+                                    <button class="btn-modern deck-builder-testdraw-btn" onclick="openDrawSimulator('cityLeague')" data-i18n="btn.testDraw">Test Draw</button>
+                                    <button class="btn-modern success" onclick="openPlaytesterSetup('cityLeague')" data-i18n="btn.playtest">Playtest</button>
+                                    <button class="btn-modern tertiary-danger city-league-clear-btn deck-builder-clear-btn" onclick="clearDeck('cityLeague')" data-i18n="btn.clear">Clear</button>
                                 </div>
                             </div>
-                            <div class="deck-summary city-league-deck-summary">
-                                <h3 class="city-league-deck-summary-title">
-                                    <span data-i18n="deck.deckLabel">Deck:</span> <span id="cityLeagueDeckCount" class="city-league-deck-count">0</span> <span data-i18n="deck.of60Cards">/ 60 Cards</span>
-                                    <span id="cityLeagueDeckCountUnique" class="city-league-deck-count-unique">(0 Unique)</span>
-                                </h3>
-                                <div class="city-league-deck-price">
-                                    💰 <span id="cityLeagueDeckPrice">0.00 €</span>
+                            <div class="deck-summary city-league-deck-summary deck-metrics-grid">
+                                <div class="deck-metric-card">
+                                    <div class="deck-metric-label" data-i18n="deck.deckLabel">Deck</div>
+                                    <div class="deck-metric-value"><span id="cityLeagueDeckCount" class="city-league-deck-count">0</span> <span data-i18n="deck.of60Cards">/ 60 Cards</span></div>
+                                </div>
+                                <div class="deck-metric-card">
+                                    <div class="deck-metric-label" data-i18n="cl.unique">Unique</div>
+                                    <div class="deck-metric-value"><span id="cityLeagueDeckCountUnique" class="city-league-deck-count-unique">(0 Unique)</span></div>
+                                </div>
+                                <div class="deck-metric-card deck-metric-card-price">
+                                    <div class="deck-metric-label">Estimated Price</div>
+                                    <div class="deck-metric-value"><span id="cityLeagueDeckPrice">0.00 €</span></div>
                                 </div>
                             </div>
                             <div id="cityLeagueHandStats" class="city-league-hand-stats"></div>
@@ -267,7 +315,17 @@
                                 </div>
                                 <input type="text" id="cityLeagueDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." class="card-search-input deck-card-search city-league-mydeck-search" oninput="filterDeckGrid('cityLeague')" aria-label="Search City League deck cards" data-i18n-placeholder="filter.searchCardPlaceholder" data-i18n-aria="filter.searchCardAria">
                                 <div class="deck-grid city-league-mydeck-grid" id="cityLeagueMyDeckGrid">
-                                    <p class="city-league-mydeck-empty" data-i18n="deck.emptyPlaceholder">Create a deck using the buttons above or add cards manually...</p>
+                                    <div class="deck-builder-empty-state" role="status" aria-live="polite">
+                                        <div class="deck-builder-empty-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+                                        </div>
+                                        <h4 class="deck-builder-empty-title">Your deck is empty</h4>
+                                        <p class="deck-builder-empty-text" data-i18n="deck.emptyPlaceholder">Create a deck using the buttons above or add cards manually...</p>
+                                        <div class="deck-builder-empty-actions">
+                                            <button class="btn-modern primary" onclick="autoCompleteConsistency('cityLeague', 'min')">Generate Deck</button>
+                                            <button class="btn-modern" onclick="openDrawSimulator('cityLeague')">Open Test Draw</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="section-panel city-league-add-card-panel">
@@ -353,13 +411,13 @@
                             </div>
                             <div class="control-group">
                                 <label for="currentMetaDeckSelect" data-i18n="cl.selectArchetype">🎯 Select Deck Archetype:</label>
-                                <select id="currentMetaDeckSelect" autocomplete="off" class="control-input">
+                                <select id="currentMetaDeckSelect" autocomplete="off" class="control-input modern-select">
                                     <option value="" data-i18n="cl.selectDeckOption">-- Please Select Deck --</option>
                                 </select>
                             </div>
                             <div class="control-group">
                                 <label for="currentMetaFilterSelect" data-i18n="cl.cardShareFilter">🦂 Card Share Filter:</label>
-                                <select id="currentMetaFilterSelect">
+                                <select id="currentMetaFilterSelect" class="control-input modern-select">
                                     <option value="all" data-i18n="cl.allCards">All Cards</option>
                                     <option value="90" data-i18n="cl.cards90">Cards in >90% of Decks (Core)</option>
                                     <option value="70" data-i18n="cl.cards70">Cards in >70% of Decks</option>
@@ -384,6 +442,13 @@
                                 <div class="current-meta-stat-label" data-i18n="stats.matchupTop20">Matchup vs Top 20</div>
                                 <div class="current-meta-stat-value" id="currentMetaStatMatchup">-</div>
                             </div>
+                        </div>
+                        <div id="currentMetaBeginnerTooltipCard" class="beginner-tooltip-card d-none" aria-live="polite">
+                            <div class="beginner-tooltip-header">
+                                <strong data-i18n="tip.beginnerTitle">🧠 Beginner Strategy</strong>
+                                <span id="currentMetaTooltipSource" class="beginner-tooltip-source" data-i18n="tip.sourceDefault">Default</span>
+                            </div>
+                            <p id="currentMetaBeginnerTooltipText" class="beginner-tooltip-text">-</p>
                         </div>
                         <div id="currentMetaTop256Section" class="d-none current-meta-top256-section">
                             <div class="current-meta-top256-title">🏆 Used in Top 256</div>
@@ -487,28 +552,33 @@
                     <!-- Deck Builder -->
                     <div class="deck-builder">
                         <h2 data-i18n="cl.deckBuilder">🛠️ Deck Builder</h2>
-                        <div class="action-bar">
-                            <div class="current-meta-action-group">
-                                <span class="action-group-label" data-i18n="cl.generate">🪄 Generate:</span>
-                                <button class="btn-modern" onclick="autoComplete('currentMeta', 'min')" title="Fill deck with lowest rarity cards" data-i18n="cl.genLow" data-i18n-title="cl.genLowTitle">⬇️ Low</button>
-                                <button class="btn-modern" onclick="autoComplete('currentMeta', 'max')" title="Fill deck with highest rarity cards" data-i18n="cl.genMax" data-i18n-title="cl.genMaxTitle">⬆️ Max</button>
-                                <button class="btn-modern primary" onclick="autoCompleteConsistency('currentMeta', 'min')" title="Uses tournament data for optimal card counts" data-i18n="cl.genConsistency" data-i18n-title="cl.genConsistencyTitle">🎯 Consistency</button>
+                        <div class="action-bar deck-builder-toolbar">
+                            <div class="current-meta-action-group deck-builder-primary-actions">
+                                <span class="action-group-label" data-i18n="cl.generate">Generate</span>
+                                <button class="btn-modern primary deck-builder-main-cta" onclick="autoCompleteConsistency('currentMeta', 'min')" title="Uses tournament data for optimal card counts" data-i18n="cl.genConsistency" data-i18n-title="cl.genConsistencyTitle">Consistency Generate</button>
+                                <button class="btn-modern" onclick="autoComplete('currentMeta', 'min')" title="Fill deck with lowest rarity cards" data-i18n="cl.genLow" data-i18n-title="cl.genLowTitle">Low</button>
+                                <button class="btn-modern" onclick="autoComplete('currentMeta', 'max')" title="Fill deck with highest rarity cards" data-i18n="cl.genMax" data-i18n-title="cl.genMaxTitle">Max</button>
                             </div>
                             <div class="action-divider"></div>
-                            <div class="current-meta-action-group">
-                                <button class="btn-modern" onclick="openDrawSimulator('currentMeta')" data-i18n="cl.testDraw">🎲 Test Draw</button>
-                                <button class="btn-modern success" onclick="openPlaytesterSetup('currentMeta')" data-i18n="cl.playtest">🃏 Playtest</button>
-                                <button class="btn-modern danger" onclick="clearDeck('currentMeta')" id="currentMetaClearDeckBtn" data-i18n="cl.clear">🗑️ Clear</button>
+                            <div class="current-meta-action-group deck-builder-secondary-actions">
+                                <button class="btn-modern deck-builder-testdraw-btn" onclick="openDrawSimulator('currentMeta')" data-i18n="cl.testDraw">Test Draw</button>
+                                <button class="btn-modern success" onclick="openPlaytesterSetup('currentMeta')" data-i18n="cl.playtest">Playtest</button>
+                                <button class="btn-modern tertiary-danger deck-builder-clear-btn" onclick="clearDeck('currentMeta')" id="currentMetaClearDeckBtn" data-i18n="cl.clear">Clear</button>
                             </div>
                         </div>
                         
-                        <div class="deck-summary current-meta-deck-summary">
-                            <h3 class="current-meta-deck-summary-title">
-                                <span data-i18n="cl.deckLabel">Deck:</span> <span id="currentMetaDeckCount" class="current-meta-deck-count">0</span> <span data-i18n="cl.of60Cards">/ 60 Cards</span>
-                                <span id="currentMetaDeckCountUnique" class="current-meta-deck-count-unique">(0 <span data-i18n="cl.unique">Unique</span>)</span>
-                            </h3>
-                            <div class="current-meta-deck-price">
-                                💰 <span id="currentMetaDeckPrice">0.00 €</span>
+                        <div class="deck-summary current-meta-deck-summary deck-metrics-grid">
+                            <div class="deck-metric-card">
+                                <div class="deck-metric-label" data-i18n="cl.deckLabel">Deck</div>
+                                <div class="deck-metric-value"><span id="currentMetaDeckCount" class="current-meta-deck-count">0</span> <span data-i18n="cl.of60Cards">/ 60 Cards</span></div>
+                            </div>
+                            <div class="deck-metric-card">
+                                <div class="deck-metric-label" data-i18n="cl.unique">Unique</div>
+                                <div class="deck-metric-value"><span id="currentMetaDeckCountUnique" class="current-meta-deck-count-unique">(0 <span data-i18n="cl.unique">Unique</span>)</span></div>
+                            </div>
+                            <div class="deck-metric-card deck-metric-card-price">
+                                <div class="deck-metric-label">Estimated Price</div>
+                                <div class="deck-metric-value"><span id="currentMetaDeckPrice">0.00 €</span></div>
                             </div>
                         </div>
                         <div id="currentMetaHandStats" class="current-meta-hand-stats-block"></div>
@@ -530,7 +600,17 @@
                             </div>
                             <input type="text" id="currentMetaDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." data-i18n-placeholder="cl.searchCardsPlaceholder" class="card-search-input deck-card-search" oninput="filterDeckGrid('currentMeta')" aria-label="Search current meta deck cards" data-i18n-aria="cm.searchDeckCardsAria">
                             <div class="deck-grid" id="currentMetaMyDeckGrid">
-                                <p class="deck-empty-hint" data-i18n="cl.createDeckHint">Create a deck using the buttons above or add cards manually...</p>
+                                <div class="deck-builder-empty-state" role="status" aria-live="polite">
+                                    <div class="deck-builder-empty-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+                                    </div>
+                                    <h4 class="deck-builder-empty-title">Your deck is empty</h4>
+                                    <p class="deck-builder-empty-text" data-i18n="cl.createDeckHint">Create a deck using the buttons above or add cards manually...</p>
+                                    <div class="deck-builder-empty-actions">
+                                        <button class="btn-modern primary" onclick="autoCompleteConsistency('currentMeta', 'min')">Generate Deck</button>
+                                        <button class="btn-modern" onclick="openDrawSimulator('currentMeta')">Open Test Draw</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -590,13 +670,13 @@
                         <div class="control-row">
                             <div class="control-group">
                                 <label for="pastMetaFormatFilter" data-i18n="pm.formatFilter">🎴 Meta/Format Filter:</label>
-                                <select id="pastMetaFormatFilter" autocomplete="off" class="control-input">
+                                <select id="pastMetaFormatFilter" autocomplete="off" class="control-input modern-select">
                                     <option value="all" data-i18n="pm.allFormats">-- All Formats --</option>
                                 </select>
                             </div>
                             <div class="control-group">
                                 <label for="pastMetaTournamentFilter" data-i18n="pm.tournamentFilter">🏆 Tournament Filter:</label>
-                                <select id="pastMetaTournamentFilter" autocomplete="off" class="control-input">
+                                <select id="pastMetaTournamentFilter" autocomplete="off" class="control-input modern-select">
                                     <option value="all" data-i18n="pm.allTournaments">-- All Tournaments --</option>
                                 </select>
                             </div>
@@ -608,13 +688,13 @@
                             </div>
                             <div class="control-group">
                                 <label for="pastMetaDeckSelect" data-i18n="cl.selectArchetype">🎯 Select Deck Archetype:</label>
-                                <select id="pastMetaDeckSelect" autocomplete="off" class="control-input">
+                                <select id="pastMetaDeckSelect" autocomplete="off" class="control-input modern-select">
                                     <option value="" data-i18n="cl.selectDeckOption">-- Please Select Deck --</option>
                                 </select>
                             </div>
                             <div class="control-group">
                                 <label for="pastMetaFilterSelect" data-i18n="cl.cardShareFilter">🦂 Card Share Filter:</label>
-                                <select id="pastMetaFilterSelect">
+                                <select id="pastMetaFilterSelect" class="control-input modern-select">
                                     <option value="all" data-i18n="cl.allCards">All Cards</option>
                                     <option value="90" data-i18n="cl.cards90">Cards in >90% of Decks (Core)</option>
                                     <option value="70" data-i18n="cl.cards70">Cards in >70% of Decks</option>
@@ -688,28 +768,33 @@
                     <!-- Deck Builder -->
                     <div class="deck-builder">
                         <h2 data-i18n="cl.deckBuilder">🛠️ Deck Builder</h2>
-                        <div class="action-bar">
-                            <div class="past-meta-action-group">
-                                <span class="action-group-label" data-i18n="cl.generate">🪄 Generate:</span>
-                                <button class="btn-modern" onclick="autoComplete('pastMeta', 'min')" title="Fill deck with lowest rarity cards" data-i18n="cl.genLow" data-i18n-title="cl.genLowTitle">⬇️ Low</button>
-                                <button class="btn-modern" onclick="autoComplete('pastMeta', 'max')" title="Fill deck with highest rarity cards" data-i18n="cl.genMax" data-i18n-title="cl.genMaxTitle">⬆️ Max</button>
-                                <button class="btn-modern primary" onclick="autoCompleteConsistency('pastMeta', 'min')" title="Uses tournament data for optimal card counts" data-i18n="cl.genConsistency" data-i18n-title="cl.genConsistencyTitle">🎯 Consistency</button>
+                        <div class="action-bar deck-builder-toolbar">
+                            <div class="past-meta-action-group deck-builder-primary-actions">
+                                <span class="action-group-label" data-i18n="cl.generate">Generate</span>
+                                <button class="btn-modern primary deck-builder-main-cta" onclick="autoCompleteConsistency('pastMeta', 'min')" title="Uses tournament data for optimal card counts" data-i18n="cl.genConsistency" data-i18n-title="cl.genConsistencyTitle">Consistency Generate</button>
+                                <button class="btn-modern" onclick="autoComplete('pastMeta', 'min')" title="Fill deck with lowest rarity cards" data-i18n="cl.genLow" data-i18n-title="cl.genLowTitle">Low</button>
+                                <button class="btn-modern" onclick="autoComplete('pastMeta', 'max')" title="Fill deck with highest rarity cards" data-i18n="cl.genMax" data-i18n-title="cl.genMaxTitle">Max</button>
                             </div>
                             <div class="action-divider"></div>
-                            <div class="past-meta-action-group">
-                                <button class="btn-modern" onclick="openDrawSimulator('pastMeta')" data-i18n="cl.testDraw">🎲 Test Draw</button>
-                                <button class="btn-modern success" onclick="openPlaytesterSetup('pastMeta')" data-i18n="cl.playtest">🃏 Playtest</button>
-                                <button class="btn-modern danger" onclick="clearDeck('pastMeta')" id="pastMetaClearDeckBtn" data-i18n="cl.clear">🗑️ Clear</button>
+                            <div class="past-meta-action-group deck-builder-secondary-actions">
+                                <button class="btn-modern deck-builder-testdraw-btn" onclick="openDrawSimulator('pastMeta')" data-i18n="cl.testDraw">Test Draw</button>
+                                <button class="btn-modern success" onclick="openPlaytesterSetup('pastMeta')" data-i18n="cl.playtest">Playtest</button>
+                                <button class="btn-modern tertiary-danger deck-builder-clear-btn" onclick="clearDeck('pastMeta')" id="pastMetaClearDeckBtn" data-i18n="cl.clear">Clear</button>
                             </div>
                         </div>
                         
-                        <div class="deck-summary flex-between flex-wrap gap-15 bg-blue-light px-15 br-8 border-left-blue mb-20">
-                            <h3 class="past-meta-deck-summary-title">
-                                <span data-i18n="cl.deckLabel">Deck:</span> <span id="pastMetaDeckCount" class="past-meta-deck-count">0</span> <span data-i18n="cl.of60Cards">/ 60 Cards</span>
-                                <span id="pastMetaDeckCountUnique" class="past-meta-deck-count-unique">(0 <span data-i18n="cl.unique">Unique</span>)</span>
-                            </h3>
-                            <div class="past-meta-deck-price">
-                                💰 <span id="pastMetaDeckPrice">0.00 €</span>
+                        <div class="deck-summary past-meta-deck-summary deck-metrics-grid">
+                            <div class="deck-metric-card">
+                                <div class="deck-metric-label" data-i18n="cl.deckLabel">Deck</div>
+                                <div class="deck-metric-value"><span id="pastMetaDeckCount" class="past-meta-deck-count">0</span> <span data-i18n="cl.of60Cards">/ 60 Cards</span></div>
+                            </div>
+                            <div class="deck-metric-card">
+                                <div class="deck-metric-label" data-i18n="cl.unique">Unique</div>
+                                <div class="deck-metric-value"><span id="pastMetaDeckCountUnique" class="past-meta-deck-count-unique">(0 <span data-i18n="cl.unique">Unique</span>)</span></div>
+                            </div>
+                            <div class="deck-metric-card deck-metric-card-price">
+                                <div class="deck-metric-label">Estimated Price</div>
+                                <div class="deck-metric-value"><span id="pastMetaDeckPrice">0.00 €</span></div>
                             </div>
                         </div>
                         
@@ -732,7 +817,17 @@
                             </div>
                             <input type="text" id="pastMetaDeckGridSearch" placeholder="🔍 Search name (EN/DE), set+number, or Pokédex..." data-i18n-placeholder="cl.searchCardsPlaceholder" class="card-search-input deck-card-search" oninput="filterDeckGrid('pastMeta')" aria-label="Search past meta deck cards" data-i18n-aria="pm.searchDeckCardsAria">
                             <div class="deck-grid" id="pastMetaMyDeckGrid">
-                                <p class="deck-empty-hint" data-i18n="cl.createDeckHint">Create a deck using the buttons above or add cards manually...</p>
+                                <div class="deck-builder-empty-state" role="status" aria-live="polite">
+                                    <div class="deck-builder-empty-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>
+                                    </div>
+                                    <h4 class="deck-builder-empty-title">Your deck is empty</h4>
+                                    <p class="deck-builder-empty-text" data-i18n="cl.createDeckHint">Create a deck using the buttons above or add cards manually...</p>
+                                    <div class="deck-builder-empty-actions">
+                                        <button class="btn-modern primary" onclick="autoCompleteConsistency('pastMeta', 'min')">Generate Deck</button>
+                                        <button class="btn-modern" onclick="openDrawSimulator('pastMeta')">Open Test Draw</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -1862,6 +1957,42 @@
                                 <p id="profile-decks-count">0</p>
                             </div>
                         </div>
+
+                        <div class="battle-journal-profile-card mb-25">
+                            <div class="battle-journal-profile-copy">
+                                <h3 data-i18n="bj.profileTitle">📝 Battle Journal</h3>
+                                <p data-i18n="bj.profileSubtitle">Log matches offline and sync them automatically when you are back online.</p>
+                            </div>
+                            <div class="battle-journal-profile-stats">
+                                <div class="battle-journal-profile-stat">
+                                    <span data-i18n="bj.pendingSync">Pending Sync</span>
+                                    <strong id="battleJournalProfilePending">0</strong>
+                                </div>
+                                <div class="battle-journal-profile-stat">
+                                    <span data-i18n="bj.syncState">Sync Status</span>
+                                    <strong id="battleJournalProfileState" data-i18n="bj.statusReady">Ready</strong>
+                                </div>
+                            </div>
+                            <div class="battle-journal-profile-actions">
+                                <button type="button" class="btn-gradient-blue" onclick="openBattleJournalSheet()" data-i18n="bj.openBtn">📝 Log Match</button>
+                                <button type="button" class="btn-gradient-green" onclick="flushBattleJournalOutbox()" data-i18n="bj.syncNow">🔄 Sync Now</button>
+                            </div>
+                        </div>
+
+                        <div class="tooltip-admin-card mb-25">
+                            <div class="tooltip-admin-copy">
+                                <h3 data-i18n="tip.adminTitle">🛠️ Beginner Tooltip Admin</h3>
+                                <p data-i18n="tip.adminSubtitle">Review AI-generated tips and overwrite manually if needed.</p>
+                            </div>
+                            <div class="tooltip-admin-controls">
+                                <select id="tooltipAdminArchetype" class="control-input modern-select" aria-label="Select archetype for tooltip admin"></select>
+                                <textarea id="tooltipAdminText" class="tooltip-admin-textarea" rows="3" maxlength="420" data-i18n-placeholder="tip.adminPlaceholder" placeholder="Manual beginner tooltip..."></textarea>
+                                <div class="tooltip-admin-actions">
+                                    <button type="button" class="btn-gradient-blue" onclick="saveArchetypeTooltipOverride()" data-i18n="tip.saveOverride">💾 Save Override</button>
+                                    <button type="button" class="btn-gradient-red" onclick="resetArchetypeTooltipOverride()" data-i18n="tip.resetOverride">↺ Reset</button>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Tabs for Profile sections -->
                         <div class="border-bottom-grey mb-20">
@@ -2180,21 +2311,31 @@
     <div id="playtesterModal" class="d-none pos-fixed top-0 left-0 right-0 bottom-0 z-15000 flex-col" role="dialog" aria-modal="true" aria-label="Playtester simulator">
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
 
-        <div class="pt-controls d-flex justify-space-around align-center flex-nowrap overflow-visible p-5 bg-white border-bottom-grey w-100 pos-rel z-1000">
-            <button title="Multiplayer" onclick="openMultiplayerMenu()" class="pt-btn pt-btn-lg" aria-label="Open multiplayer menu">👥</button>
-            <button title="Start / Reset" onclick="startPlaytesterSetup()" class="pt-btn pt-btn-lg" aria-label="Start or reset playtester">▶️</button>
-            <button title="Flip Board" onclick="ptFlipBoard()" class="pt-btn pt-btn-lg" aria-label="Flip board to opponent view">🔄</button>
-            <button title="Quit" onclick="ptQuitPlaytester()" class="pt-btn pt-btn-lg" aria-label="Quit playtester">❌</button>
-            <button title="Coin" onclick="mpFlipCoin ? mpFlipCoin() : showToast(t('pt.mpOnly'))" class="pt-btn pt-btn-lg" aria-label="Flip coin">🪙</button>
-            <button title="Zoom" onclick="ptZoomBoard()" class="pt-btn pt-btn-lg" aria-label="Zoom board">🔍</button>
+        <div class="pt-controls pt-floating-bar" role="toolbar" aria-label="Playtester actions">
+            <div class="pt-tool-group" aria-label="Session actions">
+                <span class="pt-tool-group-label">Session</span>
+                <button title="Multiplayer" data-pt-tip="Multiplayer" onclick="openMultiplayerMenu()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Open multiplayer menu">MP</button>
+                <button title="Start / Reset" data-pt-tip="Start / Reset" onclick="startPlaytesterSetup()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Start or reset playtester">Start</button>
+                <button title="Flip Board" data-pt-tip="Flip Board" onclick="ptFlipBoard()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Flip board to opponent view">Flip</button>
+                <button title="Quit" data-pt-tip="Quit" onclick="ptQuitPlaytester()" class="pt-btn pt-btn-lg pt-tool-btn pt-tool-btn-danger" aria-label="Quit playtester">Quit</button>
+            </div>
 
-            <button title="Undo" onclick="ptUndo()" class="pt-btn pt-btn-lg" aria-label="Undo last action">↩️</button>
-            <button title="Mulligan" onclick="ptMulligan(ptCurrentPlayer)" class="pt-btn pt-btn-lg" aria-label="Mulligan hand">🃏</button>
-            <button id="ptVstarMarker" title="V Marker" class="pt-marker pt-marker-vstar pt-btn pt-btn-sm" onclick="ptToggleMarker('vstar')" aria-label="Toggle V marker">V</button>
-            <button id="ptGxMarker" title="GX Marker" class="pt-marker pt-marker-gx pt-btn pt-btn-sm" onclick="ptToggleMarker('gx')" aria-label="Toggle GX marker">GX</button>
-            <button title="Save Game" onclick="ptSaveGame()" class="pt-btn pt-btn-lg" aria-label="Save game">💾</button>
-            <button title="Load Game" onclick="ptLoadGame()" class="pt-btn pt-btn-lg" aria-label="Load game">📂</button>
-            <button title="Info / Anleitung" onclick="ptShowManual()" class="pt-btn pt-btn-lg" aria-label="Show playtester manual">ℹ️</button>
+            <div class="pt-tool-group" aria-label="Turn actions">
+                <span class="pt-tool-group-label">Turn</span>
+                <button title="Coin" data-pt-tip="Coin Flip" onclick="mpFlipCoin ? mpFlipCoin() : showToast(t('pt.mpOnly'))" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Flip coin">Coin</button>
+                <button title="Zoom" data-pt-tip="Zoom Board" onclick="ptZoomBoard()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Zoom board">Zoom</button>
+                <button title="Undo" data-pt-tip="Undo" onclick="ptUndo()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Undo last action">Undo</button>
+                <button title="Mulligan" data-pt-tip="Mulligan" onclick="ptMulligan(ptCurrentPlayer)" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Mulligan hand">Mulligan</button>
+            </div>
+
+            <div class="pt-tool-group" aria-label="Markers and data">
+                <span class="pt-tool-group-label">Markers</span>
+                <button id="ptVstarMarker" title="V Marker" data-pt-tip="V Marker" class="pt-marker pt-marker-vstar pt-btn pt-btn-sm pt-tool-btn pt-marker-chip" onclick="ptToggleMarker('vstar')" aria-label="Toggle V marker">V</button>
+                <button id="ptGxMarker" title="GX Marker" data-pt-tip="GX Marker" class="pt-marker pt-marker-gx pt-btn pt-btn-sm pt-tool-btn pt-marker-chip" onclick="ptToggleMarker('gx')" aria-label="Toggle GX marker">GX</button>
+                <button title="Save Game" data-pt-tip="Save Game" onclick="ptSaveGame()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Save game">Save</button>
+                <button title="Load Game" data-pt-tip="Load Game" onclick="ptLoadGame()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Load game">Load</button>
+                <button title="Info / Anleitung" data-pt-tip="Manual" onclick="ptShowManual()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Show playtester manual">Help</button>
+            </div>
         </div>
 
         <div id="ptDirectActionModal" class="d-none pos-fixed top-0 left-0 w-100 h-100 bg-black-70 z-10001 align-center justify-center" role="dialog" aria-modal="true" aria-label="Game actions">
@@ -2739,6 +2880,86 @@
         </div>
     </div>
 
+    <button id="battleJournalFab" class="battle-journal-fab" type="button" onclick="openBattleJournalSheet()" aria-label="Open battle journal">
+        <span class="battle-journal-fab-icon">📝</span>
+        <span class="battle-journal-fab-label" data-i18n="bj.openShort">Journal</span>
+        <span id="battleJournalFabBadge" class="battle-journal-fab-badge display-none">0</span>
+    </button>
+
+    <div id="battleJournalOverlay" class="battle-journal-overlay" aria-hidden="true">
+        <div id="battleJournalSheet" class="battle-journal-sheet" role="dialog" aria-modal="true" aria-label="Battle journal">
+            <div class="battle-journal-sheet-handle"></div>
+            <div class="battle-journal-header">
+                <div>
+                    <h2 class="battle-journal-title" data-i18n="bj.title">📝 Offline Battle Journal</h2>
+                    <p class="battle-journal-subtitle" data-i18n="bj.subtitle">Log a match in under 30 seconds. Entries stay local until they can sync.</p>
+                </div>
+                <div class="battle-journal-header-actions">
+                    <button type="button" id="battleJournalThemeToggle" class="battle-journal-theme-toggle" onclick="toggleBattleJournalTheme()" data-i18n="bj.themeDark">🌙 Dark</button>
+                    <button type="button" class="battle-journal-close" onclick="closeBattleJournalSheet()" aria-label="Close battle journal">×</button>
+                </div>
+            </div>
+
+            <div class="battle-journal-status-row">
+                <span id="battleJournalStatusBadge" class="battle-journal-status-badge" data-i18n="bj.statusReady">Ready</span>
+                <span id="battleJournalPendingCount" class="battle-journal-pending-count">0 pending</span>
+            </div>
+
+            <form id="battleJournalForm" class="battle-journal-form" onsubmit="submitBattleJournalEntry(event)">
+                <div>
+                    <span class="battle-journal-label" data-i18n="bj.ownDeck">Your Deck</span>
+                    <input id="battleJournalOwnDeckValue" type="hidden" value="">
+                    <div id="battleJournalOwnDeckChoices" class="battle-journal-tap-grid battle-journal-tap-grid-own" aria-label="Own deck choices"></div>
+                </div>
+
+                <div>
+                    <span class="battle-journal-label" data-i18n="bj.opponentDeck">Opponent Archetype</span>
+                    <input id="battleJournalOpponentValue" type="hidden" value="">
+                    <div id="battleJournalOpponentChoices" class="battle-journal-tap-grid" aria-label="Opponent deck choices"></div>
+                    <div id="battleJournalOpponentExtended" class="battle-journal-extended-list d-none"></div>
+                </div>
+
+                <div class="battle-journal-grid">
+                    <div>
+                        <span class="battle-journal-label" data-i18n="bj.turnOrder">Going</span>
+                        <input id="battleJournalTurnOrder" type="hidden" value="">
+                        <div class="battle-journal-choice-group" data-choice-group="turnOrder">
+                            <button type="button" class="battle-journal-choice" data-field="turnOrder" data-value="first" onclick="setBattleJournalChoice('turnOrder', 'first')" data-i18n="bj.first">First</button>
+                            <button type="button" class="battle-journal-choice" data-field="turnOrder" data-value="second" onclick="setBattleJournalChoice('turnOrder', 'second')" data-i18n="bj.second">Second</button>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="battle-journal-label" data-i18n="bj.result">Result</span>
+                        <input id="battleJournalResult" type="hidden" value="">
+                        <div class="battle-journal-choice-group battle-journal-choice-group-result" data-choice-group="result">
+                            <button type="button" class="battle-journal-choice battle-journal-choice-win" data-field="result" data-value="win" onclick="setBattleJournalChoice('result', 'win')" data-i18n="bj.win">Win</button>
+                            <button type="button" class="battle-journal-choice battle-journal-choice-loss" data-field="result" data-value="loss" onclick="setBattleJournalChoice('result', 'loss')" data-i18n="bj.loss">Loss</button>
+                            <button type="button" class="battle-journal-choice battle-journal-choice-tie" data-field="result" data-value="tie" onclick="setBattleJournalChoice('result', 'tie')" data-i18n="bj.tie">Tie</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="battle-journal-actions">
+                    <button type="button" class="battle-journal-secondary-btn" onclick="clearBattleJournalDraft()" data-i18n="bj.clearDraft">Clear</button>
+                    <button type="submit" class="battle-journal-primary-btn" data-i18n="bj.saveBtn">Save Match</button>
+                </div>
+            </form>
+
+            <div id="battleJournalSaveFx" class="battle-journal-save-fx" aria-hidden="true">
+                <div class="battle-journal-save-fx-check">✓</div>
+                <div class="battle-journal-save-fx-text" data-i18n="bj.savedShort">Saved</div>
+            </div>
+
+            <div class="battle-journal-footer">
+                <div class="battle-journal-footer-row">
+                    <strong data-i18n="bj.pendingEntries">Pending Entries</strong>
+                    <button type="button" class="battle-journal-link-btn" onclick="flushBattleJournalOutbox()" data-i18n="bj.syncNow">🔄 Sync Now</button>
+                </div>
+                <div id="battleJournalPendingList" class="battle-journal-pending-list"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- External libraries -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -2770,6 +2991,8 @@
     <script src="js/app-init.js?v=1"></script>
     <script src="js/app-current-meta-analysis.js?v=1"></script>
     <script src="js/app-features.js?v=1"></script>
+    <script src="js/archetype-tooltips.js?v=1"></script>
+    <script src="js/battle-journal.js?v=1"></script>
     <script src="js/draw-simulator.js?v=1"></script>
     <script src="js/combo-worker.js?v=1"></script>
     <script src="js/firebase-multiplayer.js?v=1"></script>

@@ -20,9 +20,9 @@ from datetime import datetime
 try:
     from bs4 import BeautifulSoup
     import requests as std_requests
-    from seleniumbase import Driver
+    import cloudscraper
 except ImportError:
-    print("FEHLER: Bibliotheken fehlen! pip install seleniumbase beautifulsoup4 requests")
+    print("FEHLER: Bibliotheken fehlen! pip install cloudscraper beautifulsoup4 requests")
     sys.exit(1)
 
 from backend.settings import get_data_path, get_config_path
@@ -114,7 +114,7 @@ def _fetch_limitless(card: dict) -> dict:
     
     return {**card, "eur_price": eur_price, "last_updated": datetime.now().isoformat()}
 
-# --- PHASE 2: CARDMARKET OVERWRITE (STEALTH) ---
+# --- PHASE 2: CARDMARKET OVERWRITE (CLOUDSCRAPER APPROACH) ---
 def _fetch_cardmarket(card: dict, base_delay: float, is_headless: bool, proxy_str: str) -> dict:
     card_id = f"{card['set']}-{card['number']}"
     cm_url = card.get("cardmarket_url", "")
@@ -128,35 +128,43 @@ def _fetch_cardmarket(card: dict, base_delay: float, is_headless: bool, proxy_st
     
     with _cm_semaphore:
         for attempt in range(2):
-            driver = None
             try:
-                driver = Driver(uc=True, proxy=proxy_str, headless=is_headless) if proxy_str else Driver(uc=True, headless=is_headless)
-                driver.get(target_url)
+                scraper = cloudscraper.create_scraper(
+                    browser={
+                        "browser": "chrome",
+                        "platform": "windows",
+                        "desktop": True,
+                    }
+                )
+
                 time.sleep(base_delay + random.uniform(2.0, 4.0))
-                
-                html = driver.page_source
-                soup = BeautifulSoup(html, "lxml")
-                
-                # Preis parsen
-                for dt in soup.find_all("dt"):
-                    if dt.get_text(strip=True).lower() in ("from", "ab"):
-                        dd = dt.find_next_sibling("dd")
-                        if dd and ("EUR" in dd.text or "€" in dd.text) and "£" not in dd.text:
-                            new_price = dd.get_text(strip=True)
-                            logger.info("  [P2] CM OVERWRITE [%s]: %s (vorher: %s)", card_id, new_price, card.get('eur_price', 'N/A'))
-                            break
-                
-                if new_price: 
-                    break
-                else:
-                    if "Just a moment" in html or "Bitte warten" in html or "cloudflare" in html.lower():
-                        logger.warning("  [P2] CM Warnung [%s]: Cloudflare blockiert (Versuch %s/2)", card_id, attempt+1)
+
+                response = scraper.get(target_url, timeout=15)
+
+                if response.status_code == 200:
+                    html = response.text
+                    soup = BeautifulSoup(html, "lxml")
+
+                    # Preis parsen (wie vorher)
+                    for dt in soup.find_all("dt"):
+                        if dt.get_text(strip=True).lower() in ("from", "ab"):
+                            dd = dt.find_next_sibling("dd")
+                            if dd and ("EUR" in dd.text or "€" in dd.text) and "£" not in dd.text:
+                                new_price = dd.get_text(strip=True)
+                                logger.info("  [P2] CM OVERWRITE [%s]: %s (vorher: %s)", card_id, new_price, card.get("eur_price", "N/A"))
+                                break
+
+                    if new_price:
+                        break
                     else:
-                        logger.warning("  [P2] CM Warnung [%s]: Seite geladen, aber Preis nicht gefunden.", card_id)
+                        if "Just a moment" in html or "cloudflare" in html.lower():
+                            logger.warning("  [P2] CM Warnung [%s]: Cloudflare blockiert (HTTP Status 200) (Versuch %s/2)", card_id, attempt + 1)
+                        else:
+                            logger.warning("  [P2] CM Warnung [%s]: Seite geladen, aber Preis nicht gefunden.", card_id)
+                else:
+                    logger.warning("  [P2] CM Warnung [%s]: HTTP Status Code %s (Versuch %s/2)", card_id, response.status_code, attempt + 1)
             except Exception as e:
                 logger.error("  [P2] CM ABSTURZ [%s]: %s", card_id, e)
-            finally:
-                if driver: driver.quit()
 
     if new_price:
         return {**card, "eur_price": new_price, "last_updated": datetime.now().isoformat()}

@@ -727,6 +727,25 @@
             
             const allCards = currentCardsKey ? (window[currentCardsKey] || []) : (pastMetaFilteredCards || []);
             const dbCache = getMyDeckRenderDbCache();
+
+            const getDeckBuilderEmptyStateHtml = (scope) => {
+                const generateAction = `autoCompleteConsistency('${scope}', 'min')`;
+                const testDrawAction = `openDrawSimulator('${scope}')`;
+                const emptyText = t('deck.emptyPlaceholder');
+                return `
+                    <div class="deck-builder-empty-state" role="status" aria-live="polite">
+                        <div class="deck-builder-empty-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h5"></path></svg>
+                        </div>
+                        <h4 class="deck-builder-empty-title">Your deck is empty</h4>
+                        <p class="deck-builder-empty-text">${emptyText}</p>
+                        <div class="deck-builder-empty-actions">
+                            <button class="btn-modern primary" onclick="${generateAction}">Generate Deck</button>
+                            <button class="btn-modern" onclick="${testDrawAction}">Open Test Draw</button>
+                        </div>
+                    </div>
+                `;
+            };
             
             // Build card data maps: by name and by name+set+number
             const cardDataByName = Object.create((dbCache && dbCache.cardDataByName) || null);
@@ -1055,7 +1074,7 @@
             
             const gridContainer = document.getElementById(gridContainerId);
             if (gridContainer) {
-                gridContainer.innerHTML = html || '<p style="text-align: center; color: #444; padding: 40px; font-weight: 500;">' + t('deck.emptyPlaceholder') + '</p>';
+                gridContainer.innerHTML = html || getDeckBuilderEmptyStateHtml(source);
             }
         }
         

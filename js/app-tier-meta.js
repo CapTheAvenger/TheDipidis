@@ -298,6 +298,29 @@
             
             return pokemonCards[0].image_url || '';
         }
+
+        function getCombinedMainArchetypeLabel(archetypeName) {
+            const raw = String(archetypeName || '').trim().toLowerCase();
+            if (!raw) return '';
+
+            if (raw.startsWith('mega ')) {
+                const parts = raw.split(' ');
+                return parts.slice(0, 2).join(' ');
+            }
+            if (raw.startsWith('alolan ') || raw.startsWith('galarian ') || raw.startsWith('hisuian ')) {
+                const parts = raw.split(' ');
+                return parts.slice(0, 2).join(' ');
+            }
+            return raw.split(' ')[0];
+        }
+
+        function toTitleCaseWords(value) {
+            return String(value || '')
+                .split(' ')
+                .filter(Boolean)
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
         
         /**
          * Render Tier List for City League
@@ -348,6 +371,49 @@
             // 1. Sort descending by count (= Meta-Share / deck-list count).
             const archetypeArray = [...cityLeagueData].sort((a, b) => parseDeckCount(b) - parseDeckCount(a));
 
+            // Hero section: combine variants by main Pokemon using same grouping rules as Archetype Combined.
+            const combinedHeroMap = new Map();
+            archetypeArray.forEach(deck => {
+                const archetypeName = String(deck.archetype || '').trim();
+                if (!archetypeName) return;
+
+                const mainKey = getCombinedMainArchetypeLabel(archetypeName);
+                if (!mainKey) return;
+
+                const deckCount = parseDeckCount(deck);
+                const avgRank = parseDeckRank(deck);
+
+                if (!combinedHeroMap.has(mainKey)) {
+                    combinedHeroMap.set(mainKey, {
+                        key: mainKey,
+                        label: toTitleCaseWords(mainKey),
+                        totalCount: 0,
+                        weightedRankSum: 0,
+                        variants: [],
+                        representativeVariant: archetypeName,
+                        representativeDeckCount: 0
+                    });
+                }
+
+                const group = combinedHeroMap.get(mainKey);
+                group.totalCount += deckCount;
+                group.weightedRankSum += avgRank * Math.max(1, deckCount);
+                group.variants.push(archetypeName);
+
+                if (deckCount > group.representativeDeckCount) {
+                    group.representativeVariant = archetypeName;
+                    group.representativeDeckCount = deckCount;
+                }
+            });
+
+            const topHeroArchetypes = Array.from(combinedHeroMap.values())
+                .sort((a, b) => b.totalCount - a.totalCount)
+                .slice(0, 5)
+                .map(item => ({
+                    ...item,
+                    weightedRank: item.totalCount > 0 ? (item.weightedRankSum / item.totalCount) : 999
+                }));
+
             // 2. Fixed index-based tier assignment: Top-3 | Next-7 | Next-10 | Rest
             const tierGroups = { 'tier-1': [], 'tier-2': [], 'tier-3': [], 'tier-trending': [] };
             archetypeArray.forEach((deck, idx) => {
@@ -369,7 +435,48 @@
                 tierGroups[tierKey].sort((a, b) => parseDeckRank(a) - parseDeckRank(b));
             });
 
-            let html = '<div style="margin-bottom: 30px;">';
+            let heroHtml = '';
+            if (topHeroArchetypes.length > 0) {
+                heroHtml = `
+                    <section class="tier-hero-section" aria-label="${escapeHtml(t('cl.heroAria'))}">
+                        <div class="tier-hero-header">
+                            <h2>${t('cl.heroTitle')}</h2>
+                            <p>${t('cl.heroSubtitle')}</p>
+                        </div>
+                        <div class="tier-hero-grid">`;
+
+                topHeroArchetypes.forEach((item, index) => {
+                    const representativeCards = cardDataByArchetype[item.representativeVariant] || [];
+                    const imageUrl = getArchetypeImage(item.representativeVariant, representativeCards);
+                    const topVariant = item.variants[0] || item.representativeVariant;
+                    const archetypeEscaped = escapeJsStr(topVariant);
+                    const avgRankText = Number.isFinite(item.weightedRank) && item.weightedRank < 999
+                        ? item.weightedRank.toFixed(1)
+                        : '0.0';
+                    const variantCount = item.variants.length;
+                    const variantLabel = variantCount === 1 ? t('cl.heroVariantSingular') : t('cl.heroVariantPlural');
+
+                    heroHtml += `
+                        <div class="tier-hero-card" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')">
+                            <span class="tier-hero-rank">#${index + 1}</span>
+                            ${imageUrl ? `<div class="tier-hero-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
+                            <div class="tier-hero-content">
+                                <div class="tier-hero-name">${item.label}</div>
+                                <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
+                                <div class="tier-hero-stats">
+                                    <span class="stat-badge">📦 ${item.totalCount} ${t('cl.decks')}</span>
+                                    <span class="stat-badge rank-performance-hint" title="${escapeHtml(t('cl.heroRankHint'))}">🏆 ${t('cl.heroAvgRank')} ${avgRankText}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                heroHtml += `
+                        </div>
+                    </section>`;
+            }
+
+            let html = heroHtml + '<div style="margin-bottom: 30px;">';
             
             // Render each tier
             ['tier-1', 'tier-2', 'tier-3', 'tier-trending'].forEach(tierKey => {
@@ -384,7 +491,7 @@
                         <details>
                             <summary class="tier-trending-summary">
                                 <h3 style="display:inline;">${tierMeta.title} <small>${tierMeta.subtitle}</small></h3>
-                                <span class="tier-trending-count">${decks.length} Decks</span>
+                                <span class="tier-trending-count">${decks.length} ${t('cl.decks')}</span>
                             </summary>
                             <div class="deck-grid tier-deck-grid">`;
                 } else {

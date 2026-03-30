@@ -261,6 +261,65 @@ def main() -> None:
             {"rendered_cards": card_count, **stats_values},
         )
 
+        print("STEP: top256 tournament completeness")
+        top256_metrics = page.evaluate(
+            """
+            async () => {
+                const select = document.getElementById('currentMetaDeckSelect');
+                if (!select || typeof window.setCurrentMetaFormatFilter !== 'function') {
+                    return { ok: false, reason: 'missing elements' };
+                }
+
+                // Switch to play (Major Tournament) filter
+                await window.setCurrentMetaFormatFilter('play');
+
+                // Choose first available archetype with deck count > 5 (more likely to have many tournaments)
+                const candidates = Array.from(select.options).filter(o => !!o.value);
+                if (!candidates.length) return { ok: false, reason: 'no play archetypes' };
+
+                const picked = candidates[0];
+                select.value = picked.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+
+                return { ok: true, picked: picked.value };
+            }
+            """
+        )
+
+        if top256_metrics.get("ok"):
+            page.wait_for_timeout(4000)
+            top256_count = page.evaluate(
+                """
+                () => ({
+                    sectionVisible: !document.getElementById('currentMetaTop256Section')?.classList.contains('d-none'),
+                    entryCount: document.querySelectorAll('#currentMetaTop256List .top256-entry').length,
+                    firstTournament: document.querySelector('#currentMetaTop256List .top256-entry .top256-tournament')?.textContent?.trim() || ''
+                })
+                """
+            )
+            top256_ok = (
+                bool(top256_metrics.get("ok"))
+                and bool(top256_count.get("sectionVisible"))
+                and int(top256_count.get("entryCount", 0)) > 3
+            )
+        else:
+            top256_count = {}
+            top256_ok = False
+
+        add_result(
+            results,
+            "Top-256 tournament list has more than 3 entries",
+            top256_ok,
+            f"Top-256 section shows {top256_count.get('entryCount', 0)} entries for '{top256_metrics.get('picked', '?')}'."
+            if top256_ok
+            else f"Top-256 list incomplete or hidden: {top256_metrics} | {top256_count}",
+            {**top256_metrics, **top256_count},
+        )
+
+        # Restore 'all' filter for subsequent steps
+        page.evaluate("""async () => { await window.setCurrentMetaFormatFilter('all'); }""")
+        page.wait_for_timeout(1000)
+
         print("STEP: share filter")
         baseline_visible = page.locator(".city-league-card-item:not(.d-none)").count()
         share_metrics = page.evaluate(

@@ -52,6 +52,12 @@ function onUserSignedIn(user) {
 
   loadUserData(user.uid);
   loadUserDecks(user.uid);
+
+  if (typeof flushBattleJournalOutbox === 'function') {
+    flushBattleJournalOutbox(false);
+  } else if (typeof renderBattleJournalSummary === 'function') {
+    renderBattleJournalSummary();
+  }
 }
 
 function onUserSignedOut() {
@@ -72,6 +78,10 @@ function onUserSignedOut() {
   // Cleanup any active multiplayer listeners to avoid Firestore cost leaks
   if (typeof leaveMultiplayerGame === 'function') {
     try { leaveMultiplayerGame(); } catch (_) { /* ignore if no active game */ }
+  }
+
+  if (typeof renderBattleJournalSummary === 'function') {
+    renderBattleJournalSummary();
   }
 }
 

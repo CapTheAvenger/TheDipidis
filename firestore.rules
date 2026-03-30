@@ -81,6 +81,11 @@ service cloud.firestore {
       allow write: if isOwner(userId) && isValidSize(524288);
     }
 
+    match /users/{userId}/battleJournal/{entryId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && isValidSize(262144);
+    }
+
     // ══════════════════════════════════════════════════════════════════════
     // USER PROFILES, COLLECTIONS & WISHLISTS
     // ══════════════════════════════════════════════════════════════════════

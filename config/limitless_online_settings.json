@@ -1,8 +1,8 @@
 {
   "game": "POKEMON",
   "format": "STANDARD",
-  "rotation": "2025",
-  "set": "ASC",
+  "rotation": "2026",
+  "set": "POR",
   "top_decks_for_matchup": 100,
   "delay_between_requests": 1.5,
   "output_file": "limitless_online_decks.csv",

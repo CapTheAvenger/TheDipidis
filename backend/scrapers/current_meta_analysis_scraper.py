@@ -443,11 +443,11 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
 
         # Apply date filter
         if start_date:
-            # Handle multi-day ranges like "Feb 21-23, 2026" or "Feb 28 - Mar 2, 2026"
-            # Extract the FIRST date mentioned (start of the event)
+            # Search in page TEXT (not raw HTML) to avoid matching dates in scripts/attributes
+            page_text = tsoup.get_text(' ', strip=True)
             date_match = re.search(
                 r'(\w+)\s+(\d{1,2})(?:\s*[-\u2013]\s*(?:\w+\s+)?\d{1,2})?[^,\d]*,?\s*(\d{4})',
-                t_html
+                page_text
             )
             if date_match:
                 try:
@@ -456,10 +456,14 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
                         "%B %d %Y"
                     )
                     if t_date < start_date:
-                        logger.info(f"   Uebersprungen (Datum {t_date.strftime('%d.%m.%Y')} vor Filter) - breche ab.")
+                        logger.info(f"   Uebersprungen (Datum {t_date.strftime('%d.%m.%Y')} vor Filter {start_date.strftime('%d.%m.%Y')}) - breche ab.")
                         break
                 except ValueError:
-                    pass  # Unknown date: include rather than skip
+                    logger.info(f"   Uebersprungen (Datum nicht parsebar: {date_match.group(0)}) - sicherheitshalber uebersprungen.")
+                    continue
+            else:
+                logger.info(f"   Uebersprungen (kein Datum auf Turnierseite {tid} gefunden) - sicherheitshalber uebersprungen.")
+                continue
 
         deck_tasks = []
         for row in tsoup.select('tr'):
@@ -540,6 +544,11 @@ def main():
     if not card_db.cards:
         logger.error("Karten-Datenbank ist leer!")
         return
+
+    # Reset tournament tracking when not in append mode (clean slate)
+    if not settings.get('append_mode', False):
+        save_scraped_meta_tournaments(set())
+        logger.info("append_mode=false -> Turnier-Tracking zurueckgesetzt.")
 
     limitless_decks = scrape_limitless_online(settings, card_db)
     tournament_decks = scrape_tournaments(settings, card_db)

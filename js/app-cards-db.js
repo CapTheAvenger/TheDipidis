@@ -3281,8 +3281,9 @@
                 return;
             }
             
-            // Open Cardmarket URL in new tab
-            window.open(cardmarketUrl, '_blank');
+            // Strip Limitless tracking params, add German seller + EN/DE language filter
+            const cleanUrl = cardmarketUrl.split('?')[0];
+            window.open(cleanUrl + '?sellerCountry=7&language=1,3', '_blank');
         }
 
         function openLimitlessCard(setCode, setNumber) {

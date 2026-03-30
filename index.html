@@ -36,7 +36,7 @@
     <!-- Mobile Drag & Drop polyfill for touch devices -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@3.0.0-rc.0/default.css" type="text/css" crossorigin="anonymous">
     <!-- Mobile Drag & Drop polyfill JS -->
-    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@3.0.0-rc.0/index.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@3.0.0-rc.0/index.min.js" crossorigin="anonymous" defer></script>
 </head>
 <body>
     <a href="#main-content" class="skip-to-content">Skip to content</a>
@@ -99,7 +99,7 @@
                             </button>
                             <button id="menu-btn-sandbox" class="menu-item" data-tab-id="sandbox" onclick="switchTabAndUpdateMenu('sandbox')" data-i18n="menu.playtester" role="menuitem">
                                 <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span>
-                                <span class="menu-item-label">Playtester Sandbox</span>
+                                <span class="menu-item-label">Playtester</span>
                             </button>
                             <button id="menu-btn-profile" class="menu-item" data-tab-id="profile" onclick="switchTabAndUpdateMenu('profile')" data-i18n="menu.profile" role="menuitem">
                                 <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="5"/></svg></span>
@@ -164,16 +164,16 @@
                     <div class="city-league-container">
                         <div class="city-league-header">
                             <h2><span data-i18n="cl.cityLeagueDev">🇯🇵 City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
-                            <div class="format-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-                                <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" style="padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); font-weight: bold; background: var(--primary-blue); color: var(--text-main); cursor: pointer;">
+                            <div class="cl-format-container">
+                                <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select">
                                     <option value="M4" data-i18n="format.m4current">Current Meta</option>
                                     <option value="M3" data-i18n="format.m3archive">Past Meta</option>
                                 </select>
                             </div>
                         </div>
-                        <div id="cityLeagueContent" style="padding: 12px; background: #ffffff;">
+                        <div id="cityLeagueContent" class="cl-content-panel">
                             <div id="cityLeagueTierSections"></div>
-                            <div style="text-align: center; padding: 20px; color: var(--text-muted);" data-i18n="misc.loading">Loading...</div>
+                            <div class="loading" data-i18n="misc.loading">Loading...</div>
                         </div>
                     </div>
                 </div>
@@ -186,11 +186,11 @@
                     <div id="tab-decks">
                         <div class="section-grid-container date-range-container">
                             <div>
-                                <label for="cityLeagueDateFrom" style="font-size: 0.95em; color: var(--text-main); font-weight: 600; display: block; margin-bottom: 5px;" data-i18n="filter.from">From:</label>
+                                <label for="cityLeagueDateFrom" class="form-label-block" data-i18n="filter.from">From:</label>
                                 <input type="date" id="cityLeagueDateFrom" onchange="applyCityLeagueDateFilter()" class="control-input">
                             </div>
                             <div>
-                                <label for="cityLeagueDateTo" style="font-size: 0.95em; color: var(--text-main); font-weight: 600; display: block; margin-bottom: 5px;" data-i18n="filter.to">To:</label>
+                                <label for="cityLeagueDateTo" class="form-label-block" data-i18n="filter.to">To:</label>
                                 <input type="date" id="cityLeagueDateTo" onchange="applyCityLeagueDateFilter()" class="control-input">
                             </div>
                         </div>
@@ -970,7 +970,7 @@
             <div id="sandbox" class="tab-content">
                 <div class="sandbox-container">
                     <div class="sandbox-header">
-                        <h2 class="sandbox-title"><span data-i18n="sandbox.heading">⚔️ Battle Sandbox</span> <button class="tab-help-btn" onclick="openTabHelp('sandbox')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2 class="sandbox-title"><span data-i18n="sandbox.heading">⚔️ Playtester</span> <button class="tab-help-btn" onclick="openTabHelp('sandbox')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <p class="sandbox-subtitle" data-i18n="sandbox.subtitle">Import decks for 2 players and start the match.</p>
                     </div>
 
@@ -1003,7 +1003,7 @@
                         </p>
                         <div class="sandbox-action-btn-row">
                             <button class="btn sandbox-start-btn" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="startStandalonePlaytester()">
-                                <span data-i18n="misc.startSimulator">🚀 START SIMULATOR</span>
+                                <span data-i18n="misc.startSimulator">🚀 START PLAYTESTER</span>
                             </button>
                             <button class="btn sandbox-multiplayer-btn" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="openMultiplayerFromSandbox()">
                                 <span data-i18n="misc.multiplayer">🌐 MULTIPLAYER</span>
@@ -2008,6 +2008,9 @@
                             <button class="profile-tab-btn" onclick="switchProfileTab('settings')">
                                 <span data-i18n="profile.settings">⚙️ Settings</span>
                             </button>
+                            <button class="profile-tab-btn" onclick="switchProfileTab('metabinder')">
+                                <span data-i18n="profile.metaBinder">📋 Meta Binder</span>
+                            </button>
                         </div>
                         
                         <!-- Collection Tab -->
@@ -2126,6 +2129,22 @@
                             </div>
                         </div>
                         
+                        <!-- Meta Binder Tab -->
+                        <div id="profile-metabinder" class="profile-tab-content display-none">
+                            <div class="meta-binder-header">
+                                <h2 data-i18n="profile.metaBinder">📋 Meta Binder</h2>
+                                <p class="color-grey mb-15" data-i18n="mb.subtitle">All cards needed for the current meta — compared against your collection.</p>
+                            </div>
+                            <div class="meta-binder-actions mb-15">
+                                <button onclick="buildMetaBinder()" class="btn-system-primary" data-i18n="mb.generate">🔄 Generate Binder</button>
+                                <button id="metaBinderAddWishlist" onclick="metaBinderAddMissingToWishlist()" class="btn-system-secondary" disabled data-i18n="mb.addWishlist">♥ Add Missing to Wishlist</button>
+                                <button id="metaBinderSendProxy" onclick="metaBinderSendMissingToProxy()" class="btn-system-secondary" disabled data-i18n="mb.sendProxy">🖨️ Send Missing to Proxy Printer</button>
+                            </div>
+                            <div id="metaBinderStats" class="meta-binder-stats display-none"></div>
+                            <div id="metaBinderDelta" class="meta-binder-delta display-none"></div>
+                            <div id="metaBinderGrid" class="meta-binder-grid"></div>
+                        </div>
+
                         <!-- Settings Tab -->
                         <div id="profile-settings" class="profile-tab-content display-none">
                             <h2 data-i18n="profile.settings">⚙️ Settings</h2>
@@ -2697,10 +2716,10 @@
     <!-- Attack View Modal -->
     <div id="ptAttackModal" class="d-none pos-fixed inset-0 z-23000 bg-black-92 align-center justify-center flex-col gap-12 overflow-y-auto py-16 px-8" role="dialog" aria-modal="true" aria-label="Attack view">
         <div class="color-yellow fs-13 fw-900 ls-1 tt-upper opacity-80 flex-shrink-0">⚔️ Attack</div>
-        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center;width:100%;max-width:960px;">
+        <div class="pt-attack-layout">
             <!-- My active Pokémon large -->
-            <div style="text-align:center;flex-shrink:0;">
-                <div style="color:#3B4CCA;font-size:11px;font-weight:700;margin-bottom:6px;">⚔️ My Active</div>
+            <div class="pt-attack-player">
+                <div class="pt-attack-player-label blue">⚔️ My Active</div>
                 <img id="ptAttackMyImg" src="" class="mw-44vw-320 mh-65vh-460 br-10 d-block box-shadow-blue border-2-blue" onerror="this.src=''">
                 <div id="ptAttackMyName" class="color-white mt-6 fw-700 fs-13"></div>
             </div>
@@ -2790,49 +2809,49 @@
                 <button id="ptDscSortOrder" onclick="ptSetDiscardSort('order')" class="border-blue-dark br-5 p-3-9 fs-11 pointer bg-blue color-white">🃏 Order</button>
                 <button id="ptDscSortType"  onclick="ptSetDiscardSort('type')"  class="border-grey-dark br-5 p-3-9 fs-11 pointer bg-grey-dark color-grey">📋 Type</button>
             </div>
-            <div id="ptDiscardGrid" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
+            <div id="ptDiscardGrid"></div>
         </div>
     </div>
 
     <!-- My Decks Playtest Modal -->
-    <div id="myDecksPlaytestModal" class="rarity-switcher-modal" onclick="if(event.target===this)closeMyDecksPlaytest()" style="z-index: 20000; display: none;" role="dialog" aria-modal="true" aria-label="My Decks playtest selector">
+    <div id="myDecksPlaytestModal" class="rarity-switcher-modal" onclick="if(event.target===this)closeMyDecksPlaytest()" role="dialog" aria-modal="true" aria-label="My Decks playtest selector">
         <div class="rarity-switcher-modal-content" style="max-width: 500px; background: #f8f9fa;">
             <span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()">✕</span>
-            <h2 style="margin-top: 0; color: #27ae60; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;" data-i18n="myDecks.heading">⚔️ Playtest – My Decks</h2>
-            <p style="color: #555; margin-bottom: 20px;" data-i18n="myDecks.description">Choose a deck for each player, then start the match!</p>
-            <div style="margin-bottom: 16px;">
-                                <div class="mb-15">
-                <select id="myDeckSelectP1" style="width: 100%; padding: 10px 12px; border: 2px solid #3B4CCA; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
+            <h2 class="setup-modal-heading green" data-i18n="myDecks.heading">⚔️ Playtest – My Decks</h2>
+            <p class="setup-modal-description" data-i18n="myDecks.description">Choose a deck for each player, then start the match!</p>
+            <div class="mb-15">
+                <div class="mb-15">
+                <select id="myDeckSelectP1" class="setup-modal-select player1"></select>
             </div>
             </div>
-            <div style="margin-bottom: 24px;">
-                <label for="myDeckSelectP2" style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;" data-i18n="myDecks.player2Label">Player 2 🔴</label>
-                <select id="myDeckSelectP2" style="width: 100%; padding: 10px 12px; border: 2px solid #E3350D; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
+            <div class="mb-15">
+                <label for="myDeckSelectP2" class="setup-modal-player-label red" data-i18n="myDecks.player2Label">Player 2 🔴</label>
+                <select id="myDeckSelectP2" class="setup-modal-select player2"></select>
             </div>
-            <div style="display: flex; gap: 12px;">
-                <button onclick="closeMyDecksPlaytest()" style="flex:1; padding:12px; background:#e1e8ed; color:#2c3e50; font-weight:700; border:2px solid #ccd6dd; border-radius:8px; cursor:pointer; font-size:14px;" data-i18n="myDecks.cancelBtn">Cancel</button>
-                <button onclick="startMyDecksPlaytest()" style="flex:2; padding:12px; background:linear-gradient(135deg,#27ae60 0%,#1e8449 100%); color:white; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-size:14px; box-shadow:0 4px 10px rgba(39,174,96,0.3);" data-i18n="myDecks.startBtn">🚀 Start Playtest</button>
+            <div class="setup-modal-btn-row">
+                <button onclick="closeMyDecksPlaytest()" class="btn-system-secondary" style="flex:1;" data-i18n="myDecks.cancelBtn">Cancel</button>
+                <button onclick="startMyDecksPlaytest()" class="btn-system-primary" style="flex:2;" data-i18n="myDecks.startBtn">🚀 Start Playtest</button>
             </div>
         </div>
     </div>
 
     <!-- Playtester Setup Modal -->
-    <div id="playtesterSetupModal" class="rarity-switcher-modal" onclick="if(event.target === this) closePlaytesterSetup()" style="z-index: 20000; display: none;" role="dialog" aria-modal="true" aria-label="Playtester setup">
+    <div id="playtesterSetupModal" class="rarity-switcher-modal" onclick="if(event.target === this) closePlaytesterSetup()" role="dialog" aria-modal="true" aria-label="Playtester setup">
         <div class="rarity-switcher-modal-content" style="max-width: 600px; background: #f8f9fa;">
             <span class="rarity-switcher-close" onclick="closePlaytesterSetup()">✕</span>
-            <h2 style="margin-top: 0; color: #3B4CCA; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;" data-i18n="setup.heading">⚔️ Playtester Setup</h2>
-            <p style="margin-bottom: 15px; color: #555; font-size: 1.05em;" data-i18n="setup.description">
+            <h2 class="setup-modal-heading blue" data-i18n="setup.heading">⚔️ Playtester Setup</h2>
+            <p class="setup-modal-description" data-i18n="setup.description">
                 Your current deck <strong>(Player 1)</strong> is ready. What should <strong>Player 2</strong> play?
             </p>
-            <div style="margin-bottom: 20px;">
-                <label style="display:block; font-weight:bold; margin-bottom:8px; color: #2c3e50;" data-i18n="setup.opponentLabel">Opponent's Deck (PTCG Live Format):</label>
-                <textarea id="playtesterOpponentDeck" placeholder="Paste Player 2's deck list here (e.g. from Limitless)..." data-i18n-placeholder="setup.opponentPlaceholder" style="width: 100%; height: 180px; padding: 12px; border: 2px solid #b3d9ff; border-radius: 8px; font-family: monospace; font-size: 12px; resize: vertical; box-sizing: border-box;"></textarea>
+            <div class="mb-15">
+                <label class="setup-modal-label" data-i18n="setup.opponentLabel">Opponent's Deck (PTCG Live Format):</label>
+                <textarea id="playtesterOpponentDeck" placeholder="Paste Player 2's deck list here (e.g. from Limitless)..." data-i18n-placeholder="setup.opponentPlaceholder" class="setup-modal-textarea"></textarea>
             </div>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <button class="btn" onclick="startPlaytesterWithMirror()" style="flex: 1; background: #e1e8ed; color: #2c3e50; font-weight: bold; border: 2px solid #ccd6dd; padding: 12px; border-radius: 8px; cursor: pointer;" data-i18n="setup.mirrorBtn">
+            <div class="setup-modal-btn-row wide">
+                <button onclick="startPlaytesterWithMirror()" class="btn-system-secondary" style="flex: 1;" data-i18n="setup.mirrorBtn">
                     🪞 Mirror Match (Same Deck)
                 </button>
-                <button class="btn" onclick="startPlaytesterWithOpponent()" style="flex: 1; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; font-weight: bold; border: none; box-shadow: 0 4px 10px rgba(39,174,96,0.3); padding: 12px; border-radius: 8px; cursor: pointer;" data-i18n="setup.startBtn">
+                <button onclick="startPlaytesterWithOpponent()" class="btn-system-primary" style="flex: 1;" data-i18n="setup.startBtn">
                     🚀 Start vs. Opponent
                 </button>
             </div>
@@ -2860,12 +2879,12 @@
             <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','hand')"    title="To hand">✋</button>
             <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','deck')"    title="Shuffle into deck">🔄</button>
             <button class="pt-menu-btn red"  onclick="ptMenuAction('utility','discard')" title="Discard pile">🗑️</button>
-            <button class="pt-menu-btn" style="background:#e67e22;color:#fff;" onclick="ptMenuAction('utility','energy-discard')" title="Discard energy">⚡🗑️</button>
+            <button class="pt-menu-btn energy-discard" onclick="ptMenuAction('utility','energy-discard')" title="Discard energy">⚡🗑️</button>
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
-            <button class="pt-menu-btn" style="background:#c0392b;color:#fff;" onclick="ptMenuAction('utility','retreat')" title="Swap Bench ↔ Active (Retreat)">↩️ Retreat</button>
-            <button class="pt-menu-btn red" style="flex:1;font-weight:800;" onclick="ptMenuAction('utility','ko')" title="Knock Out Pokémon">☠️ K.O.</button>
+            <button class="pt-menu-btn retreat-btn" onclick="ptMenuAction('utility','retreat')" title="Swap Bench ↔ Active (Retreat)">↩️ Retreat</button>
+            <button class="pt-menu-btn red ko-btn" onclick="ptMenuAction('utility','ko')" title="Knock Out Pokémon">☠️ K.O.</button>
         </div>
     </div>
 
@@ -2909,17 +2928,27 @@
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.ownDeck">Your Deck</span>
                     <input id="battleJournalOwnDeckValue" type="hidden" value="">
+                    <input id="battleJournalOwnDeckSearch" type="text" class="battle-journal-search-input" autocomplete="off" data-i18n-placeholder="bj.searchDeck" placeholder="Search deck...">
                     <div id="battleJournalOwnDeckChoices" class="battle-journal-tap-grid battle-journal-tap-grid-own" aria-label="Own deck choices"></div>
                 </div>
 
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.opponentDeck">Opponent Archetype</span>
                     <input id="battleJournalOpponentValue" type="hidden" value="">
+                    <input id="battleJournalOpponentSearch" type="text" class="battle-journal-search-input" autocomplete="off" data-i18n-placeholder="bj.searchOpponent" placeholder="Search opponent...">
                     <div id="battleJournalOpponentChoices" class="battle-journal-tap-grid" aria-label="Opponent deck choices"></div>
                     <div id="battleJournalOpponentExtended" class="battle-journal-extended-list d-none"></div>
                 </div>
 
                 <div class="battle-journal-grid">
+                    <div>
+                        <span class="battle-journal-label" data-i18n="bj.bestOf">Best of</span>
+                        <input id="battleJournalBestOf" type="hidden" value="">
+                        <div class="battle-journal-choice-group" data-choice-group="bestOf">
+                            <button type="button" class="battle-journal-choice" data-field="bestOf" data-value="bo1" onclick="setBattleJournalChoice('bestOf', 'bo1')" data-i18n="bj.bo1">BO1</button>
+                            <button type="button" class="battle-journal-choice" data-field="bestOf" data-value="bo3" onclick="setBattleJournalChoice('bestOf', 'bo3')" data-i18n="bj.bo3">BO3</button>
+                        </div>
+                    </div>
                     <div>
                         <span class="battle-journal-label" data-i18n="bj.turnOrder">Going</span>
                         <input id="battleJournalTurnOrder" type="hidden" value="">
@@ -2962,9 +2991,9 @@
 
     <!-- External libraries -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
     <!-- Utilities first (provides escapeHtml globally) -->
     <script src="js/app-utils.js?v=1"></script>
     <script src="js/i18n.js?v=1"></script>
@@ -2976,8 +3005,8 @@
     <script src="js/auth-ui-helpers.js?v=1"></script>
     <script src="js/firebase-collection.js?v=1"></script>
     <!-- Chart.js and PapaParse -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous" defer></script>
     <!-- App modules -->
     <script src="js/app-core.js?v=1"></script>
     <script src="js/app-price.js?v=1"></script>
@@ -2993,6 +3022,7 @@
     <script src="js/app-features.js?v=1"></script>
     <script src="js/archetype-tooltips.js?v=1"></script>
     <script src="js/battle-journal.js?v=1"></script>
+    <script src="js/meta-binder.js?v=1"></script>
     <script src="js/draw-simulator.js?v=1"></script>
     <script src="js/combo-worker.js?v=1"></script>
     <script src="js/firebase-multiplayer.js?v=1"></script>
@@ -3000,32 +3030,32 @@
     <script src="js/playtester.js?v=1"></script>
 
     <!-- Draw Simulator Modal -->
-    <div id="drawSimulatorModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" aria-label="Starting hand simulator">
-        <div id="drawSimModal" style="background:#1a1a2e;border-radius:16px;max-width:800px;width:95%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:helpModalIn 0.25s ease-out;position:relative;color:#eee;">
-            <button onclick="closeDrawSimulator()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:#999;padding:4px 8px;border-radius:8px;line-height:1;">&times;</button>
-            <h2 style="margin-top:0;color:#FFCB05;font-size:1.4em;border-bottom:2px solid #3B4CCA;padding-bottom:10px;margin-bottom:16px;" data-i18n="draw.title">🎲 Starting Hand Simulator</h2>
-            <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+    <div id="drawSimulatorModal" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" aria-label="Starting hand simulator">
+        <div id="drawSimModal">
+            <button onclick="closeDrawSimulator()" class="draw-sim-close-btn">&times;</button>
+            <h2 class="draw-sim-title" data-i18n="draw.title">🎲 Starting Hand Simulator</h2>
+            <div class="draw-sim-toolbar">
                 <button class="btn-modern btn-primary" onclick="drawNewHand()" data-i18n="draw.newHand">🔄 New Hand</button>
                 <button class="btn-modern btn-primary" onclick="drawExtraCard()" data-i18n="draw.drawCard">➕ Draw Card</button>
-                <span style="margin-left:auto;font-size:13px;color:#aaa;align-self:center;"><span data-i18n="draw.deckLabel">Deck:</span> <strong id="simulatorDeckCount" style="color:#FFCB05;">0</strong> <span data-i18n="draw.remaining">remaining</span></span>
+                <span class="draw-sim-deck-info"><span data-i18n="draw.deckLabel">Deck:</span> <strong id="simulatorDeckCount">0</strong> <span data-i18n="draw.remaining">remaining</span></span>
             </div>
-            <div id="simulatorHandGrid" class="draw-sim-hand" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:160px;margin-bottom:24px;"></div>
+            <div id="simulatorHandGrid" class="draw-sim-hand"></div>
 
             <!-- Combo Calculator Section -->
-            <div style="border-top:2px solid #333;padding-top:18px;">
-                <h3 style="margin:0 0 12px 0;color:#FFCB05;font-size:1.1em;" data-i18n="draw.comboTitle">🎯 Combo Probability</h3>
-                <p style="font-size:12px;color:#888;margin:0 0 10px 0;" data-i18n="draw.comboDesc">Select up to 4 cards — Calculated via Monte Carlo simulation (10,000 iterations)</p>
-                <div id="comboTargetBadges" style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;margin-bottom:10px;"></div>
-                <div class="combo-grid" style="margin-bottom:12px;">
+            <div class="draw-sim-combo-section">
+                <h3 class="draw-sim-combo-title" data-i18n="draw.comboTitle">🎯 Combo Probability</h3>
+                <p class="draw-sim-combo-desc" data-i18n="draw.comboDesc">Select up to 4 cards — Calculated via Monte Carlo simulation (10,000 iterations)</p>
+                <div id="comboTargetBadges" class="draw-sim-combo-badges"></div>
+                <div class="combo-grid">
                     <select id="comboTarget1" aria-label="Combo target 1" onchange="onComboDropdownChange()"></select>
                     <select id="comboTarget2" aria-label="Combo target 2" onchange="onComboDropdownChange()"></select>
                     <select id="comboTarget3" aria-label="Combo target 3" onchange="onComboDropdownChange()"></select>
                     <select id="comboTarget4" aria-label="Combo target 4" onchange="onComboDropdownChange()"></select>
                 </div>
-                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                    <button class="btn-modern btn-primary" onclick="runComboCalculation()" style="font-weight:700;" data-i18n="draw.calculate">📊 Calculate Chance</button>
+                <div class="draw-sim-combo-actions">
+                    <button class="btn-modern btn-primary" onclick="runComboCalculation()" data-i18n="draw.calculate">📊 Calculate Chance</button>
                     <button class="btn-modern btn-primary" onclick="clearComboTargets()" data-i18n="draw.clearSelection">🗑️ Clear Selection</button>
-                    <span id="comboResultDisplay" style="margin-left:auto;font-size:1.1em;font-weight:700;color:#2ecc71;"></span>
+                    <span id="comboResultDisplay"></span>
                 </div>
             </div>
         </div>
@@ -3043,136 +3073,6 @@
         </div>
     </div>
 
-<script>
-// --- Intelligente Sidebar-Navigation ---
-function openTab(event, tabId) {
-    // Sidebar: Setze 'active' nur am geklickten Button, entferne bei allen anderen
-    if (event && event.currentTarget) {
-        const btn = event.currentTarget;
-        const siblings = btn.parentElement.querySelectorAll('.tab-link');
-        siblings.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-    }
-    // Content umschalten
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    const tab = document.getElementById(tabId);
-    if (tab) tab.classList.add('active');
-}
-
-// --- High-End Karten-Tooltips (Dark-Theme, robust, Event Delegation) ---
-let cardTooltipDiv = null;
-function createCardTooltip() {
-    if (!cardTooltipDiv) {
-        cardTooltipDiv = document.createElement('div');
-        cardTooltipDiv.style.position = 'fixed';
-        cardTooltipDiv.style.zIndex = 9999;
-        cardTooltipDiv.style.pointerEvents = 'none';
-        cardTooltipDiv.style.background = 'var(--bg-card)';
-        cardTooltipDiv.style.border = '2px solid var(--primary-blue)';
-        cardTooltipDiv.style.boxShadow = '0 8px 32px rgba(0,0,0,0.85)';
-        cardTooltipDiv.style.borderRadius = '10px';
-        cardTooltipDiv.style.padding = '8px';
-        cardTooltipDiv.style.display = 'none';
-        cardTooltipDiv.style.minWidth = '180px';
-        cardTooltipDiv.style.maxWidth = '240px';
-        cardTooltipDiv.style.maxHeight = '340px';
-        cardTooltipDiv.style.overflow = 'hidden';
-        document.body.appendChild(cardTooltipDiv);
-    }
-}
-
-function showCardTooltip(imgUrl, x, y) {
-    createCardTooltip();
-    cardTooltipDiv.innerHTML = `<img src="${imgUrl}" alt="Card" style="width: 100%; height: auto; display: block; border-radius: 6px;">`;
-    cardTooltipDiv.style.display = 'block';
-    positionCardTooltip(x, y);
-}
-
-function hideCardTooltip() {
-    if (cardTooltipDiv) cardTooltipDiv.style.display = 'none';
-}
-
-function positionCardTooltip(x, y) {
-    if (!cardTooltipDiv) return;
-    // Offset so Tooltip nicht unter dem Cursor ist
-    let left = x + 24;
-    let top = y - 20;
-    // Viewport-Kollision vermeiden
-    const rect = cardTooltipDiv.getBoundingClientRect();
-    if (left + rect.width > window.innerWidth) left = window.innerWidth - rect.width - 12;
-    if (top + rect.height > window.innerHeight) top = window.innerHeight - rect.height - 12;
-    if (top < 0) top = 8;
-    cardTooltipDiv.style.left = left + 'px';
-    cardTooltipDiv.style.top = top + 'px';
-}
-
-// Event Delegation für dynamisch geladene Inhalte
-document.body.addEventListener('mouseover', function(e) {
-    const el = e.target.closest('[data-card-img]');
-    if (el) {
-        showCardTooltip(el.getAttribute('data-card-img'), e.clientX, e.clientY);
-        document.body.addEventListener('mousemove', moveCardTooltip);
-    }
-});
-document.body.addEventListener('mouseout', function(e) {
-    const el = e.target.closest('[data-card-img]');
-    if (el) {
-        hideCardTooltip();
-        document.body.removeEventListener('mousemove', moveCardTooltip);
-    }
-});
-function moveCardTooltip(e) {
-    positionCardTooltip(e.clientX, e.clientY);
-}
-
-// --- Karten-Bild-Tooltips (UX-Highlight) ---
-let cardTooltipImg = null;
-document.addEventListener('mouseover', function(e) {
-    const cell = e.target.closest('[data-card-img]');
-    if (cell) {
-        if (!cardTooltipImg) {
-            cardTooltipImg = document.createElement('img');
-            cardTooltipImg.style.position = 'fixed';
-            cardTooltipImg.style.zIndex = 9999;
-            cardTooltipImg.style.pointerEvents = 'none';
-            cardTooltipImg.style.maxWidth = '220px';
-            cardTooltipImg.style.boxShadow = '0 4px 16px rgba(0,0,0,0.7)';
-            cardTooltipImg.style.borderRadius = '8px';
-            document.body.appendChild(cardTooltipImg);
-        }
-        cardTooltipImg.src = cell.getAttribute('data-card-img');
-        cardTooltipImg.style.display = 'block';
-        document.addEventListener('mousemove', moveTooltip);
-    }
-});
-document.addEventListener('mouseout', function(e) {
-    const cell = e.target.closest('[data-card-img]');
-    if (cell && cardTooltipImg) {
-        cardTooltipImg.style.display = 'none';
-        document.removeEventListener('mousemove', moveTooltip);
-    }
-});
-function moveTooltip(e) {
-    if (cardTooltipImg) {
-        cardTooltipImg.style.left = (e.clientX + 24) + 'px';
-        cardTooltipImg.style.top = (e.clientY - 20) + 'px';
-    }
-}
-
-// --- Tabellen-Verschönerung: modern-table & Winrate-Farben ---
-document.addEventListener('DOMContentLoaded', function() {
-    // Add 'modern-table' to all tables
-    document.querySelectorAll('table').forEach(tbl => tbl.classList.add('modern-table'));
-    // Color winrate cells
-    document.querySelectorAll('td.winrate, span.winrate').forEach(cell => {
-        const val = parseFloat(cell.textContent.replace('%',''));
-        if (!isNaN(val)) {
-            if (val >= 50) cell.style.color = 'var(--success)';
-            else cell.style.color = 'var(--danger)';
-        }
-    });
-});
-// Content is rendered inline — no dynamic component loading needed.
-</script>
+    <script src="js/card-tooltips.js?v=1" defer></script>
 </body>
 </html>

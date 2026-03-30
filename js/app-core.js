@@ -316,12 +316,24 @@ const BASE_PATH = './data/';
             if (!grid) return;
             grid.classList.add('card-grid-loading');
             grid.innerHTML = createCardSkeletonMarkup(count);
+            // Auto-timeout: show error if skeleton is still visible after 30s
+            if (grid._skeletonTimer) clearTimeout(grid._skeletonTimer);
+            grid._skeletonTimer = setTimeout(function () {
+                if (grid.classList.contains('card-grid-loading')) {
+                    grid.innerHTML = '<div class="skeleton-error-message">' +
+                        '⚠️ Loading took too long.<br>' +
+                        '<span class="retry-link" onclick="location.reload()">Reload page</span>' +
+                        '</div>';
+                    grid.classList.remove('card-grid-loading');
+                }
+            }, 30000);
         }
 
         function clearGridLoadingSkeleton(gridOrId) {
             const grid = typeof gridOrId === 'string' ? document.getElementById(gridOrId) : gridOrId;
             if (!grid) return;
             grid.classList.remove('card-grid-loading');
+            if (grid._skeletonTimer) { clearTimeout(grid._skeletonTimer); grid._skeletonTimer = null; }
         }
 
         function loadDeferredScript(src) {

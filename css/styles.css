@@ -54,7 +54,9 @@
     --border-light: #e0e0e0;
     --border-input: #ddd;
 
-    /* Z-index scale */
+    /* Z-index scale — ordered lowest to highest.
+       Playtester JS uses high values (99998-100000) for its own
+       stacking context; do NOT overlap those here. */
     --z-base: 1;
     --z-dropdown: 100;
     --z-sticky: 200;
@@ -5158,263 +5160,6 @@ details[open] > .tier-trending-summary::after {
     gap: 4px;
 }
 
-.meta-gauntlet-binder {
-    margin: 0 0 22px 0;
-    padding: 18px;
-    border-radius: 16px;
-    border: 1px solid #e7ecf2;
-    background:
-        radial-gradient(circle at 12% 0%, rgba(22, 160, 133, 0.10), transparent 42%),
-        radial-gradient(circle at 100% 0%, rgba(243, 156, 18, 0.08), transparent 40%),
-        #fbfdff;
-    box-shadow: 0 8px 20px rgba(25, 42, 70, 0.08);
-}
-
-.meta-gauntlet-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 14px;
-}
-
-.meta-gauntlet-header h3 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 900;
-    color: #15324d;
-}
-
-.meta-gauntlet-header p {
-    margin: 6px 0 0 0;
-    color: #5f748b;
-    font-size: 0.9rem;
-    max-width: 620px;
-}
-
-.meta-gauntlet-header-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.meta-gauntlet-content {
-    display: grid;
-    grid-template-columns: 1.55fr 1fr;
-    gap: 14px;
-}
-
-.meta-gauntlet-candidates,
-.meta-gauntlet-selected {
-    border: 1px solid #e9eef4;
-    border-radius: 12px;
-    background: #fff;
-    padding: 12px;
-}
-
-.meta-gauntlet-candidates h4,
-.meta-gauntlet-selected h4 {
-    margin: 0 0 10px 0;
-    font-size: 0.95rem;
-    font-weight: 800;
-    color: #304a62;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.meta-gauntlet-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
-    gap: 10px;
-}
-
-.meta-gauntlet-card {
-    border: 1px solid #edf2f7;
-    border-radius: 10px;
-    padding: 10px;
-    background: linear-gradient(165deg, #fff 0%, #f8fbff 100%);
-}
-
-.meta-gauntlet-card.is-selected {
-    border-color: #2e86de;
-    box-shadow: inset 0 0 0 1px rgba(46, 134, 222, 0.22);
-}
-
-.meta-gauntlet-card-name {
-    font-size: 0.92rem;
-    font-weight: 800;
-    color: #1e3853;
-    min-height: 34px;
-}
-
-.meta-gauntlet-card-stats {
-    display: flex;
-    gap: 6px;
-    margin: 8px 0;
-}
-
-.meta-gauntlet-card-actions {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.meta-gauntlet-empty {
-    border: 1px dashed #c9d4df;
-    border-radius: 10px;
-    padding: 12px;
-    color: #6f8092;
-    background: #fafcfe;
-    font-size: 0.9rem;
-}
-
-.meta-gauntlet-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.meta-gauntlet-list-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    border: 1px solid #ecf1f6;
-    border-radius: 10px;
-    padding: 8px 10px;
-    background: #fff;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.meta-gauntlet-list-item:hover {
-    border-color: #d8e4ef;
-}
-
-.meta-gauntlet-list-item.is-dragging {
-    opacity: 0.55;
-    box-shadow: 0 8px 20px rgba(19, 50, 76, 0.14);
-}
-
-.meta-gauntlet-list-rank {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 999px;
-    background: #14324c;
-    color: #fff;
-    font-size: 0.78rem;
-    font-weight: 800;
-    flex-shrink: 0;
-}
-
-.meta-gauntlet-list-name {
-    font-weight: 700;
-    color: #17344f;
-    flex: 1;
-}
-
-.meta-gauntlet-list-main {
-    flex: 1;
-    min-width: 240px;
-}
-
-.meta-gauntlet-list-title-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 6px;
-}
-
-.meta-gauntlet-list-meta {
-    font-size: 0.75rem;
-    color: #5f768d;
-    font-weight: 700;
-}
-
-.meta-gauntlet-note-input {
-    width: 100%;
-    min-height: 58px;
-    max-height: 140px;
-    resize: vertical;
-    border: 1px solid #d7e1ec;
-    border-radius: 8px;
-    padding: 7px 9px;
-    font-size: 0.82rem;
-    line-height: 1.4;
-    color: #1f3953;
-    background: #fbfdff;
-}
-
-.meta-gauntlet-note-input:focus {
-    outline: none;
-    border-color: #3a86d9;
-    box-shadow: 0 0 0 2px rgba(58, 134, 217, 0.14);
-}
-
-.meta-gauntlet-list-actions {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.meta-gauntlet-footer-actions {
-    margin-top: 12px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-@media (max-width: 980px) {
-    .meta-gauntlet-content {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .meta-gauntlet-binder {
-        padding: 12px;
-        border-radius: 12px;
-    }
-
-    .meta-gauntlet-header {
-        flex-direction: column;
-    }
-
-    .meta-gauntlet-header-actions {
-        width: 100%;
-        justify-content: flex-start;
-    }
-
-    .meta-gauntlet-cards {
-        grid-template-columns: 1fr;
-    }
-
-    .meta-gauntlet-list-item {
-        flex-wrap: wrap;
-    }
-
-    .meta-gauntlet-list-main {
-        min-width: 100%;
-    }
-
-    .meta-gauntlet-list-title-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .meta-gauntlet-list-actions,
-    .meta-gauntlet-footer-actions {
-        width: 100%;
-    }
-}
-
 .trend-badge-overlay {
     position: absolute;
     top: 32px;
@@ -5811,6 +5556,30 @@ details[open] > .tier-trending-summary::after {
     box-shadow: 0 0 0 4px rgba(59, 76, 202, 0.12);
 }
 
+.battle-journal-search-input {
+    width: 100%;
+    min-height: 40px;
+    border-radius: 10px;
+    border: 2px solid rgba(59, 76, 202, 0.14);
+    background: #fff;
+    padding: 8px 12px;
+    font-size: 14px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+}
+
+.battle-journal-search-input:focus {
+    border-color: var(--pokemon-blue);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 76, 202, 0.10);
+}
+
+.battle-journal-sheet.is-dark .battle-journal-search-input {
+    background: #1e2235;
+    border-color: rgba(140, 160, 255, 0.18);
+    color: #e0e4f0;
+}
+
 .battle-journal-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -6158,7 +5927,7 @@ body.battle-journal-open {
     }
 
     .battle-journal-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 

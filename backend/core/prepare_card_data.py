@@ -144,6 +144,79 @@ def create_merged_database():
     print(f"✓ Erfolgreich {len(merged_cards)} Karten für das Frontend exportiert!")
     print(f"✓ Pokédex-Nummern gefunden für: {match_count} Pokémon")
 
+    # ---- Generate era-based chunks for lazy loading ----
+    _generate_card_chunks(merged_cards, set_order)
+
+
+def _generate_card_chunks(merged_cards: List[Dict], set_order: Dict):
+    """Split cards into era-based chunks and write a manifest for the frontend.
+
+    Eras (based on set_order value):
+      - standard  : set_order >= 128  (Scarlet & Violet series)
+      - swsh      : 110 <= set_order < 128  (Sword & Shield series)
+      - legacy    : set_order < 110  (everything older)
+    """
+    ERA_THRESHOLDS = [
+        ('standard', 128, None),
+        ('swsh', 110, 128),
+        ('legacy', None, 110),
+    ]
+
+    chunks: Dict[str, List[Dict]] = {era: [] for era, _, _ in ERA_THRESHOLDS}
+
+    for card in merged_cards:
+        card_set = card.get('set', '')
+        order = set_order.get(card_set, 0)
+        placed = False
+        for era, low, high in ERA_THRESHOLDS:
+            low_ok = (low is None) or (order >= low)
+            high_ok = (high is None) or (order < high)
+            if low_ok and high_ok:
+                chunks[era].append(card)
+                placed = True
+                break
+        if not placed:
+            chunks['legacy'].append(card)
+
+    import hashlib
+
+    manifest_chunks = []
+    for era, _, _ in ERA_THRESHOLDS:
+        cards = chunks[era]
+        if not cards:
+            continue
+        filename = f'cards_chunk_{era}.json'
+        filepath = get_data_path(filename)
+        payload = json.dumps({'cards': cards}, ensure_ascii=False)
+        chunk_hash = hashlib.md5(payload.encode('utf-8')).hexdigest()[:8]
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(payload)
+        manifest_chunks.append({
+            'file': filename,
+            'era': era,
+            'count': len(cards),
+            'hash': chunk_hash,
+        })
+        size_kb = len(payload.encode('utf-8')) / 1024
+        print(f"  ✓ Chunk '{era}': {len(cards)} Karten ({size_kb:.0f} KB) → {filename}")
+
+    # Version = combined hash of all chunk hashes
+    combined = '|'.join(c['hash'] for c in manifest_chunks)
+    version = hashlib.md5(combined.encode()).hexdigest()[:12]
+
+    manifest = {
+        'version': version,
+        'generated': __import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
+        'totalCards': len(merged_cards),
+        'chunks': manifest_chunks,
+    }
+    manifest_path = get_data_path('cards_manifest.json')
+    with open(manifest_path, 'w', encoding='utf-8') as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+    print(f"✓ Manifest geschrieben: {len(manifest_chunks)} Chunks, Version {version}")
+
+
 if __name__ == "__main__":
     try:
         create_merged_database()

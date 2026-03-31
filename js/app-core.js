@@ -1707,82 +1707,181 @@ const BASE_PATH = './data/';
 
         async function loadAllCardsDatabase() {
             try {
-                const timestamp = new Date().getTime();
-                const response = await fetch(`./data/all_cards_merged.json?t=${timestamp}`);
-                if (response.ok) {
-                    const jsonData = await response.json();
-                    // Extract cards array from JSON structure
-                    allCardsDatabase = (jsonData.cards || jsonData).map(c => {
-                        // Ensure 'name' field exists (JSON may only have 'name_en')
-                        if (!c.name && c.name_en) c.name = c.name_en;
-                        return c;
-                    });
-                    window.allCardsDatabase = allCardsDatabase;
-                    cardIndexBySetNumber = buildCardIndexBySetNumber(allCardsDatabase);
-                    window.cardIndexBySetNumber = cardIndexBySetNumber;
-                    cardsByNameMap = buildCardsByNameMap(allCardsDatabase);
-                    window.cardsByNameMap = cardsByNameMap;
-                    cardsBySetNumberMap = buildCardsBySetNumberMap(allCardsDatabase); // Build index for fast lookup
-                    window.cardsBySetNumberMap = cardsBySetNumberMap; // Expose for multiplayer & playtester
-                    // Build O(1) name index (exact + normalized keys)
-                    cardIndexMap = new Map();
-                    allCardsDatabase.forEach(c => {
-                        const primaryName = String(c.name_en || c.name || '').trim();
-                        if (!primaryName) return;
+                // --- Strategy: Chunked loading with IndexedDB cache ---
+                // 1. Try manifest-based chunked loading (Standard chunk first, rest lazy)
+                // 2. Fallback to monolith all_cards_merged.json if chunks unavailable
+                const cache = window.cardDataCache;
+                const manifestUrl = './data/cards_manifest.json';
 
-                        const exactKey = fixMojibake(primaryName);
-                        const normalizedKey = normalizeCardName(primaryName);
+                if (cache) {
+                    const freshness = await cache.checkFreshness(manifestUrl);
 
-                        if (!cardIndexMap.has(exactKey)) cardIndexMap.set(exactKey, c);
-                        if (normalizedKey && !cardIndexMap.has(normalizedKey)) cardIndexMap.set(normalizedKey, c);
-                    });
-                    invalidateCardLookupCaches();
-                    window.cardIndexMap = cardIndexMap;
-                    devLog(`✅ Loaded ${allCardsDatabase.length} cards from all_cards_merged.json (with prices)`);
-                    devLog(`📊 Karten mit mehreren Versionen:`, Object.keys(cardsByNameMap).filter(k => cardsByNameMap[k].length > 1).length);
-                    
-                    // Count cards with prices
-                    const cardsWithPrices = allCardsDatabase.filter(c => c.eur_price).length;
-                    devLog(`💰 Karten mit Preisen: ${cardsWithPrices} (${Math.round(100*cardsWithPrices/allCardsDatabase.length)}%)`);
-                    
-                    // Initialisiere Suche wenn sie existiert
-                    const searchInput = document.getElementById('cityLeagueDeckCardSearch');
-                    if (searchInput && searchInput.value.trim()) {
-                        searchDeckCards('cityLeague');
-                    }
-                    
-                    const currentMetaSearchInput = document.getElementById('currentMetaDeckCardSearch');
-                    if (currentMetaSearchInput && currentMetaSearchInput.value.trim()) {
-                        searchDeckCards('currentMeta');
-                    }
-                    
-                    const pastMetaSearchInput = document.getElementById('pastMetaDeckCardSearch');
-                    if (pastMetaSearchInput && pastMetaSearchInput.value.trim()) {
-                        searchDeckCards('pastMeta');
+                    if (freshness.fresh && freshness.cachedManifest) {
+                        // --- Fast path: load from IndexedDB ---
+                        devLog('[CardDB] Using IndexedDB cache (version ' + freshness.cachedManifest.version + ')');
+                        const manifest = freshness.cachedManifest;
+                        let allCards = [];
+                        let allCached = true;
+                        for (const chunk of manifest.chunks) {
+                            const cached = await cache.getCachedChunk(chunk.file);
+                            if (cached && cached.length > 0) {
+                                allCards = allCards.concat(cached);
+                            } else {
+                                allCached = false;
+                                break;
+                            }
+                        }
+                        if (allCached && allCards.length > 0) {
+                            _applyCardDatabase(allCards);
+                            devLog('[CardDB] Loaded ' + allCards.length + ' cards from IndexedDB cache');
+                            _notifyCardDBReady();
+                            return;
+                        }
+                        // Some chunks missing from cache — fall through to network
                     }
 
-                    // My Decks may load before card DB; refresh once DB is ready to render card images.
-                    if (window.userDecks && window.userDecks.length > 0 && typeof updateDecksUI === 'function') {
-                        updateDecksUI();
-                    }
+                    // --- Network path: fetch manifest, load chunks ---
+                    try {
+                        const serverManifest = freshness.serverManifest || await _fetchManifest(manifestUrl);
+                        if (serverManifest && serverManifest.chunks && serverManifest.chunks.length > 0) {
+                            devLog('[CardDB] Loading ' + serverManifest.chunks.length + ' chunks from network...');
 
-                    // Collection/Wishlist can also load before card DB; re-render once card metadata is ready.
-                    if (typeof updateCollectionUI === 'function') {
-                        updateCollectionUI();
+                            // Load Standard chunk first for fast initial display
+                            const standardChunk = serverManifest.chunks.find(c => c.era === 'standard');
+                            const otherChunks = serverManifest.chunks.filter(c => c.era !== 'standard');
+
+                            if (standardChunk) {
+                                const standardCards = await cache.fetchAndCacheChunk('./data/', standardChunk.file);
+                                _applyCardDatabase(standardCards);
+                                devLog('[CardDB] Standard chunk loaded: ' + standardCards.length + ' cards (fast display ready)');
+                                _notifyCardDBReady();
+
+                                // Load remaining chunks in background
+                                _loadRemainingChunks(cache, otherChunks, standardCards, serverManifest);
+                                return;
+                            }
+
+                            // No standard chunk — load all sequentially
+                            let allCards = [];
+                            for (const chunk of serverManifest.chunks) {
+                                const cards = await cache.fetchAndCacheChunk('./data/', chunk.file);
+                                allCards = allCards.concat(cards);
+                            }
+                            cache.setCachedManifest({ ...serverManifest, timestamp: Date.now() });
+                            _applyCardDatabase(allCards);
+                            _notifyCardDBReady();
+                            return;
+                        }
+                    } catch (chunkErr) {
+                        console.warn('[CardDB] Chunk loading failed, falling back to monolith:', chunkErr);
                     }
-                    if (typeof updateWishlistUI === 'function') {
-                        updateWishlistUI();
-                    }
-                    // Profile stats (value, card count) also depend on card prices from DB; refresh stats.
-                    if (window.userProfile && typeof updateProfileUI === 'function') {
-                        updateProfileUI(window.userProfile);
-                    }
-                } else {
-                    console.error('? Failed to load all_cards_merged.json');
                 }
+
+                // --- Fallback: monolith all_cards_merged.json ---
+                await _loadMonolithCardDatabase();
             } catch (error) {
                 console.error('Error loading all cards database:', error);
             }
+        }
+
+        async function _fetchManifest(url) {
+            const resp = await fetch(url + '?t=' + Date.now());
+            if (!resp.ok) return null;
+            return resp.json();
+        }
+
+        async function _loadRemainingChunks(cache, otherChunks, initialCards, manifest) {
+            // Non-blocking: load SWSH + Legacy in background after initial render
+            try {
+                let allCards = initialCards.slice();
+                for (const chunk of otherChunks) {
+                    const cards = await cache.fetchAndCacheChunk('./data/', chunk.file);
+                    allCards = allCards.concat(cards);
+                    devLog('[CardDB] Background chunk "' + chunk.era + '" loaded: +' + cards.length + ' cards (total: ' + allCards.length + ')');
+                }
+                // Rebuild indices with full dataset
+                _applyCardDatabase(allCards);
+                cache.setCachedManifest({ ...manifest, timestamp: Date.now() });
+                devLog('[CardDB] All chunks loaded: ' + allCards.length + ' cards total');
+
+                // Re-notify so Cards DB tab can refresh with full data
+                _notifyCardDBReady();
+            } catch (e) {
+                console.warn('[CardDB] Background chunk loading error:', e);
+            }
+        }
+
+        async function _loadMonolithCardDatabase() {
+            const timestamp = new Date().getTime();
+            const response = await fetch(`./data/all_cards_merged.json?t=${timestamp}`);
+            if (response.ok) {
+                const jsonData = await response.json();
+                const cards = (jsonData.cards || jsonData);
+                _applyCardDatabase(cards);
+
+                // Cache the monolith in IndexedDB for next visit
+                const cache = window.cardDataCache;
+                if (cache) {
+                    cache.setCachedChunk('all_cards_merged.json', cards);
+                    cache.setCachedManifest({
+                        version: 'monolith-' + timestamp,
+                        chunks: [{ file: 'all_cards_merged.json', era: 'all', count: cards.length }],
+                        timestamp: Date.now()
+                    });
+                }
+                _notifyCardDBReady();
+                devLog('[CardDB] Loaded ' + cards.length + ' cards from monolith (fallback)');
+            } else {
+                console.error('Failed to load all_cards_merged.json');
+            }
+        }
+
+        function _applyCardDatabase(cards) {
+            allCardsDatabase = cards.map(c => {
+                if (!c.name && c.name_en) c.name = c.name_en;
+                return c;
+            });
+            window.allCardsDatabase = allCardsDatabase;
+            cardIndexBySetNumber = buildCardIndexBySetNumber(allCardsDatabase);
+            window.cardIndexBySetNumber = cardIndexBySetNumber;
+            cardsByNameMap = buildCardsByNameMap(allCardsDatabase);
+            window.cardsByNameMap = cardsByNameMap;
+            cardsBySetNumberMap = buildCardsBySetNumberMap(allCardsDatabase);
+            window.cardsBySetNumberMap = cardsBySetNumberMap;
+            // Build O(1) name index (exact + normalized keys)
+            cardIndexMap = new Map();
+            allCardsDatabase.forEach(c => {
+                const primaryName = String(c.name_en || c.name || '').trim();
+                if (!primaryName) return;
+                const exactKey = fixMojibake(primaryName);
+                const normalizedKey = normalizeCardName(primaryName);
+                if (!cardIndexMap.has(exactKey)) cardIndexMap.set(exactKey, c);
+                if (normalizedKey && !cardIndexMap.has(normalizedKey)) cardIndexMap.set(normalizedKey, c);
+            });
+            invalidateCardLookupCaches();
+            window.cardIndexMap = cardIndexMap;
+        }
+
+        function _notifyCardDBReady() {
+            devLog('Cards DB ready: ' + allCardsDatabase.length + ' cards');
+
+            // Count cards with prices
+            const cardsWithPrices = allCardsDatabase.filter(c => c.eur_price).length;
+            devLog('Cards with prices: ' + cardsWithPrices + ' (' + Math.round(100 * cardsWithPrices / allCardsDatabase.length) + '%)');
+
+            // Re-trigger any pending searches
+            const searchInput = document.getElementById('cityLeagueDeckCardSearch');
+            if (searchInput && searchInput.value.trim()) searchDeckCards('cityLeague');
+            const currentMetaSearchInput = document.getElementById('currentMetaDeckCardSearch');
+            if (currentMetaSearchInput && currentMetaSearchInput.value.trim()) searchDeckCards('currentMeta');
+            const pastMetaSearchInput = document.getElementById('pastMetaDeckCardSearch');
+            if (pastMetaSearchInput && pastMetaSearchInput.value.trim()) searchDeckCards('pastMeta');
+
+            // Refresh dependent UIs
+            if (window.userDecks && window.userDecks.length > 0 && typeof updateDecksUI === 'function') updateDecksUI();
+            if (typeof updateCollectionUI === 'function') updateCollectionUI();
+            if (typeof updateWishlistUI === 'function') updateWishlistUI();
+            if (window.userProfile && typeof updateProfileUI === 'function') updateProfileUI(window.userProfile);
         }
         
         async function loadAceSpecsList() {

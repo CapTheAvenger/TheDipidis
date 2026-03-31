@@ -1,7 +1,7 @@
 // Service Worker for Pokemon TCG Analysis PWA
 // Strategy: Cache static shell, network-first for data
 
-const CACHE_NAME = 'tcg-analysis-v1';
+const CACHE_NAME = 'tcg-analysis-v2';
 
 // Static shell — cached on install
 const SHELL_ASSETS = [
@@ -43,6 +43,7 @@ const SHELL_ASSETS = [
   './js/combo-worker.js',
   './js/app-calculator.js',
   './js/card-tooltips.js',
+  './js/card-data-cache.js',
   './images/pokeball-icon.png'
 ];
 
@@ -78,18 +79,20 @@ self.addEventListener('fetch', function(event) {
   if (url.origin !== location.origin) return;
 
   // Data files (CSV/JSON): network-first with cache fallback
+  // Strip cache-buster query params so SW cache matches
   if (url.pathname.indexOf('/data/') !== -1) {
+    var cleanUrl = new URL(url.pathname, location.origin).href;
     event.respondWith(
       fetch(event.request).then(function(response) {
         if (response && response.ok) {
           var clone = response.clone();
           caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(event.request, clone);
+            cache.put(cleanUrl, clone);
           });
         }
         return response;
       }).catch(function() {
-        return caches.match(event.request);
+        return caches.match(cleanUrl);
       })
     );
     return;

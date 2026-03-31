@@ -1698,7 +1698,9 @@ function formatProfileDate(timestamp) {
 function switchProfileTab(tabName) {
   // Hide all tabs
   document.querySelectorAll('.profile-tab-content').forEach(tab => {
-    tab.style.display = 'none';
+    tab.classList.add('display-none');
+    tab.classList.remove('active');
+    tab.style.display = '';
   });
   
   // Remove active class from all buttons
@@ -1709,14 +1711,17 @@ function switchProfileTab(tabName) {
   // Show selected tab
   const selectedTab = document.getElementById('profile-' + tabName);
   if (selectedTab) {
-    selectedTab.style.display = 'block';
+    selectedTab.classList.remove('display-none');
+    selectedTab.classList.add('active');
+    selectedTab.style.display = '';
   }
   
   // Add active class to selected button
   const activeBtn = document.querySelector(`.profile-tab-btn[onclick*="${tabName}"]`);
   if (activeBtn) {
     activeBtn.classList.add('active');
-  }}
+  }
+}
 // Filter collection by search term
 function filterCollection() {
   const searchInput = document.getElementById('collection-search');

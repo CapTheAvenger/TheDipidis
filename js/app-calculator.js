@@ -29,10 +29,15 @@
     }
 
     function updateCalculations() {
-        const deckSize = 60;
-        const copies = clamp(parseInt(document.getElementById('calc-copies').value) || 1, 1, 60);
-        const drawn = clamp(parseInt(document.getElementById('calc-drawn').value) || 7, 1, 60);
+        const deckSize = clamp(parseInt(document.getElementById('calc-deck-size').value) || 60, 1, 99);
+        const copies = clamp(parseInt(document.getElementById('calc-copies').value) || 1, 1, deckSize);
+        const drawn = clamp(parseInt(document.getElementById('calc-drawn').value) || 7, 1, deckSize);
         const inHand = clamp(parseInt(document.getElementById('calc-in-hand').value) || 0, 0, copies);
+
+        // Verbleibende Karten im Deck nach Hand und Preisen
+        const remaining = Math.max(deckSize - drawn - 6, 0);
+        const remainingEl = document.getElementById('calc-remaining-deck');
+        if (remainingEl) remainingEl.textContent = remaining;
 
         // 1. Wahrscheinlichkeit mindestens 1 beim Ziehen (z.B. Starthand)
         const drawProb = probabilityAtLeastOne(deckSize, copies, drawn);
@@ -48,7 +53,6 @@
         document.getElementById('res-prize').textContent = prizeProb.toFixed(2) + '%';
 
         // 3. Topdeck-Wahrscheinlichkeit (nächste Karte nach Hand + Preise)
-        const remaining = deckSize - drawn - 6;
         let topdeckProb = 0;
         if (remaining > 0 && copiesLeft > 0) {
             topdeckProb = (copiesLeft / remaining) * 100;

@@ -935,7 +935,7 @@
          * Render and inject Top Cards Widget into Current Meta tab
          */
         async function renderCurrentMetaTopCards() {
-            const container = document.querySelector('#currentMetaContent .container');
+            const container = document.querySelector('#currentMetaContent .container') || document.getElementById('currentMetaContent');
             if (!container) return;
             
             // Load card data

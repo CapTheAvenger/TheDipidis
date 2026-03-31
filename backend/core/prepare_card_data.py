@@ -180,7 +180,17 @@ def _generate_card_chunks(merged_cards: List[Dict], set_order: Dict):
 
     chunks: Dict[str, List[Dict]] = {era: [] for era, _, _ in ERA_THRESHOLDS}
 
+    jp_count = 0
     for card in merged_cards:
+        # Japanese-origin cards (image contains _JP_LG.png) always go into the
+        # standard chunk — they represent the newest upcoming set(s) and may not
+        # have a set_order entry in sets.json yet.
+        image_url = card.get('image_url', '')
+        if '_JP_LG.png' in image_url or '_JP_' in image_url:
+            chunks['standard'].append(card)
+            jp_count += 1
+            continue
+
         card_set = card.get('set', '')
         order = set_order.get(card_set, 0)
         placed = False
@@ -193,6 +203,9 @@ def _generate_card_chunks(merged_cards: List[Dict], set_order: Dict):
                 break
         if not placed:
             chunks['legacy'].append(card)
+
+    if jp_count:
+        print(f"  ✓ {jp_count} japanische Karten → Standard-Chunk (neueste Sets)")
 
     import hashlib
 

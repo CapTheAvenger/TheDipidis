@@ -567,7 +567,7 @@ const translations = {
     'bj.statusError':           'Sync Error',
     'bj.emptyState':            'No pending entries.',
     'bj.emptyStateDesc':         'Record your first match by tapping the button below!',
-    'bj.savedAndSyncing':       'Entry saved. Sync starting...'
+    'bj.savedAndSyncing':       'Entry saved. Sync starting...',
     'bj.savedOffline':          'Saved offline. It will sync automatically later.',
     'bj.savedWaitingLogin':     'Saved locally. Sign in once to sync it.',
     'bj.syncSuccess':           '{count} entries synced.',

@@ -152,13 +152,13 @@ def _generate_card_chunks(merged_cards: List[Dict], set_order: Dict):
     """Split cards into era-based chunks and write a manifest for the frontend.
 
     Eras (based on set_order value):
-      - standard  : set_order >= 128  (Scarlet & Violet series)
-      - swsh      : 110 <= set_order < 128  (Sword & Shield series)
+      - standard  : set_order >= 136  (Current Meta: TEF–POR)
+      - extended  : 110 <= set_order < 136  (SVI-era before TEF + SWSH-era)
       - legacy    : set_order < 110  (everything older)
     """
     ERA_THRESHOLDS = [
-        ('standard', 128, None),
-        ('swsh', 110, 128),
+        ('standard', 136, None),
+        ('extended', 110, 136),
         ('legacy', None, 110),
     ]
 

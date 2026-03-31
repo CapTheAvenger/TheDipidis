@@ -219,6 +219,35 @@ class TestSafeFetchHtml:
         result = safe_fetch_html("https://example.com", timeout=5, retries=1, retry_delay=0.01)
         assert result == "<html>ok</html>"
 
+    @patch('backend.core.card_scraper_shared.time.sleep')
+    @patch('backend.core.card_scraper_shared._get_scraper')
+    def test_retries_on_503_with_retry_after(self, mock_get_scraper, mock_sleep):
+        mock_resp_503 = MagicMock()
+        mock_resp_503.status_code = 503
+        mock_resp_503.headers = {'Retry-After': '2'}
+
+        mock_resp_ok = MagicMock()
+        mock_resp_ok.status_code = 200
+        mock_resp_ok.text = "<html>ok</html>"
+        mock_resp_ok.raise_for_status = MagicMock()
+
+        mock_get_scraper.return_value.get.side_effect = [mock_resp_503, mock_resp_ok]
+
+        result = safe_fetch_html("https://example.com", timeout=5, retries=1, retry_delay=0.25)
+        assert result == "<html>ok</html>"
+        mock_sleep.assert_called_once_with(2)
+
+    @patch('backend.core.card_scraper_shared.time.sleep')
+    @patch('backend.core.card_scraper_shared._get_scraper')
+    def test_returns_empty_after_exhausting_retries(self, mock_get_scraper, mock_sleep):
+        mock_get_scraper.return_value.get.side_effect = ConnectionError("network down")
+
+        result = safe_fetch_html("https://example.com", timeout=1, retries=2, retry_delay=0.5)
+
+        assert result == ""
+        assert mock_get_scraper.return_value.get.call_count == 3
+        assert [call.args[0] for call in mock_sleep.call_args_list] == [0.5, 1.0]
+
 
 # ============================================================================
 # fetch_page_bs4 — mock network

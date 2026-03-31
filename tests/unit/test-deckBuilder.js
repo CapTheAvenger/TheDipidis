@@ -59,7 +59,9 @@ function createDeckEnv(overrides = {}) {
         console,
         setTimeout: (fn) => fn(),
         clearTimeout: () => {},
-        confirm: () => false,
+        requestAnimationFrame: (fn) => fn(),
+        cancelAnimationFrame: () => {},
+        confirm: overrides.confirm || (() => false),
         Map, Set, Array, Object, String, Number, JSON, Math,
         parseInt, parseFloat, isNaN, decodeURIComponent, eval,
         // Stubs for functions from app-utils.js / app-core.js
@@ -71,6 +73,7 @@ function createDeckEnv(overrides = {}) {
         escapeHtml: (s) => String(s),
         escapeHtmlAttr: (s) => String(s),
         fixMojibake: overrides.fixMojibake || ((s) => String(s || '')),
+        fixCardNameEncoding: overrides.fixCardNameEncoding || ((s) => String(s || '')),
         hasMojibake: () => false,
         normalizeCardName: overrides.normalizeCardName || ((s) => String(s || '').toLowerCase().trim()),
         normalizeSetCode: overrides.normalizeSetCode || ((s) => s ? String(s).toUpperCase().trim() : ''),
@@ -133,9 +136,13 @@ function createDeckEnv(overrides = {}) {
             }
             return total;
         }),
+        getCityLeagueDeckCountFallback: overrides.getCityLeagueDeckCountFallback || (() => 100),
+        getCurrentMetaDeckCountFallback: overrides.getCurrentMetaDeckCountFallback || (() => 100),
+        getPastMetaDeckCountFallback: overrides.getPastMetaDeckCountFallback || (() => 100),
         setRarityPreference: overrides.setRarityPreference || (() => {}),
         getRarityPreference: overrides.getRarityPreference || (() => null),
         getGlobalRarityPreference: overrides.getGlobalRarityPreference || (() => 'min'),
+        saveRarityPreferences: overrides.saveRarityPreferences || (() => {}),
         globalRarityPreference: 'min',
         pastMetaFilteredCards: overrides.pastMetaCards || [],
         updateDeckDisplay: () => {},
@@ -154,7 +161,13 @@ function createDeckEnv(overrides = {}) {
             combinedShare: 0, combinedAvgWhenUsed: 0, recommendedCount: 2, baseName: '', legalMax: 4,
         })),
         getOpeningHandProbability: () => 0,
-        sanitizeDeckDependencies: () => {},
+        sanitizeDeckDependencies: (c) => c,
+        normalizeDeckEntries: (d) => d || [],
+        sortDeckByCategory: () => [],
+        getCardCategoryForSort: () => 'other',
+        formatAverageValueForUi: () => '',
+        buildInlineCardPlaceholder: () => '',
+        getCardImageSource: () => '',
         renderOverviewCards: () => {},
         renderMyDeckGrid: () => {},
         filterDeckGrid: () => {},
@@ -181,12 +194,25 @@ function createDeckEnv(overrides = {}) {
         // as long as the functions are defined
     }
 
+    // Replace DOM-heavy functions after source load so tests stay logic-focused.
+    sandbox.updateDeckDisplay = () => {};
+    sandbox.window.updateDeckDisplay = () => {};
+    sandbox.scheduleDeckDisplayUpdate = () => {};
+    sandbox.window.scheduleDeckDisplayUpdate = () => {};
+    sandbox.scheduleDeckDependentRefresh = () => {};
+    sandbox.window.scheduleDeckDependentRefresh = () => {};
+    sandbox.renderMyDeckGrid = () => {};
+    sandbox.window.renderMyDeckGrid = () => {};
+    sandbox.renderOverviewCards = () => {};
+    sandbox.window.renderOverviewCards = () => {};
+
     // Collect exported functions
     const exported = {};
     const fnNames = [
         'addCardToDeckBatch', 'normalizeGeneratedDeckTo60', 'addCardToDeck',
         'getDeckRefBySource', 'getDeckTotalCards', 'isBasicEnergyName',
         'removeCardFromDeck', 'clearDeck', 'copyDeck', 'autoComplete',
+        'autoCompleteConsistency',
     ];
     for (const fn of fnNames) {
         if (typeof sandbox[fn] === 'function') exported[fn] = sandbox[fn];
@@ -414,6 +440,62 @@ describe('normalizeGeneratedDeckTo60 — uses fallback cards', () => {
         // Card1 should have 4, Water Energy fills rest
         assert.equal(env._window.cityLeagueDeck['Card1 (SVI 1)'], 4);
         assert.equal(env._window.cityLeagueDeck['Water Energy (SVE 19)'], 56);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════
+// autoCompleteConsistency
+// ═══════════════════════════════════════════════════════════
+describe('autoCompleteConsistency', () => {
+    it('enforces deck-wide Ace Spec and Radiant limits', () => {
+        const cards = [
+            { card_name: 'Prime Catcher', rarity: 'ACE SPEC', deck_count: 95, total_count: 95, average_count: '1.0', total_decks_in_archetype: 100 },
+            { card_name: 'Master Ball', rarity: 'ACE SPEC', deck_count: 92, total_count: 92, average_count: '1.0', total_decks_in_archetype: 100 },
+            { card_name: 'Radiant Charizard', deck_count: 90, total_count: 90, average_count: '1.0', total_decks_in_archetype: 100 },
+            { card_name: 'Radiant Greninja', deck_count: 89, total_count: 89, average_count: '1.0', total_decks_in_archetype: 100 },
+            { card_name: 'Pidgeot ex', deck_count: 90, total_count: 180, average_count: '2.0', total_decks_in_archetype: 100 },
+            { card_name: 'Iono', deck_count: 88, total_count: 176, average_count: '2.0', total_decks_in_archetype: 100 },
+            { card_name: 'Fire Energy', set_code: 'SVE', set_number: '18', deck_count: 80, total_count: 400, average_count: '5.0', total_decks_in_archetype: 100 },
+        ];
+
+        const env = createDeckEnv({
+            cityLeagueCards: cards,
+            confirm: () => true,
+        });
+
+        env._window.currentCityLeagueArchetype = 'Test Archetype';
+        env.autoCompleteConsistency('cityLeague', 'min');
+
+        const deck = env._window.cityLeagueDeck;
+        const keys = Object.keys(deck);
+        const baseNames = keys.map((k) => k.replace(/\s*\(.*\)$/, ''));
+        const aceCount = baseNames.filter((n) => ['Prime Catcher', 'Master Ball'].includes(n)).reduce((sum, name) => sum + (deck[keys.find((k) => k.startsWith(name))] || 0), 0);
+        const radiantCount = baseNames.filter((n) => n.startsWith('Radiant ')).reduce((sum, name) => sum + (deck[keys.find((k) => k.startsWith(name))] || 0), 0);
+
+        assert.equal(aceCount, 1, 'Deck must contain exactly one Ace Spec copy total');
+        assert.equal(radiantCount, 1, 'Deck must contain exactly one Radiant copy total');
+    });
+
+    it('builds and normalizes to exactly 60 cards', () => {
+        const cards = [
+            { card_name: 'Prime Catcher', rarity: 'ACE SPEC', set_code: 'TEF', set_number: '157', deck_count: 95, total_count: 95, average_count: '1.0', total_decks_in_archetype: 100 },
+            { card_name: 'Pidgeot ex', set_code: 'OBF', set_number: '164', deck_count: 90, total_count: 180, average_count: '2.0', total_decks_in_archetype: 100 },
+            { card_name: 'Iono', set_code: 'PAL', set_number: '185', deck_count: 88, total_count: 176, average_count: '2.0', total_decks_in_archetype: 100 },
+            { card_name: 'Ultra Ball', set_code: 'SVI', set_number: '196', deck_count: 86, total_count: 258, average_count: '3.0', total_decks_in_archetype: 100 },
+            { card_name: 'Rare Candy', set_code: 'SVI', set_number: '191', deck_count: 84, total_count: 252, average_count: '3.0', total_decks_in_archetype: 100 },
+            { card_name: 'Fire Energy', set_code: 'SVE', set_number: '18', deck_count: 80, total_count: 560, average_count: '7.0', total_decks_in_archetype: 100 },
+        ];
+
+        const env = createDeckEnv({
+            cityLeagueCards: cards,
+            confirm: () => true,
+        });
+
+        env._window.currentCityLeagueArchetype = 'Test Archetype';
+        env.autoCompleteConsistency('cityLeague', 'min');
+
+        const total = env.getDeckTotalCards(env._window.cityLeagueDeck);
+        assert.equal(total, 60, 'Consistency generation must normalize to exactly 60 cards');
     });
 });
 

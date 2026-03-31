@@ -58,9 +58,6 @@
                             <div class="menu-header" data-i18n="menu.title">Main Menu</div>
 
                             <button id="menu-group-meta" class="menu-group-toggle" type="button" onclick="toggleMenuCluster('meta')" aria-expanded="true" aria-controls="menu-submenu-meta">
-                                <span class="menu-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>
-                                </span>
                                 <span class="menu-item-label">Meta & Tier Lists</span>
                                 <span class="menu-chevron" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -68,45 +65,35 @@
                             </button>
                             <div id="menu-submenu-meta" class="menu-submenu open" role="group" aria-label="Meta and Tier Lists">
                                 <button id="menu-btn-city-league" class="menu-item menu-subitem active" data-tab-id="city-league" onclick="switchTabAndUpdateMenu('city-league')" data-i18n="menu.cityLeague" role="menuitem">
-                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><path d="m5.6 5.6 12.8 12.8"/><path d="m18.4 5.6-12.8 12.8"/></svg></span>
                                     <span class="menu-item-label">City League Meta</span>
                                 </button>
                                 <button id="menu-btn-city-league-analysis" class="menu-item menu-subitem" data-tab-id="city-league-analysis" onclick="switchTabAndUpdateMenu('city-league-analysis')" data-i18n="menu.cityLeagueAnalysis" role="menuitem">
-                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="12" y="7" width="3" height="10"/><rect x="17" y="13" width="3" height="4"/></svg></span>
                                     <span class="menu-item-label">Deck Analysis (Japan)</span>
                                 </button>
                                 <button id="menu-btn-current-meta" class="menu-item menu-subitem" data-tab-id="current-meta" onclick="switchTabAndUpdateMenu('current-meta')" data-i18n="menu.currentMeta" role="menuitem">
-                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14.5 14.5 0 0 1 0 18"/><path d="M12 3a14.5 14.5 0 0 0 0 18"/></svg></span>
                                     <span class="menu-item-label">Current Meta (Global)</span>
                                 </button>
                                 <button id="menu-btn-current-analysis" class="menu-item menu-subitem" data-tab-id="current-analysis" onclick="switchTabAndUpdateMenu('current-analysis')" data-i18n="menu.currentMetaAnalysis" role="menuitem">
-                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg></span>
                                     <span class="menu-item-label">Deck Analysis (Global)</span>
                                 </button>
                                 <button id="menu-btn-past-meta" class="menu-item menu-subitem" data-tab-id="past-meta" onclick="switchTabAndUpdateMenu('past-meta')" data-i18n="menu.pastMeta" role="menuitem">
-                                    <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10"/><path d="M17 4v4a5 5 0 0 1-10 0V4"/></svg></span>
                                     <span class="menu-item-label">Past Meta</span>
                                 </button>
                             </div>
 
                             <button id="menu-btn-cards" class="menu-item" data-tab-id="cards" onclick="switchTabAndUpdateMenu('cards')" data-i18n="menu.cardDatabase" role="menuitem">
-                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h6"/></svg></span>
                                 <span class="menu-item-label">Card Database</span>
                             </button>
                             <button id="menu-btn-proxy" class="menu-item" data-tab-id="proxy" onclick="switchTabAndUpdateMenu('proxy')" data-i18n="menu.proxyPrinter" role="menuitem">
-                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></span>
                                 <span class="menu-item-label">Proxy Printer</span>
                             </button>
                             <button id="menu-btn-sandbox" class="menu-item" data-tab-id="sandbox" onclick="switchTabAndUpdateMenu('sandbox')" data-i18n="menu.playtester" role="menuitem">
-                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span>
                                 <span class="menu-item-label">Playtester</span>
                             </button>
                             <button id="menu-btn-profile" class="menu-item" data-tab-id="profile" onclick="switchTabAndUpdateMenu('profile')" data-i18n="menu.profile" role="menuitem">
-                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="5"/></svg></span>
                                 <span class="menu-item-label">My Profile</span>
                             </button>
                             <button id="menu-btn-tutorial" class="menu-item" data-tab-id="tutorial" onclick="switchTabAndUpdateMenu('tutorial')" data-i18n="menu.howToUse" role="menuitem">
-                                <span class="menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
                                 <span class="menu-item-label">How to Use</span>
                             </button>
                         </div>

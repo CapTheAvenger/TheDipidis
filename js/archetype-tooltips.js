@@ -548,10 +548,35 @@
         renderArchetypeTooltip();
     }
 
+    function importGeneratedTooltips() {
+        const generated = {
+            "Dragapult Meowth": "Dragapult ex nutzt Phantom Dive (200 Schaden + 3× 30 auf die Bank) als Hauptangriff. Meowth münzt die Bankmarken in KOs um: Flying Entry (beim Aufsetzen 2 Marken → 60) und Pay Day liefern Chip-Damage. Typischer Spielplan: T2 Phantom Dive auf den aktiven Gegner, Schadensmarken auf 2–3 Bankpokémon verteilen, dann mit Meowth oder erneutem Phantom Dive die geschwächten Pokémon aufräumen. Achte darauf, die 30er-Marken so zu platzieren, dass du nächste Runde möglichst viele Knock-outs erreichst. Die Stärke des Decks liegt in der Flächenkontrolle – du zwingst den Gegner, seine Bank zu schützen, während dein Hauptangreifer vorne Druck macht.",
+            "Mega Lucario Hariyama": "Mega Lucario ist ein reines Angriffsdeck: Lucario ex trifft hart (Aura Sphere: 160 + 30 Bank), und Hariyama liefert mit Slap Down massive Durchschlagskraft. Das Deck setzt auf schnelle Energiebeschleunigung (z. B. über Unterstützerkarten oder Stadien) und will ab T2 jeden Zug ein Knock-out landen. Spielplan: Lucario früh angreifen lassen, Bankschaden verteilen, Hariyama als Closer nachlegen. Die Stärke liegt in der konstant hohen Schadensausgabe und einfachen Strategie – kein kompliziertes Setup, einfach angreifen und tauschen. Schwäche: wenig Erholung, wenn der Angreifer fällt.",
+            "Dragapult Dusknoir": "Dragapult ex verteilt mit Phantom Dive Flächenschaden (200 + 3× 30 auf die Bank), während Dusknoir mit Cursed Blast gezielt geschwächte Bankpokémon eliminiert. Spielplan: Phantom Dive aufbauen, Schadensmarken strategisch auf die Bank verteilen, dann Dusknoir einsetzen, um die angesammelten Marken in Knock-outs umzuwandeln. Die Synergie liegt darin, dass Dragapult den Schaden vorbereitet und Dusknoir ihn verwertet. Achte darauf, die Marken nicht zu streuen, sondern gezielt auf 2–3 Ziele zu konzentrieren. Das Deck kontrolliert das Spiel über Bankdruck und bestraft Gegner, die zu viele Pokémon aufbauen.",
+            "Zoroark Darmanitan": "Zoroark nutzt seine Wandlungsfähigkeit (Illusion-Ability), um als Kopie gegnerischer oder eigener Pokémon anzugreifen, während Darmanitan als Glaskanone massive Einmal-Treffer (OHKOs) liefert. Spielplan: Zoroark flexibel einsetzen – je nach Matchup kopiert es den besten verfügbaren Angriff. Darmanitan kommt rein, wenn ein großer Knock-out nötig ist. Das Deck lebt von Überraschungsmomenten und Anpassungsfähigkeit. Stärke: unberechenbar für den Gegner, hoher Burst-Schaden. Schwäche: beide Angreifer sind fragil – wenn der Gegner schneller zuschlägt, fehlt die Erholung. Tipp: Immer einen Backup-Angreifer auf der Bank vorbereiten."
+        };
+
+        const existing = getOverrides();
+        let added = 0;
+        let skipped = 0;
+        for (const [archetype, text] of Object.entries(generated)) {
+            if (existing[archetype]) {
+                skipped++;
+            } else {
+                existing[archetype] = text;
+                added++;
+            }
+        }
+        setOverrides(existing);
+        console.log(`[importGeneratedTooltips] Added: ${added}, Skipped (already exist): ${skipped}`);
+        return { added, skipped, total: Object.keys(existing).length };
+    }
+
     window.renderArchetypeTooltip = renderArchetypeTooltip;
     window.saveArchetypeTooltipOverride = saveArchetypeTooltipOverride;
     window.resetArchetypeTooltipOverride = resetArchetypeTooltipOverride;
     window.filterTooltipAdminArchetypes = filterTooltipAdminArchetypes;
+    window.importGeneratedTooltips = importGeneratedTooltips;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initArchetypeTooltips, { once: true });

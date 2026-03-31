@@ -26,6 +26,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install JS test dependencies
+        run: npm install --no-save papaparse
+
       - name: Run JS unit tests
         run: |
           TOTAL_PASS=0

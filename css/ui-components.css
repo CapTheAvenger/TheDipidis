@@ -2,6 +2,38 @@
    UI COMPONENTS (ui-components.css)
    ==================================== */
 
+/* ============================================================
+ * General-purpose Loading Indicator (shimmer bars)
+ * ============================================================ */
+.loading-indicator-wrap {
+    padding: 24px 16px;
+    text-align: center;
+}
+.loading-indicator-msg {
+    font-size: 0.95em;
+    font-weight: 700;
+    color: #6b7280;
+    margin-bottom: 14px;
+}
+.loading-indicator-bar {
+    height: 12px;
+    border-radius: 999px;
+    background: #e7ecf3;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+.loading-indicator-bar:nth-child(2) { width: 85%; }
+.loading-indicator-bar:nth-child(3) { width: 65%; }
+.loading-indicator-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 45%, transparent 100%);
+    transform: translateX(-100%);
+    animation: skeletonShimmer 1.2s ease-in-out infinite;
+}
+
 /* Standard Button Basis */
 .btn {
     padding: 0.6rem 1.2rem;

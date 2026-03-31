@@ -87,7 +87,7 @@
             // Show loading indicator
             const content = document.getElementById('cityLeagueContent');
             if (content) {
-                content.innerHTML = '<div class="city-league-loading-indicator">' + t('cl.loading') + ' ' + escapeHtml(format) + ' ' + t('cl.loadingData') + '</div>';
+                showLoadingIndicator(content, { lines: 5, message: t('cl.loading') + ' ' + escapeHtml(format) + ' ' + t('cl.loadingData') });
             }
             
             // Load M3 comparison data only on non-mobile to avoid blocking slower devices.

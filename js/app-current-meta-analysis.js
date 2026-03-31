@@ -27,6 +27,10 @@
         async function loadCurrentMetaAnalysis() {
           try {
             devLog('Loading Current Meta Analysis...');
+            const deckGrid = document.getElementById('currentMetaDeckGrid');
+            if (deckGrid && !deckGrid.innerHTML.trim()) {
+                showLoadingIndicator(deckGrid, { lines: 4, message: 'Loading meta analysis...' });
+            }
             const data = await loadCurrentMetaRowsWithFallback();
             devLog('Loaded data:', data ? `${data.length} rows` : 'null');
             

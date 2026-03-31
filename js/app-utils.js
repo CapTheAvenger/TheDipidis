@@ -24,6 +24,36 @@ function debounce(fn, delay = 300) {
     };
 }
 
+// ============================================================================
+// General-purpose Loading Indicator
+// ============================================================================
+/**
+ * Show a shimmer loading indicator inside a container.
+ * @param {string|HTMLElement} containerOrId - Container element or its ID
+ * @param {object} [opts] - Options: { lines: 3, message: '' }
+ */
+function showLoadingIndicator(containerOrId, opts) {
+    const el = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
+    if (!el) return;
+    const o = Object.assign({ lines: 3, message: '' }, opts);
+    el.classList.add('loading-indicator-active');
+    const msg = o.message ? '<div class="loading-indicator-msg">' + o.message + '</div>' : '';
+    const bars = Array.from({ length: o.lines }, () =>
+        '<div class="loading-indicator-bar"></div>'
+    ).join('');
+    el.innerHTML = '<div class="loading-indicator-wrap">' + msg + bars + '</div>';
+}
+
+/**
+ * Remove the loading indicator and restore the container.
+ * @param {string|HTMLElement} containerOrId
+ */
+function hideLoadingIndicator(containerOrId) {
+    const el = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
+    if (!el) return;
+    el.classList.remove('loading-indicator-active');
+}
+
 // app-utils.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 

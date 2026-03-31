@@ -157,6 +157,10 @@
         
         async function loadPastMeta() {
             devLog('Loading Past Meta Deck Analysis...');
+            const pastMetaGrid = document.getElementById('pastMetaDeckGrid');
+            if (pastMetaGrid && !pastMetaGrid.innerHTML.trim()) {
+                showLoadingIndicator(pastMetaGrid, { lines: 4, message: 'Loading past meta data...' });
+            }
             
             // Load tournament overview and cards data
             const [tournamentOverview, cardsData] = await Promise.all([

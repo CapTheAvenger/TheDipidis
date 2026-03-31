@@ -15,8 +15,57 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run JS unit tests
+        run: |
+          TOTAL_PASS=0
+          TOTAL_FAIL=0
+          for f in tests/unit/test-*.js; do
+            OUTPUT=$(node --test "$f" 2>&1) || true
+            PASS=$(echo "$OUTPUT" | grep -oP '# pass \K\d+' || echo 0)
+            FAIL=$(echo "$OUTPUT" | grep -oP '# fail \K\d+' || echo 0)
+            TOTAL_PASS=$((TOTAL_PASS + PASS))
+            TOTAL_FAIL=$((TOTAL_FAIL + FAIL))
+            if [ "$FAIL" -gt 0 ]; then
+              echo "::error::$f — $FAIL test(s) failed"
+              echo "$OUTPUT"
+            fi
+          done
+          echo "✓ JS tests: $TOTAL_PASS passed, $TOTAL_FAIL failed"
+          if [ "$TOTAL_FAIL" -gt 0 ]; then
+            echo "::error::$TOTAL_FAIL JS test(s) failed — blocking deployment"
+            exit 1
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python test dependencies
+        run: |
+          pip install pytest beautifulsoup4 requests lxml
+
+      - name: Run Python unit tests
+        run: |
+          python -m pytest tests/python/ -q --tb=short \
+            --ignore=tests/python/test_price_proxy_and_price_scraper.py \
+            2>&1
+          echo "✓ Python tests passed"
+
   build:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,6 +109,17 @@ jobs:
             echo "✓ Google Client ID injected"
           else
             echo "::warning::GOOGLE_CLIENT_ID secret is not set – Google Sign-In will be disabled"
+          fi
+
+      - name: Inject Sentry DSN
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          if [ -n "$SENTRY_DSN" ]; then
+            sed -i "s|__SENTRY_DSN__|${SENTRY_DSN}|g" js/error-tracking.js
+            echo "✓ Sentry DSN injected"
+          else
+            echo "::warning::SENTRY_DSN secret is not set – error tracking will be disabled"
           fi
 
       - name: Prepare deployment directory

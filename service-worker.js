@@ -44,6 +44,7 @@ const SHELL_ASSETS = [
   './js/app-calculator.js',
   './js/card-tooltips.js',
   './js/card-data-cache.js',
+  './js/error-tracking.js',
   './images/pokeball-icon.png'
 ];
 

@@ -1914,7 +1914,21 @@ function getLang() {
 function updateTranslationsInDOM() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (key) el.innerHTML = t(key);
+    if (!key) return;
+    const translated = t(key);
+    // Preserve child elements (e.g. info-icon spans) — only replace the text part
+    const childElements = Array.from(el.children);
+    if (childElements.length > 0) {
+      // Find the first text node or create one
+      let textNode = Array.from(el.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
+      if (textNode) {
+        textNode.textContent = translated + ' ';
+      } else {
+        el.insertBefore(document.createTextNode(translated + ' '), el.firstChild);
+      }
+    } else {
+      el.innerHTML = translated;
+    }
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');

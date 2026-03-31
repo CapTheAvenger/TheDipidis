@@ -537,6 +537,18 @@ describe('sortCardsPTCG — card sorting', () => {
         assert.equal(sorted[0].name_en, 'Rare Candy');
         assert.equal(sorted[1].name_en, 'Choice Belt');
     });
+    it('classifies "Pokémon Tool" as Tool (cat 4), NOT Pokémon (cat 1)', () => {
+        const cards = [
+            { name_en: 'Choice Belt', type: 'Pokémon Tool' },
+            { name_en: 'Pikachu', type: 'Pokémon', pokedex_number: '25' },
+            { name_en: 'Nest Ball', type: 'Item' },
+        ];
+        const sorted = fns.sortCardsPTCG(cards);
+        // Pokémon (1) → Item (3) → Pokémon Tool (4)
+        assert.equal(sorted[0].name_en, 'Pikachu');
+        assert.equal(sorted[1].name_en, 'Nest Ball');
+        assert.equal(sorted[2].name_en, 'Choice Belt');
+    });
     it('handles Stadium type', () => {
         const cards = [
             { name_en: 'Temple', type: 'Stadium' },

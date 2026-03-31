@@ -2078,10 +2078,10 @@ const BASE_PATH = './data/';
                 
                 if (a.type) {
                     const typeA = a.type.toLowerCase();
-                    if (typeA.includes("pokémon") || typeA.includes("pokemon")) catA = 1;
+                    if (typeA.includes("tool")) catA = 4;
+                    else if (typeA.includes("pokémon") || typeA.includes("pokemon")) catA = 1;
                     else if (typeA.includes("supporter")) catA = 2;
-                    else if (typeA.includes("item") && !typeA.includes("tool")) catA = 3;
-                    else if (typeA.includes("tool")) catA = 4;
+                    else if (typeA.includes("item")) catA = 3;
                     else if (typeA.includes("stadium")) catA = 5;
                     else if (typeA.includes("special energy")) catA = 6;
                     else if (typeA.includes("basic energy")) catA = 7;
@@ -2089,10 +2089,10 @@ const BASE_PATH = './data/';
                 
                 if (b.type) {
                     const typeB = b.type.toLowerCase();
-                    if (typeB.includes("pokémon") || typeB.includes("pokemon")) catB = 1;
+                    if (typeB.includes("tool")) catB = 4;
+                    else if (typeB.includes("pokémon") || typeB.includes("pokemon")) catB = 1;
                     else if (typeB.includes("supporter")) catB = 2;
-                    else if (typeB.includes("item") && !typeB.includes("tool")) catB = 3;
-                    else if (typeB.includes("tool")) catB = 4;
+                    else if (typeB.includes("item")) catB = 3;
                     else if (typeB.includes("stadium")) catB = 5;
                     else if (typeB.includes("special energy")) catB = 6;
                     else if (typeB.includes("basic energy")) catB = 7;

@@ -1,0 +1,11 @@
+{
+  "name": "pokemon-tcg-analysis",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:unit": "node --test tests/unit/test-*.js"
+  },
+  "devDependencies": {
+    "papaparse": "^5.5.3"
+  }
+}

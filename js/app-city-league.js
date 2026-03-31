@@ -84,10 +84,10 @@
             window.currentCityLeagueFormat = format;
             localStorage.setItem('cityLeagueFormat', format);
             
-            // Show loading indicator
+            // Show skeleton loader while data loads
             const content = document.getElementById('cityLeagueContent');
             if (content) {
-                showLoadingIndicator(content, { lines: 5, message: t('cl.loading') + ' ' + escapeHtml(format) + ' ' + t('cl.loadingData') });
+                showTableSkeleton(content, { rows: 8, cols: 5, withImage: true });
             }
             
             // Load M3 comparison data only on non-mobile to avoid blocking slower devices.
@@ -1925,7 +1925,11 @@
         }
 
         function getEmptyStateHtml() {
-            return '<div class="empty-state"><h3>' + t('cl.noDataFound') + '</h3><p>' + t('cl.noDataFoundDesc') + '</p></div>';
+            return getEmptyStateBoxHtml({
+                title: t('cl.noDataFound'),
+                description: t('cl.noDataFoundDesc'),
+                icon: 'cards'
+            });
         }
 
         // Universal image URL resolver used across grids, analysis, and deckbuilder.
@@ -2966,8 +2970,11 @@
             }
             if (!data || data.length === 0) {
                 console.warn('No data to render');
-                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #444; font-weight: 500;">' + t('cl.selectDeckPlaceholder') + '</p>';
-                                tableContainer.innerHTML = '<p class="city-league-empty-state">' + t('cl.selectDeckPlaceholder') + '</p>';
+                tableContainer.innerHTML = getEmptyStateBoxHtml({
+                    title: t('cl.selectDeckPlaceholder'),
+                    description: t('cl.noDataFoundDesc'),
+                    icon: 'cards'
+                });
                 return;
             }
 
@@ -3012,17 +3019,23 @@
             const renderTier = (tierCards, tierTitle, tierEmoji) => {
                 if (tierCards.length === 0) return '';
                 
-                let html = `<div style="margin-bottom: 30px;">`;
-                html = `<div class="city-league-tier-block">`;
+                let html = `<div class="city-league-tier-block">`;
                 html += `<h3 class="city-league-tier-title"><span>${tierEmoji}</span> ${tierTitle}</h3>`;
-                html += '<table><thead><tr>';
-                html += `<th class="col-image">${t('cl.thImage')}</th>`;
-                html += `<th>${t('cl.thCardsInDeck')}</th>`;
-                html += `<th>${t('cl.thCardName')}</th>`;
-                html += `<th>${t('cl.thSet')}</th>`;
-                html += `<th>${t('cl.thNumber')}</th>`;
-                html += `<th>${t('cl.thPctArchetype')}</th>`;
-                html += `<th>${t('cl.thAvgCountUsed')}</th>`;
+                html += '<table class="responsive-table"><thead><tr>';
+                const thImage = t('cl.thImage');
+                const thCardsInDeck = t('cl.thCardsInDeck');
+                const thCardName = t('cl.thCardName');
+                const thSet = t('cl.thSet');
+                const thNumber = t('cl.thNumber');
+                const thPctArchetype = t('cl.thPctArchetype');
+                const thAvgCount = t('cl.thAvgCountUsed');
+                html += `<th class="col-image">${thImage}</th>`;
+                html += `<th>${thCardsInDeck}</th>`;
+                html += `<th>${thCardName}</th>`;
+                html += `<th>${thSet}</th>`;
+                html += `<th>${thNumber}</th>`;
+                html += `<th>${thPctArchetype}</th>`;
+                html += `<th>${thAvgCount}</th>`;
                 html += `<th>${t('cl.thAction')}</th>`;
                 html += '</tr></thead><tbody>';
 
@@ -3043,18 +3056,18 @@
                     
                     html += '<tr>';
                     // Image with green badge if card is in deck
-                    html += `<td class="col-image"><div class="city-league-img-badge-wrap">`;
+                    html += `<td class="col-image" data-label="${thImage}"><div class="city-league-img-badge-wrap">`;
                     html += `<img src="${imageUrl}" alt="${cardName}" loading="lazy" class="city-league-card-img" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${escapeJsStr(cardName)}')">`;
                     if (currentDeckCount > 0) {
                         html += `<div class="city-league-img-badge">${currentDeckCount}</div>`;
                     }
                     html += `</div></td>`;
-                    html += `<td><strong>${currentDeckCount}/${maxCount}</strong></td>`;
-                    html += `<td><strong>${cardName}</strong></td>`;
-                    html += `<td>${setCode}</td>`;
-                    html += `<td>${setNumber}</td>`;
-                    html += `<td><strong class="city-league-pct">${percentage}%</strong></td>`;
-                    html += `<td><strong class="city-league-avg-count">${avgCount}x</strong></td>`;
+                    html += `<td data-label="${thCardsInDeck}"><strong>${currentDeckCount}/${maxCount}</strong></td>`;
+                    html += `<td data-label="${thCardName}"><strong>${cardName}</strong></td>`;
+                    html += `<td data-label="${thSet}">${setCode}</td>`;
+                    html += `<td data-label="${thNumber}">${setNumber}</td>`;
+                    html += `<td data-label="${thPctArchetype}"><strong class="city-league-pct">${percentage}%</strong></td>`;
+                    html += `<td data-label="${thAvgCount}"><strong class="city-league-avg-count">${avgCount}x</strong></td>`;
                     html += `<td class="city-league-action-btns"><button class="btn btn-primary" onclick="addCardToDeck('cityLeague', '${escapeJsStr(cardName)}')">${t('cl.addBtn')}</button><button class="btn btn-red" onclick="addCardToProxy('${escapeJsStr(cardName)}', '${setCode}', '${setNumber}', 1)">${t('cl.proxy')}</button></td>`;
                     html += '</tr>';
                 });

@@ -272,7 +272,11 @@
 
         if (!els.pendingList) return;
         if (pendingCount === 0) {
-            els.pendingList.innerHTML = `<div class="battle-journal-empty-state">${escapeHtml(battleJournalText('bj.emptyState', 'No pending entries.'))}</div>`;
+            els.pendingList.innerHTML = getEmptyStateBoxHtml({
+                title: escapeHtml(battleJournalText('bj.emptyState', 'No pending entries.')),
+                description: escapeHtml(battleJournalText('bj.emptyStateDesc', 'Record your first match by tapping the button below!')),
+                icon: 'professor'
+            });
             return;
         }
 

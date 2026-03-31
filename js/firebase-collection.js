@@ -801,12 +801,12 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
     if (collectionHtml.length > 0) {
       collectionGrid.innerHTML = collectionHtml.join('');
     } else if (searchFilter) {
-      collectionGrid.innerHTML = '<p style="color: #999;">No cards found matching your search.</p>';
+      collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current search filter.', icon: 'cards' });
     } else {
-      collectionGrid.innerHTML = '<p style="color: #999;">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>';
+      collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: '➕ Browse Cards', buttonOnclick: "switchTab('cards')" });
     }
   } else if (collectionGrid) {
-    collectionGrid.innerHTML = '<p style="color: #999;">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>';
+    collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: '➕ Browse Cards', buttonOnclick: "switchTab('cards')" });
   }
 
   // Update tab counter
@@ -995,9 +995,9 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
   if (wishlistHtml.length > 0) {
     wishlistGrid.innerHTML = wishlistHtml.join('');
   } else if (searchFilter || setFilter) {
-    wishlistGrid.innerHTML = '<p style="color: #999;">No cards found matching your filters.</p>';
+    wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current filters.', icon: 'cards' });
   } else {
-    wishlistGrid.innerHTML = '<p style="color: #999;">No cards in wishlist yet</p>';
+    wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Wishlist is empty!', description: 'Add cards to your wishlist by clicking the ♡ button on any card.', icon: 'pokeball' });
   }
 }
 
@@ -1066,7 +1066,7 @@ function updateDecksUI() {
   }
 
   if (!window.userDecks || window.userDecks.length === 0) {
-    decksGrid.innerHTML = '<p style="color: #999;">No saved decks yet. Build a deck and save it to see it here!</p>';
+    decksGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No saved Decks yet!', description: 'Build a deck in the City League or Current Meta tab and save it to see it here.', icon: 'pokeball', buttonText: '🏗️ Build a Deck', buttonOnclick: "switchTab('cityLeague')" });
     return;
   }
   

@@ -566,7 +566,8 @@ const translations = {
     'bj.statusWaitingLogin':    'Waiting for Sign-In',
     'bj.statusError':           'Sync Error',
     'bj.emptyState':            'No pending entries.',
-    'bj.savedAndSyncing':       'Entry saved. Sync starting...',
+    'bj.emptyStateDesc':         'Record your first match by tapping the button below!',
+    'bj.savedAndSyncing':       'Entry saved. Sync starting...'
     'bj.savedOffline':          'Saved offline. It will sync automatically later.',
     'bj.savedWaitingLogin':     'Saved locally. Sign in once to sync it.',
     'bj.syncSuccess':           '{count} entries synced.',
@@ -1494,6 +1495,7 @@ const translations = {
     'bj.statusWaitingLogin':    'Wartet auf Login',
     'bj.statusError':           'Sync-Fehler',
     'bj.emptyState':            'Keine wartenden Einträge.',
+    'bj.emptyStateDesc':         'Trage dein erstes Match ein, indem du auf den Button unten tippst!',
     'bj.savedAndSyncing':       'Eintrag gespeichert. Synchronisierung startet...',
     'bj.savedOffline':          'Offline gespeichert. Wird später automatisch synchronisiert.',
     'bj.savedWaitingLogin':     'Lokal gespeichert. Nach dem Login wird synchronisiert.',

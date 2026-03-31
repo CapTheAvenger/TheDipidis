@@ -1175,7 +1175,7 @@
                 const content = document.getElementById('cardsContent');
                 const resultsInfo = document.getElementById('cardResultsInfo');
                 if (content) {
-                    content.innerHTML = '<div style="text-align: center; padding: 40px; color: #444;"><h2>No Cards Loaded</h2><p style="font-weight: 500;">Check data files or reload the page.</p></div>';
+                    content.innerHTML = getEmptyStateBoxHtml({ title: 'No Cards Loaded', description: 'Check your data files or reload the page.', icon: 'pokeball' });
                 }
                 if (resultsInfo) {
                     resultsInfo.textContent = '0 cards found';

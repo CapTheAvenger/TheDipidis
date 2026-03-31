@@ -159,7 +159,7 @@
             devLog('Loading Past Meta Deck Analysis...');
             const pastMetaGrid = document.getElementById('pastMetaDeckGrid');
             if (pastMetaGrid && !pastMetaGrid.innerHTML.trim()) {
-                showLoadingIndicator(pastMetaGrid, { lines: 4, message: 'Loading past meta data...' });
+                showTableSkeleton(pastMetaGrid, { rows: 6, cols: 4, withImage: true });
             }
             
             // Load tournament overview and cards data
@@ -642,7 +642,7 @@
             const tableContainer = document.getElementById('pastMetaDeckTable');
             
             if (cards.length === 0) {
-                tableContainer.innerHTML = '<p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">No cards found</p>';
+                tableContainer.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'Select a deck to see its card breakdown.', icon: 'cards' });
                 return;
             }
             

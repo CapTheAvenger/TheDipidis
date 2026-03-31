@@ -54,6 +54,89 @@ function hideLoadingIndicator(containerOrId) {
     el.classList.remove('loading-indicator-active');
 }
 
+// ============================================================================
+// Unified Empty State Component
+// ============================================================================
+/**
+ * Return HTML for a beautiful "empty state" box (Professor Oak style).
+ * @param {object} opts - { title, description, buttonText, buttonOnclick, icon }
+ *   icon: 'professor' (default) | 'pokeball' | 'cards'
+ */
+function getEmptyStateBoxHtml(opts) {
+    const o = Object.assign({ title: '', description: '', buttonText: '', buttonOnclick: '', icon: 'professor' }, opts);
+    const icons = {
+        professor: '<svg class="empty-state-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">'
+            + '<circle cx="50" cy="50" r="48" fill="#eef2ff" stroke="#3B4CCA" stroke-width="2"/>'
+            + '<circle cx="50" cy="36" r="16" fill="#3B4CCA" opacity=".15"/>'
+            + '<circle cx="50" cy="36" r="12" fill="#fff"/>'
+            + '<circle cx="46" cy="34" r="2" fill="#1a1a2e"/><circle cx="54" cy="34" r="2" fill="#1a1a2e"/>'
+            + '<path d="M45 40 Q50 44 55 40" stroke="#1a1a2e" stroke-width="1.5" fill="none" stroke-linecap="round"/>'
+            + '<rect x="40" y="22" rx="2" width="20" height="6" fill="#8B8B8B" opacity=".35"/>'
+            + '<path d="M32 56 C32 52 40 48 50 48 C60 48 68 52 68 56 L68 70 Q50 74 32 70Z" fill="#3B4CCA" opacity=".18"/>'
+            + '<text x="50" y="88" text-anchor="middle" font-size="11" font-weight="800" fill="#3B4CCA">Prof. Oak</text>'
+            + '</svg>',
+        pokeball: '<svg class="empty-state-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+            + '<circle cx="50" cy="50" r="46" fill="#fff" stroke="#1a1a2e" stroke-width="3"/>'
+            + '<path d="M4 50 H96" stroke="#1a1a2e" stroke-width="3"/>'
+            + '<path d="M4 50 A46 46 0 0 0 96 50" fill="#E3350D"/>'
+            + '<circle cx="50" cy="50" r="12" fill="#fff" stroke="#1a1a2e" stroke-width="3"/>'
+            + '<circle cx="50" cy="50" r="6" fill="#1a1a2e"/>'
+            + '</svg>',
+        cards: '<svg class="empty-state-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+            + '<rect x="18" y="12" width="44" height="62" rx="6" fill="#eef2ff" stroke="#3B4CCA" stroke-width="2" transform="rotate(-8 40 43)"/>'
+            + '<rect x="30" y="18" width="44" height="62" rx="6" fill="#fff" stroke="#3B4CCA" stroke-width="2" transform="rotate(4 52 49)"/>'
+            + '<rect x="40" y="36" width="20" height="3" rx="1.5" fill="#3B4CCA" opacity=".3"/>'
+            + '<rect x="40" y="42" width="14" height="3" rx="1.5" fill="#3B4CCA" opacity=".2"/>'
+            + '<text x="50" y="92" text-anchor="middle" font-size="10" font-weight="700" fill="#6b7280">No Data</text>'
+            + '</svg>',
+    };
+    const svg = icons[o.icon] || icons.professor;
+    let html = '<div class="empty-state-box">' + svg;
+    if (o.title) html += '<div class="empty-state-title">' + o.title + '</div>';
+    if (o.description) html += '<div class="empty-state-desc">' + o.description + '</div>';
+    if (o.buttonText) html += '<button class="empty-state-btn" onclick="' + (o.buttonOnclick || '') + '">' + o.buttonText + '</button>';
+    html += '</div>';
+    return html;
+}
+
+// ============================================================================
+// Skeleton Table Loader
+// ============================================================================
+/**
+ * Return HTML for a skeleton table placeholder.
+ * @param {number} rows - Number of placeholder rows (default 5).
+ * @param {number} cols - Number of columns (default 5).
+ * @param {boolean} withImage - Show an image skeleton in the first column.
+ */
+function getTableSkeletonHtml(rows, cols, withImage) {
+    rows = rows || 5;
+    cols = cols || 5;
+    let html = '<div class="skeleton-table" aria-hidden="true">';
+    for (let r = 0; r < rows; r++) {
+        html += '<div class="skeleton-table-row">';
+        if (withImage) html += '<div class="skeleton-cell skeleton-cell--img"></div>';
+        for (let c = 0; c < cols; c++) {
+            const cls = c === 0 ? ' skeleton-cell--wide' : (c === cols - 1 ? ' skeleton-cell--narrow' : '');
+            html += '<div class="skeleton-cell' + cls + '"></div>';
+        }
+        html += '</div>';
+    }
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Show a skeleton table inside a container while data loads.
+ * @param {string|HTMLElement} containerOrId
+ * @param {object} [opts] - { rows, cols, withImage }
+ */
+function showTableSkeleton(containerOrId, opts) {
+    const el = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
+    if (!el) return;
+    const o = Object.assign({ rows: 5, cols: 5, withImage: true }, opts);
+    el.innerHTML = getTableSkeletonHtml(o.rows, o.cols, o.withImage);
+}
+
 // app-utils.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 

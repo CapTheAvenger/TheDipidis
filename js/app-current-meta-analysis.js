@@ -29,7 +29,7 @@
             devLog('Loading Current Meta Analysis...');
             const deckGrid = document.getElementById('currentMetaDeckGrid');
             if (deckGrid && !deckGrid.innerHTML.trim()) {
-                showLoadingIndicator(deckGrid, { lines: 4, message: 'Loading meta analysis...' });
+                showTableSkeleton(deckGrid, { rows: 6, cols: 4, withImage: true });
             }
             const data = await loadCurrentMetaRowsWithFallback();
             devLog('Loaded data:', data ? `${data.length} rows` : 'null');

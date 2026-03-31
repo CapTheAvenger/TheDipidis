@@ -1,0 +1,18 @@
+{
+  "name": "Pokemon TCG Analysis",
+  "short_name": "TCG Analysis",
+  "description": "City League Meta, Deck Builder & Card Database for Pokemon TCG",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#3B4CCA",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "images/pokeball-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

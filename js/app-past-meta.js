@@ -979,6 +979,9 @@
             devLog(`[Past Meta] Rarity mode changed to: ${mode}`);
             pastMetaRarityMode = mode;
             
+            // Sync global rarity preference so getPreferredVersionForCard() uses the correct mode
+            globalRarityPreference = (mode === 'all') ? null : mode;
+            
             // Update button styles
             const minBtn = document.getElementById('pastMetaRarityMin');
             const maxBtn = document.getElementById('pastMetaRarityMax');

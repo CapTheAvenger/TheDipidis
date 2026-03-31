@@ -782,8 +782,10 @@
             
             if (mode === 'all') {
                 currentMetaGlobalRarityPreference = null;
+                globalRarityPreference = null;
             } else {
                 currentMetaGlobalRarityPreference = mode;
+                globalRarityPreference = mode;
             }
             
             // Update button styles with null-checks

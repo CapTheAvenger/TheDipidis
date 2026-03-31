@@ -655,11 +655,10 @@
                 const isAceSpecCard = isAceSpec(cardName);
                 const proxySetCode = card.set_code || card.set || '';
                 const proxySetNumber = card.set_number || card.number || '';
-                const tableImgUrl = getBestCardImage({ card_name: cardName, set_code: proxySetCode, set_number: proxySetNumber }) || '';
                 
                 html += '<tr>';
                 html += `<td style="text-align: center; font-weight: bold; color: #2c3e50;">${count}</td>`;
-                html += `<td data-card-img="${tableImgUrl}" style="cursor: default;">${cardName}</td>`;
+                html += `<td>${cardName}</td>`;
                 html += `<td style="text-align: center;">${isAceSpecCard ? '<span style="color: #e74c3c; font-weight: bold;">★</span>' : '-'}</td>`;
                 html += `<td style="text-align: center; display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${escapeJsStr(cardName)}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button><button class="btn" style="padding: 6px 10px; font-size: 0.8em; background:#e74c3c; color:white;" onclick='addCardToProxy("${escapeJsStr(cardName)}", "${proxySetCode}", "${proxySetNumber}", 1)'>Proxy</button></td>`;
                 html += '</tr>';
@@ -899,7 +898,7 @@
                                 ${otherPrintSparkleHtml}
                                 <div class="card-info-bottom city-league-card-info-bottom">
                                     <div class="card-info-text city-league-card-info-text">
-                                        <div class="city-league-card-title-mobile" data-card-img="${imageUrl}">${cardName}${cardNameWarning}</div>
+                                        <div class="city-league-card-title-mobile">${cardName}${cardNameWarning}</div>
                                         <div class="city-league-card-set-mobile">${setCode} ${setNumber}</div>
                                         <div class="city-league-card-stats-mobile">${percentage}% | Ø ${avgInUsingDecks}x (${avgCountOverallDisplay}x)</div>
                                         <div class="city-league-card-deck-stats-mobile">${deckCountByStatsDisplay} / ${decklistCountDisplay} Decks</div>

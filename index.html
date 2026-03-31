@@ -219,15 +219,15 @@
                             <h2 data-i18n="section.deckStats">📊 Deck Statistics</h2>
                             <div class="stats-grid city-league-stats-grid">
                                 <div class="stat-card city-league-stat-card">
-                                    <div class="label city-league-stat-label" data-i18n="stats.cardsInDeck">Cards in Deck (Unique / Total)</div>
+                                    <div class="label city-league-stat-label" data-i18n="stats.cardsInDeck" title="Unique: Number of different card names in the deck. Total: Sum of all card copies (should be ~60).">Cards in Deck (Unique / Total)</div>
                                     <div class="value city-league-stat-value" id="cityLeagueStatCards">-</div>
                                 </div>
                                 <div class="stat-card city-league-stat-card">
-                                    <div class="label city-league-stat-label" data-i18n="stats.decksUsed">Decks Used</div>
+                                    <div class="label city-league-stat-label" data-i18n="stats.decksUsed" title="Total number of tournament decklists analyzed for this archetype.">Decks Used</div>
                                     <div class="value city-league-stat-value" id="cityLeagueStatDecksUsed">-</div>
                                 </div>
                                 <div class="stat-card city-league-stat-card">
-                                    <div class="label city-league-stat-label" data-i18n="stats.avgPlacement">Avg Placement</div>
+                                    <div class="label city-league-stat-label" data-i18n="stats.avgPlacement" title="Average tournament placement of all decks running this archetype.">Avg Placement</div>
                                     <div class="value city-league-stat-value" id="cityLeagueStatAvgPlacement">-</div>
                                 </div>
                             </div>
@@ -431,15 +431,15 @@
                         <h2 class="current-meta-stats-title" data-i18n="cl.deckStats">📊 Deck Statistics</h2>
                         <div class="current-meta-stats-grid">
                             <div class="current-meta-stat-card">
-                                <div class="current-meta-stat-label" data-i18n="cl.cardsInDeck">Cards in Deck (Unique / Total)</div>
+                                <div class="current-meta-stat-label" data-i18n="cl.cardsInDeck" title="Unique: Number of different card names in the deck. Total: Sum of all card copies (should be ~60).">Cards in Deck (Unique / Total)</div>
                                 <div class="current-meta-stat-value" id="currentMetaStatCards">-</div>
                             </div>
                             <div class="current-meta-stat-card">
-                                <div class="current-meta-stat-label" data-i18n="stats.totalWinrate">Total Winrate Limitless Online Tournaments</div>
+                                <div class="current-meta-stat-label" data-i18n="stats.totalWinrate" title="Overall win percentage across all Limitless Online tournaments for this archetype.">Total Winrate Limitless Online Tournaments</div>
                                 <div class="current-meta-stat-value" id="currentMetaStatWinrate">-</div>
                             </div>
                             <div class="current-meta-stat-card">
-                                <div class="current-meta-stat-label" data-i18n="stats.matchupTop20">Matchup vs Top 20</div>
+                                <div class="current-meta-stat-label" data-i18n="stats.matchupTop20" title="Average winrate of this archetype against the Top 20 most popular decks.">Matchup vs Top 20</div>
                                 <div class="current-meta-stat-value" id="currentMetaStatMatchup">-</div>
                             </div>
                         </div>
@@ -708,15 +708,15 @@
                         <h2 class="past-meta-stats-title" data-i18n="cl.deckStats">📊 Deck Statistics</h2>
                         <div class="past-meta-stats-grid">
                             <div class="past-meta-stat-card">
-                                <div class="past-meta-stat-label" data-i18n="cl.cardsInDeck">Cards in Deck (Unique / Total)</div>
+                                <div class="past-meta-stat-label" data-i18n="cl.cardsInDeck" title="Unique: Number of different card names in the deck. Total: Sum of all card copies (should be ~60).">Cards in Deck (Unique / Total)</div>
                                 <div class="past-meta-stat-value" id="pastMetaStatCards">-</div>
                             </div>
                             <div class="past-meta-stat-card">
-                                <div class="past-meta-stat-label" data-i18n="stats.tournament">Tournament</div>
+                                <div class="past-meta-stat-label" data-i18n="stats.tournament" title="Name and decklist count of the tournament(s) this data is aggregated from.">Tournament</div>
                                 <div class="past-meta-stat-value" id="pastMetaStatTournament">-</div>
                             </div>
                             <div class="past-meta-stat-card">
-                                <div class="past-meta-stat-label" data-i18n="stats.format">Format</div>
+                                <div class="past-meta-stat-label" data-i18n="stats.format" title="The TCG format (Standard/Expanded) used in the selected tournament(s).">Format</div>
                                 <div class="past-meta-stat-value" id="pastMetaStatFormat">-</div>
                             </div>
                         </div>
@@ -2991,9 +2991,9 @@
 
     <!-- External libraries -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js" defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <!-- Utilities first (provides escapeHtml globally) -->
     <script src="js/app-utils.js?v=1"></script>
     <script src="js/i18n.js?v=1"></script>
@@ -3005,8 +3005,8 @@
     <script src="js/auth-ui-helpers.js?v=1"></script>
     <script src="js/firebase-collection.js?v=1"></script>
     <!-- Chart.js and PapaParse -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous"></script>
     <!-- App modules -->
     <script src="js/app-core.js?v=1"></script>
     <script src="js/app-price.js?v=1"></script>

@@ -150,11 +150,9 @@
         function getPastMetaSummaryTotalCount(cards) {
             if (!Array.isArray(cards) || cards.length === 0) return 0;
 
-            if (!pastMetaCurrentScope || pastMetaCurrentScope.totalDecklists <= 1) {
-                return cards.reduce((sum, card) => sum + (parseInt(card.max_count || 0, 10) || 0), 0);
-            }
-
-            return cards.reduce((sum, card) => sum + getPastMetaRepresentativeCardCopies(card), 0);
+            // Sum the rounded display counts so the total matches what the user
+            // sees on each individual card badge.
+            return cards.reduce((sum, card) => sum + getPastMetaDisplayCount(card), 0);
         }
         
         async function loadPastMeta() {
@@ -173,10 +171,10 @@
                 return;
             }
             
-            pastMetaAllData = cardsData;
+            pastMetaAllData = cardsData.filter(c => String(c.meta || '').trim().toLowerCase() !== 'expanded');
             
-            // Store tournament overview data
-            pastMetaTournaments = tournamentOverview || [];
+            // Store tournament overview data — exclude Expanded (only Standard is scraped)
+            pastMetaTournaments = (tournamentOverview || []).filter(t => String(t.format || '').trim().toLowerCase() !== 'expanded');
 
             // Load dynamic set order map for proper meta sorting (newest -> oldest)
             let pastMetaSetOrderMap = {};
@@ -196,7 +194,7 @@
             // CSV structure: meta (format), tournament_date, archetype (deck name!), card_name, ...
             // Some exports have empty meta/format columns; infer per DECK (tournament_date + archetype) from newest set_code
             const inferredMetaByDeck = new Map();
-            cardsData.forEach(card => {
+            pastMetaAllData.forEach(card => {
                 const tournamentId = String(card.tournament_id || '').trim();
                 const tournamentDate = String(card.tournament_date || '').trim();
                 const deckArchetype = String(card.archetype || '').trim();
@@ -216,7 +214,7 @@
 
             // Group cards by tournament_date + archetype (deck archetype)
             const deckMap = new Map();
-            cardsData.forEach(card => {
+            pastMetaAllData.forEach(card => {
                 const deckArchetype = sanitizePastMetaArchetypeName(card.archetype);
                 const tournamentDate = card.tournament_date || 'Unknown Date';
                 const cardTournamentId = String(card.tournament_id || '').trim();
@@ -292,7 +290,7 @@
             
             // Build latest date per meta for robust fallback sorting.
             const metaLatestDateMap = new Map();
-            cardsData.forEach(card => {
+            pastMetaAllData.forEach(card => {
                 const metaName = String(card.meta || '').trim();
                 if (!metaName) return;
                 const dateMs = parsePastMetaDateMs(card.tournament_date);
@@ -657,10 +655,11 @@
                 const isAceSpecCard = isAceSpec(cardName);
                 const proxySetCode = card.set_code || card.set || '';
                 const proxySetNumber = card.set_number || card.number || '';
+                const tableImgUrl = getBestCardImage({ card_name: cardName, set_code: proxySetCode, set_number: proxySetNumber }) || '';
                 
                 html += '<tr>';
                 html += `<td style="text-align: center; font-weight: bold; color: #2c3e50;">${count}</td>`;
-                html += `<td>${cardName}</td>`;
+                html += `<td data-card-img="${tableImgUrl}" style="cursor: default;">${cardName}</td>`;
                 html += `<td style="text-align: center;">${isAceSpecCard ? '<span style="color: #e74c3c; font-weight: bold;">★</span>' : '-'}</td>`;
                 html += `<td style="text-align: center; display:flex; gap:6px; justify-content:center;"><button class="btn btn-primary" onclick='addCardToDeck("pastMeta", "${escapeJsStr(cardName)}");' style="padding: 6px 12px; font-size: 0.85em;">+ Add</button><button class="btn" style="padding: 6px 10px; font-size: 0.8em; background:#e74c3c; color:white;" onclick='addCardToProxy("${escapeJsStr(cardName)}", "${proxySetCode}", "${proxySetNumber}", 1)'>Proxy</button></td>`;
                 html += '</tr>';
@@ -900,7 +899,7 @@
                                 ${otherPrintSparkleHtml}
                                 <div class="card-info-bottom city-league-card-info-bottom">
                                     <div class="card-info-text city-league-card-info-text">
-                                        <div class="city-league-card-title-mobile">${cardName}${cardNameWarning}</div>
+                                        <div class="city-league-card-title-mobile" data-card-img="${imageUrl}">${cardName}${cardNameWarning}</div>
                                         <div class="city-league-card-set-mobile">${setCode} ${setNumber}</div>
                                         <div class="city-league-card-stats-mobile">${percentage}% | Ø ${avgInUsingDecks}x (${avgCountOverallDisplay}x)</div>
                                         <div class="city-league-card-deck-stats-mobile">${deckCountByStatsDisplay} / ${decklistCountDisplay} Decks</div>

@@ -614,7 +614,7 @@
                             <!-- Card info section -->
                             <div class="card-info-bottom">
                                 <div class="card-info-text mb-6">
-                                    <div class="fw-bold mb-2 nowrap ellipsis">${card.card_name}</div>
+                                    <div class="fw-bold mb-2 nowrap ellipsis" data-card-img="${imageUrl}">${card.card_name}</div>
                                     <div class="color-grey fs-09">${setCode} ${setNumber}</div>
                                     ${card.metaShare > 0 ? `<div class="color-yellow fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
                                 </div>

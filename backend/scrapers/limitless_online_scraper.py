@@ -41,6 +41,19 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
 }
 
 
+# Explicit set-code → meta-format mapping (mirrors frontend mapSetCodeToMetaFormat)
+_SET_TO_META = {
+    'POR': 'TEF-POR', 'ASC': 'SVI-ASC', 'PFL': 'SVI-PFL', 'MEG': 'SVI-MEG',
+    'BLK': 'SVI-BLK', 'WHT': 'SVI-BLK', 'DRI': 'SVI-DRI', 'JTG': 'SVI-JTG',
+    'PRE': 'BRS-PRE', 'SSP': 'BRS-SSP', 'SCR': 'BRS-SCR', 'SFA': 'BRS-SFA',
+    'TWM': 'BRS-TWM', 'TEF': 'BRS-TEF', 'PAR': 'BST-PAR', 'PAF': 'SVI-PAF',
+}
+
+def _get_meta_format_code(settings: Dict[str, Any]) -> str:
+    set_code = settings.get('set', '').upper()
+    return _SET_TO_META.get(set_code, f"SVI-{set_code}")
+
+
 def clean_deck_name(deck_name: str) -> str:
     """Clean deck name by removing extra whitespace and HTML artifacts."""
     deck_name = ' '.join(deck_name.split())
@@ -901,7 +914,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             </div>
             <div class="stat-card">
                 <h3>🎴 Meta</h3>
-                <div class="value" style="font-size: 1.8em; margin: 10px 0;">SVI-{settings.get('set', 'PFL')}</div>
+                <div class="value" style="font-size: 1.8em; margin: 10px 0;">{_get_meta_format_code(settings)}</div>
                 <p style="font-size: 0.9em;">Current Format Legality</p>
             </div>
         </div>

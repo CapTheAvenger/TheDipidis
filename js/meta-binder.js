@@ -330,17 +330,60 @@
         const promises = [];
 
         // Load Current Meta Analysis if not already present
-        if (!window.currentMetaAnalysisLoaded && typeof loadCurrentMetaAnalysis === 'function') {
-            promises.push(loadCurrentMetaAnalysis());
+        if (!window.currentMetaAnalysisLoaded) {
+            if (typeof loadCurrentAnalysis === 'function') {
+                console.log('[MetaBinder] Triggering loadCurrentAnalysis()…');
+                promises.push(loadCurrentAnalysis().catch(e => console.warn('[MetaBinder] loadCurrentAnalysis failed:', e)));
+            } else if (typeof loadCurrentMetaAnalysis === 'function') {
+                console.log('[MetaBinder] Triggering loadCurrentMetaAnalysis()…');
+                promises.push(loadCurrentMetaAnalysis().catch(e => console.warn('[MetaBinder] loadCurrentMetaAnalysis failed:', e)));
+            } else {
+                // Direct CSV fallback
+                console.log('[MetaBinder] No loader found, loading CSV directly…');
+                promises.push((async () => {
+                    try {
+                        const data = await loadCSV('current_meta_card_data.csv');
+                        if (data && data.length > 0) {
+                            window.currentMetaAnalysisData = data;
+                            if (typeof populateCurrentMetaDeckSelect === 'function') {
+                                await populateCurrentMetaDeckSelect(data);
+                            }
+                            window.currentMetaAnalysisLoaded = true;
+                        }
+                    } catch (e) { console.warn('[MetaBinder] Direct CSV load failed:', e); }
+                })());
+            }
         }
 
         // Load City League Analysis if not already present
-        if (!window.cityLeagueAnalysisLoaded && typeof loadCityLeagueAnalysis === 'function') {
-            promises.push(loadCityLeagueAnalysis());
+        if (!window.cityLeagueAnalysisLoaded) {
+            if (typeof loadCityLeagueAnalysis === 'function') {
+                console.log('[MetaBinder] Triggering loadCityLeagueAnalysis()…');
+                promises.push(loadCityLeagueAnalysis().catch(e => console.warn('[MetaBinder] loadCityLeagueAnalysis failed:', e)));
+            } else {
+                // Direct CSV fallback
+                console.log('[MetaBinder] No CL loader found, loading CSV directly…');
+                promises.push((async () => {
+                    try {
+                        const data = await loadCSV('city_league_analysis.csv');
+                        if (data && data.length > 0) {
+                            window.cityLeagueAnalysisData = data;
+                            if (typeof populateCityLeagueDeckSelect === 'function') {
+                                await populateCityLeagueDeckSelect(data);
+                            }
+                            window.cityLeagueAnalysisLoaded = true;
+                        }
+                    } catch (e) { console.warn('[MetaBinder] Direct CL CSV load failed:', e); }
+                })());
+            }
         }
 
         if (promises.length > 0) {
+            console.log('[MetaBinder] Waiting for', promises.length, 'data sources…');
             await Promise.all(promises);
+            console.log('[MetaBinder] Data loading complete.',
+                'currentMetaAnalysisData:', Array.isArray(window.currentMetaAnalysisData) ? window.currentMetaAnalysisData.length + ' rows' : 'null',
+                'cityLeagueAnalysisData:', Array.isArray(window.cityLeagueAnalysisData) ? window.cityLeagueAnalysisData.length + ' rows' : 'null');
         }
     }
 
@@ -349,10 +392,12 @@
         const grid = document.getElementById('metaBinderGrid');
         if (grid) grid.innerHTML = `<p class="color-grey">${mbText('mb.loading', 'Loading meta data…')}</p>`;
 
+        console.log('[MetaBinder] Building binder…');
         await ensureMetaDataLoaded();
 
         const currentMetaArchetypes = getTopArchetypesFromSelect('currentMetaDeckSelect', 20);
         const cityLeagueArchetypes = getTopArchetypesFromSelect('cityLeagueDeckSelect', 10);
+        console.log('[MetaBinder] Archetypes found — currentMeta:', currentMetaArchetypes.length, ', cityLeague:', cityLeagueArchetypes.length);
 
         // Merge, deduplicate
         const seen = new Set();

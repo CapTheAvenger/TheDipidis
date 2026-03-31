@@ -93,6 +93,9 @@
                             <button id="menu-btn-profile" class="menu-item" data-tab-id="profile" onclick="switchTabAndUpdateMenu('profile')" data-i18n="menu.profile" role="menuitem">
                                 <span class="menu-item-label">My Profile</span>
                             </button>
+                            <button id="menu-btn-calculator" class="menu-item" data-tab-id="calculator" onclick="switchTabAndUpdateMenu('calculator')" data-i18n="menu.calculator" role="menuitem">
+                                <span class="menu-item-label">Probability Calculator</span>
+                            </button>
                             <button id="menu-btn-tutorial" class="menu-item" data-tab-id="tutorial" onclick="switchTabAndUpdateMenu('tutorial')" data-i18n="menu.howToUse" role="menuitem">
                                 <span class="menu-item-label">How to Use</span>
                             </button>
@@ -1899,7 +1902,54 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Tab: Probability Calculator -->
+            <div id="calculator" class="tab-content">
+                <div class="container">
+                    <div class="header">
+                        <h2><span data-i18n="calc.heading">🎲 TCG Probability Calculator</span></h2>
+                        <p data-i18n="calc.subtitle">Calculate the odds of drawing specific cards in your opening hand, prize cards, or topdeck.</p>
+                    </div>
+
+                    <div class="calc-layout">
+                        <div class="calc-params">
+                            <h3 data-i18n="calc.parameters">Parameters</h3>
+                            <div class="calc-field">
+                                <label for="calc-copies" data-i18n="calc.copies">Copies in Deck</label>
+                                <input type="number" class="calc-input" id="calc-copies" value="1" min="1" max="60">
+                            </div>
+                            <div class="calc-field">
+                                <label for="calc-drawn" data-i18n="calc.drawn">Cards Drawn (e.g. 7 for opening hand)</label>
+                                <input type="number" class="calc-input" id="calc-drawn" value="7" min="1" max="60">
+                            </div>
+                            <div class="calc-field">
+                                <label for="calc-in-hand" data-i18n="calc.inHand">Already in Hand (for prize/topdeck calc)</label>
+                                <input type="number" class="calc-input" id="calc-in-hand" value="0" min="0" max="4">
+                            </div>
+                        </div>
+
+                        <div class="calc-results">
+                            <div class="calc-result-card calc-result-draw">
+                                <div class="calc-result-label" data-i18n="calc.drawLabel">Draw (at least 1)</div>
+                                <div class="calc-result-value calc-prob-low" id="res-draw">11.67%</div>
+                            </div>
+                            <div class="calc-result-row">
+                                <div class="calc-result-card calc-result-prize">
+                                    <div class="calc-result-label" data-i18n="calc.prizeLabel">In Prize Cards</div>
+                                    <div class="calc-result-value" id="res-prize">9.83%</div>
+                                    <div class="calc-result-note" data-i18n="calc.prizeNote">(at least 1, after opening hand)</div>
+                                </div>
+                                <div class="calc-result-card calc-result-topdeck">
+                                    <div class="calc-result-label" data-i18n="calc.topdeckLabel">Topdeck Chance</div>
+                                    <div class="calc-result-value" id="res-topdeck">2.13%</div>
+                                    <div class="calc-result-note" data-i18n="calc.topdeckNote">(next card drawn)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tab 8: Profile -->
             <div id="profile" class="tab-content">
                 <div class="container">
@@ -3018,6 +3068,7 @@
     <script src="js/firebase-multiplayer.js?v=1"></script>
     <script src="js/playtester-mobile.js?v=1"></script>
     <script src="js/playtester.js?v=1"></script>
+    <script src="js/app-calculator.js?v=1"></script>
 
     <!-- Draw Simulator Modal -->
     <div id="drawSimulatorModal" onclick="if(event.target===this)closeDrawSimulator()" role="dialog" aria-modal="true" aria-label="Starting hand simulator">

@@ -2670,6 +2670,33 @@
     background: #f0f4ff;
 }
 
+/* ====================================
+   Probability Calculator
+   ==================================== */
+.calc-layout { max-width: 620px; margin: 0 auto; }
+.calc-params { background: var(--bg-white, #fff); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.calc-params h3 { margin: 0 0 16px; font-size: 1.1rem; color: var(--pokemon-blue, #1a5276); }
+.calc-field { margin-bottom: 14px; }
+.calc-field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: var(--text-dark, #333); }
+.calc-input { width: 100%; padding: 10px 12px; font-size: 1rem; border: 2px solid #dde3ea; border-radius: 8px; background: var(--bg-light, #f8fafc); transition: border-color .2s; }
+.calc-input:focus { border-color: var(--pokemon-blue, #3498db); outline: none; }
+.calc-results { display: flex; flex-direction: column; gap: 14px; }
+.calc-result-card { border-radius: 12px; padding: 20px; text-align: center; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+.calc-result-draw { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+.calc-result-prize { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+.calc-result-topdeck { background: linear-gradient(135deg, #2980b9, #3498db); }
+.calc-result-label { font-size: 0.85rem; opacity: .85; margin-bottom: 6px; }
+.calc-result-value { font-size: 2.4rem; font-weight: 800; line-height: 1.1; }
+.calc-result-note { font-size: 0.7rem; opacity: .7; margin-top: 4px; }
+.calc-result-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.calc-prob-high { color: #fff !important; }
+.calc-prob-mid { color: #fff !important; }
+.calc-prob-low { color: #fff !important; }
+@media (max-width: 480px) {
+    .calc-result-value { font-size: 1.8rem; }
+    .calc-result-row { grid-template-columns: 1fr; }
+}
+
 .meta-binder-card-info {
     display: flex;
     align-items: center;

@@ -70,7 +70,11 @@ Statische Bilder und visuelle Assets.
 Testskripte fuer Scraper- und Price-Funktionen.
 
 ### utils/
-Hilfsmodule fuer Parsing, Mapping, Normalisierung und Wiederverwendung.
+Aktive manuelle Hilfsskripte fuer Datenpflege und Sortierung.
+Details und Zweckbeschreibungen stehen in utils/README.md.
+
+### archive/utils/
+Archivierte Einmal-Fix- und Regenerationsskripte ohne aktuelle Automation.
 
 ### .github/
 GitHub-Workflows und Repository-Automation.
@@ -89,3 +93,6 @@ Workspace-spezifische Editor-Konfiguration.
 
 Wenn Dateien/Ordner im Root oder in den Kernverzeichnissen hinzukommen/entfernt werden,
 soll dieses Dokument direkt mit aktualisiert werden.
+
+Zusatz: Einmal-Fixes zuerst nach archive/utils verschieben und erst nach
+laengerer Nichtnutzung loeschen.

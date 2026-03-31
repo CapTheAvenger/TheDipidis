@@ -510,13 +510,14 @@ function hideLoadingIndicator(containerOrId) {
         function sanitizeDeckDependencies(cardsToAdd) {
             const list = Array.isArray(cardsToAdd) ? cardsToAdd : [];
             if (list.length === 0) return list;
+            const safeEntries = list.filter(entry => entry && typeof entry === 'object');
 
-            const hasStage2 = list.some(entry => String(entry?.type || entry?.card_type || '').toLowerCase().includes('stage 2'));
+            const hasStage2 = safeEntries.some(entry => String(entry.type || entry.card_type || '').toLowerCase().includes('stage 2'));
             if (!hasStage2) {
-                return list.filter(entry => normalizeCardName(entry.card_name) !== 'rare candy');
+                return safeEntries.filter(entry => normalizeCardName(entry.card_name) !== 'rare candy');
             }
 
-            const next = list.map(entry => ({ ...entry }));
+            const next = safeEntries.map(entry => ({ ...entry }));
             const rareCandy = next.find(entry => normalizeCardName(entry.card_name) === 'rare candy');
             if (rareCandy && Number.isFinite(rareCandy.addCount)) {
                 rareCandy.addCount = Math.min(rareCandy.addCount, 3);

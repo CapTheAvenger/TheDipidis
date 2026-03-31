@@ -105,3 +105,14 @@ ENV/
 debug_check.py
 fix_meta_play_data.py
 screenshot/
+
+# Generated E2E artifacts
+tests/artifacts/
+
+# Local Windows shortcuts (developer-local helper files)
+*.lnk
+
+# Archive folders (moved/deprecated files kept locally)
+_archive/
+archive/
+data/_archive/

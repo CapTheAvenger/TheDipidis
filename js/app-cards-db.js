@@ -164,6 +164,12 @@
         const cardsPerPage = 60;
         let showAllCards = false;
         let showOnlyOnePrint = true; // Toggle for deduplication: true = only show 1 print per card (low rarity, newest)
+        const cardsVirtualState = {
+            observer: null,
+            slots: [],
+            estimatedHeight: 460,
+            renderedCount: 0
+        };
         let _loadCardsRunning = false;
         
         async function loadCards() {
@@ -1934,6 +1940,8 @@
             const content = document.getElementById('cardsContent');
             const resultsInfo = document.getElementById('cardResultsInfo');
             const shouldScrollToTop = options.scrollToTop !== false;
+
+            destroyCardsVirtualGrid();
             
             if (cards.length === 0) {
                 content.innerHTML = '<div style="text-align: center; padding: 40px; color: #444;"><h2>No Cards Found</h2><p style="font-weight: 500;">Try adjusting your filter settings</p></div>';
@@ -1971,29 +1979,10 @@
                 });
             }
             
-            // Create card grid with DocumentFragment for batch DOM insert
+            // Create card grid and virtualize heavy card nodes using IO placeholders
             const grid = document.createElement('div');
             grid.className = 'card-database-grid';
-            const fragment = document.createDocumentFragment();
-            
-            let renderedCount = 0;
-            let skippedNoName = 0;
-            let skippedNullEl = 0;
-            cardsToShow.forEach(card => {
-                // Skip cards with missing name
-                if (!card.name) {
-                    skippedNoName++;
-                    return;
-                }
-                const cardEl = createCardDatabaseItem(card, namePrintsIndex);
-                if (cardEl) {
-                    fragment.appendChild(cardEl);
-                    renderedCount++;
-                } else {
-                    skippedNullEl++;
-                }
-            });
-            grid.appendChild(fragment);
+            mountVirtualCardsGrid(grid, cardsToShow, (card) => createCardDatabaseItem(card, namePrintsIndex));
             
             // Create pagination controls for bottom
             const paginationBottom = createPaginationControls(cards.length, totalPages);
@@ -2008,6 +1997,81 @@
                 // Scroll to top of cards section for filter/pagination changes.
                 document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+        }
+
+        function destroyCardsVirtualGrid() {
+            if (cardsVirtualState.observer) {
+                cardsVirtualState.observer.disconnect();
+                cardsVirtualState.observer = null;
+            }
+            cardsVirtualState.slots = [];
+            cardsVirtualState.renderedCount = 0;
+        }
+
+        function mountVirtualCardsGrid(grid, cards, createNode) {
+            destroyCardsVirtualGrid();
+
+            const fragment = document.createDocumentFragment();
+            cardsVirtualState.slots = cards.map((card) => {
+                const slot = document.createElement('div');
+                slot.className = 'virtual-card-slot';
+                slot.style.minHeight = `${cardsVirtualState.estimatedHeight}px`;
+                slot.dataset.rendered = 'false';
+                slot._cardData = card;
+                fragment.appendChild(slot);
+                return slot;
+            });
+            grid.appendChild(fragment);
+
+            const renderSlot = (slot) => {
+                if (!slot || slot.dataset.rendered === 'true') return;
+                const node = createNode(slot._cardData);
+                slot.textContent = '';
+                if (node) {
+                    slot.appendChild(node);
+                    slot.dataset.rendered = 'true';
+                    cardsVirtualState.renderedCount += 1;
+                    requestAnimationFrame(() => {
+                        const measured = Math.round(slot.getBoundingClientRect().height || 0);
+                        if (measured > 120) {
+                            slot.style.minHeight = `${measured}px`;
+                            cardsVirtualState.estimatedHeight = Math.round((cardsVirtualState.estimatedHeight * 0.85) + (measured * 0.15));
+                        }
+                    });
+                }
+            };
+
+            const unrenderSlot = (slot) => {
+                if (!slot || slot.dataset.rendered !== 'true') return;
+                const measured = Math.round(slot.getBoundingClientRect().height || cardsVirtualState.estimatedHeight);
+                slot.textContent = '';
+                slot.dataset.rendered = 'false';
+                slot.style.minHeight = `${Math.max(120, measured)}px`;
+                cardsVirtualState.renderedCount = Math.max(0, cardsVirtualState.renderedCount - 1);
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    const slot = entry.target;
+                    if (entry.isIntersecting) {
+                        renderSlot(slot);
+                    } else {
+                        unrenderSlot(slot);
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '700px 0px 700px 0px',
+                threshold: 0.01
+            });
+
+            cardsVirtualState.observer = observer;
+            cardsVirtualState.slots.forEach((slot, index) => {
+                observer.observe(slot);
+                if (index < 16) {
+                    renderSlot(slot);
+                }
+            });
         }
         
         function createPaginationControls(totalCards, totalPages) {

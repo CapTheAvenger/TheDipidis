@@ -44,6 +44,12 @@
     align-items: stretch !important;
 }
 
+#cards .card-database-grid .virtual-card-slot,
+#cityLeagueDeckOverview .virtual-card-slot {
+    width: 100%;
+    contain: layout style paint;
+}
+
 #cards .card-database-item {
     border-radius: 12px !important;
     border: 1px solid #d8deea !important;

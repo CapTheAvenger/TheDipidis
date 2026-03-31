@@ -1442,7 +1442,9 @@ const BASE_PATH = './data/';
             // each sanitized name per tournament, so we can correct total_decks_in_archetype.
             const rawArchetypesPerGroup = new Map(); // key "tournamentId|||sanitizedArch" → Set<rawArch>
             rows.forEach(row => {
+                if (!row || typeof row !== 'object') return;
                 const rawArch = String(row.archetype || '').trim();
+                if (!rawArch) return;
                 const sanitized = sanitizeTournamentArchetypeName(rawArch);
                 const tournamentId = String(row.tournament_id || '').trim();
                 const groupKey = `${tournamentId}|||${sanitized}`;
@@ -1451,11 +1453,15 @@ const BASE_PATH = './data/';
             });
 
             return rows.map(row => {
+                if (!row || typeof row !== 'object') return null;
                 const normalized = { ...row };
                 const rawArch = String(normalized.archetype || '').trim();
                 normalized.archetype = sanitizeTournamentArchetypeName(rawArch);
 
-                const normalizedFormat = normalizeTournamentFormatLabel(normalized.format || normalized.meta || '', normalized.set_code || '');
+                const rawFormat = Object.prototype.hasOwnProperty.call(normalized, 'format')
+                    ? normalized.format
+                    : (normalized.meta || '');
+                const normalizedFormat = normalizeTournamentFormatLabel(rawFormat, normalized.set_code || '');
                 normalized.format = normalizedFormat;
                 // Fallback CSV (tournament_cards_data_cards.csv) stores format codes
                 // (e.g. 'SVI-ASC') in the meta column, not source labels. Since all
@@ -1949,9 +1955,11 @@ const BASE_PATH = './data/';
          *   - Pokédex number (exact match for 1-2 digit terms, partial for 3+)
          */
         function filterCardsArray(allCardsArray, searchInputText) {
+            const safeCards = Array.isArray(allCardsArray) ? allCardsArray : [];
             const term = (searchInputText || '').toLowerCase().trim();
-            if (!term) return allCardsArray;
-            return allCardsArray.filter(card => {
+            if (!term) return safeCards;
+            return safeCards.filter(card => {
+                if (!card || typeof card !== 'object') return false;
                 const nameEn = (card.name_en || card.name || '').toLowerCase();
                 const nameDe = (card.name_de || '').toLowerCase();
                 const setCode = (card.set || '').toLowerCase();

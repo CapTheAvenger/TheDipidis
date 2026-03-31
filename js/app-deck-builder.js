@@ -1428,6 +1428,85 @@
         }
         
         // ========== DECK OVERVIEW RENDERING FUNCTIONS ==========
+
+        const deckOverviewVirtualState = {
+            observer: null,
+            slots: [],
+            estimatedHeight: 360
+        };
+
+        function destroyDeckOverviewVirtualGrid() {
+            if (deckOverviewVirtualState.observer) {
+                deckOverviewVirtualState.observer.disconnect();
+                deckOverviewVirtualState.observer = null;
+            }
+            deckOverviewVirtualState.slots = [];
+        }
+
+        function mountDeckOverviewVirtualGrid(container, cards, createNode) {
+            destroyDeckOverviewVirtualGrid();
+            container.textContent = '';
+
+            const fragment = document.createDocumentFragment();
+            deckOverviewVirtualState.slots = cards.map((card) => {
+                const slot = document.createElement('div');
+                slot.className = 'virtual-card-slot';
+                slot.style.minHeight = `${deckOverviewVirtualState.estimatedHeight}px`;
+                slot.dataset.rendered = 'false';
+                slot._cardData = card;
+                fragment.appendChild(slot);
+                return slot;
+            });
+            container.appendChild(fragment);
+
+            const renderSlot = (slot) => {
+                if (!slot || slot.dataset.rendered === 'true') return;
+                const node = createNode(slot._cardData);
+                slot.textContent = '';
+                if (node) {
+                    slot.appendChild(node);
+                    slot.dataset.rendered = 'true';
+                    requestAnimationFrame(() => {
+                        const measured = Math.round(slot.getBoundingClientRect().height || 0);
+                        if (measured > 100) {
+                            slot.style.minHeight = `${measured}px`;
+                            deckOverviewVirtualState.estimatedHeight = Math.round((deckOverviewVirtualState.estimatedHeight * 0.85) + (measured * 0.15));
+                        }
+                    });
+                }
+            };
+
+            const unrenderSlot = (slot) => {
+                if (!slot || slot.dataset.rendered !== 'true') return;
+                const measured = Math.round(slot.getBoundingClientRect().height || deckOverviewVirtualState.estimatedHeight);
+                slot.textContent = '';
+                slot.dataset.rendered = 'false';
+                slot.style.minHeight = `${Math.max(100, measured)}px`;
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    const slot = entry.target;
+                    if (entry.isIntersecting) {
+                        renderSlot(slot);
+                    } else {
+                        unrenderSlot(slot);
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '600px 0px 600px 0px',
+                threshold: 0.01
+            });
+
+            deckOverviewVirtualState.observer = observer;
+            deckOverviewVirtualState.slots.forEach((slot, index) => {
+                observer.observe(slot);
+                if (index < 20) {
+                    renderSlot(slot);
+                }
+            });
+        }
         
         function renderOverviewCards(cards) {
             /**
@@ -1453,8 +1532,8 @@
             
             const overviewContainer = document.getElementById('cityLeagueDeckOverview');
             if (!overviewContainer) return;
-            
-            const gridHtml = sortedCards.map(card => {
+
+            mountDeckOverviewVirtualGrid(overviewContainer, sortedCards, (card) => {
                 const imageUrl = getBestCardImage(card);
                 // Konvertiere Komma zu Punkt fuer parseFloat (CSV verwendet Komma als Dezimaltrennzeichen)
                 const percentageStr = (card.percentage_in_archetype || '0').toString().replace(',', '.');
@@ -1501,8 +1580,8 @@
                 } else {
                     imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">??</div>`;
                 }
-                
-                return `
+
+                const html = `
                     <div class="card-item card-item-shadow">
                         <div class="pos-rel w-100">
                             ${imgHtml}
@@ -1531,9 +1610,10 @@
                         </div>
                     </div>
                 `;
-            }).join('');
-            
-            overviewContainer.innerHTML = gridHtml;
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+                return wrapper.firstElementChild;
+            });
         }
         
         function generateDeckGrid(source) {

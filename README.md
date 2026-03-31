@@ -316,6 +316,45 @@ pip install -r requirements.txt
 4. **Web-Interface testen** → `python -m http.server 8000` → `http://localhost:8000`
 5. **Zu GitHub pushen** → `PUSH_TO_GITHUB.bat`
 
+## 🧹 Cleanup-Checkliste (sicheres Entfernen)
+
+Wenn Skripte als ungenutzt markiert sind, bitte nicht sofort endgueltig loeschen.
+
+1. Datei zuerst nach `_archive/` oder `archive/` verschieben.
+2. Lokalen Lauf pruefen (Dashboard starten, Seite lokal oeffnen, relevante Tests ausfuehren).
+3. Auf dynamische Dateinamen achten (z. B. String-Verkettungen bei Dateipfaden).
+4. Wenn alles stabil bleibt, Datei im Archiv belassen und erst spaeter final loeschen.
+
+Hinweis:
+- Die aktuelle Utility-Archivierung ist in `archive/utils/` dokumentiert.
+- Aktive manuelle Utilities sind in `utils/README.md` beschrieben.
+
+### PR-Loesch-Freigabevorlage (Copy/Paste)
+
+Nutze diese Vorlage in PR-Beschreibungen, wenn Dateien entfernt oder archiviert werden:
+
+```md
+## Loesch-/Archivierungs-Freigabe
+
+### Kandidaten
+- [ ] Datei(en) in `_archive/` oder `archive/` verschoben (nicht hart geloescht)
+- [ ] Grund pro Datei kurz dokumentiert
+
+### Sicherheitspruefung
+- [ ] Nach statischen Referenzen gesucht (Imports, Dateipfade, Workflow-Aufrufe)
+- [ ] Auf dynamische Pfadbildung geprueft (z. B. `"data/cards_" + year + ".json"`)
+- [ ] GitHub Actions/Workflows geprueft (`.github/workflows/`)
+
+### Laufzeit-Check
+- [ ] Lokalen Server gestartet und Hauptseiten geoeffnet
+- [ ] Relevante Skripte/Tests ausgefuehrt
+- [ ] Keine Regression sichtbar
+
+### Entscheidung
+- [ ] Datei bleibt vorerst im Archiv (empfohlen)
+- [ ] Finales Loeschen erst nach Beobachtungszeitraum (z. B. 2-4 Wochen)
+```
+
 ## 📚 Dokumentation
 
 Detaillierte Dokumentation in separaten Dateien:

@@ -186,22 +186,81 @@
         if (els.text) els.text.textContent = text;
     }
 
+    // ── All known archetype names (cached after first population) ──
+    let allAdminArchetypes = [];
+
     function getAdminArchetypeOptions() {
-        const select = document.getElementById('currentMetaDeckSelect');
-        if (!select) return [];
-        return Array.from(select.querySelectorAll('option'))
-            .map(option => normalize(option.value))
-            .filter(Boolean)
-            .sort((a, b) => a.localeCompare(b));
+        // Collect from all available select dropdowns
+        const names = new Set();
+        ['currentMetaDeckSelect', 'cityLeagueDeckSelect'].forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
+            Array.from(select.querySelectorAll('option')).forEach(option => {
+                const v = normalize(option.value);
+                if (v) names.add(v);
+            });
+        });
+        // Also scan loaded analysis data arrays
+        [window.currentMetaAnalysisData, window.cityLeagueAnalysisData].forEach(data => {
+            if (!Array.isArray(data)) return;
+            data.forEach(row => {
+                const v = normalize(row.archetype);
+                if (v) names.add(v);
+            });
+        });
+        return Array.from(names).sort((a, b) => a.localeCompare(b));
     }
 
-    function populateAdminArchetypeOptions(activeArchetype) {
+    async function ensureAdminArchetypesLoaded() {
+        // If we already have archetypes, skip
+        if (allAdminArchetypes.length > 0) return;
+        const initial = getAdminArchetypeOptions();
+        if (initial.length > 0) { allAdminArchetypes = initial; return; }
+
+        // Try loading data
+        const promises = [];
+        if (!window.currentMetaAnalysisLoaded) {
+            if (typeof loadCurrentAnalysis === 'function') {
+                promises.push(loadCurrentAnalysis().catch(() => {}));
+            } else if (typeof loadCurrentMetaAnalysis === 'function') {
+                promises.push(loadCurrentMetaAnalysis().catch(() => {}));
+            } else if (typeof loadCSV === 'function') {
+                promises.push(loadCSV('current_meta_card_data.csv').then(data => {
+                    if (data && data.length) window.currentMetaAnalysisData = data;
+                }).catch(() => {}));
+            }
+        }
+        if (!window.cityLeagueAnalysisLoaded) {
+            if (typeof loadCityLeagueAnalysis === 'function') {
+                promises.push(loadCityLeagueAnalysis().catch(() => {}));
+            } else if (typeof loadCSV === 'function') {
+                promises.push(loadCSV('city_league_analysis.csv').then(data => {
+                    if (data && data.length) window.cityLeagueAnalysisData = data;
+                }).catch(() => {}));
+            }
+        }
+        if (promises.length > 0) await Promise.all(promises);
+        allAdminArchetypes = getAdminArchetypeOptions();
+    }
+
+    function populateAdminArchetypeOptions(activeArchetype, filterText) {
         const els = getTooltipElements();
         if (!els.adminArchetype) return;
 
-        const values = getAdminArchetypeOptions();
+        let values = allAdminArchetypes.length > 0 ? allAdminArchetypes : getAdminArchetypeOptions();
+        if (!values.length) {
+            els.adminArchetype.innerHTML = '<option value="">Loading archetypes…</option>';
+            return;
+        }
+
+        // Apply search filter
+        if (filterText) {
+            const lower = filterText.toLowerCase();
+            values = values.filter(v => v.toLowerCase().includes(lower));
+        }
+
         if (values.length === 0) {
-            els.adminArchetype.innerHTML = '';
+            els.adminArchetype.innerHTML = '<option value="">No match</option>';
             return;
         }
 
@@ -216,9 +275,16 @@
             .join('');
     }
 
-    function hydrateAdminFields(archetype) {
+    function filterTooltipAdminArchetypes() {
+        const searchInput = document.getElementById('tooltipAdminSearch');
+        const filterText = searchInput ? searchInput.value.trim() : '';
+        populateAdminArchetypeOptions('', filterText);
+    }
+
+    async function hydrateAdminFields(archetype) {
         const els = getTooltipElements();
         const overrides = getOverrides();
+        await ensureAdminArchetypesLoaded();
         populateAdminArchetypeOptions(archetype);
         if (els.adminArchetype) els.adminArchetype.value = archetype || '';
         if (els.adminText) els.adminText.value = archetype && overrides[archetype] ? String(overrides[archetype]) : '';
@@ -485,6 +551,7 @@
     window.renderArchetypeTooltip = renderArchetypeTooltip;
     window.saveArchetypeTooltipOverride = saveArchetypeTooltipOverride;
     window.resetArchetypeTooltipOverride = resetArchetypeTooltipOverride;
+    window.filterTooltipAdminArchetypes = filterTooltipAdminArchetypes;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initArchetypeTooltips, { once: true });

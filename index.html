@@ -1985,6 +1985,7 @@
                                 <p data-i18n="tip.adminSubtitle">Review AI-generated tips and overwrite manually if needed.</p>
                             </div>
                             <div class="tooltip-admin-controls">
+                                <input type="text" id="tooltipAdminSearch" class="control-input" placeholder="🔍 Search archetype..." oninput="filterTooltipAdminArchetypes()" aria-label="Search archetype">
                                 <select id="tooltipAdminArchetype" class="control-input modern-select" aria-label="Select archetype for tooltip admin"></select>
                                 <textarea id="tooltipAdminText" class="tooltip-admin-textarea" rows="3" maxlength="420" data-i18n-placeholder="tip.adminPlaceholder" placeholder="Manual beginner tooltip..."></textarea>
                                 <div class="tooltip-admin-actions">

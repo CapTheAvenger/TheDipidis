@@ -7,6 +7,7 @@
     let actionDataPromise = null;
     let lastRenderedArchetype = '';
     let overridesHydratedUserId = '';
+    let aiGeneratedTooltips = {};
 
     function tipText(key, fallback) {
         if (typeof t === 'function') {
@@ -408,6 +409,13 @@
             return;
         }
 
+        if (aiGeneratedTooltips[archetype]) {
+            setTooltipText(aiGeneratedTooltips[archetype]);
+            setSourceLabel('🤖 AI Strategy (Auto-Updated)');
+            hydrateAdminFields(archetype);
+            return;
+        }
+
         setTooltipText(tipText('tip.generating', 'Building beginner tooltip from local data...'));
         setSourceLabel(tipText('tip.sourceGenerating', 'Generating...'));
 
@@ -541,9 +549,21 @@
         }
     }
 
+    async function loadAITooltips() {
+        try {
+            const response = await fetch('data/generated_tooltips.json?t=' + Date.now());
+            if (response.ok) {
+                aiGeneratedTooltips = await response.json();
+            }
+        } catch (error) {
+            console.warn('[Tooltip] Konnte generierte Tooltips nicht laden:', error);
+        }
+    }
+
     async function initArchetypeTooltips() {
         attachHooks();
         attachAuthHooks();
+        await loadAITooltips();
         await loadOverridesRemoteForUser(false);
         renderArchetypeTooltip();
     }

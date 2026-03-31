@@ -36,6 +36,14 @@ jobs:
       - name: Install npm tools
         run: npm install -g terser clean-css-cli html-minifier-terser
 
+      - name: Generate AI Archetype Tooltips
+        if: env.OPENAI_API_KEY != ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          pip install requests beautifulsoup4 openai
+          python backend/scrapers/generate_tooltips.py
+
       - name: Validate JS syntax
         run: |
           shopt -s nullglob

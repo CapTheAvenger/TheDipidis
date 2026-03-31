@@ -18,6 +18,15 @@ from backend.settings import get_data_path
 
 setup_console_encoding()
 
+# ---------------------------------------------------------------------------
+# Standard-Format-Rotation: Das älteste Set, das noch im aktuellen Standard-
+# Format enthalten ist.  Wird ca. 1x pro Jahr bei der Rotation aktualisiert.
+# Der Wert wird automatisch über sets.json in einen set_order-Wert aufgelöst,
+# sodass neue Sets (die einen höheren order-Wert bekommen) immer automatisch
+# in den Standard-Chunk landen.
+# ---------------------------------------------------------------------------
+STANDARD_FORMAT_START_SET = 'TEF'
+
 def load_csv(filepath: str) -> List[Dict]:
     cards = []
     if os.path.exists(filepath):
@@ -151,14 +160,21 @@ def create_merged_database():
 def _generate_card_chunks(merged_cards: List[Dict], set_order: Dict):
     """Split cards into era-based chunks and write a manifest for the frontend.
 
+    The standard threshold is derived dynamically from STANDARD_FORMAT_START_SET
+    and sets.json so that newly released sets are always included automatically.
+
     Eras (based on set_order value):
-      - standard  : set_order >= 136  (Current Meta: TEF–POR)
-      - extended  : 110 <= set_order < 136  (SVI-era before TEF + SWSH-era)
+      - standard  : set_order >= <STANDARD_FORMAT_START_SET order>
+      - extended  : 110 <= set_order < standard threshold  (SVI-era before rotation + SWSH-era)
       - legacy    : set_order < 110  (everything older)
     """
+    standard_threshold = set_order.get(STANDARD_FORMAT_START_SET, 136)
+    print(f"  Standard-Chunk-Schwelle: set_order >= {standard_threshold} "
+          f"(ab Set '{STANDARD_FORMAT_START_SET}')")
+
     ERA_THRESHOLDS = [
-        ('standard', 136, None),
-        ('extended', 110, 136),
+        ('standard', standard_threshold, None),
+        ('extended', 110, standard_threshold),
         ('legacy', None, 110),
     ]
 

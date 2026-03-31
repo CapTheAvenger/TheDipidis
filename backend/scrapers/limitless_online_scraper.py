@@ -43,6 +43,7 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
 
 # Explicit set-code → meta-format mapping (mirrors frontend mapSetCodeToMetaFormat)
 _SET_TO_META = {
+    'M4': 'TEF-M4',
     'POR': 'TEF-POR', 'ASC': 'SVI-ASC', 'PFL': 'SVI-PFL', 'MEG': 'SVI-MEG',
     'BLK': 'SVI-BLK', 'WHT': 'SVI-BLK', 'DRI': 'SVI-DRI', 'JTG': 'SVI-JTG',
     'PRE': 'BRS-PRE', 'SSP': 'BRS-SSP', 'SCR': 'BRS-SCR', 'SFA': 'BRS-SFA',

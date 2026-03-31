@@ -1371,6 +1371,7 @@ const BASE_PATH = './data/';
             if (legacyToRotationCode[code]) return legacyToRotationCode[code];
 
             const explicit = {
+                M4: 'TEF-M4',
                 POR: 'TEF-POR',
                 ASC: 'SVI-ASC',
                 PFL: 'SVI-PFL',

@@ -34,6 +34,7 @@ except ImportError:
 # Hardcoded fallback — used if live scraping fails
 FALLBACK_SET_ORDER = {
     # Mega (2025-2026)
+    'M4': 152,
     'POR': 151, 'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,
     # Scarlet & Violet (2023-2025)
     'BLK': 145, 'WHT': 144, 'DRI': 143, 'JTG': 142, 'PRE': 141,

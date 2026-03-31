@@ -1916,16 +1916,20 @@ function updateTranslationsInDOM() {
     const key = el.getAttribute('data-i18n');
     if (!key) return;
     const translated = t(key);
-    // Preserve child elements (e.g. info-icon spans) — only replace the text part
     const childElements = Array.from(el.children);
     if (childElements.length > 0) {
-      // Find the first text node or create one
-      let textNode = Array.from(el.childNodes).find(n => n.nodeType === Node.TEXT_NODE);
-      if (textNode) {
-        textNode.textContent = translated + ' ';
-      } else {
-        el.insertBefore(document.createTextNode(translated + ' '), el.firstChild);
+      // If the element has a dedicated label child, update that instead
+      const labelChild = el.querySelector('.menu-item-label');
+      if (labelChild) {
+        labelChild.textContent = translated;
+        return;
       }
+      // Preserve other child elements (e.g. info-icon spans) — only replace direct text
+      const textNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+      if (textNodes.length > 0) {
+        textNodes[0].textContent = translated + ' ';
+      }
+      // If no text nodes exist, don't insert one (the element uses child elements for text)
     } else {
       el.innerHTML = translated;
     }

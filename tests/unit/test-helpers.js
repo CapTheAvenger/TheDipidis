@@ -154,6 +154,12 @@ function loadAppUtils(overrides = {}) {
         'debounce', 'showLoadingIndicator', 'hideLoadingIndicator',
         'getOpeningHandProbability', 'sanitizeDeckDependencies',
         'normalizeDeckEntries', 'formatAverageValueForUi',
+        'hasMojibake', 'escapeHtmlAttr', 'escapeJsStr', 'getDisplayCardName',
+        'getCanonicalDeckKey', 'getSafeCardIdentityName', 'getDeckCopiesForCardName',
+        'getTotalAceSpecCopiesInDeck', 'getTotalRadiantCopiesInDeck',
+        'getRarityAbbreviation', 'getNameWarningHtml', 'getAverageValueSuffix',
+        'buildCityLeaguePlacementStatsMap', 'enrichCityLeagueDataWithPlacementStats',
+        'getInternationalPrintsForCard',
     ];
     for (const fn of topLevelFns) {
         if (!exported[fn] && typeof sandbox[fn] === 'function') {

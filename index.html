@@ -2123,6 +2123,7 @@
                             <div class="flex align-center justify-between mb-8 flex-wrap gap-10">
                                 <h2 class="m-0" data-i18n="profile.myDecks">My Decks</h2>
                                 <div class="flex gap-8 flex-wrap">
+                                    <button onclick="compareActiveDecks()" class="btn-gradient-green color-white br-8 py-10 px-20 fs-14 fw-700 box-shadow-green scale-hover" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" data-i18n="profile.compareBuilt">Compare Built Decks</button>
                                     <button onclick="openMyDecksPlaytest()" class="btn-gradient-green color-white br-8 py-10 px-20 fs-14 fw-700 box-shadow-green scale-hover" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" data-i18n="profile.playtest">Playtest</button>
                                     <button onclick="createDeckFolder()" class="btn-gradient-blue color-white br-8 py-10 px-20 fs-14 fw-700 box-shadow-blue scale-hover" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" data-i18n="profile.newFolder">New Folder</button>
                                 </div>
@@ -2130,10 +2131,11 @@
                             <p class="color-grey mb-15" data-i18n="profile.decksNote">Your saved decks are synced across all devices</p>
                             
                             <!-- Deck Search -->
-                            <div class="mb-15">
+                            <div class="mb-15 flex gap-10 flex-wrap align-center">
                                 <input type="text" id="decks-search" placeholder="Search decks by name or archetype..." 
-                                    class="w-100 px-12 py-12 fs-16 border-blue br-8 box-shadow-light"
+                                    class="flex-1 minw-200 px-12 py-12 fs-16 border-blue br-8 box-shadow-light"
                                     oninput="filterMyDecks()" aria-label="Search saved decks by name or archetype">
+                                <button id="decks-filter-built" onclick="toggleBuiltFilter()" class="px-14 py-10 br-20 fs-14 fw-700 border-green bg-white color-green" style="cursor:pointer;transition:all 0.2s;" data-i18n="profile.filterBuilt">IRL Built Only</button>
                             </div>
                             
                             <!-- Folder Navigation -->

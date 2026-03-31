@@ -2169,6 +2169,63 @@
 }
 
 /* ====================================
+   STAT INFO ICON TOOLTIP
+   Visible ℹ icon with hover popup
+   ==================================== */
+.stat-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    font-style: normal;
+    background: #3B4CCA;
+    color: #fff;
+    border-radius: 50%;
+    cursor: help;
+    position: relative;
+    vertical-align: middle;
+    margin-left: 4px;
+    line-height: 1;
+}
+.stat-info-icon::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border: 1px solid #3B4CCA;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.8em;
+    font-weight: 400;
+    white-space: normal;
+    width: max-content;
+    max-width: 260px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+.stat-info-icon:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+@media (max-width: 768px) {
+    .stat-info-icon::after {
+        left: auto;
+        right: 0;
+        transform: none;
+        max-width: 200px;
+    }
+}
+
+/* ====================================
    UNIFIED BUTTON DESIGN SYSTEM
    Primary, Secondary, Danger, Ghost
    ==================================== */
@@ -2513,6 +2570,52 @@
 .meta-binder-delta-dropped {
     background: rgba(231, 76, 60, 0.12);
     color: #b42318;
+}
+
+.meta-binder-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.meta-binder-filter-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color, #ddd);
+    background: transparent;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--text-dark, #1f2d3d);
+}
+
+.meta-binder-filter-btn:hover {
+    border-color: #3B4CCA;
+    color: #3B4CCA;
+}
+
+.meta-binder-filter-btn.active {
+    background: #3B4CCA;
+    border-color: #3B4CCA;
+    color: #fff;
+}
+
+.meta-binder-card-dropped {
+    border-color: rgba(230, 126, 34, 0.4);
+    opacity: 0.7;
+}
+
+.meta-binder-badge-dropped {
+    background: rgba(231, 76, 60, 0.12);
+    color: #b42318;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .meta-binder-grid {

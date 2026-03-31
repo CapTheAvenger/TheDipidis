@@ -219,15 +219,15 @@
                             <h2 data-i18n="section.deckStats">📊 Deck Statistics</h2>
                             <div class="stats-grid city-league-stats-grid">
                                 <div class="stat-card city-league-stat-card">
-                                    <div class="label city-league-stat-label" data-i18n="stats.cardsInDeck" title="Unique: Number of different card names in the deck. Total: Sum of all card copies (should be ~60).">Cards in Deck (Unique / Total)</div>
+                                    <div class="label city-league-stat-label" data-i18n="stats.cardsInDeck">Cards in Deck (Unique / Total) <span class="stat-info-icon" data-tooltip="Unique: Number of different card names in the deck. Total: Sum of all card copies (should be ~60).">ℹ</span></div>
                                     <div class="value city-league-stat-value" id="cityLeagueStatCards">-</div>
                                 </div>
                                 <div class="stat-card city-league-stat-card">
-                                    <div class="label city-league-stat-label" data-i18n="stats.decksUsed" title="Total number of tournament decklists analyzed for this archetype.">Decks Used</div>
+                                    <div class="label city-league-stat-label" data-i18n="stats.decksUsed">Decks Used <span class="stat-info-icon" data-tooltip="Total number of tournament decklists analyzed for this archetype.">ℹ</span></div>
                                     <div class="value city-league-stat-value" id="cityLeagueStatDecksUsed">-</div>
                                 </div>
                                 <div class="stat-card city-league-stat-card">
-                                    <div class="label city-league-stat-label" data-i18n="stats.avgPlacement" title="Average tournament placement of all decks running this archetype.">Avg Placement</div>
+                                    <div class="label city-league-stat-label" data-i18n="stats.avgPlacement">Avg Placement <span class="stat-info-icon" data-tooltip="Average tournament placement of all decks running this archetype.">ℹ</span></div>
                                     <div class="value city-league-stat-value" id="cityLeagueStatAvgPlacement">-</div>
                                 </div>
                             </div>
@@ -431,15 +431,15 @@
                         <h2 class="current-meta-stats-title" data-i18n="cl.deckStats">📊 Deck Statistics</h2>
                         <div class="current-meta-stats-grid">
                             <div class="current-meta-stat-card">
-                                <div class="current-meta-stat-label" data-i18n="cl.cardsInDeck" title="Unique: Number of different card names in the deck. Total: Sum of all card copies (should be ~60).">Cards in Deck (Unique / Total)</div>
+                                <div class="current-meta-stat-label" data-i18n="cl.cardsInDeck">Cards in Deck (Unique / Total) <span class="stat-info-icon" data-tooltip="Unique: Number of different card names in the deck. Total: Sum of all card copies (should be ~60).">ℹ</span></div>
                                 <div class="current-meta-stat-value" id="currentMetaStatCards">-</div>
                             </div>
                             <div class="current-meta-stat-card">
-                                <div class="current-meta-stat-label" data-i18n="stats.totalWinrate" title="Overall win percentage across all Limitless Online tournaments for this archetype.">Total Winrate Limitless Online Tournaments</div>
+                                <div class="current-meta-stat-label" data-i18n="stats.totalWinrate">Total Winrate Limitless Online Tournaments <span class="stat-info-icon" data-tooltip="Overall win percentage across all Limitless Online tournaments for this archetype.">ℹ</span></div>
                                 <div class="current-meta-stat-value" id="currentMetaStatWinrate">-</div>
                             </div>
                             <div class="current-meta-stat-card">
-                                <div class="current-meta-stat-label" data-i18n="stats.matchupTop20" title="Average winrate of this archetype against the Top 20 most popular decks.">Matchup vs Top 20</div>
+                                <div class="current-meta-stat-label" data-i18n="stats.matchupTop20">Matchup vs Top 20 <span class="stat-info-icon" data-tooltip="Average winrate of this archetype against the Top 20 most popular decks.">ℹ</span></div>
                                 <div class="current-meta-stat-value" id="currentMetaStatMatchup">-</div>
                             </div>
                         </div>
@@ -708,15 +708,15 @@
                         <h2 class="past-meta-stats-title" data-i18n="cl.deckStats">📊 Deck Statistics</h2>
                         <div class="past-meta-stats-grid">
                             <div class="past-meta-stat-card">
-                                <div class="past-meta-stat-label" data-i18n="cl.cardsInDeck" title="Unique: Number of different card names in the deck. Total: Sum of all card copies (should be ~60).">Cards in Deck (Unique / Total)</div>
+                                <div class="past-meta-stat-label" data-i18n="cl.cardsInDeck">Cards in Deck (Unique / Total) <span class="stat-info-icon" data-tooltip="Unique: Number of different card names in the deck. Total: Sum of all card copies (should be ~60).">ℹ</span></div>
                                 <div class="past-meta-stat-value" id="pastMetaStatCards">-</div>
                             </div>
                             <div class="past-meta-stat-card">
-                                <div class="past-meta-stat-label" data-i18n="stats.tournament" title="Name and decklist count of the tournament(s) this data is aggregated from.">Tournament</div>
+                                <div class="past-meta-stat-label" data-i18n="stats.tournament">Tournament <span class="stat-info-icon" data-tooltip="Name and decklist count of the tournament(s) this data is aggregated from.">ℹ</span></div>
                                 <div class="past-meta-stat-value" id="pastMetaStatTournament">-</div>
                             </div>
                             <div class="past-meta-stat-card">
-                                <div class="past-meta-stat-label" data-i18n="stats.format" title="The TCG format (Standard/Expanded) used in the selected tournament(s).">Format</div>
+                                <div class="past-meta-stat-label" data-i18n="stats.format">Format <span class="stat-info-icon" data-tooltip="The TCG format (Standard/Expanded) used in the selected tournament(s).">ℹ</span></div>
                                 <div class="past-meta-stat-value" id="pastMetaStatFormat">-</div>
                             </div>
                         </div>
@@ -2138,9 +2138,11 @@
                             <div class="meta-binder-actions mb-15">
                                 <button onclick="buildMetaBinder()" class="btn-system-primary" data-i18n="mb.generate">🔄 Generate Binder</button>
                                 <button id="metaBinderAddWishlist" onclick="metaBinderAddMissingToWishlist()" class="btn-system-secondary" disabled data-i18n="mb.addWishlist">♥ Add Missing to Wishlist</button>
-                                <button id="metaBinderSendProxy" onclick="metaBinderSendMissingToProxy()" class="btn-system-secondary" disabled data-i18n="mb.sendProxy">🖨️ Send Missing to Proxy Printer</button>
+                                <button id="metaBinderSendProxy" onclick="metaBinderSendMissingToProxy()" class="btn-system-secondary" disabled data-i18n="mb.sendProxy">🖨️ Proxy All Missing</button>
+                                <button id="metaBinderProxyNew" onclick="metaBinderProxyNewCards()" class="btn-system-secondary" disabled data-i18n="mb.proxyNew">🆕 Proxy NEW Cards</button>
                             </div>
                             <div id="metaBinderStats" class="meta-binder-stats display-none"></div>
+                            <div id="metaBinderFilters" class="meta-binder-filters display-none"></div>
                             <div id="metaBinderDelta" class="meta-binder-delta display-none"></div>
                             <div id="metaBinderGrid" class="meta-binder-grid"></div>
                         </div>

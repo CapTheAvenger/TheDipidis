@@ -157,11 +157,25 @@
         return found ? (found.image_url || found.image || '') : '';
     }
 
+    // ── Active filter for the binder view ──
+    let metaBinderFilter = 'all'; // 'all', 'new', 'dropped', 'missing'
+
+    function setMetaBinderFilter(filter) {
+        metaBinderFilter = filter;
+        // Update filter button states
+        document.querySelectorAll('.meta-binder-filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filter);
+        });
+        const delta = window._metaBinderDelta;
+        if (delta) renderMetaBinderGrid(delta);
+    }
+
     // ── Render ──
     function renderMetaBinder(delta) {
         const grid = document.getElementById('metaBinderGrid');
         const statsEl = document.getElementById('metaBinderStats');
         const deltaEl = document.getElementById('metaBinderDelta');
+        const filtersEl = document.getElementById('metaBinderFilters');
         if (!grid) return;
 
         const { cards, droppedCards } = delta;
@@ -170,6 +184,8 @@
         const missingUnique = cards.filter(c => c.missing > 0).length;
         const missingCopies = cards.reduce((s, c) => s + c.missing, 0);
         const ownedComplete = cards.filter(c => c.missing === 0).length;
+        const newCount = cards.filter(c => c.isNew).length;
+        const droppedCount = droppedCards.length;
 
         // Stats bar
         if (statsEl) {
@@ -190,31 +206,87 @@
                 <div class="meta-binder-stat">
                     <span class="meta-binder-stat-value meta-binder-stat-red">${missingUnique} / ${missingCopies}</span>
                     <span class="meta-binder-stat-label">${mbText('mb.missing', 'Missing (Cards / Copies)')}</span>
+                </div>
+                <div class="meta-binder-stat">
+                    <span class="meta-binder-stat-value" style="color:#3B4CCA">${newCount}</span>
+                    <span class="meta-binder-stat-label">${mbText('mb.newThisWeek', 'New This Week')}</span>
+                </div>
+                <div class="meta-binder-stat">
+                    <span class="meta-binder-stat-value" style="color:#e67e22">${droppedCount}</span>
+                    <span class="meta-binder-stat-label">${mbText('mb.droppedCount', 'Dropped')}</span>
                 </div>`;
         }
 
-        // Dropped cards delta info
-        if (deltaEl) {
-            if (droppedCards.length > 0) {
-                deltaEl.classList.remove('display-none');
-                const droppedNames = droppedCards.map(c => escapeHtml(c.name)).join(', ');
-                deltaEl.innerHTML = `<p class="meta-binder-delta-text">
-                    <span class="meta-binder-delta-badge meta-binder-delta-dropped">${mbText('mb.dropped', 'Dropped')}</span>
-                    ${mbText('mb.droppedInfo', 'No longer in top meta decks:')} ${droppedNames}
-                </p>`;
-            } else {
-                deltaEl.classList.add('display-none');
-            }
+        // Filter buttons
+        if (filtersEl) {
+            filtersEl.classList.remove('display-none');
+            filtersEl.innerHTML = `
+                <button class="meta-binder-filter-btn active" data-filter="all" onclick="setMetaBinderFilter('all')">
+                    ${mbText('mb.filterAll', 'All')} (${totalUnique})
+                </button>
+                <button class="meta-binder-filter-btn" data-filter="new" onclick="setMetaBinderFilter('new')">
+                    🆕 ${mbText('mb.filterNew', 'New')} (${newCount})
+                </button>
+                <button class="meta-binder-filter-btn" data-filter="dropped" onclick="setMetaBinderFilter('dropped')">
+                    🗑️ ${mbText('mb.filterDropped', 'Dropped')} (${droppedCount})
+                </button>
+                <button class="meta-binder-filter-btn" data-filter="missing" onclick="setMetaBinderFilter('missing')">
+                    ❌ ${mbText('mb.filterMissing', 'Missing')} (${missingUnique})
+                </button>`;
         }
 
         // Enable action buttons if there are missing cards
         const wishlistBtn = document.getElementById('metaBinderAddWishlist');
         const proxyBtn = document.getElementById('metaBinderSendProxy');
+        const proxyNewBtn = document.getElementById('metaBinderProxyNew');
         if (wishlistBtn) wishlistBtn.disabled = missingCopies === 0;
         if (proxyBtn) proxyBtn.disabled = missingCopies === 0;
+        if (proxyNewBtn) proxyNewBtn.disabled = newCount === 0;
 
-        // Sort: missing first, then by deck count desc, then alphabetical
-        const sorted = [...cards].sort((a, b) => {
+        metaBinderFilter = 'all';
+        renderMetaBinderGrid(delta);
+    }
+
+    // ── Render grid (filtered) ──
+    function renderMetaBinderGrid(delta) {
+        const grid = document.getElementById('metaBinderGrid');
+        if (!grid) return;
+
+        const { cards, droppedCards } = delta;
+
+        // Apply active filter
+        let filtered;
+        if (metaBinderFilter === 'new') {
+            filtered = cards.filter(c => c.isNew);
+        } else if (metaBinderFilter === 'missing') {
+            filtered = cards.filter(c => c.missing > 0);
+        } else if (metaBinderFilter === 'dropped') {
+            // Show dropped cards (no longer in meta)
+            grid.innerHTML = droppedCards.length > 0
+                ? droppedCards.map(card => {
+                    const imageUrl = findCardImage(card.name, card.set, card.number);
+                    const safeImage = escapeHtml(imageUrl);
+                    const safeName = escapeHtml(card.name);
+                    return `
+                        <div class="meta-binder-card meta-binder-card-dropped" title="${safeName} — no longer in top meta">
+                            ${imageUrl
+                                ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                   <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
+                                : `<div class="meta-binder-card-fallback">${safeName}<br><small>${escapeHtml(card.set)} ${escapeHtml(card.number)}</small></div>`}
+                            <div class="meta-binder-card-info">
+                                <span class="meta-binder-badge-dropped">${mbText('mb.dropped', 'DROPPED')}</span>
+                            </div>
+                        </div>`;
+                }).join('')
+                : `<p class="color-grey">${mbText('mb.noDropped', 'No cards dropped from meta this week.')}</p>`;
+            return;
+        } else {
+            filtered = cards;
+        }
+
+        // Sort: new cards first, then missing, then by deck count desc, then alphabetical
+        const sorted = [...filtered].sort((a, b) => {
+            if (a.isNew !== b.isNew) return a.isNew ? -1 : 1;
             const aMiss = a.missing > 0 ? 0 : 1;
             const bMiss = b.missing > 0 ? 0 : 1;
             if (aMiss !== bMiss) return aMiss - bMiss;
@@ -253,8 +325,32 @@
         }).join('');
     }
 
+    // ── Ensure meta data is loaded before building the binder ──
+    async function ensureMetaDataLoaded() {
+        const promises = [];
+
+        // Load Current Meta Analysis if not already present
+        if (!window.currentMetaAnalysisLoaded && typeof loadCurrentMetaAnalysis === 'function') {
+            promises.push(loadCurrentMetaAnalysis());
+        }
+
+        // Load City League Analysis if not already present
+        if (!window.cityLeagueAnalysisLoaded && typeof loadCityLeagueAnalysis === 'function') {
+            promises.push(loadCityLeagueAnalysis());
+        }
+
+        if (promises.length > 0) {
+            await Promise.all(promises);
+        }
+    }
+
     // ── Main: build the binder ──
-    function buildMetaBinder() {
+    async function buildMetaBinder() {
+        const grid = document.getElementById('metaBinderGrid');
+        if (grid) grid.innerHTML = `<p class="color-grey">${mbText('mb.loading', 'Loading meta data…')}</p>`;
+
+        await ensureMetaDataLoaded();
+
         const currentMetaArchetypes = getTopArchetypesFromSelect('currentMetaDeckSelect', 20);
         const cityLeagueArchetypes = getTopArchetypesFromSelect('cityLeagueDeckSelect', 10);
 
@@ -271,12 +367,14 @@
 
         if (allArchetypes.length === 0) {
             showToast(mbText('mb.noData', 'No meta data loaded yet. Please visit Current Meta or City League first.'), 'warning');
+            if (grid) grid.innerHTML = '';
             return;
         }
 
         const binderMap = collectBinderCards(allArchetypes);
         if (binderMap.size === 0) {
             showToast(mbText('mb.noCards', 'No card data found for the selected archetypes.'), 'warning');
+            if (grid) grid.innerHTML = '';
             return;
         }
 
@@ -287,6 +385,29 @@
 
         renderMetaBinder(delta);
         showToast(mbText('mb.generated', 'Meta Binder generated!'), 'success');
+    }
+
+    // ── Quick-Action: Send NEW cards to proxy printer ──
+    function metaBinderProxyNewCards() {
+        const delta = window._metaBinderDelta;
+        if (!delta || !delta.cards) return;
+
+        const newCards = delta.cards.filter(c => c.isNew && c.missing > 0);
+        if (newCards.length === 0) {
+            showToast(mbText('mb.noNewMissing', 'No new missing cards to proxy.'), 'info');
+            return;
+        }
+
+        let totalAdded = 0;
+        newCards.forEach(card => {
+            if (typeof addCardToProxy === 'function') {
+                addCardToProxy(card.name, card.set, card.number, card.missing, true);
+                totalAdded += card.missing;
+            }
+        });
+
+        if (typeof renderProxyQueue === 'function') renderProxyQueue();
+        showToast(mbText('mb.proxyNewDone', '{count} new cards sent to Proxy Printer.').replace('{count}', String(totalAdded)), 'success');
     }
 
     // ── Quick-Action: Add missing to wishlist ──
@@ -345,4 +466,6 @@
     window.buildMetaBinder = buildMetaBinder;
     window.metaBinderAddMissingToWishlist = metaBinderAddMissingToWishlist;
     window.metaBinderSendMissingToProxy = metaBinderSendMissingToProxy;
+    window.metaBinderProxyNewCards = metaBinderProxyNewCards;
+    window.setMetaBinderFilter = setMetaBinderFilter;
 })();

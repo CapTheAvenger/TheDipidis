@@ -12,6 +12,18 @@
     ];
     utils.forEach(fn => { if (typeof window[fn] !== 'function' && typeof eval(fn) === 'function') window[fn] = eval(fn); });
 })();
+
+// ============================================================================
+// Reusable Debounce Utility
+// ============================================================================
+function debounce(fn, delay = 300) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
 // app-utils.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 

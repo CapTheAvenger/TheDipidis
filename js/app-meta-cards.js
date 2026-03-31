@@ -958,19 +958,19 @@
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('cityLeagueDeckCardSearch');
             if (searchInput) {
-                searchInput.addEventListener('input', () => searchDeckCards('cityLeague'));
+                searchInput.addEventListener('input', debounce(() => searchDeckCards('cityLeague'), 250));
             }
             
             // Current Meta search listener
             const currentMetaSearchInput = document.getElementById('currentMetaDeckCardSearch');
             if (currentMetaSearchInput) {
-                currentMetaSearchInput.addEventListener('input', () => searchDeckCards('currentMeta'));
+                currentMetaSearchInput.addEventListener('input', debounce(() => searchDeckCards('currentMeta'), 250));
             }
             
             // Past Meta search listener
             const pastMetaSearchInput = document.getElementById('pastMetaDeckCardSearch');
             if (pastMetaSearchInput) {
-                pastMetaSearchInput.addEventListener('input', () => searchDeckCards('pastMeta'));
+                pastMetaSearchInput.addEventListener('input', debounce(() => searchDeckCards('pastMeta'), 250));
             }
         });
 

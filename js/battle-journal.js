@@ -600,13 +600,13 @@
         updateThemeVisual();
 
         if (els.ownDeckSearch) {
-            els.ownDeckSearch.addEventListener('input', () => renderDeckChoices());
+            els.ownDeckSearch.addEventListener('input', debounce(() => renderDeckChoices(), 250));
         }
         if (els.opponentSearch) {
-            els.opponentSearch.addEventListener('input', () => {
+            els.opponentSearch.addEventListener('input', debounce(() => {
                 const opponentValue = String(els.opponentValue?.value || '');
                 renderOpponentChoices(opponentValue);
-            });
+            }, 250));
         }
 
         els.overlay.addEventListener('click', event => {

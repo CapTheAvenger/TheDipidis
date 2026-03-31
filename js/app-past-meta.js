@@ -327,7 +327,7 @@
                 updatePastMetaDeckList();
             });
             tournamentSelect.addEventListener('change', updatePastMetaDeckList);
-            document.getElementById('pastMetaDeckSearch').addEventListener('input', updatePastMetaDeckList);
+            document.getElementById('pastMetaDeckSearch').addEventListener('input', debounce(updatePastMetaDeckList, 250));
             document.getElementById('pastMetaDeckSelect').addEventListener('change', onPastMetaDeckSelect);
             document.getElementById('pastMetaFilterSelect').addEventListener('change', filterPastMetaCards);
             

@@ -223,3 +223,44 @@
     color: #e74c3c;
     font-weight: 700;
 }
+
+/* ============================================================
+ * Mobile / Tablet responsive rules
+ * ============================================================ */
+@media (max-width: 768px) {
+    #currentMetaContent .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    #currentMetaContent .stat-card {
+        padding: 14px 16px;
+    }
+    #currentMetaContent .stat-card .value {
+        font-size: 1.5em;
+    }
+    #currentMetaContent .section table {
+        overflow-x: auto;
+        display: block;
+    }
+    #currentMetaContent .section table thead,
+    #currentMetaContent .section table tbody {
+        display: table;
+        width: 100%;
+    }
+    #currentMetaContent .section table th,
+    #currentMetaContent .section table td {
+        padding: 7px 8px;
+        font-size: 0.82em;
+    }
+    #currentMetaContent .section > h2 {
+        font-size: 1.05em;
+    }
+    .current-meta-matchup-select-container {
+        padding: 10px;
+    }
+    #currentMetaContent .matchups-grid-container table th,
+    #currentMetaContent .matchups-grid-container table td {
+        padding: 6px 5px;
+        font-size: 0.82em;
+    }
+}

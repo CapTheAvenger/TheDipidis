@@ -129,6 +129,9 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html _site/
+          cp manifest.json _site/
+          cp service-worker.js _site/
+          cp .nojekyll _site/
           cp -r css _site/css
           cp -r js _site/js
           cp -r images _site/images 2>/dev/null || true

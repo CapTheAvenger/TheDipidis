@@ -245,6 +245,15 @@
     // ── Core: collect max card counts across all target decks ──
     function collectBinderCards(targetArchetypes) {
         const thresholdPercent = 70;
+        const intlFamilyCache = new Map();
+
+        function getCachedIntlFamilyInfo(name, set, number) {
+            const key = `${String(name || '').trim()}|${String(set || '').trim()}|${String(number || '').trim()}`;
+            if (intlFamilyCache.has(key)) return intlFamilyCache.get(key);
+            const family = getIntlFamilyInfo(name, set, number);
+            intlFamilyCache.set(key, family);
+            return family;
+        }
 
         function parseUsagePercent(row) {
             const direct = String(row.percentage_in_archetype || row.usage_rate || row.usageRate || '').trim();
@@ -299,7 +308,7 @@
                 const usagePercent = parseUsagePercent(row);
                 if (!isAceSpec && usagePercent < thresholdPercent) return;
 
-                const family = getIntlFamilyInfo(name, set, number);
+                const family = getCachedIntlFamilyInfo(name, set, number);
                 const key = family.signature || `${name}|${set}|${number}`;
                 const count = parseInt(row.max_count || row.count || 0, 10);
                 const existing = deckCardMap.get(key);
@@ -345,26 +354,27 @@
 
     // ── Delta: compare with collection and cached previous binder ──
     function computeDelta(binderMap) {
-        const collection = window.userCollection || new Set();
         const collectionCounts = window.userCollectionCounts || new Map();
+        const ownedByPrintRef = new Map();
+
+        collectionCounts.forEach((qty, collKey) => {
+            const ownedQty = parseInt(qty, 10) || 0;
+            if (ownedQty <= 0) return;
+            const parts = String(collKey || '').split('|');
+            if (parts.length < 3) return;
+            const ref = normalizeIntlPrintRef(parts[1], parts[2]);
+            if (!ref || ref === '-') return;
+            ownedByPrintRef.set(ref, (ownedByPrintRef.get(ref) || 0) + ownedQty);
+        });
 
         function countOwnedIntlRefs(refs) {
             if (!Array.isArray(refs) || refs.length === 0) return 0;
             let total = 0;
             refs.forEach(ref => {
                 const parsed = parseIntlPrintRef(ref);
-                if (!parsed.set || !parsed.number) return;
-                collectionCounts.forEach((qty, collKey) => {
-                    const ownedQty = parseInt(qty, 10) || 0;
-                    if (ownedQty <= 0) return;
-                    const parts = String(collKey || '').split('|');
-                    if (parts.length < 3) return;
-                    const cSet = String(parts[1] || '').trim().toUpperCase();
-                    const cNum = String(parts[2] || '').trim().toUpperCase();
-                    if (cSet === String(parsed.set || '').toUpperCase() && cNum === String(parsed.number || '').toUpperCase()) {
-                        total += ownedQty;
-                    }
-                });
+                const normalized = normalizeIntlPrintRef(parsed.set, parsed.number);
+                if (!normalized || normalized === '-') return;
+                total += ownedByPrintRef.get(normalized) || 0;
             });
             return total;
         }

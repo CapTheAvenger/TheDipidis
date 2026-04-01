@@ -726,14 +726,26 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
       if (card && card.image_url) {
         totalCards++;
         
-        // Apply search filter
+        // Apply search filter - Omni-Search: name (EN/DE), set+number, Pokédex number
         if (searchFilter) {
           const searchLower = searchFilter.toLowerCase();
-          const matchesName = card.name.toLowerCase().includes(searchLower);
-          const matchesSet = cardSet.toLowerCase().includes(searchLower);
-          const matchesNumber = cardNumber.toLowerCase().includes(searchLower);
-          
-          if (!matchesName && !matchesSet && !matchesNumber) {
+          const nameEn = (card.name_en || card.name || '').toLowerCase();
+          const nameDe = (card.name_de || card.card_name_de || '').toLowerCase();
+          const setCode = String(cardSet || '').toLowerCase();
+          const number = String(cardNumber || '').toLowerCase();
+          const dexNum = String(card.pokedex_number || '').toLowerCase();
+          const setNumSpace = `${setCode} ${number}`;
+          const setNumCombined = `${setCode}${number}`;
+
+          const matchesSearch =
+            nameEn.includes(searchLower) ||
+            nameDe.includes(searchLower) ||
+            setNumSpace.includes(searchLower) ||
+            setNumCombined.includes(searchLower) ||
+            (dexNum !== '' && dexNum === searchLower) ||
+            (searchLower.length >= 3 && dexNum !== '' && dexNum.includes(searchLower));
+
+          if (!matchesSearch) {
             return; // Skip this card
           }
         }
@@ -1105,7 +1117,11 @@ function updateDecksUI() {
   console.log('[updateDecksUI] Building deck list with', window.userDecks.length, 'decks');
 
   function normalizeMyDeckSetCode(value) {
-    return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return String(value || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[?#].*$/, '')
+      .replace(/[^A-Z0-9]/g, '');
   }
 
   function normalizeMyDeckCardNumber(value) {
@@ -1114,6 +1130,86 @@ function updateDecksUI() {
       .toUpperCase()
       .replace(/[?#].*$/, '')
       .replace(/[^A-Z0-9]/g, '');
+  }
+
+  function normalizeMyDeckCardName(value) {
+    return String(value || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  function parseMyDeckCardKey(rawKey) {
+    const deckKey = String(rawKey || '').trim();
+    const exact = deckKey.match(/^(.+?)\s+\(([^\s()]+)\s+([^)]+)\)$/i);
+    if (exact) {
+      return {
+        name: String(exact[1] || '').trim(),
+        setCode: normalizeMyDeckSetCode(exact[2]),
+        setNumber: normalizeMyDeckCardNumber(exact[3]),
+        hasPrint: true
+      };
+    }
+
+    // Tolerate malformed keys where URL params leaked into the key.
+    const loose = deckKey.match(/^(.+?)\s+\(([^)]*)\)$/i);
+    if (loose) {
+      const inside = String(loose[2] || '').trim();
+      const parts = inside.split(/\s+/).filter(Boolean);
+      const setGuess = parts.length > 0 ? parts[0] : '';
+      const numberGuess = parts.length > 1 ? parts.slice(1).join(' ') : '';
+      return {
+        name: String(loose[1] || '').trim(),
+        setCode: normalizeMyDeckSetCode(setGuess),
+        setNumber: normalizeMyDeckCardNumber(numberGuess),
+        hasPrint: true
+      };
+    }
+
+    return {
+      name: deckKey,
+      setCode: '',
+      setNumber: '',
+      hasPrint: false
+    };
+  }
+
+  function findFallbackDeckCardByName(rawName) {
+    if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) return null;
+
+    const cardName = String(rawName || '').trim();
+    if (!cardName) return null;
+
+    // 1) Exact match first
+    let found = window.allCardsDatabase.find(c => c.name === cardName);
+    if (found) return found;
+
+    // 2) Normalized exact match (handles punctuation/case differences)
+    const normalizedTarget = normalizeMyDeckCardName(cardName);
+    found = window.allCardsDatabase.find(c => normalizeMyDeckCardName(c.name) === normalizedTarget);
+    if (found) return found;
+
+    // 3) Legacy aliases for renamed cards
+    const legacyNameAliases = {
+      'rock fighting energy': 'Rocky Fighting Energy'
+    };
+    const alias = legacyNameAliases[normalizedTarget];
+    if (alias) {
+      found = window.allCardsDatabase.find(c => c.name === alias);
+      if (found) return found;
+    }
+
+    // 4) Soft fallback: all significant target words must appear in candidate name
+    const wantedTokens = normalizedTarget.split(' ').filter(token => token.length >= 3);
+    if (wantedTokens.length > 0) {
+      found = window.allCardsDatabase.find(c => {
+        const candidate = normalizeMyDeckCardName(c.name);
+        return wantedTokens.every(token => candidate.includes(token));
+      });
+      if (found) return found;
+    }
+
+    return null;
   }
   
   decksGrid.innerHTML = window.userDecks.map((deck, deckIndex) => {
@@ -1139,24 +1235,24 @@ function updateDecksUI() {
         let cardName = deckKey;
         
         // Parse "CardName (SET NUMBER)" format - EXACT print saved in deck
-        const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([^)]+)\)$/i);
-        if (setMatch) {
-          cardName = setMatch[1];
-          setCode = normalizeMyDeckSetCode(setMatch[2]);
-          setNumber = normalizeMyDeckCardNumber(setMatch[3]);
+        const parsedKey = parseMyDeckCardKey(deckKey);
+        if (parsedKey.hasPrint) {
+          cardName = parsedKey.name;
+          setCode = parsedKey.setCode;
+          setNumber = parsedKey.setNumber;
           
           // METHOD 1: Fast lookup using cardsBySetNumberMap (preferred)
           if (!cardData && typeof window.getIndexedCardBySetNumber === 'function') {
             cardData = window.getIndexedCardBySetNumber(setCode, setNumber);
           }
 
-          if (!cardData && window.cardsBySetNumberMap) {
+          if (!cardData && window.cardsBySetNumberMap && setCode && setNumber) {
             const key = `${setCode}-${setNumber}`;
             cardData = window.cardsBySetNumberMap[key];
           }
           
           // METHOD 2: Fallback - search allCardsDatabase by set+number (still exact print!)
-          if (!cardData && window.allCardsDatabase) {
+          if (!cardData && window.allCardsDatabase && setCode && setNumber) {
             cardData = window.allCardsDatabase.find(c => 
               c.set === setCode && c.number === setNumber
             );
@@ -1165,13 +1261,13 @@ function updateDecksUI() {
           // METHOD 3: Last resort - search by name only (loses exact print info)
           if (!cardData && window.allCardsDatabase) {
             console.warn(`[My Decks] Could not find exact print ${deckKey}, using any print of ${cardName}`);
-            cardData = window.allCardsDatabase.find(c => c.name === cardName);
+            cardData = findFallbackDeckCardByName(cardName);
           }
         } else {
           // Legacy format without set info - try name lookup
           console.warn(`[My Decks] Old deck format detected: ${deckKey}`);
           if (window.allCardsDatabase) {
-            cardData = window.allCardsDatabase.find(c => c.name === cardName);
+            cardData = findFallbackDeckCardByName(cardName);
             if (cardData) {
               setCode = cardData.set;
               setNumber = cardData.number;

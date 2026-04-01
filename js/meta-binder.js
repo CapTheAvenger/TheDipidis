@@ -11,6 +11,14 @@
         return fallback;
     }
 
+    function normalizeArchetypeKey(value) {
+        return String(value || '')
+            .toLowerCase()
+            .replace(/\bmega\b/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
     function getTopArchetypesFromRows(rows, limit) {
         if (!Array.isArray(rows) || rows.length === 0) return [];
 
@@ -19,7 +27,7 @@
             const archetypeName = String(row.archetype || row.deck_name || '').trim();
             if (!archetypeName) return;
 
-            const key = archetypeName.toLowerCase();
+            const key = normalizeArchetypeKey(archetypeName);
             const rowCount = parseInt(row.total_decks_in_archetype || row.new_count || 0, 10) || 0;
             const current = archetypeMap.get(key);
 
@@ -69,7 +77,7 @@
             const deduped = [];
             const seen = new Set();
             ranked.forEach(item => {
-                const key = item.name.toLowerCase();
+                const key = normalizeArchetypeKey(item.name);
                 if (seen.has(key)) return;
                 seen.add(key);
                 deduped.push(item.name);
@@ -110,7 +118,7 @@
     }
 
     function getCardsForArchetypeSource(archetype, sourceKey) {
-        const wanted = String(archetype || '').trim().toLowerCase();
+        const wanted = normalizeArchetypeKey(archetype);
         if (!wanted) return [];
 
         const sourceMap = {
@@ -121,7 +129,7 @@
 
         const rows = sourceMap[sourceKey];
         if (!Array.isArray(rows) || rows.length === 0) return [];
-        return rows.filter(row => String(row.archetype || '').trim().toLowerCase() === wanted);
+        return rows.filter(row => normalizeArchetypeKey(row.archetype) === wanted);
     }
 
     function resolveCityLeagueDisplayPrint(name, set, number) {
@@ -326,6 +334,15 @@
         return Number.isFinite(parsed) ? parsed : null;
     }
 
+    function normalizeMainPokemonName(value) {
+        return String(value || '')
+            .toLowerCase()
+            .replace(/\b(ex|gx|vmax|vstar|v|radiant|prism star)\b/g, '')
+            .replace(/[^a-z0-9\s-]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
     async function loadMetaBinderArchetypeMetricMaps() {
         const [currentCmp, cityCurrentCmp, cityPastCmp] = await Promise.all([
             loadCSV('limitless_online_decks_comparison.csv').catch(() => []),
@@ -337,23 +354,44 @@
         (Array.isArray(currentCmp) ? currentCmp : []).forEach(row => {
             const name = String(row.deck_name || '').trim();
             if (!name) return;
+            const key = normalizeArchetypeKey(name);
             const rank = parseLocaleNumber(row.new_rank);
             const share = parseLocaleNumber(row.new_share);
-            currentMetaMap.set(name.toLowerCase(), { rank, share });
+            const existing = currentMetaMap.get(key);
+            if (!existing) {
+                currentMetaMap.set(key, { rank, share });
+                return;
+            }
+
+            const existingRank = Number.isFinite(existing.rank) ? existing.rank : Number.MAX_SAFE_INTEGER;
+            const nextRank = Number.isFinite(rank) ? rank : Number.MAX_SAFE_INTEGER;
+            if (nextRank < existingRank) {
+                currentMetaMap.set(key, { rank, share });
+            }
         });
 
         const cityCurrentMap = new Map();
         (Array.isArray(cityCurrentCmp) ? cityCurrentCmp : []).forEach(row => {
             const name = String(row.archetype || '').trim();
             if (!name) return;
-            cityCurrentMap.set(name.toLowerCase(), parseLocaleNumber(row.new_avg_placement));
+            const key = normalizeArchetypeKey(name);
+            const next = parseLocaleNumber(row.new_avg_placement);
+            const existing = cityCurrentMap.get(key);
+            if (!Number.isFinite(existing) || (Number.isFinite(next) && next < existing)) {
+                cityCurrentMap.set(key, next);
+            }
         });
 
         const cityPastMap = new Map();
         (Array.isArray(cityPastCmp) ? cityPastCmp : []).forEach(row => {
             const name = String(row.archetype || '').trim();
             if (!name) return;
-            cityPastMap.set(name.toLowerCase(), parseLocaleNumber(row.new_avg_placement));
+            const key = normalizeArchetypeKey(name);
+            const next = parseLocaleNumber(row.new_avg_placement);
+            const existing = cityPastMap.get(key);
+            if (!Number.isFinite(existing) || (Number.isFinite(next) && next < existing)) {
+                cityPastMap.set(key, next);
+            }
         });
 
         return { currentMetaMap, cityCurrentMap, cityPastMap };
@@ -363,14 +401,39 @@
         const rows = getCardsForArchetypeSource(archetypeName, sourceKey);
         if (!Array.isArray(rows) || rows.length === 0) return '';
 
-        const sortedRows = rows.slice().sort((a, b) => {
+        const scoredRows = rows.slice().sort((a, b) => {
             const aPct = parseLocaleNumber(a.percentage_in_archetype) || 0;
             const bPct = parseLocaleNumber(b.percentage_in_archetype) || 0;
+            const aCount = parseInt(String(a.max_count || a.count || 0), 10) || 0;
+            const bCount = parseInt(String(b.max_count || b.count || 0), 10) || 0;
+
+            // Main Pokemon tends to have both high copy count and high usage.
+            if (bCount !== aCount) return bCount - aCount;
             return bPct - aPct;
         });
 
-        // Prefer the main Pokemon for archetype banners.
-        const pickedRow = sortedRows.find(row => isPokemonTypeString(row.type)) || sortedRows[0];
+        const pokemonRows = scoredRows.filter(row => {
+            if (isPokemonTypeString(row.type)) return true;
+
+            const rawName = String(row.card_name || row.full_card_name || '').trim();
+            const rawSet = String(row.set_code || row.set || '').trim();
+            const rawNumber = String(row.set_number || row.number || '').trim();
+            const resolved = sourceKey.startsWith('city-')
+                ? resolveCityLeagueDisplayPrint(rawName, rawSet, rawNumber)
+                : { name: rawName, set: rawSet, number: rawNumber };
+            const cardDb = findCardRecord(resolved.name, resolved.set, resolved.number);
+            return !!(cardDb && String(cardDb.supertype || '').toLowerCase() === 'pokemon');
+        });
+
+        const archetypeNorm = normalizeMainPokemonName(archetypeName);
+        const matchedPokemonRows = pokemonRows.filter(row => {
+            const cardName = String(row.card_name || row.full_card_name || '').trim();
+            const cardNorm = normalizeMainPokemonName(cardName);
+            return cardNorm && archetypeNorm.includes(cardNorm);
+        });
+
+        // Prefer Pokemon name that appears in archetype title; fallback to strongest Pokemon row.
+        const pickedRow = matchedPokemonRows[0] || pokemonRows[0] || scoredRows[0];
 
         if (!pickedRow) return '';
 
@@ -389,7 +452,7 @@
             title: group.title,
             source: group.source,
             items: group.names.map(name => {
-                const key = String(name || '').toLowerCase();
+                const key = normalizeArchetypeKey(name);
                 const currentMeta = metricMaps.currentMetaMap.get(key) || {};
                 return {
                     name,
@@ -678,6 +741,10 @@
                 const escapedJsName = escapeArchetypeForJs(item.name || '');
                 const navFn = item.source === 'current-meta' ? 'navigateToCurrentMetaWithDeck' : 'navigateToAnalysisWithDeck';
                 const currentMetaLabel = escapeHtml(item.currentMetaFormatLabel || 'TEF-POR');
+                const rankText = formatMetaBinderMetric(item.currentMetaRank, 1);
+                const shareText = Number.isFinite(item.currentMetaShare) ? `${item.currentMetaShare.toFixed(1)}%` : '—';
+                const cityCurrentText = formatMetaBinderMetric(item.cityCurrentAvgRank, 1);
+                const cityPastText = formatMetaBinderMetric(item.cityPastAvgRank, 1);
 
                 return `
                     <div class="deck-banner-card" onclick="${navFn}('${escapedJsName}')">
@@ -685,10 +752,10 @@
                         <div class="deck-banner-content">
                             <div class="deck-banner-name">${safeName}</div>
                             <div class="deck-banner-stats" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
-                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="Current Meta Format">🏆 ${currentMetaLabel}</span>
-                                <span class="stat-badge">📊 ${currentMetaLabel}</span>
-                                <span class="stat-badge">City current</span>
-                                <span class="stat-badge">City past</span>
+                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="Lower Rank = Better Performance">🏆 ${currentMetaLabel}: ${rankText}</span>
+                                <span class="stat-badge">📊 ${currentMetaLabel}: ${shareText}</span>
+                                <span class="stat-badge">City current: ${cityCurrentText}</span>
+                                <span class="stat-badge">City past: ${cityPastText}</span>
                             </div>
                         </div>
                     </div>`;

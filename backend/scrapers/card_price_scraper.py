@@ -77,17 +77,30 @@ def _fetch_limitless(card: dict) -> dict:
             prints_table = soup.select_one("table.card-prints-versions")
             
             if prints_table:
-                # STRATEGIE A: Die aktuell markierte Zeile (tr.current)
-                current_row = prints_table.select_one("tr.current")
-                if current_row:
-                    eur_link = current_row.select_one("a.card-price.eur")
-                    if eur_link:
-                        eur_price = eur_link.get_text(strip=True)
-                        logger.info("  [LT] Price [%s]: %s (Exakter Match)", card_id, eur_price)
-                
-                # STRATEGIE B: Zeile mit link-losem <a> = aktuelle Karte
-                # Limitless rendert die aufgerufene Karte mit <a> OHNE href,
-                # alle anderen Drucke haben <a href="/cards/SET/NUM">
+                # STRATEGIE A (PRIMÄR): Direkte Zeile per href-Link-Match für exaktes Set/Nummer.
+                # Zuverlässigste Methode: sucht die Zeile mit href="/cards/SET/NUM".
+                # Hinweis: tr.current zeigt manchmal auf eine ANDERE Karte (z.B. /cards/SVE/22
+                # markiert SV1 #258 als current statt SVE #22) -> daher Link-Match zuerst.
+                exact_path = f"/cards/{card['set']}/{card['number']}".lower()
+                for row in prints_table.select("tr"):
+                    link_elem = row.select_one("td:first-child a[href]")
+                    if link_elem and exact_path in link_elem["href"].lower():
+                        eur_link = row.select_one("a.card-price.eur")
+                        if eur_link:
+                            eur_price = eur_link.get_text(strip=True)
+                            logger.info("  [LT] Price [%s]: %s (Link-Match)", card_id, eur_price)
+                            break
+
+                # STRATEGIE B (FALLBACK): Die aktuell markierte Zeile (tr.current)
+                if not eur_price:
+                    current_row = prints_table.select_one("tr.current")
+                    if current_row:
+                        eur_link = current_row.select_one("a.card-price.eur")
+                        if eur_link:
+                            eur_price = eur_link.get_text(strip=True)
+                            logger.info("  [LT] Price [%s]: %s (tr.current)", card_id, eur_price)
+
+                # STRATEGIE C (FALLBACK): Zeile mit link-losem <a> = kein-href Marker
                 if not eur_price:
                     for row in prints_table.select("tr"):
                         first_td = row.select_one("td")
@@ -97,19 +110,7 @@ def _fetch_limitless(card: dict) -> dict:
                                 eur_link = row.select_one("a.card-price.eur")
                                 if eur_link:
                                     eur_price = eur_link.get_text(strip=True)
-                                    logger.info("  [LT] Price [%s]: %s (Current-Row Marker)", card_id, eur_price)
-                                break
-                
-                # STRATEGIE C: Link-Match fuer Set/Nummer
-                if not eur_price:
-                    exact_path = f"/cards/{card['set'].upper()}/{card['number']}"
-                    for row in prints_table.select("tr"):
-                        link_elem = row.select_one("td:first-child a[href]")
-                        if link_elem and exact_path in link_elem["href"].upper():
-                            eur_link = row.select_one("a.card-price.eur")
-                            if eur_link:
-                                eur_price = eur_link.get_text(strip=True)
-                                logger.info("  [LT] Price [%s]: %s (Link-Match)", card_id, eur_price)
+                                    logger.info("  [LT] Price [%s]: %s (No-Href Marker)", card_id, eur_price)
                                 break
                     
     except Exception as e:

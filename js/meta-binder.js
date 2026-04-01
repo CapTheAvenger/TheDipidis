@@ -343,6 +343,14 @@
             .trim();
     }
 
+    function tokenizeArchetypeMatch(value) {
+        const stopWords = new Set(['ex', 'gx', 'v', 'vmax', 'vstar', 'radiant', 'prism', 'star', 'mega', 'box', 'lead', 'deck']);
+        return normalizeMainPokemonName(value)
+            .split(' ')
+            .map(token => token.trim())
+            .filter(token => token.length > 1 && !stopWords.has(token));
+    }
+
     async function loadMetaBinderArchetypeMetricMaps() {
         const [currentCmp, cityCurrentCmp, cityPastCmp] = await Promise.all([
             loadCSV('limitless_online_decks_comparison.csv').catch(() => []),
@@ -426,14 +434,45 @@
         });
 
         const archetypeNorm = normalizeMainPokemonName(archetypeName);
+        const archetypeTokens = tokenizeArchetypeMatch(archetypeName);
         const matchedPokemonRows = pokemonRows.filter(row => {
             const cardName = String(row.card_name || row.full_card_name || '').trim();
             const cardNorm = normalizeMainPokemonName(cardName);
             return cardNorm && archetypeNorm.includes(cardNorm);
         });
 
-        // Prefer Pokemon name that appears in archetype title; fallback to strongest Pokemon row.
-        const pickedRow = matchedPokemonRows[0] || pokemonRows[0] || scoredRows[0];
+        const matchedRows = scoredRows
+            .map(row => {
+                const cardName = String(row.card_name || row.full_card_name || '').trim();
+                const cardNorm = normalizeMainPokemonName(cardName);
+                const cardTokens = tokenizeArchetypeMatch(cardName);
+                const overlap = cardTokens.filter(token => archetypeTokens.includes(token)).length;
+                const directMatch = !!(cardNorm && (archetypeNorm.includes(cardNorm) || cardNorm.includes(archetypeNorm)));
+                const count = parseInt(String(row.max_count || row.count || 0), 10) || 0;
+                const usage = parseLocaleNumber(row.percentage_in_archetype) || 0;
+                return {
+                    row,
+                    overlap,
+                    directMatch,
+                    count,
+                    usage,
+                    isPokemon: isPokemonTypeString(row.type)
+                };
+            })
+            .sort((a, b) => {
+                if (a.directMatch !== b.directMatch) return a.directMatch ? -1 : 1;
+                if (a.overlap !== b.overlap) return b.overlap - a.overlap;
+                if (a.count !== b.count) return b.count - a.count;
+                if (a.usage !== b.usage) return b.usage - a.usage;
+                if (a.isPokemon !== b.isPokemon) return a.isPokemon ? -1 : 1;
+                return 0;
+            });
+
+        // Prefer explicit deck-name/card-name match (e.g. N's Zoroark ex, Festival Grounds).
+        const matchedBest = matchedRows.find(entry => entry.directMatch || entry.overlap > 0);
+
+        // Fallback chain: best lexical match -> pokemon name match -> strongest pokemon -> strongest row.
+        const pickedRow = (matchedBest && matchedBest.row) || matchedPokemonRows[0] || pokemonRows[0] || scoredRows[0];
 
         if (!pickedRow) return '';
 
@@ -465,6 +504,13 @@
                     cityPastAvgRank: metricMaps.cityPastMap.get(key) ?? null
                 };
             }).sort((a, b) => {
+                // Keep Top 20 Current Meta exactly in source rank order.
+                if (group.source === 'current-meta') {
+                    const indexA = group.names.findIndex(name => String(name || '').toLowerCase() === String(a.name || '').toLowerCase());
+                    const indexB = group.names.findIndex(name => String(name || '').toLowerCase() === String(b.name || '').toLowerCase());
+                    return indexA - indexB;
+                }
+
                 const getRankValue = (item) => {
                     if (group.source === 'current-meta') return item.currentMetaRank;
                     if (group.source === 'city-current') return item.cityCurrentAvgRank;

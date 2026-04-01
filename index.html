@@ -38,6 +38,10 @@
     <link rel="stylesheet" href="css/de-overview-tabs.css?v=1" type="text/css">
     <link rel="stylesheet" href="css/profile-howto-info.css?v=1" type="text/css">
     <link rel="stylesheet" href="css/dashboard-theme.css?v=1" type="text/css">
+    <link rel="stylesheet" href="css/ux-step1.css?v=1" type="text/css">
+    <link rel="stylesheet" href="css/ux-step2.css?v=1" type="text/css">
+    <link rel="stylesheet" href="css/ux-step3.css?v=1" type="text/css">
+    <link rel="stylesheet" href="css/ux-step4.css?v=1" type="text/css">
     <!-- Mobile Drag & Drop polyfill for touch devices -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@3.0.0-rc.0/default.css" type="text/css" crossorigin="anonymous">
     <!-- Mobile Drag & Drop polyfill JS -->
@@ -360,10 +364,19 @@
                                     </div>
                                     <input type="text" id="cityLeagueMetaSearch" placeholder="Search name (EN/DE), set+number, or Pokédex..." class="card-search-input meta-card-analysis-search" oninput="filterMetaCards('cityLeague')" aria-label="Search City League meta cards" data-i18n-placeholder="filter.searchCardPlaceholder" data-i18n-aria="filter.searchCardAria">
                                     <div id="cityLeagueMetaGrid" class="meta-card-grid meta-card-analysis-grid">
-                                        <p class="meta-card-analysis-empty" data-i18n="meta.loadHint">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
+                                        <div class="deck-builder-empty-state app-empty-state meta-card-analysis-empty" role="status" aria-live="polite">
+                                            <div class="deck-builder-empty-icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>
+                                            </div>
+                                            <h4 class="deck-builder-empty-title">Meta analysis not loaded yet</h4>
+                                            <p class="deck-builder-empty-text" data-i18n="meta.loadHint">Click "Load Meta Analysis" to see cards from Top 10 Archetypes...</p>
+                                            <div class="deck-builder-empty-actions">
+                                                <button class="btn btn-primary" onclick="loadMetaCardAnalysis('cityLeague')" data-i18n="btn.loadMetaAnalysis">Load Meta Analysis</button>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="meta-card-analysis-btn-row">
-                                        <button class="btn-gradient-primary" onclick="loadMetaCardAnalysis('cityLeague')" data-i18n="btn.loadMetaAnalysis">Load Meta Analysis</button>
+                                        <button class="btn btn-primary" onclick="loadMetaCardAnalysis('cityLeague')" data-i18n="btn.loadMetaAnalysis">Load Meta Analysis</button>
                                     </div>
                                 </div>
                             </div>
@@ -649,7 +662,13 @@
                             </div>
                             <input type="text" id="currentMetaMetaSearch" placeholder="Search name (EN/DE), set+number, or Pokédex..." class="card-search-input city-league-meta-search current-meta-meta-search" oninput="filterMetaCards('currentMeta')" aria-label="Search current meta cards" data-i18n-placeholder="filter.searchCardPlaceholder" data-i18n-aria="filter.searchCardAria">
                             <div id="currentMetaMetaGrid" class="meta-card-grid city-league-meta-grid current-meta-meta-grid">
-                                <p class="current-meta-meta-empty">Meta Card Analysis is loading automatically...</p>
+                                <div class="deck-builder-empty-state app-empty-state current-meta-meta-empty" role="status" aria-live="polite">
+                                    <div class="deck-builder-empty-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3-3 3 2 4-5"/></svg>
+                                    </div>
+                                    <h4 class="deck-builder-empty-title">Meta analysis loading</h4>
+                                    <p class="deck-builder-empty-text">Meta Card Analysis is loading automatically...</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -963,7 +982,18 @@
                         </div>
                     </div>
 
-                    <div id="proxyQueueList" class="proxy-queue-list"></div>
+                    <div id="proxyQueueList" class="proxy-queue-list">
+                        <div class="deck-builder-empty-state app-empty-state app-empty-state-sm" role="status" aria-live="polite">
+                            <div class="deck-builder-empty-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h8"/></svg>
+                            </div>
+                            <h4 class="deck-builder-empty-title">Proxy queue is empty</h4>
+                            <p class="deck-builder-empty-text">Add a decklist or single cards to start building your print queue.</p>
+                            <div class="deck-builder-empty-actions">
+                                <button class="btn btn-primary" onclick="document.getElementById('proxyDecklistInput').focus()">Add Decklist</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1003,10 +1033,10 @@
                             Tip: If you only import a deck for Player 1, it will automatically be copied for Player 2 (Mirror Match).
                         </p>
                         <div class="sandbox-action-btn-row">
-                            <button class="btn sandbox-start-btn" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="startStandalonePlaytester()">
+                            <button class="btn sandbox-start-btn btn-lift" onclick="startStandalonePlaytester()">
                                 <span data-i18n="misc.startSimulator">START PLAYTESTER</span>
                             </button>
-                            <button class="btn sandbox-multiplayer-btn" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="openMultiplayerFromSandbox()">
+                            <button class="btn sandbox-multiplayer-btn btn-lift" onclick="openMultiplayerFromSandbox()">
                                 <span data-i18n="misc.multiplayer">MULTIPLAYER</span>
                             </button>
                         </div>
@@ -1992,8 +2022,8 @@
                                 </div>
                             </div>
                             <div class="battle-journal-profile-actions">
-                                <button type="button" class="btn-gradient-blue" onclick="openBattleJournalSheet()" data-i18n="bj.openBtn">Log Match</button>
-                                <button type="button" class="btn-gradient-green" onclick="flushBattleJournalOutbox()" data-i18n="bj.syncNow">Sync Now</button>
+                                <button type="button" class="btn btn-primary" onclick="openBattleJournalSheet()" data-i18n="bj.openBtn">Log Match</button>
+                                <button type="button" class="btn btn-secondary" onclick="flushBattleJournalOutbox()" data-i18n="bj.syncNow">Sync Now</button>
                             </div>
                         </div>
 
@@ -2007,8 +2037,8 @@
                                 <select id="tooltipAdminArchetype" class="control-input modern-select" aria-label="Select archetype for tooltip admin"></select>
                                 <textarea id="tooltipAdminText" class="tooltip-admin-textarea" rows="3" maxlength="420" data-i18n-placeholder="tip.adminPlaceholder" placeholder="Manual beginner tooltip..."></textarea>
                                 <div class="tooltip-admin-actions">
-                                    <button type="button" class="btn-gradient-blue" onclick="saveArchetypeTooltipOverride()" data-i18n="tip.saveOverride">Save Override</button>
-                                    <button type="button" class="btn-gradient-red" onclick="resetArchetypeTooltipOverride()" data-i18n="tip.resetOverride">↺ Reset</button>
+                                    <button type="button" class="btn btn-primary" onclick="saveArchetypeTooltipOverride()" data-i18n="tip.saveOverride">Save Override</button>
+                                    <button type="button" class="btn btn-danger" onclick="resetArchetypeTooltipOverride()" data-i18n="tip.resetOverride">↺ Reset</button>
                                 </div>
                             </div>
                         </div>
@@ -2040,8 +2070,7 @@
                             <!-- Dex TCG CSV Import -->
                             <div class="flex gap-10 align-center mb-15 flex-wrap">
                                 <button onclick="dexImportOpenFilePicker()"
-                                        class="btn-gradient-blue color-white br-8 py-10 px-18 fs-14 fw-700 box-shadow-blue scale-hover"
-                                        onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                                    class="btn btn-primary btn-lift">
                                     <span data-i18n="profile.dexImport">Dex Import</span>
                                 </button>
                                 <span class="fs-12 color-grey-light" data-i18n="profile.dexImportHint">Import your Dex TCG collection via CSV export</span>
@@ -2077,8 +2106,7 @@
                                     <option value="basic-energy" data-i18n="profile.filterBasicEnergy">Basic Energy</option>
                                 </select>
                                 <button onclick="clearCollection()"
-                                    class="btn-gradient-red color-white br-8 py-10 px-16 fs-13 fw-700 box-shadow-red scale-hover"
-                                    onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+                                    class="btn btn-danger btn-lift">
                                     <span data-i18n="profile.clearCollection">Clear Collection</span>
                                 </button>
                             </div>
@@ -2089,13 +2117,22 @@
                             <!-- Collection Search -->
                             <div class="mb-15">
                                 <input type="text" id="collection-search" placeholder="Search name (EN/DE), set+number, or Pokédex..." 
-                                    class="w-100 px-12 py-12 fs-16 select-blue br-8 box-shadow-light"
+                                    class="ui-search-input w-100 px-12 py-12 fs-16 select-blue br-8 box-shadow-light"
                                     oninput="filterCollection()" aria-label="Search collection by card name or set">
                                 <div id="collection-search-results" class="mt-8 fs-14 color-grey fw-500"></div>
                             </div>
                             
                             <div id="collection-grid" class="collection-grid">
-                                <p class="color-grey-light" data-i18n="profile.noCards">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>
+                                <div class="deck-builder-empty-state app-empty-state" role="status" aria-live="polite">
+                                    <div class="deck-builder-empty-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7l8-4z"/><path d="M12 3v18"/></svg>
+                                    </div>
+                                    <h4 class="deck-builder-empty-title">Your collection is empty</h4>
+                                    <p class="deck-builder-empty-text" data-i18n="profile.noCards">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>
+                                    <div class="deck-builder-empty-actions">
+                                        <button class="btn btn-primary" onclick="switchTabAndUpdateMenu('cards')">Open Card Database</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -2104,9 +2141,9 @@
                             <div class="flex align-center justify-between mb-8 flex-wrap gap-10">
                                 <h2 class="m-0" data-i18n="profile.myDecks">My Decks</h2>
                                 <div class="flex gap-8 flex-wrap">
-                                    <button onclick="compareActiveDecks()" class="btn-gradient-green color-white br-8 py-10 px-20 fs-14 fw-700 box-shadow-green scale-hover" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" data-i18n="profile.compareBuilt">Compare Built Decks</button>
-                                    <button onclick="openMyDecksPlaytest()" class="btn-gradient-green color-white br-8 py-10 px-20 fs-14 fw-700 box-shadow-green scale-hover" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" data-i18n="profile.playtest">Playtest</button>
-                                    <button onclick="createDeckFolder()" class="btn-gradient-blue color-white br-8 py-10 px-20 fs-14 fw-700 box-shadow-blue scale-hover" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" data-i18n="profile.newFolder">New Folder</button>
+                                    <button onclick="compareActiveDecks()" class="btn btn-secondary btn-lift" data-i18n="profile.compareBuilt">Compare Built Decks</button>
+                                    <button onclick="openMyDecksPlaytest()" class="btn btn-secondary btn-lift" data-i18n="profile.playtest">Playtest</button>
+                                    <button onclick="createDeckFolder()" class="btn btn-primary btn-lift" data-i18n="profile.newFolder">New Folder</button>
                                 </div>
                             </div>
                             <p class="color-grey mb-15" data-i18n="profile.decksNote">Your saved decks are synced across all devices</p>
@@ -2114,9 +2151,9 @@
                             <!-- Deck Search -->
                             <div class="mb-15 flex gap-10 flex-wrap align-center">
                                 <input type="text" id="decks-search" placeholder="Search decks by name or archetype..." 
-                                    class="flex-1 minw-200 px-12 py-12 fs-16 border-blue br-8 box-shadow-light"
+                                    class="ui-search-input flex-1 minw-200 px-12 py-12 fs-16 border-blue br-8 box-shadow-light"
                                     oninput="filterMyDecks()" aria-label="Search saved decks by name or archetype">
-                                <button id="decks-filter-built" onclick="toggleBuiltFilter()" class="px-14 py-10 br-20 fs-14 fw-700 border-green bg-white color-green" style="cursor:pointer;transition:all 0.2s;" data-i18n="profile.filterBuilt">IRL Built Only</button>
+                                <button id="decks-filter-built" onclick="toggleBuiltFilter()" class="btn btn-outline decks-filter-chip" data-i18n="profile.filterBuilt">IRL Built Only</button>
                             </div>
                             
                             <!-- Folder Navigation -->
@@ -2124,7 +2161,16 @@
                             </div>
                             
                             <div id="decks-grid" class="decks-grid">
-                                <p class="color-grey-light" data-i18n="profile.noDecks">No saved decks yet. Build a deck and save it to see it here!</p>
+                                <div class="deck-builder-empty-state app-empty-state" role="status" aria-live="polite">
+                                    <div class="deck-builder-empty-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/></svg>
+                                    </div>
+                                    <h4 class="deck-builder-empty-title">No saved decks yet</h4>
+                                    <p class="deck-builder-empty-text" data-i18n="profile.noDecks">No saved decks yet. Build a deck and save it to see it here!</p>
+                                    <div class="deck-builder-empty-actions">
+                                        <button class="btn btn-primary" onclick="switchTabAndUpdateMenu('city-league')">Build a Deck</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -2146,7 +2192,16 @@
                             <div id="wishlist-search-results" class="mb-8 fs-14 color-grey fw-500"></div>
                             
                             <div id="wishlist-grid" class="collection-grid">
-                                <p class="color-grey-light" data-i18n="profile.noWishlist">No cards in wishlist yet</p>
+                                <div class="deck-builder-empty-state app-empty-state" role="status" aria-live="polite">
+                                    <div class="deck-builder-empty-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.35-9-8.5C1.5 9 3.6 5 7.5 5c2.1 0 3.4 1.1 4.5 2.5C13.1 6.1 14.4 5 16.5 5 20.4 5 22.5 9 21 12.5 19 16.65 12 21 12 21z"/></svg>
+                                    </div>
+                                    <h4 class="deck-builder-empty-title">Your wishlist is empty</h4>
+                                    <p class="deck-builder-empty-text" data-i18n="profile.noWishlist">No cards in wishlist yet</p>
+                                    <div class="deck-builder-empty-actions">
+                                        <button class="btn btn-primary" onclick="switchTabAndUpdateMenu('cards')">Find Cards</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -2157,15 +2212,26 @@
                                 <p class="color-grey mb-15" data-i18n="mb.subtitle">All cards needed for the current meta — compared against your collection.</p>
                             </div>
                             <div class="meta-binder-actions mb-15">
-                                <button onclick="buildMetaBinder()" class="btn-system-primary" data-i18n="mb.generate">Generate Binder</button>
-                                <button id="metaBinderAddWishlist" onclick="metaBinderAddMissingToWishlist()" class="btn-system-secondary" disabled data-i18n="mb.addWishlist">Add Missing to Wishlist</button>
-                                <button id="metaBinderSendProxy" onclick="metaBinderSendMissingToProxy()" class="btn-system-secondary" disabled data-i18n="mb.sendProxy">Proxy All Missing</button>
-                                <button id="metaBinderProxyNew" onclick="metaBinderProxyNewCards()" class="btn-system-secondary" disabled data-i18n="mb.proxyNew">Proxy NEW Cards</button>
+                                <button onclick="buildMetaBinder()" class="btn btn-primary" data-i18n="mb.generate">Generate Binder</button>
+                                <button id="metaBinderAddWishlist" onclick="metaBinderAddMissingToWishlist()" class="btn btn-outline" disabled data-i18n="mb.addWishlist">Add Missing to Wishlist</button>
+                                <button id="metaBinderSendProxy" onclick="metaBinderSendMissingToProxy()" class="btn btn-outline" disabled data-i18n="mb.sendProxy">Proxy All Missing</button>
+                                <button id="metaBinderProxyNew" onclick="metaBinderProxyNewCards()" class="btn btn-outline" disabled data-i18n="mb.proxyNew">Proxy NEW Cards</button>
                             </div>
                             <div id="metaBinderStats" class="meta-binder-stats display-none"></div>
                             <div id="metaBinderFilters" class="meta-binder-filters display-none"></div>
                             <div id="metaBinderDelta" class="meta-binder-delta display-none"></div>
-                            <div id="metaBinderGrid" class="meta-binder-grid"></div>
+                            <div id="metaBinderGrid" class="meta-binder-grid">
+                                <div class="deck-builder-empty-state app-empty-state" role="status" aria-live="polite">
+                                    <div class="deck-builder-empty-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+                                    </div>
+                                    <h4 class="deck-builder-empty-title">Meta Binder not generated yet</h4>
+                                    <p class="deck-builder-empty-text">Generate the binder to compare current meta staples with your collection.</p>
+                                    <div class="deck-builder-empty-actions">
+                                        <button class="btn btn-primary" onclick="buildMetaBinder()" data-i18n="mb.generate">Generate Binder</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Settings Tab -->
@@ -2176,7 +2242,7 @@
                                     <label class="d-block fw-bold mb-5" data-i18n="profile.displayName">Display Name</label>
                                     <div class="flex gap-10 align-center">
                                         <input type="text" id="settings-display-name" placeholder="Enter your name" data-i18n-placeholder="profile.namePlaceholder" maxlength="50" class="py-10 px-10 border-grey br-6 flex-1 fs-16" aria-label="Enter your display name" data-i18n-aria="profile.nameAria">
-                                        <button onclick="saveDisplayName()" class="btn-green color-white br-6 py-10 px-25 fs-16 fw-600 nowrap" data-i18n="profile.save">
+                                        <button onclick="saveDisplayName()" class="btn btn-secondary nowrap" data-i18n="profile.save">
                                             Save
                                         </button>
                                     </div>
@@ -2184,7 +2250,7 @@
                                 </div>
                                 
                                 <div class="pt-20 border-top-grey">
-                                    <button onclick="signOut()" class="btn-red color-white br-6 py-12 px-30 fs-16 fw-600" data-i18n="profile.signOut">
+                                    <button onclick="signOut()" class="btn btn-danger" data-i18n="profile.signOut">
                                         Sign Out
                                     </button>
                                 </div>
@@ -2201,9 +2267,9 @@
     </div>
     
     <!-- Authentication Modal -->
-    <div id="auth-modal" class="auth-modal display-none" role="dialog" aria-modal="true" aria-label="Authentication" onclick="if(event.target === this) closeAuthModal()">
-        <div class="auth-modal-content">
-            <button class="auth-modal-close" onclick="closeAuthModal()" aria-label="Close"></button>
+    <div id="auth-modal" class="auth-modal ui-modal-backdrop display-none" role="dialog" aria-modal="true" aria-label="Authentication" onclick="if(event.target === this) closeAuthModal()">
+        <div class="auth-modal-content ui-modal-panel ui-modal-md">
+            <button class="auth-modal-close ui-modal-close" onclick="closeAuthModal()" aria-label="Close"></button>
             
             <!-- Sign In Form -->
             <div id="signin-form-container">
@@ -2303,9 +2369,9 @@
     </div>
 
     <!-- Rarity Switcher Modal -->
-    <div id="raritySwitcherModal" class="rarity-switcher-modal" role="dialog" aria-modal="true" aria-labelledby="raritySwitcherTitle" onclick="if(event.target === this) closeRaritySwitcher()">
-        <div class="rarity-switcher-modal-content">
-            <span class="rarity-switcher-close" onclick="closeRaritySwitcher()"></span>
+    <div id="raritySwitcherModal" class="rarity-switcher-modal ui-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="raritySwitcherTitle" onclick="if(event.target === this) closeRaritySwitcher()">
+        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-lg">
+            <span class="rarity-switcher-close ui-modal-close" onclick="closeRaritySwitcher()"></span>
             <h2 id="raritySwitcherTitle" data-i18n="modal.raritySwitcher">Card - Rarity Switcher</h2>
             
             <div id="rarityOptionsList" class="rarity-options-list">
@@ -2316,9 +2382,9 @@
     </div>
 
     <!-- Deck Compare Modal -->
-    <div id="deckCompareModal" class="rarity-switcher-modal z-10000" role="dialog" aria-modal="true" aria-label="Deck Compare" onclick="if(event.target === this) closeDeckCompare()">
-        <div class="rarity-switcher-modal-content max-w-1400 w-95 max-h-90vh overflow-y-auto">
-            <span class="rarity-switcher-close" onclick="closeDeckCompare()"></span>
+    <div id="deckCompareModal" class="rarity-switcher-modal ui-modal-backdrop z-10000" role="dialog" aria-modal="true" aria-label="Deck Compare" onclick="if(event.target === this) closeDeckCompare()">
+        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-xl max-w-1400 w-95 max-h-90vh overflow-y-auto">
+            <span class="rarity-switcher-close ui-modal-close" onclick="closeDeckCompare()"></span>
             <h2 data-i18n="compare.heading">Deck Compare</h2>
             
             <!-- Option 1: Manual Decklist Input -->
@@ -2383,9 +2449,12 @@
             </div>
         </div>
 
-        <div id="ptDirectActionModal" class="d-none pos-fixed top-0 left-0 w-100 h-100 bg-black-70 z-10001 align-center justify-center" role="dialog" aria-modal="true" aria-label="Game actions">
-            <div class="bg-white p-15 br-12 w-90 maxw-350 d-flex flex-col gap-12">
-                <h3 class="m-0 ta-center fs-16" data-i18n="pt.gameActions">Game Actions</h3>
+        <div id="ptDirectActionModal" class="d-none ui-modal-backdrop pos-fixed top-0 left-0 w-100 h-100 bg-black-70 z-10001 align-center justify-center" role="dialog" aria-modal="true" aria-label="Game actions">
+            <div class="ui-modal-panel ui-modal-sm bg-white p-15 br-12 w-90 maxw-350 d-flex flex-col gap-12 pt-direct-panel">
+                <div class="ui-modal-header">
+                    <h3 class="m-0 ta-center fs-16" data-i18n="pt.gameActions">Game Actions</h3>
+                    <button class="ui-modal-close" onclick="document.getElementById('ptDirectActionModal').style.display='none'" aria-label="Close"></button>
+                </div>
 
                 <button class="btn-primary py-10 br-6" onclick="ptOpenDeckSearch(); document.getElementById('ptDirectActionModal').style.display='none'">Deck Search</button>
 
@@ -2421,7 +2490,9 @@
                     <input type="number" id="inpIonoP2" value="6" class="w-50 ta-center fs-16 border-grey br-6" aria-label="Player 2 Iono hand size">
                 </div>
 
-                <button onclick="document.getElementById('ptDirectActionModal').style.display='none'" class="mt-5 py-12 br-6 border-none bg-grey-light fw-bold" data-i18n="btn.close">Close</button>
+                <div class="ui-modal-actions">
+                    <button onclick="document.getElementById('ptDirectActionModal').style.display='none'" class="btn btn-outline w-100" data-i18n="btn.close">Close</button>
+                </div>
             </div>
         </div>
 
@@ -2840,9 +2911,9 @@
     </div>
 
     <!-- My Decks Playtest Modal -->
-    <div id="myDecksPlaytestModal" class="rarity-switcher-modal" onclick="if(event.target===this)closeMyDecksPlaytest()" role="dialog" aria-modal="true" aria-label="My Decks playtest selector">
-        <div class="rarity-switcher-modal-content" style="max-width: 500px; background: #f8f9fa;">
-            <span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()"></span>
+    <div id="myDecksPlaytestModal" class="rarity-switcher-modal ui-modal-backdrop" onclick="if(event.target===this)closeMyDecksPlaytest()" role="dialog" aria-modal="true" aria-label="My Decks playtest selector">
+        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-md mydecks-playtest-modal-content">
+            <span class="rarity-switcher-close ui-modal-close" onclick="closeMyDecksPlaytest()"></span>
             <h2 class="setup-modal-heading green" data-i18n="myDecks.heading">Playtest – My Decks</h2>
             <p class="setup-modal-description" data-i18n="myDecks.description">Choose a deck for each player, then start the match!</p>
             <div class="mb-15">
@@ -2855,16 +2926,16 @@
                 <select id="myDeckSelectP2" class="setup-modal-select player2"></select>
             </div>
             <div class="setup-modal-btn-row">
-                <button onclick="closeMyDecksPlaytest()" class="btn-system-secondary" style="flex:1;" data-i18n="myDecks.cancelBtn">Cancel</button>
-                <button onclick="startMyDecksPlaytest()" class="btn-system-primary" style="flex:2;" data-i18n="myDecks.startBtn">Start Playtest</button>
+                <button onclick="closeMyDecksPlaytest()" class="btn btn-outline flex-1" data-i18n="myDecks.cancelBtn">Cancel</button>
+                <button onclick="startMyDecksPlaytest()" class="btn btn-primary flex-2" data-i18n="myDecks.startBtn">Start Playtest</button>
             </div>
         </div>
     </div>
 
     <!-- Playtester Setup Modal -->
-    <div id="playtesterSetupModal" class="rarity-switcher-modal" onclick="if(event.target === this) closePlaytesterSetup()" role="dialog" aria-modal="true" aria-label="Playtester setup">
-        <div class="rarity-switcher-modal-content" style="max-width: 600px; background: #f8f9fa;">
-            <span class="rarity-switcher-close" onclick="closePlaytesterSetup()"></span>
+    <div id="playtesterSetupModal" class="rarity-switcher-modal ui-modal-backdrop" onclick="if(event.target === this) closePlaytesterSetup()" role="dialog" aria-modal="true" aria-label="Playtester setup">
+        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-md playtester-setup-modal-content">
+            <span class="rarity-switcher-close ui-modal-close" onclick="closePlaytesterSetup()"></span>
             <h2 class="setup-modal-heading blue" data-i18n="setup.heading">Playtester Setup</h2>
             <p class="setup-modal-description" data-i18n="setup.description">
                 Your current deck <strong>(Player 1)</strong> is ready. What should <strong>Player 2</strong> play?
@@ -2874,10 +2945,10 @@
                 <textarea id="playtesterOpponentDeck" placeholder="Paste Player 2's deck list here (e.g. from Limitless)..." data-i18n-placeholder="setup.opponentPlaceholder" class="setup-modal-textarea"></textarea>
             </div>
             <div class="setup-modal-btn-row wide">
-                <button onclick="startPlaytesterWithMirror()" class="btn-system-secondary" style="flex: 1;" data-i18n="setup.mirrorBtn">
+                <button onclick="startPlaytesterWithMirror()" class="btn btn-outline flex-1" data-i18n="setup.mirrorBtn">
                     Mirror Match (Same Deck)
                 </button>
-                <button onclick="startPlaytesterWithOpponent()" class="btn-system-primary" style="flex: 1;" data-i18n="setup.startBtn">
+                <button onclick="startPlaytesterWithOpponent()" class="btn btn-primary flex-1" data-i18n="setup.startBtn">
                     Start vs. Opponent
                 </button>
             </div>

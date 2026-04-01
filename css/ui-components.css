@@ -2787,6 +2787,17 @@
     margin-bottom: 14px;
 }
 
+.meta-binder-filters .filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.meta-binder-filters .select-system {
+    min-width: 170px;
+}
+
 .meta-binder-filter-btn {
     padding: 6px 14px;
     border-radius: 8px;

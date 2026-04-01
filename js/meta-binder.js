@@ -57,6 +57,34 @@
 
     // ── Core: collect max card counts across all target decks ──
     function collectBinderCards(archetypes) {
+        const thresholdPercent = 70;
+
+        function parseUsagePercent(row) {
+            const direct = String(row.percentage_in_archetype || row.usage_rate || row.usageRate || '').trim();
+            if (direct) {
+                const directNum = Number.parseFloat(direct.replace(',', '.'));
+                if (!Number.isNaN(directNum)) {
+                    // Support both 0-1 and 0-100 scales.
+                    return directNum <= 1 ? directNum * 100 : directNum;
+                }
+            }
+
+            const inclusion = Number.parseFloat(String(row.deck_inclusion_count || '').replace(',', '.'));
+            const total = Number.parseFloat(String(row.total_decks_in_archetype || '').replace(',', '.'));
+            if (!Number.isNaN(inclusion) && !Number.isNaN(total) && total > 0) {
+                return (inclusion / total) * 100;
+            }
+
+            return 0;
+        }
+
+        function isAceSpecRow(row) {
+            const rarity = String(row.rarity || '').toLowerCase();
+            const group = String(row.group || '').toLowerCase();
+            const flag = String(row.is_ace_spec || '').toLowerCase();
+            return rarity.includes('ace spec') || group.includes('ace spec') || flag === 'yes' || flag === 'true';
+        }
+
         // Map<cardId, { name, set, number, maxCount, decks: string[] }>
         const binderMap = new Map();
 
@@ -69,25 +97,44 @@
                 const set = String(row.set_code || row.set || '').trim();
                 const number = String(row.set_number || row.number || '').trim();
                 if (!name) return;
+
+                const isAceSpec = isAceSpecRow(row);
+                const usagePercent = parseUsagePercent(row);
+                if (!isAceSpec && usagePercent < thresholdPercent) return;
+
                 const key = `${name}|${set}|${number}`;
                 const count = parseInt(row.max_count || row.count || 0, 10);
                 const existing = deckCardMap.get(key);
                 if (!existing || count > existing.count) {
-                    deckCardMap.set(key, { name, set, number, count });
+                    deckCardMap.set(key, {
+                        name,
+                        set,
+                        number,
+                        count,
+                        type: String(row.type || '').trim(),
+                        rarity: String(row.rarity || '').trim(),
+                        isAceSpec
+                    });
                 }
             });
 
-            deckCardMap.forEach(({ name, set, number, count }, key) => {
+            deckCardMap.forEach(({ name, set, number, count, type, rarity, isAceSpec }, key) => {
                 const cardId = buildCardId(name, set, number);
                 const entry = binderMap.get(cardId);
                 if (entry) {
                     entry.maxCount = Math.max(entry.maxCount, count);
-                    entry.decks.push(archetype);
+                    if (!entry.decks.includes(archetype)) entry.decks.push(archetype);
+                    if (!entry.type && type) entry.type = type;
+                    if (!entry.rarity && rarity) entry.rarity = rarity;
+                    entry.isAceSpec = entry.isAceSpec || isAceSpec;
                 } else {
                     binderMap.set(cardId, {
                         name, set, number,
                         maxCount: count,
-                        decks: [archetype]
+                        decks: [archetype],
+                        type,
+                        rarity,
+                        isAceSpec
                     });
                 }
             });
@@ -123,7 +170,10 @@
                 owned,
                 missing,
                 isNew: !wasInPrevious,
-                decks: entry.decks
+                decks: entry.decks,
+                type: entry.type,
+                rarity: entry.rarity,
+                isAceSpec: !!entry.isAceSpec
             });
         });
 
@@ -157,8 +207,102 @@
         return found ? (found.image_url || found.image || '') : '';
     }
 
+    function findCardRecord(name, set, number) {
+        if (typeof window.getIndexedCardBySetNumber === 'function') {
+            const card = window.getIndexedCardBySetNumber(set, number)
+                || window.getIndexedCardBySetNumber(set, String(parseInt(number, 10) || number));
+            if (card) return card;
+        }
+        const allCards = window.allCardsDatabase || [];
+        return allCards.find(c =>
+            c.name === name && c.set === set && String(c.number) === String(number)
+        ) || null;
+    }
+
+    function isPokemonTypeString(typeValue) {
+        const t = String(typeValue || '').toLowerCase();
+        return t.includes('basic')
+            || t.includes('stage')
+            || t.includes('vmax')
+            || t.includes('vstar')
+            || t.includes('ex')
+            || t.includes('mega')
+            || t.includes('break')
+            || t.includes('legend')
+            || t.includes('restored');
+    }
+
+    function normalizePokemonElement(value) {
+        const t = String(value || '').toLowerCase();
+        if (t.includes('grass')) return 'Grass';
+        if (t.includes('fire')) return 'Fire';
+        if (t.includes('water')) return 'Water';
+        if (t.includes('lightning') || t.includes('electric')) return 'Lightning';
+        if (t.includes('psychic')) return 'Psychic';
+        if (t.includes('fighting')) return 'Fighting';
+        if (t.includes('darkness') || t.includes('dark')) return 'Darkness';
+        if (t.includes('metal') || t.includes('steel')) return 'Metal';
+        if (t.includes('dragon')) return 'Dragon';
+        if (t.includes('colorless') || t.includes('normal')) return 'Colorless';
+        return '';
+    }
+
+    function getMetaBinderTypeMeta(card) {
+        const cardDb = findCardRecord(card.name, card.set, card.number);
+        const rowType = String(card.type || '').trim();
+        const rowTypeLower = rowType.toLowerCase();
+        const rarityLower = String(card.rarity || '').toLowerCase();
+        const aceSpec = !!card.isAceSpec || rarityLower.includes('ace spec');
+
+        if (aceSpec) {
+            return { supertype: 'Trainer', type: 'ACE SPEC', isAceSpec: true };
+        }
+
+        if (rowTypeLower.includes('supporter')) return { supertype: 'Trainer', type: 'Supporter', isAceSpec: false };
+        if (rowTypeLower.includes('item')) return { supertype: 'Trainer', type: 'Item', isAceSpec: false };
+        if (rowTypeLower.includes('tool')) return { supertype: 'Trainer', type: 'Tool', isAceSpec: false };
+        if (rowTypeLower.includes('stadium')) return { supertype: 'Trainer', type: 'Stadium', isAceSpec: false };
+        if (rowTypeLower.includes('special energy')) return { supertype: 'Energy', type: 'Special Energy', isAceSpec: false };
+        if (rowTypeLower.includes('basic energy')) return { supertype: 'Energy', type: 'Basic Energy', isAceSpec: false };
+
+        const looksLikePokemon = isPokemonTypeString(rowType) || (!rowTypeLower.includes('energy') && !rowTypeLower.includes('trainer'));
+        if (looksLikePokemon) {
+            let element = normalizePokemonElement(rowType);
+            if (!element && cardDb) {
+                if (typeof window.getPokemonElementFromCard === 'function') {
+                    const fromCard = window.getPokemonElementFromCard(cardDb);
+                    element = normalizePokemonElement(fromCard);
+                }
+                if (!element) {
+                    element = normalizePokemonElement(cardDb.type);
+                }
+            }
+            return { supertype: 'Pokemon', type: element ? `Pokemon-${element}` : 'Pokemon-Colorless', isAceSpec: false };
+        }
+
+        if (rowTypeLower.includes('energy')) return { supertype: 'Energy', type: 'Special Energy', isAceSpec: false };
+        return { supertype: 'Trainer', type: 'Item', isAceSpec: false };
+    }
+
+    function sortMetaCards(cards) {
+        const typeOrder = {
+            Pokemon: 1,
+            Trainer: 2,
+            Energy: 3
+        };
+        return cards.sort((a, b) => {
+            const aTypeMeta = getMetaBinderTypeMeta(a);
+            const bTypeMeta = getMetaBinderTypeMeta(b);
+            const aOrder = typeOrder[aTypeMeta.supertype] || 99;
+            const bOrder = typeOrder[bTypeMeta.supertype] || 99;
+            if (aOrder !== bOrder) return aOrder - bOrder;
+            if (aTypeMeta.type !== bTypeMeta.type) return aTypeMeta.type.localeCompare(bTypeMeta.type);
+            return a.name.localeCompare(b.name);
+        });
+    }
+
     // ── Active filter for the binder view ──
-    let metaBinderFilter = 'all'; // 'all', 'new', 'dropped', 'missing'
+    let metaBinderFilter = 'all'; // 'all', 'new', 'missing'
 
     function setMetaBinderFilter(filter) {
         metaBinderFilter = filter;
@@ -166,8 +310,33 @@
         document.querySelectorAll('.meta-binder-filter-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.filter === filter);
         });
+        applyComplexMetaFilter();
+    }
+
+    function updateMetaBinderSetFilter(cards) {
+        const setSelect = document.getElementById('mbFilterSet');
+        if (!setSelect) return;
+
+        const currentValue = setSelect.value || 'all';
+        const setCodes = [...new Set(cards.map(c => String(c.set || '').trim()).filter(Boolean))]
+            .sort((a, b) => a.localeCompare(b));
+
+        setSelect.innerHTML = [
+            '<option value="all">Alle Sets</option>',
+            ...setCodes.map(code => `<option value="${escapeHtml(code)}">${escapeHtml(code)}</option>`)
+        ].join('');
+
+        if (setCodes.includes(currentValue)) {
+            setSelect.value = currentValue;
+        } else {
+            setSelect.value = 'all';
+        }
+    }
+
+    function applyComplexMetaFilter() {
         const delta = window._metaBinderDelta;
-        if (delta) renderMetaBinderGrid(delta);
+        if (!delta) return;
+        renderMetaBinderGrid(delta);
     }
 
     // ── Render ──
@@ -221,18 +390,37 @@
         if (filtersEl) {
             filtersEl.classList.remove('display-none');
             filtersEl.innerHTML = `
-                <button class="meta-binder-filter-btn active" data-filter="all" onclick="setMetaBinderFilter('all')">
-                    ${mbText('mb.filterAll', 'All')} (${totalUnique})
-                </button>
-                <button class="meta-binder-filter-btn" data-filter="new" onclick="setMetaBinderFilter('new')">
-                    🆕 ${mbText('mb.filterNew', 'New')} (${newCount})
-                </button>
-                <button class="meta-binder-filter-btn" data-filter="dropped" onclick="setMetaBinderFilter('dropped')">
-                    🗑️ ${mbText('mb.filterDropped', 'Dropped')} (${droppedCount})
-                </button>
-                <button class="meta-binder-filter-btn" data-filter="missing" onclick="setMetaBinderFilter('missing')">
-                    ❌ ${mbText('mb.filterMissing', 'Missing')} (${missingUnique})
-                </button>`;
+                <div class="filter-group">
+                    <button class="meta-binder-filter-btn active" data-filter="all" onclick="setMetaBinderFilter('all')">${mbText('mb.filterAll', 'Alle')} (${totalUnique})</button>
+                    <button class="meta-binder-filter-btn" data-filter="missing" onclick="setMetaBinderFilter('missing')">❌ ${mbText('mb.filterMissing', 'Fehlend')} (${missingUnique})</button>
+                    <button class="meta-binder-filter-btn" data-filter="new" onclick="setMetaBinderFilter('new')">🆕 ${mbText('mb.filterNew', 'Neu')} (${newCount})</button>
+                </div>
+                <div class="filter-group">
+                    <select id="mbFilterType" onchange="applyComplexMetaFilter()" class="select-system">
+                        <option value="all">Alle Typen</option>
+                        <option value="Pokemon-Grass">Pokemon: Pflanze</option>
+                        <option value="Pokemon-Fire">Pokemon: Feuer</option>
+                        <option value="Pokemon-Water">Pokemon: Wasser</option>
+                        <option value="Pokemon-Lightning">Pokemon: Elektro</option>
+                        <option value="Pokemon-Psychic">Pokemon: Psycho</option>
+                        <option value="Pokemon-Fighting">Pokemon: Kampf</option>
+                        <option value="Pokemon-Darkness">Pokemon: Unlicht</option>
+                        <option value="Pokemon-Metal">Pokemon: Metall</option>
+                        <option value="Pokemon-Dragon">Pokemon: Drache</option>
+                        <option value="Pokemon-Colorless">Pokemon: Farblos</option>
+                        <option value="Supporter">Unterstutzer</option>
+                        <option value="Item">Item</option>
+                        <option value="Tool">Ausrustung</option>
+                        <option value="Stadium">Stadion</option>
+                        <option value="Special Energy">Spezial-Energie</option>
+                        <option value="Basic Energy">Basis-Energie</option>
+                        <option value="ACE SPEC">ACE SPEC</option>
+                    </select>
+
+                    <select id="mbFilterSet" onchange="applyComplexMetaFilter()" class="select-system">
+                        <option value="all">Alle Sets</option>
+                    </select>
+                </div>`;
         }
 
         // Enable action buttons if there are missing cards
@@ -244,6 +432,7 @@
         if (proxyNewBtn) proxyNewBtn.disabled = newCount === 0;
 
         metaBinderFilter = 'all';
+        updateMetaBinderSetFilter(cards);
         renderMetaBinderGrid(delta);
     }
 
@@ -252,7 +441,12 @@
         const grid = document.getElementById('metaBinderGrid');
         if (!grid) return;
 
-        const { cards, droppedCards } = delta;
+        const { cards } = delta;
+
+        const typeFilterEl = document.getElementById('mbFilterType');
+        const setFilterEl = document.getElementById('mbFilterSet');
+        const typeFilter = typeFilterEl ? String(typeFilterEl.value || 'all') : 'all';
+        const setFilter = setFilterEl ? String(setFilterEl.value || 'all').toLowerCase() : 'all';
 
         // Apply active filter
         let filtered;
@@ -260,39 +454,20 @@
             filtered = cards.filter(c => c.isNew);
         } else if (metaBinderFilter === 'missing') {
             filtered = cards.filter(c => c.missing > 0);
-        } else if (metaBinderFilter === 'dropped') {
-            // Show dropped cards (no longer in meta)
-            grid.innerHTML = droppedCards.length > 0
-                ? droppedCards.map(card => {
-                    const imageUrl = findCardImage(card.name, card.set, card.number);
-                    const safeImage = escapeHtml(imageUrl);
-                    const safeName = escapeHtml(card.name);
-                    return `
-                        <div class="meta-binder-card meta-binder-card-dropped" title="${safeName} — no longer in top meta">
-                            ${imageUrl
-                                ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                                   <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
-                                : `<div class="meta-binder-card-fallback">${safeName}<br><small>${escapeHtml(card.set)} ${escapeHtml(card.number)}</small></div>`}
-                            <div class="meta-binder-card-info">
-                                <span class="meta-binder-badge-dropped">${mbText('mb.dropped', 'DROPPED')}</span>
-                            </div>
-                        </div>`;
-                }).join('')
-                : `<p class="color-grey">${mbText('mb.noDropped', 'No cards dropped from meta this week.')}</p>`;
-            return;
         } else {
             filtered = cards;
         }
 
-        // Sort: new cards first, then missing, then by deck count desc, then alphabetical
-        const sorted = [...filtered].sort((a, b) => {
-            if (a.isNew !== b.isNew) return a.isNew ? -1 : 1;
-            const aMiss = a.missing > 0 ? 0 : 1;
-            const bMiss = b.missing > 0 ? 0 : 1;
-            if (aMiss !== bMiss) return aMiss - bMiss;
-            if (b.decks.length !== a.decks.length) return b.decks.length - a.decks.length;
-            return a.name.localeCompare(b.name);
+        filtered = filtered.filter(card => {
+            const meta = getMetaBinderTypeMeta(card);
+            const cardSet = String(card.set || '').toLowerCase();
+
+            if (typeFilter !== 'all' && meta.type !== typeFilter) return false;
+            if (setFilter !== 'all' && cardSet !== setFilter) return false;
+            return true;
         });
+
+        const sorted = sortMetaCards([...filtered]);
 
         if (sorted.length === 0) {
             grid.innerHTML = `<p class="color-grey">${mbText('mb.empty', 'No meta card data found. Make sure Current Meta or City League data is loaded.')}</p>`;
@@ -301,17 +476,18 @@
 
         grid.innerHTML = sorted.map(card => {
             const imageUrl = findCardImage(card.name, card.set, card.number);
-            const statusClass = card.missing > 0 ? 'meta-binder-card-missing' : 'meta-binder-card-owned';
+            const statusClass = card.missing > 0 ? 'meta-binder-card-missing card-missing' : 'meta-binder-card-owned card-owned';
             const newBadge = card.isNew ? `<span class="meta-binder-badge-new">${mbText('mb.new', 'NEW')}</span>` : '';
             const safeImage = escapeHtml(imageUrl);
             const safeName = escapeHtml(card.name);
             const deckList = card.decks.map(d => escapeHtml(d)).join(', ');
+            const typeMeta = getMetaBinderTypeMeta(card);
             const countLabel = card.missing > 0
                 ? `<span class="meta-binder-count-missing">${card.owned}/${card.maxCount}</span>`
                 : `<span class="meta-binder-count-ok">${card.owned}/${card.maxCount} ✓</span>`;
 
             return `
-                <div class="meta-binder-card ${statusClass}" title="${safeName} — ${deckList}">
+                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${escapeHtml(String(card.set || ''))}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" title="Wird verwendet in: ${deckList}">
                     ${imageUrl
                         ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                            <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
@@ -319,6 +495,7 @@
                     <div class="meta-binder-card-info">
                         ${newBadge}
                         <span class="meta-binder-card-need">${card.maxCount}x</span>
+                        <div class="deck-indicator-count">${card.decks.length} Decks</div>
                         ${countLabel}
                     </div>
                 </div>`;
@@ -513,4 +690,5 @@
     window.metaBinderSendMissingToProxy = metaBinderSendMissingToProxy;
     window.metaBinderProxyNewCards = metaBinderProxyNewCards;
     window.setMetaBinderFilter = setMetaBinderFilter;
+    window.applyComplexMetaFilter = applyComplexMetaFilter;
 })();

@@ -19,6 +19,21 @@
             .trim();
     }
 
+    function tokenizeArchetypeNameForMatch(value) {
+        const stopWords = new Set(['ex', 'gx', 'v', 'vmax', 'vstar', 'radiant', 'prism', 'star', 'mega', 'box', 'lead', 'deck']);
+        const cleaned = String(value || '')
+            .toLowerCase()
+            .replace(/['’]s\b/g, '')
+            .replace(/[^a-z0-9\s-]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        return cleaned
+            .split(' ')
+            .map(token => token.trim())
+            .filter(token => token.length > 1 && !stopWords.has(token));
+    }
+
     function getTopArchetypesFromRows(rows, limit) {
         if (!Array.isArray(rows) || rows.length === 0) return [];
 
@@ -175,7 +190,36 @@
 
         const rows = sourceMap[sourceKey];
         if (!Array.isArray(rows) || rows.length === 0) return [];
-        return rows.filter(row => normalizeArchetypeKey(row.archetype) === wanted);
+        const exactRows = rows.filter(row => normalizeArchetypeKey(row.archetype) === wanted);
+        if (exactRows.length > 0) return exactRows;
+
+        // Fuzzy fallback for naming drifts across sources (e.g. "N's Zoroark" vs "Zoroark", "Rocket's Mewtwo" vs "Rocket Mewtwo Ex").
+        const targetTokens = tokenizeArchetypeNameForMatch(archetype);
+        if (targetTokens.length === 0) return [];
+
+        const uniqueNames = [...new Set(rows.map(row => String(row.archetype || '').trim()).filter(Boolean))];
+        let bestName = '';
+        let bestScore = -1;
+
+        uniqueNames.forEach(name => {
+            const candidateTokens = tokenizeArchetypeNameForMatch(name);
+            if (candidateTokens.length === 0) return;
+
+            const overlap = targetTokens.filter(token => candidateTokens.includes(token)).length;
+            if (overlap === 0) return;
+
+            const missing = targetTokens.length - overlap;
+            const extras = candidateTokens.length - overlap;
+            const score = (overlap * 100) - (missing * 10) - extras;
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestName = name;
+            }
+        });
+
+        if (!bestName) return [];
+        return rows.filter(row => String(row.archetype || '').trim() === bestName);
     }
 
     function resolveCityLeagueDisplayPrint(name, set, number) {
@@ -713,13 +757,18 @@
                     : null;
                 const exactMeta = exactMetaMap ? exactMetaMap.get(exactKey) : null;
                 const currentMeta = metricMaps.currentMetaMap.get(key) || {};
+                const useExactOnly = group.source === 'current-meta';
                 return {
                     name,
                     source: group.source,
                     imageUrl: pickArchetypeBannerImage(name, group.source),
                     currentMetaFormatLabel: window._metaBinderCurrentMetaLabel || 'TEF-POR',
-                    currentMetaRank: Number.isFinite(exactMeta?.rank) ? exactMeta.rank : (Number.isFinite(currentMeta.rank) ? currentMeta.rank : null),
-                    currentMetaShare: Number.isFinite(exactMeta?.share) ? exactMeta.share : (Number.isFinite(currentMeta.share) ? currentMeta.share : null),
+                    currentMetaRank: useExactOnly
+                        ? (Number.isFinite(exactMeta?.rank) ? exactMeta.rank : null)
+                        : (Number.isFinite(exactMeta?.rank) ? exactMeta.rank : (Number.isFinite(currentMeta.rank) ? currentMeta.rank : null)),
+                    currentMetaShare: useExactOnly
+                        ? (Number.isFinite(exactMeta?.share) ? exactMeta.share : null)
+                        : (Number.isFinite(exactMeta?.share) ? exactMeta.share : (Number.isFinite(currentMeta.share) ? currentMeta.share : null)),
                     cityCurrentAvgRank: metricMaps.cityCurrentMap.get(key) ?? null,
                     cityPastAvgRank: metricMaps.cityPastMap.get(key) ?? null
                 };
@@ -904,16 +953,21 @@
             Tool: 4,
             Stadium: 5,
             'Special Energy': 6,
-            'Basic Energy': 7,
-            'ACE SPEC': 8
+            'Basic Energy': 7
         };
 
         return cards.sort((a, b) => {
             const aTypeMeta = getMetaBinderTypeMeta(a);
             const bTypeMeta = getMetaBinderTypeMeta(b);
 
-            const aCategory = aTypeMeta.supertype === 'Pokemon' ? 'Pokemon' : aTypeMeta.type;
-            const bCategory = bTypeMeta.supertype === 'Pokemon' ? 'Pokemon' : bTypeMeta.type;
+            const toSortCategory = (meta) => {
+                if (meta.supertype === 'Pokemon') return 'Pokemon';
+                if (meta.type === 'ACE SPEC') return 'Item';
+                return meta.type;
+            };
+
+            const aCategory = toSortCategory(aTypeMeta);
+            const bCategory = toSortCategory(bTypeMeta);
             const aOrder = categoryOrder[aCategory] || 99;
             const bOrder = categoryOrder[bCategory] || 99;
             if (aOrder !== bOrder) return aOrder - bOrder;
@@ -1025,13 +1079,9 @@
                 const shareText = Number.isFinite(item.currentMetaShare) ? `${item.currentMetaShare.toFixed(1)}%` : '—';
                 const cityCurrentText = formatMetaBinderMetric(item.cityCurrentAvgRank, 1);
                 const cityPastText = formatMetaBinderMetric(item.cityPastAvgRank, 1);
-                const rankPill = item.source === 'current-meta' && Number.isFinite(item.currentMetaRank)
-                    ? `<span class="tier-hero-rank">#${Math.round(item.currentMetaRank)}</span>`
-                    : '';
 
                 return `
                     <div class="deck-banner-card" onclick="${navFn}('${escapedJsName}')">
-                        ${rankPill}
                         ${item.imageUrl ? `<div class="deck-banner-bg" style="background-image: url('${safeImage}')"></div>` : ''}
                         <div class="deck-banner-content">
                             <div class="deck-banner-name">${safeName}</div>

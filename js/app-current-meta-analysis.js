@@ -89,13 +89,24 @@
             const comparisonData = await loadCSV('limitless_online_decks_comparison.csv');
             const comparisonMap = new Map();
 
+            const normalizeRankKey = (value) => String(value || '')
+                .toLowerCase()
+                .replace(/['’]s\b/g, '')
+                .replace(/[^a-z0-9\s-]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
             if (comparisonData && comparisonData.length > 0) {
                 comparisonData.forEach(row => {
                     if (row.deck_name && row.new_count) {
-                        comparisonMap.set(row.deck_name.toLowerCase(), {
+                        const entry = {
                             count: parseInt(row.new_count || 0, 10),
                             rank: parseInt(row.new_rank || 999, 10)
-                        });
+                        };
+                        const exactKey = String(row.deck_name || '').toLowerCase();
+                        const normalizedKey = normalizeRankKey(row.deck_name);
+                        comparisonMap.set(exactKey, entry);
+                        if (normalizedKey) comparisonMap.set(`norm:${normalizedKey}`, entry);
                     }
                 });
                 devLog('Loaded comparison data for', comparisonMap.size, 'decks');
@@ -120,7 +131,8 @@
                 if (!archetype) return;
 
                 if (!archetypeMap.has(archetype)) {
-                    const comparisonInfo = comparisonMap.get(archetype.toLowerCase());
+                    const comparisonInfo = comparisonMap.get(archetype.toLowerCase())
+                        || comparisonMap.get(`norm:${normalizeRankKey(archetype)}`);
                     const deckCount = currentMetaFormatFilter === 'play'
                         ? parseInt(row.total_decks_in_archetype || 0, 10)
                         : (comparisonInfo ? comparisonInfo.count : parseInt(row.total_decks_in_archetype || 0, 10));
@@ -1041,21 +1053,7 @@
                     const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
                     
                     // Collection badge
-                    let otherPrintOwnedCount = 0;
-                    if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
-                        const normalizedCurrentName = normalizeCardName(cardName);
-                        const normalizedSet = String(setCode || '').toUpperCase();
-                        const normalizedNumber = String(setNumber || '').toUpperCase();
-                        window.userCollectionCounts.forEach((qty, collKey) => {
-                            const ownedQty = parseInt(qty, 10) || 0;
-                            if (ownedQty <= 0) return;
-                            const parts = String(collKey || '').split('|');
-                            if (parts.length < 3) return;
-                            if (normalizeCardName(parts[0]) !== normalizedCurrentName) return;
-                            if (String(parts[1] || '').toUpperCase() === normalizedSet && String(parts[2] || '').toUpperCase() === normalizedNumber) return;
-                            otherPrintOwnedCount += ownedQty;
-                        });
-                    }
+                    const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
                     const otherPrintSparkleHtml = otherPrintOwnedCount > 0
                         ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}">
                             <span class="city-league-other-print-sparkle-icon">✨</span>

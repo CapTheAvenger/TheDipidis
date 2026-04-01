@@ -134,6 +134,40 @@
     /* Additional grid styles if needed */
 }
 
+#cityLeagueMetaGrid,
+#currentMetaMetaGrid {
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 8px;
+}
+
+#cityLeagueMetaGrid .card-info-bottom,
+#currentMetaMetaGrid .card-info-bottom {
+    padding: 4px;
+}
+
+#cityLeagueMetaGrid .card-info-text,
+#currentMetaMetaGrid .card-info-text {
+    font-size: 0.86em;
+}
+
+#cityLeagueMetaGrid .card-action-btn,
+#currentMetaMetaGrid .card-action-btn {
+    height: 17px;
+    font-size: 8px;
+    border-radius: 4px;
+    padding: 0 2px;
+}
+
+#cityLeagueMetaGrid .card-action-row,
+#currentMetaMetaGrid .card-action-row {
+    gap: 2px;
+}
+
+#cityLeagueMetaGrid .card-action-row-wide,
+#currentMetaMetaGrid .card-action-row-wide {
+    grid-template-columns: 28px 28px 1fr;
+}
+
 .meta-card-analysis-search {
     margin-bottom: 15px;
     width: 100%;
@@ -241,15 +275,34 @@
     #city-league-analysis .meta-card-analysis-share-btn,
     #city-league-analysis .meta-card-analysis-type-btn,
     #city-league-analysis .meta-card-analysis-sort-btn {
-        min-height: 28px;
+        min-height: 30px;
         font-size: 0.66em !important;
-        padding: 5px 6px !important;
+        padding: 5px 7px !important;
         border-radius: 7px;
     }
 
     #city-league-analysis .meta-card-analysis-search {
         padding: 7px;
         font-size: 0.84em;
+    }
+}
+
+@media (max-width: 360px) {
+    #cityLeagueMetaGrid,
+    #currentMetaMetaGrid {
+        grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+        gap: 6px;
+    }
+
+    #cityLeagueMetaGrid .card-action-btn,
+    #currentMetaMetaGrid .card-action-btn {
+        height: 16px;
+        font-size: 7px;
+    }
+
+    #cityLeagueMetaGrid .card-action-row-wide,
+    #currentMetaMetaGrid .card-action-row-wide {
+        grid-template-columns: 26px 26px 1fr;
     }
 }
 
@@ -269,7 +322,7 @@
     #city-league-analysis .meta-card-analysis-share-btn,
     #city-league-analysis .meta-card-analysis-type-btn,
     #city-league-analysis .meta-card-analysis-sort-btn {
-        min-height: 29px;
+        min-height: 30px;
         font-size: 0.69em !important;
         padding: 5px 7px !important;
     }

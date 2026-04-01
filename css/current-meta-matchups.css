@@ -77,6 +77,41 @@
     box-shadow: 0 2px 8px rgba(59, 76, 202, 0.06);
 }
 
+#matchupHeatmapContainer .heatmap-table-scroll {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    width: 100% !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+#matchupHeatmapContainer .heatmap-table {
+    width: max-content !important;
+    min-width: 980px !important;
+    table-layout: auto !important;
+}
+
+#matchupHeatmapContainer .heatmap-th-y,
+#matchupHeatmapContainer .heatmap-th-row,
+#matchupHeatmapContainer .heatmap-td {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+}
+
+#matchupHeatmapContainer .heatmap-th-y {
+    min-width: 110px !important;
+    max-width: none !important;
+}
+
+#matchupHeatmapContainer .heatmap-th-row {
+    min-width: 160px !important;
+    max-width: none !important;
+}
+
+#matchupHeatmapContainer .heatmap-td {
+    min-width: 88px !important;
+}
+
 /* ============================================================
  * Styles for the scraped Limitless HTML loaded into
  * #currentMetaContent — replaces lost <style> block CSS
@@ -314,6 +349,10 @@
         gap: 10px;
     }
 
+    #matchupHeatmapContainer .heatmap-table {
+        min-width: 940px !important;
+    }
+
     #currentMetaContent .stats-grid {
         grid-template-columns: 1fr;
         gap: 12px;
@@ -373,6 +412,10 @@
 }
 
 @media (max-width: 430px) {
+    #matchupHeatmapContainer .heatmap-table {
+        min-width: 900px !important;
+    }
+
     #currentMetaContent .top-cards-container {
         padding: 12px;
     }
@@ -402,7 +445,29 @@
     }
 }
 
+@media (max-width: 390px) {
+    #matchupHeatmapContainer .heatmap-table {
+        min-width: 860px !important;
+    }
+}
+
 @media (max-width: 360px) {
+    #matchupHeatmapContainer .heatmap-table {
+        min-width: 820px !important;
+    }
+
+    #matchupHeatmapContainer .heatmap-th-y {
+        min-width: 98px !important;
+    }
+
+    #matchupHeatmapContainer .heatmap-th-row {
+        min-width: 144px !important;
+    }
+
+    #matchupHeatmapContainer .heatmap-td {
+        min-width: 82px !important;
+    }
+
     #currentMetaContent .top-cards-container {
         padding: 10px;
     }

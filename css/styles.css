@@ -1355,7 +1355,7 @@
 
         .deck-card-overlay {
             position: absolute;
-            bottom: 45px;
+            bottom: 52px;
             left: 0;
             right: 0;
             background: rgba(0, 0, 0, 0.75);
@@ -4630,11 +4630,12 @@ h3:first-child {
 
 .tier-hero-topline {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
 }
 
 .tier-hero-name {
+    flex: 1;
     font-size: 1.05rem;
     font-weight: 900;
     color: #1a2c43;

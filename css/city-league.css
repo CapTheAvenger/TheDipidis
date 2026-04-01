@@ -1283,7 +1283,22 @@
     gap: 10px;
 }
 .city-league-deck-grid {
-    /* inherits from .deck-grid — keep for backwards compat */
+    grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
+    gap: 12px;
+}
+
+@media (max-width: 768px) {
+    .city-league-deck-grid {
+        grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+        gap: 10px;
+    }
+}
+
+@media (max-width: 430px) {
+    .city-league-deck-grid {
+        grid-template-columns: repeat(auto-fill, minmax(102px, 1fr));
+        gap: 8px;
+    }
 }
 .city-league-cards-header {
     display: block;
@@ -1694,23 +1709,9 @@
 #city-league-analysis .city-league-stat-label-cards::before,
 #city-league-analysis .city-league-stat-label-decks::before,
 #city-league-analysis .city-league-stat-label-placement::before {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    font-size: 0.56rem;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    background: #e8eef8;
-    color: #334155;
-    border: 1px solid #c9d6eb;
+    display: none;
+    content: none;
 }
-
-#city-league-analysis .city-league-stat-label-cards::before { content: "C"; }
-#city-league-analysis .city-league-stat-label-decks::before { content: "D"; }
-#city-league-analysis .city-league-stat-label-placement::before { content: "P"; }
 
 #city-league-analysis .city-league-stat-value {
     font-size: 1.7em;
@@ -1898,22 +1899,9 @@
 #current-analysis .current-meta-stat-label-cards::before,
 #current-analysis .current-meta-stat-label-winrate::before,
 #current-analysis .current-meta-stat-label-matchup::before {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    font-size: 0.56rem;
-    font-weight: 800;
-    background: #e8eef8;
-    color: #334155;
-    border: 1px solid #c9d6eb;
+    display: none;
+    content: none;
 }
-
-#current-analysis .current-meta-stat-label-cards::before { content: "C"; }
-#current-analysis .current-meta-stat-label-winrate::before { content: "W"; }
-#current-analysis .current-meta-stat-label-matchup::before { content: "M"; }
 
 #current-analysis .current-meta-stat-value {
     font-size: 1.7em;
@@ -2093,22 +2081,9 @@
 #past-meta .past-meta-stat-label-cards::before,
 #past-meta .past-meta-stat-label-tournament::before,
 #past-meta .past-meta-stat-label-format::before {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    font-size: 0.56rem;
-    font-weight: 800;
-    background: #e8eef8;
-    color: #334155;
-    border: 1px solid #c9d6eb;
+    display: none;
+    content: none;
 }
-
-#past-meta .past-meta-stat-label-cards::before { content: "C"; }
-#past-meta .past-meta-stat-label-tournament::before { content: "T"; }
-#past-meta .past-meta-stat-label-format::before { content: "F"; }
 
 #past-meta .past-meta-stat-value {
     font-size: 1.7em;

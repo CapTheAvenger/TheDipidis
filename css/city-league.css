@@ -1605,6 +1605,37 @@
     }
 }
 
+/* Top Archetypes card header: stable badge + title alignment */
+.archetype-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.archetype-rank-badge {
+    background-color: var(--dark-bg, #1a1a2e);
+    color: white;
+    border-radius: 50%;
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.archetype-card-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: bold;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
 @media (min-width: 640px) {
     .proxy-add-single-card-grid {
         grid-template-columns: minmax(180px, 2fr) minmax(90px, 1fr);

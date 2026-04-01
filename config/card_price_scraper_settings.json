@@ -1,6 +1,6 @@
 {
   "max_workers": 10,
   "batch_size": 100,
-  "limitless_update_sets": ["POR", "ASC", "PFL", "MEG", "MEE", "MEP", "BLK", "WHT", "DRI", "JTG", "PRE", "SSP", "SCR", "SFA", "TWM", "TEF"],
+  "limitless_update_sets": ["POR", "ASC", "PFL", "MEG", "MEE", "MEP", "BLK", "WHT", "DRI", "JTG", "PRE", "SSP", "SCR", "SFA", "TWM", "TEF";"SVE"],
   "_comment": "ONLY LIMITLESS UPDATE - Phase 2 (Cardmarket) wurde deaktiviert. CM Links werden dynamisch im Frontend gebaut."
 }

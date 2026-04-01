@@ -460,9 +460,9 @@
                         <div class="tier-hero-card" onclick="analyzeCombinedArchetype('${combinedMainEscaped}', '${combinedVariantsJsonEscaped}')">
                             ${imageUrl ? `<div class="tier-hero-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
                             <div class="tier-hero-content">
-                                <div class="tier-hero-topline">
-                                    <span class="tier-hero-rank">#${index + 1}</span>
-                                    <div class="tier-hero-name">${item.label}</div>
+                                <div class="archetype-card-header">
+                                    <span class="archetype-rank-badge">#${index + 1}</span>
+                                    <h3 class="archetype-card-title">${item.label}</h3>
                                 </div>
                                 <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
                                 <div class="tier-hero-stats">

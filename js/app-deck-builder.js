@@ -1,21 +1,8 @@
 // app-deck-builder.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
-// Autosave beim Laden der Seite prüfen
-(function() {
-    try {
-        const saved = localStorage.getItem('autosave_deck');
-        if (saved) {
-            const data = JSON.parse(saved);
-            const totalCards = Object.values(data.cityLeague?.deck || {}).reduce((s,c)=>s+c,0)
-                           + Object.values(data.currentMeta?.deck || {}).reduce((s,c)=>s+c,0)
-                           + Object.values(data.pastMeta?.deck || {}).reduce((s,c)=>s+c,0);
-            if (totalCards > 0) {
-                window._pendingAutosave = data;
-            }
-        }
-    } catch(e) { /* ignore */ }
-})();
+// On reload we intentionally start fresh for temporary deck-builder state.
+try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         localStorage.removeItem('cityLeagueDeck');
         localStorage.removeItem('currentMetaDeck');
         localStorage.removeItem('pastMetaDeck');
@@ -31,45 +18,6 @@
         devLog('[Init] Starting with empty deck (localStorage cleared on page load)');
         // Check for a shared deck in the URL – runs after clearing so it wins
         setTimeout(function() { if (typeof importDeckFromUrl === 'function') importDeckFromUrl(); }, 100);
-
-        // Auto-save deck restore prompt (runs after DOM + shared deck import)
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                if (!window._pendingAutosave) return;
-                const data = window._pendingAutosave;
-                delete window._pendingAutosave;
-                // Don't prompt if a shared deck was already imported
-                const anyDeck = Object.values(window.cityLeagueDeck || {}).reduce((s,c)=>s+c,0)
-                             + Object.values(window.currentMetaDeck || {}).reduce((s,c)=>s+c,0)
-                             + Object.values(window.pastMetaDeck || {}).reduce((s,c)=>s+c,0);
-                if (anyDeck > 0) return;
-
-                const ts = data.timestamp ? new Date(data.timestamp).toLocaleString() : '';
-                if (confirm(t('deck.restorePrompt') + (ts ? ' (' + ts + ')' : '') + '\n' + t('deck.autoCompleteContinue'))) {
-                    ['cityLeague', 'currentMeta', 'pastMeta'].forEach(src => {
-                        const saved = data[src];
-                        if (!saved || !saved.deck || Object.keys(saved.deck).length === 0) return;
-                        if (src === 'cityLeague') {
-                            window.cityLeagueDeck = saved.deck;
-                            window.cityLeagueDeckOrder = saved.order || [];
-                            window.currentCityLeagueArchetype = saved.archetype || null;
-                        } else if (src === 'currentMeta') {
-                            window.currentMetaDeck = saved.deck;
-                            window.currentMetaDeckOrder = saved.order || [];
-                            window.currentCurrentMetaArchetype = saved.archetype || null;
-                        } else if (src === 'pastMeta') {
-                            window.pastMetaDeck = saved.deck;
-                            window.pastMetaDeckOrder = saved.order || [];
-                            window.pastMetaCurrentArchetype = saved.archetype || null;
-                        }
-                        if (typeof updateDeckDisplay === 'function') updateDeckDisplay(src);
-                    });
-                    if (typeof showToast === 'function') showToast(t('deck.restored'), 'success');
-                } else {
-                    localStorage.removeItem('autosave_deck');
-                }
-            }, 500);
-        });
         
         // ---------------------------------------------------------------
         // BATCH ADD FUNCTION - For Auto-Generate Performance

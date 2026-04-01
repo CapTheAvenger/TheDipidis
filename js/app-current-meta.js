@@ -52,8 +52,10 @@
                     return;
                 }
                 
-                // Normalisierungs-Helfer für Namen (entfernt Apostrophe, Leerzeichen, Bindestriche)
-                const normalizeName = (name) => name ? name.toLowerCase().replace(/[''`\s-]/g, '') : '';
+                // Normalize deck names consistently for matching/filtering (all apostrophe variants + spaces/hyphens).
+                const normalizeName = (name) => name
+                    ? String(name).toLowerCase().replace(/[\u2019\u2018\u201B'`´\s-]/g, '')
+                    : '';
                 
                 const escapeAttr = (value) => String(value || '')
                     .replace(/&/g, '&amp;')
@@ -120,25 +122,22 @@
                     return gamesB - gamesA;
                 });
                 
-                // X-Achse: Top 10/alle; bei Suche werden passende Gegner verwendet
-                const xSourceDecks = rawSearchX
-                    ? deckNames.filter(deck => {
-                        const normalDeck = deck.toLowerCase();
-                        const strippedDeck = normalDeck.replace(/['’\s-]/g, '');
-                        return normalDeck.includes(rawSearchX) || strippedDeck.includes(normalizedSearchX);
-                    })
-                    : (window.heatmapExpanded ? deckNames : deckNames.slice(0, 10));
+                const axisDeckLimit = (window.heatmapExpanded ? deckNames : deckNames.slice(0, 10));
+                const matchesAxisSearch = (deckName, rawSearch, normalizedSearch) => {
+                    const normalDeck = String(deckName || '').toLowerCase();
+                    const strippedDeck = normalDeck.replace(/[\u2019\u2018\u201B'`´\s-]/g, '');
+                    return normalDeck.includes(rawSearch) || strippedDeck.includes(normalizedSearch);
+                };
 
-                const xDecks = xSourceDecks;
+                // X-Achse (Gegner): nur X-Suche beeinflusst X.
+                const xDecks = rawSearchX
+                    ? deckNames.filter(deck => matchesAxisSearch(deck, rawSearchX, normalizedSearchX))
+                    : axisDeckLimit;
 
-                // Y-Achse: Suche auf dein Deck; ohne Suche wie bisher (gleich X-Achse)
+                // Y-Achse (dein Deck): nur Y-Suche beeinflusst Y.
                 const yDecks = rawSearchY
-                    ? deckNames.filter(deck => {
-                        const normalDeck = deck.toLowerCase();
-                        const strippedDeck = normalDeck.replace(/['’\s-]/g, '');
-                        return normalDeck.includes(rawSearchY) || strippedDeck.includes(normalizedSearchY);
-                    })
-                    : xDecks;
+                    ? deckNames.filter(deck => matchesAxisSearch(deck, rawSearchY, normalizedSearchY))
+                    : axisDeckLimit;
 
                 if (rawSearchY || rawSearchX) {
                     devLog(`🔍 Suche aktiv: Y='${rawSearchY || '-'}' (${yDecks.length}), X='${rawSearchX || '-'}' (${xDecks.length})`);
@@ -177,6 +176,7 @@
                 
                 // 3. HTML GENERIEREN
                 let tableHtml = '<table class="heatmap-table">';
+                tableHtml += `<colgroup><col class="heatmap-col-first">${xDecks.map(() => '<col class="heatmap-col-data">').join('')}</colgroup>`;
                 
                 // PERFORMANCE: Pre-compute normalized colDeck names (once per render, not per cell)
                 const normalizedColDeckMap = new Map(xDecks.map(d => [d, normalizeName(d)]));

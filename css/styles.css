@@ -2217,12 +2217,12 @@
 
         .rarity-switcher-modal-content {
             background-color: #ffffff;
-            padding: 20px;
+            padding: 16px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            max-width: 800px;
-            width: 90%;
-            max-height: 85vh;
+            max-width: 1200px;
+            width: 96%;
+            max-height: 92vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease-in-out;
         }
@@ -2237,15 +2237,15 @@
 
         .rarity-options-list {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
         }
 
         .rarity-option-card {
             border: 2px solid #ddd;
             border-radius: 8px;
-            padding: 12px;
+            padding: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
             text-align: center;
@@ -2266,19 +2266,59 @@
 
         .rarity-option-card img {
             width: 100%;
-            max-width: 150px;
+            max-width: 118px;
             height: auto;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             border-radius: 4px;
         }
 
 
         .rarity-option-info {
-            font-size: 13px;
+            font-size: 12px;
             color: #333;
-            margin: 5px 0;
-            line-height: 1.5;
+            margin: 3px 0;
+            line-height: 1.35;
             font-weight: 500;
+        }
+
+        .rarity-option-qty-wrap {
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .rarity-option-qty-label {
+            font-size: 11px;
+            color: #475569;
+            font-weight: 700;
+        }
+
+        .rarity-option-qty-input {
+            width: 58px;
+            padding: 4px 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .rarity-option-swap-all-btn {
+            margin-top: 6px;
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .rarity-distribution-summary {
+            width: 100%;
+            margin-bottom: 6px;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
         }
 
         .rarity-badge {
@@ -2655,7 +2695,12 @@
             }
 
             .rarity-option-card img {
-                max-width: 100px;
+                max-width: 92px;
+            }
+
+            .rarity-options-list {
+                grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
+                gap: 8px;
             }
         }
 

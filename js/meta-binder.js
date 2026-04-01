@@ -1056,6 +1056,11 @@
         Colorless: 10
     };
 
+    const META_BINDER_NAME_COLLATOR = new Intl.Collator(undefined, {
+        sensitivity: 'base',
+        numeric: true
+    });
+
     const META_BINDER_SET_ORDER_FALLBACK = [
         'SSP', 'SCR', 'SFA', 'TWM', 'PRE', 'TEF', 'MEP', 'MEG', 'ASC', 'DRI', 'JTG', 'BLK'
     ];
@@ -1139,48 +1144,93 @@
         return META_BINDER_POKEMON_TYPE_ORDER[element] || 99;
     }
 
+    function compareMetaBinderEntries(a, b) {
+        const aTypeMeta = a.typeMeta || getMetaBinderTypeMeta(a);
+        const bTypeMeta = b.typeMeta || getMetaBinderTypeMeta(b);
+
+        const aCategory = getMetaBinderSortCategory(aTypeMeta);
+        const bCategory = getMetaBinderSortCategory(bTypeMeta);
+        const aOrder = META_BINDER_CATEGORY_ORDER[aCategory] || 99;
+        const bOrder = META_BINDER_CATEGORY_ORDER[bCategory] || 99;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+
+        if (aCategory === 'Pokemon') {
+            const aElementOrder = getMetaBinderPokemonElementOrder(aTypeMeta);
+            const bElementOrder = getMetaBinderPokemonElementOrder(bTypeMeta);
+            if (aElementOrder !== bElementOrder) return aElementOrder - bElementOrder;
+
+            const dexA = Number.isFinite(a.dexNumber) ? a.dexNumber : Number.MAX_SAFE_INTEGER;
+            const dexB = Number.isFinite(b.dexNumber) ? b.dexNumber : Number.MAX_SAFE_INTEGER;
+            if (dexA !== dexB) return dexA - dexB;
+        }
+
+        const setFirstCategories = new Set(['Supporter', 'Item', 'Tool', 'Stadium', 'Special Energy']);
+        if (setFirstCategories.has(aCategory) && setFirstCategories.has(bCategory)) {
+            const catOrderA = META_BINDER_CATEGORY_ORDER[aCategory] || 99;
+            const catOrderB = META_BINDER_CATEGORY_ORDER[bCategory] || 99;
+            if (catOrderA !== catOrderB) return catOrderA - catOrderB;
+
+            const catSetOrderA = Number.isFinite(a.setOrder) ? a.setOrder : 0;
+            const catSetOrderB = Number.isFinite(b.setOrder) ? b.setOrder : 0;
+            if (catSetOrderA !== catSetOrderB) return catSetOrderB - catSetOrderA;
+
+            const catNumberA = Number.isFinite(a.numberSort) ? a.numberSort : Number.MAX_SAFE_INTEGER;
+            const catNumberB = Number.isFinite(b.numberSort) ? b.numberSort : Number.MAX_SAFE_INTEGER;
+            if (catNumberA !== catNumberB) return catNumberA - catNumberB;
+
+            const catNameA = String(a.name || '');
+            const catNameB = String(b.name || '');
+            return META_BINDER_NAME_COLLATOR.compare(catNameA, catNameB);
+        }
+
+        // Stable fallback for all categories:
+        // newer set first -> card number -> name.
+        const setOrderA = Number.isFinite(a.setOrder) ? a.setOrder : 0;
+        const setOrderB = Number.isFinite(b.setOrder) ? b.setOrder : 0;
+        if (setOrderA !== setOrderB) return setOrderB - setOrderA;
+
+        const numberA = Number.isFinite(a.numberSort) ? a.numberSort : Number.MAX_SAFE_INTEGER;
+        const numberB = Number.isFinite(b.numberSort) ? b.numberSort : Number.MAX_SAFE_INTEGER;
+        if (numberA !== numberB) return numberA - numberB;
+
+        const nameA = String(a.name || '');
+        const nameB = String(b.name || '');
+        const nameDiff = META_BINDER_NAME_COLLATOR.compare(nameA, nameB);
+        if (nameDiff !== 0) return nameDiff;
+
+        const setA = String(a.set || '');
+        const setB = String(b.set || '');
+        const setDiff = META_BINDER_NAME_COLLATOR.compare(setA, setB);
+        if (setDiff !== 0) return setDiff;
+
+        return 0;
+    }
+
     function sortMetaCards(cards) {
         return cards.sort((a, b) => {
-            const aTypeMeta = getMetaBinderTypeMeta(a);
-            const bTypeMeta = getMetaBinderTypeMeta(b);
-
-            const aCategory = getMetaBinderSortCategory(aTypeMeta);
-            const bCategory = getMetaBinderSortCategory(bTypeMeta);
-            const aOrder = META_BINDER_CATEGORY_ORDER[aCategory] || 99;
-            const bOrder = META_BINDER_CATEGORY_ORDER[bCategory] || 99;
-            if (aOrder !== bOrder) return aOrder - bOrder;
-
             const aCardDb = findCardRecord(a.name, a.set, a.number);
             const bCardDb = findCardRecord(b.name, b.set, b.number);
 
-            if (aCategory === 'Pokemon') {
-                // Pokemon: element -> dex number -> newest set first.
-                const aElementOrder = getMetaBinderPokemonElementOrder(aTypeMeta);
-                const bElementOrder = getMetaBinderPokemonElementOrder(bTypeMeta);
-                if (aElementOrder !== bElementOrder) return aElementOrder - bElementOrder;
-
-                const dexA = getMetaBinderPokemonDex(a, aCardDb);
-                const dexB = getMetaBinderPokemonDex(b, bCardDb);
-                if (dexA !== dexB) return dexA - dexB;
-
-                const setOrderA = getMetaBinderSetOrderValue(a.set);
-                const setOrderB = getMetaBinderSetOrderValue(b.set);
-                if (setOrderA !== setOrderB) return setOrderB - setOrderA;
-            } else {
-                const nameA = String(a.name || '').toLowerCase();
-                const nameB = String(b.name || '').toLowerCase();
-                if (nameA !== nameB) return nameA.localeCompare(nameB);
-
-                const setOrderA = getMetaBinderSetOrderValue(a.set);
-                const setOrderB = getMetaBinderSetOrderValue(b.set);
-                if (setOrderA !== setOrderB) return setOrderB - setOrderA;
-            }
-
-            const numberA = parseCardNumberForSort(a.number);
-            const numberB = parseCardNumberForSort(b.number);
-            if (numberA !== numberB) return numberA - numberB;
-
-            return String(a.name || '').localeCompare(String(b.name || ''));
+            return compareMetaBinderEntries(
+                {
+                    name: a.name,
+                    set: a.set,
+                    number: a.number,
+                    typeMeta: getMetaBinderTypeMeta(a),
+                    dexNumber: getMetaBinderPokemonDex(a, aCardDb),
+                    setOrder: getMetaBinderSetOrderValue(a.set),
+                    numberSort: parseCardNumberForSort(a.number)
+                },
+                {
+                    name: b.name,
+                    set: b.set,
+                    number: b.number,
+                    typeMeta: getMetaBinderTypeMeta(b),
+                    dexNumber: getMetaBinderPokemonDex(b, bCardDb),
+                    setOrder: getMetaBinderSetOrderValue(b.set),
+                    numberSort: parseCardNumberForSort(b.number)
+                }
+            );
         });
     }
 
@@ -1197,45 +1247,32 @@
         const cards = Array.from(grid.querySelectorAll('.meta-binder-card'));
         if (cards.length <= 1) return;
 
-        cards.sort((a, b) => {
-            const aMeta = {
-                supertype: String(a.dataset.supertype || ''),
-                type: String(a.dataset.type || ''),
-                isAceSpec: a.dataset.isAceSpec === 'true'
-            };
-            const bMeta = {
-                supertype: String(b.dataset.supertype || ''),
-                type: String(b.dataset.type || ''),
-                isAceSpec: b.dataset.isAceSpec === 'true'
-            };
-
-            const aCategory = getMetaBinderSortCategory(aMeta);
-            const bCategory = getMetaBinderSortCategory(bMeta);
-            const categoryDiff = (META_BINDER_CATEGORY_ORDER[aCategory] || 99) - (META_BINDER_CATEGORY_ORDER[bCategory] || 99);
-            if (categoryDiff !== 0) return categoryDiff;
-
-            if (aCategory === 'Pokemon') {
-                const pokemonTypeDiff = getMetaBinderPokemonElementOrder(aMeta) - getMetaBinderPokemonElementOrder(bMeta);
-                if (pokemonTypeDiff !== 0) return pokemonTypeDiff;
-
-                const dexDiff = parseMetaBinderDomNumber(a.dataset.pokedex) - parseMetaBinderDomNumber(b.dataset.pokedex);
-                if (dexDiff !== 0) return dexDiff;
-
-                const setDiff = parseMetaBinderDomNumber(b.dataset.setOrder) - parseMetaBinderDomNumber(a.dataset.setOrder);
-                if (setDiff !== 0) return setDiff;
-            } else {
-                const nameDiff = String(a.dataset.name || '').localeCompare(String(b.dataset.name || ''));
-                if (nameDiff !== 0) return nameDiff;
-
-                const setDiff = parseMetaBinderDomNumber(b.dataset.setOrder) - parseMetaBinderDomNumber(a.dataset.setOrder);
-                if (setDiff !== 0) return setDiff;
+        cards.sort((a, b) => compareMetaBinderEntries(
+            {
+                name: String(a.dataset.name || ''),
+                set: String(a.dataset.set || ''),
+                typeMeta: {
+                    supertype: String(a.dataset.supertype || ''),
+                    type: String(a.dataset.type || ''),
+                    isAceSpec: a.dataset.isAceSpec === 'true'
+                },
+                dexNumber: parseMetaBinderDomNumber(a.dataset.pokedex),
+                setOrder: parseMetaBinderDomNumber(a.dataset.setOrder),
+                numberSort: parseMetaBinderDomNumber(a.dataset.numberSort)
+            },
+            {
+                name: String(b.dataset.name || ''),
+                set: String(b.dataset.set || ''),
+                typeMeta: {
+                    supertype: String(b.dataset.supertype || ''),
+                    type: String(b.dataset.type || ''),
+                    isAceSpec: b.dataset.isAceSpec === 'true'
+                },
+                dexNumber: parseMetaBinderDomNumber(b.dataset.pokedex),
+                setOrder: parseMetaBinderDomNumber(b.dataset.setOrder),
+                numberSort: parseMetaBinderDomNumber(b.dataset.numberSort)
             }
-
-            const numberDiff = parseMetaBinderDomNumber(a.dataset.numberSort) - parseMetaBinderDomNumber(b.dataset.numberSort);
-            if (numberDiff !== 0) return numberDiff;
-
-            return String(a.dataset.name || '').localeCompare(String(b.dataset.name || ''));
-        });
+        ));
 
         const fragment = document.createDocumentFragment();
         cards.forEach(card => fragment.appendChild(card));

@@ -57,6 +57,30 @@
             cityLeague: [],
             currentMeta: []
         };
+
+        let metaCardDebugStats = {
+            cityLeague: null,
+            currentMeta: null
+        };
+
+        function setMetaDebugStats(source, stats) {
+            metaCardDebugStats[source] = stats || null;
+            if (source !== 'currentMeta') return;
+
+            const debugEl = document.getElementById('currentMetaMetaDebugInfo');
+            if (!debugEl) return;
+
+            if (!stats) {
+                debugEl.textContent = 'DBG: idle';
+                return;
+            }
+
+            const loaded = Number(stats.loadedRows || 0);
+            const matched = Number(stats.matchedRows || 0);
+            const aggregated = Number(stats.aggregatedCards || 0);
+            const fallback = stats.usedFallback ? 'yes' : 'no';
+            debugEl.textContent = `DBG L:${loaded} M:${matched} A:${aggregated} F:${fallback}`;
+        }
         
         let metaCardFilter = {
             cityLeague: { shareThreshold: 'all', cardType: 'all', sortBy: 'type', searchTerm: '' },
@@ -75,6 +99,12 @@
             const gridId = source === 'cityLeague' ? 'cityLeagueMetaGrid' : 'currentMetaMetaGrid';
             const grid = document.getElementById(gridId);
             setGridLoadingSkeleton(grid, 10);
+            setMetaDebugStats(source, {
+                loadedRows: 0,
+                matchedRows: 0,
+                aggregatedCards: 0,
+                usedFallback: false
+            });
             
             try {
                 // ? FIX: Use comparison data for correct Top 10, then analysis data for cards
@@ -197,7 +227,7 @@
                 }
 
                 // Filter to only Top 10 archetypes (with fuzzy fallback for currentMeta)
-                const top10AnalysisData = allAnalysisData.filter(row => {
+                let top10AnalysisData = allAnalysisData.filter(row => {
                     const arch = (row.archetype || '').toLowerCase();
                     if (top10Names.has(arch)) return true;
                     if (analysisToCompMap) {
@@ -206,6 +236,15 @@
                     }
                     return false;
                 });
+
+                // Safety fallback for Current Meta: if fuzzy matching yields no rows,
+                // keep analysis rows instead of rendering an empty panel.
+                let usedTop10Fallback = false;
+                if (source === 'currentMeta' && top10AnalysisData.length === 0 && allAnalysisData.length > 0) {
+                    console.warn('[loadMetaCardAnalysis] Top10 archetype match produced 0 rows for currentMeta. Falling back to all analysis rows.');
+                    top10AnalysisData = allAnalysisData;
+                    usedTop10Fallback = true;
+                }
                 
                 // Build map of archetype -> deckCount from comparison data
                 const archetypeMap = {};
@@ -501,11 +540,18 @@
                 globalRarityPreference = previousGlobalRarityPreference;
                 
                 metaCardData[source] = mergedMetaCards;
+                setMetaDebugStats(source, {
+                    loadedRows: allAnalysisData.length,
+                    matchedRows: top10AnalysisData.length,
+                    aggregatedCards: mergedMetaCards.length,
+                    usedFallback: usedTop10Fallback
+                });
                 
                 renderMetaCards(source);
                 
             } catch (error) {
                 console.error('[loadMetaCardAnalysis] Error:', error);
+                setMetaDebugStats(source, null);
                 clearGridLoadingSkeleton(grid);
                 grid.innerHTML = '<p style="text-align: center; color: #dc3545; padding: 40px; grid-column: 1 / -1;">? Error loading meta analysis</p>';
             }
@@ -589,20 +635,17 @@
                 });
             }
             
-            // Apply minimum share filter (card type specific, always active)
+            // Apply base suppression rules.
+            // City League keeps stricter default cutoffs, Current Meta must stay broad
+            // otherwise realistic low-share rows collapse to empty state.
             cards = cards.filter(c => {
-                if (isBasicEnergyCardEntry(c)) {
-                    return false;
-                }
+                if (isBasicEnergyCardEntry(c)) return false;
+                if (source === 'currentMeta') return true;
 
                 const category = getCardTypeCategory(c.type);
-                
-                // Pokemon: Only show if >40% meta share (user requirement)
                 if (category === 'Pokemon') {
                     return c.metaShare >= 40;
                 }
-                
-                // Trainer and Special Energy: Show if >30% meta share (user requirement)
                 return c.metaShare >= 30;
             });
             

@@ -88,7 +88,15 @@
     width: 100% !important;
     min-width: 900px !important;
     max-width: none !important;
-    table-layout: auto !important;
+    table-layout: fixed !important;
+}
+
+#matchupHeatmapContainer .heatmap-col-first {
+    width: 170px !important;
+}
+
+#matchupHeatmapContainer .heatmap-col-data {
+    width: 78px !important;
 }
 
 #matchupHeatmapContainer .heatmap-th-y,
@@ -100,8 +108,8 @@
 }
 
 #matchupHeatmapContainer .heatmap-th-y {
-    width: 74px !important;
-    min-width: 74px !important;
+    width: 78px !important;
+    min-width: 78px !important;
     max-width: none !important;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
@@ -123,8 +131,8 @@
 }
 
 #matchupHeatmapContainer .heatmap-td {
-    width: 74px !important;
-    min-width: 74px !important;
+    width: 78px !important;
+    min-width: 78px !important;
     overflow: hidden;
     text-overflow: clip;
 }
@@ -519,8 +527,8 @@
     }
 
     #matchupHeatmapContainer .heatmap-th-y {
-        width: 74px !important;
-        min-width: 74px !important;
+        width: 78px !important;
+        min-width: 78px !important;
     }
 
     #matchupHeatmapContainer .heatmap-th-row {
@@ -529,8 +537,8 @@
     }
 
     #matchupHeatmapContainer .heatmap-td {
-        width: 74px !important;
-        min-width: 74px !important;
+        width: 78px !important;
+        min-width: 78px !important;
     }
 
     #currentMetaContent .top-cards-container {

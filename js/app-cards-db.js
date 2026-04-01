@@ -2362,17 +2362,10 @@
             const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
             const userWantsCard = window.userWishlist && window.userWishlist.has(cardId);
 
-            // Also show ownership of other prints to avoid confusing "owned but not marked" states.
-            let altPrintOwnedCount = 0;
-            if (ownedCount === 0 && window.userCollectionCounts && namePrintsIndex) {
-                const sameNamePrints = namePrintsIndex.get(card.name) || [];
-                sameNamePrints.forEach(v => {
-                    if (v.set !== displaySet || v.number !== displayNumber) {
-                        const altId = `${card.name}|${v.set}|${v.number}`;
-                        altPrintOwnedCount += window.userCollectionCounts.get(altId) || 0;
-                    }
-                });
-            }
+            // Show other-print ownership strictly from the card's international_prints family.
+            const altPrintOwnedCount = ownedCount === 0
+                ? getOtherInternationalPrintOwnedCount(displaySet, displayNumber, window.userCollectionCounts)
+                : 0;
             
             // Format price button
             let priceButton = '';
@@ -2424,9 +2417,9 @@
             
             item.innerHTML = `
                 <div class="pos-rel card-database-image-wrap">
-                    <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImageUrl}', '${escapedName}');}" aria-label="Open ${displayName} image in fullscreen">
+                    <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" decoding="async" onclick="showImageView('${escapedImageUrl}', '${escapedName}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImageUrl}', '${escapedName}');}" aria-label="Open ${displayName} image in fullscreen">
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
-                    ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="You own other prints of this card">${altPrintOwnedCount}</div>` : ''}
+                    ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="Owned other INT prints">${altPrintOwnedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${displayName} to collection">+</button>
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-green card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#4CAF50' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} from collection">-</button>
@@ -2942,6 +2935,56 @@
             return { source: sourceHint || '', oldKey: deckKey, count: 0 };
         }
 
+        function getRaritySwitcherDeckContext(source, profileDeckId = '') {
+            if (profileDeckId) {
+                const profileDeck = (window.userDecks || []).find(d => String(d && d.id) === String(profileDeckId));
+                const profileCards = profileDeck && profileDeck.cards && typeof profileDeck.cards === 'object'
+                    ? profileDeck.cards
+                    : null;
+                if (!profileDeck || !profileCards) return null;
+                return {
+                    type: 'profile',
+                    source: 'profile',
+                    profileDeckId,
+                    deck: profileCards,
+                    profileDeck
+                };
+            }
+
+            const deckContexts = {
+                cityLeague: { deck: window.cityLeagueDeck || {}, orderKey: 'cityLeagueDeckOrder' },
+                currentMeta: { deck: window.currentMetaDeck || {}, orderKey: 'currentMetaDeckOrder' },
+                pastMeta: { deck: window.pastMetaDeck || {}, orderKey: 'pastMetaDeckOrder' }
+            };
+            if (!deckContexts[source]) return null;
+            return {
+                type: 'temporary',
+                source,
+                deck: deckContexts[source].deck,
+                orderKey: deckContexts[source].orderKey
+            };
+        }
+
+        function getDeckDistributionForCard(deckObj, cardName) {
+            const distribution = new Map();
+            let total = 0;
+            const wanted = normalizeCardName(cardName);
+            Object.entries(deckObj || {}).forEach(([key, qty]) => {
+                const count = parseInt(qty, 10) || 0;
+                if (count <= 0) return;
+                const match = String(key).match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                const keyName = match ? match[1] : key;
+                if (normalizeCardName(keyName) !== wanted) return;
+                total += count;
+                if (match) {
+                    const set = String(match[2] || '').toUpperCase();
+                    const number = String(match[3] || '').toUpperCase();
+                    distribution.set(`${set}-${number}`, count);
+                }
+            });
+            return { distribution, total };
+        }
+
         async function openRaritySwitcher(cardName, deckKey, sourceHint = '') {
             const isReady = await ensureCardDatabaseReadyForRaritySwitcher();
             if (!isReady) {
@@ -2983,6 +3026,15 @@
                 resolvedCount: resolvedTarget.count || 0,
                 profileDeckId: resolvedTarget.profileDeckId || (String(sourceHint || '').startsWith('profile|') ? String(sourceHint).slice('profile|'.length) : '')
             };
+
+            const activeDeckContext = getRaritySwitcherDeckContext(
+                currentRaritySwitcherCard.source,
+                currentRaritySwitcherCard.profileDeckId
+            );
+            const activeDistribution = activeDeckContext
+                ? getDeckDistributionForCard(activeDeckContext.deck, actualCardName)
+                : { distribution: new Map(), total: 0 };
+            currentRaritySwitcherCard.totalCopies = activeDistribution.total;
             devLog('[RaritySwitch][open] resolved target', {
                 input: { cardName, deckKey: safeDeckKey, sourceHint },
                 resolved: currentRaritySwitcherCard
@@ -3141,8 +3193,6 @@
                     optionDiv.classList.add('selected');
                 }
                 
-                optionDiv.onclick = () => selectRarityVersion(version.set, version.number, safeDeckKey, actualCardName, (currentRaritySwitcherCard && currentRaritySwitcherCard.source) || '');
-                
                 let imageHtml = '';
                 const imageUrl = getUnifiedCardImage(version.set, version.number) || version.image_url || '';
 
@@ -3187,6 +3237,12 @@
                 const _rsOtherPrintLine = _rsOtherPrintsQty > 0
                     ? `<div class="card-database-other-prints-line">✨ Andere Prints: ${_rsOtherPrintsQty}x</div>`
                     : '';
+
+                const optionSet = String(version.set || '').toUpperCase();
+                const optionNumber = String(version.number || '').toUpperCase();
+                const optionDistributionKey = `${optionSet}-${optionNumber}`;
+                const assignedQty = activeDistribution.distribution.get(optionDistributionKey) || 0;
+                const safeOptionCardName = escapeJsStr(actualCardName);
                 
                 optionDiv.innerHTML = `
                     ${imageHtml}
@@ -3196,9 +3252,29 @@
                         ${_rsOwnedLine}
                         ${_rsOtherPrintLine}
                     </div>
+                    <div class="rarity-option-qty-wrap">
+                        <label class="rarity-option-qty-label">Deck Qty</label>
+                        <input
+                            type="number"
+                            class="rarity-option-qty-input"
+                            min="0"
+                            max="60"
+                            step="1"
+                            value="${assignedQty}"
+                            data-set="${optionSet}"
+                            data-number="${optionNumber}"
+                            onclick="event.stopPropagation();"
+                            oninput="this.value = Math.max(0, Math.min(60, parseInt(this.value || '0', 10) || 0));"
+                        >
+                    </div>
                     <div class="rarity-badge" style="--rarity-badge-bg: ${rarityBadgeColor};">
                         ${version.rarity || 'Unknown'}
                     </div>
+                    <button class="btn btn-primary rarity-option-swap-all-btn"
+                            onclick="event.stopPropagation(); selectRarityVersion('${optionSet}', '${optionNumber}', '${escapeJsStr(safeDeckKey)}', '${safeOptionCardName}', '${escapeJsStr((currentRaritySwitcherCard && currentRaritySwitcherCard.source) || '')}')"
+                            title="Alle Kopien auf diesen Print wechseln">
+                        Swap All
+                    </button>
                     ${cardmarketUrl ? `
                         <button class="${cardmarketBtnClass} card-database-price-btn" 
                                 onclick="event.stopPropagation(); window.open('${cardmarketUrl}', '_blank');" 
@@ -3210,6 +3286,21 @@
                 
                 optionsList.appendChild(optionDiv);
             });
+
+            const controlsHost = document.getElementById('raritySwitcherDistributionControls');
+            const totalCopies = currentRaritySwitcherCard.totalCopies || 0;
+            const controlsHtml = `
+                <div class="rarity-switcher-modal-buttons" id="raritySwitcherDistributionControls">
+                    <div class="rarity-distribution-summary">Deck copies: <strong>${totalCopies}</strong>. Sum of all "Deck Qty" fields must match.</div>
+                    <button class="btn btn-primary" onclick="applyRarityDistribution()">Apply Quantities</button>
+                    <button class="btn btn-secondary" onclick="closeRaritySwitcher()">Close</button>
+                </div>
+            `;
+            if (controlsHost) {
+                controlsHost.outerHTML = controlsHtml;
+            } else {
+                optionsList.insertAdjacentHTML('afterend', controlsHtml);
+            }
 
             document.getElementById('raritySwitcherTitle').textContent = `${actualCardName} - Rarity Switcher`;
             const modal = document.getElementById('raritySwitcherModal');
@@ -3409,6 +3500,96 @@
             closeRaritySwitcher();
         }
 
+        async function applyRarityDistribution() {
+            if (!currentRaritySwitcherCard) {
+                showToast('No active rarity selection.', 'warning');
+                return;
+            }
+
+            const cardName = currentRaritySwitcherCard.cardName || '';
+            const expectedTotal = parseInt(currentRaritySwitcherCard.totalCopies, 10) || 0;
+            if (expectedTotal <= 0) {
+                showToast('Card is not present in the active deck.', 'warning');
+                return;
+            }
+
+            const qtyInputs = Array.from(document.querySelectorAll('#rarityOptionsList .rarity-option-qty-input'));
+            if (qtyInputs.length === 0) {
+                showToast('No print options available.', 'warning');
+                return;
+            }
+
+            const desiredEntries = [];
+            let desiredTotal = 0;
+            qtyInputs.forEach(input => {
+                const setCode = String(input.dataset.set || '').toUpperCase();
+                const setNumber = String(input.dataset.number || '').toUpperCase();
+                const qty = Math.max(0, parseInt(input.value || '0', 10) || 0);
+                if (!setCode || !setNumber || qty <= 0) return;
+                desiredEntries.push({ setCode, setNumber, qty, key: `${cardName} (${setCode} ${setNumber})` });
+                desiredTotal += qty;
+            });
+
+            if (desiredTotal !== expectedTotal) {
+                showToast(`Total qty must be ${expectedTotal} (currently ${desiredTotal}).`, 'warning', 4500);
+                return;
+            }
+
+            const deckContext = getRaritySwitcherDeckContext(
+                currentRaritySwitcherCard.source,
+                currentRaritySwitcherCard.profileDeckId
+            );
+            if (!deckContext || !deckContext.deck) {
+                showToast('Unable to resolve active deck.', 'warning');
+                return;
+            }
+
+            const wantedName = normalizeCardName(cardName);
+            const keysToRemove = Object.keys(deckContext.deck).filter(key => {
+                const keyMatch = String(key).match(/^(.+?)\s*\(/);
+                const keyName = keyMatch ? keyMatch[1] : key;
+                return normalizeCardName(keyName) === wantedName;
+            });
+
+            keysToRemove.forEach(key => delete deckContext.deck[key]);
+            desiredEntries.forEach(entry => {
+                deckContext.deck[entry.key] = entry.qty;
+            });
+
+            if (deckContext.type === 'profile') {
+                const profileDeck = deckContext.profileDeck;
+                const updatedProfileDeck = {
+                    ...profileDeck,
+                    cards: deckContext.deck,
+                    totalCards: Object.values(deckContext.deck).reduce((sum, qty) => sum + (parseInt(qty, 10) || 0), 0)
+                };
+                if (typeof saveDeck === 'function') {
+                    await saveDeck(updatedProfileDeck);
+                }
+                if (typeof updateDecksUI === 'function') {
+                    updateDecksUI();
+                }
+            } else {
+                const order = Array.isArray(window[deckContext.orderKey]) ? window[deckContext.orderKey] : [];
+                const cleanedOrder = order.filter(key => {
+                    const keyMatch = String(key).match(/^(.+?)\s*\(/);
+                    const keyName = keyMatch ? keyMatch[1] : key;
+                    return normalizeCardName(keyName) !== wantedName;
+                });
+                desiredEntries.forEach(entry => cleanedOrder.push(entry.key));
+                window[deckContext.orderKey] = cleanedOrder;
+                updateDeckCountAndDisplay(deckContext.source);
+            }
+
+            const firstPrint = desiredEntries[0];
+            if (firstPrint) {
+                setRarityPreference(cardName, { mode: 'specific', set: firstPrint.setCode, number: firstPrint.setNumber });
+            }
+
+            showToast('Print quantities updated.', 'success');
+            closeRaritySwitcher();
+        }
+
         function closeRaritySwitcher() {
             const modal = document.getElementById('raritySwitcherModal');
             modal.classList.remove('show');
@@ -3419,6 +3600,7 @@
         window.openRaritySwitcher = openRaritySwitcher;
         window.closeRaritySwitcher = closeRaritySwitcher;
         window.selectRarityVersion = selectRarityVersion;
+        window.applyRarityDistribution = applyRarityDistribution;
         window.openRaritySwitcherFromDB = openRaritySwitcherFromDB;
         
         // Add ESC key handler for Rarity Switcher

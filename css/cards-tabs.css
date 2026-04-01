@@ -38,9 +38,9 @@
 /* Card Database visual refresh (scoped to cards tab only) */
 #cards .card-database-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)) !important;
-    gap: 14px !important;
-    padding: 10px !important;
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)) !important;
+    gap: 8px !important;
+    padding: 6px !important;
     align-items: stretch !important;
 }
 
@@ -51,7 +51,7 @@
 }
 
 #cards .card-database-item {
-    border-radius: 12px !important;
+    border-radius: 9px !important;
     border: 1px solid #d8deea !important;
     box-shadow: 0 7px 18px rgba(16, 24, 40, 0.09) !important;
     overflow: hidden !important;
@@ -82,36 +82,36 @@
 }
 
 #cards .card-database-top-actions {
-    top: 6px !important;
-    right: 6px !important;
+    top: 4px !important;
+    right: 4px !important;
     display: grid !important;
-    grid-template-columns: repeat(3, 22px) !important;
-    gap: 3px !important;
+    grid-template-columns: repeat(3, 19px) !important;
+    gap: 2px !important;
 }
 
 #cards .card-database-top-actions .card-badge {
     position: relative !important;
-    width: 22px !important;
-    height: 22px !important;
-    font-size: 12px !important;
+    width: 19px !important;
+    height: 19px !important;
+    font-size: 10px !important;
     line-height: 1 !important;
     cursor: pointer !important;
     border: 1.5px solid rgba(0,0,0,0.15) !important;
 }
 
 #cards .card-database-info {
-    padding: 10px !important;
+    padding: 6px !important;
     background: linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%) !important;
     border-top: 1px solid #e3e8f5 !important;
     display: grid !important;
-    grid-template-rows: minmax(34px, auto) minmax(24px, auto) auto auto auto !important;
+    grid-template-rows: minmax(28px, auto) minmax(20px, auto) auto auto auto !important;
     align-content: start !important;
-    gap: 6px !important;
+    gap: 4px !important;
 }
 
 #cards .card-database-name {
     margin: 0 !important;
-    font-size: 14px !important;
+    font-size: 11px !important;
     line-height: 1.25 !important;
     font-weight: 800 !important;
     color: #1b2537 !important;
@@ -135,11 +135,11 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-height: 20px !important;
+    min-height: 17px !important;
     border-radius: 999px !important;
-    font-size: 11px !important;
+    font-size: 9px !important;
     font-weight: 700 !important;
-    padding: 2px 9px !important;
+    padding: 1px 6px !important;
     white-space: nowrap !important;
 }
 
@@ -156,7 +156,7 @@
 #cards .card-database-button-row {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 6px !important;
+    gap: 4px !important;
     margin-top: 0 !important;
     align-items: stretch !important;
 }
@@ -164,16 +164,16 @@
 #cards .card-database-secondary-row {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 6px !important;
+    gap: 4px !important;
 }
 
 #cards .card-database-price-btn,
 #cards .card-database-rarity-btn,
 #cards .card-database-proxy-btn,
 #cards .card-database-price-placeholder {
-    min-height: 42px !important;
-    border-radius: 8px !important;
-    font-size: 12px !important;
+    min-height: 28px !important;
+    border-radius: 6px !important;
+    font-size: 9px !important;
     font-weight: 800 !important;
     letter-spacing: 0.1px !important;
     display: flex !important;
@@ -181,7 +181,7 @@
     justify-content: center !important;
     text-align: center !important;
     line-height: 1.15 !important;
-    padding: 4px 6px !important;
+    padding: 2px 4px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: normal !important;
@@ -218,15 +218,15 @@
 #cards .card-database-limitless-btn,
 #cards .card-database-limitless-placeholder {
     width: 100% !important;
-    min-height: 32px !important;
-    border-radius: 8px !important;
-    font-size: 12px !important;
+    min-height: 24px !important;
+    border-radius: 6px !important;
+    font-size: 9px !important;
     font-weight: 700 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
-    padding: 4px 8px !important;
+    padding: 2px 4px !important;
     line-height: 1.1 !important;
 }
 
@@ -242,14 +242,14 @@
 
 #cards .card-database-coverage {
     margin-top: 0 !important;
-    min-height: 30px !important;
-    border-radius: 8px !important;
-    font-size: 11px !important;
+    min-height: 22px !important;
+    border-radius: 6px !important;
+    font-size: 9px !important;
     font-weight: 700 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 4px 8px !important;
+    padding: 2px 4px !important;
     line-height: 1.1 !important;
 }
 
@@ -373,7 +373,7 @@
 
 @media (max-width: 1100px) {
     #cards .card-database-grid {
-        grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)) !important;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
         gap: 12px !important;
     }
 

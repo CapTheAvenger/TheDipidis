@@ -1361,31 +1361,9 @@ function updateDecksUI() {
         const safeDeckKeyJs = escapeJsSingleQuoted(card.deck_key || `${cardName} (${setCode} ${setNumber})`);
         const safeProfileHintJs = escapeJsSingleQuoted(`profile|${deck.id || ''}`);
         const safeCardmarketTitleHtml = escapeHtml(eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available');
-        let otherPrintOwnedCount = 0;
-        if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
-          const normalizedCurrentName = (typeof normalizeCardName === 'function')
-            ? normalizeCardName(cardName)
-            : String(cardName || '').toLowerCase().trim();
-          const normalizedSet = String(setCode || '').toUpperCase();
-          const normalizedNumber = String(setNumber || '').toUpperCase();
-          window.userCollectionCounts.forEach((qty, collKey) => {
-            const ownedQty = parseInt(qty, 10) || 0;
-            if (ownedQty <= 0) return;
-            const parts = String(collKey || '').split('|');
-            if (parts.length < 3) return;
-            const keyName = parts[0];
-            const keySet = String(parts[1] || '').toUpperCase();
-            const keyNumber = String(parts[2] || '').toUpperCase();
-            const normalizedKeyName = (typeof normalizeCardName === 'function')
-              ? normalizeCardName(keyName)
-              : String(keyName || '').toLowerCase().trim();
-            if (normalizedKeyName !== normalizedCurrentName) return;
-            if (keySet === normalizedSet && keyNumber === normalizedNumber) return;
-            otherPrintOwnedCount += ownedQty;
-          });
-        }
+        const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber, window.userCollectionCounts);
         const otherPrintSparkle = otherPrintOwnedCount > 0
-          ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Andere Int. Prints in Sammlung: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));">✨</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
+          ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Owned other INT prints: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));">✨</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
           : '';
         
         cardsHtml += `

@@ -1103,7 +1103,7 @@
                     // Collection badge
                     const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
                     const otherPrintSparkleHtml = otherPrintOwnedCount > 0
-                        ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}">
+                        ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}" title="Owned other INT prints: ${otherPrintOwnedCount}x">
                             <span class="city-league-other-print-sparkle-icon">✨</span>
                             <span class="city-league-other-print-sparkle-count">${otherPrintOwnedCount}</span>
                         </div>`

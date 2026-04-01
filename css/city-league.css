@@ -574,6 +574,16 @@
     color: #3B4CCA;
     font-weight: 600;
 }
+.current-meta-meta-debug-info {
+    margin-left: auto;
+    font-size: 0.78em;
+    color: #4e5968;
+    background: #eef2f8;
+    border: 1px solid #d7dfeb;
+    border-radius: 999px;
+    padding: 3px 10px;
+    white-space: nowrap;
+}
 .current-meta-meta-card-filters {
     display: flex;
     gap: 18px;

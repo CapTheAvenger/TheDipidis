@@ -1,0 +1,43 @@
+/* Step 2: Empty state standardization */
+
+.app-empty-state {
+    width: min(100%, 520px);
+    margin: 14px auto;
+    text-align: center;
+}
+
+.app-empty-state .deck-builder-empty-icon {
+    color: #6f7f99;
+}
+
+.app-empty-state .deck-builder-empty-title {
+    color: #2c3e50;
+}
+
+.app-empty-state .deck-builder-empty-text {
+    color: #5f6f86;
+}
+
+.app-empty-state .deck-builder-empty-actions {
+    justify-content: center;
+}
+
+.app-empty-state-sm {
+    width: min(100%, 460px);
+    margin: 8px auto;
+    padding: 18px;
+}
+
+#collection-grid,
+#decks-grid,
+#wishlist-grid,
+#metaBinderGrid,
+#proxyQueueList,
+#cityLeagueMetaGrid,
+#currentMetaMetaGrid {
+    min-height: 120px;
+}
+
+#proxyQueueList .app-empty-state {
+    margin-top: 0;
+}

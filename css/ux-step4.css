@@ -1,0 +1,81 @@
+/* Step 4: Layout, spacing, card/panel visual consistency */
+
+:root {
+    --ui-radius-card: 8px;
+    --ui-radius-modal: 12px;
+    --ui-shadow-card: 0 6px 18px rgba(17, 27, 44, 0.08);
+    --ui-shadow-card-hover: 0 10px 24px rgba(17, 27, 44, 0.12);
+    --ui-shadow-panel: 0 8px 22px rgba(20, 32, 54, 0.10);
+}
+
+/* Unified card-level radius + shadow */
+.section-panel,
+.proxy-panel,
+.meta-binder-stats,
+.meta-binder-filters,
+.meta-binder-delta,
+.deck-builder,
+.cards-section,
+.stat-card,
+.compact-card,
+.deck-builder-empty-state,
+.app-empty-state {
+    border-radius: var(--ui-radius-card) !important;
+}
+
+.section-panel,
+.proxy-panel,
+.meta-binder-stats,
+.meta-binder-filters,
+.meta-binder-delta,
+.deck-builder,
+.cards-section,
+.app-empty-state,
+#collection-grid .collection-card,
+#decks-grid .deck-card,
+#wishlist-grid .collection-card,
+#metaBinderGrid .meta-binder-card {
+    box-shadow: var(--ui-shadow-card);
+}
+
+.section-panel:hover,
+.proxy-panel:hover,
+#metaBinderGrid .meta-binder-card:hover,
+#decks-grid .deck-card:hover,
+#collection-grid .collection-card:hover,
+#wishlist-grid .collection-card:hover {
+    box-shadow: var(--ui-shadow-card-hover);
+}
+
+/* Keep modals consistently rounder than cards */
+.ui-modal-panel,
+.auth-modal-content,
+.rarity-switcher-modal-content,
+.single-card-modal-content,
+.image-view-content,
+.mydecks-playtest-modal-content,
+.playtester-setup-modal-content {
+    border-radius: var(--ui-radius-modal) !important;
+    box-shadow: var(--ui-shadow-panel) !important;
+}
+
+/* Utility cleanup replacements for frequent inline intent */
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+.flex-fill {
+    flex: 1 1 auto !important;
+}
+
+/* Modal action rows remain aligned and consistent */
+.setup-modal-btn-row {
+    align-items: stretch;
+}
+
+.setup-modal-btn-row > .btn,
+.setup-modal-btn-row > .btn-system-primary,
+.setup-modal-btn-row > .btn-system-secondary,
+.setup-modal-btn-row > .btn-system-danger {
+    min-height: 42px;
+}

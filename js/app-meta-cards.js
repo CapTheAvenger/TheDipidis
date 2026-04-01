@@ -1,6 +1,58 @@
 // app-meta-cards.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
+        /**
+         * Normalize an archetype name for fuzzy matching.
+         * Strips apostrophes, "ex" suffix, and known set-code suffixes.
+         */
+        function normalizeArchetypeForMatch(name) {
+            return (name || '').toLowerCase()
+                .replace(/[''`]/g, '')           // Rocket's → Rockets
+                .replace(/\bex\b/g, '')          // strip standalone "ex"
+                .replace(/\b(scr|jtg|tef|twm|pfl|dri|meg)\b/g, '') // strip set-code suffixes
+                .replace(/\s+/g, ' ').trim();
+        }
+
+        /**
+         * Build a fuzzy resolution map: analysis archetype (lower) → comparison name (lower).
+         * Handles naming differences between limitless_online_decks_comparison.csv (deck_name)
+         * and current_meta_card_data.csv (archetype).
+         *
+         * @param {Set<string>} top10NamesSet – lowercased comparison deck_names in Top 10
+         * @param {Array<{name:string}>} top10Archetypes – Top 10 entries with original names
+         * @param {string[]} uniqueAnalysisNames – unique archetype names from analysis data
+         * @returns {Map<string,string>} analysisLower → compLower
+         */
+        function buildFuzzyArchetypeMap(top10NamesSet, top10Archetypes, uniqueAnalysisNames) {
+            const compEntries = top10Archetypes.map(a => {
+                const norm = normalizeArchetypeForMatch(a.name);
+                return { lower: a.name.toLowerCase(), norm, words: norm.split(' ').filter(Boolean) };
+            });
+            const result = new Map();
+            for (const analName of uniqueAnalysisNames) {
+                const analLower = analName.toLowerCase();
+                if (top10NamesSet.has(analLower)) { result.set(analLower, analLower); continue; }
+                const analNorm = normalizeArchetypeForMatch(analName);
+                const analWords = analNorm.split(' ').filter(Boolean);
+                let bestMatch = null;
+                let bestScore = 0;
+                for (const comp of compEntries) {
+                    if (analNorm === comp.norm) { bestMatch = comp.lower; bestScore = 100; break; }
+                    const shorter = comp.words.length <= analWords.length ? comp.words : analWords;
+                    const longer  = comp.words.length <= analWords.length ? analWords : comp.words;
+                    const matchCount = shorter.filter(sw =>
+                        longer.some(lw => lw === sw || lw.startsWith(sw) || sw.startsWith(lw))
+                    ).length;
+                    if (matchCount === shorter.length && shorter.length > 0) {
+                        const score = (shorter.length / longer.length) * 100;
+                        if (score > bestScore) { bestScore = score; bestMatch = comp.lower; }
+                    }
+                }
+                if (bestMatch) result.set(analLower, bestMatch);
+            }
+            return result;
+        }
+
         let metaCardData = {
             cityLeague: [],
             currentMeta: []
@@ -130,10 +182,29 @@
                     healCurrentMetaCardRows(allAnalysisData);
                 }
                 
-                // Filter to only Top 10 archetypes
+                // --- Fuzzy archetype resolution for currentMeta ---
+                // Comparison CSV (deck_name) and analysis CSV (archetype) use
+                // different naming conventions (e.g. "Rocket's Mewtwo" vs
+                // "Rocket Mewtwo Ex", "Slowking" vs "Slowking Scr").
+                // Build a resolution map: analysis archetype → comparison name.
+                let analysisToCompMap = null;
+                if (source === 'currentMeta') {
+                    const uniqueAnalysisNames = [...new Set(
+                        allAnalysisData.map(r => (r.archetype || '').trim()).filter(Boolean)
+                    )];
+                    analysisToCompMap = buildFuzzyArchetypeMap(top10Names, top10Archetypes, uniqueAnalysisNames);
+                    devLog('[loadMetaCardAnalysis] Fuzzy archetype resolution:', Object.fromEntries(analysisToCompMap));
+                }
+
+                // Filter to only Top 10 archetypes (with fuzzy fallback for currentMeta)
                 const top10AnalysisData = allAnalysisData.filter(row => {
                     const arch = (row.archetype || '').toLowerCase();
-                    return top10Names.has(arch);
+                    if (top10Names.has(arch)) return true;
+                    if (analysisToCompMap) {
+                        const resolved = analysisToCompMap.get(arch);
+                        return resolved && top10Names.has(resolved);
+                    }
+                    return false;
                 });
                 
                 // Build map of archetype -> deckCount from comparison data
@@ -141,6 +212,14 @@
                 top10Archetypes.forEach(arch => {
                     archetypeMap[arch.name.toLowerCase()] = arch.deckCount;
                 });
+                // Extend archetypeMap with fuzzy-resolved analysis names
+                if (analysisToCompMap) {
+                    for (const [analLower, compLower] of analysisToCompMap) {
+                        if (archetypeMap[compLower] !== undefined && archetypeMap[analLower] === undefined) {
+                            archetypeMap[analLower] = archetypeMap[compLower];
+                        }
+                    }
+                }
                 
                 // Aggregate cards using raw included-deck counts so small samples do not skew the meta share.
                 const cardArchetypeMap = {}; // card -> archetype -> aggregated usage totals

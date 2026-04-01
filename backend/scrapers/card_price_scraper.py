@@ -77,7 +77,7 @@ def _fetch_limitless(card: dict) -> dict:
             prints_table = soup.select_one("table.card-prints-versions")
             
             if prints_table:
-                # STRATEGIE A: Die aktuell markierte Zeile
+                # STRATEGIE A: Die aktuell markierte Zeile (tr.current)
                 current_row = prints_table.select_one("tr.current")
                 if current_row:
                     eur_link = current_row.select_one("a.card-price.eur")
@@ -85,24 +85,32 @@ def _fetch_limitless(card: dict) -> dict:
                         eur_price = eur_link.get_text(strip=True)
                         logger.info("  [LT] Price [%s]: %s (Exakter Match)", card_id, eur_price)
                 
-                # STRATEGIE B: Link-Match
+                # STRATEGIE B: Zeile mit link-losem <a> = aktuelle Karte
+                # Limitless rendert die aufgerufene Karte mit <a> OHNE href,
+                # alle anderen Drucke haben <a href="/cards/SET/NUM">
+                if not eur_price:
+                    for row in prints_table.select("tr"):
+                        first_td = row.select_one("td")
+                        if first_td:
+                            name_link = first_td.select_one("a")
+                            if name_link and not name_link.has_attr("href"):
+                                eur_link = row.select_one("a.card-price.eur")
+                                if eur_link:
+                                    eur_price = eur_link.get_text(strip=True)
+                                    logger.info("  [LT] Price [%s]: %s (Current-Row Marker)", card_id, eur_price)
+                                break
+                
+                # STRATEGIE C: Link-Match fuer Set/Nummer
                 if not eur_price:
                     exact_path = f"/cards/{card['set'].upper()}/{card['number']}"
                     for row in prints_table.select("tr"):
-                        link_elem = row.select_one("a[href]")
-                        if link_elem and link_elem.has_attr('href') and exact_path in link_elem["href"].upper():
+                        link_elem = row.select_one("td:first-child a[href]")
+                        if link_elem and exact_path in link_elem["href"].upper():
                             eur_link = row.select_one("a.card-price.eur")
                             if eur_link:
                                 eur_price = eur_link.get_text(strip=True)
                                 logger.info("  [LT] Price [%s]: %s (Link-Match)", card_id, eur_price)
                                 break
-            
-            # STRATEGIE C: Fallback
-            if not eur_price:
-                first_price = soup.select_one("a.card-price.eur")
-                if first_price:
-                    eur_price = first_price.get_text(strip=True)
-                    logger.info("  [LT] Price [%s]: %s (Fallback)", card_id, eur_price)
                     
     except Exception as e:
         logger.debug("  [LT] Interner Fehler bei %s: %s", card_id, e)

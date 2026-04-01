@@ -125,6 +125,43 @@ class TestAllCardsScraperDetails:
         assert result["cardmarket_url"] == "https://cardmarket.example/obf-125"
         assert result["international_prints"] == "OBF-125,PAL-54"
 
+    @pytest.mark.parametrize(
+        ("input_url", "set_code", "set_number", "expected"),
+        [
+            ("/cards/GRI/125a/field-blower", "GRI", "125a", "/cards/GRI/125a"),
+            ("https://limitlesstcg.com/cards/GRI/125a/field-blower", "GRI", "125a", "/cards/GRI/125a"),
+            ("/cards/en/GRI/125a/field-blower", "GRI", "125a", "/cards/GRI/125a"),
+            ("/cards/SVE/22/fighting-energy", "SVE", "22", "/cards/SVE/22"),
+            ("", "MEE", "3", "/cards/MEE/3"),
+        ],
+    )
+    def test_normalize_limitless_card_url(self, input_url, set_code, set_number, expected):
+        assert all_cards_scraper.normalize_limitless_card_url(input_url, set_code, set_number) == expected
+
+    @patch("backend.scrapers.all_cards_scraper.safe_fetch_html")
+    def test_fetch_single_card_uses_canonical_url_without_slug(self, mock_fetch):
+        mock_fetch.return_value = """
+        <html><body>
+          <img class="card shadow resp-w" src="https://img.example/gri-125a.png" />
+        </body></html>
+        """
+        card = {
+            "name_en": "Field Blower",
+            "set": "GRI",
+            "number": "125a",
+            "card_url": "/cards/GRI/125a/field-blower",
+            "image_url": "",
+            "rarity": "",
+            "international_prints": "",
+            "cardmarket_url": "",
+        }
+
+        result = all_cards_scraper._fetch_single_card(card)
+
+        called_url = mock_fetch.call_args[0][0]
+        assert called_url == "https://limitlesstcg.com/cards/GRI/125a"
+        assert result["card_url"] == "/cards/GRI/125a"
+
 
     class TestSharedDeckExtractionEdgeCases:
       def test_extract_cards_skips_pokemon_without_resolvable_set_data(self, mock_card_db):

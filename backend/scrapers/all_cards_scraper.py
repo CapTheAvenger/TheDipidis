@@ -16,7 +16,6 @@ import sys
 import time
 import logging
 import concurrent.futures
-import re
 from datetime import datetime
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
@@ -67,6 +66,56 @@ else:
 
 def sort_key(card: dict):
     return card_sort_key(card, SET_ORDER)
+
+
+def build_limitless_card_path(set_code: str, set_number: str) -> str:
+    sc = str(set_code or "").strip().upper()
+    sn = str(set_number or "").strip()
+    if not (sc and sn):
+        return ""
+    return f"/cards/{sc}/{sn}"
+
+
+def normalize_limitless_card_url(card_url: str, set_code: str = "", set_number: str = "") -> str:
+    """
+    Normalize any Limitless card URL/path to canonical '/cards/SET/NUMBER'.
+
+    Examples:
+      /cards/GRI/125a/field-blower -> /cards/GRI/125a
+      https://limitlesstcg.com/cards/en/GRI/125a/field-blower -> /cards/GRI/125a
+      /cards/SVE/22/fighting-energy -> /cards/SVE/22
+    """
+    fallback = build_limitless_card_path(set_code, set_number)
+    raw = str(card_url or "").strip()
+    if not raw:
+        return fallback
+
+    path_only = raw.split("?", 1)[0].split("#", 1)[0]
+    marker = "/cards/"
+    lower_path = path_only.lower()
+    marker_index = lower_path.find(marker)
+    if marker_index != -1:
+        suffix = path_only[marker_index + len(marker):].strip("/")
+    else:
+        return fallback or raw
+
+    if not suffix:
+        return fallback or raw
+
+    parts = [p for p in suffix.split("/") if p]
+    if not parts:
+        return fallback or raw
+
+    lang_prefixes = {"en", "de", "fr", "es", "it", "pt", "ja", "ko"}
+    if parts and parts[0].lower() in lang_prefixes:
+        parts = parts[1:]
+
+    if len(parts) >= 2:
+        parsed_set = parts[0].upper()
+        parsed_number = parts[1]
+        return build_limitless_card_path(parsed_set, parsed_number)
+
+    return fallback or raw
 
 
 # LOAD EXISTING CSV
@@ -283,11 +332,32 @@ RARITY_KEYWORDS = [
 
 
 def _fetch_single_card(card: dict) -> dict:
+    original_card_url = str(card.get("card_url", "")).strip()
+    normalized_path = normalize_limitless_card_url(
+        original_card_url,
+        card.get("set", ""),
+        card.get("number", ""),
+    )
+    if normalized_path:
+        card["card_url"] = normalized_path
+
     if not card.get("card_url"):
         return card
 
-    full_url = urljoin("https://limitlesstcg.com", card["card_url"])
-    html = safe_fetch_html(full_url, timeout=15)
+    # Prefer canonical URL without slug. Some older cards 404 with slug paths.
+    candidate_paths = []
+    if normalized_path:
+        candidate_paths.append(normalized_path)
+    if original_card_url and original_card_url not in candidate_paths:
+        candidate_paths.append(original_card_url)
+
+    html = ""
+    for path in candidate_paths:
+        full_url = urljoin("https://limitlesstcg.com", path)
+        html = safe_fetch_html(full_url, timeout=15)
+        if html:
+            card["card_url"] = path
+            break
 
     if not html:
         logger.error(
@@ -511,10 +581,9 @@ def main():
         for ic in incomplete_cards:
             if "name" in ic and "name_en" not in ic:
                 ic["name_en"] = ic.pop("name")
-            if not ic.get("card_url") and ic.get("name_en") and ic.get("set") and ic.get("number"):
-                slug = re.sub(r"[^a-z0-9\s-]", "", ic["name_en"].lower())
-                slug = re.sub(r"-+", "-", slug.replace(" ", "-")).strip("-")
-                ic["card_url"] = f"/cards/{ic['set'].upper()}/{ic['number']}/{slug}"
+            canonical = build_limitless_card_path(ic.get("set", ""), ic.get("number", ""))
+            if canonical:
+                ic["card_url"] = canonical
 
         all_cards = incomplete_cards + en_cards
 

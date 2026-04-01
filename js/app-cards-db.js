@@ -2709,6 +2709,35 @@
         // Rarity Switcher Functions
         let currentRaritySwitcherCard = null;
 
+        function hasLoadedCardDatabaseForRaritySwitcher() {
+            return Array.isArray(window.allCardsDatabase) && window.allCardsDatabase.length > 0;
+        }
+
+        async function ensureCardDatabaseReadyForRaritySwitcher(options = {}) {
+            const maxWaitMs = Number(options.maxWaitMs) > 0 ? Number(options.maxWaitMs) : 5000;
+            const pollIntervalMs = Number(options.pollIntervalMs) > 0 ? Number(options.pollIntervalMs) : 100;
+
+            if (hasLoadedCardDatabaseForRaritySwitcher()) return true;
+
+            if (typeof loadAllCardsDatabase === 'function') {
+                try {
+                    await Promise.resolve(loadAllCardsDatabase());
+                } catch (err) {
+                    devWarn('[RaritySwitch][ready] loadAllCardsDatabase failed', err);
+                }
+            }
+
+            if (hasLoadedCardDatabaseForRaritySwitcher()) return true;
+
+            const startedAt = Date.now();
+            while ((Date.now() - startedAt) < maxWaitMs) {
+                await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+                if (hasLoadedCardDatabaseForRaritySwitcher()) return true;
+            }
+
+            return false;
+        }
+
         function resolveRaritySwitchTarget(cardName, deckKey, sourceHint = '') {
             const normalizedActualName = normalizeCardName(cardName || '');
             const parsedMatch = String(deckKey || '').match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
@@ -2810,14 +2839,17 @@
             return { source: sourceHint || '', oldKey: deckKey, count: 0 };
         }
 
-        function openRaritySwitcher(cardName, deckKey, sourceHint = '') {
-            if (!window.allCardsDatabase) {
+        async function openRaritySwitcher(cardName, deckKey, sourceHint = '') {
+            const isReady = await ensureCardDatabaseReadyForRaritySwitcher();
+            if (!isReady) {
                 showToast('Card database not loaded yet...', 'info');
                 return;
             }
 
+            const safeDeckKey = String(deckKey || '');
+
             // Extract card name from deckKey if needed (handle "CardName (SET NUM)" format)
-            const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
+            const baseNameMatch = safeDeckKey.match(/^(.+?)\s*\(/);
             const actualCardName = baseNameMatch ? baseNameMatch[1] : cardName;
             const normalizedActualCardName = normalizeCardName(actualCardName);
 
@@ -2829,7 +2861,7 @@
             };
             
             // Extract set and number from deckKey (e.g., "Boss's Orders (RCL 189)" -> set="RCL", number="189")
-            const setNumMatch = deckKey.match(/\(([A-Z0-9]+)\s+(\d+[A-Z]*)\)/);
+            const setNumMatch = safeDeckKey.match(/\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)/);
             let currentSet = '';
             let currentNumber = '';
             if (setNumMatch) {
@@ -2837,19 +2869,19 @@
                 currentNumber = setNumMatch[2];
             }
             
-            devLog(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${deckKey}, actualCardName: ${actualCardName}`);
+            devLog(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${safeDeckKey}, actualCardName: ${actualCardName}`);
 
-            const resolvedTarget = resolveRaritySwitchTarget(actualCardName, deckKey, sourceHint);
+            const resolvedTarget = resolveRaritySwitchTarget(actualCardName, safeDeckKey, sourceHint);
             currentRaritySwitcherCard = {
                 cardName: actualCardName,
-                deckKey,
+                deckKey: safeDeckKey,
                 source: resolvedTarget.source || sourceHint || '',
-                resolvedOldKey: resolvedTarget.oldKey || deckKey,
+                resolvedOldKey: resolvedTarget.oldKey || safeDeckKey,
                 resolvedCount: resolvedTarget.count || 0,
                 profileDeckId: resolvedTarget.profileDeckId || (String(sourceHint || '').startsWith('profile|') ? String(sourceHint).slice('profile|'.length) : '')
             };
             devLog('[RaritySwitch][open] resolved target', {
-                input: { cardName, deckKey, sourceHint },
+                input: { cardName, deckKey: safeDeckKey, sourceHint },
                 resolved: currentRaritySwitcherCard
             });
             
@@ -2989,6 +3021,11 @@
 
             // Build rarity options
             const optionsList = document.getElementById('rarityOptionsList');
+            if (!optionsList) {
+                console.error('[openRaritySwitcher] #rarityOptionsList not found in DOM');
+                showToast('Rarity switcher UI not available.', 'warning', 4000);
+                return;
+            }
             optionsList.innerHTML = '';
 
             versions.forEach(version => {
@@ -2997,11 +3034,11 @@
                 
                 // Check if this is the current version
                 const versionKey = `${actualCardName} (${version.set} ${version.number})`;
-                if (deckKey === versionKey) {
+                if (safeDeckKey === versionKey) {
                     optionDiv.classList.add('selected');
                 }
                 
-                optionDiv.onclick = () => selectRarityVersion(version.set, version.number, deckKey, actualCardName, (currentRaritySwitcherCard && currentRaritySwitcherCard.source) || '');
+                optionDiv.onclick = () => selectRarityVersion(version.set, version.number, safeDeckKey, actualCardName, (currentRaritySwitcherCard && currentRaritySwitcherCard.source) || '');
                 
                 let imageHtml = '';
                 const imageUrl = getUnifiedCardImage(version.set, version.number) || version.image_url || '';
@@ -3073,6 +3110,11 @@
 
             document.getElementById('raritySwitcherTitle').textContent = `${actualCardName} - Rarity Switcher`;
             const modal = document.getElementById('raritySwitcherModal');
+            if (!modal) {
+                console.error('[openRaritySwitcher] #raritySwitcherModal not found in DOM');
+                showToast('Rarity switcher modal not available.', 'warning', 4000);
+                return;
+            }
             modal.classList.add('show');
         }
 
@@ -3269,6 +3311,12 @@
             modal.classList.remove('show');
             currentRaritySwitcherCard = null;
         }
+
+        // Explicit exports for inline onclick handlers across all tabs.
+        window.openRaritySwitcher = openRaritySwitcher;
+        window.closeRaritySwitcher = closeRaritySwitcher;
+        window.selectRarityVersion = selectRarityVersion;
+        window.openRaritySwitcherFromDB = openRaritySwitcherFromDB;
         
         // Add ESC key handler for Rarity Switcher
         document.addEventListener('keydown', function(e) {

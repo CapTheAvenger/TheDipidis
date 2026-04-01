@@ -181,6 +181,67 @@
         return `${String(name || '').trim()}|${String(set || '').trim()}|${String(number || '').trim()}`;
     }
 
+    function normalizeIntlPrintRef(set, number) {
+        return `${String(set || '').trim().toUpperCase()}-${String(number || '').trim().toUpperCase()}`;
+    }
+
+    function parseIntlPrintRef(ref) {
+        const raw = String(ref || '').trim();
+        if (!raw.includes('-')) return { set: '', number: '' };
+        const idx = raw.indexOf('-');
+        return {
+            set: raw.slice(0, idx).trim(),
+            number: raw.slice(idx + 1).trim()
+        };
+    }
+
+    function getIntlFamilyInfo(name, set, number) {
+        const refs = [];
+        const cards = [];
+        const setOrderMap = window.setOrderMap || {};
+        const normSet = String(set || '').trim();
+        const normNumber = String(number || '').trim();
+
+        if (typeof getInternationalPrintsForCard === 'function') {
+            const intlCards = getInternationalPrintsForCard(normSet, normNumber) || [];
+            intlCards.forEach(card => {
+                const cSet = String(card?.set || '').trim();
+                const cNumber = String(card?.number || '').trim();
+                if (!cSet || !cNumber) return;
+                refs.push(normalizeIntlPrintRef(cSet, cNumber));
+                cards.push(card);
+            });
+        }
+
+        if (refs.length === 0) {
+            refs.push(normalizeIntlPrintRef(normSet, normNumber));
+        }
+
+        const uniqueRefs = [...new Set(refs)].filter(ref => ref !== '-');
+        uniqueRefs.sort((a, b) => {
+            const pa = parseIntlPrintRef(a);
+            const pb = parseIntlPrintRef(b);
+            const oa = setOrderMap[pa.set] || setOrderMap[String(pa.set || '').toLowerCase()] || 0;
+            const ob = setOrderMap[pb.set] || setOrderMap[String(pb.set || '').toLowerCase()] || 0;
+            if (oa !== ob) return ob - oa;
+            return String(pb.number || '').localeCompare(String(pa.number || ''));
+        });
+
+        const newestRef = uniqueRefs[0] || normalizeIntlPrintRef(normSet, normNumber);
+        const newest = parseIntlPrintRef(newestRef);
+        const newestCard = cards.find(card =>
+            normalizeIntlPrintRef(card?.set, card?.number) === newestRef
+        ) || findCardRecord(name, newest.set, newest.number);
+
+        return {
+            refs: uniqueRefs,
+            signature: uniqueRefs.join('|'),
+            newestSet: newest.set || normSet,
+            newestNumber: newest.number || normNumber,
+            newestName: String(newestCard?.name || newestCard?.name_en || name || '').trim() || String(name || '').trim()
+        };
+    }
+
     // ── Core: collect max card counts across all target decks ──
     function collectBinderCards(targetArchetypes) {
         const thresholdPercent = 70;
@@ -238,15 +299,17 @@
                 const usagePercent = parseUsagePercent(row);
                 if (!isAceSpec && usagePercent < thresholdPercent) return;
 
-                const key = `${name}|${set}|${number}`;
+                const family = getIntlFamilyInfo(name, set, number);
+                const key = family.signature || `${name}|${set}|${number}`;
                 const count = parseInt(row.max_count || row.count || 0, 10);
                 const existing = deckCardMap.get(key);
                 if (!existing || count > existing.count) {
                     deckCardMap.set(key, {
-                        name,
-                        set,
-                        number,
+                        name: family.newestName || name,
+                        set: family.newestSet || set,
+                        number: family.newestNumber || number,
                         count,
+                        familyRefs: family.refs,
                         type: String(row.type || '').trim(),
                         rarity: String(row.rarity || '').trim(),
                         isAceSpec
@@ -254,9 +317,9 @@
                 }
             });
 
-            deckCardMap.forEach(({ name, set, number, count, type, rarity, isAceSpec }, key) => {
-                const cardId = buildCardId(name, set, number);
-                const entry = binderMap.get(cardId);
+            deckCardMap.forEach(({ name, set, number, count, familyRefs, type, rarity, isAceSpec }, key) => {
+                const familyKey = `intl:${key}`;
+                const entry = binderMap.get(familyKey);
                 if (entry) {
                     entry.maxCount = Math.max(entry.maxCount, count);
                     if (!entry.decks.includes(archetype)) entry.decks.push(archetype);
@@ -264,8 +327,9 @@
                     if (!entry.rarity && rarity) entry.rarity = rarity;
                     entry.isAceSpec = entry.isAceSpec || isAceSpec;
                 } else {
-                    binderMap.set(cardId, {
+                    binderMap.set(familyKey, {
                         name, set, number,
+                        familyRefs: Array.isArray(familyRefs) ? familyRefs : [],
                         maxCount: count,
                         decks: [archetype],
                         type,
@@ -284,6 +348,27 @@
         const collection = window.userCollection || new Set();
         const collectionCounts = window.userCollectionCounts || new Map();
 
+        function countOwnedIntlRefs(refs) {
+            if (!Array.isArray(refs) || refs.length === 0) return 0;
+            let total = 0;
+            refs.forEach(ref => {
+                const parsed = parseIntlPrintRef(ref);
+                if (!parsed.set || !parsed.number) return;
+                collectionCounts.forEach((qty, collKey) => {
+                    const ownedQty = parseInt(qty, 10) || 0;
+                    if (ownedQty <= 0) return;
+                    const parts = String(collKey || '').split('|');
+                    if (parts.length < 3) return;
+                    const cSet = String(parts[1] || '').trim().toUpperCase();
+                    const cNum = String(parts[2] || '').trim().toUpperCase();
+                    if (cSet === String(parsed.set || '').toUpperCase() && cNum === String(parsed.number || '').toUpperCase()) {
+                        total += ownedQty;
+                    }
+                });
+            });
+            return total;
+        }
+
         // Load previous binder from cache
         let previousIds = new Set();
         try {
@@ -293,18 +378,27 @@
 
         const results = [];
         binderMap.forEach((entry, cardId) => {
-            const owned = collectionCounts.get(cardId) || 0;
+            const exactCardId = buildCardId(entry.name, entry.set, entry.number);
+            const ownedExact = collectionCounts.get(exactCardId) || 0;
+            const ownedIntlTotal = countOwnedIntlRefs(entry.familyRefs);
             const needed = entry.maxCount;
-            const missing = Math.max(0, needed - owned);
+            const effectiveOwned = ownedIntlTotal;
+            const missing = Math.max(0, needed - effectiveOwned);
             const wasInPrevious = previousIds.has(cardId);
+            const ownershipMode = ownedExact >= needed
+                ? 'exact'
+                : (ownedIntlTotal >= needed ? 'intl-complete' : 'missing');
             results.push({
                 cardId,
                 name: entry.name,
                 set: entry.set,
                 number: entry.number,
                 maxCount: needed,
-                owned,
+                owned: effectiveOwned,
+                ownedExact,
+                ownedIntlTotal,
                 missing,
+                ownershipMode,
                 isNew: !wasInPrevious,
                 decks: entry.decks,
                 type: entry.type,
@@ -504,11 +598,11 @@
                     cityPastAvgRank: metricMaps.cityPastMap.get(key) ?? null
                 };
             }).sort((a, b) => {
-                // Keep Top 20 Current Meta exactly in source rank order.
                 if (group.source === 'current-meta') {
-                    const indexA = group.names.findIndex(name => String(name || '').toLowerCase() === String(a.name || '').toLowerCase());
-                    const indexB = group.names.findIndex(name => String(name || '').toLowerCase() === String(b.name || '').toLowerCase());
-                    return indexA - indexB;
+                    const rankA = Number.isFinite(a.currentMetaRank) ? a.currentMetaRank : Number.MAX_SAFE_INTEGER;
+                    const rankB = Number.isFinite(b.currentMetaRank) ? b.currentMetaRank : Number.MAX_SAFE_INTEGER;
+                    if (rankA !== rankB) return rankA - rankB;
+                    return String(a.name || '').localeCompare(String(b.name || ''));
                 }
 
                 const getRankValue = (item) => {
@@ -791,9 +885,13 @@
                 const shareText = Number.isFinite(item.currentMetaShare) ? `${item.currentMetaShare.toFixed(1)}%` : '—';
                 const cityCurrentText = formatMetaBinderMetric(item.cityCurrentAvgRank, 1);
                 const cityPastText = formatMetaBinderMetric(item.cityPastAvgRank, 1);
+                const rankPill = item.source === 'current-meta' && Number.isFinite(item.currentMetaRank)
+                    ? `<span class="tier-hero-rank">#${Math.round(item.currentMetaRank)}</span>`
+                    : '';
 
                 return `
                     <div class="deck-banner-card" onclick="${navFn}('${escapedJsName}')">
+                        ${rankPill}
                         ${item.imageUrl ? `<div class="deck-banner-bg" style="background-image: url('${safeImage}')"></div>` : ''}
                         <div class="deck-banner-content">
                             <div class="deck-banner-name">${safeName}</div>
@@ -962,18 +1060,27 @@
 
         grid.innerHTML = sorted.map(card => {
             const imageUrl = findCardImage(card.name, card.set, card.number);
-            const statusClass = card.missing > 0 ? 'meta-binder-card-missing card-missing' : 'meta-binder-card-owned card-owned';
+            const statusClass = card.ownershipMode === 'exact'
+                ? 'meta-binder-card-owned card-owned'
+                : (card.ownershipMode === 'intl-complete'
+                    ? 'meta-binder-card-owned-intl card-owned'
+                    : 'meta-binder-card-missing card-missing');
             const newBadge = card.isNew ? `<span class="meta-binder-badge-new">${mbText('mb.new', 'NEW')}</span>` : '';
             const safeImage = escapeHtml(imageUrl);
             const safeName = escapeHtml(card.name);
             const deckList = card.decks.map(d => escapeHtml(d)).join(', ');
             const typeMeta = getMetaBinderTypeMeta(card);
-            const countLabel = card.missing > 0
-                ? `<span class="meta-binder-count-missing">${card.owned}/${card.maxCount}</span>`
-                : `<span class="meta-binder-count-ok">${card.owned}/${card.maxCount} ✓</span>`;
+            const countLabel = card.ownershipMode === 'exact'
+                ? `<span class="meta-binder-count-ok">${card.ownedExact}/${card.maxCount} ✓</span>`
+                : (card.ownershipMode === 'intl-complete'
+                    ? `<span class="meta-binder-count-intl">${card.ownedIntlTotal}/${card.maxCount} ✓</span>`
+                    : `<span class="meta-binder-count-missing">${card.ownedIntlTotal}/${card.maxCount}</span>`);
+            const ownershipHint = card.ownershipMode === 'intl-complete'
+                ? ' (filled via other international prints)'
+                : '';
 
             return `
-                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${escapeHtml(String(card.set || ''))}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" title="Wird verwendet in: ${deckList}">
+                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${escapeHtml(String(card.set || ''))}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" title="Wird verwendet in: ${deckList}${ownershipHint}">
                     ${imageUrl
                         ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                            <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`

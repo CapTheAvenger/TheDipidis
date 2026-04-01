@@ -2961,6 +2961,10 @@
     border-color: rgba(39, 174, 96, 0.35);
 }
 
+.meta-binder-card-owned-intl {
+    border-color: rgba(41, 128, 185, 0.42);
+}
+
 .meta-binder-card-missing {
     border-color: rgba(231, 76, 60, 0.35);
 }
@@ -3027,6 +3031,10 @@
 
 .meta-binder-count-ok {
     color: #27ae60;
+}
+
+.meta-binder-count-intl {
+    color: #2980b9;
 }
 
 .meta-binder-count-missing {

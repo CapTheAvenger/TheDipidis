@@ -117,7 +117,7 @@
                 </div>
 
                 <div class="header-flex-user">
-                    <button id="langToggleBtn" onclick="switchLanguage(getLang() === 'en' ? 'de' : 'en')" class="lang-toggle-btn" title="Switch language">DE</button>
+                    <button id="langToggleBtn" onclick="switchLanguage(getLang() === 'en' ? 'de' : 'en')" class="lang-toggle-btn" title="Switch language" data-i18n-title="header.switchLanguageTitle">DE</button>
                     <button id="battleJournalFab" class="battle-journal-fab battle-journal-fab-header" type="button" onclick="openBattleJournalSheet()" aria-label="Open battle journal">
                         <span class="battle-journal-fab-icon"></span>
                         <span class="battle-journal-fab-label" data-i18n="bj.openShort">Journal</span>
@@ -322,8 +322,8 @@
                                         <h4 class="deck-builder-empty-title">Your deck is empty</h4>
                                         <p class="deck-builder-empty-text" data-i18n="deck.emptyPlaceholder">Create a deck using the buttons above or add cards manually...</p>
                                         <div class="deck-builder-empty-actions">
-                                            <button class="btn-modern primary" onclick="autoCompleteConsistency('cityLeague', 'min')">Generate Deck</button>
-                                            <button class="btn-modern" onclick="openDrawSimulator('cityLeague')">Open Test Draw</button>
+                                            <button class="btn-modern primary" onclick="autoCompleteConsistency('cityLeague', 'min')" data-i18n="deck.emptyGenerate">Generate Deck</button>
+                                            <button class="btn-modern" onclick="openDrawSimulator('cityLeague')" data-i18n="deck.emptyTestDraw">Open Test Draw</button>
                                         </div>
                                     </div>
                                 </div>
@@ -607,8 +607,8 @@
                                     <h4 class="deck-builder-empty-title">Your deck is empty</h4>
                                     <p class="deck-builder-empty-text" data-i18n="cl.createDeckHint">Create a deck using the buttons above or add cards manually...</p>
                                     <div class="deck-builder-empty-actions">
-                                        <button class="btn-modern primary" onclick="autoCompleteConsistency('currentMeta', 'min')">Generate Deck</button>
-                                        <button class="btn-modern" onclick="openDrawSimulator('currentMeta')">Open Test Draw</button>
+                                        <button class="btn-modern primary" onclick="autoCompleteConsistency('currentMeta', 'min')" data-i18n="deck.emptyGenerate">Generate Deck</button>
+                                        <button class="btn-modern" onclick="openDrawSimulator('currentMeta')" data-i18n="deck.emptyTestDraw">Open Test Draw</button>
                                     </div>
                                 </div>
                             </div>
@@ -821,8 +821,8 @@
                                     <h4 class="deck-builder-empty-title">Your deck is empty</h4>
                                     <p class="deck-builder-empty-text" data-i18n="cl.createDeckHint">Create a deck using the buttons above or add cards manually...</p>
                                     <div class="deck-builder-empty-actions">
-                                        <button class="btn-modern primary" onclick="autoCompleteConsistency('pastMeta', 'min')">Generate Deck</button>
-                                        <button class="btn-modern" onclick="openDrawSimulator('pastMeta')">Open Test Draw</button>
+                                        <button class="btn-modern primary" onclick="autoCompleteConsistency('pastMeta', 'min')" data-i18n="deck.emptyGenerate">Generate Deck</button>
+                                        <button class="btn-modern" onclick="openDrawSimulator('pastMeta')" data-i18n="deck.emptyTestDraw">Open Test Draw</button>
                                     </div>
                                 </div>
                             </div>
@@ -852,7 +852,7 @@
                         <div id="cardSearchAutocomplete" class="cards-autocomplete-dropdown"></div>
                     </div>
 
-                    <button type="button" id="cardsFiltersToggle" class="cards-filters-toggle" onclick="toggleCardsFilterPanel()" aria-expanded="true">
+                    <button type="button" id="cardsFiltersToggle" class="cards-filters-toggle" onclick="toggleCardsFilterPanel()" aria-expanded="true" data-i18n="cards.hideFilters">
                         Hide Filters
                     </button>
 
@@ -922,7 +922,7 @@
             <div id="proxy" class="tab-content">
                 <div class="proxy-container">
                     <div class="proxy-header-row">
-                        <h2 class="proxy-title"><span data-i18n="tab.proxyPrinter">Proxy Printer</span> <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help"></button></h2>
+                        <h2 class="proxy-title"><span data-i18n="tab.proxyPrinter">Proxy Printer</span> <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <div class="proxy-header-counts">
                             <div class="proxy-header-count proxy-header-unique"><span data-i18n="misc.unique">Unique:</span> <span id="proxyUniqueCount">0</span></div>
                             <div class="proxy-header-count proxy-header-copies"><span data-i18n="misc.copies">Copies:</span> <span id="proxyCopiesCount">0</span></div>
@@ -1020,7 +1020,7 @@
                 <div class="container">
                     <div class="header">
                         <h2><span data-i18n="tutorial.heading">How to Use This Website</span> <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
-                        <p data-i18n="tutorial.subtitle">Complete Guide to Pokemon TCG Analysis, Deck Building &amp; Playtester — v45 (March 2026)</p>
+                        <p data-i18n="tutorial.subtitle">Complete guide to Pokémon TCG analysis, deck building, and playtesting — v45 (March 2026)</p>
                     </div>
                     
                     <div class="tutorial-main-container">
@@ -1066,7 +1066,7 @@
                                         <li><strong>Card Overview:</strong> All cards with usage%, rarity options, type filters</li>
                                         <li><strong>Deck Builder:</strong> +/− buttons, Auto-Generate (Max Consistency), copy to clipboard</li>
                                         <li><strong>Deck Compare:</strong> Compare two decklists with visual color-coded diff</li>
-                                        <li><strong>Rarity Switcher ():</strong> Click the yellow button on any card to switch print versions</li>
+                                        <li><strong>Rarity Switcher:</strong> Click the yellow button on any card to switch print versions</li>
                                     </ul>
                                 </div>
                                 
@@ -1089,7 +1089,7 @@
                                         <li><strong>Matchup Analysis:</strong> Best/worst matchups with win rates and game records</li>
                                         <li><strong>Meta Card Analysis:</strong> Most played cards across Top 10 meta decks with deck-building buttons</li>
                                         <li><strong>Max Consistency Mode:</strong> Auto-generate decks with optimal card counts based on tournament data</li>
-                                        <li><strong>Rarity Switcher:</strong> Click the yellow on any card to switch prints</li>
+                                        <li><strong>Rarity Switcher:</strong> Click the yellow button on any card to switch prints</li>
                                     </ul>
                                 </div>
                                 
@@ -1128,7 +1128,7 @@
                                         <li><strong>Sort:</strong> Pokédex order, name, set, price, rarity</li>
                                         <li><strong>Lightbox:</strong> Click any card for full-size preview</li>
                                         <li><strong>Rarity Switcher:</strong> Click the yellow button to see all available prints</li>
-                                        <li>/ <strong>Collection &amp; Wishlist buttons</strong> on every card</li>
+                                        <li><strong>Collection &amp; Wishlist buttons</strong> on every card</li>
                                     </ul>
                                 </div>
                                 
@@ -1173,7 +1173,7 @@
                                 <!-- How to Use Tab -->
                                 <div class="how-to-use-info-block">
                                     <h3 class="how-to-use-info-title">How to Use</h3>
-                                    <p><strong>This guide!</strong> Complete documentation for all features — updated to v44</p>
+                                    <p><strong>This guide:</strong> Complete documentation for all features — updated for v45</p>
                                 </div>
                             </div>
                         </section>
@@ -1277,7 +1277,7 @@
                                 <p class="deck-building-guide-rarity-desc"><strong>All Prints:</strong> All available versions side by side</p>
                             </div>
                             
-                            <h3 class="deck-building-guide-section deck-building-guide-section-margin">Rarity Switcher ()</h3>
+                            <h3 class="deck-building-guide-section deck-building-guide-section-margin">Rarity Switcher</h3>
                             <p class="deck-building-guide-rarity-switcher-desc">Every card in Card Overview, Deck Builder grid, and My Decks has a <strong>yellow button</strong>. Click it to open a modal showing all available prints of that card — regular, reverse holo, full art, trainer gallery, promo, etc.</p>
                             <ul class="deck-building-guide-rarity-switcher-list">
                                 <li>Click any version to immediately replace the print in the active deck entry</li>
@@ -1338,24 +1338,6 @@
                         </section>
                         
                         <!-- Card Type Guide -->
-                                <div class="playtester-guide-board-zone playtester-guide-board-zone-stadium"><strong>Stadium</strong><br><small>S-marker shown on card. Drag to discard or replace with new stadium.</small></div>
-                                <div class="playtester-guide-board-zone playtester-guide-board-zone-hand"><strong>Hand</strong><br><small>Drawn cards. Drag to field. Click to zoom.</small></div>
-                            </div>
-                            <h3 class="playtester-guide-toolbar-title">Toolbar Buttons &amp; Controls</h3>
-                            <div class="playtester-guide-toolbar-box">
-                                <p><strong>New Game</strong> — Shuffle &amp; deal fresh 7-card hands, reset prizes</p>
-                                <p><strong>Draw</strong> — Draw 1 card from deck</p>
-                                <p><strong>Shuffle</strong> — Shuffle your deck</p>
-                                <p><strong>/attach</strong> — Type in the input box to attach energy from hand to a field zone</p>
-                                <p><strong>Judge / Iono</strong> — Judge: both players shuffle hand into deck, draw exactly 4 (TCG rule). Iono: shuffle hand under deck, draw equal to remaining prize cards.</p>
-                                <p><strong>Undo</strong> — Revert the last board state change</p>
-                                <p><strong>Stepper ＋/－</strong> — Adjust damage counters, energy, prize count with precise controls</p>
-                                <p><strong>Damage Modifier</strong> — Always-visible buff counter (e.g., +30 damage from Choice Belt)</p>
-                                <p><strong>Coin</strong> — Flip for Heads/Tails in the center panel</p>
-                                <p><strong>? Legend</strong> — Toggle zone reference overlay</p>
-                                <p><strong>Quit</strong> — Close playtester (confirms before closing)</p>
-                            </div>
-                        </section>
                         <section class="card-type-guide-section">
                             <h2 class="card-type-guide-title">Card Type Categories</h2>
                             <div class="card-type-guide-grid">
@@ -1406,7 +1388,7 @@
                                     <li><strong>Copy Function:</strong> All deck copies use Pokémon TCG Live format for easy import</li>
                                     <li><strong>Compare Decks:</strong> Great for tracking deck evolution between sessions</li>
                                     <li><strong>Goldfish Practice:</strong> Load the same deck for both players to practice your own opening lines</li>
-                                    <li><strong>Rarity Switcher:</strong> The yellow is on every card everywhere — use it to swap to your preferred print without rebuilding the deck</li>
+                                        <li><strong>Rarity Switcher:</strong> The yellow button is available on cards across the app, so you can switch to your preferred print without rebuilding the deck</li>
                                     <li><strong>My Decks Playtest:</strong> Save every deck you build — the Playtest button makes it trivial to run any 2 saved decks against each other in seconds</li>
                                 </ul>
                             </div>
@@ -1506,7 +1488,7 @@
                                         <li><strong>Kartenübersicht:</strong> Alle Karten mit Nutzungs-%, Seltenheitsoptionen, Typfiltern</li>
                                         <li><strong>Deck Builder:</strong> +/−-Buttons, Auto-Generieren (Max. Konsistenz), in Zwischenablage kopieren</li>
                                         <li><strong>Deck-Vergleich:</strong> Zwei Decklisten mit farbcodiertem Diff vergleichen</li>
-                                        <li><strong>Seltenheits-Wechsler ():</strong> Klicke den gelben -Button auf jeder Karte, um Druckversionen zu wechseln</li>
+                                        <li><strong>Seltenheits-Wechsler:</strong> Klicke den gelben Button auf jeder Karte, um Druckversionen zu wechseln</li>
                                     </ul>
                                 </div>
 
@@ -1567,8 +1549,8 @@
                                         <li><strong>Seltenheits-Filter:</strong> Nach Kartenseltenheit filtern</li>
                                         <li><strong>Sortierung:</strong> Pokédex-Reihenfolge, Name, Set, Preis, Seltenheit</li>
                                         <li><strong>Lightbox:</strong> Klicke auf eine Karte für Vollbild-Vorschau</li>
-                                        <li><strong>Seltenheits-Wechsler:</strong> Klicke den gelben -Button, um alle verfügbaren Prints zu sehen</li>
-                                        <li>/ <strong>Sammlungs- &amp; Wunschlisten-Buttons</strong> auf jeder Karte</li>
+                                        <li><strong>Seltenheits-Wechsler:</strong> Klicke den gelben Button, um alle verfügbaren Prints zu sehen</li>
+                                        <li><strong>Sammlungs- &amp; Wunschlisten-Buttons</strong> auf jeder Karte</li>
                                     </ul>
                                 </div>
 
@@ -1613,7 +1595,7 @@
                                 <!-- How to Use Tab -->
                                 <div class="bg-light px-20 br-8 border-left-green">
                                     <h3 class="color-green mt-0">So funktioniert's</h3>
-                                    <p class="lh-17"><strong>Diese Anleitung!</strong> Vollständige Dokumentation aller Funktionen — aktualisiert auf v44</p>
+                                    <p class="lh-17"><strong>Diese Anleitung:</strong> Vollständige Dokumentation aller Funktionen — aktualisiert auf v45</p>
                                 </div>
                             </div>
                         </section>
@@ -1713,17 +1695,13 @@
                             <h3 class="color-grey mt-25">Seltenheits-Anzeigemodi</h3>
                             <div class="bg-grey-light px-15 br-6 mb-15">
                                 <p class="my-5"><strong>Niedrige Seltenheit:</strong> Günstigster Print jeder Karte (budgetfreundliche Builds)</p>
-                                                                <p class="my-5"><strong>Niedrige Seltenheit:</strong> Günstigster Print jeder Karte (budgetfreundliche Builds)</p>
                                 <p class="my-5"><strong>Max. Seltenheit:</strong> Höchste Seltenheitsversion (Full Art, Secret Rare usw.)</p>
-                                                                <p class="my-5"><strong>Max. Seltenheit:</strong> Höchste Seltenheitsversion (Full Art, Secret Rare usw.)</p>
                                 <p class="my-5"><strong>Alle Prints:</strong> Alle verfügbaren Versionen nebeneinander</p>
-                                                            <p class="my-5"><strong>Alle Prints:</strong> Alle verfügbaren Versionen nebeneinander</p>
                             </div>
 
-                            <h3 class="color-grey mt-25">Seltenheits-Wechsler ()</h3>
-                            <p class="lh-18">Jede Karte in Kartenübersicht, Deck Builder Grid und Meine Decks hat einen <strong>gelben -Button</strong>. Klicke ihn, um ein Modal mit allen verfügbaren Prints dieser Karte zu öffnen — Normal, Reverse Holo, Full Art, Trainer Gallery, Promo usw.</p>
+                            <h3 class="color-grey mt-25">Seltenheits-Wechsler</h3>
+                            <p class="lh-18">Jede Karte in der Kartenübersicht, im Deck-Builder-Grid und in Meine Decks hat einen <strong>gelben Button</strong>. Klicke ihn, um ein Modal mit allen verfügbaren Prints dieser Karte zu öffnen — Normal, Reverse Holo, Full Art, Trainer Gallery, Promo usw.</p>
                             <ul class="lh-19">
-                                                            <ul class="lh-19">
                                 <li>Klicke auf eine Version, um den Print im aktiven Deck-Eintrag sofort zu ersetzen</li>
                                 <li>Jede Wechsler-Karte zeigt die exakte Besitz-Anzahl für diesen Print</li>
                                 <li><strong>Andere Prints</strong>-Zeile erscheint, wenn du weitere internationale Prints derselben Karte besitzt</li>
@@ -1732,10 +1710,6 @@
                             <h3 class="color-grey mt-25">Deck-Vergleichs-Funktion</h3>
                             <p class="lh-18">Vergleiche dein aktuelles Deck mit jedem gespeicherten Deck oder einer früheren Version:</p>
                             <ol class="lh-20">
-                                                            <ol class="lh-20">
-                                                                <span class="badge-gold">Gold = Hinzugefügt</span>
-                                                                <span class="badge-red">Rot = Entfernt</span>
-                                                                <span class="badge-green">Grün = Unverändert</span>
                                 <li>Baue oder generiere ein Deck im "Dein Deck"-Bereich</li>
                                 <li>Klicke "Deck vergleichen"</li>
                                 <li>Füge eine Liste im Limitless/PTCGL-Format ein oder wähle ein gespeichertes Deck per Suche</li>
@@ -1746,9 +1720,6 @@
 
                         <!-- Playtester-Anleitung -->
                         <section class="mb-40">
-                                                                                                    <section class="mb-40">
-                                                                            <section class="mb-40">
-                                                    <section class="mb-40">
                             <h2 class="color-dark border-bottom-blue pb-10 mb-20">Playtester — Vollständige Anleitung</h2>
                             <p class="lh-18 fs-105">Die Playtester Sandbox simuliert ein echtes 2-Spieler Pokémon TCG Spiel in deinem Browser. Lade zwei beliebige Decklisten und übe Goldfish, teste Matchups oder studiere Spielzüge.</p>
 
@@ -1847,7 +1818,6 @@
 
                         <!-- FAQ -->
                         <section class="mb-20">
-                                                    <section class="mb-20">
                             <h2 class="color-dark border-bottom-blue pb-10 mb-20">Häufig gestellte Fragen</h2>
 
                             <div class="mb-15">
@@ -1871,8 +1841,8 @@
                             </div>
 
                             <div class="mb-15">
-                                <h4 class="color-grey-dark mb-5">F: Mein Seltenheits-Wechsler zeigte vorher ein "?" statt — ist das behoben?</h4>
-                                <p class="ml-20 lh-17">A: Ja, behoben in v36. Alle defekten Symbolzeichen (Seltenheits-Wechsler , Besitz--Badge, Ace Spec -Spalte) werden jetzt korrekt in jedem Tab angezeigt.</p>
+                                <h4 class="color-grey-dark mb-5">F: Der Seltenheits-Wechsler zeigte zuvor fehlerhafte Symbole. Ist das behoben?</h4>
+                                <p class="ml-20 lh-17">A: Ja. Die Symboldarstellung wurde in v36 korrigiert, inklusive Seltenheits-Wechsler-Symbol, Besitz-Badges und ACE-SPEC-Anzeige.</p>
                             </div>
 
                             <div class="mb-15">
@@ -2089,22 +2059,22 @@
                                 <select id="collection-filter" onchange="setCollectionFilter(this.value)" aria-label="Collection filter"
                                     class="select-blue px-12 py-10 br-8 fs-14 bg-white color-dark minw-280">
                                     <option value="all" selected data-i18n="profile.filterAll">Filter: All Cards</option>
-                                    <option value="pokemon">Pokemon: Alle</option>
-                                    <option value="pokemon-grass">Pokemon: Grass</option>
-                                    <option value="pokemon-fire">Pokemon: Fire</option>
-                                    <option value="pokemon-water">Pokemon: Water</option>
-                                    <option value="pokemon-lightning">Pokemon: Lightning</option>
-                                    <option value="pokemon-psychic">Pokemon: Psychic</option>
-                                    <option value="pokemon-fighting">Pokemon: Fighting</option>
-                                    <option value="pokemon-darkness">Pokemon: Darkness</option>
-                                    <option value="pokemon-metal">Pokemon: Metal</option>
-                                    <option value="pokemon-dragon">Pokemon: Dragon</option>
-                                    <option value="pokemon-colorless">Pokemon: Colorless</option>
-                                    <option value="supporter">Supporter</option>
-                                    <option value="item">Item</option>
-                                    <option value="tool">Tool</option>
-                                    <option value="special-energy">Special Energy</option>
-                                    <option value="basic-energy">Basic Energy</option>
+                                    <option value="pokemon" data-i18n="profile.filterPokemonAll">Pokémon: All</option>
+                                    <option value="pokemon-grass" data-i18n="profile.filterPokemonGrass">Pokémon: Grass</option>
+                                    <option value="pokemon-fire" data-i18n="profile.filterPokemonFire">Pokémon: Fire</option>
+                                    <option value="pokemon-water" data-i18n="profile.filterPokemonWater">Pokémon: Water</option>
+                                    <option value="pokemon-lightning" data-i18n="profile.filterPokemonLightning">Pokémon: Lightning</option>
+                                    <option value="pokemon-psychic" data-i18n="profile.filterPokemonPsychic">Pokémon: Psychic</option>
+                                    <option value="pokemon-fighting" data-i18n="profile.filterPokemonFighting">Pokémon: Fighting</option>
+                                    <option value="pokemon-darkness" data-i18n="profile.filterPokemonDarkness">Pokémon: Darkness</option>
+                                    <option value="pokemon-metal" data-i18n="profile.filterPokemonMetal">Pokémon: Metal</option>
+                                    <option value="pokemon-dragon" data-i18n="profile.filterPokemonDragon">Pokémon: Dragon</option>
+                                    <option value="pokemon-colorless" data-i18n="profile.filterPokemonColorless">Pokémon: Colorless</option>
+                                    <option value="supporter" data-i18n="profile.filterSupporter">Supporter</option>
+                                    <option value="item" data-i18n="profile.filterItem">Item</option>
+                                    <option value="tool" data-i18n="profile.filterTool">Tool</option>
+                                    <option value="special-energy" data-i18n="profile.filterSpecialEnergy">Special Energy</option>
+                                    <option value="basic-energy" data-i18n="profile.filterBasicEnergy">Basic Energy</option>
                                 </select>
                                 <button onclick="clearCollection()"
                                     class="btn-gradient-red color-white br-8 py-10 px-16 fs-13 fw-700 box-shadow-red scale-hover"
@@ -2409,7 +2379,7 @@
                 <button id="ptGxMarker" title="GX Marker" data-pt-tip="GX Marker" class="pt-marker pt-marker-gx pt-btn pt-btn-sm pt-tool-btn pt-marker-chip" onclick="ptToggleMarker('gx')" aria-label="Toggle GX marker">GX</button>
                 <button title="Save Game" data-pt-tip="Save Game" onclick="ptSaveGame()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Save game">Save</button>
                 <button title="Load Game" data-pt-tip="Load Game" onclick="ptLoadGame()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Load game">Load</button>
-                <button title="Info / Anleitung" data-pt-tip="Manual" onclick="ptShowManual()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Show playtester manual">Help</button>
+                <button title="Info / Manual" data-pt-tip="Manual" onclick="ptShowManual()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Show playtester manual">Help</button>
             </div>
         </div>
 
@@ -2743,9 +2713,9 @@
             </div>
             <!-- Tabs -->
             <div class="flex gap-6 mb-14" id="ptOppTabs">
-                <button id="ptOppTab-field"    onclick="ptOppSwitchTab('field')"    class="flex-1 py-7 border-none br-6 pointer fs-12 fw-700 bg-red color-white">Feld</button>
-                <button id="ptOppTab-discard"  onclick="ptOppSwitchTab('discard')"  class="flex-1 py-7 border-none br-6 pointer fs-12 fw-700 bg-grey-dark color-grey-light">Discard</button>
-                <button id="ptOppTab-lostzone" onclick="ptOppSwitchTab('lostzone')" class="flex-1 py-7 border-none br-6 pointer fs-12 fw-700 bg-grey-dark color-grey-light">Lost Zone</button>
+                <button id="ptOppTab-field"    onclick="ptOppSwitchTab('field')"    class="flex-1 py-7 border-none br-6 pointer fs-12 fw-700 bg-red color-white" data-i18n="pt.oppTabField">Field</button>
+                <button id="ptOppTab-discard"  onclick="ptOppSwitchTab('discard')"  class="flex-1 py-7 border-none br-6 pointer fs-12 fw-700 bg-grey-dark color-grey-light" data-i18n="pt.oppTabDiscard">Discard</button>
+                <button id="ptOppTab-lostzone" onclick="ptOppSwitchTab('lostzone')" class="flex-1 py-7 border-none br-6 pointer fs-12 fw-700 bg-grey-dark color-grey-light" data-i18n="pt.oppTabLostZone">Lost Zone</button>
             </div>
             <div id="ptOppPanelContent"></div>
         </div>

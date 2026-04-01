@@ -201,6 +201,7 @@ def scrape_all_cards_list(
 
     base_url   = f"https://limitlesstcg.com/cards?q=lang%3A{language}&display=list"
     seen_keys  = set()
+    seen_page_signatures = set()
     page_index = max(1, start_page)
 
     while True:
@@ -228,6 +229,17 @@ def scrape_all_cards_list(
         if not rows:
             logger.info("  Keine Karten mehr gefunden - Ende der Liste.")
             break
+
+        # Safety guard: if page navigation changes upstream and the same list page
+        # is returned repeatedly for different ?page= values, stop to avoid loops.
+        page_signature = tuple(
+            f"{(cells[0].get_text(strip=True) if len(cells) > 0 else '')}::{(cells[1].get_text(strip=True) if len(cells) > 1 else '')}"
+            for cells in (tr.find_all("td") for tr in rows[:8])
+        )
+        if page_signature in seen_page_signatures:
+            logger.info("  Wiederholte Seitensignatur erkannt - Ende der Liste.")
+            break
+        seen_page_signatures.add(page_signature)
 
         new_on_page = 0
         for row in rows:
@@ -308,9 +320,10 @@ def scrape_all_cards_list(
             logger.info("  Alle angeforderten %s-Karten gefunden. Stoppe fruehzeitig.", language.upper())
             break
 
-        if not has_next and new_on_page == 0:
-            logger.info("  Keine neuen Karten - Ende der Liste.")
-            break
+        # Do not end solely on "no new cards" because cached data can make an
+        # entire page look unchanged while newer/target cards may exist on later pages.
+        # We now rely on true list-end (no rows), explicit page limits, target completion,
+        # or repeated page signature detection above.
 
         time.sleep(delay)
 

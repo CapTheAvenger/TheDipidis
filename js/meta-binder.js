@@ -59,6 +59,19 @@
     async function getTopCurrentMetaArchetypes(limit) {
         const comparisonRows = await loadCSV('limitless_online_decks_comparison.csv').catch(() => []);
         if (Array.isArray(comparisonRows) && comparisonRows.length > 0) {
+            const exactMap = new Map();
+            comparisonRows.forEach(row => {
+                const name = String(row.deck_name || '').trim();
+                if (!name) return;
+                const rank = parseInt(String(row.new_rank || '').trim(), 10);
+                const share = Number.parseFloat(String(row.new_share || '').replace(',', '.'));
+                exactMap.set(name.toLowerCase(), {
+                    rank: Number.isFinite(rank) ? rank : null,
+                    share: Number.isFinite(share) ? share : null
+                });
+            });
+            window._metaBinderCurrentMetaExactMap = exactMap;
+
             const ranked = comparisonRows
                 .map(row => ({
                     name: String(row.deck_name || '').trim(),
@@ -89,6 +102,39 @@
         const currentMetaRows = Array.isArray(window.currentMetaAnalysisData) ? window.currentMetaAnalysisData : [];
         const currentMetaLiveRows = currentMetaRows.filter(row => String(row.meta || '').trim().toLowerCase() === 'meta live');
         return getTopArchetypesFromRows(currentMetaLiveRows.length > 0 ? currentMetaLiveRows : currentMetaRows, limit);
+    }
+
+    async function getTopCityArchetypes(comparisonFile, fallbackRows, limit) {
+        const comparisonRows = await loadCSV(comparisonFile).catch(() => []);
+        if (Array.isArray(comparisonRows) && comparisonRows.length > 0) {
+            const ranked = comparisonRows
+                .map(row => ({
+                    name: String(row.archetype || row.deck_name || '').trim(),
+                    rank: parseInt(String(row.new_rank || '').trim(), 10),
+                    count: parseInt(String(row.new_count || row.total_decks || row.count || 0).trim(), 10) || 0
+                }))
+                .filter(item => item.name)
+                .sort((a, b) => {
+                    const rankA = Number.isFinite(a.rank) ? a.rank : Number.MAX_SAFE_INTEGER;
+                    const rankB = Number.isFinite(b.rank) ? b.rank : Number.MAX_SAFE_INTEGER;
+                    if (rankA !== rankB) return rankA - rankB;
+                    if (b.count !== a.count) return b.count - a.count;
+                    return a.name.localeCompare(b.name);
+                });
+
+            const deduped = [];
+            const seen = new Set();
+            ranked.forEach(item => {
+                const key = normalizeArchetypeKey(item.name);
+                if (seen.has(key)) return;
+                seen.add(key);
+                deduped.push(item.name);
+            });
+
+            if (deduped.length > 0) return deduped.slice(0, limit);
+        }
+
+        return getTopArchetypesFromRows(fallbackRows, limit);
     }
 
     function getCurrentMetaFormatLabelFromRows(rows) {
@@ -227,11 +273,51 @@
             return String(pb.number || '').localeCompare(String(pa.number || ''));
         });
 
-        const newestRef = uniqueRefs[0] || normalizeIntlPrintRef(normSet, normNumber);
+        const getRarityTier = (rarityValue) => {
+            const r = String(rarityValue || '').toLowerCase();
+            if (!r) return 50;
+            if (r.includes('common')) return 1;
+            if (r.includes('uncommon')) return 2;
+            if (r === 'rare' || r.includes('holo rare') || r.includes('reverse holo')) return 3;
+            if (r.includes('double rare')) return 10;
+            if (r.includes('ultra rare') || r.includes('special illustration') || r.includes('illustration') || r.includes('art rare') || r.includes('secret')) return 20;
+            return 9;
+        };
+
+        const familyCards = uniqueRefs
+            .map(ref => {
+                const parsed = parseIntlPrintRef(ref);
+                const fromIntl = cards.find(card => normalizeIntlPrintRef(card?.set, card?.number) === ref);
+                const record = fromIntl || findCardRecord(name, parsed.set, parsed.number);
+                if (!record) return null;
+                return {
+                    card: record,
+                    set: String(record.set || parsed.set || '').trim(),
+                    number: String(record.number || parsed.number || '').trim(),
+                    ref,
+                    rarityTier: getRarityTier(record.rarity)
+                };
+            })
+            .filter(Boolean);
+
+        let selected = null;
+        if (familyCards.length > 0) {
+            const minTier = Math.min(...familyCards.map(item => item.rarityTier));
+            selected = familyCards
+                .filter(item => item.rarityTier === minTier)
+                .sort((a, b) => {
+                    const oa = setOrderMap[a.set] || setOrderMap[String(a.set || '').toLowerCase()] || 0;
+                    const ob = setOrderMap[b.set] || setOrderMap[String(b.set || '').toLowerCase()] || 0;
+                    if (oa !== ob) return ob - oa;
+                    return String(a.number || '').localeCompare(String(b.number || ''));
+                })[0];
+        }
+
+        const newestRef = selected ? selected.ref : (uniqueRefs[0] || normalizeIntlPrintRef(normSet, normNumber));
         const newest = parseIntlPrintRef(newestRef);
-        const newestCard = cards.find(card =>
+        const newestCard = selected ? selected.card : (cards.find(card =>
             normalizeIntlPrintRef(card?.set, card?.number) === newestRef
-        ) || findCardRecord(name, newest.set, newest.number);
+        ) || findCardRecord(name, newest.set, newest.number));
 
         return {
             refs: uniqueRefs,
@@ -256,19 +342,19 @@
         }
 
         function parseUsagePercent(row) {
-            const direct = String(row.percentage_in_archetype || row.usage_rate || row.usageRate || '').trim();
-            if (direct) {
-                const directNum = Number.parseFloat(direct.replace(',', '.'));
-                if (!Number.isNaN(directNum)) {
-                    // Support both 0-1 and 0-100 scales.
-                    return directNum <= 1 ? directNum * 100 : directNum;
-                }
-            }
-
             const inclusion = Number.parseFloat(String(row.deck_inclusion_count || '').replace(',', '.'));
             const total = Number.parseFloat(String(row.total_decks_in_archetype || '').replace(',', '.'));
             if (!Number.isNaN(inclusion) && !Number.isNaN(total) && total > 0) {
                 return (inclusion / total) * 100;
+            }
+
+            const direct = String(row.percentage_in_archetype || row.usage_rate || row.usageRate || '').trim();
+            if (direct) {
+                const directNum = Number.parseFloat(direct.replace('%', '').replace(',', '.'));
+                if (!Number.isNaN(directNum)) {
+                    // CSV stores percentage already on 0..100 scale (including values like 0.95%).
+                    return directNum;
+                }
             }
 
             return 0;
@@ -455,6 +541,11 @@
             .filter(token => token.length > 1 && !stopWords.has(token));
     }
 
+    function getPrimaryArchetypeToken(value) {
+        const tokens = tokenizeArchetypeMatch(value).filter(token => token.length >= 3);
+        return tokens.length > 0 ? tokens[0] : '';
+    }
+
     async function loadMetaBinderArchetypeMetricMaps() {
         const [currentCmp, cityCurrentCmp, cityPastCmp] = await Promise.all([
             loadCSV('limitless_online_decks_comparison.csv').catch(() => []),
@@ -539,11 +630,27 @@
 
         const archetypeNorm = normalizeMainPokemonName(archetypeName);
         const archetypeTokens = tokenizeArchetypeMatch(archetypeName);
+        const primaryToken = getPrimaryArchetypeToken(archetypeName);
         const matchedPokemonRows = pokemonRows.filter(row => {
             const cardName = String(row.card_name || row.full_card_name || '').trim();
             const cardNorm = normalizeMainPokemonName(cardName);
             return cardNorm && archetypeNorm.includes(cardNorm);
         });
+
+        const primaryPokemonRows = pokemonRows
+            .map(row => {
+                const cardName = String(row.card_name || row.full_card_name || '').trim();
+                const cardNorm = normalizeMainPokemonName(cardName);
+                const hasPrimary = !!(primaryToken && cardNorm.includes(primaryToken));
+                const count = parseInt(String(row.max_count || row.count || 0), 10) || 0;
+                const usage = parseLocaleNumber(row.percentage_in_archetype) || 0;
+                return { row, hasPrimary, count, usage };
+            })
+            .filter(item => item.hasPrimary)
+            .sort((a, b) => {
+                if (a.count !== b.count) return b.count - a.count;
+                return b.usage - a.usage;
+            });
 
         const matchedRows = scoredRows
             .map(row => {
@@ -576,7 +683,11 @@
         const matchedBest = matchedRows.find(entry => entry.directMatch || entry.overlap > 0);
 
         // Fallback chain: best lexical match -> pokemon name match -> strongest pokemon -> strongest row.
-        const pickedRow = (matchedBest && matchedBest.row) || matchedPokemonRows[0] || pokemonRows[0] || scoredRows[0];
+        const pickedRow = (primaryPokemonRows[0] && primaryPokemonRows[0].row)
+            || (matchedBest && matchedBest.row)
+            || matchedPokemonRows[0]
+            || pokemonRows[0]
+            || scoredRows[0];
 
         if (!pickedRow) return '';
 
@@ -596,14 +707,19 @@
             source: group.source,
             items: group.names.map(name => {
                 const key = normalizeArchetypeKey(name);
+                const exactKey = String(name || '').trim().toLowerCase();
+                const exactMetaMap = window._metaBinderCurrentMetaExactMap instanceof Map
+                    ? window._metaBinderCurrentMetaExactMap
+                    : null;
+                const exactMeta = exactMetaMap ? exactMetaMap.get(exactKey) : null;
                 const currentMeta = metricMaps.currentMetaMap.get(key) || {};
                 return {
                     name,
                     source: group.source,
                     imageUrl: pickArchetypeBannerImage(name, group.source),
                     currentMetaFormatLabel: window._metaBinderCurrentMetaLabel || 'TEF-POR',
-                    currentMetaRank: Number.isFinite(currentMeta.rank) ? currentMeta.rank : null,
-                    currentMetaShare: Number.isFinite(currentMeta.share) ? currentMeta.share : null,
+                    currentMetaRank: Number.isFinite(exactMeta?.rank) ? exactMeta.rank : (Number.isFinite(currentMeta.rank) ? currentMeta.rank : null),
+                    currentMetaShare: Number.isFinite(exactMeta?.share) ? exactMeta.share : (Number.isFinite(currentMeta.share) ? currentMeta.share : null),
                     cityCurrentAvgRank: metricMaps.cityCurrentMap.get(key) ?? null,
                     cityPastAvgRank: metricMaps.cityPastMap.get(key) ?? null
                 };
@@ -742,9 +858,23 @@
         if (Number.isFinite(dexFromCard) && dexFromCard > 0) return dexFromCard;
 
         const dexMap = window.pokedexNumbers || {};
-        const name = String(card.name || '').trim().toLowerCase();
-        const direct = parseInt(String(dexMap[name] || '').trim(), 10);
-        if (Number.isFinite(direct) && direct > 0) return direct;
+        const rawName = String(cardDb?.name || cardDb?.name_en || card?.name || '').trim().toLowerCase();
+        const candidates = [rawName];
+        if (rawName) {
+            candidates.push(
+                rawName
+                    .replace(/\b(mega|ex|gx|vmax|vstar|v|radiant)\b/g, '')
+                    .replace(/[^a-z0-9\s-]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+            );
+        }
+
+        for (const c of candidates) {
+            if (!c) continue;
+            const direct = parseInt(String(dexMap[c] || '').trim(), 10);
+            if (Number.isFinite(direct) && direct > 0) return direct;
+        }
 
         return Number.MAX_SAFE_INTEGER;
     }
@@ -1205,8 +1335,8 @@
             ? window.cityLeagueAnalysisDataPast
             : (Array.isArray(window.cityLeagueAnalysisM3Data) ? window.cityLeagueAnalysisM3Data : []);
 
-        const cityCurrentTop10 = getTopArchetypesFromRows(cityCurrentRows, 10);
-        const cityPastTop10 = getTopArchetypesFromRows(cityPastRows, 10);
+        const cityCurrentTop10 = await getTopCityArchetypes('city_league_archetypes_comparison.csv', cityCurrentRows, 10);
+        const cityPastTop10 = await getTopCityArchetypes('city_league_archetypes_comparison_M3.csv', cityPastRows, 10);
 
         const topGroupDefs = [
             { title: 'Top 20 Current Meta', source: 'current-meta', names: currentTop20 },

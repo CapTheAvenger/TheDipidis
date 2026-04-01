@@ -51,8 +51,28 @@ _SET_TO_META = {
 }
 
 def _get_meta_format_code(settings: Dict[str, Any]) -> str:
-    set_code = settings.get('set', '').upper()
-    return _SET_TO_META.get(set_code, f"SVI-{set_code}")
+    set_code = str(settings.get('set', '')).strip().upper()
+    if not set_code:
+        return ''
+
+    # Normalize known legacy labels first.
+    legacy_to_rotation = {
+        'SVI-POR': 'TEF-POR'
+    }
+    if set_code in legacy_to_rotation:
+        return legacy_to_rotation[set_code]
+
+    # Explicit short-code mapping used by scraper settings.
+    mapped = _SET_TO_META.get(set_code)
+    if mapped:
+        return mapped
+
+    # Already compound code (e.g. SVI-ASC, BRS-TEF): keep as-is.
+    if '-' in set_code:
+        return set_code
+
+    # Fallback for future SVI-era short codes.
+    return f"SVI-{set_code}"
 
 
 def clean_deck_name(deck_name: str) -> str:

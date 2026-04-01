@@ -48,6 +48,67 @@
             .map(entry => entry.name);
     }
 
+    async function getTopCurrentMetaArchetypes(limit) {
+        const comparisonRows = await loadCSV('limitless_online_decks_comparison.csv').catch(() => []);
+        if (Array.isArray(comparisonRows) && comparisonRows.length > 0) {
+            const ranked = comparisonRows
+                .map(row => ({
+                    name: String(row.deck_name || '').trim(),
+                    rank: parseInt(String(row.new_rank || '').trim(), 10),
+                    count: parseInt(String(row.new_count || '').trim(), 10) || 0
+                }))
+                .filter(item => item.name)
+                .sort((a, b) => {
+                    const rankA = Number.isFinite(a.rank) ? a.rank : 9999;
+                    const rankB = Number.isFinite(b.rank) ? b.rank : 9999;
+                    if (rankA !== rankB) return rankA - rankB;
+                    if (b.count !== a.count) return b.count - a.count;
+                    return a.name.localeCompare(b.name);
+                });
+
+            const deduped = [];
+            const seen = new Set();
+            ranked.forEach(item => {
+                const key = item.name.toLowerCase();
+                if (seen.has(key)) return;
+                seen.add(key);
+                deduped.push(item.name);
+            });
+
+            if (deduped.length > 0) return deduped.slice(0, limit);
+        }
+
+        const currentMetaRows = Array.isArray(window.currentMetaAnalysisData) ? window.currentMetaAnalysisData : [];
+        const currentMetaLiveRows = currentMetaRows.filter(row => String(row.meta || '').trim().toLowerCase() === 'meta live');
+        return getTopArchetypesFromRows(currentMetaLiveRows.length > 0 ? currentMetaLiveRows : currentMetaRows, limit);
+    }
+
+    function getCurrentMetaFormatLabelFromRows(rows) {
+        const setOrderMap = window.setOrderMap || {};
+        const mappedCodes = (Array.isArray(rows) ? rows : []).map(row => {
+            const rawSet = String(row.set_code || row.set || '').trim();
+            if (!rawSet) return '';
+            if (typeof mapSetCodeToMetaFormat === 'function') {
+                return String(mapSetCodeToMetaFormat(rawSet) || rawSet).trim();
+            }
+            return rawSet;
+        }).filter(Boolean);
+
+        if (mappedCodes.length === 0) return 'TEF-POR';
+
+        const uniqueCodes = [...new Set(mappedCodes)];
+        uniqueCodes.sort((a, b) => {
+            const [prefixA, suffixA] = String(a).split('-');
+            const [prefixB, suffixB] = String(b).split('-');
+            const orderA = setOrderMap[suffixA] || setOrderMap[prefixA] || 0;
+            const orderB = setOrderMap[suffixB] || setOrderMap[prefixB] || 0;
+            if (orderA !== orderB) return orderB - orderA;
+            return String(a).localeCompare(String(b));
+        });
+
+        return uniqueCodes[0] || 'TEF-POR';
+    }
+
     function getCardsForArchetypeSource(archetype, sourceKey) {
         const wanted = String(archetype || '').trim().toLowerCase();
         if (!wanted) return [];
@@ -334,6 +395,7 @@
                     name,
                     source: group.source,
                     imageUrl: pickArchetypeBannerImage(name, group.source),
+                    currentMetaFormatLabel: window._metaBinderCurrentMetaLabel || 'TEF-POR',
                     currentMetaRank: Number.isFinite(currentMeta.rank) ? currentMeta.rank : null,
                     currentMetaShare: Number.isFinite(currentMeta.share) ? currentMeta.share : null,
                     cityCurrentAvgRank: metricMaps.cityCurrentMap.get(key) ?? null,
@@ -615,7 +677,7 @@
                 const safeImage = escapeHtml(item.imageUrl || '');
                 const escapedJsName = escapeArchetypeForJs(item.name || '');
                 const navFn = item.source === 'current-meta' ? 'navigateToCurrentMetaWithDeck' : 'navigateToAnalysisWithDeck';
-                const shareText = Number.isFinite(item.currentMetaShare) ? `${item.currentMetaShare.toFixed(1)}%` : '—';
+                const currentMetaLabel = escapeHtml(item.currentMetaFormatLabel || 'TEF-POR');
 
                 return `
                     <div class="deck-banner-card" onclick="${navFn}('${escapedJsName}')">
@@ -623,10 +685,10 @@
                         <div class="deck-banner-content">
                             <div class="deck-banner-name">${safeName}</div>
                             <div class="deck-banner-stats" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
-                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="Lower Rank = Better Performance">🏆 Rank current Meta: ${formatMetaBinderMetric(item.currentMetaRank, 1)}</span>
-                                <span class="stat-badge">📊 Share current Meta: ${shareText}</span>
-                                <span class="stat-badge">🇯🇵 Avg Rank Japan current: ${formatMetaBinderMetric(item.cityCurrentAvgRank, 1)}</span>
-                                <span class="stat-badge">🇯🇵 Avg Rank Japan past: ${formatMetaBinderMetric(item.cityPastAvgRank, 1)}</span>
+                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="Current Meta Format">🏆 ${currentMetaLabel}</span>
+                                <span class="stat-badge">📊 ${currentMetaLabel}</span>
+                                <span class="stat-badge">City current</span>
+                                <span class="stat-badge">City past</span>
                             </div>
                         </div>
                     </div>`;
@@ -903,8 +965,8 @@
         await ensureMetaDataLoaded();
 
         const currentMetaRows = Array.isArray(window.currentMetaAnalysisData) ? window.currentMetaAnalysisData : [];
-        const currentMetaLiveRows = currentMetaRows.filter(row => String(row.meta || '').trim().toLowerCase() === 'meta live');
-        const currentTop20 = getTopArchetypesFromRows(currentMetaLiveRows.length > 0 ? currentMetaLiveRows : currentMetaRows, 20);
+        window._metaBinderCurrentMetaLabel = getCurrentMetaFormatLabelFromRows(currentMetaRows);
+        const currentTop20 = await getTopCurrentMetaArchetypes(20);
 
         const cityCurrentRows = Array.isArray(window.cityLeagueAnalysisDataCurrent)
             ? window.cityLeagueAnalysisDataCurrent

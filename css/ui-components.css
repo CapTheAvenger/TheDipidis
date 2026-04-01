@@ -2759,6 +2759,31 @@
     margin-bottom: 14px;
 }
 
+.meta-binder-archetype-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.meta-binder-archetype-group {
+    background: linear-gradient(135deg, #f8fbff 0%, #eef3fb 100%);
+    border: 1px solid rgba(59, 76, 202, 0.15);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.meta-binder-archetype-title {
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+    color: #263252;
+}
+
+.meta-binder-archetype-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+}
+
 .meta-binder-delta-text {
     font-size: 0.85rem;
     color: var(--text-light, #6c757d);

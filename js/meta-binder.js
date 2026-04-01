@@ -11,43 +11,100 @@
         return fallback;
     }
 
-    // ── Gather top archetype names from the <select> dropdowns ──
-    function getTopArchetypesFromSelect(selectId, limit) {
-        const select = document.getElementById(selectId);
-        if (!select) return [];
-        return Array.from(select.querySelectorAll('option'))
-            .map(o => String(o.value || '').trim())
-            .filter(Boolean)
-            .slice(0, limit);
+    function getTopArchetypesFromRows(rows, limit) {
+        if (!Array.isArray(rows) || rows.length === 0) return [];
+
+        const archetypeMap = new Map();
+        rows.forEach(row => {
+            const archetypeName = String(row.archetype || row.deck_name || '').trim();
+            if (!archetypeName) return;
+
+            const key = archetypeName.toLowerCase();
+            const rowCount = parseInt(row.total_decks_in_archetype || row.new_count || 0, 10) || 0;
+            const current = archetypeMap.get(key);
+
+            if (!current) {
+                archetypeMap.set(key, {
+                    name: archetypeName,
+                    deckCount: rowCount,
+                    rowCount: 1
+                });
+            } else {
+                current.deckCount = Math.max(current.deckCount, rowCount);
+                current.rowCount += 1;
+            }
+        });
+
+        return Array.from(archetypeMap.values())
+            .map(entry => ({
+                name: entry.name,
+                score: entry.deckCount > 0 ? entry.deckCount : entry.rowCount
+            }))
+            .sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return a.name.localeCompare(b.name);
+            })
+            .slice(0, limit)
+            .map(entry => entry.name);
     }
 
-    // ── Gather cards for one archetype from available analysis data ──
-    function getCardsForArchetype(archetype) {
-        // Try current meta analysis data first, then city league
-        const sources = [
-            window.currentMetaAnalysisData,
-            window.cityLeagueAnalysisData
-        ];
+    function getCardsForArchetypeSource(archetype, sourceKey) {
+        const wanted = String(archetype || '').trim().toLowerCase();
+        if (!wanted) return [];
 
-        for (const data of sources) {
-            if (!Array.isArray(data)) continue;
-            const cards = data.filter(row =>
-                String(row.archetype || '').trim().toLowerCase() === archetype.toLowerCase()
+        const sourceMap = {
+            'current-meta': window.currentMetaAnalysisData,
+            'city-current': window.cityLeagueAnalysisDataCurrent || window.cityLeagueAnalysisData,
+            'city-past': window.cityLeagueAnalysisDataPast || window.cityLeagueAnalysisM3Data || []
+        };
+
+        const rows = sourceMap[sourceKey];
+        if (!Array.isArray(rows) || rows.length === 0) return [];
+        return rows.filter(row => String(row.archetype || '').trim().toLowerCase() === wanted);
+    }
+
+    function resolveCityLeagueDisplayPrint(name, set, number) {
+        const rawName = String(name || '').trim();
+        const rawSet = String(set || '').trim();
+        const rawNumber = String(number || '').trim();
+
+        if (typeof getPreferredVersionForCard === 'function') {
+            const preferred = getPreferredVersionForCard(rawName, rawSet, rawNumber);
+            if (preferred && preferred.set && preferred.number) {
+                return {
+                    name: String(preferred.name || preferred.name_en || rawName).trim(),
+                    set: String(preferred.set).trim(),
+                    number: String(preferred.number).trim()
+                };
+            }
+        }
+
+        // Legacy fallback for JP-only set codes (M3/M4/etc): pick any non-M* EN print by name.
+        if (/^M\d+$/i.test(rawSet) && Array.isArray(window.allCardsDatabase)) {
+            const normalizedTarget = rawName.toLowerCase();
+            const candidates = window.allCardsDatabase.filter(card =>
+                String(card.name || '').trim().toLowerCase() === normalizedTarget &&
+                !/^M\d+$/i.test(String(card.set || '').trim())
             );
-            if (cards.length > 0) return cards;
+
+            if (candidates.length > 0) {
+                const setOrder = window.setOrderMap || {};
+                const best = candidates.slice().sort((a, b) => {
+                    const orderA = setOrder[a.set] || 0;
+                    const orderB = setOrder[b.set] || 0;
+                    if (orderA !== orderB) return orderB - orderA;
+                    return String(a.number || '').localeCompare(String(b.number || ''));
+                })[0];
+
+                return {
+                    name: String(best.name || rawName).trim(),
+                    set: String(best.set || rawSet).trim(),
+                    number: String(best.number || rawNumber).trim()
+                };
+            }
         }
 
-        // Fallback: tournament cards data
-        if (Array.isArray(window.currentMetaTournamentCardsData)) {
-            const cards = window.currentMetaTournamentCardsData.filter(row => {
-                const rowArch = typeof normalizeCurrentMetaTournamentArchetypeName === 'function'
-                    ? normalizeCurrentMetaTournamentArchetypeName(row.archetype)
-                    : String(row.archetype || '').trim();
-                return rowArch.toLowerCase() === archetype.toLowerCase();
-            });
-            if (cards.length > 0) return cards;
-        }
-        return [];
+        return { name: rawName, set: rawSet, number: rawNumber };
     }
 
     // ── Build canonical cardId matching collection format ──
@@ -56,7 +113,7 @@
     }
 
     // ── Core: collect max card counts across all target decks ──
-    function collectBinderCards(archetypes) {
+    function collectBinderCards(targetArchetypes) {
         const thresholdPercent = 70;
 
         function parseUsagePercent(row) {
@@ -88,14 +145,24 @@
         // Map<cardId, { name, set, number, maxCount, decks: string[] }>
         const binderMap = new Map();
 
-        archetypes.forEach(archetype => {
-            const rows = getCardsForArchetype(archetype);
+        targetArchetypes.forEach(target => {
+            const archetype = String(target && target.name ? target.name : target || '').trim();
+            const sourceKey = String(target && target.source ? target.source : 'current-meta');
+            if (!archetype) return;
+
+            const rows = getCardsForArchetypeSource(archetype, sourceKey);
             // Deduplicate by card_name within this archetype (take highest max_count)
             const deckCardMap = new Map();
             rows.forEach(row => {
-                const name = String(row.card_name || row.full_card_name || '').trim();
-                const set = String(row.set_code || row.set || '').trim();
-                const number = String(row.set_number || row.number || '').trim();
+                const rawName = String(row.card_name || row.full_card_name || '').trim();
+                const rawSet = String(row.set_code || row.set || '').trim();
+                const rawNumber = String(row.set_number || row.number || '').trim();
+                const resolved = sourceKey.startsWith('city-')
+                    ? resolveCityLeagueDisplayPrint(rawName, rawSet, rawNumber)
+                    : { name: rawName, set: rawSet, number: rawNumber };
+                const name = resolved.name;
+                const set = resolved.set;
+                const number = resolved.number;
                 if (!name) return;
 
                 const isAceSpec = isAceSpecRow(row);
@@ -191,6 +258,86 @@
         localStorage.setItem(META_BINDER_CACHE_KEY, JSON.stringify(Array.from(binderMap.keys())));
 
         return { cards: results, droppedCards };
+    }
+
+    function parseLocaleNumber(value) {
+        const parsed = Number.parseFloat(String(value || '').replace(',', '.'));
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    async function loadMetaBinderArchetypeMetricMaps() {
+        const [currentCmp, cityCurrentCmp, cityPastCmp] = await Promise.all([
+            loadCSV('limitless_online_decks_comparison.csv').catch(() => []),
+            loadCSV('city_league_archetypes_comparison.csv').catch(() => []),
+            loadCSV('city_league_archetypes_comparison_M3.csv').catch(() => [])
+        ]);
+
+        const currentMetaMap = new Map();
+        (Array.isArray(currentCmp) ? currentCmp : []).forEach(row => {
+            const name = String(row.deck_name || '').trim();
+            if (!name) return;
+            const rank = parseLocaleNumber(row.new_rank);
+            const share = parseLocaleNumber(row.new_share);
+            currentMetaMap.set(name.toLowerCase(), { rank, share });
+        });
+
+        const cityCurrentMap = new Map();
+        (Array.isArray(cityCurrentCmp) ? cityCurrentCmp : []).forEach(row => {
+            const name = String(row.archetype || '').trim();
+            if (!name) return;
+            cityCurrentMap.set(name.toLowerCase(), parseLocaleNumber(row.new_avg_placement));
+        });
+
+        const cityPastMap = new Map();
+        (Array.isArray(cityPastCmp) ? cityPastCmp : []).forEach(row => {
+            const name = String(row.archetype || '').trim();
+            if (!name) return;
+            cityPastMap.set(name.toLowerCase(), parseLocaleNumber(row.new_avg_placement));
+        });
+
+        return { currentMetaMap, cityCurrentMap, cityPastMap };
+    }
+
+    function pickArchetypeBannerImage(archetypeName, sourceKey) {
+        const rows = getCardsForArchetypeSource(archetypeName, sourceKey);
+        if (!Array.isArray(rows) || rows.length === 0) return '';
+
+        const pickedRow = rows.slice().sort((a, b) => {
+            const aPct = parseLocaleNumber(a.percentage_in_archetype) || 0;
+            const bPct = parseLocaleNumber(b.percentage_in_archetype) || 0;
+            return bPct - aPct;
+        })[0];
+
+        if (!pickedRow) return '';
+
+        const rawName = String(pickedRow.card_name || pickedRow.full_card_name || '').trim();
+        const rawSet = String(pickedRow.set_code || pickedRow.set || '').trim();
+        const rawNumber = String(pickedRow.set_number || pickedRow.number || '').trim();
+        const resolved = sourceKey.startsWith('city-')
+            ? resolveCityLeagueDisplayPrint(rawName, rawSet, rawNumber)
+            : { name: rawName, set: rawSet, number: rawNumber };
+
+        return findCardImage(resolved.name, resolved.set, resolved.number) || '';
+    }
+
+    function buildMetaBinderArchetypeGroups(groupDefs, metricMaps) {
+        return groupDefs.map(group => ({
+            title: group.title,
+            source: group.source,
+            items: group.names.map(name => {
+                const key = String(name || '').toLowerCase();
+                const currentMeta = metricMaps.currentMetaMap.get(key) || {};
+                return {
+                    name,
+                    source: group.source,
+                    imageUrl: pickArchetypeBannerImage(name, group.source),
+                    currentMetaRank: Number.isFinite(currentMeta.rank) ? currentMeta.rank : null,
+                    currentMetaShare: Number.isFinite(currentMeta.share) ? currentMeta.share : null,
+                    cityCurrentAvgRank: metricMaps.cityCurrentMap.get(key) ?? null,
+                    cityPastAvgRank: metricMaps.cityPastMap.get(key) ?? null
+                };
+            })
+        }));
     }
 
     // ── Look up card image URL from the allCardsDatabase ──
@@ -318,8 +465,14 @@
         if (!setSelect) return;
 
         const currentValue = setSelect.value || 'all';
+        const setOrderMap = window.setOrderMap || {};
         const setCodes = [...new Set(cards.map(c => String(c.set || '').trim()).filter(Boolean))]
-            .sort((a, b) => a.localeCompare(b));
+            .sort((a, b) => {
+                const orderA = setOrderMap[a] || setOrderMap[a.toLowerCase()] || 0;
+                const orderB = setOrderMap[b] || setOrderMap[b.toLowerCase()] || 0;
+                if (orderA !== orderB) return orderB - orderA; // newest -> oldest
+                return a.localeCompare(b);
+            });
 
         setSelect.innerHTML = [
             '<option value="all">Alle Sets</option>',
@@ -337,6 +490,58 @@
         const delta = window._metaBinderDelta;
         if (!delta) return;
         renderMetaBinderGrid(delta);
+    }
+
+    function formatMetaBinderMetric(value, digits = 1) {
+        return Number.isFinite(value) ? value.toFixed(digits) : '—';
+    }
+
+    function escapeArchetypeForJs(value) {
+        if (typeof escapeJsStr === 'function') return escapeJsStr(value);
+        return String(value || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function renderMetaBinderArchetypeGroups(deltaEl) {
+        if (!deltaEl) return;
+        const groups = Array.isArray(window._metaBinderArchetypeGroups) ? window._metaBinderArchetypeGroups : [];
+        if (groups.length === 0) {
+            deltaEl.classList.add('display-none');
+            deltaEl.innerHTML = '';
+            return;
+        }
+
+        const html = groups.map(group => {
+            const cardsHtml = group.items.map(item => {
+                const safeName = escapeHtml(item.name || 'Unknown');
+                const safeImage = escapeHtml(item.imageUrl || '');
+                const escapedJsName = escapeArchetypeForJs(item.name || '');
+                const navFn = item.source === 'current-meta' ? 'navigateToCurrentMetaWithDeck' : 'navigateToAnalysisWithDeck';
+                const shareText = Number.isFinite(item.currentMetaShare) ? `${item.currentMetaShare.toFixed(1)}%` : '—';
+
+                return `
+                    <div class="deck-banner-card" onclick="${navFn}('${escapedJsName}')">
+                        ${item.imageUrl ? `<div class="deck-banner-bg" style="background-image: url('${safeImage}')"></div>` : ''}
+                        <div class="deck-banner-content">
+                            <div class="deck-banner-name">${safeName}</div>
+                            <div class="deck-banner-stats" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
+                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="Lower Rank = Better Performance">🏆 Rank current Meta: ${formatMetaBinderMetric(item.currentMetaRank, 1)}</span>
+                                <span class="stat-badge">📊 Share current Meta: ${shareText}</span>
+                                <span class="stat-badge">🇯🇵 Avg Rank Japan current: ${formatMetaBinderMetric(item.cityCurrentAvgRank, 1)}</span>
+                                <span class="stat-badge">🇯🇵 Avg Rank Japan past: ${formatMetaBinderMetric(item.cityPastAvgRank, 1)}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            return `
+                <div class="meta-binder-archetype-group">
+                    <h3 class="meta-binder-archetype-title">${escapeHtml(group.title)}</h3>
+                    <div class="meta-binder-archetype-grid">${cardsHtml}</div>
+                </div>`;
+        }).join('');
+
+        deltaEl.classList.remove('display-none');
+        deltaEl.innerHTML = `<div class="meta-binder-archetype-groups">${html}</div>`;
     }
 
     // ── Render ──
@@ -385,6 +590,8 @@
                     <span class="meta-binder-stat-label">${mbText('mb.droppedCount', 'Dropped')}</span>
                 </div>`;
         }
+
+            renderMetaBinderArchetypeGroups(deltaEl);
 
         // Filter buttons
         if (filtersEl) {
@@ -555,6 +762,25 @@
             }
         }
 
+        // Always load both City League eras for Meta Binder source buckets.
+        promises.push((async () => {
+            try {
+                const [currentRows, pastRows] = await Promise.all([
+                    loadCSV('city_league_analysis.csv').catch(() => []),
+                    loadCSV('city_league_analysis_M3.csv').catch(() => [])
+                ]);
+                if (Array.isArray(currentRows) && currentRows.length > 0) {
+                    window.cityLeagueAnalysisDataCurrent = currentRows;
+                }
+                if (Array.isArray(pastRows) && pastRows.length > 0) {
+                    window.cityLeagueAnalysisDataPast = pastRows;
+                    window.cityLeagueAnalysisM3Data = pastRows;
+                }
+            } catch (e) {
+                console.warn('[MetaBinder] Could not load both city league eras:', e);
+            }
+        })());
+
         if (promises.length > 0) {
             console.log('[MetaBinder] Waiting for', promises.length, 'data sources…');
             await Promise.all(promises);
@@ -572,28 +798,48 @@
         console.log('[MetaBinder] Building binder…');
         await ensureMetaDataLoaded();
 
-        const currentMetaArchetypes = getTopArchetypesFromSelect('currentMetaDeckSelect', 20);
-        const cityLeagueArchetypes = getTopArchetypesFromSelect('cityLeagueDeckSelect', 10);
-        console.log('[MetaBinder] Archetypes found — currentMeta:', currentMetaArchetypes.length, ', cityLeague:', cityLeagueArchetypes.length);
+        const currentMetaRows = Array.isArray(window.currentMetaAnalysisData) ? window.currentMetaAnalysisData : [];
+        const currentMetaLiveRows = currentMetaRows.filter(row => String(row.meta || '').trim().toLowerCase() === 'meta live');
+        const currentTop20 = getTopArchetypesFromRows(currentMetaLiveRows.length > 0 ? currentMetaLiveRows : currentMetaRows, 20);
 
-        // Merge, deduplicate
-        const seen = new Set();
-        const allArchetypes = [];
-        [...currentMetaArchetypes, ...cityLeagueArchetypes].forEach(name => {
-            const lower = name.toLowerCase();
-            if (!seen.has(lower)) {
-                seen.add(lower);
-                allArchetypes.push(name);
-            }
+        const cityCurrentRows = Array.isArray(window.cityLeagueAnalysisDataCurrent)
+            ? window.cityLeagueAnalysisDataCurrent
+            : (Array.isArray(window.cityLeagueAnalysisData) ? window.cityLeagueAnalysisData : []);
+        const cityPastRows = Array.isArray(window.cityLeagueAnalysisDataPast)
+            ? window.cityLeagueAnalysisDataPast
+            : (Array.isArray(window.cityLeagueAnalysisM3Data) ? window.cityLeagueAnalysisM3Data : []);
+
+        const cityCurrentTop10 = getTopArchetypesFromRows(cityCurrentRows, 10);
+        const cityPastTop10 = getTopArchetypesFromRows(cityPastRows, 10);
+
+        const topGroupDefs = [
+            { title: 'Top 20 Current Meta', source: 'current-meta', names: currentTop20 },
+            { title: 'Top 10 City League current', source: 'city-current', names: cityCurrentTop10 },
+            { title: 'Top 10 City League past', source: 'city-past', names: cityPastTop10 }
+        ];
+
+        const metricMaps = await loadMetaBinderArchetypeMetricMaps();
+        window._metaBinderArchetypeGroups = buildMetaBinderArchetypeGroups(topGroupDefs, metricMaps);
+
+        const sourceTargets = [
+            ...currentTop20.map(name => ({ name, source: 'current-meta' })),
+            ...cityCurrentTop10.map(name => ({ name, source: 'city-current' })),
+            ...cityPastTop10.map(name => ({ name, source: 'city-past' }))
+        ];
+
+        console.log('[MetaBinder] Source archetypes:', {
+            currentTop20: currentTop20.length,
+            cityCurrentTop10: cityCurrentTop10.length,
+            cityPastTop10: cityPastTop10.length
         });
 
-        if (allArchetypes.length === 0) {
+        if (sourceTargets.length === 0) {
             showToast(mbText('mb.noData', 'No meta data loaded yet. Please visit Current Meta or City League first.'), 'warning');
             if (grid) grid.innerHTML = '';
             return;
         }
 
-        const binderMap = collectBinderCards(allArchetypes);
+        const binderMap = collectBinderCards(sourceTargets);
         if (binderMap.size === 0) {
             showToast(mbText('mb.noCards', 'No card data found for the selected archetypes.'), 'warning');
             if (grid) grid.innerHTML = '';

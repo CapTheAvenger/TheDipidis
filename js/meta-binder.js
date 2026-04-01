@@ -302,11 +302,14 @@
         const rows = getCardsForArchetypeSource(archetypeName, sourceKey);
         if (!Array.isArray(rows) || rows.length === 0) return '';
 
-        const pickedRow = rows.slice().sort((a, b) => {
+        const sortedRows = rows.slice().sort((a, b) => {
             const aPct = parseLocaleNumber(a.percentage_in_archetype) || 0;
             const bPct = parseLocaleNumber(b.percentage_in_archetype) || 0;
             return bPct - aPct;
-        })[0];
+        });
+
+        // Prefer the main Pokemon for archetype banners.
+        const pickedRow = sortedRows.find(row => isPokemonTypeString(row.type)) || sortedRows[0];
 
         if (!pickedRow) return '';
 
@@ -336,6 +339,22 @@
                     cityCurrentAvgRank: metricMaps.cityCurrentMap.get(key) ?? null,
                     cityPastAvgRank: metricMaps.cityPastMap.get(key) ?? null
                 };
+            }).sort((a, b) => {
+                const getRankValue = (item) => {
+                    if (group.source === 'current-meta') return item.currentMetaRank;
+                    if (group.source === 'city-current') return item.cityCurrentAvgRank;
+                    if (group.source === 'city-past') return item.cityPastAvgRank;
+                    return null;
+                };
+
+                const rankA = getRankValue(a);
+                const rankB = getRankValue(b);
+                const hasA = Number.isFinite(rankA);
+                const hasB = Number.isFinite(rankB);
+
+                if (hasA && hasB && rankA !== rankB) return rankA - rankB;
+                if (hasA !== hasB) return hasA ? -1 : 1;
+                return String(a.name || '').localeCompare(String(b.name || ''));
             })
         }));
     }
@@ -431,20 +450,100 @@
         return { supertype: 'Trainer', type: 'Item', isAceSpec: false };
     }
 
-    function sortMetaCards(cards) {
-        const typeOrder = {
-            Pokemon: 1,
-            Trainer: 2,
-            Energy: 3
+    function parseCardNumberForSort(value) {
+        const raw = String(value || '').trim();
+        const match = raw.match(/^(\d+)/);
+        return match ? parseInt(match[1], 10) : Number.MAX_SAFE_INTEGER;
+    }
+
+    function getMetaBinderSetOrderValue(setCode) {
+        const code = String(setCode || '').trim();
+        const setOrderMap = window.setOrderMap || {};
+        return setOrderMap[code] || setOrderMap[code.toLowerCase()] || 0;
+    }
+
+    function getMetaBinderPokemonDex(card, cardDb) {
+        const dexFromCard = parseInt(String(cardDb?.pokedex_number || cardDb?.pokedexNumber || card?.pokedex_number || card?.pokedexNumber || '').trim(), 10);
+        if (Number.isFinite(dexFromCard) && dexFromCard > 0) return dexFromCard;
+
+        const dexMap = window.pokedexNumbers || {};
+        const name = String(card.name || '').trim().toLowerCase();
+        const direct = parseInt(String(dexMap[name] || '').trim(), 10);
+        if (Number.isFinite(direct) && direct > 0) return direct;
+
+        return Number.MAX_SAFE_INTEGER;
+    }
+
+    function getMetaBinderPokemonElementOrder(typeMeta) {
+        const element = String(typeMeta.type || '').replace('Pokemon-', '');
+        const elementOrder = {
+            Grass: 1,
+            Fire: 2,
+            Water: 3,
+            Lightning: 4,
+            Psychic: 5,
+            Fighting: 6,
+            Darkness: 7,
+            Metal: 8,
+            Dragon: 9,
+            Colorless: 10
         };
+        return elementOrder[element] || 99;
+    }
+
+    function sortMetaCards(cards) {
+        const categoryOrder = {
+            Pokemon: 1,
+            Supporter: 2,
+            Item: 3,
+            Tool: 4,
+            Stadium: 5,
+            'Special Energy': 6,
+            'Basic Energy': 7,
+            'ACE SPEC': 8
+        };
+
         return cards.sort((a, b) => {
             const aTypeMeta = getMetaBinderTypeMeta(a);
             const bTypeMeta = getMetaBinderTypeMeta(b);
-            const aOrder = typeOrder[aTypeMeta.supertype] || 99;
-            const bOrder = typeOrder[bTypeMeta.supertype] || 99;
+
+            const aCategory = aTypeMeta.supertype === 'Pokemon' ? 'Pokemon' : aTypeMeta.type;
+            const bCategory = bTypeMeta.supertype === 'Pokemon' ? 'Pokemon' : bTypeMeta.type;
+            const aOrder = categoryOrder[aCategory] || 99;
+            const bOrder = categoryOrder[bCategory] || 99;
             if (aOrder !== bOrder) return aOrder - bOrder;
-            if (aTypeMeta.type !== bTypeMeta.type) return aTypeMeta.type.localeCompare(bTypeMeta.type);
-            return a.name.localeCompare(b.name);
+
+            const aCardDb = findCardRecord(a.name, a.set, a.number);
+            const bCardDb = findCardRecord(b.name, b.set, b.number);
+
+            if (aCategory === 'Pokemon') {
+                // Pokemon: element -> dex number -> newest set first.
+                const aElementOrder = getMetaBinderPokemonElementOrder(aTypeMeta);
+                const bElementOrder = getMetaBinderPokemonElementOrder(bTypeMeta);
+                if (aElementOrder !== bElementOrder) return aElementOrder - bElementOrder;
+
+                const dexA = getMetaBinderPokemonDex(a, aCardDb);
+                const dexB = getMetaBinderPokemonDex(b, bCardDb);
+                if (dexA !== dexB) return dexA - dexB;
+
+                const setOrderA = getMetaBinderSetOrderValue(a.set);
+                const setOrderB = getMetaBinderSetOrderValue(b.set);
+                if (setOrderA !== setOrderB) return setOrderB - setOrderA;
+            } else {
+                const nameA = String(a.name || '').toLowerCase();
+                const nameB = String(b.name || '').toLowerCase();
+                if (nameA !== nameB) return nameA.localeCompare(nameB);
+
+                const setOrderA = getMetaBinderSetOrderValue(a.set);
+                const setOrderB = getMetaBinderSetOrderValue(b.set);
+                if (setOrderA !== setOrderB) return setOrderB - setOrderA;
+            }
+
+            const numberA = parseCardNumberForSort(a.number);
+            const numberB = parseCardNumberForSort(b.number);
+            if (numberA !== numberB) return numberA - numberB;
+
+            return String(a.name || '').localeCompare(String(b.name || ''));
         });
     }
 
@@ -535,8 +634,13 @@
 
             return `
                 <div class="meta-binder-archetype-group">
-                    <h3 class="meta-binder-archetype-title">${escapeHtml(group.title)}</h3>
-                    <div class="meta-binder-archetype-grid">${cardsHtml}</div>
+                    <details class="meta-binder-archetype-panel" open>
+                        <summary class="meta-binder-archetype-summary">
+                            <h3 class="meta-binder-archetype-title">${escapeHtml(group.title)}</h3>
+                            <span class="meta-binder-archetype-count">${group.items.length}</span>
+                        </summary>
+                        <div class="meta-binder-archetype-grid">${cardsHtml}</div>
+                    </details>
                 </div>`;
         }).join('');
 

@@ -47,6 +47,10 @@
         }
 
         function normalizeCardAggregationKey(name) {
+            if (typeof normalizeCardName === 'function') {
+                return normalizeCardName(name);
+            }
+
             return String(name || '')
                 .toLowerCase()
                 .replace(/[\u2019'`]/g, '')

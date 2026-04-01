@@ -1378,14 +1378,59 @@
                 'Illustration Rare': 9,
                 'Promo': 10
             };
+
+            function getCardAggregationKey(card) {
+                const rawName = card?.card_name || card?.name || '';
+                if (typeof normalizeCardName === 'function') {
+                    return normalizeCardName(rawName);
+                }
+                return String(rawName || '').toLowerCase().trim();
+            }
+
+            function getCanonicalDisplayName(card) {
+                const rawName = card?.card_name || card?.name || '';
+                const setCode = card?.set_code || card?.set || '';
+                const setNumber = card?.set_number || card?.number || '';
+
+                if (typeof getDisplayCardName === 'function') {
+                    return getDisplayCardName(rawName, setCode, setNumber) || rawName;
+                }
+
+                return rawName;
+            }
+
+            function applyRepresentativePrint(target, source) {
+                if (!target || !source) return;
+
+                if (source.image_url) target.image_url = source.image_url;
+                if (source.set_code) target.set_code = source.set_code;
+                if (source.rarity) target.rarity = source.rarity;
+                if (source.set_number) target.set_number = source.set_number;
+
+                const canonicalName = getCanonicalDisplayName(source);
+                if (canonicalName) {
+                    target.card_name = canonicalName;
+                    if (Object.prototype.hasOwnProperty.call(target, 'name')) {
+                        target.name = canonicalName;
+                    }
+                }
+            }
             
             const cardMap = new Map();
             
             cards.forEach(card => {
-                const cardName = normalizeCardAggregationKey(card.card_name);
+                const cardName = getCardAggregationKey(card);
                 if (!cardName) return;
                 if (!cardMap.has(cardName)) {
-                    cardMap.set(cardName, { ...card });
+                    const entry = { ...card };
+                    const canonicalName = getCanonicalDisplayName(card);
+                    if (canonicalName) {
+                        entry.card_name = canonicalName;
+                        if (Object.prototype.hasOwnProperty.call(entry, 'name')) {
+                            entry.name = canonicalName;
+                        }
+                    }
+                    cardMap.set(cardName, entry);
                 } else {
                     const existing = cardMap.get(cardName);
                     const existingSetPriority = setOrder[existing.set_code] || 0;
@@ -1394,15 +1439,9 @@
                     const newRarityPriority = rarityOrder[card.rarity] || 99;
                     // Bevorzuge: 1. Low Rarity (Common/Uncommon), 2. Neuestes Set
                     if (newRarityPriority < existingRarityPriority) {
-                        if (card.image_url) existing.image_url = card.image_url;
-                        if (card.set_code) existing.set_code = card.set_code;
-                        if (card.rarity) existing.rarity = card.rarity;
-                        if (card.set_number) existing.set_number = card.set_number;
+                        applyRepresentativePrint(existing, card);
                     } else if (newRarityPriority === existingRarityPriority && newSetPriority > existingSetPriority) {
-                        if (card.image_url) existing.image_url = card.image_url;
-                        if (card.set_code) existing.set_code = card.set_code;
-                        if (card.rarity) existing.rarity = card.rarity;
-                        if (card.set_number) existing.set_number = card.set_number;
+                        applyRepresentativePrint(existing, card);
                     }
                     // Aggregiere max_count (höchsten Wert behalten)
                     existing.max_count = Math.max(parseInt(existing.max_count || 0), parseInt(card.max_count || 0));

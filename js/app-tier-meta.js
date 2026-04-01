@@ -916,8 +916,10 @@
                 
                 html += `
                     <div class="top-card-item">
-                        <div class="top-card-rank" style="background: ${rankColor};">#${rank}</div>
-                        <img src="${imageUrl}" class="top-card-img" alt="${card.name}" loading="lazy">
+                        <div style="position:relative;">
+                            <img src="${imageUrl}" class="top-card-img" alt="${card.name}" loading="lazy" data-image-source="limitless-en">
+                            <div class="top-card-rank" style="background: ${rankColor};">#${rank}</div>
+                        </div>
                         <div class="top-card-stats">
                             <div class="top-card-name">${card.name}</div>
                             <div class="top-card-share">${card.global_share.toFixed(1)}% Usage</div>

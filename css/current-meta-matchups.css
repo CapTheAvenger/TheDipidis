@@ -85,10 +85,10 @@
 }
 
 #matchupHeatmapContainer .heatmap-table {
-    width: 920px !important;
-    min-width: 920px !important;
-    max-width: 920px !important;
-    table-layout: fixed !important;
+    width: 100% !important;
+    min-width: 900px !important;
+    max-width: none !important;
+    table-layout: auto !important;
 }
 
 #matchupHeatmapContainer .heatmap-th-y,
@@ -254,30 +254,38 @@
 #currentMetaContent .top-cards-grid,
 #currentMetaContent .top-cards-scroll {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 10px;
     overflow: visible;
     padding: 0;
 }
 
 #currentMetaContent .top-card-item {
-    min-width: 0;
-    max-width: none;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 10px;
-    border: 1px solid #e8edf5;
+    position: relative;
     border-radius: 10px;
-    background: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    background: #fff;
+    cursor: default;
+}
+
+#currentMetaContent .top-card-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(59, 76, 202, 0.18);
+}
+
+#currentMetaContent .top-card-img {
+    width: 100%;
+    aspect-ratio: 2.5 / 3.5;
+    object-fit: cover;
+    display: block;
 }
 
 #currentMetaContent .top-card-rank {
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: 6px;
+    left: 6px;
     color: #fff;
     padding: 3px 7px;
     border-radius: 6px;
@@ -285,64 +293,37 @@
     font-size: 0.72rem;
     line-height: 1;
     z-index: 2;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-}
-
-#currentMetaContent .top-card-img {
-    width: 125px;
-    min-width: 125px;
-    max-width: 125px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 10px;
-    display: block;
-    margin: 0 auto;
-    box-shadow: 0 4px 12px rgba(20, 33, 61, 0.12);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 #currentMetaContent .top-card-stats {
-    width: 100%;
-    margin-top: 2px;
-    padding-top: 8px;
-    border-top: 1px solid #edf1f6;
+    padding: 5px 6px 6px;
+    background: white;
+    font-size: 0.72em;
     text-align: center;
+    border-top: 1px solid #edf1f6;
 }
 
 #currentMetaContent .top-card-name {
-    margin: 0;
-    font-size: 0.92rem;
+    margin: 0 0 2px;
+    font-size: 0.86em;
     font-weight: 800;
     color: #1a2c43;
-    line-height: 1.25;
+    line-height: 1.2;
     overflow-wrap: anywhere;
+    white-space: normal;
 }
 
 #currentMetaContent .top-card-share {
-    margin-top: 4px;
-    font-size: 0.84rem;
+    font-size: 0.82em;
     font-weight: 700;
     color: #2563eb;
 }
 
 #currentMetaContent .top-card-decks {
-    margin-top: 2px;
-    font-size: 0.8rem;
+    font-size: 0.78em;
     font-weight: 600;
     color: #64748b;
-}
-
-@media (min-width: 768px) {
-    #currentMetaContent .top-cards-grid,
-    #currentMetaContent .top-cards-scroll {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (min-width: 1100px) {
-    #currentMetaContent .top-cards-grid,
-    #currentMetaContent .top-cards-scroll {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
 }
 
 /* Matchup deck section cards */
@@ -506,13 +487,6 @@
         gap: 8px;
     }
 
-    #currentMetaContent .top-card-img {
-        width: 115px;
-        min-width: 115px;
-        max-width: 115px;
-        height: 184px;
-    }
-
     #currentMetaContent .section table th,
     #currentMetaContent .section table td {
         padding: 6px 7px;
@@ -561,13 +535,6 @@
 
     #currentMetaContent .top-cards-container {
         padding: 10px;
-    }
-
-    #currentMetaContent .top-card-img {
-        width: 108px;
-        min-width: 108px;
-        max-width: 108px;
-        height: 172px;
     }
 
     #currentMetaContent .section table th,

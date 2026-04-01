@@ -323,17 +323,43 @@ function showTableSkeleton(containerOrId, opts) {
                 .replace(/\n/g, '\\n');
         }
 
+        const LEGACY_CARD_NAME_ALIASES = Object.freeze({
+            'rock fighting energy': 'Rocky Fighting Energy'
+        });
+
+        function getLegacyCardNameAlias(name) {
+            const raw = fixMojibake(String(name || '')).trim();
+            if (!raw) return '';
+
+            const aliasKey = raw
+                .replace(/\([^)]*\)/g, '')
+                .replace(/\[[^\]]*\]/g, '')
+                .replace(/[\u2019\u2018\u201B\u0060\u00B4]/g, "'")
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toLowerCase();
+
+            return LEGACY_CARD_NAME_ALIASES[aliasKey] || '';
+        }
+
         function getDisplayCardName(cardName, setCode = '', cardNumber = '') {
             const repairedInputName = fixMojibake(cardName);
             const canonicalCard = getCanonicalCardRecord(setCode, cardNumber);
             const canonicalName = fixMojibake(canonicalCard?.name_en || canonicalCard?.name || '');
+            const aliasedName = getLegacyCardNameAlias(repairedInputName);
+            const fallbackCard = aliasedName ? getCardByNameFromIndex(aliasedName) : getCardByNameFromIndex(repairedInputName);
+            const fallbackName = fixMojibake(fallbackCard?.name_en || fallbackCard?.name || aliasedName || '');
 
             // Prefer canonical DB name only when incoming name is clearly mojibake.
             if (canonicalName && /[ÃÂâ]/.test(String(cardName || ''))) {
                 return canonicalName;
             }
 
-            return repairedInputName || canonicalName || 'Unknown Card';
+            if (fallbackName && normalizeCardName(fallbackName) === normalizeCardName(repairedInputName)) {
+                return fallbackName;
+            }
+
+            return repairedInputName || canonicalName || fallbackName || 'Unknown Card';
         }
 
         function getNameWarningHtml(rawName, displayName, setCode = '', cardNumber = '') {
@@ -462,13 +488,15 @@ function showTableSkeleton(containerOrId, opts) {
         // Normalize card names for matching: lowercase, remove parenthetical suffixes, unify apostrophes
         function normalizeCardName(name) {
             if (!name) return '';
-            return fixMojibake(name)
+            const cleaned = fixMojibake(name)
                 .replace(/\([^)]*\)/g, '')  // remove (Ghetsis), (PAL), etc.
                 .replace(/\[[^\]]*\]/g, '') // remove [anything]
                 .replace(/[\u2019\u2018\u201B\u0060\u00B4]/g, "'") // unify curly/smart apostrophes
                 .replace(/\s+/g, ' ')
-                .trim()
-                .toLowerCase();
+                .trim();
+
+            const alias = getLegacyCardNameAlias(cleaned);
+            return (alias || cleaned).toLowerCase();
         }
 
         function getSafeCardIdentityName(name) {

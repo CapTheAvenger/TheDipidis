@@ -99,6 +99,7 @@ function loadAppUtils(overrides = {}) {
         getIndexedCardBySetNumber: overrides.getIndexedCardBySetNumber || (() => null),
         getEnglishCardVersions: overrides.getEnglishCardVersions || (() => []),
         getCanonicalCardRecord: overrides.getCanonicalCardRecord || (() => null),
+        getCardByNameFromIndex: overrides.getCardByNameFromIndex || (() => null),
         debugVersionSelectionLog: overrides.debugVersionSelectionLog || (() => {}),
         devLog: overrides.devLog || (() => {}),
         getRarityPreference: overrides.getRarityPreference || (() => null),

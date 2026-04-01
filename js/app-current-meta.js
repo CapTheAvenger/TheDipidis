@@ -295,11 +295,11 @@
                         ${searchControlsHtml}
                         <div class="heatmap-table-scroll">
                             ${tableHtml}
-                            <div class="heatmap-btn-row">
-                                <button class="action-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
-                                    ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
-                                </button>
-                            </div>
+                        </div>
+                        <div class="heatmap-btn-row">
+                            <button class="action-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
+                                ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
+                            </button>
                         </div>
                         <p class="heatmap-hint">
                             ${t('heatmap.hint')}
@@ -356,6 +356,17 @@
             // Load Current Meta Analysis (deck analysis)
             if (!window.currentMetaAnalysisLoaded) {
                 await loadCurrentMetaAnalysis();
+            }
+
+            const metaGrid = document.getElementById('currentMetaMetaGrid');
+            const shouldRefreshMetaAnalysis =
+                !metaGrid ||
+                !metaGrid.children.length ||
+                /no data|load meta analysis|loading/i.test(metaGrid.textContent || '');
+            if (shouldRefreshMetaAnalysis && typeof loadMetaCardAnalysis === 'function') {
+                loadMetaCardAnalysis('currentMeta').catch(err => {
+                    console.warn('[loadCurrentAnalysis] Auto-load meta analysis failed:', err);
+                });
             }
             
             // Load saved deck from localStorage

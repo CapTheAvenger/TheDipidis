@@ -1274,6 +1274,15 @@
                 // Check if this is the Full Comparison Table (has Old Rank, New Rank, Rank ? columns)
                 if (headers.includes('Old Rank') && headers.includes('New Rank') && headers.includes('Rank ?')) {
                     devLog('?? Patching Full Comparison Table...');
+
+                    if (!table.parentElement || !table.parentElement.classList.contains('current-meta-full-table-wrap')) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'current-meta-full-table-wrap';
+                        table.parentNode.insertBefore(wrapper, table);
+                        wrapper.appendChild(table);
+                    }
+
+                    table.classList.add('current-meta-full-comparison-table');
                     
                     // Find column indices
                     const oldRankIdx = headers.indexOf('Old Rank');
@@ -1328,6 +1337,33 @@
                                 deckNameCell.innerHTML = `<a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'currentMeta')" class="archetype-jump-link">${escapeHtml(archetype)}</a>`;
                             }
                         }
+                    });
+
+                    const finalHeaderCells = Array.from(table.querySelectorAll('thead th'));
+                    const normalizedHeaders = finalHeaderCells.map(th => String(th.textContent || '').trim().toLowerCase());
+
+                    const deckIdx = normalizedHeaders.findIndex(h => h.includes('deck') || h.includes('archetype'));
+                    const rankIdx = normalizedHeaders.findIndex(h => h === 'rank' || h.includes('rank'));
+                    const countIdx = normalizedHeaders.findIndex(h => h.includes('count'));
+                    const winRateIdx = normalizedHeaders.findIndex(h => h.includes('win rate') || h.includes('winrate') || h === 'wr');
+
+                    finalHeaderCells.forEach((th, idx) => {
+                        th.classList.remove('full-col-deck', 'full-col-rank', 'full-col-count', 'full-col-winrate');
+                        if (idx === deckIdx) th.classList.add('full-col-deck');
+                        if (idx === rankIdx) th.classList.add('full-col-rank');
+                        if (idx === countIdx) th.classList.add('full-col-count');
+                        if (idx === winRateIdx) th.classList.add('full-col-winrate');
+                    });
+
+                    table.querySelectorAll('tbody tr').forEach(row => {
+                        const tds = row.querySelectorAll('td');
+                        tds.forEach((td, idx) => {
+                            td.classList.remove('full-col-deck', 'full-col-rank', 'full-col-count', 'full-col-winrate');
+                            if (idx === deckIdx) td.classList.add('full-col-deck');
+                            if (idx === rankIdx) td.classList.add('full-col-rank');
+                            if (idx === countIdx) td.classList.add('full-col-count');
+                            if (idx === winRateIdx) td.classList.add('full-col-winrate');
+                        });
                     });
                     
                     devLog('? Full Comparison Table patched successfully');
@@ -1429,16 +1465,30 @@
         async function patchMetaStats() {
             try {
                 // Load format from settings
-                let currentFormat = 'SVI-ASC'; // Default fallback
+                let currentFormat = 'TEF-POR'; // Default fallback
                 try {
-                    const settingsResponse = await fetch('./config/current_meta_analysis_settings.json?t=' + Date.now());
-                    if (settingsResponse.ok) {
+                    const settingsPaths = [
+                        './current_meta_analysis_settings.json?t=' + Date.now(),
+                        './config/current_meta_analysis_settings.json?t=' + Date.now()
+                    ];
+                    for (const settingsPath of settingsPaths) {
+                        const settingsResponse = await fetch(settingsPath);
+                        if (!settingsResponse.ok) continue;
                         const settings = await settingsResponse.json();
-                        const formatFilter = settings?.sources?.limitless_online?.format_filter;
+                        const formatFilter = String(settings?.sources?.limitless_online?.format_filter || '').trim();
                         if (formatFilter) {
-                            // formatFilter is just the set code (e.g., "ASC"), prefix with "SVI-"
-                            currentFormat = `SVI-${formatFilter}`;
+                            let resolved = formatFilter.toUpperCase();
+                            if (!resolved.includes('-')) {
+                                resolved = `TEF-${resolved}`;
+                            }
+                            if (typeof mapSetCodeToMetaFormat === 'function') {
+                                currentFormat = mapSetCodeToMetaFormat(resolved) || resolved;
+                            } else {
+                                currentFormat = resolved;
+                            }
+                            currentFormat = currentFormat === 'SVI-POR' ? 'TEF-POR' : currentFormat;
                             devLog(`?? Loaded format from settings: ${currentFormat}`);
+                            break;
                         }
                     }
                 } catch (e) {
@@ -1450,7 +1500,12 @@
                 try {
                     const metaResponse = await fetch(BASE_PATH + 'limitless_meta_stats.json?t=' + Date.now());
                     if (metaResponse.ok) {
-                        metaStats = await metaResponse.json();
+                        const statsData = await metaResponse.json();
+                        metaStats = {
+                            tournaments: parseInt(statsData?.tournaments, 10) || 0,
+                            players: parseInt(statsData?.players, 10) || 0,
+                            matches: parseInt(statsData?.matches, 10) || 0
+                        };
                     }
                 } catch (e) {
                     console.warn('Could not load limitless_meta_stats.json:', e);
@@ -1484,15 +1539,16 @@
                         // Add tournament stats below the current format
                         const existingP = card.querySelector('p');
                         if (existingP && existingP.textContent.includes('Current Format')) {
+                            card.querySelectorAll('.meta-online-stats, .meta-major-stats').forEach(el => el.remove());
                             // Add new stats
                             const statsHtml = `
-                                <p style="font-size: 0.85em; color: #555; margin: 15px 0 5px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-weight: 500;">
-                                    <strong style="color: #3498db;">?? Online Meta:</strong><br>
+                                <p class="meta-online-stats" style="font-size: 0.85em; color: #555; margin: 15px 0 5px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-weight: 500;">
+                                    <strong style="color: #3498db;">Online Meta:</strong><br>
                                     <span style="font-size: 0.95em;">${metaStats.tournaments.toLocaleString()} tournaments · ${metaStats.players.toLocaleString()} players · ${metaStats.matches.toLocaleString()} matches</span>
                                 </p>
-                                <p style="font-size: 0.85em; color: #555; margin: 5px 0 0 0; font-weight: 500;">
-                                    <strong style="color: #27ae60;">?? Major Tournaments:</strong><br>
-                                    <span style="font-size: 0.95em;">${majorTournaments} tournaments · ${totalPlayers.toLocaleString()} players</span>
+                                <p class="meta-major-stats" style="font-size: 0.85em; color: #555; margin: 5px 0 0 0; font-weight: 500;">
+                                    <strong style="color: #27ae60;">Major Tournaments:</strong><br>
+                                    <span style="font-size: 0.95em;">${(majorTournaments || 0).toLocaleString()} tournaments · ${(totalPlayers || 0).toLocaleString()} players</span>
                                 </p>
                             `;
                             existingP.insertAdjacentHTML('afterend', statsHtml);

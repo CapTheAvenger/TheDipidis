@@ -2,6 +2,7 @@
 (function() {
     const utils = [
         'getInternationalPrintsForCard', 'fixMojibake', 'hasMojibake', 'escapeHtmlAttr', 'escapeJsStr',
+        'getOtherInternationalPrintOwnedCount',
         'getDisplayCardName', 'getNameWarningHtml', 'getCanonicalDeckKey', 'normalizeDeckEntries',
         'normalizeCardName', 'getSafeCardIdentityName', 'isBasicEnergy', 'isRadiantPokemon',
         'isPrismStarCard', 'getDeckCopiesForCardName', 'getTotalAceSpecCopiesInDeck',
@@ -217,6 +218,45 @@ function showTableSkeleton(containerOrId, opts) {
             );
             
             return intPrintCards;
+        }
+
+        // Count owned copies from other prints strictly within the card's
+        // international_prints family (Limitless canonical identity).
+        function getOtherInternationalPrintOwnedCount(setCode, setNumber, collectionCounts) {
+            const countsMap = collectionCounts instanceof Map ? collectionCounts : window.userCollectionCounts;
+            if (!(countsMap instanceof Map) || countsMap.size === 0) return 0;
+
+            const normalizedSet = String(setCode || '').toUpperCase().trim();
+            const normalizedNumber = String(setNumber || '').toUpperCase().trim();
+            if (!normalizedSet || !normalizedNumber) return 0;
+
+            const intPrints = getInternationalPrintsForCard(normalizedSet, normalizedNumber);
+            if (!Array.isArray(intPrints) || intPrints.length === 0) return 0;
+
+            const allowedPrints = new Set(
+                intPrints
+                    .map(c => `${String(c.set || '').toUpperCase()}-${String(c.number || '').toUpperCase()}`)
+                    .filter(Boolean)
+            );
+
+            // Never count the currently displayed print as "other print".
+            allowedPrints.delete(`${normalizedSet}-${normalizedNumber}`);
+            if (allowedPrints.size === 0) return 0;
+
+            let totalOwnedOtherPrints = 0;
+            countsMap.forEach((qty, collKey) => {
+                const ownedQty = parseInt(qty, 10) || 0;
+                if (ownedQty <= 0) return;
+                const parts = String(collKey || '').split('|');
+                if (parts.length < 3) return;
+                const keySet = String(parts[1] || '').toUpperCase();
+                const keyNumber = String(parts[2] || '').toUpperCase();
+                if (allowedPrints.has(`${keySet}-${keyNumber}`)) {
+                    totalOwnedOtherPrints += ownedQty;
+                }
+            });
+
+            return totalOwnedOtherPrints;
         }
 
         // Repair common mojibake sequences (UTF-8 bytes interpreted as Latin-1/Windows-1252).

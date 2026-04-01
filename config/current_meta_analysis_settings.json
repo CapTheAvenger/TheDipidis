@@ -23,7 +23,7 @@
     "request_timeout":  20,
     "max_retries":  2,
     "retry_delay":  1.0,
-    "append_mode":  false,
+    "append_mode":  true,
     "output_file":  "current_meta_card_data.csv",
     "_comment":  "Combines Limitless Online (Meta Live) and Play! (Meta Play!). append_mode=true keeps old data and only adds new entries."
 }

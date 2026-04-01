@@ -4516,13 +4516,16 @@ h3:first-child {
 }
 
 .tier-section h3 {
-    font-size: 1.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 1.35rem;
     font-weight: 900;
-    margin: 40px 0 20px 0;
-    padding-bottom: 10px;
-    border-bottom: 3px solid #eee;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    margin: 32px 0 18px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #d9e3ef;
+    text-transform: none;
+    letter-spacing: 0.3px;
 }
 
 .tier-section h3 small {
@@ -4601,10 +4604,6 @@ h3:first-child {
 }
 
 .tier-hero-rank {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 2;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -4615,6 +4614,7 @@ h3:first-child {
     color: #fff;
     font-size: 0.75rem;
     font-weight: 800;
+    flex-shrink: 0;
 }
 
 .tier-hero-content {
@@ -4628,11 +4628,22 @@ h3:first-child {
     padding: 16px;
 }
 
+.tier-hero-topline {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
 .tier-hero-name {
     font-size: 1.05rem;
     font-weight: 900;
     color: #1a2c43;
     text-transform: capitalize;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .tier-hero-meta {
@@ -4668,6 +4679,23 @@ h3:first-child {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 15px;
     padding: 0;
+}
+
+.tier-section .deck-banner-card {
+    border-radius: 14px;
+    border: 1px solid #edf1f4;
+    background: linear-gradient(145deg, #fff 0%, #f9fbfd 100%);
+    box-shadow: 0 8px 20px rgba(20, 33, 61, 0.08);
+    overflow: hidden;
+}
+
+.tier-section .deck-banner-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px rgba(20, 33, 61, 0.16);
+}
+
+.tier-section .deck-banner-name {
+    line-height: 1.2;
 }
 
 .deck-tier-title {
@@ -5207,37 +5235,42 @@ details[open] > .tier-trending-summary::after {
     border: 1px solid #e0e0e0;
 }
 
-.top-cards-scroll {
-    display: flex;
-    gap: 15px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 10px 5px;
-    scroll-behavior: smooth;
+.top-cards-scroll,
+.top-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    overflow: visible;
+    padding: 6px 0;
 }
 
 /* Scrollbar styling */
-.top-cards-scroll::-webkit-scrollbar {
+.top-cards-scroll::-webkit-scrollbar,
+.top-cards-grid::-webkit-scrollbar {
     height: 8px;
 }
 
-.top-cards-scroll::-webkit-scrollbar-track {
+.top-cards-scroll::-webkit-scrollbar-track,
+.top-cards-grid::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 4px;
 }
 
-.top-cards-scroll::-webkit-scrollbar-thumb {
+.top-cards-scroll::-webkit-scrollbar-thumb,
+.top-cards-grid::-webkit-scrollbar-thumb {
     background: #888;
     border-radius: 4px;
 }
 
-.top-cards-scroll::-webkit-scrollbar-thumb:hover {
+.top-cards-scroll::-webkit-scrollbar-thumb:hover,
+.top-cards-grid::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
 
 .top-card-item {
-    min-width: 140px;
-    max-width: 140px;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
     background: white;
     border-radius: 10px;
     overflow: hidden;
@@ -5245,7 +5278,7 @@ details[open] > .tier-trending-summary::after {
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
     position: relative;
-    flex-shrink: 0;
+    flex-shrink: 1;
 }
 
 .top-card-item:hover {
@@ -5356,19 +5389,17 @@ details[open] > .tier-trending-summary::after {
 }
 
 .battle-journal-fab {
-    position: fixed;
-    right: 20px;
-    bottom: 22px;
-    z-index: 19990;
+    position: relative;
+    z-index: 2;
     display: inline-flex;
     align-items: center;
     gap: 10px;
     border: none;
     border-radius: 999px;
-    padding: 14px 18px;
+    padding: 9px 12px;
     background: linear-gradient(135deg, var(--pokemon-red) 0%, #ff6b35 100%);
     color: #fff;
-    box-shadow: 0 18px 38px rgba(227, 53, 13, 0.35);
+    box-shadow: 0 10px 20px rgba(227, 53, 13, 0.28);
     cursor: pointer;
     font-weight: 900;
 }
@@ -5382,7 +5413,7 @@ details[open] > .tier-trending-summary::after {
 }
 
 .battle-journal-fab-label {
-    font-size: 14px;
+    font-size: 12px;
     letter-spacing: 0.02em;
 }
 
@@ -5943,10 +5974,9 @@ body.battle-journal-open {
 
 @media (max-width: 640px) {
     .battle-journal-fab {
-        right: 14px;
-        left: 14px;
-        bottom: 14px;
-        justify-content: center;
+        padding: 8px 10px;
+        gap: 8px;
+        justify-content: flex-start;
     }
 
     .battle-journal-overlay {

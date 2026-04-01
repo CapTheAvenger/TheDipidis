@@ -22,6 +22,16 @@
                 .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
                 .trim();
         }
+
+        function normalizeCurrentMetaArchetypeKey(value) {
+            return String(value || '')
+                .toLowerCase()
+                .replace(/[''`]/g, '')
+                .replace(/\bex\b/g, '')
+                .replace(/[^a-z0-9\s-]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
         
         // Load Current Meta Analysis Data
         async function loadCurrentMetaAnalysis() {
@@ -233,6 +243,28 @@
                 }
             }
 
+            if (!pendingMeta) {
+                const savedArchetype = String(window.currentCurrentMetaArchetype || '').trim();
+                if (savedArchetype) {
+                    const savedOption = Array.from(select.options).find(option =>
+                        option.value && option.value.toLowerCase() === savedArchetype.toLowerCase()
+                    );
+                    if (savedOption) {
+                        select.value = savedOption.value;
+                        loadCurrentMetaDeckData(savedOption.value);
+                    }
+                }
+            }
+
+            if (!select.value) {
+                const firstDeckOption = Array.from(select.options).find(option => option.value);
+                if (firstDeckOption) {
+                    select.value = firstDeckOption.value;
+                    window.currentCurrentMetaArchetype = firstDeckOption.value;
+                    loadCurrentMetaDeckData(firstDeckOption.value);
+                }
+            }
+
             // Enable search functionality
             const searchInput = document.getElementById('currentMetaDeckSearch');
             if (searchInput) {
@@ -358,12 +390,18 @@
             }
             
             // Filter by archetype
+            const normalizedTarget = normalizeCurrentMetaArchetypeKey(archetype);
             let deckCards = data.filter(row => {
                 const rowArchetype = currentMetaFormatFilter === 'play'
                     ? normalizeCurrentMetaTournamentArchetypeName(row.archetype)
                     : String(row.archetype || '').trim();
 
-                return rowArchetype && rowArchetype.toLowerCase() === archetype.toLowerCase();
+                if (!rowArchetype) return false;
+                const exactMatch = rowArchetype.toLowerCase() === archetype.toLowerCase();
+                if (exactMatch) return true;
+
+                const normalizedRow = normalizeCurrentMetaArchetypeKey(rowArchetype);
+                return normalizedRow && normalizedRow === normalizedTarget;
             });
             
             // Apply format filter only when using current_meta data with 'live' or 'all'
@@ -446,11 +484,12 @@
                     }
                 }
                 
-                // Update stats  
-                document.getElementById('currentMetaStatCards').textContent = `${uniqueCards} / ${totalCardsInDeck}`;
-                document.getElementById('currentMetaStatWinrate').textContent = winrate;
-                document.getElementById('currentMetaStatMatchup').textContent = matchupVsTop20;
-                document.getElementById('currentMetaStatsSection').classList.remove('d-none');
+                // Update stats
+                updateDeckStatsByIds({
+                    currentMetaStatCards: `${uniqueCards} / ${totalCardsInDeck}`,
+                    currentMetaStatWinrate: winrate,
+                    currentMetaStatMatchup: matchupVsTop20
+                }, 'currentMetaStatsSection');
                 
                 // Render matchups
                 renderCurrentMetaMatchups(archetype);
@@ -471,10 +510,8 @@
                 const el = document.getElementById(id);
                 if (el) el.classList.add('d-none');
             });
-            const countEl = document.getElementById('currentMetaCardCount');
-            if (countEl) countEl.textContent = '0 ' + t('cl.cards');
-            const summaryEl = document.getElementById('currentMetaCardCountSummary');
-            if (summaryEl) summaryEl.textContent = '/ 0 Total';
+            renderNoDeckSelectedState('currentMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
+            resetDeckOverviewCounts('currentMetaCardCount', 'currentMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 Total');
         }
         
         // Render "Used in Top 256" breakdown per major tournament for selected archetype
@@ -1040,6 +1077,17 @@
                             cardmarketUrl = priceCard.cardmarket_url || '';
                             if (priceCard.name_de) germanCardName = String(priceCard.name_de).toLowerCase();
                         }
+                    }
+                    const isBasicEnergyEntry = (typeof isBasicEnergyCardEntry === 'function' && isBasicEnergyCardEntry({
+                        card_name: cardName,
+                        type: card.type || card.card_type,
+                        supertype: card.supertype,
+                        subtypes: card.subtypes
+                    })) || /basic energy/i.test(String(card.type || card.card_type || ''));
+
+                    if (isBasicEnergyEntry) {
+                        eurPrice = '0,05€';
+                        cardmarketUrl = '';
                     }
                     const priceDisplay = eurPrice || '0,00€';
                     const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';

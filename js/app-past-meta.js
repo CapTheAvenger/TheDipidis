@@ -475,7 +475,10 @@
                 document.getElementById('pastMetaDeckVisual').classList.add('d-none');
                 pastMetaCurrentDeck = null;
                 pastMetaCurrentCards = [];
+                pastMetaFilteredCards = [];
                 pastMetaCurrentScope = null;
+                resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 Cards', '/ 0 Total');
+                renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
                 return;
             }
             
@@ -605,8 +608,16 @@
             if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
                 document.getElementById('pastMetaDeckTableView').classList.add('d-none');
                 document.getElementById('pastMetaDeckVisual').classList.add('d-none');
-                document.getElementById('pastMetaCardCount').textContent = '0 Cards';
-                document.getElementById('pastMetaCardCountSummary').textContent = '/ 0 Total';
+                resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 Cards', '/ 0 Total');
+                const gridContainer = document.getElementById('pastMetaDeckGrid');
+                if (gridContainer) {
+                    const selectedArchetype = String(document.getElementById('pastMetaDeckSelect')?.value || '').trim();
+                    if (!selectedArchetype) {
+                        renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
+                    } else {
+                        gridContainer.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match the current filters.', icon: 'cards' });
+                    }
+                }
                 return;
             }
             
@@ -646,7 +657,7 @@
                 return;
             }
             
-            let html = '<table><thead><tr>';
+            let html = '<thead><tr>';
             html += '<th style="width: 60px;">Count</th>';
             html += '<th>Card Name</th>';
             html += '<th style="width: 100px;">ACE SPEC</th>';
@@ -668,8 +679,8 @@
                 html += '</tr>';
             });
             
-            html += '</tbody></table>';
-            tableContainer.innerHTML = html;
+            html += '</tbody>';
+            tableContainer.innerHTML = `<div class="past-meta-table-scroll"><table class="past-meta-table-zebra">${html}</table></div>`;
         }
         
         function renderPastMetaGridView(cards) {
@@ -871,21 +882,7 @@
                     const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
                     
                     // Collection badge
-                    let otherPrintOwnedCount = 0;
-                    if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
-                        const normalizedCurrentName = normalizeCardName(cardName);
-                        const normalizedSet = String(setCode || '').toUpperCase();
-                        const normalizedNumber = String(setNumber || '').toUpperCase();
-                        window.userCollectionCounts.forEach((qty, collKey) => {
-                            const ownedQty = parseInt(qty, 10) || 0;
-                            if (ownedQty <= 0) return;
-                            const parts = String(collKey || '').split('|');
-                            if (parts.length < 3) return;
-                            if (normalizeCardName(parts[0]) !== normalizedCurrentName) return;
-                            if (String(parts[1] || '').toUpperCase() === normalizedSet && String(parts[2] || '').toUpperCase() === normalizedNumber) return;
-                            otherPrintOwnedCount += ownedQty;
-                        });
-                    }
+                    const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
                     const otherPrintSparkleHtml = otherPrintOwnedCount > 0
                         ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}">
                             <span class="city-league-other-print-sparkle-icon">✨</span>

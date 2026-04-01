@@ -448,8 +448,8 @@
                 topHeroArchetypes.forEach((item, index) => {
                     const representativeCards = cardDataByArchetype[item.representativeVariant] || [];
                     const imageUrl = getArchetypeImage(item.representativeVariant, representativeCards);
-                    const topVariant = item.variants[0] || item.representativeVariant;
-                    const archetypeEscaped = escapeJsStr(topVariant);
+                    const combinedMainEscaped = escapeJsStr(item.key || item.label || item.representativeVariant || '');
+                    const combinedVariantsJsonEscaped = escapeJsStr(encodeURIComponent(JSON.stringify(item.variants || [])));
                     const avgRankText = Number.isFinite(item.weightedRank) && item.weightedRank < 999
                         ? item.weightedRank.toFixed(1)
                         : '0.0';
@@ -457,11 +457,13 @@
                     const variantLabel = variantCount === 1 ? t('cl.heroVariantSingular') : t('cl.heroVariantPlural');
 
                     heroHtml += `
-                        <div class="tier-hero-card" onclick="navigateToAnalysisWithDeck('${archetypeEscaped}')">
-                            <span class="tier-hero-rank">#${index + 1}</span>
+                        <div class="tier-hero-card" onclick="analyzeCombinedArchetype('${combinedMainEscaped}', '${combinedVariantsJsonEscaped}')">
                             ${imageUrl ? `<div class="tier-hero-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
                             <div class="tier-hero-content">
-                                <div class="tier-hero-name">${item.label}</div>
+                                <div class="tier-hero-topline">
+                                    <span class="tier-hero-rank">#${index + 1}</span>
+                                    <div class="tier-hero-name">${item.label}</div>
+                                </div>
                                 <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
                                 <div class="tier-hero-stats">
                                     <span class="stat-badge">📦 ${item.totalCount} ${t('cl.decks')}</span>
@@ -899,7 +901,7 @@
                     <h3 style="color: #2c3e50; margin: 0 0 15px 0; font-size: 1.3em; font-weight: 800; display: flex; align-items: center; gap: 10px;">
                         🔥 Most Used Cards (Format Staples)
                     </h3>
-                    <div class="top-cards-scroll">`;
+                    <div class="top-cards-grid">`;
             
             top15.forEach((card, index) => {
                 const rank = index + 1;

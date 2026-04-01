@@ -1,0 +1,75 @@
+{
+  "last_updated": "2026-04-01 10:41:24",
+  "formats": [
+    {
+      "code": "BRS-PRE",
+      "name": "Brilliant Stars - Prismatic Evolutions",
+      "source": "known"
+    },
+    {
+      "code": "BRS-SCR",
+      "name": "Brilliant Stars - Stellar Crown",
+      "source": "known"
+    },
+    {
+      "code": "BRS-SFA",
+      "name": "Brilliant Stars - Shrouded Fable",
+      "source": "known"
+    },
+    {
+      "code": "BRS-SSP",
+      "name": "Brilliant Stars - Surging Sparks",
+      "source": "known"
+    },
+    {
+      "code": "BRS-TEF",
+      "name": "Brilliant Stars - Temporal Forces",
+      "source": "known"
+    },
+    {
+      "code": "BRS-TWM",
+      "name": "Brilliant Stars - Twilight Masquerade",
+      "source": "known"
+    },
+    {
+      "code": "BST-PAR",
+      "name": "Battle Styles - Paradox Rift",
+      "source": "known"
+    },
+    {
+      "code": "SVI-ASC",
+      "name": "Scarlet & Violet - Ascended Heroes",
+      "source": "known"
+    },
+    {
+      "code": "SVI-BLK",
+      "name": "Scarlet & Violet - Black Bolt / White Flare",
+      "source": "known"
+    },
+    {
+      "code": "SVI-DRI",
+      "name": "Scarlet & Violet - Destined Rivals",
+      "source": "known"
+    },
+    {
+      "code": "SVI-JTG",
+      "name": "Scarlet & Violet - Journey Together",
+      "source": "known"
+    },
+    {
+      "code": "SVI-MEG",
+      "name": "Scarlet & Violet - Mega Evolution",
+      "source": "known"
+    },
+    {
+      "code": "SVI-PAF",
+      "name": "Scarlet & Violet - Paldean Fates",
+      "source": "known"
+    },
+    {
+      "code": "SVI-PFL",
+      "name": "Scarlet & Violet - Phantasmal Flames",
+      "source": "known"
+    }
+  ]
+}

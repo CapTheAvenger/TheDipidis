@@ -250,10 +250,11 @@ const BASE_PATH = './data/';
         window.pastMetaCurrentArchetype = window.pastMetaCurrentArchetype || null;
         window.proxyQueue = window.proxyQueue || [];
 
-        const PROXY_QUEUE_STORAGE_KEY = 'proxyQueueV1';
+        const PROXY_IMPORT_TIMEOUT_MS = 10000;
         const PROXY_MANUAL_SUGGESTIONS_ID = 'proxyManualNameSuggestions';
         let proxyManualSearchIndex = [];
         let proxyManualSearchIndexReady = false;
+        const proxyActionState = Object.create(null);
 
         function normalizeProxySetCode(setCode) {
             const raw = String(setCode || '').trim();
@@ -581,39 +582,91 @@ const BASE_PATH = './data/';
             }, 2200);
         }
 
-        function saveProxyQueue() {
+        function clearLegacyProxyQueueStorage() {
             try {
-                localStorage.setItem(PROXY_QUEUE_STORAGE_KEY, JSON.stringify(window.proxyQueue || []));
+                localStorage.removeItem('proxyQueueV1');
             } catch (e) {
-                console.warn('[Proxy] Could not persist proxy queue:', e);
+                console.warn('[Proxy] Could not clear legacy proxy queue storage:', e);
             }
         }
 
-        function loadProxyQueue() {
+        function setProxyButtonBusy(buttonIds, busy, loadingText) {
+            if (!Array.isArray(buttonIds)) return;
+            buttonIds.forEach((buttonId) => {
+                const button = document.getElementById(buttonId);
+                if (!button) return;
+
+                if (busy) {
+                    if (!button.dataset.originalLabel) {
+                        button.dataset.originalLabel = button.textContent || '';
+                    }
+                    button.disabled = true;
+                    button.classList.add('proxy-btn-loading');
+                    button.setAttribute('aria-busy', 'true');
+                    button.textContent = loadingText || t('misc.loading');
+                    return;
+                }
+
+                button.disabled = false;
+                button.classList.remove('proxy-btn-loading');
+                button.removeAttribute('aria-busy');
+                if (button.dataset.originalLabel) {
+                    button.textContent = button.dataset.originalLabel;
+                    delete button.dataset.originalLabel;
+                }
+            });
+        }
+
+        function withTimeout(promise, timeoutMs, timeoutMessage) {
+            if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) return promise;
+
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error(timeoutMessage || 'Proxy action timed out.'));
+                }, timeoutMs);
+
+                Promise.resolve(promise)
+                    .then((result) => {
+                        clearTimeout(timeout);
+                        resolve(result);
+                    })
+                    .catch((error) => {
+                        clearTimeout(timeout);
+                        reject(error);
+                    });
+            });
+        }
+
+        async function runProxyAction(actionKey, buttonIds, action, options = {}) {
+            if (!actionKey || typeof action !== 'function') return;
+            if (proxyActionState[actionKey]) return;
+
+            const loadingText = options.loadingText || t('misc.loading');
+            const timeoutMs = Number.isFinite(options.timeoutMs) ? options.timeoutMs : PROXY_IMPORT_TIMEOUT_MS;
+            proxyActionState[actionKey] = true;
+            setProxyButtonBusy(buttonIds, true, loadingText);
+
             try {
-                const saved = localStorage.getItem(PROXY_QUEUE_STORAGE_KEY);
-                if (!saved) {
-                    window.proxyQueue = [];
-                    return;
-                }
-                const parsed = JSON.parse(saved);
-                if (!Array.isArray(parsed)) {
-                    window.proxyQueue = [];
-                    return;
-                }
-                window.proxyQueue = parsed
-                    .filter(item => item && typeof item === 'object' && item.name)
-                    .map(item => ({
-                        id: buildProxyItemId(item.name, item.set, item.number),
-                        name: String(item.name || '').trim(),
-                        set: normalizeProxySetCode(item.set),
-                        number: normalizeProxyCardNumber(item.number),
-                        count: parseProxyCount(item.count, 1)
-                    }));
-            } catch (e) {
-                console.warn('[Proxy] Could not load proxy queue:', e);
-                window.proxyQueue = [];
+                await withTimeout(Promise.resolve().then(action), timeoutMs, options.timeoutMessage);
+            } catch (error) {
+                const detail = String(error?.message || error || '').toLowerCase();
+                const corsHint = detail.includes('cors') ? ' (possible CORS/network restriction)' : '';
+                const message = options.errorMessage || 'Proxy import failed. Please try again.';
+                showToast(`${message}${corsHint}`, 'error');
+                console.error('[Proxy] Action failed:', actionKey, error);
+            } finally {
+                proxyActionState[actionKey] = false;
+                setProxyButtonBusy(buttonIds, false);
             }
+        }
+
+        function saveProxyQueue() {
+            // Proxy queue persistence was intentionally removed.
+        }
+
+        function loadProxyQueue() {
+            clearLegacyProxyQueueStorage();
+            window.proxyQueue = [];
         }
 
         function getProxyQueueTotals() {
@@ -739,14 +792,12 @@ const BASE_PATH = './data/';
                 item.count = nextValue;
             }
 
-            saveProxyQueue();
             renderProxyQueue();
         }
 
         function removeCardFromProxy(cardName, setCode = '', cardNumber = '') {
             const id = buildProxyItemId(cardName, setCode, cardNumber);
             window.proxyQueue = (window.proxyQueue || []).filter(item => item.id !== id);
-            saveProxyQueue();
             renderProxyQueue();
         }
 
@@ -754,92 +805,138 @@ const BASE_PATH = './data/';
             if (!window.proxyQueue || window.proxyQueue.length === 0) return;
             if (!confirm(t('proxy.clearConfirm'))) return;
             window.proxyQueue = [];
-            saveProxyQueue();
             renderProxyQueue();
         }
 
-        function addCurrentDeckToProxy(source) {
-            let deckMap = null;
-            if (source === 'cityLeague') deckMap = window.cityLeagueDeck;
-            if (source === 'currentMeta') deckMap = window.currentMetaDeck;
-            if (source === 'pastMeta') deckMap = window.pastMetaDeck;
+        async function addCurrentDeckToProxy(source) {
+            const sourceToDeck = {
+                cityLeague: window.cityLeagueDeck,
+                currentMeta: window.currentMetaDeck,
+                pastMeta: window.pastMetaDeck
+            };
+            const sourceToButton = {
+                cityLeague: 'proxyAddCityLeagueDeckBtn',
+                currentMeta: 'proxyAddCurrentMetaDeckBtn',
+                pastMeta: 'proxyAddPastMetaDeckBtn'
+            };
 
-            if (!deckMap || Object.keys(deckMap).length === 0) {
-                showToast(t('proxy.noDeckCards'), 'warning');
-                return;
-            }
+            await runProxyAction(
+                `proxyDeckImport:${source}`,
+                [sourceToButton[source]],
+                async () => {
+                    const deckMap = sourceToDeck[source];
+                    if (!deckMap || typeof deckMap !== 'object' || Object.keys(deckMap).length === 0) {
+                        showToast(t('proxy.noDeckCards'), 'warning');
+                        return;
+                    }
 
-            let addedCopies = 0;
-            Object.entries(deckMap).forEach(([deckKey, count]) => {
-                const copies = parseProxyCount(count, 0);
-                if (copies <= 0) return;
+                    let addedCopies = 0;
+                    Object.entries(deckMap).forEach(([deckKey, count]) => {
+                        const copies = parseProxyCount(count, 0);
+                        if (copies <= 0) return;
 
-                const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                if (match) {
-                    addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
-                } else {
-                    addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                        const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                        if (match) {
+                            addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                        } else {
+                            addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                        }
+                        addedCopies += copies;
+                    });
+
+                    if (addedCopies <= 0) {
+                        showToast(t('proxy.noDeckCards'), 'warning');
+                        return;
+                    }
+
+                    renderProxyQueue();
+                    showProxyToast(`${addedCopies} ${t('proxy.deckCardsAdded')}`);
+                },
+                {
+                    loadingText: t('misc.loading'),
+                    errorMessage: 'Could not import selected deck into proxy queue.'
                 }
-                addedCopies += copies;
-            });
-
-            saveProxyQueue();
-            renderProxyQueue();
-            showProxyToast(`${addedCopies} ${t('proxy.deckCardsAdded')}`);
+            );
         }
 
         function sendCurrentDeckToProxyPrinter(source) {
-            addCurrentDeckToProxy(source);
-
-            if (typeof switchTabAndUpdateMenu === 'function') {
-                switchTabAndUpdateMenu('proxy');
-            } else if (typeof switchTab === 'function') {
-                switchTab('proxy');
-            }
+            addCurrentDeckToProxy(source)
+                .finally(() => {
+                    if (typeof switchTabAndUpdateMenu === 'function') {
+                        switchTabAndUpdateMenu('proxy');
+                    } else if (typeof switchTab === 'function') {
+                        switchTab('proxy');
+                    }
+                });
         }
 
-        function importDecklistToProxy() {
-            const input = document.getElementById('proxyDecklistInput');
-            if (!input) return;
+        async function importDecklistToProxy() {
+            await runProxyAction(
+                'proxyDecklistImport',
+                ['proxyImportDecklistBtn'],
+                async () => {
+                    const input = document.getElementById('proxyDecklistInput');
+                    if (!input) return;
 
-            const text = String(input.value || '').trim();
-            if (!text) {
-                showToast(t('proxy.pasteFirst'), 'warning');
-                return;
-            }
+                    const text = String(input.value || '').trim();
+                    if (!text) {
+                        showToast(t('proxy.pasteFirst'), 'warning');
+                        return;
+                    }
 
-            let entries = parseDeckList(text);
-            if (!Array.isArray(entries) || entries.length === 0) {
-                entries = [];
-                text.split('\n').forEach(line => {
-                    const trimmed = line.trim();
-                    if (!trimmed) return;
-                    const match = trimmed.match(/^(\d+)\s+(.+)$/);
-                    if (!match) return;
-                    entries.push({
-                        count: parseProxyCount(match[1], 1),
-                        name: String(match[2] || '').trim(),
-                        set: '',
-                        number: ''
+                    let entries = [];
+                    try {
+                        entries = parseDeckList(text);
+                    } catch (parseErr) {
+                        console.warn('[Proxy] parseDeckList failed, using fallback parser:', parseErr);
+                        entries = [];
+                    }
+
+                    if (!Array.isArray(entries) || entries.length === 0) {
+                        entries = [];
+                        text.split('\n').forEach(line => {
+                            const trimmed = line.trim();
+                            if (!trimmed) return;
+                            const match = trimmed.match(/^(\d+)\s+(.+)$/);
+                            if (!match) return;
+                            entries.push({
+                                count: parseProxyCount(match[1], 1),
+                                name: String(match[2] || '').trim(),
+                                set: '',
+                                number: ''
+                            });
+                        });
+                    }
+
+                    if (!Array.isArray(entries) || entries.length === 0) {
+                        showToast(t('proxy.parseError'), 'error');
+                        return;
+                    }
+
+                    let addedCopies = 0;
+                    entries.forEach(entry => {
+                        const safeName = String(entry?.name || '').trim();
+                        if (!safeName) return;
+                        const amount = parseProxyCount(entry.count, 1);
+                        addCardToProxyInternal(safeName, entry.set, entry.number, amount, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                        addedCopies += amount;
                     });
-                });
-            }
 
-            if (entries.length === 0) {
-                showToast(t('proxy.parseError'), 'error');
-                return;
-            }
+                    if (addedCopies <= 0) {
+                        showToast(t('proxy.parseError'), 'error');
+                        return;
+                    }
 
-            let addedCopies = 0;
-            entries.forEach(entry => {
-                const amount = parseProxyCount(entry.count, 1);
-                addCardToProxyInternal(entry.name, entry.set, entry.number, amount, { suppressToast: true, suppressRender: true, suppressPersist: true });
-                addedCopies += amount;
-            });
-
-            saveProxyQueue();
-            renderProxyQueue();
-            showProxyToast(`${addedCopies} ${t('proxy.cardsImported')}`);
+                    renderProxyQueue();
+                    showProxyToast(`${addedCopies} ${t('proxy.cardsImported')}`);
+                },
+                {
+                    loadingText: t('misc.loading'),
+                    timeoutMs: PROXY_IMPORT_TIMEOUT_MS,
+                    timeoutMessage: 'Decklist import timed out.',
+                    errorMessage: 'Could not import decklist into proxy queue.'
+                }
+            );
         }
 
         function addManualProxyCard() {
@@ -1027,6 +1124,8 @@ const BASE_PATH = './data/';
         loadProxyQueue();
 
         document.addEventListener('DOMContentLoaded', function() {
+            clearLegacyProxyQueueStorage();
+            window.proxyQueue = [];
             renderProxyQueue();
             initializeProxyManualSearchInput();
 
@@ -1211,11 +1310,24 @@ const BASE_PATH = './data/';
                 const select = document.getElementById('cityLeagueDeckSelect');
                 
                 if (select && select.options.length > 1) { // More than just placeholder
-                    // Find matching option (case-insensitive)
                     const options = Array.from(select.options);
-                    const matchingOption = options.find(opt => 
-                        opt.value.toLowerCase() === archetypeName.toLowerCase()
-                    );
+                    const target = String(archetypeName || '').trim().toLowerCase();
+
+                    // Prefer combined archetype entries (GROUP:...) when they contain the clicked archetype.
+                    const combinedOption = options.find(opt => {
+                        const value = String(opt.value || '');
+                        if (!value.startsWith('GROUP:')) return false;
+                        const variants = value
+                            .replace(/^GROUP:/, '')
+                            .split('|')
+                            .map(v => String(v || '').trim().toLowerCase())
+                            .filter(Boolean);
+                        return variants.includes(target);
+                    });
+
+                    // Fallback to exact single-archetype match.
+                    const exactOption = options.find(opt => String(opt.value || '').toLowerCase() === target);
+                    const matchingOption = combinedOption || exactOption;
                     
                     if (matchingOption) {
                         select.value = matchingOption.value;
@@ -1223,7 +1335,7 @@ const BASE_PATH = './data/';
                         // Trigger change event to load the deck
                         const event = new Event('change', { bubbles: true });
                         select.dispatchEvent(event);
-                        devLog('✅ Deck selected:', matchingOption.value);
+                        devLog('✅ Deck selected:', matchingOption.value, combinedOption ? '(combined)' : '(exact)');
                     } else {
                         console.warn('⚠️ Deck not found in dropdown:', archetypeName);
                     }

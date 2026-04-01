@@ -229,9 +229,13 @@
 }
 .proxy-action-btn-row {
     display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
+}
+.proxy-action-btn-row .btn-modern {
+    flex: 1 1 180px;
+    min-height: 42px;
 }
 .proxy-add-cl-btn {}
 .proxy-add-cm-btn {}
@@ -248,13 +252,19 @@
 }
 .proxy-queue-list {
     display: grid;
-    gap: 10px;
+    gap: 12px;
 }
 .proxy-panel {
     border: 1px solid #dee2e6;
     border-radius: 10px;
     padding: 14px;
     background: #fff;
+}
+.proxy-panels-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
 }
 .proxy-import-decklist-panel {}
 .proxy-panel-title {
@@ -279,6 +289,10 @@
     margin-top: 10px;
     flex-wrap: wrap;
 }
+.proxy-panel-btn-row .btn-modern {
+    width: 100%;
+    min-height: 42px;
+}
 .proxy-add-decklist-btn {
     background: #e74c3c;
     border-color: #c0392b;
@@ -287,7 +301,7 @@
 .proxy-add-single-card-panel {}
 .proxy-add-single-card-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 80px;
+    grid-template-columns: 1fr;
     gap: 8px;
     margin-bottom: 10px;
 }
@@ -303,7 +317,7 @@
 }
 .proxy-container {
     background: white;
-    padding: 25px;
+    padding: 16px;
     border-radius: 14px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.08);
 }
@@ -334,6 +348,10 @@
 }
 .proxy-header-unique {}
 .proxy-header-copies {}
+.proxy-btn-loading {
+    opacity: 0.72;
+    cursor: wait;
+}
 .past-meta-add-card-title {
     margin-top: 0;
     font-size: 1.1em;
@@ -1512,7 +1530,7 @@
         padding: 14px;
     }
     .proxy-add-single-card-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
     }
     .proxy-container {
         padding: 14px;
@@ -1572,6 +1590,26 @@
     }
 }
 
+@media (min-width: 640px) {
+    .proxy-add-single-card-grid {
+        grid-template-columns: minmax(180px, 2fr) minmax(90px, 1fr);
+    }
+    .proxy-panel-btn-row .btn-modern {
+        width: auto;
+        min-width: 160px;
+    }
+}
+
+@media (min-width: 980px) {
+    .proxy-panels-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .proxy-add-single-card-grid {
+        grid-template-columns: 2fr 1fr 1fr 80px;
+    }
+}
+
 @media (max-width: 430px) {
     .proxy-add-single-card-grid {
         grid-template-columns: 1fr;
@@ -1587,5 +1625,599 @@
     }
     .current-meta-meta-filters {
         gap: 8px;
+    }
+}
+
+/* Deck Analysis (Japan): compact modern date filter + cleaner stats cards */
+#city-league-analysis .date-range-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#city-league-analysis .date-range-container > div {
+    min-width: 0;
+}
+
+#city-league-analysis .date-range-container .form-label-block {
+    margin-bottom: 4px;
+    font-size: 0.82rem;
+    color: #4b5563;
+    font-weight: 700;
+}
+
+#city-league-analysis #cityLeagueDateFrom,
+#city-league-analysis #cityLeagueDateTo {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 36px 8px 10px;
+    border: 1px solid #cfd8e3;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+#city-league-analysis #cityLeagueDateFrom:focus,
+#city-league-analysis #cityLeagueDateTo:focus {
+    border-color: #3b4cca;
+    box-shadow: 0 0 0 3px rgba(59, 76, 202, 0.14);
+}
+
+#city-league-analysis #cityLeagueDateFrom::-webkit-calendar-picker-indicator,
+#city-league-analysis #cityLeagueDateTo::-webkit-calendar-picker-indicator {
+    opacity: 0.85;
+    cursor: pointer;
+}
+
+#city-league-analysis .city-league-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+#city-league-analysis .city-league-stat-card {
+    padding: 10px 12px;
+    min-height: 74px;
+    border-left-width: 0;
+    border: 1px solid #dbe5f2;
+    box-shadow: 0 2px 8px rgba(59, 76, 202, 0.08);
+}
+
+#city-league-analysis .city-league-stat-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    color: #4b5563;
+}
+
+#city-league-analysis .city-league-stat-label-cards::before,
+#city-league-analysis .city-league-stat-label-decks::before,
+#city-league-analysis .city-league-stat-label-placement::before {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 0.56rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    background: #e8eef8;
+    color: #334155;
+    border: 1px solid #c9d6eb;
+}
+
+#city-league-analysis .city-league-stat-label-cards::before { content: "C"; }
+#city-league-analysis .city-league-stat-label-decks::before { content: "D"; }
+#city-league-analysis .city-league-stat-label-placement::before { content: "P"; }
+
+#city-league-analysis .city-league-stat-value {
+    font-size: 1.7em;
+    font-weight: 900;
+    color: #1e3a8a;
+}
+
+@media (max-width: 768px) {
+    #city-league-analysis .date-range-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    #city-league-analysis #cityLeagueDateFrom,
+    #city-league-analysis #cityLeagueDateTo {
+        min-height: 34px;
+        padding: 7px 32px 7px 9px;
+        font-size: 0.86rem;
+    }
+
+    #city-league-analysis .city-league-stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    #city-league-analysis .city-league-stat-card {
+        padding: 8px 9px;
+        min-height: 64px;
+    }
+
+    #city-league-analysis .city-league-stat-label {
+        font-size: 0.66rem;
+        margin-bottom: 3px;
+    }
+
+    #city-league-analysis .city-league-stat-value {
+        font-size: 1.22rem;
+    }
+}
+
+@media (max-width: 390px) {
+    #city-league-analysis .date-range-container {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+
+    #city-league-analysis #cityLeagueDateFrom,
+    #city-league-analysis #cityLeagueDateTo {
+        min-height: 32px;
+        padding: 6px 30px 6px 8px;
+        font-size: 0.82rem;
+        border-radius: 9px;
+    }
+
+    #city-league-analysis .city-league-stats-grid {
+        gap: 6px;
+    }
+
+    #city-league-analysis .city-league-stat-card {
+        min-height: 58px;
+        padding: 7px 7px;
+    }
+
+    #city-league-analysis .city-league-stat-label {
+        gap: 4px;
+        font-size: 0.6rem;
+    }
+
+    #city-league-analysis .city-league-stat-label-cards::before,
+    #city-league-analysis .city-league-stat-label-decks::before,
+    #city-league-analysis .city-league-stat-label-placement::before {
+        width: 13px;
+        height: 13px;
+        font-size: 0.48rem;
+    }
+
+    #city-league-analysis .city-league-stat-value {
+        font-size: 1.08rem;
+    }
+}
+
+@media (max-width: 412px) and (min-width: 391px) {
+    #city-league-analysis .date-range-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    #city-league-analysis #cityLeagueDateFrom,
+    #city-league-analysis #cityLeagueDateTo {
+        min-height: 33px;
+        padding: 6px 30px 6px 8px;
+        font-size: 0.84rem;
+    }
+
+    #city-league-analysis .city-league-stat-card {
+        min-height: 60px;
+        padding: 7px 8px;
+    }
+
+    #city-league-analysis .city-league-stat-label {
+        font-size: 0.62rem;
+        gap: 4px;
+    }
+
+    #city-league-analysis .city-league-stat-value {
+        font-size: 1.12rem;
+    }
+}
+
+@media (max-width: 360px) {
+    #current-meta .current-meta-format-btns {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    #current-meta .current-meta-format-btn {
+        min-height: 32px;
+        padding: 6px 8px;
+        font-size: 0.74em;
+        border-radius: 7px;
+    }
+
+    #current-meta .current-meta-filter-status {
+        display: block;
+        width: 100%;
+        margin-left: 0;
+        margin-top: 3px;
+        font-size: 0.75em;
+    }
+
+    #current-meta .control-input,
+    #current-meta select.control-input,
+    #current-meta input.control-input,
+    #current-meta .current-meta-matchup-search-input {
+        min-height: 34px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+        font-size: 0.82em;
+    }
+
+    #current-meta .control-row {
+        gap: 8px;
+    }
+}
+
+/* Deck Analysis (Global): align UI with Japan improvements */
+#current-analysis .control-row {
+    gap: 10px;
+}
+
+#current-analysis .current-meta-format-btns {
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#current-analysis .current-meta-format-btn {
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 9px;
+}
+
+#current-analysis .current-meta-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+#current-analysis .current-meta-stat-card {
+    padding: 10px 12px;
+    min-height: 74px;
+    border-left-width: 0;
+    border: 1px solid #dbe5f2;
+    box-shadow: 0 2px 8px rgba(59, 76, 202, 0.08);
+}
+
+#current-analysis .current-meta-stat-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    color: #4b5563;
+}
+
+#current-analysis .current-meta-stat-label-cards::before,
+#current-analysis .current-meta-stat-label-winrate::before,
+#current-analysis .current-meta-stat-label-matchup::before {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 0.56rem;
+    font-weight: 800;
+    background: #e8eef8;
+    color: #334155;
+    border: 1px solid #c9d6eb;
+}
+
+#current-analysis .current-meta-stat-label-cards::before { content: "C"; }
+#current-analysis .current-meta-stat-label-winrate::before { content: "W"; }
+#current-analysis .current-meta-stat-label-matchup::before { content: "M"; }
+
+#current-analysis .current-meta-stat-value {
+    font-size: 1.7em;
+    font-weight: 900;
+    color: #1e3a8a;
+}
+
+#current-analysis .current-meta-meta-card-filters {
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
+    border: 1px solid #dbe5f2;
+    border-radius: 12px;
+}
+
+#current-analysis .current-meta-meta-share-filter,
+#current-analysis .current-meta-meta-type-filter,
+#current-analysis .current-meta-meta-sort-filter {
+    border: 1px solid #d4deec;
+    border-radius: 10px;
+    padding: 4px;
+    background: #ffffff;
+}
+
+#current-analysis .current-meta-meta-share-btn,
+#current-analysis .current-meta-meta-type-btn,
+#current-analysis .current-meta-meta-sort-btn {
+    min-height: 30px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    opacity: 0.85;
+}
+
+#current-analysis .current-meta-meta-share-btn.active,
+#current-analysis .current-meta-meta-type-btn.active,
+#current-analysis .current-meta-meta-sort-btn.active {
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+}
+
+#current-analysis .current-meta-meta-load-btn-row {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    #current-analysis .current-meta-stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    #current-analysis .current-meta-stat-card {
+        padding: 8px 9px;
+        min-height: 64px;
+    }
+
+    #current-analysis .current-meta-stat-label {
+        font-size: 0.66rem;
+        margin-bottom: 3px;
+    }
+
+    #current-analysis .current-meta-stat-value {
+        font-size: 1.22rem;
+    }
+
+    #current-analysis .current-meta-meta-card-filters {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 6px;
+    }
+
+    #current-analysis .current-meta-meta-share-filter,
+    #current-analysis .current-meta-meta-type-filter,
+    #current-analysis .current-meta-meta-sort-filter {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    #current-analysis .current-meta-meta-share-btn,
+    #current-analysis .current-meta-meta-type-btn,
+    #current-analysis .current-meta-meta-sort-btn {
+        width: 100%;
+        min-height: 28px;
+        padding: 5px 6px;
+        font-size: 0.72em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+@media (max-width: 430px) {
+    #current-analysis .current-meta-stats-grid {
+        gap: 6px;
+    }
+
+    #current-analysis .current-meta-stat-card {
+        min-height: 58px;
+        padding: 7px 7px;
+    }
+
+    #current-analysis .current-meta-stat-label {
+        gap: 4px;
+        font-size: 0.6rem;
+    }
+
+    #current-analysis .current-meta-stat-label-cards::before,
+    #current-analysis .current-meta-stat-label-winrate::before,
+    #current-analysis .current-meta-stat-label-matchup::before {
+        width: 13px;
+        height: 13px;
+        font-size: 0.48rem;
+    }
+
+    #current-analysis .current-meta-stat-value {
+        font-size: 1.06rem;
+    }
+
+    #current-analysis .current-meta-meta-card-filters {
+        gap: 5px;
+        padding: 5px;
+        border-radius: 10px;
+    }
+}
+
+@media (max-width: 360px) {
+    #current-analysis .current-meta-format-btn {
+        min-height: 32px;
+        padding: 6px 8px;
+        font-size: 0.74em;
+    }
+
+    #current-analysis .current-meta-meta-share-btn,
+    #current-analysis .current-meta-meta-type-btn,
+    #current-analysis .current-meta-meta-sort-btn {
+        min-height: 26px;
+        font-size: 0.66em;
+        padding: 4px 5px;
+        border-radius: 7px;
+    }
+}
+
+/* Deck Analysis (Past Meta): aligned with Global/Japan optimized layout */
+#past-meta .controls .control-row:first-of-type {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+#past-meta .past-meta-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+#past-meta .past-meta-stat-card {
+    padding: 10px 12px;
+    min-height: 74px;
+    border-left-width: 0;
+    border: 1px solid #dbe5f2;
+    box-shadow: 0 2px 8px rgba(59, 76, 202, 0.08);
+}
+
+#past-meta .past-meta-stat-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    color: #4b5563;
+}
+
+#past-meta .past-meta-stat-label-cards::before,
+#past-meta .past-meta-stat-label-tournament::before,
+#past-meta .past-meta-stat-label-format::before {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 0.56rem;
+    font-weight: 800;
+    background: #e8eef8;
+    color: #334155;
+    border: 1px solid #c9d6eb;
+}
+
+#past-meta .past-meta-stat-label-cards::before { content: "C"; }
+#past-meta .past-meta-stat-label-tournament::before { content: "T"; }
+#past-meta .past-meta-stat-label-format::before { content: "F"; }
+
+#past-meta .past-meta-stat-value {
+    font-size: 1.7em;
+    font-weight: 900;
+    color: #1e3a8a;
+}
+
+#past-meta .past-meta-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+#past-meta .past-meta-table-zebra {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: collapse;
+}
+
+#past-meta .past-meta-table-zebra th,
+#past-meta .past-meta-table-zebra td {
+    padding: 10px 12px;
+    vertical-align: middle;
+}
+
+#past-meta .past-meta-table-zebra tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+@media (max-width: 768px) {
+    #past-meta .controls .control-row:first-of-type {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    #past-meta .past-meta-stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    #past-meta .past-meta-stat-card {
+        padding: 8px 9px;
+        min-height: 64px;
+    }
+
+    #past-meta .past-meta-stat-label {
+        font-size: 0.66rem;
+        margin-bottom: 3px;
+    }
+
+    #past-meta .past-meta-stat-value {
+        font-size: 1.22rem;
+    }
+
+    #past-meta .past-meta-table-zebra th,
+    #past-meta .past-meta-table-zebra td {
+        padding: 7px 8px;
+        font-size: 0.82em;
+        white-space: nowrap;
+    }
+
+    #past-meta .past-meta-table-zebra th:nth-child(2),
+    #past-meta .past-meta-table-zebra td:nth-child(2) {
+        min-width: 150px;
+        white-space: normal;
+    }
+}
+
+@media (max-width: 430px) {
+    #past-meta .controls .control-row:first-of-type {
+        gap: 6px;
+    }
+
+    #past-meta .past-meta-stats-grid {
+        gap: 6px;
+    }
+
+    #past-meta .past-meta-stat-card {
+        min-height: 58px;
+        padding: 7px 7px;
+    }
+
+    #past-meta .past-meta-stat-label {
+        gap: 4px;
+        font-size: 0.6rem;
+    }
+
+    #past-meta .past-meta-stat-label-cards::before,
+    #past-meta .past-meta-stat-label-tournament::before,
+    #past-meta .past-meta-stat-label-format::before {
+        width: 13px;
+        height: 13px;
+        font-size: 0.48rem;
+    }
+
+    #past-meta .past-meta-stat-value {
+        font-size: 1.06rem;
+    }
+}
+
+@media (max-width: 360px) {
+    #past-meta .controls .control-row:first-of-type {
+        grid-template-columns: 1fr;
+    }
+
+    #past-meta .past-meta-table-zebra th,
+    #past-meta .past-meta-table-zebra td {
+        padding: 5px 6px;
+        font-size: 0.75em;
     }
 }

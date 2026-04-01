@@ -46,7 +46,7 @@
 }
 .cards-filter-sort select {
     padding: 10px 15px;
-    border: 2px solid #3498db;
+    border: 1px solid #b6c3d6;
     border-radius: 6px;
     font-size: 14px;
     font-weight: 600;
@@ -72,4 +72,123 @@
     text-align: center;
     font-weight: 600;
     font-size: 15px;
+}
+
+#cards .cards-filter-section {
+    overflow: clip;
+}
+
+#cards .cards-autocomplete-item:focus-visible {
+    outline: 2px solid #ffcb05 !important;
+    outline-offset: -2px !important;
+    background: #f0f6ff !important;
+}
+
+#cards .cards-filters-toggle {
+    display: none;
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid #9fb0c7;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f4f7fc 0%, #e8eef8 100%);
+    color: #20324f;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #cards .cards-filters-toggle {
+        display: block;
+        margin: 10px 0;
+    }
+
+    #cards .cards-filter-section.mobile-filters-collapsed .cards-filter-grid {
+        display: none !important;
+    }
+}
+
+@media (max-width: 430px) {
+    #cards .cards-filter-search-input {
+        padding: 9px !important;
+        font-size: 14px !important;
+    }
+
+    #cards .cards-filter-actions {
+        gap: 8px !important;
+    }
+
+    #cards .btn-reset-filters,
+    #cards .cards-filter-view-mode button,
+    #cards .cards-filter-sort select,
+    #cards .cards-filters-toggle {
+        min-height: 38px !important;
+        font-size: 13px !important;
+    }
+
+    #cards .cards-filter-results-info {
+        font-size: 13px !important;
+        padding: 10px !important;
+    }
+
+    #cards .cards-filter-sort,
+    #cards .cards-filter-view-mode {
+        width: 100% !important;
+    }
+
+    #cards .cards-filter-sort label,
+    #cards .cards-filter-view-mode label {
+        display: block !important;
+        margin-bottom: 4px !important;
+        font-size: 12px !important;
+    }
+
+    #cards .cards-filter-sort select,
+    #cards .cards-filter-view-mode button,
+    #cards .btn-reset-filters,
+    #cards .cards-filters-toggle {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 412px) {
+    #cards .cards-autocomplete-dropdown {
+        max-height: 280px !important;
+    }
+
+    #cards .cards-filter-actions {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        align-items: stretch !important;
+    }
+}
+
+@media (max-width: 390px) {
+    #cards .cards-filter-section {
+        padding: 10px !important;
+    }
+
+    #cards .cards-filter-actions {
+        gap: 6px !important;
+    }
+
+    #cards .btn-reset-filters,
+    #cards .cards-filter-view-mode button,
+    #cards .cards-filter-sort select,
+    #cards .cards-filters-toggle {
+        min-height: 36px !important;
+        font-size: 12px !important;
+        padding: 8px 10px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    #cards .cards-filter-search-input {
+        font-size: 13px !important;
+    }
+
+    #cards .cards-filter-results-info {
+        font-size: 12px !important;
+        padding: 8px !important;
+    }
 }

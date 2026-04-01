@@ -159,7 +159,7 @@ function loadAppUtils(overrides = {}) {
         'getTotalAceSpecCopiesInDeck', 'getTotalRadiantCopiesInDeck',
         'getRarityAbbreviation', 'getNameWarningHtml', 'getAverageValueSuffix',
         'buildCityLeaguePlacementStatsMap', 'enrichCityLeagueDataWithPlacementStats',
-        'getInternationalPrintsForCard',
+        'getInternationalPrintsForCard', 'getOtherInternationalPrintOwnedCount',
     ];
     for (const fn of topLevelFns) {
         if (!exported[fn] && typeof sandbox[fn] === 'function') {

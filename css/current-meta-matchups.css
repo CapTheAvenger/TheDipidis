@@ -58,6 +58,16 @@
     color: #e74c3c;
 }
 
+.current-meta-matchups-grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.current-meta-matchups-grid-container > div {
+    min-width: 0;
+}
+
 .current-meta-matchup-select-container {
     background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
     padding: 14px;
@@ -152,6 +162,77 @@
     transition: background 0.15s;
 }
 
+/* Full Comparison Table improvements */
+#currentMetaContent .current-meta-full-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+#currentMetaContent table.current-meta-full-comparison-table {
+    width: 100%;
+    min-width: 780px;
+    border-collapse: collapse;
+}
+
+#currentMetaContent table.current-meta-full-comparison-table th,
+#currentMetaContent table.current-meta-full-comparison-table td {
+    padding: 10px 12px;
+}
+
+#currentMetaContent table.current-meta-full-comparison-table tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+#currentMetaContent table.current-meta-full-comparison-table .full-col-deck {
+    min-width: 150px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+#currentMetaContent table.current-meta-full-comparison-table .full-col-rank,
+#currentMetaContent table.current-meta-full-comparison-table .full-col-count,
+#currentMetaContent table.current-meta-full-comparison-table .full-col-winrate {
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Most Used Cards: mobile-first grid instead of horizontal carousel */
+#currentMetaContent .top-cards-grid,
+#currentMetaContent .top-cards-scroll {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    overflow: visible;
+    padding: 0;
+}
+
+#currentMetaContent .top-card-item {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+}
+
+#currentMetaContent .top-card-img {
+    height: 170px;
+    object-fit: cover;
+}
+
+@media (min-width: 768px) {
+    #currentMetaContent .top-cards-grid,
+    #currentMetaContent .top-cards-scroll {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1100px) {
+    #currentMetaContent .top-cards-grid,
+    #currentMetaContent .top-cards-scroll {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
 /* Matchup deck section cards */
 #currentMetaContent > .section > div > div[style*="background: #f8f9fa"] {
     border-radius: 10px;
@@ -228,6 +309,11 @@
  * Mobile / Tablet responsive rules
  * ============================================================ */
 @media (max-width: 768px) {
+    .current-meta-matchups-grid-container {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
     #currentMetaContent .stats-grid {
         grid-template-columns: 1fr;
         gap: 12px;
@@ -251,7 +337,16 @@
     #currentMetaContent .section table td {
         padding: 7px 8px;
         font-size: 0.82em;
+        white-space: nowrap;
+        min-width: 82px;
     }
+
+    #currentMetaContent .section table th:first-child,
+    #currentMetaContent .section table td:first-child {
+        min-width: 150px;
+        white-space: normal;
+    }
+
     #currentMetaContent .section > h2 {
         font-size: 1.05em;
     }
@@ -262,5 +357,70 @@
     #currentMetaContent .matchups-grid-container table td {
         padding: 6px 5px;
         font-size: 0.82em;
+    }
+
+    #currentMetaContent .matchups-grid-container,
+    #currentMetaContent .section-grid-container,
+    #currentMetaContent .stats-grid + div[style*="grid-template-columns"] {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    #currentMetaContent .current-meta-full-table-wrap {
+        margin-top: 8px;
+    }
+}
+
+@media (max-width: 430px) {
+    #currentMetaContent .top-cards-container {
+        padding: 12px;
+    }
+
+    #currentMetaContent .top-cards-grid,
+    #currentMetaContent .top-cards-scroll {
+        gap: 8px;
+    }
+
+    #currentMetaContent .top-card-img {
+        height: 155px;
+    }
+
+    #currentMetaContent .section table th,
+    #currentMetaContent .section table td {
+        padding: 6px 7px;
+        font-size: 0.79em;
+    }
+
+    #currentMetaContent .section table th:first-child,
+    #currentMetaContent .section table td:first-child {
+        min-width: 136px;
+    }
+
+    #currentMetaContent .current-meta-full-comparison-table .full-col-deck {
+        min-width: 136px;
+    }
+}
+
+@media (max-width: 360px) {
+    #currentMetaContent .top-cards-container {
+        padding: 10px;
+    }
+
+    #currentMetaContent .top-card-img {
+        height: 142px;
+    }
+
+    #currentMetaContent .section table th,
+    #currentMetaContent .section table td {
+        padding: 5px 6px;
+        font-size: 0.75em;
+        min-width: 74px;
+    }
+
+    #currentMetaContent .section table th:first-child,
+    #currentMetaContent .section table td:first-child,
+    #currentMetaContent .current-meta-full-comparison-table .full-col-deck {
+        min-width: 126px;
     }
 }

@@ -1259,7 +1259,7 @@ const translations = {
     'cl.thChange':              'Änderung',
     'cl.thAvgPlacement':        'Ø-Platzierung',
     'cl.thCount':               'Anzahl',
-    'cl.thAvgPlacementShort':   'Ø-Platzierung',
+    'cl.thAvgPlacementShort':   'Durchschnittliche Platzierung',
     'cl.thMainPokemon':         'Haupt-Pokémon',
     'cl.thVariants':            'Varianten',
     'cl.thDeck':                'Deck',

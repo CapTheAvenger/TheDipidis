@@ -164,6 +164,11 @@
         const cardsPerPage = 60;
         let showAllCards = false;
         let showOnlyOnePrint = true; // Toggle for deduplication: true = only show 1 print per card (low rarity, newest)
+        const cardsFilterRenderState = {
+            isFiltering: false,
+            pending: false,
+            lastSignature: ''
+        };
         const cardsVirtualState = {
             observer: null,
             slots: [],
@@ -224,8 +229,9 @@
                 try { populateCategoryFilter(); } catch (e) { console.error('[Cards Tab] populateCategoryFilter error:', e); }
                 try { await populateSetFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateSetFilter error:', e); }
                 try { setupCardFilters(); } catch (e) { console.error('[Cards Tab] setupCardFilters error:', e); }
+                try { initializeCardsFilterPanel(); } catch (e) { console.error('[Cards Tab] initializeCardsFilterPanel error:', e); }
 
-                filterAndRenderCards();
+                filterAndRenderCards({ force: true });
                 window.cardsLoaded = true;
 
                 // --- PHASE 2: Load enrichment data (playable cards, coverage, formats) in background ---
@@ -260,12 +266,34 @@
                 try { populateMetaFilter(); } catch (e) { console.error('[Cards Tab] populateMetaFilter error:', e); }
 
                 // Re-render so coverage badges and enrichment filters take effect
-                filterAndRenderCards();
+                filterAndRenderCards({ force: true });
                 devLog('[Cards Tab] Phase 2: Enrichment complete.');
             } catch (error) {
                 console.error('[Cards Tab] Enrichment loading failed (cards still visible):', error);
             }
         }
+
+        function initializeCardsFilterPanel() {
+            const section = document.querySelector('#cards .cards-filter-section');
+            const toggleBtn = document.getElementById('cardsFiltersToggle');
+            if (!section || !toggleBtn) return;
+
+            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            section.classList.toggle('mobile-filters-collapsed', isMobile);
+            toggleBtn.setAttribute('aria-expanded', isMobile ? 'false' : 'true');
+            toggleBtn.textContent = isMobile ? 'Show Filters' : 'Hide Filters';
+        }
+
+        function toggleCardsFilterPanel() {
+            const section = document.querySelector('#cards .cards-filter-section');
+            const toggleBtn = document.getElementById('cardsFiltersToggle');
+            if (!section || !toggleBtn) return;
+
+            const collapsed = section.classList.toggle('mobile-filters-collapsed');
+            toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            toggleBtn.textContent = collapsed ? 'Show Filters' : 'Hide Filters';
+        }
+        window.toggleCardsFilterPanel = toggleCardsFilterPanel;
         
         // Cached parsed CSV rows to avoid re-downloading & re-parsing large files
         let _cachedCityLeagueRows = null;
@@ -1008,6 +1036,11 @@
                 };
             }
 
+            if (window._cardsFilterEventsBound) {
+                return;
+            }
+            window._cardsFilterEventsBound = true;
+
             const searchInput = document.getElementById('cardSearch');
             
             // Debounced autocomplete to avoid excessive DOM updates per keystroke
@@ -1034,18 +1067,18 @@
                 searchInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         hideCardAutocomplete();
+                    } else if (e.key === 'ArrowDown') {
+                        const firstItem = document.querySelector('#cardSearchAutocomplete .cards-autocomplete-item');
+                        if (firstItem) {
+                            e.preventDefault();
+                            firstItem.focus();
+                        }
                     }
                 });
+
+                searchInput.setAttribute('aria-autocomplete', 'list');
+                searchInput.setAttribute('aria-controls', 'cardSearchAutocomplete');
             }
-            
-            // All checkboxes in filter options
-            const filterContainers = document.querySelectorAll('.cards-filter-options');
-            filterContainers.forEach(container => {
-                const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-                checkboxes.forEach(cb => {
-                    cb.addEventListener('change', filterAndRenderCards);
-                });
-            });
             
             // Coverage radio buttons: clicking an already-selected radio deselects it
             document.querySelectorAll('#deckCoverageFilterOptions input[type="radio"]').forEach(radio => {
@@ -1053,13 +1086,17 @@
                     if (this.dataset.wasChecked === 'true') {
                         this.checked = false;
                         this.dataset.wasChecked = 'false';
-                        filterAndRenderCards();
+                        window.scheduleFilterAndRenderCards(80);
                     } else {
                         document.querySelectorAll('#deckCoverageFilterOptions input[type="radio"]').forEach(r => r.dataset.wasChecked = 'false');
                         this.dataset.wasChecked = 'true';
                     }
                 });
             });
+
+            window.addEventListener('resize', () => {
+                initializeCardsFilterPanel();
+            }, { passive: true });
         }
         
         function showCardAutocomplete(searchTerm) {
@@ -1098,9 +1135,10 @@
             dropdown.innerHTML = matches.map(card => {
                 // Count how many versions exist
                 const versions = window.allCardsData.filter(c => c.name === card.name).length;
+                const cardNameEsc = escapeJsStr(card.name);
                 
                 return `
-                    <div class="cards-autocomplete-item" onclick="selectCardFromAutocomplete('${escapeJsStr(card.name)}')">
+                    <div class="cards-autocomplete-item" role="option" tabindex="0" onclick="selectCardFromAutocomplete('${cardNameEsc}')" onkeydown="handleCardAutocompleteKeydown(event, '${cardNameEsc}')" aria-label="Select ${escapeHtml(card.name)} from autocomplete">
                         <img src="${card.image_url}" alt="${escapeHtml(card.name)}" loading="lazy">
                         <div class="cards-autocomplete-item-info">
                             <div class="cards-autocomplete-item-name">${escapeHtml(card.name)}</div>
@@ -1111,15 +1149,45 @@
                 `;
             }).join('');
             
-                dropdown.classList.remove('d-none');
+            dropdown.setAttribute('role', 'listbox');
+            dropdown.setAttribute('aria-hidden', 'false');
+            dropdown.classList.remove('d-none');
         }
         
         function hideCardAutocomplete() {
             const dropdown = document.getElementById('cardSearchAutocomplete');
             if (dropdown) {
                 dropdown.classList.add('d-none');
+                dropdown.setAttribute('aria-hidden', 'true');
             }
         }
+
+        function handleCardAutocompleteKeydown(event, cardName) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                selectCardFromAutocomplete(cardName);
+                return;
+            }
+
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                hideCardAutocomplete();
+                const searchInput = document.getElementById('cardSearch');
+                if (searchInput) searchInput.focus();
+                return;
+            }
+
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                const items = Array.from(document.querySelectorAll('#cardSearchAutocomplete .cards-autocomplete-item'));
+                const currentIndex = items.indexOf(event.currentTarget);
+                if (currentIndex === -1 || items.length === 0) return;
+                const delta = event.key === 'ArrowDown' ? 1 : -1;
+                const nextIndex = (currentIndex + delta + items.length) % items.length;
+                items[nextIndex].focus();
+            }
+        }
+        window.handleCardAutocompleteKeydown = handleCardAutocompleteKeydown;
         
         function selectCardFromAutocomplete(cardName) {
             const searchInput = document.getElementById('cardSearch');
@@ -1168,7 +1236,7 @@
             filterAndRenderCards();
         }
         
-        function filterAndRenderCards() {
+                function filterAndRenderCards(options = {}) {
           try {
             if (!window.allCardsData || window.allCardsData.length === 0) {
                 console.warn('[Cards Tab] No cards loaded yet');
@@ -1180,6 +1248,11 @@
                 if (resultsInfo) {
                     resultsInfo.textContent = '0 cards found';
                 }
+                return;
+            }
+
+            if (cardsFilterRenderState.isFiltering) {
+                cardsFilterRenderState.pending = true;
                 return;
             }
             
@@ -1211,6 +1284,29 @@
             const selectedMainPokemons = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value);
             const selectedArchetypes = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
             const selectedMetaFilters = Array.from(document.querySelectorAll('#metaFormatOptions input:checked')).filter(cb => cb.value.startsWith('meta:')).map(cb => cb.value.replace('meta:', ''));
+            const sortOrderSelect = document.getElementById('cardSortOrder');
+            const sortOrder = sortOrderSelect ? sortOrderSelect.value : 'set';
+
+            const signature = JSON.stringify({
+                searchTerm,
+                selectedMetas,
+                selectedSets,
+                selectedRarities,
+                selectedCategories,
+                selectedDeckCoverages,
+                selectedMainPokemons,
+                selectedArchetypes,
+                selectedMetaFilters,
+                sortOrder,
+                showOnlyOnePrint,
+                dataLen: window.allCardsData.length
+            });
+
+            if (!options.force && signature === cardsFilterRenderState.lastSignature) {
+                return;
+            }
+            cardsFilterRenderState.lastSignature = signature;
+            cardsFilterRenderState.isFiltering = true;
             
             devLog(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}, DeckCov: ${selectedDeckCoverages.length}, MainPkm: ${selectedMainPokemons.length}, Archetypes: ${selectedArchetypes.length}, MetaFilters: ${selectedMetaFilters.length}`);
             devLog(`[Filter Debug] Selected Meta Values:`, selectedMetas);
@@ -1508,8 +1604,15 @@
             // Apply sorting based on user selection
             sortCardsDatabase(window.filteredCardsData);
             
-            renderCardDatabase(window.filteredCardsData);
+                        renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
+                        cardsFilterRenderState.isFiltering = false;
+
+                        if (cardsFilterRenderState.pending) {
+                                cardsFilterRenderState.pending = false;
+                                window.scheduleFilterAndRenderCards(60);
+                        }
           } catch (err) {
+                        cardsFilterRenderState.isFiltering = false;
             console.error('[Cards Tab] filterAndRenderCards error:', err);
             const content = document.getElementById('cardsContent');
             if (content) {
@@ -2276,7 +2379,7 @@
             if (card.eur_price && card.eur_price !== '' && card.eur_price !== '0' && card.eur_price !== 'N/A') {
                 const price = parseFloat(card.eur_price.replace(',', '.'));
                 if (!isNaN(price)) {
-                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="View on CardMarket">
+                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="View on CardMarket" aria-label="View ${displayName} on CardMarket (opens in new tab)">
                         <span class="card-database-price-value">Ø ${price.toFixed(2).replace('.', ',')} €</span>
                     </a>`;
                 }
@@ -2315,21 +2418,19 @@
                     ${coverageIcon} ${coveragePctLabel}% Coverage${maxCountText}
                 </div>`;
             }
-            if (!coverageDisplay) {
-                coverageDisplay = `<div class="card-database-coverage card-database-coverage-empty" title="No deck coverage data for this card">
-                    -- No Coverage Data --
-                </div>`;
-            }
+            const limitlessButton = (card.set && card.number)
+                ? `<button type="button" onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless" aria-label="Open ${displayName} on Limitless">L Limitless</button>`
+                : '<div class="card-database-limitless-placeholder"></div>';
             
             item.innerHTML = `
                 <div class="pos-rel card-database-image-wrap">
-                    <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
+                    <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImageUrl}', '${escapedName}');}" aria-label="Open ${displayName} image in fullscreen">
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
                     ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="You own other prints of this card">${altPrintOwnedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)">+</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-green card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#4CAF50' : '#fff'};" title="Remove from collection (${ownedCount}/4)">-</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${displayName} to collection">+</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-green card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#4CAF50' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} from collection">-</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}" aria-label="${userWantsCard ? 'Remove ' + displayName + ' from wishlist' : 'Add ' + displayName + ' to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                     </div>
                 </div>
                 <div class="card-database-info">
@@ -2340,12 +2441,14 @@
                     </div>
                     <div class="card-database-button-row">
                         ${priceButton}
-                        <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}">
+                        <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRarityFromCardDbButton(this);}" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}" role="button" tabindex="0" aria-label="Open print variants for ${displayName}">
                             ${displayRarity}
                         </div>
-                        <button type="button" onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add to proxy queue">Proxy</button>
                     </div>
-                    ${(card.set && card.number) ? `<button type="button" onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless">L Limitless</button>` : '<div class="card-database-limitless-placeholder">No Limitless Link</div>'}
+                    <div class="card-database-secondary-row">
+                        <button type="button" onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add to proxy queue" aria-label="Add ${displayName} to proxy queue">Proxy</button>
+                        ${limitlessButton}
+                    </div>
                     ${coverageDisplay}
                 </div>
             `;

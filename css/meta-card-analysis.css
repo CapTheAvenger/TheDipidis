@@ -38,6 +38,15 @@
     margin-bottom: 15px;
 }
 
+#city-league-analysis .meta-card-analysis-filters-row {
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid #dbe5f2;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
+}
+
 .meta-card-analysis-share-filter,
 .meta-card-analysis-type-filter {
     display: flex;
@@ -47,6 +56,15 @@
     padding: 5px;
     border-radius: 6px;
     background: #fff;
+}
+
+#city-league-analysis .meta-card-analysis-share-filter,
+#city-league-analysis .meta-card-analysis-type-filter,
+#city-league-analysis .meta-card-analysis-sort-filter {
+    border-color: #d4deec;
+    border-radius: 10px;
+    padding: 4px;
+    background: #ffffff;
 }
 
 .meta-card-analysis-share-btn,
@@ -61,6 +79,24 @@
     font-weight: bold;
     opacity: 0.6;
     transition: background 0.2s, opacity 0.2s;
+}
+
+#city-league-analysis .meta-card-analysis-share-btn,
+#city-league-analysis .meta-card-analysis-type-btn,
+#city-league-analysis .meta-card-analysis-sort-btn {
+    min-height: 30px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    opacity: 0.85;
+    box-shadow: none;
+}
+
+#city-league-analysis .meta-card-analysis-share-btn.active,
+#city-league-analysis .meta-card-analysis-type-btn.active,
+#city-league-analysis .meta-card-analysis-sort-btn.active {
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
 }
 .meta-card-analysis-share-btn.active,
 .meta-card-analysis-type-btn.active {
@@ -152,5 +188,89 @@
         max-width: 100%;
         padding: 8px;
         font-size: 0.9em;
+    }
+
+    #city-league-analysis .meta-card-analysis-filters-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 6px;
+    }
+
+    #city-league-analysis .meta-card-analysis-share-filter,
+    #city-league-analysis .meta-card-analysis-type-filter,
+    #city-league-analysis .meta-card-analysis-sort-filter {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    #city-league-analysis .meta-card-analysis-share-btn,
+    #city-league-analysis .meta-card-analysis-type-btn,
+    #city-league-analysis .meta-card-analysis-sort-btn {
+        width: 100%;
+        min-height: 28px;
+        padding: 5px 6px !important;
+        font-size: 0.72em !important;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+@media (max-width: 390px) {
+    #city-league-analysis .meta-card-analysis-container {
+        padding: 12px;
+    }
+
+    #city-league-analysis .meta-card-analysis-filters-row {
+        gap: 4px;
+        padding: 5px;
+        border-radius: 10px;
+    }
+
+    #city-league-analysis .meta-card-analysis-share-filter,
+    #city-league-analysis .meta-card-analysis-type-filter,
+    #city-league-analysis .meta-card-analysis-sort-filter {
+        grid-template-columns: 1fr 1fr;
+        gap: 3px;
+        padding: 3px;
+    }
+
+    #city-league-analysis .meta-card-analysis-share-btn,
+    #city-league-analysis .meta-card-analysis-type-btn,
+    #city-league-analysis .meta-card-analysis-sort-btn {
+        min-height: 28px;
+        font-size: 0.66em !important;
+        padding: 5px 6px !important;
+        border-radius: 7px;
+    }
+
+    #city-league-analysis .meta-card-analysis-search {
+        padding: 7px;
+        font-size: 0.84em;
+    }
+}
+
+@media (max-width: 412px) and (min-width: 391px) {
+    #city-league-analysis .meta-card-analysis-filters-row {
+        gap: 5px;
+        padding: 6px;
+    }
+
+    #city-league-analysis .meta-card-analysis-share-filter,
+    #city-league-analysis .meta-card-analysis-type-filter,
+    #city-league-analysis .meta-card-analysis-sort-filter {
+        gap: 3px;
+        padding: 3px;
+    }
+
+    #city-league-analysis .meta-card-analysis-share-btn,
+    #city-league-analysis .meta-card-analysis-type-btn,
+    #city-league-analysis .meta-card-analysis-sort-btn {
+        min-height: 29px;
+        font-size: 0.69em !important;
+        padding: 5px 7px !important;
     }
 }

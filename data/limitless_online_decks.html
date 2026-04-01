@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limitless Online Decks - Overview</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .content {
+            padding: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .rank {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        .positive {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .negative {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Limitless Online Decks</h1>
+            <p>Complete Deck Statistics</p>
+        </div>
+        <div class="content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Deck Name</th>
+                        <th>Entries</th>
+                        <th>Meta Share</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Ties</th>
+                        <th>Win Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td class="rank">#1</td>
+                        <td><strong>Lucario Hariyama</strong></td>
+                        <td>203</td>
+                        <td>8.86%</td>
+                        <td class="positive">441</td>
+                        <td class="negative">478</td>
+                        <td>13</td>
+                        <td><strong>47.32%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#2</td>
+                        <td><strong>Dragapult Dusknoir</strong></td>
+                        <td>156</td>
+                        <td>6.81%</td>
+                        <td class="positive">285</td>
+                        <td class="negative">345</td>
+                        <td>6</td>
+                        <td><strong>44.81%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#4</td>
+                        <td><strong>Dragapult</strong></td>
+                        <td>147</td>
+                        <td>6.41%</td>
+                        <td class="positive">395</td>
+                        <td class="negative">330</td>
+                        <td>15</td>
+                        <td><strong>53.38%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#5</td>
+                        <td><strong>N's Zoroark</strong></td>
+                        <td>124</td>
+                        <td>5.41%</td>
+                        <td class="positive">279</td>
+                        <td class="negative">284</td>
+                        <td>4</td>
+                        <td><strong>49.21%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#6</td>
+                        <td><strong>Alakazam Dudunsparce</strong></td>
+                        <td>119</td>
+                        <td>5.19%</td>
+                        <td class="positive">299</td>
+                        <td class="negative">273</td>
+                        <td>9</td>
+                        <td><strong>51.46%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#7</td>
+                        <td><strong>Starmie Froslass</strong></td>
+                        <td>94</td>
+                        <td>4.10%</td>
+                        <td class="positive">256</td>
+                        <td class="negative">213</td>
+                        <td>4</td>
+                        <td><strong>54.12%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#8</td>
+                        <td><strong>Rocket's Mewtwo</strong></td>
+                        <td>93</td>
+                        <td>4.06%</td>
+                        <td class="positive">231</td>
+                        <td class="negative">223</td>
+                        <td>6</td>
+                        <td><strong>50.22%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#9</td>
+                        <td><strong>Raging Bolt Ogerpon</strong></td>
+                        <td>76</td>
+                        <td>3.32%</td>
+                        <td class="positive">189</td>
+                        <td class="negative">175</td>
+                        <td>5</td>
+                        <td><strong>51.22%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#10</td>
+                        <td><strong>Cynthia's Garchomp</strong></td>
+                        <td>76</td>
+                        <td>3.32%</td>
+                        <td class="positive">177</td>
+                        <td class="negative">171</td>
+                        <td>1</td>
+                        <td><strong>50.72%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#11</td>
+                        <td><strong>Dragapult Blaziken</strong></td>
+                        <td>68</td>
+                        <td>2.97%</td>
+                        <td class="positive">181</td>
+                        <td class="negative">148</td>
+                        <td>2</td>
+                        <td><strong>54.68%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#12</td>
+                        <td><strong>Rocket's Honchkrow</strong></td>
+                        <td>65</td>
+                        <td>2.84%</td>
+                        <td class="positive">166</td>
+                        <td class="negative">125</td>
+                        <td>8</td>
+                        <td><strong>55.52%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#13</td>
+                        <td><strong>Ogerpon Meganium</strong></td>
+                        <td>63</td>
+                        <td>2.75%</td>
+                        <td class="positive">197</td>
+                        <td class="negative">127</td>
+                        <td>6</td>
+                        <td><strong>59.70%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#14</td>
+                        <td><strong>Slowking</strong></td>
+                        <td>63</td>
+                        <td>2.75%</td>
+                        <td class="positive">164</td>
+                        <td class="negative">150</td>
+                        <td>6</td>
+                        <td><strong>51.25%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#15</td>
+                        <td><strong>Steven's Metagross</strong></td>
+                        <td>60</td>
+                        <td>2.62%</td>
+                        <td class="positive">148</td>
+                        <td class="negative">139</td>
+                        <td>5</td>
+                        <td><strong>50.68%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#16</td>
+                        <td><strong>Grimmsnarl Froslass</strong></td>
+                        <td>57</td>
+                        <td>2.49%</td>
+                        <td class="positive">133</td>
+                        <td class="negative">105</td>
+                        <td>2</td>
+                        <td><strong>55.42%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#17</td>
+                        <td><strong>Festival Lead</strong></td>
+                        <td>55</td>
+                        <td>2.40%</td>
+                        <td class="positive">114</td>
+                        <td class="negative">111</td>
+                        <td>7</td>
+                        <td><strong>49.14%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#18</td>
+                        <td><strong>Mega Absol Box</strong></td>
+                        <td>48</td>
+                        <td>2.09%</td>
+                        <td class="positive">105</td>
+                        <td class="negative">112</td>
+                        <td>4</td>
+                        <td><strong>47.51%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#19</td>
+                        <td><strong>Mega Lucario</strong></td>
+                        <td>44</td>
+                        <td>1.92%</td>
+                        <td class="positive">106</td>
+                        <td class="negative">95</td>
+                        <td>1</td>
+                        <td><strong>52.48%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#20</td>
+                        <td><strong>Mega Venusaur</strong></td>
+                        <td>44</td>
+                        <td>1.92%</td>
+                        <td class="positive">86</td>
+                        <td class="negative">114</td>
+                        <td>2</td>
+                        <td><strong>42.57%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#21</td>
+                        <td><strong>Clefairy Ogerpon</strong></td>
+                        <td>41</td>
+                        <td>1.79%</td>
+                        <td class="positive">117</td>
+                        <td class="negative">92</td>
+                        <td>2</td>
+                        <td><strong>55.45%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#22</td>
+                        <td><strong>Okidogi</strong></td>
+                        <td>40</td>
+                        <td>1.75%</td>
+                        <td class="positive">69</td>
+                        <td class="negative">81</td>
+                        <td>0</td>
+                        <td><strong>46.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#23</td>
+                        <td><strong>Flareon Noctowl</strong></td>
+                        <td>30</td>
+                        <td>1.31%</td>
+                        <td class="positive">69</td>
+                        <td class="negative">76</td>
+                        <td>1</td>
+                        <td><strong>47.26%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#24</td>
+                        <td><strong>Froslass Munkidori</strong></td>
+                        <td>28</td>
+                        <td>1.22%</td>
+                        <td class="positive">63</td>
+                        <td class="negative">64</td>
+                        <td>1</td>
+                        <td><strong>49.22%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#25</td>
+                        <td><strong>Greninja</strong></td>
+                        <td>25</td>
+                        <td>1.09%</td>
+                        <td class="positive">59</td>
+                        <td class="negative">50</td>
+                        <td>3</td>
+                        <td><strong>52.68%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#26</td>
+                        <td><strong>Ceruledge</strong></td>
+                        <td>24</td>
+                        <td>1.05%</td>
+                        <td class="positive">36</td>
+                        <td class="negative">57</td>
+                        <td>1</td>
+                        <td><strong>38.30%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#27</td>
+                        <td><strong>Crustle</strong></td>
+                        <td>23</td>
+                        <td>1.00%</td>
+                        <td class="positive">48</td>
+                        <td class="negative">58</td>
+                        <td>2</td>
+                        <td><strong>44.44%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#28</td>
+                        <td><strong>Diancie Dusknoir</strong></td>
+                        <td>22</td>
+                        <td>0.96%</td>
+                        <td class="positive">53</td>
+                        <td class="negative">51</td>
+                        <td>0</td>
+                        <td><strong>50.96%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#29</td>
+                        <td><strong>Hop's Trevenant</strong></td>
+                        <td>18</td>
+                        <td>0.79%</td>
+                        <td class="positive">39</td>
+                        <td class="negative">43</td>
+                        <td>1</td>
+                        <td><strong>46.99%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#30</td>
+                        <td><strong>Mega Kangaskhan</strong></td>
+                        <td>16</td>
+                        <td>0.70%</td>
+                        <td class="positive">47</td>
+                        <td class="negative">44</td>
+                        <td>1</td>
+                        <td><strong>51.09%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#31</td>
+                        <td><strong>Rocket's Spidops</strong></td>
+                        <td>16</td>
+                        <td>0.70%</td>
+                        <td class="positive">51</td>
+                        <td class="negative">50</td>
+                        <td>3</td>
+                        <td><strong>49.04%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#32</td>
+                        <td><strong>Tera Box</strong></td>
+                        <td>13</td>
+                        <td>0.57%</td>
+                        <td class="positive">35</td>
+                        <td class="negative">28</td>
+                        <td>3</td>
+                        <td><strong>53.03%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#33</td>
+                        <td><strong>Hydreigon</strong></td>
+                        <td>11</td>
+                        <td>0.48%</td>
+                        <td class="positive">26</td>
+                        <td class="negative">24</td>
+                        <td>0</td>
+                        <td><strong>52.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#34</td>
+                        <td><strong>Mega Abomasnow</strong></td>
+                        <td>11</td>
+                        <td>0.48%</td>
+                        <td class="positive">12</td>
+                        <td class="negative">30</td>
+                        <td>0</td>
+                        <td><strong>28.57%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#35</td>
+                        <td><strong>Mega Starmie</strong></td>
+                        <td>10</td>
+                        <td>0.44%</td>
+                        <td class="positive">23</td>
+                        <td class="negative">26</td>
+                        <td>0</td>
+                        <td><strong>46.94%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#36</td>
+                        <td><strong>Alolan Exeggutor ex</strong></td>
+                        <td>8</td>
+                        <td>0.35%</td>
+                        <td class="positive">21</td>
+                        <td class="negative">20</td>
+                        <td>0</td>
+                        <td><strong>51.22%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#37</td>
+                        <td><strong>Archaludon</strong></td>
+                        <td>8</td>
+                        <td>0.35%</td>
+                        <td class="positive">14</td>
+                        <td class="negative">13</td>
+                        <td>1</td>
+                        <td><strong>50.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#38</td>
+                        <td><strong>Kangaskhan Bouffalant</strong></td>
+                        <td>8</td>
+                        <td>0.35%</td>
+                        <td class="positive">18</td>
+                        <td class="negative">22</td>
+                        <td>1</td>
+                        <td><strong>43.90%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#39</td>
+                        <td><strong>Hydrapple Ogerpon</strong></td>
+                        <td>7</td>
+                        <td>0.31%</td>
+                        <td class="positive">12</td>
+                        <td class="negative">14</td>
+                        <td>0</td>
+                        <td><strong>46.15%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#40</td>
+                        <td><strong>Dragonite Eelektrik</strong></td>
+                        <td>7</td>
+                        <td>0.31%</td>
+                        <td class="positive">10</td>
+                        <td class="negative">16</td>
+                        <td>0</td>
+                        <td><strong>38.46%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#41</td>
+                        <td><strong>Mega Diancie</strong></td>
+                        <td>7</td>
+                        <td>0.31%</td>
+                        <td class="positive">8</td>
+                        <td class="negative">13</td>
+                        <td>0</td>
+                        <td><strong>38.10%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#42</td>
+                        <td><strong>Ursaluna Lunatone</strong></td>
+                        <td>7</td>
+                        <td>0.31%</td>
+                        <td class="positive">11</td>
+                        <td class="negative">20</td>
+                        <td>0</td>
+                        <td><strong>35.48%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#43</td>
+                        <td><strong>Alakazam</strong></td>
+                        <td>6</td>
+                        <td>0.26%</td>
+                        <td class="positive">13</td>
+                        <td class="negative">10</td>
+                        <td>0</td>
+                        <td><strong>56.52%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#44</td>
+                        <td><strong>Hop's Zacian</strong></td>
+                        <td>6</td>
+                        <td>0.26%</td>
+                        <td class="positive">13</td>
+                        <td class="negative">12</td>
+                        <td>0</td>
+                        <td><strong>52.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#45</td>
+                        <td><strong>Iono's Bellibolt</strong></td>
+                        <td>6</td>
+                        <td>0.26%</td>
+                        <td class="positive">21</td>
+                        <td class="negative">19</td>
+                        <td>1</td>
+                        <td><strong>51.22%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#46</td>
+                        <td><strong>Mega Charizard X</strong></td>
+                        <td>6</td>
+                        <td>0.26%</td>
+                        <td class="positive">3</td>
+                        <td class="negative">12</td>
+                        <td>2</td>
+                        <td><strong>17.65%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#47</td>
+                        <td><strong>Yanmega</strong></td>
+                        <td>5</td>
+                        <td>0.22%</td>
+                        <td class="positive">22</td>
+                        <td class="negative">12</td>
+                        <td>0</td>
+                        <td><strong>64.71%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#48</td>
+                        <td><strong>Mega Froslass</strong></td>
+                        <td>5</td>
+                        <td>0.22%</td>
+                        <td class="positive">11</td>
+                        <td class="negative">11</td>
+                        <td>0</td>
+                        <td><strong>50.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#49</td>
+                        <td><strong>Marnie's Grimmsnarl</strong></td>
+                        <td>5</td>
+                        <td>0.22%</td>
+                        <td class="positive">16</td>
+                        <td class="negative">20</td>
+                        <td>1</td>
+                        <td><strong>43.24%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#50</td>
+                        <td><strong>Ethan's Typhlosion</strong></td>
+                        <td>5</td>
+                        <td>0.22%</td>
+                        <td class="positive">8</td>
+                        <td class="negative">15</td>
+                        <td>0</td>
+                        <td><strong>34.78%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#51</td>
+                        <td><strong>Sharpedo Toxtricity</strong></td>
+                        <td>5</td>
+                        <td>0.22%</td>
+                        <td class="positive">4</td>
+                        <td class="negative">10</td>
+                        <td>0</td>
+                        <td><strong>28.57%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#52</td>
+                        <td><strong>Lopunny Dusknoir</strong></td>
+                        <td>5</td>
+                        <td>0.22%</td>
+                        <td class="positive">1</td>
+                        <td class="negative">9</td>
+                        <td>0</td>
+                        <td><strong>10.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#53</td>
+                        <td><strong>Mega Dragonite</strong></td>
+                        <td>4</td>
+                        <td>0.17%</td>
+                        <td class="positive">16</td>
+                        <td class="negative">11</td>
+                        <td>1</td>
+                        <td><strong>57.14%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#54</td>
+                        <td><strong>Blissey</strong></td>
+                        <td>4</td>
+                        <td>0.17%</td>
+                        <td class="positive">2</td>
+                        <td class="negative">9</td>
+                        <td>0</td>
+                        <td><strong>18.18%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#55</td>
+                        <td><strong>Iron Thorns Crustle</strong></td>
+                        <td>3</td>
+                        <td>0.13%</td>
+                        <td class="positive">8</td>
+                        <td class="negative">7</td>
+                        <td>0</td>
+                        <td><strong>53.33%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#56</td>
+                        <td><strong>Dudunsparce Control</strong></td>
+                        <td>3</td>
+                        <td>0.13%</td>
+                        <td class="positive">6</td>
+                        <td class="negative">5</td>
+                        <td>4</td>
+                        <td><strong>40.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#57</td>
+                        <td><strong>Palafin</strong></td>
+                        <td>3</td>
+                        <td>0.13%</td>
+                        <td class="positive">4</td>
+                        <td class="negative">7</td>
+                        <td>0</td>
+                        <td><strong>36.36%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#58</td>
+                        <td><strong>Mega Gengar</strong></td>
+                        <td>3</td>
+                        <td>0.13%</td>
+                        <td class="positive">3</td>
+                        <td class="negative">7</td>
+                        <td>0</td>
+                        <td><strong>30.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#59</td>
+                        <td><strong>Lopunny Dudunsparce</strong></td>
+                        <td>3</td>
+                        <td>0.13%</td>
+                        <td class="positive">1</td>
+                        <td class="negative">4</td>
+                        <td>0</td>
+                        <td><strong>20.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#60</td>
+                        <td><strong>Joltik Box</strong></td>
+                        <td>3</td>
+                        <td>0.13%</td>
+                        <td class="positive">1</td>
+                        <td class="negative">6</td>
+                        <td>0</td>
+                        <td><strong>14.29%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#61</td>
+                        <td><strong>Toxtricity</strong></td>
+                        <td>2</td>
+                        <td>0.09%</td>
+                        <td class="positive">5</td>
+                        <td class="negative">5</td>
+                        <td>0</td>
+                        <td><strong>50.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#62</td>
+                        <td><strong>Rocket's Porygon-Z</strong></td>
+                        <td>2</td>
+                        <td>0.09%</td>
+                        <td class="positive">4</td>
+                        <td class="negative">4</td>
+                        <td>0</td>
+                        <td><strong>50.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#63</td>
+                        <td><strong>Mega Camerupt</strong></td>
+                        <td>2</td>
+                        <td>0.09%</td>
+                        <td class="positive">1</td>
+                        <td class="negative">3</td>
+                        <td>0</td>
+                        <td><strong>25.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#64</td>
+                        <td><strong>Feraligatr</strong></td>
+                        <td>2</td>
+                        <td>0.09%</td>
+                        <td class="positive">1</td>
+                        <td class="negative">3</td>
+                        <td>0</td>
+                        <td><strong>25.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#65</td>
+                        <td><strong>Toxtricity Box</strong></td>
+                        <td>2</td>
+                        <td>0.09%</td>
+                        <td class="positive">0</td>
+                        <td class="negative">2</td>
+                        <td>0</td>
+                        <td><strong>0.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#66</td>
+                        <td><strong>Blaziken</strong></td>
+                        <td>2</td>
+                        <td>0.09%</td>
+                        <td class="positive">0</td>
+                        <td class="negative">3</td>
+                        <td>0</td>
+                        <td><strong>0.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#67</td>
+                        <td><strong>Lillie's Clefairy</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">5</td>
+                        <td class="negative">2</td>
+                        <td>0</td>
+                        <td><strong>71.43%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#68</td>
+                        <td><strong>Cinderace</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">4</td>
+                        <td class="negative">2</td>
+                        <td>0</td>
+                        <td><strong>66.67%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#69</td>
+                        <td><strong>Bloodmoon Ursaluna</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">2</td>
+                        <td class="negative">2</td>
+                        <td>0</td>
+                        <td><strong>50.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#70</td>
+                        <td><strong>Archaludon Zoroark</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">3</td>
+                        <td class="negative">3</td>
+                        <td>0</td>
+                        <td><strong>50.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#71</td>
+                        <td><strong>Dragapult Froslass</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">2</td>
+                        <td class="negative">2</td>
+                        <td>0</td>
+                        <td><strong>50.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#72</td>
+                        <td><strong>Flygon</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">2</td>
+                        <td class="negative">3</td>
+                        <td>0</td>
+                        <td><strong>40.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#73</td>
+                        <td><strong>Okidogi</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">1</td>
+                        <td class="negative">2</td>
+                        <td>0</td>
+                        <td><strong>33.33%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#74</td>
+                        <td><strong>Mamoswine</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">1</td>
+                        <td class="negative">2</td>
+                        <td>0</td>
+                        <td><strong>33.33%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#75</td>
+                        <td><strong>Iron Thorns</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">1</td>
+                        <td class="negative">3</td>
+                        <td>0</td>
+                        <td><strong>25.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#76</td>
+                        <td><strong>Scovillain</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">1</td>
+                        <td class="negative">4</td>
+                        <td>0</td>
+                        <td><strong>20.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#77</td>
+                        <td><strong>Mega Lopunny</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">0</td>
+                        <td class="negative">1</td>
+                        <td>0</td>
+                        <td><strong>0.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#78</td>
+                        <td><strong>Paldean Tauros</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">0</td>
+                        <td class="negative">3</td>
+                        <td>0</td>
+                        <td><strong>0.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#79</td>
+                        <td><strong>Hydrapple</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">0</td>
+                        <td class="negative">1</td>
+                        <td>0</td>
+                        <td><strong>0.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#80</td>
+                        <td><strong>Manectric Eelektrik</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">0</td>
+                        <td class="negative">1</td>
+                        <td>0</td>
+                        <td><strong>0.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#81</td>
+                        <td><strong>Gholdengo Lunatone</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">0</td>
+                        <td class="negative">2</td>
+                        <td>0</td>
+                        <td><strong>0.00%</strong></td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="rank">#82</td>
+                        <td><strong>Greninja Froslass</strong></td>
+                        <td>1</td>
+                        <td>0.04%</td>
+                        <td class="positive">0</td>
+                        <td class="negative">1</td>
+                        <td>0</td>
+                        <td><strong>0.00%</strong></td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

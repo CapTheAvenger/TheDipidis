@@ -1761,11 +1761,11 @@
             devLog(`Stored global deck count: ${window.currentCityLeagueTotalDecks}`);
             
             // Update stats
-            document.getElementById('cityLeagueStatCards').textContent = `${uniqueCards} / ${totalCardsInDeck}`;
-            document.getElementById('cityLeagueStatDecksUsed').textContent = decksCount;
-            document.getElementById('cityLeagueStatAvgPlacement').textContent = avgPlacement !== '-' ? avgPlacement : '-';
-            const statsSection = document.getElementById('cityLeagueStatsSection');
-            if (statsSection) statsSection.classList.remove('d-none', 'city-league-stats-section-hidden');
+            updateDeckStatsByIds({
+                cityLeagueStatCards: `${uniqueCards} / ${totalCardsInDeck}`,
+                cityLeagueStatDecksUsed: decksCount,
+                cityLeagueStatAvgPlacement: avgPlacement !== '-' ? avgPlacement : '-'
+            }, 'cityLeagueStatsSection');
             
             // Reset button text to show list view option
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
@@ -1783,10 +1783,7 @@
                 const el = document.getElementById(id);
                 if (el) el.classList.add('d-none');
             });
-            const countEl = document.getElementById('cityLeagueCardCount');
-            if (countEl) countEl.textContent = '0 ' + t('cl.cards');
-            const summaryEl = document.getElementById('cityLeagueCardCountSummary');
-            if (summaryEl) summaryEl.textContent = '/ 0 ' + t('cl.total');
+            resetDeckOverviewCounts('cityLeagueCardCount', 'cityLeagueCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
             
             // Reset button text
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
@@ -2513,24 +2510,7 @@
                 const isAceSpecCard = isAceSpec(cardName);
                 const filterCategory = isAceSpecCard ? 'Ace Spec' : cardCategory;
                 const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
-                let otherPrintOwnedCount = 0;
-                if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
-                    const normalizedCurrentName = normalizeCardName(cardName);
-                    const normalizedSet = String(setCode || '').toUpperCase();
-                    const normalizedNumber = String(setNumber || '').toUpperCase();
-                    window.userCollectionCounts.forEach((qty, collKey) => {
-                        const ownedQty = parseInt(qty, 10) || 0;
-                        if (ownedQty <= 0) return;
-                        const parts = String(collKey || '').split('|');
-                        if (parts.length < 3) return;
-                        const keyName = parts[0];
-                        const keySet = String(parts[1] || '').toUpperCase();
-                        const keyNumber = String(parts[2] || '').toUpperCase();
-                        if (normalizeCardName(keyName) !== normalizedCurrentName) return;
-                        if (keySet === normalizedSet && keyNumber === normalizedNumber) return;
-                        otherPrintOwnedCount += ownedQty;
-                    });
-                }
+                const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
                 const otherPrintSparkleHtml = otherPrintOwnedCount > 0
                     ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}">
                         <span class="city-league-other-print-sparkle-icon">✨</span>

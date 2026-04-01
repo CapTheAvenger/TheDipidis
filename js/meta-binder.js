@@ -318,13 +318,59 @@
         });
 
         const getRarityTier = (rarityValue) => {
-            const r = String(rarityValue || '').toLowerCase();
-            if (!r) return 50;
-            if (r.includes('common')) return 1;
+            const r = String(rarityValue || '').toLowerCase().trim();
+
+            // Empty rarity values are typically normal playable deck prints and must
+            // never lose against ultra/secret variants.
+            if (!r) return 4;
+
+            // Order matters: "uncommon" must be checked before "common" because of includes().
             if (r.includes('uncommon')) return 2;
-            if (r === 'rare' || r.includes('holo rare') || r.includes('reverse holo')) return 3;
-            if (r.includes('double rare')) return 10;
-            if (r.includes('ultra rare') || r.includes('special illustration') || r.includes('illustration') || r.includes('art rare') || r.includes('secret')) return 20;
+            if (r.includes('common')) return 1;
+
+            if (r.includes('promo')) return 4;
+
+            // Low / regular rare tiers
+            if (r === 'rare' || r.includes('holo rare') || r.includes('reverse holo')) return 5;
+
+            // Mid-tier competitive shiny prints / mainline ex/v prints
+            if (
+                r.includes('double rare') ||
+                r === 'ex' ||
+                r === 'v' ||
+                r.includes(' ex') ||
+                r.includes(' v') ||
+                r === 'dr'
+            ) return 10;
+
+            // Upper-mid decorative but not top-end tiers
+            if (
+                r.includes('radiant') ||
+                r.includes('amazing rare') ||
+                r === 'ar' ||
+                r.includes(' art rare')
+            ) return 14;
+
+            // High rarity / premium prints
+            if (
+                r.includes('illustration rare') ||
+                r.includes('special illustration rare') ||
+                r.includes('special illustration') ||
+                r.includes('special art rare') ||
+                r.includes('special art') ||
+                r.includes('ultra rare') ||
+                r.includes('hyper rare') ||
+                r.includes('secret rare') ||
+                r.includes('secret') ||
+                r.includes('shiny') ||
+                r === 'sr' ||
+                r === 'ur' ||
+                r === 'sar' ||
+                r === 'chr' ||
+                r === 'csr'
+            ) return 20;
+
+            // Unknown strings stay in a medium tier so they do not outrank low-rarity deck prints.
             return 9;
         };
 
@@ -376,6 +422,67 @@
     function collectBinderCards(targetArchetypes) {
         const thresholdPercent = 70;
         const intlFamilyCache = new Map();
+        const setOrderMap = window.setOrderMap || {};
+
+        function getGroupingRarityTier(rarityValue) {
+            const r = String(rarityValue || '').toLowerCase().trim();
+            if (!r) return 4;
+            if (r.includes('uncommon')) return 2;
+            if (r.includes('common')) return 1;
+            if (r.includes('promo')) return 4;
+            if (r === 'rare' || r.includes('holo rare') || r.includes('reverse holo')) return 5;
+            if (
+                r.includes('double rare') ||
+                r === 'ex' ||
+                r === 'v' ||
+                r.includes(' ex') ||
+                r.includes(' v') ||
+                r === 'dr'
+            ) return 10;
+            if (
+                r.includes('radiant') ||
+                r.includes('amazing rare') ||
+                r === 'ar' ||
+                r.includes(' art rare')
+            ) return 14;
+            if (
+                r.includes('illustration rare') ||
+                r.includes('special illustration rare') ||
+                r.includes('special illustration') ||
+                r.includes('special art rare') ||
+                r.includes('special art') ||
+                r.includes('ultra rare') ||
+                r.includes('hyper rare') ||
+                r.includes('secret rare') ||
+                r.includes('secret') ||
+                r.includes('shiny') ||
+                r === 'sr' ||
+                r === 'ur' ||
+                r === 'sar' ||
+                r === 'chr' ||
+                r === 'csr'
+            ) return 20;
+            return 9;
+        }
+
+        function getSetRecencyValue(setCode) {
+            const code = String(setCode || '').trim();
+            return setOrderMap[code] || setOrderMap[code.toLowerCase()] || 0;
+        }
+
+        function shouldPreferCandidatePrint(currentEntry, candidateEntry) {
+            const currentTier = getGroupingRarityTier(currentEntry?.rarity);
+            const candidateTier = getGroupingRarityTier(candidateEntry?.rarity);
+            if (candidateTier !== currentTier) return candidateTier < currentTier;
+
+            const currentSetOrder = getSetRecencyValue(currentEntry?.set);
+            const candidateSetOrder = getSetRecencyValue(candidateEntry?.set);
+            if (candidateSetOrder !== currentSetOrder) return candidateSetOrder > currentSetOrder;
+
+            const currentNumber = parseCardNumberForSort(currentEntry?.number);
+            const candidateNumber = parseCardNumberForSort(candidateEntry?.number);
+            return candidateNumber < currentNumber;
+        }
 
         function getCachedIntlFamilyInfo(name, set, number) {
             const key = `${String(name || '').trim()}|${String(set || '').trim()}|${String(number || '').trim()}`;
@@ -439,32 +546,61 @@
                 if (!isAceSpec && usagePercent < thresholdPercent) return;
 
                 const family = getCachedIntlFamilyInfo(name, set, number);
-                const key = family.signature || `${name}|${set}|${number}`;
+                const isPokemon = isPokemonTypeString(String(row.type || ''));
+                const key = isPokemon
+                    ? (family.signature || `${name}|${set}|${number}`)
+                    : name.toLowerCase();
                 const count = parseInt(row.max_count || row.count || 0, 10);
                 const existing = deckCardMap.get(key);
-                if (!existing || count > existing.count) {
-                    deckCardMap.set(key, {
-                        name: family.newestName || name,
-                        set: family.newestSet || set,
-                        number: family.newestNumber || number,
-                        count,
-                        familyRefs: family.refs,
-                        type: String(row.type || '').trim(),
-                        rarity: String(row.rarity || '').trim(),
-                        isAceSpec
-                    });
+                const candidateEntry = {
+                    name: isPokemon ? (family.newestName || name) : name,
+                    set: isPokemon ? (family.newestSet || set) : set,
+                    number: isPokemon ? (family.newestNumber || number) : number,
+                    count,
+                    familyRefs: family.refs,
+                    type: String(row.type || '').trim(),
+                    rarity: String(row.rarity || '').trim(),
+                    isAceSpec,
+                    isPokemon
+                };
+
+                if (!existing) {
+                    deckCardMap.set(key, candidateEntry);
+                    return;
+                }
+
+                existing.count = Math.max(existing.count, count);
+                existing.isAceSpec = existing.isAceSpec || isAceSpec;
+                if (!existing.type && candidateEntry.type) existing.type = candidateEntry.type;
+                if (!existing.familyRefs?.length && candidateEntry.familyRefs?.length) existing.familyRefs = candidateEntry.familyRefs;
+
+                if (shouldPreferCandidatePrint(existing, candidateEntry)) {
+                    existing.name = candidateEntry.name;
+                    existing.set = candidateEntry.set;
+                    existing.number = candidateEntry.number;
+                    existing.rarity = candidateEntry.rarity;
+                } else if (!existing.rarity && candidateEntry.rarity) {
+                    existing.rarity = candidateEntry.rarity;
                 }
             });
 
-            deckCardMap.forEach(({ name, set, number, count, familyRefs, type, rarity, isAceSpec }, key) => {
+            deckCardMap.forEach(({ name, set, number, count, familyRefs, type, rarity, isAceSpec, isPokemon }, key) => {
                 const familyKey = `intl:${key}`;
                 const entry = binderMap.get(familyKey);
                 if (entry) {
                     entry.maxCount = Math.max(entry.maxCount, count);
                     if (!entry.decks.includes(archetype)) entry.decks.push(archetype);
                     if (!entry.type && type) entry.type = type;
-                    if (!entry.rarity && rarity) entry.rarity = rarity;
+                    if (shouldPreferCandidatePrint(entry, { set, number, rarity })) {
+                        entry.name = name;
+                        entry.set = set;
+                        entry.number = number;
+                        entry.rarity = rarity;
+                    } else if (!entry.rarity && rarity) {
+                        entry.rarity = rarity;
+                    }
                     entry.isAceSpec = entry.isAceSpec || isAceSpec;
+                    if (!entry.familyRefs?.length && Array.isArray(familyRefs)) entry.familyRefs = familyRefs;
                 } else {
                     binderMap.set(familyKey, {
                         name, set, number,
@@ -473,7 +609,8 @@
                         decks: [archetype],
                         type,
                         rarity,
-                        isAceSpec
+                        isAceSpec,
+                        isPokemon
                     });
                 }
             });
@@ -896,10 +1033,74 @@
         return match ? parseInt(match[1], 10) : Number.MAX_SAFE_INTEGER;
     }
 
+    const META_BINDER_CATEGORY_ORDER = {
+        Pokemon: 1,
+        Supporter: 2,
+        Item: 3,
+        Tool: 4,
+        Stadium: 5,
+        'Special Energy': 6,
+        'Basic Energy': 7
+    };
+
+    const META_BINDER_POKEMON_TYPE_ORDER = {
+        Grass: 1,
+        Fire: 2,
+        Water: 3,
+        Lightning: 4,
+        Psychic: 5,
+        Fighting: 6,
+        Darkness: 7,
+        Metal: 8,
+        Dragon: 9,
+        Colorless: 10
+    };
+
+    const META_BINDER_SET_ORDER_FALLBACK = [
+        'SSP', 'SCR', 'SFA', 'TWM', 'PRE', 'TEF', 'MEP', 'MEG', 'ASC', 'DRI', 'JTG', 'BLK'
+    ];
+
+    function extractDexFromImageUrl(imageUrl) {
+        const raw = String(imageUrl || '').trim();
+        if (!raw) return Number.MAX_SAFE_INTEGER;
+
+        const patterns = [
+            /\/([A-Z0-9]+)_0*(\d+)_/i,
+            /[_\-]0*(\d+)(?:[_\.-]|$)/i
+        ];
+
+        for (const pattern of patterns) {
+            const match = raw.match(pattern);
+            if (!match) continue;
+            const numericPart = match[match.length - 1];
+            const parsed = parseInt(String(numericPart || '').trim(), 10);
+            if (Number.isFinite(parsed) && parsed > 0) return parsed;
+        }
+
+        return Number.MAX_SAFE_INTEGER;
+    }
+
+    function getMetaBinderSortCategory(meta) {
+        if (!meta) return 'Item';
+        if (meta.supertype === 'Pokemon') return 'Pokemon';
+        if (meta.type === 'ACE SPEC') return 'Item';
+        return String(meta.type || 'Item');
+    }
+
     function getMetaBinderSetOrderValue(setCode) {
         const code = String(setCode || '').trim();
+        if (!code) return 0;
+
         const setOrderMap = window.setOrderMap || {};
-        return setOrderMap[code] || setOrderMap[code.toLowerCase()] || 0;
+        const directValue = setOrderMap[code] || setOrderMap[code.toLowerCase()] || 0;
+        if (directValue) return directValue;
+
+        const fallbackIndex = META_BINDER_SET_ORDER_FALLBACK.indexOf(code.toUpperCase());
+        if (fallbackIndex !== -1) {
+            return META_BINDER_SET_ORDER_FALLBACK.length - fallbackIndex;
+        }
+
+        return 0;
     }
 
     function getMetaBinderPokemonDex(card, cardDb) {
@@ -925,51 +1126,28 @@
             if (Number.isFinite(direct) && direct > 0) return direct;
         }
 
+        const fromImageUrl = extractDexFromImageUrl(cardDb?.image_url || cardDb?.image || card?.image_url || card?.image);
+        if (Number.isFinite(fromImageUrl) && fromImageUrl > 0 && fromImageUrl !== Number.MAX_SAFE_INTEGER) {
+            return fromImageUrl;
+        }
+
         return Number.MAX_SAFE_INTEGER;
     }
 
     function getMetaBinderPokemonElementOrder(typeMeta) {
         const element = String(typeMeta.type || '').replace('Pokemon-', '');
-        const elementOrder = {
-            Grass: 1,
-            Fire: 2,
-            Water: 3,
-            Lightning: 4,
-            Psychic: 5,
-            Fighting: 6,
-            Darkness: 7,
-            Metal: 8,
-            Dragon: 9,
-            Colorless: 10
-        };
-        return elementOrder[element] || 99;
+        return META_BINDER_POKEMON_TYPE_ORDER[element] || 99;
     }
 
     function sortMetaCards(cards) {
-        const categoryOrder = {
-            Pokemon: 1,
-            Supporter: 2,
-            Item: 3,
-            Tool: 4,
-            Stadium: 5,
-            'Special Energy': 6,
-            'Basic Energy': 7
-        };
-
         return cards.sort((a, b) => {
             const aTypeMeta = getMetaBinderTypeMeta(a);
             const bTypeMeta = getMetaBinderTypeMeta(b);
 
-            const toSortCategory = (meta) => {
-                if (meta.supertype === 'Pokemon') return 'Pokemon';
-                if (meta.type === 'ACE SPEC') return 'Item';
-                return meta.type;
-            };
-
-            const aCategory = toSortCategory(aTypeMeta);
-            const bCategory = toSortCategory(bTypeMeta);
-            const aOrder = categoryOrder[aCategory] || 99;
-            const bOrder = categoryOrder[bCategory] || 99;
+            const aCategory = getMetaBinderSortCategory(aTypeMeta);
+            const bCategory = getMetaBinderSortCategory(bTypeMeta);
+            const aOrder = META_BINDER_CATEGORY_ORDER[aCategory] || 99;
+            const bOrder = META_BINDER_CATEGORY_ORDER[bCategory] || 99;
             if (aOrder !== bOrder) return aOrder - bOrder;
 
             const aCardDb = findCardRecord(a.name, a.set, a.number);
@@ -1005,6 +1183,66 @@
             return String(a.name || '').localeCompare(String(b.name || ''));
         });
     }
+
+    function parseMetaBinderDomNumber(value) {
+        const raw = String(value || '').trim();
+        const parsed = parseInt(raw, 10);
+        return Number.isFinite(parsed) ? parsed : Number.MAX_SAFE_INTEGER;
+    }
+
+    function sortMetaBinder() {
+        const grid = document.getElementById('metaBinderGrid');
+        if (!grid) return;
+
+        const cards = Array.from(grid.querySelectorAll('.meta-binder-card'));
+        if (cards.length <= 1) return;
+
+        cards.sort((a, b) => {
+            const aMeta = {
+                supertype: String(a.dataset.supertype || ''),
+                type: String(a.dataset.type || ''),
+                isAceSpec: a.dataset.isAceSpec === 'true'
+            };
+            const bMeta = {
+                supertype: String(b.dataset.supertype || ''),
+                type: String(b.dataset.type || ''),
+                isAceSpec: b.dataset.isAceSpec === 'true'
+            };
+
+            const aCategory = getMetaBinderSortCategory(aMeta);
+            const bCategory = getMetaBinderSortCategory(bMeta);
+            const categoryDiff = (META_BINDER_CATEGORY_ORDER[aCategory] || 99) - (META_BINDER_CATEGORY_ORDER[bCategory] || 99);
+            if (categoryDiff !== 0) return categoryDiff;
+
+            if (aCategory === 'Pokemon') {
+                const pokemonTypeDiff = getMetaBinderPokemonElementOrder(aMeta) - getMetaBinderPokemonElementOrder(bMeta);
+                if (pokemonTypeDiff !== 0) return pokemonTypeDiff;
+
+                const dexDiff = parseMetaBinderDomNumber(a.dataset.pokedex) - parseMetaBinderDomNumber(b.dataset.pokedex);
+                if (dexDiff !== 0) return dexDiff;
+
+                const setDiff = parseMetaBinderDomNumber(b.dataset.setOrder) - parseMetaBinderDomNumber(a.dataset.setOrder);
+                if (setDiff !== 0) return setDiff;
+            } else {
+                const nameDiff = String(a.dataset.name || '').localeCompare(String(b.dataset.name || ''));
+                if (nameDiff !== 0) return nameDiff;
+
+                const setDiff = parseMetaBinderDomNumber(b.dataset.setOrder) - parseMetaBinderDomNumber(a.dataset.setOrder);
+                if (setDiff !== 0) return setDiff;
+            }
+
+            const numberDiff = parseMetaBinderDomNumber(a.dataset.numberSort) - parseMetaBinderDomNumber(b.dataset.numberSort);
+            if (numberDiff !== 0) return numberDiff;
+
+            return String(a.dataset.name || '').localeCompare(String(b.dataset.name || ''));
+        });
+
+        const fragment = document.createDocumentFragment();
+        cards.forEach(card => fragment.appendChild(card));
+        grid.appendChild(fragment);
+    }
+
+    window.sortMetaBinder = sortMetaBinder;
 
     // ── Active filter for the binder view ──
     let metaBinderFilter = 'all'; // 'all', 'new', 'missing'
@@ -1260,6 +1498,11 @@
             const safeName = escapeHtml(card.name);
             const deckList = card.decks.map(d => escapeHtml(d)).join(', ');
             const typeMeta = getMetaBinderTypeMeta(card);
+            const sortCategory = getMetaBinderSortCategory(typeMeta);
+            const cardDb = findCardRecord(card.name, card.set, card.number);
+            const dexNumber = sortCategory === 'Pokemon' ? getMetaBinderPokemonDex(card, cardDb) : Number.MAX_SAFE_INTEGER;
+            const setOrder = getMetaBinderSetOrderValue(card.set);
+            const numberSort = parseCardNumberForSort(card.number);
             const countLabel = card.ownershipMode === 'exact'
                 ? `<span class="meta-binder-count-ok">${card.ownedExact}/${card.maxCount} ✓</span>`
                 : (card.ownershipMode === 'intl-complete'
@@ -1270,7 +1513,7 @@
                 : '';
 
             return `
-                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${escapeHtml(String(card.set || ''))}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" title="Wird verwendet in: ${deckList}${ownershipHint}">
+                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${escapeHtml(String(card.set || ''))}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" title="Wird verwendet in: ${deckList}${ownershipHint}">
                     ${imageUrl
                         ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                            <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
@@ -1283,6 +1526,8 @@
                     </div>
                 </div>`;
         }).join('');
+
+            sortMetaBinder();
     }
 
     // ── Ensure meta data is loaded before building the binder ──

@@ -3263,8 +3263,8 @@
                         headerLi.style.pointerEvents = 'none';
                         list.appendChild(headerLi);
 
-                        // Add items from this optgroup
-                        Array.from(child.options).forEach(option => {
+                        // Add items from this optgroup - use querySelectorAll for OPTGROUP children
+                        Array.from(child.querySelectorAll('option')).forEach(option => {
                             if (!option.value) return;
                             
                             const text = option.textContent.trim();

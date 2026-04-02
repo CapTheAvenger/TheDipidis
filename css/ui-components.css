@@ -2409,6 +2409,10 @@
     transition: background-color 0.2s ease;
     cursor: pointer;
 }
+/* Ensure all cells in a row have consistent background */
+.city-league-info-table-row td {
+    background: inherit !important;
+}
 .city-league-info-table tbody .city-league-info-table-row:nth-child(even) {
     background: var(--cl-table-row-even);
 }
@@ -2421,6 +2425,7 @@
     padding: 12px 14px;
     font-size: 0.95em;
     vertical-align: middle;
+    background: inherit !important;
 }
 .city-league-info-table-cell-archetype {
     text-align: left;

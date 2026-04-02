@@ -3247,24 +3247,51 @@
                 return;
             }
 
-            // Baue Kombobox-Einträge aus Select-Optionen
+            // Baue Kombobox-Einträge aus Select-Optionen mit Optgroup-Support
             const rebuildList = () => {
                 list.innerHTML = '';
                 const items = [];
 
-                // Alle Options als Kombobox-Items umwandeln
-                Array.from(select.options).forEach(option => {
-                    if (!option.value) return; // Skip empty option
+                // Process optgroups and individual options
+                Array.from(select.children).forEach(child => {
+                    if (child.tagName === 'OPTGROUP') {
+                        // Add category header
+                        const headerLi = document.createElement('li');
+                        headerLi.className = 'deck-combobox-category-header';
+                        headerLi.setAttribute('role', 'presentation');
+                        headerLi.innerHTML = `<span class="deck-combobox-category-title">${escapeHtml(child.label)}</span>`;
+                        headerLi.style.pointerEvents = 'none';
+                        list.appendChild(headerLi);
 
-                    const text = option.textContent.trim();
-                    const li = document.createElement('li');
-                    li.className = 'deck-combobox-item';
-                    li.setAttribute('data-value', option.value);
-                    li.setAttribute('role', 'option');
-                    li.innerHTML = `<span class="deck-combobox-item-name">${escapeHtml(text)}</span>`;
-                    li.onclick = () => selectComboboxItem(option.value);
-                    list.appendChild(li);
-                    items.push({ li, value: option.value, text });
+                        // Add items from this optgroup
+                        Array.from(child.options).forEach(option => {
+                            if (!option.value) return;
+                            
+                            const text = option.textContent.trim();
+                            const li = document.createElement('li');
+                            li.className = 'deck-combobox-item deck-combobox-item-grouped';
+                            li.setAttribute('data-value', option.value);
+                            li.setAttribute('data-category', child.label);
+                            li.setAttribute('role', 'option');
+                            li.innerHTML = `<span class="deck-combobox-item-name">${escapeHtml(text)}</span>`;
+                            li.onclick = () => selectComboboxItem(option.value);
+                            list.appendChild(li);
+                            items.push({ li, value: option.value, text, category: child.label, header: headerLi });
+                        });
+                    } else if (child.tagName === 'OPTION') {
+                        // Standalone option (e.g., "Select Deck...")
+                        if (!child.value) return;
+                        
+                        const text = child.textContent.trim();
+                        const li = document.createElement('li');
+                        li.className = 'deck-combobox-item';
+                        li.setAttribute('data-value', child.value);
+                        li.setAttribute('role', 'option');
+                        li.innerHTML = `<span class="deck-combobox-item-name">${escapeHtml(text)}</span>`;
+                        li.onclick = () => selectComboboxItem(child.value);
+                        list.appendChild(li);
+                        items.push({ li, value: child.value, text });
+                    }
                 });
 
                 return items;
@@ -3278,9 +3305,22 @@
                 const searchText = e.target.value.toLowerCase();
                 highlightedIndex = -1;
 
-                allItems.forEach(({ li, text }) => {
+                // Track which categories have visible items
+                const visibleCategories = new Set();
+
+                allItems.forEach(({ li, text, category }) => {
                     const matches = text.toLowerCase().includes(searchText);
                     li.classList.toggle('d-none', !matches);
+                    if (matches && category) {
+                        visibleCategories.add(category);
+                    }
+                });
+
+                // Show/hide category headers based on whether they have visible items
+                Array.from(list.querySelectorAll('.deck-combobox-category-header')).forEach(header => {
+                    const categoryTitle = header.querySelector('.deck-combobox-category-title')?.textContent || '';
+                    const hasVisibleItems = visibleCategories.has(categoryTitle);
+                    header.classList.toggle('d-none', !hasVisibleItems);
                 });
 
                 // Show/hide list basierend auf Matching-Items
@@ -3300,7 +3340,7 @@
                 }
             });
 
-            // Input: Escape/Blur schliesst Liste
+            // Input: Keyboard-Navigation
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     list.classList.add('deck-combobox-list-hidden');
@@ -3321,9 +3361,11 @@
                     e.preventDefault();
                     selectComboboxItem(visibleItems[highlightedIndex].value);
                     return;
+                } else {
+                    return;
                 }
 
-                // Highlight aktualisieren
+                // Highlight aktualisieren (skip headers)
                 visibleItems.forEach(({ li }, idx) => {
                     li.classList.toggle('highlighted', idx === highlightedIndex);
                 });

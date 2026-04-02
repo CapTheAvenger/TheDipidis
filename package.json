@@ -5,6 +5,10 @@
   "scripts": {
     "test:unit": "node --test tests/unit/test-*.js",
     "test:visual:nonmeta:ci": "node tests/e2e/run-visual-nonmeta-ci.js",
+    "test:visual:fullpage": "npx playwright test tests/e2e/visual-full-page-coverage.spec.js -c playwright.config.js",
+    "test:visual:fullpage:ci": "npx playwright test tests/e2e/visual-full-page-coverage.spec.js -c playwright.config.js --workers=1",
+    "test:visual:fullpage:bootstrap": "npx playwright test tests/e2e/visual-full-page-coverage.spec.js -c playwright.config.js --update-snapshots=missing --workers=1",
+    "test:visual:fullpage:update": "npx playwright test tests/e2e/visual-full-page-coverage.spec.js -c playwright.config.js --update-snapshots",
     "test:visual:nonmeta:report": "node -e \"const fs=require('fs');const p='visual-nonmeta-summary.txt';console.log(fs.existsSync(p)?fs.readFileSync(p,'utf8'):'No summary file found.');\""
   },
   "devDependencies": {

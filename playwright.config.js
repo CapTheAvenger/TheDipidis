@@ -1,5 +1,13 @@
 // Local E2E config for Playwright.
-// Uses system Chrome to avoid launch issues with bundled browser binaries.
+// Uses system Chrome when present, otherwise Playwright's bundled Chromium.
+
+const fs = require('fs');
+
+const CHROME_PATH = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const launchOptions = {};
+if (fs.existsSync(CHROME_PATH)) {
+    launchOptions.executablePath = CHROME_PATH;
+}
 
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 module.exports = {
@@ -18,9 +26,7 @@ module.exports = {
         headless: true,
         // Fixed viewport ensures screenshots are reproducible across machines.
         viewport: { width: 1280, height: 800 },
-        launchOptions: {
-            executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-        },
+        ...(Object.keys(launchOptions).length ? { launchOptions } : {}),
     },
     // Snapshot baselines live next to tests, committed to git.
     snapshotPathTemplate: '{testDir}/{testFileDir}/__snapshots__/{testFilename}/{arg}{ext}',

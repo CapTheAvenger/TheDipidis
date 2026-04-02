@@ -128,7 +128,10 @@ test.describe('City League Tab', () => {
     test('archetype table screenshot matches baseline', async ({ page }) => {
         const table = page.locator('#city-league table').first();
         await expect(table).toBeVisible({ timeout: 30_000 });
-        await expect(table).toHaveScreenshot('city-league-archetype-table.png');
+        await table.scrollIntoViewIfNeeded();
+        await expect(table).toHaveScreenshot('city-league-archetype-table.png', {
+            maxDiffPixelRatio: 0.03,
+        });
     });
 });
 

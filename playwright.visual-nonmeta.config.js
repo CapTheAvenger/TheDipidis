@@ -1,18 +1,35 @@
-const baseConfig = require('./playwright.config');
+const fs = require('fs');
+
+const CHROME_PATH = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const EDGE_PATH = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+
+const launchOptions = {};
+const use = {
+	headless: true,
+	viewport: { width: 1440, height: 1000 }
+};
+
+if (fs.existsSync(CHROME_PATH)) {
+	launchOptions.executablePath = CHROME_PATH;
+} else if (fs.existsSync(EDGE_PATH)) {
+	use.channel = 'msedge';
+}
+
+if (Object.keys(launchOptions).length) {
+	use.launchOptions = launchOptions;
+}
 
 /** @type {import('@playwright/test').PlaywrightTestConfig} */
 module.exports = {
-    ...baseConfig,
-    use: {
-        ...baseConfig.use,
-    },
-    workers: 1,
-    grep: /Card Action Buttons|Navigation|City League Tab|Rarity Switcher Modal|Cards Database Tab/,
-    reporter: [['json', { outputFile: 'visual-nonmeta-report.json' }]],
-    webServer: {
-        command: 'python -m http.server 8000',
-        url: 'http://127.0.0.1:8000/index.html',
-        reuseExistingServer: true,
-        timeout: 120_000,
-    },
+	testDir: 'tests/e2e',
+	timeout: 60_000,
+	expect: {
+		timeout: 15_000,
+		toHaveScreenshot: {
+			threshold: 0.2,
+			maxDiffPixelRatio: 0.02
+		}
+	},
+	use,
+	snapshotPathTemplate: '{testDir}/{testFileDir}/__snapshots__/{testFilename}/{arg}{ext}'
 };

@@ -1,67 +1,87 @@
-const { spawn } = require('node:child_process');
-const fs = require('node:fs');
-const path = require('node:path');
+const { spawn } = require('child_process');
+const http = require('http');
 
-const rootDir = path.resolve(__dirname, '..', '..');
-const reportFile = path.join(rootDir, 'visual-nonmeta-report.json');
-const summaryFile = path.join(rootDir, 'visual-nonmeta-summary.txt');
+const BASE_URL = 'http://127.0.0.1:8000/index.html';
 
-function writeSummary(lines) {
-    fs.mkdirSync(path.dirname(summaryFile), { recursive: true });
-    fs.writeFileSync(summaryFile, `${lines.join('\n')}\n`, 'utf8');
+function isServerUp() {
+	return new Promise((resolve) => {
+		const req = http.get(BASE_URL, { timeout: 2000 }, (res) => {
+			res.resume();
+			resolve(res.statusCode >= 200 && res.statusCode < 500);
+		});
+		req.on('error', () => resolve(false));
+		req.on('timeout', () => {
+			req.destroy();
+			resolve(false);
+		});
+	});
 }
 
-function summarizeReport() {
-    if (!fs.existsSync(reportFile)) {
-        writeSummary([
-            'Visual Non-Meta Summary',
-            `Generated: ${new Date().toISOString()}`,
-            'Result: report file missing',
-        ]);
-        return;
-    }
-
-    let report;
-    try {
-        report = JSON.parse(fs.readFileSync(reportFile, 'utf8'));
-    } catch {
-        writeSummary([
-            'Visual Non-Meta Summary',
-            `Generated: ${new Date().toISOString()}`,
-            'Result: invalid JSON report',
-        ]);
-        return;
-    }
-
-    const stats = report?.stats || {};
-    const errors = Array.isArray(report?.errors) ? report.errors : [];
-    const firstError = errors[0]?.message || 'none';
-
-    writeSummary([
-        'Visual Non-Meta Summary',
-        `Generated: ${new Date().toISOString()}`,
-        `Expected: ${stats.expected ?? 0}`,
-        `Unexpected: ${stats.unexpected ?? 0}`,
-        `Flaky: ${stats.flaky ?? 0}`,
-        `Skipped: ${stats.skipped ?? 0}`,
-        `DurationMs: ${Math.round(stats.duration ?? 0)}`,
-        `Errors: ${errors.length}`,
-        `FirstError: ${firstError}`,
-    ]);
+function wait(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function run() {
-    const playwrightCli = require.resolve('@playwright/test/cli');
-    const child = spawn(process.execPath, [playwrightCli, 'test', '-c', 'playwright.visual-nonmeta.config.js'], {
-        cwd: rootDir,
-        stdio: 'inherit',
-        shell: false,
-    });
+async function startServerIfNeeded() {
+	const up = await isServerUp();
+	if (up) return null;
 
-    child.on('close', (code) => {
-        summarizeReport();
-        process.exit(code ?? 1);
-    });
+	const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+	const server = spawn(pythonCmd, ['-m', 'http.server', '8000'], {
+		stdio: 'ignore',
+		detached: false
+	});
+
+	for (let i = 0; i < 20; i += 1) {
+		await wait(500);
+		// eslint-disable-next-line no-await-in-loop
+		if (await isServerUp()) {
+			return server;
+		}
+	}
+
+	try {
+		server.kill();
+	} catch (_) {
+		// ignore cleanup failure
+	}
+	throw new Error('Local server did not start on 127.0.0.1:8000');
 }
 
-run();
+function runPlaywright() {
+	return new Promise((resolve, reject) => {
+		const playwrightCli = require.resolve('@playwright/test/cli');
+
+		const args = [
+			'test',
+			'tests/e2e/visual-regression.spec.js',
+			'tests/e2e/city-league-hero-combined-navigation.e2e.spec.js',
+			'--config=playwright.visual-nonmeta.config.js',
+			'--pass-with-no-tests',
+			'--reporter=line'
+		];
+
+		const child = spawn(process.execPath, [playwrightCli, ...args], { stdio: 'inherit' });
+		child.on('error', reject);
+		child.on('close', (code) => resolve(code || 0));
+	});
+}
+
+(async () => {
+	let serverProcess = null;
+	try {
+		serverProcess = await startServerIfNeeded();
+		const code = await runPlaywright();
+		process.exitCode = code;
+	} catch (err) {
+		console.error('[FAIL] Visual nonmeta CI run ::', err && err.message ? err.message : err);
+		process.exitCode = 1;
+	} finally {
+		if (serverProcess) {
+			try {
+				serverProcess.kill();
+			} catch (_) {
+				// ignore cleanup failure
+			}
+		}
+	}
+})();

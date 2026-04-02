@@ -42,6 +42,8 @@
     <link rel="stylesheet" href="css/ux-step2.css?v=1" type="text/css">
     <link rel="stylesheet" href="css/ux-step3.css?v=1" type="text/css">
     <link rel="stylesheet" href="css/ux-step4.css?v=1" type="text/css">
+    <!-- Mobile Responsive Optimization — SCHRITT 1 (Layout Umbrüche) -->
+    <link rel="stylesheet" href="css/mobile-responsive.css?v=1" type="text/css">
     <!-- Mobile Drag & Drop polyfill for touch devices -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@3.0.0-rc.0/default.css" type="text/css" crossorigin="anonymous">
     <!-- Mobile Drag & Drop polyfill JS -->
@@ -475,33 +477,37 @@
                         <div class="current-meta-matchups-grid-container">
                             <div>
                                 <h4 class="current-meta-matchups-best-title" data-i18n="matchup.best">Best Matchups</h4>
-                                <table class="current-meta-matchups-table best-matchups">
-                                    <thead>
-                                        <tr>
-                                            <th data-i18n="matchup.opponent">Opponent</th>
-                                            <th data-i18n="matchup.winRate">Win Rate</th>
-                                            <th data-i18n="matchup.record">Record</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="currentMetaBestMatchups">
-                                        <tr><td colspan="3" data-i18n="matchup.noData">No data available</td></tr>
-                                    </tbody>
-                                </table>
+                                <div class="mobile-table-scroll" aria-label="Best matchups table scroll area">
+                                    <table class="current-meta-matchups-table best-matchups">
+                                        <thead>
+                                            <tr>
+                                                <th data-i18n="matchup.opponent">Opponent</th>
+                                                <th data-i18n="matchup.winRate">Win Rate</th>
+                                                <th data-i18n="matchup.record">Record</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="currentMetaBestMatchups">
+                                            <tr><td colspan="3" data-i18n="matchup.noData">No data available</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                             <div>
                                 <h4 class="current-meta-matchups-worst-title" data-i18n="matchup.worst">Worst Matchups</h4>
-                                <table class="current-meta-matchups-table worst-matchups">
-                                    <thead>
-                                        <tr>
-                                            <th data-i18n="matchup.opponent">Opponent</th>
-                                            <th data-i18n="matchup.winRate">Win Rate</th>
-                                            <th data-i18n="matchup.record">Record</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="currentMetaWorstMatchups">
-                                        <tr><td colspan="3" data-i18n="matchup.noData">No data available</td></tr>
-                                    </tbody>
-                                </table>
+                                <div class="mobile-table-scroll" aria-label="Worst matchups table scroll area">
+                                    <table class="current-meta-matchups-table worst-matchups">
+                                        <thead>
+                                            <tr>
+                                                <th data-i18n="matchup.opponent">Opponent</th>
+                                                <th data-i18n="matchup.winRate">Win Rate</th>
+                                                <th data-i18n="matchup.record">Record</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="currentMetaWorstMatchups">
+                                            <tr><td colspan="3" data-i18n="matchup.noData">No data available</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                         
@@ -2268,7 +2274,7 @@
     
     <!-- Authentication Modal -->
     <div id="auth-modal" class="auth-modal ui-modal-backdrop display-none" role="dialog" aria-modal="true" aria-label="Authentication" onclick="if(event.target === this) closeAuthModal()">
-        <div class="auth-modal-content ui-modal-panel ui-modal-md">
+        <div class="auth-modal-content ui-modal-panel ui-modal-md mobile-modal-panel">
             <button class="auth-modal-close ui-modal-close" onclick="closeAuthModal()" aria-label="Close"></button>
             
             <!-- Sign In Form -->
@@ -2383,7 +2389,7 @@
 
     <!-- Deck Compare Modal -->
     <div id="deckCompareModal" class="rarity-switcher-modal ui-modal-backdrop z-10000" role="dialog" aria-modal="true" aria-label="Deck Compare" onclick="if(event.target === this) closeDeckCompare()">
-        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-xl max-w-1400 w-95 max-h-90vh overflow-y-auto">
+        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-xl max-w-1400 w-95 max-h-90vh overflow-y-auto mobile-modal-panel">
             <span class="rarity-switcher-close ui-modal-close" onclick="closeDeckCompare()"></span>
             <h2 data-i18n="compare.heading">Deck Compare</h2>
             
@@ -2524,7 +2530,7 @@
             </div>
         </div>
 
-        <div class="flex-1 flex justify-center align-center p-15 overflow-hidden box-border pos-rel">
+        <div class="flex-1 flex justify-center align-center p-15 overflow-hidden box-border pos-rel pt-arena-shell">
 
 
 
@@ -2614,9 +2620,7 @@
                                 <div id="ptLostPile-p1" class="pt-empty-slot pt-dropzone border-purple bg-black-40"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-lost')" onclick="ptOpenLostZone('p1')">&#127744;</div>
                             </div>
-                            <div class="ta-center pos-rel"
-                                 onmouseenter="this.querySelector('.pt-deck-controls').style.display='flex'"
-                                 onmouseleave="this.querySelector('.pt-deck-controls').style.display='none'">
+                               <div class="ta-center pos-rel pt-deck-controls-shell">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDeckMenu('p1')">
                                     <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p1', 1)" title="Draw card"></div>
@@ -2843,25 +2847,27 @@
             <h3 class="m-0 color-yellow">Hotkeys</h3>
             <button class="pt-btn pt-danger" onclick="document.getElementById('ptHotkeyModal').style.display='none'"></button>
         </div>
-        <table class="w-100 border-collapse">
-            <tr><td class="py-4 px-8 color-green-light"><b>D</b></td><td class="py-4 px-8">Draw 1 card</td></tr>
-            <tr><td class="py-4 px-8 color-green-light"><b>S</b></td><td class="py-4 px-8">Shuffle deck</td></tr>
-            <tr><td class="py-4 px-8 color-green-light"><b>C</b></td><td class="py-4 px-8">Flip coin</td></tr>
-            <tr><td class="py-4 px-8 color-green-light"><b>P</b></td><td class="py-4 px-8">Pass turn</td></tr>
-            <tr><td class="py-4 px-8 color-green-light"><b>F</b></td><td class="py-4 px-8">Flip board</td></tr>
-            <tr><td class="py-4 px-8 color-green-light"><b>`</b></td><td class="py-4 px-8">Toggle Action Log</td></tr>
-            <tr><td class="py-4 px-8 color-green-light"><b>/</b></td><td class="py-4 px-8">Focus command input</td></tr>
-            <tr><td colspan="2" class="pt-12 color-yellow fs-11 fw-bold">Commands (press Enter):</td></tr>
-            <tr><td class="py-2 px-8 color-green-light"><b>/draw N</b></td><td class="py-2 px-8">Draw N cards</td></tr>
-            <tr><td class="py-2 px-8 color-green-light"><b>/mill N</b></td><td class="py-2 px-8">Mill N cards to discard</td></tr>
-            <tr><td class="py-2 px-8 color-green-light"><b>/top N</b></td><td class="py-2 px-8">Look at top N cards</td></tr>
-            <tr><td class="py-2 px-8 color-green-light"><b>/iono N</b></td><td class="py-2 px-8">Both shuffle & draw N</td></tr>
-            <tr><td class="py-2 px-8 color-green-light"><b>/roxanne N</b></td><td class="py-2 px-8">Both bottom & draw N</td></tr>
-            <tr><td class="py-2 px-8 color-green-light"><b>/shuffle</b></td><td class="py-2 px-8">Shuffle current deck</td></tr>
-            <tr><td class="py-2 px-8 color-green-light"><b>/coin N</b></td><td class="py-2 px-8">Flip N coins</td></tr>
-            <tr><td class="py-2 px-8 color-green-light"><b>/dice</b></td><td class="py-2 px-8">Roll a d6</td></tr>
-            <tr><td class="py-2 px-8 color-green-light"><b>/attach [zone]</b></td><td class="py-2 px-8">Attach energy from hand to active/bench0–4</td></tr>
-        </table>
+        <div class="mobile-table-scroll" aria-label="Hotkey table scroll area">
+            <table class="w-100 border-collapse">
+                <tr><td class="py-4 px-8 color-green-light"><b>D</b></td><td class="py-4 px-8">Draw 1 card</td></tr>
+                <tr><td class="py-4 px-8 color-green-light"><b>S</b></td><td class="py-4 px-8">Shuffle deck</td></tr>
+                <tr><td class="py-4 px-8 color-green-light"><b>C</b></td><td class="py-4 px-8">Flip coin</td></tr>
+                <tr><td class="py-4 px-8 color-green-light"><b>P</b></td><td class="py-4 px-8">Pass turn</td></tr>
+                <tr><td class="py-4 px-8 color-green-light"><b>F</b></td><td class="py-4 px-8">Flip board</td></tr>
+                <tr><td class="py-4 px-8 color-green-light"><b>`</b></td><td class="py-4 px-8">Toggle Action Log</td></tr>
+                <tr><td class="py-4 px-8 color-green-light"><b>/</b></td><td class="py-4 px-8">Focus command input</td></tr>
+                <tr><td colspan="2" class="pt-12 color-yellow fs-11 fw-bold">Commands (press Enter):</td></tr>
+                <tr><td class="py-2 px-8 color-green-light"><b>/draw N</b></td><td class="py-2 px-8">Draw N cards</td></tr>
+                <tr><td class="py-2 px-8 color-green-light"><b>/mill N</b></td><td class="py-2 px-8">Mill N cards to discard</td></tr>
+                <tr><td class="py-2 px-8 color-green-light"><b>/top N</b></td><td class="py-2 px-8">Look at top N cards</td></tr>
+                <tr><td class="py-2 px-8 color-green-light"><b>/iono N</b></td><td class="py-2 px-8">Both shuffle & draw N</td></tr>
+                <tr><td class="py-2 px-8 color-green-light"><b>/roxanne N</b></td><td class="py-2 px-8">Both bottom & draw N</td></tr>
+                <tr><td class="py-2 px-8 color-green-light"><b>/shuffle</b></td><td class="py-2 px-8">Shuffle current deck</td></tr>
+                <tr><td class="py-2 px-8 color-green-light"><b>/coin N</b></td><td class="py-2 px-8">Flip N coins</td></tr>
+                <tr><td class="py-2 px-8 color-green-light"><b>/dice</b></td><td class="py-2 px-8">Roll a d6</td></tr>
+                <tr><td class="py-2 px-8 color-green-light"><b>/attach [zone]</b></td><td class="py-2 px-8">Attach energy from hand to active/bench0–4</td></tr>
+            </table>
+        </div>
     </div>
 
     <div id="ptTopCardsModal" class="d-none pos-fixed top-50 left-50 translate--50 z-20000 bg-blue-dark border-yellow br-12 p-20 minw-360 maxw-95vw maxh-80vh overflow-y-auto box-shadow-dark" role="dialog" aria-modal="true" aria-label="Top deck control">
@@ -2934,7 +2940,7 @@
 
     <!-- Playtester Setup Modal -->
     <div id="playtesterSetupModal" class="rarity-switcher-modal ui-modal-backdrop" onclick="if(event.target === this) closePlaytesterSetup()" role="dialog" aria-modal="true" aria-label="Playtester setup">
-        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-md playtester-setup-modal-content">
+        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-md playtester-setup-modal-content mobile-modal-panel">
             <span class="rarity-switcher-close ui-modal-close" onclick="closePlaytesterSetup()"></span>
             <h2 class="setup-modal-heading blue" data-i18n="setup.heading">Playtester Setup</h2>
             <p class="setup-modal-description" data-i18n="setup.description">

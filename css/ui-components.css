@@ -2480,19 +2480,16 @@
     vertical-align: middle;
 }
 .city-league-info-table-cell-archetype {
-    font-weight: 600;
     text-align: left;
 }
 .city-league-info-table-cell-center {
     text-align: center;
 }
 .city-league-info-table-cell-entry {
-    color: #27ae60;
-    font-weight: bold;
+    /* color/bold restricted to the change span — cell itself stays neutral */
 }
 .city-league-info-table-cell-exit {
-    color: #e74c3c;
-    font-weight: bold;
+    /* color/bold restricted to the change span — cell itself stays neutral */
 }
 .city-league-info-table-count-change {
     color: #555;
@@ -2501,6 +2498,7 @@
 }
 .city-league-info-table-placement {
     font-weight: bold;
+    color: var(--placement-color, inherit);
 }
 
 /* Make first column look consistent with metric columns while keeping links discoverable. */

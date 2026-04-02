@@ -74,8 +74,6 @@ NUL
 
 # Node.js (only used for CI tooling tests)
 node_modules/
-package.json
-package-lock.json
 
 # Secrets & credentials
 .env

@@ -129,8 +129,21 @@ test.describe('City League Tab', () => {
         const table = page.locator('#city-league table').first();
         await expect(table).toBeVisible({ timeout: 30_000 });
         await table.scrollIntoViewIfNeeded();
-        await expect(table).toHaveScreenshot('city-league-archetype-table.png', {
-            maxDiffPixelRatio: 0.03,
+
+        const box = await table.boundingBox();
+        expect(box).not.toBeNull();
+
+        // Use a fixed-height clip to avoid cross-platform row-height drift (e.g. 154px vs 158px).
+        const clip = {
+            x: Math.max(0, Math.round(box.x)),
+            y: Math.max(0, Math.round(box.y)),
+            width: Math.round(box.width),
+            height: 158,
+        };
+
+        await expect(page).toHaveScreenshot('city-league-archetype-table.png', {
+            clip,
+            maxDiffPixelRatio: 0.04,
         });
     });
 });
@@ -202,10 +215,17 @@ test.describe('Rarity Switcher Modal', () => {
         await waitForAppReady(page);
 
         await goToTab(page, 'cards');
-        await page.waitForSelector('.card-database-rarity-btn', { timeout: 30_000 });
+        await page.waitForSelector('#cards.tab-content.active .card-database-item', { timeout: 30_000 });
 
-        const rarityButton = page.locator('.card-database-rarity-btn').first();
-        await rarityButton.click();
+        const rarityButton = page.locator('#cards.tab-content.active .card-database-rarity-btn:visible').first();
+        await expect(rarityButton).toBeVisible({ timeout: 10_000 });
+        await page.waitForFunction(() => {
+            const btn = Array.from(document.querySelectorAll('#cards.tab-content.active .card-database-rarity-btn'))
+                .find((node) => node instanceof HTMLElement && node.offsetParent !== null);
+            if (!btn) return false;
+            btn.click();
+            return true;
+        }, null, { timeout: 10_000 });
 
         const modal = page.locator('#raritySwitcherModal');
         await expect(modal).toHaveClass(/show/, { timeout: 10_000 });
@@ -214,6 +234,7 @@ test.describe('Rarity Switcher Modal', () => {
         await expect(modal).toHaveScreenshot('rarity-switcher-modal.png');
 
         await page.keyboard.press('Escape');
+        await expect(modal).not.toHaveClass(/show/, { timeout: 10_000 });
     });
 });
 

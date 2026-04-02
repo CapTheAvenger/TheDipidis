@@ -88,12 +88,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5406,
+                      "duration": 5182,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-02T09:36:34.676Z",
+                      "startTime": "2026-04-02T09:44:57.601Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -139,12 +139,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4050,
+                      "duration": 3266,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-02T09:36:40.288Z",
+                      "startTime": "2026-04-02T09:45:02.967Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -173,12 +173,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5364,
+                      "duration": 3336,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-02T09:36:44.349Z",
+                      "startTime": "2026-04-02T09:45:06.243Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -215,12 +215,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1967,
+                      "duration": 1806,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-02T09:36:49.723Z",
+                      "startTime": "2026-04-02T09:45:09.590Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -257,12 +257,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1847,
+                      "duration": 1866,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-02T09:36:51.699Z",
+                      "startTime": "2026-04-02T09:45:11.403Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -291,12 +291,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1812,
+                      "duration": 1798,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-02T09:36:53.553Z",
+                      "startTime": "2026-04-02T09:45:13.276Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -306,7 +306,7 @@
               ],
               "id": "614534ba5c1e0a84453e-81dc8ddfe976964bdeb0",
               "file": "visual-regression.spec.js",
-              "line": 112,
+              "line": 115,
               "column": 5
             }
           ]
@@ -314,7 +314,7 @@
         {
           "title": "Rarity Switcher Modal",
           "file": "visual-regression.spec.js",
-          "line": 180,
+          "line": 183,
           "column": 6,
           "specs": [
             {
@@ -333,12 +333,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5549,
+                      "duration": 5532,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-02T09:36:55.377Z",
+                      "startTime": "2026-04-02T09:45:15.082Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -348,7 +348,7 @@
               ],
               "id": "614534ba5c1e0a84453e-5a7ddee501aeab6a07c2",
               "file": "visual-regression.spec.js",
-              "line": 181,
+              "line": 184,
               "column": 5
             }
           ]
@@ -356,7 +356,7 @@
         {
           "title": "Cards Database Tab",
           "file": "visual-regression.spec.js",
-          "line": 204,
+          "line": 207,
           "column": 6,
           "specs": [
             {
@@ -375,12 +375,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 8015,
+                      "duration": 8049,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-02T09:37:00.934Z",
+                      "startTime": "2026-04-02T09:45:20.622Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -390,7 +390,7 @@
               ],
               "id": "614534ba5c1e0a84453e-d4faeaed4752fafba7c5",
               "file": "visual-regression.spec.js",
-              "line": 205,
+              "line": 208,
               "column": 5
             }
           ]
@@ -400,8 +400,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-04-02T09:36:34.005Z",
-    "duration": 35162.61,
+    "startTime": "2026-04-02T09:44:56.982Z",
+    "duration": 31914.819,
     "expected": 8,
     "skipped": 0,
     "unexpected": 0,

@@ -106,7 +106,10 @@ test.describe('City League Tab', () => {
     test('hero archetype grid screenshot matches baseline', async ({ page }) => {
         const heroGrid = page.locator('.tier-hero-grid').first();
         await expect(heroGrid).toBeVisible({ timeout: 30_000 });
-        await expect(heroGrid).toHaveScreenshot('city-league-hero-grid.png');
+        // Hero card text can reflow by ~1-2px across OS/font stacks; keep this snapshot tolerant to tiny shifts.
+        await expect(heroGrid).toHaveScreenshot('city-league-hero-grid.png', {
+            maxDiffPixelRatio: 0.04,
+        });
     });
 
     test('archetype table screenshot matches baseline', async ({ page }) => {

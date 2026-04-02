@@ -1,9 +1,9 @@
 Visual Non-Meta Summary
-Generated: 2026-04-02T09:37:09.199Z
+Generated: 2026-04-02T09:45:28.929Z
 Expected: 8
 Unexpected: 0
 Flaky: 0
 Skipped: 0
-DurationMs: 35163
+DurationMs: 31915
 Errors: 0
 FirstError: none

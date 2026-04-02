@@ -525,13 +525,22 @@
 }
 .card-action-row {
     display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 2px !important;
+    width: 100% !important;
 }
 .card-action-row-wide {
     display: grid !important;
-    grid-template-columns: 1fr 1fr 2fr !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 2px !important;
+    width: 100% !important;
+}
+.card-action-row .card-action-btn,
+.card-action-row-wide .card-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
 }
 /* Modular utility class for live price button (used in app-price.js) */
 .price-btn-live {
@@ -2863,31 +2872,6 @@
 }
 
 /* ====================================
-   CARD HOVER TOOLTIP (extracted from inline script)
-   ==================================== */
-.card-hover-tooltip {
-    position: fixed;
-    z-index: var(--z-notification, 2000);
-    pointer-events: none;
-    background: var(--bg-card, #1a1a2e);
-    border: 2px solid var(--primary-blue, #3B4CCA);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85);
-    border-radius: 10px;
-    padding: 8px;
-    display: none;
-    min-width: 180px;
-    max-width: 240px;
-    max-height: 340px;
-    overflow: hidden;
-}
-.card-hover-tooltip img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 6px;
-}
-
-/* ====================================
    STAT INFO ICON TOOLTIP
    Visible ℹ icon with hover popup
    ==================================== */
@@ -3246,6 +3230,17 @@
     border-radius: 12px;
     padding: 14px 16px;
     text-align: center;
+}
+
+.meta-binder-stat-clickable {
+    border: 1px solid rgba(59, 76, 202, 0.2);
+    cursor: pointer;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.meta-binder-stat-clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(59, 76, 202, 0.15);
 }
 
 .meta-binder-stat-value {

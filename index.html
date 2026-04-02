@@ -458,13 +458,6 @@
                                 <div class="current-meta-stat-value" id="currentMetaStatMatchup">-</div>
                             </div>
                         </div>
-                        <div id="currentMetaBeginnerTooltipCard" class="beginner-tooltip-card d-none" aria-live="polite">
-                            <div class="beginner-tooltip-header">
-                                <strong data-i18n="tip.beginnerTitle">Beginner Strategy</strong>
-                                <span id="currentMetaTooltipSource" class="beginner-tooltip-source" data-i18n="tip.sourceDefault">Default</span>
-                            </div>
-                            <p id="currentMetaBeginnerTooltipText" class="beginner-tooltip-text">-</p>
-                        </div>
                         <div id="currentMetaTop256Section" class="d-none current-meta-top256-section">
                             <div class="current-meta-top256-title">Used in Top 256</div>
                             <div id="currentMetaTop256List" class="current-meta-top256-list"></div>
@@ -2033,22 +2026,6 @@
                             </div>
                         </div>
 
-                        <div class="tooltip-admin-card mb-25">
-                            <div class="tooltip-admin-copy">
-                                <h3 data-i18n="tip.adminTitle">Beginner Tooltip Admin</h3>
-                                <p data-i18n="tip.adminSubtitle">Review AI-generated tips and overwrite manually if needed.</p>
-                            </div>
-                            <div class="tooltip-admin-controls">
-                                <input type="text" id="tooltipAdminSearch" class="control-input" placeholder="Search archetype..." oninput="filterTooltipAdminArchetypes()" aria-label="Search archetype">
-                                <select id="tooltipAdminArchetype" class="control-input modern-select" aria-label="Select archetype for tooltip admin"></select>
-                                <textarea id="tooltipAdminText" class="tooltip-admin-textarea" rows="3" maxlength="420" data-i18n-placeholder="tip.adminPlaceholder" placeholder="Manual beginner tooltip..."></textarea>
-                                <div class="tooltip-admin-actions">
-                                    <button type="button" class="btn btn-primary" onclick="saveArchetypeTooltipOverride()" data-i18n="tip.saveOverride">Save Override</button>
-                                    <button type="button" class="btn btn-danger" onclick="resetArchetypeTooltipOverride()" data-i18n="tip.resetOverride">↺ Reset</button>
-                                </div>
-                            </div>
-                        </div>
-                        
                         <!-- Tabs for Profile sections -->
                         <div class="border-bottom-grey mb-20">
                             <button class="profile-tab-btn active" onclick="switchProfileTab('collection')">
@@ -3024,17 +3001,14 @@
             <form id="battleJournalForm" class="battle-journal-form" onsubmit="submitBattleJournalEntry(event)">
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.ownDeck">Your Deck</span>
-                    <input id="battleJournalOwnDeckValue" type="hidden" value="">
-                    <input id="battleJournalOwnDeckSearch" type="text" class="battle-journal-search-input" autocomplete="off" data-i18n-placeholder="bj.searchDeck" placeholder="Search deck...">
-                    <div id="battleJournalOwnDeckChoices" class="battle-journal-tap-grid battle-journal-tap-grid-own" aria-label="Own deck choices"></div>
+                    <input id="battleJournalOwnDeckValue" type="text" class="battle-journal-input" list="battleJournalOwnDeckList" autocomplete="off" data-i18n-placeholder="bj.searchDeck" placeholder="Search deck...">
+                    <datalist id="battleJournalOwnDeckList"></datalist>
                 </div>
 
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.opponentDeck">Opponent Archetype</span>
-                    <input id="battleJournalOpponentValue" type="hidden" value="">
-                    <input id="battleJournalOpponentSearch" type="text" class="battle-journal-search-input" autocomplete="off" data-i18n-placeholder="bj.searchOpponent" placeholder="Search opponent...">
-                    <div id="battleJournalOpponentChoices" class="battle-journal-tap-grid" aria-label="Opponent deck choices"></div>
-                    <div id="battleJournalOpponentExtended" class="battle-journal-extended-list d-none"></div>
+                    <input id="battleJournalOpponentValue" type="text" class="battle-journal-input" list="battleJournalOpponentList" autocomplete="off" data-i18n-placeholder="bj.searchOpponent" placeholder="Search opponent...">
+                    <datalist id="battleJournalOpponentList"></datalist>
                 </div>
 
                 <div class="battle-journal-grid">
@@ -3065,6 +3039,52 @@
                     </div>
                 </div>
 
+                <div id="battleJournalBo3Details" class="battle-journal-bo3-details d-none">
+                    <span class="battle-journal-label">BO3 Game Details</span>
+                    <div class="battle-journal-bo3-row">
+                        <span class="battle-journal-bo3-game">Game 1</span>
+                        <select id="battleJournalBo3Game1Turn" class="battle-journal-input">
+                            <option value="">Going</option>
+                            <option value="first">First</option>
+                            <option value="second">Second</option>
+                        </select>
+                        <select id="battleJournalBo3Game1Result" class="battle-journal-input">
+                            <option value="">Result</option>
+                            <option value="win">Win</option>
+                            <option value="loss">Loss</option>
+                            <option value="tie">Tie</option>
+                        </select>
+                    </div>
+                    <div class="battle-journal-bo3-row">
+                        <span class="battle-journal-bo3-game">Game 2</span>
+                        <select id="battleJournalBo3Game2Turn" class="battle-journal-input">
+                            <option value="">Going</option>
+                            <option value="first">First</option>
+                            <option value="second">Second</option>
+                        </select>
+                        <select id="battleJournalBo3Game2Result" class="battle-journal-input">
+                            <option value="">Result</option>
+                            <option value="win">Win</option>
+                            <option value="loss">Loss</option>
+                            <option value="tie">Tie</option>
+                        </select>
+                    </div>
+                    <div class="battle-journal-bo3-row">
+                        <span class="battle-journal-bo3-game">Game 3</span>
+                        <select id="battleJournalBo3Game3Turn" class="battle-journal-input">
+                            <option value="">Going</option>
+                            <option value="first">First</option>
+                            <option value="second">Second</option>
+                        </select>
+                        <select id="battleJournalBo3Game3Result" class="battle-journal-input">
+                            <option value="">Result</option>
+                            <option value="win">Win</option>
+                            <option value="loss">Loss</option>
+                            <option value="tie">Tie</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="battle-journal-actions">
                     <button type="button" class="battle-journal-secondary-btn" onclick="clearBattleJournalDraft()" data-i18n="bj.clearDraft">Clear</button>
                     <button type="submit" class="battle-journal-primary-btn" data-i18n="bj.saveBtn">Save Match</button>
@@ -3083,6 +3103,21 @@
                 </div>
                 <div id="battleJournalPendingList" class="battle-journal-pending-list"></div>
             </div>
+        </div>
+    </div>
+
+    <div id="metaBinderDroppedModal" class="battle-journal-overlay display-none" onclick="if(event.target===this)closeMetaBinderDroppedModal()" aria-hidden="false">
+        <div class="battle-journal-sheet" role="dialog" aria-modal="true" aria-label="Dropped cards">
+            <div class="battle-journal-header">
+                <div>
+                    <h2 class="battle-journal-title">Dropped Cards</h2>
+                    <p class="battle-journal-subtitle">Cards removed from the latest binder scope: <strong id="metaBinderDroppedCount">0</strong></p>
+                </div>
+                <div class="battle-journal-header-actions">
+                    <button type="button" class="battle-journal-close" onclick="closeMetaBinderDroppedModal()" aria-label="Close dropped cards">×</button>
+                </div>
+            </div>
+            <div id="metaBinderDroppedList" class="battle-journal-pending-list"></div>
         </div>
     </div>
 
@@ -3121,7 +3156,6 @@
     <script src="js/app-init.js?v=1"></script>
     <script src="js/app-current-meta-analysis.js?v=1"></script>
     <script src="js/app-features.js?v=1"></script>
-    <script src="js/archetype-tooltips.js?v=1"></script>
     <script src="js/battle-journal.js?v=1"></script>
     <script src="js/meta-binder.js?v=1"></script>
     <script src="js/draw-simulator.js?v=1"></script>
@@ -3175,7 +3209,6 @@
         </div>
     </div>
 
-    <script src="js/card-tooltips.js?v=1" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {

@@ -2412,7 +2412,7 @@
                 </div>`;
             }
             const limitlessButton = (card.set && card.number)
-                ? `<button type="button" onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless" aria-label="Open ${displayName} on Limitless">L Limitless</button>`
+                ? `<button type="button" onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless" aria-label="Open ${displayName} on Limitless">Limitless</button>`
                 : '<div class="card-database-limitless-placeholder"></div>';
             
             item.innerHTML = `
@@ -2422,7 +2422,7 @@
                     ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="Owned other INT prints">${altPrintOwnedCount}</div>` : ''}
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${displayName} to collection">+</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-green card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#4CAF50' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} from collection">-</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} from collection">-</button>
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}" aria-label="${userWantsCard ? 'Remove ' + displayName + ' from wishlist' : 'Add ' + displayName + ' to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                     </div>
                 </div>

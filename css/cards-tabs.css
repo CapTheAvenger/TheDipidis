@@ -82,37 +82,57 @@
 }
 
 #cards .card-database-top-actions {
+    position: absolute !important;
     top: 4px !important;
     right: 4px !important;
-    display: grid !important;
-    grid-template-columns: repeat(3, 19px) !important;
-    gap: 2px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    gap: 3px !important;
+    z-index: 3 !important;
 }
 
 #cards .card-database-top-actions .card-badge {
     position: relative !important;
-    width: 19px !important;
-    height: 19px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    flex: 0 0 21px !important;
+    width: 21px !important;
+    height: 21px !important;
     font-size: 10px !important;
     line-height: 1 !important;
     cursor: pointer !important;
     border: 1.5px solid rgba(0,0,0,0.15) !important;
 }
 
+#cards .card-database-top-actions .btn-green.card-badge {
+    background: #28a745 !important;
+    color: #fff !important;
+}
+
+#cards .card-database-top-actions .btn-red.card-badge {
+    background: #dc3545 !important;
+    color: #fff !important;
+}
+
 #cards .card-database-info {
-    padding: 6px !important;
+    padding: 3px !important;
     background: linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%) !important;
     border-top: 1px solid #e3e8f5 !important;
     display: grid !important;
-    grid-template-rows: minmax(28px, auto) minmax(20px, auto) auto auto auto !important;
+    grid-template-rows: minmax(20px, auto) minmax(16px, auto) auto auto auto !important;
     align-content: start !important;
-    gap: 4px !important;
+    gap: 2px !important;
 }
 
 #cards .card-database-name {
     margin: 0 !important;
-    font-size: 11px !important;
-    line-height: 1.25 !important;
+    font-size: 9px !important;
+    line-height: 1.15 !important;
     font-weight: 800 !important;
     color: #1b2537 !important;
     overflow: hidden !important;
@@ -135,11 +155,11 @@
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-height: 17px !important;
+    min-height: 15px !important;
     border-radius: 999px !important;
-    font-size: 9px !important;
+    font-size: 8px !important;
     font-weight: 700 !important;
-    padding: 1px 6px !important;
+    padding: 1px 5px !important;
     white-space: nowrap !important;
 }
 
@@ -156,7 +176,7 @@
 #cards .card-database-button-row {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 4px !important;
+    gap: 3px !important;
     margin-top: 0 !important;
     align-items: stretch !important;
 }
@@ -164,16 +184,16 @@
 #cards .card-database-secondary-row {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 4px !important;
+    gap: 3px !important;
 }
 
 #cards .card-database-price-btn,
 #cards .card-database-rarity-btn,
 #cards .card-database-proxy-btn,
 #cards .card-database-price-placeholder {
-    min-height: 28px !important;
+    min-height: 24px !important;
     border-radius: 6px !important;
-    font-size: 9px !important;
+    font-size: 8px !important;
     font-weight: 800 !important;
     letter-spacing: 0.1px !important;
     display: flex !important;
@@ -181,7 +201,7 @@
     justify-content: center !important;
     text-align: center !important;
     line-height: 1.15 !important;
-    padding: 2px 4px !important;
+    padding: 1px 3px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: normal !important;
@@ -218,15 +238,15 @@
 #cards .card-database-limitless-btn,
 #cards .card-database-limitless-placeholder {
     width: 100% !important;
-    min-height: 24px !important;
+    min-height: 20px !important;
     border-radius: 6px !important;
-    font-size: 9px !important;
+    font-size: 8px !important;
     font-weight: 700 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
-    padding: 2px 4px !important;
+    padding: 1px 3px !important;
     line-height: 1.1 !important;
 }
 

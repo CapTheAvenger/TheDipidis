@@ -257,12 +257,9 @@
             }
 
             if (!select.value) {
-                const firstDeckOption = Array.from(select.options).find(option => option.value);
-                if (firstDeckOption) {
-                    select.value = firstDeckOption.value;
-                    window.currentCurrentMetaArchetype = firstDeckOption.value;
-                    loadCurrentMetaDeckData(firstDeckOption.value);
-                }
+                // Keep deck selection empty after reload/reset until user picks one.
+                window.currentCurrentMetaArchetype = '';
+                clearCurrentMetaDeckView();
             }
 
             // Enable search functionality

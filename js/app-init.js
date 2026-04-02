@@ -9,7 +9,8 @@
                     'cityLeagueDeck',
                     'currentMetaDeck',
                     'pastMetaDeck',
-                    'cityLeagueFormat'
+                    'cityLeagueFormat',
+                    'averageDisplayMode'
                 ].forEach(key => {
                     try { localStorage.removeItem(key); } catch (_) {}
                 });

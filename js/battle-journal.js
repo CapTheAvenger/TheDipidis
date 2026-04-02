@@ -50,10 +50,17 @@
             opponentArchetype: String(draft?.opponentArchetype || '').trim(),
             bestOf: String(draft?.bestOf || '').trim(),
             turnOrder: String(draft?.turnOrder || '').trim(),
-            result: String(draft?.result || '').trim()
+            result: String(draft?.result || '').trim(),
+            bo3Games: Array.isArray(draft?.bo3Games)
+                ? draft.bo3Games.slice(0, 3).map(game => ({
+                    turnOrder: String(game?.turnOrder || '').trim(),
+                    result: String(game?.result || '').trim()
+                }))
+                : []
         };
 
-        if (!safeDraft.ownDeck && !safeDraft.opponentArchetype && !safeDraft.bestOf && !safeDraft.turnOrder && !safeDraft.result) {
+        const hasBo3Details = safeDraft.bo3Games.some(game => game.turnOrder || game.result);
+        if (!safeDraft.ownDeck && !safeDraft.opponentArchetype && !safeDraft.bestOf && !safeDraft.turnOrder && !safeDraft.result && !hasBo3Details) {
             localStorage.removeItem(BATTLE_JOURNAL_DRAFT_KEY);
             return;
         }
@@ -66,15 +73,19 @@
             sheet: document.getElementById('battleJournalSheet'),
             form: document.getElementById('battleJournalForm'),
             ownDeckValue: document.getElementById('battleJournalOwnDeckValue'),
-            ownDeckSearch: document.getElementById('battleJournalOwnDeckSearch'),
+            ownDeckList: document.getElementById('battleJournalOwnDeckList'),
             opponentValue: document.getElementById('battleJournalOpponentValue'),
-            opponentSearch: document.getElementById('battleJournalOpponentSearch'),
-            ownDeckChoices: document.getElementById('battleJournalOwnDeckChoices'),
-            opponentChoices: document.getElementById('battleJournalOpponentChoices'),
-            opponentExtended: document.getElementById('battleJournalOpponentExtended'),
+            opponentList: document.getElementById('battleJournalOpponentList'),
             bestOfInput: document.getElementById('battleJournalBestOf'),
             turnOrderInput: document.getElementById('battleJournalTurnOrder'),
             resultInput: document.getElementById('battleJournalResult'),
+            bo3Details: document.getElementById('battleJournalBo3Details'),
+            bo3Game1Turn: document.getElementById('battleJournalBo3Game1Turn'),
+            bo3Game1Result: document.getElementById('battleJournalBo3Game1Result'),
+            bo3Game2Turn: document.getElementById('battleJournalBo3Game2Turn'),
+            bo3Game2Result: document.getElementById('battleJournalBo3Game2Result'),
+            bo3Game3Turn: document.getElementById('battleJournalBo3Game3Turn'),
+            bo3Game3Result: document.getElementById('battleJournalBo3Game3Result'),
             statusBadge: document.getElementById('battleJournalStatusBadge'),
             pendingCount: document.getElementById('battleJournalPendingCount'),
             pendingList: document.getElementById('battleJournalPendingList'),
@@ -132,95 +143,76 @@
     }
 
     function getExtendedOpponentChoices() {
-        const top = new Set(getTopOpponentChoices().map(name => name.toLowerCase()));
         return uniqueSorted([
             ...getValuesFromSelect('currentMetaDeckSelect'),
             ...getValuesFromSelect('cityLeagueDeckSelect'),
             ...getValuesFromSelect('pastMetaDeckSelect')
-        ]).filter(name => !top.has(name.toLowerCase())).slice(0, 32);
-    }
-
-    function renderTapGrid(container, field, choices, selectedValue) {
-        if (!container) return;
-        container.innerHTML = choices
-            .map(value => {
-                const safeValue = escapeHtml(value);
-                const isSelected = String(selectedValue || '') === value;
-                return `<button type="button" class="battle-journal-tap-card ${isSelected ? 'is-selected' : ''}" data-field="${escapeHtml(field)}" data-value="${safeValue}">${safeValue}</button>`;
-            })
-            .join('');
-
-        container.querySelectorAll('.battle-journal-tap-card').forEach(button => {
-            button.addEventListener('click', () => {
-                setBattleJournalChoice(field, String(button.dataset.value || ''));
-            });
-        });
-    }
-
-    function filterChoicesBySearch(choices, searchTerm) {
-        if (!searchTerm) return choices;
-        const lower = searchTerm.toLowerCase();
-        return choices.filter(name => name.toLowerCase().includes(lower));
-    }
-
-    function getAllOpponentChoices() {
-        return uniqueSorted([
-            ...getTopOpponentChoices(),
-            ...getExtendedOpponentChoices()
-        ]);
-    }
-
-    function renderOpponentChoices(selectedValue) {
-        const els = battleJournalElements();
-        const searchTerm = String(els.opponentSearch?.value || '').trim();
-        const top = getTopOpponentChoices();
-        const selected = String(selectedValue || '');
-
-        if (searchTerm) {
-            const allChoices = getAllOpponentChoices();
-            const filtered = filterChoicesBySearch(allChoices, searchTerm);
-            renderTapGrid(els.opponentChoices, 'opponentArchetype', filtered, selected);
-            if (els.opponentExtended) {
-                els.opponentExtended.classList.add('d-none');
-                els.opponentExtended.innerHTML = '';
-            }
-            return;
-        }
-
-        const showExtended = selected && !top.includes(selected);
-        const topChoices = [...top, battleJournalText('bj.otherDeck', 'Other...')];
-        renderTapGrid(els.opponentChoices, 'opponentArchetype', topChoices, showExtended ? battleJournalText('bj.otherDeck', 'Other...') : selected);
-
-        if (!els.opponentExtended) return;
-        if (showExtended) {
-            els.opponentExtended.classList.remove('d-none');
-            renderTapGrid(els.opponentExtended, 'opponentArchetype', getExtendedOpponentChoices(), selected);
-        } else {
-            els.opponentExtended.classList.add('d-none');
-            els.opponentExtended.innerHTML = '';
-        }
+        ]).slice(0, 64);
     }
 
     function renderDeckChoices() {
         const els = battleJournalElements();
         const draft = getBattleJournalDraft();
-        const searchTerm = String(els.ownDeckSearch?.value || '').trim();
         const allOwnDeckChoices = uniqueSorted([
             getBattleJournalCurrentOwnDeck(),
             ...getBattleJournalSavedDeckNames(),
             ...getValuesFromSelect('currentMetaDeckSelect'),
             ...getValuesFromSelect('cityLeagueDeckSelect')
         ]);
-        const ownDeckChoices = searchTerm
-            ? filterChoicesBySearch(allOwnDeckChoices, searchTerm)
-            : allOwnDeckChoices.slice(0, 12);
 
-        const ownValue = String(els.ownDeckValue?.value || draft.ownDeck || getBattleJournalCurrentOwnDeck() || ownDeckChoices[0] || '');
+        if (els.ownDeckList) {
+            els.ownDeckList.innerHTML = allOwnDeckChoices
+                .slice(0, 120)
+                .map(name => `<option value="${escapeHtml(name)}"></option>`)
+                .join('');
+        }
+
+        const allOpponentChoices = uniqueSorted([
+            ...getTopOpponentChoices(),
+            ...getExtendedOpponentChoices()
+        ]);
+
+        if (els.opponentList) {
+            els.opponentList.innerHTML = allOpponentChoices
+                .slice(0, 160)
+                .map(name => `<option value="${escapeHtml(name)}"></option>`)
+                .join('');
+        }
+
+        const ownValue = String(els.ownDeckValue?.value || draft.ownDeck || getBattleJournalCurrentOwnDeck() || allOwnDeckChoices[0] || '');
         if (els.ownDeckValue && !els.ownDeckValue.value && ownValue) els.ownDeckValue.value = ownValue;
-        renderTapGrid(els.ownDeckChoices, 'ownDeck', ownDeckChoices, ownValue);
 
-        const opponentValue = String(els.opponentValue?.value || draft.opponentArchetype || '');
-        renderOpponentChoices(opponentValue);
+        const opponentValue = String(els.opponentValue?.value || draft.opponentArchetype || allOpponentChoices[0] || '');
+        if (els.opponentValue && !els.opponentValue.value && opponentValue) els.opponentValue.value = opponentValue;
+    }
+
+    function getBo3GameDetails() {
+        const els = battleJournalElements();
+        return [
+            { turnOrder: String(els.bo3Game1Turn?.value || '').trim(), result: String(els.bo3Game1Result?.value || '').trim() },
+            { turnOrder: String(els.bo3Game2Turn?.value || '').trim(), result: String(els.bo3Game2Result?.value || '').trim() },
+            { turnOrder: String(els.bo3Game3Turn?.value || '').trim(), result: String(els.bo3Game3Result?.value || '').trim() }
+        ];
+    }
+
+    function applyBo3GameDetails(details) {
+        const els = battleJournalElements();
+        const games = Array.isArray(details) ? details : [];
+        const safeGet = (idx, key) => String(games[idx]?.[key] || '').trim();
+
+        if (els.bo3Game1Turn) els.bo3Game1Turn.value = safeGet(0, 'turnOrder');
+        if (els.bo3Game1Result) els.bo3Game1Result.value = safeGet(0, 'result');
+        if (els.bo3Game2Turn) els.bo3Game2Turn.value = safeGet(1, 'turnOrder');
+        if (els.bo3Game2Result) els.bo3Game2Result.value = safeGet(1, 'result');
+        if (els.bo3Game3Turn) els.bo3Game3Turn.value = safeGet(2, 'turnOrder');
+        if (els.bo3Game3Result) els.bo3Game3Result.value = safeGet(2, 'result');
+    }
+
+    function toggleBo3Details() {
+        const els = battleJournalElements();
+        if (!els.bo3Details || !els.bestOfInput) return;
+        const show = String(els.bestOfInput.value || '') === 'bo3';
+        els.bo3Details.classList.toggle('d-none', !show);
     }
 
     function setBattleJournalStatus(status) {
@@ -293,11 +285,14 @@
                 const turnText = entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : battleJournalText('bj.secondShort', '2nd');
                 const bestOfText = entry.bestOf === 'bo3' ? 'BO3' : 'BO1';
                 const title = `${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}`;
+                const bo3Text = entry.bestOf === 'bo3' && Array.isArray(entry.bo3Games) && entry.bo3Games.length === 3
+                    ? ` · G1:${entry.bo3Games[0].turnOrder || '-'}-${entry.bo3Games[0].result || '-'} G2:${entry.bo3Games[1].turnOrder || '-'}-${entry.bo3Games[1].result || '-'} G3:${entry.bo3Games[2].turnOrder || '-'}-${entry.bo3Games[2].result || '-'}`
+                    : '';
                 return `
                     <div class="battle-journal-pending-item">
                         <div class="battle-journal-pending-main">
                             <div class="battle-journal-pending-title">${escapeHtml(title)}</div>
-                            <div class="battle-journal-pending-meta">${escapeHtml(bestOfText)} · ${escapeHtml(turnText)} · ${new Date(entry.createdAtMs || Date.now()).toLocaleString(getLang() === 'de' ? 'de-DE' : 'en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                            <div class="battle-journal-pending-meta">${escapeHtml(bestOfText)} · ${escapeHtml(turnText)}${escapeHtml(bo3Text)} · ${new Date(entry.createdAtMs || Date.now()).toLocaleString(getLang() === 'de' ? 'de-DE' : 'en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
                         </div>
                         <span class="battle-journal-result-pill ${resultClass}">${escapeHtml(resultText)}</span>
                     </div>
@@ -325,18 +320,11 @@
             document.querySelectorAll('.battle-journal-choice[data-field="bestOf"]').forEach(button => {
                 button.classList.toggle('is-selected', button.dataset.value === normalized);
             });
+            toggleBo3Details();
         } else if (field === 'ownDeck' && els.ownDeckValue) {
             els.ownDeckValue.value = normalized;
-            if (els.ownDeckSearch) els.ownDeckSearch.value = '';
-            renderDeckChoices();
         } else if (field === 'opponentArchetype' && els.opponentValue) {
-            const otherLabel = battleJournalText('bj.otherDeck', 'Other...');
-            if (normalized === otherLabel) {
-                renderOpponentChoices(String(els.opponentValue.value || ''));
-            } else {
-                els.opponentValue.value = normalized;
-                renderOpponentChoices(normalized);
-            }
+            els.opponentValue.value = normalized;
         }
 
         persistBattleJournalDraftFromForm();
@@ -349,7 +337,8 @@
             opponentArchetype: String(els.opponentValue?.value || '').trim(),
             bestOf: String(els.bestOfInput?.value || '').trim(),
             turnOrder: String(els.turnOrderInput?.value || '').trim(),
-            result: String(els.resultInput?.value || '').trim()
+            result: String(els.resultInput?.value || '').trim(),
+            bo3Games: getBo3GameDetails()
         };
     }
 
@@ -366,8 +355,7 @@
         if (els.bestOfInput) els.bestOfInput.value = draft.bestOf || '';
         if (els.turnOrderInput) els.turnOrderInput.value = draft.turnOrder || '';
         if (els.resultInput) els.resultInput.value = draft.result || '';
-        if (els.ownDeckSearch) els.ownDeckSearch.value = '';
-        if (els.opponentSearch) els.opponentSearch.value = '';
+        applyBo3GameDetails(draft.bo3Games || []);
 
         renderDeckChoices();
         setBattleJournalChoice('bestOf', draft.bestOf || '');
@@ -383,9 +371,9 @@
         if (els.bestOfInput) els.bestOfInput.value = '';
         if (els.turnOrderInput) els.turnOrderInput.value = '';
         if (els.resultInput) els.resultInput.value = '';
-        if (els.ownDeckSearch) els.ownDeckSearch.value = '';
-        if (els.opponentSearch) els.opponentSearch.value = '';
+        applyBo3GameDetails([]);
         document.querySelectorAll('.battle-journal-choice').forEach(button => button.classList.remove('is-selected'));
+        toggleBo3Details();
         renderDeckChoices();
         saveBattleJournalDraft({ ownDeck: getBattleJournalCurrentOwnDeck() || '' });
     }
@@ -412,6 +400,13 @@
             showToast(battleJournalText('bj.validationResult', 'Please choose the match result.'), 'warning');
             return false;
         }
+        if (values.bestOf === 'bo3') {
+            const hasInvalidBo3Game = (values.bo3Games || []).some(game => !game.turnOrder || !game.result);
+            if (hasInvalidBo3Game) {
+                showToast('Please fill Going and Result for all 3 BO3 games.', 'warning');
+                return false;
+            }
+        }
         return true;
     }
 
@@ -425,6 +420,7 @@
             bestOf: values.bestOf || 'bo1',
             turnOrder: values.turnOrder,
             result: values.result,
+            bo3Games: values.bestOf === 'bo3' ? (values.bo3Games || []) : [],
             createdAtMs: Date.now(),
             sourceTab: activeTab,
             sourceArchetype,
@@ -469,6 +465,7 @@
             bestOf: entry.bestOf || 'bo1',
             turnOrder: entry.turnOrder,
             result: entry.result,
+            bo3Games: Array.isArray(entry.bo3Games) ? entry.bo3Games : [],
             sourceTab: entry.sourceTab || null,
             sourceArchetype: entry.sourceArchetype || null,
             createdAtMs: entry.createdAtMs,
@@ -603,15 +600,17 @@
         renderBattleJournalSummary();
         updateThemeVisual();
 
-        if (els.ownDeckSearch) {
-            els.ownDeckSearch.addEventListener('input', debounce(() => renderDeckChoices(), 250));
+        if (els.ownDeckValue) {
+            els.ownDeckValue.addEventListener('input', () => persistBattleJournalDraftFromForm());
         }
-        if (els.opponentSearch) {
-            els.opponentSearch.addEventListener('input', debounce(() => {
-                const opponentValue = String(els.opponentValue?.value || '');
-                renderOpponentChoices(opponentValue);
-            }, 250));
+        if (els.opponentValue) {
+            els.opponentValue.addEventListener('input', () => persistBattleJournalDraftFromForm());
         }
+        [els.bo3Game1Turn, els.bo3Game1Result, els.bo3Game2Turn, els.bo3Game2Result, els.bo3Game3Turn, els.bo3Game3Result]
+            .filter(Boolean)
+            .forEach(el => el.addEventListener('change', () => persistBattleJournalDraftFromForm()));
+
+        toggleBo3Details();
 
         els.overlay.addEventListener('click', event => {
             if (event.target === els.overlay) closeBattleJournalSheet();

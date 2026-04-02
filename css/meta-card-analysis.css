@@ -165,7 +165,7 @@
 
 #cityLeagueMetaGrid .card-action-row-wide,
 #currentMetaMetaGrid .card-action-row-wide {
-    grid-template-columns: 28px 28px 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .meta-card-analysis-search {
@@ -302,7 +302,7 @@
 
     #cityLeagueMetaGrid .card-action-row-wide,
     #currentMetaMetaGrid .card-action-row-wide {
-        grid-template-columns: 26px 26px 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 

@@ -1,27 +1,6 @@
 // app-deck-builder.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
-(function() {
-    try {
-        const raw = localStorage.getItem('autosave_deck');
-        if (!raw) return;
-
-        const parsed = JSON.parse(raw);
-        if (!parsed || typeof parsed !== 'object') return;
-
-        const hasDeckEntries = ['cityLeague', 'currentMeta', 'pastMeta'].some((scope) => {
-            const deck = parsed?.[scope]?.deck;
-            return deck && typeof deck === 'object' && Object.keys(deck).length > 0;
-        });
-
-        if (hasDeckEntries) {
-            window._pendingAutosave = parsed;
-        }
-    } catch (_) {
-        // Ignore malformed autosave payloads during bootstrap.
-    }
-})();
-
 // On reload we intentionally start fresh for temporary deck-builder state.
 try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         localStorage.removeItem('cityLeagueDeck');

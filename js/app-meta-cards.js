@@ -726,9 +726,7 @@
                 return `
                     <div class="card-item">
                         <div class="card-image-container">
-                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
-                                 onmouseover="showMetaCardTooltip(event, '${cardNameEscaped}', '${archetypesJson}')" 
-                                 onmouseout="hideMetaCardTooltip()">
+                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
@@ -816,51 +814,6 @@
             renderMetaCards(source);
         }
         
-        // Tooltip for Meta Card Analysis - show archetypes
-        let metaCardTooltip = null;
-        
-        function showMetaCardTooltip(event, cardName, archetypesJson) {
-            // Parse archetypes from JSON string
-            const archetypes = JSON.parse(archetypesJson.replace(/&quot;/g, '"'));
-            
-            if (!archetypes || archetypes.length === 0) return;
-            
-            // Create tooltip if it doesn't exist
-            if (!metaCardTooltip) {
-                metaCardTooltip = document.createElement('div');
-                metaCardTooltip.id = 'metaCardTooltip';
-                metaCardTooltip.className = 'meta-card-tooltip';
-                document.body.appendChild(metaCardTooltip);
-            }
-            
-            // Build tooltip content
-            const title = `<div style="font-weight: bold; margin-bottom: 8px; color: #ffd700; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 6px;">${escapeHtml(cardName)}</div>`;
-            const archetypeItems = archetypes
-                .sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage))
-                .map(a => `
-                    <div class="meta-card-tooltip-archetype-row">
-                        <span class="meta-card-tooltip-archetype-name">${escapeHtml(a.name)}</span>
-                        <span class="meta-card-tooltip-archetype-pct">${escapeHtml(a.percentage)}%</span>
-                    </div>
-                `).join('');
-            
-            metaCardTooltip.innerHTML = title + '<div style="font-size: 0.9em; color: #aaa; margin-bottom: 6px;">Used in archetypes:</div>' + archetypeItems;
-                        metaCardTooltip.innerHTML = `<div class="meta-card-tooltip-title">${escapeHtml(cardName)}</div><div class="meta-card-tooltip-desc">Used in archetypes:</div>${archetypeItems}`;
-            metaCardTooltip.classList.remove('d-none');
-            
-            // Position tooltip near mouse
-            const x = event.clientX + 15;
-            const y = event.clientY + 15;
-            
-            metaCardTooltip.style.left = `${x}px`;
-            metaCardTooltip.style.top = `${y}px`;
-        }
-        
-        function hideMetaCardTooltip() {
-            if (metaCardTooltip) {
-                metaCardTooltip.classList.add('d-none');
-            }
-        }
         
         function searchDeckCards(source = 'cityLeague') {
             const searchInputId = source === 'cityLeague' ? 'cityLeagueDeckCardSearch' : 

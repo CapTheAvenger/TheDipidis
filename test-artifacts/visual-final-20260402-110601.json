@@ -1,0 +1,359 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\playwright.visual-nonmeta.config.js",
+    "rootDir": "C:/Users/haush/OneDrive/Desktop/Hausi´s Pokemon TCG Analysis/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/haush/OneDrive/Desktop/Hausi´s Pokemon TCG Analysis/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/haush/OneDrive/Desktop/Hausi´s Pokemon TCG Analysis/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json",
+        {
+          "outputFile": "visual-nonmeta-report.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.0",
+    "workers": 1,
+    "webServer": {
+      "command": "python -m http.server 8000",
+      "url": "http://127.0.0.1:8000/index.html",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "visual-regression.spec.js",
+      "file": "visual-regression.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Card Action Buttons",
+          "file": "visual-regression.spec.js",
+          "line": 35,
+          "column": 6,
+          "specs": [
+            {
+              "title": "card action buttons are equal width in both rows",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5470,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T09:06:03.271Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-d099eb28c49e5bd8a1f3",
+              "file": "visual-regression.spec.js",
+              "line": 44,
+              "column": 5
+            },
+            {
+              "title": "card action buttons screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5322,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T09:06:08.985Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-a4b1c9cda3c878084fc1",
+              "file": "visual-regression.spec.js",
+              "line": 72,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Navigation",
+          "file": "visual-regression.spec.js",
+          "line": 82,
+          "column": 6,
+          "specs": [
+            {
+              "title": "pokeball menu dropdown screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3671,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T09:06:14.322Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-0358dd6edf279e5dd311",
+              "file": "visual-regression.spec.js",
+              "line": 83,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "City League Tab",
+          "file": "visual-regression.spec.js",
+          "line": 99,
+          "column": 6,
+          "specs": [
+            {
+              "title": "hero archetype grid screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2883,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T09:06:18.007Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-cf47bab4c4deb5240d29",
+              "file": "visual-regression.spec.js",
+              "line": 106,
+              "column": 5
+            },
+            {
+              "title": "archetype table screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2760,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T09:06:20.906Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-81dc8ddfe976964bdeb0",
+              "file": "visual-regression.spec.js",
+              "line": 112,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Rarity Switcher Modal",
+          "file": "visual-regression.spec.js",
+          "line": 180,
+          "column": 6,
+          "specs": [
+            {
+              "title": "rarity switcher modal screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9363,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T09:06:23.679Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-5a7ddee501aeab6a07c2",
+              "file": "visual-regression.spec.js",
+              "line": 181,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Cards Database Tab",
+          "file": "visual-regression.spec.js",
+          "line": 204,
+          "column": 6,
+          "specs": [
+            {
+              "title": "cards database grid screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 16992,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T09:06:33.056Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-d4faeaed4752fafba7c5",
+              "file": "visual-regression.spec.js",
+              "line": 205,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-02T09:06:02.544Z",
+    "duration": 47870.314,
+    "expected": 7,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

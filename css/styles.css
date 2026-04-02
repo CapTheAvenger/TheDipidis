@@ -5667,6 +5667,27 @@ details[open] > .tier-trending-summary::after {
     gap: 12px;
 }
 
+.battle-journal-bo3-details {
+    border: 1px solid rgba(31, 45, 61, 0.12);
+    border-radius: 12px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.battle-journal-bo3-row {
+    display: grid;
+    grid-template-columns: 76px 1fr 1fr;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.battle-journal-bo3-game {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-light);
+}
+
 .battle-journal-choice-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5850,7 +5871,8 @@ details[open] > .tier-trending-summary::after {
 
 .battle-journal-sheet.is-dark .battle-journal-pending-item,
 .battle-journal-sheet.is-dark .battle-journal-empty-state,
-.battle-journal-sheet.is-dark .battle-journal-tap-card {
+.battle-journal-sheet.is-dark .battle-journal-tap-card,
+.battle-journal-sheet.is-dark .battle-journal-bo3-details {
     background: rgba(15, 23, 42, 0.8);
     color: #eef4ff;
     border-color: rgba(148, 163, 184, 0.24);
@@ -6041,6 +6063,10 @@ body.battle-journal-open {
     }
 
     .battle-journal-choice-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .battle-journal-bo3-row {
         grid-template-columns: 1fr;
     }
 

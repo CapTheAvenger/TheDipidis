@@ -36,13 +36,11 @@ const SHELL_ASSETS = [
   './js/app-init.js',
   './js/app-current-meta-analysis.js',
   './js/app-features.js',
-  './js/archetype-tooltips.js',
   './js/battle-journal.js',
   './js/meta-binder.js',
   './js/draw-simulator.js',
   './js/combo-worker.js',
   './js/app-calculator.js',
-  './js/card-tooltips.js',
   './js/card-data-cache.js',
   './js/error-tracking.js',
   './images/pokeball-icon.png'

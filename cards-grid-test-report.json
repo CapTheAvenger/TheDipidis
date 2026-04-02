@@ -1,0 +1,150 @@
+﻿{
+  "config": {
+    "configFile": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\playwright.visual-nonmeta.config.js",
+    "rootDir": "C:/Users/haush/OneDrive/Desktop/Hausi┬┤s Pokemon TCG Analysis/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/haush/OneDrive/Desktop/Hausi┬┤s Pokemon TCG Analysis/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/haush/OneDrive/Desktop/Hausi┬┤s Pokemon TCG Analysis/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.0",
+    "workers": 1,
+    "webServer": {
+      "command": "python -m http.server 8000",
+      "url": "http://127.0.0.1:8000/index.html",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "visual-regression.spec.js",
+      "file": "visual-regression.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Cards Database Tab",
+          "file": "visual-regression.spec.js",
+          "line": 204,
+          "column": 6,
+          "specs": [
+            {
+              "title": "cards database grid screenshot matches baseline",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 32136,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.card-database-card') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.card-database-card') to be visible\u001b[22m\n\n    at C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js:211:20",
+                        "location": {
+                          "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                          "column": 20,
+                          "line": 211
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 209 |\u001b[39m         \u001b[36mawait\u001b[39m goToTab(page\u001b[33m,\u001b[39m \u001b[32m'cards'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 210 |\u001b[39m         \u001b[90m// Wait for at least one card to render.\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 211 |\u001b[39m         \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'.card-database-card'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m30\u001b[39m_000 })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 212 |\u001b[39m\n \u001b[90m 213 |\u001b[39m         \u001b[36mconst\u001b[39m grid \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'#cardsGrid'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 214 |\u001b[39m         \u001b[36mawait\u001b[39m expect(grid)\u001b[33m.\u001b[39mtoHaveScreenshot(\u001b[32m'cards-database-grid.png'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                            "column": 20,
+                            "line": 211
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.card-database-card') to be visible\u001b[22m\n\n\n  209 |         await goToTab(page, 'cards');\n  210 |         // Wait for at least one card to render.\n> 211 |         await page.waitForSelector('.card-database-card', { timeout: 30_000 });\n      |                    ^\n  212 |\n  213 |         const grid = page.locator('#cardsGrid').first();\n  214 |         await expect(grid).toHaveScreenshot('cards-database-grid.png');\n    at C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js:211:20"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-02T08:40:07.460Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\test-results\\visual-regression-Cards-Da-4ffe4-screenshot-matches-baseline\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi┬┤s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                        "column": 20,
+                        "line": 211
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-d4faeaed4752fafba7c5",
+              "file": "visual-regression.spec.js",
+              "line": 205,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-02T08:40:06.830Z",
+    "duration": 33168.467,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

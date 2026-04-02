@@ -1386,6 +1386,43 @@
         deltaEl.innerHTML = `<div class="meta-binder-archetype-groups">${html}</div>`;
     }
 
+    function closeMetaBinderDroppedModal() {
+        const modal = document.getElementById('metaBinderDroppedModal');
+        if (!modal) return;
+        modal.classList.add('display-none');
+    }
+
+    function openMetaBinderDroppedModal() {
+        const modal = document.getElementById('metaBinderDroppedModal');
+        const listEl = document.getElementById('metaBinderDroppedList');
+        const countEl = document.getElementById('metaBinderDroppedCount');
+        if (!modal || !listEl || !countEl) return;
+
+        const droppedCards = Array.isArray(window._metaBinderDroppedCards)
+            ? window._metaBinderDroppedCards
+            : [];
+
+        countEl.textContent = String(droppedCards.length);
+
+        if (droppedCards.length === 0) {
+            listEl.innerHTML = `<div class="battle-journal-empty-state">${mbText('mb.noDroppedCards', 'No dropped cards this cycle.')}</div>`;
+        } else {
+            listEl.innerHTML = droppedCards
+                .slice()
+                .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
+                .map(card => {
+                    const name = escapeHtml(String(card.name || 'Unknown'));
+                    const set = escapeHtml(String(card.set || ''));
+                    const number = escapeHtml(String(card.number || ''));
+                    const id = escapeHtml(String(card.cardId || ''));
+                    return `<div class="battle-journal-pending-item"><div class="battle-journal-pending-main"><div class="battle-journal-pending-title">${name}</div><div class="battle-journal-pending-meta">${set && number ? `${set} ${number}` : id}</div></div></div>`;
+                })
+                .join('');
+        }
+
+        modal.classList.remove('display-none');
+    }
+
     // ── Render ──
     function renderMetaBinder(delta) {
         const grid = document.getElementById('metaBinderGrid');
@@ -1395,6 +1432,7 @@
         if (!grid) return;
 
         const { cards, droppedCards } = delta;
+        window._metaBinderDroppedCards = droppedCards;
         const totalUnique = cards.length;
         const totalCopies = cards.reduce((s, c) => s + c.maxCount, 0);
         const missingUnique = cards.filter(c => c.missing > 0).length;
@@ -1427,10 +1465,10 @@
                     <span class="meta-binder-stat-value" style="color:#3B4CCA">${newCount}</span>
                     <span class="meta-binder-stat-label">${mbText('mb.newThisWeek', 'New This Week')}</span>
                 </div>
-                <div class="meta-binder-stat">
+                <button class="meta-binder-stat meta-binder-stat-clickable" type="button" onclick="openMetaBinderDroppedModal()" title="${mbText('mb.openDroppedModal', 'Show dropped cards')}">
                     <span class="meta-binder-stat-value" style="color:#e67e22">${droppedCount}</span>
                     <span class="meta-binder-stat-label">${mbText('mb.droppedCount', 'Dropped')}</span>
-                </div>`;
+                </button>`;
         }
 
             renderMetaBinderArchetypeGroups(deltaEl);
@@ -1795,4 +1833,6 @@
     window.metaBinderProxyNewCards = metaBinderProxyNewCards;
     window.setMetaBinderFilter = setMetaBinderFilter;
     window.applyComplexMetaFilter = applyComplexMetaFilter;
+    window.openMetaBinderDroppedModal = openMetaBinderDroppedModal;
+    window.closeMetaBinderDroppedModal = closeMetaBinderDroppedModal;
 })();

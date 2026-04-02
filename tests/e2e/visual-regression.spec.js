@@ -106,8 +106,21 @@ test.describe('City League Tab', () => {
     test('hero archetype grid screenshot matches baseline', async ({ page }) => {
         const heroGrid = page.locator('.tier-hero-grid').first();
         await expect(heroGrid).toBeVisible({ timeout: 30_000 });
-        // Hero card text can reflow by ~1-2px across OS/font stacks; keep this snapshot tolerant to tiny shifts.
-        await expect(heroGrid).toHaveScreenshot('city-league-hero-grid.png', {
+
+        const box = await heroGrid.boundingBox();
+        expect(box).not.toBeNull();
+
+        // Use a fixed-height clip to avoid cross-platform locator screenshot rounding (139/141/142px).
+        const clip = {
+            x: Math.max(0, Math.round(box.x)),
+            y: Math.max(0, Math.round(box.y)),
+            width: Math.round(box.width),
+            height: 141,
+        };
+
+        // Hero text can still reflow slightly across OS/font stacks.
+        await expect(page).toHaveScreenshot('city-league-hero-grid.png', {
+            clip,
             maxDiffPixelRatio: 0.04,
         });
     });

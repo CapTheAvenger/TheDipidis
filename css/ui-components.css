@@ -2256,126 +2256,68 @@
     gap: 15px;
 }
 /* Compact mobile/desktop archetype tables and cells */
-.city-league-info-table-row-mobile {
-    border-bottom: 1px solid #ecf0f1;
-    transition: background 0.2s;
-    cursor: pointer;
-}
-.city-league-info-table-row-mobile:hover,
-.city-league-info-table-row-mobile:focus {
-    background: #f0f8ff;
-    outline: none;
-}
-.city-league-info-table-cell-main-mobile {
-    font-size: 0.85em;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-.city-league-info-table-count-change-mobile {
-    font-weight: bold;
-    font-size: 0.8em;
-}
-.city-league-info-table-placement-mobile {
-    font-weight: bold;
-    font-size: 0.8em;
-}
-.city-league-info-table-row-desktop {
-    border-bottom: 1px solid #ecf0f1;
-    transition: background 0.2s;
-    cursor: pointer;
-}
-.city-league-info-table-row-desktop:hover,
-.city-league-info-table-row-desktop:focus {
-    background: #f0f8ff;
-    outline: none;
-}
-.city-league-info-table-cell-main-desktop {
-}
-.city-league-info-table-count-change-desktop {
-    font-size: 0.9em;
-    font-weight: bold;
-}
-.city-league-info-table-placement-desktop {
-    font-weight: bold;
-    font-size: 0.9em;
-}
-/* Desktop city league info table and cells */
-.city-league-info-table-desktop {
-    /* Inherits base table styles */
-}
-.city-league-info-table-row-desktop {
-    border-bottom: 1px solid #ecf0f1;
-    transition: background 0.2s;
-    cursor: pointer;
-}
-.city-league-info-table-row-desktop:hover,
-.city-league-info-table-row-desktop:focus {
-    background: #f8f9fa;
-    outline: none;
-}
-.city-league-info-table-cell-main-desktop {
-    color: #3498db;
-    cursor: pointer;
-    text-decoration: underline;
-}
-.city-league-info-table-cell-variants-desktop {
-    color: #555;
-    font-weight: 600;
-}
-.city-league-info-table-cell-count-desktop {
-}
-.city-league-info-table-count-change-desktop {
-    font-size: 0.9em;
-    font-weight: bold;
-}
-.city-league-info-table-cell-placement-desktop {
-}
-.city-league-info-table-placement-desktop {
-    font-weight: bold;
-    font-size: 0.9em;
-}
-/* Mobile city league info table and cells */
 .city-league-info-table-mobile {
-    font-size: 0.68em;
+    font-size: 0.72em;
     table-layout: fixed;
 }
+
 .city-league-info-col-main {
     width: 55%;
 }
+
 .city-league-info-col-variants,
 .city-league-info-col-count,
 .city-league-info-col-placement {
     width: 22.5%;
 }
-.city-league-info-table-row-mobile {
-    border-bottom: 1px solid #ecf0f1;
+
+.city-league-info-table-row-mobile,
+.city-league-info-table-row-desktop {
+    transition: background-color 0.2s ease, transform 0.12s ease;
+    cursor: pointer;
 }
+
+.city-league-info-table-row-mobile:hover,
+.city-league-info-table-row-mobile:focus,
+.city-league-info-table-row-desktop:hover,
+.city-league-info-table-row-desktop:focus {
+    outline: none;
+}
+
 .city-league-info-table-cell-main-mobile {
-    font-size: 0.85em;
+    font-size: 0.9em;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    color: #3498db;
-    cursor: pointer;
-    text-decoration: underline;
 }
+
 .city-league-info-table-cell-variants-mobile {
-    color: #555;
-    font-size: 0.85em;
+    font-size: 0.86em;
     font-weight: 600;
+    color: #445268;
 }
-.city-league-info-table-cell-count-mobile {
-    font-size: 0.85em;
-}
-.city-league-info-table-count-change-mobile {
-    font-weight: bold;
-    font-size: 0.8em;
-}
+
+.city-league-info-table-cell-count-mobile,
 .city-league-info-table-cell-placement-mobile {
-    font-size: 0.85em;
+    font-size: 0.86em;
 }
-.city-league-info-table-placement-mobile {
-    font-weight: bold;
-    font-size: 0.8em;
+
+.city-league-info-table-count-change-mobile,
+.city-league-info-table-placement-mobile,
+.city-league-info-table-count-change-desktop,
+.city-league-info-table-placement-desktop {
+    font-weight: 700;
+    font-size: 0.88em;
+}
+
+.city-league-info-table-cell-main-desktop,
+.city-league-info-table-cell-main-mobile {
+    color: inherit;
+    text-decoration: none;
+}
+
+.city-league-info-table-cell-variants-desktop {
+    color: #445268;
+    font-weight: 600;
 }
 /* Modular city league info wide flex blocks and search */
 .city-league-info-flex-block-wide {
@@ -2426,53 +2368,58 @@
     margin-bottom: 24px;
 }
 .city-league-info-table-title {
-    color: #34495e;
-    border-bottom: 3px solid #3498db;
+    color: #1f2d3d;
+    border-bottom: 2px solid #2f80c7;
     padding-bottom: 10px;
     margin-bottom: 20px;
-    font-size: 1.2em;
-    font-weight: 600;
+    font-size: 1.18em;
+    font-weight: 700;
 }
 .city-league-info-table {
+    --cl-table-head-bg: linear-gradient(120deg, #143a6f 0%, #245fa5 100%);
+    --cl-table-row-even: #f6f9ff;
+    --cl-table-row-hover: #e9f2ff;
+    --cl-table-border: #d7e2f0;
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 24px rgba(17, 39, 66, 0.08);
     background: white;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    border: 1px solid #dbe4f1;
+    border: 1px solid var(--cl-table-border);
 }
 .city-league-info-table-header-row {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--cl-table-head-bg);
     color: white;
 }
 .city-league-info-table-header {
-    padding: 12px;
+    padding: 13px 14px;
     text-align: center;
-    font-weight: 600;
-    font-size: 1em;
+    font-weight: 700;
+    font-size: 0.96em;
+    letter-spacing: 0.02em;
     vertical-align: middle;
 }
 .city-league-info-table-header-archetype {
     text-align: left;
 }
 .city-league-info-table-row {
-    border-bottom: 1px solid #ecf0f1;
-    transition: background 0.2s;
+    border-bottom: 1px solid #e4ebf6;
+    transition: background-color 0.2s ease;
     cursor: pointer;
 }
 .city-league-info-table tbody .city-league-info-table-row:nth-child(even) {
-    background: #f8fbff;
+    background: var(--cl-table-row-even);
 }
 .city-league-info-table-row:focus,
 .city-league-info-table-row:hover {
-    background: #f0f8ff;
+    background: var(--cl-table-row-hover);
     outline: none;
 }
 .city-league-info-table-cell {
-    padding: 12px;
-    font-size: 1em;
+    padding: 12px 14px;
+    font-size: 0.95em;
     vertical-align: middle;
 }
 .city-league-info-table-cell-archetype {
@@ -2488,12 +2435,12 @@
     /* color/bold restricted to the change span — cell itself stays neutral */
 }
 .city-league-info-table-count-change {
-    color: #555;
-    font-size: 0.9em;
+    color: #4c5f78;
+    font-size: 0.88em;
     font-weight: 600;
 }
 .city-league-info-table-placement {
-    font-weight: bold;
+    font-weight: 700;
     color: var(--placement-color, inherit);
 }
 
@@ -2518,9 +2465,9 @@
 #cityLeagueCombinedTable {
     border-radius: 14px;
     overflow: hidden;
-    border: 1px solid #d9e2ee;
+    border: 1px solid #d7e2f0;
     background: #ffffff;
-    box-shadow: 0 8px 20px rgba(18, 42, 66, 0.08);
+    box-shadow: 0 12px 26px rgba(18, 42, 66, 0.1);
 }
 
 #cityLeagueFullTable .city-league-info-table,
@@ -2534,12 +2481,12 @@
 
 #cityLeagueFullTable .city-league-info-table-header-row,
 #cityLeagueCombinedTable .city-league-info-table-header-row {
-    background: linear-gradient(135deg, #274b8a 0%, #1e3c72 100%);
+    background: linear-gradient(120deg, #15396b 0%, #2a5f9d 100%);
 }
 
 #cityLeagueFullTable .city-league-info-table-row:nth-child(even),
 #cityLeagueCombinedTable .city-league-info-table-row:nth-child(even) {
-    background: #f7fbff;
+    background: #f4f8ff;
 }
 
 #cityLeagueFullTable .city-league-info-table-cell,
@@ -2555,7 +2502,7 @@
 
 #cityLeagueFullTable .city-league-info-table-row,
 #cityLeagueCombinedTable .city-league-info-table-row {
-    border-bottom: 1px solid #e6edf7;
+    border-bottom: 1px solid #dfe8f5;
 }
 
 #cityLeagueFullTable .city-league-info-table-row:last-child,

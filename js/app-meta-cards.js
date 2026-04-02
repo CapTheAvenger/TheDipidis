@@ -274,6 +274,7 @@
                     const totalCount = parseFloat(String(row.total_count || '0').replace(',', '.')) || 0;
                     const avgCountWhenUsed = parseFloat(String(row.average_count || row.avg_count || '0').replace(',', '.')) || 0;
                     const avgCountOverall = parseFloat(String(row.average_count_overall || '0').replace(',', '.')) || 0;
+                    const sampledDecksInArchetype = parseFloat(String(row.total_decks_in_archetype || '0').replace(',', '.')) || 0;
                     const archetypeDeckCount = archetypeMap[archetypeLower] || 0;
                     const safePercentage = Math.min(100, Math.max(0, percentage));
                     
@@ -312,13 +313,34 @@
 
                     const archetypeEntry = cardArchetypeMap[cardName].byArchetype[archetypeLower];
 
-                    if (deckCount > 0) {
+                    const estimatedDecksFromPct = (safePercentage > 0 && archetypeDeckCount > 0)
+                        ? (safePercentage / 100) * archetypeDeckCount
+                        : 0;
+                    const estimatedDecksFromSample = (deckCount > 0 && sampledDecksInArchetype > 0 && archetypeDeckCount > 0)
+                        ? (deckCount / sampledDecksInArchetype) * archetypeDeckCount
+                        : 0;
+                    const estimatedDecksResolved = Math.max(estimatedDecksFromPct, estimatedDecksFromSample);
+
+                    if (estimatedDecksResolved > 0) {
+                        archetypeEntry.estimatedDecksWithCard += estimatedDecksResolved;
+                    } else if (deckCount > 0) {
                         archetypeEntry.estimatedDecksWithCard += deckCount;
                     } else if (safePercentage > 0 && archetypeDeckCount > 0) {
                         archetypeEntry.fallbackPercentages.push(safePercentage);
                     }
 
-                    if (totalCount > 0) {
+                    const scaledCopiesFromAvgOverall = (avgCountOverall > 0 && archetypeDeckCount > 0)
+                        ? avgCountOverall * archetypeDeckCount
+                        : 0;
+                    const scaledCopiesFromSampleTotal = (totalCount > 0 && sampledDecksInArchetype > 0 && archetypeDeckCount > 0)
+                        ? (totalCount / sampledDecksInArchetype) * archetypeDeckCount
+                        : 0;
+
+                    if (scaledCopiesFromAvgOverall > 0) {
+                        archetypeEntry.totalCopies += scaledCopiesFromAvgOverall;
+                    } else if (scaledCopiesFromSampleTotal > 0) {
+                        archetypeEntry.totalCopies += scaledCopiesFromSampleTotal;
+                    } else if (totalCount > 0) {
                         archetypeEntry.totalCopies += totalCount;
                     } else {
                         let copiesPerDeckWhenUsed = 0;
@@ -539,11 +561,16 @@
                 });
                 globalRarityPreference = previousGlobalRarityPreference;
                 
-                metaCardData[source] = mergedMetaCards;
+                // Current Meta Top 10 view: show only cards used in at least 40% of Top 10 decks.
+                const finalCards = source === 'currentMeta'
+                    ? mergedMetaCards.filter(card => card.metaShare >= 40)
+                    : mergedMetaCards;
+
+                metaCardData[source] = finalCards;
                 setMetaDebugStats(source, {
                     loadedRows: allAnalysisData.length,
                     matchedRows: top10AnalysisData.length,
-                    aggregatedCards: mergedMetaCards.length,
+                    aggregatedCards: finalCards.length,
                     usedFallback: usedTop10Fallback
                 });
                 
@@ -1464,8 +1491,8 @@
                 let currentFormat = 'TEF-POR'; // Default fallback
                 try {
                     const settingsPaths = [
-                        './current_meta_analysis_settings.json?t=' + Date.now(),
-                        './config/current_meta_analysis_settings.json?t=' + Date.now()
+                        './config/current_meta_analysis_settings.json?t=' + Date.now(),
+                        './current_meta_analysis_settings.json?t=' + Date.now()
                     ];
                     for (const settingsPath of settingsPaths) {
                         const settingsResponse = await fetch(settingsPath);

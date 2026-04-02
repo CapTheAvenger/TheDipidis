@@ -131,6 +131,49 @@
             } else if (currentMetaFormatFilter === 'play') {
                 filteredData = data.filter(row => row.meta === 'Meta Play!');
                 devLog(`Filtered archetypes to Major Tournament only: ${filteredData.length} rows`);
+
+                if (filteredData.length === 0) {
+                    if (!window.currentMetaTournamentCardsData) {
+                        window.currentMetaTournamentCardsData = await loadCSV('tournament_cards_data_cards.csv');
+                    }
+
+                    const tournamentRows = Array.isArray(window.currentMetaTournamentCardsData)
+                        ? window.currentMetaTournamentCardsData
+                        : [];
+                    const perArchetypeTournamentCounts = new Map();
+
+                    tournamentRows.forEach(row => {
+                        const rawArchetype = normalizeCurrentMetaTournamentArchetypeName(row.archetype);
+                        if (!rawArchetype) return;
+
+                        const tournamentKey = String(row.tournament_id || row.tournament_name || '').trim();
+                        if (!tournamentKey) return;
+
+                        const normalizedKey = normalizeCurrentMetaArchetypeKey(rawArchetype) || rawArchetype.toLowerCase();
+                        const deckCount = parseInt(row.total_decks_in_archetype || 0, 10) || 0;
+
+                        if (!perArchetypeTournamentCounts.has(normalizedKey)) {
+                            perArchetypeTournamentCounts.set(normalizedKey, {
+                                name: rawArchetype,
+                                tournaments: new Map()
+                            });
+                        }
+
+                        const archetypeEntry = perArchetypeTournamentCounts.get(normalizedKey);
+                        const existingCount = archetypeEntry.tournaments.get(tournamentKey) || 0;
+                        if (deckCount > existingCount) {
+                            archetypeEntry.tournaments.set(tournamentKey, deckCount);
+                        }
+                    });
+
+                    filteredData = Array.from(perArchetypeTournamentCounts.values()).map(entry => ({
+                        archetype: entry.name,
+                        total_decks_in_archetype: Array.from(entry.tournaments.values()).reduce((sum, count) => sum + count, 0),
+                        meta: 'Meta Play!'
+                    }));
+
+                    devLog(`Built Major Tournament archetype list from tournament CSV: ${filteredData.length} archetypes`);
+                }
             }
 
             devLog(`Building archetype list from ${filteredData.length} rows...`);

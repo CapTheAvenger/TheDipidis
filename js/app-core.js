@@ -1409,7 +1409,7 @@ const BASE_PATH = './data/';
             devLog('🔍 Navigating to Current Meta with deck:', archetypeName);
             
             // Switch to Current Meta Analysis tab
-            switchTab('current-meta-analysis');
+            switchTab('current-analysis');
             
             // Wait for dropdown to be populated with data
             let attempts = 0;

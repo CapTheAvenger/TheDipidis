@@ -140,6 +140,11 @@
     gap: 8px;
 }
 
+#currentMetaMetaGrid {
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    gap: 6px;
+}
+
 #cityLeagueMetaGrid .card-info-bottom,
 #currentMetaMetaGrid .card-info-bottom {
     padding: 4px;
@@ -161,6 +166,16 @@
 #cityLeagueMetaGrid .card-action-row,
 #currentMetaMetaGrid .card-action-row {
     gap: 2px;
+}
+
+#currentMetaMetaGrid .card-info-text {
+    font-size: 0.8em;
+}
+
+#currentMetaMetaGrid .card-action-btn {
+    height: 16px;
+    font-size: 7px;
+    padding: 0 1px;
 }
 
 #cityLeagueMetaGrid .card-action-row-wide,

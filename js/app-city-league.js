@@ -493,7 +493,7 @@
                 // Performance Improvers
                 html += `
                     <div class="city-league-info-flex-block">
-                        <h2 class="city-league-info-table-title">? ${t('cl.perfImprovers')}</h2>
+                        <h2 class="city-league-info-table-title">${t('cl.perfImprovers')}</h2>
                         <table class="city-league-info-table">
                             <thead>
                                 <tr class="city-league-info-table-header-row">

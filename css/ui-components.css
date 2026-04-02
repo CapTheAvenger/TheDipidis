@@ -2267,7 +2267,6 @@
     outline: none;
 }
 .city-league-info-table-cell-main-mobile {
-    font-weight: bold;
     font-size: 0.85em;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -2291,7 +2290,6 @@
     outline: none;
 }
 .city-league-info-table-cell-main-desktop {
-    font-weight: bold;
 }
 .city-league-info-table-count-change-desktop {
     font-size: 0.9em;
@@ -2316,7 +2314,6 @@
     outline: none;
 }
 .city-league-info-table-cell-main-desktop {
-    font-weight: bold;
     color: #3498db;
     cursor: pointer;
     text-decoration: underline;
@@ -2354,7 +2351,6 @@
     border-bottom: 1px solid #ecf0f1;
 }
 .city-league-info-table-cell-main-mobile {
-    font-weight: bold;
     font-size: 0.85em;
     word-wrap: break-word;
     overflow-wrap: break-word;

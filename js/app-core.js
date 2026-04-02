@@ -174,14 +174,67 @@ const BASE_PATH = './data/';
                 title: '\ud83d\udc64 User Profile',
                 html: '<p>Manage your personal card collection, saved decks, and settings.</p><ul><li><strong>My Collection:</strong> Exact print counts (set+number) synced to Firebase</li><li><strong>Dex Import:</strong> CSV import supports set-name mapping and id-based number parsing</li><li><strong>My Decks:</strong> Per-card badges show exact owned count for that print</li><li><strong>\u2728 Indicator:</strong> Shows when other international prints of same card exist in your collection</li><li><strong>Rarity Switcher (\u2605):</strong> Swap print directly from saved deck cards</li><li><strong>Compare (\u2696\ufe0f):</strong> Choose source (paste Limitless/PTCGL or search saved decks)</li><li><strong>Compare Mode:</strong> Functional (prints merged) or Exact print</li><li><strong>Wishlist + Settings:</strong> Manage targets and account preferences</li></ul>'
             },
+            'calculator': {
+                title: '\ud83e\uddee Probability Calculator',
+                html: '<p>Calculate draw, prize, and topdeck odds for your deck.</p><ul><li><strong>Draw Chance:</strong> Probability to see at least one copy in drawn cards</li><li><strong>Prize Chance:</strong> Probability that at least one copy is in your prizes</li><li><strong>Topdeck Chance:</strong> Probability your next draw is the target card</li><li><strong>Inputs:</strong> Copies in deck, cards drawn, and already-in-hand correction</li></ul>'
+            },
             'tutorial': {
                 title: '\ud83d\udcd6 How to Use',
                 html: '<p>Comprehensive guide to all features of this website.</p><ul><li><strong>Tab Guides:</strong> Detailed instructions for every section</li><li><strong>Latest Changes:</strong> Includes exact-print collection badges, \u2728 other-print indicator, robust \u2605 print swapping, and upgraded deck compare</li><li><strong>Compare Notes:</strong> Paste parser live preview + Functional/Exact compare modes</li><li><strong>Import Notes:</strong> Dex CSV set-name + set-number matching behavior explained</li></ul>'
             }
         };
 
+        const TAB_HELP_CONTENT_DE = {
+            'city-league': {
+                title: '\ud83c\uddef\ud83c\uddf5 City League Entwicklung',
+                html: '<p>Zeigt Trends der Archetyp-Popularitaet aus japanischen City-League-Turnieren.</p><ul><li><strong>Diagramm:</strong> Verfolgt Deck-Archetypen ueber die Zeit</li><li><strong>Format-Filter:</strong> Wechsel zwischen M4 (aktuell) und M3 (Archiv)</li><li><strong>Legenden-Toggle:</strong> Archetypen ein- und ausblenden</li><li><strong>Deck-Builder-Sync:</strong> Archetyp oeffnen und direkt zur Deck-Analyse wechseln</li></ul>'
+            },
+            'city-league-analysis': {
+                title: '\ud83e\udd85 City League Deck-Analyse',
+                html: '<p>Durchsuche und analysiere einzelne Decklisten aus City-League-Turnieren.</p><ul><li><strong>Archetyp- und Datumsfilter:</strong> Daten schnell eingrenzen</li><li><strong>Deck Builder:</strong> Karten hinzufuegen/entfernen und 60-Karten-Deck bauen</li><li><strong>Seltenheits-Wechsler (\u2605):</strong> Prints direkt in Deck und Uebersicht wechseln</li><li><strong>Exakter Print-Tausch:</strong> Wechsel aktualisiert den Deck-Eintrag (Set+Nummer)</li><li><strong>Deck kopieren:</strong> Export im Pokemon-TCG-Live-Format</li></ul>'
+            },
+            'current-meta': {
+                title: '\ud83c\udfae Limitless-Online-Vergleich',
+                html: '<p>Vergleicht Meta-Anteile von Archetypen zwischen verschiedenen Turnierquellen.</p><ul><li><strong>Nebeneinander-Vergleich:</strong> Online vs. Turnierergebnisse</li><li><strong>Diagramme:</strong> Kreis- und Balkenansichten</li><li><strong>Meta-Share %:</strong> Schnellueberblick zur Popularitaet</li><li><strong>Fallback:</strong> Fehlt current_meta_card_data.csv, nutzt die App automatisch tournament_cards_data_cards.csv</li></ul>'
+            },
+            'current-analysis': {
+                title: '\ud83d\udcc8 Aktuelle-Meta Deck-Analyse',
+                html: '<p>Analysiere Decklisten aus aktuellen Limitless-Online-Turnieren.</p><ul><li><strong>Archetyp-Filter:</strong> Decks nach Archetyp durchsuchen</li><li><strong>Kartenverteilung:</strong> Meistgespielte Karten und Nutzung</li><li><strong>Deck Builder:</strong> Decks interaktiv bauen und anpassen</li><li><strong>Seltenheits-Wechsler (\u2605):</strong> Internationale Prints mit einem Klick wechseln</li><li><strong>Max Consistency:</strong> Optimiertes 60-Karten-Deck aus Statistiken erzeugen</li></ul>'
+            },
+            'past-meta': {
+                title: '\ud83c\udfc6 Vergangenes Turnier-Meta',
+                html: '<p>Historische Turnierdaten grosser Events (Regionals, EUIC, Worlds usw.).</p><ul><li><strong>Format-Filter:</strong> Nach Formatcode filtern (z. B. TEF-SCR, OBF-TWM)</li><li><strong>Quellen-Filter:</strong> Turniere/Regionen auswaehlen</li><li><strong>Volle Deck-Analyse:</strong> Inklusive Builder, Kopieren, Vergleichen und \u2605 Print-Wechsel</li><li><strong>Historische Trends:</strong> Deck-Entwicklung ueber Formate verfolgen</li></ul>'
+            },
+            'cards': {
+                title: '\ud83e\uddf0 Kartendatenbank',
+                html: '<p>Durchsuche die vollstaendige Pokemon-TCG-Kartendatenbank.</p><ul><li><strong>Suche + Filter:</strong> Name, Set, Typ, Seltenheit, Meta-Filter</li><li><strong>Sortierung:</strong> Sets von neu nach alt</li><li><strong>Seltenheits-Wechsler (\u2605):</strong> Verfuegbare Prints schnell auswaehlen</li><li><strong>Sammlungsanzahl:</strong> Exakte Print-Zaehlung per Set+Nummer</li><li><strong>Wunschliste:</strong> Zielkarten mit \u2764 markieren</li></ul>'
+            },
+            'proxy': {
+                title: '\ud83d\udda8\ufe0f Proxy-Drucker',
+                html: '<p>Erstelle druckbare Proxy-Karten fuer Tests und Casual Play.</p><ul><li><strong>Deck importieren:</strong> Deckliste einfuegen und Proxys automatisch erzeugen</li><li><strong>Manuell hinzufuegen:</strong> Einzelkarten suchen und hinzufuegen</li><li><strong>Drucklayout:</strong> Optimiert fuer 6.3cm x 8.8cm Kartenmass</li><li><strong>Mengen anpassen:</strong> Exakte Kopienzahl je Karte setzen</li><li><strong>@media print:</strong> Browserdruck erzeugt A4-Seiten mit korrekten Kartengroessen</li></ul>'
+            },
+            'sandbox': {
+                title: '\u2694\ufe0f Battle Sandbox',
+                html: '<p>Simuliere 2-Spieler-Pokemon-TCG-Matches mit vollstaendigen Spielmechaniken.</p><ul><li><strong>Decks importieren:</strong> Decklisten fuer Spieler 1 und 2 einfuegen</li><li><strong>Draw-Simulator:</strong> Starthaende und Preiskarten testen</li><li><strong>Spielbrett:</strong> Interaktives Feld mit Bank- und Aktiv-Slots</li><li><strong>Gespeicherte Decks laden:</strong> Decks aus deinem Profil nutzen</li><li><strong>Judge:</strong> Beide mischen Hand ins Deck und ziehen genau 4</li><li><strong>Iono:</strong> Hand unter Deck mischen, Anzahl nach Preiskarten ziehen</li><li><strong>Decksuche:</strong> Deck waehrend des Spiels mit Sortierung durchsuchen</li></ul>'
+            },
+            'profile': {
+                title: '\ud83d\udc64 Benutzerprofil',
+                html: '<p>Verwalte deine Sammlung, gespeicherte Decks und Einstellungen.</p><ul><li><strong>Meine Sammlung:</strong> Exakte Print-Anzahlen (Set+Nummer) mit Firebase-Sync</li><li><strong>Dex-Import:</strong> CSV-Import mit Setnamen-Mapping und nummernbasierter Erkennung</li><li><strong>Meine Decks:</strong> Badge pro Karte zeigt exakte Besitzanzahl fuer diesen Print</li><li><strong>\u2728 Indikator:</strong> Zeigt weitere internationale Prints derselben Karte in deiner Sammlung</li><li><strong>Seltenheits-Wechsler (\u2605):</strong> Prints direkt in gespeicherten Deckkarten wechseln</li><li><strong>Vergleich (\u2696\ufe0f):</strong> Quelle waehlen (Limitless/PTCGL oder gespeicherte Decks)</li><li><strong>Vergleichsmodus:</strong> Funktional (Prints zusammengefuehrt) oder exakter Print</li><li><strong>Wunschliste + Einstellungen:</strong> Ziele und Kontooptionen verwalten</li></ul>'
+            },
+            'calculator': {
+                title: '\ud83e\uddee Wahrscheinlichkeitsrechner',
+                html: '<p>Berechnet Zieh-, Preis- und Topdeck-Wahrscheinlichkeiten fuer dein Deck.</p><ul><li><strong>Zug-Chance:</strong> Wahrscheinlichkeit, mindestens eine Kopie in gezogenen Karten zu sehen</li><li><strong>Preiskarten-Chance:</strong> Wahrscheinlichkeit, dass mindestens eine Kopie in den Preisen liegt</li><li><strong>Topdeck-Chance:</strong> Wahrscheinlichkeit, dass der naechste Draw deine Zielkarte ist</li><li><strong>Eingaben:</strong> Kopien im Deck, gezogene Karten, bereits auf der Hand</li></ul>'
+            },
+            'tutorial': {
+                title: '\ud83d\udcd6 Anleitung',
+                html: '<p>Umfassender Guide zu allen Funktionen dieser Website.</p><ul><li><strong>Tab-Guides:</strong> Detaillierte Hinweise zu jedem Bereich</li><li><strong>Neueste Aenderungen:</strong> Exakte Print-Badges, \u2728 Indikator, stabiler \u2605 Print-Wechsel und erweiterter Deck-Vergleich</li><li><strong>Vergleichshinweise:</strong> Live-Parser-Vorschau + Funktional/Exakt-Modi</li><li><strong>Import-Hinweise:</strong> Dex-CSV Setnamen- und Setnummern-Matching erklaert</li></ul>'
+            }
+        };
+
         function openTabHelp(tabId) {
-            const help = TAB_HELP_CONTENT[tabId];
+            const lang = typeof window.getLang === 'function' ? window.getLang() : 'en';
+            const helpSet = lang === 'de' ? TAB_HELP_CONTENT_DE : TAB_HELP_CONTENT;
+            const help = helpSet[tabId] || TAB_HELP_CONTENT[tabId];
             if (!help) return;
             const modal = document.getElementById('helpModal');
             if (!modal) return;

@@ -190,6 +190,9 @@
                 <div id="city-league-analysis-component-container">
                     <!-- City League Deck Analysis Tab Content -->
                     <div id="tab-decks">
+                        <div class="header">
+                            <h2><span data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        </div>
                         <div class="section-grid-container date-range-container">
                             <div>
                                 <label for="cityLeagueDateFrom" class="form-label-block" data-i18n="filter.from">From:</label>
@@ -1143,6 +1146,19 @@
                                         <li><strong>Counter:</strong> Unique cards and total copies displayed</li>
                                     </ul>
                                 </div>
+
+                                <!-- Probability Calculator Tab -->
+                                <div class="cards-info-block">
+                                    <h3 class="cards-info-title">Probability Calculator</h3>
+                                    <p><strong>Purpose:</strong> Calculate draw, prize, and topdeck odds for deckbuilding decisions</p>
+                                    <p><strong>Features:</strong></p>
+                                    <ul class="info-block-features-list">
+                                        <li><strong>Draw Chance:</strong> Chance to see at least one copy in your drawn cards</li>
+                                        <li><strong>Prize Chance:</strong> Chance that at least one copy is in prize cards</li>
+                                        <li><strong>Topdeck Chance:</strong> Chance the next card drawn is your target</li>
+                                        <li><strong>Custom Inputs:</strong> Copies in deck, cards drawn, and already-in-hand correction</li>
+                                    </ul>
+                                </div>
                                 
                                 <!-- Cards Tab -->
                                 <div class="cards-info-block">
@@ -1566,6 +1582,19 @@
                                     </ul>
                                 </div>
 
+                                <!-- Wahrscheinlichkeitsrechner Tab -->
+                                <div class="de-tab-block de-tab-block-cards">
+                                    <h3>Wahrscheinlichkeitsrechner</h3>
+                                    <p class="de-tab-block-desc"><strong>Zweck:</strong> Zug-, Preis- und Topdeck-Chancen fuer fundierte Deckbau-Entscheidungen berechnen</p>
+                                    <p class="de-tab-block-desc"><strong>Funktionen:</strong></p>
+                                    <ul class="de-tab-block-list">
+                                        <li><strong>Zug-Chance:</strong> Wahrscheinlichkeit, mindestens eine Kopie in gezogenen Karten zu sehen</li>
+                                        <li><strong>Preiskarten-Chance:</strong> Wahrscheinlichkeit, dass mindestens eine Kopie in den Preisen liegt</li>
+                                        <li><strong>Topdeck-Chance:</strong> Wahrscheinlichkeit, dass der naechste Draw die Zielkarte ist</li>
+                                        <li><strong>Flexible Eingaben:</strong> Kopien im Deck, gezogene Karten und bereits auf der Hand</li>
+                                    </ul>
+                                </div>
+
                                 <!-- Cards Tab -->
                                 <div class="de-tab-block de-tab-block-cards">
                                     <h3>Kartendatenbank</h3>
@@ -1917,7 +1946,7 @@
             <div id="calculator" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="calc.heading">TCG Probability Calculator</span></h2>
+                        <h2><span data-i18n="calc.heading">TCG Probability Calculator</span> <button class="tab-help-btn" onclick="openTabHelp('calculator')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="calc.subtitle">Calculate the odds of drawing specific cards in your opening hand, prize cards, or topdeck.</p>
                     </div>
 

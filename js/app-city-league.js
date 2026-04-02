@@ -1091,25 +1091,8 @@
             // Apply pending combined archetype selection (from analyzeCombinedArchetype click)
             applyPendingCombinedArchetypeSelection();
 
-            // Enable search functionality
-            const searchInput = document.getElementById('cityLeagueDeckSearch');
-            if (searchInput) {
-                searchInput.oninput = function() {
-                    const searchTerm = this.value.toLowerCase();
-                    // Search through all options in all optgroups
-                    Array.from(select.querySelectorAll('option')).forEach(option => {
-                        if (option.value) {
-                            const match = option.textContent.toLowerCase().includes(searchTerm);
-                            option.classList.toggle('d-none', !match);
-                        }
-                    });
-                    // Hide optgroups if all options are hidden
-                    Array.from(select.querySelectorAll('optgroup')).forEach(group => {
-                        const hasVisibleOptions = Array.from(group.querySelectorAll('option')).some(opt => !opt.classList.contains('d-none'));
-                        group.classList.toggle('d-none', !hasVisibleOptions);
-                    });
-                };
-            }
+            // Initialize the new combobox UI (replaces old search input)
+            initializeDeckArchetypeCombobox('cityLeague');
         }
         
         // Date filter functions for City League
@@ -3243,5 +3226,150 @@
                 }
             }
         });
+
+        // ===============================================================
+        // GENERIC DECK ARCHETYPE COMBOBOX (Initiative Fenster)
+        // ===============================================================
+        // Ersetzt alte Search/Select Pattern mit kombiniertem Kombobox
+        // Supportet: City League, Current Meta, Past Meta
+        window.initializeDeckArchetypeCombobox = function(tabPrefix) {
+            const comboboxId = `${tabPrefix}DeckCombobox`;
+            const comboboxListId = `${tabPrefix}DeckComboboxList`;
+            const selectId = `${tabPrefix}DeckSelect`;
+            const loadFunctionName = `load${tabPrefix.charAt(0).toUpperCase() + tabPrefix.slice(1)}DeckData`;
+
+            const input = document.getElementById(comboboxId);
+            const list = document.getElementById(comboboxListId);
+            const select = document.getElementById(selectId);
+
+            if (!input || !list || !select) {
+                devLog(`[initializeDeckArchetypeCombobox] Missing elements for ${tabPrefix}`);
+                return;
+            }
+
+            // Baue Kombobox-Einträge aus Select-Optionen
+            const rebuildList = () => {
+                list.innerHTML = '';
+                const items = [];
+
+                // Alle Options als Kombobox-Items umwandeln
+                Array.from(select.options).forEach(option => {
+                    if (!option.value) return; // Skip empty option
+
+                    const text = option.textContent.trim();
+                    const li = document.createElement('li');
+                    li.className = 'deck-combobox-item';
+                    li.setAttribute('data-value', option.value);
+                    li.setAttribute('role', 'option');
+                    li.innerHTML = `<span class="deck-combobox-item-name">${escapeHtml(text)}</span>`;
+                    li.onclick = () => selectComboboxItem(option.value);
+                    list.appendChild(li);
+                    items.push({ li, value: option.value, text });
+                });
+
+                return items;
+            };
+
+            let allItems = rebuildList();
+            let highlightedIndex = -1;
+
+            // Input: Live-Filterung
+            input.addEventListener('input', (e) => {
+                const searchText = e.target.value.toLowerCase();
+                highlightedIndex = -1;
+
+                allItems.forEach(({ li, text }) => {
+                    const matches = text.toLowerCase().includes(searchText);
+                    li.classList.toggle('d-none', !matches);
+                });
+
+                // Show/hide list basierend auf Matching-Items
+                const hasMatches = allItems.some(({ li }) => !li.classList.contains('d-none'));
+                list.classList.toggle('deck-combobox-list-hidden', !hasMatches || !searchText);
+                input.setAttribute('aria-expanded', hasMatches && searchText ? 'true' : 'false');
+            });
+
+            // Input: Focus zeigt Liste
+            input.addEventListener('focus', () => {
+                if (!list.classList.contains('deck-combobox-list-hidden')) return;
+                if (input.value) {
+                    input.dispatchEvent(new Event('input'));
+                } else {
+                    list.classList.remove('deck-combobox-list-hidden');
+                    input.setAttribute('aria-expanded', 'true');
+                }
+            });
+
+            // Input: Escape/Blur schliesst Liste
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    list.classList.add('deck-combobox-list-hidden');
+                    input.setAttribute('aria-expanded', 'false');
+                    return;
+                }
+
+                const visibleItems = allItems.filter(({ li }) => !li.classList.contains('d-none'));
+                if (!visibleItems.length) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    highlightedIndex = Math.min(highlightedIndex + 1, visibleItems.length - 1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    highlightedIndex = Math.max(highlightedIndex - 1, -1);
+                } else if (e.key === 'Enter' && highlightedIndex >= 0) {
+                    e.preventDefault();
+                    selectComboboxItem(visibleItems[highlightedIndex].value);
+                    return;
+                }
+
+                // Highlight aktualisieren
+                visibleItems.forEach(({ li }, idx) => {
+                    li.classList.toggle('highlighted', idx === highlightedIndex);
+                });
+            });
+
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    list.classList.add('deck-combobox-list-hidden');
+                    input.setAttribute('aria-expanded', 'false');
+                }, 100);
+            });
+
+            // SELECT-Item-Handler
+            const selectComboboxItem = (value) => {
+                const option = Array.from(select.options).find(o => o.value === value);
+                if (!option) return;
+
+                // Update Input mit Archetype-Name
+                input.value = option.textContent.split('(')[0].trim();
+
+                // Speichere Wert im Hidden Select
+                select.value = value;
+
+                // Schliesse Liste
+                list.classList.add('deck-combobox-list-hidden');
+                input.setAttribute('aria-expanded', 'false');
+                highlightedIndex = -1;
+
+                // Triggere Change Event auf dem versteckten Select, um bestehende Handler zu aktivieren
+                select.value = value;
+                const changeEvent = new Event('change', { bubbles: true });
+                select.dispatchEvent(changeEvent);
+
+                // Fallback: Lade Deck-Daten direkt (für Tabs ohne Change-Handler)
+                if (window[loadFunctionName] && typeof window[loadFunctionName] === 'function') {
+                    window[loadFunctionName](value);
+                    devLog(`[selectComboboxItem] Loaded deck for ${tabPrefix}:`, value);
+                }
+            };
+
+            // Observer: Select ändert sich (z.B. aus Navigations-Code) → Kombobox aktualisieren
+            const observeSelectChanges = new MutationObserver(() => {
+                allItems = rebuildList();
+            });
+            observeSelectChanges.observe(select, { childList: true });
+        };
+        
 
 

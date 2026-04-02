@@ -335,9 +335,10 @@
                 updatePastMetaDeckList();
             });
             tournamentSelect.addEventListener('change', updatePastMetaDeckList);
-            document.getElementById('pastMetaDeckSearch').addEventListener('input', debounce(updatePastMetaDeckList, 250));
-            document.getElementById('pastMetaDeckSelect').addEventListener('change', onPastMetaDeckSelect);
             document.getElementById('pastMetaFilterSelect').addEventListener('change', filterPastMetaCards);
+            
+            // Initialize the new combobox UI (replaces old search input)
+            initializeDeckArchetypeCombobox('pastMeta');
             
             // Initial population
             updatePastMetaTournamentFilter();

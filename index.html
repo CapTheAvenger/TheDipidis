@@ -205,14 +205,16 @@
                         </div>
                         <div class="control-row">
                             <div class="control-group">
-                                <label for="cityLeagueDeckSearch" data-i18n="filter.searchDeck">Search Deck:</label>
-                                <input type="text" id="cityLeagueDeckSearch" placeholder="Enter deck name..." class="control-input" aria-label="Search deck by name" data-i18n-placeholder="filter.searchDeckPlaceholder" data-i18n-aria="filter.searchDeckAria">
-                            </div>
-                            <div class="control-group">
-                                <label for="cityLeagueDeckSelect" data-i18n="filter.selectArchetype">Select Deck Archetype:</label>
-                                <select id="cityLeagueDeckSelect" autocomplete="off" class="control-input modern-select">
-                                    <option value="" data-i18n="cl.pleaseSelectDeck">-- Please Select Deck --</option>
-                                </select>
+                                <label for="cityLeagueDeckCombobox" data-i18n="filter.selectArchetype">Select & Search Deck Archetype:</label>
+                                <div class="deck-combobox-container" id="cityLeagueDeckComboboxContainer">
+                                    <input type="text" id="cityLeagueDeckCombobox" placeholder="Type to search or browse decks..." class="control-input deck-combobox-input" aria-label="Search and select deck archetype" data-i18n-placeholder="filter.searchDeckPlaceholder" data-i18n-aria="filter.searchDeckAria" aria-expanded="false" aria-controls="cityLeagueDeckComboboxList">
+                                    <ul id="cityLeagueDeckComboboxList" class="deck-combobox-list deck-combobox-list-hidden" role="listbox" aria-label="Available deck archetypes">
+                                        <!-- Populated by JS -->
+                                    </ul>
+                                    <select id="cityLeagueDeckSelect" class="d-none" autocomplete="off" style="display: none;">
+                                        <option value="" data-i18n="cl.pleaseSelectDeck">-- Please Select Deck --</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="control-group">
                                 <label for="cityLeagueFilterSelect" data-i18n="filter.cardShareFilter">Card Share Filter:</label>
@@ -424,14 +426,16 @@
                         </div>
                         <div class="control-row">
                             <div class="control-group">
-                                <label for="currentMetaDeckSearch" data-i18n="cl.searchDeck">Search Deck:</label>
-                                <input type="text" id="currentMetaDeckSearch" placeholder="Enter deck name..." data-i18n-placeholder="cl.searchDeckPlaceholder" class="control-input" aria-label="Search current meta deck by name" data-i18n-aria="cm.searchDeckAria">
-                            </div>
-                            <div class="control-group">
-                                <label for="currentMetaDeckSelect" data-i18n="cl.selectArchetype">Select Deck Archetype:</label>
-                                <select id="currentMetaDeckSelect" autocomplete="off" class="control-input modern-select">
-                                    <option value="" data-i18n="cl.selectDeckOption">-- Please Select Deck --</option>
-                                </select>
+                                <label for="currentMetaDeckCombobox" data-i18n="cl.selectArchetype">Select & Search Deck Archetype:</label>
+                                <div class="deck-combobox-container" id="currentMetaDeckComboboxContainer">
+                                    <input type="text" id="currentMetaDeckCombobox" placeholder="Type to search or browse decks..." class="control-input deck-combobox-input" aria-label="Search and select current meta deck archetype" data-i18n-placeholder="cl.searchDeckPlaceholder" data-i18n-aria="cm.searchDeckAria" aria-expanded="false" aria-controls="currentMetaDeckComboboxList">
+                                    <ul id="currentMetaDeckComboboxList" class="deck-combobox-list deck-combobox-list-hidden" role="listbox" aria-label="Available current meta deck archetypes">
+                                        <!-- Populated by JS -->
+                                    </ul>
+                                    <select id="currentMetaDeckSelect" class="d-none" autocomplete="off" style="display: none;">
+                                        <option value="" data-i18n="cl.selectDeckOption">-- Please Select Deck --</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="control-group">
                                 <label for="currentMetaFilterSelect" data-i18n="cl.cardShareFilter">Card Share Filter:</label>
@@ -702,14 +706,16 @@
                         </div>
                         <div class="control-row">
                             <div class="control-group">
-                                <label for="pastMetaDeckSearch" data-i18n="cl.searchDeck">Search Deck:</label>
-                                <input type="text" id="pastMetaDeckSearch" placeholder="Enter deck name..." data-i18n-placeholder="cl.searchDeckPlaceholder" class="control-input" aria-label="Search past meta deck by name" data-i18n-aria="pm.searchDeckAria">
-                            </div>
-                            <div class="control-group">
-                                <label for="pastMetaDeckSelect" data-i18n="cl.selectArchetype">Select Deck Archetype:</label>
-                                <select id="pastMetaDeckSelect" autocomplete="off" class="control-input modern-select">
-                                    <option value="" data-i18n="cl.selectDeckOption">-- Please Select Deck --</option>
-                                </select>
+                                <label for="pastMetaDeckCombobox" data-i18n="cl.selectArchetype">Select & Search Deck Archetype:</label>
+                                <div class="deck-combobox-container" id="pastMetaDeckComboboxContainer">
+                                    <input type="text" id="pastMetaDeckCombobox" placeholder="Type to search or browse decks..." class="control-input deck-combobox-input" aria-label="Search and select past meta deck archetype" data-i18n-placeholder="cl.searchDeckPlaceholder" data-i18n-aria="pm.searchDeckAria" aria-expanded="false" aria-controls="pastMetaDeckComboboxList">
+                                    <ul id="pastMetaDeckComboboxList" class="deck-combobox-list deck-combobox-list-hidden" role="listbox" aria-label="Available past meta deck archetypes">
+                                        <!-- Populated by JS -->
+                                    </ul>
+                                    <select id="pastMetaDeckSelect" class="d-none" autocomplete="off" style="display: none;">
+                                        <option value="" data-i18n="cl.selectDeckOption">-- Please Select Deck --</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="control-group">
                                 <label for="pastMetaFilterSelect" data-i18n="cl.cardShareFilter">Card Share Filter:</label>

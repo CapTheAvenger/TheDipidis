@@ -390,6 +390,32 @@
             padding-left: 20px;
         }
 
+        /* City League: compact dropdown density for faster scanning */
+        #city-league-analysis .deck-combobox-list {
+            max-height: 220px;
+        }
+
+        #city-league-analysis .deck-combobox-item {
+            padding: 5px 8px;
+        }
+
+        #city-league-analysis .deck-combobox-item-name {
+            font-size: 0.82rem;
+            line-height: 1.15;
+            font-weight: 600;
+        }
+
+        #city-league-analysis .deck-combobox-category-header {
+            padding: 4px 8px;
+            margin-top: 3px;
+            font-size: 0.68rem;
+            letter-spacing: 0.25px;
+        }
+
+        #city-league-analysis .deck-combobox-item-grouped {
+            padding-left: 12px;
+        }
+
         .deck-metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

@@ -2461,6 +2461,17 @@
     text-decoration: underline;
 }
 
+/* Hard override: keep first column visually consistent with metric columns. */
+.city-league-info-table .city-league-info-table-row > .city-league-info-table-cell-archetype {
+    background: inherit !important;
+    color: #1f2d3d;
+}
+
+.city-league-info-table .city-league-info-table-row > .city-league-info-table-cell-archetype .archetype-jump-link {
+    color: #1f2d3d !important;
+    font-weight: 700;
+}
+
 .city-league-info-table-cell-main-desktop {
     color: inherit;
     text-decoration: none;

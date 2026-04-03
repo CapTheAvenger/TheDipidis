@@ -1045,26 +1045,26 @@ const BASE_PATH = './data/';
                 // Load data for the tab
                 switch(tabName) {
                     case 'city-league':
-                        if (!window.cityLeagueLoaded) loadCityLeagueData();
+                        if (!window.cityLeagueLoaded && typeof loadCityLeagueData === 'function') loadCityLeagueData();
                         break;
                     case 'city-league-analysis':
-                        if (!window.cityLeagueAnalysisLoaded) loadCityLeagueAnalysis();
+                        if (!window.cityLeagueAnalysisLoaded && typeof loadCityLeagueAnalysis === 'function') loadCityLeagueAnalysis();
                         break;
                     case 'current-meta':
-                        if (!window.currentMetaLoaded) loadCurrentMeta();
+                        if (!window.currentMetaLoaded && typeof loadCurrentMeta === 'function') loadCurrentMeta();
                         break;
                     case 'current-analysis':
-                        if (!window.currentAnalysisLoaded) loadCurrentAnalysis();
+                        if (!window.currentAnalysisLoaded && typeof loadCurrentAnalysis === 'function') loadCurrentAnalysis();
                         break;
                     case 'past-meta':
-                        if (!window.pastMetaLoaded) loadPastMeta();
+                        if (!window.pastMetaLoaded && typeof loadPastMeta === 'function') loadPastMeta();
                         break;
                     case 'cards':
-                        if (!window.cardsLoaded) loadCards();
+                        if (!window.cardsLoaded && typeof loadCards === 'function') loadCards();
                         break;
                     case 'proxy':
-                        renderProxyQueue();
-                        initializeProxyManualSearchInput();
+                        if (typeof renderProxyQueue === 'function') renderProxyQueue();
+                        if (typeof initializeProxyManualSearchInput === 'function') initializeProxyManualSearchInput();
                         break;
                 }
             }

@@ -1,0 +1,90 @@
+{
+  "suite": "City League Meta E2E + Visual Snapshots",
+  "url": "http://127.0.0.1:8000/index.html",
+  "timestamp": "2026-04-02 23:36:30",
+  "summary": {
+    "total": 8,
+    "passed": 2,
+    "failed": 6,
+    "status": "FAIL"
+  },
+  "artifacts_dir": "tests\\artifacts\\city_league_meta",
+  "console_errors": [
+    "console-error: Error loading City League data: TypeError: undefined is not iterable (cannot read property Symbol(Symbol.iterator))\n    at Array.from (<anonymous>)\n    at http://127.0.0.1:8000/js/app-city-league.js?v=1:3267:31\n    at Array.forEach (<anonymous>)\n    at rebuildList (http://127.0.0.1:8000/js/app-city-league.js?v=1:3256:45)\n    at window.initializeDeckArchetypeCombobox (http://127.0.0.1:8000/js/app-city-league.js?v=1:3300:28)\n    at populateCityLeagueDeckSelect (http://127.0.0.1:8000/js/app-city-league.js?v=1:1095:13)\n    at loadCityLeagueData (http://127.0.0.1:8000/js/app-city-league.js?v=1:325:17)\n    at async Promise.allSettled (index 2)\n    at async HTMLDocument.<anonymous> (http://127.0.0.1:8000/js/app-init.js?v=1:46:38)",
+    "console-error: Error loading City League data: TypeError: undefined is not iterable (cannot read property Symbol(Symbol.iterator))\n    at Array.from (<anonymous>)\n    at http://127.0.0.1:8000/js/app-city-league.js?v=1:3267:31\n    at Array.forEach (<anonymous>)\n    at rebuildList (http://127.0.0.1:8000/js/app-city-league.js?v=1:3256:45)\n    at window.initializeDeckArchetypeCombobox (http://127.0.0.1:8000/js/app-city-league.js?v=1:3300:28)\n    at populateCityLeagueDeckSelect (http://127.0.0.1:8000/js/app-city-league.js?v=1:1095:13)\n    at loadCityLeagueData (http://127.0.0.1:8000/js/app-city-league.js?v=1:325:17)\n    at async Promise.allSettled (index 2)\n    at async HTMLDocument.<anonymous> (http://127.0.0.1:8000/js/app-init.js?v=1:46:38)",
+    "console-error: Error loading City League data: TypeError: undefined is not iterable (cannot read property Symbol(Symbol.iterator))\n    at Array.from (<anonymous>)\n    at http://127.0.0.1:8000/js/app-city-league.js?v=1:3267:31\n    at Array.forEach (<anonymous>)\n    at rebuildList (http://127.0.0.1:8000/js/app-city-league.js?v=1:3256:45)\n    at window.initializeDeckArchetypeCombobox (http://127.0.0.1:8000/js/app-city-league.js?v=1:3300:28)\n    at populateCityLeagueDeckSelect (http://127.0.0.1:8000/js/app-city-league.js?v=1:1095:13)\n    at loadCityLeagueData (http://127.0.0.1:8000/js/app-city-league.js?v=1:325:17)\n    at async Promise.allSettled (index 2)\n    at async HTMLDocument.<anonymous> (http://127.0.0.1:8000/js/app-init.js?v=1:46:38)"
+  ],
+  "results": [
+    {
+      "name": "Initial city-league tab active",
+      "passed": true,
+      "details": "",
+      "metrics": null
+    },
+    {
+      "name": "Initial meta tables rendered",
+      "passed": false,
+      "details": "Expected rows missing.",
+      "metrics": {
+        "combined_rows": 0,
+        "full_rows": 0
+      }
+    },
+    {
+      "name": "Search hook available",
+      "passed": false,
+      "details": "Search hook incomplete.",
+      "metrics": {
+        "has_input": false,
+        "has_fn": true
+      }
+    },
+    {
+      "name": "Snapshot M4 initial captured",
+      "passed": true,
+      "details": "Initial snapshot captured.",
+      "metrics": {
+        "path": "tests\\artifacts\\city_league_meta\\city_league_m4_initial.png",
+        "size_bytes": 310699,
+        "md5": "09d53024194c549c20bc56b9760c6d06"
+      }
+    },
+    {
+      "name": "Load M3 and snapshot",
+      "passed": false,
+      "details": "M3 render/snapshot issue.",
+      "metrics": {
+        "m3_rows": 0,
+        "path": "tests\\artifacts\\city_league_meta\\city_league_m3.png",
+        "size_bytes": 310699,
+        "md5": "09d53024194c549c20bc56b9760c6d06"
+      }
+    },
+    {
+      "name": "Load M4 and snapshot",
+      "passed": false,
+      "details": "M4 render/snapshot issue.",
+      "metrics": {
+        "m4_rows": 0,
+        "path": "tests\\artifacts\\city_league_meta\\city_league_m4_back.png",
+        "size_bytes": 310699,
+        "md5": "09d53024194c549c20bc56b9760c6d06"
+      }
+    },
+    {
+      "name": "Visual difference M4 vs M3",
+      "passed": false,
+      "details": "Snapshots look identical by hash.",
+      "metrics": {
+        "m4_md5": "09d53024194c549c20bc56b9760c6d06",
+        "m3_md5": "09d53024194c549c20bc56b9760c6d06"
+      }
+    },
+    {
+      "name": "Search filter behavior",
+      "passed": false,
+      "details": "Search test failed: Locator.inner_text: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator(\"#cityLeagueFullTable tbody tr td:first-child\").first\n",
+      "metrics": null
+    }
+  ]
+}

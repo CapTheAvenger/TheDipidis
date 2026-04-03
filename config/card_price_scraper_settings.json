@@ -1,6 +1,9 @@
 {
-  "max_workers": 10,
+  "delay_seconds": 6.0,
+  "max_workers": 2,
+  "headless": false,
   "batch_size": 100,
-  "limitless_update_sets": ["POR", "ASC", "PFL", "MEG", "MEE", "MEP", "BLK", "WHT", "DRI", "JTG", "PRE", "SSP", "SCR", "SFA", "TWM", "TEF"],
-  "_comment": "ONLY LIMITLESS UPDATE - Phase 2 (Cardmarket) wurde deaktiviert. CM Links werden dynamisch im Frontend gebaut."
+  "skip_cards_with_prices": false,
+  "only_update_sets": ["POR", "ASC", "PFL", "MEG"],
+  "_comment": "FULL UPDATE - Nutzt echte Chrome Fenster (Selenium) + IPRoyal Proxies"
 }

@@ -9,7 +9,7 @@ from playwright.sync_api import sync_playwright
 
 
 URL = "http://127.0.0.1:8000/index.html"
-ARTIFACT_DIR = Path("tests/artifacts/deck_analysis_global")
+ARTIFACT_DIR = Path("tests/artifacts/current_meta_global")
 
 
 @dataclass
@@ -108,9 +108,9 @@ def main() -> None:
         page.evaluate("() => { if (typeof window.switchTab === 'function') window.switchTab('current-analysis'); }")
         try:
             page.wait_for_selector("#current-analysis.active", timeout=25000)
-            add_result(results, "Deck Analysis Global tab active", True)
+            add_result(results, "Current Meta tab active", True)
         except Exception as exc:
-            add_result(results, "Deck Analysis Global tab active", False, f"Tab activation failed: {exc}")
+            add_result(results, "Current Meta tab active", False, f"Tab activation failed: {exc}")
 
         print("STEP: wait deck options")
         option_count = wait_for_count(page, "#currentMetaDeckSelect option", minimum=2, timeout_ms=50000)
@@ -123,7 +123,7 @@ def main() -> None:
         )
 
         print("STEP: snapshot initial")
-        shot_initial = ARTIFACT_DIR / "deck_analysis_global_initial.png"
+        shot_initial = ARTIFACT_DIR / "current_meta_global_initial.png"
         page.screenshot(path=str(shot_initial), full_page=True)
         info_initial = screenshot_info(shot_initial)
         add_result(
@@ -261,65 +261,6 @@ def main() -> None:
             {"rendered_cards": card_count, **stats_values},
         )
 
-        print("STEP: top256 tournament completeness")
-        top256_metrics = page.evaluate(
-            """
-            async () => {
-                const select = document.getElementById('currentMetaDeckSelect');
-                if (!select || typeof window.setCurrentMetaFormatFilter !== 'function') {
-                    return { ok: false, reason: 'missing elements' };
-                }
-
-                // Switch to play (Major Tournament) filter
-                await window.setCurrentMetaFormatFilter('play');
-
-                // Choose first available archetype with deck count > 5 (more likely to have many tournaments)
-                const candidates = Array.from(select.options).filter(o => !!o.value);
-                if (!candidates.length) return { ok: false, reason: 'no play archetypes' };
-
-                const picked = candidates[0];
-                select.value = picked.value;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-
-                return { ok: true, picked: picked.value };
-            }
-            """
-        )
-
-        if top256_metrics.get("ok"):
-            page.wait_for_timeout(4000)
-            top256_count = page.evaluate(
-                """
-                () => ({
-                    sectionVisible: !document.getElementById('currentMetaTop256Section')?.classList.contains('d-none'),
-                    entryCount: document.querySelectorAll('#currentMetaTop256List .top256-entry').length,
-                    firstTournament: document.querySelector('#currentMetaTop256List .top256-entry .top256-tournament')?.textContent?.trim() || ''
-                })
-                """
-            )
-            top256_ok = (
-                bool(top256_metrics.get("ok"))
-                and bool(top256_count.get("sectionVisible"))
-                and int(top256_count.get("entryCount", 0)) > 3
-            )
-        else:
-            top256_count = {}
-            top256_ok = False
-
-        add_result(
-            results,
-            "Top-256 tournament list has more than 3 entries",
-            top256_ok,
-            f"Top-256 section shows {top256_count.get('entryCount', 0)} entries for '{top256_metrics.get('picked', '?')}'."
-            if top256_ok
-            else f"Top-256 list incomplete or hidden: {top256_metrics} | {top256_count}",
-            {**top256_metrics, **top256_count},
-        )
-
-        # Restore 'all' filter for subsequent steps
-        page.evaluate("""async () => { await window.setCurrentMetaFormatFilter('all'); }""")
-        page.wait_for_timeout(1000)
-
         print("STEP: share filter")
         baseline_visible = page.locator(".city-league-card-item:not(.d-none)").count()
         share_metrics = page.evaluate(
@@ -420,7 +361,7 @@ def main() -> None:
         )
 
         print("STEP: snapshot after interactions")
-        shot_after = ARTIFACT_DIR / "deck_analysis_global_after.png"
+        shot_after = ARTIFACT_DIR / "current_meta_global_after.png"
         page.screenshot(path=str(shot_after), full_page=True)
         info_after = screenshot_info(shot_after)
         add_result(
@@ -441,7 +382,7 @@ def main() -> None:
             unique_404_urls.append(url)
 
     report: dict[str, Any] = {
-        "suite": "Deck Analysis Global E2E",
+        "suite": "Current Meta Global E2E",
         "url": URL,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "summary": {

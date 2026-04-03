@@ -8,12 +8,10 @@ Fetches all English sets from Limitless TCG, assigns release-order numbers
 Run this once initially, then whenever new sets are released.
 """
 
-
 import json
 import os
 import sys
 import time
-from backend.settings import get_data_path, get_config_path
 
 try:
     from bs4 import BeautifulSoup
@@ -22,9 +20,11 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from backend.core.card_scraper_shared import setup_console_encoding, safe_fetch_html
+    from card_scraper_shared import get_data_dir, setup_console_encoding, safe_fetch_html
     setup_console_encoding()
+    data_dir = get_data_dir()
 except ImportError:
+    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
     def safe_fetch_html(url, timeout=15, **kwargs):
         import requests
         r = requests.get(url, timeout=timeout)
@@ -34,8 +34,7 @@ except ImportError:
 # Hardcoded fallback — used if live scraping fails
 FALLBACK_SET_ORDER = {
     # Mega (2025-2026)
-    'M4': 152,
-    'POR': 151, 'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,
+    'ASC': 150, 'PFL': 149, 'MEG': 148, 'MEE': 147, 'MEP': 146,
     # Scarlet & Violet (2023-2025)
     'BLK': 145, 'WHT': 144, 'DRI': 143, 'JTG': 142, 'PRE': 141,
     'SSP': 140, 'SCR': 139, 'SFA': 138, 'TWM': 137, 'TEF': 136,
@@ -215,9 +214,9 @@ def main():
         sets_order = merged
         print(f"[Update Sets] Merged live data with fallback ({len(sets_order)} sets total).")
 
+    os.makedirs(data_dir, exist_ok=True)
+    out_path = os.path.join(data_dir, 'sets.json')
 
-    out_path = get_data_path('sets.json')
-    os.makedirs(out_path.parent, exist_ok=True)
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(sets_order, f, indent=2, sort_keys=True)
 

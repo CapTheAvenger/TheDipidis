@@ -28,9 +28,8 @@ if (!window.deckFolders)          window.deckFolders          = [];
 function onUserSignedIn(user) {
   const authPrompt     = document.getElementById('profile-auth-prompt');
   const profileContent = document.getElementById('profile-content');
-  // Use classList so the change wins against `display: none !important` from the .display-none utility class
-  if (authPrompt)     { authPrompt.classList.add('display-none');    authPrompt.classList.remove('display-block'); }
-  if (profileContent) { profileContent.classList.remove('display-none'); profileContent.classList.add('display-block'); }
+  if (authPrompt)     authPrompt.style.display     = 'none';
+  if (profileContent) profileContent.style.display  = 'block';
 
   // Show name/email immediately from Auth (no Firestore round-trip needed)
   const nameEl = document.getElementById('profile-user-name');
@@ -39,8 +38,8 @@ function onUserSignedIn(user) {
   // Toggle header auth UI: hide sign-in button, show user-info bar
   const signinBtn = document.getElementById('signin-btn');
   const userInfoBar = document.getElementById('user-info');
-  if (signinBtn) signinBtn.classList.add('signin-btn-hidden');
-  if (userInfoBar) { userInfoBar.classList.remove('user-info-hidden'); userInfoBar.style.display = 'flex'; }
+  if (signinBtn) signinBtn.style.display = 'none';
+  if (userInfoBar) userInfoBar.style.display = 'flex';
 
   const emailDisplay = document.getElementById('user-email-display');
   if (emailDisplay) emailDisplay.textContent = user.displayName || user.email || '';
@@ -52,36 +51,25 @@ function onUserSignedIn(user) {
 
   loadUserData(user.uid);
   loadUserDecks(user.uid);
-
-  if (typeof flushBattleJournalOutbox === 'function') {
-    flushBattleJournalOutbox(false);
-  } else if (typeof renderBattleJournalSummary === 'function') {
-    renderBattleJournalSummary();
-  }
 }
 
 function onUserSignedOut() {
   const authPrompt     = document.getElementById('profile-auth-prompt');
   const profileContent = document.getElementById('profile-content');
-  // Use classList to match the initial HTML state and respect !important CSS rules
-  if (authPrompt)     { authPrompt.classList.remove('display-none');  authPrompt.classList.add('display-block'); }
-  if (profileContent) { profileContent.classList.add('display-none');    profileContent.classList.remove('display-block'); }
+  if (authPrompt)     authPrompt.style.display     = 'block';
+  if (profileContent) profileContent.style.display  = 'none';
 
   // Toggle header auth UI: show sign-in button, hide user-info bar
   const signinBtn = document.getElementById('signin-btn');
   const userInfoBar = document.getElementById('user-info');
-  if (signinBtn) signinBtn.classList.remove('signin-btn-hidden');
-  if (userInfoBar) { userInfoBar.classList.add('user-info-hidden'); userInfoBar.style.display = ''; }
+  if (signinBtn) signinBtn.style.display = '';
+  if (userInfoBar) userInfoBar.style.display = 'none';
 
   clearUserData();
 
   // Cleanup any active multiplayer listeners to avoid Firestore cost leaks
   if (typeof leaveMultiplayerGame === 'function') {
     try { leaveMultiplayerGame(); } catch (_) { /* ignore if no active game */ }
-  }
-
-  if (typeof renderBattleJournalSummary === 'function') {
-    renderBattleJournalSummary();
   }
 }
 
@@ -187,35 +175,4 @@ function clearUserData() {
   window.userWishlist         = new Set();
   window.userDecks            = [];
   window.deckFolders          = [];
-}
-
-function syncAuthUiFromPendingOrCurrentState() {
-  // Prefer queued auth state from firebase-config.js callback if handlers were not ready yet.
-  if (window.__pendingAuthUser !== undefined) {
-    const pendingUser = window.__pendingAuthUser;
-    if (pendingUser) {
-      onUserSignedIn(pendingUser);
-    } else {
-      onUserSignedOut();
-    }
-    console.info('[Auth] Applied queued auth state in firebase-globals');
-    delete window.__pendingAuthUser;
-    return;
-  }
-
-  // Fallback: synchronize once from current Firebase auth state.
-  const currentUser = window.auth?.currentUser || null;
-  if (currentUser) {
-    onUserSignedIn(currentUser);
-    console.info('[Auth] Synced header UI from current signed-in user');
-  } else {
-    onUserSignedOut();
-    console.info('[Auth] Synced header UI for signed-out state');
-  }
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', syncAuthUiFromPendingOrCurrentState, { once: true });
-} else {
-  syncAuthUiFromPendingOrCurrentState();
 }

@@ -1,94 +1,4 @@
-﻿import json
-from datetime import datetime, timedelta
-
-# ===================== TECH-RADAR FEATURE =====================
-def calculate_tech_trends():
-    db_path = "backend/data/unified_card_database.json"
-    city_league_path = "backend/data/city_league_data.json"
-    limitless_path = "backend/data/limitless_meta_data.json"
-    output_path = "backend/data/tech_radar_data.json"
-
-    def load_json(path):
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return []
-
-    card_db = {c["name"]: c for c in load_json(db_path)}
-    city_league = load_json(city_league_path)
-    limitless = load_json(limitless_path)
-    all_decks = city_league + limitless
-
-    now = datetime.utcnow()
-    week_ago = now - timedelta(days=7)
-    def parse_date(d):
-        try:
-            return datetime.strptime(d, "%Y-%m-%d")
-        except Exception:
-            return now
-
-    card_counts = {}
-    for deck in all_decks:
-        seen = set()
-        for c in deck.get("cards", []):
-            if c["name"] not in seen:
-                card_counts[c["name"]] = card_counts.get(c["name"], 0) + 1
-                seen.add(c["name"])
-    total_decks = len(all_decks)
-    staple_blacklist = {name for name, count in card_counts.items() if count / total_decks > 0.6}
-
-    archetype_decks = {}
-    for deck in all_decks:
-        arch = deck.get("archetype", "Unknown")
-        date = parse_date(deck.get("date", deck.get("tournament_date", "")))
-        archetype_decks.setdefault(arch, []).append((date, deck))
-
-    tech_cards = []
-    for arch, decks in archetype_decks.items():
-        decks = sorted(decks, key=lambda x: x[0], reverse=True)
-        recent_decks = [d for dt, d in decks if dt >= week_ago]
-        prev_week_decks = [d for dt, d in decks if week_ago - timedelta(days=7) <= dt < week_ago]
-
-        card_freq = {}
-        for deck in recent_decks:
-            for c in deck.get("cards", []):
-                card_freq.setdefault(c["name"], []).append(deck)
-
-        prev_freq = {}
-        for deck in prev_week_decks:
-            for c in deck.get("cards", []):
-                prev_freq.setdefault(c["name"], []).append(deck)
-
-        for card, decks_with_card in card_freq.items():
-            if card in staple_blacklist:
-                continue
-            presence = len(decks_with_card) / max(1, len(recent_decks))
-            if presence >= 0.3:
-                continue
-            top_decks = [d for d in recent_decks if d.get("placement", 99) <= 8]
-            top4_decks = [d for d in recent_decks if d.get("placement", 99) <= 4]
-            in_top8 = any(card in [c["name"] for c in d.get("cards", [])] for d in top_decks)
-            in_top4 = any(card in [c["name"] for c in d.get("cards", [])] for d in top4_decks)
-            if not in_top8:
-                continue
-            prev_presence = len(prev_freq.get(card, [])) / max(1, len(prev_week_decks)) if prev_week_decks else 0
-            increase = round((presence - prev_presence) * 100, 1)
-            if increase <= 0:
-                continue
-            tech_cards.append({
-                "name": card,
-                "image_url": card_db.get(card, {}).get("image_url", ""),
-                "increase": increase,
-                "found_in": arch,
-                "highlight": in_top4,
-                "newcomer": prev_presence == 0
-            })
-
-    tech_cards = sorted(tech_cards, key=lambda x: (not x["highlight"], -x["increase"]))
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(tech_cards, f, indent=2, ensure_ascii=False)
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Current Meta Analysis Scraper - FAST EDITION
 ============================================
@@ -116,8 +26,10 @@ except ImportError:
     print("FEHLER: beautifulsoup4 fehlt! pip install beautifulsoup4")
     sys.exit(1)
 
-from backend.core.card_scraper_shared import (
+from card_scraper_shared import (
     setup_console_encoding,
+    get_app_path,
+    get_data_dir,
     CardDatabaseLookup,
     aggregate_card_data,
     save_to_csv,
@@ -129,7 +41,6 @@ from backend.core.card_scraper_shared import (
     setup_logging,
     load_settings
 )
-from backend.settings import get_data_path, get_config_path
 
 # Fix Windows console encoding
 setup_console_encoding()
@@ -143,13 +54,12 @@ logger = setup_logging("current_meta_scraper")
 # TOURNAMENT TRACKING (Incremental Scraping for Meta Play!)
 # ============================================================================
 def get_scraped_meta_tournaments_file() -> str:
-    return str(get_data_path('current_meta_scraped_tournaments.json'))
+    return os.path.join(get_data_dir(), 'current_meta_scraped_tournaments.json')
 
-from typing import Set
-def load_scraped_meta_tournaments() -> Set[str]:
+def load_scraped_meta_tournaments() -> set:
     return load_scraped_ids(get_scraped_meta_tournaments_file())
 
-def save_scraped_meta_tournaments(tournament_ids: Set[str]) -> None:
+def save_scraped_meta_tournaments(tournament_ids: set) -> None:
     save_scraped_ids(get_scraped_meta_tournaments_file(), tournament_ids, 'scraped_tournament_ids')
 
 # ============================================================================
@@ -277,8 +187,7 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
     timeout = settings.get("request_timeout", 20)
     max_workers = settings.get("max_workers", 5)
 
-    # FIX 1: Das Set direkt an die Basis-URL anhaengen
-    decks_url = f"https://play.limitlesstcg.com/decks?game=PTCG&format=standard&set={format_filter}"
+    decks_url = "https://play.limitlesstcg.com/decks?game=PTCG"
     logger.info("Lade Deck-Uebersicht: %s", decks_url)
 
     html = safe_fetch_html(decks_url, timeout)
@@ -289,19 +198,17 @@ def scrape_limitless_online(settings: dict, card_db: CardDatabaseLookup) -> list
     deck_links = []
     seen_slugs = set()
 
-    # FIX 2: Einfach alle Deck-Links einsammeln, anstatt hart nach 'set=PFL' zu suchen
-    for a in soup.select('a[href^="/decks/"]'):
+    for a in soup.select(f'a[href*="set={format_filter}"]'):
         href = a.get('href', '')
-        if '/matchups' in href.lower() or 'game=' in href.lower():
+        if '/matchups' in href.lower():
             continue
 
         slug_match = re.search(r'/decks/([^"?]+)', href)
         if slug_match:
             slug = slug_match.group(1)
-            if slug not in seen_slugs and slug != "other":
+            if slug not in seen_slugs:
                 seen_slugs.add(slug)
-                # FIX 3: Die URL fuer die Detailseite muss den Filter ebenfalls enthalten
-                deck_links.append((slug, f"https://play.limitlesstcg.com/decks/{slug}?format=standard&set={format_filter}"))
+                deck_links.append((slug, f"https://play.limitlesstcg.com{href}"))
 
     deck_links = deck_links[:max_decks]
     logger.info("%s Archetypes zum Scrapen gefunden.", len(deck_links))
@@ -443,11 +350,11 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
 
         # Apply date filter
         if start_date:
-            # Search in page TEXT (not raw HTML) to avoid matching dates in scripts/attributes
-            page_text = tsoup.get_text(' ', strip=True)
+            # Handle multi-day ranges like "Feb 21-23, 2026" or "Feb 28 - Mar 2, 2026"
+            # Extract the FIRST date mentioned (start of the event)
             date_match = re.search(
                 r'(\w+)\s+(\d{1,2})(?:\s*[-\u2013]\s*(?:\w+\s+)?\d{1,2})?[^,\d]*,?\s*(\d{4})',
-                page_text
+                t_html
             )
             if date_match:
                 try:
@@ -456,14 +363,10 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
                         "%B %d %Y"
                     )
                     if t_date < start_date:
-                        logger.info(f"   Uebersprungen (Datum {t_date.strftime('%d.%m.%Y')} vor Filter {start_date.strftime('%d.%m.%Y')}) - breche ab.")
+                        logger.info(f"   Uebersprungen (Datum {t_date.strftime('%d.%m.%Y')} vor Filter) - breche ab.")
                         break
                 except ValueError:
-                    logger.info(f"   Uebersprungen (Datum nicht parsebar: {date_match.group(0)}) - sicherheitshalber uebersprungen.")
-                    continue
-            else:
-                logger.info(f"   Uebersprungen (kein Datum auf Turnierseite {tid} gefunden) - sicherheitshalber uebersprungen.")
-                continue
+                    pass  # Unknown date: include rather than skip
 
         deck_tasks = []
         for row in tsoup.select('tr'):
@@ -545,11 +448,6 @@ def main():
         logger.error("Karten-Datenbank ist leer!")
         return
 
-    # Reset tournament tracking when not in append mode (clean slate)
-    if not settings.get('append_mode', False):
-        save_scraped_meta_tournaments(set())
-        logger.info("append_mode=false -> Turnier-Tracking zurueckgesetzt.")
-
     limitless_decks = scrape_limitless_online(settings, card_db)
     tournament_decks = scrape_tournaments(settings, card_db)
 
@@ -557,20 +455,12 @@ def main():
     aggregated_data.extend(aggregate_with_meta(limitless_decks, card_db, "Meta Live"))
     aggregated_data.extend(aggregate_with_meta(tournament_decks, card_db, "Meta Play!"))
 
-
     if not aggregated_data:
         logger.info("Keine Daten gesammelt. Vorgang beendet.")
         return
 
     append_mode = settings.get('append_mode', False)
     save_to_csv(aggregated_data, settings["output_file"], append_mode=append_mode)
-
-    # Tech-Radar berechnen
-    try:
-        calculate_tech_trends()
-        logger.info("Tech-Radar Daten erfolgreich generiert.")
-    except Exception as e:
-        logger.error(f"Tech-Radar Fehler: {e}")
 
     logger.info("=" * 60)
     logger.info("SCRAPING KOMPLETT!")

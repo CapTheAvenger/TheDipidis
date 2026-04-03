@@ -1,0 +1,139 @@
+{
+  "suite": "Current Meta Global E2E",
+  "url": "http://127.0.0.1:8000/index.html",
+  "timestamp": "2026-04-02 17:57:17",
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "status": "PASS"
+  },
+  "artifacts_dir": "tests\\artifacts\\current_meta_global",
+  "console_errors": [],
+  "response_404_urls": [],
+  "results": [
+    {
+      "name": "Current Meta tab active",
+      "passed": true,
+      "details": "",
+      "metrics": null
+    },
+    {
+      "name": "Deck selector populated",
+      "passed": true,
+      "details": "Deck selector has selectable options.",
+      "metrics": {
+        "option_count": 68
+      }
+    },
+    {
+      "name": "Initial snapshot captured",
+      "passed": true,
+      "details": "Initial snapshot captured.",
+      "metrics": {
+        "path": "tests\\artifacts\\current_meta_global\\current_meta_global_initial.png",
+        "size_bytes": 605555,
+        "md5": "4debb699ac975992d9e2758e3b57d3df"
+      }
+    },
+    {
+      "name": "Format filter switches data",
+      "passed": true,
+      "details": "All format modes expose selectable archetypes.",
+      "metrics": {
+        "ok": true,
+        "counts": {
+          "all": 67,
+          "live": 67,
+          "play": 174
+        },
+        "status": {
+          "all": "Active filter: All Tournaments",
+          "live": "Active filter: Limitless Decks Only",
+          "play": "Active filter: Major Tournament Decks Only"
+        }
+      }
+    },
+    {
+      "name": "Deck search filter works",
+      "passed": true,
+      "details": "Deck search narrows option list consistently.",
+      "metrics": {
+        "ok": true,
+        "token": "Lucario",
+        "visible_count": 2,
+        "visible_match": true
+      }
+    },
+    {
+      "name": "Archetype selectable",
+      "passed": true,
+      "details": "Archetype selected.",
+      "metrics": {
+        "ok": true,
+        "selected": "Lucario Hariyama",
+        "label": "Lucario Hariyama"
+      }
+    },
+    {
+      "name": "Deck cards and stats rendered",
+      "passed": true,
+      "details": "Cards and stats rendered after deck selection.",
+      "metrics": {
+        "rendered_cards": 42,
+        "cards": "42 / 96",
+        "winrate": "47.18%",
+        "matchup": "45.88% (19 MU)",
+        "isStatsVisible": true
+      }
+    },
+    {
+      "name": "Card share filter applies",
+      "passed": true,
+      "details": "Share filter applied and visible cards did not increase.",
+      "metrics": {
+        "baseline_visible": 42,
+        "filtered_visible": 17,
+        "ok": true,
+        "mode": "applyCurrentMetaFilter"
+      }
+    },
+    {
+      "name": "Generation yields exactly 60 cards (sample archetypes)",
+      "passed": true,
+      "details": "Sample archetypes generated exactly 60 cards.",
+      "metrics": {
+        "rows": [
+          {
+            "archetype": "Lucario Hariyama",
+            "ui": 60,
+            "state": 60,
+            "passed": true
+          },
+          {
+            "archetype": "Dragapult Dusknoir",
+            "ui": 60,
+            "state": 60,
+            "passed": true
+          },
+          {
+            "archetype": "Alakazam Dudunsparce",
+            "ui": 60,
+            "state": 60,
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "Post-interaction snapshot captured",
+      "passed": true,
+      "details": "Post-interaction snapshot captured.",
+      "metrics": {
+        "path": "tests\\artifacts\\current_meta_global\\current_meta_global_after.png",
+        "size_bytes": 7530810,
+        "md5": "9aeeeea05ffc19cdf53e6301da4de3b6"
+      }
+    }
+  ]
+}

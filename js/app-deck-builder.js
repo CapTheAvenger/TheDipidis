@@ -1,34 +1,21 @@
 // app-deck-builder.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
-// Bootstrap pending autosave payload from localStorage for optional restore flows.
+// Autosave beim Laden der Seite prüfen
 (function() {
     try {
-        const savedAutosave = localStorage.getItem('autosave_deck');
-        if (!savedAutosave) return;
-
-        const parsedAutosave = JSON.parse(savedAutosave);
-        if (!parsedAutosave || typeof parsedAutosave !== 'object') return;
-
-        const sources = ['cityLeague', 'currentMeta', 'pastMeta'];
-        const hasAnyDeckCards = sources.some((source) => {
-            const section = parsedAutosave[source];
-            if (!section || typeof section !== 'object') return false;
-            const deck = section.deck;
-            if (!deck || typeof deck !== 'object' || Array.isArray(deck)) return false;
-            return Object.keys(deck).length > 0;
-        });
-
-        if (hasAnyDeckCards) {
-            window._pendingAutosave = parsedAutosave;
+        const saved = localStorage.getItem('autosave_deck');
+        if (saved) {
+            const data = JSON.parse(saved);
+            const totalCards = Object.values(data.cityLeague?.deck || {}).reduce((s,c)=>s+c,0)
+                           + Object.values(data.currentMeta?.deck || {}).reduce((s,c)=>s+c,0)
+                           + Object.values(data.pastMeta?.deck || {}).reduce((s,c)=>s+c,0);
+            if (totalCards > 0) {
+                window._pendingAutosave = data;
+            }
         }
-    } catch (_) {
-        // Ignore malformed autosave payloads.
-    }
+    } catch(e) { /* ignore */ }
 })();
-
-// On reload we intentionally start fresh for temporary deck-builder state.
-try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         localStorage.removeItem('cityLeagueDeck');
         localStorage.removeItem('currentMetaDeck');
         localStorage.removeItem('pastMetaDeck');
@@ -44,6 +31,45 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         devLog('[Init] Starting with empty deck (localStorage cleared on page load)');
         // Check for a shared deck in the URL – runs after clearing so it wins
         setTimeout(function() { if (typeof importDeckFromUrl === 'function') importDeckFromUrl(); }, 100);
+
+        // Auto-save deck restore prompt (runs after DOM + shared deck import)
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (!window._pendingAutosave) return;
+                const data = window._pendingAutosave;
+                delete window._pendingAutosave;
+                // Don't prompt if a shared deck was already imported
+                const anyDeck = Object.values(window.cityLeagueDeck || {}).reduce((s,c)=>s+c,0)
+                             + Object.values(window.currentMetaDeck || {}).reduce((s,c)=>s+c,0)
+                             + Object.values(window.pastMetaDeck || {}).reduce((s,c)=>s+c,0);
+                if (anyDeck > 0) return;
+
+                const ts = data.timestamp ? new Date(data.timestamp).toLocaleString() : '';
+                if (confirm(t('deck.restorePrompt') + (ts ? ' (' + ts + ')' : '') + '\n' + t('deck.autoCompleteContinue'))) {
+                    ['cityLeague', 'currentMeta', 'pastMeta'].forEach(src => {
+                        const saved = data[src];
+                        if (!saved || !saved.deck || Object.keys(saved.deck).length === 0) return;
+                        if (src === 'cityLeague') {
+                            window.cityLeagueDeck = saved.deck;
+                            window.cityLeagueDeckOrder = saved.order || [];
+                            window.currentCityLeagueArchetype = saved.archetype || null;
+                        } else if (src === 'currentMeta') {
+                            window.currentMetaDeck = saved.deck;
+                            window.currentMetaDeckOrder = saved.order || [];
+                            window.currentCurrentMetaArchetype = saved.archetype || null;
+                        } else if (src === 'pastMeta') {
+                            window.pastMetaDeck = saved.deck;
+                            window.pastMetaDeckOrder = saved.order || [];
+                            window.pastMetaCurrentArchetype = saved.archetype || null;
+                        }
+                        if (typeof updateDeckDisplay === 'function') updateDeckDisplay(src);
+                    });
+                    if (typeof showToast === 'function') showToast(t('deck.restored'), 'success');
+                } else {
+                    localStorage.removeItem('autosave_deck');
+                }
+            }, 500);
+        });
         
         // ---------------------------------------------------------------
         // BATCH ADD FUNCTION - For Auto-Generate Performance
@@ -163,98 +189,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             
             return true; // Success
-        }
-
-        function getDeckRefBySource(source) {
-            if (source === 'cityLeague') return window.cityLeagueDeck;
-            if (source === 'currentMeta') return window.currentMetaDeck;
-            if (source === 'pastMeta') return window.pastMetaDeck;
-            return null;
-        }
-
-        function getDeckTotalCards(deck) {
-            return Object.values(deck || {}).reduce((sum, count) => sum + (parseInt(count, 10) || 0), 0);
-        }
-
-        function isBasicEnergyName(cardName) {
-            const name = String(cardName || '').toLowerCase().trim();
-            return name === 'grass energy'
-                || name === 'fire energy'
-                || name === 'water energy'
-                || name === 'lightning energy'
-                || name === 'psychic energy'
-                || name === 'fighting energy'
-                || name === 'darkness energy'
-                || name === 'metal energy';
-        }
-
-        function normalizeGeneratedDeckTo60(source, plannedCards, fallbackCards) {
-            const deck = getDeckRefBySource(source);
-            if (!deck) return 0;
-
-            let total = getDeckTotalCards(deck);
-            if (total >= 60) return total;
-
-            const byName = new Map();
-            const ingest = (card) => {
-                if (!card || !card.card_name) return;
-                const key = String(card.card_name).trim().toLowerCase();
-                if (!key) return;
-                if (!byName.has(key)) byName.set(key, card);
-            };
-
-            (plannedCards || []).forEach(ingest);
-            (fallbackCards || []).forEach(ingest);
-
-            const candidates = Array.from(byName.values()).sort((a, b) => {
-                const shareA = parseFloat(String(a.sharePercent || a.percentage_in_archetype || 0).replace(',', '.')) || 0;
-                const shareB = parseFloat(String(b.sharePercent || b.percentage_in_archetype || 0).replace(',', '.')) || 0;
-                return shareB - shareA;
-            });
-
-            let guard = 0;
-            while (total < 60 && guard < 180) {
-                guard++;
-                let added = false;
-
-                for (const card of candidates) {
-                    const cardName = String(card.card_name || '').trim();
-                    if (!cardName) continue;
-
-                    const originalSetCode = card.set_code || '';
-                    const originalSetNumber = card.set_number || '';
-                    const preferredVersion = getPreferredVersionForCard(cardName, originalSetCode, originalSetNumber);
-                    const setCode = preferredVersion ? preferredVersion.set : originalSetCode;
-                    const setNumber = preferredVersion ? preferredVersion.number : originalSetNumber;
-
-                    const success = addCardToDeckBatch(source, cardName, setCode, setNumber);
-                    if (success) {
-                        total++;
-                        added = true;
-                        if (total >= 60) break;
-                    }
-                }
-
-                // Absolute fallback: try adding basic energy if normal candidates are blocked by limits.
-                if (!added) {
-                    const basicEnergy = candidates.find(card => isBasicEnergyName(card.card_name));
-                    if (basicEnergy) {
-                        const success = addCardToDeckBatch(source, basicEnergy.card_name, basicEnergy.set_code || '', basicEnergy.set_number || '');
-                        if (success) {
-                            total++;
-                            added = true;
-                        }
-                    }
-                }
-
-                if (!added) break;
-            }
-
-            if (total < 60) {
-                console.warn(`[DeckBuilder] Could not normalize deck to 60 for ${source}. Current total: ${total}`);
-            }
-
-            return total;
         }
         
         // ---------------------------------------------------------------
@@ -701,25 +635,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             
             const allCards = currentCardsKey ? (window[currentCardsKey] || []) : (pastMetaFilteredCards || []);
             const dbCache = getMyDeckRenderDbCache();
-
-            const getDeckBuilderEmptyStateHtml = (scope) => {
-                const generateAction = `autoCompleteConsistency('${scope}', 'min')`;
-                const testDrawAction = `openDrawSimulator('${scope}')`;
-                const emptyText = t('deck.emptyPlaceholder');
-                return `
-                    <div class="deck-builder-empty-state" role="status" aria-live="polite">
-                        <div class="deck-builder-empty-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M8 8h8"></path><path d="M8 12h8"></path><path d="M8 16h5"></path></svg>
-                        </div>
-                        <h4 class="deck-builder-empty-title">Your deck is empty</h4>
-                        <p class="deck-builder-empty-text">${emptyText}</p>
-                        <div class="deck-builder-empty-actions">
-                            <button class="btn-modern primary" onclick="${generateAction}">Generate Deck</button>
-                            <button class="btn-modern" onclick="${testDrawAction}">Open Test Draw</button>
-                        </div>
-                    </div>
-                `;
-            };
             
             // Build card data maps: by name and by name+set+number
             const cardDataByName = Object.create((dbCache && dbCache.cardDataByName) || null);
@@ -1048,7 +963,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             
             const gridContainer = document.getElementById(gridContainerId);
             if (gridContainer) {
-                gridContainer.innerHTML = html || getDeckBuilderEmptyStateHtml(source);
+                gridContainer.innerHTML = html || '<p style="text-align: center; color: #444; padding: 40px; font-weight: 500;">' + t('deck.emptyPlaceholder') + '</p>';
             }
         }
         
@@ -1325,7 +1240,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
              */
             const setOrder = {
                 // 2026 Sets (newest first, based on pokemon_sets_mapping.csv)
-                'POR': 117, 'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
+                'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
                 'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
                 // 2024-2025 Sets
                 'SCR': 104, 'SFA': 103, 'TWM': 102, 'TEF': 101, 'PAF': 100, 'PAR': 99,
@@ -1352,59 +1267,14 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 'Illustration Rare': 9,
                 'Promo': 10
             };
-
-            function getCardAggregationKey(card) {
-                const rawName = card?.card_name || card?.name || '';
-                if (typeof normalizeCardName === 'function') {
-                    return normalizeCardName(rawName);
-                }
-                return String(rawName || '').toLowerCase().trim();
-            }
-
-            function getCanonicalDisplayName(card) {
-                const rawName = card?.card_name || card?.name || '';
-                const setCode = card?.set_code || card?.set || '';
-                const setNumber = card?.set_number || card?.number || '';
-
-                if (typeof getDisplayCardName === 'function') {
-                    return getDisplayCardName(rawName, setCode, setNumber) || rawName;
-                }
-
-                return rawName;
-            }
-
-            function applyRepresentativePrint(target, source) {
-                if (!target || !source) return;
-
-                if (source.image_url) target.image_url = source.image_url;
-                if (source.set_code) target.set_code = source.set_code;
-                if (source.rarity) target.rarity = source.rarity;
-                if (source.set_number) target.set_number = source.set_number;
-
-                const canonicalName = getCanonicalDisplayName(source);
-                if (canonicalName) {
-                    target.card_name = canonicalName;
-                    if (Object.prototype.hasOwnProperty.call(target, 'name')) {
-                        target.name = canonicalName;
-                    }
-                }
-            }
             
             const cardMap = new Map();
             
             cards.forEach(card => {
-                const cardName = getCardAggregationKey(card);
+                const cardName = normalizeCardAggregationKey(card.card_name);
                 if (!cardName) return;
                 if (!cardMap.has(cardName)) {
-                    const entry = { ...card };
-                    const canonicalName = getCanonicalDisplayName(card);
-                    if (canonicalName) {
-                        entry.card_name = canonicalName;
-                        if (Object.prototype.hasOwnProperty.call(entry, 'name')) {
-                            entry.name = canonicalName;
-                        }
-                    }
-                    cardMap.set(cardName, entry);
+                    cardMap.set(cardName, { ...card });
                 } else {
                     const existing = cardMap.get(cardName);
                     const existingSetPriority = setOrder[existing.set_code] || 0;
@@ -1413,9 +1283,15 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     const newRarityPriority = rarityOrder[card.rarity] || 99;
                     // Bevorzuge: 1. Low Rarity (Common/Uncommon), 2. Neuestes Set
                     if (newRarityPriority < existingRarityPriority) {
-                        applyRepresentativePrint(existing, card);
+                        if (card.image_url) existing.image_url = card.image_url;
+                        if (card.set_code) existing.set_code = card.set_code;
+                        if (card.rarity) existing.rarity = card.rarity;
+                        if (card.set_number) existing.set_number = card.set_number;
                     } else if (newRarityPriority === existingRarityPriority && newSetPriority > existingSetPriority) {
-                        applyRepresentativePrint(existing, card);
+                        if (card.image_url) existing.image_url = card.image_url;
+                        if (card.set_code) existing.set_code = card.set_code;
+                        if (card.rarity) existing.rarity = card.rarity;
+                        if (card.set_number) existing.set_number = card.set_number;
                     }
                     // Aggregiere max_count (höchsten Wert behalten)
                     existing.max_count = Math.max(parseInt(existing.max_count || 0), parseInt(card.max_count || 0));
@@ -1441,85 +1317,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         }
         
         // ========== DECK OVERVIEW RENDERING FUNCTIONS ==========
-
-        const deckOverviewVirtualState = {
-            observer: null,
-            slots: [],
-            estimatedHeight: 360
-        };
-
-        function destroyDeckOverviewVirtualGrid() {
-            if (deckOverviewVirtualState.observer) {
-                deckOverviewVirtualState.observer.disconnect();
-                deckOverviewVirtualState.observer = null;
-            }
-            deckOverviewVirtualState.slots = [];
-        }
-
-        function mountDeckOverviewVirtualGrid(container, cards, createNode) {
-            destroyDeckOverviewVirtualGrid();
-            container.textContent = '';
-
-            const fragment = document.createDocumentFragment();
-            deckOverviewVirtualState.slots = cards.map((card) => {
-                const slot = document.createElement('div');
-                slot.className = 'virtual-card-slot';
-                slot.style.minHeight = `${deckOverviewVirtualState.estimatedHeight}px`;
-                slot.dataset.rendered = 'false';
-                slot._cardData = card;
-                fragment.appendChild(slot);
-                return slot;
-            });
-            container.appendChild(fragment);
-
-            const renderSlot = (slot) => {
-                if (!slot || slot.dataset.rendered === 'true') return;
-                const node = createNode(slot._cardData);
-                slot.textContent = '';
-                if (node) {
-                    slot.appendChild(node);
-                    slot.dataset.rendered = 'true';
-                    requestAnimationFrame(() => {
-                        const measured = Math.round(slot.getBoundingClientRect().height || 0);
-                        if (measured > 100) {
-                            slot.style.minHeight = `${measured}px`;
-                            deckOverviewVirtualState.estimatedHeight = Math.round((deckOverviewVirtualState.estimatedHeight * 0.85) + (measured * 0.15));
-                        }
-                    });
-                }
-            };
-
-            const unrenderSlot = (slot) => {
-                if (!slot || slot.dataset.rendered !== 'true') return;
-                const measured = Math.round(slot.getBoundingClientRect().height || deckOverviewVirtualState.estimatedHeight);
-                slot.textContent = '';
-                slot.dataset.rendered = 'false';
-                slot.style.minHeight = `${Math.max(100, measured)}px`;
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach((entry) => {
-                    const slot = entry.target;
-                    if (entry.isIntersecting) {
-                        renderSlot(slot);
-                    } else {
-                        unrenderSlot(slot);
-                    }
-                });
-            }, {
-                root: null,
-                rootMargin: '600px 0px 600px 0px',
-                threshold: 0.01
-            });
-
-            deckOverviewVirtualState.observer = observer;
-            deckOverviewVirtualState.slots.forEach((slot, index) => {
-                observer.observe(slot);
-                if (index < 20) {
-                    renderSlot(slot);
-                }
-            });
-        }
         
         function renderOverviewCards(cards) {
             /**
@@ -1545,8 +1342,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             
             const overviewContainer = document.getElementById('cityLeagueDeckOverview');
             if (!overviewContainer) return;
-
-            mountDeckOverviewVirtualGrid(overviewContainer, sortedCards, (card) => {
+            
+            const gridHtml = sortedCards.map(card => {
                 const imageUrl = getBestCardImage(card);
                 // Konvertiere Komma zu Punkt fuer parseFloat (CSV verwendet Komma als Dezimaltrennzeichen)
                 const percentageStr = (card.percentage_in_archetype || '0').toString().replace(',', '.');
@@ -1593,8 +1390,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 } else {
                     imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">??</div>`;
                 }
-
-                const html = `
+                
+                return `
                     <div class="card-item card-item-shadow">
                         <div class="pos-rel w-100">
                             ${imgHtml}
@@ -1623,10 +1420,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         </div>
                     </div>
                 `;
-                const wrapper = document.createElement('div');
-                wrapper.innerHTML = html;
-                return wrapper.firstElementChild;
-            });
+            }).join('');
+            
+            overviewContainer.innerHTML = gridHtml;
         }
         
         function generateDeckGrid(source) {
@@ -2256,9 +2052,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         addCardToDeckBatch(source, card.card_name, setCode, setNumber);
                     }
                 });
-
-                const normalizedTotal = normalizeGeneratedDeckTo60(source, cardsToAdd, deckCards);
-                devLog(`[autoComplete] Final normalized deck size: ${normalizedTotal}`);
                 devLog('[autoComplete] Deck completed with rarity mode:', globalRarityPreference);
                 
                 // Save deck to localStorage
@@ -2651,9 +2444,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     }
                 });
 
-                const normalizedTotal = normalizeGeneratedDeckTo60(source, cardsToAdd, deckCards);
-                devLog(`[autoCompleteConsistency] Final normalized deck size: ${normalizedTotal}`);
-
                 devLog('[autoCompleteConsistency] Consistency deck completed with rarity mode:', globalRarityPreference);
 
                 if (source === 'cityLeague') {
@@ -2666,7 +2456,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
                 scheduleDeckDisplayUpdate(source);
 
-                if (normalizedTotal >= 60) {
+                if (currentTotal >= 60) {
                     if (typeof showDeckShareToast === 'function') {
                         showDeckShareToast(t('deck.consistencySuccess'));
                     } else {

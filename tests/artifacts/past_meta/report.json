@@ -1,0 +1,119 @@
+{
+  "suite": "Past Meta Structured E2E",
+  "url": "http://127.0.0.1:8000/index.html",
+  "timestamp": "2026-03-31 22:07:17",
+  "summary": {
+    "total": 10,
+    "passed": 9,
+    "failed": 1,
+    "status": "FAIL"
+  },
+  "artifacts_dir": "tests\\artifacts\\past_meta",
+  "console_errors": [
+    "pageerror: Cannot read properties of null (reading 'value')"
+  ],
+  "response_404_urls": [],
+  "results": [
+    {
+      "name": "Past Meta tab active",
+      "passed": true,
+      "details": "",
+      "metrics": null
+    },
+    {
+      "name": "Format selector populated",
+      "passed": true,
+      "details": "Format selector has options.",
+      "metrics": {
+        "option_count": 14
+      }
+    },
+    {
+      "name": "Initial snapshot captured",
+      "passed": true,
+      "details": "Initial snapshot captured.",
+      "metrics": {
+        "path": "tests\\artifacts\\past_meta\\past_meta_initial.png",
+        "size_bytes": 464215,
+        "md5": "7f3eddab5d45a8b0bde110d27b4b63c9"
+      }
+    },
+    {
+      "name": "Past Meta selection works",
+      "passed": true,
+      "details": "Format/tournament/deck selected.",
+      "metrics": {
+        "ok": true,
+        "format": "SVI-ASC",
+        "tournament": "Regional Houston, TX – Limitless",
+        "deck": "Alakazam Dudunsparce"
+      }
+    },
+    {
+      "name": "Deck cards and stats rendered",
+      "passed": true,
+      "details": "Cards and stats rendered.",
+      "metrics": {
+        "rendered_cards": 31,
+        "statCards": "31 / 67",
+        "summary": "/ 67 Total",
+        "cardsLabel": "31 Cards",
+        "statsVisible": true
+      }
+    },
+    {
+      "name": "Stat total matches overview total",
+      "passed": true,
+      "details": "Stat and overview totals are consistent.",
+      "metrics": {
+        "stat_total": 67,
+        "summary_total": 67,
+        "stat_text": "31 / 67",
+        "summary_text": "/ 67 Total"
+      }
+    },
+    {
+      "name": "SVI-ASC + Houston totals equal 60",
+      "passed": false,
+      "details": "Houston selection totals are not 60.",
+      "metrics": {
+        "is_houston_path": true,
+        "context": {
+          "format": "SVI-ASC",
+          "tournamentText": "Regional Houston, TX – Limitless",
+          "deck": "Alakazam Dudunsparce"
+        },
+        "stat_total": 67,
+        "summary_total": 67
+      }
+    },
+    {
+      "name": "Card share filter applies",
+      "passed": true,
+      "details": "Share filter applied and visible cards did not increase.",
+      "metrics": {
+        "baseline_visible": 31,
+        "filtered_visible": 23
+      }
+    },
+    {
+      "name": "Generated deck yields exactly 60 cards",
+      "passed": true,
+      "details": "Generated deck reached exactly 60 cards.",
+      "metrics": {
+        "ui": 60,
+        "state": 60
+      }
+    },
+    {
+      "name": "Post-interaction snapshot captured",
+      "passed": true,
+      "details": "Post-interaction snapshot captured.",
+      "metrics": {
+        "path": "tests\\artifacts\\past_meta\\past_meta_after.png",
+        "size_bytes": 1381855,
+        "md5": "71219f9c2dbdf2ac5afa57dea530b7d9"
+      }
+    }
+  ]
+}

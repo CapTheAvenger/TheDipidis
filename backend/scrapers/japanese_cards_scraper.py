@@ -13,22 +13,21 @@ import csv
 import json
 import os
 import time
+import threading
 import concurrent.futures
 from datetime import datetime
 from typing import List, Dict, Set, Tuple
 
 from bs4 import BeautifulSoup
 
-from backend.core.card_scraper_shared import (
-    setup_console_encoding,
-    setup_logging, 
-    load_settings, 
-    fetch_page_bs4
+from card_scraper_shared import (
+    setup_console_encoding, get_data_dir, _get_scraper,
+    setup_logging, load_settings as _shared_load_settings,
 )
-from backend.settings import get_data_path
 
 setup_console_encoding()
 logger = setup_logging("japanese_cards_scraper")
+data_dir = get_data_dir()
 
 # ============================================================================
 # SETTINGS
@@ -42,32 +41,69 @@ DEFAULT_SETTINGS = {
 }
 
 def _load_settings() -> dict:
-    return load_settings("japanese_cards_scraper_settings.json", DEFAULT_SETTINGS)
+    return _shared_load_settings("japanese_cards_scraper_settings.json", DEFAULT_SETTINGS)
 
 SETTINGS = _load_settings()
 
+logger.info("=" * 80)
+logger.info(f"JAPANESE CARDS SCRAPER - Lade die neusten {SETTINGS['keep_latest_sets']} JP Sets")
+logger.info("=" * 80)
 
 # ============================================================================
-# SCRAPING LOGIC
+# NETWORK UTILS
 # ============================================================================
 
-def get_latest_jp_sets() -> Set[str]:
+def fetch_page_bs4(url: str, retries: int = 3):
+    scraper = _get_scraper()
+    for attempt in range(1, retries + 1):
+        try:
+            resp = scraper.get(url, timeout=15)
+            resp.raise_for_status()
+            if "Just a moment..." in resp.text or "cf-browser-verification" in resp.text:
+                raise Exception("Cloudflare Challenge Page detected")
+            return BeautifulSoup(resp.text, "lxml")
+        except Exception as e:
+            if attempt < retries:
+                time.sleep(1)
+            else:
+                logger.debug("Fetch failed nach %s Versuchen: %s -> %s", retries, url, e)
+    return None
+
+# ============================================================================
+# LOGIC
+# ============================================================================
+def load_existing_sets() -> Set[str]:
+    csv_path = os.path.join(data_dir, "japanese_cards_database.csv")
+    if not os.path.exists(csv_path):
+        return set()
+    try:
+        existing = set()
+        with open(csv_path, "r", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                if row.get("set"):
+                    existing.add(row["set"])
+        return existing
+    except Exception as e:
+        logger.warning("Konnte bestehende DB nicht lesen: %s", e)
+        return set()
+
+def quick_check_latest_sets() -> Set[str]:
     logger.info("Quick Check: Pruefe die neusten Sets auf Limitless...")
+    # The JP set index page lists all sets, newest first
     url = "https://limitlesstcg.com/cards/jp"
     soup = fetch_page_bs4(url)
     if not soup:
         return set()
-    
     seen_sets = []
     # Limitless does not use <tbody> — select all <tr> that contain <td>
     for row in [tr for tr in soup.select("table tr") if tr.find("td")]:
+        # Set code is in <span class="code annotation"> or img alt
         span = row.find("span", class_="code")
         if span:
             set_code = span.get_text(strip=True).upper()
         else:
             img = row.find("img", class_="set")
             set_code = (img["alt"].upper() if img and img.has_attr("alt") else "").strip()
-            
         if set_code and set_code not in seen_sets:
             seen_sets.append(set_code)
             if len(seen_sets) >= SETTINGS["keep_latest_sets"]:
@@ -93,6 +129,7 @@ def scrape_japanese_cards_list(target_sets: Set[str]) -> List[Dict[str, str]]:
         if not soup:
             break
 
+        # Limitless does not use <tbody>
         rows = [tr for tr in soup.select("table tr") if tr.find("td")]
         if not rows:
             logger.info("Keine weiteren Karten gefunden.")
@@ -105,12 +142,11 @@ def scrape_japanese_cards_list(target_sets: Set[str]) -> List[Dict[str, str]]:
                 set_code = cells[0].get_text(strip=True).upper()
                 set_num  = cells[1].get_text(strip=True)
                 name     = cells[2].get_text(strip=True)
-                
+                # Strip ptcg symbol prefix from type (e.g. "GBasic" -> "Basic")
                 raw_type  = cells[3].get_text(strip=True)
                 type_span = cells[3].find("span", class_="ptcg-symbol")
                 if type_span:
                     raw_type = raw_type[len(type_span.get_text()):].strip()
-                    
                 rarity   = cells[4].get_text(strip=True) if len(cells) > 4 else ""
                 a_tag    = cells[2].find("a")
                 card_url = a_tag["href"] if a_tag and a_tag.has_attr("href") else ""
@@ -172,6 +208,7 @@ def _fetch_single_detail(card: dict) -> dict:
         if card["card_url"].startswith("/")
         else card["card_url"]
     )
+    # Force English translation for Japanese detail pages
     if "translate=en" not in url:
         url += "&translate=en" if "?" in url else "?translate=en"
 
@@ -181,6 +218,7 @@ def _fetch_single_detail(card: dict) -> dict:
         if img and img.has_attr("src"):
             card["image_url"] = img["src"]
 
+        # Rarity extraction
         rarity_spans = soup.select(".card-prints-current .prints-current-details span")
         if len(rarity_spans) >= 2:
             r_info = rarity_spans[1].get_text(strip=True)
@@ -195,6 +233,7 @@ def _fetch_single_detail(card: dict) -> dict:
                     card["rarity"] = txt.split("·")[-1].strip()
                     break
 
+        # Promo fallback
         if card["set"] in ["SVP", "SMP", "SWSH", "PR-SW"] and not card.get("rarity"):
             card["rarity"] = "Promo"
 
@@ -221,22 +260,23 @@ def scrape_card_details(cards: List[dict]) -> List[dict]:
     return updated
 
 # ============================================================================
-# MAIN ORCHESTRATION
+# MAIN
 # ============================================================================
-
 def main():
-    logger.info("=" * 80)
-    logger.info(f"JAPANESE CARDS SCRAPER - Lade die neusten {SETTINGS['keep_latest_sets']} JP Sets")
-    logger.info("=" * 80)
-    
-    target_sets = get_latest_jp_sets()
-    if not target_sets:
-        logger.error("Konnte keine Ziel-Sets finden. Abbruch.")
-        return
+    existing_sets = load_existing_sets()
+    if existing_sets:
+        logger.info("Lokale Datenbank enthaelt %s Sets.", len(existing_sets))
 
-    all_cards = scrape_japanese_cards_list(target_sets)
+    latest_online = quick_check_latest_sets()
+    if latest_online:
+        logger.info(f"Neueste Sets online: {', '.join(latest_online)}")
+        if latest_online.issubset(existing_sets):
+            logger.info("DATENBANK IST BEREITS AKTUELL!")
+            logger.info("Die neusten Sets sind bereits in der lokalen Datenbank. Abbruch.")
+            return
+
+    all_cards = scrape_japanese_cards_list(latest_online)
     if not all_cards:
-        logger.info("Keine Karten gefunden. Abbruch.")
         return
 
     filtered_cards, latest_sets = filter_latest_sets(all_cards)
@@ -246,8 +286,8 @@ def main():
     else:
         logger.info("Detail-Download uebersprungen (skip_detail_scraping = True).")
 
-    csv_path  = get_data_path("japanese_cards_database.csv")
-    json_path = get_data_path("japanese_cards_database.json")
+    csv_path  = os.path.join(data_dir, "japanese_cards_database.csv")
+    json_path = os.path.join(data_dir, "japanese_cards_database.json")
 
     with open(csv_path, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
@@ -270,6 +310,7 @@ def main():
 
     logger.info("Erfolgreich ueberschrieben. %s Karten in Datenbank gespeichert.", len(filtered_cards))
     logger.info("=" * 80)
+
 
 if __name__ == "__main__":
     try:

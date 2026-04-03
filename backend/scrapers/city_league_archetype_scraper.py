@@ -27,12 +27,11 @@ except ImportError:
     print("FEHLER: beautifulsoup4 fehlt! pip install beautifulsoup4")
     sys.exit(1)
 
-from backend.core.card_scraper_shared import (
-    setup_console_encoding, setup_logging, load_settings,
+from card_scraper_shared import (
+    setup_console_encoding, get_app_path, get_data_dir, setup_logging, load_settings,
     normalize_archetype_name, fetch_page_bs4, clean_pokemon_name, fix_mega_pokemon_name,
     parse_tournament_date
 )
-from backend.settings import get_data_path, get_config_path
 
 # Fix Windows console encoding for Unicode characters
 setup_console_encoding()
@@ -210,7 +209,8 @@ def _scrape_single_tournament(tournament: dict) -> list:
 def save_to_csv(data: list, output_file: str):
     if not data:
         return
-    output_path = get_data_path(output_file)
+    output_path = os.path.join(get_data_dir(), output_file)
+
     with open(output_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
         fieldnames = ['date', 'tournament_id', 'prefecture', 'shop', 'format', 'placement', 'player', 'archetype']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
@@ -219,7 +219,7 @@ def save_to_csv(data: list, output_file: str):
     logger.info("✓ %s Eintraege in %s gespeichert.", len(data), output_file)
 
 def save_deck_statistics(data: list, output_file: str):
-    stats_file = get_data_path(output_file.replace('.csv', '_deck_stats.csv'))
+    stats_file = os.path.join(get_data_dir(), output_file.replace('.csv', '_deck_stats.csv'))
     deck_data = {}
 
     for entry in data:
@@ -257,7 +257,7 @@ def save_deck_statistics(data: list, output_file: str):
     logger.info("✓ Deck Stats gespeichert in: %s", stats_file)
 
 def create_comparison_report(old_data: list, new_data: list, output_file: str):
-    data_dir = get_data_path("")
+    data_dir = get_data_dir()
     comparison_csv = os.path.join(data_dir, output_file.replace('.csv', '_comparison.csv'))
     comparison_html = os.path.join(data_dir, output_file.replace('.csv', '_comparison.html'))
 
@@ -472,7 +472,7 @@ def main():
 
     # Load existing to skip already scraped tournaments
     existing_ids = set()
-    output_path = get_data_path(settings['output_file'])
+    output_path = os.path.join(get_data_dir(), settings['output_file'])
     if os.path.exists(output_path):
         with open(output_path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')

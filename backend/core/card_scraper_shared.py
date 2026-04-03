@@ -11,7 +11,6 @@ Provides:
 - Card type helpers (replaces card_type_lookup.py)
 """
 
-
 import os
 import sys
 import csv
@@ -25,19 +24,6 @@ import threading
 from datetime import datetime, timedelta
 from collections import defaultdict
 from typing import List, Dict, Optional, Tuple, Any, Set, Mapping, TypedDict, Union, DefaultDict, cast
-
-# Zentrale Settings für Pfade
-try:
-    from backend.settings import get_data_path, get_config_path
-except ImportError:
-    # Fallback für Tests oder alte Struktur
-    def get_data_path(filename):
-        return os.path.join(os.path.dirname(__file__), '../../data', filename)
-    def get_config_path(filename):
-        return os.path.join(os.path.dirname(__file__), '../../config', filename)
-
-# Ensure get_config_path is always imported (for static checkers and clarity)
-from backend.settings import get_config_path
 
 try:
     cloudscraper = importlib.import_module('cloudscraper')
@@ -129,7 +115,13 @@ def get_app_path() -> str:
     return os.path.dirname(os.path.abspath(__file__))
 
 def get_data_dir() -> str:
-    data_dir = str(get_data_path(''))
+    app_path = get_app_path()
+    parts = app_path.replace('\\', '/').split('/')
+    if 'dist' in parts:
+        workspace_root = '/'.join(parts[:parts.index('dist')])
+    else:
+        workspace_root = app_path
+    data_dir = os.path.join(workspace_root, 'data')
     os.makedirs(data_dir, exist_ok=True)
     return data_dir
 
@@ -162,40 +154,54 @@ def save_scraped_ids(tracking_file: str, ids: Set[str], id_key: str = 'scraped_i
 def load_settings(settings_filename: str, defaults: dict,
                   deep_merge_keys: Optional[List[str]] = None,
                   create_if_missing: bool = False) -> dict:
-    """Load settings from JSON file, always using get_config_path for the file location.
+    """Load settings from JSON file, searching standard candidate paths.
 
     For *deep_merge_keys* (e.g. ``['sources']``), nested dicts are merged
     at the sub-key level rather than being replaced wholesale.
     """
-    settings_path = str(get_config_path(settings_filename))
-    if os.path.isfile(settings_path):
+    app_path = get_app_path()
+    candidates = [
+        os.path.join(app_path, settings_filename),
+        os.path.join(os.getcwd(), settings_filename),
+        os.path.join(app_path, "data", settings_filename),
+    ]
+    if os.path.basename(app_path) == "dist":
+        candidates.insert(0, os.path.join(os.path.dirname(app_path), settings_filename))
+
+    for path in candidates:
+        path = os.path.normpath(path)
+        if not os.path.isfile(path):
+            continue
         try:
-            with open(settings_path, "r", encoding="utf-8-sig") as f:
+            with open(path, "r", encoding="utf-8-sig") as f:
                 content = f.read().strip()
-            if content:
-                loaded = json.loads(content)
-                if isinstance(loaded, dict):
-                    # Fill in missing top-level defaults
-                    for key, value in defaults.items():
-                        if key not in loaded:
-                            loaded[key] = value
-                    # Deep-merge specified nested dicts
-                    for dmk in (deep_merge_keys or []):
-                        if dmk in defaults and isinstance(defaults[dmk], dict):
-                            loaded.setdefault(dmk, {})
-                            for sub_key, sub_defaults in defaults[dmk].items():
-                                loaded[dmk].setdefault(
-                                    sub_key, {} if isinstance(sub_defaults, dict) else sub_defaults
-                                )
-                                if isinstance(sub_defaults, dict) and isinstance(loaded[dmk].get(sub_key), dict):
-                                    for sk, sv in sub_defaults.items():
-                                        loaded[dmk][sub_key].setdefault(sk, sv)
-                    logger.info("Settings geladen: %s", settings_path)
-                    return loaded
+            if not content:
+                continue
+            loaded = json.loads(content)
+            if not isinstance(loaded, dict):
+                continue
+            # Fill in missing top-level defaults
+            for key, value in defaults.items():
+                if key not in loaded:
+                    loaded[key] = value
+            # Deep-merge specified nested dicts
+            for dmk in (deep_merge_keys or []):
+                if dmk in defaults and isinstance(defaults[dmk], dict):
+                    loaded.setdefault(dmk, {})
+                    for sub_key, sub_defaults in defaults[dmk].items():
+                        loaded[dmk].setdefault(
+                            sub_key, {} if isinstance(sub_defaults, dict) else sub_defaults
+                        )
+                        if isinstance(sub_defaults, dict) and isinstance(loaded[dmk].get(sub_key), dict):
+                            for sk, sv in sub_defaults.items():
+                                loaded[dmk][sub_key].setdefault(sk, sv)
+            logger.info("Settings geladen: %s", path)
+            return loaded
         except Exception as e:
             logger.warning("Konnte Settings nicht laden: %s", e)
 
     if create_if_missing:
+        settings_path = os.path.join(app_path, settings_filename)
         try:
             with open(settings_path, "w", encoding="utf-8") as f:
                 json.dump(defaults, f, indent=4)
@@ -361,7 +367,7 @@ def get_week_id(date_str: str) -> str:
 
 def load_set_order() -> Dict[str, int]:
     """Load set release order from data/sets.json (newest = highest number)."""
-    sets_path = get_data_path('sets.json')
+    sets_path = os.path.join(get_data_dir(), 'sets.json')
     try:
         with open(sets_path, 'r', encoding='utf-8') as f:
             raw = json.load(f)
@@ -405,7 +411,7 @@ class CardDatabaseLookup:
         self._load_databases()
 
     def _load_dynamic_set_order(self) -> Dict[str, int]:
-        sets_path = get_data_path('sets.json')
+        sets_path = os.path.join(get_data_dir(), 'sets.json')
         try:
             with open(sets_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -414,8 +420,9 @@ class CardDatabaseLookup:
             return {'SVP': 100, 'SVI': 100}
 
     def _load_databases(self):
-        en_path = get_data_path('all_cards_database.csv')
-        jp_path = get_data_path('japanese_cards_database.csv')
+        data_dir = get_data_dir()
+        en_path = os.path.join(data_dir, 'all_cards_database.csv')
+        jp_path = os.path.join(data_dir, 'japanese_cards_database.csv')
         seen: Set[str] = set()
 
         if os.path.exists(en_path):
@@ -744,8 +751,7 @@ def save_to_csv(data: List[RowDict], output_file: str, append_mode: bool = False
         def row_period_key(row: Mapping[str, Any]) -> str:
             tournament_id = row.get('tournament_id', '')
             period = row.get('period', '') or row.get('date', '') or row.get('tournament_date', '')
-            meta = row.get('meta', '')
-            return f"{tournament_id}|{period}|{row.get('archetype','')}|{row.get('card_name','')}|{meta}"
+            return f"{tournament_id}|{period}|{row.get('archetype','')}|{row.get('card_name','')}"
 
         new_keys = {row_period_key(r) for r in data}
         merged = [r for r in existing if row_period_key(r) not in new_keys]

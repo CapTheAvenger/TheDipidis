@@ -26,14 +26,13 @@ except ImportError:
     sys.exit(1)
 
 # Import shared scraper utilities
-from backend.core.card_scraper_shared import (
-    setup_console_encoding, CardDatabaseLookup, 
+from card_scraper_shared import (
+    setup_console_encoding, get_app_path, get_data_dir, CardDatabaseLookup, 
     aggregate_card_data, save_to_csv, fetch_page, normalize_archetype_name,
-    load_scraped_ids, save_scraped_ids, resolve_date_range,
+    load_scraped_ids, save_scraped_ids, _get_scraper, resolve_date_range,
     safe_fetch_html, setup_logging, load_settings, parse_tournament_date,
     extract_cards_from_decklist_soup
 )
-from backend.settings import get_data_path, get_config_path
 
 # Fix Windows console encoding for Unicode characters
 setup_console_encoding()
@@ -45,7 +44,7 @@ logger = setup_logging("city_league_scraper")
 
 # Try to import city_league_module for tournament scraping
 try:
-    from backend.scrapers import city_league_archetype_scraper as city_league_module
+    import city_league_archetype_scraper as city_league_module
     _city_league_available = True
 except ImportError as e:
     city_league_module = None
@@ -56,20 +55,18 @@ except ImportError as e:
 # TOURNAMENT TRACKING (Incremental Scraping)
 # ============================================================================
 def get_scraped_tournaments_file() -> str:
-    return str(get_data_path('city_league_analysis_scraped.json'))
+    return os.path.join(get_data_dir(), 'city_league_analysis_scraped.json')
 
-from typing import Set, Dict, List, Any
-
-def load_scraped_tournaments() -> Set[str]:
+def load_scraped_tournaments() -> set:
     return load_scraped_ids(get_scraped_tournaments_file())
 
-def save_scraped_tournaments(tournament_ids: Set[str]) -> None:
+def save_scraped_tournaments(tournament_ids: set) -> None:
     save_scraped_ids(get_scraped_tournaments_file(), tournament_ids, 'scraped_tournament_ids')
 
 # ============================================================================
 # SETTINGS
 # ============================================================================
-DEFAULT_SETTINGS: Dict[str, Any] = {
+DEFAULT_SETTINGS = {
     "sources": {
         "city_league": {
             "enabled": True,
@@ -90,7 +87,7 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "_comment": "Scrapes City League tournaments and extracts card data by archetype."
 }
 
-def _load_settings() -> Dict[str, Any]:
+def _load_settings() -> dict:
     return load_settings(
         "city_league_analysis_settings.json", DEFAULT_SETTINGS,
         deep_merge_keys=["sources"], create_if_missing=True
@@ -135,19 +132,19 @@ def extract_tournament_date_from_html(tournament_html: str, fallback_date: str =
 # ============================================================================
 # PARSING LOGIC (BeautifulSoup)
 # ============================================================================
-def extract_cards_from_deck_html(deck_html: str, card_db: CardDatabaseLookup) -> List[Any]:
+def extract_cards_from_deck_html(deck_html: str, card_db: CardDatabaseLookup) -> list:
     """Delegate to shared extraction in card_scraper_shared."""
     soup = BeautifulSoup(deck_html, 'lxml')
     return extract_cards_from_decklist_soup(soup, card_db)
 
 def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, tournament_id: str, card_db, timeout: int) -> dict:
     """Worker Funktion fuer Multithreading."""
+    scraper = _get_scraper()
     try:
-        html = safe_fetch_html(deck_url, timeout)
-        if not html:
-            return None
+        response = scraper.get(deck_url, timeout=timeout)
+        response.raise_for_status()
         
-        cards = extract_cards_from_deck_html(html, card_db)
+        cards = extract_cards_from_deck_html(response.text, card_db)
         if cards:
             return {
                 'archetype': normalize_archetype_name(deck_name),
@@ -164,11 +161,11 @@ def _fetch_single_deck(deck_url: str, deck_name: str, tournament_date: str, tour
 def process_tournament_decklists(
     tournament_html: str,
     max_decklists: int,
-    tournament_info: Dict[str, Any],
+    tournament_info: dict,
     request_timeout: int,
     max_workers: int,
     card_db: CardDatabaseLookup
-) -> List[Dict[str, Any]]:
+) -> list:
     tournament_date = tournament_info.get('date') or tournament_info.get('date_str', '')
     soup = BeautifulSoup(tournament_html, 'lxml')
     deck_tasks = []

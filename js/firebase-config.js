@@ -30,23 +30,11 @@ function initFirebaseRuntime() {
   const _fbDev = typeof DEV_MODE !== 'undefined' ? DEV_MODE : false;
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
-      console.info('[Auth] Firebase state: signed in', user.email || user.uid || 'unknown-user');
       if (_fbDev) console.log('✓ User signed in:', user.email);
-      if (typeof onUserSignedIn === 'function') {
-        onUserSignedIn(user);
-      } else {
-        window.__pendingAuthUser = user;
-        console.warn('[Auth] onUserSignedIn handler not ready yet; queued auth state for later sync');
-      }
+      if (typeof onUserSignedIn === 'function') onUserSignedIn(user);
     } else {
-      console.info('[Auth] Firebase state: signed out');
       if (_fbDev) console.log('✗ User signed out');
-      if (typeof onUserSignedOut === 'function') {
-        onUserSignedOut();
-      } else {
-        window.__pendingAuthUser = null;
-        console.warn('[Auth] onUserSignedOut handler not ready yet; queued auth state for later sync');
-      }
+      if (typeof onUserSignedOut === 'function') onUserSignedOut();
     }
   });
 }

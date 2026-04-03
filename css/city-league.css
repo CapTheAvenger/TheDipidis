@@ -229,13 +229,9 @@
 }
 .proxy-action-btn-row {
     display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 8px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
-}
-.proxy-action-btn-row .btn-modern {
-    flex: 1 1 180px;
-    min-height: 42px;
 }
 .proxy-add-cl-btn {}
 .proxy-add-cm-btn {}
@@ -252,19 +248,13 @@
 }
 .proxy-queue-list {
     display: grid;
-    gap: 12px;
+    gap: 10px;
 }
 .proxy-panel {
     border: 1px solid #dee2e6;
     border-radius: 10px;
     padding: 14px;
     background: #fff;
-}
-.proxy-panels-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
 }
 .proxy-import-decklist-panel {}
 .proxy-panel-title {
@@ -289,10 +279,6 @@
     margin-top: 10px;
     flex-wrap: wrap;
 }
-.proxy-panel-btn-row .btn-modern {
-    width: 100%;
-    min-height: 42px;
-}
 .proxy-add-decklist-btn {
     background: #e74c3c;
     border-color: #c0392b;
@@ -301,7 +287,7 @@
 .proxy-add-single-card-panel {}
 .proxy-add-single-card-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 2fr 1fr 1fr 80px;
     gap: 8px;
     margin-bottom: 10px;
 }
@@ -317,7 +303,7 @@
 }
 .proxy-container {
     background: white;
-    padding: 16px;
+    padding: 25px;
     border-radius: 14px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.08);
 }
@@ -348,10 +334,6 @@
 }
 .proxy-header-unique {}
 .proxy-header-copies {}
-.proxy-btn-loading {
-    opacity: 0.72;
-    cursor: wait;
-}
 .past-meta-add-card-title {
     margin-top: 0;
     font-size: 1.1em;
@@ -574,16 +556,6 @@
     color: #3B4CCA;
     font-weight: 600;
 }
-.current-meta-meta-debug-info {
-    margin-left: auto;
-    font-size: 0.78em;
-    color: #4e5968;
-    background: #eef2f8;
-    border: 1px solid #d7dfeb;
-    border-radius: 999px;
-    padding: 3px 10px;
-    white-space: nowrap;
-}
 .current-meta-meta-card-filters {
     display: flex;
     gap: 18px;
@@ -716,47 +688,6 @@
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
 }
-/* --- Top 256 Tournament Breakdown --- */
-.current-meta-top256-section {
-    margin-top: 14px;
-    padding: 14px 20px;
-    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(59, 76, 202, 0.08);
-    border-left: 3px solid var(--pokemon-blue, #3B4CCA);
-}
-.current-meta-top256-title {
-    font-size: 0.85em;
-    font-weight: 700;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-bottom: 10px;
-}
-.current-meta-top256-list {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-.top256-entry {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    font-size: 0.9em;
-}
-.top256-count {
-    font-weight: 800;
-    color: var(--pokemon-blue, #3B4CCA);
-    min-width: 28px;
-}
-.top256-tournament {
-    color: #374151;
-    font-weight: 500;
-}
-.top256-date {
-    color: #9ca3af;
-    font-size: 0.82em;
-}
 .current-meta-matchups-title {
     color: #2c3e50;
     margin-top: 0;
@@ -769,10 +700,6 @@
     gap: 32px;
     flex-wrap: wrap;
     margin-bottom: 18px;
-}
-.current-meta-matchups-grid-container > div {
-    flex: 1 1 0%;
-    min-width: 0;
 }
 .current-meta-matchups-table {
     width: 100%;
@@ -1220,6 +1147,8 @@
     margin-bottom: 10px;
 }
 .city-league-mydeck-grid {
+    display: flex;
+    flex-wrap: wrap;
     gap: 12px;
 }
 .city-league-mydeck-empty {
@@ -1279,36 +1208,17 @@
     font-weight: 800;
 }
 .city-league-deck-table-view {
-    display: block;
+    display: none;
     margin-bottom: 18px;
 }
 .city-league-deck-visual {
-    display: block;
+    display: none;
     margin-bottom: 18px;
 }
-/* Shared grid layout for ALL deck card overview grids (City League, Current Meta, Past Meta) */
-.deck-grid {
+.city-league-deck-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
     gap: 10px;
-}
-.city-league-deck-grid {
-    grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
-    gap: 12px;
-}
-
-@media (max-width: 768px) {
-    .city-league-deck-grid {
-        grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-        gap: 10px;
-    }
-}
-
-@media (max-width: 430px) {
-    .city-league-deck-grid {
-        grid-template-columns: repeat(auto-fill, minmax(102px, 1fr));
-        gap: 8px;
-    }
 }
 .city-league-cards-header {
     display: block;
@@ -1335,19 +1245,18 @@
     letter-spacing: -0.3px;
 }
 .city-league-cards-count {
-    font-size: 0.9em;
-    color: var(--pokemon-blue, #3B4CCA);
-    font-weight: 800;
-    background: #fff;
-    border: 1px solid rgba(59, 76, 202, 0.22);
-    padding: 5px 12px;
+    font-size: 0.92em;
+    color: #fff;
+    font-weight: 700;
+    background: var(--pokemon-blue, #3B4CCA);
+    padding: 4px 14px;
     border-radius: 20px;
     letter-spacing: 0.2px;
 }
 .city-league-cards-count-summary {
-    margin-left: 4px;
+    margin-left: 6px;
     font-weight: 600;
-    opacity: 0.72;
+    opacity: 0.85;
 }
 .city-league-cards-controls {
     display: flex;
@@ -1410,22 +1319,20 @@
     margin-bottom: 24px;
 }
 .city-league-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 14px;
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
 }
 .city-league-stat-card {
     background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
     border-radius: 10px;
-    padding: 12px 16px;
-    min-width: 0;
+    padding: 14px 20px;
+    min-width: 160px;
     box-shadow: 0 2px 10px rgba(59, 76, 202, 0.08);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: center;
     border-left: 3px solid var(--pokemon-blue, #3B4CCA);
-    min-height: 84px;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 .city-league-stat-card:hover {
@@ -1433,16 +1340,15 @@
     box-shadow: 0 4px 16px rgba(59, 76, 202, 0.14);
 }
 .city-league-stat-label {
-    font-size: 0.78em;
+    font-size: 0.85em;
     color: #6b7280;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     text-transform: uppercase;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.3px;
 }
 .city-league-stat-value {
-    font-size: 1.9em;
-    line-height: 1;
+    font-size: 1.3em;
     font-weight: 800;
     color: var(--pokemon-blue, #3B4CCA);
 }
@@ -1528,722 +1434,4 @@
     display: block;
     margin-bottom: 5px;
 }
-}
-
-/* ============================================================
- * Mobile / Tablet responsive rules
- * ============================================================ */
-@media (max-width: 768px) {
-    .tutorial-main-container {
-        padding: 10px 10px;
-    }
-    .tutorial-section-title {
-        font-size: 1.15em;
-    }
-    .tutorial-section-desc {
-        font-size: 0.95em;
-    }
-    .sandbox-start-btn,
-    .sandbox-multiplayer-btn {
-        font-size: 16px;
-        padding: 14px 30px;
-    }
-    .sandbox-player-panels {
-        grid-template-columns: 1fr;
-    }
-    .sandbox-player-panel {
-        padding: 14px;
-    }
-    .proxy-add-single-card-grid {
-        grid-template-columns: 1fr;
-    }
-    .proxy-container {
-        padding: 14px;
-    }
-    .proxy-header-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .city-league-content {
-        padding: 12px;
-    }
-    .current-meta-matchups-grid-container {
-        flex-direction: column;
-        gap: 16px;
-    }
-    .current-meta-matchups-table {
-        overflow-x: auto;
-    }
-    .current-meta-matchups-table th,
-    .current-meta-matchups-table td {
-        padding: 8px 5px;
-        font-size: 0.88em;
-    }
-    .current-meta-matchup-search-input {
-        font-size: 0.9em;
-    }
-    .current-meta-cards-header,
-    .past-meta-cards-header {
-        padding: 12px 12px;
-    }
-    .current-meta-cards-header-row,
-    .past-meta-cards-header-row,
-    .past-meta-mydeck-header-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .current-meta-meta-card-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-    }
-    .past-meta-stats-grid {
-        gap: 10px;
-    }
-    .past-meta-stat-card {
-        min-width: 0;
-        padding: 10px 14px;
-    }
-    .past-meta-stat-value {
-        font-size: 1.1em;
-    }
-    .city-league-stat-value {
-        font-size: 1.4em;
-    }
-    .control-row-dates {
-        flex-wrap: wrap;
-    }
-}
-
-/* Top Archetypes card header: stable badge + title alignment */
-.tier-hero-card .archetype-card-header {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    width: calc(100% - 20px);
-}
-
-.tier-hero-card .archetype-rank-badge {
-    background-color: var(--dark-bg, #1a1a2e);
-    color: white;
-    border-radius: 50%;
-    width: 24px;
-    min-width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 0.72rem;
-    flex-shrink: 0;
-}
-
-.tier-hero-card .archetype-card-title {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: bold;
-    line-height: 1.2;
-    word-break: break-word;
-    color: #1a2c43;
-}
-
-.tier-hero-card .tier-hero-content {
-    padding-top: 44px;
-}
-
-@media (min-width: 640px) {
-    .proxy-add-single-card-grid {
-        grid-template-columns: minmax(180px, 2fr) minmax(90px, 1fr);
-    }
-    .proxy-panel-btn-row .btn-modern {
-        width: auto;
-        min-width: 160px;
-    }
-}
-
-@media (min-width: 980px) {
-    .proxy-panels-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-    }
-    .proxy-add-single-card-grid {
-        grid-template-columns: 2fr 1fr 1fr 80px;
-    }
-}
-
-@media (max-width: 430px) {
-    .proxy-add-single-card-grid {
-        grid-template-columns: 1fr;
-    }
-    .sandbox-action-btn-row {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .sandbox-start-btn,
-    .sandbox-multiplayer-btn {
-        font-size: 14px;
-        padding: 12px 20px;
-    }
-    .current-meta-meta-filters {
-        gap: 8px;
-    }
-}
-
-/* Deck Analysis (Japan): compact modern date filter + cleaner stats cards */
-#city-league-analysis .date-range-container {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-#city-league-analysis .date-range-container > div {
-    min-width: 0;
-}
-
-#city-league-analysis .date-range-container .form-label-block {
-    margin-bottom: 4px;
-    font-size: 0.82rem;
-    color: #4b5563;
-    font-weight: 700;
-}
-
-#city-league-analysis #cityLeagueDateFrom,
-#city-league-analysis #cityLeagueDateTo {
-    width: 100%;
-    min-height: 38px;
-    padding: 8px 36px 8px 10px;
-    border: 1px solid #cfd8e3;
-    border-radius: 10px;
-    background-color: #ffffff;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-}
-
-#city-league-analysis #cityLeagueDateFrom:focus,
-#city-league-analysis #cityLeagueDateTo:focus {
-    border-color: #3b4cca;
-    box-shadow: 0 0 0 3px rgba(59, 76, 202, 0.14);
-}
-
-#city-league-analysis #cityLeagueDateFrom::-webkit-calendar-picker-indicator,
-#city-league-analysis #cityLeagueDateTo::-webkit-calendar-picker-indicator {
-    opacity: 0.85;
-    cursor: pointer;
-}
-
-#city-league-analysis .city-league-stats-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-}
-
-#city-league-analysis .city-league-stat-card {
-    padding: 10px 12px;
-    min-height: 74px;
-    border-left-width: 0;
-    border: 1px solid #dbe5f2;
-    box-shadow: 0 2px 8px rgba(59, 76, 202, 0.08);
-}
-
-#city-league-analysis .city-league-stat-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 4px;
-    color: #4b5563;
-}
-
-#city-league-analysis .city-league-stat-label-cards::before,
-#city-league-analysis .city-league-stat-label-decks::before,
-#city-league-analysis .city-league-stat-label-placement::before {
-    display: none;
-    content: none;
-}
-
-#city-league-analysis .city-league-stat-value {
-    font-size: 1.7em;
-    font-weight: 900;
-    color: #1e3a8a;
-}
-
-@media (max-width: 768px) {
-    #city-league-analysis .date-range-container {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 6px;
-    }
-
-    #city-league-analysis #cityLeagueDateFrom,
-    #city-league-analysis #cityLeagueDateTo {
-        min-height: 34px;
-        padding: 7px 32px 7px 9px;
-        font-size: 0.86rem;
-    }
-
-    #city-league-analysis .city-league-stats-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-    }
-
-    #city-league-analysis .city-league-stat-card {
-        padding: 8px 9px;
-        min-height: 64px;
-    }
-
-    #city-league-analysis .city-league-stat-label {
-        font-size: 0.66rem;
-        margin-bottom: 3px;
-    }
-
-    #city-league-analysis .city-league-stat-value {
-        font-size: 1.22rem;
-    }
-}
-
-@media (max-width: 390px) {
-    #city-league-analysis .date-range-container {
-        grid-template-columns: 1fr;
-        gap: 6px;
-    }
-
-    #city-league-analysis #cityLeagueDateFrom,
-    #city-league-analysis #cityLeagueDateTo {
-        min-height: 32px;
-        padding: 6px 30px 6px 8px;
-        font-size: 0.82rem;
-        border-radius: 9px;
-    }
-
-    #city-league-analysis .city-league-stats-grid {
-        gap: 6px;
-    }
-
-    #city-league-analysis .city-league-stat-card {
-        min-height: 58px;
-        padding: 7px 7px;
-    }
-
-    #city-league-analysis .city-league-stat-label {
-        gap: 4px;
-        font-size: 0.6rem;
-    }
-
-    #city-league-analysis .city-league-stat-label-cards::before,
-    #city-league-analysis .city-league-stat-label-decks::before,
-    #city-league-analysis .city-league-stat-label-placement::before {
-        width: 13px;
-        height: 13px;
-        font-size: 0.48rem;
-    }
-
-    #city-league-analysis .city-league-stat-value {
-        font-size: 1.08rem;
-    }
-}
-
-@media (max-width: 412px) and (min-width: 391px) {
-    #city-league-analysis .date-range-container {
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
-    }
-
-    #city-league-analysis #cityLeagueDateFrom,
-    #city-league-analysis #cityLeagueDateTo {
-        min-height: 33px;
-        padding: 6px 30px 6px 8px;
-        font-size: 0.84rem;
-    }
-
-    #city-league-analysis .city-league-stat-card {
-        min-height: 60px;
-        padding: 7px 8px;
-    }
-
-    #city-league-analysis .city-league-stat-label {
-        font-size: 0.62rem;
-        gap: 4px;
-    }
-
-    #city-league-analysis .city-league-stat-value {
-        font-size: 1.12rem;
-    }
-}
-
-@media (max-width: 360px) {
-    #current-meta .current-meta-format-btns {
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-
-    #current-meta .current-meta-format-btn {
-        min-height: 32px;
-        padding: 6px 8px;
-        font-size: 0.74em;
-        border-radius: 7px;
-    }
-
-    #current-meta .current-meta-filter-status {
-        display: block;
-        width: 100%;
-        margin-left: 0;
-        margin-top: 3px;
-        font-size: 0.75em;
-    }
-
-    #current-meta .control-input,
-    #current-meta select.control-input,
-    #current-meta input.control-input,
-    #current-meta .current-meta-matchup-search-input {
-        min-height: 34px;
-        padding-top: 7px;
-        padding-bottom: 7px;
-        font-size: 0.82em;
-    }
-
-    #current-meta .control-row {
-        gap: 8px;
-    }
-}
-
-/* Deck Analysis (Global): align UI with Japan improvements */
-#current-analysis .control-row {
-    gap: 10px;
-}
-
-#current-analysis .current-meta-format-btns {
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-#current-analysis .current-meta-format-btn {
-    min-height: 36px;
-    padding: 8px 12px;
-    border-radius: 9px;
-}
-
-#current-analysis .current-meta-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-}
-
-#current-analysis .current-meta-stat-card {
-    padding: 10px 12px;
-    min-height: 74px;
-    border-left-width: 0;
-    border: 1px solid #dbe5f2;
-    box-shadow: 0 2px 8px rgba(59, 76, 202, 0.08);
-}
-
-#current-analysis .current-meta-stat-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 4px;
-    color: #4b5563;
-}
-
-#current-analysis .current-meta-stat-label-cards::before,
-#current-analysis .current-meta-stat-label-winrate::before,
-#current-analysis .current-meta-stat-label-matchup::before {
-    display: none;
-    content: none;
-}
-
-#current-analysis .current-meta-stat-value {
-    font-size: 1.7em;
-    font-weight: 900;
-    color: #1e3a8a;
-}
-
-#current-analysis .current-meta-meta-card-filters {
-    justify-content: flex-start;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    margin-bottom: 10px;
-    background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
-    border: 1px solid #dbe5f2;
-    border-radius: 12px;
-}
-
-#current-analysis .current-meta-meta-share-filter,
-#current-analysis .current-meta-meta-type-filter,
-#current-analysis .current-meta-meta-sort-filter {
-    border: 1px solid #d4deec;
-    border-radius: 10px;
-    padding: 4px;
-    background: #ffffff;
-}
-
-#current-analysis .current-meta-meta-share-btn,
-#current-analysis .current-meta-meta-type-btn,
-#current-analysis .current-meta-meta-sort-btn {
-    min-height: 30px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-weight: 700;
-    opacity: 0.85;
-}
-
-#current-analysis .current-meta-meta-share-btn.active,
-#current-analysis .current-meta-meta-type-btn.active,
-#current-analysis .current-meta-meta-sort-btn.active {
-    opacity: 1;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
-}
-
-#current-analysis .current-meta-meta-load-btn-row {
-    display: none;
-}
-
-@media (max-width: 768px) {
-    #current-analysis .current-meta-stats-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-    }
-
-    #current-analysis .current-meta-stat-card {
-        padding: 8px 9px;
-        min-height: 64px;
-    }
-
-    #current-analysis .current-meta-stat-label {
-        font-size: 0.66rem;
-        margin-bottom: 3px;
-    }
-
-    #current-analysis .current-meta-stat-value {
-        font-size: 1.22rem;
-    }
-
-    #current-analysis .current-meta-meta-card-filters {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 6px;
-        padding: 6px;
-    }
-
-    #current-analysis .current-meta-meta-share-filter,
-    #current-analysis .current-meta-meta-type-filter,
-    #current-analysis .current-meta-meta-sort-filter {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 4px;
-    }
-
-    #current-analysis .current-meta-meta-share-btn,
-    #current-analysis .current-meta-meta-type-btn,
-    #current-analysis .current-meta-meta-sort-btn {
-        width: 100%;
-        min-height: 28px;
-        padding: 5px 6px;
-        font-size: 0.72em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-}
-
-@media (max-width: 430px) {
-    #current-analysis .current-meta-stats-grid {
-        gap: 6px;
-    }
-
-    #current-analysis .current-meta-stat-card {
-        min-height: 58px;
-        padding: 7px 7px;
-    }
-
-    #current-analysis .current-meta-stat-label {
-        gap: 4px;
-        font-size: 0.6rem;
-    }
-
-    #current-analysis .current-meta-stat-label-cards::before,
-    #current-analysis .current-meta-stat-label-winrate::before,
-    #current-analysis .current-meta-stat-label-matchup::before {
-        width: 13px;
-        height: 13px;
-        font-size: 0.48rem;
-    }
-
-    #current-analysis .current-meta-stat-value {
-        font-size: 1.06rem;
-    }
-
-    #current-analysis .current-meta-meta-card-filters {
-        gap: 5px;
-        padding: 5px;
-        border-radius: 10px;
-    }
-}
-
-@media (max-width: 360px) {
-    #current-analysis .current-meta-format-btn {
-        min-height: 32px;
-        padding: 6px 8px;
-        font-size: 0.74em;
-    }
-
-    #current-analysis .current-meta-meta-share-btn,
-    #current-analysis .current-meta-meta-type-btn,
-    #current-analysis .current-meta-meta-sort-btn {
-        min-height: 26px;
-        font-size: 0.66em;
-        padding: 4px 5px;
-        border-radius: 7px;
-    }
-}
-
-/* Deck Analysis (Past Meta): aligned with Global/Japan optimized layout */
-#past-meta .controls .control-row:first-of-type {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-#past-meta .past-meta-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
-}
-
-#past-meta .past-meta-stat-card {
-    padding: 10px 12px;
-    min-height: 74px;
-    border-left-width: 0;
-    border: 1px solid #dbe5f2;
-    box-shadow: 0 2px 8px rgba(59, 76, 202, 0.08);
-}
-
-#past-meta .past-meta-stat-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 4px;
-    color: #4b5563;
-}
-
-#past-meta .past-meta-stat-label-cards::before,
-#past-meta .past-meta-stat-label-tournament::before,
-#past-meta .past-meta-stat-label-format::before {
-    display: none;
-    content: none;
-}
-
-#past-meta .past-meta-stat-value {
-    font-size: 1.7em;
-    font-weight: 900;
-    color: #1e3a8a;
-}
-
-#past-meta .past-meta-table-scroll {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-}
-
-#past-meta .past-meta-table-zebra {
-    width: 100%;
-    min-width: 620px;
-    border-collapse: collapse;
-}
-
-#past-meta .past-meta-table-zebra th,
-#past-meta .past-meta-table-zebra td {
-    padding: 10px 12px;
-    vertical-align: middle;
-}
-
-#past-meta .past-meta-table-zebra tbody tr:nth-child(even) {
-    background: #f8fafc;
-}
-
-@media (max-width: 768px) {
-    #past-meta .controls .control-row:first-of-type {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-    }
-
-    #past-meta .past-meta-stats-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-    }
-
-    #past-meta .past-meta-stat-card {
-        padding: 8px 9px;
-        min-height: 64px;
-    }
-
-    #past-meta .past-meta-stat-label {
-        font-size: 0.66rem;
-        margin-bottom: 3px;
-    }
-
-    #past-meta .past-meta-stat-value {
-        font-size: 1.22rem;
-    }
-
-    #past-meta .past-meta-table-zebra th,
-    #past-meta .past-meta-table-zebra td {
-        padding: 7px 8px;
-        font-size: 0.82em;
-        white-space: nowrap;
-    }
-
-    #past-meta .past-meta-table-zebra th:nth-child(2),
-    #past-meta .past-meta-table-zebra td:nth-child(2) {
-        min-width: 150px;
-        white-space: normal;
-    }
-}
-
-@media (max-width: 430px) {
-    #past-meta .controls .control-row:first-of-type {
-        gap: 6px;
-    }
-
-    #past-meta .past-meta-stats-grid {
-        gap: 6px;
-    }
-
-    #past-meta .past-meta-stat-card {
-        min-height: 58px;
-        padding: 7px 7px;
-    }
-
-    #past-meta .past-meta-stat-label {
-        gap: 4px;
-        font-size: 0.6rem;
-    }
-
-    #past-meta .past-meta-stat-label-cards::before,
-    #past-meta .past-meta-stat-label-tournament::before,
-    #past-meta .past-meta-stat-label-format::before {
-        width: 13px;
-        height: 13px;
-        font-size: 0.48rem;
-    }
-
-    #past-meta .past-meta-stat-value {
-        font-size: 1.06rem;
-    }
-}
-
-@media (max-width: 360px) {
-    #past-meta .controls .control-row:first-of-type {
-        grid-template-columns: 1fr;
-    }
-
-    #past-meta .past-meta-table-zebra th,
-    #past-meta .past-meta-table-zebra td {
-        padding: 5px 6px;
-        font-size: 0.75em;
-    }
 }

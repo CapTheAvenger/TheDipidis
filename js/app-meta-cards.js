@@ -1,86 +1,10 @@
 // app-meta-cards.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
-        /**
-         * Normalize an archetype name for fuzzy matching.
-         * Strips apostrophes, "ex" suffix, and known set-code suffixes.
-         */
-        function normalizeArchetypeForMatch(name) {
-            return (name || '').toLowerCase()
-                .replace(/[''`]/g, '')           // Rocket's → Rockets
-                .replace(/\bex\b/g, '')          // strip standalone "ex"
-                .replace(/\b(scr|jtg|tef|twm|pfl|dri|meg)\b/g, '') // strip set-code suffixes
-                .replace(/\s+/g, ' ').trim();
-        }
-
-        /**
-         * Build a fuzzy resolution map: analysis archetype (lower) → comparison name (lower).
-         * Handles naming differences between limitless_online_decks_comparison.csv (deck_name)
-         * and current_meta_card_data.csv (archetype).
-         *
-         * @param {Set<string>} top10NamesSet – lowercased comparison deck_names in Top 10
-         * @param {Array<{name:string}>} top10Archetypes – Top 10 entries with original names
-         * @param {string[]} uniqueAnalysisNames – unique archetype names from analysis data
-         * @returns {Map<string,string>} analysisLower → compLower
-         */
-        function buildFuzzyArchetypeMap(top10NamesSet, top10Archetypes, uniqueAnalysisNames) {
-            const compEntries = top10Archetypes.map(a => {
-                const norm = normalizeArchetypeForMatch(a.name);
-                return { lower: a.name.toLowerCase(), norm, words: norm.split(' ').filter(Boolean) };
-            });
-            const result = new Map();
-            for (const analName of uniqueAnalysisNames) {
-                const analLower = analName.toLowerCase();
-                if (top10NamesSet.has(analLower)) { result.set(analLower, analLower); continue; }
-                const analNorm = normalizeArchetypeForMatch(analName);
-                const analWords = analNorm.split(' ').filter(Boolean);
-                let bestMatch = null;
-                let bestScore = 0;
-                for (const comp of compEntries) {
-                    if (analNorm === comp.norm) { bestMatch = comp.lower; bestScore = 100; break; }
-                    const shorter = comp.words.length <= analWords.length ? comp.words : analWords;
-                    const longer  = comp.words.length <= analWords.length ? analWords : comp.words;
-                    const matchCount = shorter.filter(sw =>
-                        longer.some(lw => lw === sw || lw.startsWith(sw) || sw.startsWith(lw))
-                    ).length;
-                    if (matchCount === shorter.length && shorter.length > 0) {
-                        const score = (shorter.length / longer.length) * 100;
-                        if (score > bestScore) { bestScore = score; bestMatch = comp.lower; }
-                    }
-                }
-                if (bestMatch) result.set(analLower, bestMatch);
-            }
-            return result;
-        }
-
         let metaCardData = {
             cityLeague: [],
             currentMeta: []
         };
-
-        let metaCardDebugStats = {
-            cityLeague: null,
-            currentMeta: null
-        };
-
-        function setMetaDebugStats(source, stats) {
-            metaCardDebugStats[source] = stats || null;
-            if (source !== 'currentMeta') return;
-
-            const debugEl = document.getElementById('currentMetaMetaDebugInfo');
-            if (!debugEl) return;
-
-            if (!stats) {
-                debugEl.textContent = 'DBG: idle';
-                return;
-            }
-
-            const loaded = Number(stats.loadedRows || 0);
-            const matched = Number(stats.matchedRows || 0);
-            const aggregated = Number(stats.aggregatedCards || 0);
-            const fallback = stats.usedFallback ? 'yes' : 'no';
-            debugEl.textContent = `DBG L:${loaded} M:${matched} A:${aggregated} F:${fallback}`;
-        }
         
         let metaCardFilter = {
             cityLeague: { shareThreshold: 'all', cardType: 'all', sortBy: 'type', searchTerm: '' },
@@ -99,12 +23,6 @@
             const gridId = source === 'cityLeague' ? 'cityLeagueMetaGrid' : 'currentMetaMetaGrid';
             const grid = document.getElementById(gridId);
             setGridLoadingSkeleton(grid, 10);
-            setMetaDebugStats(source, {
-                loadedRows: 0,
-                matchedRows: 0,
-                aggregatedCards: 0,
-                usedFallback: false
-            });
             
             try {
                 // ? FIX: Use comparison data for correct Top 10, then analysis data for cards
@@ -212,53 +130,17 @@
                     healCurrentMetaCardRows(allAnalysisData);
                 }
                 
-                // --- Fuzzy archetype resolution for currentMeta ---
-                // Comparison CSV (deck_name) and analysis CSV (archetype) use
-                // different naming conventions (e.g. "Rocket's Mewtwo" vs
-                // "Rocket Mewtwo Ex", "Slowking" vs "Slowking Scr").
-                // Build a resolution map: analysis archetype → comparison name.
-                let analysisToCompMap = null;
-                if (source === 'currentMeta') {
-                    const uniqueAnalysisNames = [...new Set(
-                        allAnalysisData.map(r => (r.archetype || '').trim()).filter(Boolean)
-                    )];
-                    analysisToCompMap = buildFuzzyArchetypeMap(top10Names, top10Archetypes, uniqueAnalysisNames);
-                    devLog('[loadMetaCardAnalysis] Fuzzy archetype resolution:', Object.fromEntries(analysisToCompMap));
-                }
-
-                // Filter to only Top 10 archetypes (with fuzzy fallback for currentMeta)
-                let top10AnalysisData = allAnalysisData.filter(row => {
+                // Filter to only Top 10 archetypes
+                const top10AnalysisData = allAnalysisData.filter(row => {
                     const arch = (row.archetype || '').toLowerCase();
-                    if (top10Names.has(arch)) return true;
-                    if (analysisToCompMap) {
-                        const resolved = analysisToCompMap.get(arch);
-                        return resolved && top10Names.has(resolved);
-                    }
-                    return false;
+                    return top10Names.has(arch);
                 });
-
-                // Safety fallback for Current Meta: if fuzzy matching yields no rows,
-                // keep analysis rows instead of rendering an empty panel.
-                let usedTop10Fallback = false;
-                if (source === 'currentMeta' && top10AnalysisData.length === 0 && allAnalysisData.length > 0) {
-                    console.warn('[loadMetaCardAnalysis] Top10 archetype match produced 0 rows for currentMeta. Falling back to all analysis rows.');
-                    top10AnalysisData = allAnalysisData;
-                    usedTop10Fallback = true;
-                }
                 
                 // Build map of archetype -> deckCount from comparison data
                 const archetypeMap = {};
                 top10Archetypes.forEach(arch => {
                     archetypeMap[arch.name.toLowerCase()] = arch.deckCount;
                 });
-                // Extend archetypeMap with fuzzy-resolved analysis names
-                if (analysisToCompMap) {
-                    for (const [analLower, compLower] of analysisToCompMap) {
-                        if (archetypeMap[compLower] !== undefined && archetypeMap[analLower] === undefined) {
-                            archetypeMap[analLower] = archetypeMap[compLower];
-                        }
-                    }
-                }
                 
                 // Aggregate cards using raw included-deck counts so small samples do not skew the meta share.
                 const cardArchetypeMap = {}; // card -> archetype -> aggregated usage totals
@@ -274,7 +156,6 @@
                     const totalCount = parseFloat(String(row.total_count || '0').replace(',', '.')) || 0;
                     const avgCountWhenUsed = parseFloat(String(row.average_count || row.avg_count || '0').replace(',', '.')) || 0;
                     const avgCountOverall = parseFloat(String(row.average_count_overall || '0').replace(',', '.')) || 0;
-                    const sampledDecksInArchetype = parseFloat(String(row.total_decks_in_archetype || '0').replace(',', '.')) || 0;
                     const archetypeDeckCount = archetypeMap[archetypeLower] || 0;
                     const safePercentage = Math.min(100, Math.max(0, percentage));
                     
@@ -313,34 +194,13 @@
 
                     const archetypeEntry = cardArchetypeMap[cardName].byArchetype[archetypeLower];
 
-                    const estimatedDecksFromPct = (safePercentage > 0 && archetypeDeckCount > 0)
-                        ? (safePercentage / 100) * archetypeDeckCount
-                        : 0;
-                    const estimatedDecksFromSample = (deckCount > 0 && sampledDecksInArchetype > 0 && archetypeDeckCount > 0)
-                        ? (deckCount / sampledDecksInArchetype) * archetypeDeckCount
-                        : 0;
-                    const estimatedDecksResolved = Math.max(estimatedDecksFromPct, estimatedDecksFromSample);
-
-                    if (estimatedDecksResolved > 0) {
-                        archetypeEntry.estimatedDecksWithCard += estimatedDecksResolved;
-                    } else if (deckCount > 0) {
+                    if (deckCount > 0) {
                         archetypeEntry.estimatedDecksWithCard += deckCount;
                     } else if (safePercentage > 0 && archetypeDeckCount > 0) {
                         archetypeEntry.fallbackPercentages.push(safePercentage);
                     }
 
-                    const scaledCopiesFromAvgOverall = (avgCountOverall > 0 && archetypeDeckCount > 0)
-                        ? avgCountOverall * archetypeDeckCount
-                        : 0;
-                    const scaledCopiesFromSampleTotal = (totalCount > 0 && sampledDecksInArchetype > 0 && archetypeDeckCount > 0)
-                        ? (totalCount / sampledDecksInArchetype) * archetypeDeckCount
-                        : 0;
-
-                    if (scaledCopiesFromAvgOverall > 0) {
-                        archetypeEntry.totalCopies += scaledCopiesFromAvgOverall;
-                    } else if (scaledCopiesFromSampleTotal > 0) {
-                        archetypeEntry.totalCopies += scaledCopiesFromSampleTotal;
-                    } else if (totalCount > 0) {
+                    if (totalCount > 0) {
                         archetypeEntry.totalCopies += totalCount;
                     } else {
                         let copiesPerDeckWhenUsed = 0;
@@ -561,24 +421,12 @@
                 });
                 globalRarityPreference = previousGlobalRarityPreference;
                 
-                // Current Meta Top 10 view: show only cards used in at least 40% of Top 10 decks.
-                const finalCards = source === 'currentMeta'
-                    ? mergedMetaCards.filter(card => card.metaShare >= 40)
-                    : mergedMetaCards;
-
-                metaCardData[source] = finalCards;
-                setMetaDebugStats(source, {
-                    loadedRows: allAnalysisData.length,
-                    matchedRows: top10AnalysisData.length,
-                    aggregatedCards: finalCards.length,
-                    usedFallback: usedTop10Fallback
-                });
+                metaCardData[source] = mergedMetaCards;
                 
                 renderMetaCards(source);
                 
             } catch (error) {
                 console.error('[loadMetaCardAnalysis] Error:', error);
-                setMetaDebugStats(source, null);
                 clearGridLoadingSkeleton(grid);
                 grid.innerHTML = '<p style="text-align: center; color: #dc3545; padding: 40px; grid-column: 1 / -1;">? Error loading meta analysis</p>';
             }
@@ -662,17 +510,20 @@
                 });
             }
             
-            // Apply base suppression rules.
-            // City League keeps stricter default cutoffs, Current Meta must stay broad
-            // otherwise realistic low-share rows collapse to empty state.
+            // Apply minimum share filter (card type specific, always active)
             cards = cards.filter(c => {
-                if (isBasicEnergyCardEntry(c)) return false;
-                if (source === 'currentMeta') return true;
+                if (isBasicEnergyCardEntry(c)) {
+                    return false;
+                }
 
                 const category = getCardTypeCategory(c.type);
+                
+                // Pokemon: Only show if >40% meta share (user requirement)
                 if (category === 'Pokemon') {
                     return c.metaShare >= 40;
                 }
+                
+                // Trainer and Special Energy: Show if >30% meta share (user requirement)
                 return c.metaShare >= 30;
             });
             
@@ -712,6 +563,7 @@
             // Render cards (similar to card overview grid)
             grid.innerHTML = cards.map(card => {
                 const imageUrl = getBestCardImage(card) || buildInlineCardPlaceholder(card.card_name);
+                const fallbackUrl = buildInlineCardPlaceholder(card.card_name);
                 const selectedArchetype = source === 'cityLeague'
                     ? (document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all')
                     : (document.getElementById('currentMetaArchetypeSelect')?.value || 'all');
@@ -729,54 +581,34 @@
                 const deckKey = `${card.card_name} (${card.set_code} ${card.set_number})`;
                 const deckCount = (currentDeck && currentDeck[deckKey]) ? currentDeck[deckKey] : 
                                  (currentDeck && currentDeck[card.card_name]) ? currentDeck[card.card_name] : 0;
-
-                // Price lookup
-                const setCode = card.set_code || '';
-                const setNumber = card.set_number || '';
-                let eurPrice = '';
-                let cardmarketUrl = '';
-                if (setCode && setNumber) {
-                    let priceCard = (cardsBySetNumberMap || {})[`${setCode}-${setNumber}`] || null;
-                    if (!priceCard) {
-                        const normalizedNumber = setNumber.replace(/^0+/, '') || '0';
-                        priceCard = (cardsBySetNumberMap || {})[`${setCode}-${normalizedNumber}`] || null;
-                    }
-                    if (priceCard) {
-                        eurPrice = priceCard.eur_price || '';
-                        cardmarketUrl = priceCard.cardmarket_url || '';
-                    }
-                }
-                const priceDisplay = eurPrice || '0,00€';
-                const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
-                const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
                 
                 return `
                     <div class="card-item">
                         <div class="card-image-container">
-                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
+                            <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-image" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}', '${fallbackUrl}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');"
+                                 onmouseover="showMetaCardTooltip(event, '${cardNameEscaped}', '${archetypesJson}')" 
+                                 onmouseout="hideMetaCardTooltip()">
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
 
                             <!-- Card info section -->
-                            <div class="card-info-bottom">
+                            <div class="card-info-bottom card-info-bottom-meta">
                                 <div class="card-info-text mb-6">
                                     <div class="fw-bold mb-2 nowrap ellipsis">${card.card_name}</div>
-                                    <div class="color-grey fs-09">${setCode} ${setNumber}</div>
-                                    ${card.metaShare > 0 ? `<div class="color-yellow fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
+                                    ${card.metaShare > 0 ? `<div class="color-yellow fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div><div class="color-grey fs-09 fw-500">(${Math.round(card.avgCountWhenUsed)}x when used)</div>` : ''}
                                 </div>
                                 
-                                <!-- Card Actions: Row 1 = - ★ + | Row 2 = L P price -->
-                                <div class="card-action-buttons card-action-buttons-col">
+                                <!-- Card Actions: Row 1 = - ★ + | Row 2 = L (full-width) -->
+                                <div class="card-action-buttons" style="display: flex; flex-direction: column; gap: 3px;">
                                     <div class="card-action-row">
-                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" class="btn-red card-action-btn" title="Remove from deck">-</button>
-                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="btn-yellow card-action-btn" title="Switch rarity/print">★</button>
-                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="btn-green card-action-btn" title="Add to deck">+</button>
+                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" class="btn btn-danger card-action-btn card-action-remove" title="Remove from deck">-</button>
+                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${card.set_code} ${card.set_number})')" class="btn btn-warning card-action-btn card-action-rarity" title="Switch rarity/print">★</button>
+                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${card.set_code}', '${card.set_number}')" class="btn btn-success card-action-btn card-action-add" title="Add to deck">+</button>
                                     </div>
-                                    <div class="card-action-row card-action-row-wide">
-                                        ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" class="btn-purple card-action-btn btn-xs" title="Open on Limitless">L</button>` : '<span></span>'}
-                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" class="btn-gradient-red card-action-btn btn-xs" title="Add to proxy">P</button>
-                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" class="btn-gradient-orange card-action-btn btn-xs" style="background: ${priceBackground}; cursor: ${eurPrice ? 'pointer' : 'not-allowed'};" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                    <div class="card-action-row-wide">
+                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${card.set_code}', '${card.set_number}', 1)" class="btn btn-danger card-action-btn card-action-proxy" title="Add to proxy">Proxy</button>
+                                        <button onclick="event.stopPropagation(); openLimitlessCard('${card.set_code}', '${card.set_number}')" class="btn btn-purple card-action-btn card-action-limitless" title="Open on Limitless (${card.set_code} ${card.set_number})">Limitless — ${card.set_code} ${card.set_number}</button>
                                     </div>
                                 </div>
                             </div>
@@ -841,6 +673,51 @@
             renderMetaCards(source);
         }
         
+        // Tooltip for Meta Card Analysis - show archetypes
+        let metaCardTooltip = null;
+        
+        function showMetaCardTooltip(event, cardName, archetypesJson) {
+            // Parse archetypes from JSON string
+            const archetypes = JSON.parse(archetypesJson.replace(/&quot;/g, '"'));
+            
+            if (!archetypes || archetypes.length === 0) return;
+            
+            // Create tooltip if it doesn't exist
+            if (!metaCardTooltip) {
+                metaCardTooltip = document.createElement('div');
+                metaCardTooltip.id = 'metaCardTooltip';
+                metaCardTooltip.className = 'meta-card-tooltip';
+                document.body.appendChild(metaCardTooltip);
+            }
+            
+            // Build tooltip content
+            const title = `<div style="font-weight: bold; margin-bottom: 8px; color: #ffd700; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 6px;">${escapeHtml(cardName)}</div>`;
+            const archetypeItems = archetypes
+                .sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage))
+                .map(a => `
+                    <div class="meta-card-tooltip-archetype-row">
+                        <span class="meta-card-tooltip-archetype-name">${escapeHtml(a.name)}</span>
+                        <span class="meta-card-tooltip-archetype-pct">${escapeHtml(a.percentage)}%</span>
+                    </div>
+                `).join('');
+            
+            metaCardTooltip.innerHTML = title + '<div style="font-size: 0.9em; color: #aaa; margin-bottom: 6px;">Used in archetypes:</div>' + archetypeItems;
+                        metaCardTooltip.innerHTML = `<div class="meta-card-tooltip-title">${escapeHtml(cardName)}</div><div class="meta-card-tooltip-desc">Used in archetypes:</div>${archetypeItems}`;
+            metaCardTooltip.classList.remove('d-none');
+            
+            // Position tooltip near mouse
+            const x = event.clientX + 15;
+            const y = event.clientY + 15;
+            
+            metaCardTooltip.style.left = `${x}px`;
+            metaCardTooltip.style.top = `${y}px`;
+        }
+        
+        function hideMetaCardTooltip() {
+            if (metaCardTooltip) {
+                metaCardTooltip.classList.add('d-none');
+            }
+        }
         
         function searchDeckCards(source = 'cityLeague') {
             const searchInputId = source === 'cityLeague' ? 'cityLeagueDeckCardSearch' : 
@@ -1060,19 +937,19 @@
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('cityLeagueDeckCardSearch');
             if (searchInput) {
-                searchInput.addEventListener('input', debounce(() => searchDeckCards('cityLeague'), 250));
+                searchInput.addEventListener('input', () => searchDeckCards('cityLeague'));
             }
             
             // Current Meta search listener
             const currentMetaSearchInput = document.getElementById('currentMetaDeckCardSearch');
             if (currentMetaSearchInput) {
-                currentMetaSearchInput.addEventListener('input', debounce(() => searchDeckCards('currentMeta'), 250));
+                currentMetaSearchInput.addEventListener('input', () => searchDeckCards('currentMeta'));
             }
             
             // Past Meta search listener
             const pastMetaSearchInput = document.getElementById('pastMetaDeckCardSearch');
             if (pastMetaSearchInput) {
-                pastMetaSearchInput.addEventListener('input', debounce(() => searchDeckCards('pastMeta'), 250));
+                pastMetaSearchInput.addEventListener('input', () => searchDeckCards('pastMeta'));
             }
         });
 
@@ -1209,6 +1086,7 @@
                             const hasMatchupTables = grid.querySelectorAll('table').length >= 2;
                             if (hasMatchupTables) {
                                 // Remove inline grid style, let CSS take over
+                                grid.classList.add('meta-card-list-grid');
                                 grid.classList.add('matchups-grid-container');
                                 devLog('? Removed inline grid styles from matchup container');
                             }
@@ -1297,15 +1175,6 @@
                 // Check if this is the Full Comparison Table (has Old Rank, New Rank, Rank ? columns)
                 if (headers.includes('Old Rank') && headers.includes('New Rank') && headers.includes('Rank ?')) {
                     devLog('?? Patching Full Comparison Table...');
-
-                    if (!table.parentElement || !table.parentElement.classList.contains('current-meta-full-table-wrap')) {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'current-meta-full-table-wrap';
-                        table.parentNode.insertBefore(wrapper, table);
-                        wrapper.appendChild(table);
-                    }
-
-                    table.classList.add('current-meta-full-comparison-table');
                     
                     // Find column indices
                     const oldRankIdx = headers.indexOf('Old Rank');
@@ -1360,33 +1229,6 @@
                                 deckNameCell.innerHTML = `<a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'currentMeta')" class="archetype-jump-link">${escapeHtml(archetype)}</a>`;
                             }
                         }
-                    });
-
-                    const finalHeaderCells = Array.from(table.querySelectorAll('thead th'));
-                    const normalizedHeaders = finalHeaderCells.map(th => String(th.textContent || '').trim().toLowerCase());
-
-                    const deckIdx = normalizedHeaders.findIndex(h => h.includes('deck') || h.includes('archetype'));
-                    const rankIdx = normalizedHeaders.findIndex(h => h === 'rank' || h.includes('rank'));
-                    const countIdx = normalizedHeaders.findIndex(h => h.includes('count'));
-                    const winRateIdx = normalizedHeaders.findIndex(h => h.includes('win rate') || h.includes('winrate') || h === 'wr');
-
-                    finalHeaderCells.forEach((th, idx) => {
-                        th.classList.remove('full-col-deck', 'full-col-rank', 'full-col-count', 'full-col-winrate');
-                        if (idx === deckIdx) th.classList.add('full-col-deck');
-                        if (idx === rankIdx) th.classList.add('full-col-rank');
-                        if (idx === countIdx) th.classList.add('full-col-count');
-                        if (idx === winRateIdx) th.classList.add('full-col-winrate');
-                    });
-
-                    table.querySelectorAll('tbody tr').forEach(row => {
-                        const tds = row.querySelectorAll('td');
-                        tds.forEach((td, idx) => {
-                            td.classList.remove('full-col-deck', 'full-col-rank', 'full-col-count', 'full-col-winrate');
-                            if (idx === deckIdx) td.classList.add('full-col-deck');
-                            if (idx === rankIdx) td.classList.add('full-col-rank');
-                            if (idx === countIdx) td.classList.add('full-col-count');
-                            if (idx === winRateIdx) td.classList.add('full-col-winrate');
-                        });
                     });
                     
                     devLog('? Full Comparison Table patched successfully');
@@ -1488,34 +1330,20 @@
         async function patchMetaStats() {
             try {
                 // Load format from settings
-                let currentFormat = 'TEF-POR'; // Default fallback
+                let currentFormat = 'SVI-ASC'; // Default fallback
                 try {
-                    const settingsPaths = [
-                        './config/current_meta_analysis_settings.json?t=' + Date.now(),
-                        './current_meta_analysis_settings.json?t=' + Date.now()
-                    ];
-                    for (const settingsPath of settingsPaths) {
-                        const settingsResponse = await fetch(settingsPath);
-                        if (!settingsResponse.ok) continue;
+                    const settingsResponse = await fetch('./current_meta_analysis_settings.json?t=' + Date.now());
+                    if (settingsResponse.ok) {
                         const settings = await settingsResponse.json();
-                        const formatFilter = String(settings?.sources?.limitless_online?.format_filter || '').trim();
+                        const formatFilter = settings?.sources?.limitless_online?.format_filter;
                         if (formatFilter) {
-                            let resolved = formatFilter.toUpperCase();
-                            if (!resolved.includes('-')) {
-                                resolved = `TEF-${resolved}`;
-                            }
-                            if (typeof mapSetCodeToMetaFormat === 'function') {
-                                currentFormat = mapSetCodeToMetaFormat(resolved) || resolved;
-                            } else {
-                                currentFormat = resolved;
-                            }
-                            currentFormat = currentFormat === 'SVI-POR' ? 'TEF-POR' : currentFormat;
+                            // formatFilter is just the set code (e.g., "ASC"), prefix with "SVI-"
+                            currentFormat = `SVI-${formatFilter}`;
                             devLog(`?? Loaded format from settings: ${currentFormat}`);
-                            break;
                         }
                     }
                 } catch (e) {
-                    console.warn('Could not load config/current_meta_analysis_settings.json:', e);
+                    console.warn('Could not load current_meta_analysis_settings.json:', e);
                 }
                 
                 // Load Limitless meta statistics from JSON file
@@ -1523,12 +1351,7 @@
                 try {
                     const metaResponse = await fetch(BASE_PATH + 'limitless_meta_stats.json?t=' + Date.now());
                     if (metaResponse.ok) {
-                        const statsData = await metaResponse.json();
-                        metaStats = {
-                            tournaments: parseInt(statsData?.tournaments, 10) || 0,
-                            players: parseInt(statsData?.players, 10) || 0,
-                            matches: parseInt(statsData?.matches, 10) || 0
-                        };
+                        metaStats = await metaResponse.json();
                     }
                 } catch (e) {
                     console.warn('Could not load limitless_meta_stats.json:', e);
@@ -1562,16 +1385,15 @@
                         // Add tournament stats below the current format
                         const existingP = card.querySelector('p');
                         if (existingP && existingP.textContent.includes('Current Format')) {
-                            card.querySelectorAll('.meta-online-stats, .meta-major-stats').forEach(el => el.remove());
                             // Add new stats
                             const statsHtml = `
-                                <p class="meta-online-stats" style="font-size: 0.85em; color: #555; margin: 15px 0 5px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-weight: 500;">
-                                    <strong style="color: #3498db;">Online Meta:</strong><br>
+                                <p style="font-size: 0.85em; color: #555; margin: 15px 0 5px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-weight: 500;">
+                                    <strong style="color: #3498db;">?? Online Meta:</strong><br>
                                     <span style="font-size: 0.95em;">${metaStats.tournaments.toLocaleString()} tournaments · ${metaStats.players.toLocaleString()} players · ${metaStats.matches.toLocaleString()} matches</span>
                                 </p>
-                                <p class="meta-major-stats" style="font-size: 0.85em; color: #555; margin: 5px 0 0 0; font-weight: 500;">
-                                    <strong style="color: #27ae60;">Major Tournaments:</strong><br>
-                                    <span style="font-size: 0.95em;">${(majorTournaments || 0).toLocaleString()} tournaments · ${(totalPlayers || 0).toLocaleString()} players</span>
+                                <p style="font-size: 0.85em; color: #555; margin: 5px 0 0 0; font-weight: 500;">
+                                    <strong style="color: #27ae60;">?? Major Tournaments:</strong><br>
+                                    <span style="font-size: 0.95em;">${majorTournaments} tournaments · ${totalPlayers.toLocaleString()} players</span>
                                 </p>
                             `;
                             existingP.insertAdjacentHTML('afterend', statsHtml);

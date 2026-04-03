@@ -74,75 +74,6 @@ body {
 .menu-item:focus-visible { background: var(--bg-light); color: var(--pokemon-blue); padding-left: 26px; outline: 2px solid var(--pokemon-blue); outline-offset: -2px; }
 .menu-item.active { background: #f0f4f8; color: var(--pokemon-blue); border-left: 5px solid var(--pokemon-red); }
 
-.menu-icon {
-    width: 18px;
-    height: 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 18px;
-    margin-right: 8px;
-}
-.menu-icon svg {
-    width: 18px;
-    height: 18px;
-}
-.menu-item-label {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.menu-group-toggle {
-    padding: 12px 18px;
-    text-align: left;
-    border: none;
-    background: #f8fafc;
-    border-bottom: 1px solid #e5e7eb;
-    cursor: pointer;
-    color: #111827;
-    font-size: 14px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    transition: background 0.2s, color 0.2s;
-    font-family: 'Nunito', sans-serif;
-}
-.menu-group-toggle:hover,
-.menu-group-toggle:focus-visible {
-    background: #eff6ff;
-    color: var(--pokemon-blue);
-    outline: 2px solid var(--pokemon-blue);
-    outline-offset: -2px;
-}
-.menu-chevron {
-    width: 16px;
-    height: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease;
-}
-.menu-chevron svg {
-    width: 16px;
-    height: 16px;
-}
-.menu-group-toggle[aria-expanded="true"] .menu-chevron {
-    transform: rotate(180deg);
-}
-
-.menu-submenu {
-    display: none;
-    background: #ffffff;
-}
-.menu-submenu.open {
-    display: block;
-}
-.menu-subitem {
-    padding-left: 30px;
-    font-size: 14px;
-}
-
 .current-tab-badge {
     font-size: 0.5em; background: var(--pokemon-blue); color: var(--pokemon-yellow); padding: 5px 12px;
     border-radius: 20px; font-weight: 900; letter-spacing: 0.5px;
@@ -193,16 +124,6 @@ body {
 .btn-modern.success:hover { background: #219653; color: white; }
 .btn-modern.danger { color: var(--color-error); border-color: #fbc4c4; background: #fffafb; }
 .btn-modern.danger:hover { background: var(--color-error); color: white; border-color: var(--color-error); }
-.btn-modern.tertiary-danger {
-    color: #b42318;
-    border-color: #fecaca;
-    background: #fff5f5;
-}
-.btn-modern.tertiary-danger:hover {
-    background: #fee2e2;
-    border-color: #fca5a5;
-    color: #7f1d1d;
-}
 .btn-toggle-group { display: flex; background: #f8faff; border: 1px solid #d0d5e0; border-radius: 8px; overflow: hidden; }
 .btn-toggle-item {
     background: transparent; border: none; border-right: 1px solid #d0d5e0;
@@ -213,161 +134,8 @@ body {
 .btn-toggle-item:hover { background: rgba(59, 76, 202, 0.06); color: #4b5563; }
 .btn-toggle-item.btn-success, .btn-toggle-item.active { background: var(--pokemon-blue) !important; color: white !important; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15); }
 
-.deck-builder-toolbar {
-    justify-content: space-between;
-    gap: 14px;
-    border: 1px solid rgba(59, 76, 202, 0.16);
-    background: linear-gradient(135deg, #f8fbff 0%, #edf3ff 100%);
-}
-.deck-builder-primary-actions,
-.deck-builder-secondary-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-.deck-builder-main-cta {
-    padding: 9px 15px;
-    font-weight: 800;
-    letter-spacing: 0.2px;
-    box-shadow: 0 6px 16px rgba(59, 76, 202, 0.18);
-}
-.deck-builder-testdraw-btn {
-    border-color: #c7d2fe;
-    background: #f5f7ff;
-}
-.deck-builder-clear-btn {
-    margin-left: 6px;
-}
-
-.deck-builder-empty-state {
-    width: 100%;
-    border: 1px dashed #bfdbfe;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #f8fbff 0%, #eff6ff 100%);
-    padding: 28px 18px;
-    text-align: center;
-    color: #1f2937;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
-}
-.deck-builder-empty-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 10px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #3b4cca;
-    background: rgba(59, 76, 202, 0.1);
-}
-.deck-builder-empty-icon svg {
-    width: 24px;
-    height: 24px;
-}
-.deck-builder-empty-title {
-    margin: 0 0 6px;
-    font-size: 1.02rem;
-    font-weight: 800;
-    color: #111827;
-}
-.deck-builder-empty-text {
-    margin: 0 auto 14px;
-    max-width: 460px;
-    font-size: 0.94rem;
-    color: #4b5563;
-}
-.deck-builder-empty-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
 /* â”€â”€ GOLDFISHING PLAYTESTER â”€â”€ */
 #playtesterModal { font-family: 'Nunito', sans-serif !important; background: #0d2a18 !important; overflow: hidden !important; }
-
-.pt-floating-bar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    width: calc(100% - 20px);
-    margin: 10px auto 8px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: linear-gradient(135deg, rgba(18, 36, 84, 0.9) 0%, rgba(26, 64, 145, 0.9) 100%);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(8px);
-}
-
-.pt-tool-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    padding: 4px 8px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.pt-tool-group-label {
-    color: rgba(255, 255, 255, 0.84);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-right: 4px;
-}
-
-.pt-tool-btn {
-    position: relative;
-    min-height: 32px;
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-size: 10px;
-    letter-spacing: 0.25px;
-    text-transform: none;
-}
-
-.pt-tool-btn-danger {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #b91c1c;
-}
-
-.pt-tool-btn-danger:hover {
-    background: #fee2e2;
-    color: #7f1d1d;
-}
-
-.pt-marker-chip {
-    min-width: 44px;
-    height: 28px;
-}
-
-.pt-tool-btn[data-pt-tip]:hover::after,
-.pt-tool-btn[data-pt-tip]:focus-visible::after {
-    content: attr(data-pt-tip);
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.85);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    padding: 4px 6px;
-    font-size: 10px;
-    font-weight: 700;
-    white-space: nowrap;
-    pointer-events: none;
-}
 
 .pt-toolbar { background: linear-gradient(90deg, #1b3b8c 0%, #2a52be 100%); border-bottom: 3px solid var(--pokemon-yellow); box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 100; }
 .pt-btn { background: rgba(255,255,255,0.9); color: #1b3b8c; border: 2px solid var(--pokemon-yellow); border-radius: 20px; padding: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space: nowrap; transition: all 0.15s ease; font-family: inherit; }
@@ -606,23 +374,6 @@ input[type="number"] { -moz-appearance: textfield; }
 
 /* â”€â”€ Responsive Playtester: Small screens (laptops, tablets) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 1024px) {
-    .pt-floating-bar {
-        width: calc(100% - 14px);
-        padding: 8px;
-        gap: 8px;
-    }
-    .pt-tool-group {
-        gap: 4px;
-        padding: 4px 6px;
-    }
-    .pt-tool-group-label {
-        display: none;
-    }
-    .pt-tool-btn {
-        min-height: 30px;
-        font-size: 9px;
-        padding: 4px 8px;
-    }
     .pt-arena { min-height: min(500px, 75vh); border-radius: 12px; }
     .pt-btn { font-size: 10px; padding: 3px 8px; }
     .pt-zone-label { font-size: 8px; }
@@ -633,18 +384,6 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 
 @media (max-width: 768px) {
-    .pt-floating-bar {
-        justify-content: center;
-        margin: 8px auto 6px;
-    }
-    .pt-tool-group {
-        width: 100%;
-        justify-content: center;
-    }
-    .pt-tool-btn {
-        flex: 1 1 auto;
-        min-width: 58px;
-    }
     .pt-arena { min-height: min(420px, 70vh); border-width: 2px; border-radius: 8px; }
     .pt-legend-box { display: none; }
     .pt-deck-controls { width: 110px; padding: 4px; left: 40px; }

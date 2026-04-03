@@ -16,36 +16,12 @@
         if (!window.currentMetaDeckOrder) {
             window.currentMetaDeckOrder = [];
         }
-
-        function normalizeCurrentMetaTournamentArchetypeName(value) {
-            return String(value || '')
-                .replace(/\d+(?:[.,]\d+)?\$\d+(?:[.,]\d+)?€.*$/u, '')
-                .trim();
-        }
-
-        function normalizeCurrentMetaArchetypeKey(value) {
-            return String(value || '')
-                .toLowerCase()
-                .replace(/[''`]/g, '')
-                .replace(/\bex\b/g, '')
-                .replace(/[^a-z0-9\s-]/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-        }
         
         // Load Current Meta Analysis Data
         async function loadCurrentMetaAnalysis() {
-          try {
             devLog('Loading Current Meta Analysis...');
-            const deckGrid = document.getElementById('currentMetaDeckGrid');
-            if (deckGrid && !deckGrid.innerHTML.trim()) {
-                showTableSkeleton(deckGrid, { rows: 6, cols: 4, withImage: true });
-            }
             const data = await loadCurrentMetaRowsWithFallback();
             devLog('Loaded data:', data ? `${data.length} rows` : 'null');
-            
-            // Note: Major Tournament data (tournament_cards_data_cards.csv) is VERY LARGE (50MB+)
-            // and will be loaded lazily only when a deck is actually opened in Major Tournament mode.
             
             // Load deck stats (winrates)
             const deckStats = await loadCSV('limitless_online_decks.csv');
@@ -68,9 +44,6 @@
             }
             
             if (data && data.length > 0) {
-                // Fix card name encoding issues (e.g. PokÃ© → Poké) in-place so
-                // all subsequent deck lookups use correctly encoded names.
-                healCurrentMetaCardRows(data);
                 window.currentMetaAnalysisData = data;
                 await populateCurrentMetaDeckSelect(data);
                 setCurrentMetaFormatFilter('all'); // Set default filter
@@ -85,135 +58,69 @@
                     content.innerHTML = '<option value="">Error loading data</option>';
                 }
             }
-          } catch (error) {
-            console.error('[Current Meta Analysis] Error loading:', error);
-            const content = document.getElementById('currentMetaDeckSelect');
-            if (content) {
-                content.innerHTML = '<option value="">Error loading analysis data</option>';
-            }
-          }
         }
         
         // Populate deck select dropdown
         async function populateCurrentMetaDeckSelect(data) {
+            // Load comparison data for correct ranking
             const comparisonData = await loadCSV('limitless_online_decks_comparison.csv');
             const comparisonMap = new Map();
-
-            const normalizeRankKey = (value) => String(value || '')
-                .toLowerCase()
-                .replace(/['’]s\b/g, '')
-                .replace(/[^a-z0-9\s-]/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-
+            
             if (comparisonData && comparisonData.length > 0) {
                 comparisonData.forEach(row => {
                     if (row.deck_name && row.new_count) {
-                        const entry = {
-                            count: parseInt(row.new_count || 0, 10),
-                            rank: parseInt(row.new_rank || 999, 10)
-                        };
-                        const exactKey = String(row.deck_name || '').toLowerCase();
-                        const normalizedKey = normalizeRankKey(row.deck_name);
-                        comparisonMap.set(exactKey, entry);
-                        if (normalizedKey) comparisonMap.set(`norm:${normalizedKey}`, entry);
+                        comparisonMap.set(row.deck_name.toLowerCase(), {
+                            count: parseInt(row.new_count || 0),
+                            rank: parseInt(row.new_rank || 999)
+                        });
                     }
                 });
                 devLog('Loaded comparison data for', comparisonMap.size, 'decks');
             }
-
+            
+            // Apply format filter to data BEFORE building archetype list
             let filteredData = data;
-            if (currentMetaFormatFilter === 'live') {
-                filteredData = data.filter(row => row.meta === 'Meta Live');
-                devLog(`Filtered archetypes to Limitless only: ${filteredData.length} rows`);
-            } else if (currentMetaFormatFilter === 'all') {
-                devLog(`Keeping all archetype data: ${filteredData.length} rows`);
-            } else if (currentMetaFormatFilter === 'play') {
-                filteredData = data.filter(row => row.meta === 'Meta Play!');
-                devLog(`Filtered archetypes to Major Tournament only: ${filteredData.length} rows`);
-
-                if (filteredData.length === 0) {
-                    if (!window.currentMetaTournamentCardsData) {
-                        window.currentMetaTournamentCardsData = await loadCSV('tournament_cards_data_cards.csv');
-                    }
-
-                    const tournamentRows = Array.isArray(window.currentMetaTournamentCardsData)
-                        ? window.currentMetaTournamentCardsData
-                        : [];
-                    const perArchetypeTournamentCounts = new Map();
-
-                    tournamentRows.forEach(row => {
-                        const rawArchetype = normalizeCurrentMetaTournamentArchetypeName(row.archetype);
-                        if (!rawArchetype) return;
-
-                        const tournamentKey = String(row.tournament_id || row.tournament_name || '').trim();
-                        if (!tournamentKey) return;
-
-                        const normalizedKey = normalizeCurrentMetaArchetypeKey(rawArchetype) || rawArchetype.toLowerCase();
-                        const deckCount = parseInt(row.total_decks_in_archetype || 0, 10) || 0;
-
-                        if (!perArchetypeTournamentCounts.has(normalizedKey)) {
-                            perArchetypeTournamentCounts.set(normalizedKey, {
-                                name: rawArchetype,
-                                tournaments: new Map()
-                            });
-                        }
-
-                        const archetypeEntry = perArchetypeTournamentCounts.get(normalizedKey);
-                        const existingCount = archetypeEntry.tournaments.get(tournamentKey) || 0;
-                        if (deckCount > existingCount) {
-                            archetypeEntry.tournaments.set(tournamentKey, deckCount);
-                        }
-                    });
-
-                    filteredData = Array.from(perArchetypeTournamentCounts.values()).map(entry => ({
-                        archetype: entry.name,
-                        total_decks_in_archetype: Array.from(entry.tournaments.values()).reduce((sum, count) => sum + count, 0),
-                        meta: 'Meta Play!'
-                    }));
-
-                    devLog(`Built Major Tournament archetype list from tournament CSV: ${filteredData.length} archetypes`);
-                }
+            if (currentMetaFormatFilter !== 'all' && !window.currentMetaUsingFallback) {
+                const filterValue = currentMetaFormatFilter === 'live' ? 'Meta Live' : 'Meta Play!';
+                filteredData = data.filter(row => row.meta === filterValue);
+                devLog(`Filtered archetypes by ${currentMetaFormatFilter}: ${filteredData.length} cards`);
             }
-
-            devLog(`Building archetype list from ${filteredData.length} rows...`);
+            
             const archetypeMap = new Map();
-
             filteredData.forEach(row => {
-                const archetype = String(row.archetype || '').trim();
+                const archetype = row.archetype;
                 if (!archetype) return;
-
+                
                 if (!archetypeMap.has(archetype)) {
-                    const comparisonInfo = comparisonMap.get(archetype.toLowerCase())
-                        || comparisonMap.get(`norm:${normalizeRankKey(archetype)}`);
-                    const deckCount = currentMetaFormatFilter === 'play'
-                        ? parseInt(row.total_decks_in_archetype || 0, 10)
-                        : (comparisonInfo ? comparisonInfo.count : parseInt(row.total_decks_in_archetype || 0, 10));
+                    // Use comparison data for deck count if available
+                    const comparisonInfo = comparisonMap.get(archetype.toLowerCase());
+                    const deckCount = comparisonInfo ? comparisonInfo.count : parseInt(row.total_decks_in_archetype || 0);
                     const rank = comparisonInfo ? comparisonInfo.rank : 999;
-
+                    
                     archetypeMap.set(archetype, {
                         name: archetype,
-                        deckCount,
-                        rank,
+                        deckCount: deckCount,
+                        rank: rank,
                         limitlessCount: 0,
                         majorCount: 0
                     });
                 }
             });
-
+            
+            // Calculate split between Limitless and Major for each archetype
             archetypeMap.forEach((archetypeInfo, archetypeName) => {
-                const archetypeDecks = filteredData.filter(row => row.archetype === archetypeName);
-
-                if (archetypeDecks.length > 0 && archetypeDecks[0].meta) {
-                    const liveEntry = archetypeDecks.find(row => row.meta === 'Meta Live');
-                    const limitlessCount = liveEntry ? parseInt(liveEntry.total_decks_in_archetype || 0, 10) : 0;
-
-                    const playEntry = archetypeDecks.find(row => row.meta === 'Meta Play!');
-                    const majorCount = playEntry ? parseInt(playEntry.total_decks_in_archetype || 0, 10) : 0;
-
-                    archetypeInfo.limitlessCount = limitlessCount;
-                    archetypeInfo.majorCount = majorCount;
-                }
+                const archetypeDecks = data.filter(row => row.archetype === archetypeName);
+                
+                // Find an entry with Meta Live to get total_decks_in_archetype
+                const liveEntry = archetypeDecks.find(row => row.meta === 'Meta Live');
+                const limitlessCount = liveEntry ? parseInt(liveEntry.total_decks_in_archetype || 0) : 0;
+                
+                // Find an entry with Meta Play! to get total_decks_in_archetype
+                const playEntry = archetypeDecks.find(row => row.meta === 'Meta Play!');
+                const majorCount = playEntry ? parseInt(playEntry.total_decks_in_archetype || 0) : 0;
+                
+                archetypeInfo.limitlessCount = limitlessCount;
+                archetypeInfo.majorCount = majorCount;
             });
             
             const archetypeList = Array.from(archetypeMap.values());
@@ -286,27 +193,19 @@
                 }
             }
 
-            if (!pendingMeta) {
-                const savedArchetype = String(window.currentCurrentMetaArchetype || '').trim();
-                if (savedArchetype) {
-                    const savedOption = Array.from(select.options).find(option =>
-                        option.value && option.value.toLowerCase() === savedArchetype.toLowerCase()
-                    );
-                    if (savedOption) {
-                        select.value = savedOption.value;
-                        loadCurrentMetaDeckData(savedOption.value);
-                    }
-                }
+            // Enable search functionality
+            const searchInput = document.getElementById('currentMetaDeckSearch');
+            if (searchInput) {
+                searchInput.oninput = function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const options = select.querySelectorAll('option');
+                    options.forEach(opt => {
+                        if (opt.value === '') return;
+                        const text = opt.textContent.toLowerCase();
+                        opt.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                };
             }
-
-            if (!select.value) {
-                // Keep deck selection empty after reload/reset until user picks one.
-                window.currentCurrentMetaArchetype = '';
-                clearCurrentMetaDeckView();
-            }
-
-            // Initialize the new combobox UI (replaces old search input)
-            initializeDeckArchetypeCombobox('currentMeta');
         }
         
         // Format filter functions
@@ -344,11 +243,9 @@
             // Refresh dropdown list to show only archetypes matching the filter
             const currentMetaDeckSelect = document.getElementById('currentMetaDeckSelect');
             const previouslySelected = currentMetaDeckSelect ? currentMetaDeckSelect.value : null;
-
-            const dataToUse = window.currentMetaAnalysisData;
-
-            if (dataToUse) {
-                await populateCurrentMetaDeckSelect(dataToUse);
+            
+            if (window.currentMetaAnalysisData) {
+                await populateCurrentMetaDeckSelect(window.currentMetaAnalysisData);
             }
             
             // Check if previously selected archetype still exists in filtered list
@@ -371,34 +268,9 @@
         }
         
         // Load deck data with format filtering
-        async function loadCurrentMetaDeckData(archetype) {
-            // CRITICAL: Use different data sources based on filter to ensure correct numbers:
-            // - 'play' (Major Tournament Decks): tournament_cards_data_cards.csv (Top 256 only, ~31 cards for Alakazam)
-            // - 'live' (Limitless Decks): current_meta_card_data.csv with Meta Live rows (~47 cards)
-            // - 'all': current_meta_card_data.csv with all rows (~85 cards)
-            
-            let data = null;
-            let needsAggregation = false;
-            
-            if (currentMetaFormatFilter === 'play') {
-                // Use Major Tournament data (Top 256 only)
-                if (!window.currentMetaTournamentCardsData) {
-                    showToast('Lade Major-Tournament-Kartendaten...', 'info');
-                    window.currentMetaTournamentCardsData = await loadCSV('tournament_cards_data_cards.csv');
-                }
-                data = window.currentMetaTournamentCardsData;
-                needsAggregation = true;
-            } else {
-                // Use current meta (Limitless) data with optional format filtering
-                data = window.currentMetaAnalysisData;
-                needsAggregation = false;
-            }
-            
-            if (!data) {
-                console.error('[loadCurrentMetaDeckData] No data available for filter:', currentMetaFormatFilter);
-                clearCurrentMetaDeckView();
-                return;
-            }
+        function loadCurrentMetaDeckData(archetype) {
+            const data = window.currentMetaAnalysisData;
+            if (!data) return;
             
             window.currentCurrentMetaArchetype = archetype;
             
@@ -419,26 +291,15 @@
             }
             
             // Filter by archetype
-            const normalizedTarget = normalizeCurrentMetaArchetypeKey(archetype);
-            let deckCards = data.filter(row => {
-                const rowArchetype = currentMetaFormatFilter === 'play'
-                    ? normalizeCurrentMetaTournamentArchetypeName(row.archetype)
-                    : String(row.archetype || '').trim();
-
-                if (!rowArchetype) return false;
-                const exactMatch = rowArchetype.toLowerCase() === archetype.toLowerCase();
-                if (exactMatch) return true;
-
-                const normalizedRow = normalizeCurrentMetaArchetypeKey(rowArchetype);
-                return normalizedRow && normalizedRow === normalizedTarget;
-            });
+            let deckCards = data.filter(row => 
+                row.archetype && row.archetype.toLowerCase() === archetype.toLowerCase()
+            );
             
-            // Apply format filter only when using current_meta data with 'live' or 'all'
-            // (tournament_cards_data is already filtered to Top 256, should NOT be filtered further by meta)
-            if (currentMetaFormatFilter === 'live' && !needsAggregation) {
-                deckCards = deckCards.filter(row => row.meta === 'Meta Live');
+            // Apply format filter
+            if (currentMetaFormatFilter !== 'all') {
+                const filterValue = currentMetaFormatFilter === 'live' ? 'Meta Live' : 'Meta Play!';
+                deckCards = deckCards.filter(row => row.meta === filterValue);
             }
-
             
             if (deckCards.length === 0) {
                 showToast(`No data found for ${archetype} with filter "${currentMetaFormatFilter}"!`, 'warning');
@@ -446,168 +307,95 @@
                 return;
             }
             
-            // Show loading indicator for aggregation work
-            if (needsAggregation && deckCards.length > 100) {
-                showToast(`Processing ${deckCards.length} card entries... This may take a moment`, 'info');
+            // Current Meta currently falls back to tournament_cards_data_cards.csv when
+            // current_meta_card_data.csv is missing. In that mode, rows are per tournament
+            // and per print, so we must aggregate stats before choosing a display print.
+            if (deckCards.length > 0) {
+                deckCards = aggregateCardStatsByDate(deckCards);
+            }
+
+            // Deduplicate only after statistics have been merged across tournaments/prints.
+            deckCards = deduplicateCards(deckCards);
+            
+            window.currentCurrentMetaDeckCards = deckCards;
+            
+            // Calculate stats
+            const totalCardsInDeck = deckCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
+            const uniqueCards = deckCards.length;
+            
+            // Get winrate from deck stats
+            let winrate = '-';
+            const deckStats = window.currentMetaDeckStats || [];
+            const deckStatEntry = deckStats.find(d => d.deck_name && d.deck_name.toLowerCase() === archetype.toLowerCase());
+            if (deckStatEntry && deckStatEntry.win_rate) {
+                winrate = deckStatEntry.win_rate;
             }
             
-            // Use setTimeout to allow UI to update and prevent complete freezing
-            setTimeout(() => {
-                // Tournament cards data stores one row per tournament per card print,
-                // so stats must be aggregated before deduplication (like Past Meta).
-                // Current meta data is already pre-aggregated — skip aggregation for that.
-                if (needsAggregation && deckCards.length > 0) {
-                    deckCards = aggregateCardStatsByDate(deckCards);
-                }
-
-                // Deduplicate only after statistics have been merged across tournaments/prints.
-                deckCards = deduplicateCards(deckCards);
-            
-                window.currentCurrentMetaDeckCards = deckCards;
+            // Calculate matchup vs Top 20
+            let matchupVsTop20 = '-';
+            const matchupData = window.currentMetaMatchupData || [];
+            if (deckStats.length > 0 && matchupData.length > 0) {
+                // Get top 20 decks by rank
+                const top20Decks = deckStats
+                    .filter(d => d.rank && parseInt(d.rank) <= 20)
+                    .map(d => d.deck_name);
                 
-                // Calculate stats
-                // Use max_count to match the filter view calculations for consistency
-                // (both must use the same base to avoid logical impossibilities like "87 unique / 75 total")
-                const totalCardsInDeck = deckCards.reduce((sum, card) => sum + parseInt(card.max_count || 0, 10), 0);
-                const uniqueCards = deckCards.length;
+                // Get matchups against top 20
+                const relevantMatchups = matchupData.filter(m => 
+                    m.deck_name && m.deck_name.toLowerCase() === archetype.toLowerCase() &&
+                    m.opponent && top20Decks.some(deck => deck && deck.toLowerCase() === m.opponent.toLowerCase())
+                );
                 
-                // Get winrate from deck stats
-                let winrate = '-';
-                const deckStats = window.currentMetaDeckStats || [];
-                const deckStatEntry = deckStats.find(d => d.deck_name && d.deck_name.toLowerCase() === archetype.toLowerCase());
-                if (deckStatEntry && deckStatEntry.win_rate) {
-                    winrate = deckStatEntry.win_rate;
-                }
-                
-                // Calculate matchup vs Top 20
-                let matchupVsTop20 = '-';
-                const matchupData = window.currentMetaMatchupData || [];
-                if (deckStats.length > 0 && matchupData.length > 0) {
-                    // Get top 20 decks by rank
-                    const top20Decks = deckStats
-                        .filter(d => d.rank && parseInt(d.rank) <= 20)
-                        .map(d => d.deck_name);
+                if (relevantMatchups.length > 0) {
+                    // Calculate weighted average winrate
+                    let totalGames = 0;
+                    let totalWins = 0;
                     
-                    // Get matchups against top 20
-                    const relevantMatchups = matchupData.filter(m => 
-                        m.deck_name && m.deck_name.toLowerCase() === archetype.toLowerCase() &&
-                        m.opponent && top20Decks.some(deck => deck && deck.toLowerCase() === m.opponent.toLowerCase())
-                    );
+                    relevantMatchups.forEach(m => {
+                        const games = parseInt(m.total_games) || 0;
+                        const winRate = parseFloat((m.win_rate || '0').replace(',', '.'));
+                        totalGames += games;
+                        totalWins += (games * winRate / 100);
+                    });
                     
-                    if (relevantMatchups.length > 0) {
-                        // Calculate weighted average winrate
-                        let totalGames = 0;
-                        let totalWins = 0;
-                        
-                        relevantMatchups.forEach(m => {
-                            const games = parseInt(m.total_games) || 0;
-                            const winRate = parseFloat((m.win_rate || '0').replace(',', '.'));
-                            totalGames += games;
-                            totalWins += (games * winRate / 100);
-                        });
-                        
-                        if (totalGames > 0) {
-                            const avgWinrate = (totalWins / totalGames * 100).toFixed(2);
-                            matchupVsTop20 = `${avgWinrate}% (${relevantMatchups.length} MU)`;
-                        }
+                    if (totalGames > 0) {
+                        const avgWinrate = (totalWins / totalGames * 100).toFixed(2);
+                        matchupVsTop20 = `${avgWinrate}% (${relevantMatchups.length} MU)`;
                     }
                 }
-                
-                // Update stats
-                updateDeckStatsByIds({
-                    currentMetaStatCards: `${uniqueCards} / ${totalCardsInDeck}`,
-                    currentMetaStatWinrate: winrate,
-                    currentMetaStatMatchup: matchupVsTop20
-                }, 'currentMetaStatsSection');
-                
-                // Render matchups
-                renderCurrentMetaMatchups(archetype);
-                
-                // Render Top 256 tournament breakdown (only visible on Major Tournament filter)
-                renderCurrentMetaTop256(archetype);
-                
-                // Render cards using current active view (defaults to table when both are hidden)
-                applyCurrentMetaFilter();
-                
-                // DON'T auto-display deck here - let the caller decide
-                // (only display when user actively selects archetype from dropdown)
-            }, 100);  // Delay to allow UI to update
+            }
+            
+            // Update stats  
+            document.getElementById('currentMetaStatCards').textContent = `${uniqueCards} / ${totalCardsInDeck}`;
+            document.getElementById('currentMetaStatWinrate').textContent = winrate;
+            document.getElementById('currentMetaStatMatchup').textContent = matchupVsTop20;
+            document.getElementById('currentMetaStatsSection').classList.remove('d-none');
+            
+            // Render matchups
+            renderCurrentMetaMatchups(archetype);
+            
+            // Show deck visual
+            renderCurrentMetaDeckGrid(deckCards);
+            
+            // Apply current filter
+            applyCurrentMetaFilter();
+            
+            // DON'T auto-display deck here - let the caller decide
+            // (only display when user actively selects archetype from dropdown)
         }
         
         function clearCurrentMetaDeckView() {
-            ['currentMetaStatsSection', 'currentMetaMatchupsSection', 'currentMetaDeckVisual', 'currentMetaDeckTableView', 'currentMetaTop256Section'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('d-none');
-            });
-            renderNoDeckSelectedState('currentMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
-            resetDeckOverviewCounts('currentMetaCardCount', 'currentMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 Total');
+            document.getElementById('currentMetaStatsSection').classList.add('d-none');
+            document.getElementById('currentMetaMatchupsSection').classList.add('d-none');
+            document.getElementById('currentMetaDeckVisual').classList.add('d-none');
+            document.getElementById('currentMetaDeckTableView').classList.add('d-none');
+            document.getElementById('currentMetaCardCount').textContent = t('cl.cards').replace(/^/, '0 ');
+            document.getElementById('currentMetaCardCountSummary').textContent = '/ 0 Total';
         }
         
-        // Render "Used in Top 256" breakdown per major tournament for selected archetype
-        async function renderCurrentMetaTop256(archetype) {
-            const section = document.getElementById('currentMetaTop256Section');
-            const listEl = document.getElementById('currentMetaTop256List');
-            if (!section || !listEl) return;
-
-            if (currentMetaFormatFilter !== 'play') {
-                section.classList.add('d-none');
-                return;
-            }
-
-            // Load and cache tournament cards data
-            if (!window.currentMetaTournamentCardsData) {
-                window.currentMetaTournamentCardsData = await loadCSV('tournament_cards_data_cards.csv');
-            }
-            const tourData = window.currentMetaTournamentCardsData || [];
-
-            // Collect unique tournament entries for this archetype
-            // Use the maximum total_decks_in_archetype across all rows for the same
-            // tournament, because price-variant rows can carry different counts.
-            const tourMap = new Map();
-            tourData.forEach(row => {
-                const rowArchetype = normalizeCurrentMetaTournamentArchetypeName(row.archetype);
-                if (!rowArchetype || rowArchetype.toLowerCase() !== archetype.toLowerCase()) return;
-                const key = row.tournament_name || String(row.tournament_id);
-                const rowCount = parseInt(row.total_decks_in_archetype || 0, 10);
-                if (!tourMap.has(key)) {
-                    tourMap.set(key, {
-                        name: row.tournament_name || key,
-                        date: row.tournament_date || '',
-                        count: rowCount
-                    });
-                } else {
-                    // Keep the highest count seen across all rows for this tournament
-                    const existing = tourMap.get(key);
-                    if (rowCount > existing.count) {
-                        existing.count = rowCount;
-                    }
-                }
-            });
-
-            if (tourMap.size === 0) {
-                section.classList.add('d-none');
-                return;
-            }
-
-            // Sort newest first using ordinal-aware date parsing
-            const parseDate = s => {
-                const d = new Date((s || '').replace(/(\d+)(st|nd|rd|th)/, '$1'));
-                return isNaN(d) ? new Date(0) : d;
-            };
-            const tourList = Array.from(tourMap.values()).sort((a, b) => parseDate(b.date) - parseDate(a.date));
-
-            listEl.innerHTML = tourList.map(t =>
-                `<div class="top256-entry">` +
-                `<span class="top256-count">${t.count}\u00d7</span>` +
-                `<span class="top256-tournament">${t.name}</span>` +
-                (t.date ? `<span class="top256-date">(${t.date})</span>` : '') +
-                `</div>`
-            ).join('');
-            section.classList.remove('d-none');
-        }
-
         // Render best/worst matchups for Current Meta - extract directly from loaded HTML (1:1 copy)
         function renderCurrentMetaMatchups(archetype) {
+            devLog('?? Rendering matchups for:', archetype);
             const deckStats = window.currentMetaDeckStats || [];
             const matchupsSection = document.getElementById('currentMetaMatchupsSection');
             const bestTable = document.getElementById('currentMetaBestMatchups');
@@ -618,7 +406,7 @@
             const currentMetaContent = document.getElementById('currentMetaContent');
             if (!currentMetaContent) {
                 console.error('? Current Meta content not loaded');
-                if (matchupsSection) matchupsSection.classList.add('d-none');
+                matchupsSection.classList.add('d-none');
                 return;
             }
             
@@ -826,20 +614,12 @@
             
             const tableViewContainer = document.getElementById('currentMetaDeckTableView');
             const gridViewContainer = document.getElementById('currentMetaDeckVisual');
-            // Active view = the one NOT hidden; default to grid when both are hidden
-            const isTableViewActive = tableViewContainer && !tableViewContainer.classList.contains('d-none');
+            const isTableViewActive = tableViewContainer && tableViewContainer.style.display !== 'none';
             
             if (isTableViewActive) {
                 renderCurrentMetaDeckTable(filteredCards);
             } else {
                 renderCurrentMetaDeckGrid(filteredCards);
-            }
-
-            if (gridViewContainer && !isTableViewActive) {
-                gridViewContainer.classList.remove('d-none');
-            }
-            if (tableViewContainer && isTableViewActive) {
-                tableViewContainer.classList.remove('d-none');
             }
             
             updateCurrentMetaCardCounts(filteredCards.length, filteredTotal, allTotal);
@@ -860,10 +640,8 @@
             
             if (mode === 'all') {
                 currentMetaGlobalRarityPreference = null;
-                globalRarityPreference = null;
             } else {
                 currentMetaGlobalRarityPreference = mode;
-                globalRarityPreference = mode;
             }
             
             // Update button styles with null-checks
@@ -981,16 +759,12 @@
 
             if (!Array.isArray(cards) || cards.length === 0) {
                 gridContainer.innerHTML = getEmptyStateHtml();
-                if (visualContainer) {
-                    document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');
-                    visualContainer.classList.remove('d-none');
-                }
+                if (visualContainer) visualContainer.style.display = 'block';
                 return;
             }
             
             const sortedCards = sortCardsByType([...cards]);
             const currentDeck = window.currentMetaDeck || {};
-            const priceMap = getOverviewPriceLookupCache();
             
             let html = '';
             sortedCards.forEach(card => {
@@ -1034,134 +808,29 @@
                     const setCode = displayCard.set_code || '';
                     const setNumber = displayCard.set_number || '';
                     const cardNameWarning = getNameWarningHtml(rawCardName, cardName, setCode, setNumber);
-
-                    const imageUrl = getBestCardImage({
-                        ...displayCard,
-                        set_code: setCode,
-                        set_number: setNumber,
-                        card_name: cardName
-                    });
-                    const rawPercentage = safeParseFloat(card.percentage_in_archetype || card.share_percent || 0);
-                    
-                    const legalMaxCopies = getLegalMaxCopies(cardName, card);
-                    const rawMaxCount = parseInt(card.max_count) || 0;
-                    const totalCount = safeParseFloat(card.total_count || 0);
-                    const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
-                    const finalMaxCount = rawMaxCount > 0
-                        ? Math.min(legalMaxCopies, rawMaxCount)
-                        : 0;
-                    
-                    let deckCount = 0;
-                    if (Object.keys(currentDeck).length > 0 && setCode && setNumber) {
-                        for (const deckKey in currentDeck) {
-                            const match = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                            if (match) {
-                                if (match[1] === setCode && match[2] === setNumber) {
-                                    deckCount = currentDeck[deckKey] || 0;
-                                    break;
-                                }
-                            }
-                        }
-                    } else if (Object.keys(currentDeck).length > 0 && !setCode && !setNumber) {
-                        deckCount = currentDeck[cardName] || 0;
-                    }
-                    
-                    const totalDecksInArchetype = safeParseFloat(card.total_decks_in_archetype || 0);
-                    const avgCountOverallRaw = safeParseFloat(card.average_count_overall || '', NaN);
-                    const avgCountInUsedRaw = safeParseFloat(card.average_count || card.avg_count || '', NaN);
-
-                    const resolvedPercentage = Number.isFinite(rawPercentage) && rawPercentage > 0
-                        ? rawPercentage
-                        : (totalDecksInArchetype > 0 && decksWithCard > 0 ? (decksWithCard / totalDecksInArchetype) * 100 : 0);
-                    const avgCountOverallValue = Number.isFinite(avgCountOverallRaw) && avgCountOverallRaw > 0
-                        ? avgCountOverallRaw
-                        : (totalDecksInArchetype > 0 ? (totalCount / totalDecksInArchetype) : 0);
-                    const avgCountInUsedValue = Number.isFinite(avgCountInUsedRaw) && avgCountInUsedRaw > 0
-                        ? avgCountInUsedRaw
-                        : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
-
-                    const finalAvgUsed = Math.min(legalMaxCopies, avgCountInUsedValue);
-                    const finalAvgOverall = Math.min(legalMaxCopies, avgCountOverallValue);
-                    const maxCount = finalMaxCount;
-
-                    const percentage = Math.max(0, resolvedPercentage).toFixed(1).replace('.', ',');
-                    const avgCountOverall = Math.max(0, finalAvgOverall).toFixed(2).replace('.', ',');
-                    const avgCountInUsedDecks = Math.max(0, finalAvgUsed).toFixed(2).replace('.', ',');
-                    const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
-                    const totalDecksDisplay = Math.round(Math.max(0, totalDecksInArchetype));
-                    
-                    // Price lookup
-                    let eurPrice = '';
-                    let cardmarketUrl = '';
-                    let germanCardName = (displayCard.name_de || card.name_de || card.card_name_de || '').toLowerCase();
-                    if (setCode && setNumber) {
-                        const normalizedSet = normalizeSetCode(setCode);
-                        const normalizedNumber = normalizeCardNumber(setNumber);
-                        let priceCard = priceMap.get(`${normalizedSet}-${normalizedNumber}`);
-                        if (!priceCard && /^\d+$/.test(normalizedNumber)) {
-                            priceCard = priceMap.get(`${normalizedSet}-${normalizedNumber.padStart(3, '0')}`);
-                        }
-                        if (priceCard) {
-                            eurPrice = priceCard.eur_price || '';
-                            cardmarketUrl = priceCard.cardmarket_url || '';
-                            if (priceCard.name_de) germanCardName = String(priceCard.name_de).toLowerCase();
-                        }
-                    }
-                    const isBasicEnergyEntry = (typeof isBasicEnergyCardEntry === 'function' && isBasicEnergyCardEntry({
-                        card_name: cardName,
-                        type: card.type || card.card_type,
-                        supertype: card.supertype,
-                        subtypes: card.subtypes
-                    })) || /basic energy/i.test(String(card.type || card.card_type || ''));
-
-                    if (isBasicEnergyEntry) {
-                        eurPrice = '0,05€';
-                        cardmarketUrl = '';
-                    }
-                    const priceDisplay = eurPrice || '0,00€';
-                    const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
-                    const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
-                    
-                    // Card type category
-                    const cardType = card.type || card.card_type || '';
-                    const cardCategory = getCardTypeCategory(cardType);
-                    const isAceSpecCard = isAceSpec(cardName);
-                    const filterCategory = isAceSpecCard ? 'Ace Spec' : cardCategory;
-                    const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
-                    
-                    // Collection badge
-                    const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
-                    const otherPrintSparkleHtml = otherPrintOwnedCount > 0
-                        ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}" title="Owned other INT prints: ${otherPrintOwnedCount}x">
-                            <span class="city-league-other-print-sparkle-icon">✨</span>
-                            <span class="city-league-other-print-sparkle-count">${otherPrintOwnedCount}</span>
-                        </div>`
-                        : '';
-                    
+                    // ...existing code for imageUrl, counts, etc...
                     html += `
-                        <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
-                            <div class="card-image-container city-league-card-image-container">
-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
-                                <div class="city-league-card-badge city-league-card-badge-max">${maxCount}</div>
-                                ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
-                                ${otherPrintSparkleHtml}
-                                <div class="card-info-bottom city-league-card-info-bottom">
-                                    <div class="card-info-text city-league-card-info-text">
-                                        <div class="city-league-card-title-mobile">${cardName}${cardNameWarning}</div>
-                                        <div class="city-league-card-set-mobile">${setCode} ${setNumber}</div>
-                                        <div class="city-league-card-stats-mobile">${resolvedPercentage > 0 ? `${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)` : ''}</div>
-                                        <div class="city-league-card-deck-stats-mobile">${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)</div>
+                        <div class="card-item pointer" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
+                            <div class="card-image-container">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
+                                <div class="card-badge card-badge-top-right">${maxCount}</div>
+                                ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
+                                <div class="card-info-bottom">
+                                    <div class="card-info-text">
+                                        <div class="nowrap ellipsis" style="font-weight: 600; margin-bottom: 1px; color: #333; font-size: 0.58em;">${cardName}${cardNameWarning}</div>
+                                        <div style="color: #333; font-size: 0.52em; margin-bottom: 1px; font-weight: 600;">${setCode} ${setNumber}</div>
+                                        <div style="color: #333; font-size: 0.55em; margin-bottom: 1px; font-weight: 600;">${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)</div>
                                     </div>
-                                    <div class="card-action-buttons city-league-card-action-buttons">
-                                        <div class="city-league-card-action-row">
-                                            <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
-                                            <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
-                                            <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
+                                    <div class="card-action-buttons">
+                                        <div class="card-action-row">
+                                            <button onclick="event.stopPropagation(); removeCardFromDeck('currentMeta', '${cardNameEscaped}')" style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">-</button>
+                                            <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped}')" style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 10px; font-weight: bold; text-align: center; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;">★</button>
+                                            <button onclick="event.stopPropagation(); addCardToDeck('currentMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" style="background: #28a745; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; min-height: unset; min-width: unset;">+</button>
                                         </div>
-                                        <div class="city-league-card-action-row">
-                                            ${setCode && setNumber ? `<button class="city-league-card-action-btn city-league-card-limitless-btn" onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}
-                                            <button class="city-league-card-action-btn city-league-card-proxy-btn" onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" title="${t('cl.proxyTooltip')}">P</button>
-                                            <button class="city-league-card-action-btn city-league-card-market-btn" onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" data-market-bg="${priceBackground}" data-market-cursor="${eurPrice ? 'pointer' : 'not-allowed'}" title="${eurPrice ? t('cl.buyCardmarket') + ' ' + eurPrice : t('cl.priceNA')}">${priceDisplay}</button>
+                                        <div class="card-action-row-wide">
+                                            ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" style="background: #6c3dc5; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Open on Limitless">L</button>` : '<span></span>'}
+                                            <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" style="background: #e74c3c; color: white; border: none; border-radius: 3px; height: 16px; cursor: pointer; font-size: 7px; font-weight: bold; padding: 0; display: flex; align-items: center; justify-content: center; min-height: unset; min-width: unset;" title="Add to proxy">P</button>
+                                            <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" style="background: ${priceBackground}; color: white; height: 16px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 7px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.4); min-height: unset; min-width: unset;">  ${priceDisplay}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -1172,8 +841,7 @@
             });
             
             gridContainer.innerHTML = html;
-            document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');
-            visualContainer.classList.remove('d-none');
+            visualContainer.style.display = 'block';
         }
         
         function renderCurrentMetaDeckTable(cards) {
@@ -1348,8 +1016,7 @@
             }
             
             tableContainer.innerHTML = html;
-            document.getElementById('currentMetaDeckVisual')?.classList.add('d-none');
-            tableViewContainer.classList.remove('d-none');
+            tableViewContainer.style.display = 'block';
             devLog('Current Meta table rendered with tier grouping:', { core: coreCards.length, aceSpec: aceSpecCards.length, tech: techCards.length, spicy: spicyCards.length });
         }
         
@@ -1380,8 +1047,7 @@
                     setNumSpace.includes(searchTerm) ||
                     setNumCombined.includes(searchTerm);
 
-                const matchesType = currentMetaOverviewCardTypeFilter === 'all' || cardType === currentMetaOverviewCardTypeFilter
-                    || (currentMetaOverviewCardTypeFilter === 'Energy' && cardType === 'Basic Energy');
+                const matchesType = currentMetaOverviewCardTypeFilter === 'all' || cardType === currentMetaOverviewCardTypeFilter;
                 
                 // Show card only if it matches both filters
                 if (matchesSearch && matchesType) {
@@ -1417,14 +1083,14 @@
                 return;
             }
             
-            const isGridViewActive = !gridViewContainer.classList.contains('d-none');
+            const isGridViewActive = gridViewContainer.style.display !== 'none';
             
             if (isGridViewActive) {
-                gridViewContainer.classList.add('d-none');
-                if (button) button.textContent = '🖼️ Grid View';
+                gridViewContainer.style.display = 'none';
+                if (button) button.textContent = '??? Grid View';
             } else {
-                tableViewContainer.classList.add('d-none');
-                if (button) button.textContent = '📋 List View';
+                tableViewContainer.style.display = 'none';
+                if (button) button.textContent = '?? List View';
             }
             
             // Re-apply filter to preserve percentage filter and render correct view

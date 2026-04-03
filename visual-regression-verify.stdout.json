@@ -1,0 +1,570 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\playwright.config.js",
+    "rootDir": "C:/Users/haush/OneDrive/Desktop/Hausi´s Pokemon TCG Analysis/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/haush/OneDrive/Desktop/Hausi´s Pokemon TCG Analysis/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/haush/OneDrive/Desktop/Hausi´s Pokemon TCG Analysis/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.59.0",
+    "workers": 8,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "visual-regression.spec.js",
+      "file": "visual-regression.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Card Action Buttons",
+          "file": "visual-regression.spec.js",
+          "line": 92,
+          "column": 6,
+          "specs": [
+            {
+              "title": "card action buttons are equal width in both rows",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 60066,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                            "column": 58,
+                            "line": 110
+                          },
+                          "message": "Error: locator.evaluate: Test timeout of 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#city-league-analysis.tab-content.active').locator('.city-league-card-item .city-league-card-action-buttons, .city-league-card-item .card-action-buttons').first()\u001b[22m\n\n\n  108 |\n  109 |         // Use City League row classes directly to avoid accidental matches from unrelated widgets.\n> 110 |         const [row1Widths, row2Widths] = await firstCard.evaluate((cardEl) => {\n      |                                                          ^\n  111 |             const rowEls = Array.from(cardEl.querySelectorAll('.city-league-card-action-row, .card-action-row'));\n  112 |             const widthsPerRow = rowEls.map((rowEl) => {\n  113 |                 const buttons = Array.from(rowEl.querySelectorAll('button'));\n    at C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js:110:58"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:31:14.382Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\test-results\\visual-regression-Card-Act-36b16-re-equal-width-in-both-rows\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-d099eb28c49e5bd8a1f3",
+              "file": "visual-regression.spec.js",
+              "line": 105,
+              "column": 5
+            },
+            {
+              "title": "card action buttons screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2651,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:32:15.280Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-a4b1c9cda3c878084fc1",
+              "file": "visual-regression.spec.js",
+              "line": 134,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Navigation",
+          "file": "visual-regression.spec.js",
+          "line": 154,
+          "column": 6,
+          "specs": [
+            {
+              "title": "pokeball menu dropdown screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2215,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:32:18.123Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-0358dd6edf279e5dd311",
+              "file": "visual-regression.spec.js",
+              "line": 155,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "City League Tab",
+          "file": "visual-regression.spec.js",
+          "line": 183,
+          "column": 6,
+          "specs": [
+            {
+              "title": "hero archetype grid screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "City League data unavailable for hero grid snapshot in this run",
+                      "location": {
+                        "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                        "line": 199,
+                        "column": 14
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 3527,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:32:20.346Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "City League data unavailable for hero grid snapshot in this run",
+                          "location": {
+                            "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                            "line": 199,
+                            "column": 14
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-cf47bab4c4deb5240d29",
+              "file": "visual-regression.spec.js",
+              "line": 195,
+              "column": 5
+            },
+            {
+              "title": "archetype table screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "City League data unavailable for archetype table snapshot in this run",
+                      "location": {
+                        "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                        "line": 229,
+                        "column": 14
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 2509,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:32:23.883Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "City League data unavailable for archetype table snapshot in this run",
+                          "location": {
+                            "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                            "line": 229,
+                            "column": 14
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-81dc8ddfe976964bdeb0",
+              "file": "visual-regression.spec.js",
+              "line": 225,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Current Meta Tab",
+          "file": "visual-regression.spec.js",
+          "line": 259,
+          "column": 15,
+          "specs": [
+            {
+              "title": "best matchups table screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                        "line": 259,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:32:26.400Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                            "line": 259,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-f67b2210b758cbd3c280",
+              "file": "visual-regression.spec.js",
+              "line": 301,
+              "column": 5
+            },
+            {
+              "title": "worst matchups table screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [
+                    {
+                      "type": "fixme",
+                      "location": {
+                        "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                        "line": 259,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:32:26.400Z",
+                      "annotations": [
+                        {
+                          "type": "fixme",
+                          "location": {
+                            "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                            "line": 259,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-e9391a0a8cf4bf172b70",
+              "file": "visual-regression.spec.js",
+              "line": 307,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Rarity Switcher Modal",
+          "file": "visual-regression.spec.js",
+          "line": 317,
+          "column": 6,
+          "specs": [
+            {
+              "title": "rarity switcher modal screenshot matches baseline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7816,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:32:26.401Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-5a7ddee501aeab6a07c2",
+              "file": "visual-regression.spec.js",
+              "line": 318,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "Cards Database Tab",
+          "file": "visual-regression.spec.js",
+          "line": 352,
+          "column": 6,
+          "specs": [
+            {
+              "title": "cards database grid screenshot matches baseline",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 9530,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveScreenshot\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\n  Expected an image 1206px by 3748px, received 1198px by 375px. 1006106 pixels (ratio 0.23 of all image pixels) are different.\n\n  Snapshot: cards-database-grid.png\n\nCall log:\n\u001b[2m  - Expect \"toHaveScreenshot(cards-database-grid.png)\" with timeout 15000ms\u001b[22m\n\u001b[2m    - verifying given screenshot expectation\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - Expected an image 1206px by 3748px, received 1198px by 375px. 990577 pixels (ratio 0.22 of all image pixels) are different.\u001b[22m\n\u001b[2m  - waiting 100ms before taking screenshot\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - 214827 pixels (ratio 0.48 of all image pixels) are different.\u001b[22m\n\u001b[2m  - waiting 250ms before taking screenshot\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - captured a stable screenshot\u001b[22m\n\u001b[2m  - Expected an image 1206px by 3748px, received 1198px by 375px. 1006106 pixels (ratio 0.23 of all image pixels) are different.\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveScreenshot\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\n  Expected an image 1206px by 3748px, received 1198px by 375px. 1006106 pixels (ratio 0.23 of all image pixels) are different.\n\n  Snapshot: cards-database-grid.png\n\nCall log:\n\u001b[2m  - Expect \"toHaveScreenshot(cards-database-grid.png)\" with timeout 15000ms\u001b[22m\n\u001b[2m    - verifying given screenshot expectation\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - Expected an image 1206px by 3748px, received 1198px by 375px. 990577 pixels (ratio 0.22 of all image pixels) are different.\u001b[22m\n\u001b[2m  - waiting 100ms before taking screenshot\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - 214827 pixels (ratio 0.48 of all image pixels) are different.\u001b[22m\n\u001b[2m  - waiting 250ms before taking screenshot\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - captured a stable screenshot\u001b[22m\n\u001b[2m  - Expected an image 1206px by 3748px, received 1198px by 375px. 1006106 pixels (ratio 0.23 of all image pixels) are different.\u001b[22m\n\n    at C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js:382:28",
+                        "location": {
+                          "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                          "column": 28,
+                          "line": 382
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 380 |\u001b[39m         }\u001b[33m;\u001b[39m\n \u001b[90m 381 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 382 |\u001b[39m         \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mtoHaveScreenshot(\u001b[32m'cards-database-grid.png'\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m     |\u001b[39m                            \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 383 |\u001b[39m             clip\u001b[33m,\u001b[39m\n \u001b[90m 384 |\u001b[39m             maxDiffPixelRatio\u001b[33m:\u001b[39m \u001b[35m0.05\u001b[39m\u001b[33m,\u001b[39m\n \u001b[90m 385 |\u001b[39m         })\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                            "column": 28,
+                            "line": 382
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveScreenshot\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\n  Expected an image 1206px by 3748px, received 1198px by 375px. 1006106 pixels (ratio 0.23 of all image pixels) are different.\n\n  Snapshot: cards-database-grid.png\n\nCall log:\n\u001b[2m  - Expect \"toHaveScreenshot(cards-database-grid.png)\" with timeout 15000ms\u001b[22m\n\u001b[2m    - verifying given screenshot expectation\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - Expected an image 1206px by 3748px, received 1198px by 375px. 990577 pixels (ratio 0.22 of all image pixels) are different.\u001b[22m\n\u001b[2m  - waiting 100ms before taking screenshot\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - 214827 pixels (ratio 0.48 of all image pixels) are different.\u001b[22m\n\u001b[2m  - waiting 250ms before taking screenshot\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - captured a stable screenshot\u001b[22m\n\u001b[2m  - Expected an image 1206px by 3748px, received 1198px by 375px. 1006106 pixels (ratio 0.23 of all image pixels) are different.\u001b[22m\n\n\n  380 |         };\n  381 |\n> 382 |         await expect(page).toHaveScreenshot('cards-database-grid.png', {\n      |                            ^\n  383 |             clip,\n  384 |             maxDiffPixelRatio: 0.05,\n  385 |         });\n    at C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js:382:28"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-03T08:32:34.230Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "cards-database-grid-expected.png",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\__snapshots__\\{testFilename}\\cards-database-grid.png"
+                        },
+                        {
+                          "name": "cards-database-grid-actual.png",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\test-results\\visual-regression-Cards-Da-4ffe4-screenshot-matches-baseline\\cards-database-grid-actual.png"
+                        },
+                        {
+                          "name": "cards-database-grid-diff.png",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\test-results\\visual-regression-Cards-Da-4ffe4-screenshot-matches-baseline\\cards-database-grid-diff.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\test-results\\visual-regression-Cards-Da-4ffe4-screenshot-matches-baseline\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\haush\\OneDrive\\Desktop\\Hausi´s Pokemon TCG Analysis\\tests\\e2e\\visual-regression.spec.js",
+                        "column": 28,
+                        "line": 382
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "614534ba5c1e0a84453e-d4faeaed4752fafba7c5",
+              "file": "visual-regression.spec.js",
+              "line": 353,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-03T08:31:13.827Z",
+    "duration": 90235.437,
+    "expected": 3,
+    "skipped": 4,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

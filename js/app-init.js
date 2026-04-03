@@ -3,18 +3,6 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Reset transient UI/deck state on every full page reload.
-                [
-                    'autosave_deck',
-                    'cityLeagueDeck',
-                    'currentMetaDeck',
-                    'pastMetaDeck',
-                    'cityLeagueFormat',
-                    'averageDisplayMode'
-                ].forEach(key => {
-                    try { localStorage.removeItem(key); } catch (_) {}
-                });
-
                 const lastUpdate = localStorage.getItem('lastScraperUpdate') || new Date().toLocaleDateString('de-DE');
                 const lastUpdateEl = document.getElementById('last-update');
                 if (lastUpdateEl) {
@@ -22,7 +10,7 @@
                 }
                 
                 // Initialize City League format dropdowns
-                const savedFormat = 'M4';
+                const savedFormat = localStorage.getItem('cityLeagueFormat') || 'M4';
                 const formatDropdown = document.getElementById('cityLeagueFormatSelect');
                 const analysisFormatDropdown = document.getElementById('cityLeagueFormatSelectAnalysis');
                 if (formatDropdown) {

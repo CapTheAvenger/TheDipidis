@@ -2,19 +2,8 @@
 // Runs 10,000 iterations off the main thread to prevent UI freezing
 
 self.onmessage = function(e) {
-    const payload = e && e.data ? e.data : {};
-    const deck = Array.isArray(payload.deck) ? payload.deck : [];
-    const targetCardNames = Array.isArray(payload.targetCardNames) ? payload.targetCardNames : [];
-    const requestedIterations = Number(payload.iterations);
-    const ITERATIONS = Number.isFinite(requestedIterations) && requestedIterations > 0
-        ? Math.floor(requestedIterations)
-        : 10000;
-
-    if (deck.length === 0 || targetCardNames.length === 0) {
-        self.postMessage({ chance: '0.0', error: 'invalid-payload' });
-        return;
-    }
-
+    const { deck, targetCardNames, iterations } = e.data;
+    const ITERATIONS = iterations || 10000;
     let successCount = 0;
 
     for (let i = 0; i < ITERATIONS; i++) {

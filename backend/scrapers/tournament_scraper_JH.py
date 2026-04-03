@@ -28,13 +28,12 @@ except ImportError:
     print("FEHLER: beautifulsoup4 fehlt! pip install beautifulsoup4")
     sys.exit(1)
 
-from backend.core.card_scraper_shared import (
-    setup_console_encoding, load_scraped_ids,
+from card_scraper_shared import (
+    setup_console_encoding, get_app_path, get_data_dir, load_scraped_ids,
     save_scraped_ids, CardDatabaseLookup, is_trainer_or_energy, is_valid_card,
     fetch_page_bs4, setup_logging, load_settings, load_set_order,
     extract_cards_from_decklist_soup
 )
-from backend.settings import get_data_path, get_config_path
 
 setup_console_encoding()
 
@@ -47,7 +46,7 @@ logger = setup_logging("tournament_scraper")
 # TOURNAMENT TRACKING (Incremental Scraping)
 # ============================================================================
 def get_scraped_tournaments_file() -> str:
-    return get_data_path("tournament_jh_scraped.json")
+    return os.path.join(get_data_dir(), "tournament_jh_scraped.json")
 
 def load_scraped_tournaments() -> Set[str]:
     return load_scraped_ids(get_scraped_tournaments_file())
@@ -195,7 +194,8 @@ def infer_format_from_decks(decks_data: List[Dict[str, Any]]) -> str:
     return ""
 
 
-    catalog_path = get_data_path("formats_catalog.json")
+def update_formats_catalog(new_formats: List[str]) -> None:
+    catalog_path = os.path.join(get_data_dir(), "formats_catalog.json")
 
     known_codes = set(FORMAT_CODE_DISPLAY.keys())
     observed_codes: Set[str] = set()
@@ -486,102 +486,9 @@ def aggregate_tournament_cards(all_decks: list, t_info: dict, card_db: CardDatab
 # ============================================================================
 # CSV OUTPUT
 # ============================================================================
-    overview_f = get_data_path(output_file.replace(".csv", "_overview.csv"))
-    cards_f    = get_data_path(output_file.replace(".csv", "_cards.csv"))
-
-    o_rows = [
-        {
-            "tournament_id": t["id"],
-            "tournament_name": t["name"],
-            "tournament_date": t.get("date", ""),
-            "players": t.get("players", ""),
-            "format": t.get("format", ""),
-            "cards_url": t["cards_url"],
-            "total_cards": t.get("total_cards", 0),
-            "status": t["status"]
-        }
-        for t in data
-    ]
-
-    c_rows = []
-    for t in data:
-        for c in t.get("cards", []):
-            cr = c.copy()
-            # Formatiere Dezimalzahlen mit Komma für Excel (deutsches Format)
-            cr["percentage_in_archetype"] = str(cr["percentage_in_archetype"]).replace(".", ",")
-            if "average_count" in cr:
-                cr["average_count"] = str(cr["average_count"]).replace(".", ",")
-            c_rows.append(cr)
-
-    for f_path, rows in [(overview_f, o_rows), (cards_f, c_rows)]:
-        if not rows:
-            continue
-        fields = list(rows[0].keys())
-        mode = "a" if append_mode and os.path.exists(f_path) else "w"
-        with open(f_path, mode, newline="", encoding="utf-8-sig") as f:
-            writer = csv.DictWriter(f, fieldnames=fields, delimiter=";")
-            if mode == "w":
-                writer.writeheader()
-            writer.writerows(rows)
-
-            formats_for_catalog = [str(row.get("format", "") or "") for row in o_rows]
-            update_formats_catalog(formats_for_catalog)
-
-    return overview_f, cards_f
-
-# ============================================================================
-# CSV OUTPUT
-# ============================================================================
-def update_formats_catalog(new_formats: list) -> None:
-    from backend.settings import get_data_path
-    import os
-    import json
-    import time
-    
-    catalog_path = str(get_data_path("formats_catalog.json"))
-
-    known_codes = set(FORMAT_CODE_DISPLAY.keys())
-    observed_codes = set()
-    for f in new_formats:
-        normalized = normalize_tournament_format(f)
-        if normalized:
-            observed_codes.add(normalized)
-
-    try:
-        if os.path.exists(catalog_path):
-            with open(catalog_path, "r", encoding="utf-8") as f:
-                existing = json.load(f)
-            for row in existing.get("formats", []):
-                code = normalize_tournament_format(row.get("code", ""))
-                if code:
-                    observed_codes.add(code)
-    except Exception as e:
-        logger.warning("Could not read existing formats catalog: %s", e)
-
-    all_codes = sorted(observed_codes | known_codes)
-    payload = {
-        "last_updated": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "formats": [
-            {
-                "code": code,
-                "name": FORMAT_CODE_DISPLAY.get(code, code),
-                "source": "known" if code in known_codes else "scraped"
-            }
-            for code in all_codes
-        ]
-    }
-
-    try:
-        with open(catalog_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2, ensure_ascii=False)
-        logger.info("Formats catalog updated: %s (%d formats)", catalog_path, len(payload["formats"]))
-    except Exception as e:
-        logger.warning("Could not write formats catalog: %s", e)
-
 def save_csv_files(data: list, output_file: str, append_mode: bool):
-    from backend.settings import get_data_path
-    overview_f = str(get_data_path(output_file.replace(".csv", "_overview.csv")))
-    cards_f    = str(get_data_path(output_file.replace(".csv", "_cards.csv")))
+    overview_f = os.path.join(get_data_dir(), output_file.replace(".csv", "_overview.csv"))
+    cards_f    = os.path.join(get_data_dir(), output_file.replace(".csv", "_cards.csv"))
 
     o_rows = [
         {
@@ -611,9 +518,7 @@ def save_csv_files(data: list, output_file: str, append_mode: bool):
         if not rows:
             continue
         fields = list(rows[0].keys())
-        import os
         mode = "a" if append_mode and os.path.exists(f_path) else "w"
-        import csv
         with open(f_path, mode, newline="", encoding="utf-8-sig") as f:
             writer = csv.DictWriter(f, fieldnames=fields, delimiter=";")
             if mode == "w":

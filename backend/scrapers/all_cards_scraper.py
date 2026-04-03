@@ -16,23 +16,21 @@ import sys
 import time
 import logging
 import concurrent.futures
+import re
 from datetime import datetime
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
-
-from backend.settings import get_data_path, get_config_path
-from backend.core.card_scraper_shared import (
-    setup_console_encoding, get_app_path, safe_fetch_html,
+from card_scraper_shared import (
+    setup_console_encoding, get_app_path, get_data_dir, safe_fetch_html,
     setup_logging, load_settings, load_set_order, card_sort_key
 )
-
 
 setup_console_encoding()
 
 # LOGGING SETUP
 logger = setup_logging("scraper")
-data_dir = get_data_path("")  # returns Path object
+data_dir = get_data_dir()
 
 logger.info("=" * 80)
 logger.info("ALL CARDS SCRAPER - FAST EDITION (English + German)")
@@ -66,56 +64,6 @@ else:
 
 def sort_key(card: dict):
     return card_sort_key(card, SET_ORDER)
-
-
-def build_limitless_card_path(set_code: str, set_number: str) -> str:
-    sc = str(set_code or "").strip().upper()
-    sn = str(set_number or "").strip()
-    if not (sc and sn):
-        return ""
-    return f"/cards/{sc}/{sn}"
-
-
-def normalize_limitless_card_url(card_url: str, set_code: str = "", set_number: str = "") -> str:
-    """
-    Normalize any Limitless card URL/path to canonical '/cards/SET/NUMBER'.
-
-    Examples:
-      /cards/GRI/125a/field-blower -> /cards/GRI/125a
-      https://limitlesstcg.com/cards/en/GRI/125a/field-blower -> /cards/GRI/125a
-      /cards/SVE/22/fighting-energy -> /cards/SVE/22
-    """
-    fallback = build_limitless_card_path(set_code, set_number)
-    raw = str(card_url or "").strip()
-    if not raw:
-        return fallback
-
-    path_only = raw.split("?", 1)[0].split("#", 1)[0]
-    marker = "/cards/"
-    lower_path = path_only.lower()
-    marker_index = lower_path.find(marker)
-    if marker_index != -1:
-        suffix = path_only[marker_index + len(marker):].strip("/")
-    else:
-        return fallback or raw
-
-    if not suffix:
-        return fallback or raw
-
-    parts = [p for p in suffix.split("/") if p]
-    if not parts:
-        return fallback or raw
-
-    lang_prefixes = {"en", "de", "fr", "es", "it", "pt", "ja", "ko"}
-    if parts and parts[0].lower() in lang_prefixes:
-        parts = parts[1:]
-
-    if len(parts) >= 2:
-        parsed_set = parts[0].upper()
-        parsed_number = parts[1]
-        return build_limitless_card_path(parsed_set, parsed_number)
-
-    return fallback or raw
 
 
 # LOAD EXISTING CSV
@@ -186,8 +134,7 @@ def scrape_all_cards_list(
     settings: dict,
     start_page: int = 1,
     existing_keys: set = None,
-    language: str = "en",
-    target_keys: set = None,
+    language: str = "en"
 ) -> list:
     logger.info("Starte Listen-Scraping - Sprache: %s", language.upper())
     all_cards_data = []
@@ -201,7 +148,6 @@ def scrape_all_cards_list(
 
     base_url   = f"https://limitlesstcg.com/cards?q=lang%3A{language}&display=list"
     seen_keys  = set()
-    seen_page_signatures = set()
     page_index = max(1, start_page)
 
     while True:
@@ -230,17 +176,6 @@ def scrape_all_cards_list(
             logger.info("  Keine Karten mehr gefunden - Ende der Liste.")
             break
 
-        # Safety guard: if page navigation changes upstream and the same list page
-        # is returned repeatedly for different ?page= values, stop to avoid loops.
-        page_signature = tuple(
-            f"{(cells[0].get_text(strip=True) if len(cells) > 0 else '')}::{(cells[1].get_text(strip=True) if len(cells) > 1 else '')}"
-            for cells in (tr.find_all("td") for tr in rows[:8])
-        )
-        if page_signature in seen_page_signatures:
-            logger.info("  Wiederholte Seitensignatur erkannt - Ende der Liste.")
-            break
-        seen_page_signatures.add(page_signature)
-
         new_on_page = 0
         for row in rows:
             cells = row.find_all("td")
@@ -257,18 +192,7 @@ def scrape_all_cards_list(
                 raw_type = raw_type[len(type_span.get_text()):].strip()
             card_type   = raw_type
             # Rarity is in column 4 on the list page
-            raw_rarity = cells[4].get_text(strip=True) if len(cells) > 4 else ""
-            
-            # Übersetzer für Limitless-Abkürzungen in saubere Namen
-            rarity_map = {
-                "C": "Common", "U": "Uncommon", "R": "Rare", "H": "Holo Rare",
-                "RR": "Double Rare", "DR": "Double Rare", "UR": "Ultra Rare",
-                "IR": "Illustration Rare", "AR": "Illustration Rare", 
-                "SIR": "Special Illustration Rare", "SAR": "Special Illustration Rare",
-                "HR": "Hyper Rare", "PR": "Promo", "ACE": "ACE SPEC Rare",
-                "SH": "Shiny Rare", "SSR": "Shiny Ultra Rare"
-            }
-            card_rarity = rarity_map.get(raw_rarity.upper(), raw_rarity)
+            card_rarity = cells[4].get_text(strip=True) if len(cells) > 4 else ""
 
             if set_filter and set_code not in set_filter:
                 continue
@@ -280,8 +204,6 @@ def scrape_all_cards_list(
                 continue
 
             key = f"{set_code}::{set_number}"
-            if target_keys is not None and key not in target_keys:
-                continue
             if key in seen_keys or key in existing_keys:
                 continue
             seen_keys.add(key)
@@ -316,14 +238,9 @@ def scrape_all_cards_list(
 
         page_index += 1
 
-        if target_keys is not None and len(seen_keys) >= len(target_keys):
-            logger.info("  Alle angeforderten %s-Karten gefunden. Stoppe fruehzeitig.", language.upper())
+        if not has_next and new_on_page == 0:
+            logger.info("  Keine neuen Karten - Ende der Liste.")
             break
-
-        # Do not end solely on "no new cards" because cached data can make an
-        # entire page look unchanged while newer/target cards may exist on later pages.
-        # We now rely on true list-end (no rows), explicit page limits, target completion,
-        # or repeated page signature detection above.
 
         time.sleep(delay)
 
@@ -345,32 +262,11 @@ RARITY_KEYWORDS = [
 
 
 def _fetch_single_card(card: dict) -> dict:
-    original_card_url = str(card.get("card_url", "")).strip()
-    normalized_path = normalize_limitless_card_url(
-        original_card_url,
-        card.get("set", ""),
-        card.get("number", ""),
-    )
-    if normalized_path:
-        card["card_url"] = normalized_path
-
     if not card.get("card_url"):
         return card
 
-    # Prefer canonical URL without slug. Some older cards 404 with slug paths.
-    candidate_paths = []
-    if normalized_path:
-        candidate_paths.append(normalized_path)
-    if original_card_url and original_card_url not in candidate_paths:
-        candidate_paths.append(original_card_url)
-
-    html = ""
-    for path in candidate_paths:
-        full_url = urljoin("https://limitlesstcg.com", path)
-        html = safe_fetch_html(full_url, timeout=15)
-        if html:
-            card["card_url"] = path
-            break
+    full_url = urljoin("https://limitlesstcg.com", card["card_url"])
+    html = safe_fetch_html(full_url, timeout=15)
 
     if not html:
         logger.error(
@@ -520,15 +416,14 @@ def scrape_card_details(
 # MAIN
 def main():
     try:
-
         settings    = _load_settings()
-        csv_path    = str(get_data_path("all_cards_database.csv"))
-        json_path   = str(get_data_path("all_cards_database.json"))
+        csv_path    = os.path.join(data_dir, "all_cards_database.csv")
+        json_path   = os.path.join(data_dir, "all_cards_database.json")
         append_mode = bool(settings.get("append", True))
         start_page  = int(settings.get("start_page", 1))
         rescrape    = bool(settings.get("rescrape_incomplete", True))
 
-        logger.info("Ausgabe-Verzeichnis: %s", os.path.abspath(str(data_dir)))
+        logger.info("Ausgabe-Verzeichnis: %s", os.path.abspath(data_dir))
 
         if append_mode:
             existing_cards, existing_keys, incomplete_cards = load_existing_cards(csv_path, rescrape)
@@ -542,35 +437,12 @@ def main():
             settings, start_page=start_page, existing_keys=existing_keys, language="en"
         )
 
-        # Zielmenge fuer DE-Namen:
-        # 1) neue EN-Karten, 2) unvollstaendige Karten, 3) bestehende Karten ohne name_de
-        new_en_keys = {f"{c['set']}::{c['number']}" for c in en_cards}
-        incomplete_keys = {
-            f"{c.get('set','')}::{c.get('number','')}"
-            for c in incomplete_cards
-            if c.get('set') and c.get('number')
-        }
-        missing_de_keys = {
-            f"{c.get('set','')}::{c.get('number','')}"
-            for c in existing_cards
-            if c.get('set') and c.get('number') and not (c.get('name_de') or '').strip()
-        }
-        de_target_keys = {k for k in (new_en_keys | incomplete_keys | missing_de_keys) if "::" in k}
-
-        de_cards = []
-        if de_target_keys:
-            logger.info("=" * 60)
-            logger.info("PHASE 1b: Deutsche Liste scrapen (gezielt fuer %s Karten) ...", len(de_target_keys))
-            logger.info("=" * 60)
-            de_cards = scrape_all_cards_list(
-                settings,
-                start_page=start_page,
-                existing_keys=set(),
-                language="de",
-                target_keys=de_target_keys,
-            )
-        else:
-            logger.info("PHASE 1b uebersprungen: Keine Karten mit fehlendem DE-Namen oder neuen Schluesseln.")
+        logger.info("=" * 60)
+        logger.info("PHASE 1b: Deutsche Liste scrapen (name_de) ...")
+        logger.info("=" * 60)
+        de_cards = scrape_all_cards_list(
+            settings, start_page=start_page, existing_keys=set(), language="de"
+        )
 
         # Merge German names into EN cards
         de_lookup = {f"{c['set']}::{c['number']}": c["name"] for c in de_cards}
@@ -579,24 +451,14 @@ def main():
             card["name_en"] = card.pop("name")
             card["name_de"] = de_lookup.get(key, "")
 
-        # Falls DE-Namen fuer bestehende / unvollstaendige Karten nachgeladen wurden, direkt uebernehmen.
-        for card in existing_cards:
-            key = f"{card.get('set','')}::{card.get('number','')}"
-            if key in de_lookup and not (card.get("name_de") or "").strip():
-                card["name_de"] = de_lookup[key]
-
-        for card in incomplete_cards:
-            key = f"{card.get('set','')}::{card.get('number','')}"
-            if key in de_lookup and not (card.get("name_de") or "").strip():
-                card["name_de"] = de_lookup[key]
-
         # Prepare incomplete cards for re-scrape
         for ic in incomplete_cards:
             if "name" in ic and "name_en" not in ic:
                 ic["name_en"] = ic.pop("name")
-            canonical = build_limitless_card_path(ic.get("set", ""), ic.get("number", ""))
-            if canonical:
-                ic["card_url"] = canonical
+            if not ic.get("card_url") and ic.get("name_en") and ic.get("set") and ic.get("number"):
+                slug = re.sub(r"[^a-z0-9\s-]", "", ic["name_en"].lower())
+                slug = re.sub(r"-+", "-", slug.replace(" ", "-")).strip("-")
+                ic["card_url"] = f"/cards/{ic['set'].upper()}/{ic['number']}/{slug}"
 
         all_cards = incomplete_cards + en_cards
 

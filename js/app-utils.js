@@ -2,7 +2,6 @@
 (function() {
     const utils = [
         'getInternationalPrintsForCard', 'fixMojibake', 'hasMojibake', 'escapeHtmlAttr', 'escapeJsStr',
-        'getOtherInternationalPrintOwnedCount',
         'getDisplayCardName', 'getNameWarningHtml', 'getCanonicalDeckKey', 'normalizeDeckEntries',
         'normalizeCardName', 'getSafeCardIdentityName', 'isBasicEnergy', 'isRadiantPokemon',
         'isPrismStarCard', 'getDeckCopiesForCardName', 'getTotalAceSpecCopiesInDeck',
@@ -13,131 +12,6 @@
     ];
     utils.forEach(fn => { if (typeof window[fn] !== 'function' && typeof eval(fn) === 'function') window[fn] = eval(fn); });
 })();
-
-// ============================================================================
-// Reusable Debounce Utility
-// ============================================================================
-function debounce(fn, delay = 300) {
-    let timer;
-    return function(...args) {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn.apply(this, args), delay);
-    };
-}
-
-// ============================================================================
-// General-purpose Loading Indicator
-// ============================================================================
-/**
- * Show a shimmer loading indicator inside a container.
- * @param {string|HTMLElement} containerOrId - Container element or its ID
- * @param {object} [opts] - Options: { lines: 3, message: '' }
- */
-function showLoadingIndicator(containerOrId, opts) {
-    const el = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
-    if (!el) return;
-    const o = Object.assign({ lines: 3, message: '' }, opts);
-    el.classList.add('loading-indicator-active');
-    const msg = o.message ? '<div class="loading-indicator-msg">' + o.message + '</div>' : '';
-    const bars = Array.from({ length: o.lines }, () =>
-        '<div class="loading-indicator-bar"></div>'
-    ).join('');
-    el.innerHTML = '<div class="loading-indicator-wrap">' + msg + bars + '</div>';
-}
-
-/**
- * Remove the loading indicator and restore the container.
- * @param {string|HTMLElement} containerOrId
- */
-function hideLoadingIndicator(containerOrId) {
-    const el = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
-    if (!el) return;
-    el.classList.remove('loading-indicator-active');
-}
-
-// ============================================================================
-// Unified Empty State Component
-// ============================================================================
-/**
- * Return HTML for a beautiful "empty state" box (Professor Oak style).
- * @param {object} opts - { title, description, buttonText, buttonOnclick, icon }
- *   icon: 'professor' (default) | 'pokeball' | 'cards'
- */
-function getEmptyStateBoxHtml(opts) {
-    const o = Object.assign({ title: '', description: '', buttonText: '', buttonOnclick: '', icon: 'professor' }, opts);
-    const icons = {
-        professor: '<svg class="empty-state-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">'
-            + '<circle cx="50" cy="50" r="48" fill="#eef2ff" stroke="#3B4CCA" stroke-width="2"/>'
-            + '<circle cx="50" cy="36" r="16" fill="#3B4CCA" opacity=".15"/>'
-            + '<circle cx="50" cy="36" r="12" fill="#fff"/>'
-            + '<circle cx="46" cy="34" r="2" fill="#1a1a2e"/><circle cx="54" cy="34" r="2" fill="#1a1a2e"/>'
-            + '<path d="M45 40 Q50 44 55 40" stroke="#1a1a2e" stroke-width="1.5" fill="none" stroke-linecap="round"/>'
-            + '<rect x="40" y="22" rx="2" width="20" height="6" fill="#8B8B8B" opacity=".35"/>'
-            + '<path d="M32 56 C32 52 40 48 50 48 C60 48 68 52 68 56 L68 70 Q50 74 32 70Z" fill="#3B4CCA" opacity=".18"/>'
-            + '<text x="50" y="88" text-anchor="middle" font-size="11" font-weight="800" fill="#3B4CCA">Prof. Oak</text>'
-            + '</svg>',
-        pokeball: '<svg class="empty-state-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
-            + '<circle cx="50" cy="50" r="46" fill="#fff" stroke="#1a1a2e" stroke-width="3"/>'
-            + '<path d="M4 50 H96" stroke="#1a1a2e" stroke-width="3"/>'
-            + '<path d="M4 50 A46 46 0 0 0 96 50" fill="#E3350D"/>'
-            + '<circle cx="50" cy="50" r="12" fill="#fff" stroke="#1a1a2e" stroke-width="3"/>'
-            + '<circle cx="50" cy="50" r="6" fill="#1a1a2e"/>'
-            + '</svg>',
-        cards: '<svg class="empty-state-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
-            + '<rect x="18" y="12" width="44" height="62" rx="6" fill="#eef2ff" stroke="#3B4CCA" stroke-width="2" transform="rotate(-8 40 43)"/>'
-            + '<rect x="30" y="18" width="44" height="62" rx="6" fill="#fff" stroke="#3B4CCA" stroke-width="2" transform="rotate(4 52 49)"/>'
-            + '<rect x="40" y="36" width="20" height="3" rx="1.5" fill="#3B4CCA" opacity=".3"/>'
-            + '<rect x="40" y="42" width="14" height="3" rx="1.5" fill="#3B4CCA" opacity=".2"/>'
-            + '<text x="50" y="92" text-anchor="middle" font-size="10" font-weight="700" fill="#6b7280">No Data</text>'
-            + '</svg>',
-    };
-    const svg = icons[o.icon] || icons.professor;
-    let html = '<div class="empty-state-box">' + svg;
-    if (o.title) html += '<div class="empty-state-title">' + o.title + '</div>';
-    if (o.description) html += '<div class="empty-state-desc">' + o.description + '</div>';
-    if (o.buttonText) html += '<button class="empty-state-btn" onclick="' + (o.buttonOnclick || '') + '">' + o.buttonText + '</button>';
-    html += '</div>';
-    return html;
-}
-
-// ============================================================================
-// Skeleton Table Loader
-// ============================================================================
-/**
- * Return HTML for a skeleton table placeholder.
- * @param {number} rows - Number of placeholder rows (default 5).
- * @param {number} cols - Number of columns (default 5).
- * @param {boolean} withImage - Show an image skeleton in the first column.
- */
-function getTableSkeletonHtml(rows, cols, withImage) {
-    rows = rows || 5;
-    cols = cols || 5;
-    let html = '<div class="skeleton-table" aria-hidden="true">';
-    for (let r = 0; r < rows; r++) {
-        html += '<div class="skeleton-table-row">';
-        if (withImage) html += '<div class="skeleton-cell skeleton-cell--img"></div>';
-        for (let c = 0; c < cols; c++) {
-            const cls = c === 0 ? ' skeleton-cell--wide' : (c === cols - 1 ? ' skeleton-cell--narrow' : '');
-            html += '<div class="skeleton-cell' + cls + '"></div>';
-        }
-        html += '</div>';
-    }
-    html += '</div>';
-    return html;
-}
-
-/**
- * Show a skeleton table inside a container while data loads.
- * @param {string|HTMLElement} containerOrId
- * @param {object} [opts] - { rows, cols, withImage }
- */
-function showTableSkeleton(containerOrId, opts) {
-    const el = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
-    if (!el) return;
-    const o = Object.assign({ rows: 5, cols: 5, withImage: true }, opts);
-    el.innerHTML = getTableSkeletonHtml(o.rows, o.cols, o.withImage);
-}
-
 // app-utils.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
@@ -220,45 +94,6 @@ function showTableSkeleton(containerOrId, opts) {
             return intPrintCards;
         }
 
-        // Count owned copies from other prints strictly within the card's
-        // international_prints family (Limitless canonical identity).
-        function getOtherInternationalPrintOwnedCount(setCode, setNumber, collectionCounts) {
-            const countsMap = collectionCounts instanceof Map ? collectionCounts : window.userCollectionCounts;
-            if (!(countsMap instanceof Map) || countsMap.size === 0) return 0;
-
-            const normalizedSet = String(setCode || '').toUpperCase().trim();
-            const normalizedNumber = String(setNumber || '').toUpperCase().trim();
-            if (!normalizedSet || !normalizedNumber) return 0;
-
-            const intPrints = getInternationalPrintsForCard(normalizedSet, normalizedNumber);
-            if (!Array.isArray(intPrints) || intPrints.length === 0) return 0;
-
-            const allowedPrints = new Set(
-                intPrints
-                    .map(c => `${String(c.set || '').toUpperCase()}-${String(c.number || '').toUpperCase()}`)
-                    .filter(Boolean)
-            );
-
-            // Never count the currently displayed print as "other print".
-            allowedPrints.delete(`${normalizedSet}-${normalizedNumber}`);
-            if (allowedPrints.size === 0) return 0;
-
-            let totalOwnedOtherPrints = 0;
-            countsMap.forEach((qty, collKey) => {
-                const ownedQty = parseInt(qty, 10) || 0;
-                if (ownedQty <= 0) return;
-                const parts = String(collKey || '').split('|');
-                if (parts.length < 3) return;
-                const keySet = String(parts[1] || '').toUpperCase();
-                const keyNumber = String(parts[2] || '').toUpperCase();
-                if (allowedPrints.has(`${keySet}-${keyNumber}`)) {
-                    totalOwnedOtherPrints += ownedQty;
-                }
-            });
-
-            return totalOwnedOtherPrints;
-        }
-
         // Repair common mojibake sequences (UTF-8 bytes interpreted as Latin-1/Windows-1252).
         function fixMojibake(value) {
             if (value === null || value === undefined) return '';
@@ -323,43 +158,17 @@ function showTableSkeleton(containerOrId, opts) {
                 .replace(/\n/g, '\\n');
         }
 
-        const LEGACY_CARD_NAME_ALIASES = Object.freeze({
-            'rock fighting energy': 'Rocky Fighting Energy'
-        });
-
-        function getLegacyCardNameAlias(name) {
-            const raw = fixMojibake(String(name || '')).trim();
-            if (!raw) return '';
-
-            const aliasKey = raw
-                .replace(/\([^)]*\)/g, '')
-                .replace(/\[[^\]]*\]/g, '')
-                .replace(/[\u2019\u2018\u201B\u0060\u00B4]/g, "'")
-                .replace(/\s+/g, ' ')
-                .trim()
-                .toLowerCase();
-
-            return LEGACY_CARD_NAME_ALIASES[aliasKey] || '';
-        }
-
         function getDisplayCardName(cardName, setCode = '', cardNumber = '') {
             const repairedInputName = fixMojibake(cardName);
             const canonicalCard = getCanonicalCardRecord(setCode, cardNumber);
             const canonicalName = fixMojibake(canonicalCard?.name_en || canonicalCard?.name || '');
-            const aliasedName = getLegacyCardNameAlias(repairedInputName);
-            const fallbackCard = aliasedName ? getCardByNameFromIndex(aliasedName) : getCardByNameFromIndex(repairedInputName);
-            const fallbackName = fixMojibake(fallbackCard?.name_en || fallbackCard?.name || aliasedName || '');
 
             // Prefer canonical DB name only when incoming name is clearly mojibake.
             if (canonicalName && /[ÃÂâ]/.test(String(cardName || ''))) {
                 return canonicalName;
             }
 
-            if (fallbackName && normalizeCardName(fallbackName) === normalizeCardName(repairedInputName)) {
-                return fallbackName;
-            }
-
-            return repairedInputName || canonicalName || fallbackName || 'Unknown Card';
+            return repairedInputName || canonicalName || 'Unknown Card';
         }
 
         function getNameWarningHtml(rawName, displayName, setCode = '', cardNumber = '') {
@@ -488,15 +297,13 @@ function showTableSkeleton(containerOrId, opts) {
         // Normalize card names for matching: lowercase, remove parenthetical suffixes, unify apostrophes
         function normalizeCardName(name) {
             if (!name) return '';
-            const cleaned = fixMojibake(name)
+            return fixMojibake(name)
                 .replace(/\([^)]*\)/g, '')  // remove (Ghetsis), (PAL), etc.
                 .replace(/\[[^\]]*\]/g, '') // remove [anything]
                 .replace(/[\u2019\u2018\u201B\u0060\u00B4]/g, "'") // unify curly/smart apostrophes
                 .replace(/\s+/g, ' ')
-                .trim();
-
-            const alias = getLegacyCardNameAlias(cleaned);
-            return (alias || cleaned).toLowerCase();
+                .trim()
+                .toLowerCase();
         }
 
         function getSafeCardIdentityName(name) {
@@ -661,14 +468,13 @@ function showTableSkeleton(containerOrId, opts) {
         function sanitizeDeckDependencies(cardsToAdd) {
             const list = Array.isArray(cardsToAdd) ? cardsToAdd : [];
             if (list.length === 0) return list;
-            const safeEntries = list.filter(entry => entry && typeof entry === 'object');
 
-            const hasStage2 = safeEntries.some(entry => String(entry.type || entry.card_type || '').toLowerCase().includes('stage 2'));
+            const hasStage2 = list.some(entry => String(entry?.type || entry?.card_type || '').toLowerCase().includes('stage 2'));
             if (!hasStage2) {
-                return safeEntries.filter(entry => normalizeCardName(entry.card_name) !== 'rare candy');
+                return list.filter(entry => normalizeCardName(entry.card_name) !== 'rare candy');
             }
 
-            const next = safeEntries.map(entry => ({ ...entry }));
+            const next = list.map(entry => ({ ...entry }));
             const rareCandy = next.find(entry => normalizeCardName(entry.card_name) === 'rare candy');
             if (rareCandy && Number.isFinite(rareCandy.addCount)) {
                 rareCandy.addCount = Math.min(rareCandy.addCount, 3);

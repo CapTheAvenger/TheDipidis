@@ -16,11 +16,10 @@ from typing import List, Dict, Optional, Tuple, Any
 
 from bs4 import BeautifulSoup
 
-from backend.core.card_scraper_shared import (
-    setup_console_encoding, get_app_path, fetch_page_bs4,
+from card_scraper_shared import (
+    setup_console_encoding, get_app_path, get_data_dir, fetch_page_bs4,
     setup_logging, load_settings as _shared_load_settings,
 )
-from backend.settings import get_data_path, get_config_path
 
 setup_console_encoding()
 logger = setup_logging("limitless_online_scraper")
@@ -39,40 +38,6 @@ DEFAULT_SETTINGS: Dict[str, Any] = {
     "delay_between_requests": 1.5,
     "output_file": "limitless_online_decks.csv",
 }
-
-
-# Explicit set-code → meta-format mapping (mirrors frontend mapSetCodeToMetaFormat)
-_SET_TO_META = {
-    'M4': 'TEF-M4',
-    'POR': 'TEF-POR', 'ASC': 'SVI-ASC', 'PFL': 'SVI-PFL', 'MEG': 'SVI-MEG',
-    'BLK': 'SVI-BLK', 'WHT': 'SVI-BLK', 'DRI': 'SVI-DRI', 'JTG': 'SVI-JTG',
-    'PRE': 'BRS-PRE', 'SSP': 'BRS-SSP', 'SCR': 'BRS-SCR', 'SFA': 'BRS-SFA',
-    'TWM': 'BRS-TWM', 'TEF': 'BRS-TEF', 'PAR': 'BST-PAR', 'PAF': 'SVI-PAF',
-}
-
-def _get_meta_format_code(settings: Dict[str, Any]) -> str:
-    set_code = str(settings.get('set', '')).strip().upper()
-    if not set_code:
-        return ''
-
-    # Normalize known legacy labels first.
-    legacy_to_rotation = {
-        'SVI-POR': 'TEF-POR'
-    }
-    if set_code in legacy_to_rotation:
-        return legacy_to_rotation[set_code]
-
-    # Explicit short-code mapping used by scraper settings.
-    mapped = _SET_TO_META.get(set_code)
-    if mapped:
-        return mapped
-
-    # Already compound code (e.g. SVI-ASC, BRS-TEF): keep as-is.
-    if '-' in set_code:
-        return set_code
-
-    # Fallback for future SVI-era short codes.
-    return f"SVI-{set_code}"
 
 
 def clean_deck_name(deck_name: str) -> str:
@@ -125,7 +90,7 @@ def scrape_deck_statistics(
                 "players": int(m.group(2)),
                 "matches": int(m.group(3)),
             }
-            meta_path = get_data_path("limitless_meta_stats.json")
+            meta_path = os.path.join("data", "limitless_meta_stats.json")
             with open(meta_path, "w", encoding="utf-8") as f:
                 json.dump(meta_stats, f, indent=2)
             logger.info("Meta statistics saved: %s", meta_stats)
@@ -375,38 +340,45 @@ def save_to_csv(data: List[Dict[str, Any]], output_file: str):
     if not data:
         print("No data to save.")
         return
-    output_path = get_data_path(output_file)
+    
+    output_path = os.path.join(get_data_dir(), output_file)
+    
     print(f"\nSaving data to: {output_path}")
+    
     fieldnames = ['rank', 'deck_name', 'count', 'share', 'share_numeric', 'wins', 'losses', 
                   'ties', 'win_rate', 'win_rate_numeric']
+    
     try:
         with open(output_path, 'w', newline='', encoding='utf-8-sig') as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=';')
             writer.writeheader()
+            
             for row in data:
                 # Format numeric values for German Excel and remove unnecessary fields
                 row_formatted = {key: row[key] for key in fieldnames if key in row}
                 row_formatted['share_numeric'] = str(row['share_numeric']).replace('.', ',')
                 row_formatted['win_rate_numeric'] = str(row.get('win_rate_numeric', 0)).replace('.', ',')
                 writer.writerow(row_formatted)
+        
         print(f"Successfully saved {len(data)} entries to {output_file}")
     except Exception as e:
         print(f"Error saving to CSV: {e}")
 
 def load_previous_stats(stats_file: str) -> Dict[str, Dict[str, Any]]:
     """Load previous deck statistics from CSV file."""
-    stats_path = get_data_path(stats_file) if not os.path.isabs(stats_file) else stats_file
-    if not os.path.exists(stats_path):
+    if not os.path.exists(stats_file):
         return {}
+    
     previous_data = {}
     try:
-        with open(stats_path, 'r', encoding='utf-8-sig') as f:
+        with open(stats_file, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f, delimiter=';')
             for row in reader:
                 deck_name = row.get('deck_name', '')
                 # Convert German decimal separator back to float
                 share_numeric = row.get('share_numeric', '0').replace(',', '.')
                 win_rate_numeric = row.get('win_rate_numeric', '0').replace(',', '.')
+                
                 previous_data[deck_name] = {
                     'rank': int(row.get('rank', 0)),
                     'count': int(row.get('count', 0)),
@@ -419,12 +391,13 @@ def load_previous_stats(stats_file: str) -> Dict[str, Dict[str, Any]]:
     except Exception as e:
         print(f"⚠️  Warning: Could not load previous statistics: {e}")
         return {}
+    
     return previous_data
 
 def create_comparison_report(old_stats: Dict[str, Any], new_stats: Dict[str, Any], output_file: str, settings: Dict[str, Any], matchup_data: Optional[Dict[str, Any]] = None, deck_lookup: Optional[Dict[str, Any]] = None):
     """Create a detailed comparison report between old and new statistics."""
     # Write comparison files to data/ folder
-    data_dir = get_data_path("")
+    data_dir = get_data_dir()
     comparison_csv = os.path.join(data_dir, output_file.replace('.csv', '_comparison.csv'))
     comparison_html = os.path.join(data_dir, output_file.replace('.csv', '_comparison.html'))
     comparison_html_local = os.path.join(data_dir, output_file.replace('.csv', '_comparison_local.html'))
@@ -566,7 +539,7 @@ def create_comparison_report(old_stats: Dict[str, Any], new_stats: Dict[str, Any
 
 def create_deck_list_html(deck_data: List[Dict[str, Any]], output_file: str, deck_lookup: Dict[str, Any]):
     """Create a simple HTML report of all decks."""
-    base_path = get_data_path("")
+    base_path = get_data_dir()
     html_path = os.path.join(base_path, output_file)
     
     html_content = f"""<!DOCTYPE html>
@@ -935,7 +908,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
             </div>
             <div class="stat-card">
                 <h3>🎴 Meta</h3>
-                <div class="value" style="font-size: 1.8em; margin: 10px 0;">{_get_meta_format_code(settings)}</div>
+                <div class="value" style="font-size: 1.8em; margin: 10px 0;">SVI-{settings.get('set', 'PFL')}</div>
                 <p style="font-size: 0.9em;">Current Format Legality</p>
             </div>
         </div>
@@ -1351,7 +1324,7 @@ def main():
         f"Output: {settings['output_file']}"
     )
 
-    stats_path  = get_data_path("")
+    stats_path  = get_data_dir()
     output_file = os.path.join(stats_path, settings["output_file"])
 
     old_stats = load_previous_stats(output_file)

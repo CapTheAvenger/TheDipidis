@@ -1,8 +1,7 @@
 {
   "max_pages": 50,
   "list_page_delay_seconds": 2.0,
-  "keep_latest_sets": 1,
-  "_comment_keep_latest_sets": "Anzahl der neuesten regulaeren Sets die gescrapt werden. 1 = nur das aktuellste Set (der Rest ist bereits in den internationalen Kartendaten enthalten). Promo-Sets werden immer zusaetzlich beruecksichtigt.",
+  "keep_latest_sets": 12,
   "skip_detail_scraping": false,
   "max_workers": 8
 }

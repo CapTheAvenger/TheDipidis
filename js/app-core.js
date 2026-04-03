@@ -1366,8 +1366,11 @@ const BASE_PATH = './data/';
                     const options = Array.from(select.options);
                     const target = String(archetypeName || '').trim().toLowerCase();
 
-                    // Prefer combined archetype entries (GROUP:...) when they contain the clicked archetype.
-                    const combinedOption = options.find(opt => {
+                    // Prefer exact single-archetype match first.
+                    const exactOption = options.find(opt => String(opt.value || '').toLowerCase() === target);
+
+                    // Fallback to combined archetype entries (GROUP:...) only when no exact match exists.
+                    const combinedOption = !exactOption && options.find(opt => {
                         const value = String(opt.value || '');
                         if (!value.startsWith('GROUP:')) return false;
                         const variants = value
@@ -1378,9 +1381,7 @@ const BASE_PATH = './data/';
                         return variants.includes(target);
                     });
 
-                    // Fallback to exact single-archetype match.
-                    const exactOption = options.find(opt => String(opt.value || '').toLowerCase() === target);
-                    const matchingOption = combinedOption || exactOption;
+                    const matchingOption = exactOption || combinedOption;
                     
                     if (matchingOption) {
                         select.value = matchingOption.value;

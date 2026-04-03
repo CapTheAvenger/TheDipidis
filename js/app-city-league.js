@@ -944,12 +944,6 @@
         
         function populateCityLeagueDeckSelect(data, comparisonData) {
             const pendingDeckSelection = String(window.pendingCityLeagueDeckSelection || '').trim();
-            console.log('[CityLeagueSelect] populate-start', {
-                pendingDeckSelection: pendingDeckSelection || null,
-                dateFilterActive: !!window.cityLeagueDateFilterActive,
-                sourceRows: Array.isArray(data) ? data.length : 0,
-                comparisonRows: Array.isArray(comparisonData) ? comparisonData.length : 0
-            });
             if (pendingDeckSelection && window.cityLeagueDateFilterActive) {
                 // Banner navigation should always resolve the requested deck, even when a stale date filter hides it.
                 window.cityLeagueDateFilterActive = false;
@@ -1004,10 +998,6 @@
             
             const archetypeList = Array.from(archetypeMap.values());
             devLog('Found archetypes:', archetypeList.length);
-            console.log('[CityLeagueSelect] archetypes-built', {
-                uniqueArchetypes: archetypeList.length,
-                hasPendingDeck: !!pendingDeckSelection
-            });
             
             // Sort by deck count descending to get top meta decks
             const sortedByMeta = [...archetypeList].sort((a, b) => b.deckCount - a.deckCount);
@@ -1019,24 +1009,14 @@
             const select = document.getElementById('cityLeagueDeckSelect');
             if (!select) return;
 
+            // Set combobox text and close dropdown (no events dispatched to avoid re-opening)
             function syncCityLeagueDeckPickerUi(selectedValue) {
                 const comboboxInput = document.getElementById('cityLeagueDeckCombobox');
-                if (!comboboxInput) {
-                    console.warn('[CityLeagueSelect] combobox-missing', {
-                        expectedId: 'cityLeagueDeckCombobox',
-                        selectedValue: selectedValue || null
-                    });
-                    return;
-                }
-
+                const comboboxList  = document.getElementById('cityLeagueDeckComboboxList');
+                if (!comboboxInput) return;
                 comboboxInput.value = String(selectedValue || '').trim();
                 comboboxInput.setAttribute('aria-expanded', 'false');
-                comboboxInput.dispatchEvent(new Event('input', { bubbles: true }));
-                comboboxInput.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('[CityLeagueSelect] combobox-synced', {
-                    selectedValue: comboboxInput.value,
-                    ariaExpanded: comboboxInput.getAttribute('aria-expanded')
-                });
+                if (comboboxList) comboboxList.classList.add('deck-combobox-list-hidden');
             }
             
             // Clear and repopulate
@@ -1100,13 +1080,9 @@
             // Add change event listener
             select.onchange = function() {
                 if (this.value) {
-                    syncCityLeagueDeckPickerUi(this.value);
                     loadCityLeagueDeckData(this.value);
-                    // DON'T auto-display deck - user must click "Generate Deck" button
-                    // This prevents unwanted deck building when just browsing decks
                     devLog('[Dropdown] Archetype selected:', this.value, '- waiting for user to generate deck');
                 } else {
-                    syncCityLeagueDeckPickerUi('');
                     clearCityLeagueDeckView();
                 }
             };
@@ -1118,15 +1094,9 @@
                 const matchingOption = Array.from(select.options).find(option =>
                     option.value && option.value.toLowerCase() === pendingDeck.toLowerCase()
                 );
-                console.log('[CityLeagueSelect] pending-match-check', {
-                    pendingDeck,
-                    matched: !!matchingOption,
-                    matchedValue: matchingOption ? matchingOption.value : null,
-                    optionCount: select.options.length
-                });
                 if (matchingOption) {
                     select.value = matchingOption.value;
-                    syncCityLeagueDeckPickerUi(matchingOption.value);
+                    syncCityLeagueDeckPickerUi(matchingOption.textContent || matchingOption.value);
                     window.pendingCityLeagueDeckSelection = null;
                     loadCityLeagueDeckData(matchingOption.value);
                     appliedPendingExactDeck = true;
@@ -1216,32 +1186,15 @@
         function selectDeckArchetypeForTab(tabKey, deckValue) {
             if (tabKey !== 'cityLeague') return '';
 
-            const select = document.getElementById('cityLeagueDeckSelect');
-            if (!select) return '';
-            console.log('[CityLeagueSelect] selectDeckArchetypeForTab', {
-                tabKey,
-                deckValue: String(deckValue || '').trim() || null,
-                optionCount: select.options.length
-            });
+            const select = document.getElementById('cityLeagueDeckSelect');\n            if (!select) return '';
 
             const syncCityLeagueDeckPickerUi = (selectedValue) => {
                 const comboboxInput = document.getElementById('cityLeagueDeckCombobox');
-                if (!comboboxInput) {
-                    console.warn('[CityLeagueSelect] combobox-missing', {
-                        expectedId: 'cityLeagueDeckCombobox',
-                        selectedValue: selectedValue || null
-                    });
-                    return;
-                }
-
+                const comboboxList  = document.getElementById('cityLeagueDeckComboboxList');
+                if (!comboboxInput) return;
                 comboboxInput.value = String(selectedValue || '').trim();
                 comboboxInput.setAttribute('aria-expanded', 'false');
-                comboboxInput.dispatchEvent(new Event('input', { bubbles: true }));
-                comboboxInput.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('[CityLeagueSelect] combobox-synced', {
-                    selectedValue: comboboxInput.value,
-                    source: 'selectDeckArchetypeForTab'
-                });
+                if (comboboxList) comboboxList.classList.add('deck-combobox-list-hidden');
             };
 
             const requestedValue = String(deckValue || '').trim();
@@ -1265,12 +1218,6 @@
                     normalizeArchetypeKey(option.value) === requestedKey
                 )
             );
-            console.log('[CityLeagueSelect] select-match-check', {
-                requestedValue,
-                requestedKey,
-                matched: !!matchingOption,
-                matchedValue: matchingOption ? matchingOption.value : null
-            });
             if (!matchingOption) return '';
 
             select.value = matchingOption.value;

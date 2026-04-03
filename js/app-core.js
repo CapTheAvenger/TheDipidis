@@ -1269,7 +1269,7 @@ const BASE_PATH = './data/';
                         );
                         if (match) {
                             select.value = match.value;
-                            window.pendingCityLeagueDeckSelection = null;
+                            // Don't clear pending — let populateCityLeagueDeckSelect consume it
                             window.currentCityLeagueArchetype = match.value;
                             if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
                             if (typeof loadCityLeagueDeckData === 'function') loadCityLeagueDeckData(match.value);
@@ -1386,7 +1386,8 @@ const BASE_PATH = './data/';
                     
                     if (matchingOption) {
                         select.value = matchingOption.value;
-                        window.pendingCityLeagueDeckSelection = null;
+                        // Don't clear pendingCityLeagueDeckSelection here — let populateCityLeagueDeckSelect
+                        // consume it so initSearchableSelect creates the display with the correct value.
                         if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
                         if (typeof loadCityLeagueDeckData === 'function') loadCityLeagueDeckData(matchingOption.value);
                         devLog('✅ Deck selected:', matchingOption.value, combinedOption ? '(combined)' : '(exact)');

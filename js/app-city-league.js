@@ -1008,6 +1008,16 @@
             
             const select = document.getElementById('cityLeagueDeckSelect');
             if (!select) return;
+
+            function syncCityLeagueDeckPickerUi(selectedValue) {
+                const comboboxInput = document.getElementById('cityLeagueDeckCombobox');
+                if (!comboboxInput) return;
+
+                comboboxInput.value = String(selectedValue || '').trim();
+                comboboxInput.setAttribute('aria-expanded', 'false');
+                comboboxInput.dispatchEvent(new Event('input', { bubbles: true }));
+                comboboxInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
             
             // Clear and repopulate
             select.innerHTML = '<option value="">' + t('cl.selectDeck') + '</option>';
@@ -1070,11 +1080,13 @@
             // Add change event listener
             select.onchange = function() {
                 if (this.value) {
+                    syncCityLeagueDeckPickerUi(this.value);
                     loadCityLeagueDeckData(this.value);
                     // DON'T auto-display deck - user must click "Generate Deck" button
                     // This prevents unwanted deck building when just browsing decks
                     devLog('[Dropdown] Archetype selected:', this.value, '- waiting for user to generate deck');
                 } else {
+                    syncCityLeagueDeckPickerUi('');
                     clearCityLeagueDeckView();
                 }
             };
@@ -1088,6 +1100,7 @@
                 );
                 if (matchingOption) {
                     select.value = matchingOption.value;
+                    syncCityLeagueDeckPickerUi(matchingOption.value);
                     window.pendingCityLeagueDeckSelection = null;
                     loadCityLeagueDeckData(matchingOption.value);
                     appliedPendingExactDeck = true;
@@ -1197,9 +1210,20 @@
             const select = document.getElementById('cityLeagueDeckSelect');
             if (!select) return '';
 
+            const syncCityLeagueDeckPickerUi = (selectedValue) => {
+                const comboboxInput = document.getElementById('cityLeagueDeckCombobox');
+                if (!comboboxInput) return;
+
+                comboboxInput.value = String(selectedValue || '').trim();
+                comboboxInput.setAttribute('aria-expanded', 'false');
+                comboboxInput.dispatchEvent(new Event('input', { bubbles: true }));
+                comboboxInput.dispatchEvent(new Event('change', { bubbles: true }));
+            };
+
             const requestedValue = String(deckValue || '').trim();
             if (!requestedValue) {
                 select.value = '';
+                syncCityLeagueDeckPickerUi('');
                 clearCityLeagueDeckView();
                 return '';
             }
@@ -1220,6 +1244,7 @@
             if (!matchingOption) return '';
 
             select.value = matchingOption.value;
+            syncCityLeagueDeckPickerUi(matchingOption.value);
             loadCityLeagueDeckData(matchingOption.value);
             return matchingOption.value;
         }

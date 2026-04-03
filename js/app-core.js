@@ -1289,9 +1289,10 @@ const BASE_PATH = './data/';
                         );
                         if (match) {
                             select.value = match.value;
-                            window.pendingCurrentMetaDeckSelection = null;
+                            // Don't clear pending — let populateCurrentMetaDeckSelect consume it
                             window.currentCurrentMetaArchetype = match.value;
-                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                            if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
+                            if (typeof loadCurrentMetaDeckData === 'function') loadCurrentMetaDeckData(match.value);
                         }
                     }
                 }
@@ -1409,6 +1410,7 @@ const BASE_PATH = './data/';
         // Navigate to Current Meta Analysis tab and select a deck
         function navigateToCurrentMetaWithDeck(archetypeName) {
             devLog('🔍 Navigating to Current Meta with deck:', archetypeName);
+            window.pendingCurrentMetaDeckSelection = archetypeName;
             
             // Switch to Current Meta Analysis tab
             switchTab('current-analysis');
@@ -1430,9 +1432,8 @@ const BASE_PATH = './data/';
                     
                     if (matchingOption) {
                         select.value = matchingOption.value;
-                        // Trigger change event to load the deck
-                        const event = new Event('change', { bubbles: true });
-                        select.dispatchEvent(event);
+                        if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
+                        if (typeof loadCurrentMetaDeckData === 'function') loadCurrentMetaDeckData(matchingOption.value);
                         devLog('✅ Deck selected:', matchingOption.value);
                     } else {
                         console.warn('⚠️ Deck not found in dropdown:', archetypeName);

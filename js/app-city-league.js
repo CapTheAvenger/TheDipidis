@@ -1177,11 +1177,8 @@
                 selectEl.value = value;
                 display.textContent = text;
                 close();
-                if (value) {
-                    loadCityLeagueDeckData(value);
-                } else {
-                    clearCityLeagueDeckView();
-                }
+                // Trigger the existing change handler on the hidden <select>
+                selectEl.dispatchEvent(new Event('change', { bubbles: true }));
             }
 
             function open() {

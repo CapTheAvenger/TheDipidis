@@ -335,7 +335,6 @@
                 updatePastMetaDeckList();
             });
             tournamentSelect.addEventListener('change', updatePastMetaDeckList);
-            document.getElementById('pastMetaDeckSearch').addEventListener('input', debounce(updatePastMetaDeckList, 250));
             document.getElementById('pastMetaDeckSelect').addEventListener('change', onPastMetaDeckSelect);
             document.getElementById('pastMetaFilterSelect').addEventListener('change', filterPastMetaCards);
             
@@ -398,7 +397,6 @@
         function updatePastMetaDeckList() {
             const formatFilter = document.getElementById('pastMetaFormatFilter').value;
             const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
-            const searchTerm = document.getElementById('pastMetaDeckSearch').value.toLowerCase();
             const deckSelect = document.getElementById('pastMetaDeckSelect');
             const previousSelection = deckSelect ? deckSelect.value : '';
             
@@ -406,10 +404,7 @@
             let filteredDecks = pastMetaDecks.filter(deck => {
                 const matchesFormat = formatFilter === 'all' || deck.format === formatFilter;
                 const matchesTournament = tournamentFilter === 'all' || deck.tournament_id === tournamentFilter;
-                const matchesSearch = !searchTerm || 
-                    (deck.deck_name && deck.deck_name.toLowerCase().includes(searchTerm)) ||
-                    (deck.tournament_name && deck.tournament_name.toLowerCase().includes(searchTerm));
-                return matchesFormat && matchesTournament && matchesSearch;
+                return matchesFormat && matchesTournament;
             });
             
             // Group by archetype (deck_name) to merge across tournaments
@@ -467,6 +462,9 @@
             }
             
             devLog(`Filtered to ${archetypes.length} unique archetypes from ${filteredDecks.length} tournament entries`);
+
+            // Convert native <select> to custom searchable dropdown
+            if (deckSelect && typeof initSearchableSelect === 'function') initSearchableSelect(deckSelect);
         }
         
         function onPastMetaDeckSelect() {

@@ -262,10 +262,8 @@
                 const archetype = this.value;
                 if (archetype) {
                     loadCurrentMetaDeckData(archetype);
-                    // Display the deck after loading archetype data
                     if (window.currentMetaDeck && Object.keys(window.currentMetaDeck).length > 0) {
                         updateDeckDisplay('currentMeta');
-                        devLog('[Dropdown] Displaying saved deck for selected archetype');
                     }
                 } else {
                     clearCurrentMetaDeckView();
@@ -300,24 +298,12 @@
             }
 
             if (!select.value) {
-                // Keep deck selection empty after reload/reset until user picks one.
                 window.currentCurrentMetaArchetype = '';
                 clearCurrentMetaDeckView();
             }
 
-            // Enable search functionality
-            const searchInput = document.getElementById('currentMetaDeckSearch');
-            if (searchInput) {
-                searchInput.oninput = function() {
-                    const searchTerm = this.value.toLowerCase();
-                    const options = select.querySelectorAll('option');
-                    options.forEach(opt => {
-                        if (opt.value === '') return;
-                        const text = opt.textContent.toLowerCase();
-                        opt.style.display = text.includes(searchTerm) ? '' : 'none';
-                    });
-                };
-            }
+            // Convert native <select> to custom searchable dropdown
+            if (typeof initSearchableSelect === 'function') initSearchableSelect(select);
         }
         
         // Format filter functions
@@ -362,19 +348,18 @@
                 await populateCurrentMetaDeckSelect(dataToUse);
             }
             
-            // Check if previously selected archetype still exists in filtered list
-            if (previouslySelected && currentMetaDeckSelect) {
+            // Respect value already set by populateCurrentMetaDeckSelect (pending selection)
+            const currentValue = currentMetaDeckSelect ? currentMetaDeckSelect.value : '';
+            if (!currentValue && previouslySelected && currentMetaDeckSelect) {
                 const stillExists = Array.from(currentMetaDeckSelect.options).some(opt => opt.value === previouslySelected);
                 
                 if (stillExists) {
-                    // Restore selection and reload deck
                     currentMetaDeckSelect.value = previouslySelected;
+                    if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(currentMetaDeckSelect);
                     loadCurrentMetaDeckData(previouslySelected);
                 } else {
-                    // Clear selection and deck view
                     currentMetaDeckSelect.value = '';
                     clearCurrentMetaDeckView();
-                    devLog('?? Previously selected archetype not available in this filter');
                 }
             } else {
                 console.warn('?? No deck selected - filter saved for when deck is selected');

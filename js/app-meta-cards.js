@@ -436,19 +436,31 @@
                     
                     // Meta share = simple average of per-archetype usage percentages.
                     // Each Top 10 archetype counts equally (0% for archetypes not using this card).
-                    // Use: sum(deck_inclusion_count) / archetypeDeckCount per archetype,
-                    // then average across all top 10 archetypes.
-                    // This avoids the inflation from multi-tournament row accumulation.
+                    //
+                    // City League (multi-tournament rows per archetype):
+                    //   sum(deck_inclusion_count) / archetypeDeckCount per archetype
+                    //   avoids inflation from multi-tournament accumulation.
+                    //
+                    // Current Meta (single row per archetype, sampled data):
+                    //   Use percentage_in_archetype directly since deck_inclusion_count
+                    //   is from a sample and archetypeDeckCount is the full population.
                     let sumOfArchetypeUsagePcts = 0;
                     Object.values(cardData.byArchetype).forEach(archData => {
-                        if (archData.deckCount > 0 && archData.rawDeckInclusionSum > 0) {
-                            // True inclusion % = raw sum of deck_inclusion_count / total decks in archetype
-                            const trueInclusionPct = Math.min(100, (archData.rawDeckInclusionSum / archData.deckCount) * 100);
-                            sumOfArchetypeUsagePcts += trueInclusionPct;
-                        } else if (archData.rawPercentages && archData.rawPercentages.length > 0) {
-                            // Fallback: average of percentage_in_archetype from CSV
-                            const avgRawPct = archData.rawPercentages.reduce((s, v) => s + v, 0) / archData.rawPercentages.length;
-                            sumOfArchetypeUsagePcts += Math.min(100, avgRawPct);
+                        if (source === 'cityLeague') {
+                            // City League: compute from raw deck inclusion counts
+                            if (archData.deckCount > 0 && archData.rawDeckInclusionSum > 0) {
+                                const trueInclusionPct = Math.min(100, (archData.rawDeckInclusionSum / archData.deckCount) * 100);
+                                sumOfArchetypeUsagePcts += trueInclusionPct;
+                            } else if (archData.rawPercentages && archData.rawPercentages.length > 0) {
+                                const avgRawPct = archData.rawPercentages.reduce((s, v) => s + v, 0) / archData.rawPercentages.length;
+                                sumOfArchetypeUsagePcts += Math.min(100, avgRawPct);
+                            }
+                        } else {
+                            // Current Meta: use percentage_in_archetype directly (already correct per archetype)
+                            if (archData.rawPercentages && archData.rawPercentages.length > 0) {
+                                const avgRawPct = archData.rawPercentages.reduce((s, v) => s + v, 0) / archData.rawPercentages.length;
+                                sumOfArchetypeUsagePcts += Math.min(100, avgRawPct);
+                            }
                         }
                     });
                     const top10Count = Math.max(1, top10Archetypes.length);
@@ -587,10 +599,7 @@
                 });
                 globalRarityPreference = previousGlobalRarityPreference;
                 
-                // Current Meta Top 10 view: show only cards used in at least 40% of Top 10 decks.
-                const finalCards = source === 'currentMeta'
-                    ? mergedMetaCards.filter(card => card.metaShare >= 40)
-                    : mergedMetaCards;
+                const finalCards = mergedMetaCards;
 
                 metaCardData[source] = finalCards;
                 setMetaDebugStats(source, {
@@ -693,7 +702,6 @@
             // otherwise realistic low-share rows collapse to empty state.
             cards = cards.filter(c => {
                 if (isBasicEnergyCardEntry(c)) return false;
-                if (source === 'currentMeta') return true;
 
                 const category = getCardTypeCategory(c.type);
                 if (category === 'Pokemon') {

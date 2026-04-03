@@ -28,11 +28,11 @@ jobs:
 
       - name: Validate Python syntax
         run: |
-          python3 -m py_compile card_scraper_shared.py
+          python3 -m py_compile backend/core/card_scraper_shared.py
           python3 -m py_compile prepare_card_data.py
-          python3 -m py_compile price_proxy_server.py
+          python3 -m py_compile backend/services/price_proxy_server.py
           shopt -s nullglob
-          for f in *_scraper*.py; do
+          for f in backend/scrapers/*_scraper*.py; do
             python3 -m py_compile "$f" || { echo "::error::Syntax error in $f"; exit 1; }
           done
           echo "✓ All Python files pass syntax check"

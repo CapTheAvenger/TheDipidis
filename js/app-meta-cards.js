@@ -705,9 +705,9 @@
 
                 const category = getCardTypeCategory(c.type);
                 if (category === 'Pokemon') {
-                    return c.metaShare >= 20;
+                    return c.metaShare >= 45;
                 }
-                return c.metaShare >= 15;
+                return c.metaShare >= 30;
             });
             
             devLog(`[renderMetaCards] After filters: ${cards.length} cards remaining (from ${metaCardData[source].length} total)`);

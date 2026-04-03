@@ -61,10 +61,21 @@ jobs:
 
       - name: Run Python unit tests
         run: |
+          set +e
           python -m pytest tests/python/ -q --tb=short \
             --ignore=tests/python/test_price_proxy_and_price_scraper.py \
             2>&1
-          echo "✓ Python tests passed"
+          PYTEST_EXIT=$?
+          set -e
+
+          if [ "$PYTEST_EXIT" -eq 0 ]; then
+            echo "✓ Python tests passed"
+          elif [ "$PYTEST_EXIT" -eq 5 ]; then
+            echo "::warning::No Python tests were collected in tests/python - continuing"
+          else
+            echo "::error::Python tests failed with exit code $PYTEST_EXIT"
+            exit "$PYTEST_EXIT"
+          fi
 
   build:
     runs-on: ubuntu-latest

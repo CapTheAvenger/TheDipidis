@@ -3495,7 +3495,7 @@
                 newKey,
                 movedCount: resolvedCount
             });
-            updateDeckCountAndDisplay(resolvedSource);
+            updateDeckDisplay(resolvedSource);
 
             closeRaritySwitcher();
         }
@@ -3578,7 +3578,7 @@
                 });
                 desiredEntries.forEach(entry => cleanedOrder.push(entry.key));
                 window[deckContext.orderKey] = cleanedOrder;
-                updateDeckCountAndDisplay(deckContext.source);
+                updateDeckDisplay(deckContext.source);
             }
 
             const firstPrint = desiredEntries[0];

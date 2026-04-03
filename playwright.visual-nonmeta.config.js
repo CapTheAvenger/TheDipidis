@@ -6,7 +6,7 @@ const EDGE_PATH = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
 const launchOptions = {};
 const use = {
 	headless: true,
-	viewport: { width: 1440, height: 1000 }
+	viewport: { width: 1280, height: 800 }
 };
 
 if (fs.existsSync(CHROME_PATH)) {

@@ -1213,10 +1213,20 @@ const BASE_PATH = './data/';
                 const select = document.getElementById('cityLeagueDeckSelect');
                 
                 if (select && select.options.length > 1) { // More than just placeholder
+                    const normalizeArchetypeKey = (value) => String(value || '')
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, ' ')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    const requestedKey = normalizeArchetypeKey(safeArchetype);
+
                     // Find matching option (case-insensitive)
                     const options = Array.from(select.options);
                     const matchingOption = options.find(opt => 
-                        String(opt.value || '').toLowerCase() === safeArchetype.toLowerCase()
+                        String(opt.value || '').toLowerCase() === safeArchetype.toLowerCase() ||
+                        normalizeArchetypeKey(opt.value) === requestedKey ||
+                        normalizeArchetypeKey(opt.value).includes(requestedKey) ||
+                        requestedKey.includes(normalizeArchetypeKey(opt.value))
                     );
                     
                     if (matchingOption) {

@@ -943,6 +943,20 @@
         }
         
         function populateCityLeagueDeckSelect(data, comparisonData) {
+            const pendingDeckSelection = String(window.pendingCityLeagueDeckSelection || '').trim();
+            if (pendingDeckSelection && window.cityLeagueDateFilterActive) {
+                // Banner navigation should always resolve the requested deck, even when a stale date filter hides it.
+                window.cityLeagueDateFilterActive = false;
+                window.cityLeagueDateFrom = '1900-01-01';
+                window.cityLeagueDateTo = '2099-12-31';
+                const dateFromEl = document.getElementById('cityLeagueDateFrom');
+                const dateToEl = document.getElementById('cityLeagueDateTo');
+                if (dateFromEl) dateFromEl.value = '';
+                if (dateToEl) dateToEl.value = '';
+                updateCityLeagueDateFilterStatus();
+                devLog('ℹ️ Cleared City League date filter to honor pending banner selection:', pendingDeckSelection);
+            }
+
             const filteredArchetypesData = getFilteredCityLeagueArchetypesData();
 
             const archetypeCountMap = new Map();
@@ -1190,8 +1204,18 @@
                 return '';
             }
 
+            const normalizeArchetypeKey = (value) => String(value || '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            const requestedKey = normalizeArchetypeKey(requestedValue);
+
             const matchingOption = Array.from(select.options).find(option =>
-                option.value && option.value.toLowerCase() === requestedValue.toLowerCase()
+                option.value && (
+                    option.value.toLowerCase() === requestedValue.toLowerCase() ||
+                    normalizeArchetypeKey(option.value) === requestedKey
+                )
             );
             if (!matchingOption) return '';
 

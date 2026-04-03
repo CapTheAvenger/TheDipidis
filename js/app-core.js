@@ -1164,6 +1164,9 @@ const BASE_PATH = './data/';
             const displayName = String(mainName || '').charAt(0).toUpperCase() + String(mainName || '').slice(1);
             const groupValue = 'GROUP:' + variants.join('|');
 
+            // Combined selection must not be blocked by stale exact-deck pending state.
+            window.pendingCityLeagueDeckSelection = null;
+
             // Store for deferred application — populateCityLeagueDeckSelect picks this up
             window.pendingCombinedArchetypeSelection = {
                 value: groupValue,
@@ -1428,6 +1431,7 @@ const BASE_PATH = './data/';
             // each sanitized name per tournament, so we can correct total_decks_in_archetype.
             const rawArchetypesPerGroup = new Map(); // key "tournamentId|||sanitizedArch" → Set<rawArch>
             rows.forEach(row => {
+                if (!row || typeof row !== 'object') return;
                 const rawArch = String(row.archetype || '').trim();
                 const sanitized = sanitizeTournamentArchetypeName(rawArch);
                 const tournamentId = String(row.tournament_id || '').trim();
@@ -1437,11 +1441,17 @@ const BASE_PATH = './data/';
             });
 
             return rows.map(row => {
+                if (!row || typeof row !== 'object') return null;
                 const normalized = { ...row };
                 const rawArch = String(normalized.archetype || '').trim();
                 normalized.archetype = sanitizeTournamentArchetypeName(rawArch);
 
-                const normalizedFormat = normalizeTournamentFormatLabel(normalized.format || normalized.meta || '', normalized.set_code || '');
+                const hasExplicitFormat = String(normalized.format || '').trim().length > 0;
+                const hasSourceMeta = String(normalized.meta || '').trim().length > 0 && String(normalized.meta || '').trim() !== 'Meta Play!';
+                const formatSource = hasExplicitFormat
+                    ? normalized.format
+                    : (hasSourceMeta ? normalized.meta : '');
+                const normalizedFormat = normalizeTournamentFormatLabel(formatSource, normalized.set_code || '');
                 normalized.format = normalizedFormat;
                 // Fallback CSV (tournament_cards_data_cards.csv) stores format codes
                 // (e.g. 'SVI-ASC') in the meta column, not source labels. Since all
@@ -1931,9 +1941,11 @@ const BASE_PATH = './data/';
          *   - Pokédex number (exact match for 1-2 digit terms, partial for 3+)
          */
         function filterCardsArray(allCardsArray, searchInputText) {
+            if (!Array.isArray(allCardsArray)) return [];
             const term = (searchInputText || '').toLowerCase().trim();
             if (!term) return allCardsArray;
             return allCardsArray.filter(card => {
+                if (!card || typeof card !== 'object') return false;
                 const nameEn = (card.name_en || card.name || '').toLowerCase();
                 const nameDe = (card.name_de || '').toLowerCase();
                 const setCode = (card.set || '').toLowerCase();

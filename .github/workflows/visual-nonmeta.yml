@@ -1,0 +1,46 @@
+name: Visual Non-Meta Regression
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  visual-nonmeta:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run non-meta visual suite
+        run: npm run test:visual:nonmeta:ci
+
+      - name: Print summary
+        if: always()
+        run: npm run test:visual:nonmeta:report
+
+      - name: Upload visual non-meta artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-nonmeta-report
+          path: |
+            visual-nonmeta-summary.txt
+            visual-nonmeta-report.json
+            test-results/
+          if-no-files-found: warn

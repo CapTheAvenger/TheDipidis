@@ -52,8 +52,10 @@
                     return;
                 }
                 
-                // Normalisierungs-Helfer für Namen (entfernt Apostrophe, Leerzeichen, Bindestriche)
-                const normalizeName = (name) => name ? name.toLowerCase().replace(/[''`\s-]/g, '') : '';
+                // Normalize deck names consistently for matching/filtering (all apostrophe variants + spaces/hyphens).
+                const normalizeName = (name) => name
+                    ? String(name).toLowerCase().replace(/[\u2019\u2018\u201B'`´\s-]/g, '')
+                    : '';
                 
                 const escapeAttr = (value) => String(value || '')
                     .replace(/&/g, '&amp;')
@@ -88,12 +90,18 @@
                 const metaDecks = window.currentMetaArchetypes || window.metaArchetypes || window.currentMetaData || [];
                 let deckNames = Object.keys(matchupData);
                 
+                // PERFORMANCE: Build lookup map once (O(M)) instead of O(M) per comparator call during sort
+                const metaDeckShareMap = new Map();
+                metaDecks.forEach(d => {
+                    const share = parseFloat(d.share || d.percentage_in_archetype || 0);
+                    if (d.name) metaDeckShareMap.set(d.name, share);
+                    if (d.archetype && d.archetype !== d.name) metaDeckShareMap.set(d.archetype, share);
+                });
+                
                 // Sortierung: Prio 1 = Meta-Share, Prio 2 = Match-Anzahl
                 deckNames.sort((a, b) => {
-                    const deckA = metaDecks.find(d => d.name === a || d.archetype === a);
-                    const deckB = metaDecks.find(d => d.name === b || d.archetype === b);
-                    const shareA = deckA ? parseFloat(deckA.share || deckA.percentage_in_archetype || 0) : 0;
-                    const shareB = deckB ? parseFloat(deckB.share || deckB.percentage_in_archetype || 0) : 0;
+                    const shareA = metaDeckShareMap.get(a) ?? 0;
+                    const shareB = metaDeckShareMap.get(b) ?? 0;
                     
                     if (shareA !== shareB && (shareA > 0 || shareB > 0)) {
                         return shareB - shareA;
@@ -114,25 +122,22 @@
                     return gamesB - gamesA;
                 });
                 
-                // X-Achse: Top 10/alle; bei Suche werden passende Gegner verwendet
-                const xSourceDecks = rawSearchX
-                    ? deckNames.filter(deck => {
-                        const normalDeck = deck.toLowerCase();
-                        const strippedDeck = normalDeck.replace(/['’\s-]/g, '');
-                        return normalDeck.includes(rawSearchX) || strippedDeck.includes(normalizedSearchX);
-                    })
-                    : (window.heatmapExpanded ? deckNames : deckNames.slice(0, 10));
+                const axisDeckLimit = (window.heatmapExpanded ? deckNames : deckNames.slice(0, 10));
+                const matchesAxisSearch = (deckName, rawSearch, normalizedSearch) => {
+                    const normalDeck = String(deckName || '').toLowerCase();
+                    const strippedDeck = normalDeck.replace(/[\u2019\u2018\u201B'`´\s-]/g, '');
+                    return normalDeck.includes(rawSearch) || strippedDeck.includes(normalizedSearch);
+                };
 
-                const xDecks = xSourceDecks;
+                // X-Achse (Gegner): nur X-Suche beeinflusst X.
+                const xDecks = rawSearchX
+                    ? deckNames.filter(deck => matchesAxisSearch(deck, rawSearchX, normalizedSearchX))
+                    : axisDeckLimit;
 
-                // Y-Achse: Suche auf dein Deck; ohne Suche wie bisher (gleich X-Achse)
+                // Y-Achse (dein Deck): nur Y-Suche beeinflusst Y.
                 const yDecks = rawSearchY
-                    ? deckNames.filter(deck => {
-                        const normalDeck = deck.toLowerCase();
-                        const strippedDeck = normalDeck.replace(/['’\s-]/g, '');
-                        return normalDeck.includes(rawSearchY) || strippedDeck.includes(normalizedSearchY);
-                    })
-                    : xDecks;
+                    ? deckNames.filter(deck => matchesAxisSearch(deck, rawSearchY, normalizedSearchY))
+                    : axisDeckLimit;
 
                 if (rawSearchY || rawSearchX) {
                     devLog(`🔍 Suche aktiv: Y='${rawSearchY || '-'}' (${yDecks.length}), X='${rawSearchX || '-'}' (${xDecks.length})`);
@@ -171,6 +176,27 @@
                 
                 // 3. HTML GENERIEREN
                 let tableHtml = '<table class="heatmap-table">';
+                tableHtml += `<colgroup><col class="heatmap-col-first">${xDecks.map(() => '<col class="heatmap-col-data">').join('')}</colgroup>`;
+                
+                // PERFORMANCE: Pre-compute normalized colDeck names (once per render, not per cell)
+                const normalizedColDeckMap = new Map(xDecks.map(d => [d, normalizeName(d)]));
+                
+                // PERFORMANCE: Pre-build per-rowDeck normalized lookup maps (O(N+M) total vs O(N*M*K) inline)
+                const rowLookupMaps = new Map();
+                yDecks.forEach(rowDeck => {
+                    const rowData = matchupData[rowDeck];
+                    if (!rowData) return;
+                    const lookup = new Map();
+                    if (Array.isArray(rowData)) {
+                        rowData.forEach(opp => {
+                            const norm = normalizeName(opp.deck || opp.name || opp.archetype || opp.opponent || '');
+                            if (norm) lookup.set(norm, opp);
+                        });
+                    } else {
+                        Object.entries(rowData).forEach(([k, v]) => lookup.set(normalizeName(k), v));
+                    }
+                    rowLookupMaps.set(rowDeck, lookup);
+                });
                 
                 // Tabellenkopf (X-Achse mit Zeilenumbrüchen)
                 tableHtml += '<thead><tr><th class="heatmap-th-x">' + t('heatmap.yourDeck') + '</th>';
@@ -183,30 +209,17 @@
                 // Tabellenzeilen (Y-Achse)
                 yDecks.forEach(rowDeck => {
                     tableHtml += `<tr><th class="heatmap-th-row">${rowDeck}</th>`;
+                    const rowLookup = rowLookupMaps.get(rowDeck);
                     
                     xDecks.forEach(colDeck => {
                         // Mirror Match
-                        if (normalizeName(rowDeck) === normalizeName(colDeck)) {
+                        if (normalizeName(rowDeck) === normalizedColDeckMap.get(colDeck)) {
                             tableHtml += '<td class="heatmap-td heatmap-td-mirror" title="' + t('heatmap.mirror') + '">\\</td>';
                             return;
                         }
                         
-                        let cellData = null;
-                        const rowData = matchupData[rowDeck];
-                        
-                        // Kugelsicher: Handle both Arrays and Objects mit Normalisierung
-                        if (Array.isArray(rowData)) {
-                            cellData = rowData.find(opp => 
-                                normalizeName(opp.deck) === normalizeName(colDeck) || 
-                                normalizeName(opp.name) === normalizeName(colDeck) || 
-                                normalizeName(opp.archetype) === normalizeName(colDeck) || 
-                                normalizeName(opp.opponent) === normalizeName(colDeck)
-                            );
-                        } else if (rowData) {
-                            // Objekt-Format: Suche mit normalisiertem Key
-                            const matchedKey = Object.keys(rowData).find(k => normalizeName(k) === normalizeName(colDeck));
-                            if (matchedKey) cellData = rowData[matchedKey];
-                        }
+                        // O(1) lookup using pre-built map
+                        const cellData = rowLookup ? (rowLookup.get(normalizedColDeckMap.get(colDeck)) ?? null) : null;
                         
                         if (!cellData) {
                             tableHtml += '<td class="heatmap-td heatmap-td-nodata" title="' + t('heatmap.noData') + '">-</td>';
@@ -282,11 +295,11 @@
                         ${searchControlsHtml}
                         <div class="heatmap-table-scroll">
                             ${tableHtml}
-                            <div class="heatmap-btn-row">
-                                <button class="action-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
-                                    ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
-                                </button>
-                            </div>
+                        </div>
+                        <div class="heatmap-btn-row">
+                            <button class="action-btn" onclick="window.heatmapExpanded = !window.heatmapExpanded; renderMatchupHeatmap();">
+                                ${window.heatmapExpanded ? t('heatmap.showTop10') : t('heatmap.showAll')}
+                            </button>
                         </div>
                         <p class="heatmap-hint">
                             ${t('heatmap.hint')}
@@ -343,6 +356,17 @@
             // Load Current Meta Analysis (deck analysis)
             if (!window.currentMetaAnalysisLoaded) {
                 await loadCurrentMetaAnalysis();
+            }
+
+            const metaGrid = document.getElementById('currentMetaMetaGrid');
+            const shouldRefreshMetaAnalysis =
+                !metaGrid ||
+                !metaGrid.children.length ||
+                /no data|load meta analysis|loading/i.test(metaGrid.textContent || '');
+            if (shouldRefreshMetaAnalysis && typeof loadMetaCardAnalysis === 'function') {
+                loadMetaCardAnalysis('currentMeta').catch(err => {
+                    console.warn('[loadCurrentAnalysis] Auto-load meta analysis failed:', err);
+                });
             }
             
             // Load saved deck from localStorage

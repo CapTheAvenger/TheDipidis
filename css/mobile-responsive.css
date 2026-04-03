@@ -1,0 +1,812 @@
+/* ============================================
+   MOBILE RESPONSIVE OPTIMIZATION — SCHRITT 1
+   Layout Umbrüche für Smartphones & Tablets
+   ============================================ */
+
+/* === GLOBAL MOBILE FOUNDATIONS === */
+
+@media (max-width: 768px) {
+    /* Prevent horizontal scrolling */
+    html, body {
+        overflow-x: hidden;
+    }
+    
+    body {
+        padding: 12px;
+    }
+}
+
+/* === HEADER & NAVIGATION (Mobile-First) === */
+@media (max-width: 768px) {
+    .header {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+    }
+    
+    .header h1, .header h2 {
+        font-size: clamp(1.1em, 4vw, 1.5em);
+    }
+    
+    /* Pokeball Menu - reduce size on mobile */
+    .pokeball-btn {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .main-menu-dropdown {
+        width: calc(100vw - 24px);
+        max-width: 320px;
+        left: 0;
+        top: 60px;
+    }
+}
+
+/* === STATS GRID (City League, Current Meta, Past Meta) === */
+@media (max-width: 768px) {
+    .stats-grid,
+    .city-league-stats-grid,
+    .current-meta-stats-grid,
+    .past-meta-stats-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid,
+    .city-league-stats-grid,
+    .current-meta-stats-grid,
+    .past-meta-stats-grid {
+        gap: 8px !important;
+    }
+}
+
+/* === DECK METRICS GRID === */
+@media (max-width: 768px) {
+    .deck-metrics-grid,
+    .city-league-deck-summary,
+    .current-meta-deck-summary,
+    .past-meta-deck-summary {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+}
+
+/* === DECK GRID (Card Collections in City League, Current Meta, etc.) === */
+@media (max-width: 1024px) {
+    .deck-grid,
+    .city-league-deck-grid,
+    .currentMetaDeckGrid,
+    .pastMetaDeckGrid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+        gap: 10px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .deck-grid,
+    .city-league-deck-grid,
+    .currentMetaDeckGrid,
+    .pastMetaDeckGrid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+        gap: 8px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .deck-grid,
+    .city-league-deck-grid,
+    .currentMetaDeckGrid,
+    .pastMetaDeckGrid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+}
+
+/* === CARD GRID (Search Results, Meta Card Analysis) === */
+@media (max-width: 1024px) {
+    .card-grid,
+    .city-league-add-card-grid,
+    .current-meta-add-card-results,
+    .past-meta-add-card-results,
+    .meta-card-grid,
+    .meta-card-analysis-grid,
+    .city-league-meta-grid,
+    .current-meta-meta-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+        gap: 10px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-grid,
+    .city-league-add-card-grid,
+    .current-meta-add-card-results,
+    .past-meta-add-card-results {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+        gap: 8px !important;
+    }
+    
+    .meta-card-grid,
+    .meta-card-analysis-grid,
+    .city-league-meta-grid,
+    .current-meta-meta-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+        gap: 8px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-grid,
+    .city-league-add-card-grid,
+    .current-meta-add-card-results,
+    .past-meta-add-card-results {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+    
+    .meta-card-grid,
+    .meta-card-analysis-grid,
+    .city-league-meta-grid,
+    .current-meta-meta-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+    }
+}
+
+/* === PROXY PANELS GRID === */
+@media (max-width: 768px) {
+    .proxy-panels-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+    
+    .proxy-panel {
+        padding: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .proxy-panels-grid {
+        gap: 12px !important;
+    }
+}
+
+/* === PROXY ACTION BUTTONS === */
+@media (max-width: 768px) {
+    .proxy-action-btns-flex {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    .proxy-action-btns-flex .btn,
+    .proxy-action-btns-flex button {
+        width: 100% !important;
+    }
+}
+
+/* === CURRENT META MATCHUPS GRID === */
+@media (max-width: 1024px) {
+    .current-meta-matchups-grid-container {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .current-meta-matchups-grid-container {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+}
+
+/* === MATCHUP CARDS === */
+@media (max-width: 768px) {
+    .current-meta-matchup-card {
+        padding: 12px !important;
+    }
+}
+
+/* === COLLECTION & WISHLIST GRIDS === */
+@media (max-width: 1024px) {
+    .collection-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .collection-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+        gap: 10px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .collection-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+    }
+}
+
+/* === DECKS GRID === */
+@media (max-width: 768px) {
+    .decks-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+}
+
+/* === PROFILE STATS GRID === */
+@media (max-width: 768px) {
+    .profile-stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+}
+
+/* === COMPACT CARD GRID (Rarity Switcher Modal) === */
+@media (max-width: 768px) {
+    .compact-card-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+        gap: 8px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .compact-card-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+    }
+}
+
+/* === FLEX CONTAINERS (General Flexibility) === */
+@media (max-width: 768px) {
+    .header-flex-row {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    
+    .header-flex-group {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    
+    .header-flex-user {
+        justify-content: center !important;
+    }
+    
+    /* Controls wrap on mobile */
+    .controls {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+    
+    /* Proxy panel button rows stack */
+    .proxy-panel-btn-row {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    
+    .proxy-panel-btn-row button,
+    .proxy-panel-btn-row .btn {
+        width: 100% !important;
+    }
+}
+
+/* === TUTORIAL GRIDS (Guides & How-To) === */
+@media (max-width: 768px) {
+    .tutorial-tabs-grid,
+    .playtester-guide-board-grid,
+    .card-type-guide-grid,
+    .de-tabs-grid,
+    .playtester-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .tutorial-tabs-grid,
+    .playtester-guide-board-grid,
+    .card-type-guide-grid,
+    .de-tabs-grid,
+    .playtester-grid {
+        gap: 8px !important;
+    }
+}
+
+/* === CARD TYPE GRID (Profile/Settings) === */
+@media (max-width: 768px) {
+    .cardtype-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .cardtype-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+}
+
+/* === CONTAINER PADDING ADJUSTMENTS === */
+@media (max-width: 768px) {
+    .container,
+    .proxy-container,
+    .sandbox-container {
+        padding: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .guide-section,
+    .info-panel,
+    .section-panel {
+        padding: 12px !important;
+        margin-bottom: 12px !important;
+        border-radius: 8px !important;
+    }
+}
+
+/* === CITY LEAGUE SPECIFIC LAYOUTS === */
+@media (max-width: 768px) {
+    .cl-format-container {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    
+    .city-league-cards-controls {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+}
+
+/* === CURRENT META SPECIFIC LAYOUTS === */
+@media (max-width: 768px) {
+    .current-meta-matchup-select-container {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    .current-meta-matchup-search-container {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    
+    .current-meta-cards-controls-row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+}
+
+/* === DATE RANGE & FILTER CONTAINERS === */
+@media (max-width: 768px) {
+    .section-grid-container,
+    .date-range-container {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+}
+
+/* === PREVENT OVERFLOW IN CONTAINERS === */
+@media (max-width: 768px) {
+    .section-panel,
+    .cl-content-panel,
+    .city-league-mydeck-visual {
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+}
+
+/* === CARDS FILTER GRID (Already has media queries but enhanced) === */
+@media (max-width: 768px) {
+    .cards-filter-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+}
+
+/* === FLEX UTILITY RESPONSIVENESS === */
+@media (max-width: 768px) {
+    .flex {
+        flex-direction: column !important;
+    }
+    
+    .flex-wrap {
+        flex-wrap: wrap !important;
+    }
+    
+    .justify-between {
+        justify-content: flex-start !important;
+        gap: 8px !important;
+    }
+    
+    .minw-200 {
+        min-width: 0 !important;
+    }
+    
+    .minw-160,
+    .minw-260,
+    .minw-280 {
+        min-width: 0 !important;
+    }
+}
+
+/* === GRID-BASED UTILITIES === */
+@media (max-width: 768px) {
+    .grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-cols-3 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* === SANDBOX CONTAINER (Playtester) === Basic Stacking === */
+@media (max-width: 1024px) {
+    .sandbox-player-panels {
+        flex-direction: column !important;
+    }
+}
+
+/* === PAST META SPECIFIC === */
+@media (max-width: 768px) {
+    .past-meta-cards-controls-row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+}
+
+/* === TEXT & FONT SIZES (Scale down on mobile) === */
+@media (max-width: 768px) {
+    .fs-130 { font-size: 1.2em !important; }
+    .fs-120 { font-size: 1.1em !important; }
+    .fs-110 { font-size: 1em !important; }
+    .fs-18 { font-size: 16px !important; }
+}
+
+/* === TAB NAVIGATION HORIZONTAL SCROLL === */
+@media (max-width: 768px) {
+    .tabs-container {
+        overflow: hidden !important;
+    }
+
+    .tab-navigation,
+    .cards-tab-navigation,
+    .tab-nav {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+
+    .tab-navigation::-webkit-scrollbar,
+    .cards-tab-navigation::-webkit-scrollbar,
+    .tab-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-navigation .tab-btn,
+    .cards-tab-navigation .tab-btn,
+    .tab-nav .tab-btn {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+    }
+}
+
+/* === TABLES: MOBILE SAFE HORIZONTAL SCROLL === */
+@media (max-width: 768px) {
+    .mobile-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    .mobile-table-scroll > table {
+        min-width: 520px;
+        width: 100%;
+    }
+
+    .mobile-table-scroll .current-meta-matchups-table {
+        min-width: 420px;
+    }
+
+    .mobile-table-scroll .w-100.border-collapse {
+        min-width: 460px;
+    }
+}
+
+/* === HORIZONTAL BUTTON ROWS: SCROLL INSTEAD OF SQUEEZE === */
+@media (max-width: 768px) {
+    .city-league-card-type-filter,
+    .current-meta-cards-type-filter,
+    .past-meta-cards-type-filter,
+    .city-league-cards-rarity-toggle,
+    .current-meta-cards-rarity-toggle,
+    .past-meta-cards-rarity-toggle,
+    .city-league-cards-controls .btn-toggle-group,
+    .current-meta-cards-controls-row .btn-toggle-group,
+    .past-meta-cards-controls-row .btn-toggle-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+    }
+
+    .city-league-card-type-filter::-webkit-scrollbar,
+    .current-meta-cards-type-filter::-webkit-scrollbar,
+    .past-meta-cards-type-filter::-webkit-scrollbar,
+    .city-league-cards-rarity-toggle::-webkit-scrollbar,
+    .current-meta-cards-rarity-toggle::-webkit-scrollbar,
+    .past-meta-cards-rarity-toggle::-webkit-scrollbar,
+    .city-league-cards-controls .btn-toggle-group::-webkit-scrollbar,
+    .current-meta-cards-controls-row .btn-toggle-group::-webkit-scrollbar,
+    .past-meta-cards-controls-row .btn-toggle-group::-webkit-scrollbar {
+        display: none;
+    }
+
+    .city-league-card-type-filter > *,
+    .current-meta-cards-type-filter > *,
+    .past-meta-cards-type-filter > *,
+    .city-league-cards-rarity-toggle > *,
+    .current-meta-cards-rarity-toggle > *,
+    .past-meta-cards-rarity-toggle > *,
+    .city-league-cards-controls .btn-toggle-group > *,
+    .current-meta-cards-controls-row .btn-toggle-group > *,
+    .past-meta-cards-controls-row .btn-toggle-group > * {
+        flex: 0 0 auto;
+    }
+}
+
+/* === MARGIN & PADDING SCALE === */
+@media (max-width: 768px) {
+    .mb-30 { margin-bottom: 20px !important; }
+    .mb-20 { margin-bottom: 15px !important; }
+    .mb-15 { margin-bottom: 12px !important; }
+    .px-40 { padding-left: 16px !important; padding-right: 16px !important; }
+    .px-20 { padding-left: 12px !important; padding-right: 12px !important; }
+    .py-60 { padding-top: 30px !important; padding-bottom: 30px !important; }
+}
+
+@media (max-width: 480px) {
+    .py-60 { padding-top: 20px !important; padding-bottom: 20px !important; }
+}
+
+/* === PREVENT CONTENT OVERFLOW === */
+@media (max-width: 768px) {
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    
+    input, select, textarea, button {
+        max-width: 100% !important;
+    }
+}
+
+/* === STEP 3: TOUCH TARGETS (>=44px) === */
+@media (max-width: 768px) {
+    .btn-modern,
+    .tab-btn,
+    .btn,
+    .auth-btn,
+    .profile-tab-btn,
+    .pt-btn,
+    .pt-side-btn,
+    .pt-stepper-btn,
+    .pt-stepper-action,
+    .control-input,
+    .auth-input-field,
+    .setup-modal-select,
+    .setup-modal-textarea,
+    input:not([type="hidden"]),
+    select,
+    textarea {
+        min-height: 44px !important;
+    }
+
+    .btn-modern,
+    .tab-btn,
+    .btn,
+    .auth-btn,
+    .pt-btn,
+    .pt-side-btn,
+    .pt-stepper-btn,
+    .pt-stepper-action {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    .pt-bottom-input,
+    #ptHandDrawAmt,
+    #ptJudgeDrawP1,
+    #ptJudgeDrawP2,
+    #ptIonoDrawP1,
+    #ptIonoDrawP2,
+    #inpDraw,
+    #inpLook,
+    #inpJudgeP1,
+    #inpJudgeP2,
+    #inpOwnSD,
+    #inpOppSD,
+    #inpIonoP1,
+    #inpIonoP2 {
+        min-height: 44px !important;
+        font-size: 16px !important;
+    }
+}
+
+/* === STEP 3: MODALS FULL-WIDTH + SCROLLABLE INNER AREA === */
+@media (max-width: 768px) {
+    #auth-modal,
+    #deckCompareModal,
+    #playtesterSetupModal {
+        padding: 0 !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+    }
+
+    #auth-modal .mobile-modal-panel,
+    #deckCompareModal .mobile-modal-panel,
+    #playtesterSetupModal .mobile-modal-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-top: 52px !important;
+    }
+
+    #auth-modal .ui-modal-close,
+    #deckCompareModal .ui-modal-close,
+    #playtesterSetupModal .ui-modal-close {
+        position: sticky !important;
+        top: 8px !important;
+        right: 8px !important;
+        margin-left: auto !important;
+        display: inline-flex !important;
+        z-index: 20 !important;
+        width: 44px !important;
+        height: 44px !important;
+        touch-action: manipulation;
+    }
+}
+
+/* === STEP 4: PLAYTESTER TOUCH LAYOUT === */
+@media (max-width: 768px) {
+    #sandbox,
+    #playtesterModal {
+        overflow: hidden;
+    }
+
+    .pt-arena-shell {
+        overflow: auto !important;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start !important;
+        align-items: flex-start !important;
+        padding: 10px 8px 96px !important;
+    }
+
+    .pt-arena {
+        min-width: 860px !important;
+        min-height: 520px !important;
+    }
+
+    .pt-bench-zone,
+    .pt-dropzone,
+    #ptActiveZone-p1,
+    #ptActiveZone-p2 {
+        touch-action: manipulation;
+    }
+
+    #pt-side-buttons-left {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        z-index: 16010;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        padding: 8px;
+        background: rgba(8, 18, 40, 0.88);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 12px;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+
+    .pt-side-btn {
+        min-height: 44px !important;
+        font-size: 12px !important;
+        font-weight: 800;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: linear-gradient(135deg, #274eaa 0%, #1c3f8f 100%);
+        color: #fff;
+    }
+
+    .pt-floating-bar {
+        position: sticky;
+        top: 0;
+        z-index: 16020;
+    }
+
+    .pt-deck-controls {
+        display: flex !important;
+        width: 124px !important;
+        left: 44px !important;
+    }
+}
+
+/* Touch devices: avoid hover-only discoverability for action affordances */
+@media (hover: none), (pointer: coarse) {
+    .pt-field-actions {
+        display: flex !important;
+        bottom: -36px;
+    }
+
+    .pt-field-card:hover,
+    .pt-prize-card:hover,
+    .pt-hand-card:hover {
+        transform: none !important;
+    }
+
+    .pt-hand-wrapper .pt-hand-disc-btn,
+    .pt-hand-wrapper .pt-hand-play-btn {
+        display: flex !important;
+    }
+
+    .pt-tool-btn[data-pt-tip]:hover::after {
+        content: none;
+    }
+}
+
+/* End of Mobile Responsive CSS — SCHRITT 1 */

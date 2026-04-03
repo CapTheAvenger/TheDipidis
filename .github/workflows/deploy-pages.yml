@@ -15,8 +15,60 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install JS test dependencies
+        run: npm install --no-save papaparse
+
+      - name: Run JS unit tests
+        run: |
+          TOTAL_PASS=0
+          TOTAL_FAIL=0
+          for f in tests/unit/test-*.js; do
+            OUTPUT=$(node --test "$f" 2>&1) || true
+            PASS=$(echo "$OUTPUT" | grep -oP '# pass \K\d+' || echo 0)
+            FAIL=$(echo "$OUTPUT" | grep -oP '# fail \K\d+' || echo 0)
+            TOTAL_PASS=$((TOTAL_PASS + PASS))
+            TOTAL_FAIL=$((TOTAL_FAIL + FAIL))
+            if [ "$FAIL" -gt 0 ]; then
+              echo "::error::$f — $FAIL test(s) failed"
+              echo "$OUTPUT"
+            fi
+          done
+          echo "✓ JS tests: $TOTAL_PASS passed, $TOTAL_FAIL failed"
+          if [ "$TOTAL_FAIL" -gt 0 ]; then
+            echo "::error::$TOTAL_FAIL JS test(s) failed — blocking deployment"
+            exit 1
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python test dependencies
+        run: |
+          pip install pytest beautifulsoup4 requests lxml
+
+      - name: Run Python unit tests
+        run: |
+          python -m pytest tests/python/ -q --tb=short \
+            --ignore=tests/python/test_price_proxy_and_price_scraper.py \
+            2>&1
+          echo "✓ Python tests passed"
+
   build:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,12 +81,8 @@ jobs:
       - name: Validate Python syntax
         run: |
           python3 -m py_compile backend/core/card_scraper_shared.py
-          python3 -m py_compile prepare_card_data.py
-          python3 -m py_compile backend/services/price_proxy_server.py
-          shopt -s nullglob
-          for f in backend/scrapers/*_scraper*.py; do
-            python3 -m py_compile "$f" || { echo "::error::Syntax error in $f"; exit 1; }
-          done
+          python3 -m py_compile backend/scrapers/city_league_analysis_scraper.py
+          python3 -m py_compile backend/scrapers/current_meta_analysis_scraper.py
           echo "✓ All Python files pass syntax check"
 
       - name: Install npm tools
@@ -51,6 +99,7 @@ jobs:
       - name: Inject Firebase Credentials
         env:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         run: |
           if [ -z "$FIREBASE_CONFIG" ]; then
             echo "::warning::FIREBASE_CONFIG secret is not set – deploying with placeholder credentials"
@@ -58,17 +107,38 @@ jobs:
             echo "$FIREBASE_CONFIG" > js/firebase-credentials.js
             echo "✓ Firebase credentials injected"
           fi
+          if [ -n "$GOOGLE_CLIENT_ID" ]; then
+            echo "window.GOOGLE_CLIENT_ID = \"${GOOGLE_CLIENT_ID}\";" >> js/firebase-credentials.js
+            echo "✓ Google Client ID injected"
+          else
+            echo "::warning::GOOGLE_CLIENT_ID secret is not set – Google Sign-In will be disabled"
+          fi
+
+      - name: Inject Sentry DSN
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          if [ -n "$SENTRY_DSN" ]; then
+            sed -i "s|__SENTRY_DSN__|${SENTRY_DSN}|g" js/error-tracking.js
+            echo "✓ Sentry DSN injected"
+          else
+            echo "::warning::SENTRY_DSN secret is not set – error tracking will be disabled"
+          fi
 
       - name: Prepare deployment directory
         run: |
           mkdir -p _site
           cp index.html _site/
+          cp manifest.json _site/
+          cp service-worker.js _site/
+          cp .nojekyll _site/
           cp -r css _site/css
           cp -r js _site/js
           cp -r images _site/images 2>/dev/null || true
           cp -r data _site/data
           cp pokemon_sets_mapping.csv _site/ 2>/dev/null || true
-          cp current_meta_analysis_settings.json _site/ 2>/dev/null || true
+          mkdir -p _site/config
+          cp config/current_meta_analysis_settings.json _site/config/ 2>/dev/null || true
           cp _config.yml _site/ 2>/dev/null || true
 
       - name: Minify JS, CSS & HTML

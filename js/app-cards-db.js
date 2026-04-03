@@ -39,7 +39,9 @@
         // Toggle card filter visibility
         function toggleCardFilter(filterId) {
             const filterOptions = document.getElementById(filterId);
-            const header = filterOptions.previousElementSibling;
+            if (!filterOptions) return;
+            const group = filterOptions.closest('.cards-filter-group');
+            const header = group ? group.querySelector('.cards-filter-header') : null;
             
             if (filterOptions && header) {
                 const isCollapsed = filterOptions.classList.contains('collapsed');
@@ -48,77 +50,267 @@
                     // Expand
                     filterOptions.classList.remove('collapsed');
                     header.classList.remove('collapsed');
+                    // Show search input if present
+                    const searchInput = group.querySelector('.cards-filter-search-input');
+                    if (searchInput) searchInput.style.display = '';
                 } else {
                     // Collapse
                     filterOptions.classList.add('collapsed');
                     header.classList.add('collapsed');
+                    // Hide search input if present
+                    const searchInput = group.querySelector('.cards-filter-search-input');
+                    if (searchInput) searchInput.style.display = 'none';
                 }
             }
+        }
+
+        function ensureCardsFilterMarkup() {
+            const sections = [
+                {
+                    groupId: 'filter-meta-format',
+                    targetId: 'metaFormatOptions',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('metaFormatOptions')">
+                            <span>Meta / Format</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options collapsed" id="metaFormatOptions">
+                            <label class="label-block"><input type="checkbox" value="total" checked> Total (All Cards)</label>
+                            <label class="label-block"><input type="checkbox" value="all_playables"> All Playables</label>
+                            <label class="label-block"><input type="checkbox" value="city_league"> City League Only</label>
+                        </div>
+                    `
+                },
+                {
+                    groupId: 'filter-set',
+                    targetId: 'setFilterOptions',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('setFilterOptions')">
+                            <span>Set</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options collapsed" id="setFilterOptions"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-rarity',
+                    targetId: 'rarityFilterOptions',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('rarityFilterOptions')">
+                            <span>Rarity</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options collapsed" id="rarityFilterOptions"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-category',
+                    targetId: 'categoryFilterOptions',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('categoryFilterOptions')">
+                            <span>Category</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options collapsed" id="categoryFilterOptions"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-main-pokemon',
+                    targetId: 'mainPokemonList',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('mainPokemonList')">
+                            <span>Main Pokemon</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <input type="text" id="mainPokemonSearch" class="cards-filter-search-input" placeholder="Search main Pokemon..." oninput="filterMainPokemonList()" aria-label="Search main Pokemon filter list" style="display:none">
+                        <div class="cards-filter-options collapsed" id="mainPokemonList"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-archetype',
+                    targetId: 'archetypeList',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('archetypeList')">
+                            <span>Archetype</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <input type="text" id="archetypeSearch" class="cards-filter-search-input" placeholder="Search archetype..." oninput="filterArchetypeList()" aria-label="Search archetype filter list" style="display:none">
+                        <div class="cards-filter-options collapsed" id="archetypeList"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-deck-coverage',
+                    targetId: 'deckCoverageFilterOptions',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('deckCoverageFilterOptions')">
+                            <span>Deck Coverage</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options collapsed" id="deckCoverageFilterOptions"></div>
+                    `
+                }
+            ];
+
+            sections.forEach(section => {
+                const group = document.getElementById(section.groupId);
+                if (!group) return;
+                if (group.querySelector(`#${section.targetId}`)) return;
+                group.innerHTML = section.html;
+            });
         }
         
         // Pagination for Cards Tab
         let currentCardsPage = 1;
-        const cardsPerPage = 300;
+        const cardsPerPage = 60;
         let showAllCards = false;
         let showOnlyOnePrint = true; // Toggle for deduplication: true = only show 1 print per card (low rarity, newest)
+        const cardsFilterRenderState = {
+            isFiltering: false,
+            pending: false,
+            lastSignature: ''
+        };
+        const cardsVirtualState = {
+            observer: null,
+            slots: [],
+            estimatedHeight: 460,
+            renderedCount: 0
+        };
+        let _loadCardsRunning = false;
         
         async function loadCards() {
+            if (_loadCardsRunning) return;
+            _loadCardsRunning = true;
             const content = document.getElementById('cardsContent');
-            content.innerHTML = '<div class="loading">Loading card database...</div>';
+            const resultsInfo = document.getElementById('cardResultsInfo');
+            const setProgress = (msg) => {
+                if (content) content.innerHTML = `<div class="loading">${msg}</div>`;
+            };
+            setProgress('Loading card database...');
             
             try {
+                ensureCardsFilterMarkup();
+
                 // Ensure set mapping is loaded (for English sets)
                 if (!window.englishSetCodes || window.englishSetCodes.size === 0) {
-                    devLog('[Cards Tab] Loading set mapping for English sets...');
                     await loadSetMapping();
                 }
                 
                 // Use already loaded cards from loadAllCardsDatabase() instead of loading again
                 if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
-                    devLog('[Cards Tab] Waiting for allCardsDatabase to load...');
+                    setProgress('Loading card database (this may take a moment)...');
                     await loadAllCardsDatabase();
                 }
                 
                 // Filter to only English cards
-                const englishCards = window.allCardsDatabase.filter(card => 
-                    window.englishSetCodes && window.englishSetCodes.has(card.set)
-                );
+                let englishCards = [];
+                if (window.englishSetCodes && window.englishSetCodes.size > 0) {
+                    englishCards = window.allCardsDatabase.filter(card => 
+                        window.englishSetCodes.has(card.set)
+                    );
+                }
+                // Fallback: if set mapping failed or no matches, keep card database usable.
+                if (englishCards.length === 0 && Array.isArray(window.allCardsDatabase) && window.allCardsDatabase.length > 0) {
+                    console.warn('[Cards Tab] No English sets matched. Falling back to all cards database.');
+                    englishCards = window.allCardsDatabase.filter(card => card && (card.name || card.name_en));
+                }
                 
                 // Store reference to cards
                 window.allCardsData = englishCards;
+
+                if (!window.allCardsData || window.allCardsData.length === 0) {
+                    content.innerHTML = '<div class="error">No card data available. allCardsDatabase: ' + (window.allCardsDatabase ? window.allCardsDatabase.length : 'null') + ', englishSetCodes: ' + (window.englishSetCodes ? window.englishSetCodes.size : 'null') + '</div>';
+                    if (resultsInfo) resultsInfo.textContent = '0 cards found';
+                    window.cardsLoaded = false;
+                    return;
+                }
                 
-                devLog(`[Cards Tab] Filtered to ${window.allCardsData.length} English cards from ${window.allCardsDatabase.length} total`);
-                devLog(`[Cards Tab] First card structure:`, window.allCardsData[0]);
-                
-                // Load playable cards (from City League, Current Meta, Tournament JH)
-                await loadPlayableCards();
-                
-                // Load deck coverage statistics
-                await loadDeckCoverageStats();
-                
-                // Load formats from current meta data
-                await loadFormatsForCards();
-                
-                // Populate filters
-                await populateSetFilter(window.allCardsData);
-                // populateMetaFormatFilter(); // Disabled - using populateMetaFilter() instead for more complete data
-                populateMainPokemonFilter();
-                populateArchetypeFilter();
-                populateMetaFilter();
-                
-                // Setup filter event listeners
-                setupCardFilters();
-                
-                // Initial render
-                filterAndRenderCards();
-                
+                // --- PHASE 1: Render cards immediately with basic filters ---
+                try { populateRarityFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateRarityFilter error:', e); }
+                try { populateCategoryFilter(); } catch (e) { console.error('[Cards Tab] populateCategoryFilter error:', e); }
+                try { await populateSetFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateSetFilter error:', e); }
+                try { setupCardFilters(); } catch (e) { console.error('[Cards Tab] setupCardFilters error:', e); }
+                try { initializeCardsFilterPanel(); } catch (e) { console.error('[Cards Tab] initializeCardsFilterPanel error:', e); }
+
+                filterAndRenderCards({ force: true });
                 window.cardsLoaded = true;
+
+                // --- PHASE 2: Load enrichment data (playable cards, coverage, formats) in background ---
+                // This avoids blocking initial render on ~200MB of CSV downloads
+                _loadCardsEnrichment();
             } catch (error) {
                 console.error('[Cards Tab] Error loading card database:', error);
-                content.innerHTML = '<div class="error">? Error loading card database</div>';
+                content.innerHTML = '<div class="error" style="padding: 20px; color: #c00;">' +
+                    '<h3>Error loading card database</h3>' +
+                    '<p><strong>' + (error.message || String(error)) + '</strong></p>' +
+                    '<pre style="font-size:11px; white-space:pre-wrap; color:#666;">' + (error.stack || '') + '</pre>' +
+                    '<p style="margin-top:12px;"><button onclick="window.cardsLoaded=false;_loadCardsRunning=false;loadCards()" class="btn-blue">Retry</button></p>' +
+                    '</div>';
+            } finally {
+                _loadCardsRunning = false;
             }
         }
+
+        // Phase 2: Load enrichment data after cards are already visible.
+        // Runs asynchronously — does not block the initial card render.
+        async function _loadCardsEnrichment() {
+            try {
+                devLog('[Cards Tab] Phase 2: Loading enrichment data...');
+                await loadPlayableCards();
+                await loadDeckCoverageStats();
+                await loadFormatsForCards();
+
+                // Populate enrichment-dependent filters
+                try { populateDeckCoverageFilter(); } catch (e) { console.error('[Cards Tab] populateDeckCoverageFilter error:', e); }
+                try { populateMainPokemonFilter(); } catch (e) { console.error('[Cards Tab] populateMainPokemonFilter error:', e); }
+                try { populateArchetypeFilter(); } catch (e) { console.error('[Cards Tab] populateArchetypeFilter error:', e); }
+                try { populateMetaFilter(); } catch (e) { console.error('[Cards Tab] populateMetaFilter error:', e); }
+
+                // Re-render so coverage badges and enrichment filters take effect
+                filterAndRenderCards({ force: true });
+                devLog('[Cards Tab] Phase 2: Enrichment complete.');
+            } catch (error) {
+                console.error('[Cards Tab] Enrichment loading failed (cards still visible):', error);
+            }
+        }
+
+        function initializeCardsFilterPanel() {
+            const section = document.querySelector('#cards .cards-filter-section');
+            const toggleBtn = document.getElementById('cardsFiltersToggle');
+            if (!section || !toggleBtn) return;
+
+            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            section.classList.toggle('mobile-filters-collapsed', isMobile);
+            toggleBtn.setAttribute('aria-expanded', isMobile ? 'false' : 'true');
+            toggleBtn.textContent = isMobile ? 'Show Filters' : 'Hide Filters';
+        }
+
+        function toggleCardsFilterPanel() {
+            const section = document.querySelector('#cards .cards-filter-section');
+            const toggleBtn = document.getElementById('cardsFiltersToggle');
+            if (!section || !toggleBtn) return;
+
+            const collapsed = section.classList.toggle('mobile-filters-collapsed');
+            toggleBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            toggleBtn.textContent = collapsed ? 'Show Filters' : 'Hide Filters';
+        }
+        window.toggleCardsFilterPanel = toggleCardsFilterPanel;
         
+        // Cached parsed CSV rows to avoid re-downloading & re-parsing large files
+        let _cachedCityLeagueRows = null;
+        let _cachedTournamentRows = null;
+
+        async function _fetchAndParseCsvCached(file, cacheRef) {
+            if (cacheRef === 'cityLeague' && _cachedCityLeagueRows) return _cachedCityLeagueRows;
+            if (cacheRef === 'tournament' && _cachedTournamentRows) return _cachedTournamentRows;
+            const response = await fetch(BASE_PATH + file);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const text = await response.text();
+            const rows = parseCSV(text);
+            if (cacheRef === 'cityLeague') _cachedCityLeagueRows = rows;
+            if (cacheRef === 'tournament') _cachedTournamentRows = rows;
+            return rows;
+        }
+
         async function loadPlayableCards() {
             window.playableCardsSet = new Set(); // All playables (City League + Current Meta + Tournament)
             window.cityLeagueCardsSet = new Set(); // Only City League cards
@@ -126,10 +318,7 @@
             try {
                 // Load City League Analysis CSV
                 try {
-                    const cityLeagueResponse = await fetch(BASE_PATH + 'city_league_analysis.csv');
-                    if (!cityLeagueResponse.ok) throw new Error(`HTTP ${cityLeagueResponse.status}`);
-                    const cityLeagueText = await cityLeagueResponse.text();
-                    const cityLeagueCards = parseCSV(cityLeagueText);
+                    const cityLeagueCards = await _fetchAndParseCsvCached('city_league_analysis.csv', 'cityLeague');
                     cityLeagueCards.forEach(card => {
                         if (card.card_name) {
                             const cardNameNorm = normalizeCardName(card.card_name);
@@ -158,12 +347,9 @@
                     console.warn('Could not load Current Meta playable cards:', err);
                 }
                 
-                // Load Tournament Scraper JH CSV
+                // Load Tournament Scraper JH CSV (cached — also used by loadDeckCoverageStats)
                 try {
-                    const tournamentResponse = await fetch(BASE_PATH + 'tournament_cards_data_cards.csv');
-                    if (!tournamentResponse.ok) throw new Error(`HTTP ${tournamentResponse.status}`);
-                    const tournamentText = await tournamentResponse.text();
-                    const tournamentCards = parseCSV(tournamentText);
+                    const tournamentCards = await _fetchAndParseCsvCached('tournament_cards_data_cards.csv', 'tournament');
                     tournamentCards.forEach(card => {
                         if (card.card_name) {
                             const cardNameNorm = normalizeCardName(card.card_name);
@@ -185,6 +371,7 @@
         // Set release dates for temporal filtering (format: YYYY-MM-DD)
         const SET_RELEASE_DATES = {
             // 2026 Sets
+            'POR': '2026-04-01',
             'M3': '2026-03-01',
             'ASC': '2026-02-21',
             'PFL': '2026-01-24',  // Pok Pad is in this set
@@ -247,25 +434,16 @@
             try {
                 // Load both City League and Tournament data for comprehensive coverage
                 const dataSources = [
-                    { file: 'city_league_analysis.csv', name: 'City League' },
-                    { file: 'tournament_cards_data_cards.csv', name: 'Tournament' }
+                    { file: 'city_league_analysis.csv', name: 'City League', cache: 'cityLeague' },
+                    { file: 'tournament_cards_data_cards.csv', name: 'Tournament', cache: 'tournament' }
                 ];
                 
                 for (const source of dataSources) {
                     try {
-                        devLog(`[Deck Coverage] Attempting to load: ${source.file}`);
-                        const response = await fetch(BASE_PATH + source.file);
-                        if (!response.ok) {
-                            console.error(`[Deck Coverage] Failed to fetch ${source.file}: ${response.status}`);
-                            continue;
-                        }
-                        const text = await response.text();
-                        const rows = parseCSV(text);
+                        devLog(`[Deck Coverage] Loading: ${source.file}`);
+                        const rows = await _fetchAndParseCsvCached(source.file, source.cache);
                         
                         devLog(`[Deck Coverage] Parsed ${rows.length} rows from ${source.file}`);
-                        if (rows.length > 0) {
-                            devLog(`[Deck Coverage] First row structure:`, rows[0]);
-                        }
                         
                         let processedRows = 0;
                         
@@ -289,13 +467,23 @@
                             // Skip basic energies from coverage tracking
                             if (isBasicEnergy(row.card_name)) return;
                             
-                            const archetypeKey = `${resolvedMeta}|${row.archetype}`;
+                            const cleanedArchetype = (typeof sanitizeTournamentArchetypeName === 'function')
+                                ? sanitizeTournamentArchetypeName(row.archetype)
+                                : String(row.archetype || '').trim();
+                            if (!cleanedArchetype) return;
+
+                            const archetypeKey = `${resolvedMeta}|${cleanedArchetype}`;
                             const tournamentDate = row.tournament_date || null; // e.g., "13th February 2026"
                             
                             // Extract the actual counts from CSV
                             // deck_count = how many decks of this archetype play THIS CARD
                             // total_decks_in_archetype = total number of decks in this archetype
-                            const deckCountWithThisCard = parseInt(row.deck_count) || 0;
+                            const parsedDeckCount = parseInt(row.deck_count) || 0;
+                            const parsedDeckInclusion = parseInt(row.deck_inclusion_count) || 0;
+                            const parsedMaxCount = parseInt(row.max_count) || 0;
+                            // Some rows miss deck_count but still provide max_count/deck_inclusion_count.
+                            // In that case infer at least 1 deck so coverage and max-copy badges stay consistent.
+                            const deckCountWithThisCard = parsedDeckCount || parsedDeckInclusion || (parsedMaxCount > 0 ? 1 : 0);
                             const totalDecksInArchetype = parseInt(row.total_decks_in_archetype) || deckCountWithThisCard;
                             
                             // Store total deck count for this archetype (only once per archetype)
@@ -353,11 +541,11 @@
                                 maxCount: Math.max(maxCountInDeck, currentEntry ? currentEntry.maxCount : 0),
                                 setCode: row.set_code || (currentEntry ? currentEntry.setCode : null)
                             });
-                            cardStats.archetypes.add(row.archetype);
+                            cardStats.archetypes.add(cleanedArchetype);
                             
                             // NEW: Populate filter maps
                             // Extract main Pokemon (first word of archetype)
-                            const mainPokemon = row.archetype.split(' ')[0].trim();
+                            const mainPokemon = cleanedArchetype.split(' ')[0].trim();
                             if (mainPokemon) {
                                 window.allMainPokemons.add(mainPokemon);
                                 if (!window.mainPokemonCardsMap.has(mainPokemon)) {
@@ -367,11 +555,11 @@
                             }
                             
                             // Track archetype
-                            window.allArchetypes.add(row.archetype);
-                            if (!window.archetypeCardsMap.has(row.archetype)) {
-                                window.archetypeCardsMap.set(row.archetype, new Set());
+                            window.allArchetypes.add(cleanedArchetype);
+                            if (!window.archetypeCardsMap.has(cleanedArchetype)) {
+                                window.archetypeCardsMap.set(cleanedArchetype, new Set());
                             }
-                            window.archetypeCardsMap.get(row.archetype).add(cardName);
+                            window.archetypeCardsMap.get(cleanedArchetype).add(cardName);
                             
                             // Track meta
                             if (processedRows <= 3) {
@@ -466,8 +654,22 @@
                     'Meta Live': 'SVI-ASC'
                 };
                 
-                // Create formats array sorted (newest to oldest - reverse alphabetical for SVI-XXX format)
-                const sortedFormats = Array.from(uniqueFormats).sort((a, b) => b.localeCompare(a));
+                // Sort newest -> oldest by the latest set code in the format label.
+                const getFormatSortTimestamp = (formatCode) => {
+                    const code = String(formatCode || '').trim().toUpperCase();
+                    if (!code) return 0;
+
+                    const latestCode = code.includes('-') ? code.split('-').pop() : code;
+                    const releaseDate = SET_RELEASE_DATES[latestCode] || SET_RELEASE_DATES[code] || SET_RELEASE_DATES.DEFAULT;
+                    const ts = Date.parse(releaseDate || '');
+                    return Number.isNaN(ts) ? 0 : ts;
+                };
+
+                const sortedFormats = Array.from(uniqueFormats).sort((a, b) => {
+                    const tsDiff = getFormatSortTimestamp(b) - getFormatSortTimestamp(a);
+                    if (tsDiff !== 0) return tsDiff;
+                    return b.localeCompare(a);
+                });
                 window.cardFormatsData = {
                     formats: sortedFormats.map(format => ({
                         code: format,
@@ -505,6 +707,88 @@
             } else {
                 console.warn('[Cards Tab] No formats available to populate');
             }
+        }
+
+        function populateRarityFilter(cards) {
+            const container = document.getElementById('rarityFilterOptions');
+            if (!container) return;
+
+            const preferredOrder = [
+                'Common',
+                'Uncommon',
+                'Rare',
+                'Holo Rare',
+                'Double Rare',
+                'Triple Rare',
+                'Ultra Rare',
+                'Illustration Rare',
+                'Special Illustration Rare',
+                'Secret Rare',
+                'Hyper Rare',
+                'Promo'
+            ];
+
+            const uniqueRarities = Array.from(new Set((cards || [])
+                .map(card => String(card?.rarity || '').trim())
+                .filter(rarity => rarity && rarity.toLowerCase() !== 'rarity')));
+
+            uniqueRarities.sort((a, b) => {
+                const idxA = preferredOrder.findIndex(v => v.toLowerCase() === a.toLowerCase());
+                const idxB = preferredOrder.findIndex(v => v.toLowerCase() === b.toLowerCase());
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.localeCompare(b);
+            });
+
+            container.innerHTML = uniqueRarities.map(rarity => (
+                `<label class="label-block"><input type="checkbox" value="${escapeHtml(rarity)}"> ${escapeHtml(rarity)}</label>`
+            )).join('');
+        }
+
+        function populateCategoryFilter() {
+            const container = document.getElementById('categoryFilterOptions');
+            if (!container) return;
+
+            const categories = [
+                { value: 'pokemon_all', label: 'Pokemon (All Types)' },
+                { value: 'pokemon_grass', label: 'Pokemon - Grass' },
+                { value: 'pokemon_fire', label: 'Pokemon - Fire' },
+                { value: 'pokemon_water', label: 'Pokemon - Water' },
+                { value: 'pokemon_lightning', label: 'Pokemon - Lightning' },
+                { value: 'pokemon_psychic', label: 'Pokemon - Psychic' },
+                { value: 'pokemon_fighting', label: 'Pokemon - Fighting' },
+                { value: 'pokemon_darkness', label: 'Pokemon - Darkness' },
+                { value: 'pokemon_metal', label: 'Pokemon - Metal' },
+                { value: 'pokemon_dragon', label: 'Pokemon - Dragon' },
+                { value: 'pokemon_colorless', label: 'Pokemon - Colorless' },
+                { value: 'pokemon_fairy', label: 'Pokemon - Fairy' },
+                { value: 'supporter', label: 'Supporter' },
+                { value: 'item', label: 'Item' },
+                { value: 'tool', label: 'Pokemon Tool' },
+                { value: 'stadium', label: 'Stadium' },
+                { value: 'special_energy', label: 'Special Energy' }
+            ];
+
+            container.innerHTML = categories.map(category => (
+                `<label class="label-block"><input type="checkbox" value="${category.value}"> ${category.label}</label>`
+            )).join('');
+        }
+
+        function populateDeckCoverageFilter() {
+            const container = document.getElementById('deckCoverageFilterOptions');
+            if (!container) return;
+
+            const thresholds = [
+                { value: '50', label: '>= 50%' },
+                { value: '70', label: '>= 70%' },
+                { value: '90', label: '>= 90%' },
+                { value: '100', label: '100%' }
+            ];
+
+            container.innerHTML = thresholds.map(threshold => (
+                `<label class="label-block"><input type="radio" name="deckCoverageFilter" value="${threshold.value}" onchange="filterAndRenderCards()"> ${threshold.label}</label>`
+            )).join('');
         }
         
         async function populateSetFilter(cards) {
@@ -663,8 +947,33 @@
             const container = document.getElementById('metaFormatOptions');
             if (!container || !window.allMetas) return;
             
-            // Sort by meta name (reverse chronological for date-based metas)
-            const sortedMetas = Array.from(window.allMetas).sort().reverse();
+            const normalizeMetaCode = (meta) => String(meta || '').trim().toUpperCase();
+            const isValidMetaCode = (meta) => {
+                const code = normalizeMetaCode(meta);
+                if (!/^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(code)) return false;
+                const parts = code.split('-');
+                if (parts.length !== 2) return false;
+                if (parts[0] === parts[1]) return false; // e.g. SVI-SVI
+                return true;
+            };
+
+            const getMetaTimestamp = (meta) => {
+                const code = normalizeMetaCode(meta);
+                const latest = code.includes('-') ? code.split('-').pop() : code;
+                const dateStr = SET_RELEASE_DATES[latest] || SET_RELEASE_DATES[code] || SET_RELEASE_DATES.DEFAULT;
+                const ts = Date.parse(dateStr || '');
+                return Number.isNaN(ts) ? 0 : ts;
+            };
+
+            // Keep only valid tournament windows and sort newest -> oldest.
+            const sortedMetas = Array.from(window.allMetas)
+                .map(normalizeMetaCode)
+                .filter(isValidMetaCode)
+                .sort((a, b) => {
+                    const tsDiff = getMetaTimestamp(b) - getMetaTimestamp(a);
+                    if (tsDiff !== 0) return tsDiff;
+                    return b.localeCompare(a);
+                });
             
             // Add separator before metas
             const separator = document.createElement('div');
@@ -727,6 +1036,11 @@
                 };
             }
 
+            if (window._cardsFilterEventsBound) {
+                return;
+            }
+            window._cardsFilterEventsBound = true;
+
             const searchInput = document.getElementById('cardSearch');
             
             // Debounced autocomplete to avoid excessive DOM updates per keystroke
@@ -753,18 +1067,18 @@
                 searchInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         hideCardAutocomplete();
+                    } else if (e.key === 'ArrowDown') {
+                        const firstItem = document.querySelector('#cardSearchAutocomplete .cards-autocomplete-item');
+                        if (firstItem) {
+                            e.preventDefault();
+                            firstItem.focus();
+                        }
                     }
                 });
+
+                searchInput.setAttribute('aria-autocomplete', 'list');
+                searchInput.setAttribute('aria-controls', 'cardSearchAutocomplete');
             }
-            
-            // All checkboxes in filter options
-            const filterContainers = document.querySelectorAll('.cards-filter-options');
-            filterContainers.forEach(container => {
-                const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-                checkboxes.forEach(cb => {
-                    cb.addEventListener('change', filterAndRenderCards);
-                });
-            });
             
             // Coverage radio buttons: clicking an already-selected radio deselects it
             document.querySelectorAll('#deckCoverageFilterOptions input[type="radio"]').forEach(radio => {
@@ -772,13 +1086,17 @@
                     if (this.dataset.wasChecked === 'true') {
                         this.checked = false;
                         this.dataset.wasChecked = 'false';
-                        filterAndRenderCards();
+                        window.scheduleFilterAndRenderCards(80);
                     } else {
                         document.querySelectorAll('#deckCoverageFilterOptions input[type="radio"]').forEach(r => r.dataset.wasChecked = 'false');
                         this.dataset.wasChecked = 'true';
                     }
                 });
             });
+
+            window.addEventListener('resize', () => {
+                initializeCardsFilterPanel();
+            }, { passive: true });
         }
         
         function showCardAutocomplete(searchTerm) {
@@ -817,9 +1135,10 @@
             dropdown.innerHTML = matches.map(card => {
                 // Count how many versions exist
                 const versions = window.allCardsData.filter(c => c.name === card.name).length;
+                const cardNameEsc = escapeJsStr(card.name);
                 
                 return `
-                    <div class="cards-autocomplete-item" onclick="selectCardFromAutocomplete('${escapeJsStr(card.name)}')">
+                    <div class="cards-autocomplete-item" role="option" tabindex="0" onclick="selectCardFromAutocomplete('${cardNameEsc}')" onkeydown="handleCardAutocompleteKeydown(event, '${cardNameEsc}')" aria-label="Select ${escapeHtml(card.name)} from autocomplete">
                         <img src="${card.image_url}" alt="${escapeHtml(card.name)}" loading="lazy">
                         <div class="cards-autocomplete-item-info">
                             <div class="cards-autocomplete-item-name">${escapeHtml(card.name)}</div>
@@ -830,15 +1149,45 @@
                 `;
             }).join('');
             
-                dropdown.classList.remove('d-none');
+            dropdown.setAttribute('role', 'listbox');
+            dropdown.setAttribute('aria-hidden', 'false');
+            dropdown.classList.remove('d-none');
         }
         
         function hideCardAutocomplete() {
             const dropdown = document.getElementById('cardSearchAutocomplete');
             if (dropdown) {
                 dropdown.classList.add('d-none');
+                dropdown.setAttribute('aria-hidden', 'true');
             }
         }
+
+        function handleCardAutocompleteKeydown(event, cardName) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                selectCardFromAutocomplete(cardName);
+                return;
+            }
+
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                hideCardAutocomplete();
+                const searchInput = document.getElementById('cardSearch');
+                if (searchInput) searchInput.focus();
+                return;
+            }
+
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                const items = Array.from(document.querySelectorAll('#cardSearchAutocomplete .cards-autocomplete-item'));
+                const currentIndex = items.indexOf(event.currentTarget);
+                if (currentIndex === -1 || items.length === 0) return;
+                const delta = event.key === 'ArrowDown' ? 1 : -1;
+                const nextIndex = (currentIndex + delta + items.length) % items.length;
+                items[nextIndex].focus();
+            }
+        }
+        window.handleCardAutocompleteKeydown = handleCardAutocompleteKeydown;
         
         function selectCardFromAutocomplete(cardName) {
             const searchInput = document.getElementById('cardSearch');
@@ -887,9 +1236,23 @@
             filterAndRenderCards();
         }
         
-        function filterAndRenderCards() {
+                function filterAndRenderCards(options = {}) {
+          try {
             if (!window.allCardsData || window.allCardsData.length === 0) {
                 console.warn('[Cards Tab] No cards loaded yet');
+                const content = document.getElementById('cardsContent');
+                const resultsInfo = document.getElementById('cardResultsInfo');
+                if (content) {
+                    content.innerHTML = getEmptyStateBoxHtml({ title: 'No Cards Loaded', description: 'Check your data files or reload the page.', icon: 'pokeball' });
+                }
+                if (resultsInfo) {
+                    resultsInfo.textContent = '0 cards found';
+                }
+                return;
+            }
+
+            if (cardsFilterRenderState.isFiltering) {
+                cardsFilterRenderState.pending = true;
                 return;
             }
             
@@ -921,6 +1284,29 @@
             const selectedMainPokemons = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value);
             const selectedArchetypes = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
             const selectedMetaFilters = Array.from(document.querySelectorAll('#metaFormatOptions input:checked')).filter(cb => cb.value.startsWith('meta:')).map(cb => cb.value.replace('meta:', ''));
+            const sortOrderSelect = document.getElementById('cardSortOrder');
+            const sortOrder = sortOrderSelect ? sortOrderSelect.value : 'set';
+
+            const signature = JSON.stringify({
+                searchTerm,
+                selectedMetas,
+                selectedSets,
+                selectedRarities,
+                selectedCategories,
+                selectedDeckCoverages,
+                selectedMainPokemons,
+                selectedArchetypes,
+                selectedMetaFilters,
+                sortOrder,
+                showOnlyOnePrint,
+                dataLen: window.allCardsData.length
+            });
+
+            if (!options.force && signature === cardsFilterRenderState.lastSignature) {
+                return;
+            }
+            cardsFilterRenderState.lastSignature = signature;
+            cardsFilterRenderState.isFiltering = true;
             
             devLog(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}, DeckCov: ${selectedDeckCoverages.length}, MainPkm: ${selectedMainPokemons.length}, Archetypes: ${selectedArchetypes.length}, MetaFilters: ${selectedMetaFilters.length}`);
             devLog(`[Filter Debug] Selected Meta Values:`, selectedMetas);
@@ -1209,8 +1595,6 @@
             devLog(`  - Failed main pokemon: ${failedMainPokemon}`);
             devLog(`  - Failed archetype: ${failedArchetype}`);
             devLog(`  - Failed meta filter: ${failedMetaFilter}`);
-            devLog(`[Cards Tab] Filtered ${window.filteredCardsData.length} cards from ${window.allCardsData.length} total`);
-            
             // Deduplicate cards (same card name, different prints) - prefer print from coverage data
             // Only deduplicate if showOnlyOnePrint is enabled
             if (showOnlyOnePrint) {
@@ -1220,7 +1604,25 @@
             // Apply sorting based on user selection
             sortCardsDatabase(window.filteredCardsData);
             
-            renderCardDatabase(window.filteredCardsData);
+                        renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
+                        cardsFilterRenderState.isFiltering = false;
+
+                        if (cardsFilterRenderState.pending) {
+                                cardsFilterRenderState.pending = false;
+                                window.scheduleFilterAndRenderCards(60);
+                        }
+          } catch (err) {
+                        cardsFilterRenderState.isFiltering = false;
+            console.error('[Cards Tab] filterAndRenderCards error:', err);
+            const content = document.getElementById('cardsContent');
+            if (content) {
+                content.innerHTML = '<div class="error" style="padding:20px;color:#c00;">' +
+                    '<h3>Error rendering cards</h3>' +
+                    '<p>' + (err.message || String(err)) + '</p>' +
+                    '<pre style="font-size:11px;white-space:pre-wrap;color:#666;">' + (err.stack || '') + '</pre>' +
+                    '</div>';
+            }
+          }
         }
         
         function togglePrintView() {
@@ -1388,7 +1790,7 @@
                 // Prefer: Common/Uncommon from newest set
                 const setOrder = {
                     // 2026 Sets (newest first)
-                    'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
+                    'POR': 117, 'M3': 116, 'ASC': 115, 'PFL': 114, 'MEG': 113, 'MEE': 112, 'MEP': 111,
                     'BLK': 110, 'WHT': 109, 'DRI': 108, 'JTG': 107, 'PRE': 106, 'SSP': 105,
                     // 2024-2025 Sets
                     'SCR': 104, 'SFA': 103, 'TWM': 102, 'TEF': 101, 'PAF': 100, 'PAR': 99,
@@ -1574,8 +1976,8 @@
             } else if (sortOrder === 'coverage') {
                 // Sort by deck coverage (highest first)
                 cards.sort((a, b) => {
-                    const coverageA = calculateDynamicCoverage(a.name.toLowerCase()).percentage;
-                    const coverageB = calculateDynamicCoverage(b.name.toLowerCase()).percentage;
+                    const coverageA = (calculateDynamicCoverage(a.name.toLowerCase()) || {}).percentage || 0;
+                    const coverageB = (calculateDynamicCoverage(b.name.toLowerCase()) || {}).percentage || 0;
                     
                     // Sort by coverage descending
                     if (coverageB !== coverageA) {
@@ -1637,9 +2039,12 @@
             }
         }
         
-        function renderCardDatabase(cards) {
+        function renderCardDatabase(cards, options = {}) {
             const content = document.getElementById('cardsContent');
             const resultsInfo = document.getElementById('cardResultsInfo');
+            const shouldScrollToTop = options.scrollToTop !== false;
+
+            destroyCardsVirtualGrid();
             
             if (cards.length === 0) {
                 content.innerHTML = '<div style="text-align: center; padding: 40px; color: #444;"><h2>No Cards Found</h2><p style="font-weight: 500;">Try adjusting your filter settings</p></div>';
@@ -1667,20 +2072,20 @@
             // Create pagination controls
             const paginationTop = createPaginationControls(cards.length, totalPages);
             
-            // Create card grid
+            // Pre-build name→prints index for fast altPrint lookup (once per render, not per card)
+            const namePrintsIndex = new Map();
+            if (window.userCollectionCounts && window.allCardsData) {
+                window.allCardsData.forEach(c => {
+                    if (!c.name) return;
+                    if (!namePrintsIndex.has(c.name)) namePrintsIndex.set(c.name, []);
+                    namePrintsIndex.get(c.name).push(c);
+                });
+            }
+            
+            // Create card grid and virtualize heavy card nodes using IO placeholders
             const grid = document.createElement('div');
             grid.className = 'card-database-grid';
-            
-            cardsToShow.forEach(card => {
-                // Skip cards with missing essential data
-                if (!card.name || !card.image_url) {
-                    return;
-                }
-                const cardEl = createCardDatabaseItem(card);
-                if (cardEl) {
-                    grid.appendChild(cardEl);
-                }
-            });
+            mountVirtualCardsGrid(grid, cardsToShow, (card) => createCardDatabaseItem(card, namePrintsIndex));
             
             // Create pagination controls for bottom
             const paginationBottom = createPaginationControls(cards.length, totalPages);
@@ -1691,8 +2096,85 @@
             content.appendChild(grid);
             content.appendChild(paginationBottom);
             
-            // Scroll to top of cards section
-            document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (shouldScrollToTop) {
+                // Scroll to top of cards section for filter/pagination changes.
+                document.getElementById('cards').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function destroyCardsVirtualGrid() {
+            if (cardsVirtualState.observer) {
+                cardsVirtualState.observer.disconnect();
+                cardsVirtualState.observer = null;
+            }
+            cardsVirtualState.slots = [];
+            cardsVirtualState.renderedCount = 0;
+        }
+
+        function mountVirtualCardsGrid(grid, cards, createNode) {
+            destroyCardsVirtualGrid();
+
+            const fragment = document.createDocumentFragment();
+            cardsVirtualState.slots = cards.map((card) => {
+                const slot = document.createElement('div');
+                slot.className = 'virtual-card-slot';
+                slot.style.minHeight = `${cardsVirtualState.estimatedHeight}px`;
+                slot.dataset.rendered = 'false';
+                slot._cardData = card;
+                fragment.appendChild(slot);
+                return slot;
+            });
+            grid.appendChild(fragment);
+
+            const renderSlot = (slot) => {
+                if (!slot || slot.dataset.rendered === 'true') return;
+                const node = createNode(slot._cardData);
+                slot.textContent = '';
+                if (node) {
+                    slot.appendChild(node);
+                    slot.dataset.rendered = 'true';
+                    cardsVirtualState.renderedCount += 1;
+                    requestAnimationFrame(() => {
+                        const measured = Math.round(slot.getBoundingClientRect().height || 0);
+                        if (measured > 120) {
+                            slot.style.minHeight = `${measured}px`;
+                            cardsVirtualState.estimatedHeight = Math.round((cardsVirtualState.estimatedHeight * 0.85) + (measured * 0.15));
+                        }
+                    });
+                }
+            };
+
+            const unrenderSlot = (slot) => {
+                if (!slot || slot.dataset.rendered !== 'true') return;
+                const measured = Math.round(slot.getBoundingClientRect().height || cardsVirtualState.estimatedHeight);
+                slot.textContent = '';
+                slot.dataset.rendered = 'false';
+                slot.style.minHeight = `${Math.max(120, measured)}px`;
+                cardsVirtualState.renderedCount = Math.max(0, cardsVirtualState.renderedCount - 1);
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    const slot = entry.target;
+                    if (entry.isIntersecting) {
+                        renderSlot(slot);
+                    } else {
+                        unrenderSlot(slot);
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '700px 0px 700px 0px',
+                threshold: 0.01
+            });
+
+            cardsVirtualState.observer = observer;
+            cardsVirtualState.slots.forEach((slot, index) => {
+                observer.observe(slot);
+                if (index < 16) {
+                    renderSlot(slot);
+                }
+            });
         }
         
         function createPaginationControls(totalCards, totalPages) {
@@ -1703,6 +2185,7 @@
             leftControls.className = 'pagination-left-controls';
             
             const copyBtn = document.createElement('button');
+            copyBtn.type = 'button';
             copyBtn.textContent = '📋 Copy Names';
             copyBtn.title = 'Copy all filtered card names to clipboard';
             copyBtn.className = 'btn-green btn-outline btn-lg';
@@ -1728,6 +2211,7 @@
             
             // Previous button
             const prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
             prevBtn.textContent = '← Previous';
             prevBtn.className = 'btn-blue btn-outline btn-lg';
             prevBtn.disabled = currentCardsPage === 1 || showAllCards;
@@ -1780,6 +2264,7 @@
                 }
                 
                 const pageBtn = document.createElement('button');
+                pageBtn.type = 'button';
                 pageBtn.textContent = page;
                 pageBtn.className = 'btn-blue btn-outline btn-sm pagination-page-btn';
                 if (page === currentCardsPage) {
@@ -1796,6 +2281,7 @@
             
             // Next button
             const nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
             nextBtn.textContent = 'Next →';
             nextBtn.className = 'btn-blue btn-outline btn-lg';
             nextBtn.disabled = currentCardsPage === totalPages || showAllCards;
@@ -1820,6 +2306,7 @@
             rightControls.className = 'pagination-right-controls';
             
             const toggleShowAllBtn = document.createElement('button');
+            toggleShowAllBtn.type = 'button';
             toggleShowAllBtn.textContent = showAllCards ? '📄 Paginated' : '📋 Show All';
             toggleShowAllBtn.title = showAllCards ? 'Switch back to paginated view' : 'Show all cards at once';
             toggleShowAllBtn.className = 'btn-purple btn-outline btn-lg';
@@ -1839,9 +2326,9 @@
             return container;
         }
         
-        function createCardDatabaseItem(card) {
+        function createCardDatabaseItem(card, namePrintsIndex) {
             // Validate essential fields
-            if (!card.name || !card.image_url) {
+            if (!card.name) {
                 return null;
             }
             
@@ -1875,25 +2362,23 @@
             const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
             const userWantsCard = window.userWishlist && window.userWishlist.has(cardId);
 
-            // Also show ownership of other prints to avoid confusing "owned but not marked" states.
-            let altPrintOwnedCount = 0;
-            if (ownedCount === 0 && window.userCollectionCounts && window.allCardsData) {
-                const sameNamePrints = window.allCardsData.filter(c => c.name === card.name && (c.set !== displaySet || c.number !== displayNumber));
-                sameNamePrints.forEach(v => {
-                    const altId = `${card.name}|${v.set}|${v.number}`;
-                    altPrintOwnedCount += window.userCollectionCounts.get(altId) || 0;
-                });
-            }
+            // Show other-print ownership strictly from the card's international_prints family.
+            const altPrintOwnedCount = ownedCount === 0
+                ? getOtherInternationalPrintOwnedCount(displaySet, displayNumber, window.userCollectionCounts)
+                : 0;
             
             // Format price button
             let priceButton = '';
             if (card.eur_price && card.eur_price !== '' && card.eur_price !== '0' && card.eur_price !== 'N/A') {
                 const price = parseFloat(card.eur_price.replace(',', '.'));
                 if (!isNaN(price)) {
-                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" class="card-database-price-btn" title="View on CardMarket">
-                        Ø ${price.toFixed(2).replace('.', ',')} €
+                    priceButton = `<a href="${displayCardMarketUrl}" target="_blank" rel="noopener noreferrer" class="card-database-price-btn" title="View on CardMarket" aria-label="View ${displayName} on CardMarket (opens in new tab)">
+                        <span class="card-database-price-value">Ø ${price.toFixed(2).replace('.', ',')} €</span>
                     </a>`;
                 }
+            }
+            if (!priceButton) {
+                priceButton = `<div class="card-database-price-placeholder" title="No CardMarket price found">No Price</div>`;
             }
             
             // Calculate DYNAMIC Deck Coverage based on active filters
@@ -1903,10 +2388,7 @@
                 const percentage = coverageStats.percentage || 0;
                 const deckCount = coverageStats.deckCount || 0;
                 const archetypeCount = coverageStats.archetypeCount || 0;
-                // Get max count from cardDeckCoverageMap
-                const cardNameNorm = normalizeCardName(card.name);
-                const cardCoverageData = window.cardDeckCoverageMap ? window.cardDeckCoverageMap.get(cardNameNorm) : null;
-                const maxCount = cardCoverageData ? (cardCoverageData.maxCountOverall || 0) : 0;
+                const maxCount = coverageStats.maxCount || 0;
                 let coverageColor = '#95a5a6'; // Gray for < 50%
                 let coverageIcon = '\u{1F4CA}'; // bar chart
                 if (percentage >= 99.5) {
@@ -1924,20 +2406,24 @@
                 }
                 // Format the display with max count
                 const maxCountText = maxCount > 0 ? ` · Max: ${maxCount}x` : '';
+                const coveragePctLabel = (percentage > 0 && percentage < 0.1) ? '<0.1' : percentage.toFixed(1);
                 coverageDisplay = `<div class="card-database-coverage" style="background: ${coverageColor};" title="${deckCount} Decks / ${archetypeCount} Archetypes${maxCount > 0 ? ' · Max: ' + maxCount + 'x copies per deck' : ''}">
-                    ${coverageIcon} ${percentage.toFixed(1)}% Coverage${maxCountText}
+                    ${coverageIcon} ${coveragePctLabel}% Coverage${maxCountText}
                 </div>`;
             }
+            const limitlessButton = (card.set && card.number)
+                ? `<button type="button" onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn card-database-limitless-btn" title="View on Limitless" aria-label="Open ${displayName} on Limitless">Limitless</button>`
+                : '<div class="card-database-limitless-placeholder"></div>';
             
             item.innerHTML = `
-                <div class="pos-rel">
-                    <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" onclick="showImageView('${escapedImageUrl}', '${escapedName}')">
+                <div class="pos-rel card-database-image-wrap">
+                    <img src="${escapedImageUrl}" alt="${displayName}" loading="lazy" decoding="async" onclick="showImageView('${escapedImageUrl}', '${escapedName}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showImageView('${escapedImageUrl}', '${escapedName}');}" aria-label="Open ${displayName} image in fullscreen">
                     ${ownedCount > 0 ? `<div class="card-database-owned-badge">${ownedCount}</div>` : ''}
-                    ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="You own other prints of this card">${altPrintOwnedCount}</div>` : ''}
-                    <div class="pos-abs card-action-row-wide" style="top: 5px; right: 5px;">
-                        <button data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)">+</button>
-                        <button data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-green card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#4CAF50' : '#fff'};" title="Remove from collection (${ownedCount}/4)">-</button>
-                        <button data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                    ${ownedCount === 0 && altPrintOwnedCount > 0 ? `<div class="card-database-alt-owned-badge" title="Owned other INT prints">${altPrintOwnedCount}</div>` : ''}
+                    <div class="pos-abs card-action-row-wide card-database-top-actions">
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${displayName} to collection">+</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} from collection">-</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}" aria-label="${userWantsCard ? 'Remove ' + displayName + ' from wishlist' : 'Add ' + displayName + ' to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                     </div>
                 </div>
                 <div class="card-database-info">
@@ -1948,12 +2434,14 @@
                     </div>
                     <div class="card-database-button-row">
                         ${priceButton}
-                        <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}">
+                        <div class="card-database-rarity-btn ${rarityClass} rarity-badge" data-card-name="${escapeHtml(card.name || '')}" data-card-set="${escapeHtml(displaySet)}" data-card-number="${escapeHtml(displayNumber)}" onclick="openRarityFromCardDbButton(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRarityFromCardDbButton(this);}" style="--rarity-btn-bg: #888;" title="View all prints for ${displayRarity}" role="button" tabindex="0" aria-label="Open print variants for ${displayName}">
                             ${displayRarity}
                         </div>
-                        <button onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn" title="Add to proxy queue">Proxy</button>
                     </div>
-                    ${(card.set && card.number) ? `<button onclick="openLimitlessCard('${escapeJsStr(card.set)}', '${escapeJsStr(card.number)}')" class="btn-gradient-blue card-limitless-btn" title="View on Limitless">L Limitless</button>` : ''}
+                    <div class="card-database-secondary-row">
+                        <button type="button" onclick="addCardToProxy('${escapedName}', '${proxySetCode}', '${proxySetNumber}', 1)" class="btn-gradient-red card-proxy-btn card-database-proxy-btn" title="Add to proxy queue" aria-label="Add ${displayName} to proxy queue">Proxy</button>
+                        ${limitlessButton}
+                    </div>
                     ${coverageDisplay}
                 </div>
             `;
@@ -2078,8 +2566,10 @@
             // If no filters are active, use all decks from the global calculation
             if (selectedMainPokemons.length === 0 && selectedArchetypes.length === 0 && selectedMetaFilters.length === 0) {
                 let totalDecksWithCard = 0;
+                let filteredMaxCount = 0;
                 cardStats.archetypesWithCard.forEach((entry, archetypeKey) => {
                     const deckCount = typeof entry === 'number' ? entry : (entry.deckCount || 0);
+                    const maxCount = typeof entry === 'number' ? 0 : (entry.maxCount || 0);
                     const tournamentDate = parseTournamentDate(entry.tournamentDate || null);
                     const [meta, archetype] = archetypeKey.split('|');
                     
@@ -2094,6 +2584,7 @@
                     // If no tournament date (like City League), we DON'T filter - assume it's current
                     
                     totalDecksWithCard += deckCount;
+                    filteredMaxCount = Math.max(filteredMaxCount, maxCount);
                 });
                 
                 if (window.totalUniqueDecks) {
@@ -2102,7 +2593,8 @@
                         percentage: percentage,
                         deckCount: totalDecksWithCard,
                         archetypeCount: cardStats.archetypes.size,
-                        totalDecks: window.totalUniqueDecks
+                        totalDecks: window.totalUniqueDecks,
+                        maxCount: filteredMaxCount
                     };
                 }
                 return null;
@@ -2194,6 +2686,7 @@
             
             // Count how many decks have this card
             let decksWithCard = 0;
+            let filteredMaxCount = 0;
             const matchingArchetypes = new Set();
             
             if (cardNameLower === 'hawlucha') {
@@ -2239,6 +2732,7 @@
                     // If no tournament date, we DON'T filter - assume it's current
                     
                     decksWithCard += deckCount;
+                    filteredMaxCount = Math.max(filteredMaxCount, (typeof entry === 'number' ? 0 : (entry.maxCount || 0)));
                     // Extract archetype from archetypeKey (format: meta|archetype)
                     const archetype = archetypeKey.split('|')[1];
                     if (archetype) {
@@ -2292,7 +2786,8 @@
                 percentage: percentage,
                 deckCount: decksWithCard,
                 archetypeCount: matchingArchetypes.size,
-                totalDecks: totalFilteredDecks
+                totalDecks: totalFilteredDecks,
+                maxCount: filteredMaxCount
             };
         }
         
@@ -2309,6 +2804,35 @@
         
         // Rarity Switcher Functions
         let currentRaritySwitcherCard = null;
+
+        function hasLoadedCardDatabaseForRaritySwitcher() {
+            return Array.isArray(window.allCardsDatabase) && window.allCardsDatabase.length > 0;
+        }
+
+        async function ensureCardDatabaseReadyForRaritySwitcher(options = {}) {
+            const maxWaitMs = Number(options.maxWaitMs) > 0 ? Number(options.maxWaitMs) : 5000;
+            const pollIntervalMs = Number(options.pollIntervalMs) > 0 ? Number(options.pollIntervalMs) : 100;
+
+            if (hasLoadedCardDatabaseForRaritySwitcher()) return true;
+
+            if (typeof loadAllCardsDatabase === 'function') {
+                try {
+                    await Promise.resolve(loadAllCardsDatabase());
+                } catch (err) {
+                    devWarn('[RaritySwitch][ready] loadAllCardsDatabase failed', err);
+                }
+            }
+
+            if (hasLoadedCardDatabaseForRaritySwitcher()) return true;
+
+            const startedAt = Date.now();
+            while ((Date.now() - startedAt) < maxWaitMs) {
+                await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+                if (hasLoadedCardDatabaseForRaritySwitcher()) return true;
+            }
+
+            return false;
+        }
 
         function resolveRaritySwitchTarget(cardName, deckKey, sourceHint = '') {
             const normalizedActualName = normalizeCardName(cardName || '');
@@ -2411,14 +2935,67 @@
             return { source: sourceHint || '', oldKey: deckKey, count: 0 };
         }
 
-        function openRaritySwitcher(cardName, deckKey, sourceHint = '') {
-            if (!window.allCardsDatabase) {
+        function getRaritySwitcherDeckContext(source, profileDeckId = '') {
+            if (profileDeckId) {
+                const profileDeck = (window.userDecks || []).find(d => String(d && d.id) === String(profileDeckId));
+                const profileCards = profileDeck && profileDeck.cards && typeof profileDeck.cards === 'object'
+                    ? profileDeck.cards
+                    : null;
+                if (!profileDeck || !profileCards) return null;
+                return {
+                    type: 'profile',
+                    source: 'profile',
+                    profileDeckId,
+                    deck: profileCards,
+                    profileDeck
+                };
+            }
+
+            const deckContexts = {
+                cityLeague: { deck: window.cityLeagueDeck || {}, orderKey: 'cityLeagueDeckOrder' },
+                currentMeta: { deck: window.currentMetaDeck || {}, orderKey: 'currentMetaDeckOrder' },
+                pastMeta: { deck: window.pastMetaDeck || {}, orderKey: 'pastMetaDeckOrder' }
+            };
+            if (!deckContexts[source]) return null;
+            return {
+                type: 'temporary',
+                source,
+                deck: deckContexts[source].deck,
+                orderKey: deckContexts[source].orderKey
+            };
+        }
+
+        function getDeckDistributionForCard(deckObj, cardName) {
+            const distribution = new Map();
+            let total = 0;
+            const wanted = normalizeCardName(cardName);
+            Object.entries(deckObj || {}).forEach(([key, qty]) => {
+                const count = parseInt(qty, 10) || 0;
+                if (count <= 0) return;
+                const match = String(key).match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                const keyName = match ? match[1] : key;
+                if (normalizeCardName(keyName) !== wanted) return;
+                total += count;
+                if (match) {
+                    const set = String(match[2] || '').toUpperCase();
+                    const number = String(match[3] || '').toUpperCase();
+                    distribution.set(`${set}-${number}`, count);
+                }
+            });
+            return { distribution, total };
+        }
+
+        async function openRaritySwitcher(cardName, deckKey, sourceHint = '') {
+            const isReady = await ensureCardDatabaseReadyForRaritySwitcher();
+            if (!isReady) {
                 showToast('Card database not loaded yet...', 'info');
                 return;
             }
 
+            const safeDeckKey = String(deckKey || '');
+
             // Extract card name from deckKey if needed (handle "CardName (SET NUM)" format)
-            const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
+            const baseNameMatch = safeDeckKey.match(/^(.+?)\s*\(/);
             const actualCardName = baseNameMatch ? baseNameMatch[1] : cardName;
             const normalizedActualCardName = normalizeCardName(actualCardName);
 
@@ -2430,7 +3007,7 @@
             };
             
             // Extract set and number from deckKey (e.g., "Boss's Orders (RCL 189)" -> set="RCL", number="189")
-            const setNumMatch = deckKey.match(/\(([A-Z0-9]+)\s+(\d+[A-Z]*)\)/);
+            const setNumMatch = safeDeckKey.match(/\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)/);
             let currentSet = '';
             let currentNumber = '';
             if (setNumMatch) {
@@ -2438,19 +3015,28 @@
                 currentNumber = setNumMatch[2];
             }
             
-            devLog(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${deckKey}, actualCardName: ${actualCardName}`);
+            devLog(`[openRaritySwitcher] cardName: ${cardName}, deckKey: ${safeDeckKey}, actualCardName: ${actualCardName}`);
 
-            const resolvedTarget = resolveRaritySwitchTarget(actualCardName, deckKey, sourceHint);
+            const resolvedTarget = resolveRaritySwitchTarget(actualCardName, safeDeckKey, sourceHint);
             currentRaritySwitcherCard = {
                 cardName: actualCardName,
-                deckKey,
+                deckKey: safeDeckKey,
                 source: resolvedTarget.source || sourceHint || '',
-                resolvedOldKey: resolvedTarget.oldKey || deckKey,
+                resolvedOldKey: resolvedTarget.oldKey || safeDeckKey,
                 resolvedCount: resolvedTarget.count || 0,
                 profileDeckId: resolvedTarget.profileDeckId || (String(sourceHint || '').startsWith('profile|') ? String(sourceHint).slice('profile|'.length) : '')
             };
+
+            const activeDeckContext = getRaritySwitcherDeckContext(
+                currentRaritySwitcherCard.source,
+                currentRaritySwitcherCard.profileDeckId
+            );
+            const activeDistribution = activeDeckContext
+                ? getDeckDistributionForCard(activeDeckContext.deck, actualCardName)
+                : { distribution: new Map(), total: 0 };
+            currentRaritySwitcherCard.totalCopies = activeDistribution.total;
             devLog('[RaritySwitch][open] resolved target', {
-                input: { cardName, deckKey, sourceHint },
+                input: { cardName, deckKey: safeDeckKey, sourceHint },
                 resolved: currentRaritySwitcherCard
             });
             
@@ -2590,6 +3176,11 @@
 
             // Build rarity options
             const optionsList = document.getElementById('rarityOptionsList');
+            if (!optionsList) {
+                console.error('[openRaritySwitcher] #rarityOptionsList not found in DOM');
+                showToast('Rarity switcher UI not available.', 'warning', 4000);
+                return;
+            }
             optionsList.innerHTML = '';
 
             versions.forEach(version => {
@@ -2598,11 +3189,9 @@
                 
                 // Check if this is the current version
                 const versionKey = `${actualCardName} (${version.set} ${version.number})`;
-                if (deckKey === versionKey) {
+                if (safeDeckKey === versionKey) {
                     optionDiv.classList.add('selected');
                 }
-                
-                optionDiv.onclick = () => selectRarityVersion(version.set, version.number, deckKey, actualCardName, (currentRaritySwitcherCard && currentRaritySwitcherCard.source) || '');
                 
                 let imageHtml = '';
                 const imageUrl = getUnifiedCardImage(version.set, version.number) || version.image_url || '';
@@ -2648,6 +3237,12 @@
                 const _rsOtherPrintLine = _rsOtherPrintsQty > 0
                     ? `<div class="card-database-other-prints-line">✨ Andere Prints: ${_rsOtherPrintsQty}x</div>`
                     : '';
+
+                const optionSet = String(version.set || '').toUpperCase();
+                const optionNumber = String(version.number || '').toUpperCase();
+                const optionDistributionKey = `${optionSet}-${optionNumber}`;
+                const assignedQty = activeDistribution.distribution.get(optionDistributionKey) || 0;
+                const safeOptionCardName = escapeJsStr(actualCardName);
                 
                 optionDiv.innerHTML = `
                     ${imageHtml}
@@ -2657,9 +3252,29 @@
                         ${_rsOwnedLine}
                         ${_rsOtherPrintLine}
                     </div>
+                    <div class="rarity-option-qty-wrap">
+                        <label class="rarity-option-qty-label">Deck Qty</label>
+                        <input
+                            type="number"
+                            class="rarity-option-qty-input"
+                            min="0"
+                            max="60"
+                            step="1"
+                            value="${assignedQty}"
+                            data-set="${optionSet}"
+                            data-number="${optionNumber}"
+                            onclick="event.stopPropagation();"
+                            oninput="this.value = Math.max(0, Math.min(60, parseInt(this.value || '0', 10) || 0));"
+                        >
+                    </div>
                     <div class="rarity-badge" style="--rarity-badge-bg: ${rarityBadgeColor};">
                         ${version.rarity || 'Unknown'}
                     </div>
+                    <button class="btn btn-primary rarity-option-swap-all-btn"
+                            onclick="event.stopPropagation(); selectRarityVersion('${optionSet}', '${optionNumber}', '${escapeJsStr(safeDeckKey)}', '${safeOptionCardName}', '${escapeJsStr((currentRaritySwitcherCard && currentRaritySwitcherCard.source) || '')}')"
+                            title="Alle Kopien auf diesen Print wechseln">
+                        Swap All
+                    </button>
                     ${cardmarketUrl ? `
                         <button class="${cardmarketBtnClass} card-database-price-btn" 
                                 onclick="event.stopPropagation(); window.open('${cardmarketUrl}', '_blank');" 
@@ -2672,8 +3287,28 @@
                 optionsList.appendChild(optionDiv);
             });
 
+            const controlsHost = document.getElementById('raritySwitcherDistributionControls');
+            const totalCopies = currentRaritySwitcherCard.totalCopies || 0;
+            const controlsHtml = `
+                <div class="rarity-switcher-modal-buttons" id="raritySwitcherDistributionControls">
+                    <div class="rarity-distribution-summary">Deck copies: <strong>${totalCopies}</strong>. Sum of all "Deck Qty" fields must match.</div>
+                    <button class="btn btn-primary" onclick="applyRarityDistribution()">Apply Quantities</button>
+                    <button class="btn btn-secondary" onclick="closeRaritySwitcher()">Close</button>
+                </div>
+            `;
+            if (controlsHost) {
+                controlsHost.outerHTML = controlsHtml;
+            } else {
+                optionsList.insertAdjacentHTML('afterend', controlsHtml);
+            }
+
             document.getElementById('raritySwitcherTitle').textContent = `${actualCardName} - Rarity Switcher`;
             const modal = document.getElementById('raritySwitcherModal');
+            if (!modal) {
+                console.error('[openRaritySwitcher] #raritySwitcherModal not found in DOM');
+                showToast('Rarity switcher modal not available.', 'warning', 4000);
+                return;
+            }
             modal.classList.add('show');
         }
 
@@ -2865,11 +3500,108 @@
             closeRaritySwitcher();
         }
 
+        async function applyRarityDistribution() {
+            if (!currentRaritySwitcherCard) {
+                showToast('No active rarity selection.', 'warning');
+                return;
+            }
+
+            const cardName = currentRaritySwitcherCard.cardName || '';
+            const expectedTotal = parseInt(currentRaritySwitcherCard.totalCopies, 10) || 0;
+            if (expectedTotal <= 0) {
+                showToast('Card is not present in the active deck.', 'warning');
+                return;
+            }
+
+            const qtyInputs = Array.from(document.querySelectorAll('#rarityOptionsList .rarity-option-qty-input'));
+            if (qtyInputs.length === 0) {
+                showToast('No print options available.', 'warning');
+                return;
+            }
+
+            const desiredEntries = [];
+            let desiredTotal = 0;
+            qtyInputs.forEach(input => {
+                const setCode = String(input.dataset.set || '').toUpperCase();
+                const setNumber = String(input.dataset.number || '').toUpperCase();
+                const qty = Math.max(0, parseInt(input.value || '0', 10) || 0);
+                if (!setCode || !setNumber || qty <= 0) return;
+                desiredEntries.push({ setCode, setNumber, qty, key: `${cardName} (${setCode} ${setNumber})` });
+                desiredTotal += qty;
+            });
+
+            if (desiredTotal !== expectedTotal) {
+                showToast(`Total qty must be ${expectedTotal} (currently ${desiredTotal}).`, 'warning', 4500);
+                return;
+            }
+
+            const deckContext = getRaritySwitcherDeckContext(
+                currentRaritySwitcherCard.source,
+                currentRaritySwitcherCard.profileDeckId
+            );
+            if (!deckContext || !deckContext.deck) {
+                showToast('Unable to resolve active deck.', 'warning');
+                return;
+            }
+
+            const wantedName = normalizeCardName(cardName);
+            const keysToRemove = Object.keys(deckContext.deck).filter(key => {
+                const keyMatch = String(key).match(/^(.+?)\s*\(/);
+                const keyName = keyMatch ? keyMatch[1] : key;
+                return normalizeCardName(keyName) === wantedName;
+            });
+
+            keysToRemove.forEach(key => delete deckContext.deck[key]);
+            desiredEntries.forEach(entry => {
+                deckContext.deck[entry.key] = entry.qty;
+            });
+
+            if (deckContext.type === 'profile') {
+                const profileDeck = deckContext.profileDeck;
+                const updatedProfileDeck = {
+                    ...profileDeck,
+                    cards: deckContext.deck,
+                    totalCards: Object.values(deckContext.deck).reduce((sum, qty) => sum + (parseInt(qty, 10) || 0), 0)
+                };
+                if (typeof saveDeck === 'function') {
+                    await saveDeck(updatedProfileDeck);
+                }
+                if (typeof updateDecksUI === 'function') {
+                    updateDecksUI();
+                }
+            } else {
+                const order = Array.isArray(window[deckContext.orderKey]) ? window[deckContext.orderKey] : [];
+                const cleanedOrder = order.filter(key => {
+                    const keyMatch = String(key).match(/^(.+?)\s*\(/);
+                    const keyName = keyMatch ? keyMatch[1] : key;
+                    return normalizeCardName(keyName) !== wantedName;
+                });
+                desiredEntries.forEach(entry => cleanedOrder.push(entry.key));
+                window[deckContext.orderKey] = cleanedOrder;
+                updateDeckCountAndDisplay(deckContext.source);
+            }
+
+            const firstPrint = desiredEntries[0];
+            if (firstPrint) {
+                setRarityPreference(cardName, { mode: 'specific', set: firstPrint.setCode, number: firstPrint.setNumber });
+            }
+
+            showToast('Print quantities updated.', 'success');
+            closeRaritySwitcher();
+        }
+
         function closeRaritySwitcher() {
             const modal = document.getElementById('raritySwitcherModal');
             modal.classList.remove('show');
             currentRaritySwitcherCard = null;
         }
+
+        // Explicit exports for inline onclick handlers across all tabs.
+        window.openRaritySwitcher = openRaritySwitcher;
+        window.closeRaritySwitcher = closeRaritySwitcher;
+        window.selectRarityVersion = selectRarityVersion;
+        window.applyRarityDistribution = applyRarityDistribution;
+        window.openRaritySwitcherFromDB = openRaritySwitcherFromDB;
         
         // Add ESC key handler for Rarity Switcher
         document.addEventListener('keydown', function(e) {
@@ -2946,8 +3678,9 @@
                 return;
             }
             
-            // Open Cardmarket URL in new tab
-            window.open(cardmarketUrl, '_blank');
+            // Strip Limitless tracking params, add German seller + EN/DE language filter
+            const cleanUrl = cardmarketUrl.split('?')[0];
+            window.open(cleanUrl + '?sellerCountry=7&language=1,3', '_blank');
         }
 
         function openLimitlessCard(setCode, setNumber) {

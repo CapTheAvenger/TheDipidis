@@ -61,7 +61,7 @@ async function addToCollection(cardId) {
     
     // Re-render cards to show green checkmark
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData);
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
     }
   } catch (error) {
     console.error('Error adding to collection:', error);
@@ -102,7 +102,7 @@ async function removeFromCollection(cardId) {
     
     // Re-render cards to update checkmark
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData);
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
     }
   } catch (error) {
     console.error('Error removing from collection:', error);
@@ -140,7 +140,7 @@ async function addToWishlist(cardId) {
     
     // Re-render cards to update wishlist button
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData);
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
     }
   } catch (error) {
     console.error('Error adding to wishlist:', error);
@@ -166,7 +166,7 @@ async function removeFromWishlist(cardId) {
     
     // Re-render cards to update wishlist button
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData);
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
     }
   } catch (error) {
     console.error('Error removing from wishlist:', error);
@@ -726,14 +726,26 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
       if (card && card.image_url) {
         totalCards++;
         
-        // Apply search filter
+        // Apply search filter - Omni-Search: name (EN/DE), set+number, Pokédex number
         if (searchFilter) {
           const searchLower = searchFilter.toLowerCase();
-          const matchesName = card.name.toLowerCase().includes(searchLower);
-          const matchesSet = cardSet.toLowerCase().includes(searchLower);
-          const matchesNumber = cardNumber.toLowerCase().includes(searchLower);
-          
-          if (!matchesName && !matchesSet && !matchesNumber) {
+          const nameEn = (card.name_en || card.name || '').toLowerCase();
+          const nameDe = (card.name_de || card.card_name_de || '').toLowerCase();
+          const setCode = String(cardSet || '').toLowerCase();
+          const number = String(cardNumber || '').toLowerCase();
+          const dexNum = String(card.pokedex_number || '').toLowerCase();
+          const setNumSpace = `${setCode} ${number}`;
+          const setNumCombined = `${setCode}${number}`;
+
+          const matchesSearch =
+            nameEn.includes(searchLower) ||
+            nameDe.includes(searchLower) ||
+            setNumSpace.includes(searchLower) ||
+            setNumCombined.includes(searchLower) ||
+            (dexNum !== '' && dexNum === searchLower) ||
+            (searchLower.length >= 3 && dexNum !== '' && dexNum.includes(searchLower));
+
+          if (!matchesSearch) {
             return; // Skip this card
           }
         }
@@ -775,7 +787,7 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
 
       collectionHtml.push(`
           <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
-            <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
+            <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
             <div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${ownedCount}x owned">${ownedCount}x</div>
             <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
               <button onclick="addToCollection('${safeCardIdJs}')" style="background: #27ae60; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${ownedCount}/4)">+</button>
@@ -801,12 +813,12 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
     if (collectionHtml.length > 0) {
       collectionGrid.innerHTML = collectionHtml.join('');
     } else if (searchFilter) {
-      collectionGrid.innerHTML = '<p style="color: #999;">No cards found matching your search.</p>';
+      collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current search filter.', icon: 'cards' });
     } else {
-      collectionGrid.innerHTML = '<p style="color: #999;">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>';
+      collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: '➕ Browse Cards', buttonOnclick: "switchTab('cards')" });
     }
   } else if (collectionGrid) {
-    collectionGrid.innerHTML = '<p style="color: #999;">No cards in collection yet. Start adding cards by clicking the "+" button on card images!</p>';
+    collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: '➕ Browse Cards', buttonOnclick: "switchTab('cards')" });
   }
 
   // Update tab counter
@@ -971,7 +983,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
 
       wishlistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
-          <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
+          <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
           <button onclick="removeFromWishlist('${safeCardIdJs}')" style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" title="Remove from wishlist">
             ×
           </button>
@@ -995,9 +1007,9 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
   if (wishlistHtml.length > 0) {
     wishlistGrid.innerHTML = wishlistHtml.join('');
   } else if (searchFilter || setFilter) {
-    wishlistGrid.innerHTML = '<p style="color: #999;">No cards found matching your filters.</p>';
+    wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current filters.', icon: 'cards' });
   } else {
-    wishlistGrid.innerHTML = '<p style="color: #999;">No cards in wishlist yet</p>';
+    wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Wishlist is empty!', description: 'Add cards to your wishlist by clicking the ♡ button on any card.', icon: 'pokeball' });
   }
 }
 
@@ -1066,7 +1078,7 @@ function updateDecksUI() {
   }
 
   if (!window.userDecks || window.userDecks.length === 0) {
-    decksGrid.innerHTML = '<p style="color: #999;">No saved decks yet. Build a deck and save it to see it here!</p>';
+    decksGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No saved Decks yet!', description: 'Build a deck in the City League or Current Meta tab and save it to see it here.', icon: 'pokeball', buttonText: '🏗️ Build a Deck', buttonOnclick: "switchTab('cityLeague')" });
     return;
   }
   
@@ -1105,7 +1117,11 @@ function updateDecksUI() {
   console.log('[updateDecksUI] Building deck list with', window.userDecks.length, 'decks');
 
   function normalizeMyDeckSetCode(value) {
-    return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return String(value || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[?#].*$/, '')
+      .replace(/[^A-Z0-9]/g, '');
   }
 
   function normalizeMyDeckCardNumber(value) {
@@ -1114,6 +1130,86 @@ function updateDecksUI() {
       .toUpperCase()
       .replace(/[?#].*$/, '')
       .replace(/[^A-Z0-9]/g, '');
+  }
+
+  function normalizeMyDeckCardName(value) {
+    return String(value || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  function parseMyDeckCardKey(rawKey) {
+    const deckKey = String(rawKey || '').trim();
+    const exact = deckKey.match(/^(.+?)\s+\(([^\s()]+)\s+([^)]+)\)$/i);
+    if (exact) {
+      return {
+        name: String(exact[1] || '').trim(),
+        setCode: normalizeMyDeckSetCode(exact[2]),
+        setNumber: normalizeMyDeckCardNumber(exact[3]),
+        hasPrint: true
+      };
+    }
+
+    // Tolerate malformed keys where URL params leaked into the key.
+    const loose = deckKey.match(/^(.+?)\s+\(([^)]*)\)$/i);
+    if (loose) {
+      const inside = String(loose[2] || '').trim();
+      const parts = inside.split(/\s+/).filter(Boolean);
+      const setGuess = parts.length > 0 ? parts[0] : '';
+      const numberGuess = parts.length > 1 ? parts.slice(1).join(' ') : '';
+      return {
+        name: String(loose[1] || '').trim(),
+        setCode: normalizeMyDeckSetCode(setGuess),
+        setNumber: normalizeMyDeckCardNumber(numberGuess),
+        hasPrint: true
+      };
+    }
+
+    return {
+      name: deckKey,
+      setCode: '',
+      setNumber: '',
+      hasPrint: false
+    };
+  }
+
+  function findFallbackDeckCardByName(rawName) {
+    if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) return null;
+
+    const cardName = String(rawName || '').trim();
+    if (!cardName) return null;
+
+    // 1) Exact match first
+    let found = window.allCardsDatabase.find(c => c.name === cardName);
+    if (found) return found;
+
+    // 2) Normalized exact match (handles punctuation/case differences)
+    const normalizedTarget = normalizeMyDeckCardName(cardName);
+    found = window.allCardsDatabase.find(c => normalizeMyDeckCardName(c.name) === normalizedTarget);
+    if (found) return found;
+
+    // 3) Legacy aliases for renamed cards
+    const legacyNameAliases = {
+      'rock fighting energy': 'Rocky Fighting Energy'
+    };
+    const alias = legacyNameAliases[normalizedTarget];
+    if (alias) {
+      found = window.allCardsDatabase.find(c => c.name === alias);
+      if (found) return found;
+    }
+
+    // 4) Soft fallback: all significant target words must appear in candidate name
+    const wantedTokens = normalizedTarget.split(' ').filter(token => token.length >= 3);
+    if (wantedTokens.length > 0) {
+      found = window.allCardsDatabase.find(c => {
+        const candidate = normalizeMyDeckCardName(c.name);
+        return wantedTokens.every(token => candidate.includes(token));
+      });
+      if (found) return found;
+    }
+
+    return null;
   }
   
   decksGrid.innerHTML = window.userDecks.map((deck, deckIndex) => {
@@ -1139,24 +1235,24 @@ function updateDecksUI() {
         let cardName = deckKey;
         
         // Parse "CardName (SET NUMBER)" format - EXACT print saved in deck
-        const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([^)]+)\)$/i);
-        if (setMatch) {
-          cardName = setMatch[1];
-          setCode = normalizeMyDeckSetCode(setMatch[2]);
-          setNumber = normalizeMyDeckCardNumber(setMatch[3]);
+        const parsedKey = parseMyDeckCardKey(deckKey);
+        if (parsedKey.hasPrint) {
+          cardName = parsedKey.name;
+          setCode = parsedKey.setCode;
+          setNumber = parsedKey.setNumber;
           
           // METHOD 1: Fast lookup using cardsBySetNumberMap (preferred)
           if (!cardData && typeof window.getIndexedCardBySetNumber === 'function') {
             cardData = window.getIndexedCardBySetNumber(setCode, setNumber);
           }
 
-          if (!cardData && window.cardsBySetNumberMap) {
+          if (!cardData && window.cardsBySetNumberMap && setCode && setNumber) {
             const key = `${setCode}-${setNumber}`;
             cardData = window.cardsBySetNumberMap[key];
           }
           
           // METHOD 2: Fallback - search allCardsDatabase by set+number (still exact print!)
-          if (!cardData && window.allCardsDatabase) {
+          if (!cardData && window.allCardsDatabase && setCode && setNumber) {
             cardData = window.allCardsDatabase.find(c => 
               c.set === setCode && c.number === setNumber
             );
@@ -1165,13 +1261,13 @@ function updateDecksUI() {
           // METHOD 3: Last resort - search by name only (loses exact print info)
           if (!cardData && window.allCardsDatabase) {
             console.warn(`[My Decks] Could not find exact print ${deckKey}, using any print of ${cardName}`);
-            cardData = window.allCardsDatabase.find(c => c.name === cardName);
+            cardData = findFallbackDeckCardByName(cardName);
           }
         } else {
           // Legacy format without set info - try name lookup
           console.warn(`[My Decks] Old deck format detected: ${deckKey}`);
           if (window.allCardsDatabase) {
-            cardData = window.allCardsDatabase.find(c => c.name === cardName);
+            cardData = findFallbackDeckCardByName(cardName);
             if (cardData) {
               setCode = cardData.set;
               setNumber = cardData.number;
@@ -1265,37 +1361,15 @@ function updateDecksUI() {
         const safeDeckKeyJs = escapeJsSingleQuoted(card.deck_key || `${cardName} (${setCode} ${setNumber})`);
         const safeProfileHintJs = escapeJsSingleQuoted(`profile|${deck.id || ''}`);
         const safeCardmarketTitleHtml = escapeHtml(eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available');
-        let otherPrintOwnedCount = 0;
-        if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
-          const normalizedCurrentName = (typeof normalizeCardName === 'function')
-            ? normalizeCardName(cardName)
-            : String(cardName || '').toLowerCase().trim();
-          const normalizedSet = String(setCode || '').toUpperCase();
-          const normalizedNumber = String(setNumber || '').toUpperCase();
-          window.userCollectionCounts.forEach((qty, collKey) => {
-            const ownedQty = parseInt(qty, 10) || 0;
-            if (ownedQty <= 0) return;
-            const parts = String(collKey || '').split('|');
-            if (parts.length < 3) return;
-            const keyName = parts[0];
-            const keySet = String(parts[1] || '').toUpperCase();
-            const keyNumber = String(parts[2] || '').toUpperCase();
-            const normalizedKeyName = (typeof normalizeCardName === 'function')
-              ? normalizeCardName(keyName)
-              : String(keyName || '').toLowerCase().trim();
-            if (normalizedKeyName !== normalizedCurrentName) return;
-            if (keySet === normalizedSet && keyNumber === normalizedNumber) return;
-            otherPrintOwnedCount += ownedQty;
-          });
-        }
+        const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber, window.userCollectionCounts);
         const otherPrintSparkle = otherPrintOwnedCount > 0
-          ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Andere Int. Prints in Sammlung: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));">✨</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
+          ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Owned other INT prints: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));">✨</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
           : '';
         
         cardsHtml += `
           <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
             <img src="${safeImageAttr}" alt="${safeCardNameHtml}" style="width: 100%; display: block; cursor: zoom-in;" loading="lazy" 
-                 onerror="this.src='${safeFallbackImageAttr}'"
+                 onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}else{this.src='${safeFallbackImageAttr}'}"
                  onclick="showSingleCard('${safeImageJs}', '${safeCardNameJs}')">
             
             ${ownedBadge}
@@ -1324,12 +1398,18 @@ function updateDecksUI() {
     const safeFolderHtml = escapeHtml(deck.folder || '');
     const createdStr = formatProfileDate(deck.createdAt || deck.createdAtMs);
     const safeCreatedHtml = escapeHtml(createdStr);
+    const isActive = !!deck.active;
+    const activeGradient = isActive
+      ? 'linear-gradient(135deg, #1B5E20 0%, #388E3C 50%, #43A047 100%)'
+      : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    const activeBorder = isActive ? 'border: 2px solid #66BB6A;' : '';
+    const activeLabel = isActive ? `<span style="display:inline-block;background:#4CAF50;color:white;font-size:0.7em;padding:1px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;font-weight:700;">${getLang()==='de' ? 'IRL GEBAUT' : 'IRL BUILT'}</span>` : '';
     
     return `
-      <div class="saved-deck-item" data-deck-name="${safeDeckNameHtml}" data-deck-archetype="${safeDeckArchetypeHtml}" data-deck-folder="${safeFolderHtml}" style="background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 10px;">
-        <div onclick="toggleDeckCollapse('${deckId}')" style="padding: 15px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+      <div class="saved-deck-item" data-deck-name="${safeDeckNameHtml}" data-deck-archetype="${safeDeckArchetypeHtml}" data-deck-folder="${safeFolderHtml}" data-deck-active="${isActive}" style="background: white; border-radius: 10px; box-shadow: ${isActive ? '0 0 12px rgba(76,175,80,0.5), 0 2px 8px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.1)'}; overflow: hidden; margin-bottom: 10px; ${activeBorder}">
+        <div onclick="toggleDeckCollapse('${deckId}')" style="padding: 15px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: ${activeGradient}; color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
           <div style="flex: 1;">
-            <h3 style="margin: 0 0 3px 0; font-size: 1.1em; font-weight: 600;">${safeDeckNameHtml}</h3>
+            <h3 style="margin: 0 0 3px 0; font-size: 1.1em; font-weight: 600;">${safeDeckNameHtml}${activeLabel}</h3>
             <div style="font-size: 0.85em; opacity: 0.9;">
               ${safeDeckArchetypeHtml} • ${totalCards} Cards (${uniqueCards} Unique)
             </div>
@@ -1338,6 +1418,9 @@ function updateDecksUI() {
             </div>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
+            <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" style="padding: 6px 12px; background: ${isActive ? 'rgba(76,175,80,0.95)' : 'rgba(255,255,255,0.25)'}; color: white; border: ${isActive ? '2px solid #fff' : '2px solid rgba(255,255,255,0.5)'}; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
+              ${isActive ? '✅' : '⬜'}
+            </button>
             <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(155, 89, 182, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='rgba(155, 89, 182, 0.9)'" title="Compare with another deck">
               ⚖️
             </button>
@@ -1367,6 +1450,102 @@ function updateDecksUI() {
   
   // Render folder navigation if any folders exist
   renderFolderNav();
+}
+
+// ============================================================
+// My Decks: Active/Built Toggle
+// ============================================================
+async function toggleDeckActive(deckId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const deck = (window.userDecks || []).find(d => d.id === deckId);
+  if (!deck) return;
+  const newActive = !deck.active;
+  try {
+    await db.collection('users').doc(user.uid)
+      .collection('decks').doc(deckId)
+      .update({ active: newActive, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    deck.active = newActive;
+    showNotification(newActive
+      ? (getLang()==='de' ? 'Deck als IRL gebaut markiert' : 'Deck marked as IRL built')
+      : (getLang()==='de' ? 'Deck-Markierung entfernt' : 'Deck mark removed'), 'success');
+    updateDecksUI();
+  } catch (error) {
+    console.error('Error toggling deck active:', error);
+    showNotification('Error updating deck', 'error');
+  }
+}
+
+// Compare all active (IRL built) decks
+function compareActiveDecks() {
+  const activeDecks = (window.userDecks || []).filter(d => d.active);
+  if (activeDecks.length < 2) {
+    showNotification(getLang()==='de'
+      ? 'Markiere mindestens 2 Decks als IRL gebaut um sie zu vergleichen.'
+      : 'Mark at least 2 decks as IRL built to compare them.', 'warning');
+    return;
+  }
+
+  let existingModal = document.getElementById('compare-active-modal');
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'compare-active-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+  const isDE = getLang() === 'de';
+  const options = activeDecks.map((d, i) => {
+    const realIdx = (window.userDecks || []).indexOf(d);
+    return `<option value="${realIdx}">${escapeHtml(d.name || 'Deck ' + (i + 1))}</option>`;
+  }).join('');
+
+  modal.innerHTML = `
+    <div style="background:#1a1a2e;border-radius:14px;max-width:500px;width:100%;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,0.35);color:#eee;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h2 style="margin:0;font-size:1.2em;color:#4CAF50;">⚖️ ${isDE ? 'Gebaute Decks vergleichen' : 'Compare Built Decks'}</h2>
+        <button onclick="this.closest('#compare-active-modal').remove()" style="background:none;border:none;color:#aaa;font-size:24px;cursor:pointer;">✕</button>
+      </div>
+      <p style="color:#bbb;font-size:0.9em;margin:0 0 16px;">${isDE ? 'Wähle 2 deiner gebauten Decks zum Vergleichen:' : 'Choose 2 of your built decks to compare:'}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div>
+          <label style="display:block;font-size:0.85em;color:#aaa;margin-bottom:4px;">Deck A</label>
+          <select id="compare-active-a" style="width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#2a2a3e;color:#eee;font-size:0.95em;">
+            ${options}
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.85em;color:#aaa;margin-bottom:4px;">Deck B</label>
+          <select id="compare-active-b" style="width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#2a2a3e;color:#eee;font-size:0.95em;">
+            ${options}
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;">
+        <button onclick="this.closest('#compare-active-modal').remove()" style="padding:10px 20px;border:1px solid #555;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;font-weight:600;">${isDE ? 'Abbrechen' : 'Cancel'}</button>
+        <button id="compare-active-run" style="padding:10px 20px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer;font-weight:700;">⚖️ ${isDE ? 'Vergleichen' : 'Compare'}</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Default deck B to second option
+  const selB = modal.querySelector('#compare-active-b');
+  if (selB && selB.options.length > 1) selB.selectedIndex = 1;
+
+  modal.querySelector('#compare-active-run').onclick = () => {
+    const idxA = parseInt(modal.querySelector('#compare-active-a').value);
+    const idxB = parseInt(modal.querySelector('#compare-active-b').value);
+    if (idxA === idxB) {
+      showNotification(isDE ? 'Wähle zwei verschiedene Decks.' : 'Choose two different decks.', 'warning');
+      return;
+    }
+    const deckA = window.userDecks[idxA];
+    const deckB = window.userDecks[idxB];
+    modal.remove();
+    showDeckComparison(deckA, deckB);
+  };
 }
 
 // Open modal to pick 2 decks for playtest
@@ -1698,7 +1877,9 @@ function formatProfileDate(timestamp) {
 function switchProfileTab(tabName) {
   // Hide all tabs
   document.querySelectorAll('.profile-tab-content').forEach(tab => {
-    tab.style.display = 'none';
+    tab.classList.add('display-none');
+    tab.classList.remove('active');
+    tab.style.display = '';
   });
   
   // Remove active class from all buttons
@@ -1709,14 +1890,17 @@ function switchProfileTab(tabName) {
   // Show selected tab
   const selectedTab = document.getElementById('profile-' + tabName);
   if (selectedTab) {
-    selectedTab.style.display = 'block';
+    selectedTab.classList.remove('display-none');
+    selectedTab.classList.add('active');
+    selectedTab.style.display = '';
   }
   
   // Add active class to selected button
   const activeBtn = document.querySelector(`.profile-tab-btn[onclick*="${tabName}"]`);
   if (activeBtn) {
     activeBtn.classList.add('active');
-  }}
+  }
+}
 // Filter collection by search term
 function filterCollection() {
   const searchInput = document.getElementById('collection-search');
@@ -1741,17 +1925,39 @@ function filterWishlist() {
 // ============================================================
 // My Decks: Search / Filter
 // ============================================================
+window._filterBuiltOnly = false;
+
+function toggleBuiltFilter() {
+  window._filterBuiltOnly = !window._filterBuiltOnly;
+  const btn = document.getElementById('decks-filter-built');
+  if (btn) {
+    if (window._filterBuiltOnly) {
+      btn.style.background = '#4CAF50';
+      btn.style.color = 'white';
+      btn.style.borderColor = '#4CAF50';
+    } else {
+      btn.style.background = 'white';
+      btn.style.color = '#4CAF50';
+      btn.style.borderColor = '#4CAF50';
+    }
+  }
+  filterMyDecks();
+}
+
 function filterMyDecks() {
   const searchInput = document.getElementById('decks-search');
   if (!searchInput) return;
   const query = searchInput.value.trim().toLowerCase();
+  const builtOnly = window._filterBuiltOnly;
   
   document.querySelectorAll('.saved-deck-item').forEach(item => {
     const name = (item.dataset.deckName || '').toLowerCase();
     const archetype = (item.dataset.deckArchetype || '').toLowerCase();
     const folder = (item.dataset.deckFolder || '').toLowerCase();
-    const matches = !query || name.includes(query) || archetype.includes(query) || folder.includes(query);
-    item.style.display = matches ? '' : 'none';
+    const isActive = item.dataset.deckActive === 'true';
+    const matchesSearch = !query || name.includes(query) || archetype.includes(query) || folder.includes(query);
+    const matchesBuilt = !builtOnly || isActive;
+    item.style.display = (matchesSearch && matchesBuilt) ? '' : 'none';
   });
 }
 

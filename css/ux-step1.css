@@ -1,0 +1,185 @@
+/* Step 1: Unified Buttons + Inputs (non-breaking layer)
+   Loaded last to normalize legacy button/input classes. */
+
+:root {
+    --ui-btn-radius: 10px;
+    --ui-btn-font-size: 14px;
+    --ui-btn-font-weight: 700;
+    --ui-btn-pad-y: 10px;
+    --ui-btn-pad-x: 16px;
+    --ui-btn-shadow: 0 4px 12px rgba(20, 30, 60, 0.14);
+    --ui-btn-transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+
+    --ui-primary-start: #3f63d8;
+    --ui-primary-end: #2f53c3;
+    --ui-primary-border: #2d4db7;
+
+    --ui-secondary-start: #2fac67;
+    --ui-secondary-end: #1f9255;
+    --ui-secondary-border: #1d884f;
+
+    --ui-danger-start: #e2564a;
+    --ui-danger-end: #c84237;
+    --ui-danger-border: #b23a30;
+
+    --ui-outline-bg: #ffffff;
+    --ui-outline-border: #c9d4e4;
+    --ui-outline-text: #244064;
+
+    --ui-input-radius: 10px;
+    --ui-input-border: #d2dbe8;
+    --ui-input-focus: #3f63d8;
+    --ui-input-bg: #ffffff;
+    --ui-input-pad-y: 11px;
+    --ui-input-pad-x: 14px;
+}
+
+/* Base button system */
+.btn,
+.btn-ui,
+.btn-system-primary,
+.btn-system-secondary,
+.btn-system-danger,
+.btn-modern,
+.btn-gradient-blue,
+.btn-gradient-green,
+.btn-gradient-red,
+.btn-green {
+    border-radius: var(--ui-btn-radius) !important;
+    padding: var(--ui-btn-pad-y) var(--ui-btn-pad-x) !important;
+    font-size: var(--ui-btn-font-size) !important;
+    font-weight: var(--ui-btn-font-weight) !important;
+    line-height: 1.15;
+    border: 1px solid transparent !important;
+    cursor: pointer !important;
+    transition: var(--ui-btn-transition) !important;
+}
+
+.btn:hover,
+.btn-ui:hover,
+.btn-system-primary:hover,
+.btn-system-secondary:hover,
+.btn-system-danger:hover,
+.btn-modern:hover,
+.btn-gradient-blue:hover,
+.btn-gradient-green:hover,
+.btn-gradient-red:hover,
+.btn-green:hover {
+    transform: translateY(-1px);
+}
+
+.btn:focus-visible,
+.btn-ui:focus-visible,
+.btn-system-primary:focus-visible,
+.btn-system-secondary:focus-visible,
+.btn-system-danger:focus-visible,
+.btn-modern:focus-visible,
+.btn-gradient-blue:focus-visible,
+.btn-gradient-green:focus-visible,
+.btn-gradient-red:focus-visible,
+.btn-green:focus-visible {
+    outline: 2px solid rgba(63, 99, 216, 0.32);
+    outline-offset: 2px;
+}
+
+/* New canonical variants */
+.btn-primary,
+.btn-system-primary,
+.btn-gradient-blue,
+.btn-modern.primary {
+    color: #fff !important;
+    background: linear-gradient(135deg, var(--ui-primary-start), var(--ui-primary-end)) !important;
+    border-color: var(--ui-primary-border) !important;
+    box-shadow: var(--ui-btn-shadow);
+}
+
+.btn-secondary,
+.btn-gradient-green,
+.btn-modern.success,
+.btn-green {
+    color: #fff !important;
+    background: linear-gradient(135deg, var(--ui-secondary-start), var(--ui-secondary-end)) !important;
+    border-color: var(--ui-secondary-border) !important;
+    box-shadow: var(--ui-btn-shadow);
+}
+
+.btn-danger,
+.btn-system-danger,
+.btn-gradient-red,
+.btn-modern.tertiary-danger,
+.btn-modern.danger {
+    color: #fff !important;
+    background: linear-gradient(135deg, var(--ui-danger-start), var(--ui-danger-end)) !important;
+    border-color: var(--ui-danger-border) !important;
+    box-shadow: var(--ui-btn-shadow);
+}
+
+.btn-outline,
+.btn-system-secondary,
+.btn-modern,
+.btn-modern:not(.primary):not(.success):not(.danger):not(.tertiary-danger) {
+    color: var(--ui-outline-text) !important;
+    background: var(--ui-outline-bg) !important;
+    border-color: var(--ui-outline-border) !important;
+    box-shadow: 0 2px 8px rgba(38, 61, 94, 0.08) !important;
+}
+
+.btn-outline:hover,
+.btn-system-secondary:hover,
+.btn-modern:not(.primary):not(.success):not(.danger):not(.tertiary-danger):hover {
+    background: #f5f8fd !important;
+    border-color: #aebdd4 !important;
+}
+
+.btn-lift:hover {
+    transform: translateY(-1px) scale(1.02) !important;
+}
+
+/* Unified search inputs */
+.ui-search-input,
+.cards-filter-search-input,
+.card-search-input,
+.current-meta-matchup-search-input,
+input[type="text"][id*="search" i],
+input[type="text"][class*="search" i],
+input[type="text"][placeholder*="search" i] {
+    background-color: var(--ui-input-bg) !important;
+    border: 2px solid var(--ui-input-border) !important;
+    border-radius: var(--ui-input-radius) !important;
+    padding: var(--ui-input-pad-y) var(--ui-input-pad-x) var(--ui-input-pad-y) 38px !important;
+    font-size: 15px !important;
+    line-height: 1.2;
+    box-shadow: 0 1px 2px rgba(20, 30, 60, 0.04) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237286a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 4 4'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 16px !important;
+    background-position: 12px center !important;
+}
+
+.ui-search-input:focus,
+.cards-filter-search-input:focus,
+.card-search-input:focus,
+.current-meta-matchup-search-input:focus,
+input[type="text"][id*="search" i]:focus,
+input[type="text"][class*="search" i]:focus,
+input[type="text"][placeholder*="search" i]:focus {
+    outline: none !important;
+    border-color: var(--ui-input-focus) !important;
+    box-shadow: 0 0 0 3px rgba(63, 99, 216, 0.16) !important;
+}
+
+/* Small utility additions replacing inline styles in step 1 */
+.flex-2 {
+    flex: 2 1 0% !important;
+}
+
+.decks-filter-chip {
+    white-space: nowrap;
+    min-height: 40px;
+}
+
+.playtester-setup-modal-content {
+    max-width: 600px !important;
+    background: #f8f9fa !important;
+}

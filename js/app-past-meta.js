@@ -47,6 +47,10 @@
         }
 
         function normalizeCardAggregationKey(name) {
+            if (typeof normalizeCardName === 'function') {
+                return normalizeCardName(name);
+            }
+
             return String(name || '')
                 .toLowerCase()
                 .replace(/[\u2019'`]/g, '')
@@ -150,15 +154,17 @@
         function getPastMetaSummaryTotalCount(cards) {
             if (!Array.isArray(cards) || cards.length === 0) return 0;
 
-            if (!pastMetaCurrentScope || pastMetaCurrentScope.totalDecklists <= 1) {
-                return cards.reduce((sum, card) => sum + (parseInt(card.max_count || 0, 10) || 0), 0);
-            }
-
-            return cards.reduce((sum, card) => sum + getPastMetaRepresentativeCardCopies(card), 0);
+            // Sum the rounded display counts so the total matches what the user
+            // sees on each individual card badge.
+            return cards.reduce((sum, card) => sum + getPastMetaDisplayCount(card), 0);
         }
         
         async function loadPastMeta() {
             devLog('Loading Past Meta Deck Analysis...');
+            const pastMetaGrid = document.getElementById('pastMetaDeckGrid');
+            if (pastMetaGrid && !pastMetaGrid.innerHTML.trim()) {
+                showTableSkeleton(pastMetaGrid, { rows: 6, cols: 4, withImage: true });
+            }
             
             // Load tournament overview and cards data
             const [tournamentOverview, cardsData] = await Promise.all([
@@ -173,10 +179,10 @@
                 return;
             }
             
-            pastMetaAllData = cardsData;
+            pastMetaAllData = cardsData.filter(c => String(c.meta || '').trim().toLowerCase() !== 'expanded');
             
-            // Store tournament overview data
-            pastMetaTournaments = tournamentOverview || [];
+            // Store tournament overview data — exclude Expanded (only Standard is scraped)
+            pastMetaTournaments = (tournamentOverview || []).filter(t => String(t.format || '').trim().toLowerCase() !== 'expanded');
 
             // Load dynamic set order map for proper meta sorting (newest -> oldest)
             let pastMetaSetOrderMap = {};
@@ -196,7 +202,7 @@
             // CSV structure: meta (format), tournament_date, archetype (deck name!), card_name, ...
             // Some exports have empty meta/format columns; infer per DECK (tournament_date + archetype) from newest set_code
             const inferredMetaByDeck = new Map();
-            cardsData.forEach(card => {
+            pastMetaAllData.forEach(card => {
                 const tournamentId = String(card.tournament_id || '').trim();
                 const tournamentDate = String(card.tournament_date || '').trim();
                 const deckArchetype = String(card.archetype || '').trim();
@@ -216,7 +222,7 @@
 
             // Group cards by tournament_date + archetype (deck archetype)
             const deckMap = new Map();
-            cardsData.forEach(card => {
+            pastMetaAllData.forEach(card => {
                 const deckArchetype = sanitizePastMetaArchetypeName(card.archetype);
                 const tournamentDate = card.tournament_date || 'Unknown Date';
                 const cardTournamentId = String(card.tournament_id || '').trim();
@@ -292,7 +298,7 @@
             
             // Build latest date per meta for robust fallback sorting.
             const metaLatestDateMap = new Map();
-            cardsData.forEach(card => {
+            pastMetaAllData.forEach(card => {
                 const metaName = String(card.meta || '').trim();
                 if (!metaName) return;
                 const dateMs = parsePastMetaDateMs(card.tournament_date);
@@ -329,9 +335,10 @@
                 updatePastMetaDeckList();
             });
             tournamentSelect.addEventListener('change', updatePastMetaDeckList);
-            document.getElementById('pastMetaDeckSearch').addEventListener('input', updatePastMetaDeckList);
-            document.getElementById('pastMetaDeckSelect').addEventListener('change', onPastMetaDeckSelect);
             document.getElementById('pastMetaFilterSelect').addEventListener('change', filterPastMetaCards);
+            
+            // Initialize the new combobox UI (replaces old search input)
+            initializeDeckArchetypeCombobox('pastMeta');
             
             // Initial population
             updatePastMetaTournamentFilter();
@@ -364,9 +371,9 @@
                 .map(id => pastMetaTournaments.find(t => t.tournament_id === id))
                 .filter(t => t) // Remove undefined entries
                 .sort((a, b) => {
-                    // Sort by date (newest first)
-                    const dateA = new Date(a.tournament_date || '1970-01-01');
-                    const dateB = new Date(b.tournament_date || '1970-01-01');
+                    // Sort by date (newest first); use parser that handles "14th March 2026" ordinal format
+                    const dateA = parsePastMetaDateMs(a.tournament_date);
+                    const dateB = parsePastMetaDateMs(b.tournament_date);
                     return dateB - dateA;
                 });
             
@@ -473,7 +480,10 @@
                 document.getElementById('pastMetaDeckVisual').classList.add('d-none');
                 pastMetaCurrentDeck = null;
                 pastMetaCurrentCards = [];
+                pastMetaFilteredCards = [];
                 pastMetaCurrentScope = null;
+                resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 Cards', '/ 0 Total');
+                renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
                 return;
             }
             
@@ -603,8 +613,16 @@
             if (!pastMetaFilteredCards || pastMetaFilteredCards.length === 0) {
                 document.getElementById('pastMetaDeckTableView').classList.add('d-none');
                 document.getElementById('pastMetaDeckVisual').classList.add('d-none');
-                document.getElementById('pastMetaCardCount').textContent = '0 Cards';
-                document.getElementById('pastMetaCardCountSummary').textContent = '/ 0 Total';
+                resetDeckOverviewCounts('pastMetaCardCount', 'pastMetaCardCountSummary', '0 Cards', '/ 0 Total');
+                const gridContainer = document.getElementById('pastMetaDeckGrid');
+                if (gridContainer) {
+                    const selectedArchetype = String(document.getElementById('pastMetaDeckSelect')?.value || '').trim();
+                    if (!selectedArchetype) {
+                        renderNoDeckSelectedState('pastMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
+                    } else {
+                        gridContainer.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match the current filters.', icon: 'cards' });
+                    }
+                }
                 return;
             }
             
@@ -640,11 +658,11 @@
             const tableContainer = document.getElementById('pastMetaDeckTable');
             
             if (cards.length === 0) {
-                tableContainer.innerHTML = '<p style="text-align: center; color: #444; padding: 20px; font-weight: 500;">No cards found</p>';
+                tableContainer.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'Select a deck to see its card breakdown.', icon: 'cards' });
                 return;
             }
             
-            let html = '<table><thead><tr>';
+            let html = '<thead><tr>';
             html += '<th style="width: 60px;">Count</th>';
             html += '<th>Card Name</th>';
             html += '<th style="width: 100px;">ACE SPEC</th>';
@@ -666,8 +684,8 @@
                 html += '</tr>';
             });
             
-            html += '</tbody></table>';
-            tableContainer.innerHTML = html;
+            html += '</tbody>';
+            tableContainer.innerHTML = `<div class="past-meta-table-scroll"><table class="past-meta-table-zebra">${html}</table></div>`;
         }
         
         function renderPastMetaGridView(cards) {
@@ -868,33 +886,39 @@
                     const filterCategory = getCardType(cardName, setCode, setNumber);
                     const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
                     
+                    // Collection badge
+                    const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
+                    const otherPrintSparkleHtml = otherPrintOwnedCount > 0
+                        ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}" title="Owned other INT prints: ${otherPrintOwnedCount}x">
+                            <span class="city-league-other-print-sparkle-icon">✨</span>
+                            <span class="city-league-other-print-sparkle-count">${otherPrintOwnedCount}</span>
+                        </div>`
+                        : '';
+                    
                     html += `
-                        <div class="card-item card-item-shadow" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
-                            <div class="card-image-container pos-rel">
-                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="card-img-std" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
-                                <!-- Red badge: Max Count (top-right) -->
-                                <div class="card-badge card-badge-red pos-abs top-right">${maxCount}</div>
-                                <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
-                                ${deckCount > 0 ? `<div class="card-badge card-badge-green pos-abs top-left">${deckCount}</div>` : ''}
-                                <!-- Card info section -->
-                                <div class="card-info-bottom card-info-bottom-std">
-                                    <div class="card-info-text">
-                                        <div class="card-info-name">${cardName}${cardNameWarning}</div>
-                                        <div class="card-info-set">${setCode} ${setNumber}</div>
-                                        <div class="card-info-meta">${percentage}% | Ø ${avgInUsingDecks}x (${avgCountOverallDisplay}x)</div>
-                                        <div class="card-info-decks">${deckCountByStatsDisplay} / ${decklistCountDisplay} Decks</div>
+                        <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
+                            <div class="card-image-container city-league-card-image-container">
+                                <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
+                                <div class="city-league-card-badge city-league-card-badge-max">${maxCount}</div>
+                                ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
+                                ${otherPrintSparkleHtml}
+                                <div class="card-info-bottom city-league-card-info-bottom">
+                                    <div class="card-info-text city-league-card-info-text">
+                                        <div class="city-league-card-title-mobile">${cardName}${cardNameWarning}</div>
+                                        <div class="city-league-card-set-mobile">${setCode} ${setNumber}</div>
+                                        <div class="city-league-card-stats-mobile">${percentage}% | Ø ${avgInUsingDecks}x (${avgCountOverallDisplay}x)</div>
+                                        <div class="city-league-card-deck-stats-mobile">${deckCountByStatsDisplay} / ${decklistCountDisplay} Decks</div>
                                     </div>
-                                    <!-- Card Actions: Row 1 = - ★ + | Row 2 = L + Cardmarket -->
-                                    <div class="card-action-buttons card-action-buttons-col">
-                                        <div class="card-action-row">
-                                            <button onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" class="btn-red card-action-btn" title="Remove from deck">-</button>
-                                            <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="btn-yellow card-action-btn" title="Switch rarity/print">★</button>
-                                            <button onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="btn-green card-action-btn" title="Add to deck">+</button>
+                                    <div class="card-action-buttons city-league-card-action-buttons">
+                                        <div class="city-league-card-action-row">
+                                            <button class="city-league-card-action-btn city-league-card-remove-btn" onclick="event.stopPropagation(); removeCardFromDeck('pastMeta', '${cardNameEscaped}')" title="${t('cl.removeFromDeck')}">-</button>
+                                            <button class="city-league-card-action-btn city-league-card-rarity-btn" onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" title="${t('cl.switchPrint')}">★</button>
+                                            <button class="city-league-card-action-btn city-league-card-add-btn" onclick="event.stopPropagation(); addCardToDeck('pastMeta', '${cardNameEscaped}', '${setCode}', '${setNumber}')" title="${t('cl.addToDeckTooltip')}">+</button>
                                         </div>
-                                        <div class="card-action-row card-action-row-wide">
-                                            ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" class="btn-purple card-action-btn btn-xs" title="Open on Limitless">L</button>` : '<span></span>'}
-                                            <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" class="btn-gradient-red card-action-btn btn-xs" title="Add to proxy">P</button>
-                                            <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" class="btn-gradient-orange card-action-btn btn-xs" style="background: ${priceBackground}; cursor: ${eurPrice ? 'pointer' : 'not-allowed'};" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                        <div class="city-league-card-action-row">
+                                            ${setCode && setNumber ? `<button class="city-league-card-action-btn city-league-card-limitless-btn" onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" title="${t('cl.openLimitless')}">L</button>` : '<span></span>'}
+                                            <button class="city-league-card-action-btn city-league-card-proxy-btn" onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" title="${t('cl.proxyTooltip')}">P</button>
+                                            <button class="city-league-card-action-btn city-league-card-market-btn" onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" data-market-bg="${priceBackground}" data-market-cursor="${eurPrice ? 'pointer' : 'not-allowed'}" title="${eurPrice ? t('cl.buyCardmarket') + ' ' + eurPrice : t('cl.priceNA')}">${priceDisplay}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -934,7 +958,8 @@
                     setNumSpace.includes(searchTerm) ||
                     setNumCombined.includes(searchTerm);
 
-                const matchesType = pastMetaOverviewCardTypeFilter === 'all' || cardType === pastMetaOverviewCardTypeFilter;
+                const matchesType = pastMetaOverviewCardTypeFilter === 'all' || cardType === pastMetaOverviewCardTypeFilter
+                    || (pastMetaOverviewCardTypeFilter === 'Energy' && cardType === 'Basic Energy');
                 
                 // Show card only if it matches both filters
                 if (matchesSearch && matchesType) {
@@ -955,6 +980,9 @@
         function setPastMetaRarityMode(mode) {
             devLog(`[Past Meta] Rarity mode changed to: ${mode}`);
             pastMetaRarityMode = mode;
+            
+            // Sync global rarity preference so getPreferredVersionForCard() uses the correct mode
+            globalRarityPreference = (mode === 'all') ? null : mode;
             
             // Update button styles
             const minBtn = document.getElementById('pastMetaRarityMin');
@@ -1031,9 +1059,6 @@
             });
         }
         
-        function togglePastMetaDeckGridView() {
-            pastMetaShowGridView = !pastMetaShowGridView;
-            renderPastMetaCards();
-        }
+        // (removed duplicate togglePastMetaDeckGridView — full version above)
 
         // Generic function to render deck analysis tables

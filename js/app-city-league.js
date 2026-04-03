@@ -1061,14 +1061,16 @@
                 select.appendChild(combinedOptGroup);
             }
 
+            // Store full select innerHTML as backup for search/restore
+            select._fullHTML = select.innerHTML;
+
             // Add change event listener
             select.onchange = function() {
                 // Reset search filter on selection so next open shows all options
                 const searchEl = document.getElementById('cityLeagueDeckSearch');
-                if (searchEl) {
+                if (searchEl && searchEl.value) {
                     searchEl.value = '';
-                    this.querySelectorAll('option').forEach(opt => opt.hidden = false);
-                    this.querySelectorAll('optgroup').forEach(g => g.hidden = false);
+                    this.innerHTML = this._fullHTML;
                 }
                 if (this.value) {
                     loadCityLeagueDeckData(this.value);
@@ -1096,21 +1098,26 @@
             // Apply pending combined archetype selection (from analyzeCombinedArchetype click)
             applyPendingCombinedArchetypeSelection();
 
-            // Enable search functionality
+            // Enable search functionality — remove non-matching options from DOM
+            // (native <select> ignores hidden/display:none on <option> in most browsers)
             const searchInput = document.getElementById('cityLeagueDeckSearch');
             if (searchInput) {
                 searchInput.oninput = function() {
                     const searchTerm = this.value.toLowerCase().trim();
-                    // Use option.hidden (supported by all modern browsers) instead of CSS classes
+                    // Restore full option set from backup first
+                    select.innerHTML = select._fullHTML;
+                    if (!searchTerm) return;
+                    // Remove non-matching options
                     Array.from(select.querySelectorAll('option')).forEach(option => {
-                        if (option.value) {
-                            option.hidden = searchTerm ? !option.textContent.toLowerCase().includes(searchTerm) : false;
+                        if (option.value && !option.textContent.toLowerCase().includes(searchTerm)) {
+                            option.remove();
                         }
                     });
-                    // Hide optgroups where all options are hidden
+                    // Remove empty optgroups
                     Array.from(select.querySelectorAll('optgroup')).forEach(group => {
-                        const hasVisibleOptions = Array.from(group.querySelectorAll('option')).some(opt => !opt.hidden);
-                        group.hidden = !hasVisibleOptions;
+                        if (group.querySelectorAll('option').length === 0) {
+                            group.remove();
+                        }
                     });
                 };
             }

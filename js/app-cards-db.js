@@ -3097,10 +3097,20 @@
                 // This is THE definitive source - shows ALL functionally identical cards
                 // regardless of artwork, illustrator, or set
                 if (currentCard && currentCard.international_prints) {
-                    // Parse the comma-separated list of international prints
-                    // Format: "ASC-113,MEG-77,MEG-160,MEG-179,MEG-188,MPROMO-12"
-                    const intPrintIds = currentCard.international_prints.split(',').map(s => s.trim());
-                    const intPrintSet = new Set(intPrintIds);
+                    // Gather international_prints from ALL DB entries with this name,
+                    // then union them.  This catches newer promos (e.g. MEP-33) that
+                    // list themselves in their own field but are not yet listed by
+                    // the older reference cards.
+                    const allMatchingCards = window.allCardsDatabase.filter(c => cardMatchesActualName(c));
+                    const intPrintSet = new Set();
+                    allMatchingCards.forEach(c => {
+                        if (c.international_prints) {
+                            c.international_prints.split(',').forEach(id => {
+                                const trimmed = id.trim();
+                                if (trimmed) intPrintSet.add(trimmed);
+                            });
+                        }
+                    });
                     
                     // Find all cards that match any of these set-number combinations
                     versions = window.allCardsDatabase.filter(card => {
@@ -3114,8 +3124,8 @@
                         versions = nameMatchedVersions;
                     }
                     
-                    devLog(`[Pokemon Card] Found ${versions.length} international prints from Limitless data`);
-                    devLog(`[Pokemon Card] Int. Print IDs:`, intPrintIds);
+                    devLog(`[Pokemon Card] Found ${versions.length} international prints (union of all DB entries)`);
+                    devLog(`[Pokemon Card] Unified Int. Print IDs:`, [...intPrintSet]);
                 } else {
                     // No international_prints data available - show only current card
                     versions = currentCard ? [currentCard] : [];

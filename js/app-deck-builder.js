@@ -852,8 +852,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const globalPref = getGlobalRarityPreference();
                 const pref = getRarityPreference(baseName);
                 
-                // Handle image URL based on rarity preference (simplified)
-                if (pref && pref.mode === 'specific' && pref.set && pref.number) {
+                // Only apply rarity preference when deck key does NOT already
+                // carry an explicit set/number (i.e. user assigned via rarity switcher).
+                const deckKeyHasExplicitPrint = !!setMatch;
+
+                if (!deckKeyHasExplicitPrint && pref && pref.mode === 'specific' && pref.set && pref.number) {
                     const key = `${pref.set}-${pref.number}`;
                     const specificCard = cardsBySetNumberMap ? cardsBySetNumberMap[key] : null;
                     if (specificCard && specificCard.image_url && specificCard.name === baseName) {
@@ -863,7 +866,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         cardData.rarity = specificCard.rarity;
                     }
                 }
-                else if (globalPref === 'max' || globalPref === 'min') {
+                else if (!deckKeyHasExplicitPrint && (globalPref === 'max' || globalPref === 'min')) {
                     if (originalSet && originalNumber) {
                         const preferredVersion = getPreferredVersionForCard(baseName, originalSet, originalNumber);
                         if (preferredVersion) {

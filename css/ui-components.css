@@ -2562,20 +2562,25 @@
 }
 
 /* Make first column look consistent with metric columns while keeping links discoverable. */
-.city-league-info-table-cell-archetype .archetype-jump-link {
-    color: #1f2d3d;
-    font-weight: inherit;
+.city-league-info-table-cell-archetype .archetype-jump-link,
+.city-league-info-table-cell-archetype .archetype-jump-link:link,
+.city-league-info-table-cell-archetype .archetype-jump-link:visited,
+.city-league-info-table-cell-archetype .archetype-jump-link:active {
+    color: #1f2d3d !important;
+    font-weight: 700;
     text-decoration: none;
 }
 
 .city-league-info-table-cell-archetype .archetype-jump-link:hover,
 .city-league-info-table-cell-archetype .archetype-jump-link:focus-visible {
+    color: #2f80c7 !important;
     text-decoration: underline;
 }
 
 .city-league-info-table-cell-main-desktop {
-    color: #1f2d3d;
+    color: #1f2d3d !important;
     text-decoration: none;
+    font-weight: 700;
 }
 
 #cityLeagueFullTable,

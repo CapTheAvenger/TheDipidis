@@ -4195,8 +4195,11 @@ h3:first-child {
     background: #34495e !important;
 }
 
-.archetype-jump-link {
-    color: #1f2d3d;
+.archetype-jump-link,
+.archetype-jump-link:link,
+.archetype-jump-link:visited,
+.archetype-jump-link:active {
+    color: #1f2d3d !important;
     text-decoration: none;
     font-weight: 700;
     transition: color 0.2s ease, text-decoration 0.2s ease;
@@ -4205,7 +4208,7 @@ h3:first-child {
 }
 
 .archetype-jump-link:hover {
-    color: #2f80c7;
+    color: #2f80c7 !important;
     text-decoration: underline;
     cursor: pointer;
 }

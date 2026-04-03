@@ -103,6 +103,8 @@ test.describe('Card Action Buttons', () => {
     });
 
     test('card action buttons are equal width in both rows', async ({ page }) => {
+        test.skip(!RUN_PIXEL_SNAPSHOTS, 'Button-width measurements depend on platform font rendering — Windows only');
+
         const section = page.locator('#city-league-analysis.tab-content.active');
         // Find the first action button block that actually exposes at least two populated rows.
         const [row1Widths, row2Widths] = await section.evaluate((rootEl) => {

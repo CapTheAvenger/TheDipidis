@@ -128,6 +128,31 @@ def create_merged_database():
     else:
         print("⚠ sets.json nicht gefunden – Sortierung nach Erscheinungsdatum übersprungen. Bitte [8] ausführen!")
 
+    # ── Unify international_prints across all cards with the same name ──
+    # Newer reprints list all siblings, but older cards may only list themselves.
+    # Build the full union per name, then write it back to every card.
+    from collections import defaultdict
+    name_to_prints = defaultdict(set)
+    for card in merged_cards:
+        name = (card.get('name_en') or '').strip()
+        ip = (card.get('international_prints') or '').strip()
+        if name and ip:
+            for token in ip.split(','):
+                t = token.strip()
+                if t:
+                    name_to_prints[name].add(t)
+    unified_count = 0
+    for card in merged_cards:
+        name = (card.get('name_en') or '').strip()
+        if name and name in name_to_prints:
+            old_ip = (card.get('international_prints') or '').strip()
+            new_ip = ','.join(sorted(name_to_prints[name]))
+            if new_ip != old_ip:
+                card['international_prints'] = new_ip
+                unified_count += 1
+    if unified_count:
+        print(f"✓ international_prints vereinheitlicht bei {unified_count} Karten.")
+
     json_path = os.path.join(data_dir, 'all_cards_merged.json')
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump({'cards': merged_cards}, f, ensure_ascii=False, indent=2)

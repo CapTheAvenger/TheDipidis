@@ -307,11 +307,19 @@
                             estimatedDecksWithCard: 0,
                             totalCopies: 0,
                             fallbackPercentages: [],
-                            fallbackCopiesWhenUsed: []
+                            fallbackCopiesWhenUsed: [],
+                            rawDeckInclusionSum: 0,
+                            rawPercentages: []
                         };
                     }
 
                     const archetypeEntry = cardArchetypeMap[cardName].byArchetype[archetypeLower];
+                    // Track raw deck_inclusion_count for accurate meta share.
+                    archetypeEntry.rawDeckInclusionSum += deckCount;
+                    // Track the original percentage_in_archetype values as fallback.
+                    if (safePercentage > 0) {
+                        archetypeEntry.rawPercentages.push(safePercentage);
+                    }
 
                     const estimatedDecksFromPct = (safePercentage > 0 && archetypeDeckCount > 0)
                         ? (safePercentage / 100) * archetypeDeckCount
@@ -426,7 +434,25 @@
                         });
                     });
                     
-                    const rawMetaShare = (totalDecksWithCard / safeTotalDecksInTop10) * 100;
+                    // Meta share = simple average of per-archetype usage percentages.
+                    // Each Top 10 archetype counts equally (0% for archetypes not using this card).
+                    // Use: sum(deck_inclusion_count) / archetypeDeckCount per archetype,
+                    // then average across all top 10 archetypes.
+                    // This avoids the inflation from multi-tournament row accumulation.
+                    let sumOfArchetypeUsagePcts = 0;
+                    Object.values(cardData.byArchetype).forEach(archData => {
+                        if (archData.deckCount > 0 && archData.rawDeckInclusionSum > 0) {
+                            // True inclusion % = raw sum of deck_inclusion_count / total decks in archetype
+                            const trueInclusionPct = Math.min(100, (archData.rawDeckInclusionSum / archData.deckCount) * 100);
+                            sumOfArchetypeUsagePcts += trueInclusionPct;
+                        } else if (archData.rawPercentages && archData.rawPercentages.length > 0) {
+                            // Fallback: average of percentage_in_archetype from CSV
+                            const avgRawPct = archData.rawPercentages.reduce((s, v) => s + v, 0) / archData.rawPercentages.length;
+                            sumOfArchetypeUsagePcts += Math.min(100, avgRawPct);
+                        }
+                    });
+                    const top10Count = Math.max(1, top10Archetypes.length);
+                    const rawMetaShare = sumOfArchetypeUsagePcts / top10Count;
                     const correctedMetaShare = Math.min(100, Math.max(0, rawMetaShare));
                     if (rawMetaShare > 100.01) {
                         console.warn('[loadMetaCardAnalysis] metaShare capped above 100%', {
@@ -671,9 +697,9 @@
 
                 const category = getCardTypeCategory(c.type);
                 if (category === 'Pokemon') {
-                    return c.metaShare >= 40;
+                    return c.metaShare >= 20;
                 }
-                return c.metaShare >= 30;
+                return c.metaShare >= 15;
             });
             
             devLog(`[renderMetaCards] After filters: ${cards.length} cards remaining (from ${metaCardData[source].length} total)`);

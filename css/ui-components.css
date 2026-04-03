@@ -2426,7 +2426,7 @@
 
 .city-league-info-table-cell-main-desktop,
 .city-league-info-table-cell-main-mobile {
-    color: inherit;
+    color: #1f2d3d;
     text-decoration: none;
 }
 
@@ -2515,6 +2515,7 @@
     font-size: 0.96em;
     letter-spacing: 0.02em;
     vertical-align: middle;
+    color: #ffffff;
 }
 .city-league-info-table-header-archetype {
     text-align: left;
@@ -2536,6 +2537,7 @@
     padding: 12px 14px;
     font-size: 0.95em;
     vertical-align: middle;
+    color: #1f2d3d;
 }
 .city-league-info-table-cell-archetype {
     text-align: left;
@@ -2561,7 +2563,7 @@
 
 /* Make first column look consistent with metric columns while keeping links discoverable. */
 .city-league-info-table-cell-archetype .archetype-jump-link {
-    color: inherit;
+    color: #1f2d3d;
     font-weight: inherit;
     text-decoration: none;
 }
@@ -2572,7 +2574,7 @@
 }
 
 .city-league-info-table-cell-main-desktop {
-    color: inherit;
+    color: #1f2d3d;
     text-decoration: none;
 }
 

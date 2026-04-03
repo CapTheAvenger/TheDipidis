@@ -966,10 +966,13 @@
         }
         
         function populateCityLeagueDeckSelect(data, comparisonData) {
-            const filteredArchetypesData = getFilteredCityLeagueArchetypesData();
+            // Always use FULL (unfiltered) archetype data for deck counts in the
+            // dropdown so the number reflects the total meta regardless of date filter.
+            // The date-specific "Used Decks" count is shown separately in Deck Stats.
+            const allArchetypesData = window.cityLeagueArchetypesData || [];
 
             const archetypeCountMap = new Map();
-            filteredArchetypesData.forEach(row => {
+            allArchetypesData.forEach(row => {
                 const archetypeName = String(row.archetype || '').trim();
                 if (!archetypeName) return;
 
@@ -988,12 +991,12 @@
                 devLog('Loaded comparison counts for', comparisonMap.size, 'archetypes');
             }
             
-            // Extract unique archetypes with their deck counts
+            // Extract unique archetypes with their deck counts (total meta counts)
             const archetypeMap = new Map();
-            const sourceRows = filteredArchetypesData.length > 0 ? filteredArchetypesData : data;
+            const sourceRows = allArchetypesData.length > 0 ? allArchetypesData : data;
             sourceRows.forEach(row => {
                 if (row.archetype && !archetypeMap.has(row.archetype)) {
-                    // Prefer live counts from raw archetype rows so dropdown and deck stats stay in sync.
+                    // Use total meta counts so dropdown always shows full picture.
                     const deckCount = archetypeCountMap.get(row.archetype.toLowerCase())
                         || comparisonMap.get(row.archetype.toLowerCase())
                         || parseInt(row.total_decks_in_archetype || 0, 10)

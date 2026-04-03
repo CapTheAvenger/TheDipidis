@@ -128,28 +128,65 @@ def create_merged_database():
     else:
         print("⚠ sets.json nicht gefunden – Sortierung nach Erscheinungsdatum übersprungen. Bitte [8] ausführen!")
 
-    # ── Unify international_prints across all cards with the same name ──
-    # Newer reprints list all siblings, but older cards may only list themselves.
-    # Build the full union per name, then write it back to every card.
+    # ── Unify international_prints via transitive closure ──
+    # Two cards with the same name are "connected" when their int-print lists
+    # overlap. We grow each group transitively so that newer reprints (e.g.
+    # POR-81 → ASC-198) propagate back to older entries, WITHOUT merging
+    # functionally different cards (e.g. Riolu ASC-112 vs Riolu PRE-50).
     from collections import defaultdict
-    name_to_prints = defaultdict(set)
+
+    # Group cards by name
+    cards_by_name = defaultdict(list)
     for card in merged_cards:
         name = (card.get('name_en') or '').strip()
-        ip = (card.get('international_prints') or '').strip()
-        if name and ip:
-            for token in ip.split(','):
-                t = token.strip()
-                if t:
-                    name_to_prints[name].add(t)
+        if name:
+            cards_by_name[name].append(card)
+
     unified_count = 0
-    for card in merged_cards:
-        name = (card.get('name_en') or '').strip()
-        if name and name in name_to_prints:
+    for name, group in cards_by_name.items():
+        # Parse each card's int-print set
+        card_sets = []
+        for card in group:
+            ip = (card.get('international_prints') or '').strip()
+            ids = set(t.strip() for t in ip.split(',') if t.strip()) if ip else set()
+            # Ensure card's own ID is always present
+            own_id = f"{card.get('set','')}-{card.get('number','')}"
+            if own_id and own_id != '-':
+                ids.add(own_id)
+            card_sets.append(ids)
+
+        # Build transitive closure groups via union-find
+        parent = list(range(len(group)))
+
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def union(a, b):
+            ra, rb = find(a), find(b)
+            if ra != rb:
+                parent[ra] = rb
+
+        for i in range(len(group)):
+            for j in range(i + 1, len(group)):
+                if card_sets[i] & card_sets[j]:  # overlapping sets
+                    union(i, j)
+
+        # Merge int-prints within each group
+        groups = defaultdict(set)
+        for i in range(len(group)):
+            groups[find(i)].update(card_sets[i])
+
+        # Write back unified prints
+        for i, card in enumerate(group):
+            merged_ip = ','.join(sorted(groups[find(i)]))
             old_ip = (card.get('international_prints') or '').strip()
-            new_ip = ','.join(sorted(name_to_prints[name]))
-            if new_ip != old_ip:
-                card['international_prints'] = new_ip
+            if merged_ip != old_ip:
+                card['international_prints'] = merged_ip
                 unified_count += 1
+
     if unified_count:
         print(f"✓ international_prints vereinheitlicht bei {unified_count} Karten.")
 

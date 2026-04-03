@@ -59,6 +59,35 @@ if errorlevel 1 (
     goto :end
 )
 
+echo.
+echo [3b/7] Pruefen auf geloeschte Dateien...
+set "DELETED_TMP=%TEMP%\git_deleted_%RANDOM%.txt"
+git diff --cached --name-only --diff-filter=D 2>nul > "!DELETED_TMP!"
+set "DELETED_COUNT=0"
+for /f %%i in ('type "!DELETED_TMP!" 2^>nul ^| find /c /v ""') do set "DELETED_COUNT=%%i"
+if !DELETED_COUNT! gtr 0 (
+    echo.
+    echo [WARNUNG] ================================================================
+    echo [WARNUNG] !DELETED_COUNT! Datei^(en^) werden aus Git GELOESCHT:
+    echo [WARNUNG] ================================================================
+    type "!DELETED_TMP!"
+    echo [WARNUNG] ================================================================
+    echo.
+    echo Moegliche Ursache: OneDrive hat Dateien als "Nur online" markiert ^(lokale
+    echo Kopie verschwunden^). Oeffne den OneDrive-Ordner und waehle "Immer auf
+    echo diesem Geraet behalten" fuer die betroffenen Dateien, dann erneut versuchen.
+    echo.
+    choice /M "Loeschungen TROTZDEM committen (J=Ja, N=Abbrechen)"
+    if errorlevel 2 (
+        echo [INFO] Abgebrochen - Staging wird zurueckgesetzt...
+        git reset HEAD >nul 2>&1
+        del "!DELETED_TMP!" >nul 2>&1
+        goto :end
+    )
+    echo [INFO] Loeschungen wurden bestaetigt.
+)
+del "!DELETED_TMP!" >nul 2>&1
+
 echo [4/7] Checking staged changes...
 git diff --cached --quiet
 if errorlevel 1 goto :has_changes

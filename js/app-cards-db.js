@@ -3097,25 +3097,43 @@
                 // This is THE definitive source - shows ALL functionally identical cards
                 // regardless of artwork, illustrator, or set
                 if (currentCard && currentCard.international_prints) {
-                    // Gather international_prints from ALL DB entries with this name,
-                    // then union them.  This catches newer promos (e.g. MEP-33) that
-                    // list themselves in their own field but are not yet listed by
-                    // the older reference cards.
-                    const allMatchingCards = window.allCardsDatabase.filter(c => cardMatchesActualName(c));
-                    const intPrintSet = new Set();
-                    allMatchingCards.forEach(c => {
-                        if (c.international_prints) {
-                            c.international_prints.split(',').forEach(id => {
-                                const trimmed = id.trim();
-                                if (trimmed) intPrintSet.add(trimmed);
-                            });
+                    // Build transitive closure of international_prints starting
+                    // from the current card.  Two cards are "connected" when their
+                    // int-print lists overlap.  This correctly groups reprints
+                    // (e.g. MEP-33 ↔ MEG-77) without merging functionally
+                    // different cards that happen to share the same name
+                    // (e.g. Riolu ASC-112 vs Riolu PRE-50).
+
+                    // Seed: int-prints of the current card
+                    const seedIds = new Set(
+                        currentCard.international_prints.split(',').map(s => s.trim()).filter(Boolean)
+                    );
+
+                    // Collect every card with the same name that has int-prints
+                    const allMatchingCards = window.allCardsDatabase.filter(c => cardMatchesActualName(c) && c.international_prints);
+
+                    // Iteratively grow the set until stable (transitive closure)
+                    let changed = true;
+                    while (changed) {
+                        changed = false;
+                        for (const c of allMatchingCards) {
+                            const ids = c.international_prints.split(',').map(s => s.trim()).filter(Boolean);
+                            const overlaps = ids.some(id => seedIds.has(id));
+                            if (overlaps) {
+                                for (const id of ids) {
+                                    if (!seedIds.has(id)) {
+                                        seedIds.add(id);
+                                        changed = true;
+                                    }
+                                }
+                            }
                         }
-                    });
-                    
-                    // Find all cards that match any of these set-number combinations
+                    }
+
+                    // Find all DB cards that belong to this closure
                     versions = window.allCardsDatabase.filter(card => {
                         const cardId = `${card.set}-${card.number}`;
-                        return intPrintSet.has(cardId);
+                        return seedIds.has(cardId);
                     });
 
                     // Prefer exact/normalized name matches when available.
@@ -3124,8 +3142,8 @@
                         versions = nameMatchedVersions;
                     }
                     
-                    devLog(`[Pokemon Card] Found ${versions.length} international prints (union of all DB entries)`);
-                    devLog(`[Pokemon Card] Unified Int. Print IDs:`, [...intPrintSet]);
+                    devLog(`[Pokemon Card] Found ${versions.length} international prints (transitive closure)`);
+                    devLog(`[Pokemon Card] Closure IDs:`, [...seedIds]);
                 } else {
                     // No international_prints data available - show only current card
                     versions = currentCard ? [currentCard] : [];
@@ -3145,15 +3163,26 @@
                 }
             }
             
-            // Filter to English sets only if we have the set mapping
-            // CRITICAL: Skip this filter for Pokemon cards with international_prints
-            // Limitless already validates these sets - we trust their data even if not in formats.json
+            // Filter to English/international sets only.
+            // Japanese-only sets (image_url contains _JP_LG) are excluded –
+            // they are only useful for Deck Analysis Japan previews.
+            const JAPANESE_SET_PATTERN = /\/(M[0-9]+)\//i;
+            const isJapaneseCard = (card) => {
+                const imgUrl = card.image_url || '';
+                if (imgUrl.includes('_JP_LG.') || imgUrl.includes('/tpc/')) return true;
+                if (JAPANESE_SET_PATTERN.test(imgUrl) && !imgUrl.includes('/tpci/')) return true;
+                return false;
+            };
+            const beforeJpFilter = versions.length;
+            versions = versions.filter(v => !isJapaneseCard(v));
+            if (beforeJpFilter > versions.length) {
+                devLog(`[openRaritySwitcher] Removed ${beforeJpFilter - versions.length} Japanese-only versions`);
+            }
+
             if (!isPokemonCard && window.englishSetCodes && window.englishSetCodes.size > 0) {
                 const beforeEnglishFilter = versions.length;
                 versions = versions.filter(version => window.englishSetCodes.has(version.set));
-                devLog(`[openRaritySwitcher] English filter: ${beforeEnglishFilter} ? ${versions.length} versions (Trainer/Energy only)`);
-            } else if (isPokemonCard) {
-                devLog(`[openRaritySwitcher] Skipping English filter for Pokemon cards (trust international_prints from Limitless)`);
+                devLog(`[openRaritySwitcher] English filter: ${beforeEnglishFilter} → ${versions.length} versions (Trainer/Energy only)`);
             }
             
             // Filter to only show cards with COMPLETE data

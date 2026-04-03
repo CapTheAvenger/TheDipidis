@@ -1867,18 +1867,21 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             document.body.style.overflow = 'hidden';
-            overlay.classList.add('card-modal-overlay');
-            overlay.classList.remove('show');
-            overlay.classList.remove('active');
-            img.classList.remove('active');
+
+            // Cancel any pending hide-timeout from a previous close
+            if (overlay._hideTimeout) {
+                clearTimeout(overlay._hideTimeout);
+                overlay._hideTimeout = null;
+            }
+            overlay._closing = false;
+
+            overlay.style.display = 'flex';
             overlay.classList.remove('d-none');
-            overlay.classList.add('d-flex');
-            overlay.style.opacity = '';  // let CSS handle opacity via .active class
-            setTimeout(() => {
-                overlay.classList.add('active');
-                overlay.classList.add('show');
-                img.classList.add('active');
-            }, 10);
+            // Force reflow before adding animation class
+            void overlay.offsetWidth;
+            overlay.classList.add('active');
+            overlay.classList.add('show');
+            img.classList.add('active');
 
             if (window._singleCardOverlayClickHandler) {
                 overlay.removeEventListener('click', window._singleCardOverlayClickHandler);
@@ -1906,6 +1909,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         function hideSingleCard() {
             const overlay = document.getElementById('fullCardOverlay') || document.getElementById('singleCardModal');
             if (!overlay) return;
+            // Re-entrancy guard: prevent double-close from duplicate handlers
+            if (overlay._closing) return;
+            overlay._closing = true;
+
             const img = overlay.querySelector('img') || document.getElementById('singleCardImage');
             overlay.classList.remove('active');
             overlay.classList.remove('show');
@@ -1925,10 +1932,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 window._singleCardEscHandler = null;
             }
 
-            setTimeout(() => {
+            // After transition, hide completely
+            overlay._hideTimeout = setTimeout(() => {
+                overlay._hideTimeout = null;
                 if (!overlay.classList.contains('active') && !overlay.classList.contains('show')) {
                     overlay.style.display = 'none';
+                    overlay.classList.remove('d-flex');
+                    overlay.classList.add('d-none');
                 }
+                document.body.style.overflow = '';
+                overlay._closing = false;
             }, 300);
         }
 
@@ -1937,13 +1950,18 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             hideSingleCard();
         }
 
-        if (!window.__singleCardEscapeBound) {
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    hideSingleCard();
+        // Safety net: if body.overflow is stuck on 'hidden' but no modal is
+        // visible, restore scrollability.  This prevents "frozen page" bugs.
+        if (!window.__overflowSafetyBound) {
+            setInterval(() => {
+                if (document.body.style.overflow !== 'hidden') return;
+                const singleModal = document.getElementById('singleCardModal') || document.getElementById('fullCardOverlay');
+                const isVisible = singleModal && (singleModal.classList.contains('active') || singleModal.classList.contains('show'));
+                if (!isVisible) {
+                    document.body.style.overflow = '';
                 }
-            });
-            window.__singleCardEscapeBound = true;
+            }, 2000);
+            window.__overflowSafetyBound = true;
         }
         
         function autoComplete(source, rarityMode) {

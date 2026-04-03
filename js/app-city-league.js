@@ -1221,10 +1221,19 @@
 
         // Helper: update searchable select display when value set externally
         function syncSearchableSelectDisplay(selectEl) {
-            if (selectEl && selectEl._searchableDisplay) {
-                const opt = selectEl.options[selectEl.selectedIndex];
-                selectEl._searchableDisplay.textContent = opt ? opt.textContent : '';
-            }
+            if (!selectEl) return;
+            var doSync = function() {
+                var displayEl = selectEl._searchableDisplay
+                    || (selectEl.parentElement && selectEl.parentElement.querySelector('.searchable-select-display'));
+                if (displayEl) {
+                    var opt = selectEl.options[selectEl.selectedIndex];
+                    displayEl.textContent = opt ? opt.textContent : '';
+                    selectEl._searchableDisplay = displayEl;
+                }
+            };
+            doSync();
+            // Retry once after a tick in case initSearchableSelect hasn't run yet
+            setTimeout(doSync, 50);
         }
         
         // Date filter functions for City League

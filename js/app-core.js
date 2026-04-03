@@ -2149,3 +2149,95 @@ const BASE_PATH = './data/';
                 return numA - numB;
             });
         }
+
+        // ============================================================
+        // SHARED: Deck Archetype Combobox Initializer
+        // Populates the visible <ul> dropdown from the hidden <select>,
+        // wires search/filter, click-to-select, and outside-click-close.
+        // prefix: 'cityLeague' | 'currentMeta' | 'pastMeta'
+        // ============================================================
+        function initializeDeckArchetypeCombobox(prefix) {
+            const select        = document.getElementById(prefix + 'DeckSelect');
+            const comboboxInput = document.getElementById(prefix + 'DeckCombobox');
+            const comboboxList  = document.getElementById(prefix + 'DeckComboboxList');
+            const containerId   = prefix + 'DeckComboboxContainer';
+            if (!select || !comboboxInput || !comboboxList) return;
+
+            // Build <li> items from every <optgroup>/<option> in the hidden select
+            comboboxList.innerHTML = '';
+            Array.from(select.children).forEach(child => {
+                if (child.tagName === 'OPTGROUP') {
+                    const header = document.createElement('li');
+                    header.className = 'deck-combobox-category-header';
+                    header.setAttribute('role', 'presentation');
+                    header.textContent = child.label;
+                    comboboxList.appendChild(header);
+                    Array.from(child.querySelectorAll('option')).forEach(opt => {
+                        if (!opt.value) return;
+                        const li = document.createElement('li');
+                        li.className = 'deck-combobox-item deck-combobox-item-grouped';
+                        li.setAttribute('role', 'option');
+                        li.dataset.value = opt.value;
+                        li.innerHTML = '<span class="deck-combobox-item-name">' + opt.textContent + '</span>';
+                        comboboxList.appendChild(li);
+                    });
+                } else if (child.tagName === 'OPTION' && child.value) {
+                    const li = document.createElement('li');
+                    li.className = 'deck-combobox-item';
+                    li.setAttribute('role', 'option');
+                    li.dataset.value = child.value;
+                    li.innerHTML = '<span class="deck-combobox-item-name">' + child.textContent + '</span>';
+                    comboboxList.appendChild(li);
+                }
+            });
+
+            // Filter items on typing
+            comboboxInput.oninput = function() {
+                const term = this.value.toLowerCase().trim();
+                comboboxList.classList.remove('deck-combobox-list-hidden');
+                comboboxInput.setAttribute('aria-expanded', 'true');
+                comboboxList.querySelectorAll('.deck-combobox-item').forEach(li => {
+                    const match = !term || li.textContent.toLowerCase().includes(term);
+                    li.style.display = match ? '' : 'none';
+                });
+                comboboxList.querySelectorAll('.deck-combobox-category-header').forEach(header => {
+                    let next = header.nextElementSibling;
+                    let anyVisible = false;
+                    while (next && !next.classList.contains('deck-combobox-category-header')) {
+                        if (next.style.display !== 'none') anyVisible = true;
+                        next = next.nextElementSibling;
+                    }
+                    header.style.display = anyVisible ? '' : 'none';
+                });
+            };
+
+            // Open dropdown on focus
+            comboboxInput.onfocus = function() {
+                comboboxList.classList.remove('deck-combobox-list-hidden');
+                comboboxInput.setAttribute('aria-expanded', 'true');
+                if (!this.value.trim()) {
+                    comboboxList.querySelectorAll('.deck-combobox-item, .deck-combobox-category-header').forEach(el => {
+                        el.style.display = '';
+                    });
+                }
+            };
+
+            // Select item on click
+            comboboxList.onclick = function(e) {
+                const li = e.target.closest('.deck-combobox-item');
+                if (!li || !li.dataset.value) return;
+                select.value = li.dataset.value;
+                comboboxInput.value = li.querySelector('.deck-combobox-item-name').textContent;
+                comboboxList.classList.add('deck-combobox-list-hidden');
+                comboboxInput.setAttribute('aria-expanded', 'false');
+                select.dispatchEvent(new Event('change'));
+            };
+
+            // Close dropdown on outside click
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#' + containerId)) {
+                    comboboxList.classList.add('deck-combobox-list-hidden');
+                    comboboxInput.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }

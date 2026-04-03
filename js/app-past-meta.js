@@ -399,7 +399,8 @@
         function updatePastMetaDeckList() {
             const formatFilter = document.getElementById('pastMetaFormatFilter').value;
             const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
-            const searchTerm = document.getElementById('pastMetaDeckSearch').value.toLowerCase();
+            const searchEl = document.getElementById('pastMetaDeckCombobox') || document.getElementById('pastMetaDeckSearch');
+            const searchTerm = (searchEl ? searchEl.value : '').toLowerCase();
             const deckSelect = document.getElementById('pastMetaDeckSelect');
             const previousSelection = deckSelect ? deckSelect.value : '';
             

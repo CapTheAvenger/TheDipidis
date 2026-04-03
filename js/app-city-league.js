@@ -1140,25 +1140,8 @@
                 applyPendingCombinedArchetypeSelection();
             }
 
-            // Enable search functionality
-            const searchInput = document.getElementById('cityLeagueDeckSearch');
-            if (searchInput) {
-                searchInput.oninput = function() {
-                    const searchTerm = this.value.toLowerCase();
-                    // Search through all options in all optgroups
-                    Array.from(select.querySelectorAll('option')).forEach(option => {
-                        if (option.value) {
-                            const match = option.textContent.toLowerCase().includes(searchTerm);
-                            option.classList.toggle('d-none', !match);
-                        }
-                    });
-                    // Hide optgroups if all options are hidden
-                    Array.from(select.querySelectorAll('optgroup')).forEach(group => {
-                        const hasVisibleOptions = Array.from(group.querySelectorAll('option')).some(opt => !opt.classList.contains('d-none'));
-                        group.classList.toggle('d-none', !hasVisibleOptions);
-                    });
-                };
-            }
+            // Populate the visible combobox dropdown from the hidden <select>
+            initializeDeckArchetypeCombobox('cityLeague');
         }
         
         // Date filter functions for City League

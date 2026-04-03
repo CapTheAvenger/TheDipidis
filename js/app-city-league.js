@@ -1186,7 +1186,8 @@
         function selectDeckArchetypeForTab(tabKey, deckValue) {
             if (tabKey !== 'cityLeague') return '';
 
-            const select = document.getElementById('cityLeagueDeckSelect');\n            if (!select) return '';
+            const select = document.getElementById('cityLeagueDeckSelect');
+            if (!select) return '';
 
             const syncCityLeagueDeckPickerUi = (selectedValue) => {
                 const comboboxInput = document.getElementById('cityLeagueDeckCombobox');

@@ -340,7 +340,10 @@
                     deckSelect.value = '';
                 }
 
-                if (!restoredSelection) {
+                if (restoredSelection) {
+                    // Reload analysis for the restored deck with the new data
+                    loadCityLeagueDeckData(restoredSelection);
+                } else {
                     clearCityLeagueDeckView();
                 }
                 
@@ -934,12 +937,18 @@
                 const deckSelect = document.getElementById('cityLeagueDeckSelect');
                 // Respect value already set by populateCityLeagueDeckSelect (pending selection)
                 const currentValue = deckSelect ? deckSelect.value : '';
+                let restoredAnalysisDeck = currentValue;
                 if (!currentValue && deckSelect && previousDeckValue) {
                     const stillExists = Array.from(deckSelect.options).some(option => option.value === previousDeckValue);
                     if (stillExists) {
                         deckSelect.value = previousDeckValue;
+                        restoredAnalysisDeck = previousDeckValue;
                         syncSearchableSelectDisplay(deckSelect);
                     }
+                }
+                // Reload analysis for restored deck with fresh data
+                if (restoredAnalysisDeck) {
+                    loadCityLeagueDeckData(restoredAnalysisDeck);
                 }
                 window.cityLeagueAnalysisLoaded = true;
                 
@@ -1315,8 +1324,19 @@
 
             if (!select) return '';
 
+            const currentValue = select.value; // populateCityLeagueDeckSelect may have applied pending
+            if (currentValue) {
+                syncSearchableSelectDisplay(select);
+                return currentValue;
+            }
+
             const stillExists = Array.from(select.options).some(option => option.value === previousValue);
-            select.value = stillExists ? previousValue : '';
+            if (stillExists && previousValue) {
+                select.value = previousValue;
+                syncSearchableSelectDisplay(select);
+            } else {
+                select.value = '';
+            }
             return select.value;
         }
 

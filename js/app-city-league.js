@@ -1177,6 +1177,31 @@
             devLog('✅ Applied combined archetype:', pending.value.replace('GROUP:', '').split('|')[0]);
         }
 
+        function selectDeckArchetypeForTab(tabKey, deckValue) {
+            if (tabKey !== 'cityLeague') return '';
+
+            const select = document.getElementById('cityLeagueDeckSelect');
+            if (!select) return '';
+
+            const requestedValue = String(deckValue || '').trim();
+            if (!requestedValue) {
+                select.value = '';
+                clearCityLeagueDeckView();
+                return '';
+            }
+
+            const matchingOption = Array.from(select.options).find(option =>
+                option.value && option.value.toLowerCase() === requestedValue.toLowerCase()
+            );
+            if (!matchingOption) return '';
+
+            select.value = matchingOption.value;
+            loadCityLeagueDeckData(matchingOption.value);
+            return matchingOption.value;
+        }
+
+        window.selectDeckArchetypeForTab = selectDeckArchetypeForTab;
+
         function refreshCityLeagueDeckSelect() {
             const select = document.getElementById('cityLeagueDeckSelect');
             const previousValue = select ? select.value : '';

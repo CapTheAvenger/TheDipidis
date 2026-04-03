@@ -7090,6 +7090,15 @@ body.battle-journal-open {
     z-index: 3;
 }
 
+/* City League tables: undo sticky first-column override */
+.tab-content .city-league-info-table th:first-child,
+.tab-content .city-league-info-table td:first-child {
+    position: static;
+    z-index: auto;
+    background-color: transparent;
+    box-shadow: none;
+}
+
 /* ===================================================
    MOBILE MAKEOVER — Meta cards, Card DB, Proxy Printer
    =================================================== */

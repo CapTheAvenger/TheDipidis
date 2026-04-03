@@ -1143,21 +1143,42 @@
             // Enable search functionality
             const searchInput = document.getElementById('cityLeagueDeckSearch');
             if (searchInput) {
-                searchInput.oninput = function() {
-                    const searchTerm = this.value.toLowerCase();
-                    // Search through all options in all optgroups
+                // Prevent browser address/profile autofill from polluting the deck search.
+                searchInput.setAttribute('autocomplete', 'off');
+                searchInput.setAttribute('autocapitalize', 'none');
+                searchInput.setAttribute('autocorrect', 'off');
+                searchInput.setAttribute('spellcheck', 'false');
+
+                const applyDeckSearchFilter = () => {
+                    const searchTerm = String(searchInput.value || '').toLowerCase().trim();
+
+                    // Use the native hidden flag for option/optgroup visibility for reliable restore.
                     Array.from(select.querySelectorAll('option')).forEach(option => {
-                        if (option.value) {
-                            const match = option.textContent.toLowerCase().includes(searchTerm);
-                            option.classList.toggle('d-none', !match);
+                        if (!option.value) {
+                            option.hidden = false;
+                            return;
                         }
+                        const match = searchTerm === '' || option.textContent.toLowerCase().includes(searchTerm);
+                        option.hidden = !match;
                     });
-                    // Hide optgroups if all options are hidden
+
                     Array.from(select.querySelectorAll('optgroup')).forEach(group => {
-                        const hasVisibleOptions = Array.from(group.querySelectorAll('option')).some(opt => !opt.classList.contains('d-none'));
-                        group.classList.toggle('d-none', !hasVisibleOptions);
+                        const hasVisibleOptions = Array.from(group.querySelectorAll('option')).some(opt => !opt.hidden);
+                        group.hidden = !hasVisibleOptions;
                     });
                 };
+
+                searchInput.oninput = applyDeckSearchFilter;
+
+                // If browser autofill injected an URL/mail string, clear it so options are visible.
+                const suspiciousAutofill = /https?:\/\/|www\.|[@]|\.[a-z]{2,}$/i;
+                if (suspiciousAutofill.test(searchInput.value || '')) {
+                    console.warn('[CityLeagueSelect] cleared suspicious autofill value from deck search', searchInput.value);
+                    searchInput.value = '';
+                }
+
+                // Ensure visibility state is synced immediately after repopulation.
+                applyDeckSearchFilter();
             }
         }
         

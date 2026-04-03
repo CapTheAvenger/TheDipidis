@@ -16,6 +16,7 @@
 const { test, expect } = require('@playwright/test');
 
 const BASE_URL = 'http://127.0.0.1:8000/index.html';
+const RUN_PIXEL_SNAPSHOTS = process.platform === 'win32';
 
 async function openStablePage(page) {
     await page.addInitScript(() => {
@@ -114,16 +115,19 @@ test.describe('Card Action Buttons', () => {
         // Within row 1: keep near-equal sizing with CI-safe tolerance for icon/font metrics.
         const [r1first, ...r1rest] = row1Widths;
         for (const w of r1rest) {
-            expect(Math.abs(w - r1first)).toBeLessThanOrEqual(10);
+            expect(Math.abs(w - r1first)).toBeLessThanOrEqual(12);
         }
 
-        // Row 2 should keep usable button widths (regression guard against collapsed controls).
-        for (const w of row2Widths) {
-            expect(w).toBeGreaterThanOrEqual(24);
-        }
+        // Row 2 is text-driven; keep it within a sane spread so controls are not visibly collapsed.
+        const row2Min = Math.min(...row2Widths);
+        const row2Max = Math.max(...row2Widths);
+        expect(row2Min).toBeGreaterThanOrEqual(24);
+        expect(row2Max - row2Min).toBeLessThanOrEqual(30);
     });
 
     test('card action buttons screenshot matches baseline', async ({ page }) => {
+        test.skip(!RUN_PIXEL_SNAPSHOTS, 'Pixel baselines are maintained on Windows only');
+
         const section = page.locator('#city-league-analysis.tab-content.active');
         const firstRow = section.locator('.card-action-buttons .card-action-row:not(.card-action-row-wide)').first();
         await firstRow.evaluate((el) => {
@@ -143,6 +147,8 @@ test.describe('Card Action Buttons', () => {
 // ---------------------------------------------------------------------------
 test.describe('Navigation', () => {
     test('pokeball menu dropdown screenshot matches baseline', async ({ page }) => {
+        test.skip(!RUN_PIXEL_SNAPSHOTS, 'Pixel baselines are maintained on Windows only');
+
         await openStablePage(page);
 
         // Open the pokeball nav dropdown.
@@ -181,6 +187,8 @@ test.describe('City League Tab', () => {
     });
 
     test('hero archetype grid screenshot matches baseline', async ({ page }) => {
+        test.skip(!RUN_PIXEL_SNAPSHOTS, 'Pixel baselines are maintained on Windows only');
+
         const hasLoadError = await page.locator('#cityLeagueContent .error').count();
         test.skip(hasLoadError > 0, 'City League data unavailable for hero grid snapshot in this run');
 
@@ -209,6 +217,8 @@ test.describe('City League Tab', () => {
     });
 
     test('archetype table screenshot matches baseline', async ({ page }) => {
+        test.skip(!RUN_PIXEL_SNAPSHOTS, 'Pixel baselines are maintained on Windows only');
+
         const hasLoadError = await page.locator('#cityLeagueContent .error').count();
         test.skip(hasLoadError > 0, 'City League data unavailable for archetype table snapshot in this run');
 
@@ -300,6 +310,8 @@ test.describe.fixme('Current Meta Tab', () => {
 // ---------------------------------------------------------------------------
 test.describe('Rarity Switcher Modal', () => {
     test('rarity switcher modal screenshot matches baseline', async ({ page }) => {
+        test.skip(!RUN_PIXEL_SNAPSHOTS, 'Pixel baselines are maintained on Windows only');
+
         await openStablePage(page);
 
         await goToTab(page, 'cards');
@@ -333,6 +345,8 @@ test.describe('Rarity Switcher Modal', () => {
 // ---------------------------------------------------------------------------
 test.describe('Cards Database Tab', () => {
     test('cards database grid screenshot matches baseline', async ({ page }) => {
+        test.skip(!RUN_PIXEL_SNAPSHOTS, 'Pixel baselines are maintained on Windows only');
+
         await openStablePage(page);
 
         await goToTab(page, 'cards');

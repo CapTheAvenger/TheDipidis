@@ -1682,18 +1682,37 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // Extract card name from deckKey (handle "CardName (SET NUM)" format)
                 const baseNameMatch = deckKey.match(/^(.+?)\s*\(/);
                 const cardName = baseNameMatch ? baseNameMatch[1] : deckKey;
+
+                // Extract explicit set/number from deck key so we honour
+                // the print the user picked in the Rarity Switcher.
+                const setMatch = deckKey.match(/\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                const explicitSet = setMatch ? setMatch[1] : '';
+                const explicitNumber = setMatch ? setMatch[2] : '';
                 
                 let cardData = cardDataMap.get(cardName) || cardDataMap.get(deckKey);
                 
-                // If not found, try allCardsDatabase with O(1) lookup
-                if (!cardData) {
-                    const setMatch = deckKey.match(/\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                    if (setMatch) {
-                        const exactCard = allCardsDbMap.get(cardName);
+                // If not found in analysis data, try cardsBySetNumberMap for image/type
+                if (!cardData && explicitSet && explicitNumber) {
+                    const dbCard = (window.cardsBySetNumberMap || {})[`${explicitSet}-${explicitNumber}`];
+                    if (dbCard) {
+                        cardData = {
+                            card_name: dbCard.name || cardName,
+                            image_url: dbCard.image_url || '',
+                            type: dbCard.type || 'Unknown',
+                            set_code: dbCard.set,
+                            set_number: dbCard.number,
+                            rarity: dbCard.rarity
+                        };
                     }
                 }
                 
                 if (!cardData) continue;
+
+                // Override set_code / set_number so the image resolves to the
+                // exact print shown in the deck builder.
+                if (explicitSet && explicitNumber) {
+                    cardData = { ...cardData, set_code: explicitSet, set_number: explicitNumber };
+                }
                 
                 deckCards.push({...cardData, deck_count_in_selected: count, card_name: cardName});
             }

@@ -1,7 +1,7 @@
 // Service Worker for Pokemon TCG Analysis PWA
 // Strategy: Cache static shell, network-first for data
 
-const CACHE_NAME = 'tcg-analysis-v2';
+const CACHE_NAME = 'tcg-analysis-v3';
 
 // Static shell — cached on install
 const SHELL_ASSETS = [
@@ -97,18 +97,18 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Static assets: cache-first with network fallback
+  // Static assets: network-first so users always get the latest version
   event.respondWith(
-    caches.match(event.request).then(function(cached) {
-      return cached || fetch(event.request).then(function(response) {
-        if (response && response.ok) {
-          var clone = response.clone();
-          caches.open(CACHE_NAME).then(function(cache) {
-            cache.put(event.request, clone);
-          });
-        }
-        return response;
-      });
+    fetch(event.request).then(function(response) {
+      if (response && response.ok) {
+        var clone = response.clone();
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(event.request, clone);
+        });
+      }
+      return response;
+    }).catch(function() {
+      return caches.match(event.request);
     })
   );
 });

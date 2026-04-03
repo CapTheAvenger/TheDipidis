@@ -1271,7 +1271,8 @@ const BASE_PATH = './data/';
                             select.value = match.value;
                             window.pendingCityLeagueDeckSelection = null;
                             window.currentCityLeagueArchetype = match.value;
-                            select.dispatchEvent(new Event('change', { bubbles: true }));
+                            if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
+                            if (typeof loadCityLeagueDeckData === 'function') loadCityLeagueDeckData(match.value);
                         }
                     }
                 }
@@ -1386,9 +1387,8 @@ const BASE_PATH = './data/';
                     if (matchingOption) {
                         select.value = matchingOption.value;
                         window.pendingCityLeagueDeckSelection = null;
-                        // Trigger change event to load the deck
-                        const event = new Event('change', { bubbles: true });
-                        select.dispatchEvent(event);
+                        if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
+                        if (typeof loadCityLeagueDeckData === 'function') loadCityLeagueDeckData(matchingOption.value);
                         devLog('✅ Deck selected:', matchingOption.value, combinedOption ? '(combined)' : '(exact)');
                     } else {
                         console.warn('⚠️ Deck not found in dropdown:', archetypeName);

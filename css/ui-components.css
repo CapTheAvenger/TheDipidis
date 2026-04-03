@@ -3,6 +3,121 @@
    ==================================== */
 
 /* ============================================================
+ * SEARCHABLE SELECT DROPDOWN
+ * Custom dropdown that replaces native <select> with
+ * a filterable option list and built-in search input.
+ * ============================================================ */
+.searchable-select {
+    position: relative;
+    width: 100%;
+}
+
+.searchable-select-display {
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+}
+
+.searchable-select-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #fff;
+    border: 2px solid #93c5fd;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    flex-direction: column;
+    max-height: 400px;
+    overflow: hidden;
+}
+.searchable-select-dropdown.open {
+    display: flex;
+}
+
+.searchable-select-search {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-bottom: 2px solid #e2e8f0;
+    font-size: 15px;
+    outline: none;
+    box-sizing: border-box;
+    background: #f8fafc;
+}
+.searchable-select-search:focus {
+    background: #fff;
+    border-bottom-color: #60a5fa;
+}
+
+.searchable-select-options {
+    overflow-y: auto;
+    max-height: 340px;
+    overscroll-behavior: contain;
+}
+
+.searchable-select-group {
+    padding: 8px 12px 4px;
+    font-size: 0.8em;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: #f1f5f9;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.searchable-select-option {
+    padding: 9px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.1s;
+}
+.searchable-select-option:hover {
+    background: #e0f2fe;
+}
+.searchable-select-option.selected {
+    background: #bfdbfe;
+    font-weight: 600;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .searchable-select-dropdown {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .searchable-select-search {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-bottom-color: #334155;
+}
+[data-theme="dark"] .searchable-select-search:focus {
+    background: #1e293b;
+    border-bottom-color: #60a5fa;
+}
+[data-theme="dark"] .searchable-select-group {
+    background: #0f172a;
+    color: #94a3b8;
+}
+[data-theme="dark"] .searchable-select-option {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .searchable-select-option:hover {
+    background: #334155;
+}
+[data-theme="dark"] .searchable-select-option.selected {
+    background: #1e3a5f;
+}
+
+/* ============================================================
  * 1) MOBILE-FIRST TABLE → CARD TILES
  *    On screens < 768px tables with .responsive-table become
  *    stacked "card tiles" instead of horizontal rows.

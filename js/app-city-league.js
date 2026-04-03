@@ -1061,20 +1061,11 @@
                 select.appendChild(combinedOptGroup);
             }
 
-            // Store full select innerHTML as backup for search/restore
-            select._fullHTML = select.innerHTML;
-
-            // Add change event listener
+            // Add change event listener (for programmatic changes)
             select.onchange = function() {
-                // Reset search filter on selection so next open shows all options
-                const searchEl = document.getElementById('cityLeagueDeckSearch');
-                if (searchEl && searchEl.value) {
-                    searchEl.value = '';
-                    this.innerHTML = this._fullHTML;
-                }
                 if (this.value) {
                     loadCityLeagueDeckData(this.value);
-                    devLog('[Dropdown] Archetype selected:', this.value, '- waiting for user to generate deck');
+                    devLog('[Dropdown] Archetype selected:', this.value);
                 } else {
                     clearCityLeagueDeckView();
                 }
@@ -1093,33 +1084,146 @@
                     devLog('✅ Applied pending City League deck selection:', matchingOption.value);
                 }
             }
-            
 
             // Apply pending combined archetype selection (from analyzeCombinedArchetype click)
             applyPendingCombinedArchetypeSelection();
 
-            // Enable search functionality — remove non-matching options from DOM
-            // (native <select> ignores hidden/display:none on <option> in most browsers)
-            const searchInput = document.getElementById('cityLeagueDeckSearch');
-            if (searchInput) {
-                searchInput.oninput = function() {
-                    const searchTerm = this.value.toLowerCase().trim();
-                    // Restore full option set from backup first
-                    select.innerHTML = select._fullHTML;
-                    if (!searchTerm) return;
-                    // Remove non-matching options
-                    Array.from(select.querySelectorAll('option')).forEach(option => {
-                        if (option.value && !option.textContent.toLowerCase().includes(searchTerm)) {
-                            option.remove();
-                        }
+            // Convert native <select> to a custom searchable dropdown
+            initSearchableSelect(select);
+        }
+
+        /**
+         * Converts a native <select> into a custom searchable dropdown.
+         * The <select> stays hidden for data / programmatic access.
+         * A visual overlay with a built-in search input replaces it.
+         */
+        function initSearchableSelect(selectEl) {
+            // Remove previous instance if populateCityLeagueDeckSelect is called again
+            const prev = selectEl.parentElement.querySelector('.searchable-select');
+            if (prev) prev.remove();
+
+            selectEl.style.display = 'none';
+
+            // --- Wrapper ---
+            const wrapper = document.createElement('div');
+            wrapper.className = 'searchable-select';
+
+            // --- Display (shows current selection) ---
+            const display = document.createElement('div');
+            display.className = 'searchable-select-display control-input modern-select';
+            display.tabIndex = 0;
+            display.textContent = selectEl.options[selectEl.selectedIndex]?.textContent || t('cl.selectDeck');
+
+            // --- Dropdown panel ---
+            const dropdown = document.createElement('div');
+            dropdown.className = 'searchable-select-dropdown';
+
+            const search = document.createElement('input');
+            search.type = 'text';
+            search.className = 'searchable-select-search';
+            search.placeholder = t('filter.searchDeckPlaceholder') || 'Search deck…';
+            search.autocomplete = 'off';
+
+            const list = document.createElement('div');
+            list.className = 'searchable-select-options';
+
+            dropdown.appendChild(search);
+            dropdown.appendChild(list);
+
+            // --- Build visible option items from <select> ---
+            function buildList(filter) {
+                list.innerHTML = '';
+                const q = (filter || '').toLowerCase().trim();
+
+                // Default "-- Select a Deck --"
+                if (!q) {
+                    const def = document.createElement('div');
+                    def.className = 'searchable-select-option' + (!selectEl.value ? ' selected' : '');
+                    def.textContent = selectEl.options[0]?.textContent || '-- Select a Deck --';
+                    def.dataset.value = '';
+                    def.onclick = () => pick('', def.textContent);
+                    list.appendChild(def);
+                }
+
+                Array.from(selectEl.querySelectorAll('optgroup')).forEach(group => {
+                    const opts = Array.from(group.querySelectorAll('option')).filter(o =>
+                        !q || o.textContent.toLowerCase().includes(q)
+                    );
+                    if (opts.length === 0) return;
+
+                    const label = document.createElement('div');
+                    label.className = 'searchable-select-group';
+                    label.textContent = group.label;
+                    list.appendChild(label);
+
+                    opts.forEach(o => {
+                        const item = document.createElement('div');
+                        item.className = 'searchable-select-option' + (o.value === selectEl.value ? ' selected' : '');
+                        item.textContent = o.textContent;
+                        item.dataset.value = o.value;
+                        item.onclick = () => pick(o.value, o.textContent);
+                        list.appendChild(item);
                     });
-                    // Remove empty optgroups
-                    Array.from(select.querySelectorAll('optgroup')).forEach(group => {
-                        if (group.querySelectorAll('option').length === 0) {
-                            group.remove();
-                        }
-                    });
-                };
+                });
+            }
+
+            function pick(value, text) {
+                selectEl.value = value;
+                display.textContent = text;
+                close();
+                if (value) {
+                    loadCityLeagueDeckData(value);
+                } else {
+                    clearCityLeagueDeckView();
+                }
+            }
+
+            function open() {
+                dropdown.classList.add('open');
+                search.value = '';
+                buildList('');
+                search.focus();
+            }
+
+            function close() {
+                dropdown.classList.remove('open');
+            }
+
+            function isOpen() {
+                return dropdown.classList.contains('open');
+            }
+
+            display.onclick = (e) => {
+                e.stopPropagation();
+                isOpen() ? close() : open();
+            };
+
+            search.oninput = () => buildList(search.value);
+            search.onclick = (e) => e.stopPropagation();
+
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (!wrapper.contains(e.target)) close();
+            });
+
+            // Keyboard: Escape closes
+            search.onkeydown = (e) => {
+                if (e.key === 'Escape') close();
+            };
+
+            wrapper.appendChild(display);
+            wrapper.appendChild(dropdown);
+            selectEl.parentElement.insertBefore(wrapper, selectEl.nextSibling);
+
+            // Keep display text in sync when select.value changes programmatically
+            selectEl._searchableDisplay = display;
+        }
+
+        // Helper: update searchable select display when value set externally
+        function syncSearchableSelectDisplay(selectEl) {
+            if (selectEl && selectEl._searchableDisplay) {
+                const opt = selectEl.options[selectEl.selectedIndex];
+                selectEl._searchableDisplay.textContent = opt ? opt.textContent : '';
             }
         }
         
@@ -1186,6 +1290,7 @@
                 select.appendChild(option);
             }
             select.value = pending.value;
+            syncSearchableSelectDisplay(select);
             loadCityLeagueDeckData(pending.value);
             devLog('✅ Applied combined archetype:', pending.value.replace('GROUP:', '').split('|')[0]);
         }

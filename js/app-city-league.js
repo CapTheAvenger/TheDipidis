@@ -1063,10 +1063,15 @@
 
             // Add change event listener
             select.onchange = function() {
+                // Reset search filter on selection so next open shows all options
+                const searchEl = document.getElementById('cityLeagueDeckSearch');
+                if (searchEl) {
+                    searchEl.value = '';
+                    this.querySelectorAll('option').forEach(opt => opt.hidden = false);
+                    this.querySelectorAll('optgroup').forEach(g => g.hidden = false);
+                }
                 if (this.value) {
                     loadCityLeagueDeckData(this.value);
-                    // DON'T auto-display deck - user must click "Generate Deck" button
-                    // This prevents unwanted deck building when just browsing decks
                     devLog('[Dropdown] Archetype selected:', this.value, '- waiting for user to generate deck');
                 } else {
                     clearCityLeagueDeckView();
@@ -1095,18 +1100,17 @@
             const searchInput = document.getElementById('cityLeagueDeckSearch');
             if (searchInput) {
                 searchInput.oninput = function() {
-                    const searchTerm = this.value.toLowerCase();
-                    // Search through all options in all optgroups
+                    const searchTerm = this.value.toLowerCase().trim();
+                    // Use option.hidden (supported by all modern browsers) instead of CSS classes
                     Array.from(select.querySelectorAll('option')).forEach(option => {
                         if (option.value) {
-                            const match = option.textContent.toLowerCase().includes(searchTerm);
-                            option.classList.toggle('d-none', !match);
+                            option.hidden = searchTerm ? !option.textContent.toLowerCase().includes(searchTerm) : false;
                         }
                     });
-                    // Hide optgroups if all options are hidden
+                    // Hide optgroups where all options are hidden
                     Array.from(select.querySelectorAll('optgroup')).forEach(group => {
-                        const hasVisibleOptions = Array.from(group.querySelectorAll('option')).some(opt => !opt.classList.contains('d-none'));
-                        group.classList.toggle('d-none', !hasVisibleOptions);
+                        const hasVisibleOptions = Array.from(group.querySelectorAll('option')).some(opt => !opt.hidden);
+                        group.hidden = !hasVisibleOptions;
                     });
                 };
             }

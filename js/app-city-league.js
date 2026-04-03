@@ -1891,10 +1891,10 @@
             const totalCardsInDeck = deckCards.reduce((sum, card) => sum + parseInt(card.max_count || 0), 0);
             const uniqueCards = deckCards.length;
             
-            // Get current deck count from aggregated data
-            // Since we now always aggregate, use total_decks_in_archetype from first card
-            let decksCount = getSelectedCityLeagueDeckCount(archetype)
-                || archetypeStats.decksCount
+            // Get current deck count from date-filtered archetype data first,
+            // so the stat reflects the active date filter.
+            let decksCount = archetypeStats.decksCount
+                || getSelectedCityLeagueDeckCount(archetype)
                 || parseInt(deckCards[0]?.total_decks_in_archetype || 0, 10);
             if (!decksCount || decksCount <= 0) {
                 decksCount = getCityLeagueDeckCountFallback(archetype);

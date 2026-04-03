@@ -325,12 +325,15 @@
                 populateCityLeagueDeckSelect(analysisData, cityLeagueData);
 
                 const deckSelect = document.getElementById('cityLeagueDeckSelect');
-                let restoredSelection = '';
-                if (deckSelect && previousDeckValue) {
+                // populateCityLeagueDeckSelect may have applied a pending selection — respect it
+                const currentValue = deckSelect ? deckSelect.value : '';
+                let restoredSelection = currentValue; // already set by pending
+                if (!currentValue && deckSelect && previousDeckValue) {
                     const stillExists = Array.from(deckSelect.options).some(option => option.value === previousDeckValue);
                     if (stillExists) {
                         deckSelect.value = previousDeckValue;
                         restoredSelection = previousDeckValue;
+                        syncSearchableSelectDisplay(deckSelect);
                     }
                 }
                 if (!restoredSelection && deckSelect) {
@@ -929,10 +932,13 @@
                 const previousDeckValue = document.getElementById('cityLeagueDeckSelect')?.value || '';
                 populateCityLeagueDeckSelect(data, comparisonData);
                 const deckSelect = document.getElementById('cityLeagueDeckSelect');
-                if (deckSelect && previousDeckValue) {
+                // Respect value already set by populateCityLeagueDeckSelect (pending selection)
+                const currentValue = deckSelect ? deckSelect.value : '';
+                if (!currentValue && deckSelect && previousDeckValue) {
                     const stillExists = Array.from(deckSelect.options).some(option => option.value === previousDeckValue);
                     if (stillExists) {
                         deckSelect.value = previousDeckValue;
+                        syncSearchableSelectDisplay(deckSelect);
                     }
                 }
                 window.cityLeagueAnalysisLoaded = true;

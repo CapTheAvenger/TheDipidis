@@ -2,6 +2,214 @@
    UI COMPONENTS (ui-components.css)
    ==================================== */
 
+/* ============================================================
+ * 1) MOBILE-FIRST TABLE → CARD TILES
+ *    On screens < 768px tables with .responsive-table become
+ *    stacked "card tiles" instead of horizontal rows.
+ * ============================================================ */
+.responsive-table { width: 100%; border-collapse: collapse; }
+
+@media (max-width: 768px) {
+    .responsive-table,
+    .responsive-table thead,
+    .responsive-table tbody,
+    .responsive-table tr,
+    .responsive-table th,
+    .responsive-table td {
+        display: block;
+    }
+    .responsive-table thead { display: none; }
+    .responsive-table tr {
+        background: var(--bg-light, #fff);
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .responsive-table td {
+        padding: 4px 0;
+        text-align: left;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+    .responsive-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.82em;
+        color: #6b7280;
+        flex-shrink: 0;
+        min-width: 90px;
+    }
+    /* Image cell spans full width at top of tile */
+    .responsive-table td.col-image {
+        justify-content: center;
+        margin-bottom: 6px;
+    }
+    .responsive-table td.col-image::before { display: none; }
+    .responsive-table td.col-image img {
+        max-width: 100px;
+        border-radius: 8px;
+    }
+    /* Action buttons wrap nicely */
+    .responsive-table td.city-league-action-btns {
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(0,0,0,0.06);
+    }
+    .responsive-table td.city-league-action-btns::before { display: none; }
+}
+
+/* ============================================================
+ * 2) EMPTY STATES (unified component)
+ *    Professor Oak style with SVG illustration.
+ * ============================================================ */
+.empty-state-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    border-radius: 16px;
+    border: 2px dashed rgba(59, 76, 202, 0.15);
+    margin: 16px 0;
+}
+.empty-state-icon {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 18px;
+    opacity: 0.85;
+}
+.empty-state-title {
+    font-size: 1.15em;
+    font-weight: 800;
+    color: #1a1a2e;
+    margin: 0 0 8px 0;
+}
+.empty-state-desc {
+    font-size: 0.92em;
+    color: #6b7280;
+    max-width: 340px;
+    margin: 0 0 18px 0;
+    line-height: 1.5;
+}
+.empty-state-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    background: var(--pokemon-red, #E3350D);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.92em;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.empty-state-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(227, 53, 13, 0.35);
+}
+
+/* ============================================================
+ * 3) SKELETON LOADERS (table + generic row variants)
+ * ============================================================ */
+.skeleton-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.skeleton-table-row {
+    display: flex;
+    gap: 12px;
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.skeleton-table-row:first-child {
+    background: rgba(26, 26, 46, 0.04);
+    border-radius: 8px 8px 0 0;
+}
+.skeleton-cell {
+    height: 14px;
+    border-radius: 999px;
+    background: #e7ecf3;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+}
+.skeleton-cell--narrow { max-width: 60px; }
+.skeleton-cell--wide   { flex: 2; }
+.skeleton-cell--img {
+    width: 48px;
+    height: 68px;
+    border-radius: 6px;
+    flex: none;
+}
+.skeleton-cell::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 45%, transparent 100%);
+    transform: translateX(-100%);
+    animation: skeletonShimmer 1.2s ease-in-out infinite;
+}
+
+/* Row skeleton (for generic lists) */
+.skeleton-row-block {
+    padding: 16px;
+    background: var(--bg-light, #fff);
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+}
+.skeleton-row-block .skeleton-cell { margin-bottom: 10px; }
+.skeleton-row-block .skeleton-cell:last-child { margin-bottom: 0; width: 55%; }
+
+@media (max-width: 768px) {
+    .skeleton-table-row { flex-wrap: wrap; }
+    .skeleton-cell--img { width: 40px; height: 56px; }
+}
+
+/* ============================================================
+ * General-purpose Loading Indicator (shimmer bars)
+ * ============================================================ */
+.loading-indicator-wrap {
+    padding: 24px 16px;
+    text-align: center;
+}
+.loading-indicator-msg {
+    font-size: 0.95em;
+    font-weight: 700;
+    color: #6b7280;
+    margin-bottom: 14px;
+}
+.loading-indicator-bar {
+    height: 12px;
+    border-radius: 999px;
+    background: #e7ecf3;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+.loading-indicator-bar:nth-child(2) { width: 85%; }
+.loading-indicator-bar:nth-child(3) { width: 65%; }
+.loading-indicator-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 45%, transparent 100%);
+    transform: translateX(-100%);
+    animation: skeletonShimmer 1.2s ease-in-out infinite;
+}
+
 /* Standard Button Basis */
 .btn {
     padding: 0.6rem 1.2rem;
@@ -73,6 +281,15 @@
 .bg-grey-light { background: #f8f9fa !important; }
 .cursor-text { cursor: text !important; }
 /* Modular meta matchup table styles (used in app-meta-cards.js) */
+.matchups-grid-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    align-items: start !important;
+}
+.matchups-grid-container > * {
+    min-width: 0 !important;
+}
 .meta-matchup-table {
     width: 100% !important;
     table-layout: fixed !important;
@@ -308,13 +525,22 @@
 }
 .card-action-row {
     display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 2px !important;
+    width: 100% !important;
 }
 .card-action-row-wide {
     display: grid !important;
-    grid-template-columns: 1fr 1fr 2fr !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 2px !important;
+    width: 100% !important;
+}
+.card-action-row .card-action-btn,
+.card-action-row-wide .card-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
 }
 /* Modular utility class for live price button (used in app-price.js) */
 .price-btn-live {
@@ -382,6 +608,7 @@
 .heatmap-table {
     border-collapse: collapse !important;
     width: 100% !important;
+    min-width: max-content !important;
     font-size: 0.85em !important;
 }
 .heatmap-th-x {
@@ -431,6 +658,8 @@
     text-align: center !important;
     font-weight: 600 !important;
     border: 1px solid #ddd !important;
+    white-space: nowrap !important;
+    min-width: 80px !important;
     transition: all 0.2s !important;
 }
 .heatmap-td-mirror {
@@ -452,6 +681,9 @@
 }
 .heatmap-table-scroll {
     overflow-x: auto !important;
+    overflow-y: hidden !important;
+    width: 100% !important;
+    -webkit-overflow-scrolling: touch;
 }
 .heatmap-btn-row {
     text-align: center !important;
@@ -508,8 +740,9 @@
 }
 .card-database-button-row {
     display: flex !important;
-    gap: 8px !important;
-    margin-top: 8px !important;
+    gap: 5px !important;
+    margin-top: 4px !important;
+    flex-wrap: wrap !important;
 }
 .card-database-owned-badge {
     position: absolute !important;
@@ -559,13 +792,13 @@
     font-weight: 700 !important;
 }
 .card-database-coverage {
-    margin-top: 8px !important;
-    padding: 8px !important;
+    margin-top: 4px !important;
+    padding: 5px !important;
     color: white !important;
-    border-radius: 6px !important;
+    border-radius: 5px !important;
     text-align: center !important;
     font-weight: 600 !important;
-    font-size: 13px !important;
+    font-size: 11px !important;
 }
 .card-item {
     position: relative !important;
@@ -588,6 +821,32 @@
     aspect-ratio: 2.5/3.5 !important;
     object-fit: cover !important;
     cursor: zoom-in !important;
+}
+/* Standard card image class used in Past Meta and Deck Builder card grids */
+.card-img-std {
+    width: 100% !important;
+    aspect-ratio: 2.5 / 3.5 !important;
+    object-fit: cover !important;
+    display: block !important;
+    cursor: zoom-in !important;
+}
+/* Badge colour variants */
+.card-badge-red {
+    background: #dc3545 !important;
+    color: white !important;
+}
+.card-badge-green {
+    background: #28a745 !important;
+    color: white !important;
+}
+/* Absolute-position helpers for card badges (top-right / top-left) */
+.top-right {
+    top: 5px !important;
+    right: 5px !important;
+}
+.top-left {
+    top: 5px !important;
+    left: 5px !important;
 }
 /* Utility classes for playtester discard/lost zone dynamic styles */
 .pointer { cursor: pointer !important; }
@@ -1189,10 +1448,7 @@
     top: 29px;
 }
 
-/*
-    Note: The background and cursor for .city-league-card-market-btn are now set via data attributes (data-market-bg, data-market-cursor).
-    You can use a script or attribute selector CSS to apply these styles if needed.
-*/
+/* Cardmarket button uses data-market-cursor for state styling (available vs unavailable). */
 /* City League Card Item Modular Styles */
 .city-league-card-item {
     position: relative;
@@ -1315,30 +1571,35 @@
 .city-league-card-action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 1px;
-    margin-top: 2px;
+    gap: 3px;
+    margin-top: 5px;
 }
 .city-league-card-action-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 1px;
+    gap: 3px;
 }
 .city-league-card-action-row:last-child {
-    grid-template-columns: 1fr 1fr 2fr;
+    grid-template-columns: 1fr 1fr 1.7fr;
 }
 .city-league-card-action-btn {
     border: none;
-    border-radius: 3px;
-    height: 14px;
+    border-radius: 5px;
+    height: 20px;
     cursor: pointer;
     font-weight: 700;
-    padding: 0;
+    padding: 0 3px;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: unset;
     min-width: unset;
+    line-height: 1;
     transition: filter 0.15s, transform 0.15s;
+}
+.city-league-card-action-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 1px;
 }
 .city-league-card-action-btn:hover {
     filter: brightness(1.1);
@@ -1347,45 +1608,181 @@
 .city-league-card-remove-btn {
     background: #ef4444;
     color: white;
-    font-size: 10px;
+    font-size: 11px;
 }
 .city-league-card-rarity-btn {
     background: #f59e0b;
     color: #333;
-    font-size: 9px;
+    font-size: 10px;
     text-align: center;
 }
 .city-league-card-add-btn {
     background: #22c55e;
     color: white;
-    font-size: 10px;
+    font-size: 11px;
 }
 .city-league-card-limitless-btn {
-    background: #8b5cf6;
+    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
     color: white;
-    font-size: 6px;
+    font-size: 10px;
 }
 .city-league-card-proxy-btn {
-    background: #ef4444;
+    background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
     color: white;
-    font-size: 6px;
+    font-size: 10px;
 }
 .city-league-card-market-btn {
-    color: white;
-    height: 14px;
-    border-radius: 3px;
-    font-size: 6px;
-    font-weight: 700;
-    padding: 0 2px;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.24);
+    height: 20px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 0 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    text-shadow: none;
+    letter-spacing: 0.1px;
     min-height: unset;
     min-width: unset;
+}
+.city-league-card-market-btn[data-market-cursor="pointer"] {
+    background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
+    color: #ffffff;
+    cursor: pointer;
+}
+.city-league-card-market-btn[data-market-cursor="not-allowed"] {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: #f3f4f6;
+    cursor: not-allowed;
+}
+
+/* Deck Analysis (Japan): denser overlay and cleaner action rows */
+#city-league-analysis .city-league-card-info-bottom {
+    padding: 5px 6px;
+    min-height: 30px;
+}
+
+#city-league-analysis .city-league-card-stats-mobile,
+#city-league-analysis .city-league-card-deck-stats-mobile {
+    font-size: 0.53em;
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+#city-league-analysis .city-league-card-action-buttons {
+    gap: 2px;
+    margin-top: 3px;
+}
+
+#city-league-analysis .city-league-card-action-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+}
+
+#city-league-analysis .city-league-card-action-row:last-child {
+    grid-template-columns: 1fr 1fr;
+}
+
+#city-league-analysis .city-league-card-action-btn,
+#city-league-analysis .city-league-card-market-btn {
+    height: 19px;
+    border-radius: 4px;
+    padding: 0 3px;
+}
+
+#city-league-analysis .city-league-card-remove-btn,
+#city-league-analysis .city-league-card-add-btn,
+#city-league-analysis .city-league-card-rarity-btn,
+#city-league-analysis .city-league-card-limitless-btn,
+#city-league-analysis .city-league-card-proxy-btn,
+#city-league-analysis .city-league-card-market-btn {
+    font-size: 9px;
+}
+
+/* Deck Analysis (Global): same compact card overlay behavior as Japan */
+#current-analysis .city-league-card-info-bottom {
+    padding: 5px 6px;
+    min-height: 30px;
+}
+
+#current-analysis .city-league-card-stats-mobile,
+#current-analysis .city-league-card-deck-stats-mobile {
+    font-size: 0.53em;
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+#current-analysis .city-league-card-action-buttons {
+    gap: 2px;
+    margin-top: 3px;
+}
+
+#current-analysis .city-league-card-action-row,
+#current-analysis .city-league-card-action-row:last-child {
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+}
+
+#current-analysis .city-league-card-action-btn,
+#current-analysis .city-league-card-market-btn {
+    height: 19px;
+    border-radius: 4px;
+    padding: 0 3px;
+}
+
+#current-analysis .city-league-card-remove-btn,
+#current-analysis .city-league-card-add-btn,
+#current-analysis .city-league-card-rarity-btn,
+#current-analysis .city-league-card-limitless-btn,
+#current-analysis .city-league-card-proxy-btn,
+#current-analysis .city-league-card-market-btn {
+    font-size: 9px;
+}
+
+/* Deck Analysis (Past Meta): same compact card overlay behavior as Japan/Global */
+#past-meta .city-league-card-info-bottom {
+    padding: 5px 6px;
+    min-height: 30px;
+}
+
+#past-meta .city-league-card-stats-mobile,
+#past-meta .city-league-card-deck-stats-mobile {
+    font-size: 0.53em;
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+#past-meta .city-league-card-action-buttons {
+    gap: 2px;
+    margin-top: 3px;
+}
+
+#past-meta .city-league-card-action-row,
+#past-meta .city-league-card-action-row:last-child {
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+}
+
+#past-meta .city-league-card-action-btn,
+#past-meta .city-league-card-market-btn {
+    height: 19px;
+    border-radius: 4px;
+    padding: 0 3px;
+}
+
+#past-meta .city-league-card-remove-btn,
+#past-meta .city-league-card-add-btn,
+#past-meta .city-league-card-rarity-btn,
+#past-meta .city-league-card-limitless-btn,
+#past-meta .city-league-card-proxy-btn,
+#past-meta .city-league-card-market-btn {
+    font-size: 9px;
 }
 /* City League Card Table Row Modular Styles */
 .city-league-card-table-row {
@@ -1398,7 +1795,7 @@
     gap: 20px;
 }
 
-.city-league-card-image-container {
+.city-league-card-table-row .city-league-card-image-container {
     flex-shrink: 0;
     position: relative;
     width: 120px;
@@ -1481,18 +1878,376 @@
     gap: 6px;
 }
 
-.city-league-card-add-btn {
+.city-league-card-actions .city-league-card-add-btn {
     padding: 10px 20px;
     font-size: 0.95em;
     white-space: nowrap;
 }
 
-.city-league-card-proxy-btn {
+.city-league-card-actions .city-league-card-proxy-btn {
     padding: 10px 20px;
     font-size: 0.9em;
     white-space: nowrap;
     background: #e74c3c;
     border-color: #c0392b;
+}
+
+/* Mobile: keep heatmap readable via horizontal scroll (no squeezed/rotated labels) */
+@media (max-width: 768px) {
+    .heatmap-th-y {
+        writing-mode: horizontal-tb !important;
+        transform: none !important;
+        white-space: nowrap !important;
+        word-wrap: normal !important;
+        min-width: 90px !important;
+        max-width: none !important;
+        padding: 7px 6px !important;
+        font-size: 0.7rem !important;
+        height: auto !important;
+        vertical-align: middle !important;
+    }
+    .heatmap-th-row {
+        max-width: none !important;
+        min-width: 140px !important;
+        white-space: nowrap !important;
+        font-size: 0.8rem !important;
+        line-height: 1.2 !important;
+    }
+    .heatmap-td {
+        padding: 7px 6px !important;
+        font-size: 0.8rem !important;
+        min-width: 82px !important;
+    }
+}
+
+@media (max-width: 430px) {
+    .heatmap-th-y {
+        min-width: 84px !important;
+        padding: 6px 5px !important;
+        font-size: 0.68rem !important;
+    }
+
+    .heatmap-th-row {
+        min-width: 128px !important;
+        font-size: 0.76rem !important;
+    }
+
+    .heatmap-td {
+        min-width: 76px !important;
+        padding: 6px 5px !important;
+        font-size: 0.76rem !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .heatmap-th-y {
+        min-width: 80px !important;
+        font-size: 0.64rem !important;
+    }
+
+    .heatmap-th-row {
+        min-width: 118px !important;
+        font-size: 0.72rem !important;
+    }
+
+    .heatmap-td {
+        min-width: 72px !important;
+        font-size: 0.72rem !important;
+    }
+
+    .heatmap-search-label {
+        min-width: 100% !important;
+        font-size: 0.78rem !important;
+    }
+
+    .heatmap-search-input {
+        min-height: 34px !important;
+        padding: 7px 9px !important;
+        font-size: 0.84rem !important;
+    }
+
+    .heatmap-btn-row .action-btn {
+        min-height: 34px !important;
+        padding: 7px 10px !important;
+        font-size: 0.82rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .city-league-card-info-bottom {
+        padding: 4px;
+    }
+    .city-league-card-action-buttons {
+        gap: 2px;
+        margin-top: 4px;
+    }
+    .city-league-card-action-row {
+        gap: 2px;
+    }
+    .city-league-card-action-btn,
+    .city-league-card-market-btn {
+        height: 18px;
+        border-radius: 4px;
+    }
+    .city-league-card-market-btn {
+        font-size: 8px;
+        padding: 0 3px;
+    }
+
+    #city-league-analysis .city-league-card-info-bottom {
+        padding: 4px 5px;
+        min-height: 26px;
+    }
+
+    #city-league-analysis .city-league-card-stats-mobile,
+    #city-league-analysis .city-league-card-deck-stats-mobile {
+        font-size: 0.49em;
+    }
+
+    #city-league-analysis .city-league-card-action-btn,
+    #city-league-analysis .city-league-card-market-btn {
+        height: 17px;
+        border-radius: 3px;
+        padding: 0 2px;
+    }
+
+    #city-league-analysis .city-league-card-remove-btn,
+    #city-league-analysis .city-league-card-add-btn,
+    #city-league-analysis .city-league-card-rarity-btn,
+    #city-league-analysis .city-league-card-limitless-btn,
+    #city-league-analysis .city-league-card-proxy-btn,
+    #city-league-analysis .city-league-card-market-btn {
+        font-size: 8px;
+    }
+
+    #current-analysis .city-league-card-info-bottom {
+        padding: 4px 5px;
+        min-height: 26px;
+    }
+
+    #current-analysis .city-league-card-stats-mobile,
+    #current-analysis .city-league-card-deck-stats-mobile {
+        font-size: 0.49em;
+    }
+
+    #current-analysis .city-league-card-action-btn,
+    #current-analysis .city-league-card-market-btn {
+        height: 17px;
+        border-radius: 3px;
+        padding: 0 2px;
+    }
+
+    #current-analysis .city-league-card-remove-btn,
+    #current-analysis .city-league-card-add-btn,
+    #current-analysis .city-league-card-rarity-btn,
+    #current-analysis .city-league-card-limitless-btn,
+    #current-analysis .city-league-card-proxy-btn,
+    #current-analysis .city-league-card-market-btn {
+        font-size: 8px;
+    }
+
+    #past-meta .city-league-card-info-bottom {
+        padding: 4px 5px;
+        min-height: 26px;
+    }
+
+    #past-meta .city-league-card-stats-mobile,
+    #past-meta .city-league-card-deck-stats-mobile {
+        font-size: 0.49em;
+    }
+
+    #past-meta .city-league-card-action-btn,
+    #past-meta .city-league-card-market-btn {
+        height: 17px;
+        border-radius: 3px;
+        padding: 0 2px;
+    }
+
+    #past-meta .city-league-card-remove-btn,
+    #past-meta .city-league-card-add-btn,
+    #past-meta .city-league-card-rarity-btn,
+    #past-meta .city-league-card-limitless-btn,
+    #past-meta .city-league-card-proxy-btn,
+    #past-meta .city-league-card-market-btn {
+        font-size: 8px;
+    }
+}
+
+@media (max-width: 430px) {
+    #current-analysis .city-league-card-info-bottom {
+        padding: 3px 5px;
+        min-height: 24px;
+    }
+
+    #current-analysis .city-league-card-title-mobile {
+        font-size: 0.54em;
+    }
+
+    #current-analysis .city-league-card-set-mobile,
+    #current-analysis .city-league-card-stats-mobile,
+    #current-analysis .city-league-card-deck-stats-mobile {
+        font-size: 0.47em;
+    }
+
+    #current-analysis .city-league-card-action-btn,
+    #current-analysis .city-league-card-market-btn {
+        height: 16px;
+        font-size: 7px;
+    }
+}
+
+@media (max-width: 360px) {
+    #current-analysis .city-league-card-info-bottom {
+        padding: 3px 4px;
+        min-height: 22px;
+    }
+
+    #current-analysis .city-league-card-title-mobile {
+        font-size: 0.52em;
+        margin-bottom: 0;
+    }
+
+    #current-analysis .city-league-card-set-mobile,
+    #current-analysis .city-league-card-stats-mobile,
+    #current-analysis .city-league-card-deck-stats-mobile {
+        font-size: 0.46em;
+        line-height: 1.1;
+    }
+
+    #current-analysis .city-league-card-action-buttons {
+        gap: 1px;
+        margin-top: 2px;
+    }
+
+    #current-analysis .city-league-card-action-row,
+    #current-analysis .city-league-card-action-row:last-child {
+        gap: 2px;
+        grid-template-columns: 28px 28px 1fr;
+    }
+
+    #current-analysis .city-league-card-action-btn,
+    #current-analysis .city-league-card-market-btn {
+        height: 16px;
+        border-radius: 3px;
+        padding: 0 3px;
+    }
+}
+
+@media (max-width: 420px) {
+    .city-league-card-info-bottom {
+        padding: 3px;
+    }
+    .city-league-card-title-mobile {
+        font-size: 0.55em;
+    }
+    .city-league-card-set-mobile,
+    .city-league-card-stats-mobile,
+    .city-league-card-deck-stats-mobile {
+        font-size: 0.5em;
+    }
+    .city-league-card-action-buttons {
+        gap: 1px;
+        margin-top: 3px;
+    }
+    .city-league-card-action-row {
+        gap: 1px;
+    }
+    .city-league-card-action-row:last-child {
+        grid-template-columns: 1fr 1fr 1.5fr;
+    }
+    .city-league-card-action-btn,
+    .city-league-card-market-btn {
+        height: 16px;
+        border-radius: 3px;
+        padding: 0 2px;
+    }
+    .city-league-card-remove-btn,
+    .city-league-card-add-btn,
+    .city-league-card-rarity-btn,
+    .city-league-card-limitless-btn,
+    .city-league-card-proxy-btn {
+        font-size: 9px;
+    }
+    .city-league-card-market-btn {
+        font-size: 7px;
+    }
+}
+
+@media (max-width: 390px) {
+    #city-league-analysis .city-league-card-info-bottom {
+        padding: 3px 4px;
+        min-height: 22px;
+    }
+
+    #city-league-analysis .city-league-card-title-mobile {
+        font-size: 0.52em;
+        margin-bottom: 0;
+    }
+
+    #city-league-analysis .city-league-card-set-mobile,
+    #city-league-analysis .city-league-card-stats-mobile,
+    #city-league-analysis .city-league-card-deck-stats-mobile {
+        font-size: 0.46em;
+        line-height: 1.1;
+    }
+
+    #city-league-analysis .city-league-card-action-buttons {
+        gap: 1px;
+        margin-top: 2px;
+    }
+
+    #city-league-analysis .city-league-card-action-row,
+    #city-league-analysis .city-league-card-action-row:last-child {
+        gap: 2px;
+        grid-template-columns: 28px 28px 1fr;
+    }
+
+    #city-league-analysis .city-league-card-action-btn,
+    #city-league-analysis .city-league-card-market-btn {
+        height: 16px;
+        border-radius: 3px;
+        padding: 0 3px;
+    }
+
+    #city-league-analysis .city-league-card-remove-btn,
+    #city-league-analysis .city-league-card-add-btn,
+    #city-league-analysis .city-league-card-rarity-btn,
+    #city-league-analysis .city-league-card-limitless-btn,
+    #city-league-analysis .city-league-card-proxy-btn,
+    #city-league-analysis .city-league-card-market-btn {
+        font-size: 7px;
+        letter-spacing: 0;
+    }
+}
+
+@media (max-width: 412px) and (min-width: 391px) {
+    #city-league-analysis .city-league-card-info-bottom {
+        padding: 3px 5px;
+        min-height: 24px;
+    }
+
+    #city-league-analysis .city-league-card-title-mobile {
+        font-size: 0.54em;
+    }
+
+    #city-league-analysis .city-league-card-set-mobile,
+    #city-league-analysis .city-league-card-stats-mobile,
+    #city-league-analysis .city-league-card-deck-stats-mobile {
+        font-size: 0.47em;
+    }
+
+    #city-league-analysis .city-league-card-action-row,
+    #city-league-analysis .city-league-card-action-row:last-child {
+        grid-template-columns: 28px 28px 1fr;
+        gap: 2px;
+    }
+
+    #city-league-analysis .city-league-card-action-btn,
+    #city-league-analysis .city-league-card-market-btn {
+        height: 17px;
+        font-size: 8px;
+        padding: 0 3px;
+    }
 }
 /* Card table row list container */
 .city-league-card-table-list {
@@ -1501,130 +2256,68 @@
     gap: 15px;
 }
 /* Compact mobile/desktop archetype tables and cells */
-.city-league-info-table-row-mobile {
-    border-bottom: 1px solid #ecf0f1;
-    transition: background 0.2s;
-    cursor: pointer;
-}
-.city-league-info-table-row-mobile:hover,
-.city-league-info-table-row-mobile:focus {
-    background: #f0f8ff;
-    outline: none;
-}
-.city-league-info-table-cell-main-mobile {
-    font-weight: bold;
-    font-size: 0.85em;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-.city-league-info-table-count-change-mobile {
-    font-weight: bold;
-    font-size: 0.8em;
-}
-.city-league-info-table-placement-mobile {
-    font-weight: bold;
-    font-size: 0.8em;
-}
-.city-league-info-table-row-desktop {
-    border-bottom: 1px solid #ecf0f1;
-    transition: background 0.2s;
-    cursor: pointer;
-}
-.city-league-info-table-row-desktop:hover,
-.city-league-info-table-row-desktop:focus {
-    background: #f0f8ff;
-    outline: none;
-}
-.city-league-info-table-cell-main-desktop {
-    font-weight: bold;
-}
-.city-league-info-table-count-change-desktop {
-    font-size: 0.9em;
-    font-weight: bold;
-}
-.city-league-info-table-placement-desktop {
-    font-weight: bold;
-    font-size: 0.9em;
-}
-/* Desktop city league info table and cells */
-.city-league-info-table-desktop {
-    /* Inherits base table styles */
-}
-.city-league-info-table-row-desktop {
-    border-bottom: 1px solid #ecf0f1;
-    transition: background 0.2s;
-    cursor: pointer;
-}
-.city-league-info-table-row-desktop:hover,
-.city-league-info-table-row-desktop:focus {
-    background: #f8f9fa;
-    outline: none;
-}
-.city-league-info-table-cell-main-desktop {
-    font-weight: bold;
-    color: #3498db;
-    cursor: pointer;
-    text-decoration: underline;
-}
-.city-league-info-table-cell-variants-desktop {
-    color: #555;
-    font-weight: 600;
-}
-.city-league-info-table-cell-count-desktop {
-}
-.city-league-info-table-count-change-desktop {
-    font-size: 0.9em;
-    font-weight: bold;
-}
-.city-league-info-table-cell-placement-desktop {
-}
-.city-league-info-table-placement-desktop {
-    font-weight: bold;
-    font-size: 0.9em;
-}
-/* Mobile city league info table and cells */
 .city-league-info-table-mobile {
-    font-size: 0.68em;
+    font-size: 0.72em;
     table-layout: fixed;
 }
+
 .city-league-info-col-main {
     width: 55%;
 }
+
 .city-league-info-col-variants,
 .city-league-info-col-count,
 .city-league-info-col-placement {
     width: 22.5%;
 }
-.city-league-info-table-row-mobile {
-    border-bottom: 1px solid #ecf0f1;
+
+.city-league-info-table-row-mobile,
+.city-league-info-table-row-desktop {
+    transition: background-color 0.2s ease, transform 0.12s ease;
+    cursor: pointer;
 }
+
+.city-league-info-table-row-mobile:hover,
+.city-league-info-table-row-mobile:focus,
+.city-league-info-table-row-desktop:hover,
+.city-league-info-table-row-desktop:focus {
+    outline: none;
+}
+
 .city-league-info-table-cell-main-mobile {
-    font-weight: bold;
-    font-size: 0.85em;
+    font-size: 0.9em;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    color: #3498db;
-    cursor: pointer;
-    text-decoration: underline;
 }
+
 .city-league-info-table-cell-variants-mobile {
-    color: #555;
-    font-size: 0.85em;
+    font-size: 0.86em;
     font-weight: 600;
+    color: #445268;
 }
-.city-league-info-table-cell-count-mobile {
-    font-size: 0.85em;
-}
-.city-league-info-table-count-change-mobile {
-    font-weight: bold;
-    font-size: 0.8em;
-}
+
+.city-league-info-table-cell-count-mobile,
 .city-league-info-table-cell-placement-mobile {
-    font-size: 0.85em;
+    font-size: 0.86em;
 }
-.city-league-info-table-placement-mobile {
-    font-weight: bold;
-    font-size: 0.8em;
+
+.city-league-info-table-count-change-mobile,
+.city-league-info-table-placement-mobile,
+.city-league-info-table-count-change-desktop,
+.city-league-info-table-placement-desktop {
+    font-weight: 700;
+    font-size: 0.88em;
+}
+
+.city-league-info-table-cell-main-desktop,
+.city-league-info-table-cell-main-mobile {
+    color: inherit;
+    text-decoration: none;
+}
+
+.city-league-info-table-cell-variants-desktop {
+    color: #445268;
+    font-weight: 600;
 }
 /* Modular city league info wide flex blocks and search */
 .city-league-info-flex-block-wide {
@@ -1675,117 +2368,148 @@
     margin-bottom: 24px;
 }
 .city-league-info-table-title {
-    color: #34495e;
-    border-bottom: 3px solid #3498db;
+    color: #1f2d3d;
+    border-bottom: 2px solid #2f80c7;
     padding-bottom: 10px;
     margin-bottom: 20px;
-    font-size: 1.2em;
-    font-weight: 600;
+    font-size: 1.18em;
+    font-weight: 700;
 }
 .city-league-info-table {
+    --cl-table-head-bg: linear-gradient(120deg, #143a6f 0%, #245fa5 100%);
+    --cl-table-row-even: #f6f9ff;
+    --cl-table-row-hover: #e9f2ff;
+    --cl-table-border: #d7e2f0;
     width: 100%;
-    border-collapse: collapse;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-collapse: separate;
+    border-spacing: 0;
+    box-shadow: 0 10px 24px rgba(17, 39, 66, 0.08);
     background: white;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
+    border: 1px solid var(--cl-table-border);
 }
 .city-league-info-table-header-row {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--cl-table-head-bg);
     color: white;
 }
 .city-league-info-table-header {
-    padding: 12px;
+    padding: 13px 14px;
     text-align: center;
-    font-weight: 600;
-    font-size: 1em;
+    font-weight: 700;
+    font-size: 0.96em;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
 }
 .city-league-info-table-header-archetype {
     text-align: left;
 }
-
-/* Override global sticky-first-column table rule for City League info tables. */
-#city-league .city-league-info-table th:first-child,
-#city-league .city-league-info-table td:first-child,
-#city-league-analysis .city-league-info-table th:first-child,
-#city-league-analysis .city-league-info-table td:first-child {
-    position: static;
-    left: auto;
-    z-index: auto;
-    box-shadow: none;
-    background-color: inherit;
-}
-
-@media (max-width: 768px) {
-    /* Mobile hard guard against global sticky-first-column overrides. */
-    #city-league .city-league-info-table th:first-child,
-    #city-league .city-league-info-table td:first-child,
-    #city-league-analysis .city-league-info-table th:first-child,
-    #city-league-analysis .city-league-info-table td:first-child {
-        position: static !important;
-        left: auto !important;
-        z-index: auto !important;
-        box-shadow: none !important;
-        background-color: inherit !important;
-    }
-}
-
-/* Keep the gradient uniformly visible across all header cells. */
-.city-league-info-table-header-row .city-league-info-table-header {
-    background: transparent;
-    color: inherit;
-}
 .city-league-info-table-row {
-    border-bottom: 1px solid #ecf0f1;
-    transition: background 0.2s;
+    border-bottom: 1px solid #e4ebf6;
+    transition: background-color 0.2s ease;
     cursor: pointer;
+}
+.city-league-info-table tbody .city-league-info-table-row:nth-child(even) {
+    background: var(--cl-table-row-even);
 }
 .city-league-info-table-row:focus,
 .city-league-info-table-row:hover {
-    background: #f0f8ff;
+    background: var(--cl-table-row-hover);
     outline: none;
 }
 .city-league-info-table-cell {
-    padding: 12px;
-    font-size: 1em;
+    padding: 12px 14px;
+    font-size: 0.95em;
+    vertical-align: middle;
 }
 .city-league-info-table-cell-archetype {
-    font-weight: bold;
     text-align: left;
-}
-
-/* Prevent generic link color from making the first column look lighter/different. */
-.city-league-info-table-cell-archetype .archetype-jump-link {
-    color: inherit;
-    font-weight: inherit;
-    text-decoration: none;
-    padding: 0;
-}
-
-.city-league-info-table-cell-archetype .archetype-jump-link:hover,
-.city-league-info-table-cell-archetype .archetype-jump-link:focus-visible {
-    color: inherit;
-    text-decoration: underline;
 }
 .city-league-info-table-cell-center {
     text-align: center;
 }
 .city-league-info-table-cell-entry {
-    color: #27ae60;
-    font-weight: bold;
+    /* color/bold restricted to the change span — cell itself stays neutral */
 }
 .city-league-info-table-cell-exit {
-    color: #e74c3c;
-    font-weight: bold;
+    /* color/bold restricted to the change span — cell itself stays neutral */
 }
 .city-league-info-table-count-change {
-    color: #555;
-    font-size: 0.9em;
+    color: #4c5f78;
+    font-size: 0.88em;
     font-weight: 600;
 }
 .city-league-info-table-placement {
-    font-weight: bold;
+    font-weight: 700;
+    color: var(--placement-color, inherit);
 }
+
+/* Make first column look consistent with metric columns while keeping links discoverable. */
+.city-league-info-table-cell-archetype .archetype-jump-link {
+    color: inherit;
+    font-weight: inherit;
+    text-decoration: none;
+}
+
+.city-league-info-table-cell-archetype .archetype-jump-link:hover,
+.city-league-info-table-cell-archetype .archetype-jump-link:focus-visible {
+    text-decoration: underline;
+}
+
+.city-league-info-table-cell-main-desktop {
+    color: inherit;
+    text-decoration: none;
+}
+
+#cityLeagueFullTable,
+#cityLeagueCombinedTable {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #d7e2f0;
+    background: #ffffff;
+    box-shadow: 0 12px 26px rgba(18, 42, 66, 0.1);
+}
+
+#cityLeagueFullTable .city-league-info-table,
+#cityLeagueCombinedTable .city-league-info-table {
+    margin: 0;
+    border-radius: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    box-shadow: none;
+}
+
+#cityLeagueFullTable .city-league-info-table-header-row,
+#cityLeagueCombinedTable .city-league-info-table-header-row {
+    background: linear-gradient(120deg, #15396b 0%, #2a5f9d 100%);
+}
+
+#cityLeagueFullTable .city-league-info-table-row:nth-child(even),
+#cityLeagueCombinedTable .city-league-info-table-row:nth-child(even) {
+    background: #f4f8ff;
+}
+
+#cityLeagueFullTable .city-league-info-table-cell,
+#cityLeagueCombinedTable .city-league-info-table-cell {
+    padding: 14px 16px;
+}
+
+#cityLeagueFullTable .city-league-info-table-header,
+#cityLeagueCombinedTable .city-league-info-table-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+#cityLeagueFullTable .city-league-info-table-row,
+#cityLeagueCombinedTable .city-league-info-table-row {
+    border-bottom: 1px solid #dfe8f5;
+}
+
+#cityLeagueFullTable .city-league-info-table-row:last-child,
+#cityLeagueCombinedTable .city-league-info-table-row:last-child {
+    border-bottom: none;
+}
+
 .city-league-info-flex {
     display: flex;
     gap: 16px;
@@ -1795,6 +2519,30 @@
 .city-league-info-flex-block {
     flex: 1;
     min-width: 300px;
+}
+
+@media (max-width: 768px) {
+    #cityLeagueFullTable .city-league-info-table-cell,
+    #cityLeagueCombinedTable .city-league-info-table-cell {
+        padding: 10px 8px;
+    }
+
+    #cityLeagueFullTable,
+    #cityLeagueCombinedTable {
+        border-radius: 10px;
+    }
+}
+
+/* City League overview cards: denser actions with wider cards */
+#city-league-analysis .city-league-card-action-row,
+#city-league-analysis .city-league-card-action-row:last-child {
+    grid-template-columns: 30px 30px 1fr;
+    gap: 3px;
+}
+
+#city-league-analysis .city-league-card-market-btn {
+    font-size: 8px;
+    padding: 0 4px;
 }
 /* Modular info grid and card styles for City League */
 .city-league-info-grid {
@@ -1988,30 +2736,29 @@
 
 .proxy-queue-card {
     display: grid;
-    grid-template-columns: 78px 1fr auto;
-    gap: 12px;
-    align-items: center;
+    grid-template-columns: 66px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
     background: white;
     border: 1px solid #e1e8ed;
     border-radius: 10px;
     padding: 10px;
 }
 .proxy-queue-card img {
-    width: 78px;
-    height: 108px;
+    width: 66px;
+    height: 92px;
     object-fit: cover;
     border-radius: 6px;
     border: 1px solid #d0d7de;
 }
 .proxy-queue-card .proxy-queue-card-info {
     min-width: 0;
+    margin-top: 2px;
 }
 .proxy-queue-card .proxy-queue-card-title {
     font-weight: 800;
     color: #2c3e50;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.25;
 }
 .proxy-queue-card .proxy-queue-card-print {
     font-size: 0.9em;
@@ -2019,32 +2766,799 @@
     margin-top: 2px;
 }
 .proxy-queue-card .proxy-queue-card-controls {
-    display: grid;
-    grid-template-columns: 32px 44px 32px;
-    gap: 4px;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     align-items: center;
 }
 .proxy-queue-card .proxy-queue-card-controls button {
-    height: 30px;
+    height: 32px;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
+}
+.proxy-queue-card .proxy-queue-card-controls input {
+    width: 58px;
+    height: 32px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    text-align: center;
 }
 .proxy-queue-card .proxy-queue-card-controls .btn-minus {
     border: none;
     background: #dc3545;
     color: white;
+    min-width: 34px;
 }
 .proxy-queue-card .proxy-queue-card-controls .btn-plus {
     border: none;
     background: #28a745;
     color: white;
+    min-width: 34px;
 }
 .proxy-queue-card .proxy-queue-card-controls .btn-remove {
-    grid-column: 1 / span 3;
-    height: 28px;
+    height: 32px;
     border: none;
     background: #6c757d;
     color: white;
     font-size: 0.8em;
+    margin-left: auto;
+    min-width: 92px;
+}
+
+@media (min-width: 760px) {
+    .proxy-queue-card {
+        grid-template-columns: 78px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+    }
+    .proxy-queue-card img {
+        width: 78px;
+        height: 108px;
+    }
+    .proxy-queue-card .proxy-queue-card-controls {
+        grid-column: auto;
+        display: grid;
+        grid-template-columns: 32px 46px 32px;
+        gap: 4px;
+    }
+    .proxy-queue-card .proxy-queue-card-controls .btn-remove {
+        grid-column: 1 / span 3;
+        margin-left: 0;
+        min-width: 0;
+        height: 28px;
+    }
+}
+
+/* ====================================
+   STAT INFO ICON TOOLTIP
+   Visible ℹ icon with hover popup
+   ==================================== */
+.stat-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    font-style: normal;
+    background: #3B4CCA;
+    color: #fff;
+    border-radius: 50%;
+    cursor: help;
+    position: relative;
+    vertical-align: middle;
+    margin-left: 4px;
+    line-height: 1;
+}
+.stat-info-icon::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border: 1px solid #3B4CCA;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.8em;
+    font-weight: 400;
+    white-space: normal;
+    width: max-content;
+    max-width: 260px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+.stat-info-icon:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+@media (max-width: 768px) {
+    .stat-info-icon::after {
+        left: auto;
+        right: 0;
+        transform: none;
+        max-width: 200px;
+    }
+}
+
+/* ====================================
+   UNIFIED BUTTON DESIGN SYSTEM
+   Primary, Secondary, Danger, Ghost
+   ==================================== */
+.btn-system-primary {
+    background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+    transition: all 0.2s ease;
+}
+.btn-system-primary:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+}
+
+.btn-system-secondary {
+    background: #e1e8ed;
+    color: #2c3e50;
+    font-weight: 700;
+    border: 2px solid #ccd6dd;
+    border-radius: 8px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+.btn-system-secondary:hover {
+    background: #d5dce4;
+    transform: translateY(-1px);
+}
+
+.btn-system-danger {
+    background: #dc3545;
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+.btn-system-danger:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+.btn-system-ghost {
+    background: transparent;
+    color: var(--text-dark, #2c3e50);
+    font-weight: 700;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+.btn-system-ghost:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* ====================================
+   DRAW SIMULATOR MODAL (was inline styles)
+   ==================================== */
+#drawSimulatorModal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: var(--z-top, 2500);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+}
+#drawSimulatorModal.show,
+#drawSimulatorModal[style*="display:flex"],
+#drawSimulatorModal[style*="display: flex"] {
+    display: flex;
+}
+#drawSimModal {
+    background: #1a1a2e;
+    border-radius: 16px;
+    max-width: 800px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: helpModalIn 0.25s ease-out;
+    position: relative;
+    color: #eee;
+}
+.draw-sim-close-btn {
+    position: absolute;
+    top: 12px; right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    padding: 4px 8px;
+    border-radius: 8px;
+    line-height: 1;
+}
+.draw-sim-close-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+.draw-sim-title {
+    margin-top: 0;
+    color: #FFCB05;
+    font-size: 1.4em;
+    border-bottom: 2px solid #3B4CCA;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+}
+.draw-sim-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+.draw-sim-deck-info {
+    margin-left: auto;
+    font-size: 13px;
+    color: #aaa;
+    align-self: center;
+}
+.draw-sim-deck-info strong {
+    color: #FFCB05;
+}
+.draw-sim-combo-section {
+    border-top: 2px solid #333;
+    padding-top: 18px;
+}
+.draw-sim-combo-title {
+    margin: 0 0 12px 0;
+    color: #FFCB05;
+    font-size: 1.1em;
+}
+.draw-sim-combo-desc {
+    font-size: 12px;
+    color: #888;
+    margin: 0 0 10px 0;
+}
+.draw-sim-combo-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 28px;
+    margin-bottom: 10px;
+}
+.draw-sim-combo-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+#comboResultDisplay {
+    margin-left: auto;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #2ecc71;
+}
+
+/* ====================================
+   PLAYTEST SETUP MODALS (was inline styles)
+   ==================================== */
+.setup-modal-heading {
+    margin-top: 0;
+    border-bottom: 2px solid #e1e8ed;
+    padding-bottom: 10px;
+}
+.setup-modal-heading.blue { color: #3B4CCA; }
+.setup-modal-heading.green { color: #27ae60; }
+.setup-modal-description {
+    margin-bottom: 15px;
+    color: #555;
+    font-size: 1.05em;
+}
+.setup-modal-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+.setup-modal-textarea {
+    width: 100%;
+    height: 180px;
+    padding: 12px;
+    border: 2px solid #b3d9ff;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 12px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+.setup-modal-select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+}
+.setup-modal-select.player1 { border: 2px solid #3B4CCA; }
+.setup-modal-select.player2 { border: 2px solid #E3350D; }
+.setup-modal-player-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.setup-modal-player-label.red { color: #E3350D; }
+.setup-modal-btn-row {
+    display: flex;
+    gap: 12px;
+}
+.setup-modal-btn-row.wide { gap: 15px; flex-wrap: wrap; }
+
+/* Inline-style overrides for format selects in the city league header */
+.cl-format-select {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    font-weight: bold;
+    background: var(--primary-blue);
+    color: var(--text-main);
+    cursor: pointer;
+}
+.cl-format-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+.cl-content-panel {
+    padding: 12px;
+    background: #ffffff;
+}
+
+/* Inline-style overrides for form labels in deck analysis */
+.form-label-block {
+    font-size: 0.95em;
+    color: var(--text-main);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* ====================================
+   SKELETON LOADER ERROR TIMEOUT
+   ==================================== */
+.skeleton-error-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted, #999);
+    font-size: 1em;
+}
+.skeleton-error-message .retry-link {
+    color: var(--primary-blue, #3B4CCA);
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+/* ====================================
+   VISUAL HIERARCHY & SPACING
+   ==================================== */
+.tab-content {
+    padding: 16px;
+}
+.section-grid-container {
+    margin-bottom: 20px;
+}
+
+/* ====================================
+   META BINDER
+   ==================================== */
+.meta-binder-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.meta-binder-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.meta-binder-stat {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8ecf8 100%);
+    border-radius: 12px;
+    padding: 14px 16px;
+    text-align: center;
+}
+
+.meta-binder-stat-clickable {
+    border: 1px solid rgba(59, 76, 202, 0.2);
+    cursor: pointer;
+    transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.meta-binder-stat-clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(59, 76, 202, 0.15);
+}
+
+.meta-binder-stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-dark, #1f2d3d);
+}
+
+.meta-binder-stat-green { color: #27ae60; }
+.meta-binder-stat-red { color: #e74c3c; }
+
+.meta-binder-stat-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-light, #6c757d);
+    margin-top: 2px;
+}
+
+.meta-binder-delta {
+    margin-bottom: 14px;
+}
+
+.meta-binder-archetype-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.meta-binder-archetype-group {
+    background: linear-gradient(135deg, #f8fbff 0%, #eef3fb 100%);
+    border: 1px solid rgba(59, 76, 202, 0.15);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.meta-binder-archetype-panel {
+    display: block;
+}
+
+.meta-binder-archetype-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    list-style: none;
+    margin: 0 0 10px;
+}
+
+.meta-binder-archetype-summary::-webkit-details-marker {
+    display: none;
+}
+
+.meta-binder-archetype-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: rgba(59, 76, 202, 0.14);
+    color: #263252;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.meta-binder-archetype-title {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #263252;
+}
+
+.meta-binder-archetype-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.meta-binder-archetype-grid .deck-banner-card {
+    min-height: 140px;
+}
+
+.meta-binder-archetype-grid .deck-banner-name {
+    font-size: 0.9rem;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.meta-binder-archetype-grid .deck-banner-stats .stat-badge {
+    font-size: 0.65rem;
+    padding: 4px 7px;
+    line-height: 1.2;
+}
+
+@media (max-width: 1200px) {
+    .meta-binder-archetype-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .meta-binder-archetype-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .meta-binder-archetype-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.meta-binder-delta-text {
+    font-size: 0.85rem;
+    color: var(--text-light, #6c757d);
+    line-height: 1.5;
+}
+
+.meta-binder-delta-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-right: 4px;
+}
+
+.meta-binder-delta-dropped {
+    background: rgba(231, 76, 60, 0.12);
+    color: #b42318;
+}
+
+.meta-binder-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.meta-binder-filters .filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.meta-binder-filters .select-system {
+    min-width: 170px;
+}
+
+.meta-binder-filter-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color, #ddd);
+    background: transparent;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: var(--text-dark, #1f2d3d);
+}
+
+.meta-binder-filter-btn:hover {
+    border-color: #3B4CCA;
+    color: #3B4CCA;
+}
+
+.meta-binder-filter-btn.active {
+    background: #3B4CCA;
+    border-color: #3B4CCA;
+    color: #fff;
+}
+
+.meta-binder-card-dropped {
+    border-color: rgba(230, 126, 34, 0.4);
+    opacity: 0.7;
+}
+
+.meta-binder-badge-dropped {
+    background: rgba(231, 76, 60, 0.12);
+    color: #b42318;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.meta-binder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+}
+
+@media (min-width: 600px) {
+    .meta-binder-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    }
+}
+
+.meta-binder-card {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 2px solid transparent;
+}
+
+.meta-binder-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.meta-binder-card-owned {
+    border-color: rgba(39, 174, 96, 0.35);
+}
+
+.meta-binder-card-owned-intl {
+    border-color: rgba(41, 128, 185, 0.42);
+}
+
+.meta-binder-card-missing {
+    border-color: rgba(231, 76, 60, 0.35);
+}
+
+.meta-binder-card-img {
+    width: 100%;
+    display: block;
+}
+
+.meta-binder-card-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 160px;
+    padding: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-dark, #1f2d3d);
+    background: #f0f4ff;
+}
+
+/* ====================================
+   Probability Calculator
+   ==================================== */
+.calc-layout { max-width: 620px; margin: 0 auto; }
+.calc-params { background: var(--bg-white, #fff); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.calc-params h3 { margin: 0 0 16px; font-size: 1.1rem; color: var(--pokemon-blue, #1a5276); }
+.calc-field { margin-bottom: 14px; }
+.calc-field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: var(--text-dark, #333); }
+.calc-input { width: 100%; padding: 10px 12px; font-size: 1rem; border: 2px solid #dde3ea; border-radius: 8px; background: var(--bg-light, #f8fafc); transition: border-color .2s; }
+.calc-input:focus { border-color: var(--pokemon-blue, #3498db); outline: none; }
+.calc-results { display: flex; flex-direction: column; gap: 14px; }
+.calc-result-card { border-radius: 12px; padding: 20px; text-align: center; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+.calc-result-draw { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+.calc-result-prize { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+.calc-result-topdeck { background: linear-gradient(135deg, #2980b9, #3498db); }
+.calc-result-label { font-size: 0.85rem; opacity: .85; margin-bottom: 6px; }
+.calc-result-value { font-size: 2.4rem; font-weight: 800; line-height: 1.1; }
+.calc-result-note { font-size: 0.7rem; opacity: .7; margin-top: 4px; }
+.calc-result-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.calc-prob-high { color: #fff !important; }
+.calc-prob-mid { color: #fff !important; }
+.calc-prob-low { color: #fff !important; }
+@media (max-width: 480px) {
+    .calc-result-value { font-size: 1.8rem; }
+    .calc-result-row { grid-template-columns: 1fr; }
+}
+
+.meta-binder-card-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 5px 7px;
+    background: rgba(255, 255, 255, 0.92);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.meta-binder-card-need {
+    color: var(--text-dark, #1f2d3d);
+}
+
+.meta-binder-count-ok {
+    color: #27ae60;
+}
+
+.meta-binder-count-intl {
+    color: #2980b9;
+}
+
+.meta-binder-count-missing {
+    color: #e74c3c;
+}
+
+.meta-binder-badge-new {
+    background: #3B4CCA;
+    color: #fff;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.control-row {
+    margin-bottom: 16px;
+}
+.sandbox-player-panels {
+    gap: 24px;
+}
+.tutorial-section {
+    margin-bottom: 28px;
+    padding: 20px 24px;
+}
+.tutorial-tabs-grid {
+    gap: 20px;
+}
+
+/* Attack modal layout (was inline styles) */
+.pt-attack-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 960px;
+}
+.pt-attack-player {
+    text-align: center;
+    flex-shrink: 0;
+}
+.pt-attack-player-label {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+.pt-attack-player-label.blue { color: #3B4CCA; }
+
+/* Energy discard button in context menu (was inline) */
+.pt-menu-btn.energy-discard { background: #e67e22; color: #fff; }
+.pt-menu-btn.retreat-btn { background: #c0392b; color: #fff; }
+.pt-menu-btn.ko-btn { flex: 1; font-weight: 800; }
+
+/* Discard grid (was inline style) */
+#ptDiscardGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
 }

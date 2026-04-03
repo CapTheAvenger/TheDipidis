@@ -335,10 +335,9 @@
                 updatePastMetaDeckList();
             });
             tournamentSelect.addEventListener('change', updatePastMetaDeckList);
+            document.getElementById('pastMetaDeckSearch').addEventListener('input', debounce(updatePastMetaDeckList, 250));
+            document.getElementById('pastMetaDeckSelect').addEventListener('change', onPastMetaDeckSelect);
             document.getElementById('pastMetaFilterSelect').addEventListener('change', filterPastMetaCards);
-            
-            // Initialize the new combobox UI (replaces old search input)
-            initializeDeckArchetypeCombobox('pastMeta');
             
             // Initial population
             updatePastMetaTournamentFilter();
@@ -399,8 +398,7 @@
         function updatePastMetaDeckList() {
             const formatFilter = document.getElementById('pastMetaFormatFilter').value;
             const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
-            const searchEl = document.getElementById('pastMetaDeckCombobox') || document.getElementById('pastMetaDeckSearch');
-            const searchTerm = (searchEl ? searchEl.value : '').toLowerCase();
+            const searchTerm = document.getElementById('pastMetaDeckSearch').value.toLowerCase();
             const deckSelect = document.getElementById('pastMetaDeckSelect');
             const previousSelection = deckSelect ? deckSelect.value : '';
             

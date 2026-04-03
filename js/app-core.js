@@ -174,14 +174,67 @@ const BASE_PATH = './data/';
                 title: '\ud83d\udc64 User Profile',
                 html: '<p>Manage your personal card collection, saved decks, and settings.</p><ul><li><strong>My Collection:</strong> Exact print counts (set+number) synced to Firebase</li><li><strong>Dex Import:</strong> CSV import supports set-name mapping and id-based number parsing</li><li><strong>My Decks:</strong> Per-card badges show exact owned count for that print</li><li><strong>\u2728 Indicator:</strong> Shows when other international prints of same card exist in your collection</li><li><strong>Rarity Switcher (\u2605):</strong> Swap print directly from saved deck cards</li><li><strong>Compare (\u2696\ufe0f):</strong> Choose source (paste Limitless/PTCGL or search saved decks)</li><li><strong>Compare Mode:</strong> Functional (prints merged) or Exact print</li><li><strong>Wishlist + Settings:</strong> Manage targets and account preferences</li></ul>'
             },
+            'calculator': {
+                title: '\ud83e\uddee Probability Calculator',
+                html: '<p>Calculate draw, prize, and topdeck odds for your deck.</p><ul><li><strong>Draw Chance:</strong> Probability to see at least one copy in drawn cards</li><li><strong>Prize Chance:</strong> Probability that at least one copy is in your prizes</li><li><strong>Topdeck Chance:</strong> Probability your next draw is the target card</li><li><strong>Inputs:</strong> Copies in deck, cards drawn, and already-in-hand correction</li></ul>'
+            },
             'tutorial': {
                 title: '\ud83d\udcd6 How to Use',
                 html: '<p>Comprehensive guide to all features of this website.</p><ul><li><strong>Tab Guides:</strong> Detailed instructions for every section</li><li><strong>Latest Changes:</strong> Includes exact-print collection badges, \u2728 other-print indicator, robust \u2605 print swapping, and upgraded deck compare</li><li><strong>Compare Notes:</strong> Paste parser live preview + Functional/Exact compare modes</li><li><strong>Import Notes:</strong> Dex CSV set-name + set-number matching behavior explained</li></ul>'
             }
         };
 
+        const TAB_HELP_CONTENT_DE = {
+            'city-league': {
+                title: '\ud83c\uddef\ud83c\uddf5 City League Entwicklung',
+                html: '<p>Zeigt Trends der Archetyp-Popularitaet aus japanischen City-League-Turnieren.</p><ul><li><strong>Diagramm:</strong> Verfolgt Deck-Archetypen ueber die Zeit</li><li><strong>Format-Filter:</strong> Wechsel zwischen M4 (aktuell) und M3 (Archiv)</li><li><strong>Legenden-Toggle:</strong> Archetypen ein- und ausblenden</li><li><strong>Deck-Builder-Sync:</strong> Archetyp oeffnen und direkt zur Deck-Analyse wechseln</li></ul>'
+            },
+            'city-league-analysis': {
+                title: '\ud83e\udd85 City League Deck-Analyse',
+                html: '<p>Durchsuche und analysiere einzelne Decklisten aus City-League-Turnieren.</p><ul><li><strong>Archetyp- und Datumsfilter:</strong> Daten schnell eingrenzen</li><li><strong>Deck Builder:</strong> Karten hinzufuegen/entfernen und 60-Karten-Deck bauen</li><li><strong>Seltenheits-Wechsler (\u2605):</strong> Prints direkt in Deck und Uebersicht wechseln</li><li><strong>Exakter Print-Tausch:</strong> Wechsel aktualisiert den Deck-Eintrag (Set+Nummer)</li><li><strong>Deck kopieren:</strong> Export im Pokemon-TCG-Live-Format</li></ul>'
+            },
+            'current-meta': {
+                title: '\ud83c\udfae Limitless-Online-Vergleich',
+                html: '<p>Vergleicht Meta-Anteile von Archetypen zwischen verschiedenen Turnierquellen.</p><ul><li><strong>Nebeneinander-Vergleich:</strong> Online vs. Turnierergebnisse</li><li><strong>Diagramme:</strong> Kreis- und Balkenansichten</li><li><strong>Meta-Share %:</strong> Schnellueberblick zur Popularitaet</li><li><strong>Fallback:</strong> Fehlt current_meta_card_data.csv, nutzt die App automatisch tournament_cards_data_cards.csv</li></ul>'
+            },
+            'current-analysis': {
+                title: '\ud83d\udcc8 Aktuelle-Meta Deck-Analyse',
+                html: '<p>Analysiere Decklisten aus aktuellen Limitless-Online-Turnieren.</p><ul><li><strong>Archetyp-Filter:</strong> Decks nach Archetyp durchsuchen</li><li><strong>Kartenverteilung:</strong> Meistgespielte Karten und Nutzung</li><li><strong>Deck Builder:</strong> Decks interaktiv bauen und anpassen</li><li><strong>Seltenheits-Wechsler (\u2605):</strong> Internationale Prints mit einem Klick wechseln</li><li><strong>Max Consistency:</strong> Optimiertes 60-Karten-Deck aus Statistiken erzeugen</li></ul>'
+            },
+            'past-meta': {
+                title: '\ud83c\udfc6 Vergangenes Turnier-Meta',
+                html: '<p>Historische Turnierdaten grosser Events (Regionals, EUIC, Worlds usw.).</p><ul><li><strong>Format-Filter:</strong> Nach Formatcode filtern (z. B. TEF-SCR, OBF-TWM)</li><li><strong>Quellen-Filter:</strong> Turniere/Regionen auswaehlen</li><li><strong>Volle Deck-Analyse:</strong> Inklusive Builder, Kopieren, Vergleichen und \u2605 Print-Wechsel</li><li><strong>Historische Trends:</strong> Deck-Entwicklung ueber Formate verfolgen</li></ul>'
+            },
+            'cards': {
+                title: '\ud83e\uddf0 Kartendatenbank',
+                html: '<p>Durchsuche die vollstaendige Pokemon-TCG-Kartendatenbank.</p><ul><li><strong>Suche + Filter:</strong> Name, Set, Typ, Seltenheit, Meta-Filter</li><li><strong>Sortierung:</strong> Sets von neu nach alt</li><li><strong>Seltenheits-Wechsler (\u2605):</strong> Verfuegbare Prints schnell auswaehlen</li><li><strong>Sammlungsanzahl:</strong> Exakte Print-Zaehlung per Set+Nummer</li><li><strong>Wunschliste:</strong> Zielkarten mit \u2764 markieren</li></ul>'
+            },
+            'proxy': {
+                title: '\ud83d\udda8\ufe0f Proxy-Drucker',
+                html: '<p>Erstelle druckbare Proxy-Karten fuer Tests und Casual Play.</p><ul><li><strong>Deck importieren:</strong> Deckliste einfuegen und Proxys automatisch erzeugen</li><li><strong>Manuell hinzufuegen:</strong> Einzelkarten suchen und hinzufuegen</li><li><strong>Drucklayout:</strong> Optimiert fuer 6.3cm x 8.8cm Kartenmass</li><li><strong>Mengen anpassen:</strong> Exakte Kopienzahl je Karte setzen</li><li><strong>@media print:</strong> Browserdruck erzeugt A4-Seiten mit korrekten Kartengroessen</li></ul>'
+            },
+            'sandbox': {
+                title: '\u2694\ufe0f Battle Sandbox',
+                html: '<p>Simuliere 2-Spieler-Pokemon-TCG-Matches mit vollstaendigen Spielmechaniken.</p><ul><li><strong>Decks importieren:</strong> Decklisten fuer Spieler 1 und 2 einfuegen</li><li><strong>Draw-Simulator:</strong> Starthaende und Preiskarten testen</li><li><strong>Spielbrett:</strong> Interaktives Feld mit Bank- und Aktiv-Slots</li><li><strong>Gespeicherte Decks laden:</strong> Decks aus deinem Profil nutzen</li><li><strong>Judge:</strong> Beide mischen Hand ins Deck und ziehen genau 4</li><li><strong>Iono:</strong> Hand unter Deck mischen, Anzahl nach Preiskarten ziehen</li><li><strong>Decksuche:</strong> Deck waehrend des Spiels mit Sortierung durchsuchen</li></ul>'
+            },
+            'profile': {
+                title: '\ud83d\udc64 Benutzerprofil',
+                html: '<p>Verwalte deine Sammlung, gespeicherte Decks und Einstellungen.</p><ul><li><strong>Meine Sammlung:</strong> Exakte Print-Anzahlen (Set+Nummer) mit Firebase-Sync</li><li><strong>Dex-Import:</strong> CSV-Import mit Setnamen-Mapping und nummernbasierter Erkennung</li><li><strong>Meine Decks:</strong> Badge pro Karte zeigt exakte Besitzanzahl fuer diesen Print</li><li><strong>\u2728 Indikator:</strong> Zeigt weitere internationale Prints derselben Karte in deiner Sammlung</li><li><strong>Seltenheits-Wechsler (\u2605):</strong> Prints direkt in gespeicherten Deckkarten wechseln</li><li><strong>Vergleich (\u2696\ufe0f):</strong> Quelle waehlen (Limitless/PTCGL oder gespeicherte Decks)</li><li><strong>Vergleichsmodus:</strong> Funktional (Prints zusammengefuehrt) oder exakter Print</li><li><strong>Wunschliste + Einstellungen:</strong> Ziele und Kontooptionen verwalten</li></ul>'
+            },
+            'calculator': {
+                title: '\ud83e\uddee Wahrscheinlichkeitsrechner',
+                html: '<p>Berechnet Zieh-, Preis- und Topdeck-Wahrscheinlichkeiten fuer dein Deck.</p><ul><li><strong>Zug-Chance:</strong> Wahrscheinlichkeit, mindestens eine Kopie in gezogenen Karten zu sehen</li><li><strong>Preiskarten-Chance:</strong> Wahrscheinlichkeit, dass mindestens eine Kopie in den Preisen liegt</li><li><strong>Topdeck-Chance:</strong> Wahrscheinlichkeit, dass der naechste Draw deine Zielkarte ist</li><li><strong>Eingaben:</strong> Kopien im Deck, gezogene Karten, bereits auf der Hand</li></ul>'
+            },
+            'tutorial': {
+                title: '\ud83d\udcd6 Anleitung',
+                html: '<p>Umfassender Guide zu allen Funktionen dieser Website.</p><ul><li><strong>Tab-Guides:</strong> Detaillierte Hinweise zu jedem Bereich</li><li><strong>Neueste Aenderungen:</strong> Exakte Print-Badges, \u2728 Indikator, stabiler \u2605 Print-Wechsel und erweiterter Deck-Vergleich</li><li><strong>Vergleichshinweise:</strong> Live-Parser-Vorschau + Funktional/Exakt-Modi</li><li><strong>Import-Hinweise:</strong> Dex-CSV Setnamen- und Setnummern-Matching erklaert</li></ul>'
+            }
+        };
+
         function openTabHelp(tabId) {
-            const help = TAB_HELP_CONTENT[tabId];
+            const lang = typeof window.getLang === 'function' ? window.getLang() : 'en';
+            const helpSet = lang === 'de' ? TAB_HELP_CONTENT_DE : TAB_HELP_CONTENT;
+            const help = helpSet[tabId] || TAB_HELP_CONTENT[tabId];
             if (!help) return;
             const modal = document.getElementById('helpModal');
             if (!modal) return;
@@ -250,10 +303,11 @@ const BASE_PATH = './data/';
         window.pastMetaCurrentArchetype = window.pastMetaCurrentArchetype || null;
         window.proxyQueue = window.proxyQueue || [];
 
-        const PROXY_QUEUE_STORAGE_KEY = 'proxyQueueV1';
+        const PROXY_IMPORT_TIMEOUT_MS = 10000;
         const PROXY_MANUAL_SUGGESTIONS_ID = 'proxyManualNameSuggestions';
         let proxyManualSearchIndex = [];
         let proxyManualSearchIndexReady = false;
+        const proxyActionState = Object.create(null);
 
         function normalizeProxySetCode(setCode) {
             const raw = String(setCode || '').trim();
@@ -316,12 +370,24 @@ const BASE_PATH = './data/';
             if (!grid) return;
             grid.classList.add('card-grid-loading');
             grid.innerHTML = createCardSkeletonMarkup(count);
+            // Auto-timeout: show error if skeleton is still visible after 30s
+            if (grid._skeletonTimer) clearTimeout(grid._skeletonTimer);
+            grid._skeletonTimer = setTimeout(function () {
+                if (grid.classList.contains('card-grid-loading')) {
+                    grid.innerHTML = '<div class="skeleton-error-message">' +
+                        '⚠️ Loading took too long.<br>' +
+                        '<span class="retry-link" onclick="location.reload()">Reload page</span>' +
+                        '</div>';
+                    grid.classList.remove('card-grid-loading');
+                }
+            }, 30000);
         }
 
         function clearGridLoadingSkeleton(gridOrId) {
             const grid = typeof gridOrId === 'string' ? document.getElementById(gridOrId) : gridOrId;
             if (!grid) return;
             grid.classList.remove('card-grid-loading');
+            if (grid._skeletonTimer) { clearTimeout(grid._skeletonTimer); grid._skeletonTimer = null; }
         }
 
         function loadDeferredScript(src) {
@@ -569,39 +635,91 @@ const BASE_PATH = './data/';
             }, 2200);
         }
 
-        function saveProxyQueue() {
+        function clearLegacyProxyQueueStorage() {
             try {
-                localStorage.setItem(PROXY_QUEUE_STORAGE_KEY, JSON.stringify(window.proxyQueue || []));
+                localStorage.removeItem('proxyQueueV1');
             } catch (e) {
-                console.warn('[Proxy] Could not persist proxy queue:', e);
+                console.warn('[Proxy] Could not clear legacy proxy queue storage:', e);
             }
         }
 
-        function loadProxyQueue() {
+        function setProxyButtonBusy(buttonIds, busy, loadingText) {
+            if (!Array.isArray(buttonIds)) return;
+            buttonIds.forEach((buttonId) => {
+                const button = document.getElementById(buttonId);
+                if (!button) return;
+
+                if (busy) {
+                    if (!button.dataset.originalLabel) {
+                        button.dataset.originalLabel = button.textContent || '';
+                    }
+                    button.disabled = true;
+                    button.classList.add('proxy-btn-loading');
+                    button.setAttribute('aria-busy', 'true');
+                    button.textContent = loadingText || t('misc.loading');
+                    return;
+                }
+
+                button.disabled = false;
+                button.classList.remove('proxy-btn-loading');
+                button.removeAttribute('aria-busy');
+                if (button.dataset.originalLabel) {
+                    button.textContent = button.dataset.originalLabel;
+                    delete button.dataset.originalLabel;
+                }
+            });
+        }
+
+        function withTimeout(promise, timeoutMs, timeoutMessage) {
+            if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) return promise;
+
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error(timeoutMessage || 'Proxy action timed out.'));
+                }, timeoutMs);
+
+                Promise.resolve(promise)
+                    .then((result) => {
+                        clearTimeout(timeout);
+                        resolve(result);
+                    })
+                    .catch((error) => {
+                        clearTimeout(timeout);
+                        reject(error);
+                    });
+            });
+        }
+
+        async function runProxyAction(actionKey, buttonIds, action, options = {}) {
+            if (!actionKey || typeof action !== 'function') return;
+            if (proxyActionState[actionKey]) return;
+
+            const loadingText = options.loadingText || t('misc.loading');
+            const timeoutMs = Number.isFinite(options.timeoutMs) ? options.timeoutMs : PROXY_IMPORT_TIMEOUT_MS;
+            proxyActionState[actionKey] = true;
+            setProxyButtonBusy(buttonIds, true, loadingText);
+
             try {
-                const saved = localStorage.getItem(PROXY_QUEUE_STORAGE_KEY);
-                if (!saved) {
-                    window.proxyQueue = [];
-                    return;
-                }
-                const parsed = JSON.parse(saved);
-                if (!Array.isArray(parsed)) {
-                    window.proxyQueue = [];
-                    return;
-                }
-                window.proxyQueue = parsed
-                    .filter(item => item && typeof item === 'object' && item.name)
-                    .map(item => ({
-                        id: buildProxyItemId(item.name, item.set, item.number),
-                        name: String(item.name || '').trim(),
-                        set: normalizeProxySetCode(item.set),
-                        number: normalizeProxyCardNumber(item.number),
-                        count: parseProxyCount(item.count, 1)
-                    }));
-            } catch (e) {
-                console.warn('[Proxy] Could not load proxy queue:', e);
-                window.proxyQueue = [];
+                await withTimeout(Promise.resolve().then(action), timeoutMs, options.timeoutMessage);
+            } catch (error) {
+                const detail = String(error?.message || error || '').toLowerCase();
+                const corsHint = detail.includes('cors') ? ' (possible CORS/network restriction)' : '';
+                const message = options.errorMessage || 'Proxy import failed. Please try again.';
+                showToast(`${message}${corsHint}`, 'error');
+                console.error('[Proxy] Action failed:', actionKey, error);
+            } finally {
+                proxyActionState[actionKey] = false;
+                setProxyButtonBusy(buttonIds, false);
             }
+        }
+
+        function saveProxyQueue() {
+            // Proxy queue persistence was intentionally removed.
+        }
+
+        function loadProxyQueue() {
+            clearLegacyProxyQueueStorage();
+            window.proxyQueue = [];
         }
 
         function getProxyQueueTotals() {
@@ -727,14 +845,12 @@ const BASE_PATH = './data/';
                 item.count = nextValue;
             }
 
-            saveProxyQueue();
             renderProxyQueue();
         }
 
         function removeCardFromProxy(cardName, setCode = '', cardNumber = '') {
             const id = buildProxyItemId(cardName, setCode, cardNumber);
             window.proxyQueue = (window.proxyQueue || []).filter(item => item.id !== id);
-            saveProxyQueue();
             renderProxyQueue();
         }
 
@@ -742,92 +858,138 @@ const BASE_PATH = './data/';
             if (!window.proxyQueue || window.proxyQueue.length === 0) return;
             if (!confirm(t('proxy.clearConfirm'))) return;
             window.proxyQueue = [];
-            saveProxyQueue();
             renderProxyQueue();
         }
 
-        function addCurrentDeckToProxy(source) {
-            let deckMap = null;
-            if (source === 'cityLeague') deckMap = window.cityLeagueDeck;
-            if (source === 'currentMeta') deckMap = window.currentMetaDeck;
-            if (source === 'pastMeta') deckMap = window.pastMetaDeck;
+        async function addCurrentDeckToProxy(source) {
+            const sourceToDeck = {
+                cityLeague: window.cityLeagueDeck,
+                currentMeta: window.currentMetaDeck,
+                pastMeta: window.pastMetaDeck
+            };
+            const sourceToButton = {
+                cityLeague: 'proxyAddCityLeagueDeckBtn',
+                currentMeta: 'proxyAddCurrentMetaDeckBtn',
+                pastMeta: 'proxyAddPastMetaDeckBtn'
+            };
 
-            if (!deckMap || Object.keys(deckMap).length === 0) {
-                showToast(t('proxy.noDeckCards'), 'warning');
-                return;
-            }
+            await runProxyAction(
+                `proxyDeckImport:${source}`,
+                [sourceToButton[source]],
+                async () => {
+                    const deckMap = sourceToDeck[source];
+                    if (!deckMap || typeof deckMap !== 'object' || Object.keys(deckMap).length === 0) {
+                        showToast(t('proxy.noDeckCards'), 'warning');
+                        return;
+                    }
 
-            let addedCopies = 0;
-            Object.entries(deckMap).forEach(([deckKey, count]) => {
-                const copies = parseProxyCount(count, 0);
-                if (copies <= 0) return;
+                    let addedCopies = 0;
+                    Object.entries(deckMap).forEach(([deckKey, count]) => {
+                        const copies = parseProxyCount(count, 0);
+                        if (copies <= 0) return;
 
-                const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
-                if (match) {
-                    addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
-                } else {
-                    addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                        const match = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+                        if (match) {
+                            addCardToProxyInternal(match[1], match[2], match[3], copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                        } else {
+                            addCardToProxyInternal(deckKey, '', '', copies, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                        }
+                        addedCopies += copies;
+                    });
+
+                    if (addedCopies <= 0) {
+                        showToast(t('proxy.noDeckCards'), 'warning');
+                        return;
+                    }
+
+                    renderProxyQueue();
+                    showProxyToast(`${addedCopies} ${t('proxy.deckCardsAdded')}`);
+                },
+                {
+                    loadingText: t('misc.loading'),
+                    errorMessage: 'Could not import selected deck into proxy queue.'
                 }
-                addedCopies += copies;
-            });
-
-            saveProxyQueue();
-            renderProxyQueue();
-            showProxyToast(`${addedCopies} ${t('proxy.deckCardsAdded')}`);
+            );
         }
 
         function sendCurrentDeckToProxyPrinter(source) {
-            addCurrentDeckToProxy(source);
-
-            if (typeof switchTabAndUpdateMenu === 'function') {
-                switchTabAndUpdateMenu('proxy');
-            } else if (typeof switchTab === 'function') {
-                switchTab('proxy');
-            }
+            addCurrentDeckToProxy(source)
+                .finally(() => {
+                    if (typeof switchTabAndUpdateMenu === 'function') {
+                        switchTabAndUpdateMenu('proxy');
+                    } else if (typeof switchTab === 'function') {
+                        switchTab('proxy');
+                    }
+                });
         }
 
-        function importDecklistToProxy() {
-            const input = document.getElementById('proxyDecklistInput');
-            if (!input) return;
+        async function importDecklistToProxy() {
+            await runProxyAction(
+                'proxyDecklistImport',
+                ['proxyImportDecklistBtn'],
+                async () => {
+                    const input = document.getElementById('proxyDecklistInput');
+                    if (!input) return;
 
-            const text = String(input.value || '').trim();
-            if (!text) {
-                showToast(t('proxy.pasteFirst'), 'warning');
-                return;
-            }
+                    const text = String(input.value || '').trim();
+                    if (!text) {
+                        showToast(t('proxy.pasteFirst'), 'warning');
+                        return;
+                    }
 
-            let entries = parseDeckList(text);
-            if (!Array.isArray(entries) || entries.length === 0) {
-                entries = [];
-                text.split('\n').forEach(line => {
-                    const trimmed = line.trim();
-                    if (!trimmed) return;
-                    const match = trimmed.match(/^(\d+)\s+(.+)$/);
-                    if (!match) return;
-                    entries.push({
-                        count: parseProxyCount(match[1], 1),
-                        name: String(match[2] || '').trim(),
-                        set: '',
-                        number: ''
+                    let entries = [];
+                    try {
+                        entries = parseDeckList(text);
+                    } catch (parseErr) {
+                        console.warn('[Proxy] parseDeckList failed, using fallback parser:', parseErr);
+                        entries = [];
+                    }
+
+                    if (!Array.isArray(entries) || entries.length === 0) {
+                        entries = [];
+                        text.split('\n').forEach(line => {
+                            const trimmed = line.trim();
+                            if (!trimmed) return;
+                            const match = trimmed.match(/^(\d+)\s+(.+)$/);
+                            if (!match) return;
+                            entries.push({
+                                count: parseProxyCount(match[1], 1),
+                                name: String(match[2] || '').trim(),
+                                set: '',
+                                number: ''
+                            });
+                        });
+                    }
+
+                    if (!Array.isArray(entries) || entries.length === 0) {
+                        showToast(t('proxy.parseError'), 'error');
+                        return;
+                    }
+
+                    let addedCopies = 0;
+                    entries.forEach(entry => {
+                        const safeName = String(entry?.name || '').trim();
+                        if (!safeName) return;
+                        const amount = parseProxyCount(entry.count, 1);
+                        addCardToProxyInternal(safeName, entry.set, entry.number, amount, { suppressToast: true, suppressRender: true, suppressPersist: true });
+                        addedCopies += amount;
                     });
-                });
-            }
 
-            if (entries.length === 0) {
-                showToast(t('proxy.parseError'), 'error');
-                return;
-            }
+                    if (addedCopies <= 0) {
+                        showToast(t('proxy.parseError'), 'error');
+                        return;
+                    }
 
-            let addedCopies = 0;
-            entries.forEach(entry => {
-                const amount = parseProxyCount(entry.count, 1);
-                addCardToProxyInternal(entry.name, entry.set, entry.number, amount, { suppressToast: true, suppressRender: true, suppressPersist: true });
-                addedCopies += amount;
-            });
-
-            saveProxyQueue();
-            renderProxyQueue();
-            showProxyToast(`${addedCopies} ${t('proxy.cardsImported')}`);
+                    renderProxyQueue();
+                    showProxyToast(`${addedCopies} ${t('proxy.cardsImported')}`);
+                },
+                {
+                    loadingText: t('misc.loading'),
+                    timeoutMs: PROXY_IMPORT_TIMEOUT_MS,
+                    timeoutMessage: 'Decklist import timed out.',
+                    errorMessage: 'Could not import decklist into proxy queue.'
+                }
+            );
         }
 
         function addManualProxyCard() {
@@ -1015,6 +1177,8 @@ const BASE_PATH = './data/';
         loadProxyQueue();
 
         document.addEventListener('DOMContentLoaded', function() {
+            clearLegacyProxyQueueStorage();
+            window.proxyQueue = [];
             renderProxyQueue();
             initializeProxyManualSearchInput();
 
@@ -1045,26 +1209,26 @@ const BASE_PATH = './data/';
                 // Load data for the tab
                 switch(tabName) {
                     case 'city-league':
-                        if (!window.cityLeagueLoaded && typeof loadCityLeagueData === 'function') loadCityLeagueData();
+                        if (!window.cityLeagueLoaded) loadCityLeagueData();
                         break;
                     case 'city-league-analysis':
-                        if (!window.cityLeagueAnalysisLoaded && typeof loadCityLeagueAnalysis === 'function') loadCityLeagueAnalysis();
+                        if (!window.cityLeagueAnalysisLoaded) loadCityLeagueAnalysis();
                         break;
                     case 'current-meta':
-                        if (!window.currentMetaLoaded && typeof loadCurrentMeta === 'function') loadCurrentMeta();
+                        if (!window.currentMetaLoaded) loadCurrentMeta();
                         break;
                     case 'current-analysis':
-                        if (!window.currentAnalysisLoaded && typeof loadCurrentAnalysis === 'function') loadCurrentAnalysis();
+                        if (!window.currentAnalysisLoaded) loadCurrentAnalysis();
                         break;
                     case 'past-meta':
-                        if (!window.pastMetaLoaded && typeof loadPastMeta === 'function') loadPastMeta();
+                        if (!window.pastMetaLoaded) loadPastMeta();
                         break;
                     case 'cards':
-                        if (!window.cardsLoaded && typeof loadCards === 'function') loadCards();
+                        if (!window.cardsLoaded) loadCards();
                         break;
                     case 'proxy':
-                        if (typeof renderProxyQueue === 'function') renderProxyQueue();
-                        if (typeof initializeProxyManualSearchInput === 'function') initializeProxyManualSearchInput();
+                        renderProxyQueue();
+                        initializeProxyManualSearchInput();
                         break;
                 }
             }
@@ -1095,8 +1259,6 @@ const BASE_PATH = './data/';
             if (normalizedRegion === 'cityLeague') {
                 // Store pending selection — populateCityLeagueDeckSelect will apply it when ready
                 window.pendingCityLeagueDeckSelection = safeArchetype;
-                // Exact archetype navigation must win over any previously queued combined selection.
-                window.pendingCombinedArchetypeSelection = null;
                 triggerTabSwitch('city-league-analysis');
                 // If data already loaded, the populate function won't re-run — apply immediately
                 if (window.cityLeagueAnalysisLoaded) {
@@ -1164,9 +1326,6 @@ const BASE_PATH = './data/';
             const displayName = String(mainName || '').charAt(0).toUpperCase() + String(mainName || '').slice(1);
             const groupValue = 'GROUP:' + variants.join('|');
 
-            // Combined selection must not be blocked by stale exact-deck pending state.
-            window.pendingCityLeagueDeckSelection = null;
-
             // Store for deferred application — populateCityLeagueDeckSelect picks this up
             window.pendingCombinedArchetypeSelection = {
                 value: groupValue,
@@ -1189,20 +1348,11 @@ const BASE_PATH = './data/';
         
         // Navigate to City League Analysis with pre-selected deck
         function navigateToAnalysisWithDeck(archetypeName) {
-            const safeArchetype = String(archetypeName || '').trim();
-            if (!safeArchetype) return;
-
-            devLog('🔍 Navigating to analysis with deck:', safeArchetype);
-            window.pendingCityLeagueDeckSelection = safeArchetype;
-            // Clear stale combined-state so it cannot override exact banner selection.
-            window.pendingCombinedArchetypeSelection = null;
+            devLog('🔍 Navigating to analysis with deck:', archetypeName);
+            window.pendingCityLeagueDeckSelection = archetypeName;
             
             // Switch to City League Analysis tab
-            if (typeof switchTabAndUpdateMenu === 'function') {
-                switchTabAndUpdateMenu('city-league-analysis');
-            } else {
-                switchTab('city-league-analysis');
-            }
+            switchTab('city-league-analysis');
             
             // Wait for dropdown to be populated with data
             let attempts = 0;
@@ -1213,36 +1363,32 @@ const BASE_PATH = './data/';
                 const select = document.getElementById('cityLeagueDeckSelect');
                 
                 if (select && select.options.length > 1) { // More than just placeholder
-                    const normalizeArchetypeKey = (value) => String(value || '')
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, ' ')
-                        .replace(/\s+/g, ' ')
-                        .trim();
-                    const requestedKey = normalizeArchetypeKey(safeArchetype);
-
-                    // Find matching option (case-insensitive)
                     const options = Array.from(select.options);
-                    const matchingOption = options.find(opt => 
-                        String(opt.value || '').toLowerCase() === safeArchetype.toLowerCase() ||
-                        normalizeArchetypeKey(opt.value) === requestedKey ||
-                        normalizeArchetypeKey(opt.value).includes(requestedKey) ||
-                        requestedKey.includes(normalizeArchetypeKey(opt.value))
-                    );
+                    const target = String(archetypeName || '').trim().toLowerCase();
+
+                    // Prefer combined archetype entries (GROUP:...) when they contain the clicked archetype.
+                    const combinedOption = options.find(opt => {
+                        const value = String(opt.value || '');
+                        if (!value.startsWith('GROUP:')) return false;
+                        const variants = value
+                            .replace(/^GROUP:/, '')
+                            .split('|')
+                            .map(v => String(v || '').trim().toLowerCase())
+                            .filter(Boolean);
+                        return variants.includes(target);
+                    });
+
+                    // Fallback to exact single-archetype match.
+                    const exactOption = options.find(opt => String(opt.value || '').toLowerCase() === target);
+                    const matchingOption = combinedOption || exactOption;
                     
                     if (matchingOption) {
                         select.value = matchingOption.value;
                         window.pendingCityLeagueDeckSelection = null;
-                        // Update combobox text to show selected deck
-                        const comboboxInput = document.getElementById('cityLeagueDeckCombobox');
-                        if (comboboxInput) {
-                            comboboxInput.value = matchingOption.textContent || matchingOption.value;
-                            comboboxInput.setAttribute('aria-expanded', 'false');
-                            const comboboxList = document.getElementById('cityLeagueDeckComboboxList');
-                            if (comboboxList) comboboxList.classList.add('deck-combobox-list-hidden');
-                        }
                         // Trigger change event to load the deck
-                        select.dispatchEvent(new Event('change', { bubbles: true }));
-                        devLog('✅ Deck selected:', matchingOption.value);
+                        const event = new Event('change', { bubbles: true });
+                        select.dispatchEvent(event);
+                        devLog('✅ Deck selected:', matchingOption.value, combinedOption ? '(combined)' : '(exact)');
                     } else {
                         console.warn('⚠️ Deck not found in dropdown:', archetypeName);
                     }
@@ -1250,7 +1396,7 @@ const BASE_PATH = './data/';
                     // Retry after 100ms
                     setTimeout(checkAndSelect, 100);
                 } else {
-                    console.error('Timeout: Dropdown not populated after 5 seconds');
+                    console.error('? Timeout: Dropdown not populated after 5 seconds');
                 }
             };
             
@@ -1263,7 +1409,7 @@ const BASE_PATH = './data/';
             devLog('🔍 Navigating to Current Meta with deck:', archetypeName);
             
             // Switch to Current Meta Analysis tab
-            switchTab('current-meta-analysis');
+            switchTab('current-analysis');
             
             // Wait for dropdown to be populated with data
             let attempts = 0;
@@ -1354,12 +1500,13 @@ const BASE_PATH = './data/';
         }
 
         const KNOWN_META_FORMAT_CODES = [
-            'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
+            'TEF-POR', 'SVI-ASC', 'SVI-PFL', 'SVI-MEG', 'SVI-BLK', 'SVI-DRI', 'SVI-JTG',
             'BRS-PRE', 'BRS-SSP', 'BRS-SCR', 'BRS-SFA', 'BRS-TWM', 'BRS-TEF',
             'BST-PAR', 'SVI-PAF'
         ];
 
         const TOURNAMENT_FORMAT_NAME_TO_CODE = {
+            'scarlet & violet - perfect order': 'TEF-POR',
             'scarlet & violet - ascended heroes': 'SVI-ASC',
             'scarlet & violet - phantasmal flames': 'SVI-PFL',
             'scarlet & violet - mega evolution': 'SVI-MEG',
@@ -1383,7 +1530,14 @@ const BASE_PATH = './data/';
             const code = String(setCode || '').trim().toUpperCase();
             if (!code) return '';
 
+            const legacyToRotationCode = {
+                'SVI-POR': 'TEF-POR'
+            };
+            if (legacyToRotationCode[code]) return legacyToRotationCode[code];
+
             const explicit = {
+                M4: 'TEF-M4',
+                POR: 'TEF-POR',
                 ASC: 'SVI-ASC',
                 PFL: 'SVI-PFL',
                 MEG: 'SVI-MEG',
@@ -1402,10 +1556,14 @@ const BASE_PATH = './data/';
             };
 
             if (explicit[code]) return explicit[code];
-            if (code.includes('-')) return code;
+            if (code.includes('-')) return legacyToRotationCode[code] || code;
 
             const sviOrder = setOrderMap.SVI || setOrderMap.SVE || 0;
+            const tefOrder = setOrderMap.TEF || 0;
             const codeOrder = setOrderMap[code] || 0;
+            if (tefOrder > 0 && codeOrder > 0 && codeOrder >= tefOrder) {
+                return `TEF-${code}`;
+            }
             if (sviOrder > 0 && codeOrder > 0 && codeOrder >= sviOrder) {
                 return `SVI-${code}`;
             }
@@ -1416,7 +1574,9 @@ const BASE_PATH = './data/';
         function normalizeTournamentFormatLabel(rawFormat, fallbackSetCode = '') {
             const raw = String(rawFormat || '').trim();
             if (!raw) return mapSetCodeToMetaFormat(fallbackSetCode);
-            if (KNOWN_META_FORMAT_CODES.includes(raw) || raw === 'Meta Live' || raw === 'Meta Play!') return raw;
+            const normalizedRawCode = mapSetCodeToMetaFormat(raw);
+            if (KNOWN_META_FORMAT_CODES.includes(normalizedRawCode)) return normalizedRawCode;
+            if (raw === 'Meta Live' || raw === 'Meta Play!') return raw;
 
             const normalized = raw.toLowerCase();
             if (TOURNAMENT_FORMAT_NAME_TO_CODE[normalized]) {
@@ -1450,6 +1610,7 @@ const BASE_PATH = './data/';
             rows.forEach(row => {
                 if (!row || typeof row !== 'object') return;
                 const rawArch = String(row.archetype || '').trim();
+                if (!rawArch) return;
                 const sanitized = sanitizeTournamentArchetypeName(rawArch);
                 const tournamentId = String(row.tournament_id || '').trim();
                 const groupKey = `${tournamentId}|||${sanitized}`;
@@ -1463,12 +1624,10 @@ const BASE_PATH = './data/';
                 const rawArch = String(normalized.archetype || '').trim();
                 normalized.archetype = sanitizeTournamentArchetypeName(rawArch);
 
-                const hasExplicitFormat = String(normalized.format || '').trim().length > 0;
-                const hasSourceMeta = String(normalized.meta || '').trim().length > 0 && String(normalized.meta || '').trim() !== 'Meta Play!';
-                const formatSource = hasExplicitFormat
+                const rawFormat = Object.prototype.hasOwnProperty.call(normalized, 'format')
                     ? normalized.format
-                    : (hasSourceMeta ? normalized.meta : '');
-                const normalizedFormat = normalizeTournamentFormatLabel(formatSource, normalized.set_code || '');
+                    : (normalized.meta || '');
+                const normalizedFormat = normalizeTournamentFormatLabel(rawFormat, normalized.set_code || '');
                 normalized.format = normalizedFormat;
                 // Fallback CSV (tournament_cards_data_cards.csv) stores format codes
                 // (e.g. 'SVI-ASC') in the meta column, not source labels. Since all
@@ -1714,78 +1873,181 @@ const BASE_PATH = './data/';
 
         async function loadAllCardsDatabase() {
             try {
-                const timestamp = new Date().getTime();
-                const response = await fetch(`./data/all_cards_merged.json?t=${timestamp}`);
-                if (response.ok) {
-                    const jsonData = await response.json();
-                    // Extract cards array from JSON structure
-                    allCardsDatabase = (jsonData.cards || jsonData).map(c => {
-                        // Ensure 'name' field exists (JSON may only have 'name_en')
-                        if (!c.name && c.name_en) c.name = c.name_en;
-                        return c;
-                    });
-                    window.allCardsDatabase = allCardsDatabase;
-                    cardIndexBySetNumber = buildCardIndexBySetNumber(allCardsDatabase);
-                    window.cardIndexBySetNumber = cardIndexBySetNumber;
-                    cardsByNameMap = buildCardsByNameMap(allCardsDatabase);
-                    window.cardsByNameMap = cardsByNameMap;
-                    cardsBySetNumberMap = buildCardsBySetNumberMap(allCardsDatabase); // Build index for fast lookup
-                    window.cardsBySetNumberMap = cardsBySetNumberMap; // Expose for multiplayer & playtester
-                    // Build O(1) name index (exact + normalized keys)
-                    cardIndexMap = new Map();
-                    allCardsDatabase.forEach(c => {
-                        const primaryName = String(c.name_en || c.name || '').trim();
-                        if (!primaryName) return;
+                // --- Strategy: Chunked loading with IndexedDB cache ---
+                // 1. Try manifest-based chunked loading (Standard chunk first, rest lazy)
+                // 2. Fallback to monolith all_cards_merged.json if chunks unavailable
+                const cache = window.cardDataCache;
+                const manifestUrl = './data/cards_manifest.json';
 
-                        const exactKey = fixMojibake(primaryName);
-                        const normalizedKey = normalizeCardName(primaryName);
+                if (cache) {
+                    const freshness = await cache.checkFreshness(manifestUrl);
 
-                        if (!cardIndexMap.has(exactKey)) cardIndexMap.set(exactKey, c);
-                        if (normalizedKey && !cardIndexMap.has(normalizedKey)) cardIndexMap.set(normalizedKey, c);
-                    });
-                    invalidateCardLookupCaches();
-                    window.cardIndexMap = cardIndexMap;
-                    devLog(`✅ Loaded ${allCardsDatabase.length} cards from all_cards_merged.json (with prices)`);
-                    devLog(`📊 Karten mit mehreren Versionen:`, Object.keys(cardsByNameMap).filter(k => cardsByNameMap[k].length > 1).length);
-                    
-                    // Count cards with prices
-                    const cardsWithPrices = allCardsDatabase.filter(c => c.eur_price).length;
-                    devLog(`💰 Karten mit Preisen: ${cardsWithPrices} (${Math.round(100*cardsWithPrices/allCardsDatabase.length)}%)`);
-                    
-                    // Initialisiere Suche wenn sie existiert
-                    const searchInput = document.getElementById('cityLeagueDeckCardSearch');
-                    if (searchInput && searchInput.value.trim()) {
-                        searchDeckCards('cityLeague');
-                    }
-                    
-                    const currentMetaSearchInput = document.getElementById('currentMetaDeckCardSearch');
-                    if (currentMetaSearchInput && currentMetaSearchInput.value.trim()) {
-                        searchDeckCards('currentMeta');
-                    }
-                    
-                    const pastMetaSearchInput = document.getElementById('pastMetaDeckCardSearch');
-                    if (pastMetaSearchInput && pastMetaSearchInput.value.trim()) {
-                        searchDeckCards('pastMeta');
+                    if (freshness.fresh && freshness.cachedManifest) {
+                        // --- Fast path: load from IndexedDB ---
+                        devLog('[CardDB] Using IndexedDB cache (version ' + freshness.cachedManifest.version + ')');
+                        const manifest = freshness.cachedManifest;
+                        let allCards = [];
+                        let allCached = true;
+                        for (const chunk of manifest.chunks) {
+                            const cached = await cache.getCachedChunk(chunk.file);
+                            if (cached && cached.length > 0) {
+                                allCards = allCards.concat(cached);
+                            } else {
+                                allCached = false;
+                                break;
+                            }
+                        }
+                        if (allCached && allCards.length > 0) {
+                            _applyCardDatabase(allCards);
+                            devLog('[CardDB] Loaded ' + allCards.length + ' cards from IndexedDB cache');
+                            _notifyCardDBReady();
+                            return;
+                        }
+                        // Some chunks missing from cache — fall through to network
                     }
 
-                    // My Decks may load before card DB; refresh once DB is ready to render card images.
-                    if (window.userDecks && window.userDecks.length > 0 && typeof updateDecksUI === 'function') {
-                        updateDecksUI();
-                    }
+                    // --- Network path: fetch manifest, load chunks ---
+                    try {
+                        const serverManifest = freshness.serverManifest || await _fetchManifest(manifestUrl);
+                        if (serverManifest && serverManifest.chunks && serverManifest.chunks.length > 0) {
+                            devLog('[CardDB] Loading ' + serverManifest.chunks.length + ' chunks from network...');
 
-                    // Collection/Wishlist can also load before card DB; re-render once card metadata is ready.
-                    if (typeof updateCollectionUI === 'function') {
-                        updateCollectionUI();
+                            // Load Standard chunk first for fast initial display
+                            const standardChunk = serverManifest.chunks.find(c => c.era === 'standard');
+                            const otherChunks = serverManifest.chunks.filter(c => c.era !== 'standard');
+
+                            if (standardChunk) {
+                                const standardCards = await cache.fetchAndCacheChunk('./data/', standardChunk.file);
+                                _applyCardDatabase(standardCards);
+                                devLog('[CardDB] Standard chunk loaded: ' + standardCards.length + ' cards (fast display ready)');
+                                _notifyCardDBReady();
+
+                                // Load remaining chunks in background
+                                _loadRemainingChunks(cache, otherChunks, standardCards, serverManifest);
+                                return;
+                            }
+
+                            // No standard chunk — load all sequentially
+                            let allCards = [];
+                            for (const chunk of serverManifest.chunks) {
+                                const cards = await cache.fetchAndCacheChunk('./data/', chunk.file);
+                                allCards = allCards.concat(cards);
+                            }
+                            cache.setCachedManifest({ ...serverManifest, timestamp: Date.now() });
+                            _applyCardDatabase(allCards);
+                            _notifyCardDBReady();
+                            return;
+                        }
+                    } catch (chunkErr) {
+                        console.warn('[CardDB] Chunk loading failed, falling back to monolith:', chunkErr);
                     }
-                    if (typeof updateWishlistUI === 'function') {
-                        updateWishlistUI();
-                    }
-                } else {
-                    console.error('? Failed to load all_cards_merged.json');
                 }
+
+                // --- Fallback: monolith all_cards_merged.json ---
+                await _loadMonolithCardDatabase();
             } catch (error) {
                 console.error('Error loading all cards database:', error);
             }
+        }
+
+        async function _fetchManifest(url) {
+            const resp = await fetch(url + '?t=' + Date.now());
+            if (!resp.ok) return null;
+            return resp.json();
+        }
+
+        async function _loadRemainingChunks(cache, otherChunks, initialCards, manifest) {
+            // Non-blocking: load SWSH + Legacy in background after initial render
+            try {
+                let allCards = initialCards.slice();
+                for (const chunk of otherChunks) {
+                    const cards = await cache.fetchAndCacheChunk('./data/', chunk.file);
+                    allCards = allCards.concat(cards);
+                    devLog('[CardDB] Background chunk "' + chunk.era + '" loaded: +' + cards.length + ' cards (total: ' + allCards.length + ')');
+                }
+                // Rebuild indices with full dataset
+                _applyCardDatabase(allCards);
+                cache.setCachedManifest({ ...manifest, timestamp: Date.now() });
+                devLog('[CardDB] All chunks loaded: ' + allCards.length + ' cards total');
+
+                // Re-notify so Cards DB tab can refresh with full data
+                _notifyCardDBReady();
+            } catch (e) {
+                console.warn('[CardDB] Background chunk loading error:', e);
+            }
+        }
+
+        async function _loadMonolithCardDatabase() {
+            const timestamp = new Date().getTime();
+            const response = await fetch(`./data/all_cards_merged.json?t=${timestamp}`);
+            if (response.ok) {
+                const jsonData = await response.json();
+                const cards = (jsonData.cards || jsonData);
+                _applyCardDatabase(cards);
+
+                // Cache the monolith in IndexedDB for next visit
+                const cache = window.cardDataCache;
+                if (cache) {
+                    cache.setCachedChunk('all_cards_merged.json', cards);
+                    cache.setCachedManifest({
+                        version: 'monolith-' + timestamp,
+                        chunks: [{ file: 'all_cards_merged.json', era: 'all', count: cards.length }],
+                        timestamp: Date.now()
+                    });
+                }
+                _notifyCardDBReady();
+                devLog('[CardDB] Loaded ' + cards.length + ' cards from monolith (fallback)');
+            } else {
+                console.error('Failed to load all_cards_merged.json');
+            }
+        }
+
+        function _applyCardDatabase(cards) {
+            allCardsDatabase = cards.map(c => {
+                if (!c.name && c.name_en) c.name = c.name_en;
+                return c;
+            });
+            window.allCardsDatabase = allCardsDatabase;
+            cardIndexBySetNumber = buildCardIndexBySetNumber(allCardsDatabase);
+            window.cardIndexBySetNumber = cardIndexBySetNumber;
+            cardsByNameMap = buildCardsByNameMap(allCardsDatabase);
+            window.cardsByNameMap = cardsByNameMap;
+            cardsBySetNumberMap = buildCardsBySetNumberMap(allCardsDatabase);
+            window.cardsBySetNumberMap = cardsBySetNumberMap;
+            // Build O(1) name index (exact + normalized keys)
+            cardIndexMap = new Map();
+            allCardsDatabase.forEach(c => {
+                const primaryName = String(c.name_en || c.name || '').trim();
+                if (!primaryName) return;
+                const exactKey = fixMojibake(primaryName);
+                const normalizedKey = normalizeCardName(primaryName);
+                if (!cardIndexMap.has(exactKey)) cardIndexMap.set(exactKey, c);
+                if (normalizedKey && !cardIndexMap.has(normalizedKey)) cardIndexMap.set(normalizedKey, c);
+            });
+            invalidateCardLookupCaches();
+            window.cardIndexMap = cardIndexMap;
+        }
+
+        function _notifyCardDBReady() {
+            devLog('Cards DB ready: ' + allCardsDatabase.length + ' cards');
+
+            // Count cards with prices
+            const cardsWithPrices = allCardsDatabase.filter(c => c.eur_price).length;
+            devLog('Cards with prices: ' + cardsWithPrices + ' (' + Math.round(100 * cardsWithPrices / allCardsDatabase.length) + '%)');
+
+            // Re-trigger any pending searches
+            const searchInput = document.getElementById('cityLeagueDeckCardSearch');
+            if (searchInput && searchInput.value.trim()) searchDeckCards('cityLeague');
+            const currentMetaSearchInput = document.getElementById('currentMetaDeckCardSearch');
+            if (currentMetaSearchInput && currentMetaSearchInput.value.trim()) searchDeckCards('currentMeta');
+            const pastMetaSearchInput = document.getElementById('pastMetaDeckCardSearch');
+            if (pastMetaSearchInput && pastMetaSearchInput.value.trim()) searchDeckCards('pastMeta');
+
+            // Refresh dependent UIs
+            if (window.userDecks && window.userDecks.length > 0 && typeof updateDecksUI === 'function') updateDecksUI();
+            if (typeof updateCollectionUI === 'function') updateCollectionUI();
+            if (typeof updateWishlistUI === 'function') updateWishlistUI();
+            if (window.userProfile && typeof updateProfileUI === 'function') updateProfileUI(window.userProfile);
         }
         
         async function loadAceSpecsList() {
@@ -1958,10 +2220,10 @@ const BASE_PATH = './data/';
          *   - Pokédex number (exact match for 1-2 digit terms, partial for 3+)
          */
         function filterCardsArray(allCardsArray, searchInputText) {
-            if (!Array.isArray(allCardsArray)) return [];
+            const safeCards = Array.isArray(allCardsArray) ? allCardsArray : [];
             const term = (searchInputText || '').toLowerCase().trim();
-            if (!term) return allCardsArray;
-            return allCardsArray.filter(card => {
+            if (!term) return safeCards;
+            return safeCards.filter(card => {
                 if (!card || typeof card !== 'object') return false;
                 const nameEn = (card.name_en || card.name || '').toLowerCase();
                 const nameDe = (card.name_de || '').toLowerCase();
@@ -2089,10 +2351,10 @@ const BASE_PATH = './data/';
                 
                 if (a.type) {
                     const typeA = a.type.toLowerCase();
-                    if (typeA.includes("pokémon") || typeA.includes("pokemon")) catA = 1;
+                    if (typeA.includes("tool")) catA = 4;
+                    else if (typeA.includes("pokémon") || typeA.includes("pokemon")) catA = 1;
                     else if (typeA.includes("supporter")) catA = 2;
-                    else if (typeA.includes("item") && !typeA.includes("tool")) catA = 3;
-                    else if (typeA.includes("tool")) catA = 4;
+                    else if (typeA.includes("item")) catA = 3;
                     else if (typeA.includes("stadium")) catA = 5;
                     else if (typeA.includes("special energy")) catA = 6;
                     else if (typeA.includes("basic energy")) catA = 7;
@@ -2100,10 +2362,10 @@ const BASE_PATH = './data/';
                 
                 if (b.type) {
                     const typeB = b.type.toLowerCase();
-                    if (typeB.includes("pokémon") || typeB.includes("pokemon")) catB = 1;
+                    if (typeB.includes("tool")) catB = 4;
+                    else if (typeB.includes("pokémon") || typeB.includes("pokemon")) catB = 1;
                     else if (typeB.includes("supporter")) catB = 2;
-                    else if (typeB.includes("item") && !typeB.includes("tool")) catB = 3;
-                    else if (typeB.includes("tool")) catB = 4;
+                    else if (typeB.includes("item")) catB = 3;
                     else if (typeB.includes("stadium")) catB = 5;
                     else if (typeB.includes("special energy")) catB = 6;
                     else if (typeB.includes("basic energy")) catB = 7;
@@ -2132,97 +2394,5 @@ const BASE_PATH = './data/';
                 const numA = parseInt(String(a.number || a.set_number || "").replace(/\D/g, '')) || 0;
                 const numB = parseInt(String(b.number || b.set_number || "").replace(/\D/g, '')) || 0;
                 return numA - numB;
-            });
-        }
-
-        // ============================================================
-        // SHARED: Deck Archetype Combobox Initializer
-        // Populates the visible <ul> dropdown from the hidden <select>,
-        // wires search/filter, click-to-select, and outside-click-close.
-        // prefix: 'cityLeague' | 'currentMeta' | 'pastMeta'
-        // ============================================================
-        function initializeDeckArchetypeCombobox(prefix) {
-            const select        = document.getElementById(prefix + 'DeckSelect');
-            const comboboxInput = document.getElementById(prefix + 'DeckCombobox');
-            const comboboxList  = document.getElementById(prefix + 'DeckComboboxList');
-            const containerId   = prefix + 'DeckComboboxContainer';
-            if (!select || !comboboxInput || !comboboxList) return;
-
-            // Build <li> items from every <optgroup>/<option> in the hidden select
-            comboboxList.innerHTML = '';
-            Array.from(select.children).forEach(child => {
-                if (child.tagName === 'OPTGROUP') {
-                    const header = document.createElement('li');
-                    header.className = 'deck-combobox-category-header';
-                    header.setAttribute('role', 'presentation');
-                    header.textContent = child.label;
-                    comboboxList.appendChild(header);
-                    Array.from(child.querySelectorAll('option')).forEach(opt => {
-                        if (!opt.value) return;
-                        const li = document.createElement('li');
-                        li.className = 'deck-combobox-item deck-combobox-item-grouped';
-                        li.setAttribute('role', 'option');
-                        li.dataset.value = opt.value;
-                        li.innerHTML = '<span class="deck-combobox-item-name">' + opt.textContent + '</span>';
-                        comboboxList.appendChild(li);
-                    });
-                } else if (child.tagName === 'OPTION' && child.value) {
-                    const li = document.createElement('li');
-                    li.className = 'deck-combobox-item';
-                    li.setAttribute('role', 'option');
-                    li.dataset.value = child.value;
-                    li.innerHTML = '<span class="deck-combobox-item-name">' + child.textContent + '</span>';
-                    comboboxList.appendChild(li);
-                }
-            });
-
-            // Filter items on typing
-            comboboxInput.oninput = function() {
-                const term = this.value.toLowerCase().trim();
-                comboboxList.classList.remove('deck-combobox-list-hidden');
-                comboboxInput.setAttribute('aria-expanded', 'true');
-                comboboxList.querySelectorAll('.deck-combobox-item').forEach(li => {
-                    const match = !term || li.textContent.toLowerCase().includes(term);
-                    li.style.display = match ? '' : 'none';
-                });
-                comboboxList.querySelectorAll('.deck-combobox-category-header').forEach(header => {
-                    let next = header.nextElementSibling;
-                    let anyVisible = false;
-                    while (next && !next.classList.contains('deck-combobox-category-header')) {
-                        if (next.style.display !== 'none') anyVisible = true;
-                        next = next.nextElementSibling;
-                    }
-                    header.style.display = anyVisible ? '' : 'none';
-                });
-            };
-
-            // Open dropdown on focus
-            comboboxInput.onfocus = function() {
-                comboboxList.classList.remove('deck-combobox-list-hidden');
-                comboboxInput.setAttribute('aria-expanded', 'true');
-                if (!this.value.trim()) {
-                    comboboxList.querySelectorAll('.deck-combobox-item, .deck-combobox-category-header').forEach(el => {
-                        el.style.display = '';
-                    });
-                }
-            };
-
-            // Select item on click
-            comboboxList.onclick = function(e) {
-                const li = e.target.closest('.deck-combobox-item');
-                if (!li || !li.dataset.value) return;
-                select.value = li.dataset.value;
-                comboboxInput.value = li.querySelector('.deck-combobox-item-name').textContent;
-                comboboxList.classList.add('deck-combobox-list-hidden');
-                comboboxInput.setAttribute('aria-expanded', 'false');
-                select.dispatchEvent(new Event('change'));
-            };
-
-            // Close dropdown on outside click
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('#' + containerId)) {
-                    comboboxList.classList.add('deck-combobox-list-hidden');
-                    comboboxInput.setAttribute('aria-expanded', 'false');
-                }
             });
         }

@@ -46,7 +46,7 @@
                 const response = await fetch(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}`);
                 if (response.ok) {
                     const text = await response.text();
-                    const m3Data = await fetchAndParseCSV(`${BASE_PATH}city_league_archetypes_comparison_M3.csv?t=${timestamp}`);
+                    const m3Data = parseCSV(text);
                     
                     // Convert to Map for quick lookup by archetype name
                     window.m3ArchetypeData = {};
@@ -84,10 +84,10 @@
             window.currentCityLeagueFormat = format;
             localStorage.setItem('cityLeagueFormat', format);
             
-            // Show loading indicator
+            // Show skeleton loader while data loads
             const content = document.getElementById('cityLeagueContent');
             if (content) {
-                content.innerHTML = '<div class="city-league-loading-indicator">' + t('cl.loading') + ' ' + escapeHtml(format) + ' ' + t('cl.loadingData') + '</div>';
+                showTableSkeleton(content, { rows: 8, cols: 5, withImage: true });
             }
             
             // Load M3 comparison data only on non-mobile to avoid blocking slower devices.
@@ -219,9 +219,9 @@
                     return;
                 }
 
-                const analysisData = await fetchAndParseCSV(analysisUrl);
-                const archetypesData = await fetchAndParseCSV(archetypesUrl);
-                const comparisonData = comparisonText ? await fetchAndParseCSV(comparisonUrl) : null;
+                const analysisData = parseCSV(analysisText);
+                const archetypesData = parseCSV(archetypesText);
+                const comparisonData = comparisonText ? parseCSV(comparisonText) : null;
                 const placementStatsMap = buildCityLeaguePlacementStatsMap(archetypesData);
 
                 // NEU: M3 Daten parsen und im globalen Objekt speichern
@@ -330,12 +330,11 @@
                     const stillExists = Array.from(deckSelect.options).some(option => option.value === previousDeckValue);
                     if (stillExists) {
                         deckSelect.value = previousDeckValue;
-                        window.selectDeckArchetypeForTab('cityLeague', previousDeckValue);
                         restoredSelection = previousDeckValue;
                     }
                 }
                 if (!restoredSelection && deckSelect) {
-                    window.selectDeckArchetypeForTab('cityLeague', '');
+                    deckSelect.value = '';
                 }
 
                 if (!restoredSelection) {
@@ -382,8 +381,21 @@
             
             const sorted = [...data].sort((a, b) => parseInt(b.new_count || 0) - parseInt(a.new_count || 0));
             
+            // PERFORMANCE: compute and cache all derived sorts here so renderCityLeagueTable never re-sorts
+            const topByCount = sorted.slice(0, 3);
+            const maxCount = parseInt(topByCount[0]?.new_count || 0);
+            const minCountThreshold = maxCount * 0.1;
+            const topByPlacement = [...data]
+                .filter(d => parseInt(d.new_count || 0) >= minCountThreshold)
+                .sort((a, b) => parseFloat((a.new_avg_placement || '0').replace(',', '.')) - parseFloat((b.new_avg_placement || '0').replace(',', '.')))
+                .slice(0, 3);
+            const top10New = sorted.slice(0, 10).map(d => d.archetype);
+            const top10Old = [...data]
+                .sort((a, b) => parseInt(b.old_count || 0) - parseInt(a.old_count || 0))
+                .slice(0, 10).map(d => d.archetype);
+            
             _cityLeagueSortDataRef = data;
-            _cityLeagueSortCache = { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted };
+            _cityLeagueSortCache = { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted, topByCount, topByPlacement, top10New, top10Old };
             return _cityLeagueSortCache;
         }
         
@@ -393,7 +405,7 @@
             if (!content || !cityLeagueData || cityLeagueData.length === 0) return;
             
             // Use cached sort results
-            const { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted } = getCityLeagueSortedSections(cityLeagueData);
+            const { newArchetypes, disappeared, increased, decreased, improvers, decliners, sorted, topByCount, topByPlacement, top10New, top10Old } = getCityLeagueSortedSections(cityLeagueData);
             const totalArchetypes = cityLeagueData.length;
             
             // Generate timestamp
@@ -403,26 +415,7 @@
                 hour: '2-digit', minute: '2-digit', second: '2-digit' 
             });
             
-            // Get top 3 by count and placement
-            const topByCount = [...cityLeagueData]
-                .sort((a, b) => parseInt(b.new_count || 0) - parseInt(a.new_count || 0))
-                .slice(0, 3);
-            
             const maxCount = parseInt(topByCount[0]?.new_count || 0);
-            const minCountThreshold = maxCount * 0.1;
-            const topByPlacement = [...cityLeagueData]
-                .filter(d => parseInt(d.new_count || 0) >= minCountThreshold)
-                .sort((a, b) => parseFloat((a.new_avg_placement || '0').replace(',', '.')) - parseFloat((b.new_avg_placement || '0').replace(',', '.')))
-                .slice(0, 3);
-            
-            const top10New = [...cityLeagueData]
-                .sort((a, b) => parseInt(b.new_count || 0) - parseInt(a.new_count || 0))
-                .slice(0, 10)
-                .map(d => d.archetype);
-            const top10Old = [...cityLeagueData]
-                .sort((a, b) => parseInt(b.old_count || 0) - parseInt(a.old_count || 0))
-                .slice(0, 10)
-                .map(d => d.archetype);
             
             const entries = top10New.filter(arch => !top10Old.includes(arch));
             const exits = top10Old.filter(arch => !top10New.includes(arch));
@@ -500,7 +493,7 @@
                 // Performance Improvers
                 html += `
                     <div class="city-league-info-flex-block">
-                        <h2 class="city-league-info-table-title">? ${t('cl.perfImprovers')}</h2>
+                        <h2 class="city-league-info-table-title">${t('cl.perfImprovers')}</h2>
                         <table class="city-league-info-table">
                             <thead>
                                 <tr class="city-league-info-table-header-row">
@@ -566,7 +559,7 @@
                     <div class="city-league-info-flex-block city-league-info-flex-block-wide">
                         <h2 class="city-league-info-table-title">${t('cl.fullComparison')}</h2>
                         <div class="city-league-info-search-block">
-                            <input type="text" id="cityLeagueSearchFilter" placeholder="${t('cl.searchPlaceholder')}" class="city-league-info-search-input" oninput="filterCityLeagueTable()">
+                            <input type="text" id="cityLeagueSearchFilter" placeholder="${t('cl.searchPlaceholder')}" class="city-league-info-search-input" oninput="debouncedFilterCityLeagueTable()">
                             <div id="cityLeagueSearchResults" class="city-league-info-search-results"></div>
                         </div>
                         <div id="cityLeagueFullTable"></div>
@@ -596,8 +589,19 @@
             // Initial render
             renderFullComparisonTable(sorted.slice(0, 30));
             renderCombinedTable(groupedData.slice(0, 20));
+            ensureCityLeagueSearchFilterBinding();
             // Phase 1: render meta share chart
             renderMetaChart('cityLeague', sorted);
+        }
+
+
+
+        function ensureCityLeagueSearchFilterBinding() {
+            const searchInput = document.getElementById('cityLeagueSearchFilter');
+            if (!searchInput) return;
+
+            // Keep an explicit runtime hook in addition to inline HTML handlers.
+            searchInput.oninput = filterCityLeagueTable;
         }
         
         // Group archetypes by main Pokemon (first word/words before space)
@@ -829,6 +833,7 @@
         }
         
         // Filter City League Table
+        const debouncedFilterCityLeagueTable = debounce(filterCityLeagueTable, 250);
         function filterCityLeagueTable() {
             const searchInput = document.getElementById('cityLeagueSearchFilter');
             const resultsDiv = document.getElementById('cityLeagueSearchResults');
@@ -866,6 +871,10 @@
                 resultsDiv.classList.add('results-success');
             }
         }
+
+        // Explicit window bindings for deterministic E2E and inline event compatibility.
+        window.filterCityLeagueTable = filterCityLeagueTable;
+        window.switchCityLeagueFormat = switchCityLeagueFormat;
         
         // Load City League Analysis
         async function loadCityLeagueAnalysis() {
@@ -924,7 +933,6 @@
                     const stillExists = Array.from(deckSelect.options).some(option => option.value === previousDeckValue);
                     if (stillExists) {
                         deckSelect.value = previousDeckValue;
-                        window.selectDeckArchetypeForTab('cityLeague', previousDeckValue);
                     }
                 }
                 window.cityLeagueAnalysisLoaded = true;
@@ -943,20 +951,6 @@
         }
         
         function populateCityLeagueDeckSelect(data, comparisonData) {
-            const pendingDeckSelection = String(window.pendingCityLeagueDeckSelection || '').trim();
-            if (pendingDeckSelection && window.cityLeagueDateFilterActive) {
-                // Banner navigation should always resolve the requested deck, even when a stale date filter hides it.
-                window.cityLeagueDateFilterActive = false;
-                window.cityLeagueDateFrom = '1900-01-01';
-                window.cityLeagueDateTo = '2099-12-31';
-                const dateFromEl = document.getElementById('cityLeagueDateFrom');
-                const dateToEl = document.getElementById('cityLeagueDateTo');
-                if (dateFromEl) dateFromEl.value = '';
-                if (dateToEl) dateToEl.value = '';
-                updateCityLeagueDateFilterStatus();
-                devLog('ℹ️ Cleared City League date filter to honor pending banner selection:', pendingDeckSelection);
-            }
-
             const filteredArchetypesData = getFilteredCityLeagueArchetypesData();
 
             const archetypeCountMap = new Map();
@@ -1008,16 +1002,6 @@
             
             const select = document.getElementById('cityLeagueDeckSelect');
             if (!select) return;
-
-            // Set combobox text and close dropdown (no events dispatched to avoid re-opening)
-            function syncCityLeagueDeckPickerUi(selectedValue) {
-                const comboboxInput = document.getElementById('cityLeagueDeckCombobox');
-                const comboboxList  = document.getElementById('cityLeagueDeckComboboxList');
-                if (!comboboxInput) return;
-                comboboxInput.value = String(selectedValue || '').trim();
-                comboboxInput.setAttribute('aria-expanded', 'false');
-                if (comboboxList) comboboxList.classList.add('deck-combobox-list-hidden');
-            }
             
             // Clear and repopulate
             select.innerHTML = '<option value="">' + t('cl.selectDeck') + '</option>';
@@ -1081,6 +1065,8 @@
             select.onchange = function() {
                 if (this.value) {
                     loadCityLeagueDeckData(this.value);
+                    // DON'T auto-display deck - user must click "Generate Deck" button
+                    // This prevents unwanted deck building when just browsing decks
                     devLog('[Dropdown] Archetype selected:', this.value, '- waiting for user to generate deck');
                 } else {
                     clearCityLeagueDeckView();
@@ -1089,29 +1075,41 @@
 
             // If navigation requested a specific deck while data was loading, apply it now.
             const pendingDeck = String(window.pendingCityLeagueDeckSelection || '').trim();
-            let appliedPendingExactDeck = false;
             if (pendingDeck) {
                 const matchingOption = Array.from(select.options).find(option =>
                     option.value && option.value.toLowerCase() === pendingDeck.toLowerCase()
                 );
                 if (matchingOption) {
                     select.value = matchingOption.value;
-                    syncCityLeagueDeckPickerUi(matchingOption.textContent || matchingOption.value);
                     window.pendingCityLeagueDeckSelection = null;
                     loadCityLeagueDeckData(matchingOption.value);
-                    appliedPendingExactDeck = true;
                     devLog('✅ Applied pending City League deck selection:', matchingOption.value);
                 }
             }
             
 
             // Apply pending combined archetype selection (from analyzeCombinedArchetype click)
-            if (!appliedPendingExactDeck) {
-                applyPendingCombinedArchetypeSelection();
-            }
+            applyPendingCombinedArchetypeSelection();
 
-            // Populate the visible combobox dropdown from the hidden <select>
-            initializeDeckArchetypeCombobox('cityLeague');
+            // Enable search functionality
+            const searchInput = document.getElementById('cityLeagueDeckSearch');
+            if (searchInput) {
+                searchInput.oninput = function() {
+                    const searchTerm = this.value.toLowerCase();
+                    // Search through all options in all optgroups
+                    Array.from(select.querySelectorAll('option')).forEach(option => {
+                        if (option.value) {
+                            const match = option.textContent.toLowerCase().includes(searchTerm);
+                            option.classList.toggle('d-none', !match);
+                        }
+                    });
+                    // Hide optgroups if all options are hidden
+                    Array.from(select.querySelectorAll('optgroup')).forEach(group => {
+                        const hasVisibleOptions = Array.from(group.querySelectorAll('option')).some(opt => !opt.classList.contains('d-none'));
+                        group.classList.toggle('d-none', !hasVisibleOptions);
+                    });
+                };
+            }
         }
         
         // Date filter functions for City League
@@ -1165,8 +1163,6 @@
         function applyPendingCombinedArchetypeSelection() {
             const pending = window.pendingCombinedArchetypeSelection;
             if (!pending) return;
-            // Never override an exact archetype navigation that is still pending.
-            if (String(window.pendingCityLeagueDeckSelection || '').trim()) return;
             const select = document.getElementById('cityLeagueDeckSelect');
             if (!select || select.options.length <= 1) return;
             window.pendingCombinedArchetypeSelection = null;
@@ -1183,52 +1179,6 @@
             devLog('✅ Applied combined archetype:', pending.value.replace('GROUP:', '').split('|')[0]);
         }
 
-        function selectDeckArchetypeForTab(tabKey, deckValue) {
-            if (tabKey !== 'cityLeague') return '';
-
-            const select = document.getElementById('cityLeagueDeckSelect');
-            if (!select) return '';
-
-            const syncCityLeagueDeckPickerUi = (selectedValue) => {
-                const comboboxInput = document.getElementById('cityLeagueDeckCombobox');
-                const comboboxList  = document.getElementById('cityLeagueDeckComboboxList');
-                if (!comboboxInput) return;
-                comboboxInput.value = String(selectedValue || '').trim();
-                comboboxInput.setAttribute('aria-expanded', 'false');
-                if (comboboxList) comboboxList.classList.add('deck-combobox-list-hidden');
-            };
-
-            const requestedValue = String(deckValue || '').trim();
-            if (!requestedValue) {
-                select.value = '';
-                syncCityLeagueDeckPickerUi('');
-                clearCityLeagueDeckView();
-                return '';
-            }
-
-            const normalizeArchetypeKey = (value) => String(value || '')
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-            const requestedKey = normalizeArchetypeKey(requestedValue);
-
-            const matchingOption = Array.from(select.options).find(option =>
-                option.value && (
-                    option.value.toLowerCase() === requestedValue.toLowerCase() ||
-                    normalizeArchetypeKey(option.value) === requestedKey
-                )
-            );
-            if (!matchingOption) return '';
-
-            select.value = matchingOption.value;
-            syncCityLeagueDeckPickerUi(matchingOption.value);
-            loadCityLeagueDeckData(matchingOption.value);
-            return matchingOption.value;
-        }
-
-        window.selectDeckArchetypeForTab = selectDeckArchetypeForTab;
-
         function refreshCityLeagueDeckSelect() {
             const select = document.getElementById('cityLeagueDeckSelect');
             const previousValue = select ? select.value : '';
@@ -1238,7 +1188,7 @@
             if (!select) return '';
 
             const stillExists = Array.from(select.options).some(option => option.value === previousValue);
-            window.selectDeckArchetypeForTab('cityLeague', stillExists ? previousValue : '');
+            select.value = stillExists ? previousValue : '';
             return select.value;
         }
 
@@ -1261,8 +1211,10 @@
         }
         
         function applyCityLeagueDateFilter() {
-            const dateFrom = document.getElementById('cityLeagueDateFrom').value;
-            const dateTo = document.getElementById('cityLeagueDateTo').value;
+            const dateFromEl = document.getElementById('cityLeagueDateFrom');
+            const dateToEl = document.getElementById('cityLeagueDateTo');
+            const dateFrom = dateFromEl ? dateFromEl.value : '';
+            const dateTo = dateToEl ? dateToEl.value : '';
             
             // Set filter active if at least one date is set
             if (dateFrom || dateTo) {
@@ -1288,8 +1240,10 @@
             const statusEl = document.getElementById('cityLeagueDateFilterStatus');
             if (!statusEl) return;
             
-            const dateFrom = document.getElementById('cityLeagueDateFrom').value;
-            const dateTo = document.getElementById('cityLeagueDateTo').value;
+            const dateFromEl = document.getElementById('cityLeagueDateFrom');
+            const dateToEl = document.getElementById('cityLeagueDateTo');
+            const dateFrom = dateFromEl ? dateFromEl.value : '';
+            const dateTo = dateToEl ? dateToEl.value : '';
             
             if (dateFrom && dateTo) {
                 statusEl.textContent = `${t('cl.filteredRange')} ${formatDate(dateFrom)} to ${formatDate(dateTo)}`;
@@ -1443,16 +1397,10 @@
                 // Recalculate deck_count (how many decks contain this card)
                 const deck_count = stats.tournaments.size;
                 
-                // Recalculate max_count (most common count)
+                // max_count = actual maximum copies in any single deck
                 let max_count = 0;
                 if (stats.counts.length > 0) {
-                    const countFrequency = {};
-                    stats.counts.forEach(c => {
-                        countFrequency[c] = (countFrequency[c] || 0) + 1;
-                    });
-                    max_count = parseInt(Object.keys(countFrequency).reduce((a, b) => 
-                        countFrequency[a] > countFrequency[b] ? a : b
-                    ));
+                    max_count = Math.max(...stats.counts);
                 }
                 
                 // Recalculate percentage
@@ -1587,16 +1535,10 @@
                 const row = { ...data.sampleRow };
                 const legalMaxCopies = getLegalMaxCopies(data.sampleRow?.card_name || cardName, data.sampleRow);
                 
-                // Calculate aggregated max_count (most common value)
+                // max_count = actual maximum across all tournament periods
                 let max_count = 0;
                 if (data.maxCountValues.length > 0) {
-                    const countFreq = {};
-                    data.maxCountValues.forEach(val => {
-                        countFreq[val] = (countFreq[val] || 0) + 1;
-                    });
-                    max_count = parseInt(Object.keys(countFreq).reduce((a, b) => 
-                        countFreq[a] > countFreq[b] ? a : b
-                    ));
+                    max_count = Math.max(...data.maxCountValues);
                 }
 
                 // Recalculate deckCounts per tournament with cap (prevents split-print double counting).
@@ -1662,6 +1604,36 @@
             devLog(`Aggregated ${result.length} unique cards from ${totalDecks} decks across ${tournamentDecksMap.size} tournaments`);
             return result;
         }
+
+        // Persist City League deck state to localStorage
+        function saveCityLeagueDeck() {
+            try {
+                const deck = window.cityLeagueDeck || {};
+                const deckSize = Object.keys(deck).length;
+
+                // Avoid storing empty deck payloads
+                if (deckSize === 0) {
+                    localStorage.removeItem('cityLeagueDeck');
+                    devLog('[City League] Deck is empty - removed from localStorage');
+                    return;
+                }
+
+                const data = {
+                    deck: deck,
+                    order: window.cityLeagueDeckOrder || [],
+                    archetype: window.currentCityLeagueArchetype || null,
+                    timestamp: new Date().toISOString()
+                };
+
+                localStorage.setItem('cityLeagueDeck', JSON.stringify(data));
+                devLog('[City League] Deck saved to localStorage:', deckSize, 'cards');
+            } catch (e) {
+                console.error('[City League] Error saving deck:', e);
+            }
+        }
+
+        // Ensure cross-file callers (e.g. app-deck-builder.js) can always access it.
+        window.saveCityLeagueDeck = saveCityLeagueDeck;
         
         function loadCityLeagueDeckData(archetype) {
             devLog('Loading deck data for:', archetype);
@@ -1789,11 +1761,11 @@
             devLog(`Stored global deck count: ${window.currentCityLeagueTotalDecks}`);
             
             // Update stats
-            document.getElementById('cityLeagueStatCards').textContent = `${uniqueCards} / ${totalCardsInDeck}`;
-            document.getElementById('cityLeagueStatDecksUsed').textContent = decksCount;
-            document.getElementById('cityLeagueStatAvgPlacement').textContent = avgPlacement !== '-' ? avgPlacement : '-';
-            const statsSection = document.getElementById('cityLeagueStatsSection');
-            if (statsSection) statsSection.classList.remove('d-none');
+            updateDeckStatsByIds({
+                cityLeagueStatCards: `${uniqueCards} / ${totalCardsInDeck}`,
+                cityLeagueStatDecksUsed: decksCount,
+                cityLeagueStatAvgPlacement: avgPlacement !== '-' ? avgPlacement : '-'
+            }, 'cityLeagueStatsSection');
             
             // Reset button text to show list view option
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
@@ -1807,11 +1779,11 @@
         }
         
         function clearCityLeagueDeckView() {
-            document.getElementById('cityLeagueStatsSection').classList.add('d-none');
-            document.getElementById('cityLeagueDeckVisual').classList.add('d-none');
-            document.getElementById('cityLeagueDeckTableView').classList.add('d-none');
-            document.getElementById('cityLeagueCardCount').textContent = '0 ' + t('cl.cards');
-            document.getElementById('cityLeagueCardCountSummary').textContent = '/ 0 ' + t('cl.total');
+            ['cityLeagueStatsSection', 'cityLeagueDeckVisual', 'cityLeagueDeckTableView'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('d-none');
+            });
+            resetDeckOverviewCounts('cityLeagueCardCount', 'cityLeagueCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
             
             // Reset button text
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
@@ -1950,7 +1922,11 @@
         }
 
         function getEmptyStateHtml() {
-            return '<div class="empty-state"><h3>' + t('cl.noDataFound') + '</h3><p>' + t('cl.noDataFoundDesc') + '</p></div>';
+            return getEmptyStateBoxHtml({
+                title: t('cl.noDataFound'),
+                description: t('cl.noDataFoundDesc'),
+                icon: 'cards'
+            });
         }
 
         // Universal image URL resolver used across grids, analysis, and deckbuilder.
@@ -2274,7 +2250,7 @@
             }); // Ende der forEach-Schleife
             html += '</div>';
             tableContainer.innerHTML = html;
-            if (tableViewContainer) tableViewContainer.classList.remove('d-none');
+            if (tableViewContainer) tableViewContainer.classList.remove('d-none', 'city-league-deck-table-view-hidden');
         }
         
         // Get all versions of a card from allCardsDatabase
@@ -2341,11 +2317,18 @@
             debugVersionSelectionLog('?? renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
             const visualContainer = document.getElementById('cityLeagueDeckVisual');
             const gridContainer = document.getElementById('cityLeagueDeckGrid');
-            if (!gridContainer) return;
+            if (!gridContainer) {
+                console.warn('[CityLeague] cityLeagueDeckGrid container not found - cannot render card overview grid');
+                return;
+            }
 
             if (!Array.isArray(cards) || cards.length === 0) {
+                console.info('[CityLeague] Rendering empty card overview state (0 cards after filtering)');
                 gridContainer.innerHTML = getEmptyStateHtml();
-                if (visualContainer) visualContainer.classList.remove('d-none');
+                if (visualContainer) {
+                    visualContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
+                    visualContainer.style.display = 'block';
+                }
                 return;
             }
             
@@ -2355,6 +2338,10 @@
             // Get current deck to show deck counts
             const currentDeck = window.cityLeagueDeck || {};
             const priceMap = getOverviewPriceLookupCache();
+            
+            // PERFORMANCE: Resolve once outside render loop (avoids repeated DOM query + N*M data scans)
+            const selectedArchetypeForTrend = document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all';
+            const trendHistoryCache = new Map();
             
             let html = '';
             sortedCards.forEach(card => {
@@ -2420,20 +2407,13 @@
                 const rawPercentage = safeParseFloat(card.percentage_in_archetype || card.share_percent || 0);
                 
                 const legalMaxCopies = getLegalMaxCopies(cardName, card);
-                const rawMaxCount = parseInt(card.max_count) || card.max_count || 0;
-                // --- FIX: Max Count muss mindestens dem gerundeten Durchschnitt entsprechen! (Verhindert 3.59 -> 3) ---
+                const rawMaxCount = parseInt(card.max_count) || 0;
                 const totalCount = safeParseFloat(card.total_count || 0);
                 const decksWithCard = safeParseFloat(card.deck_count || card.deck_inclusion_count || 0);
-                const avgCountFromRow = safeParseFloat(card.average_count || card.avg_count || '', NaN);
-                const earlyAvgInUsed = Number.isFinite(avgCountFromRow) && avgCountFromRow > 0
-                    ? avgCountFromRow
-                    : (decksWithCard > 0 ? (totalCount / decksWithCard) : 0);
-                const roundedAvgUsed = Math.round(earlyAvgInUsed);
-                const improvedMaxCount = Math.max(rawMaxCount, roundedAvgUsed);
-                const finalMaxCount = improvedMaxCount > 0
-                    ? Math.min(legalMaxCopies, Math.max(1, improvedMaxCount))
+                // finalMaxCount = highest copies of this card (across all int prints) used in any single deck
+                const finalMaxCount = rawMaxCount > 0
+                    ? Math.min(legalMaxCopies, rawMaxCount)
                     : 0;
-                // --- ENDE FIX ---
                 
                 // CRITICAL: ALWAYS show green marker ONLY on the exact version that is in the deck
                 // Match by SET CODE + SET NUMBER only (not by card name, which may differ in different languages)
@@ -2489,8 +2469,12 @@
                 const avgCountInUsedDecks = Math.max(0, finalAvgUsed).toFixed(2).replace('.', ',');  // Average in decks that use this card
                 const decksWithCardDisplay = Math.round(Math.max(0, decksWithCard));
                 const totalDecksDisplay = Math.round(Math.max(0, totalDecksInArchetype));
-                const selectedArchetype = document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all';
-                const trendHistory = getCityLeagueCardShareHistory(cardName, selectedArchetype);
+                const selectedArchetype = selectedArchetypeForTrend;
+                const trendCacheKey = cardName + '||' + selectedArchetype;
+                if (!trendHistoryCache.has(trendCacheKey)) {
+                    trendHistoryCache.set(trendCacheKey, getCityLeagueCardShareHistory(cardName, selectedArchetype));
+                }
+                const trendHistory = trendHistoryCache.get(trendCacheKey);
                 const trendIndicator = getTrendIndicator(trendHistory);
                 const showTrendOverlay = trendIndicator && !trendIndicator.includes('trend-stable');
                 
@@ -2526,26 +2510,9 @@
                 const isAceSpecCard = isAceSpec(cardName);
                 const filterCategory = isAceSpecCard ? 'Ace Spec' : cardCategory;
                 const germanCardNameEscaped = germanCardName.replace(/"/g, '&quot;');
-                let otherPrintOwnedCount = 0;
-                if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
-                    const normalizedCurrentName = normalizeCardName(cardName);
-                    const normalizedSet = String(setCode || '').toUpperCase();
-                    const normalizedNumber = String(setNumber || '').toUpperCase();
-                    window.userCollectionCounts.forEach((qty, collKey) => {
-                        const ownedQty = parseInt(qty, 10) || 0;
-                        if (ownedQty <= 0) return;
-                        const parts = String(collKey || '').split('|');
-                        if (parts.length < 3) return;
-                        const keyName = parts[0];
-                        const keySet = String(parts[1] || '').toUpperCase();
-                        const keyNumber = String(parts[2] || '').toUpperCase();
-                        if (normalizeCardName(keyName) !== normalizedCurrentName) return;
-                        if (keySet === normalizedSet && keyNumber === normalizedNumber) return;
-                        otherPrintOwnedCount += ownedQty;
-                    });
-                }
+                const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
                 const otherPrintSparkleHtml = otherPrintOwnedCount > 0
-                    ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}">
+                    ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}" title="Owned other INT prints: ${otherPrintOwnedCount}x">
                         <span class="city-league-other-print-sparkle-icon">✨</span>
                         <span class="city-league-other-print-sparkle-count">${otherPrintOwnedCount}</span>
                     </div>`
@@ -2590,7 +2557,11 @@
             }); // End of sortedCards.forEach
             
             gridContainer.innerHTML = html;
-            if (visualContainer) visualContainer.classList.remove('d-none');
+            if (visualContainer) {
+                visualContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
+                visualContainer.style.display = 'block';
+            }
+            console.info(`[CityLeague] Rendered ${sortedCards.length} overview cards`);
         }
         
         function filterOverviewCards() {
@@ -2620,7 +2591,8 @@
                     setNumSpace.includes(searchTerm) ||
                     setNumCombined.includes(searchTerm);
 
-                const matchesType = overviewCardTypeFilter === 'all' || cardType === overviewCardTypeFilter;
+                const matchesType = overviewCardTypeFilter === 'all' || cardType === overviewCardTypeFilter
+                    || (overviewCardTypeFilter === 'Energy' && cardType === 'Basic Energy');
                 
                 // Show card only if it matches both filters
                 if (matchesSearch && matchesType) {
@@ -2761,12 +2733,12 @@
             if (isGridViewActive) {
                 // Switch to list/table view
                 gridViewContainer.classList.add('d-none');
-                tableViewContainer.classList.remove('d-none');
+                tableViewContainer.classList.remove('d-none', 'city-league-deck-table-view-hidden');
                 if (button) button.textContent = '📊 Grid View';
             } else {
                 // Switch back to grid view
                 tableViewContainer.classList.add('d-none');
-                gridViewContainer.classList.remove('d-none');
+                gridViewContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
                 if (button) button.textContent = '📋 List View';
             }
             
@@ -2978,8 +2950,11 @@
             }
             if (!data || data.length === 0) {
                 console.warn('No data to render');
-                tableContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #444; font-weight: 500;">' + t('cl.selectDeckPlaceholder') + '</p>';
-                                tableContainer.innerHTML = '<p class="city-league-empty-state">' + t('cl.selectDeckPlaceholder') + '</p>';
+                tableContainer.innerHTML = getEmptyStateBoxHtml({
+                    title: t('cl.selectDeckPlaceholder'),
+                    description: t('cl.noDataFoundDesc'),
+                    icon: 'cards'
+                });
                 return;
             }
 
@@ -3024,17 +2999,23 @@
             const renderTier = (tierCards, tierTitle, tierEmoji) => {
                 if (tierCards.length === 0) return '';
                 
-                let html = `<div style="margin-bottom: 30px;">`;
-                html = `<div class="city-league-tier-block">`;
+                let html = `<div class="city-league-tier-block">`;
                 html += `<h3 class="city-league-tier-title"><span>${tierEmoji}</span> ${tierTitle}</h3>`;
-                html += '<table><thead><tr>';
-                html += `<th class="col-image">${t('cl.thImage')}</th>`;
-                html += `<th>${t('cl.thCardsInDeck')}</th>`;
-                html += `<th>${t('cl.thCardName')}</th>`;
-                html += `<th>${t('cl.thSet')}</th>`;
-                html += `<th>${t('cl.thNumber')}</th>`;
-                html += `<th>${t('cl.thPctArchetype')}</th>`;
-                html += `<th>${t('cl.thAvgCountUsed')}</th>`;
+                html += '<table class="responsive-table"><thead><tr>';
+                const thImage = t('cl.thImage');
+                const thCardsInDeck = t('cl.thCardsInDeck');
+                const thCardName = t('cl.thCardName');
+                const thSet = t('cl.thSet');
+                const thNumber = t('cl.thNumber');
+                const thPctArchetype = t('cl.thPctArchetype');
+                const thAvgCount = t('cl.thAvgCountUsed');
+                html += `<th class="col-image">${thImage}</th>`;
+                html += `<th>${thCardsInDeck}</th>`;
+                html += `<th>${thCardName}</th>`;
+                html += `<th>${thSet}</th>`;
+                html += `<th>${thNumber}</th>`;
+                html += `<th>${thPctArchetype}</th>`;
+                html += `<th>${thAvgCount}</th>`;
                 html += `<th>${t('cl.thAction')}</th>`;
                 html += '</tr></thead><tbody>';
 
@@ -3055,18 +3036,18 @@
                     
                     html += '<tr>';
                     // Image with green badge if card is in deck
-                    html += `<td class="col-image"><div class="city-league-img-badge-wrap">`;
+                    html += `<td class="col-image" data-label="${thImage}"><div class="city-league-img-badge-wrap">`;
                     html += `<img src="${imageUrl}" alt="${cardName}" loading="lazy" class="city-league-card-img" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${escapeJsStr(cardName)}')">`;
                     if (currentDeckCount > 0) {
                         html += `<div class="city-league-img-badge">${currentDeckCount}</div>`;
                     }
                     html += `</div></td>`;
-                    html += `<td><strong>${currentDeckCount}/${maxCount}</strong></td>`;
-                    html += `<td><strong>${cardName}</strong></td>`;
-                    html += `<td>${setCode}</td>`;
-                    html += `<td>${setNumber}</td>`;
-                    html += `<td><strong class="city-league-pct">${percentage}%</strong></td>`;
-                    html += `<td><strong class="city-league-avg-count">${avgCount}x</strong></td>`;
+                    html += `<td data-label="${thCardsInDeck}"><strong>${currentDeckCount}/${maxCount}</strong></td>`;
+                    html += `<td data-label="${thCardName}"><strong>${cardName}</strong></td>`;
+                    html += `<td data-label="${thSet}">${setCode}</td>`;
+                    html += `<td data-label="${thNumber}">${setNumber}</td>`;
+                    html += `<td data-label="${thPctArchetype}"><strong class="city-league-pct">${percentage}%</strong></td>`;
+                    html += `<td data-label="${thAvgCount}"><strong class="city-league-avg-count">${avgCount}x</strong></td>`;
                     html += `<td class="city-league-action-btns"><button class="btn btn-primary" onclick="addCardToDeck('cityLeague', '${escapeJsStr(cardName)}')">${t('cl.addBtn')}</button><button class="btn btn-red" onclick="addCardToProxy('${escapeJsStr(cardName)}', '${setCode}', '${setNumber}', 1)">${t('cl.proxy')}</button></td>`;
                     html += '</tr>';
                 });
@@ -3159,7 +3140,18 @@
             const filterSelect = document.getElementById('cityLeagueFilterSelect');
             const archetype = document.getElementById('cityLeagueDeckSelect')?.value;
             
-            if (!filterSelect || !archetype || !window.currentCityLeagueDeckCards) return;
+            if (!filterSelect) {
+                console.warn('[CityLeague] cityLeagueFilterSelect not found - card overview cannot be rendered');
+                return;
+            }
+            if (!archetype) {
+                console.info('[CityLeague] No archetype selected - skipping card overview render');
+                return;
+            }
+            if (!window.currentCityLeagueDeckCards) {
+                console.warn('[CityLeague] No deck cards loaded yet for selected archetype');
+                return;
+            }
             
             const filterValue = filterSelect.value;
             const allCards = window.currentCityLeagueDeckCards;
@@ -3179,6 +3171,13 @@
                 renderCityLeagueDeckTable(filteredCards);
             } else {
                 renderCityLeagueDeckGrid(filteredCards);
+            }
+
+            if (gridViewContainer && !isTableViewActive) {
+                gridViewContainer.style.display = 'block';
+            }
+            if (tableViewContainer && isTableViewActive) {
+                tableViewContainer.style.display = 'block';
             }
             
             // Update card counts (unique filtered cards / total cards in deck)
@@ -3244,3 +3243,5 @@
                 }
             }
         });
+
+

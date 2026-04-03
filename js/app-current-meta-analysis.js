@@ -305,8 +305,19 @@
                 clearCurrentMetaDeckView();
             }
 
-            // Initialize the new combobox UI (replaces old search input)
-            initializeDeckArchetypeCombobox('currentMeta');
+            // Enable search functionality
+            const searchInput = document.getElementById('currentMetaDeckSearch');
+            if (searchInput) {
+                searchInput.oninput = function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const options = select.querySelectorAll('option');
+                    options.forEach(opt => {
+                        if (opt.value === '') return;
+                        const text = opt.textContent.toLowerCase();
+                        opt.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                };
+            }
         }
         
         // Format filter functions

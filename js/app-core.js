@@ -1193,6 +1193,12 @@ const BASE_PATH = './data/';
             if (!safeArchetype) return;
 
             devLog('🔍 Navigating to analysis with deck:', safeArchetype);
+            console.log('[BannerNav] click', {
+                archetype: safeArchetype,
+                cityLeagueLoaded: !!window.cityLeagueLoaded,
+                cityLeagueAnalysisLoaded: !!window.cityLeagueAnalysisLoaded,
+                currentTab: window.currentTab || null
+            });
             window.pendingCityLeagueDeckSelection = safeArchetype;
             // Clear stale combined-state so it cannot override exact banner selection.
             window.pendingCombinedArchetypeSelection = null;
@@ -1211,6 +1217,12 @@ const BASE_PATH = './data/';
             const checkAndSelect = () => {
                 attempts++;
                 const select = document.getElementById('cityLeagueDeckSelect');
+                console.log('[BannerNav] retry', {
+                    attempt: attempts,
+                    hasSelect: !!select,
+                    optionCount: select ? select.options.length : 0,
+                    pendingDeck: window.pendingCityLeagueDeckSelection || null
+                });
                 
                 if (select && select.options.length > 1) { // More than just placeholder
                     const normalizeArchetypeKey = (value) => String(value || '')
@@ -1228,6 +1240,12 @@ const BASE_PATH = './data/';
                         normalizeArchetypeKey(opt.value).includes(requestedKey) ||
                         requestedKey.includes(normalizeArchetypeKey(opt.value))
                     );
+                    console.log('[BannerNav] match-check', {
+                        requested: safeArchetype,
+                        requestedKey,
+                        matched: !!matchingOption,
+                        matchedValue: matchingOption ? matchingOption.value : null
+                    });
                     
                     if (matchingOption) {
                         select.value = matchingOption.value;
@@ -1235,6 +1253,10 @@ const BASE_PATH = './data/';
                         // Trigger change event to load the deck
                         const event = new Event('change', { bubbles: true });
                         select.dispatchEvent(event);
+                        console.log('[BannerNav] dispatch-change', {
+                            selectedValue: matchingOption.value,
+                            pendingAfterDispatch: window.pendingCityLeagueDeckSelection || null
+                        });
                         devLog('✅ Deck selected:', matchingOption.value);
                     } else {
                         console.warn('⚠️ Deck not found in dropdown:', archetypeName);

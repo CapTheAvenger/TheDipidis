@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
+		"test:visual:fullpage:ci": "node tests/e2e/run-visual-fullpage-ci.js",
 		"test:visual:nonmeta:ci": "node tests/e2e/run-visual-nonmeta-ci.js",
 		"test:visual:nonmeta:report": "node tests/e2e/runtime-verify-updates.js"
 	},

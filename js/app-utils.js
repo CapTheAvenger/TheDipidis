@@ -189,7 +189,7 @@ function showTableSkeleton(containerOrId, opts) {
 
             // Fast lookup for all international prints using index + de-duplicate by set-number.
             const uniqueCards = new Map();
-            printRefs.forEach(ref => {
+            const addRef = (ref) => {
                 const key = `${ref.set}-${ref.number}`;
                 const candidate = cardsBySetNumberMap[key];
                 if (!candidate) return;
@@ -208,7 +208,51 @@ function showTableSkeleton(containerOrId, opts) {
                 if (candidateScore > existingScore) {
                     uniqueCards.set(uniqueKey, candidate);
                 }
-            });
+            };
+
+            printRefs.forEach(addRef);
+
+            // Transitive closure: also check OTHER cards with the same name
+            // whose international_prints overlap with the current set.
+            // This catches cases where card B references card A, but A's own
+            // international_prints field hasn't been updated to include B
+            // (e.g. MEP-33 → ASC-113 group, but ASC-113 doesn't list MEP-33).
+            const cardName = (baseCard.name_en || baseCard.name || '').trim();
+            const sameNameCards = (cardName && window.cardsByNameMap)
+                ? (window.cardsByNameMap[cardName] || [])
+                : [];
+
+            let prevSize = 0;
+            while (uniqueCards.size > prevSize) {
+                prevSize = uniqueCards.size;
+
+                // 1. Expand from cards already collected
+                for (const card of Array.from(uniqueCards.values())) {
+                    if (!card.international_prints) continue;
+                    card.international_prints.split(',').forEach(p => {
+                        const [s, n] = p.trim().split('-');
+                        if (s && n) addRef({ set: s, number: n });
+                    });
+                }
+
+                // 2. Pull in same-name cards whose int-prints overlap
+                const currentKeys = new Set(uniqueCards.keys());
+                for (const candidate of sameNameCards) {
+                    const cKey = `${String(candidate.set || '').toUpperCase()}-${String(candidate.number || '').trim()}`;
+                    if (currentKeys.has(cKey)) continue; // already collected
+                    const cIp = (candidate.international_prints || '').trim();
+                    if (!cIp) continue;
+                    const cRefs = cIp.split(',').map(p => p.trim());
+                    const overlaps = cRefs.some(r => currentKeys.has(r));
+                    if (overlaps) {
+                        addRef({ set: candidate.set, number: candidate.number });
+                        cRefs.forEach(p => {
+                            const [s, n] = p.split('-');
+                            if (s && n) addRef({ set: s, number: n });
+                        });
+                    }
+                }
+            }
 
             const intPrintCards = Array.from(uniqueCards.values());
             _intlCacheSet(cacheKey, intPrintCards);

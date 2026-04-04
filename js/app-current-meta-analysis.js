@@ -8,6 +8,57 @@
         let currentMetaFormatFilter = 'all'; // 'all', 'live', 'play'
         let currentMetaRarityMode = 'min'; // 'min', 'max', 'all'
         let currentMetaGlobalRarityPreference = 'min';
+        let currentMetaTournamentStartDate = null; // Date object from settings start_date
+
+        // Parse "14th March 2026" style dates into Date objects
+        function parseEnglishTournamentDate(str) {
+            if (!str) return null;
+            const d = new Date(String(str).replace(/(\d+)(st|nd|rd|th)/, '$1'));
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        // Parse DD.MM.YYYY from settings into Date object
+        function parseDDMMYYYY(str) {
+            if (!str) return null;
+            const parts = String(str).split('.');
+            if (parts.length !== 3) return null;
+            const d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        // Load tournament start date from settings (called once during init)
+        async function loadCurrentMetaTournamentStartDate() {
+            const paths = [
+                './config/current_meta_analysis_settings.json?t=' + Date.now(),
+                './current_meta_analysis_settings.json?t=' + Date.now()
+            ];
+            for (const p of paths) {
+                try {
+                    const resp = await fetch(p);
+                    if (!resp.ok) continue;
+                    const settings = await resp.json();
+                    const raw = settings?.sources?.tournaments?.start_date;
+                    if (raw) {
+                        currentMetaTournamentStartDate = parseDDMMYYYY(raw);
+                        devLog(`[Current Meta] Tournament start_date from settings: ${raw} → ${currentMetaTournamentStartDate}`);
+                        return;
+                    }
+                } catch (e) { /* ignore */ }
+            }
+            devLog('[Current Meta] No tournament start_date found in settings');
+        }
+
+        // Filter tournament CSV rows to only include tournaments >= start_date
+        function filterTournamentRowsByMetaDate(rows) {
+            if (!currentMetaTournamentStartDate || !Array.isArray(rows)) return rows;
+            const cutoff = currentMetaTournamentStartDate;
+            const filtered = rows.filter(row => {
+                const d = parseEnglishTournamentDate(row.tournament_date);
+                return d && d >= cutoff;
+            });
+            devLog(`[Current Meta] Tournament date filter: ${rows.length} → ${filtered.length} rows (cutoff: ${cutoff.toISOString().slice(0, 10)})`);
+            return filtered;
+        }
         
         // Initialize Current Meta Deck from localStorage
         if (!window.currentMetaDeck) {
@@ -43,6 +94,9 @@
             }
             const data = await loadCurrentMetaRowsWithFallback();
             devLog('Loaded data:', data ? `${data.length} rows` : 'null');
+            
+            // Load tournament start_date from settings for Major Tournament date filtering
+            await loadCurrentMetaTournamentStartDate();
             
             // Note: Major Tournament data (tournament_cards_data_cards.csv) is VERY LARGE (50MB+)
             // and will be loaded lazily only when a deck is actually opened in Major Tournament mode.
@@ -134,7 +188,9 @@
 
                 if (filteredData.length === 0) {
                     if (!window.currentMetaTournamentCardsData) {
-                        window.currentMetaTournamentCardsData = await loadCSV('tournament_cards_data_cards.csv');
+                        const rawTournament = await loadCSV('tournament_cards_data_cards.csv');
+                        window.currentMetaTournamentCardsDataRaw = rawTournament;
+                        window.currentMetaTournamentCardsData = filterTournamentRowsByMetaDate(rawTournament);
                     }
 
                     const tournamentRows = Array.isArray(window.currentMetaTournamentCardsData)
@@ -377,10 +433,12 @@
             let needsAggregation = false;
             
             if (currentMetaFormatFilter === 'play') {
-                // Use Major Tournament data (Top 256 only)
+                // Use Major Tournament data (Top 256 only), filtered to current meta period
                 if (!window.currentMetaTournamentCardsData) {
                     showToast('Lade Major-Tournament-Kartendaten...', 'info');
-                    window.currentMetaTournamentCardsData = await loadCSV('tournament_cards_data_cards.csv');
+                    const rawTournament = await loadCSV('tournament_cards_data_cards.csv');
+                    window.currentMetaTournamentCardsDataRaw = rawTournament;
+                    window.currentMetaTournamentCardsData = filterTournamentRowsByMetaDate(rawTournament);
                 }
                 data = window.currentMetaTournamentCardsData;
                 needsAggregation = true;
@@ -554,9 +612,11 @@
                 return;
             }
 
-            // Load and cache tournament cards data
+            // Load and cache tournament cards data (filtered by meta date)
             if (!window.currentMetaTournamentCardsData) {
-                window.currentMetaTournamentCardsData = await loadCSV('tournament_cards_data_cards.csv');
+                const rawTournament = await loadCSV('tournament_cards_data_cards.csv');
+                window.currentMetaTournamentCardsDataRaw = rawTournament;
+                window.currentMetaTournamentCardsData = filterTournamentRowsByMetaDate(rawTournament);
             }
             const tourData = window.currentMetaTournamentCardsData || [];
 

@@ -1389,6 +1389,7 @@
     function closeMetaBinderDroppedModal() {
         const modal = document.getElementById('metaBinderDroppedModal');
         if (!modal) return;
+        modal.classList.remove('is-open');
         modal.classList.add('display-none');
     }
 
@@ -1421,6 +1422,7 @@
         }
 
         modal.classList.remove('display-none');
+        modal.classList.add('is-open');
     }
 
     // ── Render ──

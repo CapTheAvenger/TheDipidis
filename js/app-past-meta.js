@@ -160,29 +160,28 @@
         }
         
         async function loadPastMeta() {
+          try {
             devLog('Loading Past Meta Deck Analysis...');
             const pastMetaGrid = document.getElementById('pastMetaDeckGrid');
             if (pastMetaGrid && !pastMetaGrid.innerHTML.trim()) {
                 showTableSkeleton(pastMetaGrid, { rows: 6, cols: 4, withImage: true });
             }
+            showToast('Loading Past Meta data...', 'info');
             
-            // Load tournament overview and cards data
-            const [tournamentOverview, cardsData] = await Promise.all([
-                loadCSV('tournament_cards_data_overview.csv'),
-                loadCSV('tournament_cards_data_cards.csv')
-            ]);
-            
-            if (!cardsData || cardsData.length === 0) {
-                const errorMsg = 'No past tournament data found';
-                showToast(errorMsg, 'error');
-                console.error(errorMsg);
-                return;
-            }
-            
-            pastMetaAllData = cardsData.filter(c => String(c.meta || '').trim().toLowerCase() !== 'expanded');
+            // Phase 1: Load lightweight overview CSV (24KB) for tournament/format dropdowns
+            const tournamentOverview = await loadCSV('tournament_cards_data_overview.csv');
             
             // Store tournament overview data — exclude Expanded (only Standard is scraped)
             pastMetaTournaments = (tournamentOverview || []).filter(t => String(t.format || '').trim().toLowerCase() !== 'expanded');
+
+            // Build tournament lookup index (by date) for fast matching later
+            const tournamentsByDate = new Map();
+            pastMetaTournaments.forEach(t => {
+                const date = String(t.tournament_date || '').trim();
+                if (!date) return;
+                if (!tournamentsByDate.has(date)) tournamentsByDate.set(date, []);
+                tournamentsByDate.get(date).push(t);
+            });
 
             // Load dynamic set order map for proper meta sorting (newest -> oldest)
             let pastMetaSetOrderMap = {};
@@ -198,110 +197,28 @@
             } catch (e) {
                 console.warn('[Past Meta] Could not load sets.json for format sorting, using date fallback.', e);
             }
+            // Store for later use in lazy card loading
+            window._pastMetaSetOrderMap = pastMetaSetOrderMap;
+            window._pastMetaTournamentsByDate = tournamentsByDate;
+
+            // Phase 2: Stream the large cards CSV to build ONLY the deck index
+            // (unique archetype+tournament combos) without storing 429k card rows in memory.
+            const deckIndex = await streamPastMetaDeckIndex(pastMetaSetOrderMap, tournamentsByDate);
             
-            // CSV structure: meta (format), tournament_date, archetype (deck name!), card_name, ...
-            // Some exports have empty meta/format columns; infer per DECK (tournament_date + archetype) from newest set_code
-            const inferredMetaByDeck = new Map();
-            pastMetaAllData.forEach(card => {
-                const tournamentId = String(card.tournament_id || '').trim();
-                const tournamentDate = String(card.tournament_date || '').trim();
-                const deckArchetype = String(card.archetype || '').trim();
-                const setCode = String(card.set_code || '').trim().toUpperCase();
-                if ((!tournamentId && !tournamentDate) || !deckArchetype || !setCode) return;
+            if (!deckIndex || deckIndex.size === 0) {
+                showToast('No past tournament data found', 'error');
+                console.error('[Past Meta] No decks found in tournament CSV');
+                return;
+            }
 
-                const deckPeriodKey = tournamentId || tournamentDate;
-                const deckKey = `${deckPeriodKey}|||${deckArchetype}`;
-                const nextOrder = pastMetaSetOrderMap[setCode] || 0;
-                const current = inferredMetaByDeck.get(deckKey);
-                const currentOrder = current ? (pastMetaSetOrderMap[current] || 0) : -1;
-
-                if (nextOrder > currentOrder) {
-                    inferredMetaByDeck.set(deckKey, setCode);
-                }
-            });
-
-            // Group cards by tournament_date + archetype (deck archetype)
-            const deckMap = new Map();
-            pastMetaAllData.forEach(card => {
-                const deckArchetype = sanitizePastMetaArchetypeName(card.archetype);
-                const tournamentDate = card.tournament_date || 'Unknown Date';
-                const cardTournamentId = String(card.tournament_id || '').trim();
-                const cardTournamentName = String(card.tournament_name || '').trim();
-                
-                // Infer format per deck from the newest set code in this specific deck
-                const deckPeriodKey = cardTournamentId || String(tournamentDate).trim();
-                const deckMetaLookupKey = `${deckPeriodKey}|||${String(card.archetype || '').trim()}`;
-                const inferredMetaSetCode = inferredMetaByDeck.get(deckMetaLookupKey) || '';
-                const inferredMeta = derivePastMetaLabelFromSetCode(inferredMetaSetCode, pastMetaSetOrderMap);
-                
-                const matchingTournaments = pastMetaTournaments.filter(t => {
-                    if (!t || t.tournament_date !== tournamentDate) return false;
-                    const cardMeta = String(card.meta || '').trim();
-                    const overviewFormat = String(t.format || '').trim();
-                    return !cardMeta || !overviewFormat || overviewFormat === cardMeta;
-                });
-                const tournament = matchingTournaments.length === 1 ? matchingTournaments[0] : null;
-                const resolvedFormat = String(card.meta || '').trim()
-                    || String((tournament && tournament.format) || '').trim()
-                    || inferredMeta
-                    || 'Unknown';
-                const resolvedTournamentId = cardTournamentId || String((tournament && tournament.tournament_id) || '').trim() || tournamentDate;
-                const resolvedTournamentName = cardTournamentName || String((tournament && tournament.tournament_name) || '').trim() || tournamentDate;
-                const deckKey = `${resolvedFormat}|||${resolvedTournamentId}|||${deckArchetype}`;
-                
-                if (!deckMap.has(deckKey)) {
-                    deckMap.set(deckKey, {
-                        key: deckKey,
-                        tournament_id: resolvedTournamentId,
-                        tournament_name: resolvedTournamentName,
-                        tournament_date: tournamentDate,
-                        deck_name: deckArchetype,
-                        archetype: deckArchetype,
-                        format: resolvedFormat,
-                        decklist_count: parseInt(card.total_decks_in_archetype || 1),
-                        _rawArchetypes: new Set([String(card.archetype || '').trim()]),
-                        cards: []
-                    });
-                } else {
-                    const existing = deckMap.get(deckKey);
-                    // Track max decklist count seen across all merging rows
-                    const rowDecklistCount = parseInt(card.total_decks_in_archetype || 1);
-                    existing.decklist_count = Math.max(existing.decklist_count, rowDecklistCount);
-                    // Track distinct raw archetypes (before sanitization) to detect
-                    // per-decklist rows that collapsed into one archetype
-                    existing._rawArchetypes.add(String(card.archetype || '').trim());
-                }
-                deckMap.get(deckKey).cards.push({
-                    ...card,
-                    total_count: parsePastMetaNumber(card.total_count, 0),
-                    card_count: parsePastMetaNumber(card.average_count_overall, 0),
-                    average_count: parsePastMetaNumber(card.average_count, 0),
-                    average_count_overall: parsePastMetaNumber(card.average_count_overall, 0),
-                    percentage_in_archetype: parsePastMetaNumber(card.percentage_in_archetype, 0),
-                    decklist_count: parseInt(card.total_decks_in_archetype || 1, 10) || 1,
-                    deck_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0,
-                    deck_inclusion_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0
-                });
-            });
-            
-            // Post-process: if multiple distinct raw archetypes collapsed into one
-            // sanitized name (e.g. different deck prices appended), use the raw archetype
-            // count as decklist_count when it exceeds the CSV-reported value.
-            deckMap.forEach(deck => {
-                if (deck._rawArchetypes && deck._rawArchetypes.size > deck.decklist_count) {
-                    deck.decklist_count = deck._rawArchetypes.size;
-                }
-                delete deck._rawArchetypes; // Clean up temporary tracking set
-            });
-
-            pastMetaDecks = Array.from(deckMap.values());
+            pastMetaDecks = Array.from(deckIndex.values());
             
             // Build latest date per meta for robust fallback sorting.
             const metaLatestDateMap = new Map();
-            pastMetaAllData.forEach(card => {
-                const metaName = String(card.meta || '').trim();
+            pastMetaDecks.forEach(deck => {
+                const metaName = String(deck.format || '').trim();
                 if (!metaName) return;
-                const dateMs = parsePastMetaDateMs(card.tournament_date);
+                const dateMs = parsePastMetaDateMs(deck.tournament_date);
                 const current = metaLatestDateMap.get(metaName) || 0;
                 if (dateMs > current) {
                     metaLatestDateMap.set(metaName, dateMs);
@@ -346,8 +263,129 @@
             setPastMetaRarityMode('min');
             
             const tournamentCount = [...new Set(pastMetaDecks.map(d => d.tournament_id))].length;
-            devLog(`? Loaded ${pastMetaDecks.length} decks from ${tournamentCount} tournaments`);
+            devLog(`✅ Loaded ${pastMetaDecks.length} decks from ${tournamentCount} tournaments (lazy card loading)`);
+            showToast(`Past Meta: ${pastMetaDecks.length} decks loaded`, 'success');
             window.pastMetaLoaded = true;
+          } catch (err) {
+            console.error('[Past Meta] loadPastMeta failed:', err);
+            showToast('Error loading Past Meta: ' + (err.message || err), 'error');
+          }
+        }
+        
+        // Stream-parse the large cards CSV to build the deck index AND store cards per deck.
+        // Uses PapaParse streaming so PapaParse never holds all 429k rows internally.
+        function streamPastMetaDeckIndex(setOrderMap, tournamentsByDate) {
+            return new Promise((resolve, reject) => {
+                const deckMap = new Map();
+                const inferredMeta = new Map(); // deckKey → newest set code
+                
+                Papa.parse(BASE_PATH + 'tournament_cards_data_cards.csv', {
+                    download: true,
+                    header: true,
+                    delimiter: ';',
+                    worker: false,
+                    skipEmptyLines: true,
+                    step: function(result) {
+                        const card = result.data;
+                        if (!card) return;
+                        
+                        const meta = String(card.meta || '').trim();
+                        if (meta.toLowerCase() === 'expanded') return;
+                        
+                        const rawArchetype = String(card.archetype || '').trim();
+                        const deckArchetype = sanitizePastMetaArchetypeName(rawArchetype);
+                        if (!deckArchetype || deckArchetype === 'Unknown Deck') return;
+                        
+                        const tournamentDate = String(card.tournament_date || '').trim() || 'Unknown Date';
+                        const cardTournamentId = String(card.tournament_id || '').trim();
+                        const cardTournamentName = String(card.tournament_name || '').trim();
+                        const setCode = String(card.set_code || '').trim().toUpperCase();
+                        
+                        // Infer format from newest set code
+                        const deckPeriodKey = cardTournamentId || tournamentDate;
+                        const metaLookupKey = `${deckPeriodKey}|||${rawArchetype}`;
+                        if (setCode) {
+                            const nextOrder = setOrderMap[setCode] || 0;
+                            const currentCode = inferredMeta.get(metaLookupKey);
+                            const currentOrder = currentCode ? (setOrderMap[currentCode] || 0) : -1;
+                            if (nextOrder > currentOrder) {
+                                inferredMeta.set(metaLookupKey, setCode);
+                            }
+                        }
+                        
+                        // Match tournament from overview (indexed by date)
+                        const candidates = tournamentsByDate.get(tournamentDate) || [];
+                        let tournament = null;
+                        if (candidates.length === 1) {
+                            tournament = candidates[0];
+                        } else if (candidates.length > 1) {
+                            tournament = candidates.find(t => {
+                                const overviewFormat = String(t.format || '').trim();
+                                return !meta || !overviewFormat || overviewFormat === meta;
+                            }) || null;
+                        }
+                        
+                        const inferredMetaSetCode = inferredMeta.get(metaLookupKey) || '';
+                        const inferredMetaLabel = derivePastMetaLabelFromSetCode(inferredMetaSetCode, setOrderMap);
+                        
+                        const resolvedFormat = meta
+                            || String((tournament && tournament.format) || '').trim()
+                            || inferredMetaLabel
+                            || 'Unknown';
+                        const resolvedTournamentId = cardTournamentId || String((tournament && tournament.tournament_id) || '').trim() || tournamentDate;
+                        const resolvedTournamentName = cardTournamentName || String((tournament && tournament.tournament_name) || '').trim() || tournamentDate;
+                        const deckKey = `${resolvedFormat}|||${resolvedTournamentId}|||${deckArchetype}`;
+                        
+                        if (!deckMap.has(deckKey)) {
+                            deckMap.set(deckKey, {
+                                key: deckKey,
+                                tournament_id: resolvedTournamentId,
+                                tournament_name: resolvedTournamentName,
+                                tournament_date: tournamentDate,
+                                deck_name: deckArchetype,
+                                archetype: deckArchetype,
+                                format: resolvedFormat,
+                                decklist_count: parseInt(card.total_decks_in_archetype || 1),
+                                _rawArchetypes: new Set([rawArchetype]),
+                                cards: []
+                            });
+                        } else {
+                            const existing = deckMap.get(deckKey);
+                            const rowDecklistCount = parseInt(card.total_decks_in_archetype || 1);
+                            existing.decklist_count = Math.max(existing.decklist_count, rowDecklistCount);
+                            existing._rawArchetypes.add(rawArchetype);
+                        }
+                        
+                        // Store card data directly in the deck (no re-streaming needed later)
+                        deckMap.get(deckKey).cards.push({
+                            ...card,
+                            total_count: parsePastMetaNumber(card.total_count, 0),
+                            card_count: parsePastMetaNumber(card.average_count_overall, 0),
+                            average_count: parsePastMetaNumber(card.average_count, 0),
+                            average_count_overall: parsePastMetaNumber(card.average_count_overall, 0),
+                            percentage_in_archetype: parsePastMetaNumber(card.percentage_in_archetype, 0),
+                            decklist_count: parseInt(card.total_decks_in_archetype || 1, 10) || 1,
+                            deck_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0,
+                            deck_inclusion_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0
+                        });
+                    },
+                    complete: function() {
+                        // Post-process: fix decklist counts from collapsed raw archetypes
+                        deckMap.forEach(deck => {
+                            if (deck._rawArchetypes && deck._rawArchetypes.size > deck.decklist_count) {
+                                deck.decklist_count = deck._rawArchetypes.size;
+                            }
+                            delete deck._rawArchetypes;
+                        });
+                        devLog(`[Past Meta] Streamed deck index: ${deckMap.size} unique decks`);
+                        resolve(deckMap);
+                    },
+                    error: function(err) {
+                        console.error('[Past Meta] Stream parse error:', err);
+                        reject(err);
+                    }
+                });
+            });
         }
         
         function updatePastMetaTournamentFilter() {
@@ -484,6 +522,13 @@
                 return;
             }
             
+            // Async wrapper for lazy card loading
+            _loadPastMetaDeckCards(selectedArchetype);
+        }
+        
+        async function _loadPastMetaDeckCards(selectedArchetype) {
+          try {
+            
             const formatFilter = document.getElementById('pastMetaFormatFilter').value;
             const tournamentFilter = document.getElementById('pastMetaTournamentFilter').value;
             
@@ -517,13 +562,10 @@
                     tournamentNames.push(cleanTournamentName);
                 }
                 
-                // Collect rows for unified aggregation
+                // Collect rows for unified aggregation (cards stored during initial stream)
                 deck.cards.forEach(card => {
                     selectedRows.push({
                         ...card,
-                        // Override raw archetype (which may contain price suffixes like
-                        // "Alakazam Dudunsparce35.27$23.60€") with the sanitized deck name
-                        // so aggregateCardStatsByDate counts all variants as ONE archetype.
                         archetype: deck.deck_name || card.archetype || '',
                         tournament_id: deck.tournament_id || '',
                         tournament_date: deck.tournament_date || card.tournament_date || 'Unknown Date',
@@ -592,6 +634,10 @@
             filterPastMetaCards();
             
             devLog(`Selected archetype: ${selectedArchetype} (${aggregatedCards.length} unique cards across ${uniqueTournamentCount} tournaments, ${totalDecklists} total decklists)`);
+          } catch (err) {
+            console.error('[Past Meta] Error loading deck cards:', err);
+            showToast('Error loading deck: ' + (err.message || err), 'error');
+          }
         }
         
         function filterPastMetaCards() {

@@ -1163,6 +1163,7 @@
                     list.appendChild(def);
                 }
 
+                // Grouped options (<optgroup>)
                 Array.from(selectEl.querySelectorAll('optgroup')).forEach(group => {
                     const opts = Array.from(group.querySelectorAll('option')).filter(o =>
                         !q || o.textContent.toLowerCase().includes(q)
@@ -1182,6 +1183,18 @@
                         item.onclick = () => pick(o.value, o.textContent);
                         list.appendChild(item);
                     });
+                });
+
+                // Standalone options (not inside <optgroup>)
+                Array.from(selectEl.children).forEach(child => {
+                    if (child.tagName !== 'OPTION' || child === selectEl.options[0]) return;
+                    if (q && !child.textContent.toLowerCase().includes(q)) return;
+                    const item = document.createElement('div');
+                    item.className = 'searchable-select-option' + (child.value === selectEl.value ? ' selected' : '');
+                    item.textContent = child.textContent;
+                    item.dataset.value = child.value;
+                    item.onclick = () => pick(child.value, child.textContent);
+                    list.appendChild(item);
                 });
             }
 

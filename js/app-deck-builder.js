@@ -2490,8 +2490,88 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             devLog('[autoCompleteConsistency] After Combined Variants merge:', deckCards.length, 'unique cards');
             
             // ==========================================
-            // 2. COMPUTE PER-CARD STATISTICS
+            // 2. COMPUTE PER-CARD STATISTICS + META BOOST + RECENCY
             // ==========================================
+
+            // ── 2a. Meta Card Boost ──
+            // Cards that are heavily played across the Top 10 meta decks get a
+            // bonus.  If a card already appears in this archetype AND is a
+            // meta-staple, it is objectively more important for consistency.
+            const metaCards = (typeof metaCardData !== 'undefined' && metaCardData)
+                ? (metaCardData[source === 'pastMeta' ? 'cityLeague' : source] || [])
+                : [];
+            const metaShareMap = new Map();
+            metaCards.forEach(mc => {
+                const name = (mc.card_name || '').trim().toLowerCase();
+                if (name && mc.metaShare > 0) metaShareMap.set(name, mc.metaShare);
+            });
+            devLog(`[Consistency][Meta] Loaded ${metaShareMap.size} meta card entries for boost`);
+
+            // ── 2b. Recency Scoring ──
+            // From the raw per-tournament rows, compute what fraction of a
+            // card's total deck appearances happened in the last 14 days.
+            // recencyRatio > 1  →  card is trending UP (recent share exceeds overall share)
+            // recencyRatio < 1  →  card is trending DOWN
+            const rawRows = source === 'cityLeague'  ? (window.cityLeagueRawDeckCards  || [])
+                          : source === 'currentMeta' ? (window.currentMetaRawDeckCards || [])
+                          : source === 'pastMeta'    ? (window.pastMetaRawDeckCards    || [])
+                          : [];
+            const recencyMap = new Map(); // cardName → recencyRatio
+            if (rawRows.length > 0) {
+                const RECENCY_DAYS = 14;
+                const today = new Date();
+                const cutoff = new Date(today.getTime() - RECENCY_DAYS * 86400000);
+                const cutoffStr = cutoff.toISOString().slice(0, 10); // "YYYY-MM-DD"
+
+                // Collect deck_count per card: overall & recent
+                const overallMap = new Map();
+                const recentMap  = new Map();
+                let totalTournaments = 0;
+                let recentTournaments = 0;
+                const tournamentDates = new Map();
+
+                rawRows.forEach(row => {
+                    const cardNameRaw = (row.card_name || row.full_card_name || '').toString().trim();
+                    const cardName = cardNameRaw.toLowerCase();
+                    if (!cardName) return;
+
+                    const rawDate = row.tournament_date || row.date || '';
+                    const parsedDate = typeof parseJapaneseDate === 'function' ? parseJapaneseDate(rawDate) : '';
+                    const tid = row.tournament_id || rawDate || 'unknown';
+                    if (!tournamentDates.has(tid) && parsedDate) tournamentDates.set(tid, parsedDate);
+
+                    const dc = parseInt(row.deck_count || row.deck_inclusion_count || 0, 10) || 0;
+                    overallMap.set(cardName, (overallMap.get(cardName) || 0) + dc);
+
+                    if (parsedDate && parsedDate >= cutoffStr) {
+                        recentMap.set(cardName, (recentMap.get(cardName) || 0) + dc);
+                    }
+                });
+
+                // Count tournament time distribution for normalization
+                tournamentDates.forEach(d => {
+                    totalTournaments++;
+                    if (d >= cutoffStr) recentTournaments++;
+                });
+
+                const timeFraction = totalTournaments > 0 ? (recentTournaments / totalTournaments) : 0;
+                devLog(`[Consistency][Recency] ${recentTournaments}/${totalTournaments} tournaments in last ${RECENCY_DAYS} days (${(timeFraction * 100).toFixed(0)}%)`);
+
+                if (timeFraction > 0 && timeFraction < 1) {
+                    overallMap.forEach((overallDC, cardName) => {
+                        if (overallDC <= 0) return;
+                        const recentDC = recentMap.get(cardName) || 0;
+                        // Normalize: what share of appearances is recent vs expected
+                        const recentFraction = recentDC / overallDC;
+                        const expectedFraction = timeFraction;
+                        const ratio = recentFraction / expectedFraction; // >1 = trending up
+                        recencyMap.set(cardName, ratio);
+                    });
+                }
+                devLog(`[Consistency][Recency] Computed recency ratios for ${recencyMap.size} cards`);
+            }
+
+            // ── 2c. Compute final consistencyScore per card ──
             deckCards.forEach(card => {
                 const sharePercent = Math.min(100, Math.max(0, parseFloat((card.percentage_in_archetype || '0').toString().replace(',', '.')) || 0));
 
@@ -2507,6 +2587,26 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
                 card.sharePercent = sharePercent;
                 card.avgCountWhenUsed = avgCountWhenUsed;
+
+                // Meta boost: 0 to 0.15 extra multiplier based on metaShare (0-100)
+                const nameLower = (card.card_name || '').trim().toLowerCase();
+                const metaShare = metaShareMap.get(nameLower) || 0;
+                const metaBoost = (metaShare / 100) * 0.15; // max +15%
+                card._metaShare = metaShare;
+
+                // Recency boost: trending cards get up to +20%, declining cards up to -10%
+                const rawRatio = recencyMap.get(nameLower) || 1.0;
+                const clampedRecency = Math.max(-0.5, Math.min(1.0, rawRatio - 1.0)); // [-0.5, +1.0]
+                const recencyBoost = clampedRecency * 0.20; // [-0.10, +0.20]
+                card._recencyRatio = rawRatio;
+
+                // Final consistency score
+                card.consistencyScore = sharePercent * (1 + metaBoost) * (1 + recencyBoost);
+                card.consistencyScore = Math.min(120, Math.max(0, card.consistencyScore)); // cap at 120 for safety
+
+                if (metaBoost > 0 || Math.abs(recencyBoost) > 0.01) {
+                    devLog(`[Consistency][Score] ${card.card_name}: share=${sharePercent.toFixed(1)}% × meta=${(1+metaBoost).toFixed(2)} × recency=${(1+recencyBoost).toFixed(2)} → score=${card.consistencyScore.toFixed(1)}`);
+                }
             });
 
             // ==========================================
@@ -2563,21 +2663,21 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 
                 consistencyDeck.push({ card: cardData, count: actualCount });
                 currentTotal += actualCount;
-                devLog(`${logPrefix} + ${actualCount}x ${cardData.card_name} (Share: ${cardData.sharePercent.toFixed(1)}%, Avg: ${cardData.avgCountWhenUsed.toFixed(2)}x) -- Total: ${currentTotal}/60`);
+                devLog(`${logPrefix} + ${actualCount}x ${cardData.card_name} (Share: ${cardData.sharePercent.toFixed(1)}%, Score: ${cardData.consistencyScore.toFixed(1)}, Avg: ${cardData.avgCountWhenUsed.toFixed(2)}x) -- Total: ${currentTotal}/60`);
             };
 
-            // Sortiere Karten nach Share (absteigend)
-            deckCards.sort((a, b) => b.sharePercent - a.sharePercent);
+            // Sortiere Karten nach consistencyScore (absteigend)
+            deckCards.sort((a, b) => b.consistencyScore - a.consistencyScore);
 
             let radiantAdded = false; // Deck-wide: max 1 Radiant Pokémon total
 
             // ==========================================
             // 🚨 1. ACE SPEC PRIORITY (Lokal) 🚨
             // ==========================================
-            // Finde die ECHTE Ace Spec unter den verfügbaren Karten (höchster Share)
+            // Finde die ECHTE Ace Spec unter den verfügbaren Karten (höchster Score)
             const aceSpecSlotCard = deckCards
                 .filter(c => isAceSpecCard(c))
-                .sort((a, b) => b.sharePercent - a.sharePercent)[0] || null;
+                .sort((a, b) => b.consistencyScore - a.consistencyScore)[0] || null;
 
             if (aceSpecSlotCard) {
                 pushCard(aceSpecSlotCard, 1, '[Consistency][ACE-SPEC-Priority]');
@@ -2587,7 +2687,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             // ==========================================
-            // 🚨 2. STUFE 1 (Core: >= 80% Share) 🚨
+            // 🚨 2. STUFE 1 (Core: consistencyScore >= 75) 🚨
+            // Meta-boosted + trending cards can exceed 100
             // ==========================================
             deckCards.forEach(card => {
                 if (currentTotal >= 60) return;
@@ -2599,17 +2700,19 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     radiantAdded = true;
                 }
                 
-                if (card.sharePercent >= 80) {
+                if (card.consistencyScore >= 75) {
                     let addCount = card._recommendedCount != null ? card._recommendedCount : Math.round(card.avgCountWhenUsed);
                     addCount = Math.max(1, addCount); // Core Karten MÜSSEN mindestens 1x rein
                     const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
                     if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, legalMax);
-                    pushCard(card, addCount, '[Consistency][Stage1]');
+                    pushCard(card, addCount, '[Consistency][Stage1-Core]');
                 }
             });
 
             // ==========================================
-            // 🚨 3. STUFE 2 (Extended Core: >= 30% Share) 🚨
+            // 🚨 3. STUFE 2 (Extended: consistencyScore >= 25) 🚨
+            // Lower threshold than before (30% share) because meta-relevant
+            // cards with 20% share can now score >=25 via meta boost
             // ==========================================
             deckCards.forEach(card => {
                 if (currentTotal >= 60) return;
@@ -2622,12 +2725,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     radiantAdded = true;
                 }
                 
-                if (card.sharePercent >= 30) {
+                if (card.consistencyScore >= 25) {
                     let addCount = card._recommendedCount != null ? card._recommendedCount : Math.round(card.avgCountWhenUsed);
                     if (addCount >= 1) {
                         const legalMax = card._legalMax || getLegalMaxCopies(card.card_name, card);
                         if (!isBasicEnergyCardEntry(card)) addCount = Math.min(addCount, legalMax);
-                        pushCard(card, addCount, '[Consistency][Stage2]');
+                        pushCard(card, addCount, '[Consistency][Stage2-Extended]');
                     }
                 }
             });
@@ -2659,15 +2762,28 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             // Keep output deterministic
             cardsToAdd.sort((a, b) => {
-                if (b.sharePercent !== a.sharePercent) return b.sharePercent - a.sharePercent;
+                if (b.consistencyScore !== a.consistencyScore) return b.consistencyScore - a.consistencyScore;
                 return a.card_name.localeCompare(b.card_name);
             });
 
             // Build confirm summary
+            const hasMetaData = metaShareMap.size > 0;
+            const hasRecency = recencyMap.size > 0;
+            let algoDesc = 'ACE SPEC → Core (≥75) → Extended (≥25) → Energy Fill';
+            if (hasMetaData) algoDesc += ' | +Meta Boost';
+            if (hasRecency) algoDesc += ' | +Recency';
+
             let summary = `MAX CONSISTENCY Deck (${currentTotal} ${t('deck.cards')}):\n`;
-            summary += `Algorithm: ACE SPEC Priority -> Stage 1 (>=80%) -> Stage 2 (>=30%) -> Energy Fill\n\n`;
+            summary += `Algorithm: ${algoDesc}\n\n`;
             cardsToAdd.forEach(c => {
-                summary += `${c.addCount}x ${c.card_name} (${c.sharePercent.toFixed(0)}% archetype)\n`;
+                let line = `${c.addCount}x ${c.card_name} (${c.sharePercent.toFixed(0)}%`;
+                if (c._metaShare > 0) line += ` | meta:${c._metaShare.toFixed(0)}%`;
+                if (c._recencyRatio && Math.abs(c._recencyRatio - 1) > 0.05) {
+                    const arrow = c._recencyRatio > 1 ? '↑' : '↓';
+                    line += ` ${arrow}${((c._recencyRatio - 1) * 100).toFixed(0)}%`;
+                }
+                line += ` → ${c.consistencyScore.toFixed(0)})`;
+                summary += line + '\n';
             });
             summary += `\n${t('deck.autoCompleteContinue')}`;
 

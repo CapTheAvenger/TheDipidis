@@ -536,6 +536,9 @@
                 });
             });
 
+            // Preserve raw per-tournament rows for Recency scoring in Consistency builder
+            window.pastMetaRawDeckCards = selectedRows.slice();
+
             const aggregatedCardsRaw = aggregateCardStatsByDate(selectedRows).map(card => ({
                 ...card,
                 card_count: parsePastMetaNumber(card.average_count_overall, 0),

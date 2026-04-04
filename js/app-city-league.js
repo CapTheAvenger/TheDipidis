@@ -1873,6 +1873,9 @@
             
             devLog('Found cards (before deduplication):', deckCards.length);
             
+            // Preserve raw per-tournament rows for Recency scoring in Consistency builder
+            window.cityLeagueRawDeckCards = deckCards.slice();
+
             // Always aggregate cards stats (not just when date filter is active)
             // This ensures deck_count is correctly summed across all tournaments
             if (deckCards.length > 0) {

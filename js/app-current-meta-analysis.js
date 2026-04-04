@@ -452,6 +452,10 @@
                 // Tournament cards data stores one row per tournament per card print,
                 // so stats must be aggregated before deduplication (like Past Meta).
                 // Current meta data is already pre-aggregated — skip aggregation for that.
+                
+                // Preserve raw per-tournament rows for Recency scoring in Consistency builder
+                window.currentMetaRawDeckCards = deckCards.slice();
+
                 if (needsAggregation && deckCards.length > 0) {
                     deckCards = aggregateCardStatsByDate(deckCards);
                 }

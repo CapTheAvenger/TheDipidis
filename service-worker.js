@@ -1,7 +1,7 @@
 // Service Worker for Pokemon TCG Analysis PWA
 // Strategy: Cache static shell, network-first for data
 
-const CACHE_NAME = 'tcg-analysis-v202604042351';
+const CACHE_NAME = 'tcg-analysis-v202604091900';
 
 // Static shell — cached on install
 const SHELL_ASSETS = [
@@ -69,7 +69,7 @@ self.addEventListener('activate', function(event) {
   self.clients.claim();
 });
 
-// Fetch: network-first for data/, cache-first for static shell
+// Fetch: cache-first for static shell, stale-while-revalidate for data
 self.addEventListener('fetch', function(event) {
   var url = new URL(event.request.url);
 
@@ -77,12 +77,34 @@ self.addEventListener('fetch', function(event) {
   if (event.request.method !== 'GET') return;
   if (url.origin !== location.origin) return;
 
-  // Data files (CSV/JSON): network-first with cache fallback
-  // Strip cache-buster query params so SW cache matches
+  // Strip query params (?v=..., ?t=...) for consistent cache keys
+  var cleanUrl = new URL(url.pathname, location.origin).href;
+
+  // Data files (CSV/JSON): stale-while-revalidate
+  // Serve cached version instantly, fetch fresh copy in background
   if (url.pathname.indexOf('/data/') !== -1) {
-    var cleanUrl = new URL(url.pathname, location.origin).href;
     event.respondWith(
-      fetch(event.request).then(function(response) {
+      caches.match(cleanUrl).then(function(cached) {
+        var fetchPromise = fetch(event.request).then(function(response) {
+          if (response && response.ok) {
+            var clone = response.clone();
+            caches.open(CACHE_NAME).then(function(cache) {
+              cache.put(cleanUrl, clone);
+            });
+          }
+          return response;
+        }).catch(function() { return cached; });
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
+
+  // Static assets (JS/CSS/HTML): cache-first, network fallback
+  // Pre-cached on install; updated when SW version changes
+  event.respondWith(
+    caches.match(cleanUrl).then(function(cached) {
+      return cached || fetch(event.request).then(function(response) {
         if (response && response.ok) {
           var clone = response.clone();
           caches.open(CACHE_NAME).then(function(cache) {
@@ -90,25 +112,7 @@ self.addEventListener('fetch', function(event) {
           });
         }
         return response;
-      }).catch(function() {
-        return caches.match(cleanUrl);
-      })
-    );
-    return;
-  }
-
-  // Static assets: network-first so users always get the latest version
-  event.respondWith(
-    fetch(event.request).then(function(response) {
-      if (response && response.ok) {
-        var clone = response.clone();
-        caches.open(CACHE_NAME).then(function(cache) {
-          cache.put(event.request, clone);
-        });
-      }
-      return response;
-    }).catch(function() {
-      return caches.match(event.request);
+      });
     })
   );
 });

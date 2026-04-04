@@ -6728,24 +6728,24 @@ body.battle-journal-open {
     text-align: center;
 }
 
-/* Die 7 Handkarten - Wischbare Reihe (Swipe) */
+/* Die 7 Handkarten - 2-Reihen-Grid (4 oben, 3 unten) */
 .draw-sim-hand {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    gap: 10px !important;
-    padding: 10px 5px !important;
-    margin-bottom: 20px !important;
-    scrollbar-width: none;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
+    padding: 8px 0 !important;
+    margin-bottom: 12px !important;
+    justify-items: center !important;
 }
-.draw-sim-hand::-webkit-scrollbar { display: none; }
 
 .draw-sim-hand img {
-    height: 140px !important;
-    width: auto !important;
+    width: 100% !important;
+    max-width: 140px !important;
+    height: auto !important;
+    aspect-ratio: 2.5 / 3.5 !important;
+    object-fit: cover !important;
     border-radius: 6px !important;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    flex-shrink: 0 !important;
 }
 
 /* Das Combo-Menü - Sauberes 2x2 Grid */
@@ -6764,12 +6764,20 @@ body.battle-journal-open {
     border: 1px solid #ccc !important;
 }
 
-/* Schöne Buttons im Modal */
-#drawSimModal button {
-    width: 100% !important;
-    margin-bottom: 10px !important;
-    padding: 12px !important;
+/* Buttons im Draw-Sim Modal - kompakt */
+#drawSimModal .draw-sim-toolbar button {
+    width: auto !important;
+    margin-bottom: 0 !important;
+    padding: 6px 16px !important;
     font-weight: bold !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+}
+#drawSimModal .draw-sim-combo-actions button {
+    width: auto !important;
+    margin-bottom: 0 !important;
+    padding: 6px 14px !important;
+    font-size: 12px !important;
     border-radius: 8px !important;
 }
 

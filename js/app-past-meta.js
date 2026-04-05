@@ -513,6 +513,7 @@
                 document.getElementById('pastMetaStatsSection').classList.add('d-none');
                 document.getElementById('pastMetaDeckTableView').classList.add('d-none');
                 document.getElementById('pastMetaDeckVisual').classList.add('d-none');
+                hideDeckSections('pastMeta');
                 pastMetaCurrentDeck = null;
                 pastMetaCurrentCards = [];
                 pastMetaFilteredCards = [];
@@ -614,6 +615,7 @@
             
             // Update stats
             document.getElementById('pastMetaStatsSection').classList.remove('d-none');
+            showDeckSections('pastMeta');
             const totalCards = getPastMetaSummaryTotalCount(aggregatedCards);
             document.getElementById('pastMetaStatCards').textContent = `${aggregatedCards.length} / ${Math.round(totalCards)}`;
             

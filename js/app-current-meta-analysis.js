@@ -577,6 +577,7 @@
                     currentMetaStatWinrate: winrate,
                     currentMetaStatMatchup: matchupVsTop20
                 }, 'currentMetaStatsSection');
+                showDeckSections('currentMeta');
                 
                 // Render matchups
                 renderCurrentMetaMatchups(archetype);
@@ -597,6 +598,7 @@
                 const el = document.getElementById(id);
                 if (el) el.classList.add('d-none');
             });
+            hideDeckSections('currentMeta');
             renderNoDeckSelectedState('currentMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
             resetDeckOverviewCounts('currentMetaCardCount', 'currentMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 Total');
         }

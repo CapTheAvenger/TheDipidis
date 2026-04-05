@@ -16,6 +16,22 @@
         }
     }
 
+    /** Show cards-section + deck-builder for a given tab prefix when data loads */
+    function showDeckSections(prefix) {
+        var cardsSec = document.getElementById(prefix + 'CardsSection');
+        var builderSec = document.getElementById(prefix + 'DeckBuilderSection');
+        if (cardsSec) cardsSec.classList.remove('d-none');
+        if (builderSec) builderSec.classList.remove('d-none');
+    }
+
+    /** Hide cards-section + deck-builder for a given tab prefix (no deck selected) */
+    function hideDeckSections(prefix) {
+        var cardsSec = document.getElementById(prefix + 'CardsSection');
+        var builderSec = document.getElementById(prefix + 'DeckBuilderSection');
+        if (cardsSec) cardsSec.classList.add('d-none');
+        if (builderSec) builderSec.classList.add('d-none');
+    }
+
     function resetDeckOverviewCounts(countId, summaryId, cardsText, totalText) {
         setText(countId, cardsText || '0 Cards');
         setText(summaryId, totalText || '/ 0 Total');
@@ -32,4 +48,6 @@
     window.updateDeckStatsByIds = updateDeckStatsByIds;
     window.resetDeckOverviewCounts = resetDeckOverviewCounts;
     window.renderNoDeckSelectedState = renderNoDeckSelectedState;
+    window.showDeckSections = showDeckSections;
+    window.hideDeckSections = hideDeckSections;
 })();

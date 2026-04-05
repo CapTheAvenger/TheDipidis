@@ -1933,6 +1933,7 @@
                 cityLeagueStatDecksUsed: decksCount,
                 cityLeagueStatAvgPlacement: avgPlacement !== '-' ? avgPlacement : '-'
             }, 'cityLeagueStatsSection');
+            showDeckSections('cityLeague');
             
             // Reset button text to show list view option
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
@@ -1950,6 +1951,7 @@
                 const el = document.getElementById(id);
                 if (el) el.classList.add('d-none');
             });
+            hideDeckSections('cityLeague');
             resetDeckOverviewCounts('cityLeagueCardCount', 'cityLeagueCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
             
             // Reset button text

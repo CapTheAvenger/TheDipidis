@@ -196,6 +196,12 @@
                     <div id="tab-decks">
                         <div class="header">
                             <h2><span data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                            <div class="cl-format-container">
+                                <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select">
+                                    <option value="M4" data-i18n="format.m4current">Current Meta</option>
+                                    <option value="M3" data-i18n="format.m3archive">Past Meta</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="section-grid-container date-range-container">
                             <div>

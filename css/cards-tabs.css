@@ -36,12 +36,18 @@
 }
 
 /* Card Database visual refresh (scoped to cards tab only) */
+#cards > h2 {
+    border-bottom: none !important;
+    margin-bottom: 10px !important;
+    padding-bottom: 0 !important;
+}
+
 #cards .card-database-grid {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)) !important;
     gap: 8px !important;
     padding: 6px !important;
-    align-items: stretch !important;
+    align-items: start !important;
 }
 
 #cards .card-database-grid .virtual-card-slot,
@@ -55,9 +61,8 @@
     border: 1px solid #d8deea !important;
     box-shadow: 0 7px 18px rgba(16, 24, 40, 0.09) !important;
     overflow: hidden !important;
-    display: grid !important;
-    grid-template-rows: auto 1fr !important;
-    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
     background: #fff !important;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease !important;
 }
@@ -103,8 +108,14 @@
     flex: 0 0 21px !important;
     width: 21px !important;
     height: 21px !important;
+    min-width: 21px !important;
+    min-height: 21px !important;
+    max-width: 21px !important;
+    max-height: 21px !important;
+    padding: 0 !important;
     font-size: 10px !important;
     line-height: 1 !important;
+    border-radius: 50% !important;
     cursor: pointer !important;
     border: 1.5px solid rgba(0,0,0,0.15) !important;
 }
@@ -119,18 +130,24 @@
     color: #fff !important;
 }
 
+#cards .card-database-top-actions .btn-wishlist.card-badge {
+    background: #F48FB1 !important;
+    color: #fff !important;
+    border-color: #F48FB1 !important;
+}
+
 #cards .card-database-info {
     padding: 3px !important;
     background: linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%) !important;
-    border-top: 1px solid #e3e8f5 !important;
-    display: grid !important;
-    grid-template-rows: minmax(20px, auto) minmax(16px, auto) auto auto auto !important;
-    align-content: start !important;
-    gap: 2px !important;
+    border-top: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
 }
 
 #cards .card-database-name {
     margin: 0 !important;
+    padding-top: 1px !important;
     font-size: 9px !important;
     line-height: 1.15 !important;
     font-weight: 800 !important;
@@ -274,6 +291,7 @@
 }
 
 #cards .card-database-coverage-empty {
+    display: none !important;
     background: #ebeff7 !important;
     color: #66758f !important;
     border: 1px dashed #bcc8da !important;
@@ -418,8 +436,8 @@
 
     #cards .card-database-info {
         padding: 8px !important;
-        grid-template-rows: minmax(32px, auto) minmax(24px, auto) auto auto auto !important;
-        gap: 5px !important;
+        grid-template-rows: auto auto auto auto auto !important;
+        gap: 4px !important;
     }
 
     #cards .card-database-name {

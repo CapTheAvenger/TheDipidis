@@ -1418,7 +1418,7 @@
         /* Cards Filter Styles */
         .cards-filter-section {
             background: white;
-            padding: 20px;
+            padding: 16px;
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -1432,15 +1432,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 15px;
+            padding: 8px 12px;
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-end) 100%);
             color: white;
             border-radius: 6px;
             cursor: pointer;
             user-select: none;
             font-weight: 700;
-            font-size: 15px;
-            margin-bottom: 5px;
+            font-size: 13px;
+            margin-bottom: 4px;
             transition: all 0.3s;
         }
         
@@ -1450,7 +1450,7 @@
         }
         
         .cards-filter-header .toggle-icon {
-            font-size: 18px;
+            font-size: 14px;
             transition: transform 0.3s;
         }
         
@@ -1533,6 +1533,9 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 1000;
             margin-top: -2px;
+        }
+        .cards-autocomplete-dropdown:empty {
+            display: none;
         }
         
         .cards-autocomplete-item {

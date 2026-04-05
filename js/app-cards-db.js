@@ -1629,23 +1629,24 @@
             /**
              * Toggle between showing all prints vs. only one print per card
              */
-            showOnlyOnePrint = !showOnlyOnePrint;
+            setPrintView(!showOnlyOnePrint);
+        }
+        
+        function setPrintView(onePrint) {
+            /**
+             * Set print view to specific mode
+             */
+            showOnlyOnePrint = onePrint;
             
             // Update button appearance
-            const toggleBtn = document.getElementById('printViewToggle');
-            if (toggleBtn) {
-                if (showOnlyOnePrint) {
-                    toggleBtn.textContent = '📦 1 Print per Card (Budget)';
-                    toggleBtn.classList.remove('btn-blue');
-                    toggleBtn.classList.add('btn-purple');
-                } else {
-                    toggleBtn.textContent = '🖼️ All Prints';
-                    toggleBtn.classList.remove('btn-purple');
-                    toggleBtn.classList.add('btn-blue');
-                }
+            const btnStandard = document.getElementById('btnStandardPrint');
+            const btnAll = document.getElementById('btnAllPrints');
+            if (btnStandard && btnAll) {
+                btnStandard.classList.toggle('active', showOnlyOnePrint);
+                btnAll.classList.toggle('active', !showOnlyOnePrint);
             }
             
-            devLog(`[Print View] Toggled to: ${showOnlyOnePrint ? 'Only 1 Print' : 'All Prints'}`);
+            devLog(`[Print View] Set to: ${showOnlyOnePrint ? 'Standard Print' : 'All Prints'}`);
             
             // Re-render with new setting
             filterAndRenderCards();
@@ -2137,7 +2138,8 @@
                     requestAnimationFrame(() => {
                         const measured = Math.round(slot.getBoundingClientRect().height || 0);
                         if (measured > 120) {
-                            slot.style.minHeight = `${measured}px`;
+                            slot.style.minHeight = '';
+                            slot._measuredHeight = measured;
                             cardsVirtualState.estimatedHeight = Math.round((cardsVirtualState.estimatedHeight * 0.85) + (measured * 0.15));
                         }
                     });
@@ -2146,7 +2148,7 @@
 
             const unrenderSlot = (slot) => {
                 if (!slot || slot.dataset.rendered !== 'true') return;
-                const measured = Math.round(slot.getBoundingClientRect().height || cardsVirtualState.estimatedHeight);
+                const measured = Math.round(slot._measuredHeight || slot.getBoundingClientRect().height || cardsVirtualState.estimatedHeight);
                 slot.textContent = '';
                 slot.dataset.rendered = 'false';
                 slot.style.minHeight = `${Math.max(120, measured)}px`;
@@ -2423,7 +2425,7 @@
                     <div class="pos-abs card-action-row-wide card-database-top-actions">
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${displayName} to collection">+</button>
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} from collection">-</button>
-                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-red card-badge" style="color: ${userWantsCard ? '#fff' : '#000'}; background: ${userWantsCard ? '#E91E63' : '#fff'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#FF9800'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}" aria-label="${userWantsCard ? 'Remove ' + displayName + ' from wishlist' : 'Add ' + displayName + ' to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color: ${userWantsCard ? '#fff' : '#fff'}; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}" aria-label="${userWantsCard ? 'Remove ' + displayName + ' from wishlist' : 'Add ' + displayName + ' to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
                     </div>
                 </div>
                 <div class="card-database-info">

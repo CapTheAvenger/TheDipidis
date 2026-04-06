@@ -36,6 +36,21 @@
         let allCardsData = [];
         let filteredCardsData = [];
         
+        // Mutual exclusion for base meta checkboxes (total / all_playables / city_league)
+        function handleBaseMetaChange(changedCb) {
+            const baseValues = ['total', 'all_playables', 'city_league'];
+            if (!baseValues.includes(changedCb.value)) return;
+            if (changedCb.checked) {
+                // Uncheck other base options
+                baseValues.forEach(val => {
+                    if (val !== changedCb.value) {
+                        const cb = document.querySelector(`#metaFormatOptions input[value="${val}"]`);
+                        if (cb) cb.checked = false;
+                    }
+                });
+            }
+        }
+
         // Toggle card filter visibility
         function toggleCardFilter(filterId) {
             const filterOptions = document.getElementById(filterId);
@@ -75,9 +90,9 @@
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="cards-filter-options collapsed" id="metaFormatOptions">
-                            <label class="label-block"><input type="checkbox" value="total" checked> Total (All Cards)</label>
-                            <label class="label-block"><input type="checkbox" value="all_playables"> All Playables</label>
-                            <label class="label-block"><input type="checkbox" value="city_league"> City League Only</label>
+                            <label class="label-block"><input type="checkbox" value="total" checked onchange="handleBaseMetaChange(this); filterAndRenderCards()"> Total (All Cards)</label>
+                            <label class="label-block"><input type="checkbox" value="all_playables" onchange="handleBaseMetaChange(this); filterAndRenderCards()"> All Playables</label>
+                            <label class="label-block"><input type="checkbox" value="city_league" onchange="handleBaseMetaChange(this); filterAndRenderCards()"> City League Only</label>
                         </div>
                     `
                 },
@@ -161,7 +176,7 @@
         
         // Pagination for Cards Tab
         let currentCardsPage = 1;
-        const cardsPerPage = 60;
+        const cardsPerPage = 63;
         let showAllCards = false;
         let showOnlyOnePrint = true; // Toggle for deduplication: true = only show 1 print per card (low rarity, newest)
         const cardsFilterRenderState = {
@@ -742,7 +757,7 @@
             });
 
             container.innerHTML = uniqueRarities.map(rarity => (
-                `<label class="label-block"><input type="checkbox" value="${escapeHtml(rarity)}"> ${escapeHtml(rarity)}</label>`
+                `<label class="label-block"><input type="checkbox" value="${escapeHtml(rarity)}" onchange="filterAndRenderCards()"> ${escapeHtml(rarity)}</label>`
             )).join('');
         }
 
@@ -751,27 +766,17 @@
             if (!container) return;
 
             const categories = [
-                { value: 'pokemon_all', label: 'Pokemon (All Types)' },
-                { value: 'pokemon_grass', label: 'Pokemon - Grass' },
-                { value: 'pokemon_fire', label: 'Pokemon - Fire' },
-                { value: 'pokemon_water', label: 'Pokemon - Water' },
-                { value: 'pokemon_lightning', label: 'Pokemon - Lightning' },
-                { value: 'pokemon_psychic', label: 'Pokemon - Psychic' },
-                { value: 'pokemon_fighting', label: 'Pokemon - Fighting' },
-                { value: 'pokemon_darkness', label: 'Pokemon - Darkness' },
-                { value: 'pokemon_metal', label: 'Pokemon - Metal' },
-                { value: 'pokemon_dragon', label: 'Pokemon - Dragon' },
-                { value: 'pokemon_colorless', label: 'Pokemon - Colorless' },
-                { value: 'pokemon_fairy', label: 'Pokemon - Fairy' },
+                { value: 'pokemon_all', label: 'Pokemon (All)' },
                 { value: 'supporter', label: 'Supporter' },
                 { value: 'item', label: 'Item' },
                 { value: 'tool', label: 'Pokemon Tool' },
                 { value: 'stadium', label: 'Stadium' },
-                { value: 'special_energy', label: 'Special Energy' }
+                { value: 'special_energy', label: 'Special Energy' },
+                { value: 'basic_energy', label: 'Basic Energy' }
             ];
 
             container.innerHTML = categories.map(category => (
-                `<label class="label-block"><input type="checkbox" value="${category.value}"> ${category.label}</label>`
+                `<label class="label-block"><input type="checkbox" value="${category.value}" onchange="filterAndRenderCards()"> ${category.label}</label>`
             )).join('');
         }
 
@@ -825,7 +830,7 @@
                 setsToShow.forEach(set => {
                     const label = document.createElement('label');
                     label.className = 'label-block';
-                    label.innerHTML = `<input type="checkbox" value="${escapeHtml(set)}"> ${escapeHtml(set)}`;
+                    label.innerHTML = `<input type="checkbox" value="${escapeHtml(set)}" onchange="filterAndRenderCards()"> ${escapeHtml(set)}`;
                     container.appendChild(label);
                 });
             } catch (error) {
@@ -840,7 +845,7 @@
                 sets.forEach(set => {
                     const label = document.createElement('label');
                     label.className = 'label-block';
-                    label.innerHTML = `<input type="checkbox" value="${escapeHtml(set)}"> ${escapeHtml(set)}`;
+                    label.innerHTML = `<input type="checkbox" value="${escapeHtml(set)}" onchange="filterAndRenderCards()"> ${escapeHtml(set)}`;
                     container.appendChild(label);
                 });
             }
@@ -1398,32 +1403,13 @@
                     let categoryMatch = false;
                     const type = card.type || '';
                     
+                    // Card types in data: Basic, Stage 1, Stage 2, VSTAR, Item, Supporter, Stadium, Tool, Special Energy, Basic Energy
+                    const pokemonTypes = ['Basic', 'Stage 1', 'Stage 2', 'VSTAR', 'VMAX', 'VUNION', 'V', 'GX', 'EX', 'ex', 'BREAK'];
+                    
                     for (const category of selectedCategories) {
                         if (category === 'pokemon_all') {
-                            const isPokemon = /^[GRWLPFDMNCYDL]/.test(type) && !['Item', 'Supporter', 'Stadium', 'Tool', 'Energy'].some(t => type.includes(t));
+                            const isPokemon = pokemonTypes.some(pt => type === pt || type.includes(pt)) && !['Item', 'Supporter', 'Stadium', 'Tool', 'Energy'].some(t => type.includes(t));
                             if (isPokemon) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_grass') {
-                            if (type.startsWith('G')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_fire') {
-                            if (type.startsWith('R')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_water') {
-                            if (type.startsWith('W')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_lightning') {
-                            if (type.startsWith('L')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_psychic') {
-                            if (type.startsWith('P')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_fighting') {
-                            if (type.startsWith('F')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_darkness') {
-                            if (type.startsWith('D')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_metal') {
-                            if (type.startsWith('M')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_dragon') {
-                            if (type.startsWith('N')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_colorless') {
-                            if (type.startsWith('C')) { categoryMatch = true; break; }
-                        } else if (category === 'pokemon_fairy') {
-                            if (type.startsWith('Y')) { categoryMatch = true; break; }
                         } else if (category === 'supporter') {
                             if (type.includes('Supporter')) { categoryMatch = true; break; }
                         } else if (category === 'item') {
@@ -1434,6 +1420,8 @@
                             if (type.includes('Stadium')) { categoryMatch = true; break; }
                         } else if (category === 'special_energy') {
                             if (type.includes('Special Energy')) { categoryMatch = true; break; }
+                        } else if (category === 'basic_energy') {
+                            if (type === 'Basic Energy') { categoryMatch = true; break; }
                         }
                     }
                     
@@ -1911,8 +1899,9 @@
                     const typeB = b.type || '';
                     
                     // Determine category
-                    const isPokemonA = /^[GRWLPFDMNCYDL]/.test(typeA) && !['Item', 'Supporter', 'Stadium', 'Tool', 'Energy'].some(t => typeA.includes(t));
-                    const isPokemonB = /^[GRWLPFDMNCYDL]/.test(typeB) && !['Item', 'Supporter', 'Stadium', 'Tool', 'Energy'].some(t => typeB.includes(t));
+                    const pokemonStages = ['Basic', 'Stage 1', 'Stage 2', 'VSTAR', 'VMAX', 'VUNION', 'V', 'GX', 'EX', 'ex', 'BREAK'];
+                    const isPokemonA = pokemonStages.some(pt => typeA === pt || typeA.includes(pt)) && !['Item', 'Supporter', 'Stadium', 'Tool', 'Energy'].some(t => typeA.includes(t));
+                    const isPokemonB = pokemonStages.some(pt => typeB === pt || typeB.includes(pt)) && !['Item', 'Supporter', 'Stadium', 'Tool', 'Energy'].some(t => typeB.includes(t));
                     
                     let categoryA, categoryB;
                     if (isPokemonA) {

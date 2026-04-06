@@ -106,7 +106,7 @@ test.describe('Card Database Filters', () => {
     test('Initial load shows all cards with "Total" checked', async ({ page }) => {
         await openCardsTab(page);
 
-        // "Total" checkbox should be checked by default
+        // "Total" radio should be checked by default
         const totalChecked = await page.evaluate(() => {
             const cb = document.querySelector('#metaFormatOptions input[value="total"]');
             return cb ? cb.checked : false;
@@ -133,8 +133,7 @@ test.describe('Card Database Filters', () => {
         console.log(`[Enrichment] playableCardsSet has ${playableSetSize} entries`);
         expect(playableSetSize).toBeGreaterThan(0);
 
-        // Uncheck "Total", check "All Playables"
-        await uncheckFilterOption(page, 'metaFormatOptions', 'total');
+        // Select "All Playables" radio (auto-deselects Total)
         await checkFilterOption(page, 'metaFormatOptions', 'all_playables');
 
         const playableCount = await getFilteredCount(page);
@@ -150,8 +149,7 @@ test.describe('Card Database Filters', () => {
         await openCardsTab(page);
         await waitForEnrichment(page);
 
-        // Check City League only
-        await uncheckFilterOption(page, 'metaFormatOptions', 'total');
+        // Select City League radio (auto-deselects Total)
         await checkFilterOption(page, 'metaFormatOptions', 'city_league');
 
         const cityLeagueCount = await getFilteredCount(page);
@@ -163,7 +161,6 @@ test.describe('Card Database Filters', () => {
         expect(cityLeagueSetSize).toBeGreaterThan(0);
 
         // City League should be <= All Playables
-        await uncheckFilterOption(page, 'metaFormatOptions', 'city_league');
         await checkFilterOption(page, 'metaFormatOptions', 'all_playables');
         const playableCount = await getFilteredCount(page);
         expect(cityLeagueCount).toBeLessThanOrEqual(playableCount);
@@ -312,6 +309,43 @@ test.describe('Card Database Filters', () => {
             return cards.every(c => (c.type || '').includes('Special Energy'));
         });
         expect(allSpecialEnergy).toBe(true);
+    });
+
+    // ───────────────────────────────────────────────────────────
+    //  10b. Element type filter
+    // ───────────────────────────────────────────────────────────
+    test('Element type filter: Fire shows only Fire-type Pokemon', async ({ page }) => {
+        await openCardsTab(page);
+
+        await checkFilterOption(page, 'elementTypeFilterOptions', 'Fire');
+
+        const count = await getFilteredCount(page);
+        console.log(`[Element Type: Fire] ${count} cards`);
+        expect(count).toBeGreaterThan(1);
+
+        // Verify all displayed cards have Fire element type
+        const allFire = await page.evaluate(() => {
+            const cards = window.filteredCardsData.slice(0, 50);
+            return cards.every(c => {
+                const dex = String(c.pokedex_number);
+                const typeMap = window.pokemonTypeMap || {};
+                return typeMap[dex] === 'Fire';
+            });
+        });
+        expect(allFire).toBe(true);
+    });
+
+    test('Element type filter: multiple types show union', async ({ page }) => {
+        await openCardsTab(page);
+
+        await checkFilterOption(page, 'elementTypeFilterOptions', 'Fire');
+        const fireCount = await getFilteredCount(page);
+
+        await checkFilterOption(page, 'elementTypeFilterOptions', 'Water');
+        const combinedCount = await getFilteredCount(page);
+
+        console.log(`[Element Type: Fire+Water] Fire=${fireCount}, Combined=${combinedCount}`);
+        expect(combinedCount).toBeGreaterThan(fireCount);
     });
 
     // ───────────────────────────────────────────────────────────
@@ -478,8 +512,7 @@ test.describe('Card Database Filters', () => {
             return window.cardDeckCoverageMap && window.cardDeckCoverageMap.size > 0;
         }, { timeout: ENRICHMENT_WAIT });
 
-        // Switch to All Playables so coverage is meaningful
-        await uncheckFilterOption(page, 'metaFormatOptions', 'total');
+        // Switch to All Playables radio (auto-deselects Total)
         await checkFilterOption(page, 'metaFormatOptions', 'all_playables');
         const playableCount = await getFilteredCount(page);
 
@@ -689,8 +722,7 @@ test.describe('Card Database Filters', () => {
         if (metaOptionValue) {
             const totalCount = await getFilteredCount(page);
             
-            // Uncheck Total, check this meta
-            await uncheckFilterOption(page, 'metaFormatOptions', 'total');
+            // Check this meta period checkbox (Total radio stays selected, meta is additive)
             await checkFilterOption(page, 'metaFormatOptions', metaOptionValue);
 
             const metaCount = await getFilteredCount(page);

@@ -36,20 +36,10 @@
         let allCardsData = [];
         let filteredCardsData = [];
         
-        // Mutual exclusion for base meta checkboxes (total / all_playables / city_league)
-        function handleBaseMetaChange(changedCb) {
-            const baseValues = ['total', 'all_playables', 'city_league'];
-            if (!baseValues.includes(changedCb.value)) return;
-            if (changedCb.checked) {
-                // Uncheck other base options
-                baseValues.forEach(val => {
-                    if (val !== changedCb.value) {
-                        const cb = document.querySelector(`#metaFormatOptions input[value="${val}"]`);
-                        if (cb) cb.checked = false;
-                    }
-                });
-            }
-        }
+        // Mutual exclusion for base meta radio buttons — no handler needed,
+        // radio buttons inherently allow only one selection.
+        // Kept as a no-op stub so existing onchange references don't error.
+        function handleBaseMetaChange(changedCb) {}
 
         // Toggle card filter visibility
         function toggleCardFilter(filterId) {
@@ -90,9 +80,9 @@
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="cards-filter-options collapsed" id="metaFormatOptions">
-                            <label class="label-block"><input type="checkbox" value="total" checked onchange="handleBaseMetaChange(this); filterAndRenderCards()"> Total (All Cards)</label>
-                            <label class="label-block"><input type="checkbox" value="all_playables" onchange="handleBaseMetaChange(this); filterAndRenderCards()"> All Playables</label>
-                            <label class="label-block"><input type="checkbox" value="city_league" onchange="handleBaseMetaChange(this); filterAndRenderCards()"> City League Only</label>
+                            <label class="label-block"><input type="radio" name="baseMetaFilter" value="total" checked onchange="filterAndRenderCards()"> Total (All Cards)</label>
+                            <label class="label-block"><input type="radio" name="baseMetaFilter" value="all_playables" onchange="filterAndRenderCards()"> All Playables</label>
+                            <label class="label-block"><input type="radio" name="baseMetaFilter" value="city_league" onchange="filterAndRenderCards()"> City League Only</label>
                         </div>
                     `
                 },
@@ -127,6 +117,17 @@
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div class="cards-filter-options collapsed" id="categoryFilterOptions"></div>
+                    `
+                },
+                {
+                    groupId: 'filter-element-type',
+                    targetId: 'elementTypeFilterOptions',
+                    html: `
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('elementTypeFilterOptions')">
+                            <span>Element Type</span>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="cards-filter-options collapsed" id="elementTypeFilterOptions"></div>
                     `
                 },
                 {
@@ -242,6 +243,8 @@
                 // --- PHASE 1: Render cards immediately with basic filters ---
                 try { populateRarityFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateRarityFilter error:', e); }
                 try { populateCategoryFilter(); } catch (e) { console.error('[Cards Tab] populateCategoryFilter error:', e); }
+                try { await loadPokemonTypeMap(); } catch (e) { console.error('[Cards Tab] loadPokemonTypeMap error:', e); }
+                try { populateElementTypeFilter(); } catch (e) { console.error('[Cards Tab] populateElementTypeFilter error:', e); }
                 try { await populateSetFilter(window.allCardsData); } catch (e) { console.error('[Cards Tab] populateSetFilter error:', e); }
                 try { setupCardFilters(); } catch (e) { console.error('[Cards Tab] setupCardFilters error:', e); }
                 try { initializeCardsFilterPanel(); } catch (e) { console.error('[Cards Tab] initializeCardsFilterPanel error:', e); }
@@ -780,6 +783,50 @@
             )).join('');
         }
 
+        // Load Pokédex → TCG element type mapping (Fire, Water, Grass, etc.)
+        async function loadPokemonTypeMap() {
+            if (window.pokemonTypeMap) return;
+            try {
+                const resp = await fetch('data/pokemon_type_map.json');
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                window.pokemonTypeMap = await resp.json();
+                devLog(`[Cards Tab] Loaded pokemon_type_map.json: ${Object.keys(window.pokemonTypeMap).length} entries`);
+            } catch (e) {
+                console.warn('[Cards Tab] Could not load pokemon_type_map.json:', e.message);
+                window.pokemonTypeMap = {};
+            }
+        }
+
+        // Get TCG element type for a card (Fire, Water, Grass, etc.)
+        function getCardElementType(card) {
+            if (!card || !window.pokemonTypeMap) return null;
+            const dex = card.pokedex_number;
+            if (!dex) return null;
+            return window.pokemonTypeMap[String(dex)] || null;
+        }
+
+        function populateElementTypeFilter() {
+            const container = document.getElementById('elementTypeFilterOptions');
+            if (!container) return;
+
+            const elementTypes = [
+                { value: 'Grass', label: '🌿 Grass', color: '#78C850' },
+                { value: 'Fire', label: '🔥 Fire', color: '#F08030' },
+                { value: 'Water', label: '💧 Water', color: '#6890F0' },
+                { value: 'Lightning', label: '⚡ Lightning', color: '#F8D030' },
+                { value: 'Psychic', label: '🔮 Psychic', color: '#F85888' },
+                { value: 'Fighting', label: '👊 Fighting', color: '#C03028' },
+                { value: 'Darkness', label: '🌑 Darkness', color: '#705848' },
+                { value: 'Metal', label: '⚙️ Metal', color: '#B8B8D0' },
+                { value: 'Dragon', label: '🐉 Dragon', color: '#7038F8' },
+                { value: 'Colorless', label: '⭐ Colorless', color: '#A8A878' }
+            ];
+
+            container.innerHTML = elementTypes.map(et => (
+                `<label class="label-block"><input type="checkbox" value="${et.value}" onchange="filterAndRenderCards()"> ${et.label}</label>`
+            )).join('');
+        }
+
         function populateDeckCoverageFilter() {
             const container = document.getElementById('deckCoverageFilterOptions');
             if (!container) return;
@@ -1234,9 +1281,9 @@
             currentCardsPage = 1;
             showAllCards = false;
             
-            // Check "Total" by default
-            const totalCheckbox = document.querySelector('#metaFormatOptions input[value="total"]');
-            if (totalCheckbox) totalCheckbox.checked = true;
+            // Check "Total" radio by default
+            const totalRadio = document.querySelector('#metaFormatOptions input[name="baseMetaFilter"][value="total"]');
+            if (totalRadio) totalRadio.checked = true;
             
             filterAndRenderCards();
         }
@@ -1285,6 +1332,7 @@
             const selectedSets = Array.from(document.querySelectorAll('#setFilterOptions input:checked')).map(cb => cb.value);
             const selectedRarities = Array.from(document.querySelectorAll('#rarityFilterOptions input:checked')).map(cb => cb.value);
             const selectedCategories = Array.from(document.querySelectorAll('#categoryFilterOptions input:checked')).map(cb => cb.value);
+            const selectedElementTypes = Array.from(document.querySelectorAll('#elementTypeFilterOptions input:checked')).map(cb => cb.value);
             const selectedDeckCoverages = Array.from(document.querySelectorAll('#deckCoverageFilterOptions input:checked')).map(cb => parseFloat(cb.value));
             const selectedMainPokemons = Array.from(document.querySelectorAll('#mainPokemonList input:checked')).map(cb => cb.value);
             const selectedArchetypes = Array.from(document.querySelectorAll('#archetypeList input:checked')).map(cb => cb.value);
@@ -1298,6 +1346,7 @@
                 selectedSets,
                 selectedRarities,
                 selectedCategories,
+                selectedElementTypes,
                 selectedDeckCoverages,
                 selectedMainPokemons,
                 selectedArchetypes,
@@ -1313,7 +1362,7 @@
             cardsFilterRenderState.lastSignature = signature;
             cardsFilterRenderState.isFiltering = true;
             
-            devLog(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}, DeckCov: ${selectedDeckCoverages.length}, MainPkm: ${selectedMainPokemons.length}, Archetypes: ${selectedArchetypes.length}, MetaFilters: ${selectedMetaFilters.length}`);
+            devLog(`[Cards Tab] Filtering - Search: "${searchTerm}", Metas: ${selectedMetas.length}, Sets: ${selectedSets.length}, Rarities: ${selectedRarities.length}, Categories: ${selectedCategories.length}, ElementTypes: ${selectedElementTypes.length}, DeckCov: ${selectedDeckCoverages.length}, MainPkm: ${selectedMainPokemons.length}, Archetypes: ${selectedArchetypes.length}, MetaFilters: ${selectedMetaFilters.length}`);
             devLog(`[Filter Debug] Selected Meta Values:`, selectedMetas);
             devLog(`[Filter Debug] Selected Meta Filters (meta: prefix):`, selectedMetaFilters);
             
@@ -1323,6 +1372,7 @@
             let failedSet = 0;
             let failedRarity = 0;
             let failedCategory = 0;
+            let failedElementType = 0;
             let failedDeckCoverage = 0;
             let failedMainPokemon = 0;
             let failedArchetype = 0;
@@ -1427,6 +1477,15 @@
                     
                     if (!categoryMatch) {
                         failedCategory++;
+                        return false;
+                    }
+                }
+                
+                // Element Type filter (Fire, Water, Grass, etc.)
+                if (selectedElementTypes.length > 0) {
+                    const elementType = getCardElementType(card);
+                    if (!elementType || !selectedElementTypes.includes(elementType)) {
+                        failedElementType++;
                         return false;
                     }
                 }
@@ -1579,6 +1638,7 @@
             devLog(`  - Failed set: ${failedSet}`);
             devLog(`  - Failed rarity: ${failedRarity}`);
             devLog(`  - Failed category: ${failedCategory}`);
+            devLog(`  - Failed element type: ${failedElementType}`);
             devLog(`  - Failed deck coverage: ${failedDeckCoverage}`);
             devLog(`  - Failed main pokemon: ${failedMainPokemon}`);
             devLog(`  - Failed archetype: ${failedArchetype}`);

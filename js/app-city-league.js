@@ -1933,7 +1933,6 @@
                 cityLeagueStatDecksUsed: decksCount,
                 cityLeagueStatAvgPlacement: avgPlacement !== '-' ? avgPlacement : '-'
             }, 'cityLeagueStatsSection');
-            showDeckSections('cityLeague');
             
             // Reset button text to show list view option
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
@@ -1951,7 +1950,6 @@
                 const el = document.getElementById(id);
                 if (el) el.classList.add('d-none');
             });
-            hideDeckSections('cityLeague');
             resetDeckOverviewCounts('cityLeagueCardCount', 'cityLeagueCardCountSummary', '0 ' + t('cl.cards'), '/ 0 ' + t('cl.total'));
             
             // Reset button text
@@ -2512,7 +2510,7 @@
             const selectedArchetypeForTrend = document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all';
             const trendHistoryCache = new Map();
             
-            let html = '';
+            const cardHtmls = [];
             sortedCards.forEach(card => {
                 // Get original card's set/number from the City League deck data
                 const originalSetCode = card.set_code || '';
@@ -2687,7 +2685,7 @@
                     </div>`
                     : '';
                 
-                html += `
+                cardHtmls.push(`
                     <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                         <div class="card-image-container city-league-card-image-container">
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
@@ -2721,11 +2719,23 @@
                             </div>
                         </div>
                     </div>
-                `;
+                `);
                 }); // End of versionsToRender.forEach
             }); // End of sortedCards.forEach
             
-            gridContainer.innerHTML = html;
+            // Progressive batch rendering: show first cards instantly, load rest in background
+            const BATCH_SIZE = 12;
+            gridContainer.innerHTML = cardHtmls.slice(0, BATCH_SIZE).join('');
+            if (cardHtmls.length > BATCH_SIZE) {
+                let offset = BATCH_SIZE;
+                (function renderNextBatch() {
+                    if (offset >= cardHtmls.length) return;
+                    const batch = cardHtmls.slice(offset, offset + BATCH_SIZE);
+                    gridContainer.insertAdjacentHTML('beforeend', batch.join(''));
+                    offset += BATCH_SIZE;
+                    requestAnimationFrame(renderNextBatch);
+                })();
+            }
             if (visualContainer) {
                 visualContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
                 visualContainer.style.display = 'block';

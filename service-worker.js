@@ -1,7 +1,7 @@
 // Service Worker for Pokemon TCG Analysis PWA
 // Strategy: Cache static shell, network-first for data
 
-const CACHE_NAME = 'tcg-analysis-v202604091900';
+const CACHE_NAME = 'tcg-analysis-v202604062000';
 
 // Static shell — cached on install
 const SHELL_ASSETS = [
@@ -41,6 +41,7 @@ const SHELL_ASSETS = [
   './js/draw-simulator.js',
   './js/combo-worker.js',
   './js/app-calculator.js',
+  './js/deck-analysis-shared.js',
   './js/card-data-cache.js',
   './js/error-tracking.js',
   './images/pokeball-icon.png'

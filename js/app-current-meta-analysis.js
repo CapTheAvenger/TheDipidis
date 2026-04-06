@@ -577,7 +577,6 @@
                     currentMetaStatWinrate: winrate,
                     currentMetaStatMatchup: matchupVsTop20
                 }, 'currentMetaStatsSection');
-                showDeckSections('currentMeta');
                 
                 // Render matchups
                 renderCurrentMetaMatchups(archetype);
@@ -598,7 +597,6 @@
                 const el = document.getElementById(id);
                 if (el) el.classList.add('d-none');
             });
-            hideDeckSections('currentMeta');
             renderNoDeckSelectedState('currentMetaDeckGrid', 'Bitte waehle ein Deck aus dem Dropdown, um die Karten zu laden');
             resetDeckOverviewCounts('currentMetaCardCount', 'currentMetaCardCountSummary', '0 ' + t('cl.cards'), '/ 0 Total');
         }
@@ -1054,7 +1052,7 @@
             const currentDeck = window.currentMetaDeck || {};
             const priceMap = getOverviewPriceLookupCache();
             
-            let html = '';
+            const cardHtmls = [];
             sortedCards.forEach(card => {
                 const originalSetCode = card.set_code || '';
                 const originalSetNumber = card.set_number || '';
@@ -1200,7 +1198,7 @@
                         </div>`
                         : '';
                     
-                    html += `
+                    cardHtmls.push(`
                         <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                             <div class="card-image-container city-league-card-image-container">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
@@ -1229,11 +1227,23 @@
                                 </div>
                             </div>
                         </div>
-                    `;
+                `);
                 });
             });
             
-            gridContainer.innerHTML = html;
+            // Progressive batch rendering: show first cards instantly, load rest in background
+            const BATCH_SIZE = 12;
+            gridContainer.innerHTML = cardHtmls.slice(0, BATCH_SIZE).join('');
+            if (cardHtmls.length > BATCH_SIZE) {
+                let offset = BATCH_SIZE;
+                (function renderNextBatch() {
+                    if (offset >= cardHtmls.length) return;
+                    const batch = cardHtmls.slice(offset, offset + BATCH_SIZE);
+                    gridContainer.insertAdjacentHTML('beforeend', batch.join(''));
+                    offset += BATCH_SIZE;
+                    requestAnimationFrame(renderNextBatch);
+                })();
+            }
             document.getElementById('currentMetaDeckTableView')?.classList.add('d-none');
             visualContainer.classList.remove('d-none');
         }

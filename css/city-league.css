@@ -1255,6 +1255,69 @@
     border-left: 4px solid #3498db;
     margin-bottom: 20px;
 }
+/* --- Inline toolbar metrics (merged into action-bar) --- */
+.deck-builder-metrics-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.toolbar-metric {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(59,76,202,0.12);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 0.88em;
+    font-weight: 700;
+    color: #2c3e50;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: background 0.15s, border-color 0.15s;
+}
+.toolbar-metric:hover {
+    background: #fff;
+    border-color: rgba(59,76,202,0.22);
+}
+.toolbar-metric-icon {
+    font-size: 1em;
+    line-height: 1;
+}
+.toolbar-metric-value {
+    font-weight: 800;
+    color: #3b4cca;
+}
+.toolbar-metric-sep {
+    font-weight: 600;
+    color: #6b7280;
+    margin-left: 1px;
+}
+.toolbar-metric-price .toolbar-metric-value {
+    color: #27ae60;
+}
+.city-league-deck-count.color-red,
+.current-meta-deck-count.color-red,
+.past-meta-deck-count.color-red,
+.toolbar-metric .city-league-deck-count.color-red,
+.toolbar-metric .current-meta-deck-count.color-red,
+.toolbar-metric .past-meta-deck-count.color-red {
+    color: #e74c3c !important;
+}
+@media (max-width: 768px) {
+    .deck-builder-metrics-inline {
+        order: 10;
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
+    }
+    .toolbar-metric {
+        padding: 4px 8px;
+        font-size: 0.82em;
+    }
+}
+/* --- End inline toolbar metrics --- */
 .city-league-deck-summary-title {
     margin: 0;
     color: #2c3e50;

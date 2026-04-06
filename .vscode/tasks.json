@@ -28,30 +28,52 @@
 			"group": "build"
 		},
 		{
-			"label": "Start Local HTTP Server",
+			"label": "Run City League E2E (Visual)",
 			"type": "shell",
-			"command": "python",
+			"command": ".\\venv\\Scripts\\python.exe",
 			"args": [
-				"-m",
-				"http.server",
-				"8000",
-				"--directory",
-				"data"
+				"-u",
+				"tests/e2e_city_league_meta.py"
 			],
-			"isBackground": true,
-			"group": "build"
+			"group": "test"
 		},
 		{
-			"label": "Start HTTP Server Root",
+			"label": "Run City League E2E (Auto Server)",
 			"type": "shell",
-			"command": "python",
+			"command": "$serverUp = $false; try { Invoke-WebRequest -Uri \"http://127.0.0.1:8000/index.html\" -UseBasicParsing -TimeoutSec 2 | Out-Null; $serverUp = $true } catch { $serverUp = $false }; if (-not $serverUp) { Start-Process -FilePath \".\\venv\\Scripts\\python.exe\" -ArgumentList @('-m','http.server','8000') -WorkingDirectory \".\" -WindowStyle Hidden; Start-Sleep -Seconds 3 }; & \".\\venv\\Scripts\\python.exe\" -u \"tests/e2e_city_league_meta.py\"",
+			"group": "test"
+		},
+		{
+			"label": "Run Current Meta E2E",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\python.exe",
 			"args": [
-				"-m",
-				"http.server",
-				"8000"
+				"-u",
+				"tests/e2e_current_meta_global.py"
 			],
-			"isBackground": true,
-			"group": "build"
+			"group": "test"
+		},
+		{
+			"label": "Run Current Meta E2E (Auto Server)",
+			"type": "shell",
+			"command": "$serverUp = $false; try { Invoke-WebRequest -Uri \"http://127.0.0.1:8000/index.html\" -UseBasicParsing -TimeoutSec 2 | Out-Null; $serverUp = $true } catch { $serverUp = $false }; if (-not $serverUp) { Start-Process -FilePath \".\\venv\\Scripts\\python.exe\" -ArgumentList @('-m','http.server','8000') -WorkingDirectory \".\" -WindowStyle Hidden; Start-Sleep -Seconds 3 }; & \".\\venv\\Scripts\\python.exe\" -u \"tests/e2e_current_meta_global.py\"",
+			"group": "test"
+		},
+		{
+			"label": "Run Past Meta E2E",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\python.exe",
+			"args": [
+				"-u",
+				"tests/e2e_past_meta.py"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Past Meta E2E (Auto Server)",
+			"type": "shell",
+			"command": "$serverUp = $false; try { Invoke-WebRequest -Uri \"http://127.0.0.1:8000/index.html\" -UseBasicParsing -TimeoutSec 2 | Out-Null; $serverUp = $true } catch { $serverUp = $false }; if (-not $serverUp) { Start-Process -FilePath \".\\venv\\Scripts\\python.exe\" -ArgumentList @('-m','http.server','8000') -WorkingDirectory \".\" -WindowStyle Hidden; Start-Sleep -Seconds 3 }; & \".\\venv\\Scripts\\python.exe\" -u \"tests/e2e_past_meta.py\"",
+			"group": "test"
 		}
 	]
 }

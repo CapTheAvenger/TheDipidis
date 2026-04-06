@@ -513,7 +513,6 @@
                 document.getElementById('pastMetaStatsSection').classList.add('d-none');
                 document.getElementById('pastMetaDeckTableView').classList.add('d-none');
                 document.getElementById('pastMetaDeckVisual').classList.add('d-none');
-                hideDeckSections('pastMeta');
                 pastMetaCurrentDeck = null;
                 pastMetaCurrentCards = [];
                 pastMetaFilteredCards = [];
@@ -615,7 +614,6 @@
             
             // Update stats
             document.getElementById('pastMetaStatsSection').classList.remove('d-none');
-            showDeckSections('pastMeta');
             const totalCards = getPastMetaSummaryTotalCount(aggregatedCards);
             document.getElementById('pastMetaStatCards').textContent = `${aggregatedCards.length} / ${Math.round(totalCards)}`;
             
@@ -754,7 +752,7 @@
             // Get current deck to show deck counts
             const currentDeck = window.pastMetaDeck || {};
             
-            let html = '';
+            const cardHtmls = [];
             
             sortedCards.forEach(card => {
                 const cardFullName = fixMojibake(card.full_card_name || card.card_name || 'Unknown Card');
@@ -943,7 +941,7 @@
                         </div>`
                         : '';
                     
-                    html += `
+                    cardHtmls.push(`
                         <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                             <div class="card-image-container city-league-card-image-container">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
@@ -972,11 +970,23 @@
                                 </div>
                             </div>
                         </div>
-                    `;
+                `);
                 }); // End of versionsToRender.forEach
             }); // End of cards.forEach
             
-            gridContainer.innerHTML = html;
+            // Progressive batch rendering: show first cards instantly, load rest in background
+            const BATCH_SIZE = 12;
+            gridContainer.innerHTML = cardHtmls.slice(0, BATCH_SIZE).join('');
+            if (cardHtmls.length > BATCH_SIZE) {
+                let offset = BATCH_SIZE;
+                (function renderNextBatch() {
+                    if (offset >= cardHtmls.length) return;
+                    const batch = cardHtmls.slice(offset, offset + BATCH_SIZE);
+                    gridContainer.insertAdjacentHTML('beforeend', batch.join(''));
+                    offset += BATCH_SIZE;
+                    requestAnimationFrame(renderNextBatch);
+                })();
+            }
         }
         
         function filterPastMetaOverviewCards() {

@@ -35,6 +35,14 @@
 #filter-category {
     flex-basis: 150px;
 }
+#filter-rarity .label-block {
+    white-space: nowrap;
+    font-size: 12px;
+}
+#filter-category .label-block {
+    white-space: nowrap;
+    font-size: 12px;
+}
 #filter-main-pokemon,
 #filter-archetype {
     flex-basis: 170px;

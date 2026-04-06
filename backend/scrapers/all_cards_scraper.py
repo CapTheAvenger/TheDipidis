@@ -28,6 +28,13 @@ from card_scraper_shared import (
 
 setup_console_encoding()
 
+# Limitless ptcg-symbol letter -> TCG energy type name
+ENERGY_SYMBOL_MAP = {
+    "G": "Grass", "R": "Fire", "W": "Water", "L": "Lightning",
+    "P": "Psychic", "F": "Fighting", "D": "Darkness", "M": "Metal",
+    "N": "Dragon", "C": "Colorless",
+}
+
 # LOGGING SETUP
 logger = setup_logging("scraper")
 data_dir = get_data_dir()
@@ -185,10 +192,13 @@ def scrape_all_cards_list(
             set_code   = cells[0].get_text(strip=True)
             set_number = cells[1].get_text(strip=True)
             card_name  = cells[2].get_text(strip=True)
-            # Strip ptcg symbol letter prefix from type (e.g. "GBasic" -> "Basic")
+            # Extract energy type from ptcg-symbol span, then strip it from type
             raw_type  = cells[3].get_text(strip=True)
+            energy_type = ""
             type_span = cells[3].find("span", class_="ptcg-symbol")
             if type_span:
+                symbol_letter = type_span.get_text(strip=True)
+                energy_type = ENERGY_SYMBOL_MAP.get(symbol_letter, "")
                 raw_type = raw_type[len(type_span.get_text()):].strip()
             card_type   = raw_type
             # Rarity is in column 4 on the list page
@@ -213,6 +223,7 @@ def scrape_all_cards_list(
                 "number": set_number,
                 "name": card_name,
                 "type": card_type,
+                "energy_type": energy_type,
                 "card_url": card_url,
                 "image_url": "",
                 "rarity": card_rarity,

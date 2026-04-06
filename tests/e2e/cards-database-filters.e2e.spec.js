@@ -326,11 +326,7 @@ test.describe('Card Database Filters', () => {
         // Verify all displayed cards have Fire element type
         const allFire = await page.evaluate(() => {
             const cards = window.filteredCardsData.slice(0, 50);
-            return cards.every(c => {
-                const dex = String(c.pokedex_number);
-                const typeMap = window.pokemonTypeMap || {};
-                return typeMap[dex] === 'Fire';
-            });
+            return cards.every(c => c.energy_type === 'Fire');
         });
         expect(allFire).toBe(true);
     });

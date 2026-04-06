@@ -505,6 +505,10 @@ function getCollectionCardCategory(card) {
 
 function getPokemonElementFromCard(card) {
   if (!card) return 'unknown';
+
+  // Primary: use energy_type from card data (scraped from Limitless ptcg-symbol)
+  if (card.energy_type) return card.energy_type.toLowerCase();
+
   const typeLower = String((card.type || '')).toLowerCase();
 
   const explicitMap = {

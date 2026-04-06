@@ -29,6 +29,13 @@ setup_console_encoding()
 logger = setup_logging("japanese_cards_scraper")
 data_dir = get_data_dir()
 
+# Limitless ptcg-symbol letter -> TCG energy type name
+ENERGY_SYMBOL_MAP = {
+    "G": "Grass", "R": "Fire", "W": "Water", "L": "Lightning",
+    "P": "Psychic", "F": "Fighting", "D": "Darkness", "M": "Metal",
+    "N": "Dragon", "C": "Colorless",
+}
+
 # ============================================================================
 # SETTINGS
 # ============================================================================
@@ -142,10 +149,13 @@ def scrape_japanese_cards_list(target_sets: Set[str]) -> List[Dict[str, str]]:
                 set_code = cells[0].get_text(strip=True).upper()
                 set_num  = cells[1].get_text(strip=True)
                 name     = cells[2].get_text(strip=True)
-                # Strip ptcg symbol prefix from type (e.g. "GBasic" -> "Basic")
+                # Extract energy type from ptcg-symbol span, then strip it
                 raw_type  = cells[3].get_text(strip=True)
+                energy_type = ""
                 type_span = cells[3].find("span", class_="ptcg-symbol")
                 if type_span:
+                    symbol_letter = type_span.get_text(strip=True)
+                    energy_type = ENERGY_SYMBOL_MAP.get(symbol_letter, "")
                     raw_type = raw_type[len(type_span.get_text()):].strip()
                 rarity   = cells[4].get_text(strip=True) if len(cells) > 4 else ""
                 a_tag    = cells[2].find("a")
@@ -157,7 +167,8 @@ def scrape_japanese_cards_list(target_sets: Set[str]) -> List[Dict[str, str]]:
                         seen_keys.add(key)
                         all_cards.append({
                             "name": name, "set": set_code, "number": set_num,
-                            "type": raw_type, "card_url": card_url,
+                            "type": raw_type, "energy_type": energy_type,
+                            "card_url": card_url,
                             "image_url": "", "rarity": rarity,
                         })
                         added_this_page += 1

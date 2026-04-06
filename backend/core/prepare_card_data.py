@@ -195,7 +195,7 @@ def create_merged_database():
         json.dump({'cards': merged_cards}, f, ensure_ascii=False, indent=2)
         
     csv_path = os.path.join(data_dir, 'all_cards_merged.csv')
-    fieldnames = ['name_en', 'name_de', 'set', 'number', 'pokedex_number', 'type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'price_last_updated']
+    fieldnames = ['name_en', 'name_de', 'set', 'number', 'pokedex_number', 'type', 'energy_type', 'rarity', 'image_url', 'international_prints', 'cardmarket_url', 'eur_price', 'price_last_updated']
     
     with open(csv_path, 'w', newline='', encoding='utf-8-sig') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')

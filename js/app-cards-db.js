@@ -799,10 +799,15 @@
 
         // Get TCG element type for a card (Fire, Water, Grass, etc.)
         function getCardElementType(card) {
-            if (!card || !window.pokemonTypeMap) return null;
-            const dex = card.pokedex_number;
-            if (!dex) return null;
-            return window.pokemonTypeMap[String(dex)] || null;
+            if (!card) return null;
+            // Primary: use energy_type from card data (scraped from Limitless ptcg-symbol)
+            if (card.energy_type) return card.energy_type;
+            // Fallback: PokeAPI type map by pokedex number
+            if (window.pokemonTypeMap) {
+                const dex = card.pokedex_number;
+                if (dex) return window.pokemonTypeMap[String(dex)] || null;
+            }
+            return null;
         }
 
         function populateElementTypeFilter() {

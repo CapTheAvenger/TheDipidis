@@ -280,17 +280,21 @@
 @media (max-width: 768px) {
     .header-flex-row {
         display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
     }
     
     .header-flex-group {
-        flex-direction: column !important;
-        gap: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
     }
     
     .header-flex-user {
-        justify-content: center !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
     }
     
     /* Controls wrap on mobile */
@@ -436,17 +440,8 @@
 
 /* === FLEX UTILITY RESPONSIVENESS === */
 @media (max-width: 768px) {
-    .flex {
-        flex-direction: column !important;
-    }
-    
     .flex-wrap {
         flex-wrap: wrap !important;
-    }
-    
-    .justify-between {
-        justify-content: flex-start !important;
-        gap: 8px !important;
     }
     
     .minw-200 {
@@ -501,14 +496,19 @@
     .fs-18 { font-size: 16px !important; }
 }
 
-/* === TAB NAVIGATION HORIZONTAL SCROLL === */
+/* === TAB NAVIGATION: Hidden on mobile, Pokeball is the navigation === */
 @media (max-width: 768px) {
     .tabs-container {
         overflow: hidden !important;
     }
 
+    /* Main tab navigation hidden — Pokeball menu handles navigation */
     .tab-navigation,
-    .cards-tab-navigation,
+    .cards-tab-navigation {
+        display: none !important;
+    }
+
+    /* Sub-navigation within tabs (e.g. Cards sub-tabs) stays visible */
     .tab-nav {
         display: flex !important;
         flex-wrap: nowrap !important;
@@ -520,14 +520,10 @@
         -ms-overflow-style: none !important;
     }
 
-    .tab-navigation::-webkit-scrollbar,
-    .cards-tab-navigation::-webkit-scrollbar,
     .tab-nav::-webkit-scrollbar {
         display: none;
     }
 
-    .tab-navigation .tab-btn,
-    .cards-tab-navigation .tab-btn,
     .tab-nav .tab-btn {
         flex: 0 0 auto !important;
         white-space: nowrap !important;

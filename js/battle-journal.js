@@ -276,16 +276,22 @@
 
     function deriveOverallResult(games) {
         if (!games || games.length === 0) return { turnOrder: '', result: '' };
-        if (games.length === 1) return { turnOrder: games[0].turnOrder, result: games[0].result };
-        // BO3: turnOrder = game 1's turnOrder, result = majority
+        // Only consider games that have a result filled in
+        const filled = games.filter(g => g.result);
+        if (filled.length === 0) return { turnOrder: games[0]?.turnOrder || '', result: '' };
+        if (filled.length === 1) return { turnOrder: games[0]?.turnOrder || '', result: filled[0].result };
+        // BO3: 2 wins/losses = decisive, otherwise derive from what's filled
         let wins = 0, losses = 0;
-        games.forEach(g => {
+        filled.forEach(g => {
             if (g.result === 'win') wins++;
             else if (g.result === 'loss') losses++;
         });
         let result = 'tie';
         if (wins >= 2) result = 'win';
         else if (losses >= 2) result = 'loss';
+        else if (filled.length === 2 && wins === 1 && losses === 1) result = 'tie';
+        else if (wins > losses) result = 'win';
+        else if (losses > wins) result = 'loss';
         return { turnOrder: games[0]?.turnOrder || '', result };
     }
 
@@ -469,11 +475,11 @@
         }
         const gameCount = values.bestOf === 'bo3' ? 3 : 1;
         const games = values.games || [];
-        for (let i = 0; i < gameCount; i++) {
-            if (!games[i] || !games[i].turnOrder || !games[i].result) {
-                showToast(battleJournalText('bj.validationGames', 'Please fill Going and Result for all games.'), 'warning');
-                return false;
-            }
+        // Require at least 1 game with both turnOrder and result filled
+        const filledGames = games.filter(g => g && g.turnOrder && g.result);
+        if (filledGames.length === 0) {
+            showToast(battleJournalText('bj.validationGames', 'Please fill Going and Result for at least one game.'), 'warning');
+            return false;
         }
         return true;
     }

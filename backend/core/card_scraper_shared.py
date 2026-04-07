@@ -160,9 +160,13 @@ def load_settings(settings_filename: str, defaults: dict,
     at the sub-key level rather than being replaced wholesale.
     """
     app_path = get_app_path()
+    # Derive project root: app_path is backend/core/, so two levels up
+    project_root = os.path.dirname(os.path.dirname(app_path))
     candidates = [
+        os.path.join(project_root, "config", settings_filename),
         os.path.join(app_path, settings_filename),
         os.path.join(os.getcwd(), settings_filename),
+        os.path.join(os.getcwd(), "config", settings_filename),
         os.path.join(app_path, "data", settings_filename),
     ]
     if os.path.basename(app_path) == "dist":

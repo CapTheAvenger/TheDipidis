@@ -269,27 +269,24 @@
         let html = `<span class="battle-journal-label">${escapeHtml(headerLabel)}</span>`;
         for (let i = 1; i <= count; i++) {
             html += `
-                <div class="battle-journal-bo3-row">
+                <div class="battle-journal-game-row">
                     <span class="battle-journal-bo3-game">Game ${i}</span>
-                    <select id="battleJournalGame${i}Turn" class="battle-journal-input">
-                        <option value="">${escapeHtml(goingLabel)}</option>
-                        <option value="first">${escapeHtml(firstLabel)}</option>
-                        <option value="second">${escapeHtml(secondLabel)}</option>
-                    </select>
-                    <select id="battleJournalGame${i}Result" class="battle-journal-input">
-                        <option value="">${escapeHtml(resultLabel)}</option>
-                        <option value="win">${escapeHtml(winLabel)}</option>
-                        <option value="loss">${escapeHtml(lossLabel)}</option>
-                        <option value="tie">${escapeHtml(tieLabel)}</option>
-                    </select>
+                    <input type="hidden" id="battleJournalGame${i}Turn" value="">
+                    <input type="hidden" id="battleJournalGame${i}Result" value="">
+                    <div class="battle-journal-game-btns">
+                        <div class="battle-journal-choice-group">
+                            <button type="button" class="battle-journal-choice" data-field="game${i}Turn" data-value="first" onclick="setGameChoice(${i},'turn','first')">${escapeHtml(firstLabel)}</button>
+                            <button type="button" class="battle-journal-choice" data-field="game${i}Turn" data-value="second" onclick="setGameChoice(${i},'turn','second')">${escapeHtml(secondLabel)}</button>
+                        </div>
+                        <div class="battle-journal-choice-group battle-journal-choice-group-result">
+                            <button type="button" class="battle-journal-choice battle-journal-choice-win" data-field="game${i}Result" data-value="win" onclick="setGameChoice(${i},'result','win')">W</button>
+                            <button type="button" class="battle-journal-choice battle-journal-choice-loss" data-field="game${i}Result" data-value="loss" onclick="setGameChoice(${i},'result','loss')">L</button>
+                            <button type="button" class="battle-journal-choice battle-journal-choice-tie" data-field="game${i}Result" data-value="tie" onclick="setGameChoice(${i},'result','tie')">T</button>
+                        </div>
+                    </div>
                 </div>`;
         }
         els.gameDetails.innerHTML = html;
-
-        // Bind change events for draft persistence
-        els.gameDetails.querySelectorAll('select').forEach(sel => {
-            sel.addEventListener('change', () => persistBattleJournalDraftFromForm());
-        });
     }
 
     function getGameDetails() {
@@ -310,10 +307,19 @@
         const count = getGameCount();
         const games = Array.isArray(details) ? details : [];
         for (let i = 1; i <= count; i++) {
+            const turnVal = String(games[i - 1]?.turnOrder || '').trim();
+            const resultVal = String(games[i - 1]?.result || '').trim();
             const turnEl = document.getElementById(`battleJournalGame${i}Turn`);
             const resultEl = document.getElementById(`battleJournalGame${i}Result`);
-            if (turnEl) turnEl.value = String(games[i - 1]?.turnOrder || '').trim();
-            if (resultEl) resultEl.value = String(games[i - 1]?.result || '').trim();
+            if (turnEl) turnEl.value = turnVal;
+            if (resultEl) resultEl.value = resultVal;
+            // Highlight the correct buttons
+            document.querySelectorAll(`[data-field="game${i}Turn"]`).forEach(btn => {
+                btn.classList.toggle('is-selected', btn.dataset.value === turnVal);
+            });
+            document.querySelectorAll(`[data-field="game${i}Result"]`).forEach(btn => {
+                btn.classList.toggle('is-selected', btn.dataset.value === resultVal);
+            });
         }
     }
 
@@ -425,6 +431,20 @@
                 `;
             })
             .join('');
+    }
+
+    // ── Game choice toggle (Turn / Result per game row) ─────
+    function setGameChoice(gameNum, type, value) {
+        const fieldSuffix = type === 'turn' ? 'Turn' : 'Result';
+        const hiddenEl = document.getElementById(`battleJournalGame${gameNum}${fieldSuffix}`);
+        if (!hiddenEl) return;
+        // Toggle: clicking the already-selected value deselects it
+        const newVal = hiddenEl.value === value ? '' : value;
+        hiddenEl.value = newVal;
+        document.querySelectorAll(`[data-field="game${gameNum}${fieldSuffix}"]`).forEach(btn => {
+            btn.classList.toggle('is-selected', btn.dataset.value === newVal);
+        });
+        persistBattleJournalDraftFromForm();
     }
 
     // ── Choice buttons & form ────────────────────────────────
@@ -1013,6 +1033,7 @@
     window.closeBattleJournalSheet = closeBattleJournalSheet;
     window.submitBattleJournalEntry = submitBattleJournalEntry;
     window.setBattleJournalChoice = setBattleJournalChoice;
+    window.setGameChoice = setGameChoice;
     window.clearBattleJournalDraft = clearBattleJournalDraft;
     window.flushBattleJournalOutbox = flushBattleJournalOutbox;
     window.renderBattleJournalSummary = renderBattleJournalSummary;

@@ -5692,6 +5692,30 @@ details[open] > .tier-trending-summary::after {
     margin-top: 8px;
 }
 
+.battle-journal-game-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.battle-journal-game-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.battle-journal-game-btns .battle-journal-choice-group {
+    flex: 1;
+    gap: 4px;
+}
+
+.battle-journal-game-btns .battle-journal-choice {
+    min-height: 38px;
+    font-size: 13px;
+    font-weight: 800;
+    border-radius: 10px;
+}
+
 .battle-journal-bo3-game {
     font-size: 12px;
     font-weight: 800;
@@ -6204,6 +6228,10 @@ body.battle-journal-open {
 
     .battle-journal-bo3-row {
         grid-template-columns: 1fr;
+    }
+
+    .battle-journal-game-btns {
+        flex-direction: column;
     }
 
     .battle-journal-actions {

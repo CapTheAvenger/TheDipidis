@@ -1,7 +1,11 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// Strategy: Stale-while-revalidate for all assets (instant load + background refresh)
+// v202604080200
+// Strategies:
+//   HTML / navigation → Network-first  (users always see latest version)
+//   JS / CSS / images → Cache-first    (pre-cached fresh on install; new CACHE_NAME = full refresh)
+//   Data files        → Stale-while-revalidate (fast load + background update)
 
-const CACHE_NAME = 'tcg-analysis-v202604081500';
+const CACHE_NAME = 'tcg-analysis-v202604080200';
 
 // Static shell — cached on install
 const SHELL_ASSETS = [
@@ -52,17 +56,25 @@ const SHELL_ASSETS = [
   './images/pokeball-icon.png'
 ];
 
-// Install: pre-cache static shell
+// Install: pre-cache shell assets with cache-busting (bypass HTTP cache)
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(SHELL_ASSETS);
+      return Promise.all(
+        SHELL_ASSETS.map(function(assetUrl) {
+          return fetch(assetUrl, { cache: 'no-store' })
+            .then(function(response) {
+              if (!response.ok) throw new Error('Failed to fetch ' + assetUrl);
+              return cache.put(assetUrl, response);
+            });
+        })
+      );
     })
   );
   self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: clean old caches, then take control of all clients
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(keys) {
@@ -70,24 +82,54 @@ self.addEventListener('activate', function(event) {
         keys.filter(function(key) { return key !== CACHE_NAME; })
             .map(function(key) { return caches.delete(key); })
       );
+    }).then(function() {
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
-// Fetch: cache-first for static shell, stale-while-revalidate for data
+// Helper: strip query params for consistent cache keys
+function cleanCacheUrl(url) {
+  return new URL(url.pathname, location.origin).href;
+}
+
+// Fetch handler — strategy varies by resource type
 self.addEventListener('fetch', function(event) {
   var url = new URL(event.request.url);
 
-  // Skip non-GET, cross-origin, and Chrome extension requests
+  // Skip non-GET and cross-origin requests
   if (event.request.method !== 'GET') return;
   if (url.origin !== location.origin) return;
 
-  // Strip query params (?v=..., ?t=...) for consistent cache keys
-  var cleanUrl = new URL(url.pathname, location.origin).href;
+  var cleanUrl = cleanCacheUrl(url);
 
-  // Data files (CSV/JSON): stale-while-revalidate
-  // Serve cached version instantly, fetch fresh copy in background
+  // ── HTML / navigation: NETWORK-FIRST ──
+  // Always try the network so users see the latest index.html.
+  // Falls back to cache only when offline.
+  if (event.request.mode === 'navigate' ||
+      url.pathname.endsWith('.html') ||
+      url.pathname === '/' ||
+      url.pathname.endsWith('/')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-cache' })
+        .then(function(response) {
+          if (response && response.ok) {
+            var clone = response.clone();
+            caches.open(CACHE_NAME).then(function(cache) {
+              cache.put(cleanUrl, clone);
+            });
+          }
+          return response;
+        })
+        .catch(function() {
+          return caches.match(cleanUrl);
+        })
+    );
+    return;
+  }
+
+  // ── Data files (CSV / JSON under /data/): STALE-WHILE-REVALIDATE ──
+  // Serve instantly from cache, refresh in background for next visit.
   if (url.pathname.indexOf('/data/') !== -1) {
     event.respondWith(
       caches.match(cleanUrl).then(function(cached) {
@@ -106,11 +148,14 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Static assets (JS/CSS/HTML): stale-while-revalidate
-  // Serve cached version instantly, fetch fresh copy in background for next visit
+  // ── Static assets (JS / CSS / images): CACHE-FIRST ──
+  // Pre-cached during install. A new CACHE_NAME triggers a full re-fetch
+  // of every shell asset, so cached copies are always current for this SW version.
   event.respondWith(
     caches.match(cleanUrl).then(function(cached) {
-      var fetchPromise = fetch(event.request).then(function(response) {
+      if (cached) return cached;
+      // Not pre-cached (e.g. lazy-loaded asset) → fetch and cache
+      return fetch(event.request).then(function(response) {
         if (response && response.ok) {
           var clone = response.clone();
           caches.open(CACHE_NAME).then(function(cache) {
@@ -118,8 +163,7 @@ self.addEventListener('fetch', function(event) {
           });
         }
         return response;
-      }).catch(function() { return cached; });
-      return cached || fetchPromise;
+      });
     })
   );
 });

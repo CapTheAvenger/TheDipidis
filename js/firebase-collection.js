@@ -2177,10 +2177,10 @@ function renderFolderNav() {
   if (!nav) return;
   const folders = getDeckFolders();
   if (folders.length === 0) {
-    nav.style.display = 'none';
+    nav.classList.add('display-none');
     return;
   }
-  nav.style.display = 'flex';
+  nav.classList.remove('display-none');
   nav.innerHTML = `<button onclick="filterDecksByFolder('')" style="padding: 6px 14px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">All</button>` +
     folders.map(f => {
       const safe = escapeHtml(f);
@@ -2211,6 +2211,232 @@ function filterDecksByFolder(folder) {
       item.style.display = (item.dataset.deckFolder === folder) ? '' : 'none';
     }
   });
+
+  // Show/hide folder summary
+  renderFolderSummary(folder);
+}
+
+// ============================================================
+// Folder Summary: Core vs Tech/Flex Card Analysis
+// ============================================================
+
+function renderFolderSummary(folder) {
+  const container = document.getElementById('decks-folder-summary');
+  if (!container) return;
+
+  // Hide summary when "All" is selected or no folder
+  if (!folder) {
+    container.classList.add('display-none');
+    container.innerHTML = '';
+    return;
+  }
+
+  // Get decks in this folder
+  const folderDecks = (window.userDecks || []).filter(d => d.folder === folder);
+  if (folderDecks.length < 2) {
+    container.classList.add('display-none');
+    container.innerHTML = '';
+    return;
+  }
+
+  const totalDecks = folderDecks.length;
+
+  // Analyze all cards across all decks in the folder
+  // cardKey → { counts: [count_in_deck1, count_in_deck2, ...], name, setCode, setNumber }
+  const cardAnalysis = new Map();
+
+  folderDecks.forEach((deck, deckIdx) => {
+    if (!deck.cards) return;
+    for (const [rawKey, count] of Object.entries(deck.cards)) {
+      if (count <= 0) continue;
+      // Parse "CardName (SET NUMBER)" format
+      const keyStr = String(rawKey || '').trim();
+      let cardName = keyStr, setCode = '', setNumber = '';
+      const m = keyStr.match(/^(.+?)\s+\(([^\s()]+)\s+([^)]+)\)$/i);
+      if (m) { cardName = m[1].trim(); setCode = m[2].toUpperCase(); setNumber = m[3].toUpperCase(); }
+      // Normalize: use card name only so different prints of same card merge
+      const normName = cardName.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+      if (!cardAnalysis.has(normName)) {
+        cardAnalysis.set(normName, {
+          name: cardName,
+          setCode: setCode,
+          setNumber: setNumber,
+          rawKey: rawKey,
+          counts: new Array(totalDecks).fill(0)
+        });
+      }
+      const entry = cardAnalysis.get(normName);
+      entry.counts[deckIdx] = count;
+      // Keep the most common print info (first occurrence)
+    }
+  });
+
+  // Classify cards
+  const coreCards = []; // in ALL decks with exact same count
+  const flexCards = []; // in ALL decks but different counts
+  const techCards = []; // in SOME decks but not all
+
+  for (const [normName, data] of cardAnalysis) {
+    const inAllDecks = data.counts.every(c => c > 0);
+    const minCount = Math.min(...data.counts);
+    const maxCount = Math.max(...data.counts);
+
+    if (inAllDecks && minCount === maxCount) {
+      coreCards.push({ ...data, count: minCount, category: 'core' });
+    } else if (inAllDecks && minCount !== maxCount) {
+      // Core portion = minCount, flex portion = variable part
+      if (minCount > 0) {
+        coreCards.push({ ...data, count: minCount, category: 'core' });
+      }
+      flexCards.push({ ...data, minCount, maxCount, deckCount: totalDecks, category: 'flex' });
+    } else {
+      const decksWithCard = data.counts.filter(c => c > 0).length;
+      techCards.push({ ...data, minCount: Math.min(...data.counts.filter(c => c > 0)), maxCount, deckCount: decksWithCard, category: 'tech' });
+    }
+  }
+
+  // Sort each group by card type (Pokemon → Trainer → Energy), then by count descending
+  const sortByTypeAndCount = (a, b) => {
+    const typeOrder = { 'Pokemon': 0, 'Supporter': 1, 'Item': 2, 'Tool': 3, 'Stadium': 4, 'Special Energy': 5, 'Energy': 6 };
+    const aCard = lookupCardData(a);
+    const bCard = lookupCardData(b);
+    const aType = aCard ? getCardTypeCategory(aCard.type || '') : 'Pokemon';
+    const bType = bCard ? getCardTypeCategory(bCard.type || '') : 'Pokemon';
+    const aOrder = typeOrder[aType] ?? 0;
+    const bOrder = typeOrder[bType] ?? 0;
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    return (b.maxCount || b.count || 0) - (a.maxCount || a.count || 0);
+  };
+
+  coreCards.sort(sortByTypeAndCount);
+  flexCards.sort(sortByTypeAndCount);
+  techCards.sort(sortByTypeAndCount);
+
+  const coreTotal = coreCards.reduce((sum, c) => sum + c.count, 0);
+  const flexSlots = flexCards.reduce((sum, c) => sum + (c.maxCount - (c.minCount || 0)), 0);
+  const isDE = typeof getLang === 'function' && getLang() === 'de';
+
+  // Build HTML
+  let html = `
+    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 12px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <h3 style="margin: 0; font-size: 1.2em;">📊 ${isDE ? 'Ordner-Analyse' : 'Folder Analysis'}: ${escapeHtml(folder)}</h3>
+        <div style="font-size: 0.85em; opacity: 0.8;">
+          ${totalDecks} ${isDE ? 'Deck-Versionen' : 'Deck Versions'} • ${coreTotal} ${isDE ? 'Core-Karten' : 'Core Cards'} • ${flexCards.length + techCards.length} ${isDE ? 'variable Slots' : 'Flex Slots'}
+        </div>
+      </div>
+  `;
+
+  // Core Section
+  if (coreCards.length > 0) {
+    html += buildSummarySection(
+      isDE ? '🔒 Core (100% identisch)' : '🔒 Core (100% identical)',
+      `${coreCards.length} ${isDE ? 'Karten' : 'cards'}, ${coreTotal} ${isDE ? 'Kopien' : 'copies'}`,
+      coreCards,
+      '#4CAF50',
+      'core'
+    );
+  }
+
+  // Flex Section (in all decks, varying count)
+  if (flexCards.length > 0) {
+    html += buildSummarySection(
+      isDE ? '🔄 Flex (in allen Decks, variabler Count)' : '🔄 Flex (in all decks, varying count)',
+      `${flexCards.length} ${isDE ? 'Karten' : 'cards'}`,
+      flexCards,
+      '#FF9800',
+      'flex'
+    );
+  }
+
+  // Tech Section (not in all decks)
+  if (techCards.length > 0) {
+    html += buildSummarySection(
+      isDE ? '🧪 Tech (nicht in allen Versionen)' : '🧪 Tech (not in all versions)',
+      `${techCards.length} ${isDE ? 'Karten' : 'cards'}`,
+      techCards,
+      '#E91E63',
+      'tech'
+    );
+  }
+
+  html += `</div>`;
+  container.innerHTML = html;
+  container.classList.remove('display-none');
+}
+
+function lookupCardData(entry) {
+  if (!window.allCardsDatabase || !entry) return null;
+  if (entry.setCode && entry.setNumber) {
+    if (typeof window.getIndexedCardBySetNumber === 'function') {
+      const found = window.getIndexedCardBySetNumber(entry.setCode, entry.setNumber);
+      if (found) return found;
+    }
+    if (window.cardsBySetNumberMap) {
+      const found = window.cardsBySetNumberMap[`${entry.setCode}-${entry.setNumber}`];
+      if (found) return found;
+    }
+    const found = window.allCardsDatabase.find(c => c.set === entry.setCode && c.number === entry.setNumber);
+    if (found) return found;
+  }
+  return window.allCardsDatabase.find(c => c.name === entry.name) || null;
+}
+
+function buildSummarySection(title, subtitle, cards, accentColor, category) {
+  const cardItems = cards.map(card => {
+    const cardData = lookupCardData(card);
+    let imageUrl = '';
+    if (cardData) {
+      imageUrl = cardData.image_url || '';
+      if (!imageUrl && typeof buildCardImageUrl === 'function') {
+        imageUrl = buildCardImageUrl(cardData.set || card.setCode, cardData.number || card.setNumber, cardData.rarity || 'C');
+      }
+    }
+    if (!imageUrl) {
+      imageUrl = `https://via.placeholder.com/245x342/667eea/ffffff?text=${encodeURIComponent(card.name)}`;
+    }
+    const safeImage = escapeHtml(imageUrl);
+    const safeName = escapeHtml(card.name);
+
+    // Badge text
+    let badgeText = '';
+    if (category === 'core') {
+      badgeText = `${card.count}x`;
+    } else if (category === 'flex') {
+      badgeText = `${card.minCount}–${card.maxCount}x`;
+    } else {
+      badgeText = `${card.minCount || 1}–${card.maxCount}x`;
+    }
+
+    // Deck presence for tech cards
+    let presenceBadge = '';
+    if (category === 'tech' && card.counts) {
+      presenceBadge = `<div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,0.75);color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">${card.deckCount}/${card.counts.length}</div>`;
+    }
+
+    return `
+      <div style="position:relative;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.2);width:90px;flex-shrink:0;">
+        <img src="${safeImage}" alt="${safeName}" style="width:100%;display:block;" loading="lazy" 
+             onerror="this.src='https://via.placeholder.com/245x342/667eea/ffffff?text=${encodeURIComponent(card.name)}'"
+             onclick="if(typeof showSingleCard==='function')showSingleCard('${escapeJsSingleQuoted(imageUrl)}','${escapeJsSingleQuoted(card.name)}')">
+        <div style="position:absolute;top:3px;right:3px;background:${accentColor};color:white;padding:1px 6px;border-radius:10px;font-size:11px;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,0.4);">${badgeText}</div>
+        ${presenceBadge}
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div style="margin-bottom: 15px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <span style="font-size:1em;font-weight:700;">${title}</span>
+        <span style="font-size:0.8em;opacity:0.7;">${subtitle}</span>
+      </div>
+      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;">
+        ${cardItems}
+      </div>
+    </div>
+  `;
 }
 
 // ============================================================
@@ -2691,6 +2917,7 @@ window.createDeckFolder = createDeckFolder;
 window.moveDeckToFolder = moveDeckToFolder;
 window.renderFolderNav = renderFolderNav;
 window.filterDecksByFolder = filterDecksByFolder;
+window.renderFolderSummary = renderFolderSummary;
 window.openCompareSavedDeck = openCompareSavedDeck;
 window.showDeckComparison = showDeckComparison;
 window.addCompareNewCardsToProxy = addCompareNewCardsToProxy;

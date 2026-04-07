@@ -756,6 +756,145 @@
         flushBattleJournalOutbox(false);
     }
 
+    // ── Journal History (Profile Tab) ───────────────────────
+
+    let journalHistoryCache = [];
+
+    async function loadJournalHistory() {
+        const entries = [];
+
+        // 1) Pending entries from localStorage outbox (not yet synced)
+        const outbox = getBattleJournalOutbox();
+        outbox.forEach(e => entries.push({ ...e, _pending: true }));
+
+        // 2) Synced entries from Firestore
+        const user = window.auth?.currentUser;
+        if (user && window.db && typeof window.db.collection === 'function') {
+            try {
+                const snap = await window.db
+                    .collection('users').doc(user.uid)
+                    .collection('battleJournal')
+                    .orderBy('createdAtMs', 'desc')
+                    .limit(200)
+                    .get();
+                const pendingIds = new Set(outbox.map(e => e.id));
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    if (!pendingIds.has(doc.id)) {
+                        entries.push({ id: doc.id, ...data, _pending: false });
+                    }
+                });
+            } catch (err) {
+                console.error('[Battle Journal] Failed to load history from Firestore', err);
+            }
+        }
+
+        // Sort newest first
+        entries.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+        journalHistoryCache = entries;
+        return entries;
+    }
+
+    function renderJournalHistory() {
+        const listEl = document.getElementById('journalHistoryList');
+        const statsEl = document.getElementById('journalHistoryStats');
+        const tournamentSelect = document.getElementById('journalFilterTournament');
+        if (!listEl) return;
+
+        const filterTournament = tournamentSelect?.value || '';
+        const filterResult = document.getElementById('journalFilterResult')?.value || '';
+
+        // Filter
+        let filtered = journalHistoryCache;
+        if (filterTournament) filtered = filtered.filter(e => e.tournamentName === filterTournament);
+        if (filterResult) filtered = filtered.filter(e => e.result === filterResult);
+
+        // Stats
+        const totalW = filtered.filter(e => e.result === 'win').length;
+        const totalL = filtered.filter(e => e.result === 'loss').length;
+        const totalT = filtered.filter(e => e.result === 'tie').length;
+        const total = filtered.length;
+        const winRate = total > 0 ? Math.round((totalW / total) * 100) : 0;
+
+        if (statsEl) {
+            statsEl.innerHTML = `
+                <div class="bj-history-stat"><strong>${total}</strong><span>${battleJournalText('bj.histMatches', 'Matches')}</span></div>
+                <div class="bj-history-stat is-win"><strong>${totalW}</strong><span>${battleJournalText('bj.win', 'Win')}</span></div>
+                <div class="bj-history-stat is-loss"><strong>${totalL}</strong><span>${battleJournalText('bj.loss', 'Loss')}</span></div>
+                <div class="bj-history-stat is-tie"><strong>${totalT}</strong><span>${battleJournalText('bj.tie', 'Tie')}</span></div>
+                <div class="bj-history-stat"><strong>${winRate}%</strong><span>${battleJournalText('bj.histWinRate', 'Win Rate')}</span></div>
+            `;
+        }
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = getEmptyStateBoxHtml({
+                title: escapeHtml(battleJournalText('bj.histEmpty', 'No journal entries yet.')),
+                description: escapeHtml(battleJournalText('bj.histEmptyDesc', 'Log your first match to start tracking your results!')),
+                icon: 'professor'
+            });
+            return;
+        }
+
+        const locale = getLang() === 'de' ? 'de-DE' : 'en-GB';
+        listEl.innerHTML = filtered.map(entry => {
+            const resultClass = entry.result === 'win' ? 'is-win' : (entry.result === 'loss' ? 'is-loss' : 'is-tie');
+            const resultText = entry.result === 'win' ? battleJournalText('bj.win', 'Win')
+                : entry.result === 'loss' ? battleJournalText('bj.loss', 'Loss')
+                : battleJournalText('bj.tie', 'Tie');
+            const turnText = entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : (entry.turnOrder === 'second' ? battleJournalText('bj.secondShort', '2nd') : '');
+            const bestOfText = entry.bestOf === 'bo3' ? 'BO3' : 'BO1';
+            const dateStr = new Date(entry.createdAtMs || Date.now()).toLocaleString(locale, { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+            const tournamentPart = entry.tournamentName ? `<div class="bj-history-tournament">${escapeHtml(entry.tournamentName)}</div>` : '';
+            const pendingBadge = entry._pending ? `<span class="bj-history-pending">${escapeHtml(battleJournalText('bj.histPending', 'pending'))}</span>` : '';
+
+            let bo3Line = '';
+            if (entry.bestOf === 'bo3' && Array.isArray(entry.bo3Games)) {
+                const gameTexts = entry.bo3Games
+                    .filter(g => g && (g.turnOrder || g.result))
+                    .map((g, i) => {
+                        const gTurn = g.turnOrder === 'first' ? '1st' : (g.turnOrder === 'second' ? '2nd' : '-');
+                        const gRes = g.result || '-';
+                        return `G${i + 1}: ${gTurn}/${gRes}`;
+                    });
+                if (gameTexts.length > 0) bo3Line = `<div class="bj-history-games">${escapeHtml(gameTexts.join(' · '))}</div>`;
+            }
+
+            return `
+                <div class="bj-history-item ${resultClass}">
+                    <div class="bj-history-item-main">
+                        ${tournamentPart}
+                        <div class="bj-history-matchup">
+                            <strong>${escapeHtml(entry.ownDeck || 'Deck')}</strong>
+                            <span class="bj-history-vs">vs</span>
+                            <strong>${escapeHtml(entry.opponentArchetype || 'Opponent')}</strong>
+                        </div>
+                        <div class="bj-history-meta">${escapeHtml(bestOfText)}${turnText ? ' · ' + escapeHtml(turnText) : ''} · ${escapeHtml(dateStr)} ${pendingBadge}</div>
+                        ${bo3Line}
+                    </div>
+                    <span class="battle-journal-result-pill ${resultClass}">${escapeHtml(resultText)}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function populateJournalTournamentFilter() {
+        const select = document.getElementById('journalFilterTournament');
+        if (!select) return;
+        const tournaments = [...new Set(journalHistoryCache.map(e => e.tournamentName).filter(Boolean))].sort();
+        const current = select.value;
+        select.innerHTML = `<option value="">${escapeHtml(battleJournalText('bj.allTournaments', 'All Tournaments'))}</option>`;
+        tournaments.forEach(name => {
+            select.innerHTML += `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
+        });
+        if (current && tournaments.includes(current)) select.value = current;
+    }
+
+    async function openJournalHistoryTab() {
+        await loadJournalHistory();
+        populateJournalTournamentFilter();
+        renderJournalHistory();
+    }
+
     window.openBattleJournalSheet = openBattleJournalSheet;
     window.closeBattleJournalSheet = closeBattleJournalSheet;
     window.submitBattleJournalEntry = submitBattleJournalEntry;
@@ -765,6 +904,8 @@
     window.renderBattleJournalSummary = renderBattleJournalSummary;
     window.toggleBattleJournalTheme = toggleBattleJournalTheme;
     window.applyLastTournament = applyLastTournament;
+    window.renderJournalHistory = renderJournalHistory;
+    window.openJournalHistoryTab = openJournalHistoryTab;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBattleJournal, { once: true });

@@ -5822,6 +5822,88 @@ details[open] > .tier-trending-summary::after {
     text-overflow: ellipsis;
 }
 
+/* ── Journal History (Profile Tab) ──────────────────────── */
+.battle-journal-history-stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.bj-history-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--card-bg, #f7f8fa);
+    border-radius: 10px;
+    padding: 10px 18px;
+    min-width: 70px;
+}
+.bj-history-stat strong { font-size: 1.3rem; }
+.bj-history-stat span { font-size: 0.78rem; color: var(--text-muted, #888); }
+.bj-history-stat.is-win strong { color: #1f8b4d; }
+.bj-history-stat.is-loss strong { color: #c0392b; }
+.bj-history-stat.is-tie strong { color: #e67e22; }
+
+.battle-journal-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.bj-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--card-bg, #f7f8fa);
+    border-left: 4px solid #999;
+}
+.bj-history-item.is-win { border-left-color: #1f8b4d; }
+.bj-history-item.is-loss { border-left-color: #c0392b; }
+.bj-history-item.is-tie { border-left-color: #e67e22; }
+
+.bj-history-item-main { flex: 1; min-width: 0; }
+.bj-history-tournament {
+    font-size: 0.78rem;
+    color: var(--text-muted, #888);
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.bj-history-matchup {
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.bj-history-vs {
+    color: var(--text-muted, #999);
+    font-weight: 400;
+    font-size: 0.82rem;
+}
+.bj-history-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted, #888);
+    margin-top: 2px;
+}
+.bj-history-games {
+    font-size: 0.75rem;
+    color: var(--text-muted, #999);
+    margin-top: 2px;
+}
+.bj-history-pending {
+    display: inline-block;
+    font-size: 0.7rem;
+    background: #e67e22;
+    color: #fff;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
 .battle-journal-footer {
     margin-top: 16px;
     border-top: 1px solid rgba(31, 45, 61, 0.1);

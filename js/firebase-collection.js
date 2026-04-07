@@ -1904,6 +1904,11 @@ function switchProfileTab(tabName) {
   if (activeBtn) {
     activeBtn.classList.add('active');
   }
+
+  // Auto-load journal history when switching to journal tab
+  if (tabName === 'journal' && typeof openJournalHistoryTab === 'function') {
+    openJournalHistoryTab();
+  }
 }
 // Filter collection by search term
 function filterCollection() {

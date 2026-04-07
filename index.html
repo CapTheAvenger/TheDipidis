@@ -2231,6 +2231,9 @@
                             <button class="profile-tab-btn" onclick="switchProfileTab('metabinder')">
                                 <span data-i18n="profile.metaBinder">Meta Binder</span>
                             </button>
+                            <button class="profile-tab-btn" onclick="switchProfileTab('journal')">
+                                <span data-i18n="bj.profileTitle">Battle Journal</span>
+                            </button>
                         </div>
                         
                         <!-- Collection Tab -->
@@ -2407,6 +2410,28 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Journal History Tab -->
+                        <div id="profile-journal" class="profile-tab-content display-none">
+                            <div class="flex align-center gap-10 mb-15 flex-wrap">
+                                <h2 data-i18n="bj.profileTitle">Battle Journal</h2>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="openBattleJournalSheet()" data-i18n="bj.openBtn">Log Match</button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="flushBattleJournalOutbox()" data-i18n="bj.syncNow">Sync Now</button>
+                            </div>
+                            <div id="journalHistoryStats" class="battle-journal-history-stats mb-15"></div>
+                            <div id="journalHistoryFilters" class="flex gap-10 mb-15 flex-wrap">
+                                <select id="journalFilterTournament" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark">
+                                    <option value="" data-i18n="bj.allTournaments">All Tournaments</option>
+                                </select>
+                                <select id="journalFilterResult" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark">
+                                    <option value="" data-i18n="bj.allResults">All Results</option>
+                                    <option value="win" data-i18n="bj.win">Win</option>
+                                    <option value="loss" data-i18n="bj.loss">Loss</option>
+                                    <option value="tie" data-i18n="bj.tie">Tie</option>
+                                </select>
+                            </div>
+                            <div id="journalHistoryList" class="battle-journal-history-list"></div>
                         </div>
 
                         <!-- Settings Tab -->

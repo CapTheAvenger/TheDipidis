@@ -6475,7 +6475,8 @@ body.battle-journal-open {
     }
 
     /* --- Fix 2: Card filter bar → horizontal scroll (swipe) --- */
-    .cards-header > div:nth-child(2) > div {
+    /* Exclude type-filter divs — those should wrap into rows (see mobile-responsive.css) */
+    .cards-header > div:nth-child(2) > div:not(.city-league-card-type-filter):not(.current-meta-cards-type-filter):not(.past-meta-cards-type-filter) {
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
         scrollbar-width: none;
@@ -6483,7 +6484,7 @@ body.battle-journal-open {
         padding-bottom: 4px !important;
     }
 
-    .cards-header > div:nth-child(2) > div::-webkit-scrollbar {
+    .cards-header > div:nth-child(2) > div:not(.city-league-card-type-filter):not(.current-meta-cards-type-filter):not(.past-meta-cards-type-filter)::-webkit-scrollbar {
         display: none;
     }
 

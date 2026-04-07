@@ -260,19 +260,18 @@
     }
 }
 
-/* === COMPACT CARD GRID (Rarity Switcher Modal) === */
+/* === COMPACT CARD GRID (Grid View Modal) === */
 @media (max-width: 768px) {
     .compact-card-grid {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
-        gap: 8px !important;
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)) !important;
+        gap: 4px !important;
     }
 }
 
 @media (max-width: 480px) {
     .compact-card-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 6px !important;
+        grid-template-columns: repeat(6, 1fr) !important;
+        gap: 3px !important;
     }
 }
 

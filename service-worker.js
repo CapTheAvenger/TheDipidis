@@ -1,7 +1,7 @@
 // Service Worker for Pokemon TCG Analysis PWA
 // Strategy: Cache static shell, network-first for data
 
-const CACHE_NAME = 'tcg-analysis-v202604062000';
+const CACHE_NAME = 'tcg-analysis-v202604072315';
 
 // Static shell — cached on install
 const SHELL_ASSETS = [
@@ -21,6 +21,11 @@ const SHELL_ASSETS = [
   './css/de-overview-tabs.css',
   './css/profile-howto-info.css',
   './css/dashboard-theme.css',
+  './css/mobile-responsive.css',
+  './css/ux-step1.css',
+  './css/ux-step2.css',
+  './css/ux-step3.css',
+  './css/ux-step4.css',
   './js/inline-init.js',
   './js/app-utils.js',
   './js/i18n.js',

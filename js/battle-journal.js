@@ -87,6 +87,8 @@
             turnOrderInput: document.getElementById('battleJournalTurnOrder'),
             resultInput: document.getElementById('battleJournalResult'),
             gameDetails: document.getElementById('battleJournalGameDetails'),
+            lastTournamentRow: document.getElementById('battleJournalLastTournamentRow'),
+            lastTournamentLabel: document.getElementById('battleJournalLastTournamentLabel'),
             statusBadge: document.getElementById('battleJournalStatusBadge'),
             pendingCount: document.getElementById('battleJournalPendingCount'),
             pendingList: document.getElementById('battleJournalPendingList'),
@@ -189,6 +191,40 @@
         if (els.opponentValue && !els.opponentValue.value && draft.opponentArchetype) {
             els.opponentValue.value = draft.opponentArchetype;
         }
+    }
+
+    // ── Last tournament quick-select ─────────────────────────
+
+    function getLastTournament() {
+        const entries = getBattleJournalOutbox();
+        // Find the most recent entry that has a tournament name
+        for (let i = entries.length - 1; i >= 0; i--) {
+            if (entries[i]?.tournamentName) {
+                return { tournamentName: entries[i].tournamentName, ownDeck: entries[i].ownDeck || '' };
+            }
+        }
+        return null;
+    }
+
+    function renderLastTournamentButton() {
+        const els = battleJournalElements();
+        if (!els.lastTournamentRow || !els.lastTournamentLabel) return;
+        const last = getLastTournament();
+        if (!last) {
+            els.lastTournamentRow.classList.add('d-none');
+            return;
+        }
+        const deckSuffix = last.ownDeck ? ` (${last.ownDeck})` : '';
+        els.lastTournamentLabel.textContent = last.tournamentName + deckSuffix;
+        els.lastTournamentRow.classList.remove('d-none');
+    }
+
+    function applyLastTournament() {
+        const els = battleJournalElements();
+        const last = getLastTournament();
+        if (!last) return;
+        if (els.tournamentName) els.tournamentName.value = last.tournamentName;
+        if (els.ownDeckValue) els.ownDeckValue.value = last.ownDeck;
     }
 
     // ── Dynamic game rows ────────────────────────────────────
@@ -646,7 +682,9 @@
     function openBattleJournalSheet() {
         const els = battleJournalElements();
         if (!els.overlay) return;
-        applyBattleJournalDraft();
+        // Always start with a blank form
+        resetBattleJournalForm();
+        renderLastTournamentButton();
         renderBattleJournalSummary();
         updateThemeVisual();
         els.overlay.classList.add('is-open');
@@ -657,7 +695,8 @@
     function closeBattleJournalSheet() {
         const els = battleJournalElements();
         if (!els.overlay) return;
-        persistBattleJournalDraftFromForm();
+        // Don't persist draft — journal opens blank every time
+        localStorage.removeItem(BATTLE_JOURNAL_DRAFT_KEY);
         els.overlay.classList.remove('is-open');
         els.overlay.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('battle-journal-open');
@@ -725,6 +764,7 @@
     window.flushBattleJournalOutbox = flushBattleJournalOutbox;
     window.renderBattleJournalSummary = renderBattleJournalSummary;
     window.toggleBattleJournalTheme = toggleBattleJournalTheme;
+    window.applyLastTournament = applyLastTournament;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBattleJournal, { once: true });

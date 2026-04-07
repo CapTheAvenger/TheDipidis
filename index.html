@@ -3191,6 +3191,12 @@
             </div>
 
             <form id="battleJournalForm" class="battle-journal-form" onsubmit="submitBattleJournalEntry(event)">
+                <div id="battleJournalLastTournamentRow" class="battle-journal-last-tournament d-none">
+                    <button type="button" id="battleJournalLastTournamentBtn" class="battle-journal-secondary-btn battle-journal-last-btn" onclick="applyLastTournament()">
+                        <span data-i18n="bj.continueTournament">Continue:</span> <span id="battleJournalLastTournamentLabel"></span>
+                    </button>
+                </div>
+
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.tournamentName">Tournament Name</span>
                     <input id="battleJournalTournamentName" type="text" class="battle-journal-input" autocomplete="off" data-i18n-placeholder="bj.tournamentNamePlaceholder" placeholder="e.g. City League Hamburg...">

@@ -5805,6 +5805,23 @@ details[open] > .tier-trending-summary::after {
     color: var(--text-dark);
 }
 
+.battle-journal-last-tournament {
+    margin-bottom: 6px;
+}
+.battle-journal-last-btn {
+    width: 100%;
+    min-width: unset;
+    min-height: 40px;
+    font-size: 0.92rem;
+    text-align: left;
+    border: 1px dashed rgba(31, 45, 61, 0.25);
+    border-radius: 10px;
+    padding: 6px 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .battle-journal-footer {
     margin-top: 16px;
     border-top: 1px solid rgba(31, 45, 61, 0.1);

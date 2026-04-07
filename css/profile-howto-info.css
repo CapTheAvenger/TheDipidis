@@ -43,3 +43,23 @@
 .how-to-use-info-block p {
     line-height: 1.7;
 }
+
+/* ── Profile tab header: compact override ─────────────── */
+#profile > .container > .header {
+    padding: 10px 16px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    border-bottom-width: 3px;
+}
+#profile > .container > .header h2 {
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+}
+#profile > .container > .header h2 img {
+    width: 22px;
+    height: 22px;
+}
+#profile > .container > .header p {
+    font-size: 0.8rem;
+    margin: 0;
+}

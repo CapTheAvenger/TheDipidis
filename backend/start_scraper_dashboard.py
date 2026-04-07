@@ -55,14 +55,21 @@ BATCH_META = ["5", "6", "7", "8", "9", "10"]
 BATCH_FULL = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 
 def run_script(script_filename: str, wait_at_end: bool = True) -> None:
-    script_path = os.path.join(os.path.dirname(__file__), script_filename)
+    backend_dir = os.path.dirname(__file__)
+    script_path = os.path.join(backend_dir, script_filename)
     if not os.path.exists(script_path):
         print(f"\n  [ERROR] Script not found: {script_filename}")
         time.sleep(2)
         return
 
+    # Ensure backend/core/ is on PYTHONPATH so scrapers can import card_scraper_shared
+    env = os.environ.copy()
+    core_dir = os.path.join(backend_dir, "core")
+    existing = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = core_dir + (os.pathsep + existing if existing else "")
+
     print(f"\n  Launching {script_filename} ...\n")
-    subprocess.run([sys.executable, script_path], check=False)
+    subprocess.run([sys.executable, script_path], env=env, check=False)
     print(f"\n  {script_filename} finished.")
     if wait_at_end:
         input("\n  Press Enter to return to menu...")

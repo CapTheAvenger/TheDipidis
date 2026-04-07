@@ -1297,6 +1297,25 @@
             filterAndRenderCards();
         }
         
+        function getFormatLegalSetCodes(formatCode) {
+            const map = window.setOrderMap;
+            if (!map || !formatCode) return null;
+            const parts = formatCode.split('-');
+            if (parts.length !== 2) return null;
+            const startOrder = map[parts[0].toUpperCase()];
+            const endOrder = map[parts[1].toUpperCase()];
+            if (startOrder == null || endOrder == null) return null;
+            const minOrder = Math.min(startOrder, endOrder);
+            const maxOrder = Math.max(startOrder, endOrder);
+            const legalSets = new Set();
+            for (const [code, order] of Object.entries(map)) {
+                if (order >= minOrder && order <= maxOrder) legalSets.add(code);
+            }
+            // Promo & energy sets from current era are always Standard-legal
+            ['SVP', 'SVE'].forEach(code => { if (map[code] != null) legalSets.add(code); });
+            return legalSets;
+        }
+
                 function filterAndRenderCards(options = {}) {
           try {
             if (!window.allCardsData || window.allCardsData.length === 0) {
@@ -1386,7 +1405,20 @@
             let failedMainPokemon = 0;
             let failedArchetype = 0;
             let failedMetaFilter = 0;
+            let failedFormatSet = 0;
             let failedValidation = 0;
+            
+            // In All Prints mode + meta period: restrict to format-legal sets
+            let metaLegalSets = null;
+            if (!showOnlyOnePrint && selectedMetaFilters.length > 0) {
+                metaLegalSets = new Set();
+                for (const meta of selectedMetaFilters) {
+                    const sets = getFormatLegalSetCodes(meta);
+                    if (sets) sets.forEach(s => metaLegalSets.add(s));
+                }
+                if (metaLegalSets.size === 0) metaLegalSets = null;
+                else devLog(`[Cards Tab] All Prints + Meta: restricting to ${metaLegalSets.size} format-legal sets`);
+            }
             
             window.filteredCardsData = window.allCardsData.filter(card => {
                 // Skip invalid cards (allow missing image_url — UI will show placeholder)
@@ -1635,6 +1667,12 @@
                     }
                 }
                 
+                // In All Prints + meta period: only show prints from format-legal sets
+                if (metaLegalSets && !metaLegalSets.has(card.set)) {
+                    failedFormatSet++;
+                    return false;
+                }
+                
                 passedFilters++;
                 return true;
             });
@@ -1652,6 +1690,7 @@
             devLog(`  - Failed main pokemon: ${failedMainPokemon}`);
             devLog(`  - Failed archetype: ${failedArchetype}`);
             devLog(`  - Failed meta filter: ${failedMetaFilter}`);
+            devLog(`  - Failed format set: ${failedFormatSet}`);
             // Deduplicate cards (same card name, different prints) - prefer print from coverage data
             // Only deduplicate if showOnlyOnePrint is enabled
             if (showOnlyOnePrint) {

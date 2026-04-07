@@ -2432,7 +2432,7 @@ function buildSummarySection(title, subtitle, cards, accentColor, category) {
         <span style="font-size:1em;font-weight:700;">${title}</span>
         <span style="font-size:0.8em;opacity:0.7;">${subtitle}</span>
       </div>
-      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         ${cardItems}
       </div>
     </div>

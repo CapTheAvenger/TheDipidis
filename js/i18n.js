@@ -534,7 +534,7 @@ const translations = {
     'bj.validationBestOf':      'Please choose BO1 or BO3.',
     'bj.validationGames':       'Please fill Going and Result for all games.',
     'bj.validationTurnOrder':   'Please choose whether you went first or second.',
-    'bj.validationResult':      'Please choose the match result.'
+    'bj.validationResult':      'Please choose the match result.',
 
     // ── Beginner Tooltip ────────────────────────────────────
     'tip.beginnerTitle':       'Beginner Strategy',
@@ -1394,7 +1394,7 @@ const translations = {
     'bj.validationBestOf':      'Bitte wähle BO1 oder BO3.',
     'bj.validationGames':       'Bitte fülle Going und Result für alle Spiele aus.',
     'bj.validationTurnOrder':   'Bitte wähle, ob du First oder Second warst.',
-    'bj.validationResult':      'Bitte wähle das Match-Ergebnis aus.'
+    'bj.validationResult':      'Bitte wähle das Match-Ergebnis aus.',
 
     // ── Beginner Tooltip ────────────────────────────────────
     'tip.beginnerTitle':       'Einsteiger-Strategie',

@@ -2271,7 +2271,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (trainer.length > 0) summary += `${t('deck.trainer')}\n${trainer.join('\n')}\n\n`;
             if (energy.length > 0) summary += `${t('deck.energy')}\n${energy.join('\n')}`;
             
-            if (confirm(summary + '\n\n' + t('deck.autoCompleteContinue'))) {
+            devLog('[autoComplete] Summary:', summary);
+            {
                 // Add all cards to deck using PREFERRED versions (newest low-rarity)
                 cardsToAdd.forEach(card => {
                     // CRITICAL: Get preferred version for this card to match Grid View display
@@ -2785,9 +2786,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 line += ` → ${c.consistencyScore.toFixed(0)})`;
                 summary += line + '\n';
             });
-            summary += `\n${t('deck.autoCompleteContinue')}`;
+            devLog('[autoCompleteConsistency] Summary:', summary);
 
-            if (confirm(summary)) {
+            {
                 cardsToAdd.forEach(card => {
                     const cardName = fixCardNameEncoding((card.card_name || '').toString().trim());
                     if (!cardName) return;

@@ -3400,17 +3400,20 @@
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
-            // Force refresh: unregister old SW, clear caches, re-register
-            navigator.serviceWorker.getRegistrations().then(function(regs) {
-                var needsRefresh = false;
-                regs.forEach(function(reg) {
-                    if (reg.active && reg.active.scriptURL.indexOf('service-worker.js') !== -1) {
-                        // Check if SW is outdated by comparing cache name
-                        reg.update();
-                    }
-                });
+            // Auto-reload when a new Service Worker takes control
+            // This ensures users always see the latest version without clearing cache
+            var refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', function() {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
             });
-            navigator.serviceWorker.register('./service-worker.js').catch(function(err) {
+
+            navigator.serviceWorker.register('./service-worker.js').then(function(reg) {
+                // Check for SW updates every 5 minutes
+                setInterval(function() { reg.update(); }, 5 * 60 * 1000);
+            }).catch(function(err) {
                 console.warn('SW registration failed:', err);
             });
         });

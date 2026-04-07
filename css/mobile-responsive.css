@@ -556,9 +556,24 @@
 
 /* === HORIZONTAL BUTTON ROWS: SCROLL INSTEAD OF SQUEEZE === */
 @media (max-width: 768px) {
+    /* Type filters: WRAP into multiple rows (no horizontal scroll) */
     .city-league-card-type-filter,
     .current-meta-cards-type-filter,
-    .past-meta-cards-type-filter,
+    .past-meta-cards-type-filter {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+    }
+
+    .city-league-card-type-filter > *,
+    .current-meta-cards-type-filter > *,
+    .past-meta-cards-type-filter > * {
+        flex: 0 0 auto;
+    }
+
+    /* Rarity + toggle groups: keep horizontal scroll */
     .city-league-cards-rarity-toggle,
     .current-meta-cards-rarity-toggle,
     .past-meta-cards-rarity-toggle,
@@ -574,9 +589,6 @@
         scrollbar-width: none !important;
     }
 
-    .city-league-card-type-filter::-webkit-scrollbar,
-    .current-meta-cards-type-filter::-webkit-scrollbar,
-    .past-meta-cards-type-filter::-webkit-scrollbar,
     .city-league-cards-rarity-toggle::-webkit-scrollbar,
     .current-meta-cards-rarity-toggle::-webkit-scrollbar,
     .past-meta-cards-rarity-toggle::-webkit-scrollbar,
@@ -586,9 +598,6 @@
         display: none;
     }
 
-    .city-league-card-type-filter > *,
-    .current-meta-cards-type-filter > *,
-    .past-meta-cards-type-filter > *,
     .city-league-cards-rarity-toggle > *,
     .current-meta-cards-rarity-toggle > *,
     .past-meta-cards-rarity-toggle > *,
@@ -596,6 +605,15 @@
     .current-meta-cards-controls-row .btn-toggle-group > *,
     .past-meta-cards-controls-row .btn-toggle-group > * {
         flex: 0 0 auto;
+    }
+}
+
+/* Type-filter buttons: compact for wrapping on mobile */
+@media (max-width: 768px) {
+    .city-league-type-btn {
+        padding: 4px 7px;
+        font-size: 0.72em;
+        border-radius: 6px;
     }
 }
 

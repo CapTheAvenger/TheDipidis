@@ -182,11 +182,13 @@
                 .join('');
         }
 
-        const ownValue = String(els.ownDeckValue?.value || draft.ownDeck || getBattleJournalCurrentOwnDeck() || allOwnDeckChoices[0] || '');
-        if (els.ownDeckValue && !els.ownDeckValue.value && ownValue) els.ownDeckValue.value = ownValue;
-
-        const opponentValue = String(els.opponentValue?.value || draft.opponentArchetype || allOpponentChoices[0] || '');
-        if (els.opponentValue && !els.opponentValue.value && opponentValue) els.opponentValue.value = opponentValue;
+        // Only restore draft values — never auto-fill so users can type freely
+        if (els.ownDeckValue && !els.ownDeckValue.value && draft.ownDeck) {
+            els.ownDeckValue.value = draft.ownDeck;
+        }
+        if (els.opponentValue && !els.opponentValue.value && draft.opponentArchetype) {
+            els.opponentValue.value = draft.opponentArchetype;
+        }
     }
 
     // ── Dynamic game rows ────────────────────────────────────
@@ -422,9 +424,8 @@
     function applyBattleJournalDraft() {
         const els = battleJournalElements();
         const draft = getBattleJournalDraft();
-        const fallbackDeck = getBattleJournalCurrentOwnDeck();
         if (els.tournamentName) els.tournamentName.value = draft.tournamentName || '';
-        if (els.ownDeckValue) els.ownDeckValue.value = draft.ownDeck || fallbackDeck || '';
+        if (els.ownDeckValue) els.ownDeckValue.value = draft.ownDeck || '';
         if (els.opponentValue) els.opponentValue.value = draft.opponentArchetype || '';
         if (els.bestOfInput) els.bestOfInput.value = draft.bestOf || '';
 
@@ -437,7 +438,7 @@
         const els = battleJournalElements();
         if (els.form) els.form.reset();
         if (els.tournamentName) els.tournamentName.value = '';
-        if (els.ownDeckValue) els.ownDeckValue.value = getBattleJournalCurrentOwnDeck() || '';
+        if (els.ownDeckValue) els.ownDeckValue.value = '';
         if (els.opponentValue) els.opponentValue.value = '';
         if (els.bestOfInput) els.bestOfInput.value = '';
         if (els.turnOrderInput) els.turnOrderInput.value = '';
@@ -445,7 +446,7 @@
         document.querySelectorAll('.battle-journal-choice').forEach(button => button.classList.remove('is-selected'));
         renderGameRows();
         renderDeckChoices();
-        saveBattleJournalDraft({ ownDeck: getBattleJournalCurrentOwnDeck() || '' });
+        localStorage.removeItem(BATTLE_JOURNAL_DRAFT_KEY);
     }
 
     function clearBattleJournalDraft() {

@@ -25,7 +25,9 @@
     <link rel="apple-touch-icon" href="images/pokeball-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" type="text/css">
+    <!-- Non-blocking font load: media="print" swapped to "all" after download -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"></noscript>
     <!-- CSS: All relative paths, styles.css first -->
     <link rel="stylesheet" href="css/styles.css?v=202604080200" type="text/css">
     <link rel="stylesheet" href="css/ui-components.css?v=202604080200" type="text/css">
@@ -304,7 +306,7 @@
                                     </div>
                                     <div class="toolbar-metric toolbar-metric-price" title="Estimated price">
                                         <span class="toolbar-metric-icon">??</span>
-                                        <span id="cityLeagueDeckPrice" class="toolbar-metric-value">0.00 €</span>
+                                        <span id="cityLeagueDeckPrice" class="toolbar-metric-value">0.00 ï¿½</span>
                                     </div>
                                 </div>
                                 <div class="action-divider"></div>
@@ -739,7 +741,7 @@
                                 </div>
                                 <div class="toolbar-metric toolbar-metric-price" title="Estimated price">
                                     <span class="toolbar-metric-icon">??</span>
-                                    <span id="currentMetaDeckPrice" class="toolbar-metric-value">0.00 €</span>
+                                    <span id="currentMetaDeckPrice" class="toolbar-metric-value">0.00 ï¿½</span>
                                 </div>
                             </div>
                             <div class="action-divider"></div>
@@ -959,7 +961,7 @@
                                 </div>
                                 <div class="toolbar-metric toolbar-metric-price" title="Estimated price">
                                     <span class="toolbar-metric-icon">??</span>
-                                    <span id="pastMetaDeckPrice" class="toolbar-metric-value">0.00 €</span>
+                                    <span id="pastMetaDeckPrice" class="toolbar-metric-value">0.00 ï¿½</span>
                                 </div>
                             </div>
                             <div class="action-divider"></div>
@@ -3296,7 +3298,7 @@
     </div>
 
     <!-- External libraries -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google Sign-In loaded lazily after page load to prevent infinite spinner -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
@@ -3396,7 +3398,7 @@
             });
 
             // updateViaCache:'none' ensures the browser NEVER serves a cached
-            // service-worker.js — it always fetches the latest from the server.
+            // service-worker.js ï¿½ it always fetches the latest from the server.
             navigator.serviceWorker.register('./service-worker.js', {
                 updateViaCache: 'none'
             }).then(function(reg) {
@@ -3409,7 +3411,7 @@
                     if (!newWorker) return;
                     newWorker.addEventListener('statechange', function() {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // New SW installed while old one still controls — auto-activates via skipWaiting
+                            // New SW installed while old one still controls ï¿½ auto-activates via skipWaiting
                             showUpdateToast();
                         }
                     });
@@ -3422,7 +3424,7 @@
 
     function showUpdateToast() {
         var toast = document.createElement('div');
-        toast.textContent = '?? Neue Version wird geladen…';
+        toast.textContent = '?? Neue Version wird geladenï¿½';
         toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);' +
             'background:#1a73e8;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;' +
             'z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .5s;';
@@ -3430,6 +3432,15 @@
         setTimeout(function() { toast.style.opacity = '0'; }, 2500);
         setTimeout(function() { toast.remove(); }, 3000);
     }
+
+    // Load Google Sign-In library AFTER page load to prevent infinite spinner.
+    // The auth code already handles google === undefined gracefully.
+    window.addEventListener('load', function() {
+        var gsi = document.createElement('script');
+        gsi.src = 'https://accounts.google.com/gsi/client';
+        gsi.async = true;
+        document.body.appendChild(gsi);
+    });
     </script>
 </body>
 </html>

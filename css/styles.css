@@ -5299,10 +5299,10 @@ details[open] > .tier-trending-summary::after {
 .top-cards-scroll,
 .top-cards-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 6px;
     overflow: visible;
-    padding: 6px 0;
+    padding: 4px 0;
 }
 
 /* Scrollbar styling */
@@ -5333,9 +5333,9 @@ details[open] > .tier-trending-summary::after {
     max-width: none;
     width: 100%;
     background: white;
-    border-radius: 10px;
+    border-radius: 6px;
     overflow: hidden;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
     transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
     position: relative;
@@ -5343,27 +5343,27 @@ details[open] > .tier-trending-summary::after {
 }
 
 .top-card-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
 }
 
 .top-card-rank {
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: 3px;
+    left: 3px;
     background: #f39c12;
     color: white;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 2px 5px;
+    border-radius: 4px;
     font-weight: 900;
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     z-index: 2;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .top-card-img {
     width: 100%;
-    height: 195px;
+    aspect-ratio: 2.5 / 3.5;
     object-fit: cover;
     display: block;
     background: #f5f5f5;
@@ -5371,8 +5371,7 @@ details[open] > .tier-trending-summary::after {
 
 .top-card-stats {
     border-top: 1px solid #eee;
-    margin-top: 5px;
-
+    padding: 3px 4px 4px;
 }
 
 /* ==========================================================================
@@ -6103,24 +6102,25 @@ body.battle-journal-open {
 }
 
 .top-card-name {
-    font-size: 0.85rem;
+    font-size: 0.72rem;
     font-weight: 700;
     color: var(--text-dark);
-    margin-bottom: 5px;
+    margin-bottom: 1px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.2;
 }
 
 .top-card-share {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 600;
     color: #27ae60;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .top-card-decks {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     color: #7f8c8d;
     font-weight: 500;
 }
@@ -6128,20 +6128,22 @@ body.battle-journal-open {
 /* Mobile responsive */
 @media (max-width: 768px) {
     .top-cards-container {
-        padding: 15px;
+        padding: 10px;
+    }
+    
+    .top-cards-grid,
+    .top-cards-scroll {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
     }
     
     .top-card-item {
-        min-width: 120px;
-        max-width: 120px;
-    }
-    
-    .top-card-img {
-        height: 168px;
+        min-width: 0;
+        max-width: none;
     }
     
     .top-card-name {
-        font-size: 0.8rem;
+        font-size: 0.65rem;
     }
     
     /* Format Toggle auf Mobile */

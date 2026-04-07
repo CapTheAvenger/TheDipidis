@@ -258,29 +258,29 @@
     white-space: nowrap;
 }
 
-/* Most Used Cards: mobile-first grid instead of horizontal carousel */
+/* Most Used Cards: compact grid — 4-5 cards per row */
 #currentMetaContent .top-cards-grid,
 #currentMetaContent .top-cards-scroll {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 6px;
     overflow: visible;
     padding: 0;
 }
 
 #currentMetaContent .top-card-item {
     position: relative;
-    border-radius: 10px;
+    border-radius: 6px;
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     background: #fff;
     cursor: default;
 }
 
 #currentMetaContent .top-card-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(59, 76, 202, 0.18);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(59, 76, 202, 0.18);
 }
 
 #currentMetaContent .top-card-img {
@@ -292,44 +292,45 @@
 
 #currentMetaContent .top-card-rank {
     position: absolute;
-    top: 6px;
-    left: 6px;
+    top: 3px;
+    left: 3px;
     color: #fff;
-    padding: 3px 7px;
-    border-radius: 6px;
+    padding: 2px 5px;
+    border-radius: 4px;
     font-weight: 900;
-    font-size: 0.72rem;
+    font-size: 0.6rem;
     line-height: 1;
     z-index: 2;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 #currentMetaContent .top-card-stats {
-    padding: 5px 6px 6px;
+    padding: 3px 4px 4px;
     background: white;
-    font-size: 0.72em;
+    font-size: 0.65em;
     text-align: center;
     border-top: 1px solid #edf1f6;
 }
 
 #currentMetaContent .top-card-name {
-    margin: 0 0 2px;
-    font-size: 0.86em;
+    margin: 0 0 1px;
+    font-size: 0.82em;
     font-weight: 800;
     color: #1a2c43;
-    line-height: 1.2;
-    overflow-wrap: anywhere;
-    white-space: normal;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 #currentMetaContent .top-card-share {
-    font-size: 0.82em;
+    font-size: 0.78em;
     font-weight: 700;
     color: #2563eb;
 }
 
 #currentMetaContent .top-card-decks {
-    font-size: 0.78em;
+    font-size: 0.72em;
     font-weight: 600;
     color: #64748b;
 }
@@ -487,12 +488,13 @@
     }
 
     #currentMetaContent .top-cards-container {
-        padding: 12px;
+        padding: 8px;
     }
 
     #currentMetaContent .top-cards-grid,
     #currentMetaContent .top-cards-scroll {
-        gap: 8px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
     }
 
     #currentMetaContent .section table th,

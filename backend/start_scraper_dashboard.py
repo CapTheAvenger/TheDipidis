@@ -38,16 +38,16 @@ def print_menu() -> None:
     print("=" * 52)
 
 SCRIPTS = {
-    "1": "update_sets.py",
-    "2": "all_cards_scraper.py",
-    "3": "japanese_cards_scraper.py",
-    "4": "card_price_scraper.py",
-    "5": "current_meta_analysis_scraper.py",
-    "6": "limitless_online_scraper.py",
-    "7": "city_league_analysis_scraper.py",
-    "8": "city_league_archetype_scraper.py",
-    "9": "tournament_scraper_JH.py",
-    "10": "prepare_card_data.py"
+    "1": os.path.join("core", "update_sets.py"),
+    "2": os.path.join("scrapers", "all_cards_scraper.py"),
+    "3": os.path.join("scrapers", "japanese_cards_scraper.py"),
+    "4": os.path.join("scrapers", "card_price_scraper.py"),
+    "5": os.path.join("scrapers", "current_meta_analysis_scraper.py"),
+    "6": os.path.join("scrapers", "limitless_online_scraper.py"),
+    "7": os.path.join("scrapers", "city_league_analysis_scraper.py"),
+    "8": os.path.join("scrapers", "city_league_archetype_scraper.py"),
+    "9": os.path.join("scrapers", "tournament_scraper_JH.py"),
+    "10": os.path.join("core", "prepare_card_data.py")
 }
 
 BATCH_BASE = ["1", "2", "3", "4", "10"]

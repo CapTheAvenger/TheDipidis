@@ -316,16 +316,19 @@
         // Cached parsed CSV rows to avoid re-downloading & re-parsing large files
         let _cachedCityLeagueRows = null;
         let _cachedTournamentRows = null;
+        let _cachedCurrentMetaRows = null;
 
         async function _fetchAndParseCsvCached(file, cacheRef) {
             if (cacheRef === 'cityLeague' && _cachedCityLeagueRows) return _cachedCityLeagueRows;
             if (cacheRef === 'tournament' && _cachedTournamentRows) return _cachedTournamentRows;
+            if (cacheRef === 'currentMeta' && _cachedCurrentMetaRows) return _cachedCurrentMetaRows;
             const response = await fetch(BASE_PATH + file);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const text = await response.text();
             const rows = parseCSV(text);
             if (cacheRef === 'cityLeague') _cachedCityLeagueRows = rows;
             if (cacheRef === 'tournament') _cachedTournamentRows = rows;
+            if (cacheRef === 'currentMeta') _cachedCurrentMetaRows = rows;
             return rows;
         }
 
@@ -351,9 +354,9 @@
                     console.warn('Could not load City League playable cards:', err);
                 }
                 
-                // Load Current Meta Analysis CSV
+                // Load Current Meta Analysis CSV (direct file, not fallback — avoids double-counting tournament rows)
                 try {
-                    const currentMetaCards = await loadCurrentMetaRowsWithFallback();
+                    const currentMetaCards = await _fetchAndParseCsvCached('current_meta_card_data.csv', 'currentMeta');
                     currentMetaCards.forEach(card => {
                         if (card.card_name) {
                             const cardNameNorm = normalizeCardName(card.card_name);
@@ -450,10 +453,11 @@
             const archetypeKeysSeen = new Set(); // Track which archetypes we've already counted (GLOBAL across sources)
             
             try {
-                // Load both City League and Tournament data for comprehensive coverage
+                // Load City League, Tournament AND Current Meta data for comprehensive coverage
                 const dataSources = [
                     { file: 'city_league_analysis.csv', name: 'City League', cache: 'cityLeague' },
-                    { file: 'tournament_cards_data_cards.csv', name: 'Tournament', cache: 'tournament' }
+                    { file: 'tournament_cards_data_cards.csv', name: 'Tournament', cache: 'tournament' },
+                    { file: 'current_meta_card_data.csv', name: 'Current Meta', cache: 'currentMeta' }
                 ];
                 
                 for (const source of dataSources) {

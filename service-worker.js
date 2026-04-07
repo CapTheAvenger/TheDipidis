@@ -1,7 +1,7 @@
 // Service Worker for Pokemon TCG Analysis PWA
 // Strategy: Stale-while-revalidate for all assets (instant load + background refresh)
 
-const CACHE_NAME = 'tcg-analysis-v202606091200';
+const CACHE_NAME = 'tcg-analysis-v202604081500';
 
 // Static shell — cached on install
 const SHELL_ASSETS = [

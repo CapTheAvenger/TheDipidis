@@ -152,7 +152,7 @@
             ...getValuesFromSelect('currentMetaDeckSelect'),
             ...getValuesFromSelect('cityLeagueDeckSelect'),
             ...getValuesFromSelect('pastMetaDeckSelect')
-        ]).slice(0, 64);
+        ]);
     }
 
     function renderDeckChoices() {
@@ -162,12 +162,12 @@
             getBattleJournalCurrentOwnDeck(),
             ...getBattleJournalSavedDeckNames(),
             ...getValuesFromSelect('currentMetaDeckSelect'),
-            ...getValuesFromSelect('cityLeagueDeckSelect')
+            ...getValuesFromSelect('cityLeagueDeckSelect'),
+            ...getValuesFromSelect('pastMetaDeckSelect')
         ]);
 
         if (els.ownDeckList) {
             els.ownDeckList.innerHTML = allOwnDeckChoices
-                .slice(0, 120)
                 .map(name => `<option value="${escapeHtml(name)}"></option>`)
                 .join('');
         }
@@ -179,7 +179,6 @@
 
         if (els.opponentList) {
             els.opponentList.innerHTML = allOpponentChoices
-                .slice(0, 160)
                 .map(name => `<option value="${escapeHtml(name)}"></option>`)
                 .join('');
         }
@@ -196,11 +195,19 @@
     // ── Last tournament quick-select ─────────────────────────
 
     function getLastTournament() {
-        const entries = getBattleJournalOutbox();
-        // Find the most recent entry that has a tournament name
-        for (let i = entries.length - 1; i >= 0; i--) {
-            if (entries[i]?.tournamentName) {
-                return { tournamentName: entries[i].tournamentName, ownDeck: entries[i].ownDeck || '' };
+        // Check outbox (pending local entries) first, then synced history cache
+        const outbox = getBattleJournalOutbox();
+        for (let i = outbox.length - 1; i >= 0; i--) {
+            if (outbox[i]?.tournamentName) {
+                return { tournamentName: outbox[i].tournamentName, ownDeck: outbox[i].ownDeck || '' };
+            }
+        }
+        // Also check Firestore-synced entries (journalHistoryCache is sorted newest first)
+        if (Array.isArray(journalHistoryCache)) {
+            for (const entry of journalHistoryCache) {
+                if (entry?.tournamentName) {
+                    return { tournamentName: entry.tournamentName, ownDeck: entry.ownDeck || '' };
+                }
             }
         }
         return null;
@@ -658,14 +665,19 @@
         if (!validateBattleJournalEntry(values)) return;
 
         const outbox = getBattleJournalOutbox();
-        outbox.push(buildBattleJournalEntry(values));
+        const newEntry = buildBattleJournalEntry(values);
+        outbox.push(newEntry);
         saveBattleJournalOutbox(outbox);
         localStorage.removeItem(BATTLE_JOURNAL_DRAFT_KEY);
         resetBattleJournalForm();
         playSaveFeedback();
 
+        // Copy WhatsApp-friendly result string to clipboard
+        const clipText = formatEntryForClipboard(newEntry);
+        copyTextToClipboard(clipText);
+
         if (navigator.onLine && window.auth?.currentUser) {
-            showToast(battleJournalText('bj.savedAndSyncing', 'Entry saved. Sync starting...'), 'success');
+            showToast(battleJournalText('bj.savedAndCopied', 'Entry saved & copied to clipboard!'), 'success');
             await flushBattleJournalOutbox(false);
         } else if (!navigator.onLine) {
             setBattleJournalStatus('offline');
@@ -684,6 +696,8 @@
         if (!els.overlay) return;
         // Always start with a blank form
         resetBattleJournalForm();
+        // Load history (incl. Firestore) so getLastTournament works after sync
+        loadJournalHistory().then(() => renderLastTournamentButton()).catch(() => {});
         renderLastTournamentButton();
         renderBattleJournalSummary();
         updateThemeVisual();
@@ -759,6 +773,47 @@
     // ── Journal History (Profile Tab) ───────────────────────
 
     let journalHistoryCache = [];
+
+    // ── Clipboard format helper ──────────────────────────────
+
+    function formatEntryForClipboard(entry) {
+        // Build WhatsApp-friendly format: "WLW Dragapult Dusknoir" / "W Charizard ex"
+        let resultStr = '';
+        if (entry.bestOf === 'bo3' && Array.isArray(entry.bo3Games)) {
+            const filled = entry.bo3Games.filter(g => g && g.result);
+            resultStr = filled.map(g => {
+                if (g.result === 'win') return 'W';
+                if (g.result === 'loss') return 'L';
+                if (g.result === 'tie') return 'T';
+                return '?';
+            }).join('');
+        } else {
+            if (entry.result === 'win') resultStr = 'W';
+            else if (entry.result === 'loss') resultStr = 'L';
+            else if (entry.result === 'tie') resultStr = 'T';
+            else resultStr = '?';
+        }
+        const opponent = entry.opponentArchetype || 'Unknown';
+        return `${resultStr} ${opponent}`;
+    }
+
+    function copyTextToClipboard(text) {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+        } else {
+            fallbackCopy(text);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;left:-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (_) { /* ignore */ }
+        document.body.removeChild(ta);
+    }
 
     async function loadJournalHistory() {
         const entries = [];
@@ -859,6 +914,7 @@
                 if (gameTexts.length > 0) bo3Line = `<div class="bj-history-games">${escapeHtml(gameTexts.join(' · '))}</div>`;
             }
 
+            const clipText = formatEntryForClipboard(entry);
             return `
                 <div class="bj-history-item ${resultClass}">
                     <div class="bj-history-item-main">
@@ -870,8 +926,12 @@
                         </div>
                         <div class="bj-history-meta">${escapeHtml(bestOfText)}${turnText ? ' · ' + escapeHtml(turnText) : ''} · ${escapeHtml(dateStr)} ${pendingBadge}</div>
                         ${bo3Line}
+                        <div class="bj-history-clip">${escapeHtml(clipText)}</div>
                     </div>
-                    <span class="battle-journal-result-pill ${resultClass}">${escapeHtml(resultText)}</span>
+                    <div class="bj-history-actions">
+                        <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">📋</button>
+                        <span class="battle-journal-result-pill ${resultClass}">${escapeHtml(resultText)}</span>
+                    </div>
                 </div>
             `;
         }).join('');
@@ -895,6 +955,60 @@
         renderJournalHistory();
     }
 
+    function copyJournalEntry(entryId) {
+        const entry = journalHistoryCache.find(e => e.id === entryId);
+        if (!entry) return;
+        const text = formatEntryForClipboard(entry);
+        copyTextToClipboard(text);
+        showToast(battleJournalText('bj.copiedClipboard', 'Copied to clipboard!'), 'success');
+    }
+
+    function copyAllJournalEntries() {
+        const tournamentFilter = document.getElementById('journalFilterTournament')?.value || '';
+        const resultFilter = document.getElementById('journalFilterResult')?.value || '';
+        let entries = journalHistoryCache;
+        if (tournamentFilter) entries = entries.filter(e => e.tournamentName === tournamentFilter);
+        if (resultFilter) entries = entries.filter(e => e.result === resultFilter);
+        if (entries.length === 0) {
+            showToast(battleJournalText('bj.histEmpty', 'No journal entries yet.'), 'info');
+            return;
+        }
+        const lines = entries.map(e => formatEntryForClipboard(e));
+        copyTextToClipboard(lines.join('\n'));
+        showToast(battleJournalText('bj.copiedAllClipboard', '{count} entries copied!').replace('{count}', String(lines.length)), 'success');
+    }
+
+    async function clearAllJournalEntries() {
+        const confirmMsg = battleJournalText('bj.clearConfirm', 'Delete ALL journal entries (local + synced)? This cannot be undone.');
+        if (!confirm(confirmMsg)) return;
+
+        // 1) Clear local outbox
+        saveBattleJournalOutbox([]);
+
+        // 2) Delete all synced entries from Firestore
+        const user = window.auth?.currentUser;
+        if (user && window.db && typeof window.db.collection === 'function') {
+            try {
+                const snap = await window.db
+                    .collection('users').doc(user.uid)
+                    .collection('battleJournal')
+                    .get();
+                const batch = window.db.batch();
+                snap.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+            } catch (err) {
+                console.error('[Battle Journal] Failed to delete Firestore entries', err);
+                showToast(battleJournalText('bj.clearError', 'Error clearing synced entries.'), 'error');
+            }
+        }
+
+        // 3) Refresh view
+        journalHistoryCache = [];
+        renderJournalHistory();
+        renderBattleJournalSummary();
+        showToast(battleJournalText('bj.clearSuccess', 'All journal entries deleted.'), 'success');
+    }
+
     window.openBattleJournalSheet = openBattleJournalSheet;
     window.closeBattleJournalSheet = closeBattleJournalSheet;
     window.submitBattleJournalEntry = submitBattleJournalEntry;
@@ -906,6 +1020,9 @@
     window.applyLastTournament = applyLastTournament;
     window.renderJournalHistory = renderJournalHistory;
     window.openJournalHistoryTab = openJournalHistoryTab;
+    window.copyJournalEntry = copyJournalEntry;
+    window.copyAllJournalEntries = copyAllJournalEntries;
+    window.clearAllJournalEntries = clearAllJournalEntries;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBattleJournal, { once: true });

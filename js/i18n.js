@@ -526,10 +526,15 @@ const translations = {
     'bj.syncSuccess':           '{count} entries synced.',
     'bj.themeDark':             'Dark',
     'bj.themeLight':            'Light',
+    'bj.tournamentName':         'Tournament Name',
+    'bj.tournamentNamePlaceholder': 'e.g. City League Hamburg...',
+    'bj.gameDetails':           'Game Details',
     'bj.validationOwnDeck':     'Please enter your deck.',
     'bj.validationOpponent':    'Please enter the opponent archetype.',
+    'bj.validationBestOf':      'Please choose BO1 or BO3.',
+    'bj.validationGames':       'Please fill Going and Result for all games.',
     'bj.validationTurnOrder':   'Please choose whether you went first or second.',
-    'bj.validationResult':      'Please choose the match result.',
+    'bj.validationResult':      'Please choose the match result.'
 
     // ── Beginner Tooltip ────────────────────────────────────
     'tip.beginnerTitle':       'Beginner Strategy',
@@ -1381,10 +1386,15 @@ const translations = {
     'bj.syncSuccess':           '{count} Einträge synchronisiert.',
     'bj.themeDark':             'Dunkel',
     'bj.themeLight':            'Hell',
+    'bj.tournamentName':         'Turniername',
+    'bj.tournamentNamePlaceholder': 'z.B. City League Hamburg...',
+    'bj.gameDetails':           'Spiel-Details',
     'bj.validationOwnDeck':     'Bitte gib dein eigenes Deck ein.',
     'bj.validationOpponent':    'Bitte gib den Gegner-Archetyp ein.',
+    'bj.validationBestOf':      'Bitte wähle BO1 oder BO3.',
+    'bj.validationGames':       'Bitte fülle Going und Result für alle Spiele aus.',
     'bj.validationTurnOrder':   'Bitte wähle, ob du First oder Second warst.',
-    'bj.validationResult':      'Bitte wähle das Match-Ergebnis aus.',
+    'bj.validationResult':      'Bitte wähle das Match-Ergebnis aus.'
 
     // ── Beginner Tooltip ────────────────────────────────────
     'tip.beginnerTitle':       'Einsteiger-Strategie',

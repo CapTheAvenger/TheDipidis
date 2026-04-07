@@ -3181,7 +3181,7 @@
                 </div>
                 <div class="battle-journal-header-actions">
                     <button type="button" id="battleJournalThemeToggle" class="battle-journal-theme-toggle" onclick="toggleBattleJournalTheme()" data-i18n="bj.themeDark">Dark</button>
-                    <button type="button" class="battle-journal-close" onclick="closeBattleJournalSheet()" aria-label="Close battle journal">ï¿½</button>
+                    <button type="button" class="battle-journal-close" onclick="closeBattleJournalSheet()" aria-label="Close battle journal">&times;</button>
                 </div>
             </div>
 
@@ -3191,6 +3191,11 @@
             </div>
 
             <form id="battleJournalForm" class="battle-journal-form" onsubmit="submitBattleJournalEntry(event)">
+                <div>
+                    <span class="battle-journal-label" data-i18n="bj.tournamentName">Tournament Name</span>
+                    <input id="battleJournalTournamentName" type="text" class="battle-journal-input" autocomplete="off" data-i18n-placeholder="bj.tournamentNamePlaceholder" placeholder="e.g. City League Hamburg...">
+                </div>
+
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.ownDeck">Your Deck</span>
                     <input id="battleJournalOwnDeckValue" type="text" class="battle-journal-input" list="battleJournalOwnDeckList" autocomplete="off" data-i18n-placeholder="bj.searchDeck" placeholder="Search deck...">
@@ -3212,69 +3217,13 @@
                             <button type="button" class="battle-journal-choice" data-field="bestOf" data-value="bo3" onclick="setBattleJournalChoice('bestOf', 'bo3')" data-i18n="bj.bo3">BO3</button>
                         </div>
                     </div>
-                    <div>
-                        <span class="battle-journal-label" data-i18n="bj.turnOrder">Going</span>
-                        <input id="battleJournalTurnOrder" type="hidden" value="">
-                        <div class="battle-journal-choice-group" data-choice-group="turnOrder">
-                            <button type="button" class="battle-journal-choice" data-field="turnOrder" data-value="first" onclick="setBattleJournalChoice('turnOrder', 'first')" data-i18n="bj.first">First</button>
-                            <button type="button" class="battle-journal-choice" data-field="turnOrder" data-value="second" onclick="setBattleJournalChoice('turnOrder', 'second')" data-i18n="bj.second">Second</button>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="battle-journal-label" data-i18n="bj.result">Result</span>
-                        <input id="battleJournalResult" type="hidden" value="">
-                        <div class="battle-journal-choice-group battle-journal-choice-group-result" data-choice-group="result">
-                            <button type="button" class="battle-journal-choice battle-journal-choice-win" data-field="result" data-value="win" onclick="setBattleJournalChoice('result', 'win')" data-i18n="bj.win">Win</button>
-                            <button type="button" class="battle-journal-choice battle-journal-choice-loss" data-field="result" data-value="loss" onclick="setBattleJournalChoice('result', 'loss')" data-i18n="bj.loss">Loss</button>
-                            <button type="button" class="battle-journal-choice battle-journal-choice-tie" data-field="result" data-value="tie" onclick="setBattleJournalChoice('result', 'tie')" data-i18n="bj.tie">Tie</button>
-                        </div>
-                    </div>
                 </div>
 
-                <div id="battleJournalBo3Details" class="battle-journal-bo3-details d-none">
-                    <span class="battle-journal-label">BO3 Game Details</span>
-                    <div class="battle-journal-bo3-row">
-                        <span class="battle-journal-bo3-game">Game 1</span>
-                        <select id="battleJournalBo3Game1Turn" class="battle-journal-input">
-                            <option value="">Going</option>
-                            <option value="first">First</option>
-                            <option value="second">Second</option>
-                        </select>
-                        <select id="battleJournalBo3Game1Result" class="battle-journal-input">
-                            <option value="">Result</option>
-                            <option value="win">Win</option>
-                            <option value="loss">Loss</option>
-                            <option value="tie">Tie</option>
-                        </select>
-                    </div>
-                    <div class="battle-journal-bo3-row">
-                        <span class="battle-journal-bo3-game">Game 2</span>
-                        <select id="battleJournalBo3Game2Turn" class="battle-journal-input">
-                            <option value="">Going</option>
-                            <option value="first">First</option>
-                            <option value="second">Second</option>
-                        </select>
-                        <select id="battleJournalBo3Game2Result" class="battle-journal-input">
-                            <option value="">Result</option>
-                            <option value="win">Win</option>
-                            <option value="loss">Loss</option>
-                            <option value="tie">Tie</option>
-                        </select>
-                    </div>
-                    <div class="battle-journal-bo3-row">
-                        <span class="battle-journal-bo3-game">Game 3</span>
-                        <select id="battleJournalBo3Game3Turn" class="battle-journal-input">
-                            <option value="">Going</option>
-                            <option value="first">First</option>
-                            <option value="second">Second</option>
-                        </select>
-                        <select id="battleJournalBo3Game3Result" class="battle-journal-input">
-                            <option value="">Result</option>
-                            <option value="win">Win</option>
-                            <option value="loss">Loss</option>
-                            <option value="tie">Tie</option>
-                        </select>
-                    </div>
+                <input id="battleJournalTurnOrder" type="hidden" value="">
+                <input id="battleJournalResult" type="hidden" value="">
+
+                <div id="battleJournalGameDetails" class="battle-journal-bo3-details d-none">
+                    <span class="battle-journal-label" data-i18n="bj.gameDetails">Game Details</span>
                 </div>
 
                 <div class="battle-journal-actions">
@@ -3306,7 +3255,7 @@
                     <p class="battle-journal-subtitle">Cards removed from the latest binder scope: <strong id="metaBinderDroppedCount">0</strong></p>
                 </div>
                 <div class="battle-journal-header-actions">
-                    <button type="button" class="battle-journal-close" onclick="closeMetaBinderDroppedModal()" aria-label="Close dropped cards">ï¿½</button>
+                    <button type="button" class="battle-journal-close" onclick="closeMetaBinderDroppedModal()" aria-label="Close dropped cards">&times;</button>
                 </div>
             </div>
             <div id="metaBinderDroppedList" class="battle-journal-pending-list"></div>

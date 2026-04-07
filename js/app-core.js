@@ -1093,8 +1093,8 @@ const BASE_PATH = './data/';
                 'body { margin: 0; font-family: Arial, sans-serif; background: #fff; }',
                 '.proxy-page { page-break-after: always; }',
                 '.proxy-page:last-child { page-break-after: auto; }',
-                '.proxy-grid { display: grid; grid-template-columns: repeat(3, 63mm); grid-auto-rows: 88mm; gap: 3mm; justify-content: center; }',
-                '.proxy-slot { position: relative; width: 63mm; height: 88mm; }',
+                '.proxy-grid { display: grid; grid-template-columns: repeat(3, 60mm); grid-auto-rows: 85mm; gap: 3mm; justify-content: center; }',
+                '.proxy-slot { position: relative; width: 60mm; height: 85mm; }',
                 '.proxy-card { position: absolute; inset: 0; overflow: hidden; border: 0.2mm solid rgba(0,0,0,0.35); border-radius: 1.8mm; background: #fff; }',
                 '.proxy-card img { width: 100%; height: 100%; object-fit: cover; display: block; }',
                 '.cut { position: absolute; width: 4mm; height: 4mm; pointer-events: none; }',
@@ -1134,7 +1134,6 @@ const BASE_PATH = './data/';
                     const cardDiv = doc.createElement('div');
                     cardDiv.className = 'proxy-card';
                     const img = doc.createElement('img');
-                    img.loading = 'lazy';
                     img.src = getCardImageSource(card.name, card.set, card.number) || buildInlineCardPlaceholder(card.name);
                     img.alt = '';
                     cardDiv.appendChild(img);
@@ -1150,7 +1149,31 @@ const BASE_PATH = './data/';
             });
 
             popup.focus();
-            popup.print();
+
+            // Wait for all images to load before printing
+            const allImages = Array.from(doc.querySelectorAll('.proxy-card img'));
+            let loaded = 0;
+            const total = allImages.length;
+
+            function checkAllLoaded() {
+                loaded++;
+                if (loaded >= total) {
+                    popup.print();
+                }
+            }
+
+            if (total === 0) {
+                popup.print();
+            } else {
+                allImages.forEach(img => {
+                    if (img.complete && img.naturalWidth > 0) {
+                        checkAllLoaded();
+                    } else {
+                        img.onload = checkAllLoaded;
+                        img.onerror = checkAllLoaded;
+                    }
+                });
+            }
         }
 
         function addComparisonNewCardsToProxy() {

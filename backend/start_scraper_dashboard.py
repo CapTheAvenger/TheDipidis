@@ -62,6 +62,13 @@ def run_script(script_filename: str, wait_at_end: bool = True) -> None:
         time.sleep(2)
         return
 
+    # Prefer .venv Python so that pip-installed packages (seleniumbase etc.) are available
+    project_root = os.path.dirname(backend_dir)
+    venv_python = os.path.join(project_root, ".venv", "Scripts", "python.exe")
+    if not os.path.isfile(venv_python):
+        venv_python = os.path.join(project_root, ".venv", "bin", "python")
+    python_exe = venv_python if os.path.isfile(venv_python) else sys.executable
+
     # Ensure backend/core/ is on PYTHONPATH so scrapers can import card_scraper_shared
     env = os.environ.copy()
     core_dir = os.path.join(backend_dir, "core")
@@ -69,7 +76,7 @@ def run_script(script_filename: str, wait_at_end: bool = True) -> None:
     env["PYTHONPATH"] = core_dir + (os.pathsep + existing if existing else "")
 
     print(f"\n  Launching {script_filename} ...\n")
-    subprocess.run([sys.executable, script_path], env=env, check=False)
+    subprocess.run([python_exe, script_path], env=env, check=False)
     print(f"\n  {script_filename} finished.")
     if wait_at_end:
         input("\n  Press Enter to return to menu...")

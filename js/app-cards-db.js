@@ -2407,7 +2407,8 @@
             const proxySetNumber = card.number || '';
             const displayType = escapeHtml(card.type || 'Unknown');
             const displayRarity = escapeHtml(card.rarity || 'Unknown');
-            const displayCardMarketUrl = card.cardmarket_url || '#';
+            const rawCardMarketUrl = card.cardmarket_url || '';
+            const displayCardMarketUrl = rawCardMarketUrl ? rawCardMarketUrl.split('?')[0] + '?sellerCountry=7&language=1,3' : '#';
             
             // Create unique card ID: name|set|number (tracks SPECIFIC print, not just card name)
             const cardId = `${card.name}|${displaySet}|${displayNumber}`;
@@ -3376,7 +3377,7 @@
                     </button>
                     ${cardmarketUrl ? `
                         <button class="${cardmarketBtnClass} card-database-price-btn" 
-                                onclick="event.stopPropagation(); window.open('${cardmarketUrl}', '_blank');" 
+                                onclick="event.stopPropagation(); openCardmarket('${cardmarketUrl}', '');" 
                                 title="Auf Cardmarket kaufen: ${priceDisplay}">
                             ${priceDisplay}
                         </button>

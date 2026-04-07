@@ -3091,16 +3091,15 @@
                 bottom: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
-                height: 60.5% !important;
+                height: auto !important;
                 background: linear-gradient(to top, 
-                    rgba(255, 255, 255, 0.98) 0%, 
-                    rgba(255, 255, 255, 0.95) 40%, 
-                    rgba(255, 255, 255, 0.85) 60%,
+                    rgba(255, 255, 255, 0.97) 0%, 
+                    rgba(255, 255, 255, 0.92) 70%, 
                     rgba(255, 255, 255, 0) 100%) !important;
-                backdrop-filter: blur(4px) !important;
-                padding: 3px 3px 2px 3px !important;
-                min-height: 60.5% !important;
-                max-height: 60.5% !important;
+                backdrop-filter: blur(3px) !important;
+                padding: 6px 4px 3px 4px !important;
+                min-height: unset !important;
+                max-height: unset !important;
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: flex-end !important;
@@ -3109,35 +3108,39 @@
             }
             
             .card-item .card-info-text {
-                margin-bottom: 2px !important;
+                margin-bottom: 1px !important;
                 flex-shrink: 0 !important;
+            }
+
+            .card-item .card-info-text.mb-6 {
+                margin-bottom: 1px !important;
             }
             
             .card-item .card-info-text > div {
-                font-size: 0.55em !important;
-                margin-bottom: 1px !important;
-                line-height: 1.1 !important;
+                font-size: 0.7em !important;
+                margin-bottom: 0 !important;
+                line-height: 1.2 !important;
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
             }
             
             .card-item .card-info-text > div:nth-child(1) {
-                font-weight: 600 !important;
-                font-size: 0.6em !important;
+                font-weight: 700 !important;
+                font-size: 0.75em !important;
             }
             
             .card-item .card-action-buttons {
                 gap: 2px !important;
-                margin-top: 3px !important;
+                margin-top: 2px !important;
                 flex-shrink: 0 !important;
             }
             
             .card-item .card-action-buttons button {
-                height: 16px !important;
+                height: 18px !important;
                 width: auto !important;
-                min-height: 16px !important;
-                max-height: 16px !important;
+                min-height: 18px !important;
+                max-height: 18px !important;
                 font-size: 10px !important;
                 padding: 0 2px !important;
             }
@@ -3544,15 +3547,17 @@
                 object-fit: cover !important;
             }
 
-            /* Mobile Deck Builder - stats badge */
+            /* Mobile Deck Builder - stats badge → directly above action buttons */
             #cityLeagueMyDeckGrid .deck-card-overlay,
             #currentMetaMyDeckGrid .deck-card-overlay,
             #pastMetaMyDeckGrid .deck-card-overlay {
-                bottom: 18px !important;
+                bottom: 40px !important;
                 font-size: 7px !important;
                 padding: 1px 3px !important;
                 border-radius: 2px !important;
-                max-width: 63px !important;
+                max-width: unset !important;
+                left: 3px !important;
+                right: 3px !important;
                 height: 13px !important;
                 line-height: 13px !important;
                 display: flex !important;
@@ -3563,7 +3568,7 @@
                 text-overflow: ellipsis !important;
             }
 
-            /* Mobile Deck Builder - buttons angepasst an Kartengröße (63px breit x 15px hoch) */
+            /* Mobile Deck Builder - buttons angepasst an Kartengröße */
             #cityLeagueMyDeckGrid .deck-card-actions,
             #currentMetaMyDeckGrid .deck-card-actions,
             #pastMetaMyDeckGrid .deck-card-actions {
@@ -6539,8 +6544,16 @@ body.battle-journal-open {
         font-size: 13px !important;
     }
 
+    /* Card overlay action buttons stay compact (overrides above) */
+    .deck-card-actions button,
+    .deck-card-action-row button {
+        min-height: unset !important;
+        height: 20px !important;
+        font-size: 11px !important;
+    }
+
     .deck-card > div:last-child > div {
-        gap: 4px !important;
+        gap: 2px !important;
     }
 
     /* General tap comfort for inline filter buttons */
@@ -6568,7 +6581,7 @@ body.battle-journal-open {
     /* 2. Info-Container flexibel machen, damit nichts abgeschnitten wird */
     .card-info-bottom {
         min-height: max-content !important;
-        padding: 4px !important;
+        padding: 3px 4px !important;
         display: flex !important;
         flex-direction: column !important;
     }
@@ -6583,8 +6596,8 @@ body.battle-journal-open {
     /* Das 3. div ist das Banner "100,0% | Ø 25,13x" */
     .card-info-text > div:nth-child(3) {
         margin-top: auto !important; 
-        padding-top: 4px !important;
-        margin-bottom: 2px !important;
+        padding-top: 1px !important;
+        margin-bottom: 1px !important;
     }
 
     /* 4. Action-Buttons entzerren und klickbar machen */
@@ -6592,13 +6605,13 @@ body.battle-journal-open {
         margin-top: 2px !important;
         display: flex !important;
         flex-direction: column !important;
-        gap: 4px !important;
+        gap: 2px !important;
     }
     .card-action-buttons > div {
-        gap: 4px !important;
+        gap: 3px !important;
     }
     .card-action-buttons button {
-        height: 24px !important;
+        height: 20px !important;
         font-size: 10px !important;
     }
 

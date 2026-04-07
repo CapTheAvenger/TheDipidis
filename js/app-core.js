@@ -1525,8 +1525,8 @@ const BASE_PATH = './data/';
             'brilliant stars - twilight masquerade': 'BRS-TWM',
             'brilliant stars - temporal forces': 'BRS-TEF',
             'battle styles - paradox rift': 'BST-PAR',
-            'meta play!': 'Meta Play!',
-            'meta live': 'Meta Live'
+            'meta play!': 'TEF-POR',
+            'meta live': 'TEF-POR'
         };
 
         function mapSetCodeToMetaFormat(setCode) {
@@ -1577,9 +1577,10 @@ const BASE_PATH = './data/';
         function normalizeTournamentFormatLabel(rawFormat, fallbackSetCode = '') {
             const raw = String(rawFormat || '').trim();
             if (!raw) return mapSetCodeToMetaFormat(fallbackSetCode);
+            // Map current-meta labels to the newest known format
+            if (raw === 'Meta Live' || raw === 'Meta Play!') return KNOWN_META_FORMAT_CODES[0];
             const normalizedRawCode = mapSetCodeToMetaFormat(raw);
             if (KNOWN_META_FORMAT_CODES.includes(normalizedRawCode)) return normalizedRawCode;
-            if (raw === 'Meta Live' || raw === 'Meta Play!') return raw;
 
             const normalized = raw.toLowerCase();
             if (TOURNAMENT_FORMAT_NAME_TO_CODE[normalized]) {

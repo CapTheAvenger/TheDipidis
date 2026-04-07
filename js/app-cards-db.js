@@ -445,7 +445,7 @@
             // Initialize new filter maps
             window.mainPokemonCardsMap = new Map(); // Map<mainPokemon, Set<card_name>>
             window.archetypeCardsMap = new Map(); // Map<archetype, Set<card_name>>
-            window.metaCardsMap = new Map(); // Map<meta, Set<card_name>>
+            window.metaCardsMap = new Map(); // Map<meta, Map<card_name, Set<set_code>>>
             window.allMainPokemons = new Set();
             window.allArchetypes = new Set();
             window.allMetas = new Set();
@@ -589,9 +589,15 @@
                             }
                             window.allMetas.add(resolvedMeta);
                             if (!window.metaCardsMap.has(resolvedMeta)) {
-                                window.metaCardsMap.set(resolvedMeta, new Set());
+                                window.metaCardsMap.set(resolvedMeta, new Map());
                             }
-                            window.metaCardsMap.get(resolvedMeta).add(cardName);
+                            const metaMap = window.metaCardsMap.get(resolvedMeta);
+                            if (!metaMap.has(cardName)) {
+                                metaMap.set(cardName, new Set());
+                            }
+                            if (row.set_code) {
+                                metaMap.get(cardName).add(row.set_code);
+                            }
                         });
                         
                         devLog(`[Deck Coverage] Processed ${processedRows} rows from ${source.name}`);
@@ -611,8 +617,8 @@
                 // Log metas for debugging
                 devLog(`[Filter Data] Available Metas:`, Array.from(window.allMetas).sort());
                 if (window.metaCardsMap.size > 0) {
-                    window.metaCardsMap.forEach((cards, meta) => {
-                        devLog(`  Meta "${meta}": ${cards.size} unique cards`);
+                    window.metaCardsMap.forEach((cardsMap, meta) => {
+                        devLog(`  Meta "${meta}": ${cardsMap.size} unique cards`);
                     });
                 }
                 
@@ -1634,28 +1640,32 @@
                         }
                     }
                     
-                    // If archetype is also selected, check intersection
+                    // metaCardsMap is Map<meta, Map<cardName, Set<setCode>>>
+                    // Match both card name AND set to avoid false positives
+                    // (e.g. Pikachu ex SSP 57 ≠ Pikachu ex ASC 276)
                     if (selectedArchetypes.length > 0) {
-                        // Card must be in the intersection of selected meta AND selected archetype
                         for (const meta of selectedMetaFilters) {
                             if (window.metaCardsMap && window.metaCardsMap.has(meta)) {
                                 const cardsForMeta = window.metaCardsMap.get(meta);
                                 if (cardsForMeta.has(cardNameNorm)) {
-                                    // Card is in this meta - but we already checked archetype above
-                                    // So if we got here, card is in both archetype AND meta
-                                    metaFilterMatch = true;
-                                    break;
+                                    const metaSetCodes = cardsForMeta.get(cardNameNorm);
+                                    if (metaSetCodes.size === 0 || metaSetCodes.has(card.set)) {
+                                        metaFilterMatch = true;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     } else {
-                        // No archetype selected, just check meta
                         for (const meta of selectedMetaFilters) {
                             if (window.metaCardsMap && window.metaCardsMap.has(meta)) {
                                 const cardsForMeta = window.metaCardsMap.get(meta);
                                 if (cardsForMeta.has(cardNameNorm)) {
-                                    metaFilterMatch = true;
-                                    break;
+                                    const metaSetCodes = cardsForMeta.get(cardNameNorm);
+                                    if (metaSetCodes.size === 0 || metaSetCodes.has(card.set)) {
+                                        metaFilterMatch = true;
+                                        break;
+                                    }
                                 }
                             }
                         }

@@ -616,6 +616,13 @@
     }
 }
 
+/* Hide heatmap on mobile — table not usable on small screens */
+@media (max-width: 768px) {
+    .heatmap-container {
+        display: none !important;
+    }
+}
+
 /* === MARGIN & PADDING SCALE === */
 @media (max-width: 768px) {
     .mb-30 { margin-bottom: 20px !important; }

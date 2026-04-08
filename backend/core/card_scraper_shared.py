@@ -151,10 +151,32 @@ def save_scraped_ids(tracking_file: str, ids: Set[str], id_key: str = 'scraped_i
     except Exception as e:
         logger.warning("Failed to save scraped IDs to %s: %s", tracking_file, e)
 
+def _apply_defaults(loaded: dict, defaults: dict,
+                    deep_merge_keys: Optional[List[str]] = None) -> dict:
+    """Fill missing top-level defaults and deep-merge nested dicts."""
+    for key, value in defaults.items():
+        if key not in loaded:
+            loaded[key] = value
+    for dmk in (deep_merge_keys or []):
+        if dmk in defaults and isinstance(defaults[dmk], dict):
+            loaded.setdefault(dmk, {})
+            for sub_key, sub_defaults in defaults[dmk].items():
+                loaded[dmk].setdefault(
+                    sub_key, {} if isinstance(sub_defaults, dict) else sub_defaults
+                )
+                if isinstance(sub_defaults, dict) and isinstance(loaded[dmk].get(sub_key), dict):
+                    for sk, sv in sub_defaults.items():
+                        loaded[dmk][sub_key].setdefault(sk, sv)
+    return loaded
+
+
 def load_settings(settings_filename: str, defaults: dict,
                   deep_merge_keys: Optional[List[str]] = None,
                   create_if_missing: bool = False) -> dict:
     """Load settings from JSON file, searching standard candidate paths.
+
+    Priority: unified ``config/scraper_settings.json`` (section key derived
+    from *settings_filename*) → individual settings files → defaults.
 
     For *deep_merge_keys* (e.g. ``['sources']``), nested dicts are merged
     at the sub-key level rather than being replaced wholesale.
@@ -162,6 +184,30 @@ def load_settings(settings_filename: str, defaults: dict,
     app_path = get_app_path()
     # Derive project root: app_path is backend/core/, so two levels up
     project_root = os.path.dirname(os.path.dirname(app_path))
+
+    # --- 1. Try unified scraper_settings.json first ---
+    section_key = settings_filename.replace("_settings.json", "")
+    unified_candidates = [
+        os.path.join(project_root, "config", "scraper_settings.json"),
+        os.path.join(os.getcwd(), "config", "scraper_settings.json"),
+    ]
+    for upath in unified_candidates:
+        upath = os.path.normpath(upath)
+        if not os.path.isfile(upath):
+            continue
+        try:
+            with open(upath, "r", encoding="utf-8-sig") as f:
+                unified = json.loads(f.read().strip())
+            if isinstance(unified, dict) and section_key in unified:
+                section = unified[section_key]
+                if isinstance(section, dict):
+                    loaded = _apply_defaults(section, defaults, deep_merge_keys)
+                    logger.info("Settings geladen: %s [%s]", upath, section_key)
+                    return loaded
+        except Exception as e:
+            logger.warning("Konnte zentrale Settings nicht laden: %s", e)
+
+    # --- 2. Fallback: individual settings files ---
     candidates = [
         os.path.join(project_root, "config", settings_filename),
         os.path.join(app_path, settings_filename),
@@ -184,21 +230,7 @@ def load_settings(settings_filename: str, defaults: dict,
             loaded = json.loads(content)
             if not isinstance(loaded, dict):
                 continue
-            # Fill in missing top-level defaults
-            for key, value in defaults.items():
-                if key not in loaded:
-                    loaded[key] = value
-            # Deep-merge specified nested dicts
-            for dmk in (deep_merge_keys or []):
-                if dmk in defaults and isinstance(defaults[dmk], dict):
-                    loaded.setdefault(dmk, {})
-                    for sub_key, sub_defaults in defaults[dmk].items():
-                        loaded[dmk].setdefault(
-                            sub_key, {} if isinstance(sub_defaults, dict) else sub_defaults
-                        )
-                        if isinstance(sub_defaults, dict) and isinstance(loaded[dmk].get(sub_key), dict):
-                            for sk, sv in sub_defaults.items():
-                                loaded[dmk][sub_key].setdefault(sk, sv)
+            loaded = _apply_defaults(loaded, defaults, deep_merge_keys)
             logger.info("Settings geladen: %s", path)
             return loaded
         except Exception as e:
@@ -230,8 +262,9 @@ def _get_scraper() -> Any:
         _thread_local.scraper = create_scraper(browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False})
     return _thread_local.scraper
 
-def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: float = 1.0) -> str:
-    """Zentraler HTML Fetcher mit Cloudflare-Bypass und exponentiellem Backoff."""
+def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: float = 1.0, quiet: bool = False) -> str:
+    """Zentraler HTML Fetcher mit Cloudflare-Bypass und exponentiellem Backoff.
+    quiet=True unterdrückt das finale WARNING-Log (z.B. wenn ein Fallback folgt)."""
     scraper = _get_scraper()
     delay = retry_delay
     for attempt in range(1, retries + 2):
@@ -253,7 +286,10 @@ def safe_fetch_html(url: str, timeout: int = 15, retries: int = 2, retry_delay: 
                 time.sleep(delay)
                 delay = min(delay * 2, 30)  # exponential backoff, max 30s
             else:
-                logger.warning("Fetch failed after %s attempts for %s: %s", retries + 1, url, e)
+                if quiet:
+                    logger.debug("Fetch failed after %s attempts for %s: %s", retries + 1, url, e)
+                else:
+                    logger.warning("Fetch failed after %s attempts for %s: %s", retries + 1, url, e)
     return ""
 
 def fetch_page_bs4(url: str, timeout: int = 15, retries: int = 2) -> Optional[Any]:

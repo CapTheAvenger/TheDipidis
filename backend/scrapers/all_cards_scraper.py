@@ -277,7 +277,17 @@ def _fetch_single_card(card: dict) -> dict:
         return card
 
     full_url = urljoin("https://limitlesstcg.com", card["card_url"])
-    html = safe_fetch_html(full_url, timeout=15)
+    # Erster Versuch ohne Retries + quiet — bei 404 sofort Fallback statt 3x retry
+    html = safe_fetch_html(full_url, timeout=15, retries=0, quiet=True)
+
+    # Fallback: URL ohne Name-Slug probieren (/cards/SET/NUMBER statt /cards/SET/NUMBER/slug)
+    if not html:
+        short_url = f"/cards/{card['set'].upper()}/{card['number']}"
+        if card["card_url"].rstrip("/") != short_url:
+            fallback_full = urljoin("https://limitlesstcg.com", short_url)
+            html = safe_fetch_html(fallback_full, timeout=15)
+            if html:
+                card["card_url"] = short_url
 
     if not html:
         logger.error(

@@ -1,0 +1,123 @@
+{
+    "_info": "Zentrale Settings-Datei fuer alle Scraper. Jede Sektion entspricht einem Scraper im Dashboard. Aenderungen hier ueberschreiben die Einzel-Dateien.",
+
+    "all_cards_scraper": {
+        "start_page": 1,
+        "end_page": null,
+        "max_pages": null,
+        "set_filter": [],
+        "append": true,
+        "rescrape_incomplete": true,
+        "headless": true,
+        "skip_detail_scraping": false,
+        "list_page_delay_seconds": 1.0,
+        "detail_page_wait_seconds": 2.0,
+        "detail_request_delay_seconds": 0.5
+    },
+
+    "japanese_cards_scraper": {
+        "max_pages": 50,
+        "list_page_delay_seconds": 2.0,
+        "keep_latest_sets": 1,
+        "skip_detail_scraping": false,
+        "max_workers": 8
+    },
+
+    "card_price_scraper": {
+        "delay_seconds": 1.5,
+        "max_workers": 8,
+        "batch_size": 100,
+        "skip_cards_with_prices": false,
+        "only_update_sets": ["POR", "ASC", "PFL", "MEG"],
+        "_comment": "Limitless TCG Only - kein Cardmarket, kein Selenium, kein Proxy"
+    },
+
+    "current_meta_analysis": {
+        "sources": {
+            "limitless_online": {
+                "enabled": true,
+                "max_decks": 60,
+                "max_lists_per_deck": 20,
+                "delay_between_lists": 4.0,
+                "delay_between_decks": 8.0,
+                "format_filter": "POR"
+            },
+            "tournaments": {
+                "enabled": true,
+                "start_date": "10.04.2026",
+                "max_tournaments": 15,
+                "max_decks_per_tournament": 256,
+                "format_filter": ["Standard", "Standard (JP)"]
+            }
+        },
+        "delay_between_requests": 3.0,
+        "request_timeout": 20,
+        "max_retries": 2,
+        "retry_delay": 1.0,
+        "append_mode": true,
+        "output_file": "current_meta_card_data.csv",
+        "_comment": "Combines Limitless Online (Meta Live) and Play! (Meta Play!). append_mode=true keeps old data and only adds new entries."
+    },
+
+    "limitless_online": {
+        "game": "POKEMON",
+        "format": "STANDARD",
+        "rotation": "2026",
+        "set": "POR",
+        "top_decks_for_matchup": 100,
+        "delay_between_requests": 1.5,
+        "output_file": "limitless_online_decks.csv",
+        "max_workers": 5
+    },
+
+    "city_league_analysis": {
+        "sources": {
+            "city_league": {
+                "enabled": true,
+                "start_date": "13.03.2026",
+                "end_date": "auto",
+                "max_decklists_per_league": 50,
+                "additional_tournament_ids": []
+            }
+        },
+        "output_file": "city_league_analysis.csv",
+        "delay_between_requests": 1.5,
+        "append_mode": true,
+        "_comment": "Scrapes City League tournaments and extracts card data by archetype. append_mode=true keeps old tournament dates when adding new data. additional_tournament_ids: Add tournament IDs from main site (e.g., Champions League) - format: [547, 550]"
+    },
+
+    "city_league_archetype": {
+        "start_date": "13.03.2026",
+        "end_date": "auto",
+        "delay_between_requests": 1.5,
+        "output_file": "city_league_archetypes.csv",
+        "region": "jp",
+        "additional_tournament_ids": []
+    },
+
+    "tournament_JH": {
+        "max_tournaments": 150,
+        "delay_between_tournaments": 0,
+        "start_tournament_id": 391,
+        "output_file": "tournament_cards_data.csv",
+        "tournament_types": [
+            "Regional",
+            "Special Event",
+            "LAIC",
+            "EUIC",
+            "NAIC",
+            "Worlds",
+            "International",
+            "Championship"
+        ],
+        "append_mode": true,
+        "_comment": "Scrapes individual deck lists from all tournaments. max_tournaments=150 for complete coverage. delay=0 for speed. WICHTIG: Scraping dauert ca. 0.3-0.5 Minuten pro Turnier."
+    },
+
+    "proxy": {
+        "proxy_host": "geo.iproyal.com",
+        "proxy_port": "12321",
+        "proxy_user": "SUdFKMiObiweTnv4",
+        "proxy_pass": "cMWlX3fJZjRohu7K"
+    }
+}

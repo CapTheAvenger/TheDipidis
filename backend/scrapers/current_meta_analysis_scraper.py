@@ -348,13 +348,14 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
             logger.info("   Uebersprungen (Format %s nicht in Filter)", t_format)
             continue
 
-        # Apply date filter
+        # Apply date filter – extract date from the tournament header area only
         if start_date:
-            # Handle multi-day ranges like "Feb 21-23, 2026" or "Feb 28 - Mar 2, 2026"
-            # Extract the FIRST date mentioned (start of the event)
+            # Search only in the text near the title, not the whole HTML
+            # Limitless labs shows date like "September 13–15, 2024" or "Apr 5, 2026"
+            header_area = t_html[:3000]  # Date info is always near the top
             date_match = re.search(
-                r'(\w+)\s+(\d{1,2})(?:\s*[-\u2013]\s*(?:\w+\s+)?\d{1,2})?[^,\d]*,?\s*(\d{4})',
-                t_html
+                r'(\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\b)\s+(\d{1,2})(?:\s*[-\u2013]\s*(?:\w+\s+)?\d{1,2})?[^,\d]*,?\s*(\d{4})',
+                header_area
             )
             if date_match:
                 try:
@@ -366,7 +367,11 @@ def scrape_tournaments(settings: dict, card_db: CardDatabaseLookup) -> list:
                         logger.info(f"   Uebersprungen (Datum {t_date.strftime('%d.%m.%Y')} vor Filter) - breche ab.")
                         break
                 except ValueError:
-                    pass  # Unknown date: include rather than skip
+                    logger.warning("   Datum erkannt aber Parse-Fehler fuer Turnier %s – ueberspringe.", tid)
+                    continue
+            else:
+                logger.warning("   Kein Datum erkannt fuer Turnier %s – ueberspringe (fail-closed).", tid)
+                continue
 
         deck_tasks = []
         for row in tsoup.select('tr'):

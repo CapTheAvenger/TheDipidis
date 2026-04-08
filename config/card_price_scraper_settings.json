@@ -1,6 +1,6 @@
 {
   "delay_seconds": 1.5,
-  "max_workers": 4,
+  "max_workers": 8,
   "batch_size": 100,
   "skip_cards_with_prices": false,
   "only_update_sets": ["POR", "ASC", "PFL", "MEG"],

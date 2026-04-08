@@ -1,5 +1,5 @@
 ﻿{
-    "max_tournaments":  250,
+    "max_tournaments":  150,
     "delay_between_tournaments":  0,
     "start_tournament_id":  391,
     "output_file":  "tournament_cards_data.csv",

@@ -1,0 +1,35 @@
+{
+  "source": "tournament_cards_data_cards.csv",
+  "chunks": [
+    "tournament_cards_data_cards_BRS-PRE.csv",
+    "tournament_cards_data_cards_BRS-SCR.csv",
+    "tournament_cards_data_cards_BRS-SFA.csv",
+    "tournament_cards_data_cards_BRS-SSP.csv",
+    "tournament_cards_data_cards_BRS-TEF.csv",
+    "tournament_cards_data_cards_BRS-TWM.csv",
+    "tournament_cards_data_cards_BST-PAR.csv",
+    "tournament_cards_data_cards_SVI-ASC.csv",
+    "tournament_cards_data_cards_SVI-BLK.csv",
+    "tournament_cards_data_cards_SVI-DRI.csv",
+    "tournament_cards_data_cards_SVI-JTG.csv",
+    "tournament_cards_data_cards_SVI-MEG.csv",
+    "tournament_cards_data_cards_SVI-PFL.csv"
+  ],
+  "meta_keys": [
+    "BRS-PRE",
+    "BRS-SCR",
+    "BRS-SFA",
+    "BRS-SSP",
+    "BRS-TEF",
+    "BRS-TWM",
+    "BST-PAR",
+    "SVI-ASC",
+    "SVI-BLK",
+    "SVI-DRI",
+    "SVI-JTG",
+    "SVI-MEG",
+    "SVI-PFL"
+  ],
+  "total_rows": 452245,
+  "generated": "2026-04-08T16:12:53.030205"
+}

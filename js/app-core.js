@@ -1472,6 +1472,64 @@ const BASE_PATH = './data/';
             // Start checking after initial delay
             setTimeout(checkAndSelect, 100);
         }
+
+        /**
+         * Navigate to Current Meta Deck Analysis with a combined archetype (from Hero cards).
+         * Selects the representative variant in the dropdown (first match among variants).
+         */
+        window.navigateToCMAnalysisWithCombinedDeck = function(mainName, variantsJson) {
+            let variants = [];
+            try {
+                variants = JSON.parse(decodeURIComponent(String(variantsJson || '')));
+            } catch (e) {
+                console.error('[CM Combined Nav] Could not parse variants:', e);
+                return;
+            }
+
+            if (!Array.isArray(variants) || variants.length === 0) return;
+
+            devLog('🔍 Navigating to CM Analysis with combined deck:', mainName, variants);
+
+            // Switch to Current Meta Analysis tab
+            switchTab('current-analysis');
+
+            // Wait for dropdown and pick best matching variant
+            let attempts = 0;
+            const maxAttempts = 50;
+
+            const checkAndSelect = () => {
+                attempts++;
+                const select = document.getElementById('currentMetaDeckSelect');
+
+                if (select && select.options.length > 1) {
+                    const options = Array.from(select.options);
+                    // Try each variant in order (most popular first) for a match
+                    let matchingOption = null;
+                    for (const variant of variants) {
+                        matchingOption = options.find(opt =>
+                            opt.value.toLowerCase() === variant.toLowerCase()
+                        );
+                        if (matchingOption) break;
+                    }
+
+                    if (matchingOption) {
+                        select.value = matchingOption.value;
+                        if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
+                        if (typeof loadCurrentMetaDeckData === 'function') loadCurrentMetaDeckData(matchingOption.value);
+                        devLog('✅ CM Combined deck selected:', matchingOption.value);
+                    } else {
+                        console.warn('⚠️ No variant found in CM dropdown:', variants);
+                    }
+                } else if (attempts < maxAttempts) {
+                    setTimeout(checkAndSelect, 100);
+                } else {
+                    console.error('❌ Timeout: CM dropdown not populated after 5 seconds');
+                }
+            };
+
+            setTimeout(checkAndSelect, 100);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
         
         // CSV loading and parsing
         function parseCSV(text, delimiter) {
@@ -1732,6 +1790,41 @@ const BASE_PATH = './data/';
         const csvMemoryCache = new Map();
         const csvInFlight = new Map();
 
+        /**
+         * Load chunked tournament CSV via manifest.
+         * Returns merged array from all per-meta chunk files.
+         */
+        async function _loadTournamentCardsChunked(options) {
+            const forceRefresh = Boolean(options && options.forceRefresh);
+            const cacheBust = forceRefresh ? `?t=${Date.now()}` : '';
+
+            try {
+                const manifestResp = await fetch(`${BASE_PATH}tournament_cards_manifest.json${cacheBust}`);
+                if (!manifestResp.ok) return null; // no manifest → fall back to monolith
+
+                const manifest = await manifestResp.json();
+                if (!manifest || !Array.isArray(manifest.chunks) || manifest.chunks.length === 0) return null;
+
+                devLog(`[Tournament CSV] Loading ${manifest.chunks.length} chunks (${manifest.total_rows} rows)`);
+
+                // Load all chunks in parallel
+                const chunkPromises = manifest.chunks.map(chunkFile =>
+                    fetchAndParseCSV(`${BASE_PATH}${chunkFile}${cacheBust}`, ';').catch(e => {
+                        console.warn(`[Tournament CSV] Failed to load chunk ${chunkFile}:`, e);
+                        return [];
+                    })
+                );
+
+                const chunkResults = await Promise.all(chunkPromises);
+                const merged = chunkResults.flat();
+                devLog(`[Tournament CSV] Merged ${merged.length} rows from ${manifest.chunks.length} chunks`);
+                return merged;
+            } catch (e) {
+                console.warn('[Tournament CSV] Manifest load failed, falling back to monolith:', e);
+                return null;
+            }
+        }
+
         async function loadCSV(filename, options = {}) {
             try {
                 const forceRefresh = Boolean(options && options.forceRefresh);
@@ -1745,13 +1838,25 @@ const BASE_PATH = './data/';
                     return await csvInFlight.get(cacheKey);
                 }
 
-                const requestUrl = forceRefresh
-                    ? `${BASE_PATH}${filename}?t=${Date.now()}`
-                    : `${BASE_PATH}${filename}`;
+                // Tournament cards: prefer chunked loading via manifest
+                const isTournamentCards = cacheKey === 'tournament_cards_data_cards.csv';
 
-                const delimiter = filename.endsWith('.csv') && filename.includes('mapping') ? ',' : ';';
+                const loadPromise = (async () => {
+                    let parsed = null;
 
-                const loadPromise = fetchAndParseCSV(requestUrl, delimiter).then(parsed => {
+                    if (isTournamentCards) {
+                        parsed = await _loadTournamentCardsChunked(options);
+                    }
+
+                    // Fallback to monolith file (or non-tournament files)
+                    if (!parsed) {
+                        const requestUrl = forceRefresh
+                            ? `${BASE_PATH}${filename}?t=${Date.now()}`
+                            : `${BASE_PATH}${filename}`;
+                        const delimiter = filename.endsWith('.csv') && filename.includes('mapping') ? ',' : ';';
+                        parsed = await fetchAndParseCSV(requestUrl, delimiter);
+                    }
+
                     const fileLower = String(filename || '').toLowerCase();
                     if (fileLower.includes('current_meta')) {
                         healCurrentMetaCardRows(parsed);
@@ -1760,7 +1865,7 @@ const BASE_PATH = './data/';
                         csvMemoryCache.set(cacheKey, parsed);
                     }
                     return parsed;
-                }).catch(e => {
+                })().catch(e => {
                     const statusCode = e && (e.status || e.statusCode);
                     const fileLower = String(filename || '').toLowerCase();
                     const isCurrentMeta = fileLower.includes('current_meta');

@@ -4,15 +4,18 @@ Card Database Updater - FAST EDITION
 ====================================
 Merges English cards, Japanese cards, Prices AND Pokédex Numbers
 into the final JSON for the frontend.
+Then syncs all scraper output (tournaments, meta, city league) to the
+frontend ``data/`` folder so the dashboard serves current data.
 """
 
 import json
 import csv
 import os
 import re
+import shutil
 import sys
 from typing import List, Dict
-from card_scraper_shared import get_data_dir, setup_console_encoding, load_set_order, card_sort_key
+from card_scraper_shared import get_data_dir, get_app_path, setup_console_encoding, load_set_order, card_sort_key
 
 setup_console_encoding()
 
@@ -205,8 +208,145 @@ def create_merged_database():
     print(f"✓ Erfolgreich {len(merged_cards)} Karten für das Frontend exportiert!")
     print(f"✓ Pokédex-Nummern gefunden für: {match_count} Pokémon")
 
+
+# ============================================================================
+# SYNC SCRAPER OUTPUT → FRONTEND data/
+# ============================================================================
+
+# Files that each scraper produces and the frontend needs.
+# Patterns are matched with str.startswith against filenames in backend/core/data/.
+SYNC_PATTERNS = [
+    # Tournament Scraper JH  →  Past Meta tab
+    "tournament_cards_data_cards.csv",
+    "tournament_cards_data_overview.csv",
+    # Current Meta Analysis  →  Current Meta tab
+    "current_meta_card_data.csv",
+    # City League Analysis  →  City League tab
+    "city_league_analysis.csv",
+    "city_league_archetypes.csv",
+    "city_league_archetypes_comparison.csv",
+    "city_league_archetypes_comparison_M3.csv",
+    "city_league_archetypes_deck_stats.csv",
+    # Limitless Online  →  Current Meta deck stats
+    "limitless_online_decks.csv",
+    "limitless_online_decks.html",
+    "limitless_online_decks_comparison.csv",
+    "limitless_online_decks_comparison.html",
+    "limitless_online_decks_comparison_local.html",
+    "limitless_online_decks_matchups.csv",
+]
+
+
+def sync_scraper_data_to_frontend():
+    """Copy scraper output from backend/core/data/ to the project-root data/ folder."""
+    backend_data = get_data_dir()                       # backend/core/data/
+    project_root = os.path.dirname(os.path.dirname(get_app_path()))
+    frontend_data = os.path.join(project_root, "data")
+
+    if os.path.normpath(backend_data) == os.path.normpath(frontend_data):
+        print("  Backend- und Frontend-data sind identisch – kein Sync noetig.")
+        return
+
+    os.makedirs(frontend_data, exist_ok=True)
+
+    print("\n" + "=" * 80)
+    print("SYNCING SCRAPER DATA → FRONTEND  (backend/core/data/ → data/)")
+    print("=" * 80)
+
+    synced = 0
+    skipped = 0
+    for name in SYNC_PATTERNS:
+        src = os.path.join(backend_data, name)
+        dst = os.path.join(frontend_data, name)
+        if not os.path.isfile(src):
+            continue
+
+        # Only copy if source is newer or size differs
+        if os.path.isfile(dst):
+            src_stat = os.stat(src)
+            dst_stat = os.stat(dst)
+            if src_stat.st_mtime <= dst_stat.st_mtime and src_stat.st_size == dst_stat.st_size:
+                skipped += 1
+                continue
+
+        shutil.copy2(src, dst)
+        size_mb = os.path.getsize(dst) / (1024 * 1024)
+        print(f"  ✓ {name}  ({size_mb:.1f} MB)")
+        synced += 1
+
+    print(f"\n✓ Sync abgeschlossen: {synced} Dateien kopiert, {skipped} bereits aktuell.")
+
+    # After sync, split large tournament CSV into per-meta chunks
+    split_tournament_cards(frontend_data)
+
+
+def split_tournament_cards(frontend_data):
+    """Split tournament_cards_data_cards.csv into per-meta chunk files.
+    
+    Creates:
+      - data/tournament_cards_data_cards_<META>.csv  (one per meta period)
+      - data/tournament_cards_manifest.json          (list of chunk filenames)
+    
+    The monolith CSV remains locally for backward compat but is .gitignored.
+    """
+    source = os.path.join(frontend_data, "tournament_cards_data_cards.csv")
+    if not os.path.isfile(source):
+        return
+
+    print("\n" + "-" * 60)
+    print("SPLITTING tournament_cards_data_cards.csv by meta")
+    print("-" * 60)
+
+    # Read all rows, group by meta
+    meta_rows = {}
+    fieldnames = None
+    with open(source, "r", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f, delimiter=";")
+        fieldnames = reader.fieldnames
+        for row in reader:
+            meta = row.get("meta", "unknown").strip()
+            if not meta:
+                meta = "unknown"
+            meta_rows.setdefault(meta, []).append(row)
+
+    if not fieldnames or not meta_rows:
+        print("  Keine Daten zum Splitten gefunden.")
+        return
+
+    # Write per-meta chunk files
+    chunk_files = []
+    for meta_key in sorted(meta_rows.keys()):
+        rows = meta_rows[meta_key]
+        chunk_name = f"tournament_cards_data_cards_{meta_key}.csv"
+        chunk_path = os.path.join(frontend_data, chunk_name)
+        
+        with open(chunk_path, "w", newline="", encoding="utf-8-sig") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=";")
+            writer.writeheader()
+            writer.writerows(rows)
+
+        size_mb = os.path.getsize(chunk_path) / (1024 * 1024)
+        print(f"  ✓ {chunk_name}  ({len(rows)} Zeilen, {size_mb:.1f} MB)")
+        chunk_files.append(chunk_name)
+
+    # Write manifest
+    manifest = {
+        "source": "tournament_cards_data_cards.csv",
+        "chunks": chunk_files,
+        "meta_keys": sorted(meta_rows.keys()),
+        "total_rows": sum(len(v) for v in meta_rows.values()),
+        "generated": __import__("datetime").datetime.now().isoformat()
+    }
+    manifest_path = os.path.join(frontend_data, "tournament_cards_manifest.json")
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+    
+    print(f"\n  ✓ Manifest: tournament_cards_manifest.json ({len(chunk_files)} Chunks, {manifest['total_rows']} Zeilen)")
+
+
 if __name__ == "__main__":
     try:
         create_merged_database()
+        sync_scraper_data_to_frontend()
     except Exception as e:
         print(f"Fehler: {e}")

@@ -322,10 +322,37 @@
             if (cacheRef === 'cityLeague' && _cachedCityLeagueRows) return _cachedCityLeagueRows;
             if (cacheRef === 'tournament' && _cachedTournamentRows) return _cachedTournamentRows;
             if (cacheRef === 'currentMeta' && _cachedCurrentMetaRows) return _cachedCurrentMetaRows;
-            const response = await fetch(BASE_PATH + file);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const text = await response.text();
-            const rows = parseCSV(text);
+
+            let rows;
+            // Tournament cards: prefer chunked loading via manifest
+            if (file === 'tournament_cards_data_cards.csv') {
+                try {
+                    const manifestResp = await fetch(BASE_PATH + 'tournament_cards_manifest.json');
+                    if (manifestResp.ok) {
+                        const manifest = await manifestResp.json();
+                        if (manifest && Array.isArray(manifest.chunks) && manifest.chunks.length > 0) {
+                            const chunkPromises = manifest.chunks.map(async (chunkFile) => {
+                                const resp = await fetch(BASE_PATH + chunkFile);
+                                if (!resp.ok) return [];
+                                const text = await resp.text();
+                                return parseCSV(text);
+                            });
+                            const chunkResults = await Promise.all(chunkPromises);
+                            rows = chunkResults.flat();
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[Cards DB] Manifest not available, using monolith:', e);
+                }
+            }
+
+            if (!rows) {
+                const response = await fetch(BASE_PATH + file);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const text = await response.text();
+                rows = parseCSV(text);
+            }
+
             if (cacheRef === 'cityLeague') _cachedCityLeagueRows = rows;
             if (cacheRef === 'tournament') _cachedTournamentRows = rows;
             if (cacheRef === 'currentMeta') _cachedCurrentMetaRows = rows;

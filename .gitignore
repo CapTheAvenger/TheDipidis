@@ -114,3 +114,9 @@ tests/artifacts/
 _archive/
 archive/
 data/_archive/
+
+# Large monolith CSV (replaced by per-meta chunks + manifest)
+data/tournament_cards_data_cards.csv
+
+# Backend scraper data (synced to data/ via prepare_card_data.py)
+backend/core/data/

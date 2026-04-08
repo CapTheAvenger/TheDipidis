@@ -274,117 +274,153 @@
         
         // Stream-parse the large cards CSV to build the deck index AND store cards per deck.
         // Uses PapaParse streaming so PapaParse never holds all 429k rows internally.
+        // Prefers chunked files via tournament_cards_manifest.json when available.
         function streamPastMetaDeckIndex(setOrderMap, tournamentsByDate) {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 const deckMap = new Map();
                 const inferredMeta = new Map(); // deckKey → newest set code
-                
-                Papa.parse(BASE_PATH + 'tournament_cards_data_cards.csv', {
-                    download: true,
-                    header: true,
-                    delimiter: ';',
-                    worker: false,
-                    skipEmptyLines: true,
-                    step: function(result) {
-                        const card = result.data;
-                        if (!card) return;
-                        
-                        const meta = String(card.meta || '').trim();
-                        if (meta.toLowerCase() === 'expanded') return;
-                        
-                        const rawArchetype = String(card.archetype || '').trim();
-                        const deckArchetype = sanitizePastMetaArchetypeName(rawArchetype);
-                        if (!deckArchetype || deckArchetype === 'Unknown Deck') return;
-                        
-                        const tournamentDate = String(card.tournament_date || '').trim() || 'Unknown Date';
-                        const cardTournamentId = String(card.tournament_id || '').trim();
-                        const cardTournamentName = String(card.tournament_name || '').trim();
-                        const setCode = String(card.set_code || '').trim().toUpperCase();
-                        
-                        // Infer format from newest set code
-                        const deckPeriodKey = cardTournamentId || tournamentDate;
-                        const metaLookupKey = `${deckPeriodKey}|||${rawArchetype}`;
-                        if (setCode) {
-                            const nextOrder = setOrderMap[setCode] || 0;
-                            const currentCode = inferredMeta.get(metaLookupKey);
-                            const currentOrder = currentCode ? (setOrderMap[currentCode] || 0) : -1;
-                            if (nextOrder > currentOrder) {
-                                inferredMeta.set(metaLookupKey, setCode);
-                            }
+
+                // Shared row handler (same logic for monolith and chunks)
+                function processRow(card) {
+                    if (!card) return;
+                    
+                    const meta = String(card.meta || '').trim();
+                    if (meta.toLowerCase() === 'expanded') return;
+                    
+                    const rawArchetype = String(card.archetype || '').trim();
+                    const deckArchetype = sanitizePastMetaArchetypeName(rawArchetype);
+                    if (!deckArchetype || deckArchetype === 'Unknown Deck') return;
+                    
+                    const tournamentDate = String(card.tournament_date || '').trim() || 'Unknown Date';
+                    const cardTournamentId = String(card.tournament_id || '').trim();
+                    const cardTournamentName = String(card.tournament_name || '').trim();
+                    const setCode = String(card.set_code || '').trim().toUpperCase();
+                    
+                    // Infer format from newest set code
+                    const deckPeriodKey = cardTournamentId || tournamentDate;
+                    const metaLookupKey = `${deckPeriodKey}|||${rawArchetype}`;
+                    if (setCode) {
+                        const nextOrder = setOrderMap[setCode] || 0;
+                        const currentCode = inferredMeta.get(metaLookupKey);
+                        const currentOrder = currentCode ? (setOrderMap[currentCode] || 0) : -1;
+                        if (nextOrder > currentOrder) {
+                            inferredMeta.set(metaLookupKey, setCode);
                         }
-                        
-                        // Match tournament from overview (indexed by date)
-                        const candidates = tournamentsByDate.get(tournamentDate) || [];
-                        let tournament = null;
-                        if (candidates.length === 1) {
-                            tournament = candidates[0];
-                        } else if (candidates.length > 1) {
-                            tournament = candidates.find(t => {
-                                const overviewFormat = String(t.format || '').trim();
-                                return !meta || !overviewFormat || overviewFormat === meta;
-                            }) || null;
-                        }
-                        
-                        const inferredMetaSetCode = inferredMeta.get(metaLookupKey) || '';
-                        const inferredMetaLabel = derivePastMetaLabelFromSetCode(inferredMetaSetCode, setOrderMap);
-                        
-                        const resolvedFormat = meta
-                            || String((tournament && tournament.format) || '').trim()
-                            || inferredMetaLabel
-                            || 'Unknown';
-                        const resolvedTournamentId = cardTournamentId || String((tournament && tournament.tournament_id) || '').trim() || tournamentDate;
-                        const resolvedTournamentName = cardTournamentName || String((tournament && tournament.tournament_name) || '').trim() || tournamentDate;
-                        const deckKey = `${resolvedFormat}|||${resolvedTournamentId}|||${deckArchetype}`;
-                        
-                        if (!deckMap.has(deckKey)) {
-                            deckMap.set(deckKey, {
-                                key: deckKey,
-                                tournament_id: resolvedTournamentId,
-                                tournament_name: resolvedTournamentName,
-                                tournament_date: tournamentDate,
-                                deck_name: deckArchetype,
-                                archetype: deckArchetype,
-                                format: resolvedFormat,
-                                decklist_count: parseInt(card.total_decks_in_archetype || 1),
-                                _rawArchetypes: new Set([rawArchetype]),
-                                cards: []
-                            });
-                        } else {
-                            const existing = deckMap.get(deckKey);
-                            const rowDecklistCount = parseInt(card.total_decks_in_archetype || 1);
-                            existing.decklist_count = Math.max(existing.decklist_count, rowDecklistCount);
-                            existing._rawArchetypes.add(rawArchetype);
-                        }
-                        
-                        // Store card data directly in the deck (no re-streaming needed later)
-                        deckMap.get(deckKey).cards.push({
-                            ...card,
-                            total_count: parsePastMetaNumber(card.total_count, 0),
-                            card_count: parsePastMetaNumber(card.average_count_overall, 0),
-                            average_count: parsePastMetaNumber(card.average_count, 0),
-                            average_count_overall: parsePastMetaNumber(card.average_count_overall, 0),
-                            percentage_in_archetype: parsePastMetaNumber(card.percentage_in_archetype, 0),
-                            decklist_count: parseInt(card.total_decks_in_archetype || 1, 10) || 1,
-                            deck_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0,
-                            deck_inclusion_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0
-                        });
-                    },
-                    complete: function() {
-                        // Post-process: fix decklist counts from collapsed raw archetypes
-                        deckMap.forEach(deck => {
-                            if (deck._rawArchetypes && deck._rawArchetypes.size > deck.decklist_count) {
-                                deck.decklist_count = deck._rawArchetypes.size;
-                            }
-                            delete deck._rawArchetypes;
-                        });
-                        devLog(`[Past Meta] Streamed deck index: ${deckMap.size} unique decks`);
-                        resolve(deckMap);
-                    },
-                    error: function(err) {
-                        console.error('[Past Meta] Stream parse error:', err);
-                        reject(err);
                     }
-                });
+                    
+                    // Match tournament from overview (indexed by date)
+                    const candidates = tournamentsByDate.get(tournamentDate) || [];
+                    let tournament = null;
+                    if (candidates.length === 1) {
+                        tournament = candidates[0];
+                    } else if (candidates.length > 1) {
+                        tournament = candidates.find(t => {
+                            const overviewFormat = String(t.format || '').trim();
+                            return !meta || !overviewFormat || overviewFormat === meta;
+                        }) || null;
+                    }
+                    
+                    const inferredMetaSetCode = inferredMeta.get(metaLookupKey) || '';
+                    const inferredMetaLabel = derivePastMetaLabelFromSetCode(inferredMetaSetCode, setOrderMap);
+                    
+                    const resolvedFormat = meta
+                        || String((tournament && tournament.format) || '').trim()
+                        || inferredMetaLabel
+                        || 'Unknown';
+                    const resolvedTournamentId = cardTournamentId || String((tournament && tournament.tournament_id) || '').trim() || tournamentDate;
+                    const resolvedTournamentName = cardTournamentName || String((tournament && tournament.tournament_name) || '').trim() || tournamentDate;
+                    const deckKey = `${resolvedFormat}|||${resolvedTournamentId}|||${deckArchetype}`;
+                    
+                    if (!deckMap.has(deckKey)) {
+                        deckMap.set(deckKey, {
+                            key: deckKey,
+                            tournament_id: resolvedTournamentId,
+                            tournament_name: resolvedTournamentName,
+                            tournament_date: tournamentDate,
+                            deck_name: deckArchetype,
+                            archetype: deckArchetype,
+                            format: resolvedFormat,
+                            decklist_count: parseInt(card.total_decks_in_archetype || 1),
+                            _rawArchetypes: new Set([rawArchetype]),
+                            cards: []
+                        });
+                    } else {
+                        const existing = deckMap.get(deckKey);
+                        const rowDecklistCount = parseInt(card.total_decks_in_archetype || 1);
+                        existing.decklist_count = Math.max(existing.decklist_count, rowDecklistCount);
+                        existing._rawArchetypes.add(rawArchetype);
+                    }
+                    
+                    // Store card data directly in the deck
+                    deckMap.get(deckKey).cards.push({
+                        ...card,
+                        total_count: parsePastMetaNumber(card.total_count, 0),
+                        card_count: parsePastMetaNumber(card.average_count_overall, 0),
+                        average_count: parsePastMetaNumber(card.average_count, 0),
+                        average_count_overall: parsePastMetaNumber(card.average_count_overall, 0),
+                        percentage_in_archetype: parsePastMetaNumber(card.percentage_in_archetype, 0),
+                        decklist_count: parseInt(card.total_decks_in_archetype || 1, 10) || 1,
+                        deck_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0,
+                        deck_inclusion_count: parseInt(card.deck_inclusion_count || card.deck_count || 0, 10) || 0
+                    });
+                }
+
+                function finalize() {
+                    deckMap.forEach(deck => {
+                        if (deck._rawArchetypes && deck._rawArchetypes.size > deck.decklist_count) {
+                            deck.decklist_count = deck._rawArchetypes.size;
+                        }
+                        delete deck._rawArchetypes;
+                    });
+                    devLog(`[Past Meta] Streamed deck index: ${deckMap.size} unique decks`);
+                    resolve(deckMap);
+                }
+
+                // Helper: stream-parse a single CSV file
+                function streamFile(url) {
+                    return new Promise((res, rej) => {
+                        Papa.parse(url, {
+                            download: true,
+                            header: true,
+                            delimiter: ';',
+                            worker: false,
+                            skipEmptyLines: true,
+                            step: function(result) { processRow(result.data); },
+                            complete: function() { res(); },
+                            error: function(err) { rej(err); }
+                        });
+                    });
+                }
+
+                try {
+                    // Try chunked loading via manifest
+                    let useChunks = false;
+                    try {
+                        const manifestResp = await fetch(BASE_PATH + 'tournament_cards_manifest.json');
+                        if (manifestResp.ok) {
+                            const manifest = await manifestResp.json();
+                            if (manifest && Array.isArray(manifest.chunks) && manifest.chunks.length > 0) {
+                                devLog(`[Past Meta] Loading ${manifest.chunks.length} tournament chunks`);
+                                for (const chunkFile of manifest.chunks) {
+                                    await streamFile(BASE_PATH + chunkFile);
+                                }
+                                useChunks = true;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('[Past Meta] Manifest not available, using monolith:', e);
+                    }
+
+                    // Fallback: stream the single monolith file
+                    if (!useChunks) {
+                        await streamFile(BASE_PATH + 'tournament_cards_data_cards.csv');
+                    }
+
+                    finalize();
+                } catch (err) {
+                    console.error('[Past Meta] Stream parse error:', err);
+                    reject(err);
+                }
             });
         }
         

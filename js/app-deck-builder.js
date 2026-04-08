@@ -1861,25 +1861,20 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             ctx.fillText(countText, pillX + 10, PAD + HEADER_H / 2);
 
             // Pre-load all card images as same-origin blobs to avoid CORS canvas tainting
+            // IMPORTANT: cache:'no-store' forces a fresh network request with Origin header.
+            // Without it, the browser may reuse a cached response (from normal <img> loads
+            // without crossOrigin) that lacks CORS headers, causing the fetch to fail.
             const imgPromises = Array.from(cards).map(async (cardEl) => {
                 const imgEl = cardEl.querySelector('img');
                 const src = imgEl ? imgEl.src : '';
                 if (!src) return null;
 
                 try {
-                    // Fetch as blob to bypass CORS tainting
-                    const resp = await fetch(src, { mode: 'cors' }).catch(() => null);
-                    let blobUrl;
-                    if (resp && resp.ok) {
-                        const blob = await resp.blob();
-                        blobUrl = URL.createObjectURL(blob);
-                    } else {
-                        // CORS fetch failed — try no-cors opaque fetch (won't work for blob),
-                        // fall back to using src directly (badge-only, no image)
-                        blobUrl = null;
-                    }
+                    const resp = await fetch(src, { mode: 'cors', cache: 'no-store' }).catch(() => null);
+                    if (!resp || !resp.ok) return null;
 
-                    if (!blobUrl) return null;
+                    const blob = await resp.blob();
+                    const blobUrl = URL.createObjectURL(blob);
 
                     return new Promise(resolve => {
                         const image = new Image();

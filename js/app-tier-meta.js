@@ -779,16 +779,32 @@
             // ===================== TIER SECTIONS =====================
             const tierGroups = { 'tier-1': [], 'tier-2': [], 'tier-3': [], 'tier-trending': [] };
 
-            // Dynamische Tier-Einteilung: Tier 1 = Top 15 %, Tier 2 = nächste 25 %
-            const _nm = normalizedDecks.length;
-            const _t1 = Math.min(Math.max(1, Math.ceil(_nm * 0.15)), _nm);
-            const _t2 = Math.min(_t1 + Math.max(1, Math.ceil(_nm * 0.25)), _nm);
-            const _t3 = Math.min(_t2 + 10, _nm);
-            normalizedDecks.forEach((normalizedDeck, idx) => {
-                if (idx < _t1) tierGroups['tier-1'].push(normalizedDeck);
-                else if (idx < _t2) tierGroups['tier-2'].push(normalizedDeck);
-                else if (idx < _t3) tierGroups['tier-3'].push(normalizedDeck);
-                else tierGroups['tier-trending'].push(normalizedDeck);
+            // Tier-Einteilung mit festen Limits und Mindestspielanzahl
+            // Alle Tier 1-3 Decks müssen ≥ 10 % der Spielanzahl des Rang-1-Decks haben
+            const rank1Count = normalizedDecks.length > 0 ? (normalizedDecks[0].new_count || 0) : 0;
+            const minCountThreshold = rank1Count * 0.10;
+
+            const T1_MAX = 6;
+            const T2_MAX = 9;
+            const T3_MAX = 12;
+            const T1_MIN_SHARE = 5; // Tier 1 zusätzlich: Share > 5 %
+
+            let t1 = 0, t2 = 0, t3 = 0;
+            normalizedDecks.forEach((deck) => {
+                const meetsMinCount = (deck.new_count || 0) >= minCountThreshold;
+
+                if (t1 < T1_MAX && meetsMinCount && deck.share > T1_MIN_SHARE) {
+                    tierGroups['tier-1'].push(deck);
+                    t1++;
+                } else if (t2 < T2_MAX && meetsMinCount) {
+                    tierGroups['tier-2'].push(deck);
+                    t2++;
+                } else if (t3 < T3_MAX && meetsMinCount) {
+                    tierGroups['tier-3'].push(deck);
+                    t3++;
+                } else {
+                    tierGroups['tier-trending'].push(deck);
+                }
             });
             
             const tierTitles = {

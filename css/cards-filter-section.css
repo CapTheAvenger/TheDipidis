@@ -162,7 +162,7 @@
     #cards .cards-filter-view-mode button,
     #cards .cards-filter-sort select,
     #cards .cards-filters-toggle {
-        min-height: 38px !important;
+        min-height: 44px !important;
         font-size: 13px !important;
     }
 
@@ -216,7 +216,7 @@
     #cards .cards-filter-view-mode button,
     #cards .cards-filter-sort select,
     #cards .cards-filters-toggle {
-        min-height: 36px !important;
+        min-height: 44px !important;
         font-size: 12px !important;
         padding: 8px 10px !important;
     }

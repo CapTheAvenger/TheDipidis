@@ -829,4 +829,249 @@
     }
 }
 
+/* ============================================
+   MOBILE UX FIX — Font-Sizes, Touch-Targets,
+   FAB, Selects Full-Width
+   ============================================ */
+
+/* --- Fix 2: Enforce minimum 12px font-size for all elements on mobile --- */
+@media (max-width: 768px) {
+    /* Global mobile font-size floor */
+    body {
+        font-size: 12px !important;
+    }
+
+    /* Hard floor: force every text-bearing element inside tab content to 12px.
+       Elements that need LARGER sizes (headings, stat values) override below. */
+    .tab-content p,
+    .tab-content span,
+    .tab-content div,
+    .tab-content td,
+    .tab-content th,
+    .tab-content button,
+    .tab-content a,
+    .tab-content label,
+    .tab-content strong,
+    .tab-content em,
+    .tab-content small,
+    .tab-content li,
+    .tab-content select,
+    .tab-content input,
+    .tab-content textarea,
+    .tab-content .btn-toggle-item,
+    .tab-content [class*="count"],
+    .tab-content [class*="summary"],
+    .tab-content [class*="title"],
+    .tab-content [class*="label"],
+    .tab-content [class*="note"],
+    .tab-content [class*="details"],
+    .tab-content [class*="hint"],
+    .tab-content [class*="subtitle"],
+    .tab-content [class*="placement"],
+    .tab-content [class*="change"],
+    .tab-content [class*="metric"],
+    .tab-content [class*="action"],
+    .tab-content [class*="toolbar"],
+    .tab-content [class*="jump"],
+    .tab-content [class*="toggle"],
+    .tab-content [class*="filter"],
+    .tab-content [class*="color-"],
+    .tab-content [class*="badge"],
+    .tab-content [class*="btn"] {
+        font-size: 12px !important;
+    }
+
+    /* Restore larger sizes for headings and stat values */
+    .tab-content h1 { font-size: 1.5em !important; }
+    .tab-content h2 { font-size: 1.3em !important; }
+    .tab-content h3 { font-size: 1.15em !important; }
+    .tab-content h4 { font-size: 1.05em !important; }
+
+    /* Stat number values — keep prominent */
+    .tab-content .city-league-stat-value,
+    .tab-content .current-meta-stat-value,
+    .tab-content .past-meta-stat-value {
+        font-size: 1.5rem !important;
+    }
+
+    /* Stat-label icon pseudo-elements — keep smaller for visual balance */
+    .city-league-stat-label-cards::before,
+    .city-league-stat-label-decks::before,
+    .city-league-stat-label-placement::before,
+    .current-meta-stat-label-cards::before,
+    .current-meta-stat-label-winrate::before,
+    .current-meta-stat-label-matchup::before,
+    #city-league-analysis .city-league-stat-label-cards::before,
+    #city-league-analysis .city-league-stat-label-decks::before,
+    #city-league-analysis .city-league-stat-label-placement::before,
+    #current-analysis .current-meta-stat-label-cards::before,
+    #current-analysis .current-meta-stat-label-winrate::before,
+    #current-analysis .current-meta-stat-label-matchup::before {
+        font-size: 9px !important;
+    }
+
+    /* --- ID-scoped overrides for remaining font-size < 12px elements ---
+         Use `body` prefix to beat lazy-loaded stylesheets that activate
+         after mobile-responsive.css (media="print" onload pattern). --- */
+
+    /* CL / Current / Past Analysis: Share + Type + Sort filter buttons */
+    body #city-league-analysis .meta-card-analysis-share-btn,
+    body #city-league-analysis .meta-card-analysis-type-btn,
+    body #city-league-analysis .meta-card-analysis-sort-btn,
+    body #current-analysis .meta-card-analysis-share-btn,
+    body #current-analysis .meta-card-analysis-type-btn,
+    body #current-analysis .meta-card-analysis-sort-btn,
+    body #past-meta .meta-card-analysis-share-btn,
+    body #past-meta .meta-card-analysis-type-btn,
+    body #past-meta .meta-card-analysis-sort-btn {
+        font-size: 12px !important;
+    }
+
+    /* Current Meta: Matchup table headers */
+    body #current-meta .meta-matchup-th-opponent,
+    body #current-meta .meta-matchup-th-winrate,
+    body #current-meta .meta-matchup-th-record,
+    body .meta-matchup-th-opponent,
+    body .meta-matchup-th-winrate,
+    body .meta-matchup-th-record {
+        font-size: 12px !important;
+    }
+
+    /* Card detail tiles — utility classes used in JS-generated HTML */
+    body #current-analysis .fw-bold,
+    body #current-analysis .color-grey,
+    body #current-analysis .color-yellow,
+    body #current-analysis .color-green,
+    body #current-analysis .color-red,
+    body #current-analysis [class*="fs-0"],
+    body #current-analysis [class*="color-"],
+    body #past-meta .fw-bold,
+    body #past-meta .color-grey,
+    body #past-meta [class*="fs-0"],
+    body #past-meta [class*="color-"],
+    body #city-league-analysis .fw-bold,
+    body #city-league-analysis .color-grey,
+    body #city-league-analysis [class*="fs-0"],
+    body #city-league-analysis [class*="color-"] {
+        font-size: 12px !important;
+    }
+
+    /* Cards Database: action/pagination buttons */
+    body #cards .btn-green,
+    body #cards .btn-blue,
+    body #cards .btn-outline,
+    body #cards .btn-lg,
+    body #cards .btn-sm,
+    body #cards .pagination-page-btn,
+    body #cards .pagination-controls .btn-lg,
+    body #cards .pagination-controls .btn-sm,
+    body #cards .pagination-controls button,
+    body #cards-database .btn-green,
+    body #cards-database .btn-blue,
+    body #cards-database .btn-outline,
+    body #cards-database button {
+        font-size: 12px !important;
+    }
+
+    /* Profile: SVG text element */
+    body #profile text,
+    body #profile tspan {
+        font-size: 12px !important;
+    }
+
+    /* Utility class fs-09 — used in card details */
+    body .fs-09 {
+        font-size: 12px !important;
+    }
+
+    /* Card-Grid action buttons (−, ★, +) — override meta-card-analysis.css #ID .class */
+    body #cityLeagueMetaGrid .card-action-btn,
+    body #currentMetaMetaGrid .card-action-btn,
+    body #pastMetaMetaGrid .card-action-btn,
+    body .card-action-btn {
+        font-size: 12px !important;
+    }
+
+    /* Current Meta: Matchup table body cells */
+    body #current-meta td,
+    body .meta-matchup-table td {
+        font-size: 12px !important;
+    }
+}
+
+/* --- Fix 3: Card-Action-Buttons min 12px font-size on mobile --- */
+@media (max-width: 768px) {
+    .city-league-card-remove-btn,
+    .city-league-card-add-btn,
+    .city-league-card-rarity-btn,
+    .city-league-card-limitless-btn,
+    .city-league-card-proxy-btn,
+    .city-league-card-market-btn {
+        font-size: 12px !important;
+        min-height: 24px !important;
+    }
+}
+
+/* --- Fix 4: Battle Journal FAB — WCAG 44px touch target --- */
+@media (max-width: 768px) {
+    .battle-journal-fab {
+        min-height: 44px !important;
+        padding: 10px 14px !important;
+    }
+}
+
+/* --- Fix 5: Cards print-view / size toggle — 44px touch target --- */
+@media (max-width: 768px) {
+    .card-database-toggle-btn,
+    .cards-view-toggle-btn,
+    [class*="cards-tab"] button,
+    #cards-database .action-btn,
+    #btnStandardPrint,
+    #btnAllPrints,
+    #cards .btn-toggle-item {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        touch-action: manipulation;
+    }
+
+    /* Sandbox textarea full-width */
+    #sandbox textarea {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Reduce sandbox container padding so textarea gets >= 85% viewport width */
+    #sandbox.tab-content {
+        padding: 8px !important;
+    }
+    #sandbox .sandbox-player-panel {
+        padding: 10px !important;
+    }
+}
+
+/* --- Fix 6: Searchable selects & native selects full-width on mobile --- */
+@media (max-width: 768px) {
+    .searchable-select,
+    .searchable-select-display {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .searchable-select-dropdown.open {
+        width: calc(100vw - 24px) !important;
+        left: 12px !important;
+        max-width: none !important;
+    }
+
+    #current-analysis select.control-input,
+    #past-meta select.control-input,
+    #city-league-analysis select.control-input,
+    .tab-content select {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+
 /* End of Mobile Responsive CSS — SCHRITT 1 */

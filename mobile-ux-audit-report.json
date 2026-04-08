@@ -1,0 +1,110 @@
+{
+  "timestamp": "2026-04-08T19:05:06.700Z",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "summary": {
+    "critical": 0,
+    "warnings": 2,
+    "ok": 17,
+    "screenshots": 27
+  },
+  "findings": [
+    {
+      "severity": "OK",
+      "tab": "landing",
+      "msg": "Pokeball menu opens correctly"
+    },
+    {
+      "severity": "OK",
+      "tab": "landing",
+      "msg": "Meta submenu expands correctly"
+    },
+    {
+      "severity": "OK",
+      "tab": "city-league",
+      "msg": "Format selector visible"
+    },
+    {
+      "severity": "OK",
+      "tab": "city-league",
+      "msg": "363 deck elements rendered in tier sections"
+    },
+    {
+      "severity": "OK",
+      "tab": "city-league-analysis",
+      "msg": "Date From input visible (358×44px)"
+    },
+    {
+      "severity": "WARN",
+      "tab": "current-meta",
+      "msg": "No hero archetype cards rendered"
+    },
+    {
+      "severity": "WARN",
+      "tab": "current-meta",
+      "msg": "0 tier deck banners"
+    },
+    {
+      "severity": "OK",
+      "tab": "past-meta",
+      "msg": "Format filter has 14 options"
+    },
+    {
+      "severity": "OK",
+      "tab": "past-meta",
+      "msg": "Tournament filter has 10 options"
+    },
+    {
+      "severity": "OK",
+      "tab": "cards",
+      "msg": "Search input visible (338px wide)"
+    },
+    {
+      "severity": "OK",
+      "tab": "cards",
+      "msg": "Sort select visible"
+    },
+    {
+      "severity": "OK",
+      "tab": "cards",
+      "msg": "Card grid columns: none"
+    },
+    {
+      "severity": "OK",
+      "tab": "calculator",
+      "msg": "Calculation works: draw chance = 39.95%"
+    },
+    {
+      "severity": "OK",
+      "tab": "proxy",
+      "msg": "Decklist textarea visible"
+    },
+    {
+      "severity": "OK",
+      "tab": "proxy",
+      "msg": "Manual card name input: 332px wide"
+    },
+    {
+      "severity": "OK",
+      "tab": "tutorial",
+      "msg": "2 expandable sections found"
+    },
+    {
+      "severity": "OK",
+      "tab": "global-dropdowns",
+      "msg": "1 visible searchable-select elements found"
+    },
+    {
+      "severity": "OK",
+      "tab": "global-dropdowns",
+      "msg": "Searchable select \"-- Select a Deck --\" opens downward"
+    },
+    {
+      "severity": "OK",
+      "tab": "battle-journal-fab",
+      "msg": "FAB position: (73, 102) 83×44px"
+    }
+  ]
+}

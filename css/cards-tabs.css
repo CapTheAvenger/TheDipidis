@@ -480,7 +480,7 @@
     #cards .pagination-controls .btn-sm {
         min-height: 30px !important;
         min-width: 30px !important;
-        font-size: 11px !important;
+        font-size: 12px !important;
     }
 }
 
@@ -552,7 +552,7 @@
     #cards .pagination-controls .btn-lg,
     #cards .pagination-controls .btn-sm {
         min-height: 30px !important;
-        font-size: 11px !important;
+        font-size: 12px !important;
     }
 }
 

@@ -36,8 +36,8 @@
     <!-- Non-critical CSS: async load (tab-specific styles) -->
     <link rel="stylesheet" href="css/auth-styles.css?v=202604080200" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/cards-header.css?v=202604080200" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/cards-filter-section.css?v=202604080200" type="text/css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/cards-tabs.css?v=202604080200" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/cards-filter-section.css?v=202604090800" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/cards-tabs.css?v=202604090800" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/city-league.css?v=202604080200" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/meta-card-analysis.css?v=202604080200" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/current-meta-matchups.css?v=202604080200" type="text/css" media="print" onload="this.media='all'">
@@ -49,7 +49,7 @@
     <link rel="stylesheet" href="css/ux-step3.css?v=202604080200" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/ux-step4.css?v=202604080200" type="text/css" media="print" onload="this.media='all'">
     <!-- Mobile Responsive Optimization – SCHRITT 1 (Layout Umbrüche) -->
-    <link rel="stylesheet" href="css/mobile-responsive.css?v=202604080200" type="text/css">
+    <link rel="stylesheet" href="css/mobile-responsive.css?v=202604090830" type="text/css">
     <!-- Mobile Drag & Drop polyfill for touch devices -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@3.0.0-rc.0/default.css" type="text/css" crossorigin="anonymous">
     <!-- Mobile Drag & Drop polyfill JS -->
@@ -514,16 +514,28 @@
                             var r = disp.getBoundingClientRect();
                             dd.style.left = r.left + 'px';
                             dd.style.width = r.width + 'px';
-                            // Open downward or upward depending on space
+                            // On mobile (≤768px): always open downward with constrained height
+                            var isMobile = window.innerWidth <= 768;
                             var spaceBelow = window.innerHeight - r.bottom;
-                            if (spaceBelow < 420) {
+                            if (isMobile) {
+                                // Always open downward on mobile
+                                dd.style.top = r.bottom + 'px';
+                                dd.style.bottom = 'auto';
+                                dd.style.borderRadius = '0 0 10px 10px';
+                                dd.style.maxHeight = Math.max(spaceBelow - 12, 200) + 'px';
+                                dd.style.overflowY = 'auto';
+                            } else if (spaceBelow < 420) {
                                 dd.style.bottom = (window.innerHeight - r.top) + 'px';
                                 dd.style.top = 'auto';
                                 dd.style.borderRadius = '10px 10px 0 0';
+                                dd.style.maxHeight = '';
+                                dd.style.overflowY = '';
                             } else {
                                 dd.style.top = r.bottom + 'px';
                                 dd.style.bottom = 'auto';
                                 dd.style.borderRadius = '0 0 10px 10px';
+                                dd.style.maxHeight = '';
+                                dd.style.overflowY = '';
                             }
                         }
                     });

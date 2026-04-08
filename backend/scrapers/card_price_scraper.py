@@ -1,116 +1,103 @@
-﻿
 #!/usr/bin/env python3
 """
-Card Price Scraper - HYBRID STEALTH EDITION (V4 - Final Stable)
-==============================================================
-- Nutzt Meta-Daten & Raritäten zur CM-Minimierung.
-- High-Rares & Playables: Cardmarket (SeleniumBase UC + Proxy).
-- Rest (C, U, R): Präziser Set-Match via Limitless TCG.
-- IPRoyal Whitelist Mode (kein Passwort-Popup).
+Card Price Scraper - Limitless TCG Only (V5)
+=============================================
+- Scraped Preise ausschliesslich von Limitless TCG.
+- Kein Cardmarket, kein Selenium, kein Proxy.
+- Einfacher requests-basierter Scraper mit Set-Matching.
 """
 
 import csv
-import json
 import os
 import sys
 import time
 import logging
-import random
-import threading
 import concurrent.futures
 from datetime import datetime
 
 try:
     from bs4 import BeautifulSoup
     import requests as std_requests
-    from seleniumbase import Driver
 except ImportError:
-    print("FEHLER: Bibliotheken fehlen! pip install seleniumbase beautifulsoup4 requests")
+    print("FEHLER: Bibliotheken fehlen! pip install beautifulsoup4 requests lxml")
     sys.exit(1)
 
 from card_scraper_shared import setup_console_encoding, get_data_dir, setup_logging, load_settings
 
 setup_console_encoding()
-_request_semaphore = threading.Semaphore(2) 
 logger = setup_logging("price_scraper")
 
+
 def _load_settings() -> dict:
-    return load_settings("card_price_scraper_settings.json", {"delay_seconds": 5.0, "max_workers": 2, "headless": True})
+    return load_settings("card_price_scraper_settings.json", {
+        "delay_seconds": 1.5,
+        "max_workers": 4,
+        "batch_size": 100,
+        "skip_cards_with_prices": False,
+        "only_update_sets": []
+    })
+
 
 def load_cards_to_update(csv_path: str) -> list:
-    if not os.path.isfile(csv_path): return []
+    if not os.path.isfile(csv_path):
+        return []
     cards = []
     with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             name = (row.get("name_en") or row.get("name") or "").strip()
             cards.append({
-                "name": name, "set": row.get("set", ""), "number": row.get("number", ""),
-                "cardmarket_url": row.get("cardmarket_url", ""), "card_url": row.get("card_url", "")
+                "name": name,
+                "set": row.get("set", ""),
+                "number": row.get("number", ""),
+                "cardmarket_url": row.get("cardmarket_url", ""),
+                "card_url": row.get("card_url", ""),
             })
     return cards
 
-def _parse_cardmarket_price(html: str, card_id: str) -> str:
-    soup = BeautifulSoup(html, "lxml")
-    for dt in soup.find_all("dt"):
-        label = dt.get_text(strip=True).lower()
-        if label in ("from", "ab"):
-            dd = dt.find_next_sibling("dd")
-            if dd:
-                text = dd.get_text(strip=True)
-                if ("EUR" in text or "€" in text) and "£" not in text:
-                    logger.info("  + CM Ab-Preis [%s]: %s", card_id, text)
-                    return text
-    return ""
 
-def _fetch_single_price(card: dict, base_delay: float, is_headless: bool, force_limitless: bool) -> dict:
+def _fetch_single_price(card: dict, base_delay: float) -> dict:
+    """Fetch price from Limitless TCG only."""
     card_id = f"{card['set']}-{card['number']}"
     eur_price = ""
-    cm_url = card.get("cardmarket_url", "")
-    proxy_host_port = "geo.iproyal.com:12321"
 
-    with _request_semaphore:
-        # STRATEGIE A: Cardmarket (Nur für wichtige Karten)
-        if not force_limitless and cm_url:
-            target_url = cm_url + ("&language=1,3" if "?" in cm_url else "?language=1,3")
-            for attempt in range(2):
-                driver = None
-                try:
-                    driver = Driver(uc=True, proxy=proxy_host_port, headless=is_headless)
-                    driver.get(target_url)
-                    time.sleep(base_delay + random.uniform(2.0, 4.0))
-                    eur_price = _parse_cardmarket_price(driver.page_source, card_id)
-                    if eur_price: break
-                except Exception as e:
-                    logger.debug("  CM Fehler [%s]: %s", card_id, e)
-                finally:
-                    if driver: driver.quit()
+    try:
+        lt_url = (
+            f"https://limitlesstcg.com{card['card_url']}"
+            if card.get("card_url")
+            else f"https://limitlesstcg.com/cards/{card['set']}/{card['number']}"
+        )
+        resp = std_requests.get(lt_url, timeout=12, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        })
+        if resp.status_code == 200:
+            soup = BeautifulSoup(resp.text, "lxml")
+            prints_table = soup.select_one("table.card-prints-versions")
+            if prints_table:
+                # Try exact set match first
+                for row in prints_table.select("tr"):
+                    row_text = row.get_text().lower()
+                    if card["set"].lower() in row_text:
+                        eur_link = row.select_one("a.card-price.eur")
+                        if eur_link:
+                            eur_price = eur_link.get_text(strip=True)
+                            logger.info("  + LT Preis [%s]: %s (Set-Match: %s)", card_id, eur_price, card["set"])
+                            break
+                # Fallback: first EUR price on page
+                if not eur_price:
+                    first_price = soup.select_one("a.card-price.eur")
+                    if first_price:
+                        eur_price = first_price.get_text(strip=True)
+                        logger.info("  + LT Preis [%s]: %s (Fallback)", card_id, eur_price)
+        else:
+            logger.debug("  LT HTTP %s fuer [%s]", resp.status_code, card_id)
+    except Exception as e:
+        logger.debug("  LT Fehler [%s]: %s", card_id, e)
 
-        # STRATEGIE B: Limitless mit Set-Matching
-        if not eur_price:
-            try:
-                lt_url = f"https://limitlesstcg.com{card['card_url']}" if card.get("card_url") else f"https://limitlesstcg.com/cards/{card['set']}/{card['number']}"
-                resp = std_requests.get(lt_url, timeout=10)
-                if resp.status_code == 200:
-                    soup = BeautifulSoup(resp.text, "lxml")
-                    prints_table = soup.select_one("table.card-prints-versions")
-                    if prints_table:
-                        for row in prints_table.select("tr"):
-                            row_text = row.get_text().lower()
-                            if card['set'].lower() in row_text:
-                                eur_link = row.select_one("a.card-price.eur")
-                                if eur_link:
-                                    eur_price = eur_link.get_text(strip=True)
-                                    logger.info("  + LT %s [%s]: %s (Set-Match: %s)", 
-                                                "Fallback" if not force_limitless else "Direkt", 
-                                                card_id, eur_price, card['set'])
-                                    break
-                    if not eur_price:
-                        first_price = soup.select_one("a.card-price.eur")
-                        if first_price: eur_price = first_price.get_text(strip=True)
-            except: pass
+    time.sleep(base_delay)
 
     return {**card, "eur_price": eur_price, "last_updated": datetime.now().isoformat()}
+
 
 def save_prices(prices: list, csv_path: str):
     existing = {}
@@ -118,65 +105,89 @@ def save_prices(prices: list, csv_path: str):
         with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                if not row: continue
+                if not row:
+                    continue
                 key = f"{row.get('set', '')}_{row.get('number', '')}"
                 existing[key] = row
 
     for p in prices:
         key = f"{p.get('set', '')}_{p.get('number', '')}"
-        if p.get("eur_price"): existing[key] = p          
+        if p.get("eur_price"):
+            existing[key] = p
 
     with open(csv_path, "w", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["name", "set", "number", "eur_price", "cardmarket_url", "last_updated"], extrasaction="ignore")
+        writer = csv.DictWriter(
+            f,
+            fieldnames=["name", "set", "number", "eur_price", "cardmarket_url", "last_updated"],
+            extrasaction="ignore",
+        )
         writer.writeheader()
-        for k in sorted(existing.keys()): writer.writerow(existing[k])
+        for k in sorted(existing.keys()):
+            writer.writerow(existing[k])
+
 
 def scrape_prices(cards: list, settings: dict, csv_path: str) -> list:
-    playable_names = set()
-    data_dir = get_data_dir()
-    meta_path = os.path.join(data_dir, "meta_data.json")
-    
-    if os.path.exists(meta_path):
-        try:
-            with open(meta_path, "r", encoding="utf-8") as f:
-                meta = json.load(f)
-                for deck in meta.get("decks", []):
-                    for c in deck.get("cards", []): 
-                        playable_names.add(c.get("name", "").lower().strip())
-            logger.info("  -> %s spielbare Karten aus Meta-Analyse geladen.", len(playable_names))
-        except: pass
+    only_sets = settings.get("only_update_sets", [])
+    if only_sets:
+        only_sets_lower = [s.lower() for s in only_sets]
+        cards = [c for c in cards if c["set"].lower() in only_sets_lower]
+        logger.info("  -> Gefiltert auf Sets: %s (%s Karten)", only_sets, len(cards))
 
-    to_process = []
-    for card in cards:
-        c_name = card['name'].lower().strip()
-        c_num = card['number'].upper()
-        # High-Rare/Playable Check (SIR, Gold, EX, V, Illustration Rares)
-        is_high_rare = any(x in c_num for x in ["SIR", "GG", "TG", "SV", "AR", "FA", "EX", "VSTAR", "PROMO"]) or \
-                       (c_num.count('/') > 0 and int(c_num.split('/')[0]) > 160)
-        is_playable = c_name in playable_names
-        
-        force_lt = not (is_high_rare or is_playable)
-        to_process.append((card, force_lt))
+    if settings.get("skip_cards_with_prices"):
+        prices_csv = csv_path
+        existing_keys = set()
+        if os.path.isfile(prices_csv):
+            with open(prices_csv, "r", encoding="utf-8-sig", newline="") as f:
+                for row in csv.DictReader(f):
+                    if row.get("eur_price"):
+                        existing_keys.add(f"{row.get('set', '')}_{row.get('number', '')}")
+        before = len(cards)
+        cards = [c for c in cards if f"{c['set']}_{c['number']}" not in existing_keys]
+        logger.info("  -> Ueberspringe %s Karten mit vorhandenen Preisen.", before - len(cards))
+
+    if not cards:
+        logger.info("Keine Karten zu verarbeiten.")
+        return []
 
     results = []
-    logger.info("Starte Hybrid-Scraping: %s Karten.", len(to_process))
-    with concurrent.futures.ThreadPoolExecutor(max_workers=int(settings['max_workers'])) as executor:
-        futures = [executor.submit(_fetch_single_price, c, float(settings['delay_seconds']), bool(settings['headless']), flt) for c, flt in to_process]
+    delay = float(settings.get("delay_seconds", 1.5))
+    workers = min(int(settings.get("max_workers", 4)), 6)
+    batch_size = int(settings.get("batch_size", 100))
+
+    logger.info("Starte Limitless-Scraping: %s Karten (%s Workers, %.1fs Delay).", len(cards), workers, delay)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = [executor.submit(_fetch_single_price, c, delay) for c in cards]
         for i, f in enumerate(concurrent.futures.as_completed(futures)):
             results.append(f.result())
-            if (i+1) % 50 == 0: save_prices(results, csv_path)
+            if (i + 1) % batch_size == 0:
+                save_prices(results, csv_path)
+                logger.info("  -> Zwischenspeichern nach %s Karten.", i + 1)
+
     return results
+
 
 def main():
     settings = _load_settings()
     data_dir = get_data_dir()
     cards_csv = os.path.join(data_dir, "all_cards_database.csv")
     prices_csv = os.path.join(data_dir, "price_data.csv")
+
+    logger.info("=" * 60)
+    logger.info("Card Price Scraper - Limitless TCG Only (V5)")
+    logger.info("=" * 60)
+
     cards = load_cards_to_update(cards_csv)
+    logger.info("Geladene Karten: %s", len(cards))
+
     if cards:
         results = scrape_prices(cards, settings, prices_csv)
         save_prices(results, prices_csv)
+        found = sum(1 for r in results if r.get("eur_price"))
+        logger.info("Preise gefunden: %s / %s", found, len(results))
+
     logger.info("SUCCESS: Price update complete!")
+
 
 if __name__ == "__main__":
     main()

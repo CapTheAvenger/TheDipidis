@@ -2,7 +2,7 @@
 """
 Price Proxy Server - CORS-enabled proxy for live price fetching
 ================================================================
-Allows the web frontend to fetch live prices from Limitless TCG and Cardmarket
+Allows the web frontend to fetch live prices from Limitless TCG
 by proxying requests and adding CORS headers.
 
 Usage:
@@ -30,8 +30,7 @@ logger = logging.getLogger(__name__)
 
 # Allowed hosts for SSRF protection
 ALLOWED_HOSTS = {"limitlesstcg.com", "www.limitlesstcg.com",
-                 "play.limitlesstcg.com", "labs.limitlesstcg.com",
-                 "cardmarket.com", "www.cardmarket.com"}
+                 "play.limitlesstcg.com", "labs.limitlesstcg.com"}
 
 # Rate limiting (thread-safe)
 _rate_lock = threading.Lock()
@@ -43,28 +42,13 @@ def extract_eur_price_from_html(html: str, source: str) -> str:
     try:
         soup = BeautifulSoup(html, 'lxml')
         
-        if source == 'limitless':
-            table = soup.find('table', class_='card-prints-versions')
-            if table:
-                current_row = table.find('tr', class_='current')
-                if current_row:
-                    eur_link = current_row.find('a', class_='eur')
-                    if eur_link:
-                        return eur_link.get_text(strip=True)
-        
-        elif source == 'cardmarket':
-            # Try multiple strategies
-            price_elements = soup.find_all('dd', class_=re.compile(r'col'))
-            for elem in price_elements:
-                text = elem.get_text(strip=True)
-                if '€' in text and any(c.isdigit() for c in text):
-                    return text
-            
-            price_elem = soup.find(class_=re.compile(r'price', re.I))
-            if price_elem:
-                text = price_elem.get_text(strip=True)
-                if '€' in text:
-                    return text
+        table = soup.find('table', class_='card-prints-versions')
+        if table:
+            current_row = table.find('tr', class_='current')
+            if current_row:
+                eur_link = current_row.find('a', class_='eur')
+                if eur_link:
+                    return eur_link.get_text(strip=True)
         
         return ''
     except Exception as e:

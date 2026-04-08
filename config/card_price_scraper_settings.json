@@ -1,9 +1,8 @@
 {
-  "delay_seconds": 6.0,
-  "max_workers": 2,
-  "headless": false,
+  "delay_seconds": 1.5,
+  "max_workers": 4,
   "batch_size": 100,
   "skip_cards_with_prices": false,
   "only_update_sets": ["POR", "ASC", "PFL", "MEG"],
-  "_comment": "FULL UPDATE - Nutzt echte Chrome Fenster (Selenium) + IPRoyal Proxies"
+  "_comment": "Limitless TCG Only - kein Cardmarket, kein Selenium, kein Proxy"
 }

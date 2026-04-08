@@ -861,7 +861,6 @@
                             <div class="deck-banner-content">
                                 <div class="deck-banner-name">${archetypeName}</div>
                                 <div class="deck-banner-stats">
-                                    <span class="stat-badge stat-power">⚡ ${powerScore}</span>
                                     <span class="stat-badge">${share.toFixed(1)}% · ${winRate.toFixed(1)}% WR</span>
                                     ${trendHtml}
                                 </div>

@@ -641,13 +641,13 @@
          * Clicking navigates to Deck Analysis (global) tab.
          */
         async function renderCurrentMetaTierList() {
-            const tierMount = document.getElementById('currentMetaTierSections');
-            const container = tierMount || document.getElementById('currentMetaContent');
+            const container = document.getElementById('currentMetaContent');
             if (!container) return;
             
             // Load CSV data
             let metaData = [];
             let cardDataByArchetype = {};
+            const timestamp = Date.now();
             
             try {
                 metaData = await fetchAndParseCSV(`${BASE_PATH}limitless_online_decks_comparison.csv?t=${timestamp}`);
@@ -883,12 +883,8 @@
             
             html += '</div>';
             
-            // Inject into dedicated mount point or fallback
-            if (tierMount) {
-                tierMount.innerHTML = html;
-            } else {
-                container.innerHTML = html + container.innerHTML;
-            }
+            // Prepend hero + tier sections before existing content
+            container.innerHTML = html + container.innerHTML;
         }
         
         /**

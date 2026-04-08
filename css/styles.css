@@ -1976,6 +1976,26 @@
             transform: rotate(90deg);
         }
 
+        .image-view-export {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .image-view-export:hover {
+            background: linear-gradient(135deg, #16a085, #138d75);
+            transform: scale(1.1);
+        }
+
         .compact-card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));

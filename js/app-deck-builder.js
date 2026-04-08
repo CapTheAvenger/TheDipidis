@@ -1776,6 +1776,321 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const modal = document.getElementById('imageViewModal');
             modal.classList.remove('show');
         }
+
+        // ========== DECK IMAGE EXPORT (Screenshot) ==========
+
+        /**
+         * Renders the current grid view (compactCardGrid or a saved deck's card grid)
+         * onto a <canvas>, then offers download / native share.
+         *
+         * @param {HTMLElement} gridEl  – the container whose .compact-card / card-image
+         *                                children should be captured.
+         * @param {string}      title   – deck name shown at the top of the image.
+         */
+        async function exportDeckAsImage(gridEl, title) {
+            if (!gridEl) return;
+
+            const cards = gridEl.querySelectorAll('.compact-card, [data-export-card]');
+            if (!cards.length) {
+                showToast(t('deck.empty') || 'No cards to export', 'warning');
+                return;
+            }
+
+            showToast(getLang() === 'de' ? 'Bild wird erstellt...' : 'Creating image...', 'info');
+
+            // --- Layout constants ---
+            const COLS       = Math.min(cards.length, 10);
+            const CARD_W     = 245;
+            const CARD_H     = 342;
+            const GAP        = 8;
+            const PAD        = 24;
+            const HEADER_H   = 56;
+            const FOOTER_H   = 36;
+            const BADGE_R    = 18;
+
+            const rows   = Math.ceil(cards.length / COLS);
+            const canvasW = PAD * 2 + COLS * CARD_W + (COLS - 1) * GAP;
+            const canvasH = PAD + HEADER_H + rows * CARD_H + (rows - 1) * GAP + FOOTER_H + PAD;
+
+            const canvas = document.createElement('canvas');
+            canvas.width  = canvasW;
+            canvas.height = canvasH;
+            const ctx = canvas.getContext('2d');
+
+            // roundRect polyfill for older browsers
+            if (!ctx.roundRect) {
+                ctx.roundRect = function(x, y, w, h, r) {
+                    if (typeof r === 'number') r = [r, r, r, r];
+                    this.moveTo(x + r[0], y);
+                    this.lineTo(x + w - r[1], y);
+                    this.quadraticCurveTo(x + w, y, x + w, y + r[1]);
+                    this.lineTo(x + w, y + h - r[2]);
+                    this.quadraticCurveTo(x + w, y + h, x + w - r[2], y + h);
+                    this.lineTo(x + r[3], y + h);
+                    this.quadraticCurveTo(x, y + h, x, y + h - r[3]);
+                    this.lineTo(x, y + r[0]);
+                    this.quadraticCurveTo(x, y, x + r[0], y);
+                    this.closePath();
+                };
+            }
+
+            // Background gradient
+            const grad = ctx.createLinearGradient(0, 0, canvasW, canvasH);
+            grad.addColorStop(0, '#1a1a2e');
+            grad.addColorStop(1, '#16213e');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvasW, canvasH);
+
+            // Header
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 28px system-ui, -apple-system, sans-serif';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(title || 'Deck Overview', PAD, PAD + HEADER_H / 2);
+
+            // Card count pill
+            const countText = `${cards.length} cards`;
+            ctx.font = '16px system-ui, sans-serif';
+            const countW = ctx.measureText(countText).width + 20;
+            const pillX = canvasW - PAD - countW;
+            const pillY = PAD + HEADER_H / 2 - 14;
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.beginPath();
+            ctx.roundRect(pillX, pillY, countW, 28, 14);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(countText, pillX + 10, PAD + HEADER_H / 2);
+
+            // Pre-load all card images in parallel
+            const imgPromises = Array.from(cards).map(cardEl => {
+                const img = cardEl.querySelector('img');
+                const src = img ? img.src : '';
+                if (!src) return Promise.resolve(null);
+
+                return new Promise(resolve => {
+                    const image = new Image();
+                    image.crossOrigin = 'anonymous';
+                    image.onload  = () => resolve(image);
+                    image.onerror = () => resolve(null);
+                    image.src = src;
+                });
+            });
+
+            const images = await Promise.all(imgPromises);
+
+            // Draw cards
+            const startY = PAD + HEADER_H;
+            images.forEach((img, i) => {
+                const col = i % COLS;
+                const row = Math.floor(i / COLS);
+                const x   = PAD + col * (CARD_W + GAP);
+                const y   = startY + row * (CARD_H + GAP);
+
+                // Card shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.35)';
+                ctx.beginPath();
+                ctx.roundRect(x + 3, y + 3, CARD_W, CARD_H, 8);
+                ctx.fill();
+
+                // Card background
+                ctx.fillStyle = '#2a2a3e';
+                ctx.beginPath();
+                ctx.roundRect(x, y, CARD_W, CARD_H, 8);
+                ctx.fill();
+
+                if (img) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.roundRect(x, y, CARD_W, CARD_H, 8);
+                    ctx.clip();
+                    ctx.drawImage(img, x, y, CARD_W, CARD_H);
+                    ctx.restore();
+                } else {
+                    // Placeholder
+                    ctx.fillStyle = '#555';
+                    ctx.font = 'bold 16px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('?', x + CARD_W / 2, y + CARD_H / 2);
+                    ctx.textAlign = 'start';
+                }
+
+                // Badge (count)
+                const cardEl = cards[i];
+                const badge = cardEl.querySelector('.compact-badge, .card-max-count');
+                const badgeText = badge ? badge.textContent.trim() : '';
+                if (badgeText && badgeText !== '1') {
+                    const bx = x + CARD_W - BADGE_R - 4;
+                    const by = y + BADGE_R + 4;
+                    ctx.fillStyle = '#6c3dc5';
+                    ctx.beginPath();
+                    ctx.arc(bx, by, BADGE_R, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 16px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(badgeText, bx, by);
+                    ctx.textAlign = 'start';
+                    ctx.textBaseline = 'alphabetic';
+                }
+            });
+
+            // Footer
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.font = '13px system-ui, sans-serif';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText("Hausi's Pokemon TCG Analysis", PAD, canvasH - PAD / 2);
+
+            // --- Export ---
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    showToast('Image export failed', 'error');
+                    return;
+                }
+
+                const safeName = (title || 'deck').replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, '').replace(/\s+/g, '_');
+                const fileName = `${safeName}_${new Date().toISOString().slice(0,10)}.png`;
+
+                // Try native Share API (mobile: saves to gallery / WhatsApp etc.)
+                if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'image/png' })] })) {
+                    try {
+                        await navigator.share({
+                            files: [new File([blob], fileName, { type: 'image/png' })],
+                            title: title || 'Deck',
+                            text: title || 'Deck Overview'
+                        });
+                        showToast(getLang() === 'de' ? 'Bild geteilt!' : 'Image shared!', 'success');
+                        return;
+                    } catch (e) {
+                        if (e.name === 'AbortError') return; // User cancelled
+                    }
+                }
+
+                // Fallback: download
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast(getLang() === 'de' ? 'Bild heruntergeladen!' : 'Image downloaded!', 'success');
+            }, 'image/png');
+        }
+
+        /** Export the current Grid Modal as image. */
+        function exportGridModalAsImage() {
+            const grid = document.getElementById('compactCardGrid');
+            const deckName = _getActiveGridDeckName();
+            exportDeckAsImage(grid, deckName);
+        }
+
+        /** Determine a human-readable name for the currently open grid modal deck. */
+        function _getActiveGridDeckName() {
+            // Check which tab is active to determine source
+            const clTab = document.getElementById('city-league-tab');
+            const cmTab = document.getElementById('current-meta-tab');
+            const pmTab = document.getElementById('past-meta-tab');
+
+            if (clTab && clTab.classList.contains('active')) {
+                return window.currentCityLeagueArchetype || 'City League Deck';
+            }
+            if (cmTab && cmTab.classList.contains('active')) {
+                return window.currentCurrentMetaArchetype || 'Current Meta Deck';
+            }
+            if (pmTab && pmTab.classList.contains('active')) {
+                return window.pastMetaCurrentArchetype || 'Past Meta Deck';
+            }
+            return 'Deck';
+        }
+
+        /** Export a saved deck (My Decks) as image by deck index. */
+        function exportSavedDeckAsImage(deckIndex) {
+            const decks = window.userDecks || [];
+            if (deckIndex < 0 || deckIndex >= decks.length) return;
+
+            const deck = decks[deckIndex];
+            const deckName = deck.name || deck.archetype || 'Saved Deck';
+            const cards = deck.cards || {};
+
+            if (!Object.keys(cards).length) {
+                showToast(getLang() === 'de' ? 'Keine Karten im Deck' : 'No cards in deck', 'warning');
+                return;
+            }
+
+            showToast(getLang() === 'de' ? 'Bild wird erstellt...' : 'Creating image...', 'info');
+
+            // Build card entries with image URLs (reusing existing lookup maps)
+            const sortedEntries = sortCardsByType(
+                Object.entries(cards)
+                    .filter(([, count]) => count > 0)
+                    .map(([deckKey, count]) => {
+                        const baseMatch = deckKey.match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                        const cardName = baseMatch ? baseMatch[1] : deckKey;
+                        const setCode  = baseMatch ? baseMatch[2] : '';
+                        const setNumber = baseMatch ? baseMatch[3] : '';
+
+                        let imageUrl = '';
+                        if (setCode && setNumber) {
+                            imageUrl = getUnifiedCardImage(setCode, setNumber);
+                            if (!imageUrl && window.cardsBySetNumberMap) {
+                                const dbCard = window.cardsBySetNumberMap[`${setCode}-${setNumber}`];
+                                if (dbCard) imageUrl = dbCard.image_url || '';
+                            }
+                        }
+
+                        return {
+                            card_name: cardName,
+                            set_code: setCode,
+                            set_number: setNumber,
+                            image_url: imageUrl,
+                            type: _lookupCardType(cardName, setCode, setNumber),
+                            deck_count_in_selected: count
+                        };
+                    })
+            );
+
+            // Render onto a temporary off-screen grid so exportDeckAsImage can read it
+            const tempGrid = document.createElement('div');
+            tempGrid.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
+            sortedEntries.forEach(card => {
+                const div = document.createElement('div');
+                div.className = 'compact-card';
+                div.setAttribute('data-export-card', '1');
+
+                const img = document.createElement('img');
+                img.src = getBestCardImage(card);
+                div.appendChild(img);
+
+                const badge = document.createElement('div');
+                badge.className = 'compact-badge';
+                badge.textContent = String(card.deck_count_in_selected || 1);
+                div.appendChild(badge);
+
+                tempGrid.appendChild(div);
+            });
+            document.body.appendChild(tempGrid);
+
+            exportDeckAsImage(tempGrid, deckName).finally(() => {
+                document.body.removeChild(tempGrid);
+            });
+        }
+
+        /** Helper: look up card type from available indexes. */
+        function _lookupCardType(cardName, setCode, setNumber) {
+            if (setCode && setNumber && window.cardsBySetNumberMap) {
+                const db = window.cardsBySetNumberMap[`${setCode}-${setNumber}`];
+                if (db && db.type) return db.type;
+            }
+            if (window.cardIndexMap) {
+                const c = window.cardIndexMap.get(cardName);
+                if (c && c.type) return c.type;
+            }
+            return '';
+        }
         
         function copyDeck(source) {
             devLog('[copyDeck] Called with source:', source);

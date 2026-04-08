@@ -1434,6 +1434,9 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(52, 152, 219, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='rgba(52, 152, 219, 0.9)'" title="Copy deck list">
               📋
             </button>
+            <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" style="padding: 6px 12px; background: rgba(26, 188, 156, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#16a085'" onmouseout="this.style.background='rgba(26, 188, 156, 0.9)'" title="Save as image">
+              📸
+            </button>
             <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" style="padding: 6px 12px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='rgba(231, 76, 60, 0.9)'" title="Delete deck">
               🗑️
             </button>

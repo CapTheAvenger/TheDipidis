@@ -1860,19 +1860,36 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             ctx.fillStyle = '#ffffff';
             ctx.fillText(countText, pillX + 10, PAD + HEADER_H / 2);
 
-            // Pre-load all card images in parallel
-            const imgPromises = Array.from(cards).map(cardEl => {
-                const img = cardEl.querySelector('img');
-                const src = img ? img.src : '';
-                if (!src) return Promise.resolve(null);
+            // Pre-load all card images as same-origin blobs to avoid CORS canvas tainting
+            const imgPromises = Array.from(cards).map(async (cardEl) => {
+                const imgEl = cardEl.querySelector('img');
+                const src = imgEl ? imgEl.src : '';
+                if (!src) return null;
 
-                return new Promise(resolve => {
-                    const image = new Image();
-                    image.crossOrigin = 'anonymous';
-                    image.onload  = () => resolve(image);
-                    image.onerror = () => resolve(null);
-                    image.src = src;
-                });
+                try {
+                    // Fetch as blob to bypass CORS tainting
+                    const resp = await fetch(src, { mode: 'cors' }).catch(() => null);
+                    let blobUrl;
+                    if (resp && resp.ok) {
+                        const blob = await resp.blob();
+                        blobUrl = URL.createObjectURL(blob);
+                    } else {
+                        // CORS fetch failed — try no-cors opaque fetch (won't work for blob),
+                        // fall back to using src directly (badge-only, no image)
+                        blobUrl = null;
+                    }
+
+                    if (!blobUrl) return null;
+
+                    return new Promise(resolve => {
+                        const image = new Image();
+                        image.onload  = () => { URL.revokeObjectURL(blobUrl); resolve(image); };
+                        image.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(null); };
+                        image.src = blobUrl;
+                    });
+                } catch (e) {
+                    return null;
+                }
             });
 
             const images = await Promise.all(imgPromises);
@@ -1944,31 +1961,30 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             ctx.fillText("Hausi's Pokemon TCG Analysis", PAD, canvasH - PAD / 2);
 
             // --- Export ---
-            canvas.toBlob(async (blob) => {
+            try {
+                const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
                 if (!blob) {
-                    showToast('Image export failed', 'error');
+                    showToast(getLang() === 'de' ? 'Bild-Export fehlgeschlagen' : 'Image export failed', 'error');
                     return;
                 }
 
                 const safeName = (title || 'deck').replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, '').replace(/\s+/g, '_');
                 const fileName = `${safeName}_${new Date().toISOString().slice(0,10)}.png`;
+                const file = new File([blob], fileName, { type: 'image/png' });
 
-                // Try native Share API (mobile: saves to gallery / WhatsApp etc.)
-                if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'image/png' })] })) {
+                // Mobile: native Share API → saves to photo library / WhatsApp etc.
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     try {
-                        await navigator.share({
-                            files: [new File([blob], fileName, { type: 'image/png' })],
-                            title: title || 'Deck',
-                            text: title || 'Deck Overview'
-                        });
+                        await navigator.share({ files: [file], title: title || 'Deck' });
                         showToast(getLang() === 'de' ? 'Bild geteilt!' : 'Image shared!', 'success');
                         return;
                     } catch (e) {
                         if (e.name === 'AbortError') return; // User cancelled
+                        // Share failed — fall through to download
                     }
                 }
 
-                // Fallback: download
+                // PC / Fallback: direct download to Downloads folder
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -1978,7 +1994,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 showToast(getLang() === 'de' ? 'Bild heruntergeladen!' : 'Image downloaded!', 'success');
-            }, 'image/png');
+            } catch (e) {
+                console.error('Image export error:', e);
+                showToast(getLang() === 'de' ? 'Bild-Export fehlgeschlagen' : 'Image export failed', 'error');
+            }
         }
 
         /** Export the current Grid Modal as image. */

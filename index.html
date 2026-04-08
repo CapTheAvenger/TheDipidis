@@ -2277,6 +2277,9 @@
                             <button class="profile-tab-btn" onclick="switchProfileTab('metabinder')">
                                 <span data-i18n="profile.metaBinder">Meta Binder</span>
                             </button>
+                            <button class="profile-tab-btn" onclick="switchProfileTab('custombinder')">
+                                <span data-i18n="profile.customBinder">Custom Binder</span>
+                            </button>
                             <button class="profile-tab-btn" onclick="switchProfileTab('journal')">
                                 <span data-i18n="bj.profileTitle">Battle Journal</span>
                             </button>
@@ -2454,6 +2457,43 @@
                                     <div class="deck-builder-empty-actions">
                                         <button class="btn btn-primary" onclick="buildMetaBinder()" data-i18n="mb.generate">Generate Binder</button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Custom Binder Tab -->
+                        <div id="profile-custombinder" class="profile-tab-content display-none">
+                            <div class="meta-binder-header">
+                                <h2 data-i18n="profile.customBinder">Custom Binder</h2>
+                                <p class="color-grey mb-15" data-i18n="cb.subtitle">Pick your own archetypes and generate a personal binder – same logic as Meta Binder.</p>
+                            </div>
+
+                            <!-- Archetype Picker -->
+                            <div class="custom-binder-picker mb-15">
+                                <div class="custom-binder-search-row">
+                                    <input type="text" id="cbArchetypeSearch" class="input-system" placeholder="Search archetype…" autocomplete="off" oninput="cbFilterArchetypeList()">
+                                    <button class="btn btn-outline btn-sm" onclick="cbToggleArchetypeDropdown()" id="cbDropdownToggle">Browse ▾</button>
+                                </div>
+                                <div id="cbArchetypeDropdown" class="custom-binder-dropdown display-none"></div>
+                                <div id="cbSelectedChips" class="custom-binder-chips"></div>
+                            </div>
+
+                            <div class="meta-binder-actions mb-15">
+                                <button onclick="buildCustomBinder()" class="btn btn-primary" id="cbGenerateBtn" disabled>Generate Custom Binder</button>
+                                <button id="cbAddWishlist" onclick="cbAddMissingToWishlist()" class="btn btn-outline" disabled>Add Missing to Wishlist</button>
+                                <button id="cbSendProxy" onclick="cbSendMissingToProxy()" class="btn btn-outline" disabled>Proxy All Missing</button>
+                            </div>
+
+                            <div id="cbStats" class="meta-binder-stats display-none"></div>
+                            <div id="cbFilters" class="meta-binder-filters display-none"></div>
+                            <div id="cbDelta" class="meta-binder-delta display-none"></div>
+                            <div id="cbGrid" class="meta-binder-grid">
+                                <div class="deck-builder-empty-state app-empty-state" role="status" aria-live="polite">
+                                    <div class="deck-builder-empty-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+                                    </div>
+                                    <h4 class="deck-builder-empty-title">Select archetypes and generate your binder</h4>
+                                    <p class="deck-builder-empty-text">Pick 1–20 archetypes you want to build, then click Generate.</p>
                                 </div>
                             </div>
                         </div>
@@ -3378,6 +3418,7 @@
     <script src="js/app-features.js?v=202604080200" defer></script>
     <script src="js/battle-journal.js?v=202604080200" defer></script>
     <script src="js/meta-binder.js?v=202604080200" defer></script>
+    <script src="js/custom-binder.js?v=202604080200" defer></script>
     <script src="js/draw-simulator.js?v=202604080200" defer></script>
     <script src="js/combo-worker.js?v=202604080200" defer></script>
     <script src="js/firebase-multiplayer.js?v=202604080200" defer></script>

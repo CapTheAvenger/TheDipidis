@@ -1837,4 +1837,31 @@
     window.applyComplexMetaFilter = applyComplexMetaFilter;
     window.openMetaBinderDroppedModal = openMetaBinderDroppedModal;
     window.closeMetaBinderDroppedModal = closeMetaBinderDroppedModal;
+
+    // ── Shared internals for Custom Binder ──
+    window._mbShared = {
+        ensureMetaDataLoaded,
+        collectBinderCards,
+        computeDelta,
+        sortMetaCards,
+        findCardImage,
+        findCardRecord,
+        getMetaBinderTypeMeta,
+        getMetaBinderSortCategory,
+        getMetaBinderPokemonDex,
+        getMetaBinderSetOrderValue,
+        parseCardNumberForSort,
+        compareMetaBinderEntries,
+        normalizeArchetypeKey,
+        getCardsForArchetypeSource,
+        escapeArchetypeForJs,
+        pickArchetypeBannerImage,
+        mbText,
+        formatMetaBinderMetric,
+        loadMetaBinderArchetypeMetricMaps,
+        buildMetaBinderArchetypeGroups,
+        getCurrentMetaFormatLabelFromRows,
+        getTopCurrentMetaArchetypes,
+        getTopCityArchetypes
+    };
 })();

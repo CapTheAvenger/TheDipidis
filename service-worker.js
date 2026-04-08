@@ -47,6 +47,7 @@ const SHELL_ASSETS = [
   './js/app-features.js',
   './js/battle-journal.js',
   './js/meta-binder.js',
+  './js/custom-binder.js',
   './js/draw-simulator.js',
   './js/combo-worker.js',
   './js/app-calculator.js',

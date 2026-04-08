@@ -174,6 +174,12 @@ async function loadUserDecks(userId) {
     const snapshot = await window.db.collection('users').doc(userId).collection('decks').get();
     window.userDecks = [];
     snapshot.forEach(doc => window.userDecks.push({ id: doc.id, ...doc.data({ serverTimestamps: 'estimate' }) }));
+    // Sort newest first: prefer createdAt (Firestore Timestamp), fallback to createdAtMs
+    window.userDecks.sort((a, b) => {
+      const tsA = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAtMs || 0);
+      const tsB = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAtMs || 0);
+      return tsB - tsA;
+    });
     if (typeof updateDecksUI === 'function') updateDecksUI();
   } catch (error) {
     console.error('Error loading decks:', error);

@@ -1198,11 +1198,11 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 
-                // FIRST: Execute all scripts to load matchup data into window.matchupData_*
+                // FIRST: Execute ALL scripts from loaded HTML (matchup data + utility functions)
                 const scripts = doc.querySelectorAll('script');
                 let scriptsExecuted = 0;
                 scripts.forEach(script => {
-                    if (script.textContent && script.textContent.trim() && script.textContent.includes('window.matchupData_')) {
+                    if (script.textContent && script.textContent.trim()) {
                         try {
                             // Create a real script element and append to head for global scope execution
                             const scriptElement = document.createElement('script');
@@ -1211,11 +1211,11 @@
                             document.head.removeChild(scriptElement); // Clean up immediately
                             scriptsExecuted++;
                         } catch (scriptError) {
-                            console.warn('?? Error executing matchup script:', scriptError);
+                            console.warn('⚠️ Error executing loaded script:', scriptError);
                         }
                     }
                 });
-                devLog(`?? Loaded ${scriptsExecuted} matchup data scripts`);
+                devLog(`📦 Loaded ${scriptsExecuted} scripts (matchup data + functions)`);
                 
                 // Verify that matchup data was loaded
                 const matchupVars = Object.keys(window).filter(k => k.startsWith('matchupData_'));

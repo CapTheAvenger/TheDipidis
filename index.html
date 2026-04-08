@@ -557,6 +557,7 @@
                             <h2><span data-i18n="cm.limitlessHeading">Limitless Online Comparison</span> <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         </div>
                         <div id="currentMetaContent" class="current-meta-content">
+                            <div id="currentMetaTierSections"></div>
                             <div class="skeleton-row"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
                         </div>
                     </div>
@@ -2635,7 +2636,12 @@
         <div class="image-view-content">
             <div class="image-view-header">
                 <h3 data-i18n="modal.deckCardsOverview">Deck Cards Overview</h3>
-                <button class="image-view-close" onclick="closeImageView()"></button>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="image-view-export" onclick="exportGridModalAsImage()" title="Save as Image">
+                        📸
+                    </button>
+                    <button class="image-view-close" onclick="closeImageView()"></button>
+                </div>
             </div>
             <div id="compactCardGrid" class="compact-card-grid"></div>
         </div>

@@ -636,11 +636,13 @@
         }
         
         /**
-         * Render Tier List for Current Meta
-         * Similar to City League but uses winrate data
+         * Render Tier List for Current Meta (Global)
+         * Includes Top Archetypes hero section + Tier 1-3 + Rogue banners.
+         * Clicking navigates to Deck Analysis (global) tab.
          */
         async function renderCurrentMetaTierList() {
-            const container = document.querySelector('#currentMetaContent .container');
+            const tierMount = document.getElementById('currentMetaTierSections');
+            const container = tierMount || document.getElementById('currentMetaContent');
             if (!container) return;
             
             // Load CSV data
@@ -648,12 +650,7 @@
             let cardDataByArchetype = {};
             
             try {
-                // Load comparison CSV
-                const comparisonResponse = await fetch(`${BASE_PATH}limitless_online_decks_comparison.csv?t=${timestamp}`);
-                if (comparisonResponse.ok) {
-                    const comparisonText = await comparisonResponse.text();
-                    metaData = await fetchAndParseCSV(`${BASE_PATH}limitless_online_decks_comparison.csv?t=${timestamp}`);
-                }
+                metaData = await fetchAndParseCSV(`${BASE_PATH}limitless_online_decks_comparison.csv?t=${timestamp}`);
                 
                 // Load card data for images
                 const cardsData = await loadCurrentMetaRowsWithFallback({ forceRefresh: true });
@@ -671,19 +668,12 @@
             
             if (metaData.length === 0) return;
             
-            // Group decks by tier
-            const tierGroups = {
-                'tier-1': [],
-                'tier-2': [],
-                'tier-3': [],
-                'tier-trending': []
-            };
-            
             // Normalisiere alle Decks und sortiere nach Share (absteigend)
             const normalizedDecks = metaData.map(deck => ({
                 archetype: deck.deck_name || deck.archetype,
                 share: parseFloat(deck.new_share || 0),
                 new_share: parseFloat(deck.new_share || 0),
+                old_share: parseFloat(deck.old_share || 0),
                 winrate: parseFloat(deck.new_winrate || 0),
                 new_winrate: parseFloat(deck.new_winrate || 0),
                 count_change: parseInt(deck.count_change || 0),
@@ -691,25 +681,121 @@
             }));
             normalizedDecks.sort((a, b) => b.share - a.share);
 
+            // ===================== HERO SECTION =====================
+            const combinedHeroMap = new Map();
+            normalizedDecks.forEach(deck => {
+                const archetypeName = String(deck.archetype || '').trim();
+                if (!archetypeName) return;
+
+                const mainKey = getCombinedMainArchetypeLabel(archetypeName);
+                if (!mainKey) return;
+
+                const deckCount = deck.new_count || 0;
+                const winrate = deck.winrate || 0;
+                const share = deck.share || 0;
+
+                if (!combinedHeroMap.has(mainKey)) {
+                    combinedHeroMap.set(mainKey, {
+                        key: mainKey,
+                        label: toTitleCaseWords(mainKey),
+                        totalCount: 0,
+                        totalShare: 0,
+                        weightedWinrateSum: 0,
+                        variants: [],
+                        representativeVariant: archetypeName,
+                        representativeDeckCount: 0
+                    });
+                }
+
+                const group = combinedHeroMap.get(mainKey);
+                group.totalCount += deckCount;
+                group.totalShare += share;
+                group.weightedWinrateSum += winrate * Math.max(1, deckCount);
+                group.variants.push(archetypeName);
+
+                if (deckCount > group.representativeDeckCount) {
+                    group.representativeVariant = archetypeName;
+                    group.representativeDeckCount = deckCount;
+                }
+            });
+
+            const topHeroArchetypes = Array.from(combinedHeroMap.values())
+                .sort((a, b) => b.totalShare - a.totalShare)
+                .slice(0, 5)
+                .map(item => ({
+                    ...item,
+                    weightedWinrate: item.totalCount > 0 ? (item.weightedWinrateSum / item.totalCount) : 0
+                }));
+
+            let heroHtml = '';
+            if (topHeroArchetypes.length > 0) {
+                const heroTitle = getLang() === 'de' ? 'Top Archetypes' : 'Top Archetypes';
+                const heroSubtitle = getLang() === 'de' ? 'Meistgespielte Deck-Varianten (Global)' : 'Most played deck variants (Global)';
+
+                heroHtml = `
+                    <section class="tier-hero-section" aria-label="${heroTitle}">
+                        <div class="tier-hero-header">
+                            <h2>${heroTitle}</h2>
+                            <p>${heroSubtitle}</p>
+                        </div>
+                        <div class="tier-hero-grid">`;
+
+                topHeroArchetypes.forEach((item, index) => {
+                    const representativeCards = cardDataByArchetype[item.representativeVariant] || [];
+                    const imageUrl = getArchetypeImage(item.representativeVariant, representativeCards);
+                    const combinedMainEscaped = escapeJsStr(item.key || item.label || item.representativeVariant || '');
+                    const combinedVariantsJsonEscaped = escapeJsStr(encodeURIComponent(JSON.stringify(item.variants || [])));
+                    const winrateText = Number.isFinite(item.weightedWinrate) && item.weightedWinrate > 0
+                        ? item.weightedWinrate.toFixed(1)
+                        : '0.0';
+                    const shareText = item.totalShare > 0 ? item.totalShare.toFixed(1) : '0.0';
+                    const variantCount = item.variants.length;
+                    const variantLabel = variantCount === 1
+                        ? (getLang() === 'de' ? 'Variante' : 'Variant')
+                        : (getLang() === 'de' ? 'Varianten' : 'Variants');
+
+                    heroHtml += `
+                        <div class="tier-hero-card" onclick="navigateToCMAnalysisWithCombinedDeck('${combinedMainEscaped}', '${combinedVariantsJsonEscaped}')">
+                            ${imageUrl ? `<div class="tier-hero-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
+                            <div class="tier-hero-content">
+                                <div class="archetype-card-header">
+                                    <span class="archetype-rank-badge">#${index + 1}</span>
+                                    <h3 class="archetype-card-title">${item.label}</h3>
+                                </div>
+                                <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
+                                <div class="tier-hero-stats">
+                                    <span class="stat-badge">📊 Share: ${shareText}%</span>
+                                    <span class="stat-badge" title="Weighted average winrate">🏆 WR: ${winrateText}%</span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                heroHtml += `
+                        </div>
+                    </section>`;
+            }
+
+            // ===================== TIER SECTIONS =====================
+            const tierGroups = { 'tier-1': [], 'tier-2': [], 'tier-3': [], 'tier-trending': [] };
+
             // Dynamische Tier-Einteilung: Tier 1 = Top 15 %, Tier 2 = nächste 25 %
             const _nm = normalizedDecks.length;
             const _t1 = Math.min(Math.max(1, Math.ceil(_nm * 0.15)), _nm);
             const _t2 = Math.min(_t1 + Math.max(1, Math.ceil(_nm * 0.25)), _nm);
             const _t3 = Math.min(_t2 + 10, _nm);
             normalizedDecks.forEach((normalizedDeck, idx) => {
-                let tier;
-                if (idx < _t1) tier = 'tier-1';
-                else if (idx < _t2) tier = 'tier-2';
-                else if (idx < _t3) tier = 'tier-3';
-                else tier = 'tier-trending';
-                tierGroups[tier].push(normalizedDeck);
+                if (idx < _t1) tierGroups['tier-1'].push(normalizedDeck);
+                else if (idx < _t2) tierGroups['tier-2'].push(normalizedDeck);
+                else if (idx < _t3) tierGroups['tier-3'].push(normalizedDeck);
+                else tierGroups['tier-trending'].push(normalizedDeck);
             });
             
             const tierTitles = {
-                'tier-1': 'Tier 1 - Meta Dominators',
-                'tier-2': 'Tier 2 - Strong Contenders',
-                'tier-3': 'Tier 3 - Viable Options',
-                'tier-trending': 'Trending Decks'
+                'tier-1':        { title: 'Tier 1',          subtitle: 'Meta Dominators'     },
+                'tier-2':        { title: 'Tier 2',          subtitle: 'Strong Contenders'    },
+                'tier-3':        { title: 'Tier 3',          subtitle: 'Viable Options'       },
+                'tier-trending': { title: 'Rogue / Trending', subtitle: 'Emerging Archetypes' }
             };
             
             // Limit trending decks to top 20
@@ -717,49 +803,47 @@
                 tierGroups['tier-trending'] = tierGroups['tier-trending'].slice(0, 20);
             }
             
-            let html = '<div style="margin-bottom: 30px;">';
+            let html = heroHtml + '<div style="margin-bottom: 30px;">';
             
             // Render each tier
             ['tier-1', 'tier-2', 'tier-3', 'tier-trending'].forEach(tierKey => {
                 const decks = tierGroups[tierKey];
                 if (decks.length === 0) return;
+                const tierMeta = tierTitles[tierKey];
                 const isTrending = tierKey === 'tier-trending';
 
                 if (isTrending) {
                     html += `
-                    <div class="deck-tier-section ${tierKey}">
+                    <div class="tier-section ${tierKey}" id="cm-${tierKey}">
                         <details>
                             <summary class="tier-trending-summary">
-                                <div class="deck-tier-title" style="display:inline;">${tierTitles[tierKey]}</div>
+                                <h3 style="display:inline;">${tierMeta.title} <small>${tierMeta.subtitle}</small></h3>
                                 <span class="tier-trending-count">${decks.length} Decks</span>
                             </summary>
-                            <div class="deck-banner-grid">`;
+                            <div class="deck-grid tier-deck-grid">`;
                 } else {
                     html += `
-                    <div class="deck-tier-section ${tierKey}">
-                        <div class="deck-tier-title">${tierTitles[tierKey]}</div>
-                        <div class="deck-banner-grid">`;
+                    <div class="tier-section ${tierKey}" id="cm-${tierKey}">
+                        <h3>${tierMeta.title} <small>${tierMeta.subtitle}</small></h3>
+                        <div class="deck-grid tier-deck-grid">`;
                 }
                 
                 decks.forEach(deck => {
                     const archetypeName = deck.archetype;
                     
-                    // Fix share calculation with fallback
                     const share = parseFloat(deck.share || deck.new_share || 0);
                     const oldShare = parseFloat(deck.old_share || 0);
                     const winRate = parseFloat(deck.winrate || deck.new_winrate || 0);
                     const powerScore = calculatePowerScore(share, winRate);
-                    const newCount = parseInt(deck.new_count || 0);
                     
                     // Get archetype image
                     const archetypeCards = cardDataByArchetype[archetypeName] || [];
                     const imageUrl = getArchetypeImage(archetypeName, archetypeCards);
                     
-                    // Trend indicator based on share change
+                    // Trend indicator
                     const shareChange = share - oldShare;
                     let trendHtml = getDeckTrendBadge(archetypeName, shareChange);
                     
-                    // Legacy count change indicator (fallback if no share data)
                     const countChange = parseInt(deck.count_change || 0);
                     if (!trendHtml) {
                         if (countChange > 0) {
@@ -799,8 +883,12 @@
             
             html += '</div>';
             
-            // Prepend tier list at the beginning of container
-            container.innerHTML = html + container.innerHTML;
+            // Inject into dedicated mount point or fallback
+            if (tierMount) {
+                tierMount.innerHTML = html;
+            } else {
+                container.innerHTML = html + container.innerHTML;
+            }
         }
         
         /**

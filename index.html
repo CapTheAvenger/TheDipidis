@@ -1224,7 +1224,7 @@
                                 Access Japanese City League results, international tournament data, and detailed card statistics to build competitive decks � and test them directly in your browser.
                             </p>
                             <div class="tutorial-info-box tutorial-info-new">
-                                <strong>New in v45:</strong> <strong>Card Database Reliability</strong> � filter panel wiring was rebuilt; all filter groups now populate correctly and loading has a safe fallback if English set mapping cannot be resolved. <strong>Proxy Queue Fix</strong> � removed duplicate proxy queue container; proxy rendering is reliable again. <strong>Multiplayer Playtester Script</strong> � firebase-multiplayer.js now loads before playtester so online multiplayer actions are available. <strong>Rarity / Category / Deck Coverage Filters</strong> � were missing; these panels are now auto-generated at load time.
+                                <strong>New in v46:</strong> <strong>Battle Journal</strong> &mdash; Log every match directly from the header button (&#9876;). Records your deck, opponent, turn order, and result (BO1/BO3). Auto-copies a WhatsApp-style summary to clipboard after save. Full history with search, copy, and clear in Profile &rarr; Journal tab. <strong>Test Draw</strong> &mdash; Quick draw simulator in every Deck Builder (City League, Current Meta, Past Meta). Draws 7-card opening hands plus mulligans to evaluate consistency. <strong>Meta Binder</strong> &mdash; Profile sub-tab that generates a binder of all meta-relevant cards you&rsquo;re missing, with one-click &ldquo;Add to Wishlist&rdquo;. <strong>Toggle Buttons</strong> &mdash; Turn order (1st/2nd) and Result (W/L/T) in Battle Journal now use color-coded tap buttons instead of dropdowns. <strong>Caching Overhaul</strong> &mdash; Network-first HTML loading, automatic update detection with toast notification, 2-minute update checks.
                             </div>
                         </section>
                         
@@ -1254,6 +1254,7 @@
                                         <li><strong>Statistics:</strong> Deck size, usage, average placement</li>
                                         <li><strong>Card Overview:</strong> All cards with usage%, rarity options, type filters</li>
                                         <li><strong>Deck Builder:</strong> +/- buttons, Auto-Generate (Max Consistency), copy to clipboard</li>
+                                        <li><strong>Test Draw:</strong> Quick opening-hand simulator — draws 7 cards, supports mulligans, evaluates deck consistency</li>
                                         <li><strong>Deck Compare:</strong> Compare two decklists with visual color-coded diff</li>
                                         <li><strong>Rarity Switcher:</strong> Click the yellow button on any card to switch print versions</li>
                                     </ul>
@@ -1278,6 +1279,7 @@
                                         <li><strong>Matchup Analysis:</strong> Best/worst matchups with win rates and game records</li>
                                         <li><strong>Meta Card Analysis:</strong> Most played cards across Top 10 meta decks with deck-building buttons</li>
                                         <li><strong>Max Consistency Mode:</strong> Auto-generate decks with optimal card counts based on tournament data</li>
+                                        <li><strong>Test Draw:</strong> Quick opening-hand simulator &mdash; draws 7 cards, supports mulligans</li>
                                         <li><strong>Rarity Switcher:</strong> Click the yellow button on any card to switch prints</li>
                                     </ul>
                                 </div>
@@ -1286,7 +1288,7 @@
                                 <div class="past-meta-info-block">
                                     <h3 class="past-meta-info-title">Past Meta</h3>
                                     <p><strong>Purpose:</strong> Analyze historical tournament winners and past format decklists</p>
-                                    <p><strong>Features:</strong> Format filter (SVI-ASC, SVI-PFL, BRS-PRE, etc.), tournament filter, deck analysis with all Deck Builder features</p>
+                                    <p><strong>Features:</strong> Format filter (SVI-ASC, SVI-PFL, BRS-PRE, etc.), tournament filter, deck analysis with all Deck Builder features including Test Draw</p>
                                     <p><strong>Best for:</strong> Learning from winning decks, understanding format evolution</p>
                                 </div>
                                 
@@ -1366,16 +1368,33 @@
                                     <p><strong>Sub-tabs:</strong></p>
                                     <ul class="deck-building-guide-list">
                                         <li><strong>My Collection:</strong> Cards you own � searchable by name, set, number</li>
-                                        <li><strong>My Decks:</strong> All saved decks in a single-column layout with full card previews. Each deck entry shows the complete 60-card list with prices, rarity options, and collection badges. New: <strong>Playtest button</strong> at the top lets you pick any 2 saved decks and launch them in the playtester instantly.</li>
+                                        <li><strong>My Decks:</strong> All saved decks with card previews. <strong>Playtest button</strong> at the top lets you pick any 2 saved decks and launch them in the playtester instantly.</li>
                                         <li><strong>Wishlist:</strong> Cards you want to acquire</li>
+                                        <li><strong>Meta Binder:</strong> Auto-generates a binder of all meta-relevant cards you&rsquo;re missing. One-click &ldquo;Add Missing to Wishlist&rdquo; button.</li>
+                                        <li><strong>Journal:</strong> Full Battle Journal history &mdash; search, filter, copy single entries or all at once, clear all entries. Each entry shows tournament, decks, result pill, and clipboard preview.</li>
                                         <li><strong>Settings:</strong> Account management</li>
                                     </ul>
                                 </div>
                                 
+                                <!-- Battle Journal -->
+                                <div class="tutorial-tab-info tutorial-tab-info-clmeta">
+                                    <h3 class="tutorial-tab-title tutorial-tab-title-clmeta">Battle Journal</h3>
+                                    <p><strong>Access:</strong> Tap the &#9876; button in the header (always visible)</p>
+                                    <p><strong>Purpose:</strong> Log every match you play &mdash; deck, opponent, turn order, result</p>
+                                    <p><strong>Features:</strong></p>
+                                    <ul class="tutorial-tab-info-features-list">
+                                        <li><strong>BO1 / BO3:</strong> Toggle between Best-of-1 and Best-of-3 with per-game details</li>
+                                        <li><strong>Turn &amp; Result buttons:</strong> Tap 1st/2nd and W/L/T &mdash; color-coded, no dropdowns</li>
+                                        <li><strong>Auto-clipboard:</strong> After saving, a WhatsApp-style summary (e.g. &ldquo;WW Dragapult Dusknoir&rdquo;) is copied automatically</li>
+                                        <li><strong>Last Tournament:</strong> Quick-apply your last tournament name with one tap</li>
+                                        <li><strong>Sync:</strong> Entries are saved locally and synced to Firebase when online</li>
+                                    </ul>
+                                </div>
+
                                 <!-- How to Use Tab -->
                                 <div class="how-to-use-info-block">
                                     <h3 class="how-to-use-info-title">How to Use</h3>
-                                    <p><strong>This guide:</strong> Complete documentation for all features � updated for v45</p>
+                                    <p><strong>This guide:</strong> Complete documentation for all features � updated for v46</p>
                                 </div>
                             </div>
                         </section>
@@ -1592,6 +1611,9 @@
                                     <li><strong>Goldfish Practice:</strong> Load the same deck for both players to practice your own opening lines</li>
                                         <li><strong>Rarity Switcher:</strong> The yellow button is available on cards across the app, so you can switch to your preferred print without rebuilding the deck</li>
                                     <li><strong>My Decks Playtest:</strong> Save every deck you build � the Playtest button makes it trivial to run any 2 saved decks against each other in seconds</li>
+                                    <li><strong>Battle Journal:</strong> Log every match during tournaments via the &#9876; header button. The auto-clipboard makes sharing results via WhatsApp instant</li>
+                                    <li><strong>Meta Binder:</strong> Check Profile &rarr; Meta Binder to see exactly which meta-relevant cards you&rsquo;re still missing &mdash; then add them to your Wishlist in one click</li>
+                                    <li><strong>Test Draw:</strong> After building a deck, hit &ldquo;Test Draw&rdquo; to evaluate your opening hands. If you rarely see supporters in 7 cards, add more draw support</li>
                                 </ul>
                             </div>
                         </section>
@@ -1661,7 +1683,7 @@
                                 Greife auf japanische City League Ergebnisse, internationale Turnierdaten und detaillierte Kartenstatistiken zu, um kompetitive Decks zu bauen � und teste sie direkt in deinem Browser.
                             </p>
                             <div class="de-overview-highlight">
-                                <strong>Neu in v45:</strong> <strong>Karten-Datenbank Zuverl�ssigkeit</strong> � Filter-Panel-Verdrahtung wurde neu gebaut; alle Filter-Gruppen bef�llen sich jetzt korrekt. <strong>Proxy-Warteschlange Fix</strong> � doppeltes Proxy-Container-Element entfernt; Proxy-Rendering ist wieder zuverl�ssig. <strong>Multiplayer Playtester Script</strong> � firebase-multiplayer.js wird jetzt vor dem Playtester geladen, sodass Online-Multiplayer-Aktionen verf�gbar sind. <strong>Seltenheit / Kategorie / Deck-Abdeckung Filter</strong> � fehlten bisher; diese Panels werden jetzt beim Laden automatisch generiert.
+                                <strong>Neu in v46:</strong> <strong>Battle Journal</strong> &mdash; Logge jedes Match direkt &uuml;ber den Header-Button (&#9876;). Erfasst dein Deck, Gegner, Zugreihenfolge und Ergebnis (BO1/BO3). Kopiert nach dem Speichern automatisch eine WhatsApp-Zusammenfassung in die Zwischenablage. Volle History mit Suche, Kopieren und L&ouml;schen in Profil &rarr; Journal Tab. <strong>Test Draw</strong> &mdash; Schneller Zieh-Simulator in jedem Deck Builder. Zieht 7 Karten-Starth&auml;nde plus Mulligans. <strong>Meta Binder</strong> &mdash; Profil-Sub-Tab der einen Ordner aller meta-relevanten Karten generiert, die dir fehlen, mit Ein-Klick &bdquo;Zur Wunschliste&ldquo;. <strong>Toggle-Buttons</strong> &mdash; Zugreihenfolge (1st/2nd) und Ergebnis (W/L/T) im Battle Journal nutzen jetzt farbcodierte Buttons statt Dropdowns. <strong>Caching-&Uuml;berarbeitung</strong> &mdash; Network-first HTML-Laden, automatische Update-Erkennung mit Toast-Benachrichtigung, 2-Minuten Update-Checks.
                             </div>
                         </section>
 
@@ -1689,6 +1711,7 @@
                                         <li><strong>Statistiken:</strong> Deckgr��e, Nutzung, durchschnittliche Platzierung</li>
                                         <li><strong>Karten�bersicht:</strong> Alle Karten mit Nutzungs-%, Seltenheitsoptionen, Typfiltern</li>
                                         <li><strong>Deck Builder:</strong> +/--Buttons, Auto-Generieren (Max. Konsistenz), in Zwischenablage kopieren</li>
+                                        <li><strong>Test Draw:</strong> Schneller Starthand-Simulator &mdash; zieht 7 Karten, unterst&uuml;tzt Mulligans, bewertet Deck-Konsistenz</li>
                                         <li><strong>Deck-Vergleich:</strong> Zwei Decklisten mit farbcodiertem Diff vergleichen</li>
                                         <li><strong>Seltenheits-Wechsler:</strong> Klicke den gelben Button auf jeder Karte, um Druckversionen zu wechseln</li>
                                     </ul>
@@ -1713,6 +1736,7 @@
                                         <li><strong>Matchup-Analyse:</strong> Beste/schlechteste Matchups mit Siegquoten und Spielst�nden</li>
                                         <li><strong>Meta-Karten-Analyse:</strong> Meistgespielte Karten in den Top 10 Meta-Decks mit Deckbau-Buttons</li>
                                         <li><strong>Max-Konsistenz-Modus:</strong> Decks automatisch generieren mit optimalen Kartenanzahlen basierend auf Turnierdaten</li>
+                                        <li><strong>Test Draw:</strong> Schneller Starthand-Simulator &mdash; zieht 7 Karten, unterst&uuml;tzt Mulligans</li>
                                         <li><strong>Seltenheits-Wechsler:</strong> Klicke den gelben auf jeder Karte, um Prints zu wechseln</li>
                                     </ul>
                                 </div>
@@ -1721,7 +1745,7 @@
                                 <div class="de-tab-block de-tab-block-past-meta">
                                     <h3>Vergangenes Meta</h3>
                                     <p class="de-tab-block-desc"><strong>Zweck:</strong> Historische Turniersieger und vergangene Format-Decklisten analysieren</p>
-                                    <p class="de-tab-block-desc"><strong>Funktionen:</strong> Format-Filter (SVI-ASC, SVI-PFL, BRS-PRE usw.), Turnierfilter, Deck-Analyse mit allen Deck Builder Funktionen</p>
+                                    <p class="de-tab-block-desc"><strong>Funktionen:</strong> Format-Filter (SVI-ASC, SVI-PFL, BRS-PRE usw.), Turnierfilter, Deck-Analyse mit allen Deck Builder Funktionen inkl. Test Draw</p>
                                     <p class="de-tab-block-desc"><strong>Ideal f�r:</strong> Von Siegerdecks lernen, Format-Entwicklung verstehen</p>
                                 </div>
 
@@ -1801,16 +1825,33 @@
                                     <p class="lh-17"><strong>Unter-Tabs:</strong></p>
                                     <ul class="lh-17">
                                         <li><strong>Meine Sammlung:</strong> Karten, die du besitzt � durchsuchbar nach Name, Set, Nummer</li>
-                                        <li><strong>Meine Decks:</strong> Alle gespeicherten Decks in einer einspaltigen Ansicht mit vollst�ndigen Kartenvorschauen. Jeder Deck-Eintrag zeigt die vollst�ndige 60-Karten-Liste mit Preisen, Seltenheitsoptionen und Sammlungs-Badges. Neu: <strong>Playtest-Button</strong> oben l�sst dich beliebige 2 gespeicherte Decks ausw�hlen und sofort im Playtester starten.</li>
+                                        <li><strong>Meine Decks:</strong> Alle gespeicherten Decks mit Kartenvorschauen. <strong>Playtest-Button</strong> oben l�sst dich beliebige 2 gespeicherte Decks ausw�hlen und sofort im Playtester starten.</li>
                                         <li><strong>Wunschliste:</strong> Karten, die du erwerben m�chtest</li>
+                                        <li><strong>Meta Binder:</strong> Generiert automatisch einen Ordner aller meta-relevanten Karten, die dir fehlen. Ein-Klick &bdquo;Fehlende zur Wunschliste&ldquo;-Button.</li>
+                                        <li><strong>Journal:</strong> Volle Battle Journal History &mdash; Suchen, Filtern, einzelne Eintr&auml;ge (&#128203;) oder alle kopieren, alles l&ouml;schen. Jeder Eintrag zeigt Turnier, Decks, Ergebnis-Pill und Clipboard-Vorschau.</li>
                                         <li><strong>Einstellungen:</strong> Kontoverwaltung</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Battle Journal -->
+                                <div class="de-tab-block de-tab-block-city-league-meta">
+                                    <h3>Battle Journal</h3>
+                                    <p><strong>Zugriff:</strong> Tippe den &#9876;-Button im Header (immer sichtbar)</p>
+                                    <p><strong>Zweck:</strong> Jedes Match loggen &mdash; Deck, Gegner, Zugreihenfolge, Ergebnis</p>
+                                    <p><strong>Funktionen:</strong></p>
+                                    <ul class="de-tab-block-list">
+                                        <li><strong>BO1 / BO3:</strong> Zwischen Best-of-1 und Best-of-3 wechseln mit Details pro Spiel</li>
+                                        <li><strong>Zug- &amp; Ergebnis-Buttons:</strong> Tippe 1st/2nd und W/L/T &mdash; farbcodiert, keine Dropdowns</li>
+                                        <li><strong>Auto-Clipboard:</strong> Nach dem Speichern wird eine WhatsApp-Zusammenfassung (z.B. &bdquo;WW Dragapult Dusknoir&ldquo;) automatisch kopiert</li>
+                                        <li><strong>Letztes Turnier:</strong> Turniernamen mit einem Tipp schnell &uuml;bernehmen</li>
+                                        <li><strong>Sync:</strong> Eintr&auml;ge werden lokal gespeichert und bei Online-Verbindung mit Firebase synchronisiert</li>
                                     </ul>
                                 </div>
 
                                 <!-- How to Use Tab -->
                                 <div class="bg-light px-20 br-8 border-left-green">
                                     <h3 class="color-green mt-0">So funktioniert's</h3>
-                                    <p class="lh-17"><strong>Diese Anleitung:</strong> Vollst�ndige Dokumentation aller Funktionen � aktualisiert auf v45</p>
+                                    <p class="lh-17"><strong>Diese Anleitung:</strong> Vollst�ndige Dokumentation aller Funktionen � aktualisiert auf v46</p>
                                 </div>
                             </div>
                         </section>
@@ -2027,6 +2068,9 @@
                                     <li><strong>Goldfish-�bung:</strong> Dasselbe Deck f�r beide Spieler laden, um eigene Opening-Lines zu �ben</li>
                                     <li><strong>Seltenheits-Wechsler:</strong> Der gelbe ist auf jeder Karte �berall � nutze ihn, um zu deinem bevorzugten Print zu wechseln, ohne das Deck neu zu bauen</li>
                                     <li><strong>Meine Decks Playtest:</strong> Speichere jedes gebaute Deck � der Playtest-Button macht es kinderleicht, beliebige 2 gespeicherte Decks in Sekunden gegeneinander zu testen</li>
+                                    <li><strong>Battle Journal:</strong> Logge jedes Match w&auml;hrend Turnieren &uuml;ber den &#9876;-Button im Header. Die Auto-Clipboard-Funktion macht das Teilen der Ergebnisse per WhatsApp sofort m&ouml;glich</li>
+                                    <li><strong>Meta Binder:</strong> Pr&uuml;fe Profil &rarr; Meta Binder, um genau zu sehen, welche meta-relevanten Karten dir noch fehlen &mdash; dann mit einem Klick zur Wunschliste hinzuf&uuml;gen</li>
+                                    <li><strong>Test Draw:</strong> Nach dem Deckbau &bdquo;Test Draw&ldquo; nutzen, um Starth&auml;nde zu bewerten. Wenn du selten Supporter in 7 Karten siehst, f&uuml;ge mehr Draw-Support hinzu</li>
                                 </ul>
                             </div>
                         </section>

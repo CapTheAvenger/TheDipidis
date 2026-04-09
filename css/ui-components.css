@@ -3872,3 +3872,54 @@
 .custom-binder-chip-remove:hover {
     background: rgba(231,76,60,0.35);
 }
+
+/* ── Preset Bar ── */
+.cb-preset-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 8px 0;
+}
+
+.cb-preset-chip {
+    display: inline-flex;
+    align-items: center;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 20px;
+    overflow: hidden;
+    font-size: 13px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.cb-preset-load {
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font: inherit;
+    color: var(--text, #333);
+    white-space: nowrap;
+}
+
+.cb-preset-load:hover {
+    background: var(--accent-soft, rgba(59,76,202,0.08));
+    color: var(--accent, #3b4cca);
+}
+
+.cb-preset-delete {
+    background: none;
+    border: none;
+    border-left: 1px solid var(--border-color, #ddd);
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text-light, #999);
+    line-height: 1;
+}
+
+.cb-preset-delete:hover {
+    background: rgba(231,76,60,0.12);
+    color: #e74c3c;
+}

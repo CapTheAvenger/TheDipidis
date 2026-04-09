@@ -1517,6 +1517,7 @@
             filtersEl.innerHTML = `
                 <div class="filter-group">
                     <button class="meta-binder-filter-btn active" data-filter="all" onclick="setMetaBinderFilter('all')">${mbText('mb.filterAll', 'Alle')} (${totalUnique})</button>
+                    <button class="meta-binder-filter-btn" data-filter="owned" onclick="setMetaBinderFilter('owned')">✅ ${mbText('mb.filterOwned', 'Im Besitz')} (${ownedComplete})</button>
                     <button class="meta-binder-filter-btn" data-filter="missing" onclick="setMetaBinderFilter('missing')">❌ ${mbText('mb.filterMissing', 'Fehlend')} (${missingUnique})</button>
                     <button class="meta-binder-filter-btn" data-filter="new" onclick="setMetaBinderFilter('new')">🆕 ${mbText('mb.filterNew', 'Neu')} (${newCount})</button>
                 </div>
@@ -1579,6 +1580,8 @@
             filtered = cards.filter(c => c.isNew);
         } else if (metaBinderFilter === 'missing') {
             filtered = cards.filter(c => c.missing > 0);
+        } else if (metaBinderFilter === 'owned') {
+            filtered = cards.filter(c => c.missing === 0);
         } else {
             filtered = cards;
         }

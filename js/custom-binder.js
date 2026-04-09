@@ -3,6 +3,7 @@
 
     const CB_STORAGE_KEY = 'customBinderArchetypesV1';
     const CB_CACHE_KEY = 'customBinderCacheV1';
+    const CB_PRESETS_KEY = 'customBinderPresetsV1';
 
     let cbSelectedArchetypes = []; // [{name, source}]
     let cbAllArchetypes = [];      // [{name, source, label}]
@@ -10,6 +11,7 @@
     let cbFilter = 'all';
     let _cbSkipNextClose = false;
     let _cbTierGroups = null; // cached tier groups for dropdown
+    let cbPresets = []; // [{id, name, archetypes: [{name, source}]}]
 
     // ── Helpers ──
     function mb() { return window._mbShared || {}; }
@@ -40,6 +42,72 @@
                     .map(a => ({ name: String(a.name), source: String(a.source || 'current-meta') }));
             }
         } catch (_) { cbSelectedArchetypes = []; }
+    }
+
+    // ── Preset Persistence ──
+    function cbLoadPresets() {
+        try {
+            const raw = JSON.parse(localStorage.getItem(CB_PRESETS_KEY) || '[]');
+            cbPresets = Array.isArray(raw) ? raw.filter(p => p && p.id && p.name && Array.isArray(p.archetypes)) : [];
+        } catch (_) { cbPresets = []; }
+    }
+
+    function cbSavePresets() {
+        try { localStorage.setItem(CB_PRESETS_KEY, JSON.stringify(cbPresets)); } catch (_) { /* ignore */ }
+    }
+
+    function cbSaveCurrentAsPreset() {
+        if (cbSelectedArchetypes.length === 0) {
+            if (typeof showToast === 'function') showToast('Keine Archetypes ausgewählt.', 'warning');
+            return;
+        }
+        const name = prompt('Name für diesen Binder:');
+        if (!name || !name.trim()) return;
+        const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        cbPresets.push({ id, name: name.trim(), archetypes: cbSelectedArchetypes.map(a => ({ name: a.name, source: a.source })) });
+        cbSavePresets();
+        cbRenderPresetBar();
+        if (typeof showToast === 'function') showToast(`Binder "${name.trim()}" gespeichert.`, 'success');
+    }
+
+    function cbLoadPreset(id) {
+        const preset = cbPresets.find(p => p.id === id);
+        if (!preset) return;
+        cbSelectedArchetypes = preset.archetypes.map(a => ({ name: a.name, source: a.source }));
+        cbSaveSelections();
+        cbRenderChips();
+        cbRenderDropdownList();
+        cbRenderPresetBar();
+        if (typeof showToast === 'function') showToast(`Binder "${preset.name}" geladen.`, 'info');
+    }
+
+    function cbDeletePreset(id) {
+        const preset = cbPresets.find(p => p.id === id);
+        if (!preset) return;
+        if (!confirm(`"${preset.name}" wirklich löschen?`)) return;
+        cbPresets = cbPresets.filter(p => p.id !== id);
+        cbSavePresets();
+        cbRenderPresetBar();
+        if (typeof showToast === 'function') showToast(`Binder "${preset.name}" gelöscht.`, 'info');
+    }
+
+    function cbRenderPresetBar() {
+        const bar = document.getElementById('cbPresetBar');
+        if (!bar) return;
+        if (cbPresets.length === 0) {
+            bar.innerHTML = '';
+            bar.classList.add('display-none');
+            return;
+        }
+        bar.classList.remove('display-none');
+        bar.innerHTML = cbPresets.map(p => {
+            const safeName = escapeHtml(p.name);
+            const safeId = escapeHtml(p.id);
+            return `<span class="cb-preset-chip">
+                <button type="button" class="cb-preset-load" onclick="cbLoadPreset('${safeId}')" title="Laden: ${safeName}">${safeName} <small class="opacity-60">(${p.archetypes.length})</small></button>
+                <button type="button" class="cb-preset-delete" onclick="cbDeletePreset('${safeId}')" title="Löschen">&times;</button>
+            </span>`;
+        }).join('');
     }
 
     // ── Load all available archetypes from all data sources ──
@@ -519,6 +587,7 @@
             filtersEl.innerHTML = `
                 <div class="filter-group">
                     <button class="meta-binder-filter-btn active" data-filter="all" onclick="cbSetFilter('all')">Alle (${totalUnique})</button>
+                    <button class="meta-binder-filter-btn" data-filter="owned" onclick="cbSetFilter('owned')">✅ Im Besitz (${ownedComplete})</button>
                     <button class="meta-binder-filter-btn" data-filter="missing" onclick="cbSetFilter('missing')">❌ Fehlend (${missingUnique})</button>
                     <button class="meta-binder-filter-btn" data-filter="new" onclick="cbSetFilter('new')">🆕 Neu (${newCount})</button>
                 </div>
@@ -613,6 +682,8 @@
             filtered = cards.filter(c => c.isNew);
         } else if (cbFilter === 'missing') {
             filtered = cards.filter(c => c.missing > 0);
+        } else if (cbFilter === 'owned') {
+            filtered = cards.filter(c => c.missing === 0);
         } else {
             filtered = cards;
         }
@@ -724,11 +795,13 @@
 
     // ── Init: Load previous selections ──
     cbLoadSelections();
+    cbLoadPresets();
     // Defer chip rendering until DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', cbRenderChips);
+        document.addEventListener('DOMContentLoaded', () => { cbRenderChips(); cbRenderPresetBar(); });
     } else {
         cbRenderChips();
+        cbRenderPresetBar();
     }
 
     // ── Expose ──
@@ -742,4 +815,7 @@
     window.cbApplyFilter = cbApplyFilter;
     window.cbAddMissingToWishlist = cbAddMissingToWishlist;
     window.cbSendMissingToProxy = cbSendMissingToProxy;
+    window.cbSaveCurrentAsPreset = cbSaveCurrentAsPreset;
+    window.cbLoadPreset = cbLoadPreset;
+    window.cbDeletePreset = cbDeletePreset;
 })();

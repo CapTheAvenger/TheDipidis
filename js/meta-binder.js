@@ -553,9 +553,9 @@
                 const count = parseInt(row.max_count || row.count || 0, 10);
                 const existing = deckCardMap.get(key);
                 const candidateEntry = {
-                    name: isPokemon ? (family.newestName || name) : name,
-                    set: isPokemon ? (family.newestSet || set) : set,
-                    number: isPokemon ? (family.newestNumber || number) : number,
+                    name: family.newestName || name,
+                    set: family.newestSet || set,
+                    number: family.newestNumber || number,
                     count,
                     familyRefs: family.refs,
                     type: String(row.type || '').trim(),
@@ -990,6 +990,78 @@
         return '';
     }
 
+    // Static Pokedex-to-element map for reliable Pokemon type detection.
+    // Covers all meta-relevant Pokemon so sorting works even without PokeAPI cache.
+    // 741 unique entries – deduplicated (primary type kept for dual-types).
+    const POKEDEX_ELEMENT_MAP = {
+        // Grass
+        1:'Grass',2:'Grass',3:'Grass',13:'Grass',14:'Grass',15:'Grass',43:'Grass',44:'Grass',45:'Grass',69:'Grass',70:'Grass',71:'Grass',114:'Grass',152:'Grass',153:'Grass',
+        154:'Grass',182:'Grass',251:'Grass',252:'Grass',253:'Grass',254:'Grass',270:'Grass',271:'Grass',272:'Grass',285:'Grass',286:'Grass',315:'Grass',357:'Grass',387:'Grass',388:'Grass',
+        389:'Grass',407:'Grass',455:'Grass',470:'Grass',492:'Grass',495:'Grass',496:'Grass',497:'Grass',540:'Grass',541:'Grass',542:'Grass',546:'Grass',547:'Grass',548:'Grass',549:'Grass',
+        556:'Grass',590:'Grass',591:'Grass',650:'Grass',651:'Grass',652:'Grass',672:'Grass',673:'Grass',708:'Grass',709:'Grass',722:'Grass',723:'Grass',724:'Grass',753:'Grass',754:'Grass',
+        755:'Grass',756:'Grass',761:'Grass',762:'Grass',763:'Grass',781:'Grass',787:'Grass',810:'Grass',811:'Grass',812:'Grass',829:'Grass',830:'Grass',840:'Grass',841:'Grass',842:'Grass',
+        893:'Grass',906:'Grass',907:'Grass',908:'Grass',928:'Grass',
+        // Fire
+        4:'Fire',5:'Fire',6:'Fire',37:'Fire',38:'Fire',58:'Fire',59:'Fire',77:'Fire',78:'Fire',126:'Fire',136:'Fire',146:'Fire',155:'Fire',156:'Fire',157:'Fire',
+        218:'Fire',219:'Fire',228:'Fire',229:'Fire',240:'Fire',244:'Fire',250:'Fire',255:'Fire',256:'Fire',257:'Fire',322:'Fire',323:'Fire',324:'Fire',390:'Fire',391:'Fire',
+        392:'Fire',467:'Fire',485:'Fire',494:'Fire',498:'Fire',499:'Fire',500:'Fire',513:'Fire',514:'Fire',631:'Fire',636:'Fire',637:'Fire',653:'Fire',654:'Fire',655:'Fire',
+        662:'Fire',663:'Fire',667:'Fire',668:'Fire',721:'Fire',725:'Fire',726:'Fire',727:'Fire',741:'Fire',757:'Fire',758:'Fire',776:'Fire',806:'Fire',813:'Fire',814:'Fire',
+        815:'Fire',838:'Fire',839:'Fire',851:'Fire',884:'Fire',911:'Fire',
+        // Water
+        7:'Water',8:'Water',9:'Water',54:'Water',55:'Water',60:'Water',61:'Water',62:'Water',72:'Water',73:'Water',79:'Water',80:'Water',86:'Water',87:'Water',90:'Water',
+        91:'Water',98:'Water',99:'Water',116:'Water',117:'Water',118:'Water',119:'Water',120:'Water',121:'Water',129:'Water',130:'Water',131:'Water',134:'Water',138:'Water',139:'Water',
+        158:'Water',159:'Water',160:'Water',170:'Water',171:'Water',183:'Water',184:'Water',186:'Water',194:'Water',195:'Water',199:'Water',211:'Water',222:'Water',223:'Water',224:'Water',
+        226:'Water',230:'Water',245:'Water',258:'Water',259:'Water',260:'Water',278:'Water',279:'Water',283:'Water',318:'Water',319:'Water',339:'Water',340:'Water',349:'Water',350:'Water',
+        363:'Water',364:'Water',365:'Water',366:'Water',367:'Water',368:'Water',370:'Water',382:'Water',393:'Water',394:'Water',395:'Water',418:'Water',419:'Water',456:'Water',457:'Water',
+        458:'Water',471:'Water',484:'Water',489:'Water',490:'Water',501:'Water',502:'Water',503:'Water',515:'Water',516:'Water',550:'Water',564:'Water',565:'Water',580:'Water',581:'Water',
+        592:'Water',593:'Water',594:'Water',656:'Water',657:'Water',658:'Water',688:'Water',689:'Water',690:'Water',691:'Water',692:'Water',693:'Water',728:'Water',729:'Water',730:'Water',
+        746:'Water',747:'Water',748:'Water',751:'Water',752:'Water',771:'Water',779:'Water',788:'Water',816:'Water',817:'Water',818:'Water',833:'Water',834:'Water',845:'Water',846:'Water',
+        847:'Water',882:'Water',883:'Water',912:'Water',913:'Water',914:'Water',
+        // Lightning
+        25:'Lightning',26:'Lightning',81:'Lightning',82:'Lightning',100:'Lightning',101:'Lightning',125:'Lightning',135:'Lightning',145:'Lightning',172:'Lightning',179:'Lightning',180:'Lightning',181:'Lightning',239:'Lightning',243:'Lightning',
+        309:'Lightning',310:'Lightning',311:'Lightning',312:'Lightning',403:'Lightning',404:'Lightning',405:'Lightning',417:'Lightning',462:'Lightning',466:'Lightning',479:'Lightning',522:'Lightning',523:'Lightning',587:'Lightning',595:'Lightning',
+        596:'Lightning',602:'Lightning',603:'Lightning',604:'Lightning',642:'Lightning',694:'Lightning',695:'Lightning',702:'Lightning',737:'Lightning',738:'Lightning',777:'Lightning',785:'Lightning',835:'Lightning',836:'Lightning',848:'Lightning',
+        849:'Lightning',871:'Lightning',880:'Lightning',921:'Lightning',
+        // Psychic
+        63:'Psychic',64:'Psychic',65:'Psychic',92:'Psychic',93:'Psychic',94:'Psychic',96:'Psychic',97:'Psychic',102:'Psychic',103:'Psychic',122:'Psychic',124:'Psychic',150:'Psychic',151:'Psychic',163:'Psychic',
+        164:'Psychic',177:'Psychic',178:'Psychic',196:'Psychic',200:'Psychic',201:'Psychic',202:'Psychic',203:'Psychic',238:'Psychic',249:'Psychic',280:'Psychic',281:'Psychic',282:'Psychic',292:'Psychic',325:'Psychic',
+        326:'Psychic',337:'Psychic',338:'Psychic',343:'Psychic',344:'Psychic',353:'Psychic',354:'Psychic',355:'Psychic',356:'Psychic',358:'Psychic',380:'Psychic',385:'Psychic',386:'Psychic',413:'Psychic',425:'Psychic',
+        426:'Psychic',429:'Psychic',436:'Psychic',437:'Psychic',439:'Psychic',475:'Psychic',478:'Psychic',480:'Psychic',481:'Psychic',482:'Psychic',488:'Psychic',517:'Psychic',518:'Psychic',527:'Psychic',528:'Psychic',
+        561:'Psychic',562:'Psychic',563:'Psychic',574:'Psychic',575:'Psychic',576:'Psychic',577:'Psychic',578:'Psychic',579:'Psychic',605:'Psychic',606:'Psychic',607:'Psychic',608:'Psychic',609:'Psychic',647:'Psychic',
+        648:'Psychic',669:'Psychic',670:'Psychic',671:'Psychic',677:'Psychic',678:'Psychic',710:'Psychic',711:'Psychic',720:'Psychic',742:'Psychic',743:'Psychic',765:'Psychic',770:'Psychic',786:'Psychic',789:'Psychic',
+        790:'Psychic',791:'Psychic',792:'Psychic',793:'Psychic',800:'Psychic',825:'Psychic',826:'Psychic',854:'Psychic',855:'Psychic',856:'Psychic',857:'Psychic',858:'Psychic',866:'Psychic',876:'Psychic',898:'Psychic',
+        915:'Psychic',916:'Psychic',
+        // Fighting
+        56:'Fighting',57:'Fighting',66:'Fighting',67:'Fighting',68:'Fighting',74:'Fighting',75:'Fighting',76:'Fighting',95:'Fighting',104:'Fighting',105:'Fighting',106:'Fighting',107:'Fighting',111:'Fighting',112:'Fighting',
+        127:'Fighting',166:'Fighting',208:'Fighting',214:'Fighting',236:'Fighting',237:'Fighting',246:'Fighting',247:'Fighting',248:'Fighting',296:'Fighting',297:'Fighting',302:'Fighting',306:'Fighting',307:'Fighting',308:'Fighting',
+        328:'Fighting',329:'Fighting',330:'Fighting',332:'Fighting',341:'Fighting',342:'Fighting',377:'Fighting',383:'Fighting',447:'Fighting',448:'Fighting',453:'Fighting',454:'Fighting',464:'Fighting',532:'Fighting',533:'Fighting',
+        534:'Fighting',538:'Fighting',539:'Fighting',551:'Fighting',552:'Fighting',553:'Fighting',557:'Fighting',558:'Fighting',559:'Fighting',560:'Fighting',619:'Fighting',620:'Fighting',621:'Fighting',622:'Fighting',623:'Fighting',
+        638:'Fighting',639:'Fighting',640:'Fighting',645:'Fighting',674:'Fighting',675:'Fighting',696:'Fighting',697:'Fighting',718:'Fighting',739:'Fighting',740:'Fighting',766:'Fighting',769:'Fighting',802:'Fighting',804:'Fighting',
+        852:'Fighting',853:'Fighting',870:'Fighting',892:'Fighting',
+        // Darkness
+        19:'Darkness',20:'Darkness',23:'Darkness',24:'Darkness',41:'Darkness',42:'Darkness',48:'Darkness',49:'Darkness',51:'Darkness',52:'Darkness',53:'Darkness',88:'Darkness',89:'Darkness',109:'Darkness',110:'Darkness',
+        168:'Darkness',169:'Darkness',197:'Darkness',198:'Darkness',215:'Darkness',261:'Darkness',262:'Darkness',274:'Darkness',275:'Darkness',303:'Darkness',317:'Darkness',331:'Darkness',359:'Darkness',430:'Darkness',434:'Darkness',
+        435:'Darkness',442:'Darkness',451:'Darkness',452:'Darkness',461:'Darkness',491:'Darkness',509:'Darkness',510:'Darkness',543:'Darkness',544:'Darkness',545:'Darkness',570:'Darkness',571:'Darkness',624:'Darkness',625:'Darkness',
+        629:'Darkness',630:'Darkness',633:'Darkness',634:'Darkness',635:'Darkness',686:'Darkness',687:'Darkness',717:'Darkness',735:'Darkness',799:'Darkness',803:'Darkness',827:'Darkness',828:'Darkness',859:'Darkness',860:'Darkness',
+        861:'Darkness',862:'Darkness',877:'Darkness',891:'Darkness',903:'Darkness',
+        // Metal
+        205:'Metal',212:'Metal',227:'Metal',304:'Metal',305:'Metal',374:'Metal',375:'Metal',376:'Metal',379:'Metal',410:'Metal',411:'Metal',476:'Metal',530:'Metal',589:'Metal',597:'Metal',
+        598:'Metal',599:'Metal',600:'Metal',601:'Metal',632:'Metal',649:'Metal',679:'Metal',680:'Metal',681:'Metal',707:'Metal',778:'Metal',823:'Metal',863:'Metal',874:'Metal',878:'Metal',
+        879:'Metal',888:'Metal',890:'Metal',919:'Metal',920:'Metal',
+        // Dragon
+        147:'Dragon',148:'Dragon',149:'Dragon',334:'Dragon',371:'Dragon',372:'Dragon',373:'Dragon',381:'Dragon',384:'Dragon',443:'Dragon',444:'Dragon',445:'Dragon',483:'Dragon',487:'Dragon',610:'Dragon',
+        611:'Dragon',612:'Dragon',643:'Dragon',644:'Dragon',646:'Dragon',780:'Dragon',782:'Dragon',783:'Dragon',784:'Dragon',881:'Dragon',885:'Dragon',886:'Dragon',887:'Dragon',895:'Dragon',896:'Dragon',
+        905:'Dragon',
+        // Colorless
+        16:'Colorless',17:'Colorless',18:'Colorless',21:'Colorless',22:'Colorless',39:'Colorless',40:'Colorless',83:'Colorless',84:'Colorless',108:'Colorless',113:'Colorless',115:'Colorless',128:'Colorless',132:'Colorless',133:'Colorless',
+        137:'Colorless',142:'Colorless',143:'Colorless',173:'Colorless',174:'Colorless',175:'Colorless',176:'Colorless',190:'Colorless',206:'Colorless',216:'Colorless',217:'Colorless',233:'Colorless',234:'Colorless',235:'Colorless',241:'Colorless',
+        242:'Colorless',263:'Colorless',264:'Colorless',276:'Colorless',277:'Colorless',287:'Colorless',288:'Colorless',289:'Colorless',293:'Colorless',294:'Colorless',295:'Colorless',327:'Colorless',333:'Colorless',335:'Colorless',336:'Colorless',
+        351:'Colorless',352:'Colorless',396:'Colorless',397:'Colorless',398:'Colorless',399:'Colorless',400:'Colorless',424:'Colorless',432:'Colorless',440:'Colorless',441:'Colorless',446:'Colorless',463:'Colorless',474:'Colorless',486:'Colorless',
+        493:'Colorless',504:'Colorless',505:'Colorless',506:'Colorless',507:'Colorless',508:'Colorless',519:'Colorless',520:'Colorless',521:'Colorless',531:'Colorless',572:'Colorless',573:'Colorless',585:'Colorless',586:'Colorless',626:'Colorless',
+        627:'Colorless',628:'Colorless',641:'Colorless',660:'Colorless',661:'Colorless',676:'Colorless',731:'Colorless',732:'Colorless',733:'Colorless',734:'Colorless',744:'Colorless',745:'Colorless',759:'Colorless',760:'Colorless',764:'Colorless',
+        775:'Colorless',819:'Colorless',820:'Colorless',821:'Colorless',822:'Colorless',831:'Colorless',832:'Colorless',843:'Colorless',844:'Colorless',900:'Colorless',901:'Colorless',924:'Colorless',925:'Colorless'
+    };
+
     function getMetaBinderTypeMeta(card) {
         const cardDb = findCardRecord(card.name, card.set, card.number);
         const rowType = String(card.type || '').trim();
@@ -1010,16 +1082,57 @@
 
         const looksLikePokemon = isPokemonTypeString(rowType) || (!rowTypeLower.includes('energy') && !rowTypeLower.includes('trainer'));
         if (looksLikePokemon) {
+            // Try extracting element from row type or DB type string
             let element = normalizePokemonElement(rowType);
             if (!element && cardDb) {
-                if (typeof window.getPokemonElementFromCard === 'function') {
-                    const fromCard = window.getPokemonElementFromCard(cardDb);
-                    element = normalizePokemonElement(fromCard);
+                element = normalizePokemonElement(cardDb.energy_type || '');
+            }
+            if (!element && cardDb) {
+                element = normalizePokemonElement(cardDb.type || '');
+            }
+
+            // Resolve Pokedex number for element lookup
+            if (!element) {
+                const dex = parseInt(String(
+                    (cardDb && cardDb.pokedex_number) || (cardDb && cardDb.pokedexNumber) ||
+                    card.pokedex_number || card.pokedexNumber || ''
+                ).trim(), 10);
+
+                if (Number.isFinite(dex) && dex > 0) {
+                    // 1. Static map (always reliable)
+                    const fromStatic = POKEDEX_ELEMENT_MAP[dex];
+                    if (fromStatic) {
+                        element = fromStatic;
+                    }
+                    // 2. PokeAPI cache from Collection tab
+                    if (!element) {
+                        const typeCache = window.pokemonTypeCache || {};
+                        const cachedType = typeCache[String(dex)];
+                        if (cachedType) {
+                            const typeToElement = {
+                                grass:'Grass', fire:'Fire', water:'Water', electric:'Lightning',
+                                psychic:'Psychic', fighting:'Fighting', dark:'Darkness', steel:'Metal',
+                                dragon:'Dragon', normal:'Colorless', bug:'Grass', poison:'Psychic',
+                                ground:'Fighting', rock:'Fighting', ice:'Water', ghost:'Psychic',
+                                fairy:'Psychic', flying:'Colorless'
+                            };
+                            element = typeToElement[cachedType] || '';
+                        }
+                    }
                 }
+                // 3. Pokedex number lookup by name
                 if (!element) {
-                    element = normalizePokemonElement(cardDb.type);
+                    const dexMap = window.pokedexNumbers || {};
+                    const rawName = String((cardDb && cardDb.name) || card.name || '').trim().toLowerCase()
+                        .replace(/\b(mega |ex|gx|vmax|vstar|v |radiant )\b/g, '').replace(/[^a-z0-9\s-]/g, ' ').trim();
+                    const nameDex = parseInt(String(dexMap[rawName] || '').trim(), 10);
+                    if (Number.isFinite(nameDex) && nameDex > 0) {
+                        const fromStatic2 = POKEDEX_ELEMENT_MAP[nameDex];
+                        if (fromStatic2) element = fromStatic2;
+                    }
                 }
             }
+
             return { supertype: 'Pokemon', type: element ? `Pokemon-${element}` : 'Pokemon-Colorless', isAceSpec: false };
         }
 

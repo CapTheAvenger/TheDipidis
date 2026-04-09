@@ -3810,9 +3810,24 @@
 }
 
 .custom-binder-dropdown-item.is-selected {
-    opacity: 0.5;
-    cursor: default;
-    color: var(--text-light, #999);
+    background: var(--accent-soft, rgba(59,76,202,0.12));
+    border-left: 3px solid var(--accent, #3b4cca);
+    opacity: 1;
+    cursor: pointer;
+}
+
+.cb-dd-check {
+    display: inline-block;
+    width: 18px;
+    min-width: 18px;
+    text-align: center;
+    font-size: 14px;
+    margin-right: 4px;
+    color: var(--accent, #3b4cca);
+}
+
+.custom-binder-dropdown-item:not(.is-selected) .cb-dd-check {
+    visibility: hidden;
 }
 
 .custom-binder-chips {

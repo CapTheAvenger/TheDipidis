@@ -145,6 +145,27 @@
         cbRenderDropdownList();
     }
 
+    function cbToggleArchetype(name, source) {
+        const shared = mb();
+        const key = (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(name) : name.toLowerCase()) + '|' + source;
+        const idx = cbSelectedArchetypes.findIndex(a => {
+            const aKey = (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(a.name) : a.name.toLowerCase()) + '|' + a.source;
+            return aKey === key;
+        });
+        if (idx >= 0) {
+            cbSelectedArchetypes.splice(idx, 1);
+        } else {
+            if (cbSelectedArchetypes.length >= 30) {
+                if (typeof showToast === 'function') showToast('Maximum 30 archetypes.', 'warning');
+                return;
+            }
+            cbSelectedArchetypes.push({ name, source });
+        }
+        cbSaveSelections();
+        cbRenderChips();
+        cbRenderDropdownList();
+    }
+
     function cbRemoveArchetype(index) {
         cbSelectedArchetypes.splice(index, 1);
         cbSaveSelections();
@@ -197,14 +218,43 @@
             return;
         }
 
-        // Group by source
+        let html = '';
+
+        // ── Tier list from Meta Binder (only when not searching) ──
+        if (!query) {
+            const tierGroups = Array.isArray(window._metaBinderArchetypeGroups) ? window._metaBinderArchetypeGroups : [];
+            if (tierGroups.length > 0) {
+                html += '<div class="custom-binder-dropdown-group-label" style="color:var(--accent,#3b4cca);font-weight:900;">⭐ Meta Binder Tier List</div>';
+                const tierSeen = new Set();
+                tierGroups.forEach(group => {
+                    group.items.forEach(item => {
+                        const name = item.name;
+                        const source = item.source || 'current-meta';
+                        const tierKey = (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(name) : name.toLowerCase()) + '|' + source;
+                        if (tierSeen.has(tierKey)) return;
+                        tierSeen.add(tierKey);
+                        const isSelected = selectedKeys.has(tierKey);
+                        const safeName = escapeHtml(name);
+                        const safeSource = escapeHtml(source);
+                        const sourceTag = source === 'current-meta' ? 'Meta' : (source === 'city-current' ? 'City' : 'Past');
+                        const rankText = Number.isFinite(item.currentMetaRank) ? `#${item.currentMetaRank}` : '';
+                        html += `<button type="button" class="custom-binder-dropdown-item ${isSelected ? 'is-selected' : ''}" 
+                            onclick="cbToggleArchetype('${name.replace(/'/g, "\\'")}','${safeSource}')">
+                            <span class="cb-dd-check">${isSelected ? '✓' : ''}</span> ${safeName} <small class="opacity-60">(${sourceTag}${rankText ? ' ' + rankText : ''})</small>
+                        </button>`;
+                    });
+                });
+                html += '<div style="border-top:2px solid var(--border-color,#ddd);margin:6px 0;"></div>';
+            }
+        }
+
+        // ── Group by source (alphabetical) ──
         const groups = {};
         items.forEach(a => {
             if (!groups[a.label]) groups[a.label] = [];
             groups[a.label].push(a);
         });
 
-        let html = '';
         for (const [label, archetypes] of Object.entries(groups)) {
             html += `<div class="custom-binder-dropdown-group-label">${escapeHtml(label)}</div>`;
             archetypes.slice(0, 50).forEach(a => {
@@ -213,9 +263,8 @@
                 const safeName = escapeHtml(a.name);
                 const safeSource = escapeHtml(a.source);
                 html += `<button type="button" class="custom-binder-dropdown-item ${isSelected ? 'is-selected' : ''}" 
-                    onclick="cbAddArchetype('${a.name.replace(/'/g, "\\'")}','${safeSource}')" 
-                    ${isSelected ? 'disabled' : ''}>
-                    ${isSelected ? '✓ ' : ''}${safeName}
+                    onclick="cbToggleArchetype('${a.name.replace(/'/g, "\\'")}','${safeSource}')">
+                    <span class="cb-dd-check">${isSelected ? '✓' : ''}</span> ${safeName}
                 </button>`;
             });
         }
@@ -639,6 +688,7 @@
     // ── Expose ──
     window.buildCustomBinder = buildCustomBinder;
     window.cbAddArchetype = cbAddArchetype;
+    window.cbToggleArchetype = cbToggleArchetype;
     window.cbRemoveArchetype = cbRemoveArchetype;
     window.cbToggleArchetypeDropdown = cbToggleArchetypeDropdown;
     window.cbFilterArchetypeList = cbFilterArchetypeList;

@@ -9,6 +9,7 @@
     let cbArchetypesLoaded = false;
     let cbFilter = 'all';
     let _cbSkipNextClose = false;
+    let _cbTierGroups = null; // cached tier groups for dropdown
 
     // ── Helpers ──
     function mb() { return window._mbShared || {}; }
@@ -195,7 +196,46 @@
         dd.innerHTML = '<div class="custom-binder-dropdown-loading">Loading archetypes…</div>';
 
         await cbEnsureArchetypeList();
+        await cbEnsureTierGroups();
         cbRenderDropdownList();
+    }
+
+    async function cbEnsureTierGroups() {
+        // If Meta Binder already built the groups, use those
+        if (Array.isArray(window._metaBinderArchetypeGroups) && window._metaBinderArchetypeGroups.length > 0) {
+            _cbTierGroups = window._metaBinderArchetypeGroups;
+            return;
+        }
+        // Already loaded our own fallback
+        if (_cbTierGroups && _cbTierGroups.length > 0) return;
+
+        const shared = mb();
+        const groups = [];
+        try {
+            // Use same ranking functions as Meta Binder
+            if (shared.getTopCurrentMetaArchetypes) {
+                const top20 = await shared.getTopCurrentMetaArchetypes(20);
+                if (top20.length) groups.push({ title: 'Top 20 Current Meta', source: 'current-meta', items: top20.map(n => ({ name: n, source: 'current-meta' })) });
+            }
+
+            const cityCurrentRows = Array.isArray(window.cityLeagueAnalysisDataCurrent)
+                ? window.cityLeagueAnalysisDataCurrent
+                : (Array.isArray(window.cityLeagueAnalysisData) ? window.cityLeagueAnalysisData : []);
+            const cityPastRows = Array.isArray(window.cityLeagueAnalysisDataPast)
+                ? window.cityLeagueAnalysisDataPast
+                : (Array.isArray(window.cityLeagueAnalysisM3Data) ? window.cityLeagueAnalysisM3Data : []);
+
+            if (shared.getTopCityArchetypes) {
+                const topCity = await shared.getTopCityArchetypes('city_league_archetypes_comparison.csv', cityCurrentRows, 10);
+                if (topCity.length) groups.push({ title: 'Top 10 City League', source: 'city-current', items: topCity.map(n => ({ name: n, source: 'city-current' })) });
+
+                const topCityPast = await shared.getTopCityArchetypes('city_league_archetypes_comparison_M3.csv', cityPastRows, 10);
+                if (topCityPast.length) groups.push({ title: 'Top 10 City League Past', source: 'city-past', items: topCityPast.map(n => ({ name: n, source: 'city-past' })) });
+            }
+        } catch (e) {
+            console.warn('[CustomBinder] tier groups fallback error:', e);
+        }
+        _cbTierGroups = groups.length > 0 ? groups : null;
     }
 
     function cbRenderDropdownList() {
@@ -223,25 +263,10 @@
 
         let html = '';
 
-        // ── Tier list from Meta Binder (only when not searching) ──
+        // ── Tier list from Meta Binder or fallback (only when not searching) ──
         if (!query) {
-            let tierGroups = Array.isArray(window._metaBinderArchetypeGroups) && window._metaBinderArchetypeGroups.length > 0
-                ? window._metaBinderArchetypeGroups
-                : null;
-
-            // Fallback: build top decks from cbAllArchetypes if Meta Binder hasn't been opened yet
-            if (!tierGroups) {
-                const topBySource = {};
-                cbAllArchetypes.forEach(a => {
-                    if (!topBySource[a.source]) topBySource[a.source] = [];
-                    if (topBySource[a.source].length < 20) topBySource[a.source].push(a);
-                });
-                const fallbackGroups = [];
-                if (topBySource['current-meta']?.length) fallbackGroups.push({ title: 'Top Current Meta', source: 'current-meta', items: topBySource['current-meta'].map(a => ({ name: a.name, source: a.source })) });
-                if (topBySource['city-current']?.length) fallbackGroups.push({ title: 'Top City League', source: 'city-current', items: topBySource['city-current'].map(a => ({ name: a.name, source: a.source })) });
-                if (topBySource['city-past']?.length) fallbackGroups.push({ title: 'Top City League Past', source: 'city-past', items: topBySource['city-past'].map(a => ({ name: a.name, source: a.source })) });
-                if (fallbackGroups.length) tierGroups = fallbackGroups;
-            }
+            const tierGroups = _cbTierGroups || (Array.isArray(window._metaBinderArchetypeGroups) && window._metaBinderArchetypeGroups.length > 0
+                ? window._metaBinderArchetypeGroups : null);
 
             if (tierGroups && tierGroups.length > 0) {
                 html += '<div class="custom-binder-dropdown-group-label" style="color:var(--accent,#3b4cca);font-weight:900;">⭐ Top Decks</div>';

@@ -53,12 +53,36 @@ def create_merged_database():
     print("=" * 80)
     
     data_dir = get_data_dir()
+    project_root = os.path.dirname(os.path.dirname(get_app_path()))
+    frontend_data = os.path.join(project_root, "data")
+
     english_cards = load_csv(os.path.join(data_dir, 'all_cards_database.csv'))
     japanese_cards = load_csv(os.path.join(data_dir, 'japanese_cards_database.csv'))
-    price_data = load_csv(os.path.join(data_dir, 'price_data.csv'))
     pokedex = load_pokedex()
-    
-    prices_dict = {f"{p.get('set')}_{p.get('number')}": p for p in price_data}
+
+    # Merge price data from both backend and frontend sources.
+    # The frontend file may contain a more complete set of prices from
+    # previous scraper runs, while the backend file holds the latest scrape.
+    # We load backend prices first, then overlay frontend prices so that
+    # the larger, more complete dataset fills gaps. Finally, any backend
+    # entry that is strictly newer (by last_updated) gets a chance to win.
+    prices_dict = {}
+    frontend_prices = os.path.join(frontend_data, 'price_data.csv')
+    backend_prices = os.path.join(data_dir, 'price_data.csv')
+    backend_map = {}
+    for p in load_csv(backend_prices):
+        key = f"{p.get('set')}_{p.get('number')}"
+        if p.get('eur_price'):
+            backend_map[key] = p
+    for p in load_csv(frontend_prices):
+        key = f"{p.get('set')}_{p.get('number')}"
+        if p.get('eur_price'):
+            prices_dict[key] = p
+    # Backend entries only override if frontend has no price for that key
+    for key, p in backend_map.items():
+        if key not in prices_dict:
+            prices_dict[key] = p
+    print(f"✓ Preise geladen: {len(prices_dict)} Einträge (frontend + backend)")
     en_keys = {f"{c.get('set')}_{c.get('number')}" for c in english_cards}
     jp_to_add = [c for c in japanese_cards if f"{c.get('set')}_{c.get('number')}" not in en_keys]
     
@@ -209,8 +233,6 @@ def create_merged_database():
     print(f"✓ Pokédex-Nummern gefunden für: {match_count} Pokémon")
 
     # Generate chunked JSON files for fast frontend loading
-    project_root = os.path.dirname(os.path.dirname(get_app_path()))
-    frontend_data = os.path.join(project_root, "data")
     os.makedirs(frontend_data, exist_ok=True)
     split_card_database_chunks(merged_cards, frontend_data)
 

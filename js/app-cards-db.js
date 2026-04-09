@@ -1670,13 +1670,23 @@
                     // metaCardsMap is Map<meta, Map<cardName, Set<setCode>>>
                     // Match both card name AND set to avoid false positives
                     // (e.g. Pikachu ex SSP 57 ≠ Pikachu ex ASC 276)
+                    // In all-prints mode, also accept reprints linked via international_prints
+                    // (e.g. MEP-3 Alakazam is a promo reprint of MEG-56 Alakazam)
+                    const _setMatchesMeta = (cardObj, metaSetCodes) => {
+                        if (metaSetCodes.size === 0 || metaSetCodes.has(cardObj.set)) return true;
+                        if (!showOnlyOnePrint && cardObj.international_prints) {
+                            const printSets = cardObj.international_prints.split(',').map(p => p.split('-')[0].trim());
+                            if (printSets.some(s => metaSetCodes.has(s))) return true;
+                        }
+                        return false;
+                    };
                     if (selectedArchetypes.length > 0) {
                         for (const meta of selectedMetaFilters) {
                             if (window.metaCardsMap && window.metaCardsMap.has(meta)) {
                                 const cardsForMeta = window.metaCardsMap.get(meta);
                                 if (cardsForMeta.has(cardNameNorm)) {
                                     const metaSetCodes = cardsForMeta.get(cardNameNorm);
-                                    if (metaSetCodes.size === 0 || metaSetCodes.has(card.set)) {
+                                    if (_setMatchesMeta(card, metaSetCodes)) {
                                         metaFilterMatch = true;
                                         break;
                                     }
@@ -1689,7 +1699,7 @@
                                 const cardsForMeta = window.metaCardsMap.get(meta);
                                 if (cardsForMeta.has(cardNameNorm)) {
                                     const metaSetCodes = cardsForMeta.get(cardNameNorm);
-                                    if (metaSetCodes.size === 0 || metaSetCodes.has(card.set)) {
+                                    if (_setMatchesMeta(card, metaSetCodes)) {
                                         metaFilterMatch = true;
                                         break;
                                     }

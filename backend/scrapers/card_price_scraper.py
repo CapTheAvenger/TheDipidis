@@ -74,21 +74,32 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
             soup = BeautifulSoup(resp.text, "lxml")
             prints_table = soup.select_one("table.card-prints-versions")
             if prints_table:
-                # Try exact set match first
+                # Try exact set+number match first
                 for row in prints_table.select("tr"):
                     row_text = row.get_text().lower()
-                    if card["set"].lower() in row_text:
+                    if card["set"].lower() in row_text and card["number"].lower() in row_text:
                         eur_link = row.select_one("a.card-price.eur")
                         if eur_link:
                             eur_price = eur_link.get_text(strip=True)
-                            logger.info("  + LT Preis [%s]: %s (Set-Match: %s)", card_id, eur_price, card["set"])
+                            logger.info("  + LT Preis [%s]: %s (Set+Nr-Match)", card_id, eur_price)
                             break
-                # Fallback: first EUR price on page
+                # Fallback: set-only match (for rows where number isn't visible)
                 if not eur_price:
-                    first_price = soup.select_one("a.card-price.eur")
-                    if first_price:
-                        eur_price = first_price.get_text(strip=True)
-                        logger.info("  + LT Preis [%s]: %s (Fallback)", card_id, eur_price)
+                    for row in prints_table.select("tr"):
+                        row_text = row.get_text().lower()
+                        if card["set"].lower() in row_text:
+                            eur_link = row.select_one("a.card-price.eur")
+                            if eur_link:
+                                eur_price = eur_link.get_text(strip=True)
+                                logger.info("  + LT Preis [%s]: %s (Set-Match: %s)", card_id, eur_price, card["set"])
+                                break
+            # Last resort: use the main card price shown on the page header
+            # (outside the prints table), which corresponds to THIS specific card.
+            if not eur_price:
+                main_price = soup.select_one(".card-price-main a.card-price.eur, .card-detail-prices a.card-price.eur")
+                if main_price:
+                    eur_price = main_price.get_text(strip=True)
+                    logger.info("  + LT Preis [%s]: %s (Main-Card)", card_id, eur_price)
         else:
             logger.debug("  LT HTTP %s fuer [%s]", resp.status_code, card_id)
     except Exception as e:

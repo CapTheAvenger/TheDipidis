@@ -19,6 +19,7 @@ if (!window.userDecks)            window.userDecks            = [];
 if (!window.userCollection)       window.userCollection       = new Set();
 if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
 if (!window.userWishlist)         window.userWishlist         = new Set();
+if (!window.userWishlistCounts)  window.userWishlistCounts  = new Map();
 if (!window.deckFolders)          window.deckFolders          = [];
 
 // ---------------------------------------------------------------------------
@@ -48,6 +49,7 @@ function onUserSignedIn(user) {
   window.userCollection       = new Set();
   window.userCollectionCounts = new Map();
   window.userWishlist         = new Set();
+  window.userWishlistCounts  = new Map();
   window.userDecks            = [];
 
   loadUserData(user.uid);
@@ -175,6 +177,20 @@ async function loadUserData(userId) {
 
       // Wishlist
       window.userWishlist = new Set(data.wishlist || []);
+      const wCounts = data.wishlistCounts || {};
+      window.userWishlistCounts = new Map();
+      if (typeof wCounts === 'object') {
+        Object.entries(wCounts).forEach(([k, v]) => {
+          const n = parseInt(v, 10);
+          if (!isNaN(n) && n > 0) window.userWishlistCounts.set(k, n);
+        });
+      }
+      // Ensure every wishlist entry has at least count 1
+      window.userWishlist.forEach(cardId => {
+        if (!window.userWishlistCounts.has(cardId)) {
+          window.userWishlistCounts.set(cardId, 1);
+        }
+      });
       if (typeof updateWishlistUI === 'function') updateWishlistUI();
     } else {
       await createUserProfile(userId);
@@ -201,6 +217,7 @@ async function createUserProfile(userId) {
     collection: [],
     decks: [],
     wishlist: [],
+    wishlistCounts: {},
     deckFolders: [],
     settings: { currency: 'EUR', language: 'en' }
   };
@@ -235,6 +252,7 @@ function clearUserData() {
   window.userCollection       = new Set();
   window.userCollectionCounts = new Map();
   window.userWishlist         = new Set();
+  window.userWishlistCounts  = new Map();
   window.userDecks            = [];
   window.deckFolders          = [];
 }

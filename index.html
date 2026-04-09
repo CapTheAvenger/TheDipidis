@@ -2427,6 +2427,9 @@
                                     class="px-12 py-12 fs-15 select-orange br-8 bg-white minw-160"></select>
                                     <option value="" data-i18n="profile.allSets">All Sets</option>
                                 </select>
+                                <button onclick="openWishlistGridModal()" style="background: linear-gradient(135deg, #e67e22, #d35400); color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;" title="Show as grid image for sharing">
+                                    📸 Grid
+                                </button>
                             </div>
                             <div id="wishlist-search-results" class="mb-8 fs-14 color-grey fw-500"></div>
                             
@@ -2658,6 +2661,22 @@
                 </div>
             </div>
             <div id="compactCardGrid" class="compact-card-grid"></div>
+        </div>
+    </div>
+
+    <!-- Wishlist Grid Modal -->
+    <div id="wishlistGridModal" class="image-view-modal" role="dialog" aria-modal="true" aria-label="Wishlist Grid" onclick="if(event.target === this) closeWishlistGridModal()">
+        <div class="image-view-content">
+            <div class="image-view-header">
+                <h3>Wishlist Overview</h3>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="image-view-export" onclick="exportWishlistAsImage()" title="Save as Image">
+                        📸
+                    </button>
+                    <button class="image-view-close" onclick="closeWishlistGridModal()"></button>
+                </div>
+            </div>
+            <div id="wishlistCompactGrid" class="compact-card-grid"></div>
         </div>
     </div>
     

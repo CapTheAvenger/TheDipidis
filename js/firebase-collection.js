@@ -116,7 +116,7 @@ async function toggleCollection(cardId) {
   await addToCollection(cardId);
 }
 
-// Add card to wishlist
+// Add card to wishlist (or increment count)
 async function addToWishlist(cardId) {
   const user = auth.currentUser;
   if (!user) {
@@ -124,16 +124,25 @@ async function addToWishlist(cardId) {
     return;
   }
   
+  const currentCount = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 0) : 0;
+  if (currentCount >= 4) {
+    showNotification('Maximum 4 copies per card', 'info');
+    return;
+  }
+
+  const newCount = currentCount + 1;
+
   try {
-    await db.collection('users').doc(user.uid).set({
-      wishlist: firebase.firestore.FieldValue.arrayUnion(cardId)
-    }, { merge: true });
+    await db.collection('users').doc(user.uid).update({
+      wishlist: firebase.firestore.FieldValue.arrayUnion(cardId),
+      [`wishlistCounts.${cardId}`]: newCount
+    });
     
-    if (!window.userWishlist) {
-      window.userWishlist = new Set();
-    }
+    if (!window.userWishlist) window.userWishlist = new Set();
     window.userWishlist.add(cardId);
-    showNotification('Added to wishlist!', 'success');
+    if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
+    window.userWishlistCounts.set(cardId, newCount);
+    showNotification(`Added to wishlist (${newCount}x)`, 'success');
     
     // Update wishlist display
     updateWishlistUI();
@@ -148,18 +157,29 @@ async function addToWishlist(cardId) {
   }
 }
 
-// Remove from wishlist
+// Remove from wishlist (decrement count, remove if 0)
 async function removeFromWishlist(cardId) {
   const user = auth.currentUser;
   if (!user) return;
   
+  const currentCount = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
+  const newCount = currentCount - 1;
+
   try {
-    await db.collection('users').doc(user.uid).set({
-      wishlist: firebase.firestore.FieldValue.arrayRemove(cardId)
-    }, { merge: true });
-    
-    window.userWishlist.delete(cardId);
-    showNotification('Removed from wishlist', 'success');
+    if (newCount <= 0) {
+      await db.collection('users').doc(user.uid).update({
+        wishlist: firebase.firestore.FieldValue.arrayRemove(cardId),
+        [`wishlistCounts.${cardId}`]: firebase.firestore.FieldValue.delete()
+      });
+      window.userWishlist.delete(cardId);
+      if (window.userWishlistCounts) window.userWishlistCounts.delete(cardId);
+    } else {
+      await db.collection('users').doc(user.uid).update({
+        [`wishlistCounts.${cardId}`]: newCount
+      });
+      if (window.userWishlistCounts) window.userWishlistCounts.set(cardId, newCount);
+    }
+    showNotification(newCount > 0 ? `Wishlist: ${newCount}x` : 'Removed from wishlist', 'success');
     
     // Update wishlist display
     updateWishlistUI();
@@ -948,6 +968,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
   const wishlistHtml = [];
   let totalCards = 0;
   let matchingCards = 0;
+  let totalValue = 0;
 
   window.userWishlist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
@@ -960,6 +981,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
 
     if (card && card.image_url) {
       totalCards++;
+      const wantedCount = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
 
       // Apply set filter
       if (setFilter && cardSet !== setFilter) return;
@@ -984,13 +1006,16 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
 
       const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
+      if (!isNaN(price) && price > 0) totalValue += price * wantedCount;
 
       wishlistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
           <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
-          <button onclick="removeFromWishlist('${safeCardIdJs}')" style="position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" title="Remove from wishlist">
-            ×
-          </button>
+          <div style="position: absolute; top: 5px; left: 5px; background: #e67e22; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${wantedCount}x wanted">${wantedCount}x</div>
+          <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
+            <button onclick="addToWishlist('${safeCardIdJs}')" style="background: #e67e22; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Need more (${wantedCount}/4)">+</button>
+            <button onclick="removeFromWishlist('${safeCardIdJs}')" style="background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">−</button>
+          </div>
           <div style="padding: 8px; background: white;">
             <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
             <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
@@ -1005,7 +1030,10 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
   const searchResults = document.getElementById('wishlist-search-results');
   if (searchResults) {
     const isFiltered = searchFilter || setFilter;
-    searchResults.textContent = isFiltered ? `Showing ${matchingCards} of ${totalCards} cards` : '';
+    const valueStr = totalValue > 0 ? ` · ~${totalValue.toFixed(2).replace('.', ',')} €` : '';
+    searchResults.textContent = isFiltered
+      ? `Showing ${matchingCards} of ${totalCards} cards${valueStr}`
+      : (totalCards > 0 ? `${totalCards} cards${valueStr}` : '');
   }
 
   if (wishlistHtml.length > 0) {
@@ -1014,6 +1042,54 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
     wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current filters.', icon: 'cards' });
   } else {
     wishlistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Wishlist is empty!', description: 'Add cards to your wishlist by clicking the ♡ button on any card.', icon: 'pokeball' });
+  }
+}
+
+// Open wishlist as compact grid modal (for screenshot / sharing)
+function openWishlistGridModal() {
+  if (!window.userWishlist || window.userWishlist.size === 0) {
+    showNotification('Wishlist is empty', 'info');
+    return;
+  }
+
+  const modal = document.getElementById('wishlistGridModal');
+  const grid = document.getElementById('wishlistCompactGrid');
+  if (!modal || !grid) return;
+
+  const allCards = window.allCardsDatabase || [];
+  let html = '';
+
+  window.userWishlist.forEach(cardId => {
+    const [cardName, cardSet, cardNumber] = cardId.split('|');
+    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    if (!card || !card.image_url) return;
+
+    const wantedCount = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
+    const safeImage = escapeHtml(card.image_url);
+    const safeName = escapeHtml(card.name);
+
+    html += `<div class="compact-card" data-export-card>
+      <img src="${safeImage}" alt="${safeName}" style="width:100%;display:block;border-radius:5px;" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}">
+      ${wantedCount > 1 ? `<span class="compact-badge" style="position:absolute;top:2px;right:2px;background:#e67e22;color:#fff;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,.4);padding:0 3px;">${wantedCount}x</span>` : ''}
+    </div>`;
+  });
+
+  grid.innerHTML = html || '<p style="color:#999;">No cards to display</p>';
+  modal.classList.add('show');
+}
+
+function closeWishlistGridModal() {
+  const modal = document.getElementById('wishlistGridModal');
+  if (modal) modal.classList.remove('show');
+}
+
+function exportWishlistAsImage() {
+  const grid = document.getElementById('wishlistCompactGrid');
+  if (!grid) return;
+  if (typeof exportDeckAsImage === 'function') {
+    exportDeckAsImage(grid, 'Wishlist');
+  } else {
+    showNotification('Image export not available', 'error');
   }
 }
 

@@ -420,19 +420,6 @@
                     return String(a.number || '').localeCompare(String(b.number || ''));
                 })[0];
 
-            // Basic Energies: prefer SVE-17 to SVE-24 (modern full-art style)
-            if (typeof isBasicEnergy === 'function' && isBasicEnergy(name)) {
-                const sveMap = {
-                    'grass energy': '17', 'fire energy': '18', 'water energy': '19',
-                    'lightning energy': '20', 'psychic energy': '21', 'fighting energy': '22',
-                    'darkness energy': '23', 'metal energy': '24'
-                };
-                const sveNum = sveMap[(name || '').toLowerCase().trim()];
-                if (sveNum) {
-                    const sveMatch = familyCards.find(item => item.set === 'SVE' && item.number === sveNum);
-                    if (sveMatch) selected = sveMatch;
-                }
-            }
         }
 
         const newestRef = selected ? selected.ref : (uniqueRefs[0] || normalizeIntlPrintRef(normSet, normNumber));
@@ -565,9 +552,7 @@
                 const rawName = String(row.card_name || row.full_card_name || '').trim();
                 const rawSet = String(row.set_code || row.set || '').trim();
                 const rawNumber = String(row.set_number || row.number || '').trim();
-                const resolved = sourceKey.startsWith('city-')
-                    ? resolveCityLeagueDisplayPrint(rawName, rawSet, rawNumber)
-                    : { name: rawName, set: rawSet, number: rawNumber };
+                const resolved = resolveCityLeagueDisplayPrint(rawName, rawSet, rawNumber);
                 const name = resolved.name;
                 const set = resolved.set;
                 const number = resolved.number;
@@ -834,9 +819,7 @@
             const rawName = String(row.card_name || row.full_card_name || '').trim();
             const rawSet = String(row.set_code || row.set || '').trim();
             const rawNumber = String(row.set_number || row.number || '').trim();
-            const resolved = sourceKey.startsWith('city-')
-                ? resolveCityLeagueDisplayPrint(rawName, rawSet, rawNumber)
-                : { name: rawName, set: rawSet, number: rawNumber };
+            const resolved = resolveCityLeagueDisplayPrint(rawName, rawSet, rawNumber);
             const cardDb = findCardRecord(resolved.name, resolved.set, resolved.number);
             return !!(cardDb && String(cardDb.supertype || '').toLowerCase() === 'pokemon');
         });
@@ -907,9 +890,7 @@
         const rawName = String(pickedRow.card_name || pickedRow.full_card_name || '').trim();
         const rawSet = String(pickedRow.set_code || pickedRow.set || '').trim();
         const rawNumber = String(pickedRow.set_number || pickedRow.number || '').trim();
-        const resolved = sourceKey.startsWith('city-')
-            ? resolveCityLeagueDisplayPrint(rawName, rawSet, rawNumber)
-            : { name: rawName, set: rawSet, number: rawNumber };
+        const resolved = resolveCityLeagueDisplayPrint(rawName, rawSet, rawNumber);
 
         return findCardImage(resolved.name, resolved.set, resolved.number) || '';
     }
@@ -979,7 +960,14 @@
         const found = allCards.find(c =>
             c.name === name && c.set === set && String(c.number) === String(number)
         );
-        return found ? (found.image_url || found.image || '') : '';
+        if (found && (found.image_url || found.image)) return found.image_url || found.image;
+
+        // Fallback: use getUnifiedCardImage if available (handles M3/M4 proxy URLs)
+        if (typeof window.getUnifiedCardImage === 'function') {
+            const unified = window.getUnifiedCardImage(set, number);
+            if (unified) return unified;
+        }
+        return '';
     }
 
     function findCardRecord(name, set, number) {
@@ -1877,7 +1865,35 @@
     }
 
     // ── Expose ──
-    window.buildMetaBinder = buildMetaBinder;
+    // ── Re-render binder when remaining card DB chunks finish loading ──
+    let _metaBinderChunkCount = 0;
+    let _chunkPollId = null;
+
+    function _startChunkPoll() {
+        _metaBinderChunkCount = (window.allCardsDatabase || []).length;
+        if (_chunkPollId) clearInterval(_chunkPollId);
+        _chunkPollId = setInterval(() => {
+            const cur = (window.allCardsDatabase || []).length;
+            if (cur > _metaBinderChunkCount) {
+                console.log('[MetaBinder] Card DB grew (' + _metaBinderChunkCount + ' → ' + cur + '), re-rendering…');
+                _metaBinderChunkCount = cur;
+                clearInterval(_chunkPollId);
+                _chunkPollId = null;
+                buildMetaBinder();
+            }
+        }, 1500);
+        // Stop polling after 30s
+        setTimeout(() => { if (_chunkPollId) { clearInterval(_chunkPollId); _chunkPollId = null; } }, 30000);
+    }
+
+    // Wrap buildMetaBinder to start chunk polling after each build
+    const _origBuildMetaBinder = buildMetaBinder;
+    async function buildMetaBinderWithChunkWatch() {
+        await _origBuildMetaBinder();
+        _startChunkPoll();
+    }
+
+    window.buildMetaBinder = buildMetaBinderWithChunkWatch;
     window.metaBinderAddMissingToWishlist = metaBinderAddMissingToWishlist;
     window.metaBinderSendMissingToProxy = metaBinderSendMissingToProxy;
     window.metaBinderProxyNewCards = metaBinderProxyNewCards;

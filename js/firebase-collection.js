@@ -45,10 +45,10 @@ async function addToCollection(cardId) {
   const newCount = currentCount + 1;
   
   try {
-    await db.collection('users').doc(user.uid).set({
+    await db.collection('users').doc(user.uid).update({
       collection: firebase.firestore.FieldValue.arrayUnion(cardId),
       [`collectionCounts.${cardId}`]: newCount
-    }, { merge: true });
+    });
     
     window.userCollection.add(cardId);
     if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
@@ -79,17 +79,17 @@ async function removeFromCollection(cardId) {
   
   try {
     if (newCount <= 0) {
-      await db.collection('users').doc(user.uid).set({
+      await db.collection('users').doc(user.uid).update({
         collection: firebase.firestore.FieldValue.arrayRemove(cardId),
         [`collectionCounts.${cardId}`]: firebase.firestore.FieldValue.delete()
-      }, { merge: true });
+      });
       
       window.userCollection.delete(cardId);
       if (window.userCollectionCounts) window.userCollectionCounts.delete(cardId);
     } else {
-      await db.collection('users').doc(user.uid).set({
+      await db.collection('users').doc(user.uid).update({
         [`collectionCounts.${cardId}`]: newCount
-      }, { merge: true });
+      });
       
       if (window.userCollectionCounts) window.userCollectionCounts.set(cardId, newCount);
     }

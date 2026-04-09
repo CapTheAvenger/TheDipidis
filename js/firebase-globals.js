@@ -112,6 +112,50 @@ async function loadUserData(userId) {
       // Collection
       const rawCollection = Array.isArray(data.collection) ? data.collection.filter(v => typeof v === 'string' && v.includes('|')) : [];
       const counts = flattenCountsObject(data.collectionCounts || {});
+
+      // Recover counts stored as top-level dotted fields (legacy bug:
+      // set({merge:true}) with "collectionCounts.X" stored a literal
+      // top-level field instead of a nested path under collectionCounts).
+      const CC_PREFIX = 'collectionCounts.';
+      let hasDottedLegacy = false;
+      for (const key of Object.keys(data)) {
+        if (key.startsWith(CC_PREFIX)) {
+          const cardId = key.substring(CC_PREFIX.length);
+          const val = parseInt(data[key], 10);
+          if (!isNaN(val) && val > 0 && !(cardId in counts)) {
+            counts[cardId] = val;
+            hasDottedLegacy = true;
+          }
+        }
+      }
+
+      // Migrate legacy dotted fields → nested collectionCounts (one-time)
+      if (hasDottedLegacy) {
+        try {
+          const migrateUp = {};
+          const migrateDel = {};
+          for (const key of Object.keys(data)) {
+            if (key.startsWith(CC_PREFIX)) {
+              const cardId = key.substring(CC_PREFIX.length);
+              const val = parseInt(data[key], 10);
+              if (!isNaN(val) && val > 0) {
+                migrateUp[`collectionCounts.${cardId}`] = val;
+              }
+              migrateDel[key] = firebase.firestore.FieldValue.delete();
+            }
+          }
+          // update() interprets dots as nested paths → writes correct structure
+          const docRef = window.db.collection('users').doc(userId);
+          await docRef.update(migrateUp);
+          // Delete the legacy top-level dotted fields via set({merge:true})
+          // (set treats the dot as a literal key name → targets the right field)
+          await docRef.set(migrateDel, { merge: true });
+          console.log('[Collection] Migrated', Object.keys(migrateUp).length, 'legacy dotted count fields');
+        } catch (migErr) {
+          console.warn('[Collection] Migration of dotted fields failed:', migErr);
+        }
+      }
+
       const countKeys = Object.keys(counts);
       const mergedCollection = rawCollection.length > 0 ? rawCollection : countKeys;
 

@@ -28,7 +28,7 @@
         "max_workers": 8,
         "batch_size": 100,
         "skip_cards_with_prices": false,
-        "only_update_sets": ["POR", "ASC", "PFL", "MEG"],
+        "only_update_sets": ["POR", "ASC", "PFL", "MEG", "MEE", "MEP", "BLK", "WHT", "DRI", "JTG", "PRE", "SSP", "SCR", "SFA", "TWM", "TEF"],
         "_comment": "Limitless TCG Only - kein Cardmarket, kein Selenium, kein Proxy"
     },
 

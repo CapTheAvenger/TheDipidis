@@ -1155,13 +1155,28 @@
         if (aOrder !== bOrder) return aOrder - bOrder;
 
         if (aCategory === 'Pokemon') {
+            // 1. Element type
             const aElementOrder = getMetaBinderPokemonElementOrder(aTypeMeta);
             const bElementOrder = getMetaBinderPokemonElementOrder(bTypeMeta);
             if (aElementOrder !== bElementOrder) return aElementOrder - bElementOrder;
 
+            // 2. Pokedex number (ascending)
             const dexA = Number.isFinite(a.dexNumber) ? a.dexNumber : Number.MAX_SAFE_INTEGER;
             const dexB = Number.isFinite(b.dexNumber) ? b.dexNumber : Number.MAX_SAFE_INTEGER;
             if (dexA !== dexB) return dexA - dexB;
+
+            // 3. Set from newest to oldest (higher setOrder = newer)
+            const pokSetA = Number.isFinite(a.setOrder) ? a.setOrder : 0;
+            const pokSetB = Number.isFinite(b.setOrder) ? b.setOrder : 0;
+            if (pokSetA !== pokSetB) return pokSetB - pokSetA;
+
+            // 4. Card number within set
+            const pokNumA = Number.isFinite(a.numberSort) ? a.numberSort : Number.MAX_SAFE_INTEGER;
+            const pokNumB = Number.isFinite(b.numberSort) ? b.numberSort : Number.MAX_SAFE_INTEGER;
+            if (pokNumA !== pokNumB) return pokNumA - pokNumB;
+
+            // 5. Name fallback
+            return META_BINDER_NAME_COLLATOR.compare(String(a.name || ''), String(b.name || ''));
         }
 
         const setFirstCategories = new Set(['Supporter', 'Item', 'Tool', 'Stadium', 'Special Energy']);

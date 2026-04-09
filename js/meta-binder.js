@@ -328,8 +328,6 @@
             if (r.includes('uncommon')) return 2;
             if (r.includes('common')) return 1;
 
-            if (r.includes('promo')) return 4;
-
             // Low / regular rare tiers
             if (r === 'rare' || r.includes('holo rare') || r.includes('reverse holo')) return 5;
 
@@ -342,6 +340,10 @@
                 r.includes(' v') ||
                 r === 'dr'
             ) return 10;
+
+            // Promos are from tins/boxes/events, not regular booster packs.
+            // Prefer any regular pack rarity (including Double Rare for ex) over Promos.
+            if (r.includes('promo')) return 11;
 
             // Upper-mid decorative but not top-end tiers
             if (
@@ -429,7 +431,6 @@
             if (!r) return 4;
             if (r.includes('uncommon')) return 2;
             if (r.includes('common')) return 1;
-            if (r.includes('promo')) return 4;
             if (r === 'rare' || r.includes('holo rare') || r.includes('reverse holo')) return 5;
             if (
                 r.includes('double rare') ||
@@ -439,6 +440,7 @@
                 r.includes(' v') ||
                 r === 'dr'
             ) return 10;
+            if (r.includes('promo')) return 11;
             if (
                 r.includes('radiant') ||
                 r.includes('amazing rare') ||

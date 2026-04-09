@@ -208,6 +208,86 @@ def create_merged_database():
     print(f"✓ Erfolgreich {len(merged_cards)} Karten für das Frontend exportiert!")
     print(f"✓ Pokédex-Nummern gefunden für: {match_count} Pokémon")
 
+    # Generate chunked JSON files for fast frontend loading
+    project_root = os.path.dirname(os.path.dirname(get_app_path()))
+    frontend_data = os.path.join(project_root, "data")
+    os.makedirs(frontend_data, exist_ok=True)
+    split_card_database_chunks(merged_cards, frontend_data)
+
+
+# ============================================================================
+# CARD DATABASE CHUNKING (standard / extended / legacy)
+# ============================================================================
+
+# Standard rotation boundary — sets with set_order >= this value.
+# Update this value when the Pokemon TCG standard format rotates.
+STANDARD_MIN_ORDER = 136   # TEF and newer
+
+# Extended boundary — sets >= this and < STANDARD_MIN_ORDER
+EXTENDED_MIN_ORDER = 113   # SSH and newer
+
+# Promo sets span multiple eras; assign them to standard for fast first-load.
+PROMO_ERA_SETS = {"SVP", "MEP", "SP", "HSP", "SMP", "SV", "SWSHP"}
+
+
+def split_card_database_chunks(all_cards: list, frontend_data: str):
+    """Split all_cards_merged data into era-based JSON chunks + manifest.
+
+    Creates:
+      - data/cards_chunk_standard.json
+      - data/cards_chunk_extended.json
+      - data/cards_chunk_legacy.json
+      - data/cards_manifest.json
+    """
+    set_order = load_set_order()
+
+    standard, extended, legacy = [], [], []
+
+    for card in all_cards:
+        set_code = (card.get("set") or "").strip()
+        order = set_order.get(set_code, set_order.get(set_code.upper(), 0))
+
+        if set_code.upper() in PROMO_ERA_SETS or order >= STANDARD_MIN_ORDER:
+            standard.append(card)
+        elif order >= EXTENDED_MIN_ORDER:
+            extended.append(card)
+        else:
+            legacy.append(card)
+
+    import hashlib
+
+    def _write_chunk(filename, cards):
+        path = os.path.join(frontend_data, filename)
+        raw = json.dumps(cards, ensure_ascii=False, separators=(",", ":"))
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(raw)
+        h = hashlib.md5(raw.encode("utf-8")).hexdigest()[:8]
+        return h
+
+    h_std = _write_chunk("cards_chunk_standard.json", standard)
+    h_ext = _write_chunk("cards_chunk_extended.json", extended)
+    h_leg = _write_chunk("cards_chunk_legacy.json", legacy)
+
+    # Manifest version = hash of all chunk hashes → changes when any card changes
+    version = hashlib.md5(f"{h_std}{h_ext}{h_leg}".encode()).hexdigest()[:12]
+
+    manifest = {
+        "version": version,
+        "generated": __import__("datetime").datetime.now().astimezone().isoformat(),
+        "totalCards": len(all_cards),
+        "chunks": [
+            {"file": "cards_chunk_standard.json", "era": "standard", "count": len(standard), "hash": h_std},
+            {"file": "cards_chunk_extended.json", "era": "extended", "count": len(extended), "hash": h_ext},
+            {"file": "cards_chunk_legacy.json",   "era": "legacy",   "count": len(legacy),   "hash": h_leg},
+        ],
+    }
+    manifest_path = os.path.join(frontend_data, "cards_manifest.json")
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+    print(f"\n✓ Card-DB-Chunks generiert: standard={len(standard)}, extended={len(extended)}, legacy={len(legacy)}")
+    print(f"  Manifest-Version: {version}")
+
 
 # ============================================================================
 # SYNC SCRAPER OUTPUT → FRONTEND data/

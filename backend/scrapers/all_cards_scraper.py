@@ -111,13 +111,28 @@ def load_existing_cards(csv_path: str, rescrape_incomplete: bool = True):
             key = f"{set_code}::{set_number}"
             existing_keys.add(key)
 
+            energy_type = (row.get("energy_type") or "").strip()
+            hp_val      = (row.get("hp") or "").strip()
+            card_text   = (row.get("card_text") or "").strip()
+
+            card_data["energy_type"] = energy_type
+            card_data["hp"] = hp_val
+            card_data["card_text"] = card_text
+
             has_basic = bool(image_url and rarity and intl)
             only_self = False
             if intl:
                 p_list = [p.strip() for p in intl.split(",")]
                 only_self = (len(p_list) == 1 and p_list[0] == f"{set_code}-{set_number}")
 
-            is_incomplete = not has_basic or (only_self and not cm_url)
+            # Also rescrape if energy_type is missing for Pokemon cards
+            is_pokemon_type = (row.get("type") or "").strip().lower() in (
+                "basic", "stage 1", "stage 2", "vstar", "vmax", "v", "v-union",
+                "mega", "break", "restored", "legend"
+            )
+            missing_energy = is_pokemon_type and not energy_type
+
+            is_incomplete = not has_basic or (only_self and not cm_url) or missing_energy
 
             if not is_incomplete:
                 complete_cards.append(card_data)
@@ -224,11 +239,13 @@ def scrape_all_cards_list(
                 "name": card_name,
                 "type": card_type,
                 "energy_type": energy_type,
+                "hp": "",
                 "card_url": card_url,
                 "image_url": "",
                 "rarity": card_rarity,
                 "international_prints": "",
                 "cardmarket_url": "",
+                "card_text": "",
             })
             new_on_page += 1
 
@@ -379,6 +396,57 @@ def _fetch_single_card(card: dict) -> dict:
 
     card["international_prints"] = ",".join(sorted(int_prints))
     card["cardmarket_url"] = cardmarket_url
+
+    # ── Card text / TCG energy type from detail page ──────────────
+    title_el = soup.select_one("p.card-text-title")
+    if title_el:
+        title_text = title_el.get_text(" ", strip=True)
+        # Format: "Name - Psychic - 70 HP" or "Name - Trainer" etc.
+        parts = [p.strip() for p in title_text.split(" - ")]
+        if len(parts) >= 3:
+            # Pokemon card: Name - Type - HP
+            detail_energy = parts[1].strip()
+            hp_text = parts[2].replace("HP", "").strip()
+            if detail_energy in ENERGY_SYMBOL_MAP.values():
+                card["energy_type"] = detail_energy
+            if hp_text.isdigit():
+                card["hp"] = hp_text
+        elif len(parts) == 2:
+            # Trainer/Energy: Name - Trainer or Name - Energy
+            pass
+
+    # Card text: attacks + abilities
+    card_text_parts = []
+    for ability_el in soup.select(".card-text-ability"):
+        ab_name = ability_el.select_one(".card-text-ability-name")
+        ab_effect = ability_el.select_one(".card-text-ability-effect")
+        if ab_name:
+            card_text_parts.append(f"[Ability] {ab_name.get_text(strip=True)}")
+        if ab_effect:
+            card_text_parts.append(ab_effect.get_text(" ", strip=True))
+
+    for attack_el in soup.select(".card-text-attack"):
+        info_el = attack_el.select_one(".card-text-attack-info")
+        effect_el = attack_el.select_one(".card-text-attack-effect")
+        if info_el:
+            # Extract cost symbols + name + damage
+            symbols = [s.get_text(strip=True) for s in info_el.select(".ptcg-symbol")]
+            full_text = info_el.get_text(" ", strip=True)
+            card_text_parts.append(full_text)
+        if effect_el:
+            effect_text = effect_el.get_text(" ", strip=True)
+            if effect_text:
+                card_text_parts.append(effect_text)
+
+    # Weakness / Resistance / Retreat
+    wr_section = soup.select_one(".card-text-wrr")
+    if wr_section:
+        wr_text = wr_section.get_text(" ", strip=True)
+        card_text_parts.append(wr_text)
+
+    if card_text_parts:
+        card["card_text"] = " || ".join(card_text_parts)
+
     return card
 
 
@@ -395,8 +463,9 @@ def scrape_card_details(
         f"(Multithreading, {max_workers} Worker)..."
     )
 
-    fieldnames = ["name_en", "name_de", "set", "number", "type", "rarity",
-                  "image_url", "international_prints", "cardmarket_url"]
+    fieldnames = ["name_en", "name_de", "set", "number", "type", "energy_type",
+                  "hp", "rarity", "image_url", "international_prints",
+                  "cardmarket_url", "card_text"]
 
     def write_csv_batch(current_cards: list):
         all_data = (existing_cards + current_cards) if append_mode else current_cards
@@ -516,8 +585,9 @@ def main():
         logger.info("Sortiere %s Karten (neueste Sets zuerst) ...", len(deduplicated))
         deduplicated.sort(key=sort_key)
 
-        fieldnames = ["name_en", "name_de", "set", "number", "type", "rarity",
-                      "image_url", "international_prints", "cardmarket_url"]
+        fieldnames = ["name_en", "name_de", "set", "number", "type", "energy_type",
+                      "hp", "rarity", "image_url", "international_prints",
+                      "cardmarket_url", "card_text"]
 
         with open(csv_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")

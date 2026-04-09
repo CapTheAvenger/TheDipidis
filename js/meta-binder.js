@@ -241,10 +241,26 @@
         // Legacy fallback for JP-only set codes (M3/M4/etc): pick any non-M* EN print by name.
         if (/^M\d+$/i.test(rawSet) && Array.isArray(window.allCardsDatabase)) {
             const normalizedTarget = rawName.toLowerCase();
-            const candidates = window.allCardsDatabase.filter(card =>
-                String(card.name || '').trim().toLowerCase() === normalizedTarget &&
+            const getCardName = (card) => String(card.name_en || card.name || '').trim().toLowerCase();
+            let candidates = window.allCardsDatabase.filter(card =>
+                getCardName(card) === normalizedTarget &&
                 !/^M\d+$/i.test(String(card.set || '').trim())
             );
+
+            // Fuzzy fallback for JP special energies with slightly different EN names
+            // e.g. "Growth Grass Energy" → "Growing Grass Energy", "Telepath Psychic Energy" → "Telepathic Psychic Energy"
+            if (candidates.length === 0) {
+                const energySuffix = normalizedTarget.match(/((?:grass|fire|water|lightning|psychic|fighting|darkness|metal|fairy|dragon)\s+energy)$/i);
+                if (energySuffix) {
+                    const suffix = energySuffix[1].toLowerCase();
+                    candidates = window.allCardsDatabase.filter(card => {
+                        const cName = getCardName(card);
+                        const cType = String(card.type || '').trim().toLowerCase();
+                        return cName.endsWith(suffix) && cName !== normalizedTarget &&
+                            cType.includes('special energy') && !/^M\d+$/i.test(String(card.set || '').trim());
+                    });
+                }
+            }
 
             if (candidates.length > 0) {
                 const setOrder = window.setOrderMap || {};
@@ -256,7 +272,7 @@
                 })[0];
 
                 return {
-                    name: String(best.name || rawName).trim(),
+                    name: String(best.name_en || best.name || rawName).trim(),
                     set: String(best.set || rawSet).trim(),
                     number: String(best.number || rawNumber).trim()
                 };
@@ -403,6 +419,20 @@
                     if (oa !== ob) return ob - oa;
                     return String(a.number || '').localeCompare(String(b.number || ''));
                 })[0];
+
+            // Basic Energies: prefer SVE-17 to SVE-24 (modern full-art style)
+            if (typeof isBasicEnergy === 'function' && isBasicEnergy(name)) {
+                const sveMap = {
+                    'grass energy': '17', 'fire energy': '18', 'water energy': '19',
+                    'lightning energy': '20', 'psychic energy': '21', 'fighting energy': '22',
+                    'darkness energy': '23', 'metal energy': '24'
+                };
+                const sveNum = sveMap[(name || '').toLowerCase().trim()];
+                if (sveNum) {
+                    const sveMatch = familyCards.find(item => item.set === 'SVE' && item.number === sveNum);
+                    if (sveMatch) selected = sveMatch;
+                }
+            }
         }
 
         const newestRef = selected ? selected.ref : (uniqueRefs[0] || normalizeIntlPrintRef(normSet, normNumber));

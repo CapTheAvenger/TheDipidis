@@ -74,24 +74,22 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
             soup = BeautifulSoup(resp.text, "lxml")
             prints_table = soup.select_one("table.card-prints-versions")
             if prints_table:
-                # Try exact set+number match first
-                for row in prints_table.select("tr"):
-                    row_text = row.get_text().lower()
-                    if card["set"].lower() in row_text and card["number"].lower() in row_text:
-                        eur_link = row.select_one("a.card-price.eur")
-                        if eur_link:
-                            eur_price = eur_link.get_text(strip=True)
-                            logger.info("  + LT Preis [%s]: %s (Set+Nr-Match)", card_id, eur_price)
-                            break
-                # Fallback: set-only match (for rows where number isn't visible)
+                # Best match: the row with class="current" IS this card's print
+                current_row = prints_table.select_one("tr.current")
+                if current_row:
+                    eur_link = current_row.select_one("a.card-price.eur")
+                    if eur_link:
+                        eur_price = eur_link.get_text(strip=True)
+                        logger.info("  + LT Preis [%s]: %s (Current-Row)", card_id, eur_price)
+                # Fallback: match by card number in <span class="prints-table-card-number">
                 if not eur_price:
                     for row in prints_table.select("tr"):
-                        row_text = row.get_text().lower()
-                        if card["set"].lower() in row_text:
+                        num_span = row.select_one("span.prints-table-card-number")
+                        if num_span and num_span.get_text(strip=True) == f"#{card['number']}":
                             eur_link = row.select_one("a.card-price.eur")
                             if eur_link:
                                 eur_price = eur_link.get_text(strip=True)
-                                logger.info("  + LT Preis [%s]: %s (Set-Match: %s)", card_id, eur_price, card["set"])
+                                logger.info("  + LT Preis [%s]: %s (Nr-Span-Match)", card_id, eur_price)
                                 break
             # Last resort: use the main card price shown on the page header
             # (outside the prints table), which corresponds to THIS specific card.
@@ -100,10 +98,12 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
                 if main_price:
                     eur_price = main_price.get_text(strip=True)
                     logger.info("  + LT Preis [%s]: %s (Main-Card)", card_id, eur_price)
+            if not eur_price:
+                logger.info("  - LT kein Preis [%s] (Seite geladen, kein EUR-Match)", card_id)
         else:
-            logger.debug("  LT HTTP %s fuer [%s]", resp.status_code, card_id)
+            logger.info("  - LT HTTP %s fuer [%s]", resp.status_code, card_id)
     except Exception as e:
-        logger.debug("  LT Fehler [%s]: %s", card_id, e)
+        logger.info("  - LT Fehler [%s]: %s", card_id, e)
 
     time.sleep(base_delay)
 

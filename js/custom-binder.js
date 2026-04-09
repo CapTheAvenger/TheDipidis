@@ -8,6 +8,7 @@
     let cbAllArchetypes = [];      // [{name, source, label}]
     let cbArchetypesLoaded = false;
     let cbFilter = 'all';
+    let _cbSkipNextClose = false;
 
     // ── Helpers ──
     function mb() { return window._mbShared || {}; }
@@ -163,6 +164,8 @@
         }
         cbSaveSelections();
         cbRenderChips();
+        // Re-render dropdown without closing it
+        _cbSkipNextClose = true;
         cbRenderDropdownList();
     }
 
@@ -222,12 +225,29 @@
 
         // ── Tier list from Meta Binder (only when not searching) ──
         if (!query) {
-            const tierGroups = Array.isArray(window._metaBinderArchetypeGroups) ? window._metaBinderArchetypeGroups : [];
-            if (tierGroups.length > 0) {
-                html += '<div class="custom-binder-dropdown-group-label" style="color:var(--accent,#3b4cca);font-weight:900;">⭐ Meta Binder Tier List</div>';
+            let tierGroups = Array.isArray(window._metaBinderArchetypeGroups) && window._metaBinderArchetypeGroups.length > 0
+                ? window._metaBinderArchetypeGroups
+                : null;
+
+            // Fallback: build top decks from cbAllArchetypes if Meta Binder hasn't been opened yet
+            if (!tierGroups) {
+                const topBySource = {};
+                cbAllArchetypes.forEach(a => {
+                    if (!topBySource[a.source]) topBySource[a.source] = [];
+                    if (topBySource[a.source].length < 20) topBySource[a.source].push(a);
+                });
+                const fallbackGroups = [];
+                if (topBySource['current-meta']?.length) fallbackGroups.push({ title: 'Top Current Meta', source: 'current-meta', items: topBySource['current-meta'].map(a => ({ name: a.name, source: a.source })) });
+                if (topBySource['city-current']?.length) fallbackGroups.push({ title: 'Top City League', source: 'city-current', items: topBySource['city-current'].map(a => ({ name: a.name, source: a.source })) });
+                if (topBySource['city-past']?.length) fallbackGroups.push({ title: 'Top City League Past', source: 'city-past', items: topBySource['city-past'].map(a => ({ name: a.name, source: a.source })) });
+                if (fallbackGroups.length) tierGroups = fallbackGroups;
+            }
+
+            if (tierGroups && tierGroups.length > 0) {
+                html += '<div class="custom-binder-dropdown-group-label" style="color:var(--accent,#3b4cca);font-weight:900;">⭐ Top Decks</div>';
                 const tierSeen = new Set();
                 tierGroups.forEach(group => {
-                    group.items.forEach(item => {
+                    (group.items || []).forEach((item, idx) => {
                         const name = item.name;
                         const source = item.source || 'current-meta';
                         const tierKey = (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(name) : name.toLowerCase()) + '|' + source;
@@ -286,6 +306,7 @@
 
     // ── Close dropdown when clicking outside ──
     document.addEventListener('click', function (e) {
+        if (_cbSkipNextClose) { _cbSkipNextClose = false; return; }
         const dd = document.getElementById('cbArchetypeDropdown');
         if (!dd || dd.classList.contains('display-none')) return;
         const picker = e.target.closest('.custom-binder-picker');

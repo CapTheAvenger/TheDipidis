@@ -527,19 +527,40 @@ def main():
             settings, start_page=start_page, existing_keys=existing_keys, language="en"
         )
 
-        logger.info("=" * 60)
-        logger.info("PHASE 1b: Deutsche Liste scrapen (name_de) ...")
-        logger.info("=" * 60)
-        de_cards = scrape_all_cards_list(
-            settings, start_page=start_page, existing_keys=set(), language="de"
-        )
+        # --- DE list: nur scrapen wenn Karten deutsche Namen brauchen ---
+        de_needed_keys = set()
+        for card in en_cards:
+            de_needed_keys.add(f"{card['set']}::{card['number']}")
+        for ic in incomplete_cards:
+            if not ic.get("name_de"):
+                de_needed_keys.add(f"{ic['set']}::{ic['number']}")
 
-        # Merge German names into EN cards
+        if de_needed_keys:
+            logger.info("=" * 60)
+            logger.info("PHASE 1b: Deutsche Liste scrapen (name_de fuer %s Karten) ...",
+                         len(de_needed_keys))
+            logger.info("=" * 60)
+            de_existing = existing_keys - de_needed_keys
+            de_cards = scrape_all_cards_list(
+                settings, start_page=start_page, existing_keys=de_existing, language="de"
+            )
+        else:
+            logger.info("=" * 60)
+            logger.info("PHASE 1b: Alle Karten haben bereits deutsche Namen - ueberspringe DE-Liste.")
+            logger.info("=" * 60)
+            de_cards = []
+
+        # Merge German names into EN cards + incomplete cards
         de_lookup = {f"{c['set']}::{c['number']}": c["name"] for c in de_cards}
         for card in en_cards:
             key = f"{card['set']}::{card['number']}"
             card["name_en"] = card.pop("name")
             card["name_de"] = de_lookup.get(key, "")
+        for ic in incomplete_cards:
+            if not ic.get("name_de"):
+                key = f"{ic['set']}::{ic['number']}"
+                if key in de_lookup:
+                    ic["name_de"] = de_lookup[key]
 
         # Prepare incomplete cards for re-scrape
         for ic in incomplete_cards:

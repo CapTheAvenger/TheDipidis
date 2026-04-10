@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     <meta name="description" content="Pokémon TCG Meta Analysis – Deck Archetypes, City League Stats, Card Prices &amp; Playtester">
+    <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#3B4CCA">
     <meta property="og:title" content="Pokémon TCG Analysis">
     <meta property="og:description" content="Live meta statistics, deck archetypes, card prices and an online playtester for the Pokémon Trading Card Game.">
@@ -173,7 +174,7 @@
                 <div id="city-league-component-container">
                     <div class="city-league-container">
                         <div class="city-league-header">
-                            <h2><span data-i18n="cl.cityLeagueDev">City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                            <h2><span data-i18n="cl.cityLeagueDev">City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" aria-label="Help for City League Meta" data-i18n-title="btn.helpTitle"></button></h2>
                             <div class="cl-format-container">
                                 <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select">
                                     <option value="M4" data-i18n="format.m4current">Current Meta</option>
@@ -195,7 +196,7 @@
                     <!-- City League Deck Analysis Tab Content -->
                     <div id="tab-decks">
                         <div class="header">
-                            <h2><span data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                            <h2><span data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" aria-label="Help for Deck Analysis" data-i18n-title="btn.helpTitle"></button></h2>
                             <div class="cl-format-container">
                                 <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select">
                                     <option value="M4" data-i18n="format.m4current">Current Meta</option>
@@ -564,7 +565,7 @@
                 <div id="current-meta-component-container">
                     <div class="container">
                         <div class="header current-meta-header">
-                            <h2><span data-i18n="cm.limitlessHeading">Limitless Online Comparison</span> <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                            <h2><span data-i18n="cm.limitlessHeading">Limitless Online Comparison</span> <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help" aria-label="Help for Current Meta" data-i18n-title="btn.helpTitle"></button></h2>
                         </div>
                         <div id="currentMetaContent" class="current-meta-content">
                             <div class="skeleton-row"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
@@ -577,7 +578,7 @@
             <div id="current-analysis" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="cm.analysisHeading">Current Meta Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="cm.analysisHeading">Current Meta Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help" aria-label="Help for Current Meta Deck Analysis" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="cm.analyzeAndBuild">Analyze and Build Decks from Current Meta</p>
                     </div>
                     
@@ -850,7 +851,7 @@
             <div id="past-meta" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="pm.analysisHeading">Past Tournament Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('past-meta')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="pm.analysisHeading">Past Tournament Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('past-meta')" title="Help" aria-label="Help for Past Meta" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="pm.analyzeAndBuild">Analyze and Build Decks from Past Tournaments</p>
                     </div>
                     
@@ -1026,7 +1027,7 @@
             
             <!-- Tab 6: Cards -->
             <div id="cards" class="tab-content">
-                <h2><span data-i18n="cards.heading">Card Database</span> <button class="tab-help-btn" onclick="openTabHelp('cards')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                <h2><span data-i18n="cards.heading">Card Database</span> <button class="tab-help-btn" onclick="openTabHelp('cards')" title="Help" aria-label="Help for Card Database" data-i18n-title="btn.helpTitle"></button></h2>
                 
                 <!-- Filter Section -->
                 <!-- Cards Filter Section Modularized -->
@@ -1110,7 +1111,7 @@
             <div id="proxy" class="tab-content">
                 <div class="proxy-container">
                     <div class="proxy-header-row">
-                        <h2 class="proxy-title"><span data-i18n="tab.proxyPrinter">Proxy Printer</span> <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2 class="proxy-title"><span data-i18n="tab.proxyPrinter">Proxy Printer</span> <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help" aria-label="Help for Proxy Printer" data-i18n-title="btn.helpTitle"></button></h2>
                         <div class="proxy-header-counts">
                             <div class="proxy-header-count proxy-header-unique"><span data-i18n="misc.unique">Unique:</span> <span id="proxyUniqueCount">0</span></div>
                             <div class="proxy-header-count proxy-header-copies"><span data-i18n="misc.copies">Copies:</span> <span id="proxyCopiesCount">0</span></div>
@@ -1170,7 +1171,7 @@
             <div id="sandbox" class="tab-content">
                 <div class="sandbox-container">
                     <div class="sandbox-header">
-                        <h2 class="sandbox-title"><span data-i18n="sandbox.heading">Playtester</span> <button class="tab-help-btn" onclick="openTabHelp('sandbox')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2 class="sandbox-title"><span data-i18n="sandbox.heading">Playtester</span> <button class="tab-help-btn" onclick="openTabHelp('sandbox')" title="Help" aria-label="Help for Playtester" data-i18n-title="btn.helpTitle"></button></h2>
                         <p class="sandbox-subtitle" data-i18n="sandbox.subtitle">Import decks for 2 players and start the match.</p>
                     </div>
 
@@ -1218,7 +1219,7 @@
             <div id="tutorial" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="tutorial.heading">How to Use This Website</span> <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="tutorial.heading">How to Use This Website</span> <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help" aria-label="Help for How to Use" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="tutorial.subtitle">Complete guide to Pokémon TCG analysis, deck building, and playtesting – v45 (March 2026)</p>
                     </div>
                     
@@ -2157,7 +2158,7 @@
             <div id="calculator" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="calc.heading">TCG Probability Calculator</span> <button class="tab-help-btn" onclick="openTabHelp('calculator')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="calc.heading">TCG Probability Calculator</span> <button class="tab-help-btn" onclick="openTabHelp('calculator')" title="Help" aria-label="Help for Probability Calculator" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="calc.subtitle">Calculate the odds of drawing specific cards in your opening hand, prize cards, or topdeck.</p>
                     </div>
 
@@ -2210,7 +2211,7 @@
                     <div class="header">
                         <h2>
                             <img loading="lazy" src="images/pokeball-icon.png" alt="" class="w-32 h-32 mr-10 align-middle">
-                            <span data-i18n="profile.heading">User Profile</span> <button class="tab-help-btn" onclick="openTabHelp('profile')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button>
+                            <span data-i18n="profile.heading">User Profile</span> <button class="tab-help-btn" onclick="openTabHelp('profile')" title="Help" aria-label="Help for Profile" data-i18n-title="btn.helpTitle"></button>
                         </h2>
                         <p data-i18n="profile.subtitle">Manage your collection, decks, and settings</p>
                     </div>
@@ -2307,7 +2308,7 @@
                                     <span data-i18n="profile.dexImport">Dex Import</span>
                                 </button>
                                 <span class="fs-12 color-grey-light" data-i18n="profile.dexImportHint">Import your Dex TCG collection via CSV export</span>
-                                <input type="file" id="dexImportFileInput" accept=".csv" class="display-none" onchange="dexImportHandleFile(this)">
+                                <input type="file" id="dexImportFileInput" accept=".csv" class="display-none" aria-label="Import collection CSV" onchange="dexImportHandleFile(this)">
                             </div>
 
                             <div class="flex gap-10 align-center mb-15 flex-wrap">
@@ -2487,7 +2488,7 @@
                             <!-- Archetype Picker -->
                             <div class="custom-binder-picker mb-15">
                                 <div class="custom-binder-search-row">
-                                    <input type="text" id="cbArchetypeSearch" class="input-system" placeholder="Search archetype…" autocomplete="off" oninput="cbFilterArchetypeList()">
+                                    <input type="text" id="cbArchetypeSearch" class="input-system" placeholder="Search archetype…" aria-label="Search archetype" autocomplete="off" oninput="cbFilterArchetypeList()">
                                     <button class="btn btn-outline btn-sm" onclick="cbToggleArchetypeDropdown()" id="cbDropdownToggle">Browse ▾</button>
                                 </div>
                                 <div id="cbArchetypeDropdown" class="custom-binder-dropdown display-none"></div>
@@ -3137,7 +3138,7 @@
             <button class="pt-btn pt-danger" onclick="ptZoomClose()">✕</button>
         </div>
         <div style="padding:10px 14px;border-bottom:1px solid #1f2937;flex-shrink:0;display:flex;gap:8px;">
-            <input id="ptZoomSearch" type="text" placeholder="Search card name…" oninput="ptRenderZoomPanel(this.value)" style="flex:1;padding:8px 10px;background:#1f2937;color:#fff;border:1px solid #374151;border-radius:6px;font-size:13px;">
+            <input id="ptZoomSearch" type="text" placeholder="Search card name…" aria-label="Search card name" oninput="ptRenderZoomPanel(this.value)" style="flex:1;padding:8px 10px;background:#1f2937;color:#fff;border:1px solid #374151;border-radius:6px;font-size:13px;">
         </div>
         <div style="flex:1;overflow-y:auto;padding:10px 14px;">
             <div id="ptZoomBigImgWrap" style="text-align:center;margin-bottom:12px;">
@@ -3360,18 +3361,18 @@
 
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.tournamentName">Tournament Name</span>
-                    <input id="battleJournalTournamentName" type="text" class="battle-journal-input" autocomplete="off" data-i18n-placeholder="bj.tournamentNamePlaceholder" placeholder="e.g. City League Hamburg...">
+                    <input id="battleJournalTournamentName" type="text" class="battle-journal-input" autocomplete="off" aria-label="Tournament name" data-i18n-placeholder="bj.tournamentNamePlaceholder" placeholder="e.g. City League Hamburg...">
                 </div>
 
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.ownDeck">Your Deck</span>
-                    <input id="battleJournalOwnDeckValue" type="text" class="battle-journal-input" list="battleJournalOwnDeckList" autocomplete="off" data-i18n-placeholder="bj.searchDeck" placeholder="Search deck...">
+                    <input id="battleJournalOwnDeckValue" type="text" class="battle-journal-input" list="battleJournalOwnDeckList" autocomplete="off" aria-label="Your deck" data-i18n-placeholder="bj.searchDeck" placeholder="Search deck...">
                     <datalist id="battleJournalOwnDeckList"></datalist>
                 </div>
 
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.opponentDeck">Opponent Archetype</span>
-                    <input id="battleJournalOpponentValue" type="text" class="battle-journal-input" list="battleJournalOpponentList" autocomplete="off" data-i18n-placeholder="bj.searchOpponent" placeholder="Search opponent...">
+                    <input id="battleJournalOpponentValue" type="text" class="battle-journal-input" list="battleJournalOpponentList" autocomplete="off" aria-label="Opponent archetype" data-i18n-placeholder="bj.searchOpponent" placeholder="Search opponent...">
                     <datalist id="battleJournalOpponentList"></datalist>
                 </div>
 

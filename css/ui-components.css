@@ -15,6 +15,14 @@
     object-fit: cover;
 }
 
+/* Universal CLS fix: card images generated without class (732/739 images) */
+img[src*="digitaloceanspaces.com/tpci/"],
+img[src*="limitlesstcg"] {
+    aspect-ratio: 2.5 / 3.5;
+    width: 100%;
+    height: auto;
+}
+
 /* ============================================================
  * SEARCHABLE SELECT DROPDOWN
  * Custom dropdown that replaces native <select> with

@@ -1008,6 +1008,18 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : 'N/A';
       if (!isNaN(price) && price > 0) totalValue += price * wantedCount;
 
+      // Cardmarket link
+      const rawCmUrl = card.cardmarket_url || '';
+      const cmUrl = rawCmUrl ? rawCmUrl.split('?')[0] + '?sellerCountry=7&language=1,3' : '';
+      const safeCmUrl = escapeHtml(cmUrl);
+
+      // Owned count from collection
+      const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
+
+      // Max copies allowed in a deck
+      const maxCopies = (typeof getLegalMaxCopies === 'function') ? getLegalMaxCopies(card) : 4;
+      const maxLabel = maxCopies >= 59 ? '∞' : maxCopies;
+
       wishlistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
           <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
@@ -1019,7 +1031,13 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
           <div style="padding: 8px; background: white;">
             <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
             <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
-            <div style="font-size: 0.8em; color: #27ae60; font-weight: 600; margin-top: 4px;">💰 ${priceDisplay}</div>
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+              <span style="font-size: 0.75em; color: ${ownedCount > 0 ? '#4CAF50' : '#999'}; font-weight: 600;">✓ ${ownedCount}/${maxLabel}</span>
+              <button onclick="addOwnedFromWishlist('${safeCardIdJs}')" style="background: #4CAF50; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; line-height: 1;" title="Add to collection (owned: ${ownedCount})">+</button>
+            </div>
+            ${cmUrl
+              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">💰 ${priceDisplay}</a>`
+              : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">💰 ${priceDisplay}</div>`}
           </div>
         </div>
       `);
@@ -1091,6 +1109,67 @@ function exportWishlistAsImage() {
   } else {
     showNotification('Image export not available', 'error');
   }
+}
+
+// Add a copy to collection AND auto-decrement wishlist count
+async function addOwnedFromWishlist(cardId) {
+  const user = auth.currentUser;
+  if (!user) {
+    showNotification('Please sign in to use this feature', 'error');
+    return;
+  }
+  // Add to collection (respects 4-max internally)
+  await addToCollection(cardId);
+
+  // Auto-decrement wishlist if still on it
+  if (window.userWishlist && window.userWishlist.has(cardId)) {
+    const wantedCount = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
+    if (wantedCount > 0) {
+      await removeFromWishlist(cardId);
+    }
+  }
+}
+
+// Copy wishlist data to clipboard as text
+function copyWishlistToClipboard() {
+  if (!window.userWishlist || window.userWishlist.size === 0) {
+    showNotification('Wishlist is empty', 'info');
+    return;
+  }
+  const allCards = window.allCardsDatabase || [];
+  const lines = [];
+  let totalVal = 0;
+
+  window.userWishlist.forEach(cardId => {
+    const [cardName, cardSet, cardNumber] = cardId.split('|');
+    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
+    const price = card && card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+    const priceStr = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : '';
+    if (!isNaN(price) && price > 0) totalVal += price * count;
+    lines.push(`${count}x ${cardName} (${cardSet} ${cardNumber})${priceStr ? ' - ' + priceStr : ''}`);
+  });
+
+  const totalStr = totalVal > 0 ? `\n\nTotal: ~${totalVal.toFixed(2).replace('.', ',')} €` : '';
+  const text = `Wishlist (${window.userWishlist.size} cards):\n${lines.join('\n')}${totalStr}`;
+
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    navigator.clipboard.writeText(text).then(() => {
+      showNotification('Wishlist copied to clipboard!', 'success');
+    }).catch(() => _fallbackCopyWishlist(text));
+  } else {
+    _fallbackCopyWishlist(text);
+  }
+}
+
+function _fallbackCopyWishlist(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showNotification('Wishlist copied!', 'success'); } catch (_) { showNotification('Copy failed', 'error'); }
+  document.body.removeChild(ta);
 }
 
 // Update profile UI

@@ -287,88 +287,6 @@ body {
 /* â”€â”€ GOLDFISHING PLAYTESTER â”€â”€ */
 #playtesterModal { font-family: 'Nunito', sans-serif !important; background: #0d2a18 !important; overflow: hidden !important; }
 
-.pt-floating-bar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    width: calc(100% - 20px);
-    margin: 10px auto 8px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: linear-gradient(135deg, rgba(18, 36, 84, 0.9) 0%, rgba(26, 64, 145, 0.9) 100%);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(8px);
-}
-
-.pt-tool-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    padding: 4px 8px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.pt-tool-group-label {
-    color: rgba(255, 255, 255, 0.84);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-right: 4px;
-}
-
-.pt-tool-btn {
-    position: relative;
-    min-height: 32px;
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-size: 10px;
-    letter-spacing: 0.25px;
-    text-transform: none;
-}
-
-.pt-tool-btn-danger {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #b91c1c;
-}
-
-.pt-tool-btn-danger:hover {
-    background: #fee2e2;
-    color: #7f1d1d;
-}
-
-.pt-marker-chip {
-    min-width: 44px;
-    height: 28px;
-}
-
-.pt-tool-btn[data-pt-tip]:hover::after,
-.pt-tool-btn[data-pt-tip]:focus-visible::after {
-    content: attr(data-pt-tip);
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.85);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    padding: 4px 6px;
-    font-size: 10px;
-    font-weight: 700;
-    white-space: nowrap;
-    pointer-events: none;
-}
-
 .pt-toolbar { background: linear-gradient(90deg, #1b3b8c 0%, #2a52be 100%); border-bottom: 3px solid var(--pokemon-yellow); box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 100; }
 .pt-btn { background: rgba(255,255,255,0.9); color: #1b3b8c; border: 2px solid var(--pokemon-yellow); border-radius: 20px; padding: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space: nowrap; transition: all 0.15s ease; font-family: inherit; }
 .pt-btn:hover { background: var(--pokemon-yellow); color: #000; transform: translateY(-2px); }
@@ -489,9 +407,7 @@ body {
 .pt-hand-card:hover { transform: translateY(-15px) scale(1.2); z-index: 5; position: relative; }
 .pt-hand-card.pt-card-selected { outline: 3px solid var(--pokemon-yellow); transform: translateY(-20px) scale(1.2); z-index: 6; }
 .pt-hand-disc-btn { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 4px; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
-.pt-hand-play-btn { position: absolute; top: 2px; left: 2px; background: rgba(46,204,113,0.85); color: #fff; border: none; border-radius: 4px; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
-.pt-hand-wrapper:hover .pt-hand-disc-btn,
-.pt-hand-wrapper:hover .pt-hand-play-btn { display: flex; }
+.pt-hand-wrapper:hover .pt-hand-disc-btn { display: flex; }
 
 .pt-marker { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 18px; border-radius: 4px; font-weight: 900; font-size: 9px; cursor: pointer; border: 2px solid; transition: all 0.2s; }
 .pt-marker-vstar { background: linear-gradient(135deg, #fff, #a8e6cf); color: #000; border-color: #fff; }
@@ -503,9 +419,6 @@ body {
 .pt-log-p1 { color: #a8e6cf; }
 .pt-log-p2 { color: #ff8b94; }
 .pt-log-neutral { color: var(--pokemon-yellow); }
-
-/* Let zone children capture events while the full-size inner div is transparent */
-.pt-area-passthrough > * { pointer-events: auto; }
 
 .pt-arena.flipped { transform: rotate(180deg); }
 .pt-arena.flipped .static-element { transform: rotate(180deg); }
@@ -530,7 +443,7 @@ body {
 .pt-btn-small {
     flex: 1; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px;
     font-size: 10px; font-weight: 700; cursor: pointer; padding: 3px 4px; transition: 0.15s;
-    font-family: inherit; min-height: 44px;
+    font-family: inherit;
 }
 .pt-btn-small:hover { background: #2a52be; border-color: var(--pokemon-blue); }
 
@@ -606,23 +519,6 @@ input[type="number"] { -moz-appearance: textfield; }
 
 /* â”€â”€ Responsive Playtester: Small screens (laptops, tablets) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 1024px) {
-    .pt-floating-bar {
-        width: calc(100% - 14px);
-        padding: 8px;
-        gap: 8px;
-    }
-    .pt-tool-group {
-        gap: 4px;
-        padding: 4px 6px;
-    }
-    .pt-tool-group-label {
-        display: none;
-    }
-    .pt-tool-btn {
-        min-height: 30px;
-        font-size: 9px;
-        padding: 4px 8px;
-    }
     .pt-arena { min-height: min(500px, 75vh); border-radius: 12px; }
     .pt-btn { font-size: 10px; padding: 3px 8px; }
     .pt-zone-label { font-size: 8px; }
@@ -633,38 +529,11 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 
 @media (max-width: 768px) {
-    .pt-floating-bar {
-        justify-content: center;
-        margin: 8px auto 6px;
-    }
-    .pt-tool-group {
-        width: 100%;
-        justify-content: center;
-    }
-    .pt-tool-btn {
-        flex: 1 1 auto;
-        min-width: 58px;
-    }
     .pt-arena { min-height: min(420px, 70vh); border-width: 2px; border-radius: 8px; }
     .pt-legend-box { display: none; }
     .pt-deck-controls { width: 110px; padding: 4px; left: 40px; }
     .pt-btn { font-size: 9px; padding: 2px 6px; }
-    .pt-hand-zone { padding: 2px 4px 3px 4px; min-height: 60px; gap: 2px; }
-    .pt-hand-scroll-btn { height: 56px; width: 24px; font-size: 14px; }
-    .pt-hand-card { width: clamp(42px, 12vw, 56px) !important; }
-    .pt-hand-play-btn,
-    .pt-hand-disc-btn {
-        display: flex !important;
-        position: absolute !important;
-        width: 20px !important;
-        height: 20px !important;
-        font-size: 10px !important;
-        padding: 0 !important;
-        border-radius: 5px !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.5) !important;
-    }
-    .pt-hand-play-btn { top: 2px !important; left: 2px !important; }
-    .pt-hand-disc-btn { top: 2px !important; right: 2px !important; }
+    .pt-hand-zone { padding: 4px 8px; padding-bottom: 8px; }
     #ptActionLogPanel { width: 150px; height: 160px; font-size: 9px; }
 }
 
@@ -691,7 +560,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .pt-menu-btn.blue { background: #2980b9; border-color: #3498db; }
 .pt-menu-btn.blue:hover { background: #3498db; }
 .pt-status-btn {
-    width: 44px; height: 44px; border-radius: 50%; font-size: 13px; display: flex;
+    width: 24px; height: 24px; border-radius: 50%; font-size: 13px; display: flex;
     align-items: center; justify-content: center; background: #222; border: 1px solid #555;
     cursor: pointer; user-select: none; transition: transform 0.15s;
 }

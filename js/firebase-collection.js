@@ -1640,6 +1640,9 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(52, 152, 219, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='rgba(52, 152, 219, 0.9)'" title="Copy deck list">
               📋
             </button>
+            <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" style="padding: 6px 12px; background: rgba(230, 126, 34, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#d35400'" onmouseout="this.style.background='rgba(230, 126, 34, 0.9)'" title="Copy & open Limitless Builder">
+              🏆
+            </button>
             <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" style="padding: 6px 12px; background: rgba(26, 188, 156, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#16a085'" onmouseout="this.style.background='rgba(26, 188, 156, 0.9)'" title="Save as image">
               📸
             </button>
@@ -1929,6 +1932,60 @@ function copyMyDeck(deckIndex) {
 
   navigator.clipboard.writeText(output).then(() => {
     showToast('Deck copied to clipboard!', 'success');
+  }).catch(() => {
+    showToast('Error copying to clipboard!', 'error');
+  });
+}
+
+function copyDeckAndOpenLimitless(deckIndex) {
+  const deck = window.userDecks && window.userDecks[deckIndex];
+  if (!deck || !deck.cards) {
+    showToast('Deck not found!', 'error');
+    return;
+  }
+
+  // Reuse copyMyDeck logic to build the decklist string
+  const pokemon = [];
+  const trainer = [];
+  const energy = [];
+
+  for (const [deckKey, count] of Object.entries(deck.cards)) {
+    if (!count || count <= 0) continue;
+    const setMatch = deckKey.match(/^(.+?)\s+\(([A-Z0-9]+)\s+([A-Z0-9]+)\)$/);
+    let cardName = deckKey, setCode = '', setNumber = '';
+    if (setMatch) {
+      cardName = setMatch[1]; setCode = setMatch[2]; setNumber = setMatch[3];
+    } else {
+      const cardData = window.allCardsDatabase && window.allCardsDatabase.find(c => c.name === cardName);
+      if (cardData) { setCode = cardData.set || ''; setNumber = cardData.number || ''; }
+    }
+    const line = setCode && setNumber ? `${count} ${cardName} ${setCode} ${setNumber}` : `${count} ${cardName}`;
+    let category = 'trainer';
+    const cardData = window.allCardsDatabase && (
+      (setCode && setNumber)
+        ? window.allCardsDatabase.find(c => c.name === cardName && c.set === setCode && c.number === setNumber)
+        : window.allCardsDatabase.find(c => c.name === cardName)
+    );
+    if (cardData) {
+      const cat = getCardTypeCategory(cardData.type || '');
+      if (cat === 'Pokemon') category = 'pokemon';
+      else if (cat === 'Energy' || cat === 'Special Energy') category = 'energy';
+    } else if (/Energy$/.test(cardName)) category = 'energy';
+    if (category === 'pokemon') pokemon.push(line);
+    else if (category === 'energy') energy.push(line);
+    else trainer.push(line);
+  }
+
+  let output = '';
+  if (pokemon.length > 0) output += `Pok\u00e9mon: ${pokemon.length}\n${pokemon.join('\n')}\n\n`;
+  if (trainer.length > 0) output += `Trainer: ${trainer.length}\n${trainer.join('\n')}\n\n`;
+  if (energy.length > 0) output += `Energy: ${energy.length}\n${energy.join('\n')}`;
+  output = output.trim();
+
+  navigator.clipboard.writeText(output).then(() => {
+    const de = getLang() === 'de';
+    showToast(de ? 'Deck kopiert! Limitless Builder \u00f6ffnet sich...' : 'Deck copied! Opening Limitless Builder...', 'success');
+    window.open('https://my.limitlesstcg.com/builder', '_blank', 'noopener');
   }).catch(() => {
     showToast('Error copying to clipboard!', 'error');
   });

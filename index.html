@@ -2649,6 +2649,27 @@
             </div>
         </div>
     </div>
+
+    <!-- Share Image Modal -->
+    <div id="shareImageModal" class="image-view-modal" role="dialog" aria-modal="true" aria-label="Share deck image" onclick="if(event.target === this) closeShareImageModal()">
+        <div class="image-view-content" style="max-width:960px; text-align:center;">
+            <div class="image-view-header">
+                <h3 id="shareImageTitle">📸 Share Deck Image</h3>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="image-view-export" onclick="shareImageDownload()" title="Save Image" aria-label="Save image to device">
+                        💾
+                    </button>
+                    <button id="shareImageShareBtn" class="image-view-export" onclick="shareImageNative()" title="Share" aria-label="Share via WhatsApp, etc." style="display:none;">
+                        📤
+                    </button>
+                    <button class="image-view-close" onclick="closeShareImageModal()" aria-label="Close"></button>
+                </div>
+            </div>
+            <div id="shareImagePreview" style="padding:12px 0; overflow:auto; max-height:calc(90vh - 120px);">
+                <p style="color:#888;">Generating image…</p>
+            </div>
+        </div>
+    </div>
     
     <!-- Image View Modal -->
     <div id="imageViewModal" class="image-view-modal" role="dialog" aria-modal="true" aria-label="Card Image View" onclick="if(event.target === this) closeImageView()">
@@ -2656,7 +2677,7 @@
             <div class="image-view-header">
                 <h3 data-i18n="modal.deckCardsOverview">Deck Cards Overview</h3>
                 <div style="display:flex;align-items:center;gap:8px;">
-                    <button class="image-view-export" onclick="exportGridModalAsImage()" title="Save as Image">
+                    <button class="image-view-export" onclick="openShareImageModal()" title="Share as Image" aria-label="Open share image preview">
                         📸
                     </button>
                     <button class="image-view-close" onclick="closeImageView()" aria-label="Close"></button>

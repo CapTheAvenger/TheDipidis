@@ -1787,16 +1787,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
          *                                children should be captured.
          * @param {string}      title   – deck name shown at the top of the image.
          */
-        async function exportDeckAsImage(gridEl, title) {
-            if (!gridEl) return;
+        async function _buildDeckCanvas(gridEl, title) {
+            if (!gridEl) return null;
 
             const cards = gridEl.querySelectorAll('.compact-card, [data-export-card]');
-            if (!cards.length) {
-                showToast(t('deck.empty') || 'No cards to export', 'warning');
-                return;
-            }
-
-            showToast(getLang() === 'de' ? 'Bild wird erstellt...' : 'Creating image...', 'info');
+            if (!cards.length) return null;
 
             // --- Layout constants ---
             const COLS       = Math.min(cards.length, 10);
@@ -1861,9 +1856,6 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             ctx.fillText(countText, pillX + 10, PAD + HEADER_H / 2);
 
             // Pre-load all card images as same-origin blobs to avoid CORS canvas tainting
-            // IMPORTANT: cache:'no-store' forces a fresh network request with Origin header.
-            // Without it, the browser may reuse a cached response (from normal <img> loads
-            // without crossOrigin) that lacks CORS headers, causing the fetch to fail.
             const imgPromises = Array.from(cards).map(async (cardEl) => {
                 const imgEl = cardEl.querySelector('img');
                 const src = imgEl ? imgEl.src : '';
@@ -1975,6 +1967,26 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             ctx.textBaseline = 'bottom';
             ctx.fillText("Hausi's Pokemon TCG Analysis", PAD, canvasH - PAD / 2);
 
+            return canvas;
+        }
+
+        async function exportDeckAsImage(gridEl, title) {
+            if (!gridEl) return;
+
+            const cards = gridEl.querySelectorAll('.compact-card, [data-export-card]');
+            if (!cards.length) {
+                showToast(t('deck.empty') || 'No cards to export', 'warning');
+                return;
+            }
+
+            showToast(getLang() === 'de' ? 'Bild wird erstellt...' : 'Creating image...', 'info');
+
+            const canvas = await _buildDeckCanvas(gridEl, title);
+            if (!canvas) {
+                showToast(getLang() === 'de' ? 'Bild-Export fehlgeschlagen' : 'Image export failed', 'error');
+                return;
+            }
+
             // --- Export ---
             try {
                 const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
@@ -2014,6 +2026,111 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 showToast(getLang() === 'de' ? 'Bild-Export fehlgeschlagen' : 'Image export failed', 'error');
             }
         }
+
+        // ========== SHARE IMAGE MODAL ==========
+
+        /** State for the Share Image Modal */
+        let _shareImageBlob = null;
+        let _shareImageTitle = '';
+
+        /** Open Share Image Modal with preview of the current deck grid */
+        async function openShareImageModal() {
+            const grid = document.getElementById('compactCardGrid');
+            const deckName = _getActiveGridDeckName();
+
+            if (!grid || !grid.querySelectorAll('.compact-card, [data-export-card]').length) {
+                showToast(getLang() === 'de' ? 'Kein Deck zum Teilen' : 'No deck to share', 'warning');
+                return;
+            }
+
+            const modal = document.getElementById('shareImageModal');
+            const preview = document.getElementById('shareImagePreview');
+            const titleEl = document.getElementById('shareImageTitle');
+            const shareBtn = document.getElementById('shareImageShareBtn');
+
+            titleEl.textContent = '📸 ' + (deckName || 'Deck');
+            preview.innerHTML = '<p style="color:#888; font-size:1.1em;">⏳ ' + (getLang() === 'de' ? 'Bild wird erstellt...' : 'Generating image…') + '</p>';
+            _shareImageBlob = null;
+            _shareImageTitle = deckName || 'Deck';
+
+            modal.classList.add('show');
+
+            // Show native share button only if supported
+            const testBlob = new Blob(['test'], { type: 'image/png' });
+            const testFile = new File([testBlob], 'test.png', { type: 'image/png' });
+            shareBtn.style.display = (navigator.canShare && navigator.canShare({ files: [testFile] })) ? '' : 'none';
+
+            // ESC handler
+            const escHandler = (e) => {
+                if (e.key === 'Escape') { closeShareImageModal(); document.removeEventListener('keydown', escHandler); }
+            };
+            document.addEventListener('keydown', escHandler);
+
+            // Render canvas
+            const canvas = await _buildDeckCanvas(grid, deckName);
+            if (!canvas) {
+                preview.innerHTML = '<p style="color:#e74c3c;">❌ ' + (getLang() === 'de' ? 'Bild konnte nicht erstellt werden' : 'Could not generate image') + '</p>';
+                return;
+            }
+
+            _shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+
+            // Show preview as <img>
+            preview.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(_shareImageBlob);
+            img.alt = deckName;
+            img.style.cssText = 'max-width:100%; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+            img.onload = () => URL.revokeObjectURL(img.src);
+            preview.appendChild(img);
+        }
+
+        function closeShareImageModal() {
+            const modal = document.getElementById('shareImageModal');
+            modal.classList.remove('show');
+            _shareImageBlob = null;
+        }
+
+        async function shareImageDownload() {
+            if (!_shareImageBlob) {
+                showToast(getLang() === 'de' ? 'Bild noch nicht bereit' : 'Image not ready yet', 'warning');
+                return;
+            }
+            const safeName = (_shareImageTitle || 'deck').replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, '').replace(/\s+/g, '_');
+            const fileName = `${safeName}_${new Date().toISOString().slice(0,10)}.png`;
+            const url = URL.createObjectURL(_shareImageBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(getLang() === 'de' ? 'Bild gespeichert!' : 'Image saved!', 'success');
+        }
+
+        async function shareImageNative() {
+            if (!_shareImageBlob) {
+                showToast(getLang() === 'de' ? 'Bild noch nicht bereit' : 'Image not ready yet', 'warning');
+                return;
+            }
+            const safeName = (_shareImageTitle || 'deck').replace(/[^a-zA-Z0-9äöüÄÖÜß _-]/g, '').replace(/\s+/g, '_');
+            const fileName = `${safeName}_${new Date().toISOString().slice(0,10)}.png`;
+            const file = new File([_shareImageBlob], fileName, { type: 'image/png' });
+            try {
+                await navigator.share({ files: [file], title: _shareImageTitle || 'Deck' });
+                showToast(getLang() === 'de' ? 'Bild geteilt!' : 'Image shared!', 'success');
+            } catch (e) {
+                if (e.name !== 'AbortError') {
+                    showToast(getLang() === 'de' ? 'Teilen fehlgeschlagen' : 'Share failed', 'error');
+                }
+            }
+        }
+
+        window.openShareImageModal = openShareImageModal;
+        window.closeShareImageModal = closeShareImageModal;
+        window.shareImageDownload = shareImageDownload;
+        window.shareImageNative = shareImageNative;
 
         /** Export the current Grid Modal as image. */
         function exportGridModalAsImage() {

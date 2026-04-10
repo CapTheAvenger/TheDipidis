@@ -5,7 +5,7 @@
 //   JS / CSS / images â†’ Cache-first    (pre-cached fresh on install; new CACHE_NAME = full refresh)
 //   Data files        â†’ Stale-while-revalidate (fast load + background update)
 
-const CACHE_NAME = 'tcg-analysis-v202604100930';
+const CACHE_NAME = 'tcg-analysis-v202604100935';
 
 // Static shell â€” cached on install
 const SHELL_ASSETS = [

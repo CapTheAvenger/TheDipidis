@@ -1099,10 +1099,15 @@ function openWishlistGridModal() {
     const safeImage = escapeHtml(card.image_url);
     const safeName = escapeHtml(card.name);
 
-    // Max price stored as data-attr for PNG export only (cards too small for text overlay)
-    html += `<div class="compact-card" data-export-card${maxPrice > 0 ? ` data-max-price="${maxPrice.toFixed(2)}"` : ''}>
-      <img src="${safeImage}" alt="${safeName}" style="width:100%;display:block;border-radius:5px;" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}">
+    // Max price stored as data-attr for PNG export; shown as strip below card in modal
+    const maxPriceStrip = maxPrice > 0
+      ? `<div style="background:#8e44ad;color:#fff;text-align:center;font-size:8px;font-weight:700;padding:1px 0;border-radius:0 0 5px 5px;white-space:nowrap;overflow:hidden;">max ${maxPrice.toFixed(2).replace('.',',')}€</div>`
+      : '';
+
+    html += `<div class="compact-card" data-export-card${maxPrice > 0 ? ` data-max-price="${maxPrice.toFixed(2)}"` : ''} style="display:flex;flex-direction:column;">
+      <img src="${safeImage}" alt="${safeName}" style="width:100%;display:block;border-radius:${maxPrice > 0 ? '5px 5px 0 0' : '5px'};" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}">
       ${wantedCount > 1 ? `<span class="compact-badge" style="position:absolute;top:2px;right:2px;background:#e67e22;color:#fff;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,.4);padding:0 3px;">${wantedCount}x</span>` : ''}
+      ${maxPriceStrip}
     </div>`;
   });
 

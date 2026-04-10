@@ -325,7 +325,7 @@ ${getLang()==='de' ? `
 
 function ptQuitPlaytester() {
     if (!confirm(t('pt.quitConfirm'))) return;
-    document.getElementById('playtesterModal').style.display = 'none';
+    document.getElementById('playtesterModal').classList.add('d-none');
 }
 
 // --- INITIALIZATION ---
@@ -399,7 +399,7 @@ function openPlaytester(source) {
         ptState.p2.deck.push({ ...card, ptId: 'p2_' + Math.random().toString(36).substr(2, 9) });
     });
 
-    document.getElementById('playtesterModal').style.display = 'flex';
+    document.getElementById('playtesterModal').classList.remove('d-none');
     ptNewGame();
     setupDragAndDrop();
     setupHotkeys();
@@ -407,7 +407,7 @@ function openPlaytester(source) {
 
 function closePlaytester() {
     if (confirm(t('pt.quitConfirmFull'))) {
-        document.getElementById('playtesterModal').style.display = 'none';
+        document.getElementById('playtesterModal').classList.add('d-none');
     }
 }
 
@@ -657,7 +657,7 @@ function startStandalonePlaytester() {
             ptState.p2.deck.push({ ...card, ptId: 'p2_' + Math.random().toString(36).substr(2, 9) });
     });
 
-    document.getElementById('playtesterModal').style.display = 'flex';
+    document.getElementById('playtesterModal').classList.remove('d-none');
     ptNewGame();
     setupDragAndDrop();
     setupHotkeys();
@@ -900,7 +900,7 @@ function ptOpenStartPhase() {
     const handZone = document.querySelector('.pt-hand-zone');
     if (handZone) handZone.style.borderTopColor = '#3B4CCA';
     ptRenderStartPhaseModal();
-    if (modal) modal.style.display = 'flex';
+    if (modal) { modal.classList.remove('d-none'); modal.style.display = 'flex'; }
 }
 
 function ptRenderStartPhaseModal() {
@@ -1216,7 +1216,7 @@ function ptConfirmStartActives() {
     ptStartPhase   = false;
     ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
     const fpModal = document.getElementById('ptStartPhaseModal');
-    if (fpModal) fpModal.style.display = 'none';
+    if (fpModal) { fpModal.classList.add('d-none'); fpModal.style.display = ''; }
     ptLog(getLang()==='de' ? `✅ Spiel gestartet! P1 geht zuerst. Preiskarten verteilt. Viel Spaß!` : `✅ Game started! P1 goes first. Prize cards dealt. Have fun!`);
     ptRenderAll();
 
@@ -4917,7 +4917,7 @@ function ptQuitGame() {
     const modal = document.getElementById('ptWinModal');
     if (modal) modal.style.display = 'none';
     const playtesterModal = document.getElementById('playtesterModal');
-    if (playtesterModal) playtesterModal.style.display = 'none';
+    if (playtesterModal) playtesterModal.classList.add('d-none');
 }
 
 function _ptShowAbilityPickModal(player, cards, pickCount, pickDest, restDest, title) {

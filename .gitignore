@@ -118,5 +118,11 @@ data/_archive/
 # Large monolith CSV (replaced by per-meta chunks + manifest)
 data/tournament_cards_data_cards.csv
 
+# Pre-processed per-archetype JSON chunks (generated, not deployed)
+data/city_league_cards/
+data/city_league_cards_M3/
+data/city_league_manifest.json
+data/city_league_manifest_M3.json
+
 # Backend scraper data (synced to data/ via prepare_card_data.py)
 backend/core/data/

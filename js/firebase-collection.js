@@ -1045,6 +1045,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">Max:</span>
               <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
+                aria-label="Maximum price for ${safeNameHtml}"
                 style="width: 52px; padding: 2px 4px; border: 1.5px solid #ddd; border-radius: 4px; font-size: 0.75em; font-weight: 600; color: #8e44ad; text-align: right; outline: none;"
                 onfocus="this.style.borderColor='#8e44ad'" onblur="this.style.borderColor='#ddd'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
                 onkeydown="if(event.key==='Enter'){this.blur();}">

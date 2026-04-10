@@ -326,7 +326,7 @@
          * Render Tier List for City League
          * Generates banner-style deck cards grouped by tier
          */
-        async function renderCityLeagueTierList(prefetchedAnalysisData = null) {
+        async function renderCityLeagueTierList(prefetchedAnalysisData = null, imageMap = null) {
             const content = document.getElementById('cityLeagueContent');
             if (!content || !cityLeagueData || cityLeagueData.length === 0) return;
             
@@ -334,23 +334,27 @@
             const timestamp = new Date().getTime();
             let cardDataByArchetype = {};
             
-            try {
-                const cardsData = prefetchedAnalysisData || await (async () => {
-                    const formatSuffix = window.currentCityLeagueFormat === 'M3' ? '_M3' : '';
-                    const cardsResponse = await fetch(`${BASE_PATH}city_league_analysis${formatSuffix}.csv?t=${timestamp}`);
-                    if (!cardsResponse.ok) return [];
-                    const cardsText = await cardsResponse.text();
-                    return parseCSV(cardsText);
-                })();
+            // Wenn imageMap vorhanden (vorberechnete Archetype→Image-URL-Map, ~30 KB),
+            // koennen wir das Laden/Parsen der 35 MB Analysis-CSV komplett ueberspringen.
+            if (!imageMap) {
+                try {
+                    const cardsData = prefetchedAnalysisData || await (async () => {
+                        const formatSuffix = window.currentCityLeagueFormat === 'M3' ? '_M3' : '';
+                        const cardsResponse = await fetch(`${BASE_PATH}city_league_analysis${formatSuffix}.csv?t=${timestamp}`);
+                        if (!cardsResponse.ok) return [];
+                        const cardsText = await cardsResponse.text();
+                        return parseCSV(cardsText);
+                    })();
 
-                // Group cards by archetype
-                cardsData.forEach(card => {
-                    const arch = card.archetype;
-                    if (!cardDataByArchetype[arch]) cardDataByArchetype[arch] = [];
-                    cardDataByArchetype[arch].push(card);
-                });
-            } catch (e) {
-                console.warn('Could not load card data for images:', e);
+                    // Group cards by archetype
+                    cardsData.forEach(card => {
+                        const arch = card.archetype;
+                        if (!cardDataByArchetype[arch]) cardDataByArchetype[arch] = [];
+                        cardDataByArchetype[arch].push(card);
+                    });
+                } catch (e) {
+                    console.warn('Could not load card data for images:', e);
+                }
             }
             
             const parseDeckCount = (deck) => {
@@ -447,7 +451,9 @@
 
                 topHeroArchetypes.forEach((item, index) => {
                     const representativeCards = cardDataByArchetype[item.representativeVariant] || [];
-                    const imageUrl = getArchetypeImage(item.representativeVariant, representativeCards);
+                    const imageUrl = imageMap
+                        ? (imageMap[item.representativeVariant] || '')
+                        : getArchetypeImage(item.representativeVariant, representativeCards);
                     const combinedMainEscaped = escapeJsStr(item.key || item.label || item.representativeVariant || '');
                     const combinedVariantsJsonEscaped = escapeJsStr(encodeURIComponent(JSON.stringify(item.variants || [])));
                     const avgRankText = Number.isFinite(item.weightedRank) && item.weightedRank < 999
@@ -522,7 +528,9 @@
                     
                     // Get archetype image
                     const archetypeCards = cardDataByArchetype[archetypeName] || [];
-                    const imageUrl = getArchetypeImage(archetypeName, archetypeCards);
+                    const imageUrl = imageMap
+                        ? (imageMap[archetypeName] || '')
+                        : getArchetypeImage(archetypeName, archetypeCards);
                     
                     const currentRank = currentRankValue > 0 ? currentRankValue.toFixed(1) : '0.0';
                     const currentShare = currentShareValue.toFixed(1);

@@ -171,15 +171,18 @@
                 const analysisUrl = `${BASE_PATH}city_league_analysis${formatSuffix}.csv`;
                 const archetypesUrl = `${BASE_PATH}city_league_archetypes${formatSuffix}.csv`;
                 const comparisonUrl = `${BASE_PATH}city_league_archetypes_comparison${formatSuffix}.csv`;
+                const imagesUrl = `${BASE_PATH}city_league_images${formatSuffix}.json`;
                 const hasComparisonFile = format !== 'M3';
 
                 devLog(`Loading City League data for format: ${format}`);
 
+                // FCP-Optimierung: Lade nur kleine Dateien sofort (~880 KB statt 36 MB).
+                // Die grosse Analysis-CSV wird im Hintergrund nachgeladen.
                 const fetchPromises = [
-                    fetch(`${analysisUrl}?t=${timestamp}`)
-                        .then(response => response.ok ? response.text() : null)
+                    fetch(`${imagesUrl}?t=${timestamp}`)
+                        .then(response => response.ok ? response.json() : null)
                         .catch(error => {
-                            console.error(`Could not load analysis data (${analysisUrl}):`, error);
+                            console.warn(`Could not load images JSON (${imagesUrl}):`, error);
                             return null;
                         }),
                     fetch(`${archetypesUrl}?t=${timestamp}`)
@@ -208,18 +211,31 @@
                 }
 
                 const results = await Promise.all(fetchPromises);
-                const analysisText = results[0];
+                const imageMap = results[0];
                 const archetypesText = results[1];
                 const comparisonText = results[2];
                 const m3DataRaw = results.length > 3 ? results[3] : null;
 
-                if (!analysisText || !archetypesText) {
+                if (!archetypesText) {
                     console.error('Hauptdaten fehlen fuer Format:', format);
                     content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
                     return;
                 }
 
-                const analysisData = parseCSV(analysisText);
+                // Hintergrund-Laden der grossen Analysis-CSV (non-blocking fuer FCP)
+                window._cityLeagueAnalysisPromise = fetch(`${analysisUrl}?t=${timestamp}`)
+                    .then(r => r.ok ? r.text() : null)
+                    .then(text => text ? parseCSV(text) : [])
+                    .then(data => {
+                        window.cityLeagueAnalysisData = data;
+                        devLog('Background: analysis data loaded,', data.length, 'rows');
+                        return data;
+                    })
+                    .catch(err => {
+                        console.error('Background analysis CSV load failed:', err);
+                        return [];
+                    });
+
                 const archetypesData = parseCSV(archetypesText);
                 const comparisonData = comparisonText ? parseCSV(comparisonText) : null;
                 const placementStatsMap = buildCityLeaguePlacementStatsMap(archetypesData);
@@ -257,7 +273,7 @@
                     window.m3ArchetypeData = {};
                 }
 
-                if (!analysisData.length || !archetypesData.length) {
+                if (!archetypesData.length) {
                     console.error('Leere Hauptdaten fuer Format:', format);
                     content.innerHTML = '<div class="error">Error loading City League Meta data</div>';
                     return;
@@ -318,11 +334,12 @@
                 renderCityLeagueTable(tournamentCount, dateRange);
 
                 // Keep the analysis dropdown in sync with the freshly loaded format data
-                window.cityLeagueAnalysisData = analysisData;
+                // analysisData wird im Hintergrund geladen (window._cityLeagueAnalysisPromise)
                 window.cityLeagueArchetypesData = archetypesData;
                 window.cityLeagueComparisonData = cityLeagueData;
+                window.cityLeagueImageMap = imageMap;
                 const previousDeckValue = document.getElementById('cityLeagueDeckSelect')?.value || '';
-                populateCityLeagueDeckSelect(analysisData, cityLeagueData);
+                populateCityLeagueDeckSelect([], cityLeagueData);
 
                 const deckSelect = document.getElementById('cityLeagueDeckSelect');
                 // populateCityLeagueDeckSelect may have applied a pending selection — respect it
@@ -347,8 +364,8 @@
                     clearCityLeagueDeckView();
                 }
                 
-                // Render tier list banner view
-                await renderCityLeagueTierList(analysisData);
+                // Render tier list banner view (uses pre-computed imageMap fuer schnelles FCP)
+                await renderCityLeagueTierList(null, imageMap);
                 
                 window.cityLeagueLoaded = true;
             } catch (error) {
@@ -896,13 +913,27 @@
             
             devLog(`Loading City League Analysis for format: ${format}`);
 
+            // Analysis-CSV kann bereits im Hintergrund geladen worden sein
+            let data = null;
+            if (window._cityLeagueAnalysisPromise) {
+                data = await window._cityLeagueAnalysisPromise;
+                if (data && data.length > 0) {
+                    devLog('Reusing background-loaded analysis data:', data.length, 'rows');
+                } else {
+                    data = null;
+                }
+            }
+
             const [analysisText, archetypesText, comparisonText] = await Promise.all([
-                fetch(`${analysisUrl}?t=${timestamp}`)
-                    .then(response => response.ok ? response.text() : null)
-                    .catch(error => {
-                        console.error(`Error loading analysis CSV (${analysisUrl}):`, error);
-                        return null;
-                    }),
+                // Nur fetchen wenn Background-Load noch nicht fertig
+                !data
+                    ? fetch(`${analysisUrl}?t=${timestamp}`)
+                        .then(response => response.ok ? response.text() : null)
+                        .catch(error => {
+                            console.error(`Error loading analysis CSV (${analysisUrl}):`, error);
+                            return null;
+                        })
+                    : Promise.resolve('__SKIP__'),
                 fetch(`${archetypesUrl}?t=${timestamp}`)
                     .then(response => response.ok ? response.text() : null)
                     .catch(error => {
@@ -919,7 +950,9 @@
                     : Promise.resolve(null)
             ]);
 
-            const data = analysisText ? await fetchAndParseCSV(analysisUrl) : null;
+            if (!data) {
+                data = analysisText ? await fetchAndParseCSV(analysisUrl) : null;
+            }
             const archetypesData = archetypesText ? await fetchAndParseCSV(archetypesUrl) : null;
             const comparisonData = comparisonText ? await fetchAndParseCSV(comparisonUrl) : deriveCityLeagueComparisonData(archetypesData || []);
 
@@ -1141,6 +1174,7 @@
             search.className = 'searchable-select-search';
             search.placeholder = t('filter.searchDeckPlaceholder') || 'Search deck…';
             search.autocomplete = 'off';
+            search.setAttribute('aria-label', t('filter.searchDeckPlaceholder') || 'Search deck');
 
             const list = document.createElement('div');
             list.className = 'searchable-select-options';
@@ -1802,7 +1836,13 @@
         function loadCityLeagueDeckData(archetype) {
             devLog('Loading deck data for:', archetype);
             const data = window.cityLeagueAnalysisData;
-            if (!data) return;
+            if (!data || data.length === 0) {
+                // Analysis-CSV wird im Hintergrund geladen; warte darauf
+                if (window._cityLeagueAnalysisPromise) {
+                    window._cityLeagueAnalysisPromise.then(() => loadCityLeagueDeckData(archetype));
+                }
+                return;
+            }
 
             const selection = parseArchetypeSelection(archetype);
 

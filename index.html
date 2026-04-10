@@ -9,19 +9,17 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="description" content="Pokémon TCG Meta Analysis – Deck Archetypes, City League Stats, Card Prices &amp; Playtester">
     <meta name="theme-color" content="#3B4CCA">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta property="og:title" content="Pokémon TCG Analysis">
     <meta property="og:description" content="Live meta statistics, deck archetypes, card prices and an online playtester for the Pokémon Trading Card Game.">
     <meta property="og:type" content="website">
+    <link rel="canonical" href="https://captheavenger.github.io/TheDipidis/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pokémon TCG Analysis">
+    <meta name="twitter:description" content="Live meta statistics, deck archetypes, card prices and an online playtester for the Pokémon Trading Card Game.">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.firebaseio.com https://*.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://cdn.jsdelivr.net https://*.googleapis.com https://googleapis.com https://www.googleapis.com https://www.gstatic.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebaseinstallations.googleapis.com https://firebase.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com https://limitlesstcg.com https://www.limitlesstcg.com https://pokeapi.co http://localhost:8001 wss://*.firebaseio.com https://*.ingest.sentry.io; frame-src https://*.firebaseapp.com https://accounts.google.com;">
     <title>Pokémon TCG Analysis</title>
     <link rel="icon" href="data:,">
     <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#3B4CCA">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="images/pokeball-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,7 +59,7 @@
         <div id="header-container"></div>
         <div id="sidebar-container"></div>
 
-        <div class="header cards-header">
+        <header class="header cards-header">
             <div class="header-flex-row">
                 <div class="header-flex-group">
                     <!-- Pokeball Menu Trigger -->
@@ -151,10 +149,10 @@
                 </div>
 
             </div>
-        </div>
+        </header>
 
-        <div class="tabs-container">
-            <div class="tab-navigation cards-tab-navigation">
+        <div class="tabs-container" role="main">
+            <nav class="tab-navigation cards-tab-navigation" aria-label="Main navigation">
                 <button class="tab-btn active" onclick="switchTab('city-league')" data-i18n="tab.cityLeague">City League Meta</button>
                 <button class="tab-btn" onclick="switchTab('city-league-analysis')" data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</button>
                 <button class="tab-btn" onclick="switchTab('current-meta')" data-i18n="tab.currentMeta">Current Meta</button>
@@ -168,7 +166,7 @@
                     Profile
                 </button>
                 <button class="tab-btn" onclick="switchTab('tutorial')" data-i18n="tab.howToUse">How to Use</button>
-            </div>
+            </nav>
             
             <!-- Tab 1: City League Meta -->
             <div id="city-league" class="tab-content active">
@@ -2570,9 +2568,9 @@
             </div>
         </div>
         
-        <div class="footer">
+        <footer class="footer">
             <p><span data-i18n="footer.lastUpdate">Last Update:</span> <span id="last-update">Loading...</span></p>
-        </div>
+        </footer>
     </div>
     
     <!-- Authentication Modal -->

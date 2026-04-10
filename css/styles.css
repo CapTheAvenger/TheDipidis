@@ -178,16 +178,19 @@
             gap: 8px;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
             padding: 14px 16px;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
             overflow-x: auto;
             overflow-y: hidden;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+            scrollbar-width: thin;
             border-bottom: 3px solid var(--pokemon-yellow, #FFCB05);
         }
 
         .tab-navigation::-webkit-scrollbar {
-            display: none;
+            height: 4px;
+        }
+        .tab-navigation::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
         }
         
         .tab-btn {

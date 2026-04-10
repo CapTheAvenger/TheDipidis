@@ -379,7 +379,7 @@
                         
                         html += `
                             <div style="background: white; border: 2px solid ${group.color}; border-radius: 8px; padding: 10px; text-align: center;">
-                                ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" style="width: 100%; border-radius: 6px; margin-bottom: 8px;">` : ''}
+                                ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" loading="lazy" decoding="async" style="width: 100%; border-radius: 6px; margin-bottom: 8px;">` : ''}
                                 <div style="font-weight: 600; font-size: 0.9em; margin-bottom: 4px;">${card.name}</div>
                                 <div style="font-size: 0.8em; color: #666; margin-bottom: 4px;">${card.set} ${card.number}</div>
                                 <div style="font-size: 1.1em; font-weight: bold; color: ${group.color};">${countDisplay}</div>

@@ -161,6 +161,23 @@ async function loadUserData(userId) {
       const countKeys = Object.keys(counts);
       const mergedCollection = rawCollection.length > 0 ? rawCollection : countKeys;
 
+      // Clamp any count > 4 back to 4 (data corruption from legacy set({merge:true}) bug)
+      const clampFixes = {};
+      for (const [cardId, val] of Object.entries(counts)) {
+        if (val > 4) {
+          counts[cardId] = 4;
+          clampFixes[`collectionCounts.${cardId}`] = 4;
+        }
+      }
+      if (Object.keys(clampFixes).length > 0) {
+        try {
+          await window.db.collection('users').doc(userId).update(clampFixes);
+          console.log('[Collection] Clamped', Object.keys(clampFixes).length, 'counts that exceeded 4');
+        } catch (clampErr) {
+          console.warn('[Collection] Clamp write failed:', clampErr);
+        }
+      }
+
       window.userCollection = new Set(mergedCollection);
       window.userCollectionCounts = new Map(Object.entries(counts));
       window.userCollection.forEach(cardId => {

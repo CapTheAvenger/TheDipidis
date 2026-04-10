@@ -2749,126 +2749,147 @@
 
     <script src="js/inline-init.js?v=202604092310" defer></script>
 
-    <div id="playtesterModal" class="d-none pos-fixed top-0 left-0 right-0 bottom-0 z-15000 flex-col" role="dialog" aria-modal="true" aria-label="Playtester simulator">
+    <div id="playtesterModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:15000; flex-direction:column;" role="dialog" aria-modal="true" aria-label="Playtester simulator">
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
 
-        <div class="pt-controls pt-floating-bar" role="toolbar" aria-label="Playtester actions">
-            <div class="pt-tool-group" aria-label="Session actions">
-                <span class="pt-tool-group-label">Session</span>
-                <button title="Multiplayer" data-pt-tip="Multiplayer" onclick="openMultiplayerMenu()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Open multiplayer menu">MP</button>
-                <button title="Start / Reset" data-pt-tip="Start / Reset" onclick="startPlaytesterSetup()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Start or reset playtester">Start</button>
-                <button title="Flip Board" data-pt-tip="Flip Board" onclick="ptFlipBoard()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Flip board to opponent view">Flip</button>
-                <button title="Quit" data-pt-tip="Quit" onclick="ptQuitPlaytester()" class="pt-btn pt-btn-lg pt-tool-btn pt-tool-btn-danger" aria-label="Quit playtester">Quit</button>
-            </div>
+        <div class="pt-controls" style="display:flex; justify-content:space-around; align-items:center; flex-wrap:nowrap; overflow:visible; padding:5px; background:#fff; border-bottom:1px solid #ccc; width: 100%; position:relative; z-index:1000;">
+            <button title="Multiplayer" onclick="openMultiplayerMenu()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Open multiplayer menu">👥</button>
+            <button title="Start / Reset" onclick="startPlaytesterSetup()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Start or reset playtester">▶️</button>
+            <button title="Flip Board" onclick="ptFlipBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Flip board to opponent view">🔄</button>
+            <button title="Log" onclick="ptToggleLog()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Toggle action log">📝</button>
+            <button title="Münze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Flip coin">🪙</button>
+            <button title="Zoom" onclick="ptZoomBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Zoom board">🔍</button>
 
-            <div class="pt-tool-group" aria-label="Turn actions">
-                <span class="pt-tool-group-label">Turn</span>
-                <button title="Coin" data-pt-tip="Coin Flip" onclick="mpFlipCoin ? mpFlipCoin() : showToast(t('pt.mpOnly'))" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Flip coin">Coin</button>
-                <button title="Zoom" data-pt-tip="Zoom Board" onclick="ptZoomBoard()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Zoom board">Zoom</button>
-                <button title="Undo" data-pt-tip="Undo" onclick="ptUndo()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Undo last action">Undo</button>
-                <button title="Mulligan" data-pt-tip="Mulligan" onclick="ptMulligan(ptCurrentPlayer)" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Mulligan hand">Mulligan</button>
-            </div>
+            <button title="Undo" onclick="ptUndo()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Undo last action">↩️</button>
+            <button title="Mulligan" onclick="ptMulligan(ptCurrentPlayer)" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Mulligan hand">🃏</button>
+            <button id="ptVstarMarker" title="V Marker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;" aria-label="Toggle V marker">V</button>
+            <button id="ptGxMarker" title="GX Marker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;" aria-label="Toggle GX marker">GX</button>
+        </div>
 
-            <div class="pt-tool-group" aria-label="Markers and data">
-                <span class="pt-tool-group-label">Markers</span>
-                <button id="ptVstarMarker" title="V Marker" data-pt-tip="V Marker" class="pt-marker pt-marker-vstar pt-btn pt-btn-sm pt-tool-btn pt-marker-chip" onclick="ptToggleMarker('vstar')" aria-label="Toggle V marker">V</button>
-                <button id="ptGxMarker" title="GX Marker" data-pt-tip="GX Marker" class="pt-marker pt-marker-gx pt-btn pt-btn-sm pt-tool-btn pt-marker-chip" onclick="ptToggleMarker('gx')" aria-label="Toggle GX marker">GX</button>
-                <button title="Save Game" data-pt-tip="Save Game" onclick="ptSaveGame()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Save game">Save</button>
-                <button title="Load Game" data-pt-tip="Load Game" onclick="ptLoadGame()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Load game">Load</button>
-                <button title="Info / Manual" data-pt-tip="Manual" onclick="ptShowManual()" class="pt-btn pt-btn-lg pt-tool-btn" aria-label="Show playtester manual">Help</button>
+        <div id="ptDirectActionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10001; align-items:center; justify-content:center;" role="dialog" aria-modal="true" aria-label="Game actions">
+            <div style="background:#fff; padding:15px; border-radius:12px; width:90%; max-width:350px; display:flex; flex-direction:column; gap:12px;">
+                <h3 style="margin:0; text-align:center; font-size:16px;">Spiel-Aktionen</h3>
+
+                <button class="btn-primary" style="padding:10px; border-radius:6px;" onclick="ptOpenDeckSearch(); document.getElementById('ptDirectActionModal').style.display='none'">🔍 Deck Search</button>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="ptDrawCards(document.getElementById('inpDraw').value); document.getElementById('ptDirectActionModal').style.display='none'">🃏 Draw</button>
+                    <input type="number" id="inpDraw" value="1" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Number of cards to draw">
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="ptLookCards(document.getElementById('inpLook').value); document.getElementById('ptDirectActionModal').style.display='none'">👀 Look Top</button>
+                    <input type="number" id="inpLook" value="5" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Number of cards to look at">
+                </div>
+
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <input type="number" id="inpJudgeP1" value="4" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 1 Judge hand size">
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px; background:#f39c12; color:#fff; border:none;" onclick="executeCustomJudge()">⚖️ Judge</button>
+                    <input type="number" id="inpJudgeP2" value="4" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 2 Judge hand size">
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="executeOwnShuffleDraw()">🔄 Own Shuffle</button>
+                    <input type="number" id="inpOwnSD" value="6" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Own shuffle and draw count">
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="executeOppShuffleDraw()">🔄 Opp Shuffle</button>
+                    <input type="number" id="inpOppSD" value="4" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Opponent shuffle and draw count">
+                </div>
+
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <input type="number" id="inpIonoP1" value="6" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 1 Iono hand size">
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px; background:#e74c3c; color:#fff; border:none;" onclick="executeCustomIono()">🌪️ Iono</button>
+                    <input type="number" id="inpIonoP2" value="6" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 2 Iono hand size">
+                </div>
+
+                <button onclick="document.getElementById('ptDirectActionModal').style.display='none'" style="margin-top:5px; padding:12px; border-radius:6px; border:none; background:#eee; font-weight:bold;">Schließen</button>
             </div>
         </div>
 
-        <div id="ptDirectActionModal" class="d-none ui-modal-backdrop pos-fixed top-0 left-0 w-100 h-100 bg-black-70 z-10001 align-center justify-center" role="dialog" aria-modal="true" aria-label="Game actions">
-            <div class="ui-modal-panel ui-modal-sm bg-white p-15 br-12 w-90 maxw-350 d-flex flex-col gap-12 pt-direct-panel">
-                <div class="ui-modal-header">
-                    <h3 class="m-0 ta-center fs-16" data-i18n="pt.gameActions">Game Actions</h3>
-                    <button class="ui-modal-close" onclick="document.getElementById('ptDirectActionModal').style.display='none'" aria-label="Close"></button>
-                </div>
-
-                <button class="btn-primary py-10 br-6" onclick="ptOpenDeckSearch(); document.getElementById('ptDirectActionModal').style.display='none'">Deck Search</button>
-
-                <div class="flex gap-10">
-                    <button class="btn-secondary flex-1 py-10 br-6" onclick="ptDrawCards(document.getElementById('inpDraw').value); document.getElementById('ptDirectActionModal').style.display='none'">Draw</button>
-                    <input type="number" id="inpDraw" value="1" class="w-60 ta-center fs-16 border-grey br-6" aria-label="Number of cards to draw">
-                </div>
-
-                <div class="flex gap-10">
-                    <button class="btn-secondary flex-1 py-10 br-6" onclick="ptLookCards(document.getElementById('inpLook').value); document.getElementById('ptDirectActionModal').style.display='none'">Look Top</button>
-                    <input type="number" id="inpLook" value="5" class="w-60 ta-center fs-16 border-grey br-6" aria-label="Number of cards to look at">
-                </div>
-
-                <div class="flex gap-5 align-center">
-                    <input type="number" id="inpJudgeP1" value="4" class="w-50 ta-center fs-16 border-grey br-6" aria-label="Player 1 Judge hand size">
-                    <button class="btn-secondary flex-1 py-10 br-6 bg-orange color-white border-none" onclick="executeCustomJudge()">Judge</button>
-                    <input type="number" id="inpJudgeP2" value="4" class="w-50 ta-center fs-16 border-grey br-6" aria-label="Player 2 Judge hand size">
-                </div>
-
-                <div class="flex gap-10">
-                    <button class="btn-secondary flex-1 py-10 br-6" onclick="executeOwnShuffleDraw()">Own Shuffle</button>
-                    <input type="number" id="inpOwnSD" value="6" class="w-60 ta-center fs-16 border-grey br-6" aria-label="Own shuffle and draw count">
-                </div>
-
-                <div class="flex gap-10">
-                    <button class="btn-secondary flex-1 py-10 br-6" onclick="executeOppShuffleDraw()">Opp Shuffle</button>
-                    <input type="number" id="inpOppSD" value="4" class="w-60 ta-center fs-16 border-grey br-6" aria-label="Opponent shuffle and draw count">
-                </div>
-
-                <div class="flex gap-5 align-center">
-                    <input type="number" id="inpIonoP1" value="6" class="w-50 ta-center fs-16 border-grey br-6" aria-label="Player 1 Iono hand size">
-                    <button class="btn-secondary flex-1 py-10 br-6 bg-red color-white border-none" onclick="executeCustomIono()">Iono</button>
-                    <input type="number" id="inpIonoP2" value="6" class="w-50 ta-center fs-16 border-grey br-6" aria-label="Player 2 Iono hand size">
-                </div>
-
-                <div class="ui-modal-actions">
-                    <button onclick="document.getElementById('ptDirectActionModal').style.display='none'" class="btn btn-outline w-100" data-i18n="btn.close">Close</button>
-                </div>
+        <!-- ── MULTIPLAYER MENU ── -->
+        <div id="mpMenu" style="display:none; position:absolute; top:60px; right:12px; z-index:16000; 
+            background:rgba(20,20,20,0.98); border:2px solid #FFCB05; border-radius:12px; padding:20px; 
+            min-width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.8);" role="dialog" aria-modal="true" aria-label="Online multiplayer menu">
+            <div style="color:#FFCB05; font-weight:900; font-size:1.3rem; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
+                🌐 Online Multiplayer
             </div>
-        </div>
-
-        <!-- -- MULTIPLAYER MENU -- -->
-        <div id="mpMenu" class="d-none pos-abs top-60 right-12 z-16000 bg-dark-overlay border-2-yellow br-12 p-20 minw-320 box-shadow-dark" role="dialog" aria-modal="true" aria-label="Online multiplayer menu">
-            <div class="color-yellow fw-900 fs-130 mb-15 flex align-center gap-8">
-                Online Multiplayer
-            </div>
-            <div class="flex flex-col gap-12">
-                <select id="mpDeckSelect" class="control-input w-100 mb-4 p-10 fs-100 br-8 bg-dark-blue color-white border-1-yellow" aria-label="Select deck for match">
-                    <option value="" data-i18n="pt.mpSelectDeck">-- Select a deck for the match --</option>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <select id="mpDeckSelect" class="control-input" style="width:100%; margin-bottom:4px; padding:10px; font-size:1rem; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05;">
+                    <option value="">-- Wähle ein Deck für das Match --</option>
                 </select>
-                <div class="my-10 ta-center fw-900 fs-13 color-grey-light ls-1" data-i18n="pt.mpOr">OR</div>
-                <textarea id="mpDeckInput" rows="4" class="w-100 p-10 br-8 bg-dark-blue color-white border-1-yellow ff-mono fs-12 resize-vertical box-border" placeholder="Pokémon: 10&#10;4 Comfey LOR 79&#10;..."></textarea>
-                <button class="pt-btn w-100 fs-110 py-12" onclick="mpCreateGame()">
-                    Create Game (Host)
+                <div style="margin:10px 0; text-align:center; font-weight:900; font-size:13px; color:#888; letter-spacing:1px;">ODER</div>
+                <textarea id="mpDeckInput" rows="4" style="width:100%; padding:10px; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05; font-family:monospace; font-size:12px; resize:vertical; box-sizing:border-box;" placeholder="Pokémon: 10&#10;4 Comfey LOR 79&#10;..."></textarea>
+                <button class="pt-btn" style="width:100%; font-size:1.1rem; padding:12px;" onclick="mpCreateGame()">
+                    🎮 Create Game (Host)
                 </button>
-                <button class="pt-btn w-100 fs-110 py-12" onclick="mpJoinGame()">
-                    Join Game (Guest)
+                <button class="pt-btn" style="width:100%; font-size:1.1rem; padding:12px;" onclick="mpJoinGame()">
+                    🚀 Join Game (Guest)
                 </button>
-                <div class="border-top-dark my-8 pt-12">
-                    <div class="color-grey-light fs-085 mb-8">
-                        Requires Firebase Login
+                <div style="border-top:1px solid #444; margin:8px 0; padding-top:12px;">
+                    <div style="color:#aaa; font-size:0.85rem; margin-bottom:8px;">
+                        ℹ️ Requires Firebase Login
                     </div>
-                    <button class="pt-btn pt-danger w-100 fs-90" onclick="toggleMultiplayerMenu()">
+                    <button class="pt-btn pt-danger" style="width:100%; font-size:0.9rem;" onclick="toggleMultiplayerMenu()">
                         Close
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="flex-1 flex justify-center align-center p-15 overflow-hidden box-border pos-rel pt-arena-shell">
+        <div style="flex:1; display:flex; justify-content:center; align-items:center; padding: 15px; overflow: hidden; box-sizing:border-box; position: relative;">
 
-
+            <!-- ── LEGEND — static, left-centre ── -->
+            <div class="pt-legend-box" style="position:absolute; top:50%; left:8px; transform:translateY(-50%); z-index:200;
+                background:rgba(10,10,10,0.88); border:1px solid #333; border-radius:6px;
+                padding:8px 10px; color:#ddd; font-size:9px; box-shadow:0 4px 12px rgba(0,0,0,0.8);
+                display:flex; flex-direction:column; gap:4px; user-select:none; pointer-events:none; width:155px;">
+                <div style="color:#FFCB05; font-weight:900; font-size:10px; display:flex; align-items:center; gap:4px; margin-bottom:1px;">📖 LEGEND</div>
+                <div class="pt-legend-item"><div style="width:12px; height:12px; background:#ff6b6b; border-radius:50%; border:1px solid #fff; flex-shrink:0;"></div><span>DMG-Badge: Klick +10 | Shift -10</span></div>
+                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">🖱️</span><span>Rechtsklick auf Karte: Menü</span></div>
+                <div class="pt-legend-item"><div style="width:14px; height:14px; background:transparent; border:1px solid #f1c40f; color:#f1c40f; border-radius:50%; font-weight:900; font-size:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">A</div><span>Ability (gelb = used)</span></div>
+                <div class="pt-legend-item"><div style="width:8px; height:13px; background:#ccc; border-radius:2px; border:1px solid #fff; flex-shrink:0;"></div><span>Tool — linke Seite</span></div>
+                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">🤚</span><span>Auf Hand: In "Hand"-Zone ziehen</span></div>
+                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">🚀</span><span>Drag &amp; Drop</span></div>
+            </div>
 
             <div id="playtester-board" class="pt-arena">
 
-                <!-- -- CENTER: Stadium – moved outside arena below -- -->
+                <!-- ── CENTER: Stadium (right) + Action Buttons (left) — always stay upright ── -->
+                <div class="pt-stadium-anchor" style="position: absolute; top: 50%; right: 14%; transform: translate(50%, -50%); z-index: 5;">
+                    <div class="static-element" style="background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center; position: relative;">
+                        <div class="pt-zone-label" style="color:#a8e6cf; margin-bottom: 6px;">🏟️ Stadium</div>
+                        <div style="position: relative; display: inline-block;">
+                            <div id="ptStadiumZone" class="pt-empty-slot pt-dropzone"
+                                 ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'stadium')"
+                                 style="width:82px;height:114px;"></div>
+                            <div class="pt-stadium-marker" title="Stadium-Effekt benutzt" onclick="this.classList.toggle('used')">S</div>
+                        </div>
+                    </div>
+                </div>
 
-                <!-- -- P2 AREA (rotated 180€ so P2 sees their side correctly) -- -->
-                <div id="p2-area" class="pos-abs inset-0 pe-none">
-                    <div class="pe-none w-100 h-100 pos-rel rotate-180">
+                <!-- ── P2 AREA (rotated 180° so P2 sees their side correctly) ── -->
+                <div id="p2-area" style="position: absolute; inset: 0; pointer-events: none;">
+                    <div style="pointer-events: auto; width: 100%; height: 100%; position: relative; transform: rotate(180deg);">
 
                         <!-- P2 Left column: Lost Zone / Deck (with controls) / Discard -->
-                        <div class="pos-abs bottom-20 right-20 flex flex-col gap-12 align-center">
-                            <div class="ta-center">
+                        <div style="position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label" style="color:#d136c1;">Lost P2 (<span id="ptLostCount-p2">0</span>)</div>
+                                <div id="ptLostPile-p2" class="pt-empty-slot pt-dropzone" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);"
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-lost')" onclick="ptOpenOpponentPanel('lostzone')">&#127744;</div>
+                            </div>
+                            <div style="text-align:center; position: relative;">
+                                <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
+                                <div class="pt-deck-pile" onclick="ptDeckMenu('p2')">
+                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p2', 1)" title="⬆️ Karte ziehen">⬆️</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p2')" title="🔍 Deck durchsuchen">🔍</div>
+                                </div>
+                                <div class="pt-deck-controls">
+                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p2')">🔍 Search</button>
+                                    <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p2')">🔀 Shuffle</button>
+                                    <div class="pt-stepper-group">
                                         <button class="pt-stepper-btn" onclick="updateStepper('p2-draw-val',-1)">-</button>
                                         <span id="p2-draw-val" class="pt-stepper-val">1</span>
                                         <button class="pt-stepper-btn" onclick="updateStepper('p2-draw-val',1)">+</button>
@@ -2888,26 +2909,24 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="ta-center pt-discard-column">
-                                <div id="ptPlayDrop-p2" class="pt-dropzone pt-play-drop"
-                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-play')">Play</div>
+                            <div style="text-align:center;">
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p2">0</span>)</div>
                                 <div id="ptDiscardPile-p2" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-discard')" onclick="ptOpenOpponentPanel('discard')"></div>
-                                <button class="pt-mobile-lost-shortcut" onclick="ptOpenOpponentPanel('lostzone')">Lost</button>
+                                <button class="pt-mobile-lost-shortcut" onclick="ptOpenOpponentPanel('lostzone')">🌀 Lost</button>
                             </div>
                         </div>
 
                         <!-- P2 Prizes (top-right from P2's view) -->
-                        <div class="pos-abs bottom-20 left-20 ta-center flex flex-col gap-6">
+                        <div style="position: absolute; bottom: 20px; left: 20px; text-align: center; display: flex; flex-direction: column; gap: 6px;">
                             <div class="pt-zone-label">P2 Prizes</div>
-                            <div id="ptPrizeZone-p2" class="grid grid-cols-3 gap-4 w-prizezone"></div>
+                            <div id="ptPrizeZone-p2" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; width: clamp(70px, 11vw, 94px);"></div>
                         </div>
 
                         <!-- P2 Bench -->
-                        <div class="pos-abs bottom-20 left-41 ta-center z-50 translate-x--50">
+                        <div style="position: absolute; bottom: 20px; left: 41%; transform: translateX(-50%); text-align: center; z-index: 50;">
                             <div class="pt-zone-label">P2 Bench</div>
-                               <div class="flex justify-center gap-bench pt-dropzone pt-bench-zone"
+                               <div style="display:flex; justify-content:center; gap:clamp(3px, 1vw, 8px);" class="pt-dropzone pt-bench-zone"
                                  ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-bench')">
                                 <div id="ptBench0-p2" class="pt-dropzone" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-bench0')"></div>
                                 <div id="ptBench1-p2" class="pt-dropzone" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-bench1')"></div>
@@ -2918,41 +2937,42 @@
                         </div>
 
                         <!-- P2 Active -->
-                        <div class="pos-abs bottom-135 left-50 translate-x--50 ta-center z-10">
-                            <div class="pt-zone-label color-yellow">P2 Active</div>
-                            <div class="pos-rel d-inline-block">
-                                  <div id="ptActiveZone-p2" class="pt-dropzone minh-activezone minw-activezone"
-                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-active')"></div>
-                                <div id="ptActiveModifier-p2" class="pt-dmg-modifier" title="L-click: +10 DMG Buff | R-click: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
-                                <div class="pos-abs right--32 top-8 flex flex-col gap-5">
-                                    <button id="ptItemLock-p2" class="pt-status-marker" title="Item Lock (click to toggle)" onclick="ptToggleLock('p2','itemLock')"></button>
-                                    <button id="ptToolLock-p2" class="pt-status-marker" title="Tool Lock (click to toggle)" onclick="ptToggleLock('p2','toolLock')"></button>
+                        <div style="position: absolute; bottom: 135px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
+                            <div class="pt-zone-label" style="color:#FFCB05;">P2 Active</div>
+                            <div style="position: relative; display: inline-block;">
+                                <div id="ptActiveZone-p2" class="pt-dropzone"
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-active')"
+                                     style="min-height: clamp(84px, 12vw, 105px); min-width: clamp(60px, 9vw, 75px);"></div>
+                                <div id="ptActiveModifier-p2" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
+                                <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
+                                    <button id="ptItemLock-p2" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','itemLock')">🚫</button>
+                                    <button id="ptToolLock-p2" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','toolLock')">🔧</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- -- P1 AREA (normal orientation) -- -->
-                <div id="p1-area" class="pos-abs inset-0 pe-none">
-                    <div class="pe-none w-100 h-100 pos-rel">
+                <!-- ── P1 AREA (normal orientation) ── -->
+                <div id="p1-area" style="position: absolute; inset: 0; pointer-events: none;">
+                    <div style="pointer-events: auto; width: 100%; height: 100%; position: relative;">
 
                         <!-- P1 Right column: Lost Zone / Deck (with controls) / Discard -->
-                        <div class="pos-abs bottom-20 right-20 flex flex-col gap-12 align-center">
-                            <div class="ta-center">
-                                <div class="pt-zone-label color-purple">Lost P1 (<span id="ptLostCount-p1">0</span>)</div>
-                                <div id="ptLostPile-p1" class="pt-empty-slot pt-dropzone border-purple bg-black-40"
+                        <div style="position: absolute; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                            <div style="text-align:center;">
+                                <div class="pt-zone-label" style="color:#d136c1;">Lost P1 (<span id="ptLostCount-p1">0</span>)</div>
+                                <div id="ptLostPile-p1" class="pt-empty-slot pt-dropzone" style="border-color:#9b59b6; background:rgba(0,0,0,0.4);"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-lost')" onclick="ptOpenLostZone('p1')">&#127744;</div>
                             </div>
-                               <div class="ta-center pos-rel pt-deck-controls-shell">
+                            <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDeckMenu('p1')">
-                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p1', 1)" title="Draw card"></div>
-                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p1')" title="Search deck"></div>
+                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p1', 1)" title="⬆️ Karte ziehen">⬆️</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p1')" title="🔍 Deck durchsuchen">🔍</div>
                                 </div>
                                 <div class="pt-deck-controls">
-                                    <button class="pt-btn-small w-100 bg-blue border-blue-dark mb-4" onclick="ptOpenDeckSearch('p1')">Search</button>
-                                    <button class="pt-btn-small w-100 mb-4" onclick="ptShuffleDeck('p1')">Shuffle</button>
+                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p1')">🔍 Search</button>
+                                    <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p1')">🔀 Shuffle</button>
                                     <div class="pt-stepper-group">
                                         <button class="pt-stepper-btn" onclick="updateStepper('p1-draw-val',-1)">-</button>
                                         <span id="p1-draw-val" class="pt-stepper-val">1</span>
@@ -2973,26 +2993,24 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="ta-center pt-discard-column">
-                                <div id="ptPlayDrop-p1" class="pt-dropzone pt-play-drop"
-                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-play')">Play</div>
+                            <div style="text-align:center;">
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p1">0</span>)</div>
                                 <div id="ptDiscardPile-p1" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-discard')" onclick="ptOpenDiscard('p1')"></div>
-                                <button class="pt-mobile-lost-shortcut" onclick="ptOpenLostZone('p1')">Lost</button>
+                                <button class="pt-mobile-lost-shortcut" onclick="ptOpenLostZone('p1')">🌀 Lost</button>
                             </div>
                         </div>
 
                         <!-- P1 Prizes -->
-                        <div class="pos-abs bottom-20 left-20 ta-center flex flex-col gap-6">
+                        <div style="position: absolute; bottom: 20px; left: 20px; text-align: center; display: flex; flex-direction: column; gap: 6px;">
                             <div class="pt-zone-label">P1 Prizes</div>
-                            <div id="ptPrizeZone-p1" class="grid grid-cols-3 gap-4 w-prizezone"></div>
+                            <div id="ptPrizeZone-p1" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; width: clamp(70px, 11vw, 94px);"></div>
                         </div>
 
                         <!-- P1 Bench -->
-                        <div class="pos-abs bottom-20 left-41 translate-x--50 ta-center z-50">
+                        <div style="position: absolute; bottom: 20px; left: 41%; transform: translateX(-50%); text-align: center; z-index: 50;">
                             <div class="pt-zone-label">P1 Bench</div>
-                               <div class="flex justify-center gap-bench pt-dropzone pt-bench-zone"
+                               <div style="display:flex; justify-content:center; gap:clamp(3px, 1vw, 8px);" class="pt-dropzone pt-bench-zone"
                                  ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-bench')">
                                 <div id="ptBench0-p1" class="pt-dropzone" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-bench0')"></div>
                                 <div id="ptBench1-p1" class="pt-dropzone" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-bench1')"></div>
@@ -3003,15 +3021,16 @@
                         </div>
 
                         <!-- P1 Active -->
-                        <div class="pos-abs bottom-135 left-50 translate-x--50 ta-center z-10">
-                            <div class="pt-zone-label color-yellow">P1 Active</div>
-                            <div class="pos-rel d-inline-block">
-                                  <div id="ptActiveZone-p1" class="pt-dropzone minh-activezone minw-activezone"
-                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-active')"></div>
-                                <div id="ptActiveModifier-p1" class="pt-dmg-modifier" title="L-click: +10 DMG Buff | R-click: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
-                                <div class="pos-abs right--32 top-8 flex flex-col gap-5">
-                                    <button id="ptItemLock-p1" class="pt-status-marker" title="Item Lock (click to toggle)" onclick="ptToggleLock('p1','itemLock')"></button>
-                                    <button id="ptToolLock-p1" class="pt-status-marker" title="Tool Lock (click to toggle)" onclick="ptToggleLock('p1','toolLock')"></button>
+                        <div style="position: absolute; bottom: 135px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10;">
+                            <div class="pt-zone-label" style="color:#FFCB05;">P1 Active</div>
+                            <div style="position: relative; display: inline-block;">
+                                <div id="ptActiveZone-p1" class="pt-dropzone"
+                                     ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-active')"
+                                     style="min-height: clamp(84px, 12vw, 105px); min-width: clamp(60px, 9vw, 75px);"></div>
+                                <div id="ptActiveModifier-p1" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
+                                <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
+                                    <button id="ptItemLock-p1" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','itemLock')">🚫</button>
+                                    <button id="ptToolLock-p1" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','toolLock')">🔧</button>
                                 </div>
                             </div>
                         </div>
@@ -3019,267 +3038,257 @@
                     </div>
                 </div>
 
-
-            <!-- Stadium Block – outside arena so board flip doesn't rotate it -->
-            <div id="ptStadiumBlock" class="static-element bg-black-60 p-10 br-10 border-1-white-20 ta-center pos-rel">
-                <div class="pt-zone-label color-green-light mb-6">Stadium</div>
-                <div class="pos-rel d-inline-block">
-                    <div id="ptStadiumZone" class="pt-empty-slot pt-dropzone w-82 h-114" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'stadium')">
-                        <div class="pt-empty-slot w-82 h-113" onclick="ptClickZone('p1','stadium')">Stadium</div>
-                    </div>
-                    <div class="pt-stadium-marker" title="Stadium effect used" onclick="this.classList.toggle('used')">S</div>
-                </div>
             </div>
 
-            <!-- Battle Buttons – outside arena so board flip doesn't move them -->
-            <div id="pt-side-buttons-left">
-                <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">Attack</button>
-                <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">End Turn</button>
-                <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">Opp. View</button>
-                <button class="pt-side-btn actions-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">Actions</button>
-            </div>
+        </div>
 
-            <!-- Opponent hand card count overlay -->
-            <div id="ptOpponentHandCountOverlay" class="pt-overlay-info">
-                Opponent hand: <span id="ptOpponentHandCountValue">0</span>
-            </div>
+        <div id="pt-side-buttons-left">
+            <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">⚔️ Attack</button>
+            <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">⏭️ End Turn</button>
+            <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">⚔️ Opp. View</button>
+            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">⚡ Actions</button>
+        </div>
 
         <div class="pt-hand-zone">
-            <div id="ptHandTopRow" class="flex justify-start align-center mb-6 gap-15">
+            <div id="ptHandTopRow" style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 6px; gap: 15px;">
 
-                <div class="pt-zone-label m-0 color-white">
+                <div class="pt-zone-label" style="margin: 0; color: white;">
                     Hand (<span id="ptHandCount">0</span>) &mdash; P<span id="activePlayerIndicator">1</span>
                 </div>
 
-                <div id="ptHandActionBar" class="flex gap-6 align-center bg-white-08 py-4 px-10 br-8 border-1-white-10 flex-wrap">
+                <div id="ptHandActionBar" style="display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
 
-                    <button class="pt-btn py-4 px-8 bg-orange-dark color-white border-orange-dark" onclick="ptUndo()" title="Undo last action">Undo</button>
+                    <button class="pt-btn" style="padding: 4px 8px; background:#e67e22; color:white; border-color:#d35400;" onclick="ptUndo()" title="Letzte Aktion rückgängig machen">↩️ Undo</button>
 
-                    <button class="pt-btn pt-mobile-toggle py-4 px-8 bg-grey-dark color-white border-grey" onclick="ptToggleMobileActions()" title="More actions"></button>
+                        <button class="pt-btn" style="padding: 4px 8px; background:#8e44ad; color:white; border-color:#9b59b6;" onclick="ptMulligan(ptCurrentPlayer)" title="Hand ins Deck, 7 neue ziehen">🃏 Mulligan</button>
 
-                    <div id="ptExtendedActions" class="d-contents">
-                    <span class="color-white-25 mx-2">|</span>
+                    <button class="pt-btn pt-mobile-toggle" style="padding: 4px 8px; background:#555; color:white; border-color:#777;" onclick="ptToggleMobileActions()" title="More actions">⚙️</button>
 
-                    <span class="color-grey-light fs-10 fw-bold">Self:</span>
-                    <input type="number" id="ptHandDrawAmt" value="1" class="w-30 bg-black-60 color-white border-grey br-4 ta-center fs-11 py-2 px-0 no-outline" aria-label="Number of cards to draw">
-                    <button class="pt-btn py-4 px-8 fs-10" onclick="ptHandAction('shuffle_deck')">Deck</button>
-                    <button class="pt-btn py-4 px-8 fs-10" onclick="ptHandAction('shuffle_bottom')">Bot</button>
+                    <div id="ptExtendedActions" style="display:contents;">
+                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
-                    <span class="color-white-025 mx-2">|</span>
+                    <span style="color: #ccc; font-size: 10px; font-weight: bold;">Self:</span>
+                    <input type="number" id="ptHandDrawAmt" value="1" style="width: 30px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;" aria-label="Number of cards to draw">
+                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px;" onclick="ptHandAction('shuffle_deck')">🔀 Deck</button>
+                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px;" onclick="ptHandAction('shuffle_bottom')">⬇️ Bot</button>
 
-                    <span class="color-green fs-10 fw-bold ml-2">Judge:</span>
+                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
+
+                    <span style="color: #2ecc71; font-size: 10px; font-weight: bold; margin-left: 2px;">Judge:</span>
                     <input type="number" id="ptJudgeDrawP1" value="4" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1" aria-label="Player 1 Judge draw count">
-                    <button class="pt-btn py-4 px-8 fs-10 bg-green color-white border-green" onclick="ptGlobalJudge()" title="Both shuffle hand INTO deck and draw X"></button>
+                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#27ae60; color:white; border-color:#2ecc71;" onclick="ptGlobalJudge()" title="Beide mischen Hand INS Deck und ziehen X">⚖️</button>
                     <input type="number" id="ptJudgeDrawP2" value="4" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2" aria-label="Player 2 Judge draw count">
 
-                    <span class="color-white-025 mx-2">|</span>
+                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
-                    <span class="color-yellow-light fs-10 fw-bold ml-2">Iono:</span>
+                    <span style="color: #f1c40f; font-size: 10px; font-weight: bold; margin-left: 2px;">Iono:</span>
                     <input type="number" id="ptIonoDrawP1" value="6" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1" aria-label="Player 1 Iono draw count">
-                    <button class="pt-btn py-4 px-8 fs-10 bg-orange color-white border-orange-dark" onclick="ptGlobalIono()" title="Both put hand UNDER deck and draw X"></button>
+                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#f39c12; color:white; border-color:#e67e22;" onclick="ptGlobalIono()" title="Beide legen Hand UNTER das Deck und ziehen X">⚡</button>
                     <input type="number" id="ptIonoDrawP2" value="6" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2" aria-label="Player 2 Iono draw count">
 
-                    <span class="color-white-025 mx-2">|</span>
+                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
 
-                    <span class="color-red fs-10 fw-bold">Opp:</span>
-                    <button class="pt-btn py-4 px-8 fs-10 bg-red-dark color-white border-red" onclick="ptOpponentShuffleAndDraw()" title="Opponent shuffles hand into deck and draws X cards">S&amp;D</button>
+                    <span style="color: #e74c3c; font-size: 10px; font-weight: bold;">Opp:</span>
+                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#c0392b; color:white; border-color:#e74c3c;" onclick="ptOpponentShuffleAndDraw()" title="Gegner mischt Hand ins Deck und zieht X Karten">🔄 S&amp;D</button>
 
+                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
+
+                    <span style="color: #ccc; font-size: 10px; font-weight: bold;">Cmd:</span>
+                    <input type="text" id="ptCommandInput-p1" class="pt-cmd-input" placeholder="/draw 3…" style="width: 80px;" onkeydown="if(event.key==='Enter'){ptRunCommand();event.preventDefault();}"
+                           title="Commands: /draw N  /mill N  /top N  /iono N  /roxanne N  /shuffle  /coin N  /dice  /attach [active|bench0-4]" aria-label="Playtester command input">
                     </div>
                 </div>
 
             </div>
 
             <div class="pt-hand-scroll-shell">
-                <button id="ptHandScrollLeft" class="pt-hand-scroll-btn" onclick="ptScrollHand(-1)" title="Scroll hand left"></button>
+                <button id="ptHandScrollLeft" class="pt-hand-scroll-btn" onclick="ptScrollHand(-1)" title="Hand nach links">❮</button>
                 <div class="pt-hand-scroll-viewport">
                     <div id="ptHandZone" class="pt-dropzone pt-hand-zone" ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event, 'hand')"></div>
                 </div>
-                <button id="ptHandScrollRight" class="pt-hand-scroll-btn" onclick="ptScrollHand(1)" title="Scroll hand right"></button>
+                <button id="ptHandScrollRight" class="pt-hand-scroll-btn" onclick="ptScrollHand(1)" title="Hand nach rechts">❯</button>
             </div>
         </div>
 
     </div>
 
-    <!-- -- Start Phase Modal (coin flip + active selection) -- -->
-    <div id="ptStartPhaseModal" class="d-none pos-fixed inset-0 z-22000 bg-black-88 align-center justify-center overflow-y-auto p-20 box-border" role="dialog" aria-modal="true" aria-label="Playtester start phase"></div>
+    <!-- ── Start Phase Modal (coin flip + active selection) ── -->
+    <div id="ptStartPhaseModal" style="display:none;position:fixed;inset:0;z-index:22000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;overflow-y:auto;padding:20px;box-sizing:border-box;" role="dialog" aria-modal="true" aria-label="Playtester start phase"></div>
 
-    <!-- -- Opponent Full View Panel -- -->
-    <div id="ptOppPanel" class="d-none pos-fixed inset-0 z-21000 bg-black-82 align-center justify-center" onclick="if(event.target===this)this.style.display='none'" role="dialog" aria-modal="true" aria-label="Opponent panel">
-        <div class="bg-dark-blue border-2-red br-14 p-20 w-opp-panel maxh-90vh overflow-y-auto color-white">
-            <div class="flex justify-between align-center mb-12">
-                <h3 class="m-0 color-red" id="ptOppPanelTitle">Opponent</h3>
-                <button class="pt-btn pt-danger" onclick="document.getElementById('ptOppPanel').style.display='none'"></button>
+    <!-- ── Opponent Full View Panel ── -->
+    <div id="ptOppPanel" style="display:none;position:fixed;inset:0;z-index:21000;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'" role="dialog" aria-modal="true" aria-label="Opponent panel">
+        <div style="background:#1a1a2e;border:2px solid #e74c3c;border-radius:14px;padding:20px;width:min(98vw,680px);max-height:90vh;overflow-y:auto;color:#fff;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <h3 style="margin:0;color:#e74c3c;" id="ptOppPanelTitle">⚔️ Gegner</h3>
+                <button class="pt-btn pt-danger" onclick="document.getElementById('ptOppPanel').style.display='none'">✕</button>
             </div>
             <!-- Tabs -->
-            <div class="flex gap-6 mb-14" id="ptOppTabs">
-                <button id="ptOppTab-field"    onclick="ptOppSwitchTab('field')"    class="flex-1 py-7 border-none br-6 pointer fs-12 fw-700 bg-red color-white" data-i18n="pt.oppTabField">Field</button>
-                <button id="ptOppTab-discard"  onclick="ptOppSwitchTab('discard')"  class="flex-1 py-7 border-none br-6 pointer fs-12 fw-700 bg-grey-dark color-grey-light" data-i18n="pt.oppTabDiscard">Discard</button>
-                <button id="ptOppTab-lostzone" onclick="ptOppSwitchTab('lostzone')" class="flex-1 py-7 border-none br-6 pointer fs-12 fw-700 bg-grey-dark color-grey-light" data-i18n="pt.oppTabLostZone">Lost Zone</button>
+            <div style="display:flex;gap:6px;margin-bottom:14px;" id="ptOppTabs">
+                <button id="ptOppTab-field"    onclick="ptOppSwitchTab('field')"    style="flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:#e74c3c;color:#fff;">🡞 Feld</button>
+                <button id="ptOppTab-discard"  onclick="ptOppSwitchTab('discard')"  style="flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:#333;color:#aaa;">🗑️ Discard</button>
+                <button id="ptOppTab-lostzone" onclick="ptOppSwitchTab('lostzone')" style="flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:#333;color:#aaa;">🌌 Lost Zone</button>
             </div>
             <div id="ptOppPanelContent"></div>
         </div>
     </div>
 
-    <!-- -- Zoom / Card Search Side Panel -- -->
-    <div id="ptZoomPanel" class="pos-fixed top-0 right-0 bottom-0 w-zoom-panel z-21500 bg-blue-dark border-left-blue translate-x-100 transition-zoom flex flex-col">
-        <div class="flex justify-between align-center py-12 px-14 border-bottom-blue flex-shrink-0">
-            <span class="color-yellow fw-900 fs-105">Card Zoom & Search</span>
-            <button class="pt-btn pt-danger" onclick="ptZoomClose()"></button>
+    <!-- ── Zoom / Card Search Side Panel ── -->
+    <div id="ptZoomPanel" style="position:fixed;top:0;right:0;bottom:0;width:min(96vw,360px);z-index:21500;background:#111827;border-left:2px solid #3B4CCA;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #1f2937;flex-shrink:0;">
+            <span style="color:#FFCB05;font-weight:900;font-size:1.05em;">🔍 Card Zoom &amp; Search</span>
+            <button class="pt-btn pt-danger" onclick="ptZoomClose()">✕</button>
         </div>
-        <div class="py-10 px-14 border-bottom-blue flex-shrink-0 flex gap-8">
-            <input id="ptZoomSearch" type="text" placeholder="Search card name…" oninput="ptRenderZoomPanel(this.value)" class="flex-1 py-8 px-10 bg-blue-dark color-white border-blue-dark br-6 fs-13">
+        <div style="padding:10px 14px;border-bottom:1px solid #1f2937;flex-shrink:0;display:flex;gap:8px;">
+            <input id="ptZoomSearch" type="text" placeholder="Search card name…" oninput="ptRenderZoomPanel(this.value)" style="flex:1;padding:8px 10px;background:#1f2937;color:#fff;border:1px solid #374151;border-radius:6px;font-size:13px;">
         </div>
-        <div class="flex-1 overflow-y-auto py-10 px-14">
-            <div id="ptZoomBigImgWrap" class="ta-center mb-12">
-                <img id="ptZoomBigImg" src="" alt="" loading="lazy" class="mw-100 mh-420 br-10 border-2-blue d-none pointer" onerror="this.style.display='none'" onload="this.style.display='block'" onclick="ptViewCard(this.src,document.getElementById('ptZoomBigName').textContent)" title="Click for fullscreen">
-                <div id="ptZoomBigName" class="color-yellow fs-12 fw-700 mt-6"></div>
+        <div style="flex:1;overflow-y:auto;padding:10px 14px;">
+            <div id="ptZoomBigImgWrap" style="text-align:center;margin-bottom:12px;">
+                <img id="ptZoomBigImg" src="" alt="" loading="lazy" style="max-width:100%;max-height:420px;border-radius:10px;border:2px solid #3B4CCA;display:none;cursor:pointer;" onerror="this.style.display='none'" onload="this.style.display='block'" onclick="ptViewCard(this.src,document.getElementById('ptZoomBigName').textContent)" title="Click for fullscreen">
+                <div id="ptZoomBigName" style="color:#FFCB05;font-size:12px;font-weight:700;margin-top:6px;"></div>
             </div>
-            <div id="ptZoomPanelGrid" class="flex flex-wrap gap-8 justify-center"></div>
+            <div id="ptZoomPanelGrid" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;"></div>
         </div>
     </div>
 
     <!-- Attack View Modal -->
-    <div id="ptAttackModal" class="d-none pos-fixed inset-0 z-23000 bg-black-92 align-center justify-center flex-col gap-12 overflow-y-auto py-16 px-8" role="dialog" aria-modal="true" aria-label="Attack view">
-        <div class="color-yellow fs-13 fw-900 ls-1 tt-upper opacity-80 flex-shrink-0">Attack</div>
-        <div class="pt-attack-layout">
+    <div id="ptAttackModal" style="display:none;position:fixed;inset:0;z-index:23000;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;flex-direction:column;gap:12px;overflow-y:auto;padding:16px 8px;" role="dialog" aria-modal="true" aria-label="Attack view">
+        <div style="color:#FFCB05;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;opacity:0.8;flex-shrink:0;">⚔️ Angriff</div>
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center;width:100%;max-width:960px;">
             <!-- My active Pokémon large -->
-            <div class="pt-attack-player">
-                <div class="pt-attack-player-label blue">My Active</div>
-                <img id="ptAttackMyImg" src="" class="mw-44vw-320 mh-65vh-460 br-10 d-block box-shadow-blue border-2-blue" onerror="this.src=''">
-                <div id="ptAttackMyName" class="color-white mt-6 fw-700 fs-13"></div>
+            <div style="text-align:center;flex-shrink:0;">
+                <div style="color:#3B4CCA;font-size:11px;font-weight:700;margin-bottom:6px;">⚔️ Mein Aktives</div>
+                <img id="ptAttackMyImg" src="" style="max-width:min(44vw,320px);max-height:min(65vh,460px);border-radius:10px;display:block;box-shadow:0 8px 40px rgba(59,76,202,0.6);border:2px solid #3B4CCA;" onerror="this.src=''">
+                <div id="ptAttackMyName" style="color:#fff;margin-top:6px;font-weight:700;font-size:13px;"></div>
             </div>
             <!-- Opp panel -->
-            <div class="flex-1 minw-280 maxw-440 maxh-75vh-560 overflow-y-auto bg-dark-90 br-10 border-1-red-45 p-10">
-                <div class="color-red fs-11 fw-700 mb-8">Opponent Field</div>
+            <div style="flex:1;min-width:280px;max-width:440px;max-height:min(75vh,560px);overflow-y:auto;background:rgba(20,20,30,0.9);border-radius:10px;border:1px solid rgba(231,76,60,0.45);padding:10px;">
+                <div style="color:#e74c3c;font-size:11px;font-weight:700;margin-bottom:8px;">🛡️ Gegner Feld</div>
                 <div id="ptAttackOppContent"></div>
             </div>
         </div>
-        <button onclick="ptCloseAttackView()" class="flex-shrink-0 bg-red-dark color-white border-2-red br-8 py-10 px-28 fs-14 fw-900 pointer ls-05">Attack & End Turn</button>
-        <div class="color-grey-light fs-11 flex-shrink-0">Turn ends & opponent draws a card</div>
+        <button onclick="ptCloseAttackView()" style="flex-shrink:0;background:#c0392b;color:#fff;border:2px solid #e74c3c;border-radius:8px;padding:10px 28px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:.5px;">⚔️ Angriff &amp; Zug beenden</button>
+        <div style="color:#888;font-size:11px;flex-shrink:0;">Zug wird beendet &amp; Gegner zieht eine Karte</div>
     </div>
 
-    <div id="ptCardViewer" class="d-none pos-fixed inset-0 z-22000 bg-black-88 align-center justify-center pointer" onclick="this.style.display='none'"  role="dialog" aria-modal="true" aria-label="Card viewer">
-        <div onclick="event.stopPropagation()" class="ta-center">
-            <img id="ptCardViewerImg" src="" loading="lazy" class="mw-95vw-420 mh-90vh-600 br-10 d-block m-auto box-shadow-dark">
-            <div id="ptCardViewerName" class="color-white mt-10 fw-700 fs-14"></div>
-            <div class="color-grey-light fs-11 mt-4">Click anywhere to close</div>
-        </div>
-    </div>
-
-    <div id="ptHotkeyModal" class="d-none pos-fixed top-50 left-50 translate--50 z-20000 bg-dark-blue border-2-blue br-12 p-24 color-white ff-mono fs-13 minw-320 box-shadow-dark" role="dialog" aria-modal="true" aria-label="Hotkey reference">
-        <div class="flex justify-between align-center mb-16">
-            <h3 class="m-0 color-yellow">Hotkeys</h3>
-            <button class="pt-btn pt-danger" onclick="document.getElementById('ptHotkeyModal').style.display='none'"></button>
-        </div>
-        <div class="mobile-table-scroll" aria-label="Hotkey table scroll area">
-            <table class="w-100 border-collapse">
-                <tr><td class="py-4 px-8 color-green-light"><b>D</b></td><td class="py-4 px-8">Draw 1 card</td></tr>
-                <tr><td class="py-4 px-8 color-green-light"><b>S</b></td><td class="py-4 px-8">Shuffle deck</td></tr>
-                <tr><td class="py-4 px-8 color-green-light"><b>C</b></td><td class="py-4 px-8">Flip coin</td></tr>
-                <tr><td class="py-4 px-8 color-green-light"><b>P</b></td><td class="py-4 px-8">Pass turn</td></tr>
-                <tr><td class="py-4 px-8 color-green-light"><b>F</b></td><td class="py-4 px-8">Flip board</td></tr>
-                <tr><td class="py-4 px-8 color-green-light"><b>`</b></td><td class="py-4 px-8">Toggle Action Log</td></tr>
-                <tr><td class="py-4 px-8 color-green-light"><b>/</b></td><td class="py-4 px-8">Focus command input</td></tr>
-                <tr><td colspan="2" class="pt-12 color-yellow fs-11 fw-bold">Commands (press Enter):</td></tr>
-                <tr><td class="py-2 px-8 color-green-light"><b>/draw N</b></td><td class="py-2 px-8">Draw N cards</td></tr>
-                <tr><td class="py-2 px-8 color-green-light"><b>/mill N</b></td><td class="py-2 px-8">Mill N cards to discard</td></tr>
-                <tr><td class="py-2 px-8 color-green-light"><b>/top N</b></td><td class="py-2 px-8">Look at top N cards</td></tr>
-                <tr><td class="py-2 px-8 color-green-light"><b>/iono N</b></td><td class="py-2 px-8">Both shuffle & draw N</td></tr>
-                <tr><td class="py-2 px-8 color-green-light"><b>/roxanne N</b></td><td class="py-2 px-8">Both bottom & draw N</td></tr>
-                <tr><td class="py-2 px-8 color-green-light"><b>/shuffle</b></td><td class="py-2 px-8">Shuffle current deck</td></tr>
-                <tr><td class="py-2 px-8 color-green-light"><b>/coin N</b></td><td class="py-2 px-8">Flip N coins</td></tr>
-                <tr><td class="py-2 px-8 color-green-light"><b>/dice</b></td><td class="py-2 px-8">Roll a d6</td></tr>
-                <tr><td class="py-2 px-8 color-green-light"><b>/attach [zone]</b></td><td class="py-2 px-8">Attach energy from hand to active/bench0€4</td></tr>
-            </table>
+    <div id="ptCardViewer" style="display:none;position:fixed;inset:0;z-index:22000;background:rgba(0,0,0,0.88);align-items:center;justify-content:center;cursor:pointer;" onclick="this.style.display='none'"  role="dialog" aria-modal="true" aria-label="Card viewer">
+        <div onclick="event.stopPropagation()" style="text-align:center;">
+            <img id="ptCardViewerImg" src="" loading="lazy" style="max-width:min(95vw,420px);max-height:min(90vh,600px);border-radius:10px;display:block;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.9);">
+            <div id="ptCardViewerName" style="color:#fff;margin-top:10px;font-weight:700;font-size:14px;"></div>
+            <div style="color:#888;font-size:11px;margin-top:4px;">Klick irgendwo zum Schließen</div>
         </div>
     </div>
 
-    <div id="ptTopCardsModal" class="d-none pos-fixed top-50 left-50 translate--50 z-20000 bg-blue-dark border-yellow br-12 p-20 minw-360 maxw-95vw maxh-80vh overflow-y-auto box-shadow-dark" role="dialog" aria-modal="true" aria-label="Top deck control">
-        <div class="d-flex justify-space-between align-center mb-14">
-            <h3 class="m-0 color-yellow">&#128301; Top Deck Control</h3>
-            <button class="pt-btn pt-danger" onclick="ptCloseTopCards()"></button>
+    <div id="ptHotkeyModal" style="display:none;position:fixed;top:50%;left:50%; transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e; border:2px solid #3B4CCA;border-radius:12px;padding:24px;color:#fff; font-family:monospace;font-size:13px;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.8);" role="dialog" aria-modal="true" aria-label="Hotkey reference">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h3 style="margin:0;color:#FFCB05;">⌨️ Hotkeys</h3>
+            <button class="pt-btn pt-danger" onclick="document.getElementById('ptHotkeyModal').style.display='none'">✕</button>
         </div>
-        <div id="ptTopCardsContent"><div id="ptTopCardsGrid" class="d-flex flex-wrap gap-15 justify-center"></div></div>
-        <div class="d-flex gap-8 mt-14 justify-center flex-wrap">
-            <button class="pt-btn bg-blue border-blue-dark" onclick="ptShuffleRemainingLookedCardsIntoDeck()">Shuffle Rest Into Deck</button>
+        <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>D</b></td><td style="padding:4px 8px;">Draw 1 card</td></tr>
+            <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>S</b></td><td style="padding:4px 8px;">Shuffle deck</td></tr>
+            <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>C</b></td><td style="padding:4px 8px;">Flip coin</td></tr>
+            <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>P</b></td><td style="padding:4px 8px;">Pass turn</td></tr>
+            <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>F</b></td><td style="padding:4px 8px;">Flip board</td></tr>
+            <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>`</b></td><td style="padding:4px 8px;">Toggle Action Log</td></tr>
+            <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>/</b></td><td style="padding:4px 8px;">Focus command input</td></tr>
+            <tr><td colspan="2" style="padding-top:12px;color:#ffcb05;font-size:11px;font-weight:bold;">Commands (press Enter):</td></tr>
+            <tr><td style="padding:2px 8px;color:#a8e6cf;"><b>/draw N</b></td><td style="padding:2px 8px;">Draw N cards</td></tr>
+            <tr><td style="padding:2px 8px;color:#a8e6cf;"><b>/mill N</b></td><td style="padding:2px 8px;">Mill N cards to discard</td></tr>
+            <tr><td style="padding:2px 8px;color:#a8e6cf;"><b>/top N</b></td><td style="padding:2px 8px;">Look at top N cards</td></tr>
+            <tr><td style="padding:2px 8px;color:#a8e6cf;"><b>/iono N</b></td><td style="padding:2px 8px;">Both shuffle &amp; draw N</td></tr>
+            <tr><td style="padding:2px 8px;color:#a8e6cf;"><b>/roxanne N</b></td><td style="padding:2px 8px;">Both bottom &amp; draw N</td></tr>
+            <tr><td style="padding:2px 8px;color:#a8e6cf;"><b>/shuffle</b></td><td style="padding:2px 8px;">Shuffle current deck</td></tr>
+            <tr><td style="padding:2px 8px;color:#a8e6cf;"><b>/coin N</b></td><td style="padding:2px 8px;">Flip N coins</td></tr>
+            <tr><td style="padding:2px 8px;color:#a8e6cf;"><b>/dice</b></td><td style="padding:2px 8px;">Roll a d6</td></tr>
+            <tr><td style="padding:2px 8px;color:#a8e6cf;"><b>/attach [zone]</b></td><td style="padding:2px 8px;">Attach energy from hand to active/bench0–4</td></tr>
+        </table>
+    </div>
+
+    <div id="ptTopCardsModal" style="display:none;position:fixed;top:50%;left:50%; transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e; border:2px solid #FFCB05;border-radius:12px;padding:20px; min-width:360px;max-width:95vw;max-height:80vh;overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.9);" role="dialog" aria-modal="true" aria-label="Top deck control">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <h3 style="margin:0;color:#FFCB05;">&#128301; Top Deck Control</h3>
+            <button class="pt-btn pt-danger" onclick="ptCloseTopCards()">✕</button>
+        </div>
+        <div id="ptTopCardsContent"><div id="ptTopCardsGrid" style="display:flex;flex-wrap:wrap;gap:15px;justify-content:center;"></div></div>
+        <div style="display:flex;gap:8px;margin-top:14px;justify-content:center;flex-wrap:wrap;">
+            <button class="pt-btn" style="background:#2a52be;border-color:#3B4CCA;" onclick="ptShuffleRemainingLookedCardsIntoDeck()">🔀 Shuffle Rest Into Deck</button>
             <button class="pt-btn" onclick="ptCloseTopCards()">Done (return to deck)</button>
         </div>
     </div>
 
-    <div id="ptDeckSearchModal" class="d-none pos-fixed top-0 left-0 right-0 bottom-0 z-16000 bg-black-085 align-center justify-center" onclick="if(event.target===this)ptCloseDeckSearch()" role="dialog" aria-modal="true" aria-label="Deck search">
-        <div class="bg-grey-dark br-12 p-20 maxw-90vw w-860 maxh-90vh overflow-y-auto border-blue-dark">
-            <div class="d-flex justify-space-between align-center mb-10 gap-12">
-                <h3 class="color-white m-0" data-i18n="pt.deckSearchTitle">Search Deck</h3>
-                <div class="d-flex gap-8 align-center">
-                    <span class="color-grey-light fs-12" data-i18n="pt.deckSearchHint">Click = Hand | Right-click = Lost Zone</span>
-                    <button class="pt-btn pt-danger" onclick="ptCloseDeckSearch()"></button>
+    <div id="ptDeckSearchModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.85); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDeckSearch()" role="dialog" aria-modal="true" aria-label="Deck search">
+        <div style="background:#2a2a2a;border-radius:12px;padding:20px;max-width:90vw;width:860px;max-height:90vh;overflow-y:auto;border:2px solid #3B4CCA;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
+                <h3 style="color:#fff;margin:0;">🔍 Deck durchsuchen</h3>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <span style="color:#aaa;font-size:12px;">Klick = Hand | Rechtsklick = Lost Zone</span>
+                    <button class="pt-btn pt-danger" onclick="ptCloseDeckSearch()">✕</button>
                 </div>
             </div>
             <!-- Sort toolbar -->
-            <div class="d-flex gap-6 flex-wrap mb-12 align-center">
-                <span class="color-grey-light fs-11 flex-shrink-0">Sort:</span>
-                <button id="ptDSortDeck" onclick="_ptSetDeckSort('deck')" class="p-4-10 fs-11 border-blue-dark br-5 pointer bg-blue color-white">Deck Order</button>
-                <button id="ptDSortType" onclick="_ptSetDeckSort('type')" class="p-4-10 fs-11 border-grey-dark br-5 pointer bg-grey-dark color-grey">Pokémon ? Supporter ? Item ? Tool ? Stadium ? Energy</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+                <span style="color:#aaa;font-size:11px;flex-shrink:0;">Sortierung:</span>
+                <button id="ptDSortDeck" onclick="_ptSetDeckSort('deck')" style="padding:4px 10px;font-size:11px;border:1px solid #3B4CCA;border-radius:5px;cursor:pointer;background:#2a52be;color:#fff;">🃏 Deck-Reihenfolge</button>
+                <button id="ptDSortType" onclick="_ptSetDeckSort('type')" style="padding:4px 10px;font-size:11px;border:1px solid #555;border-radius:5px;cursor:pointer;background:#333;color:#ccc;">🏦 Pokémon → Supporter → Item → Tool → Stadion → Energie</button>
             </div>
-            <div id="ptDeckSearchGrid" class="d-flex flex-wrap gap-10 justify-center"></div>
+            <div id="ptDeckSearchGrid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;"></div>
         </div>
     </div>
 
-    <div id="ptDiscardModal" class="d-none pos-fixed top-0 left-0 right-0 bottom-0 z-16000 bg-black-082 align-center justify-center" onclick="if(event.target===this)ptCloseDiscardModal()" role="dialog" aria-modal="true" aria-label="Discard pile">
-        <div class="bg-grey-dark br-12 p-20 maxw-90vw maxh-85vh overflow-y-auto">
-            <div class="d-flex justify-space-between align-center mb-10 gap-12">
-                <h3 id="ptDiscardModalTitle" class="color-white m-0">Discard Pile</h3>
-                <button class="pt-btn pt-danger" onclick="ptCloseDiscardModal()"></button>
+    <div id="ptDiscardModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.82); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDiscardModal()" role="dialog" aria-modal="true" aria-label="Discard pile">
+        <div style="background:#2a2a2a;border-radius:12px;padding:20px; max-width:90vw;max-height:85vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
+                <h3 id="ptDiscardModalTitle" style="color:#fff;margin:0;">🗑️ Discard Pile</h3>
+                <button class="pt-btn pt-danger" onclick="ptCloseDiscardModal()">✕</button>
             </div>
-            <div id="ptDiscardSortBar" class="d-none align-center gap-6 mb-12">
-                <span class="fs-11 color-grey-light">Sort:</span>
-                <button id="ptDscSortOrder" onclick="ptSetDiscardSort('order')" class="border-blue-dark br-5 p-3-9 fs-11 pointer bg-blue color-white">Order</button>
-                <button id="ptDscSortType"  onclick="ptSetDiscardSort('type')"  class="border-grey-dark br-5 p-3-9 fs-11 pointer bg-grey-dark color-grey">Type</button>
+            <div id="ptDiscardSortBar" style="display:none;align-items:center;gap:6px;margin-bottom:12px;">
+                <span style="font-size:11px;color:#aaa;">Sortierung:</span>
+                <button id="ptDscSortOrder" onclick="ptSetDiscardSort('order')" style="border:1px solid #3B4CCA;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#2a52be;color:#fff;">🃏 Reihenfolge</button>
+                <button id="ptDscSortType"  onclick="ptSetDiscardSort('type')"  style="border:1px solid #555;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#333;color:#ccc;">📋 Typ</button>
             </div>
-            <div id="ptDiscardGrid"></div>
+            <div id="ptDiscardGrid" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
         </div>
     </div>
 
     <!-- My Decks Playtest Modal -->
-    <div id="myDecksPlaytestModal" class="rarity-switcher-modal ui-modal-backdrop" onclick="if(event.target===this)closeMyDecksPlaytest()" role="dialog" aria-modal="true" aria-label="My Decks playtest selector">
-        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-md mydecks-playtest-modal-content">
-            <span class="rarity-switcher-close ui-modal-close" onclick="closeMyDecksPlaytest()"></span>
-            <h2 class="setup-modal-heading green" data-i18n="myDecks.heading">Playtest – My Decks</h2>
-            <p class="setup-modal-description" data-i18n="myDecks.description">Choose a deck for each player, then start the match!</p>
-            <div class="mb-15">
-                <div class="mb-15">
-                <select id="myDeckSelectP1" class="setup-modal-select player1"></select>
+    <div id="myDecksPlaytestModal" class="rarity-switcher-modal" onclick="if(event.target===this)closeMyDecksPlaytest()" style="z-index: 20000; display: none;" role="dialog" aria-modal="true" aria-label="My Decks playtest selector">
+        <div class="rarity-switcher-modal-content" style="max-width: 500px; background: #f8f9fa;">
+            <span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()">✕</span>
+            <h2 style="margin-top: 0; color: #27ae60; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">⚔️ Playtest – My Decks</h2>
+            <p style="color: #555; margin-bottom: 20px;">Choose a deck for each player, then start the match!</p>
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #3B4CCA;">Player 1 🔵</label>
+                <select id="myDeckSelectP1" style="width: 100%; padding: 10px 12px; border: 2px solid #3B4CCA; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
             </div>
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;">Player 2 🔴</label>
+                <select id="myDeckSelectP2" style="width: 100%; padding: 10px 12px; border: 2px solid #E3350D; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
             </div>
-            <div class="mb-15">
-                <label for="myDeckSelectP2" class="setup-modal-player-label red" data-i18n="myDecks.player2Label">Player 2 </label>
-                <select id="myDeckSelectP2" class="setup-modal-select player2"></select>
-            </div>
-            <div class="setup-modal-btn-row">
-                <button onclick="closeMyDecksPlaytest()" class="btn btn-outline flex-1" data-i18n="myDecks.cancelBtn">Cancel</button>
-                <button onclick="startMyDecksPlaytest()" class="btn btn-primary flex-2" data-i18n="myDecks.startBtn">Start Playtest</button>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="closeMyDecksPlaytest()" style="flex:1; padding:12px; background:#e1e8ed; color:#2c3e50; font-weight:700; border:2px solid #ccd6dd; border-radius:8px; cursor:pointer; font-size:14px;">Cancel</button>
+                <button onclick="startMyDecksPlaytest()" style="flex:2; padding:12px; background:linear-gradient(135deg,#27ae60 0%,#1e8449 100%); color:white; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-size:14px; box-shadow:0 4px 10px rgba(39,174,96,0.3);">🚀 Start Playtest</button>
             </div>
         </div>
     </div>
 
     <!-- Playtester Setup Modal -->
-    <div id="playtesterSetupModal" class="rarity-switcher-modal ui-modal-backdrop" onclick="if(event.target === this) closePlaytesterSetup()" role="dialog" aria-modal="true" aria-label="Playtester setup">
-        <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-md playtester-setup-modal-content mobile-modal-panel">
-            <span class="rarity-switcher-close ui-modal-close" onclick="closePlaytesterSetup()"></span>
-            <h2 class="setup-modal-heading blue" data-i18n="setup.heading">Playtester Setup</h2>
-            <p class="setup-modal-description" data-i18n="setup.description">
+    <div id="playtesterSetupModal" class="rarity-switcher-modal" onclick="if(event.target === this) closePlaytesterSetup()" style="z-index: 20000; display: none;" role="dialog" aria-modal="true" aria-label="Playtester setup">
+        <div class="rarity-switcher-modal-content" style="max-width: 600px; background: #f8f9fa;">
+            <span class="rarity-switcher-close" onclick="closePlaytesterSetup()">✕</span>
+            <h2 style="margin-top: 0; color: #3B4CCA; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">⚔️ Playtester Setup</h2>
+            <p style="margin-bottom: 15px; color: #555; font-size: 1.05em;">
                 Your current deck <strong>(Player 1)</strong> is ready. What should <strong>Player 2</strong> play?
             </p>
-            <div class="mb-15">
-                <label class="setup-modal-label" data-i18n="setup.opponentLabel">Opponent's Deck (PTCG Live Format):</label>
-                <textarea id="playtesterOpponentDeck" placeholder="Paste Player 2's deck list here (e.g. from Limitless)..." data-i18n-placeholder="setup.opponentPlaceholder" class="setup-modal-textarea"></textarea>
+            <div style="margin-bottom: 20px;">
+                <label style="display:block; font-weight:bold; margin-bottom:8px; color: #2c3e50;">Opponent's Deck (PTCG Live Format):</label>
+                <textarea id="playtesterOpponentDeck" placeholder="Paste Player 2's deck list here (e.g. from Limitless)..." style="width: 100%; height: 180px; padding: 12px; border: 2px solid #b3d9ff; border-radius: 8px; font-family: monospace; font-size: 12px; resize: vertical; box-sizing: border-box;"></textarea>
             </div>
-            <div class="setup-modal-btn-row wide">
-                <button onclick="startPlaytesterWithMirror()" class="btn btn-outline flex-1" data-i18n="setup.mirrorBtn">
-                    Mirror Match (Same Deck)
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <button class="btn" onclick="startPlaytesterWithMirror()" style="flex: 1; background: #e1e8ed; color: #2c3e50; font-weight: bold; border: 2px solid #ccd6dd; padding: 12px; border-radius: 8px; cursor: pointer;">
+                    🪞 Mirror Match (Same Deck)
                 </button>
-                <button onclick="startPlaytesterWithOpponent()" class="btn btn-primary flex-1" data-i18n="setup.startBtn">
-                    Start vs. Opponent
+                <button class="btn" onclick="startPlaytesterWithOpponent()" style="flex: 1; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; font-weight: bold; border: none; box-shadow: 0 4px 10px rgba(39,174,96,0.3); padding: 12px; border-radius: 8px; cursor: pointer;">
+                    🚀 Start vs. Opponent
                 </button>
             </div>
         </div>
@@ -3288,38 +3297,37 @@
     <div id="ptCardContextMenu" class="pt-card-context-menu" oncontextmenu="return false;"
          onmouseenter="ptCancelMenuClose()" onmouseleave="ptScheduleMenuClose()">
         <div class="pt-menu-row">
-            <div class="pt-status-btn" title="Poison"    onclick="ptMenuAction('status','poison')"></div>
-            <div class="pt-status-btn" title="Burn"      onclick="ptMenuAction('status','burn')"></div>
-            <div class="pt-status-btn" title="Asleep"    onclick="ptMenuAction('status','asleep')"></div>
-            <div class="pt-status-btn" title="Paralyzed" onclick="ptMenuAction('status','paralyzed')"></div>
-            <div class="pt-status-btn" title="Confused"  onclick="ptMenuAction('status','confused')"></div>
+            <div class="pt-status-btn" title="Poison"    onclick="ptMenuAction('status','poison')">☠️</div>
+            <div class="pt-status-btn" title="Burn"      onclick="ptMenuAction('status','burn')">🔥</div>
+            <div class="pt-status-btn" title="Asleep"    onclick="ptMenuAction('status','asleep')">💤</div>
+            <div class="pt-status-btn" title="Paralyzed" onclick="ptMenuAction('status','paralyzed')">⚡</div>
+            <div class="pt-status-btn" title="Confused"  onclick="ptMenuAction('status','confused')">💫</div>
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
-            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',10)"  title="+10 Damage">+10</button>
-            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',50)"  title="+50 Damage">+50</button>
-            <button class="pt-menu-btn green" onclick="ptMenuAction('damage',-10)" title="Heal 10">-10</button>
-            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',0)"   title="Full heal">0</button>
+            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',10)"  title="+10 Schaden">+10</button>
+            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',50)"  title="+50 Schaden">+50</button>
+            <button class="pt-menu-btn green" onclick="ptMenuAction('damage',-10)" title="Heilen 10">-10</button>
+            <button class="pt-menu-btn"       onclick="ptMenuAction('damage',0)"   title="Voll heilen">0</button>
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
-            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','hand')"    title="To hand"></button>
-            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','deck')"    title="Shuffle into deck"></button>
-            <button class="pt-menu-btn red"  onclick="ptMenuAction('utility','discard')" title="Discard pile"></button>
-            <button class="pt-menu-btn energy-discard" onclick="ptMenuAction('utility','energy-discard')" title="Discard energy"></button>
+            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','hand')"    title="Auf die Hand">✋</button>
+            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','deck')"    title="Ins Deck mischen">🔄</button>
+            <button class="pt-menu-btn red"  onclick="ptMenuAction('utility','discard')" title="Ablagestapel">🗑️</button>
+            <button class="pt-menu-btn" style="background:#c0392b;color:#fff;" onclick="ptMenuAction('utility','retreat')" title="Bench ↔ Aktiv tauschen (Retreat)">↩️ Retreat</button>
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
-            <button class="pt-menu-btn retreat-btn" onclick="ptMenuAction('utility','retreat')" title="Swap Bench Active (Retreat)">Retreat</button>
-            <button class="pt-menu-btn red ko-btn" onclick="ptMenuAction('utility','ko')" title="Knock Out Pokémon">K.O.</button>
+            <button class="pt-menu-btn red" style="width:100%;font-weight:800;" onclick="ptMenuAction('utility','ko')" title="Pokémon sofort K.O. setzen">☠️ K.O.</button>
         </div>
     </div>
 
     <!-- Mobile Context Action Menu (Bottom Sheet) -->
     <div id="ptContextMenu">
         <div id="ptContextHeader">
-            <span id="ptContextCardName">Card</span>
-            <button id="ptContextClose" onclick="ptHideContextMenu()" aria-label="Close">×</button>
+            <span id="ptContextCardName">Karte</span>
+            <button id="ptContextClose" onclick="ptHideContextMenu()" aria-label="Schließen">×</button>
         </div>
         <div id="ptContextActions">
             <!-- Buttons werden dynamisch erstellt -->

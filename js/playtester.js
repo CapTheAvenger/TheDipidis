@@ -325,7 +325,7 @@ ${getLang()==='de' ? `
 
 function ptQuitPlaytester() {
     if (!confirm(t('pt.quitConfirm'))) return;
-    document.getElementById('playtesterModal').classList.add('d-none');
+    document.getElementById('playtesterModal').style.display = 'none';
 }
 
 // --- INITIALIZATION ---
@@ -399,7 +399,7 @@ function openPlaytester(source) {
         ptState.p2.deck.push({ ...card, ptId: 'p2_' + Math.random().toString(36).substr(2, 9) });
     });
 
-    document.getElementById('playtesterModal').classList.remove('d-none');
+    document.getElementById('playtesterModal').style.display = 'flex';
     ptNewGame();
     setupDragAndDrop();
     setupHotkeys();
@@ -407,7 +407,7 @@ function openPlaytester(source) {
 
 function closePlaytester() {
     if (confirm(t('pt.quitConfirmFull'))) {
-        document.getElementById('playtesterModal').classList.add('d-none');
+        document.getElementById('playtesterModal').style.display = 'none';
     }
 }
 
@@ -657,7 +657,7 @@ function startStandalonePlaytester() {
             ptState.p2.deck.push({ ...card, ptId: 'p2_' + Math.random().toString(36).substr(2, 9) });
     });
 
-    document.getElementById('playtesterModal').classList.remove('d-none');
+    document.getElementById('playtesterModal').style.display = 'flex';
     ptNewGame();
     setupDragAndDrop();
     setupHotkeys();
@@ -900,7 +900,7 @@ function ptOpenStartPhase() {
     const handZone = document.querySelector('.pt-hand-zone');
     if (handZone) handZone.style.borderTopColor = '#3B4CCA';
     ptRenderStartPhaseModal();
-    if (modal) { modal.classList.remove('d-none'); modal.style.display = 'flex'; }
+    if (modal) modal.style.display = 'flex';
 }
 
 function ptRenderStartPhaseModal() {
@@ -1216,7 +1216,7 @@ function ptConfirmStartActives() {
     ptStartPhase   = false;
     ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
     const fpModal = document.getElementById('ptStartPhaseModal');
-    if (fpModal) { fpModal.classList.add('d-none'); fpModal.style.display = ''; }
+    if (fpModal) fpModal.style.display = 'none';
     ptLog(getLang()==='de' ? `✅ Spiel gestartet! P1 geht zuerst. Preiskarten verteilt. Viel Spaß!` : `✅ Game started! P1 goes first. Prize cards dealt. Have fun!`);
     ptRenderAll();
 
@@ -3310,8 +3310,7 @@ function ptOpenDiscard(player) {
     // Inject sort toolbar
     const sortBar = document.getElementById('ptDiscardSortBar');
     if (sortBar) {
-        sortBar.classList.remove('d-none');
-        sortBar.classList.add('d-flex');
+        sortBar.style.display = 'flex';
         const btnOrder = document.getElementById('ptDscSortOrder');
         const btnType  = document.getElementById('ptDscSortType');
         if (btnOrder) {
@@ -3338,8 +3337,7 @@ function ptOpenDiscard(player) {
     const modal = document.getElementById('ptDiscardModal');
     modal._ptPlayer = player;
     _ptRefreshDiscardGrid(player);
-    modal.classList.remove('d-none');
-    modal.classList.add('d-flex');
+    modal.style.display = 'flex';
 }
 
 function ptOpenLostZone(player) {
@@ -3349,8 +3347,7 @@ function ptOpenLostZone(player) {
     if (title) title.textContent = `🌌 Lost Zone (${player.toUpperCase()}) – Click = Return to hand`;
     const sortBar = document.getElementById('ptDiscardSortBar');
     if (sortBar) {
-        sortBar.classList.remove('d-flex');
-        sortBar.classList.add('d-none');
+        sortBar.style.display = 'none';
     }
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
@@ -3364,8 +3361,7 @@ function ptOpenLostZone(player) {
             <div class="pos-abs bottom-0 left-0 right-0 bg-purple-dark-08 color-white fs-9 px-4 py-2 br-bottom-6 overflow-hidden nowrap ellipsis">${_ptEscHtml(c.name)}</div>
         </div>`;
     }).join('');
-    document.getElementById('ptDiscardModal').classList.remove('d-none');
-    document.getElementById('ptDiscardModal').classList.add('d-flex');
+    document.getElementById('ptDiscardModal').style.display = 'flex';
 }
 
 // --- OPP PANEL ACTIONS ---
@@ -4917,7 +4913,7 @@ function ptQuitGame() {
     const modal = document.getElementById('ptWinModal');
     if (modal) modal.style.display = 'none';
     const playtesterModal = document.getElementById('playtesterModal');
-    if (playtesterModal) playtesterModal.classList.add('d-none');
+    if (playtesterModal) playtesterModal.style.display = 'none';
 }
 
 function _ptShowAbilityPickModal(player, cards, pickCount, pickDest, restDest, title) {
@@ -5048,10 +5044,11 @@ function ptOpenCardMenu(event, player, zoneId, forceOpen = false) {
     if (posX + menuWidth / 2 > window.innerWidth) posX = window.innerWidth - menuWidth / 2 - 6;
     if (posX - menuWidth / 2 < 6)                 posX = menuWidth / 2 + 6;
 
-    menu.classList.remove('d-none');
-    menu.classList.add('d-flex', 'pos-fixed', 'translate-x--50');
+    menu.style.display = 'flex';
+    menu.style.position = 'fixed';
     menu.style.left = posX + 'px';
     menu.style.top = posY + 'px';
+    menu.style.transform = 'translateX(-50%)';
 }
 
 document.addEventListener('click', function(e) {

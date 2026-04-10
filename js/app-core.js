@@ -1269,6 +1269,17 @@ const BASE_PATH = './data/';
                     const badge = document.getElementById('current-tab-title');
                     if (badge) badge.textContent = btnText;
                 }
+            } else {
+                // Fallback: menu-only tabs (calculator, etc.) — find via menu-item
+                const menuBtn = document.querySelector(`.menu-item[data-tab-id="${tabName}"] .menu-item-label`);
+                if (menuBtn) {
+                    const menuText = menuBtn.textContent.trim();
+                    if (menuText) {
+                        document.title = menuText + ' – Pokémon TCG Hub';
+                        const badge = document.getElementById('current-tab-title');
+                        if (badge) badge.textContent = menuText;
+                    }
+                }
             }
         }
 
@@ -1803,6 +1814,7 @@ const BASE_PATH = './data/';
          */
         async function _loadTournamentCardsChunked(options) {
             const forceRefresh = Boolean(options && options.forceRefresh);
+            const latestOnly = Boolean(options && options.latestChunkOnly);
             const cacheBust = forceRefresh ? `?t=${Date.now()}` : '';
 
             try {
@@ -1812,10 +1824,16 @@ const BASE_PATH = './data/';
                 const manifest = await manifestResp.json();
                 if (!manifest || !Array.isArray(manifest.chunks) || manifest.chunks.length === 0) return null;
 
-                devLog(`[Tournament CSV] Loading ${manifest.chunks.length} chunks (${manifest.total_rows} rows)`);
+                let chunksToLoad = manifest.chunks;
+                if (latestOnly && chunksToLoad.length > 0) {
+                    chunksToLoad = [chunksToLoad[chunksToLoad.length - 1]];
+                    devLog(`[Tournament CSV] Loading latest chunk only: ${chunksToLoad[0]}`);
+                } else {
+                    devLog(`[Tournament CSV] Loading ${chunksToLoad.length} chunks (${manifest.total_rows} rows)`);
+                }
 
-                // Load all chunks in parallel
-                const chunkPromises = manifest.chunks.map(chunkFile =>
+                // Load chunks in parallel
+                const chunkPromises = chunksToLoad.map(chunkFile =>
                     fetchAndParseCSV(`${BASE_PATH}${chunkFile}${cacheBust}`, ';').catch(e => {
                         console.warn(`[Tournament CSV] Failed to load chunk ${chunkFile}:`, e);
                         return [];
@@ -1835,7 +1853,9 @@ const BASE_PATH = './data/';
         async function loadCSV(filename, options = {}) {
             try {
                 const forceRefresh = Boolean(options && options.forceRefresh);
-                const cacheKey = String(filename || '').toLowerCase();
+                const baseCacheKey = String(filename || '').toLowerCase();
+                const latestOnly = Boolean(options && options.latestChunkOnly);
+                const cacheKey = latestOnly ? baseCacheKey + ':latest' : baseCacheKey;
 
                 if (!forceRefresh && csvMemoryCache.has(cacheKey)) {
                     return csvMemoryCache.get(cacheKey);
@@ -1846,7 +1866,7 @@ const BASE_PATH = './data/';
                 }
 
                 // Tournament cards: prefer chunked loading via manifest
-                const isTournamentCards = cacheKey === 'tournament_cards_data_cards.csv';
+                const isTournamentCards = baseCacheKey === 'tournament_cards_data_cards.csv';
 
                 const loadPromise = (async () => {
                     let parsed = null;

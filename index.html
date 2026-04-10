@@ -3300,8 +3300,8 @@
                 Your current deck <strong>(Player 1)</strong> is ready. What should <strong>Player 2</strong> play?
             </p>
             <div style="margin-bottom: 20px;">
-                <label style="display:block; font-weight:bold; margin-bottom:8px; color: #2c3e50;">Opponent's Deck (PTCG Live Format):</label>
-                <textarea id="playtesterOpponentDeck" placeholder="Paste Player 2's deck list here (e.g. from Limitless)..." style="width: 100%; height: 180px; padding: 12px; border: 2px solid #b3d9ff; border-radius: 8px; font-family: monospace; font-size: 12px; resize: vertical; box-sizing: border-box;"></textarea>
+                <label for="playtesterOpponentDeck" style="display:block; font-weight:bold; margin-bottom:8px; color: #2c3e50;">Opponent's Deck (PTCG Live Format):</label>
+                <textarea id="playtesterOpponentDeck" aria-label="Paste Player 2 deck list" placeholder="Paste Player 2's deck list here (e.g. from Limitless)..." style="width: 100%; height: 180px; padding: 12px; border: 2px solid #b3d9ff; border-radius: 8px; font-family: monospace; font-size: 12px; resize: vertical; box-sizing: border-box;"></textarea>
             </div>
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 <button class="btn" onclick="startPlaytesterWithMirror()" style="flex: 1; background: #e1e8ed; color: #2c3e50; font-weight: bold; border: 2px solid #ccd6dd; padding: 12px; border-radius: 8px; cursor: pointer;">

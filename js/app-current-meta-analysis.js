@@ -188,7 +188,7 @@
 
                 if (filteredData.length === 0) {
                     if (!window.currentMetaTournamentCardsData) {
-                        const rawTournament = await loadCSV('tournament_cards_data_cards.csv');
+                        const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
                         window.currentMetaTournamentCardsDataRaw = rawTournament;
                         window.currentMetaTournamentCardsData = filterTournamentRowsByMetaDate(rawTournament);
                     }
@@ -436,7 +436,7 @@
                 // Use Major Tournament data (Top 256 only), filtered to current meta period
                 if (!window.currentMetaTournamentCardsData) {
                     showToast('Lade Major-Tournament-Kartendaten...', 'info');
-                    const rawTournament = await loadCSV('tournament_cards_data_cards.csv');
+                    const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
                     window.currentMetaTournamentCardsDataRaw = rawTournament;
                     window.currentMetaTournamentCardsData = filterTournamentRowsByMetaDate(rawTournament);
                 }
@@ -614,7 +614,7 @@
 
             // Load and cache tournament cards data (filtered by meta date)
             if (!window.currentMetaTournamentCardsData) {
-                const rawTournament = await loadCSV('tournament_cards_data_cards.csv');
+                const rawTournament = await loadCSV('tournament_cards_data_cards.csv', { latestChunkOnly: true });
                 window.currentMetaTournamentCardsDataRaw = rawTournament;
                 window.currentMetaTournamentCardsData = filterTournamentRowsByMetaDate(rawTournament);
             }

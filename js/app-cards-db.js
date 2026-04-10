@@ -336,21 +336,19 @@
             if (cacheRef === 'currentMeta' && _cachedCurrentMetaRows) return _cachedCurrentMetaRows;
 
             let rows;
-            // Tournament cards: prefer chunked loading via manifest
+            // Tournament cards: prefer latest chunk only (current format is sufficient for playability)
             if (file === 'tournament_cards_data_cards.csv') {
                 try {
                     const manifestResp = await fetch(BASE_PATH + 'tournament_cards_manifest.json');
                     if (manifestResp.ok) {
                         const manifest = await manifestResp.json();
                         if (manifest && Array.isArray(manifest.chunks) && manifest.chunks.length > 0) {
-                            const chunkPromises = manifest.chunks.map(async (chunkFile) => {
-                                const resp = await fetch(BASE_PATH + chunkFile);
-                                if (!resp.ok) return [];
+                            const latestChunk = manifest.chunks[manifest.chunks.length - 1];
+                            const resp = await fetch(BASE_PATH + latestChunk);
+                            if (resp.ok) {
                                 const text = await resp.text();
-                                return parseCSV(text);
-                            });
-                            const chunkResults = await Promise.all(chunkPromises);
-                            rows = chunkResults.flat();
+                                rows = parseCSV(text);
+                            }
                         }
                     }
                 } catch (e) {

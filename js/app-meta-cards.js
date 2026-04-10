@@ -1254,6 +1254,14 @@
                     
                     // Patch matchup box tables (Best/Worst) for proper column widths and name wrapping
                     patchMatchupBoxTables();
+
+                    // Add aria-labels to matchup search inputs injected from static HTML
+                    document.querySelectorAll('#currentMetaContent input[id^="opponent_search_"]').forEach(input => {
+                        if (!input.getAttribute('aria-label')) {
+                            const deck = input.id.replace('opponent_search_', '').replace(/_/g, ' ');
+                            input.setAttribute('aria-label', 'Search matchup for ' + deck);
+                        }
+                    });
                     
                     // Patch the Archetype Overview stat card with current CSV data
                     await patchArchetypeOverview();

@@ -201,53 +201,55 @@
             window._pastMetaSetOrderMap = pastMetaSetOrderMap;
             window._pastMetaTournamentsByDate = tournamentsByDate;
 
-            // Phase 2: Stream the large cards CSV to build ONLY the deck index
-            // (unique archetype+tournament combos) without storing 429k card rows in memory.
-            const deckIndex = await streamPastMetaDeckIndex(pastMetaSetOrderMap, tournamentsByDate);
-            
-            if (!deckIndex || deckIndex.size === 0) {
+            // Phase 2: Load manifest for lazy per-format chunk loading
+            let pastMetaManifest = null;
+            try {
+                const manifestResp = await fetch(BASE_PATH + 'tournament_cards_manifest.json?t=' + Date.now());
+                if (manifestResp.ok) pastMetaManifest = await manifestResp.json();
+            } catch (e) { /* ignore */ }
+            window._pastMetaManifest = pastMetaManifest;
+            window._pastMetaLoadedChunks = new Set();
+
+            // Populate Format Filter from manifest meta_keys (no full data load yet)
+            const formatSelect = document.getElementById('pastMetaFormatFilter');
+            resetSelectWithPlaceholder(formatSelect, '-- All Formats --', 'all');
+            let defaultFormat = 'all';
+
+            if (pastMetaManifest && Array.isArray(pastMetaManifest.meta_keys) && pastMetaManifest.meta_keys.length > 0) {
+                const sortedKeys = [...pastMetaManifest.meta_keys].sort((a, b) => {
+                    const scoreA = getPastMetaSortScore(a, pastMetaSetOrderMap, new Map());
+                    const scoreB = getPastMetaSortScore(b, pastMetaSetOrderMap, new Map());
+                    if (scoreA !== scoreB) return scoreB - scoreA;
+                    return a.localeCompare(b);
+                });
+                sortedKeys.forEach(key => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = key;
+                    formatSelect.appendChild(option);
+                });
+                // Default to newest format for fast initial load (~17MB instead of ~100MB)
+                defaultFormat = sortedKeys[0];
+                formatSelect.value = defaultFormat;
+            }
+
+            // Load only the selected format's chunk (lazy)
+            pastMetaDecks = [];
+            await _loadPastMetaChunksIfNeeded(defaultFormat, pastMetaSetOrderMap, tournamentsByDate);
+
+            if (pastMetaDecks.length === 0) {
                 showToast('No past tournament data found', 'error');
                 console.error('[Past Meta] No decks found in tournament CSV');
                 return;
             }
-
-            pastMetaDecks = Array.from(deckIndex.values());
-            
-            // Build latest date per meta for robust fallback sorting.
-            const metaLatestDateMap = new Map();
-            pastMetaDecks.forEach(deck => {
-                const metaName = String(deck.format || '').trim();
-                if (!metaName) return;
-                const dateMs = parsePastMetaDateMs(deck.tournament_date);
-                const current = metaLatestDateMap.get(metaName) || 0;
-                if (dateMs > current) {
-                    metaLatestDateMap.set(metaName, dateMs);
-                }
-            });
-
-            // Populate Format Filter
-            const formats = [...new Set(pastMetaDecks.map(d => String(d.format || '').trim()).filter(f => f && f !== 'Unknown'))]
-                .sort((a, b) => {
-                    const scoreA = getPastMetaSortScore(a, pastMetaSetOrderMap, metaLatestDateMap);
-                    const scoreB = getPastMetaSortScore(b, pastMetaSetOrderMap, metaLatestDateMap);
-                    if (scoreA !== scoreB) return scoreB - scoreA;
-                    return a.localeCompare(b);
-                });
-
-            const formatSelect = document.getElementById('pastMetaFormatFilter');
-            resetSelectWithPlaceholder(formatSelect, '-- All Formats --', 'all');
-            formats.forEach(format => {
-                const option = document.createElement('option');
-                option.value = String(format);
-                option.textContent = String(format);
-                formatSelect.appendChild(option);
-            });
             
             // Populate Tournament Filter (will be updated dynamically)
             const tournamentSelect = document.getElementById('pastMetaTournamentFilter');
             
-            // Setup event listeners - Format filter triggers tournament list update
-            formatSelect.addEventListener('change', () => {
+            // Setup event listeners - Format filter triggers lazy chunk load + update
+            formatSelect.addEventListener('change', async () => {
+                const format = formatSelect.value;
+                await _loadPastMetaChunksIfNeeded(format, window._pastMetaSetOrderMap, window._pastMetaTournamentsByDate);
                 updatePastMetaTournamentFilter();
                 updatePastMetaDeckList();
             });
@@ -272,10 +274,52 @@
           }
         }
         
+        // Lazy-load tournament chunks for a specific format (or all formats).
+        // Appends new decks to pastMetaDecks without duplicating already-loaded data.
+        async function _loadPastMetaChunksIfNeeded(format, setOrderMap, tournamentsByDate) {
+            const manifest = window._pastMetaManifest;
+            const loaded = window._pastMetaLoadedChunks || new Set();
+
+            if (!manifest || !Array.isArray(manifest.chunks)) {
+                // No manifest — fall back to full monolith load (once)
+                if (!loaded.has('__all__')) {
+                    const deckIndex = await streamPastMetaDeckIndex(setOrderMap, tournamentsByDate);
+                    pastMetaDecks = Array.from(deckIndex.values());
+                    loaded.add('__all__');
+                }
+                return;
+            }
+
+            let chunksToLoad = [];
+            if (format === 'all') {
+                manifest.meta_keys.forEach((key, i) => {
+                    if (!loaded.has(key)) chunksToLoad.push({ key, file: manifest.chunks[i] });
+                });
+            } else {
+                const idx = manifest.meta_keys.indexOf(format);
+                if (idx >= 0 && !loaded.has(format)) {
+                    chunksToLoad.push({ key: format, file: manifest.chunks[idx] });
+                }
+            }
+
+            if (chunksToLoad.length === 0) return; // Already loaded
+
+            const chunkUrls = chunksToLoad.map(c => BASE_PATH + c.file);
+            devLog(`[Past Meta] Lazy-loading ${chunkUrls.length} chunk(s) for format: ${format}`);
+            const deckIndex = await streamPastMetaDeckIndex(setOrderMap, tournamentsByDate, chunkUrls);
+            const newDecks = Array.from(deckIndex.values());
+            pastMetaDecks = pastMetaDecks.concat(newDecks);
+
+            chunksToLoad.forEach(c => loaded.add(c.key));
+            window._pastMetaLoadedChunks = loaded;
+            devLog(`[Past Meta] Now ${pastMetaDecks.length} total decks loaded (${loaded.size} chunks)`);
+        }
+
         // Stream-parse the large cards CSV to build the deck index AND store cards per deck.
         // Uses PapaParse streaming so PapaParse never holds all 429k rows internally.
         // Prefers chunked files via tournament_cards_manifest.json when available.
-        function streamPastMetaDeckIndex(setOrderMap, tournamentsByDate) {
+        // Optional chunkUrls: array of specific chunk URLs to load (for lazy per-format loading).
+        function streamPastMetaDeckIndex(setOrderMap, tournamentsByDate, chunkUrls) {
             return new Promise(async (resolve, reject) => {
                 const deckMap = new Map();
                 const inferredMeta = new Map(); // deckKey → newest set code
@@ -393,27 +437,35 @@
                 }
 
                 try {
-                    // Try chunked loading via manifest
-                    let useChunks = false;
-                    try {
-                        const manifestResp = await fetch(BASE_PATH + 'tournament_cards_manifest.json');
-                        if (manifestResp.ok) {
-                            const manifest = await manifestResp.json();
-                            if (manifest && Array.isArray(manifest.chunks) && manifest.chunks.length > 0) {
-                                devLog(`[Past Meta] Loading ${manifest.chunks.length} tournament chunks`);
-                                for (const chunkFile of manifest.chunks) {
-                                    await streamFile(BASE_PATH + chunkFile);
-                                }
-                                useChunks = true;
-                            }
+                    if (chunkUrls && chunkUrls.length > 0) {
+                        // Lazy: load only the specified chunk files
+                        devLog(`[Past Meta] Loading ${chunkUrls.length} specified chunk(s)`);
+                        for (const url of chunkUrls) {
+                            await streamFile(url);
                         }
-                    } catch (e) {
-                        console.warn('[Past Meta] Manifest not available, using monolith:', e);
-                    }
+                    } else {
+                        // Full load: try chunked loading via manifest, else monolith
+                        let useChunks = false;
+                        try {
+                            const manifestResp = await fetch(BASE_PATH + 'tournament_cards_manifest.json');
+                            if (manifestResp.ok) {
+                                const manifest = await manifestResp.json();
+                                if (manifest && Array.isArray(manifest.chunks) && manifest.chunks.length > 0) {
+                                    devLog(`[Past Meta] Loading ${manifest.chunks.length} tournament chunks`);
+                                    for (const chunkFile of manifest.chunks) {
+                                        await streamFile(BASE_PATH + chunkFile);
+                                    }
+                                    useChunks = true;
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('[Past Meta] Manifest not available, using monolith:', e);
+                        }
 
-                    // Fallback: stream the single monolith file
-                    if (!useChunks) {
-                        await streamFile(BASE_PATH + 'tournament_cards_data_cards.csv');
+                        // Fallback: stream the single monolith file
+                        if (!useChunks) {
+                            await streamFile(BASE_PATH + 'tournament_cards_data_cards.csv');
+                        }
                     }
 
                     finalize();

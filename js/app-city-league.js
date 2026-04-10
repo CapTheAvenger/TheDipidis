@@ -582,7 +582,7 @@
                     <div class="city-league-info-flex-block city-league-info-flex-block-wide">
                         <h2 class="city-league-info-table-title">${t('cl.fullComparison')}</h2>
                         <div class="city-league-info-search-block">
-                            <input type="text" id="cityLeagueSearchFilter" placeholder="${t('cl.searchPlaceholder')}" class="city-league-info-search-input" oninput="debouncedFilterCityLeagueTable()">
+                            <input type="text" id="cityLeagueSearchFilter" aria-label="Search City League table" placeholder="${t('cl.searchPlaceholder')}" class="city-league-info-search-input" oninput="debouncedFilterCityLeagueTable()">
                             <div id="cityLeagueSearchResults" class="city-league-info-search-results"></div>
                         </div>
                         <div id="cityLeagueFullTable"></div>

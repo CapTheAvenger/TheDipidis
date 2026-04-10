@@ -1947,6 +1947,27 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     ctx.textAlign = 'start';
                     ctx.textBaseline = 'alphabetic';
                 }
+
+                // Max price badge (bottom-left, for wishlist cards)
+                const allBadges = cardEl.querySelectorAll('.compact-badge');
+                const priceBadge = Array.from(allBadges).find(b => b.textContent.includes('max'));
+                if (priceBadge) {
+                    const pText = priceBadge.textContent.trim();
+                    ctx.font = 'bold 12px sans-serif';
+                    const tw = ctx.measureText(pText).width + 10;
+                    const ph = 18;
+                    const px = x + 4;
+                    const py = y + CARD_H - ph - 4;
+                    ctx.fillStyle = 'rgba(142,68,173,0.9)';
+                    ctx.beginPath();
+                    ctx.roundRect(px, py, tw, ph, 4);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(pText, px + 5, py + ph / 2);
+                    ctx.textBaseline = 'alphabetic';
+                }
             });
 
             // Footer

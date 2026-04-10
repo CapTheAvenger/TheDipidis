@@ -1009,7 +1009,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                 
                 <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
                     <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
-                    <label for="opponent_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
+                    <label for="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
                     <div style="position: relative;">
                         <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
                         <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
@@ -1076,7 +1076,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                 
                 <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
                     <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
-                    <label for="opponent_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
+                    <label for="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
                     <div style="position: relative;">
                         <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
                         <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">
@@ -1143,7 +1143,7 @@ def create_html_report(comparison_data: List[Dict[str, Any]], output_file: str,
                 
                 <div style="background: white; padding: 15px; border-radius: 5px; border: 2px solid #3498db; margin-top: 20px;">
                     <h4 style="margin-top: 0; color: #3498db;">🔍 Select & Analyze Opponent Matchup</h4>
-                    <label for="opponent_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
+                    <label for="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="display: block; margin-bottom: 8px; font-weight: bold;">Search Opponent:</label>
                     <div style="position: relative;">
                         <input type="text" id="opponent_search_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" placeholder="Type to search deck..." style="width: 100%; padding: 10px; border: 2px solid #bbb; border-radius: 4px; font-size: 1em;" oninput="filterOpponents(this, '{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}')">
                         <div id="opponent_dropdown_{deck_name.replace(' ', '_').replace(chr(39), '').replace('-', '_')}" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #bbb; border-top: none; border-radius: 0 0 4px 4px; max-height: 250px; overflow-y: auto; display: none; z-index: 1000;">

@@ -1264,7 +1264,11 @@ const BASE_PATH = './data/';
                 activeBtn.classList.add('active');
                 // Update browser tab title with active section name
                 const btnText = activeBtn.textContent.trim();
-                if (btnText) document.title = btnText + ' – Pokémon TCG Hub';
+                if (btnText) {
+                    document.title = btnText + ' – Pokémon TCG Hub';
+                    const badge = document.getElementById('current-tab-title');
+                    if (badge) badge.textContent = btnText;
+                }
             }
         }
 

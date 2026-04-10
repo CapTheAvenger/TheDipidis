@@ -176,7 +176,7 @@
                         <div class="city-league-header">
                             <h2><span data-i18n="cl.cityLeagueDev">City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" aria-label="Help for City League Meta" data-i18n-title="btn.helpTitle"></button></h2>
                             <div class="cl-format-container">
-                                <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select">
+                                <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select" aria-label="Meta format">
                                     <option value="M4" data-i18n="format.m4current">Current Meta</option>
                                     <option value="M3" data-i18n="format.m3archive">Past Meta</option>
                                 </select>
@@ -198,7 +198,7 @@
                         <div class="header">
                             <h2><span data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" aria-label="Help for Deck Analysis" data-i18n-title="btn.helpTitle"></button></h2>
                             <div class="cl-format-container">
-                                <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select">
+                                <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select" aria-label="Meta format">
                                     <option value="M4" data-i18n="format.m4current">Current Meta</option>
                                     <option value="M3" data-i18n="format.m3archive">Past Meta</option>
                                 </select>
@@ -1121,7 +1121,7 @@
                     <div class="proxy-panels-grid">
                         <div class="proxy-panel proxy-import-decklist-panel">
                             <h3 class="proxy-panel-title" data-i18n="section.importDecklist">Import Decklist</h3>
-                            <textarea id="proxyDecklistInput" placeholder="4 Buddy-Buddy Poffin SVI 186&#10;2 Rare Candy PAF 89" class="proxy-decklist-input"></textarea>
+                            <textarea id="proxyDecklistInput" placeholder="4 Buddy-Buddy Poffin SVI 186&#10;2 Rare Candy PAF 89" class="proxy-decklist-input" aria-label="Paste decklist for proxy print"></textarea>
                             <div class="proxy-panel-btn-row">
                                 <button id="proxyImportDecklistBtn" class="btn-modern proxy-add-decklist-btn" onclick="importDecklistToProxy()" data-i18n="proxy.addDecklistBtn">Add Decklist to Queue</button>
                             </div>
@@ -1180,7 +1180,7 @@
                             <div class="sandbox-player-panel-bar player1-bar"></div>
                             <h2 class="sandbox-player-title player1-title"><div class="sandbox-player-dot player1-dot"></div> <span data-i18n="misc.player1">Player 1</span></h2>
                             <p class="sandbox-player-hint" data-i18n="sandbox.pasteHint">Paste your Pokémon TCG Live deck code here:</p>
-                            <textarea id="sandboxImportP1" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." class="sandbox-player-textarea"></textarea>
+                            <textarea id="sandboxImportP1" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." class="sandbox-player-textarea" aria-label="Player 1 deck import"></textarea>
                             <div class="sandbox-player-status-row">
                                 <span id="sandboxStatusP1" class="sandbox-player-status" data-i18n="sandbox.waitingInput">Waiting for input...</span>
                                 <button class="btn sandbox-player-load-btn player1-load-btn" onclick="parseSandboxDeckToExactPrints(document.getElementById('sandboxImportP1').value, 'p1')" data-i18n="sandbox.loadDeck">Load Deck</button>
@@ -1190,7 +1190,7 @@
                             <div class="sandbox-player-panel-bar player2-bar"></div>
                             <h2 class="sandbox-player-title player2-title"><div class="sandbox-player-dot player2-dot"></div> <span data-i18n="misc.player2">Player 2</span></h2>
                             <p class="sandbox-player-hint" data-i18n="sandbox.pasteHint">Paste your Pokémon TCG Live deck code here:</p>
-                            <textarea id="sandboxImportP2" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." class="sandbox-player-textarea"></textarea>
+                            <textarea id="sandboxImportP2" placeholder="Pokémon: 16&#10;4 Comfey LOR 71&#10;..." class="sandbox-player-textarea" aria-label="Player 2 deck import"></textarea>
                             <div class="sandbox-player-status-row">
                                 <span id="sandboxStatusP2" class="sandbox-player-status" data-i18n="sandbox.waitingInput">Waiting for input...</span>
                                 <button class="btn sandbox-player-load-btn player2-load-btn" onclick="parseSandboxDeckToExactPrints(document.getElementById('sandboxImportP2').value, 'p2')" data-i18n="sandbox.loadDeck">Load Deck</button>
@@ -2529,10 +2529,10 @@
                             </div>
                             <div id="journalHistoryStats" class="battle-journal-history-stats mb-15"></div>
                             <div id="journalHistoryFilters" class="flex gap-10 mb-15 flex-wrap">
-                                <select id="journalFilterTournament" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark">
+                                <select id="journalFilterTournament" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark" aria-label="Filter by tournament">
                                     <option value="" data-i18n="bj.allTournaments">All Tournaments</option>
                                 </select>
-                                <select id="journalFilterResult" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark">
+                                <select id="journalFilterResult" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark" aria-label="Filter by result">
                                     <option value="" data-i18n="bj.allResults">All Results</option>
                                     <option value="win" data-i18n="bj.win">Win</option>
                                     <option value="loss" data-i18n="bj.loss">Loss</option>
@@ -2720,7 +2720,7 @@
             <div class="mb-25 p-20 bg-grey-light br-8 border-2-grey">
                 <h3 class="m-0 mb-15 color-grey-dark fs-110" data-i18n="compare.option1">Option 1: Compare with Manual Decklist</h3>
                 <p class="color-grey mb-10 fs-095" data-i18n="compare.pasteDesc">Paste your old decklist (Pokémon TCG Live Format):</p>
-                <textarea id="oldDeckListInput" placeholder="Pokémon: 16&#10;2 Lunatone ASC 105&#10;3 Solrock ASC 106&#10;...&#10;&#10;Trainer: 33&#10;...&#10;&#10;Energy: 11&#10;..." class="w-100 h-150 p-10 border-grey br-6 font-mono fs-09"></textarea>
+                <textarea id="oldDeckListInput" placeholder="Pokémon: 16&#10;2 Lunatone ASC 105&#10;3 Solrock ASC 106&#10;...&#10;&#10;Trainer: 33&#10;...&#10;&#10;Energy: 11&#10;..." class="w-100 h-150 p-10 border-grey br-6 font-mono fs-09" aria-label="Old decklist for comparison"></textarea>
                 <div class="flex gap-10 mt-10">
                     <button class="btn btn-primary flex-1" onclick="compareDeckLists()" data-i18n="compare.compareBtn">Compare</button>
                     <button class="btn btn-secondary" onclick="document.getElementById('oldDeckListInput').value = ''; document.getElementById('deckCompareResult').style.display = 'none';" data-i18n="compare.clearBtn">Clear</button>
@@ -2815,11 +2815,11 @@
                 🌐 Online Multiplayer
             </div>
             <div style="display:flex; flex-direction:column; gap:12px;">
-                <select id="mpDeckSelect" class="control-input" style="width:100%; margin-bottom:4px; padding:10px; font-size:1rem; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05;">
+                <select id="mpDeckSelect" class="control-input" style="width:100%; margin-bottom:4px; padding:10px; font-size:1rem; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05;" aria-label="Select deck for multiplayer match">
                     <option value="">-- Wähle ein Deck für das Match --</option>
                 </select>
                 <div style="margin:10px 0; text-align:center; font-weight:900; font-size:13px; color:#888; letter-spacing:1px;">ODER</div>
-                <textarea id="mpDeckInput" rows="4" style="width:100%; padding:10px; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05; font-family:monospace; font-size:12px; resize:vertical; box-sizing:border-box;" placeholder="Pokémon: 10&#10;4 Comfey LOR 79&#10;..."></textarea>
+                <textarea id="mpDeckInput" rows="4" style="width:100%; padding:10px; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05; font-family:monospace; font-size:12px; resize:vertical; box-sizing:border-box;" placeholder="Pokémon: 10&#10;4 Comfey LOR 79&#10;..." aria-label="Paste decklist for multiplayer match"></textarea>
                 <button class="pt-btn" style="width:100%; font-size:1.1rem; padding:12px;" onclick="mpCreateGame()">
                     🎮 Create Game (Host)
                 </button>
@@ -3256,11 +3256,11 @@
             <h2 style="margin-top: 0; color: #27ae60; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">⚔️ Playtest – My Decks</h2>
             <p style="color: #555; margin-bottom: 20px;">Choose a deck for each player, then start the match!</p>
             <div style="margin-bottom: 16px;">
-                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #3B4CCA;">Player 1 🔵</label>
+                <label for="myDeckSelectP1" style="display: block; font-weight: 700; margin-bottom: 6px; color: #3B4CCA;">Player 1 🔵</label>
                 <select id="myDeckSelectP1" style="width: 100%; padding: 10px 12px; border: 2px solid #3B4CCA; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
             </div>
             <div style="margin-bottom: 24px;">
-                <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;">Player 2 🔴</label>
+                <label for="myDeckSelectP2" style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;">Player 2 🔴</label>
                 <select id="myDeckSelectP2" style="width: 100%; padding: 10px 12px; border: 2px solid #E3350D; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
             </div>
             <div style="display: flex; gap: 12px;">

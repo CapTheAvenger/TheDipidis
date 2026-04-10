@@ -55,6 +55,7 @@
                     // Expand
                     filterOptions.classList.remove('collapsed');
                     header.classList.remove('collapsed');
+                    header.setAttribute('aria-expanded', 'true');
                     // Show search input if present
                     const searchInput = group.querySelector('.cards-filter-search-input');
                     if (searchInput) searchInput.style.display = '';
@@ -62,6 +63,7 @@
                     // Collapse
                     filterOptions.classList.add('collapsed');
                     header.classList.add('collapsed');
+                    header.setAttribute('aria-expanded', 'false');
                     // Hide search input if present
                     const searchInput = group.querySelector('.cards-filter-search-input');
                     if (searchInput) searchInput.style.display = 'none';
@@ -75,7 +77,7 @@
                     groupId: 'filter-meta-format',
                     targetId: 'metaFormatOptions',
                     html: `
-                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('metaFormatOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('metaFormatOptions')" role="button" tabindex="0" aria-expanded="false">
                             <span>Meta / Format</span>
                             <span class="toggle-icon">▼</span>
                         </div>
@@ -90,7 +92,7 @@
                     groupId: 'filter-set',
                     targetId: 'setFilterOptions',
                     html: `
-                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('setFilterOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('setFilterOptions')" role="button" tabindex="0" aria-expanded="false">
                             <span>Set</span>
                             <span class="toggle-icon">▼</span>
                         </div>
@@ -101,7 +103,7 @@
                     groupId: 'filter-rarity',
                     targetId: 'rarityFilterOptions',
                     html: `
-                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('rarityFilterOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('rarityFilterOptions')" role="button" tabindex="0" aria-expanded="false">
                             <span>Rarity</span>
                             <span class="toggle-icon">▼</span>
                         </div>
@@ -112,7 +114,7 @@
                     groupId: 'filter-category',
                     targetId: 'categoryFilterOptions',
                     html: `
-                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('categoryFilterOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('categoryFilterOptions')" role="button" tabindex="0" aria-expanded="false">
                             <span>Category</span>
                             <span class="toggle-icon">▼</span>
                         </div>
@@ -123,7 +125,7 @@
                     groupId: 'filter-element-type',
                     targetId: 'elementTypeFilterOptions',
                     html: `
-                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('elementTypeFilterOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('elementTypeFilterOptions')" role="button" tabindex="0" aria-expanded="false">
                             <span>Element Type</span>
                             <span class="toggle-icon">▼</span>
                         </div>
@@ -134,7 +136,7 @@
                     groupId: 'filter-main-pokemon',
                     targetId: 'mainPokemonList',
                     html: `
-                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('mainPokemonList')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('mainPokemonList')" role="button" tabindex="0" aria-expanded="false">
                             <span>Main Pokemon</span>
                             <span class="toggle-icon">▼</span>
                         </div>
@@ -146,7 +148,7 @@
                     groupId: 'filter-archetype',
                     targetId: 'archetypeList',
                     html: `
-                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('archetypeList')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('archetypeList')" role="button" tabindex="0" aria-expanded="false">
                             <span>Archetype</span>
                             <span class="toggle-icon">▼</span>
                         </div>
@@ -158,7 +160,7 @@
                     groupId: 'filter-deck-coverage',
                     targetId: 'deckCoverageFilterOptions',
                     html: `
-                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('deckCoverageFilterOptions')">
+                        <div class="cards-filter-header collapsed" onclick="toggleCardFilter('deckCoverageFilterOptions')" role="button" tabindex="0" aria-expanded="false">
                             <span>Deck Coverage</span>
                             <span class="toggle-icon">▼</span>
                         </div>
@@ -172,6 +174,16 @@
                 if (!group) return;
                 if (group.querySelector(`#${section.targetId}`)) return;
                 group.innerHTML = section.html;
+            });
+
+            // Keyboard support for filter headers (Enter/Space)
+            document.querySelectorAll('.cards-filter-header[role="button"]').forEach(header => {
+                if (!header._kbBound) {
+                    header._kbBound = true;
+                    header.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
+                    });
+                }
             });
         }
         

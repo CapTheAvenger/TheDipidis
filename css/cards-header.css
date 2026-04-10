@@ -61,6 +61,7 @@
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s;
+    min-height: 44px;
 }
 .lang-toggle-btn:hover {
     background: rgba(255,255,255,0.22);
@@ -105,6 +106,7 @@
     background: rgba(59,76,202,0.3);
     color: #fff;
     border: 2px solid var(--pokemon-blue, #3B4CCA);
+    min-height: 44px;
 }
 .profile-btn:hover {
     background: var(--pokemon-blue, #3B4CCA);

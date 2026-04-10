@@ -290,7 +290,7 @@ body {
 .pt-toolbar { background: linear-gradient(90deg, #1b3b8c 0%, #2a52be 100%); border-bottom: 3px solid var(--pokemon-yellow); box-shadow: 0 4px 10px rgba(0,0,0,0.8); z-index: 100; }
 .pt-btn { background: rgba(255,255,255,0.9); color: #1b3b8c; border: 2px solid var(--pokemon-yellow); border-radius: 20px; padding: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space: nowrap; transition: all 0.15s ease; font-family: inherit; }
 .pt-btn:hover { background: var(--pokemon-yellow); color: #000; transform: translateY(-2px); }
-.pt-btn.pt-danger { background: var(--color-error); color: white; border-color: var(--color-error-dark); }
+.pt-btn.pt-danger { background: var(--color-error); color: white; border-color: var(--color-error-dark); min-height: 44px; min-width: 44px; }
 .pt-zone-label { color: rgba(255,255,255,0.9); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
 
 .pt-arena {

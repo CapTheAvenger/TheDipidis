@@ -1262,6 +1262,9 @@ const BASE_PATH = './data/';
             );
             if (activeBtn) {
                 activeBtn.classList.add('active');
+                // Update browser tab title with active section name
+                const btnText = activeBtn.textContent.trim();
+                if (btnText) document.title = btnText + ' – Pokémon TCG Hub';
             }
         }
 

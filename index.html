@@ -151,7 +151,7 @@
             </div>
         </header>
 
-        <div class="tabs-container" role="main">
+        <main class="tabs-container">
             <nav class="tab-navigation cards-tab-navigation" aria-label="Main navigation">
                 <button class="tab-btn active" onclick="switchTab('city-league')" data-i18n="tab.cityLeague">City League Meta</button>
                 <button class="tab-btn" onclick="switchTab('city-league-analysis')" data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</button>
@@ -173,7 +173,7 @@
                 <div id="city-league-component-container">
                     <div class="city-league-container">
                         <div class="city-league-header">
-                            <h2><span data-i18n="cl.cityLeagueDev">City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                            <h2><span data-i18n="cl.cityLeagueDev">City League Development</span> <button class="tab-help-btn" onclick="openTabHelp('city-league')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                             <div class="cl-format-container">
                                 <select id="cityLeagueFormatSelect" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select">
                                     <option value="M4" data-i18n="format.m4current">Current Meta</option>
@@ -195,7 +195,7 @@
                     <!-- City League Deck Analysis Tab Content -->
                     <div id="tab-decks">
                         <div class="header">
-                            <h2><span data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                            <h2><span data-i18n="tab.cityLeagueAnalysis">City League Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('city-league-analysis')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                             <div class="cl-format-container">
                                 <select id="cityLeagueFormatSelectAnalysis" onchange="switchCityLeagueFormat(this.value)" class="cl-format-select">
                                     <option value="M4" data-i18n="format.m4current">Current Meta</option>
@@ -564,7 +564,7 @@
                 <div id="current-meta-component-container">
                     <div class="container">
                         <div class="header current-meta-header">
-                            <h2><span data-i18n="cm.limitlessHeading">Limitless Online Comparison</span> <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                            <h2><span data-i18n="cm.limitlessHeading">Limitless Online Comparison</span> <button class="tab-help-btn" onclick="openTabHelp('current-meta')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         </div>
                         <div id="currentMetaContent" class="current-meta-content">
                             <div class="skeleton-row"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
@@ -577,7 +577,7 @@
             <div id="current-analysis" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="cm.analysisHeading">Current Meta Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="cm.analysisHeading">Current Meta Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('current-analysis')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="cm.analyzeAndBuild">Analyze and Build Decks from Current Meta</p>
                     </div>
                     
@@ -850,7 +850,7 @@
             <div id="past-meta" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="pm.analysisHeading">Past Tournament Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('past-meta')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="pm.analysisHeading">Past Tournament Deck Analysis</span> <button class="tab-help-btn" onclick="openTabHelp('past-meta')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="pm.analyzeAndBuild">Analyze and Build Decks from Past Tournaments</p>
                     </div>
                     
@@ -1026,7 +1026,7 @@
             
             <!-- Tab 6: Cards -->
             <div id="cards" class="tab-content">
-                <h2><span data-i18n="cards.heading">Card Database</span> <button class="tab-help-btn" onclick="openTabHelp('cards')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                <h2><span data-i18n="cards.heading">Card Database</span> <button class="tab-help-btn" onclick="openTabHelp('cards')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                 
                 <!-- Filter Section -->
                 <!-- Cards Filter Section Modularized -->
@@ -1110,7 +1110,7 @@
             <div id="proxy" class="tab-content">
                 <div class="proxy-container">
                     <div class="proxy-header-row">
-                        <h2 class="proxy-title"><span data-i18n="tab.proxyPrinter">Proxy Printer</span> <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2 class="proxy-title"><span data-i18n="tab.proxyPrinter">Proxy Printer</span> <button class="tab-help-btn" onclick="openTabHelp('proxy')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <div class="proxy-header-counts">
                             <div class="proxy-header-count proxy-header-unique"><span data-i18n="misc.unique">Unique:</span> <span id="proxyUniqueCount">0</span></div>
                             <div class="proxy-header-count proxy-header-copies"><span data-i18n="misc.copies">Copies:</span> <span id="proxyCopiesCount">0</span></div>
@@ -1129,10 +1129,10 @@
                         <div class="proxy-panel proxy-add-single-card-panel">
                             <h3 class="proxy-panel-title" data-i18n="section.addSingleCard">Add Single Card</h3>
                             <div class="proxy-add-single-card-grid">
-                                <input id="proxyManualName" type="text" placeholder="Card name (search...)" data-i18n-placeholder="proxy.namePlaceholder" autocomplete="off" list="proxyManualNameSuggestions" class="proxy-add-single-input">
-                                <input id="proxyManualSet" type="text" placeholder="Set" data-i18n-placeholder="proxy.setPlaceholder" class="proxy-add-single-input">
-                                <input id="proxyManualNumber" type="text" placeholder="No." data-i18n-placeholder="proxy.numberPlaceholder" class="proxy-add-single-input">
-                                <input id="proxyManualCount" type="number" min="1" value="1" class="proxy-add-single-input">
+                                <input id="proxyManualName" type="text" placeholder="Card name (search...)" aria-label="Card name" data-i18n-placeholder="proxy.namePlaceholder" autocomplete="off" list="proxyManualNameSuggestions" class="proxy-add-single-input">
+                                <input id="proxyManualSet" type="text" placeholder="Set" aria-label="Set code" data-i18n-placeholder="proxy.setPlaceholder" class="proxy-add-single-input">
+                                <input id="proxyManualNumber" type="text" placeholder="No." aria-label="Card number" data-i18n-placeholder="proxy.numberPlaceholder" class="proxy-add-single-input">
+                                <input id="proxyManualCount" type="number" min="1" value="1" aria-label="Count" class="proxy-add-single-input">
                             </div>
                             <datalist id="proxyManualNameSuggestions"></datalist>
                             <div class="proxy-panel-btn-row">
@@ -1170,7 +1170,7 @@
             <div id="sandbox" class="tab-content">
                 <div class="sandbox-container">
                     <div class="sandbox-header">
-                        <h2 class="sandbox-title"><span data-i18n="sandbox.heading">Playtester</span> <button class="tab-help-btn" onclick="openTabHelp('sandbox')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2 class="sandbox-title"><span data-i18n="sandbox.heading">Playtester</span> <button class="tab-help-btn" onclick="openTabHelp('sandbox')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <p class="sandbox-subtitle" data-i18n="sandbox.subtitle">Import decks for 2 players and start the match.</p>
                     </div>
 
@@ -1218,7 +1218,7 @@
             <div id="tutorial" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="tutorial.heading">How to Use This Website</span> <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="tutorial.heading">How to Use This Website</span> <button class="tab-help-btn" onclick="openTabHelp('tutorial')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="tutorial.subtitle">Complete guide to Pokémon TCG analysis, deck building, and playtesting – v45 (March 2026)</p>
                     </div>
                     
@@ -2157,7 +2157,7 @@
             <div id="calculator" class="tab-content">
                 <div class="container">
                     <div class="header">
-                        <h2><span data-i18n="calc.heading">TCG Probability Calculator</span> <button class="tab-help-btn" onclick="openTabHelp('calculator')" title="Help" data-i18n-title="btn.helpTitle"></button></h2>
+                        <h2><span data-i18n="calc.heading">TCG Probability Calculator</span> <button class="tab-help-btn" onclick="openTabHelp('calculator')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button></h2>
                         <p data-i18n="calc.subtitle">Calculate the odds of drawing specific cards in your opening hand, prize cards, or topdeck.</p>
                     </div>
 
@@ -2210,7 +2210,7 @@
                     <div class="header">
                         <h2>
                             <img loading="lazy" src="images/pokeball-icon.png" alt="" class="w-32 h-32 mr-10 align-middle">
-                            <span data-i18n="profile.heading">User Profile</span> <button class="tab-help-btn" onclick="openTabHelp('profile')" title="Help" data-i18n-title="btn.helpTitle"></button>
+                            <span data-i18n="profile.heading">User Profile</span> <button class="tab-help-btn" onclick="openTabHelp('profile')" title="Help" aria-label="Help" data-i18n-title="btn.helpTitle"></button>
                         </h2>
                         <p data-i18n="profile.subtitle">Manage your collection, decks, and settings</p>
                     </div>
@@ -2566,7 +2566,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
         
         <footer class="footer">
             <p><span data-i18n="footer.lastUpdate">Last Update:</span> <span id="last-update">Loading...</span></p>
@@ -2658,7 +2658,7 @@
                     <button class="image-view-export" onclick="exportGridModalAsImage()" title="Save as Image">
                         📸
                     </button>
-                    <button class="image-view-close" onclick="closeImageView()"></button>
+                    <button class="image-view-close" onclick="closeImageView()" aria-label="Close"></button>
                 </div>
             </div>
             <div id="compactCardGrid" class="compact-card-grid"></div>
@@ -2674,7 +2674,7 @@
                     <button class="image-view-export" onclick="exportWishlistAsImage()" title="Save as Image">
                         📸
                     </button>
-                    <button class="image-view-close" onclick="closeWishlistGridModal()"></button>
+                    <button class="image-view-close" onclick="closeWishlistGridModal()" aria-label="Close"></button>
                 </div>
             </div>
             <div id="wishlistCompactGrid" class="compact-card-grid"></div>
@@ -2683,14 +2683,14 @@
     
     <!-- Fullscreen Card Modal -->
     <div id="fullscreenCardModal" class="fullscreen-card-modal" onclick="closeFullscreenCard()" role="dialog" aria-modal="true" aria-label="Fullscreen card view">
-        <button class="fullscreen-close" onclick="event.stopPropagation(); closeFullscreenCard()"></button>
+        <button class="fullscreen-close" onclick="event.stopPropagation(); closeFullscreenCard()" aria-label="Close"></button>
         <img id="fullscreenCardImage" src="" alt="" onclick="event.stopPropagation()">
     </div>
     
     <!-- Single Card View Modal -->
     <div id="singleCardModal" class="single-card-modal" role="dialog" aria-modal="true" aria-label="Card Details" onclick="if(event.target === this) closeSingleCard()">
         <div class="single-card-modal-content">
-            <button class="single-card-close" onclick="closeSingleCard()"></button>
+            <button class="single-card-close" onclick="closeSingleCard()" aria-label="Close"></button>
             <img id="singleCardImage" src="" alt="" referrerpolicy="no-referrer">
             <!-- Limitless button injected dynamically by showSingleCard() -->
         </div>
@@ -2699,7 +2699,7 @@
     <!-- Rarity Switcher Modal -->
     <div id="raritySwitcherModal" class="rarity-switcher-modal ui-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="raritySwitcherTitle" onclick="if(event.target === this) closeRaritySwitcher()">
         <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-lg">
-            <span class="rarity-switcher-close ui-modal-close" onclick="closeRaritySwitcher()"></span>
+            <span class="rarity-switcher-close ui-modal-close" onclick="closeRaritySwitcher()" role="button" aria-label="Close"></span>
             <h2 id="raritySwitcherTitle" data-i18n="modal.raritySwitcher">Card - Rarity Switcher</h2>
             
             <div id="rarityOptionsList" class="rarity-options-list">
@@ -2712,7 +2712,7 @@
     <!-- Deck Compare Modal -->
     <div id="deckCompareModal" class="rarity-switcher-modal ui-modal-backdrop z-10000" role="dialog" aria-modal="true" aria-label="Deck Compare" onclick="if(event.target === this) closeDeckCompare()">
         <div class="rarity-switcher-modal-content ui-modal-panel ui-modal-xl max-w-1400 w-95 max-h-90vh overflow-y-auto mobile-modal-panel">
-            <span class="rarity-switcher-close ui-modal-close" onclick="closeDeckCompare()"></span>
+            <span class="rarity-switcher-close ui-modal-close" onclick="closeDeckCompare()" role="button" aria-label="Close"></span>
             <h2 data-i18n="compare.heading">Deck Compare</h2>
             
             <!-- Option 1: Manual Decklist Input -->

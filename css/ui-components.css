@@ -2,6 +2,19 @@
    UI COMPONENTS (ui-components.css)
    ==================================== */
 
+/* CLS prevention: reserve space for Pokémon card images (standard 2.5:3.5 ratio) */
+.city-league-card-image,
+.city-league-card-img,
+.card-image,
+.meta-card-list-img,
+.card-img-std,
+.top-card-img,
+.meta-binder-card-img,
+.proxy-queue-card-img {
+    aspect-ratio: 2.5 / 3.5;
+    object-fit: cover;
+}
+
 /* ============================================================
  * SEARCHABLE SELECT DROPDOWN
  * Custom dropdown that replaces native <select> with

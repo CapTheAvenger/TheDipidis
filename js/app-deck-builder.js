@@ -1949,10 +1949,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 }
 
                 // Max price badge (bottom-left, for wishlist cards)
-                const allBadges = cardEl.querySelectorAll('.compact-badge');
-                const priceBadge = Array.from(allBadges).find(b => b.textContent.includes('max'));
-                if (priceBadge) {
-                    const pText = priceBadge.textContent.trim();
+                const maxPriceAttr = cardEl.dataset.maxPrice;
+                if (maxPriceAttr) {
+                    const pText = 'max ' + parseFloat(maxPriceAttr).toFixed(2).replace('.', ',') + '€';
                     ctx.font = 'bold 12px sans-serif';
                     const tw = ctx.measureText(pText).width + 10;
                     const ph = 18;

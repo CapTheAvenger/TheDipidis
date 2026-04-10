@@ -1098,14 +1098,11 @@ function openWishlistGridModal() {
     const maxPrice = window.userWishlistMaxPrices ? (window.userWishlistMaxPrices.get(cardId) || 0) : 0;
     const safeImage = escapeHtml(card.image_url);
     const safeName = escapeHtml(card.name);
-    const maxPriceTag = maxPrice > 0
-      ? `<span class="compact-badge" style="position:absolute;bottom:2px;left:2px;background:rgba(142,68,173,0.9);color:#fff;border-radius:4px;font-size:9px;font-weight:bold;padding:1px 4px;box-shadow:0 1px 3px rgba(0,0,0,.4);white-space:nowrap;">max ${maxPrice.toFixed(2).replace('.',',')}€</span>`
-      : '';
 
-    html += `<div class="compact-card" data-export-card>
+    // Max price stored as data-attr for PNG export only (cards too small for text overlay)
+    html += `<div class="compact-card" data-export-card${maxPrice > 0 ? ` data-max-price="${maxPrice.toFixed(2)}"` : ''}>
       <img src="${safeImage}" alt="${safeName}" style="width:100%;display:block;border-radius:5px;" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}">
       ${wantedCount > 1 ? `<span class="compact-badge" style="position:absolute;top:2px;right:2px;background:#e67e22;color:#fff;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,.4);padding:0 3px;">${wantedCount}x</span>` : ''}
-      ${maxPriceTag}
     </div>`;
   });
 

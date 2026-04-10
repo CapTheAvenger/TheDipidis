@@ -20,6 +20,7 @@ if (!window.userCollection)       window.userCollection       = new Set();
 if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
 if (!window.userWishlist)         window.userWishlist         = new Set();
 if (!window.userWishlistCounts)  window.userWishlistCounts  = new Map();
+if (!window.userWishlistMaxPrices) window.userWishlistMaxPrices = new Map();
 if (!window.deckFolders)          window.deckFolders          = [];
 
 // ---------------------------------------------------------------------------
@@ -50,6 +51,7 @@ function onUserSignedIn(user) {
   window.userCollectionCounts = new Map();
   window.userWishlist         = new Set();
   window.userWishlistCounts  = new Map();
+  window.userWishlistMaxPrices = new Map();
   window.userDecks            = [];
 
   loadUserData(user.uid);
@@ -208,6 +210,15 @@ async function loadUserData(userId) {
           window.userWishlistCounts.set(cardId, 1);
         }
       });
+      // Wishlist max prices (budget per card)
+      const wMaxPrices = data.wishlistMaxPrices || {};
+      window.userWishlistMaxPrices = new Map();
+      if (typeof wMaxPrices === 'object') {
+        Object.entries(wMaxPrices).forEach(([k, v]) => {
+          const n = parseFloat(v);
+          if (!isNaN(n) && n > 0) window.userWishlistMaxPrices.set(k, n);
+        });
+      }
       if (typeof updateWishlistUI === 'function') updateWishlistUI();
     } else {
       await createUserProfile(userId);
@@ -270,6 +281,7 @@ function clearUserData() {
   window.userCollectionCounts = new Map();
   window.userWishlist         = new Set();
   window.userWishlistCounts  = new Map();
+  window.userWishlistMaxPrices = new Map();
   window.userDecks            = [];
   window.deckFolders          = [];
 }

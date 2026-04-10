@@ -1020,6 +1020,10 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       const maxCopies = (typeof getLegalMaxCopies === 'function') ? getLegalMaxCopies(card) : 4;
       const maxLabel = maxCopies >= 59 ? '∞' : maxCopies;
 
+      // User's max price (budget)
+      const maxPrice = window.userWishlistMaxPrices ? (window.userWishlistMaxPrices.get(cardId) || '') : '';
+      const maxPriceVal = maxPrice ? parseFloat(maxPrice).toFixed(2).replace('.', ',') : '';
+
       wishlistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
           <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
@@ -1038,6 +1042,14 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
             ${cmUrl
               ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">💰 ${priceDisplay}</a>`
               : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">💰 ${priceDisplay}</div>`}
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+              <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">Max:</span>
+              <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
+                style="width: 52px; padding: 2px 4px; border: 1.5px solid #ddd; border-radius: 4px; font-size: 0.75em; font-weight: 600; color: #8e44ad; text-align: right; outline: none;"
+                onfocus="this.style.borderColor='#8e44ad'" onblur="this.style.borderColor='#ddd'; saveWishlistMaxPrice('${safeCardIdJs}', this.value)"
+                onkeydown="if(event.key==='Enter'){this.blur();}">
+              <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">€</span>
+            </div>
           </div>
         </div>
       `);
@@ -1130,6 +1142,35 @@ async function addOwnedFromWishlist(cardId) {
   }
 }
 
+// Save max price user is willing to pay for a wishlist card
+async function saveWishlistMaxPrice(cardId, rawValue) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  // Parse: accept comma or dot as decimal separator
+  const cleaned = rawValue.replace(',', '.').trim();
+  const val = parseFloat(cleaned);
+
+  try {
+    if (!cleaned || isNaN(val) || val <= 0) {
+      // Clear the max price
+      await db.collection('users').doc(user.uid).update({
+        [`wishlistMaxPrices.${cardId}`]: firebase.firestore.FieldValue.delete()
+      });
+      if (window.userWishlistMaxPrices) window.userWishlistMaxPrices.delete(cardId);
+    } else {
+      const rounded = Math.round(val * 100) / 100;
+      await db.collection('users').doc(user.uid).update({
+        [`wishlistMaxPrices.${cardId}`]: rounded
+      });
+      if (!window.userWishlistMaxPrices) window.userWishlistMaxPrices = new Map();
+      window.userWishlistMaxPrices.set(cardId, rounded);
+    }
+  } catch (error) {
+    console.error('Error saving wishlist max price:', error);
+  }
+}
+
 // Copy wishlist data to clipboard as text
 function copyWishlistToClipboard() {
   if (!window.userWishlist || window.userWishlist.size === 0) {
@@ -1146,8 +1187,10 @@ function copyWishlistToClipboard() {
     const count = window.userWishlistCounts ? (window.userWishlistCounts.get(cardId) || 1) : 1;
     const price = card && card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
     const priceStr = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} €` : '';
+    const maxP = window.userWishlistMaxPrices ? (window.userWishlistMaxPrices.get(cardId) || 0) : 0;
+    const maxPStr = maxP > 0 ? ` (max ${maxP.toFixed(2).replace('.', ',')} €)` : '';
     if (!isNaN(price) && price > 0) totalVal += price * count;
-    lines.push(`${count}x ${cardName} (${cardSet} ${cardNumber})${priceStr ? ' - ' + priceStr : ''}`);
+    lines.push(`${count}x ${cardName} (${cardSet} ${cardNumber})${priceStr ? ' - ' + priceStr : ''}${maxPStr}`);
   });
 
   const totalStr = totalVal > 0 ? `\n\nTotal: ~${totalVal.toFixed(2).replace('.', ',')} €` : '';

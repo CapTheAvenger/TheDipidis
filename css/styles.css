@@ -6150,6 +6150,101 @@ details[open] > .tier-trending-summary::after {
     font-weight: 700;
 }
 
+/* ── Edit Modal ─── */
+.bj-edit-modal {
+    max-width: 480px;
+    width: 95%;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--card-bg, #fff);
+}
+.bj-edit-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: #fff;
+}
+.bj-edit-modal-header h3 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+.bj-edit-modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+.bj-edit-modal-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+.bj-edit-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted, #555);
+    margin-bottom: -4px;
+}
+.bj-edit-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid rgba(0,0,0,.12);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: var(--card-bg, #f7f8fa);
+    color: var(--text-color, #333);
+    box-sizing: border-box;
+    transition: border-color .15s;
+}
+.bj-edit-input:focus {
+    outline: none;
+    border-color: var(--accent, #2563eb);
+}
+.bj-edit-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid rgba(0,0,0,.08);
+}
+
+/* ── Edit/Delete Buttons on history items ─── */
+.bj-history-edit-btn,
+.bj-history-delete-btn {
+    background: none;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 3px 7px;
+    line-height: 1;
+    transition: background .15s;
+}
+.bj-history-edit-btn:hover { background: rgba(37,99,235,.1); }
+.bj-history-delete-btn:hover { background: rgba(231,76,60,.1); }
+
+/* ── Tournament Edit Button ─── */
+.bj-tournament-edit-btn {
+    background: none;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background .15s;
+}
+.bj-tournament-edit-btn:hover { background: rgba(37,99,235,.1); }
+
 .battle-journal-footer {
     margin-top: 16px;
     border-top: 1px solid rgba(31, 45, 61, 0.1);

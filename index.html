@@ -2679,6 +2679,91 @@
         </div>
     </div>
     
+    <!-- Edit Tournament Modal -->
+    <div id="bjEditTournamentModal" class="ui-modal-backdrop" style="display:none; z-index:9999;" onclick="if(event.target===this)closeEditTournamentModal()" role="dialog" aria-modal="true" aria-label="Edit tournament">
+      <div class="ui-modal bj-edit-modal">
+        <div class="bj-edit-modal-header">
+          <h3>✏️ Edit Tournament</h3>
+          <button onclick="closeEditTournamentModal()" class="bj-edit-modal-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="bj-edit-modal-body">
+          <label class="bj-edit-label">Tournament Name</label>
+          <input id="bjEditTournName" type="text" class="bj-edit-input" autocomplete="off">
+
+          <label class="bj-edit-label">Meta Format</label>
+          <select id="bjEditTournMeta" class="bj-edit-input">
+            <option value="">– None –</option>
+            <option value="TEF-POR">TEF-POR</option>
+            <option value="SVI-ASC">SVI-ASC</option>
+            <option value="SVI-PFL">SVI-PFL</option>
+            <option value="SVI-MEG">SVI-MEG</option>
+            <option value="SVI-BLK">SVI-BLK</option>
+            <option value="SVI-DRI">SVI-DRI</option>
+            <option value="SVI-JTG">SVI-JTG</option>
+            <option value="BRS-PRE">BRS-PRE</option>
+            <option value="BRS-SSP">BRS-SSP</option>
+            <option value="BRS-SCR">BRS-SCR</option>
+            <option value="BRS-SFA">BRS-SFA</option>
+            <option value="BRS-TWM">BRS-TWM</option>
+            <option value="BRS-TEF">BRS-TEF</option>
+            <option value="BST-PAR">BST-PAR</option>
+            <option value="SVI-PAF">SVI-PAF</option>
+          </select>
+
+          <label class="bj-edit-label">Tournament Type</label>
+          <input id="bjEditTournType" type="hidden" value="">
+          <div id="bjEditTournTypeGroup" class="bj-type-chip-group">
+            <button type="button" class="bj-type-chip" data-value="City League" onclick="selectEditTournType('City League')">🏙️ City League</button>
+            <button type="button" class="bj-type-chip" data-value="Regional" onclick="selectEditTournType('Regional')">🏆 Regional</button>
+            <button type="button" class="bj-type-chip" data-value="Special Event" onclick="selectEditTournType('Special Event')">⭐ Special</button>
+            <button type="button" class="bj-type-chip" data-value="League Cup" onclick="selectEditTournType('League Cup')">🥤 Cup</button>
+            <button type="button" class="bj-type-chip" data-value="League Challenge" onclick="selectEditTournType('League Challenge')">🎯 Challenge</button>
+            <button type="button" class="bj-type-chip" data-value="Online" onclick="selectEditTournType('Online')">🌐 Online</button>
+            <button type="button" class="bj-type-chip" data-value="Casual" onclick="selectEditTournType('Casual')">🎲 Casual</button>
+          </div>
+        </div>
+        <div class="bj-edit-modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeEditTournamentModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveEditTournament()">💾 Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Single Entry Modal -->
+    <div id="bjEditEntryModal" class="ui-modal-backdrop" style="display:none; z-index:9999;" onclick="if(event.target===this)closeEditEntryModal()" role="dialog" aria-modal="true" aria-label="Edit match entry">
+      <div class="ui-modal bj-edit-modal">
+        <div class="bj-edit-modal-header">
+          <h3>✏️ Edit Match</h3>
+          <button onclick="closeEditEntryModal()" class="bj-edit-modal-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="bj-edit-modal-body">
+          <label class="bj-edit-label">Your Deck</label>
+          <input id="bjEditEntryOwnDeck" type="text" class="bj-edit-input" autocomplete="off">
+
+          <label class="bj-edit-label">Opponent Archetype</label>
+          <input id="bjEditEntryOpponent" type="text" class="bj-edit-input" autocomplete="off">
+
+          <label class="bj-edit-label">Result</label>
+          <select id="bjEditEntryResult" class="bj-edit-input">
+            <option value="win">Win</option>
+            <option value="loss">Loss</option>
+            <option value="tie">Tie</option>
+          </select>
+
+          <label class="bj-edit-label">Turn Order</label>
+          <select id="bjEditEntryTurnOrder" class="bj-edit-input">
+            <option value="">–</option>
+            <option value="first">1st (Going first)</option>
+            <option value="second">2nd (Going second)</option>
+          </select>
+        </div>
+        <div class="bj-edit-modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeEditEntryModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveEditEntry()">💾 Save</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Deck Grid Preview Modal -->
     <div id="deckGridPreviewModal" class="ui-modal-backdrop" style="display:none; z-index:9999;" onclick="if(event.target===this)closeDeckGridPreview()" role="dialog" aria-modal="true" aria-label="Deck card grid preview">
       <div class="ui-modal" style="max-width:520px; width:95%; max-height:90vh; display:flex; flex-direction:column; border-radius:16px; overflow:hidden;">

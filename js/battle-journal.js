@@ -985,6 +985,7 @@
                             <strong class="bj-tournament-name">${escapeHtml(tournLabel)}</strong>
                             <span class="bj-tournament-record">${tW}-${tL}-${tT} (${tWinRate}%)</span>
                         </div>
+                        <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">✏️</button>
                         <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">📸</button>
                     </div>`;
 
@@ -1038,6 +1039,8 @@
                     <div class="bj-history-clip">${escapeHtml(clipText)}</div>
                 </div>
                 <div class="bj-history-actions">
+                    <button type="button" class="bj-history-edit-btn" onclick="openEditEntryModal('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.editEntry', 'Edit'))}">✏️</button>
+                    <button type="button" class="bj-history-delete-btn" onclick="deleteJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.deleteEntry', 'Delete'))}">🗑️</button>
                     <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">📋</button>
                     <span class="battle-journal-result-pill ${resultClass}">${resultEmoji} ${escapeHtml(resultText)}</span>
                 </div>
@@ -1276,6 +1279,219 @@
         showToast(battleJournalText('bj.clearSuccess', 'All journal entries deleted.'), 'success');
     }
 
+    // ── Edit Tournament / Entry ──────────────────────────────
+
+    let _editTournamentOrigName = '';
+
+    function openEditTournamentModal(tournamentName) {
+        _editTournamentOrigName = tournamentName;
+        const entries = journalHistoryCache.filter(e => e.tournamentName === tournamentName);
+        if (entries.length === 0) return;
+
+        const firstEntry = entries[0];
+        const modal = document.getElementById('bjEditTournamentModal');
+        if (!modal) return;
+
+        document.getElementById('bjEditTournName').value = tournamentName || '';
+        document.getElementById('bjEditTournMeta').value = firstEntry.meta || '';
+        document.getElementById('bjEditTournType').value = firstEntry.tournamentType || '';
+        document.querySelectorAll('#bjEditTournTypeGroup .bj-type-chip').forEach(c => {
+            c.classList.toggle('is-selected', c.dataset.value === (firstEntry.tournamentType || ''));
+        });
+
+        modal.style.display = 'flex';
+    }
+
+    function closeEditTournamentModal() {
+        const modal = document.getElementById('bjEditTournamentModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function selectEditTournType(value) {
+        const input = document.getElementById('bjEditTournType');
+        if (input) input.value = value;
+        document.querySelectorAll('#bjEditTournTypeGroup .bj-type-chip').forEach(c => {
+            c.classList.toggle('is-selected', c.dataset.value === value);
+        });
+    }
+
+    async function saveEditTournament() {
+        const newName = String(document.getElementById('bjEditTournName')?.value || '').trim();
+        const newMeta = String(document.getElementById('bjEditTournMeta')?.value || '').trim();
+        const newType = String(document.getElementById('bjEditTournType')?.value || '').trim();
+
+        if (!newName) {
+            showToast(battleJournalText('bj.editNameRequired', 'Tournament name is required.'), 'warning');
+            return;
+        }
+
+        // Update local outbox entries
+        const outbox = getBattleJournalOutbox();
+        let outboxChanged = false;
+        outbox.forEach(e => {
+            if (e.tournamentName === _editTournamentOrigName) {
+                e.tournamentName = newName;
+                e.meta = newMeta;
+                e.tournamentType = newType;
+                outboxChanged = true;
+            }
+        });
+        if (outboxChanged) saveBattleJournalOutbox(outbox);
+
+        // Update Firestore entries
+        const user = window.auth?.currentUser;
+        if (user && window.db && typeof window.db.collection === 'function') {
+            try {
+                const snap = await window.db
+                    .collection('users').doc(user.uid)
+                    .collection('battleJournal')
+                    .where('tournamentName', '==', _editTournamentOrigName)
+                    .get();
+                if (!snap.empty) {
+                    const batch = window.db.batch();
+                    snap.forEach(doc => {
+                        batch.update(doc.ref, {
+                            tournamentName: newName,
+                            meta: newMeta,
+                            tournamentType: newType,
+                            syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+                    await batch.commit();
+                }
+            } catch (err) {
+                console.error('[Battle Journal] Failed to update tournament in Firestore', err);
+                showToast(battleJournalText('bj.editError', 'Error saving changes.'), 'error');
+            }
+        }
+
+        // Update local cache
+        journalHistoryCache.forEach(e => {
+            if (e.tournamentName === _editTournamentOrigName) {
+                e.tournamentName = newName;
+                e.meta = newMeta;
+                e.tournamentType = newType;
+            }
+        });
+
+        closeEditTournamentModal();
+        populateJournalFilters();
+        renderJournalHistory();
+        showToast(battleJournalText('bj.editSaved', 'Tournament updated!'), 'success');
+    }
+
+    let _editEntryId = '';
+
+    function openEditEntryModal(entryId) {
+        _editEntryId = entryId;
+        const entry = journalHistoryCache.find(e => e.id === entryId);
+        if (!entry) return;
+
+        const modal = document.getElementById('bjEditEntryModal');
+        if (!modal) return;
+
+        document.getElementById('bjEditEntryOwnDeck').value = entry.ownDeck || '';
+        document.getElementById('bjEditEntryOpponent').value = entry.opponentArchetype || '';
+        document.getElementById('bjEditEntryResult').value = entry.result || '';
+        document.getElementById('bjEditEntryTurnOrder').value = entry.turnOrder || '';
+
+        modal.style.display = 'flex';
+    }
+
+    function closeEditEntryModal() {
+        const modal = document.getElementById('bjEditEntryModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    async function saveEditEntry() {
+        const newOwnDeck = String(document.getElementById('bjEditEntryOwnDeck')?.value || '').trim();
+        const newOpponent = String(document.getElementById('bjEditEntryOpponent')?.value || '').trim();
+        const newResult = String(document.getElementById('bjEditEntryResult')?.value || '').trim();
+        const newTurnOrder = String(document.getElementById('bjEditEntryTurnOrder')?.value || '').trim();
+
+        if (!newOwnDeck || !newOpponent) {
+            showToast(battleJournalText('bj.editDeckRequired', 'Deck and opponent are required.'), 'warning');
+            return;
+        }
+
+        // Update local outbox
+        const outbox = getBattleJournalOutbox();
+        let outboxChanged = false;
+        outbox.forEach(e => {
+            if (e.id === _editEntryId) {
+                e.ownDeck = newOwnDeck;
+                e.opponentArchetype = newOpponent;
+                e.result = newResult;
+                e.turnOrder = newTurnOrder;
+                outboxChanged = true;
+            }
+        });
+        if (outboxChanged) saveBattleJournalOutbox(outbox);
+
+        // Update Firestore
+        const user = window.auth?.currentUser;
+        if (user && window.db && typeof window.db.collection === 'function') {
+            try {
+                const docRef = window.db
+                    .collection('users').doc(user.uid)
+                    .collection('battleJournal').doc(_editEntryId);
+                const doc = await docRef.get();
+                if (doc.exists) {
+                    await docRef.update({
+                        ownDeck: newOwnDeck,
+                        opponentArchetype: newOpponent,
+                        result: newResult,
+                        turnOrder: newTurnOrder,
+                        syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            } catch (err) {
+                console.error('[Battle Journal] Failed to update entry in Firestore', err);
+                showToast(battleJournalText('bj.editError', 'Error saving changes.'), 'error');
+            }
+        }
+
+        // Update local cache
+        const cached = journalHistoryCache.find(e => e.id === _editEntryId);
+        if (cached) {
+            cached.ownDeck = newOwnDeck;
+            cached.opponentArchetype = newOpponent;
+            cached.result = newResult;
+            cached.turnOrder = newTurnOrder;
+        }
+
+        closeEditEntryModal();
+        renderJournalHistory();
+        showToast(battleJournalText('bj.editEntrySaved', 'Match updated!'), 'success');
+    }
+
+    async function deleteJournalEntry(entryId) {
+        if (!confirm(battleJournalText('bj.deleteEntryConfirm', 'Delete this match entry?'))) return;
+
+        // Remove from outbox
+        const outbox = getBattleJournalOutbox().filter(e => e.id !== entryId);
+        saveBattleJournalOutbox(outbox);
+
+        // Remove from Firestore
+        const user = window.auth?.currentUser;
+        if (user && window.db && typeof window.db.collection === 'function') {
+            try {
+                await window.db
+                    .collection('users').doc(user.uid)
+                    .collection('battleJournal').doc(entryId)
+                    .delete();
+            } catch (err) {
+                console.error('[Battle Journal] Failed to delete entry from Firestore', err);
+            }
+        }
+
+        journalHistoryCache = journalHistoryCache.filter(e => e.id !== entryId);
+        populateJournalFilters();
+        renderJournalHistory();
+        renderBattleJournalSummary();
+        showToast(battleJournalText('bj.entryDeleted', 'Entry deleted.'), 'success');
+    }
+
     window.openBattleJournalSheet = openBattleJournalSheet;
     window.closeBattleJournalSheet = closeBattleJournalSheet;
     window.submitBattleJournalEntry = submitBattleJournalEntry;
@@ -1288,6 +1504,7 @@
     window.applyLastTournament = applyLastTournament;
     window.renderJournalHistory = renderJournalHistory;
     window.openJournalHistoryTab = openJournalHistoryTab;
+    window._bjSetCache = function(entries) { journalHistoryCache = entries; };
     window.copyJournalEntry = copyJournalEntry;
     window.copyAllJournalEntries = copyAllJournalEntries;
     window.clearAllJournalEntries = clearAllJournalEntries;
@@ -1295,6 +1512,14 @@
     window.shareTournamentSummary = shareTournamentSummary;
     window.toggleMatchupStats = toggleMatchupStats;
     window.renderMatchupHeatmap = renderMatchupHeatmap;
+    window.openEditTournamentModal = openEditTournamentModal;
+    window.closeEditTournamentModal = closeEditTournamentModal;
+    window.selectEditTournType = selectEditTournType;
+    window.saveEditTournament = saveEditTournament;
+    window.openEditEntryModal = openEditEntryModal;
+    window.closeEditEntryModal = closeEditEntryModal;
+    window.saveEditEntry = saveEditEntry;
+    window.deleteJournalEntry = deleteJournalEntry;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBattleJournal, { once: true });

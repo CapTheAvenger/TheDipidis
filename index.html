@@ -2726,6 +2726,20 @@
             <button type="button" class="bj-type-chip" data-value="Online" onclick="selectEditTournType('Online')">🌐 Online</button>
             <button type="button" class="bj-type-chip" data-value="Testing" onclick="selectEditTournType('Testing')">🧪 Testing</button>
           </div>
+
+          <!-- Your Deck for this tournament (batch-updates all entries) -->
+          <div class="bj-edit-form-group" style="margin-top: 16px;">
+            <label class="bj-edit-label" for="bjEditTournDeck">🃏 Your Deck <span style="font-size:11px;opacity:0.6;">(updates all matches in this tournament)</span></label>
+            <input
+              id="bjEditTournDeck"
+              type="text"
+              list="bjEditTournDeckList"
+              class="bj-edit-input"
+              placeholder="e.g. Mega Lucario Hariyama"
+              autocomplete="off"
+            >
+            <datalist id="bjEditTournDeckList"></datalist>
+          </div>
         </div>
         <div class="bj-edit-modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeEditTournamentModal()">Cancel</button>

@@ -1562,6 +1562,15 @@
             c.classList.toggle('is-selected', c.dataset.value === (firstEntry.tournamentType || ''));
         });
 
+        // Populate deck datalist from main form's datalist
+        const srcList = document.getElementById('battleJournalOwnDeckList');
+        const destList = document.getElementById('bjEditTournDeckList');
+        if (srcList && destList) destList.innerHTML = srcList.innerHTML;
+
+        // Pre-fill deck from the first entry of this tournament
+        const deckInput = document.getElementById('bjEditTournDeck');
+        if (deckInput) deckInput.value = firstEntry.ownDeck || '';
+
         modal.style.display = 'flex';
     }
 
@@ -1582,6 +1591,7 @@
         const newName = String(document.getElementById('bjEditTournName')?.value || '').trim();
         const newMeta = String(document.getElementById('bjEditTournMeta')?.value || '').trim();
         const newType = String(document.getElementById('bjEditTournType')?.value || '').trim();
+        const newDeck = String(document.getElementById('bjEditTournDeck')?.value || '').trim();
 
         if (!newName) {
             showToast(battleJournalText('bj.editNameRequired', 'Tournament name is required.'), 'warning');
@@ -1596,6 +1606,7 @@
                 e.tournamentName = newName;
                 e.meta = newMeta;
                 e.tournamentType = newType;
+                if (newDeck) e.ownDeck = newDeck;
                 outboxChanged = true;
             }
         });
@@ -1617,6 +1628,7 @@
                             tournamentName: newName,
                             meta: newMeta,
                             tournamentType: newType,
+                            ...(newDeck ? { ownDeck: newDeck } : {}),
                             syncedAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
                     });
@@ -1634,6 +1646,7 @@
                 e.tournamentName = newName;
                 e.meta = newMeta;
                 e.tournamentType = newType;
+                if (newDeck) e.ownDeck = newDeck;
             }
         });
 

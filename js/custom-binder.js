@@ -78,17 +78,17 @@
         cbRenderChips();
         cbRenderDropdownList();
         cbRenderPresetBar();
-        if (typeof showToast === 'function') showToast(`Binder "${preset.name}" geladen.`, 'info');
+        if (typeof showToast === 'function') showToast(t('binder.loaded').replace('{name}', preset.name), 'info');
     }
 
     function cbDeletePreset(id) {
         const preset = cbPresets.find(p => p.id === id);
         if (!preset) return;
-        if (!confirm(`"${preset.name}" wirklich löschen?`)) return;
+        if (!confirm(t('binder.deleteConfirm').replace('{name}', preset.name))) return;
         cbPresets = cbPresets.filter(p => p.id !== id);
         cbSavePresets();
         cbRenderPresetBar();
-        if (typeof showToast === 'function') showToast(`Binder "${preset.name}" gelöscht.`, 'info');
+        if (typeof showToast === 'function') showToast(t('binder.deleted').replace('{name}', preset.name), 'info');
     }
 
     function cbRenderPresetBar() {

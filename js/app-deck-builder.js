@@ -2413,36 +2413,36 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
                 let btns = '';
                 // Wishlist
-                btns += `<button class="sc-action-btn sc-action-wishlist${isW ? ' active' : ''}" onclick="toggleWishlist('${safeCardId}'); setTimeout(()=>{const p=document.getElementById('singleCardActionsPanel'); if(p){const b=p.querySelector('.sc-action-wishlist'); const w=window.userWishlist&&window.userWishlist.has('${safeCardId}'); b.classList.toggle('active',w); b.querySelector('.sc-action-icon').textContent=w?'♥':'♡';}},200);">
+                btns += `<button class="sc-action-btn sc-action-wishlist${isW ? ' active' : ''}" onclick="toggleWishlist('${safeCardId}'); setTimeout(()=>{const p=document.getElementById('singleCardActionsPanel'); if(p){const b=p.querySelector('.sc-action-wishlist'); const w=window.userWishlist&&window.userWishlist.has('${safeCardId}'); b.classList.toggle('active',w); b.querySelector('.sc-action-icon').textContent=w?'♥':'♡'; b.querySelector('.sc-action-label').textContent=w?t('action.wishlistActive'):t('action.wishlist');}},200);">
                     <span class="sc-action-icon">${isW ? '♥' : '♡'}</span>
-                    <span class="sc-action-label">Wunschliste${isW ? ' ✓' : ''}</span>
+                    <span class="sc-action-label">${isW ? t('action.wishlistActive') : t('action.wishlist')}</span>
                 </button>`;
                 // Collection +
                 btns += `<button class="sc-action-btn sc-action-collect" onclick="if(typeof toggleCollection==='function')toggleCollection('${safeCardId}')">
                     <span class="sc-action-icon">+</span>
-                    <span class="sc-action-label">Sammlung${ownedCount ? ' (' + ownedCount + 'x)' : ''}</span>
+                    <span class="sc-action-label">${t('action.collection')}${ownedCount ? ' (' + ownedCount + 'x)' : ''}</span>
                 </button>`;
                 // Rarity / Print
                 btns += `<button class="sc-action-btn sc-action-rarity" onclick="if(typeof openRaritySwitcher==='function')openRaritySwitcher('${safeCardName}','${safeCardName} (${resolvedSet} ${resolvedNum})')">
                     <span class="sc-action-icon">★</span>
-                    <span class="sc-action-label">Anderes Print</span>
+                    <span class="sc-action-label">${t('action.otherPrint')}</span>
                 </button>`;
                 // Limitless
                 if (resolvedSet && resolvedNum) {
                     btns += `<a class="sc-action-btn sc-action-limitless" href="https://limitlesstcg.com/cards/${encodeURIComponent(resolvedSet)}/${encodeURIComponent(resolvedNum)}" target="_blank" rel="noopener noreferrer">
                         <span class="sc-action-icon">L</span>
-                        <span class="sc-action-label">Limitless öffnen</span>
+                        <span class="sc-action-label">${t('action.openLimitless')}</span>
                     </a>`;
                 }
                 // Proxy
                 btns += `<button class="sc-action-btn sc-action-proxy" onclick="if(typeof addCardToProxy==='function')addCardToProxy('${safeCardName}','${resolvedSet}','${resolvedNum}',1)">
                     <span class="sc-action-icon">P</span>
-                    <span class="sc-action-label">Proxy drucken</span>
+                    <span class="sc-action-label">${t('action.printProxy')}</span>
                 </button>`;
                 // Cardmarket
                 btns += `<button class="sc-action-btn sc-action-market" onclick="if(typeof openCardmarket==='function')openCardmarket('','${safeCardName}')">
                     <span class="sc-action-icon">€</span>
-                    <span class="sc-action-label">Cardmarket</span>
+                    <span class="sc-action-label">${t('action.cardmarket')}</span>
                 </button>`;
 
                 panel.innerHTML = btns;

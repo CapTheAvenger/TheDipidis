@@ -876,6 +876,48 @@ const translations = {
     // ── Misc shared ──────────────────────────────────────────
     'misc.loading':             'Loading...',
 
+    // ── Card Zoom Action Panel ───────────────────────────────
+    'action.wishlist':          'Wishlist',
+    'action.wishlistActive':    'Wishlist ✓',
+    'action.collection':        'Collection',
+    'action.otherPrint':        'Other Print',
+    'action.openLimitless':     'Open Limitless',
+    'action.printProxy':        'Print Proxy',
+    'action.cardmarket':        'Cardmarket',
+
+    // ── Wishlist Badge ───────────────────────────────────────
+    'wishBadge.add':            'Add to Wishlist',
+    'wishBadge.remove':         'Remove from Wishlist',
+
+    // ── Rarity Switcher ──────────────────────────────────────
+    'rarity.inCollection':      'in Collection',
+    'rarity.notInCollection':   'Not in Collection',
+    'rarity.otherPrints':       'Other Prints',
+    'rarity.buyCardmarket':     'Buy on Cardmarket:',
+    'rarity.swapAll':           'Swap All',
+    'rarity.deckCopies':        'Deck copies',
+    'rarity.sumMustMatch':      'Sum of all "Deck Qty" fields must match.',
+    'rarity.rarity':            'Rarity',
+    'rarity.deckQty':           'Deck Qty',
+
+    // ── Custom Binder ────────────────────────────────────────
+    'binder.deleteConfirm':     'Really delete "{name}"?',
+    'binder.loaded':            'Binder "{name}" loaded.',
+    'binder.deleted':           'Binder "{name}" deleted.',
+
+    // ── Multiplayer Status ───────────────────────────────────
+    'mp.searchingDeck':         '🔍 Opponent is searching their deck...',
+    'mp.searchingDiscard':      '🔍 Opponent is searching their discard pile...',
+    'mp.choosingPrizes':        '🏆 Opponent is choosing prize cards...',
+    'mp.thinking':              '🤔 Opponent is thinking...',
+    'mp.promoting':             '⭐ Opponent is choosing a new active Pokémon...',
+    'mp.opponentDefault':       '⏳ Opponent:',
+    'mp.opponentMoved':         'Opponent made a move',
+    'mp.waitingForOpponent':    'Waiting for opponent...',
+    'mp.opponentFound':         'Opponent found!',
+    'mp.shareCode':             'Share this code with your opponent',
+    'mp.gameStarting':          'Game starting...',
+
     // ── Multiplayer Menu ─────────────────────────────────────
 
     // ── Auth: already have sign in for modal ─────────────────
@@ -1753,6 +1795,48 @@ const translations = {
 
     // ── Sonstiges ────────────────────────────────────────────
     'misc.loading':             'Laden...',
+
+    // ── Card Zoom Action Panel ───────────────────────────────
+    'action.wishlist':          'Wunschliste',
+    'action.wishlistActive':    'Wunschliste ✓',
+    'action.collection':        'Sammlung',
+    'action.otherPrint':        'Anderes Print',
+    'action.openLimitless':     'Limitless öffnen',
+    'action.printProxy':        'Proxy drucken',
+    'action.cardmarket':        'Cardmarket',
+
+    // ── Wishlist Badge ───────────────────────────────────────
+    'wishBadge.add':            'Zur Wunschliste',
+    'wishBadge.remove':         'Von Wunschliste entfernen',
+
+    // ── Rarity Switcher ──────────────────────────────────────
+    'rarity.inCollection':      'in Sammlung',
+    'rarity.notInCollection':   'Nicht in Sammlung',
+    'rarity.otherPrints':       'Andere Prints',
+    'rarity.buyCardmarket':     'Auf Cardmarket kaufen:',
+    'rarity.swapAll':           'Alle tauschen',
+    'rarity.deckCopies':        'Deck-Kopien',
+    'rarity.sumMustMatch':      'Summe aller "Deck Qty" Felder muss übereinstimmen.',
+    'rarity.rarity':            'Seltenheit',
+    'rarity.deckQty':           'Deck Anz.',
+
+    // ── Custom Binder ────────────────────────────────────────
+    'binder.deleteConfirm':     '"{name}" wirklich löschen?',
+    'binder.loaded':            'Binder "{name}" geladen.',
+    'binder.deleted':           'Binder "{name}" gelöscht.',
+
+    // ── Multiplayer Status ───────────────────────────────────
+    'mp.searchingDeck':         '🔍 Gegner durchsucht sein Deck...',
+    'mp.searchingDiscard':      '🔍 Gegner durchsucht seinen Ablagestapel...',
+    'mp.choosingPrizes':        '🏆 Gegner wählt Preiskarten...',
+    'mp.thinking':              '🤔 Gegner überlegt...',
+    'mp.promoting':             '⭐ Gegner wählt neues aktives Pokémon...',
+    'mp.opponentDefault':       '⏳ Gegner:',
+    'mp.opponentMoved':         'Gegner hat gezogen',
+    'mp.waitingForOpponent':    'Warte auf Gegner...',
+    'mp.opponentFound':         'Gegner gefunden!',
+    'mp.shareCode':             'Teile diesen Code mit deinem Gegner',
+    'mp.gameStarting':          'Spiel startet...',
 
     // ── Multiplayer-Menü ─────────────────────────────────────
 

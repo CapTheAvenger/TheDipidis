@@ -599,6 +599,85 @@ def run():
                   f"got '{tutorial_en}'")
 
         # ═══════════════════════════════════════════════════════
+        #   PHASE 4b: ACTION PANEL (dynamically generated HTML)
+        # ═══════════════════════════════════════════════════════
+        print("\n══════════════════════════════════════════════════")
+        print("  PHASE 4b: ACTION PANEL (showSingleCard)")
+        print("══════════════════════════════════════════════════")
+
+        # Open the card zoom modal via showSingleCard() in English mode
+        page.evaluate("switchLanguage('en')")
+        page.wait_for_timeout(300)
+        page.evaluate("showSingleCard('https://example.com/card.png', 'Test Card (SV1 001)')")
+        page.wait_for_timeout(500)
+
+        # Read all action panel label texts
+        en_labels = page.evaluate("""(() => {
+            const labels = {};
+            document.querySelectorAll('#singleCardActionsPanel .sc-action-label').forEach(el => {
+                const btn = el.closest('.sc-action-btn');
+                if (!btn) return;
+                // Identify by CSS class
+                const cls = [...btn.classList].find(c => c.startsWith('sc-action-') && c !== 'sc-action-btn');
+                if (cls) labels[cls] = el.textContent.trim();
+            });
+            return labels;
+        })()""")
+
+        EN_ACTION_EXPECT = {
+            'sc-action-wishlist':  'Wishlist',
+            'sc-action-collect':   'Collection',
+            'sc-action-rarity':    'Other Print',
+            'sc-action-limitless': 'Open Limitless',
+            'sc-action-proxy':     'Print Proxy',
+            'sc-action-market':    'Cardmarket',
+        }
+        for cls, expected in EN_ACTION_EXPECT.items():
+            actual = en_labels.get(cls, '<missing>')
+            check(f"AP.EN {cls}='{expected}'",
+                  actual == expected,
+                  f"got '{actual}'")
+
+        # Close modal, switch to DE, re-open
+        page.evaluate("hideSingleCard()")
+        page.wait_for_timeout(200)
+        page.evaluate("switchLanguage('de')")
+        page.wait_for_timeout(300)
+        page.evaluate("showSingleCard('https://example.com/card.png', 'Test Card (SV1 001)')")
+        page.wait_for_timeout(500)
+
+        de_labels = page.evaluate("""(() => {
+            const labels = {};
+            document.querySelectorAll('#singleCardActionsPanel .sc-action-label').forEach(el => {
+                const btn = el.closest('.sc-action-btn');
+                if (!btn) return;
+                const cls = [...btn.classList].find(c => c.startsWith('sc-action-') && c !== 'sc-action-btn');
+                if (cls) labels[cls] = el.textContent.trim();
+            });
+            return labels;
+        })()""")
+
+        DE_ACTION_EXPECT = {
+            'sc-action-wishlist':  'Wunschliste',
+            'sc-action-collect':   'Sammlung',
+            'sc-action-rarity':    'Anderes Print',
+            'sc-action-limitless': 'Limitless öffnen',
+            'sc-action-proxy':     'Proxy drucken',
+            'sc-action-market':    'Cardmarket',
+        }
+        for cls, expected in DE_ACTION_EXPECT.items():
+            actual = de_labels.get(cls, '<missing>')
+            check(f"AP.DE {cls}='{expected}'",
+                  actual == expected,
+                  f"got '{actual}'")
+
+        # Close modal + reset to EN
+        page.evaluate("hideSingleCard()")
+        page.wait_for_timeout(200)
+        page.evaluate("switchLanguage('en')")
+        page.wait_for_timeout(300)
+
+        # ═══════════════════════════════════════════════════════
         #   PHASE 5: HARDCODED TEXT CHECK
         # ═══════════════════════════════════════════════════════
         print("\n══════════════════════════════════════════════════")

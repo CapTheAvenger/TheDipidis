@@ -3409,8 +3409,8 @@
                 const cardmarketBtnClass = eurPrice ? 'btn-cardmarket rarity-option-cardmarket' : 'btn-cardmarket rarity-option-cardmarket no-price';
 
                 const _rsOwnedLine = _rsOwnedQty > 0
-                    ? `<div class="card-database-owned-line">&#10003; ${_rsOwnedQty}x in Sammlung</div>`
-                    : `<div class="card-database-not-owned-line">Nicht in Sammlung</div>`;
+                    ? `<div class="card-database-owned-line">&#10003; ${_rsOwnedQty}x ${t('rarity.inCollection')}</div>`
+                    : `<div class="card-database-not-owned-line">${t('rarity.notInCollection')}</div>`;
 
                 let _rsOtherPrintsQty = 0;
                 if (window.userCollectionCounts instanceof Map && window.userCollectionCounts.size > 0) {
@@ -3431,7 +3431,7 @@
                     });
                 }
                 const _rsOtherPrintLine = _rsOtherPrintsQty > 0
-                    ? `<div class="card-database-other-prints-line">✨ Andere Prints: ${_rsOtherPrintsQty}x</div>`
+                    ? `<div class="card-database-other-prints-line">✨ ${t('rarity.otherPrints')}: ${_rsOtherPrintsQty}x</div>`
                     : '';
 
                 const optionSet = String(version.set || '').toUpperCase();
@@ -3468,13 +3468,13 @@
                     </div>
                     <button class="btn btn-primary rarity-option-swap-all-btn"
                             onclick="event.stopPropagation(); selectRarityVersion('${optionSet}', '${optionNumber}', '${escapeJsStr(safeDeckKey)}', '${safeOptionCardName}', '${escapeJsStr((currentRaritySwitcherCard && currentRaritySwitcherCard.source) || '')}')"
-                            title="Alle Kopien auf diesen Print wechseln">
-                        Swap All
+                            title="${t('rarity.swapAll')}">
+                        ${t('rarity.swapAll')}
                     </button>
                     ${cardmarketUrl ? `
                         <button class="${cardmarketBtnClass} card-database-price-btn" 
                                 onclick="event.stopPropagation(); openCardmarket('${cardmarketUrl}', '');" 
-                                title="Auf Cardmarket kaufen: ${priceDisplay}">
+                                title="${t('rarity.buyCardmarket')} ${priceDisplay}">
                             ${priceDisplay}
                         </button>
                     ` : ''}
@@ -3487,7 +3487,7 @@
             const totalCopies = currentRaritySwitcherCard.totalCopies || 0;
             const controlsHtml = `
                 <div class="rarity-switcher-modal-buttons" id="raritySwitcherDistributionControls">
-                    <div class="rarity-distribution-summary">Deck copies: <strong>${totalCopies}</strong>. Sum of all "Deck Qty" fields must match.</div>
+                    <div class="rarity-distribution-summary">${t('rarity.deckCopies')}: <strong>${totalCopies}</strong>. ${t('rarity.sumMustMatch')}</div>
                     <button class="btn btn-primary" onclick="applyRarityDistribution()">Apply Quantities</button>
                     <button class="btn btn-secondary" onclick="closeRaritySwitcher()">Close</button>
                 </div>

@@ -3756,7 +3756,7 @@ window.clearCollection         = clearCollection;
 function getWishlistBadgeHtml(cardName, setCode, setNumber) {
     const cardId = `${cardName}|${setCode}|${setNumber}`;
     const isW = window.userWishlist && window.userWishlist.has(cardId);
-    return `<button class="wishlist-heart-badge${isW ? ' wishlisted' : ''}" data-card-id="${cardId.replace(/"/g, '&quot;')}" onclick="event.stopPropagation(); toggleWishlistBadge(this)" title="${isW ? 'Von Wunschliste entfernen' : 'Zur Wunschliste'}">` +
+    return `<button class="wishlist-heart-badge${isW ? ' wishlisted' : ''}" data-card-id="${cardId.replace(/"/g, '&quot;')}" onclick="event.stopPropagation(); toggleWishlistBadge(this)" title="${isW ? t('wishBadge.remove') : t('wishBadge.add')}">` +
         (isW ? '&#9829;' : '&#9825;') + '</button>';
 }
 
@@ -3769,7 +3769,7 @@ function toggleWishlistBadge(btn) {
             const isW = window.userWishlist && window.userWishlist.has(cardId);
             b.classList.toggle('wishlisted', isW);
             b.innerHTML = isW ? '&#9829;' : '&#9825;';
-            b.title = isW ? 'Von Wunschliste entfernen' : 'Zur Wunschliste';
+            b.title = isW ? t('wishBadge.remove') : t('wishBadge.add');
         });
     });
 }

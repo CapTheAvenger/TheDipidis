@@ -452,12 +452,12 @@ function listenToGameState(gameId) {
                 
                 // Update Message
                 if (typeof ptShowMessage === 'function') {
-                    const action = data.lastActionDescription || (getLang()==='de' ? 'Gegner hat gezogen' : 'Opponent made a move');
+                    const action = data.lastActionDescription || t('mp.opponentMoved');
                     ptShowMessage(`🌐 ${action}`);
                 }
                 // Deck search indicator: show persistent hint while opponent searches
                 if (data.lastActionDescription === 'Searching deck...' && typeof showToast === 'function') {
-                    showToast(getLang()==='de' ? '🔍 Gegner durchsucht sein Deck...' : '🔍 Opponent is searching their deck...', 'info', 8000);
+                    showToast(t('mp.searchingDeck'), 'info', 8000);
                 }
             }
 
@@ -892,13 +892,13 @@ function showMultiplayerLobby(roomCode, status) {
         lobby.innerHTML = `
             <div style="text-align: center; max-width: 500px; padding: 40px; background: #1a1a1a; border-radius: 20px; border: 3px solid #FFCB05;">
                 <h2 style="color: #FFCB05; font-size: 2.5rem; margin-bottom: 20px;">🎮 Multiplayer Lobby</h2>
-                <p style="font-size: 1.2rem; margin-bottom: 30px;">${getLang()==='de' ? 'Warte auf Gegner...' : 'Waiting for opponent...'}</p>
+                <p style="font-size: 1.2rem; margin-bottom: 30px;">${t('mp.waitingForOpponent')}</p>
                 <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                     <p style="color: #aaa; margin-bottom: 10px;">Room Code:</p>
                     <p style="font-size: 3rem; font-weight: 900; letter-spacing: 8px; color: #FFCB05;">${safeRoomCode}</p>
                 </div>
-                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">${getLang()==='de' ? 'Teile diesen Code mit deinem Gegner' : 'Share this code with your opponent'}</p>
-                <button id="mpCancelBtn" style="background: #c0392b; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;">${getLang()==='de' ? 'Abbrechen' : 'Cancel'}</button>
+                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">${t('mp.shareCode')}</p>
+                <button id="mpCancelBtn" style="background: #c0392b; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;">${t('modal.cancel')}</button>
             </div>
         `;
 
@@ -912,8 +912,8 @@ function showMultiplayerLobby(roomCode, status) {
     } else if (status === 'playing') {
         lobby.innerHTML = `
             <div style="text-align: center; max-width: 500px; padding: 40px; background: #1a1a1a; border-radius: 20px; border: 3px solid #27ae60;">
-                <h2 style="color: #27ae60; font-size: 2.5rem; margin-bottom: 20px;">${getLang()==='de' ? '✅ Spiel startet...' : '✅ Game starting...'}</h2>
-                <p style="font-size: 1.2rem;">${getLang()==='de' ? 'Gegner gefunden!' : 'Opponent found!'}</p>
+                <h2 style="color: #27ae60; font-size: 2.5rem; margin-bottom: 20px;">✅ ${t('mp.gameStarting')}</h2>
+                <p style="font-size: 1.2rem;">${t('mp.opponentFound')}</p>
             </div>
         `;
         
@@ -1134,20 +1134,14 @@ function _mpShowOpponentStatus(status) {
         if (banner) banner.remove();
         return;
     }
-    const _labels = getLang()==='de' ? {
-        'searching_deck': '🔍 Gegner durchsucht sein Deck...',
-        'searching_discard': '🔍 Gegner durchsucht seinen Ablagestapel...',
-        'choosing_prizes': '🏆 Gegner wählt Preiskarten...',
-        'thinking': '🤔 Gegner überlegt...',
-        'promoting': '⭐ Gegner wählt neues aktives Pokémon...',
-    } : {
-        'searching_deck': '🔍 Opponent is searching their deck...',
-        'searching_discard': '🔍 Opponent is searching their discard pile...',
-        'choosing_prizes': '🏆 Opponent is choosing prize cards...',
-        'thinking': '🤔 Opponent is thinking...',
-        'promoting': '⭐ Opponent is choosing a new active Pokémon...',
+    const _labels = {
+        'searching_deck': t('mp.searchingDeck'),
+        'searching_discard': t('mp.searchingDiscard'),
+        'choosing_prizes': t('mp.choosingPrizes'),
+        'thinking': t('mp.thinking'),
+        'promoting': t('mp.promoting'),
     };
-    const label = _labels[status] || (getLang()==='de' ? `⏳ Gegner: ${status}` : `⏳ Opponent: ${status}`);
+    const label = _labels[status] || `${t('mp.opponentDefault')} ${status}`;
     if (!banner) {
         banner = document.createElement('div');
         banner.id = 'mpOpponentStatusBanner';

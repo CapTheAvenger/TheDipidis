@@ -2544,7 +2544,7 @@
                                     <option value="loss" data-i18n="bj.loss">Loss</option>
                                     <option value="tie" data-i18n="bj.tie">Tie</option>
                                 </select>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleMatchupStats()" data-i18n="bj.matchups">📊 Matchups</button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleMatchupStats()" data-i18n="bj.matchups">📊 Matchup Spreadsheet</button>
                             </div>
                             <div id="journalMatchupStats" class="display-none mb-15"></div>
                             <div id="journalHistoryList" class="battle-journal-history-list"></div>
@@ -2782,18 +2782,35 @@
 
         <!-- FILTER BAR -->
         <div class="ma-filter-bar">
-          <select id="maFilterDeck" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="My Deck">
-            <option value="">All My Decks</option>
-          </select>
-          <select id="maFilterMeta" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Meta Format">
-            <option value="">All Formats</option>
-          </select>
-          <select id="maFilterType" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Tournament Type">
-            <option value="">All Types</option>
-          </select>
-          <select id="maFilterTournament" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Tournament">
-            <option value="">All Tournaments</option>
-          </select>
+          <div class="ma-filter-group">
+            <label class="ma-filter-label">🃏 Mein Deck</label>
+            <select id="maFilterDeck" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="My Deck">
+              <option value="">All My Decks</option>
+            </select>
+          </div>
+          <div class="ma-filter-group">
+            <label class="ma-filter-label">🌍 Meta</label>
+            <select id="maFilterMeta" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Meta Format">
+              <option value="">All Formats</option>
+            </select>
+          </div>
+          <div class="ma-filter-group ma-filter-group--wide">
+            <label class="ma-filter-label">🏆 Turnier-Typ</label>
+            <div id="maFilterTypeChips" class="ma-chip-row">
+              <button type="button" class="ma-chip ma-chip--active" data-value="" onclick="toggleMATypeChip(this)">Alle</button>
+              <button type="button" class="ma-chip" data-value="Testing" onclick="toggleMATypeChip(this)">Testing</button>
+              <button type="button" class="ma-chip" data-value="Challenge" onclick="toggleMATypeChip(this)">Challenge</button>
+              <button type="button" class="ma-chip" data-value="Cup" onclick="toggleMATypeChip(this)">Cup</button>
+              <button type="button" class="ma-chip" data-value="Major" onclick="toggleMATypeChip(this)">Major</button>
+              <button type="button" class="ma-chip" data-value="League" onclick="toggleMATypeChip(this)">League</button>
+            </div>
+          </div>
+          <div class="ma-filter-group">
+            <label class="ma-filter-label">📅 Turnier</label>
+            <select id="maFilterTournament" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Tournament">
+              <option value="">All Tournaments</option>
+            </select>
+          </div>
         </div>
 
         <!-- SUMMARY STATS -->

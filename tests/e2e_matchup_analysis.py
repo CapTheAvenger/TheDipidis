@@ -43,7 +43,7 @@ def run():
         # Filter selects
         check("T1.3 maFilterDeck exists", page.locator("#maFilterDeck").count() == 1)
         check("T1.4 maFilterMeta exists", page.locator("#maFilterMeta").count() == 1)
-        check("T1.5 maFilterType exists", page.locator("#maFilterType").count() == 1)
+        check("T1.5 maFilterTypeChips exists", page.locator("#maFilterTypeChips").count() == 1)
         check("T1.6 maFilterTournament exists", page.locator("#maFilterTournament").count() == 1)
 
         # Content sections
@@ -62,6 +62,7 @@ def run():
         check("T2.3 renderMatchupAnalysis is function", page.evaluate("typeof window.renderMatchupAnalysis === 'function'"))
         check("T2.4 toggleMatchupStats is function", page.evaluate("typeof window.toggleMatchupStats === 'function'"))
         check("T2.5 renderMatchupHeatmap is function", page.evaluate("typeof window.renderMatchupHeatmap === 'function'"))
+        check("T2.6 toggleMATypeChip is function", page.evaluate("typeof window.toggleMATypeChip === 'function'"))
 
         # ── CSS Classes ───────────────────────────────────────
         print("\n-- CSS Classes --")
@@ -129,9 +130,9 @@ def run():
         check("T3.7 Meta filter has TEF-POR", "TEF-POR" in meta_opts)
         check("T3.8 Meta filter has SVI-ASC", "SVI-ASC" in meta_opts)
 
-        type_opts = page.evaluate("Array.from(document.getElementById('maFilterType').options).map(o => o.value)")
-        check("T3.9 Type filter has League Cup", "League Cup" in type_opts)
-        check("T3.10 Type filter has Regional", "Regional" in type_opts)
+        type_chips = page.evaluate("Array.from(document.querySelectorAll('#maFilterTypeChips .ma-chip')).map(c => c.dataset.value)")
+        check("T3.9 Type chips include empty (Alle)", '' in type_chips)
+        check("T3.10 Type chips rendered (>1)", len(type_chips) > 1)
 
         tourn_opts = page.evaluate("Array.from(document.getElementById('maFilterTournament').options).map(o => o.value)")
         check("T3.11 Tournament filter has Cup Alpha", "Cup Alpha" in tourn_opts)

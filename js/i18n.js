@@ -552,6 +552,7 @@ const translations = {
     'bj.validationGames':       'Please fill Going and Result for at least one game.',
     'bj.validationTurnOrder':   'Please choose whether you went first or second.',
     'bj.validationResult':      'Please choose the match result.',
+    'bj.matchups':              'Matchup Spreadsheet',
 
     // ── Beginner Tooltip ────────────────────────────────────
     'tip.beginnerTitle':       'Beginner Strategy',
@@ -1429,6 +1430,7 @@ const translations = {
     'bj.validationGames':       'Bitte fülle Going und Result für mindestens ein Spiel aus.',
     'bj.validationTurnOrder':   'Bitte wähle, ob du First oder Second warst.',
     'bj.validationResult':      'Bitte wähle das Match-Ergebnis aus.',
+    'bj.matchups':              'Matchup-Auswertung',
 
     // ── Beginner Tooltip ────────────────────────────────────
     'tip.beginnerTitle':       'Einsteiger-Strategie',

@@ -1171,11 +1171,7 @@
             if (cur && metas.includes(cur)) metaSel.value = cur;
         }
         if (typeSel) {
-            const types = [...new Set(entries.map(e => e.tournamentType).filter(Boolean))].sort();
-            const cur = typeSel.value;
-            typeSel.innerHTML = '<option value="">All Types</option>';
-            types.forEach(t => { typeSel.innerHTML += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`; });
-            if (cur && types.includes(cur)) typeSel.value = cur;
+            // Type filter is now chip-based, no select to populate
         }
         if (tournSel) {
             const tourns = [...new Set(entries.map(e => e.tournamentName).filter(Boolean))].sort();
@@ -1186,16 +1182,38 @@
         }
     }
 
+    function toggleMATypeChip(btn) {
+        const val = btn.dataset.value;
+        const container = document.getElementById('maFilterTypeChips');
+        if (!container) return;
+        if (val === '') {
+            // "Alle" clicked — reset all
+            container.querySelectorAll('.ma-chip').forEach(c => c.classList.remove('ma-chip--active'));
+            btn.classList.add('ma-chip--active');
+        } else {
+            // Toggle individual chip
+            btn.classList.toggle('ma-chip--active');
+            // Remove "Alle" active state
+            const alleBtn = container.querySelector('.ma-chip[data-value=""]');
+            if (alleBtn) alleBtn.classList.remove('ma-chip--active');
+            // If nothing active, re-activate "Alle"
+            const anyActive = container.querySelectorAll('.ma-chip--active');
+            if (anyActive.length === 0 && alleBtn) alleBtn.classList.add('ma-chip--active');
+        }
+        renderMatchupAnalysis();
+    }
+
     function renderMatchupAnalysis() {
         const fDeck = document.getElementById('maFilterDeck')?.value || '';
         const fMeta = document.getElementById('maFilterMeta')?.value || '';
-        const fType = document.getElementById('maFilterType')?.value || '';
+        const activeChips = document.querySelectorAll('#maFilterTypeChips .ma-chip--active');
+        const fTypes = [...activeChips].map(c => c.dataset.value).filter(Boolean);
         const fTourn = document.getElementById('maFilterTournament')?.value || '';
 
         let entries = journalHistoryCache;
         if (fDeck) entries = entries.filter(e => e.ownDeck === fDeck);
         if (fMeta) entries = entries.filter(e => (e.meta || '') === fMeta);
-        if (fType) entries = entries.filter(e => (e.tournamentType || '') === fType);
+        if (fTypes.length) entries = entries.filter(e => fTypes.includes(e.tournamentType || ''));
         if (fTourn) entries = entries.filter(e => e.tournamentName === fTourn);
 
         // Subtitle
@@ -1717,6 +1735,7 @@
     window.openMatchupAnalysisModal = openMatchupAnalysisModal;
     window.closeMatchupAnalysisModal = closeMatchupAnalysisModal;
     window.renderMatchupAnalysis = renderMatchupAnalysis;
+    window.toggleMATypeChip = toggleMATypeChip;
     window.openEditTournamentModal = openEditTournamentModal;
     window.closeEditTournamentModal = closeEditTournamentModal;
     window.selectEditTournType = selectEditTournType;

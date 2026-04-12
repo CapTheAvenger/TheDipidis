@@ -3832,7 +3832,7 @@
             }
             // Deck Compare Modal
             const dcModal = document.getElementById('deckCompareModal');
-            if (dcModal && target === dcModal && !dcModal.classList.contains('d-none')) {
+            if (dcModal && target === dcModal && dcModal.style.display !== 'none') {
                 if (typeof closeDeckCompare === 'function') closeDeckCompare();
                 return;
             }

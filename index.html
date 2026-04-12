@@ -2952,7 +2952,7 @@
                 <textarea id="oldDeckListInput" placeholder="Pokémon: 16&#10;2 Lunatone ASC 105&#10;3 Solrock ASC 106&#10;...&#10;&#10;Trainer: 33&#10;...&#10;&#10;Energy: 11&#10;..." class="w-100 h-150 p-10 border-grey br-6 font-mono fs-09" aria-label="Old decklist for comparison"></textarea>
                 <div class="flex gap-10 mt-10">
                     <button class="btn btn-primary flex-1" onclick="compareDeckLists()" data-i18n="compare.compareBtn">Compare</button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('oldDeckListInput').value = ''; document.getElementById('deckCompareResult').style.display = 'none';" data-i18n="compare.clearBtn">Clear</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('oldDeckListInput').value = ''; document.getElementById('deckCompareResult').classList.add('d-none');" data-i18n="compare.clearBtn">Clear</button>
                 </div>
             </div>
             

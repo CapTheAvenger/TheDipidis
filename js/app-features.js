@@ -14,12 +14,12 @@
                 devLog('[Deck Compare] Loading cards database...');
                 document.getElementById('deckCompareModal').style.display = 'flex';
                 document.getElementById('deckCompareResult').innerHTML = '<div class="loading">? Loading card database...</div>';
-                document.getElementById('deckCompareResult').style.display = 'block';
+                document.getElementById('deckCompareResult').classList.remove('d-none');
                 
                 try {
                     await loadAllCardsDatabase();
                     devLog('[Deck Compare] ? Database loaded successfully');
-                    document.getElementById('deckCompareResult').style.display = 'none';
+                    document.getElementById('deckCompareResult').classList.add('d-none');
                 } catch (error) {
                     console.error('[Deck Compare] Failed to load database:', error);
                     document.getElementById('deckCompareResult').innerHTML = '<div class="error">? Error loading card database</div>';
@@ -51,7 +51,7 @@
             
             document.getElementById('deckCompareModal').style.display = 'flex';
             document.getElementById('oldDeckListInput').value = '';
-            document.getElementById('deckCompareResult').style.display = 'none';
+            document.getElementById('deckCompareResult').classList.add('d-none');
         }
 
         function closeDeckCompare() {
@@ -313,7 +313,7 @@
         function displayComparisonResults(allDisplayCards, oldDeckName) {
             window.lastDeckComparisonCards = Array.isArray(allDisplayCards) ? allDisplayCards : [];
             const resultDiv = document.getElementById('deckCompareResult');
-            resultDiv.style.display = 'block';
+            resultDiv.classList.remove('d-none');
             
             // Count statistics
             const removed = allDisplayCards.filter(c => c.changeType === 'removed');

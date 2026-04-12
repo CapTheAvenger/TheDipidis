@@ -2731,6 +2731,67 @@
 
     <!-- Edit Single Entry Modal -->
     <div id="bjEditEntryModal" class="ui-modal-backdrop" style="display:none; z-index:9999;" onclick="if(event.target===this)closeEditEntryModal()" role="dialog" aria-modal="true" aria-label="Edit match entry">
+
+    <!-- ===== MATCHUP ANALYSIS MODAL ===== -->
+    <div id="matchupAnalysisModal"
+         class="battle-journal-overlay"
+         style="display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:20px 0;"
+         onclick="if(event.target===this)closeMatchupAnalysisModal()">
+
+      <div class="ma-modal-shell">
+        <!-- HEADER -->
+        <div class="ma-modal-header">
+          <div>
+            <h2 class="ma-modal-title">📊 Matchup-Analyse</h2>
+            <p class="ma-modal-subtitle" id="maSubtitle">Dein Deck-Matchup-Explorer</p>
+          </div>
+          <button class="ma-modal-close" onclick="closeMatchupAnalysisModal()" aria-label="Close">&times;</button>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="ma-filter-bar">
+          <select id="maFilterDeck" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="My Deck">
+            <option value="">All My Decks</option>
+          </select>
+          <select id="maFilterMeta" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Meta Format">
+            <option value="">All Formats</option>
+          </select>
+          <select id="maFilterType" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Tournament Type">
+            <option value="">All Types</option>
+          </select>
+          <select id="maFilterTournament" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Tournament">
+            <option value="">All Tournaments</option>
+          </select>
+        </div>
+
+        <!-- SUMMARY STATS -->
+        <div id="maSummaryStats" class="ma-summary-stats"></div>
+
+        <!-- 2D HEATMAP -->
+        <div class="ma-section">
+          <h3 class="ma-section-title">🔥 Matchup-Heatmap</h3>
+          <div id="maHeatmapWrap" class="ma-heatmap-wrap"></div>
+        </div>
+
+        <!-- RANKING LISTS -->
+        <div class="ma-rankings">
+          <div class="ma-section ma-rank-half">
+            <h3 class="ma-section-title">🏆 Beste Matchups</h3>
+            <div id="maRankBest"></div>
+          </div>
+          <div class="ma-section ma-rank-half">
+            <h3 class="ma-section-title">💀 Schlechteste Matchups</h3>
+            <div id="maRankWorst"></div>
+          </div>
+        </div>
+
+        <!-- 1D BAR LIST (existing style) -->
+        <div class="ma-section">
+          <h3 class="ma-section-title">📋 Alle Gegner-Matchups</h3>
+          <div id="maBarList"></div>
+        </div>
+      </div>
+    </div>
       <div class="ui-modal bj-edit-modal">
         <div class="bj-edit-modal-header">
           <h3>✏️ Edit Match</h3>

@@ -1130,18 +1130,218 @@
         }, 'image/png');
     }
 
-    function renderMatchupHeatmap() {
-        const container = document.getElementById('journalMatchupStats');
-        if (!container) return;
+    function toggleMatchupStats() {
+        openMatchupAnalysisModal();
+    }
 
-        const filterMeta = document.getElementById('journalFilterMeta')?.value || '';
-        const filterType = document.getElementById('journalFilterType')?.value || '';
+    /* ── Matchup Analysis Modal ─────────────────────────── */
+
+    function openMatchupAnalysisModal() {
+        const modal = document.getElementById('matchupAnalysisModal');
+        if (!modal) return;
+        populateMatchupFilters();
+        renderMatchupAnalysis();
+        modal.style.display = 'flex';
+    }
+
+    function closeMatchupAnalysisModal() {
+        const modal = document.getElementById('matchupAnalysisModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function populateMatchupFilters() {
+        const entries = journalHistoryCache;
+        const deckSel = document.getElementById('maFilterDeck');
+        const metaSel = document.getElementById('maFilterMeta');
+        const typeSel = document.getElementById('maFilterType');
+        const tournSel = document.getElementById('maFilterTournament');
+
+        if (deckSel) {
+            const decks = [...new Set(entries.map(e => e.ownDeck).filter(Boolean))].sort();
+            const cur = deckSel.value;
+            deckSel.innerHTML = '<option value="">All My Decks</option>';
+            decks.forEach(d => { deckSel.innerHTML += `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`; });
+            if (cur && decks.includes(cur)) deckSel.value = cur;
+        }
+        if (metaSel) {
+            const metas = [...new Set(entries.map(e => e.meta).filter(Boolean))].sort();
+            const cur = metaSel.value;
+            metaSel.innerHTML = '<option value="">All Formats</option>';
+            metas.forEach(m => { metaSel.innerHTML += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`; });
+            if (cur && metas.includes(cur)) metaSel.value = cur;
+        }
+        if (typeSel) {
+            const types = [...new Set(entries.map(e => e.tournamentType).filter(Boolean))].sort();
+            const cur = typeSel.value;
+            typeSel.innerHTML = '<option value="">All Types</option>';
+            types.forEach(t => { typeSel.innerHTML += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`; });
+            if (cur && types.includes(cur)) typeSel.value = cur;
+        }
+        if (tournSel) {
+            const tourns = [...new Set(entries.map(e => e.tournamentName).filter(Boolean))].sort();
+            const cur = tournSel.value;
+            tournSel.innerHTML = '<option value="">All Tournaments</option>';
+            tourns.forEach(t => { tournSel.innerHTML += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`; });
+            if (cur && tourns.includes(cur)) tournSel.value = cur;
+        }
+    }
+
+    function renderMatchupAnalysis() {
+        const fDeck = document.getElementById('maFilterDeck')?.value || '';
+        const fMeta = document.getElementById('maFilterMeta')?.value || '';
+        const fType = document.getElementById('maFilterType')?.value || '';
+        const fTourn = document.getElementById('maFilterTournament')?.value || '';
+
         let entries = journalHistoryCache;
-        if (filterMeta) entries = entries.filter(e => (e.meta || '') === filterMeta);
-        if (filterType) entries = entries.filter(e => (e.tournamentType || '') === filterType);
+        if (fDeck) entries = entries.filter(e => e.ownDeck === fDeck);
+        if (fMeta) entries = entries.filter(e => (e.meta || '') === fMeta);
+        if (fType) entries = entries.filter(e => (e.tournamentType || '') === fType);
+        if (fTourn) entries = entries.filter(e => e.tournamentName === fTourn);
+
+        // Subtitle
+        const sub = document.getElementById('maSubtitle');
+        if (sub) sub.textContent = entries.length + ' Matches' + (fDeck ? ' mit ' + fDeck : '');
+
+        // Summary stats
+        _renderMASummary(entries);
+        // 2D Heatmap
+        _renderMAHeatmap(entries);
+        // Ranking
+        _renderMARankings(entries);
+        // Bar list
+        _renderMABarList(entries);
+    }
+
+    function _renderMASummary(entries) {
+        const el = document.getElementById('maSummaryStats');
+        if (!el) return;
+        const w = entries.filter(e => e.result === 'win').length;
+        const l = entries.filter(e => e.result === 'loss').length;
+        const t = entries.filter(e => e.result === 'tie').length;
+        const tot = entries.length;
+        const wr = tot > 0 ? Math.round((w / tot) * 100) : 0;
+        const uniqueDecks = new Set(entries.map(e => e.ownDeck).filter(Boolean)).size;
+        const uniqueOpps = new Set(entries.map(e => e.opponentArchetype).filter(Boolean)).size;
+        el.innerHTML = `
+            <div class="ma-stat"><strong>${tot}</strong><span>Matches</span></div>
+            <div class="ma-stat is-win"><strong>${w}</strong><span>Wins</span></div>
+            <div class="ma-stat is-loss"><strong>${l}</strong><span>Losses</span></div>
+            <div class="ma-stat is-tie"><strong>${t}</strong><span>Ties</span></div>
+            <div class="ma-stat"><strong>${wr}%</strong><span>Win Rate</span></div>
+            <div class="ma-stat"><strong>${uniqueDecks}</strong><span>Decks</span></div>
+            <div class="ma-stat"><strong>${uniqueOpps}</strong><span>Opponents</span></div>
+        `;
+    }
+
+    function _renderMAHeatmap(entries) {
+        const wrap = document.getElementById('maHeatmapWrap');
+        if (!wrap) return;
 
         if (entries.length === 0) {
-            container.innerHTML = '<p class="color-grey fs-13">' + escapeHtml(battleJournalText('bj.noMatchupData', 'No matchup data available.')) + '</p>';
+            wrap.innerHTML = '<p class="color-grey fs-13">No matchup data.</p>';
+            return;
+        }
+
+        // Build 2D data: myDeck × opponent
+        const grid = {};
+        const myDecks = new Set();
+        const oppDecks = new Set();
+        entries.forEach(e => {
+            const my = e.ownDeck || 'Unknown';
+            const opp = e.opponentArchetype || 'Unknown';
+            myDecks.add(my);
+            oppDecks.add(opp);
+            const key = my + '|||' + opp;
+            if (!grid[key]) grid[key] = { w: 0, l: 0, t: 0, total: 0 };
+            grid[key].total++;
+            if (e.result === 'win') grid[key].w++;
+            else if (e.result === 'loss') grid[key].l++;
+            else grid[key].t++;
+        });
+
+        const myArr = [...myDecks].sort();
+        const oppArr = [...oppDecks].sort();
+
+        // If only 1 deck, skip 2D — the bar list is enough
+        if (myArr.length <= 1 && oppArr.length <= 1) {
+            wrap.innerHTML = '<p class="color-grey fs-13">Need at least 2 different decks for heatmap.</p>';
+            return;
+        }
+
+        let html = '<div class="ma-heatmap-scroll"><table class="ma-heatmap-table"><thead><tr><th class="ma-heatmap-corner"></th>';
+        oppArr.forEach(opp => {
+            html += `<th class="ma-heatmap-col-header" title="${escapeHtml(opp)}">${escapeHtml(_truncate(opp, 10))}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        myArr.forEach(my => {
+            html += `<tr><td class="ma-heatmap-row-header" title="${escapeHtml(my)}">${escapeHtml(_truncate(my, 12))}</td>`;
+            oppArr.forEach(opp => {
+                const key = my + '|||' + opp;
+                const cell = grid[key];
+                if (!cell || cell.total === 0) {
+                    html += '<td class="ma-heatmap-cell ma-heatmap-empty">–</td>';
+                } else {
+                    const wr = Math.round((cell.w / cell.total) * 100);
+                    const cls = wr >= 60 ? 'ma-heatmap-good' : (wr >= 40 ? 'ma-heatmap-mid' : 'ma-heatmap-bad');
+                    html += `<td class="ma-heatmap-cell ${cls}" title="${escapeHtml(my)} vs ${escapeHtml(opp)}: ${cell.w}-${cell.l}-${cell.t} (${wr}%)">${wr}<span class="ma-heatmap-pct">%</span><div class="ma-heatmap-sub">${cell.w}-${cell.l}-${cell.t}</div></td>`;
+                }
+            });
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        wrap.innerHTML = html;
+    }
+
+    function _renderMARankings(entries) {
+        const bestEl = document.getElementById('maRankBest');
+        const worstEl = document.getElementById('maRankWorst');
+        if (!bestEl || !worstEl) return;
+
+        if (entries.length === 0) {
+            bestEl.innerHTML = worstEl.innerHTML = '<p class="color-grey fs-13">No data.</p>';
+            return;
+        }
+
+        // Aggregate by opponent
+        const opp = {};
+        entries.forEach(e => {
+            const o = e.opponentArchetype || 'Unknown';
+            if (!opp[o]) opp[o] = { w: 0, l: 0, t: 0, total: 0 };
+            opp[o].total++;
+            if (e.result === 'win') opp[o].w++;
+            else if (e.result === 'loss') opp[o].l++;
+            else opp[o].t++;
+        });
+
+        const sorted = Object.entries(opp)
+            .filter(([, s]) => s.total >= 2)
+            .map(([name, s]) => ({ name, ...s, wr: Math.round((s.w / s.total) * 100) }))
+            .sort((a, b) => b.wr - a.wr || b.total - a.total);
+
+        const best = sorted.slice(0, 5);
+        const worst = [...sorted].sort((a, b) => a.wr - b.wr || b.total - a.total).slice(0, 5);
+
+        bestEl.innerHTML = best.length > 0 ? best.map(m => _rankItemHtml(m, 'best')).join('') : '<p class="color-grey fs-13">Min. 2 Matches gegen selben Gegner nötig.</p>';
+        worstEl.innerHTML = worst.length > 0 ? worst.map(m => _rankItemHtml(m, 'worst')).join('') : '<p class="color-grey fs-13">Min. 2 Matches gegen selben Gegner nötig.</p>';
+    }
+
+    function _rankItemHtml(m, type) {
+        const cls = type === 'best' ? 'ma-rank-good' : 'ma-rank-bad';
+        return `<div class="ma-rank-item ${cls}">
+            <span class="ma-rank-name">${escapeHtml(m.name)}</span>
+            <span class="ma-rank-wr">${m.wr}%</span>
+            <span class="ma-rank-record">${m.w}-${m.l}-${m.t}</span>
+        </div>`;
+    }
+
+    function _renderMABarList(entries) {
+        const container = document.getElementById('maBarList');
+        if (!container) return;
+
+        if (entries.length === 0) {
+            container.innerHTML = '<p class="color-grey fs-13">No matchup data.</p>';
             return;
         }
 
@@ -1174,11 +1374,13 @@
         container.innerHTML = html;
     }
 
-    function toggleMatchupStats() {
-        const panel = document.getElementById('journalMatchupStats');
-        if (!panel) return;
-        const isHidden = panel.classList.toggle('display-none');
-        if (!isHidden) renderMatchupHeatmap();
+    function _truncate(str, max) {
+        return str.length > max ? str.slice(0, max - 1) + '\u2026' : str;
+    }
+
+    // Keep legacy inline section working (now just opens modal)
+    function renderMatchupHeatmap() {
+        openMatchupAnalysisModal();
     }
 
     function populateJournalTournamentFilter() {
@@ -1512,6 +1714,9 @@
     window.shareTournamentSummary = shareTournamentSummary;
     window.toggleMatchupStats = toggleMatchupStats;
     window.renderMatchupHeatmap = renderMatchupHeatmap;
+    window.openMatchupAnalysisModal = openMatchupAnalysisModal;
+    window.closeMatchupAnalysisModal = closeMatchupAnalysisModal;
+    window.renderMatchupAnalysis = renderMatchupAnalysis;
     window.openEditTournamentModal = openEditTournamentModal;
     window.closeEditTournamentModal = closeEditTournamentModal;
     window.selectEditTournType = selectEditTournType;

@@ -2731,6 +2731,38 @@
 
     <!-- Edit Single Entry Modal -->
     <div id="bjEditEntryModal" class="ui-modal-backdrop" style="display:none; z-index:9999;" onclick="if(event.target===this)closeEditEntryModal()" role="dialog" aria-modal="true" aria-label="Edit match entry">
+      <div class="ui-modal bj-edit-modal">
+        <div class="bj-edit-modal-header">
+          <h3>✏️ Edit Match</h3>
+          <button onclick="closeEditEntryModal()" class="bj-edit-modal-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="bj-edit-modal-body">
+          <label class="bj-edit-label">Your Deck</label>
+          <input id="bjEditEntryOwnDeck" type="text" class="bj-edit-input" autocomplete="off">
+
+          <label class="bj-edit-label">Opponent Archetype</label>
+          <input id="bjEditEntryOpponent" type="text" class="bj-edit-input" autocomplete="off">
+
+          <label class="bj-edit-label">Result</label>
+          <select id="bjEditEntryResult" class="bj-edit-input">
+            <option value="win">Win</option>
+            <option value="loss">Loss</option>
+            <option value="tie">Tie</option>
+          </select>
+
+          <label class="bj-edit-label">Turn Order</label>
+          <select id="bjEditEntryTurnOrder" class="bj-edit-input">
+            <option value="">–</option>
+            <option value="first">1st (Going first)</option>
+            <option value="second">2nd (Going second)</option>
+          </select>
+        </div>
+        <div class="bj-edit-modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeEditEntryModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveEditEntry()">💾 Save</button>
+        </div>
+      </div>
+    </div>
 
     <!-- ===== MATCHUP ANALYSIS MODAL ===== -->
     <div id="matchupAnalysisModal"
@@ -2789,38 +2821,6 @@
         <div class="ma-section">
           <h3 class="ma-section-title">📋 Alle Gegner-Matchups</h3>
           <div id="maBarList"></div>
-        </div>
-      </div>
-    </div>
-      <div class="ui-modal bj-edit-modal">
-        <div class="bj-edit-modal-header">
-          <h3>✏️ Edit Match</h3>
-          <button onclick="closeEditEntryModal()" class="bj-edit-modal-close" aria-label="Close">&times;</button>
-        </div>
-        <div class="bj-edit-modal-body">
-          <label class="bj-edit-label">Your Deck</label>
-          <input id="bjEditEntryOwnDeck" type="text" class="bj-edit-input" autocomplete="off">
-
-          <label class="bj-edit-label">Opponent Archetype</label>
-          <input id="bjEditEntryOpponent" type="text" class="bj-edit-input" autocomplete="off">
-
-          <label class="bj-edit-label">Result</label>
-          <select id="bjEditEntryResult" class="bj-edit-input">
-            <option value="win">Win</option>
-            <option value="loss">Loss</option>
-            <option value="tie">Tie</option>
-          </select>
-
-          <label class="bj-edit-label">Turn Order</label>
-          <select id="bjEditEntryTurnOrder" class="bj-edit-input">
-            <option value="">–</option>
-            <option value="first">1st (Going first)</option>
-            <option value="second">2nd (Going second)</option>
-          </select>
-        </div>
-        <div class="bj-edit-modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeEditEntryModal()">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="saveEditEntry()">💾 Save</button>
         </div>
       </div>
     </div>

@@ -201,14 +201,14 @@
         const outbox = getBattleJournalOutbox();
         for (let i = outbox.length - 1; i >= 0; i--) {
             if (outbox[i]?.tournamentName) {
-                return { tournamentName: outbox[i].tournamentName, ownDeck: outbox[i].ownDeck || '' };
+                return { tournamentName: outbox[i].tournamentName, ownDeck: outbox[i].ownDeck || '', meta: outbox[i].meta || '', tournamentType: outbox[i].tournamentType || '' };
             }
         }
         // Also check Firestore-synced entries (journalHistoryCache is sorted newest first)
         if (Array.isArray(journalHistoryCache)) {
             for (const entry of journalHistoryCache) {
                 if (entry?.tournamentName) {
-                    return { tournamentName: entry.tournamentName, ownDeck: entry.ownDeck || '' };
+                    return { tournamentName: entry.tournamentName, ownDeck: entry.ownDeck || '', meta: entry.meta || '', tournamentType: entry.tournamentType || '' };
                 }
             }
         }
@@ -225,6 +225,8 @@
         }
         const deckSuffix = last.ownDeck ? ` (${last.ownDeck})` : '';
         els.lastTournamentLabel.textContent = last.tournamentName + deckSuffix;
+        els.lastTournamentRow.dataset.lastMeta = last.meta;
+        els.lastTournamentRow.dataset.lastType = last.tournamentType;
         els.lastTournamentRow.classList.remove('d-none');
     }
 
@@ -234,6 +236,25 @@
         if (!last) return;
         if (els.tournamentName) els.tournamentName.value = last.tournamentName;
         if (els.ownDeckValue) els.ownDeckValue.value = last.ownDeck;
+        // Also restore meta and type
+        const row = document.getElementById('battleJournalLastTournamentRow');
+        const lastMeta = row?.dataset.lastMeta || '';
+        const lastType = row?.dataset.lastType || '';
+        if (lastMeta) {
+            const metaSel = document.getElementById('battleJournalMeta');
+            if (metaSel) metaSel.value = lastMeta;
+        }
+        if (lastType) selectJournalType(lastType);
+    }
+
+    function continueJournalTournament(name, meta, type) {
+        openBattleJournalSheet();
+        // Pre-fill tournament fields after sheet opens
+        const nameEl = document.getElementById('battleJournalTournamentName');
+        if (nameEl) nameEl.value = name || '';
+        const metaSel = document.getElementById('battleJournalMeta');
+        if (metaSel && meta) metaSel.value = meta;
+        if (type) selectJournalType(type);
     }
 
     // ── Dynamic game rows ────────────────────────────────────
@@ -996,13 +1017,17 @@
                 const tTotal = entries.length;
                 const tWinRate = tTotal > 0 ? Math.round((tW / tTotal) * 100) : 0;
                 const safeTournKey = escapeHtml(tournKey).replace(/'/g, "\\'");
+                const groupType = (entries[0]?.tournamentType || '').replace(/'/g, "\\'");
+                const safeMetaKey = escapeHtml(metaKey).replace(/'/g, "\\'");
+                const safeGroupType = escapeHtml(groupType);
 
-                html += `<div class="bj-tournament-block">
+                html += `<div class="bj-tournament-block" data-meta="${escapeHtml(metaKey)}" data-tournament-type="${safeGroupType}">
                     <div class="bj-tournament-header">
                         <div class="bj-tournament-info">
                             <strong class="bj-tournament-name">${escapeHtml(tournLabel)}</strong>
                             <span class="bj-tournament-record">${tW}-${tL}-${tT} (${tWinRate}%)</span>
                         </div>
+                        <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">➕</button>
                         <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">✏️</button>
                         <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">📸</button>
                     </div>`;
@@ -1633,6 +1658,11 @@
         document.getElementById('bjEditEntryResult').value = entry.result || '';
         document.getElementById('bjEditEntryTurnOrder').value = entry.turnOrder || '';
 
+        // Copy deck suggestions from main form datalist
+        const srcList = document.getElementById('battleJournalOwnDeckList');
+        const destList = document.getElementById('bjEditEntryOwnDeckList');
+        if (srcList && destList) destList.innerHTML = srcList.innerHTML;
+
         modal.style.display = 'flex';
     }
 
@@ -1763,6 +1793,7 @@
     window.closeEditEntryModal = closeEditEntryModal;
     window.saveEditEntry = saveEditEntry;
     window.deleteJournalEntry = deleteJournalEntry;
+    window.continueJournalTournament = continueJournalTournament;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBattleJournal, { once: true });

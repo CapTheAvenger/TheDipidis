@@ -210,6 +210,31 @@ def run():
         page.evaluate("closeEditEntryModal()")
         page.wait_for_timeout(100)
 
+        # ── BUG FIX TESTS ─────────────────────────────────────
+        print("\n-- Bug Fix Tests --")
+
+        # BUG 2: ➕ Add Match button on tournament headers
+        add_btns = page.locator(".bj-tournament-add-btn")
+        check("T5.1 Tournament add-match button rendered", add_btns.count() >= 1)
+
+        # BUG 2: continueJournalTournament is a function
+        check("T5.2 continueJournalTournament is function", page.evaluate("typeof window.continueJournalTournament === 'function'"))
+
+        # BUG 2: tournament blocks have data-meta and data-tournament-type
+        has_data_meta = page.evaluate("!!document.querySelector('.bj-tournament-block[data-meta]')")
+        check("T5.3 Tournament block has data-meta attr", has_data_meta)
+        has_data_type = page.evaluate("!!document.querySelector('.bj-tournament-block[data-tournament-type]')")
+        check("T5.4 Tournament block has data-tournament-type attr", has_data_type)
+
+        # BUG 3: Edit entry modal has datalist for deck
+        has_datalist = page.locator("#bjEditEntryOwnDeckList").count()
+        check("T5.5 Edit entry deck datalist exists", has_datalist == 1)
+        deck_input_list = page.evaluate("document.getElementById('bjEditEntryOwnDeck').getAttribute('list')")
+        check("T5.6 Edit entry deck input linked to datalist", deck_input_list == "bjEditEntryOwnDeckList")
+
+        # BUG 1: applyLastTournament is a function (already tested, but verify meta/type support)
+        check("T5.7 applyLastTournament is function", page.evaluate("typeof window.applyLastTournament === 'function'"))
+
         # Cleanup test data
         page.evaluate("localStorage.removeItem('battleJournalOutboxV1')")
 

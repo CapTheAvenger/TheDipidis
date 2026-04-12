@@ -6557,6 +6557,7 @@ details[open] > .tier-trending-summary::after {
 .bj-history-delete-btn:hover { background: rgba(231,76,60,.1); }
 
 /* ── Tournament Edit Button ─── */
+.bj-tournament-add-btn,
 .bj-tournament-edit-btn {
     background: none;
     border: 1px solid rgba(0,0,0,.1);
@@ -6568,6 +6569,7 @@ details[open] > .tier-trending-summary::after {
     flex-shrink: 0;
     transition: background .15s;
 }
+.bj-tournament-add-btn:hover { background: rgba(39,174,96,.12); }
 .bj-tournament-edit-btn:hover { background: rgba(37,99,235,.1); }
 
 .battle-journal-footer {

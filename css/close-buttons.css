@@ -1,0 +1,164 @@
+/* ============================================================
+   ESCAPE ROPE CLOSE BUTTONS
+   All modal/sheet close buttons use the Escape Rope sprite
+   ============================================================ */
+
+/* Base class applied to ALL close buttons */
+.btn-escape-rope,
+.auth-modal-close,
+.image-view-close,
+.bj-edit-modal-close,
+.ma-modal-close,
+.fullscreen-close,
+.single-card-close,
+.battle-journal-close,
+.draw-sim-close-btn,
+.help-modal-close {
+  /* Reset text content */
+  color: transparent !important;
+  font-size: 0 !important;
+
+  /* Rope image */
+  background-image: url('../images/escape-rope.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-color: transparent !important;
+
+  /* Consistent sizing */
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+
+  cursor: pointer;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0;
+
+  /* Smooth transitions */
+  transition: transform 0.15s ease, opacity 0.15s ease, filter 0.15s ease !important;
+  opacity: 0.85;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+}
+
+/* Hide ::before pseudo-content (used on auth-modal-close) */
+.auth-modal-close::before,
+.btn-escape-rope::before {
+  content: none !important;
+}
+
+/* Hover: leichte Rotation + heller */
+.btn-escape-rope:hover,
+.auth-modal-close:hover,
+.image-view-close:hover,
+.bj-edit-modal-close:hover,
+.ma-modal-close:hover,
+.fullscreen-close:hover,
+.single-card-close:hover,
+.battle-journal-close:hover,
+.draw-sim-close-btn:hover,
+.help-modal-close:hover {
+  transform: rotate(15deg) scale(1.15) !important;
+  opacity: 1;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)) brightness(1.1);
+}
+
+/* Active/click: zurück */
+.btn-escape-rope:active,
+.auth-modal-close:active,
+.image-view-close:active,
+.bj-edit-modal-close:active,
+.ma-modal-close:active,
+.fullscreen-close:active,
+.single-card-close:active,
+.battle-journal-close:active,
+.draw-sim-close-btn:active,
+.help-modal-close:active {
+  transform: rotate(5deg) scale(0.95) !important;
+}
+
+/* Special: image-view-close currently has red background - override */
+.image-view-close {
+  background-color: transparent !important;
+}
+
+/* The deckGridPreviewModal close button has no CSS class — add via attribute */
+[onclick="closeDeckGridPreview()"],
+[onclick="closeMyDecksPlaytest()"] {
+  color: transparent !important;
+  font-size: 0 !important;
+  background-image: url('../images/escape-rope.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-color: transparent !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: transform 0.15s ease !important;
+  opacity: 0.85;
+}
+
+[onclick="closeDeckGridPreview()"]:hover,
+[onclick="closeMyDecksPlaytest()"]:hover {
+  transform: rotate(15deg) scale(1.15) !important;
+  opacity: 1;
+}
+
+/* Tooltip on hover — "Verlassen" */
+.auth-modal-close::after,
+.image-view-close::after,
+.bj-edit-modal-close::after,
+.ma-modal-close::after,
+.fullscreen-close::after,
+.single-card-close::after,
+.battle-journal-close::after,
+.draw-sim-close-btn::after,
+.help-modal-close::after {
+  content: 'Verlassen';
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(0,0,0,0.7);
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* Make parent relative for tooltip positioning */
+.auth-modal-close,
+.bj-edit-modal-close,
+.ma-modal-close,
+.battle-journal-close,
+.draw-sim-close-btn,
+.help-modal-close {
+  position: relative;
+}
+
+.auth-modal-close:hover::after,
+.image-view-close:hover::after,
+.bj-edit-modal-close:hover::after,
+.ma-modal-close:hover::after,
+.fullscreen-close:hover::after,
+.single-card-close:hover::after,
+.battle-journal-close:hover::after,
+.draw-sim-close-btn:hover::after,
+.help-modal-close:hover::after {
+  opacity: 1;
+}

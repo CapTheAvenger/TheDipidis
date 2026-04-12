@@ -554,7 +554,7 @@
             archetypes.sort((a, b) => a.archetype.localeCompare(b.archetype));
             
             // Populate deck select dropdown
-            resetSelectWithPlaceholder(deckSelect, '-- Select a Deck --', '');
+            resetSelectWithPlaceholder(deckSelect, typeof t === 'function' ? t('currentMeta.selectDeck') : '-- Select a Deck --', '');
             
             archetypes.forEach(entry => {
                 const tournamentCount = entry.tournaments.length;
@@ -792,7 +792,7 @@
             const tableContainer = document.getElementById('pastMetaDeckTable');
             
             if (cards.length === 0) {
-                tableContainer.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'Select a deck to see its card breakdown.', icon: 'cards' });
+                tableContainer.innerHTML = getEmptyStateBoxHtml({ title: typeof t === 'function' ? t('currentMeta.noCards') : 'No cards found', description: typeof t === 'function' ? t('currentMeta.selectDeckHint') : 'Select a deck to see its card breakdown.', icon: 'cards' });
                 return;
             }
             
@@ -1165,7 +1165,7 @@
             }
             
             if (!pastMetaCurrentCards || pastMetaCurrentCards.length === 0) {
-                showToast('Please select a deck first!', 'warning');
+                showToast(typeof t === 'function' ? t('currentMeta.selectDeckFirst') : 'Please select a deck first!', 'warning');
                 return;
             }
             

@@ -737,8 +737,8 @@
 
             let heroHtml = '';
             if (topHeroArchetypes.length > 0) {
-                const heroTitle = getLang() === 'de' ? 'Top Archetypes' : 'Top Archetypes';
-                const heroSubtitle = getLang() === 'de' ? 'Meistgespielte Deck-Varianten (Global)' : 'Most played deck variants (Global)';
+                const heroTitle = typeof t === 'function' ? t('currentMeta.topArchetypes') : 'Top Archetypes';
+                const heroSubtitle = typeof t === 'function' ? t('currentMeta.topArchetypesSub') : 'Most played deck variants (Global)';
 
                 heroHtml = `
                     <section class="tier-hero-section" aria-label="${heroTitle}">

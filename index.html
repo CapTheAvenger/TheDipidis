@@ -1096,8 +1096,8 @@
                             </select>
                         </div>
                         <div class="cards-filter-view-mode">
-                            <button id="btnStandardPrint" class="active" onclick="setPrintView(true)">Standard Print</button>
-                            <button id="btnAllPrints" onclick="setPrintView(false)">All Prints</button>
+                            <button id="btnStandardPrint" class="active" onclick="setPrintView(true)" data-i18n="cards.standardPrint">Standard Print</button>
+                            <button id="btnAllPrints" onclick="setPrintView(false)" data-i18n="cards.allPrints">All Prints</button>
                         </div>
                         <div id="cardResultsInfo" class="cards-filter-results-info" data-i18n="cards.loading">
                             Loading cards...
@@ -2711,14 +2711,14 @@
     <div id="bjEditTournamentModal" class="ui-modal-backdrop" style="display:none; z-index:9999;" onclick="if(event.target===this)closeEditTournamentModal()" role="dialog" aria-modal="true" aria-label="Edit tournament">
       <div class="ui-modal bj-edit-modal">
         <div class="bj-edit-modal-header">
-          <h3>✏️ Edit Tournament</h3>
+          <h3 data-i18n="bj.editTournament">✏️ Edit Tournament</h3>
           <button onclick="closeEditTournamentModal()" class="bj-edit-modal-close" aria-label="Close" data-i18n-aria="btn.close">&times;</button>
         </div>
         <div class="bj-edit-modal-body">
-          <label class="bj-edit-label">Tournament Name</label>
+          <label class="bj-edit-label" data-i18n="bj.tournamentName">Tournament Name</label>
           <input id="bjEditTournName" type="text" class="bj-edit-input" autocomplete="off">
 
-          <label class="bj-edit-label">Meta Format</label>
+          <label class="bj-edit-label" data-i18n="bj.metaFormat">Meta Format</label>
           <select id="bjEditTournMeta" class="bj-edit-input">
             <option value="">� None �</option>
             <option value="TEF-POR">TEF-POR</option>
@@ -2738,7 +2738,7 @@
             <option value="SVI-PAF">SVI-PAF</option>
           </select>
 
-          <label class="bj-edit-label">Tournament Type</label>
+          <label class="bj-edit-label" data-i18n="bj.tournamentType">Tournament Type</label>
           <input id="bjEditTournType" type="hidden" value="">
           <div id="bjEditTournTypeGroup" class="bj-type-chip-group">
             <button type="button" class="bj-type-chip" data-value="Regional/SPE/IC" onclick="selectEditTournType('Regional/SPE/IC')">🏆 Regional/SPE/IC</button>
@@ -2750,7 +2750,7 @@
 
           <!-- Your Deck for this tournament (batch-updates all entries) -->
           <div class="bj-edit-form-group" style="margin-top: 16px;">
-            <label class="bj-edit-label" for="bjEditTournDeck">🃏 Your Deck <span style="font-size:11px;opacity:0.6;">(updates all matches in this tournament)</span></label>
+            <label class="bj-edit-label" for="bjEditTournDeck">🃏 <span data-i18n="bj.yourDeck">Your Deck</span> <span style="font-size:11px;opacity:0.6;" data-i18n="bj.updatesAllMatches">(updates all matches in this tournament)</span></label>
             <input
               id="bjEditTournDeck"
               type="text"
@@ -2763,8 +2763,8 @@
           </div>
         </div>
         <div class="bj-edit-modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeEditTournamentModal()">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="saveEditTournament()">💾 Save</button>
+          <button type="button" class="btn btn-secondary" onclick="closeEditTournamentModal()" data-i18n="bj.cancel">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveEditTournament()">💾 <span data-i18n="bj.save">Save</span></button>
         </div>
       </div>
     </div>
@@ -2773,34 +2773,34 @@
     <div id="bjEditEntryModal" class="ui-modal-backdrop" style="display:none; z-index:9999;" onclick="if(event.target===this)closeEditEntryModal()" role="dialog" aria-modal="true" aria-label="Edit match entry">
       <div class="ui-modal bj-edit-modal">
         <div class="bj-edit-modal-header">
-          <h3>✏️ Edit Match</h3>
+          <h3 data-i18n="bj.editMatch">✏️ Edit Match</h3>
           <button onclick="closeEditEntryModal()" class="bj-edit-modal-close" aria-label="Close" data-i18n-aria="btn.close">&times;</button>
         </div>
         <div class="bj-edit-modal-body">
-          <label class="bj-edit-label">Your Deck</label>
+          <label class="bj-edit-label" data-i18n="bj.yourDeck">Your Deck</label>
           <input id="bjEditEntryOwnDeck" type="text" class="bj-edit-input" list="bjEditEntryOwnDeckList" autocomplete="off">
           <datalist id="bjEditEntryOwnDeckList"></datalist>
 
-          <label class="bj-edit-label">Opponent Archetype</label>
+          <label class="bj-edit-label" data-i18n="bj.opponentArchetype">Opponent Archetype</label>
           <input id="bjEditEntryOpponent" type="text" class="bj-edit-input" autocomplete="off">
 
-          <label class="bj-edit-label">Result</label>
+          <label class="bj-edit-label" data-i18n="bj.result">Result</label>
           <select id="bjEditEntryResult" class="bj-edit-input">
-            <option value="win">Win</option>
-            <option value="loss">Loss</option>
-            <option value="tie">Tie</option>
+            <option value="win" data-i18n="bj.win">Win</option>
+            <option value="loss" data-i18n="bj.loss">Loss</option>
+            <option value="tie" data-i18n="bj.tie">Tie</option>
           </select>
 
-          <label class="bj-edit-label">Turn Order</label>
+          <label class="bj-edit-label" data-i18n="bj.turnOrder">Turn Order</label>
           <select id="bjEditEntryTurnOrder" class="bj-edit-input">
             <option value="">�</option>
-            <option value="first">1st (Going first)</option>
-            <option value="second">2nd (Going second)</option>
+            <option value="first" data-i18n="bj.goingFirst">1st (Going first)</option>
+            <option value="second" data-i18n="bj.goingSecond">2nd (Going second)</option>
           </select>
         </div>
         <div class="bj-edit-modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeEditEntryModal()">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="saveEditEntry()">💾 Save</button>
+          <button type="button" class="btn btn-secondary" onclick="closeEditEntryModal()" data-i18n="bj.cancel">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveEditEntry()">💾 <span data-i18n="bj.save">Save</span></button>
         </div>
       </div>
     </div>

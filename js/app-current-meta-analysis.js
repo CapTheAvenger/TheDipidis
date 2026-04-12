@@ -288,7 +288,7 @@
             const select = document.getElementById('currentMetaDeckSelect');
             if (!select) return;
             
-            select.innerHTML = '<option value="">-- Select a Deck --</option>';
+            select.innerHTML = `<option value="">${typeof t === 'function' ? t('currentMeta.selectDeck') : '-- Select a Deck --'}</option>`;
             
             if (top10.length > 0) {
                 const optgroup = document.createElement('optgroup');
@@ -387,11 +387,12 @@
             const statusEl = document.getElementById('currentMetaFilterStatus');
             if (statusEl) {
                 const labels = {
-                    'all': 'All Tournaments',
-                    'live': 'Limitless Decks Only',
-                    'play': 'Major Tournament Decks Only'
+                    'all': typeof t === 'function' ? t('currentMeta.allTournaments') : 'All Tournaments',
+                    'live': typeof t === 'function' ? t('currentMeta.limitlessOnly') : 'Limitless Decks Only',
+                    'play': typeof t === 'function' ? t('currentMeta.majorOnly') : 'Major Tournament Decks Only'
                 };
-                statusEl.textContent = `Active filter: ${labels[format]}`;
+                const filterLabel = typeof t === 'function' ? t('currentMeta.activeFilter') : 'Active filter:';
+                statusEl.textContent = `${filterLabel} ${labels[format]}`;
             }
             
             // Refresh dropdown list to show only archetypes matching the filter

@@ -1202,14 +1202,14 @@
         if (deckSel) {
             const decks = [...new Set(entries.map(e => e.ownDeck).filter(Boolean))].sort();
             const cur = deckSel.value;
-            deckSel.innerHTML = '<option value="">All My Decks</option>';
+            deckSel.innerHTML = `<option value="">${escapeHtml(battleJournalText('bj.allMyDecks', 'All My Decks'))}</option>`;
             decks.forEach(d => { deckSel.innerHTML += `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`; });
             if (cur && decks.includes(cur)) deckSel.value = cur;
         }
         if (metaSel) {
             const metas = [...new Set(entries.map(e => e.meta).filter(Boolean))].sort();
             const cur = metaSel.value;
-            metaSel.innerHTML = '<option value="">All Formats</option>';
+            metaSel.innerHTML = `<option value="">${escapeHtml(battleJournalText('bj.allMetas', 'All Formats'))}</option>`;
             metas.forEach(m => { metaSel.innerHTML += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`; });
             if (cur && metas.includes(cur)) metaSel.value = cur;
         }
@@ -1219,7 +1219,7 @@
         if (tournSel) {
             const tourns = [...new Set(entries.map(e => e.tournamentName).filter(Boolean))].sort();
             const cur = tournSel.value;
-            tournSel.innerHTML = '<option value="">All Tournaments</option>';
+            tournSel.innerHTML = `<option value="">${escapeHtml(battleJournalText('bj.allTourneys', 'All Tournaments'))}</option>`;
             tourns.forEach(t => { tournSel.innerHTML += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`; });
             if (cur && tourns.includes(cur)) tournSel.value = cur;
         }
@@ -1261,7 +1261,7 @@
 
         // Subtitle
         const sub = document.getElementById('maSubtitle');
-        if (sub) sub.textContent = entries.length + ' Matches' + (fDeck ? ' mit ' + fDeck : '');
+        if (sub) sub.textContent = entries.length + ' ' + battleJournalText('ma.matches', 'Matches') + (fDeck ? ' ' + battleJournalText('ma.mit', 'with') + ' ' + fDeck : '');
 
         // Summary stats
         _renderMASummary(entries);
@@ -1284,13 +1284,13 @@
         const uniqueDecks = new Set(entries.map(e => e.ownDeck).filter(Boolean)).size;
         const uniqueOpps = new Set(entries.map(e => e.opponentArchetype).filter(Boolean)).size;
         el.innerHTML = `
-            <div class="ma-stat"><strong>${tot}</strong><span>Matches</span></div>
-            <div class="ma-stat is-win"><strong>${w}</strong><span>Wins</span></div>
-            <div class="ma-stat is-loss"><strong>${l}</strong><span>Losses</span></div>
-            <div class="ma-stat is-tie"><strong>${t}</strong><span>Ties</span></div>
-            <div class="ma-stat"><strong>${wr}%</strong><span>Win Rate</span></div>
-            <div class="ma-stat"><strong>${uniqueDecks}</strong><span>Decks</span></div>
-            <div class="ma-stat"><strong>${uniqueOpps}</strong><span>Opponents</span></div>
+            <div class="ma-stat"><strong>${tot}</strong><span>${escapeHtml(battleJournalText('ma.matches', 'Matches'))}</span></div>
+            <div class="ma-stat is-win"><strong>${w}</strong><span>${escapeHtml(battleJournalText('ma.wins', 'Wins'))}</span></div>
+            <div class="ma-stat is-loss"><strong>${l}</strong><span>${escapeHtml(battleJournalText('ma.losses', 'Losses'))}</span></div>
+            <div class="ma-stat is-tie"><strong>${t}</strong><span>${escapeHtml(battleJournalText('ma.ties', 'Ties'))}</span></div>
+            <div class="ma-stat"><strong>${wr}%</strong><span>${escapeHtml(battleJournalText('ma.winRate', 'Win Rate'))}</span></div>
+            <div class="ma-stat"><strong>${uniqueDecks}</strong><span>${escapeHtml(battleJournalText('ma.decks', 'Decks'))}</span></div>
+            <div class="ma-stat"><strong>${uniqueOpps}</strong><span>${escapeHtml(battleJournalText('ma.opponents', 'Opponents'))}</span></div>
         `;
     }
 
@@ -1299,7 +1299,7 @@
         if (!wrap) return;
 
         if (entries.length === 0) {
-            wrap.innerHTML = '<p class="color-grey fs-13">No matchup data.</p>';
+            wrap.innerHTML = `<p class="color-grey fs-13">${escapeHtml(battleJournalText('ma.noData', 'No matchup data.'))}</p>`;
             return;
         }
 
@@ -1325,7 +1325,7 @@
 
         // If only 1 deck, skip 2D — the bar list is enough
         if (myArr.length <= 1 && oppArr.length <= 1) {
-            wrap.innerHTML = '<p class="color-grey fs-13">Need at least 2 different decks for heatmap.</p>';
+            wrap.innerHTML = `<p class="color-grey fs-13">${escapeHtml(battleJournalText('ma.needTwoDecks', 'Need at least 2 different decks for heatmap.'))}</p>`;
             return;
         }
 
@@ -1361,7 +1361,7 @@
         if (!bestEl || !worstEl) return;
 
         if (entries.length === 0) {
-            bestEl.innerHTML = worstEl.innerHTML = '<p class="color-grey fs-13">No data.</p>';
+            bestEl.innerHTML = worstEl.innerHTML = `<p class="color-grey fs-13">${escapeHtml(battleJournalText('ma.noRankData', 'No data.'))}</p>`;
             return;
         }
 
@@ -1384,8 +1384,8 @@
         const best = sorted.slice(0, 5);
         const worst = [...sorted].sort((a, b) => a.wr - b.wr || b.total - a.total).slice(0, 5);
 
-        bestEl.innerHTML = best.length > 0 ? best.map(m => _rankItemHtml(m, 'best')).join('') : '<p class="color-grey fs-13">Min. 2 Matches gegen selben Gegner nötig.</p>';
-        worstEl.innerHTML = worst.length > 0 ? worst.map(m => _rankItemHtml(m, 'worst')).join('') : '<p class="color-grey fs-13">Min. 2 Matches gegen selben Gegner nötig.</p>';
+        bestEl.innerHTML = best.length > 0 ? best.map(m => _rankItemHtml(m, 'best')).join('') : `<p class="color-grey fs-13">${escapeHtml(battleJournalText('ma.minTwoMatches', 'Min. 2 matches against the same opponent needed.'))}</p>`;
+        worstEl.innerHTML = worst.length > 0 ? worst.map(m => _rankItemHtml(m, 'worst')).join('') : `<p class="color-grey fs-13">${escapeHtml(battleJournalText('ma.minTwoMatches', 'Min. 2 matches against the same opponent needed.'))}</p>`;
     }
 
     function _rankItemHtml(m, type) {
@@ -1402,7 +1402,7 @@
         if (!container) return;
 
         if (entries.length === 0) {
-            container.innerHTML = '<p class="color-grey fs-13">No matchup data.</p>';
+            container.innerHTML = `<p class="color-grey fs-13">${escapeHtml(battleJournalText('ma.noData', 'No matchup data.'))}</p>`;
             return;
         }
 

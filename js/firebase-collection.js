@@ -1646,6 +1646,9 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" style="padding: 6px 12px; background: rgba(26, 188, 156, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#16a085'" onmouseout="this.style.background='rgba(26, 188, 156, 0.9)'" title="Save as image">
               📸
             </button>
+            <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(142, 68, 173, 0.7); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#7d3c98'" onmouseout="this.style.background='rgba(142, 68, 173, 0.7)'" title="Rename deck">
+              ✏️
+            </button>
             <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" style="padding: 6px 12px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='rgba(231, 76, 60, 0.9)'" title="Delete deck">
               🗑️
             </button>
@@ -1690,6 +1693,34 @@ async function toggleDeckActive(deckId) {
     console.error('Error toggling deck active:', error);
     showNotification('Error updating deck', 'error');
   }
+}
+
+// ============================================================
+// My Decks: Rename Deck
+// ============================================================
+async function renameDeck(deckIndex) {
+  const deck = window.userDecks[deckIndex];
+  if (!deck) return;
+  const newName = prompt(getLang() === 'de' ? 'Deck umbenennen:' : 'Rename deck:', deck.name);
+  if (!newName || newName.trim() === '' || newName.trim() === deck.name) return;
+  const trimmed = newName.trim();
+
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      await db.collection('users').doc(user.uid)
+        .collection('decks').doc(deck.id)
+        .update({ name: trimmed, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+  } catch (e) {
+    console.error('renameDeck Firestore error', e);
+    showNotification(getLang() === 'de' ? 'Umbenennen fehlgeschlagen.' : 'Could not save rename.', 'error');
+    return;
+  }
+
+  window.userDecks[deckIndex].name = trimmed;
+  showNotification(getLang() === 'de' ? 'Deck umbenannt!' : 'Deck renamed!', 'success');
+  updateDecksUI();
 }
 
 // Compare all active (IRL built) decks

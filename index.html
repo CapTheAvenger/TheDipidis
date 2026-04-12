@@ -2534,6 +2534,11 @@
                                 </select>
                                 <select id="journalFilterType" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark" aria-label="Filter by tournament type">
                                     <option value="" data-i18n="bj.allTypes">All Types</option>
+                                    <option value="Regional/SPE/IC">🏆 Regional/SPE/IC</option>
+                                    <option value="Challenge">🎯 Challenge</option>
+                                    <option value="Cup">🥤 Cup</option>
+                                    <option value="Online">🌐 Online</option>
+                                    <option value="Testing">🧪 Testing</option>
                                 </select>
                                 <select id="journalFilterTournament" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark" aria-label="Filter by tournament">
                                     <option value="" data-i18n="bj.allTournaments">All Tournaments</option>
@@ -2713,13 +2718,11 @@
           <label class="bj-edit-label">Tournament Type</label>
           <input id="bjEditTournType" type="hidden" value="">
           <div id="bjEditTournTypeGroup" class="bj-type-chip-group">
-            <button type="button" class="bj-type-chip" data-value="City League" onclick="selectEditTournType('City League')">🏙️ City League</button>
-            <button type="button" class="bj-type-chip" data-value="Regional" onclick="selectEditTournType('Regional')">🏆 Regional</button>
-            <button type="button" class="bj-type-chip" data-value="Special Event" onclick="selectEditTournType('Special Event')">⭐ Special</button>
-            <button type="button" class="bj-type-chip" data-value="League Cup" onclick="selectEditTournType('League Cup')">🥤 Cup</button>
-            <button type="button" class="bj-type-chip" data-value="League Challenge" onclick="selectEditTournType('League Challenge')">🎯 Challenge</button>
+            <button type="button" class="bj-type-chip" data-value="Regional/SPE/IC" onclick="selectEditTournType('Regional/SPE/IC')">🏆 Regional/SPE/IC</button>
+            <button type="button" class="bj-type-chip" data-value="Challenge" onclick="selectEditTournType('Challenge')">🎯 Challenge</button>
+            <button type="button" class="bj-type-chip" data-value="Cup" onclick="selectEditTournType('Cup')">🥤 Cup</button>
             <button type="button" class="bj-type-chip" data-value="Online" onclick="selectEditTournType('Online')">🌐 Online</button>
-            <button type="button" class="bj-type-chip" data-value="Casual" onclick="selectEditTournType('Casual')">🎲 Casual</button>
+            <button type="button" class="bj-type-chip" data-value="Testing" onclick="selectEditTournType('Testing')">🧪 Testing</button>
           </div>
         </div>
         <div class="bj-edit-modal-footer">
@@ -2798,11 +2801,11 @@
             <label class="ma-filter-label">🏆 Turnier-Typ</label>
             <div id="maFilterTypeChips" class="ma-chip-row">
               <button type="button" class="ma-chip ma-chip--active" data-value="" onclick="toggleMATypeChip(this)">Alle</button>
-              <button type="button" class="ma-chip" data-value="Testing" onclick="toggleMATypeChip(this)">Testing</button>
-              <button type="button" class="ma-chip" data-value="Challenge" onclick="toggleMATypeChip(this)">Challenge</button>
-              <button type="button" class="ma-chip" data-value="Cup" onclick="toggleMATypeChip(this)">Cup</button>
-              <button type="button" class="ma-chip" data-value="Major" onclick="toggleMATypeChip(this)">Major</button>
-              <button type="button" class="ma-chip" data-value="League" onclick="toggleMATypeChip(this)">League</button>
+              <button type="button" class="ma-chip" data-value="Regional/SPE/IC" onclick="toggleMATypeChip(this)">🏆 Regional/SPE/IC</button>
+              <button type="button" class="ma-chip" data-value="Challenge" onclick="toggleMATypeChip(this)">🎯 Challenge</button>
+              <button type="button" class="ma-chip" data-value="Cup" onclick="toggleMATypeChip(this)">🥤 Cup</button>
+              <button type="button" class="ma-chip" data-value="Online" onclick="toggleMATypeChip(this)">🌐 Online</button>
+              <button type="button" class="ma-chip" data-value="Testing" onclick="toggleMATypeChip(this)">🧪 Testing</button>
             </div>
           </div>
           <div class="ma-filter-group">
@@ -3599,13 +3602,11 @@
                         <span class="battle-journal-label" data-i18n="bj.tournamentType">Tournament Type</span>
                         <input id="battleJournalType" type="hidden" value="">
                         <div id="battleJournalTypeGroup" class="bj-type-chip-group">
-                            <button type="button" class="bj-type-chip" data-value="City League" onclick="selectJournalType('City League')">🏙️ City League</button>
-                            <button type="button" class="bj-type-chip" data-value="Regional" onclick="selectJournalType('Regional')">🏆 Regional</button>
-                            <button type="button" class="bj-type-chip" data-value="Special Event" onclick="selectJournalType('Special Event')">⭐ Special</button>
-                            <button type="button" class="bj-type-chip" data-value="League Cup" onclick="selectJournalType('League Cup')">🥤 Cup</button>
-                            <button type="button" class="bj-type-chip" data-value="League Challenge" onclick="selectJournalType('League Challenge')">🎯 Challenge</button>
+                            <button type="button" class="bj-type-chip" data-value="Regional/SPE/IC" onclick="selectJournalType('Regional/SPE/IC')">🏆 Regional/SPE/IC</button>
+                            <button type="button" class="bj-type-chip" data-value="Challenge" onclick="selectJournalType('Challenge')">🎯 Challenge</button>
+                            <button type="button" class="bj-type-chip" data-value="Cup" onclick="selectJournalType('Cup')">🥤 Cup</button>
                             <button type="button" class="bj-type-chip" data-value="Online" onclick="selectJournalType('Online')">🌐 Online</button>
-                            <button type="button" class="bj-type-chip" data-value="Casual" onclick="selectJournalType('Casual')">🎲 Casual</button>
+                            <button type="button" class="bj-type-chip" data-value="Testing" onclick="selectJournalType('Testing')">🧪 Testing</button>
                         </div>
                     </div>
                 </div>

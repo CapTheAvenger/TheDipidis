@@ -849,6 +849,24 @@
         document.body.removeChild(ta);
     }
 
+    // ── Read-time migration for old tournament type values ───
+    function _migrateTypeValues(entries) {
+        const map = {
+            'City League':      'Cup',
+            'Special Event':    'Regional/SPE/IC',
+            'League Cup':       'Cup',
+            'League Challenge': 'Challenge',
+            'Casual':           'Testing',
+            'Regional':         'Regional/SPE/IC'
+        };
+        return entries.map(e => {
+            if (e.tournamentType && map[e.tournamentType]) {
+                return { ...e, tournamentType: map[e.tournamentType] };
+            }
+            return e;
+        });
+    }
+
     async function loadJournalHistory() {
         const entries = [];
 
@@ -880,8 +898,8 @@
 
         // Sort newest first
         entries.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
-        journalHistoryCache = entries;
-        return entries;
+        journalHistoryCache = _migrateTypeValues(entries);
+        return journalHistoryCache;
     }
 
     function renderJournalHistory() {
@@ -1724,7 +1742,8 @@
     window.applyLastTournament = applyLastTournament;
     window.renderJournalHistory = renderJournalHistory;
     window.openJournalHistoryTab = openJournalHistoryTab;
-    window._bjSetCache = function(entries) { journalHistoryCache = entries; };
+    window._bjSetCache = function(entries) { journalHistoryCache = _migrateTypeValues(entries); };
+    window._bjGetCache = function() { return journalHistoryCache; };
     window.copyJournalEntry = copyJournalEntry;
     window.copyAllJournalEntries = copyAllJournalEntries;
     window.clearAllJournalEntries = clearAllJournalEntries;

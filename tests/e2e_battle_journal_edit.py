@@ -55,11 +55,11 @@ def run():
         check("T1.12 selectEditTournType is function", page.evaluate("typeof window.selectEditTournType === 'function'"))
 
         # Test selectEditTournType
-        page.evaluate("selectEditTournType('Regional')")
+        page.evaluate("selectEditTournType('Cup')")
         page.wait_for_timeout(100)
         type_val = page.evaluate("document.getElementById('bjEditTournType').value")
-        check("T1.13 selectEditTournType sets value", type_val == "Regional")
-        chip_selected = page.locator("#bjEditTournTypeGroup .bj-type-chip[data-value='Regional']")
+        check("T1.13 selectEditTournType sets value", type_val == "Cup")
+        chip_selected = page.locator("#bjEditTournTypeGroup .bj-type-chip[data-value='Cup']")
         check("T1.14 Chip gets is-selected", chip_selected.evaluate("el => el.classList.contains('is-selected')"))
 
         # Close modal works

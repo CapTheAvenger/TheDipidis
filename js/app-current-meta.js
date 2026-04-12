@@ -480,6 +480,6 @@
 
         // ── i18n: re-render on language change ──────────────────
         document.addEventListener('languageChanged', () => {
-            if (typeof renderMatchupHeatmap === 'function') renderMatchupHeatmap();
+            if (typeof renderMatchupHeatmap === 'function' && document.getElementById('matchupAnalysisModal')?.style.display !== 'none') renderMatchupHeatmap();
         });
         

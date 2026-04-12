@@ -345,11 +345,11 @@
         
         // Load Current Analysis
         async function loadCurrentAnalysis() {
-            devLog('?? Loading Current Meta Analysis Tab...');
+            devLog('📊 Loading Current Meta Analysis Tab...');
             
             // Load Current Meta HTML (for matchup data) if not already loaded
             if (!window.currentMetaLoaded) {
-                devLog('?? Loading Current Meta HTML for matchup data...');
+                devLog('📊 Loading Current Meta HTML for matchup data...');
                 await loadCurrentMeta();
             }
             
@@ -379,13 +379,13 @@
         function loadCurrentMetaDeck() {
             const saved = localStorage.getItem('currentMetaDeck');
             if (!saved) {
-                devLog('?? No saved Current Meta deck found');
+                devLog('ℹ️ No saved Current Meta deck found');
                 return;
             }
             
             try {
                 const data = JSON.parse(saved);
-                devLog('? Loaded Current Meta deck from localStorage:', data);
+                devLog('✅ Loaded Current Meta deck from localStorage:', data);
                 
                 if (data.deck) {
                     window.currentMetaDeck = data.deck;
@@ -396,13 +396,13 @@
                 if (data.archetype) {
                     window.currentCurrentMetaArchetype = data.archetype;
                     // Pre-select archetype in dropdown if it exists (but don't display deck yet)
-                    devLog('?? Saved archetype found:', data.archetype, '(waiting for user to select archetype)');
+                    devLog('📋 Saved archetype found:', data.archetype, '(waiting for user to select archetype)');
                 }
                 
                 // DON'T automatically display deck - wait for archetype selection
-                devLog('?? Current Meta Deck loaded but not displayed (waiting for archetype selection)');
+                devLog('📋 Current Meta Deck loaded but not displayed (waiting for archetype selection)');
             } catch (e) {
-                console.error('? Error loading Current Meta deck:', e);
+                console.error('❌ Error loading Current Meta deck:', e);
             }
         }
         
@@ -414,7 +414,7 @@
                 // If deck is empty, remove from localStorage instead of saving empty object
                 if (deckSize === 0) {
                     localStorage.removeItem('currentMetaDeck');
-                    devLog('?? Current Meta deck is empty - removed from localStorage');
+                    devLog('⚠️ Current Meta deck is empty - removed from localStorage');
                     return;
                 }
                 
@@ -426,9 +426,9 @@
                 };
                 
                 localStorage.setItem('currentMetaDeck', JSON.stringify(data));
-                devLog('?? Current Meta deck saved to localStorage:', deckSize, 'cards');
+                devLog('💾 Current Meta deck saved to localStorage:', deckSize, 'cards');
             } catch (e) {
-                console.error('? Error saving Current Meta deck:', e);
+                console.error('❌ Error saving Current Meta deck:', e);
             }
         }
         
@@ -440,11 +440,11 @@
                     window.pastMetaDeck = parsed.deck || {};
                     window.pastMetaDeckOrder = parsed.order || [];
                     window.pastMetaCurrentArchetype = parsed.archetype || null;
-                    devLog('?? Loaded Past Meta deck from localStorage:', Object.keys(window.pastMetaDeck).length, 'cards');
+                    devLog('✅ Loaded Past Meta deck from localStorage:', Object.keys(window.pastMetaDeck).length, 'cards');
                     return true;
                 }
             } catch (e) {
-                console.error('? Error loading Past Meta deck:', e);
+                console.error('❌ Error loading Past Meta deck:', e);
             }
             window.pastMetaDeck = {};
             window.pastMetaDeckOrder = [];
@@ -460,7 +460,7 @@
                 // If deck is empty, remove from localStorage instead of saving empty object
                 if (deckSize === 0) {
                     localStorage.removeItem('pastMetaDeck');
-                    devLog('?? Past Meta deck is empty - removed from localStorage');
+                    devLog('⚠️ Past Meta deck is empty - removed from localStorage');
                     return;
                 }
                 
@@ -472,9 +472,9 @@
                 };
                 
                 localStorage.setItem('pastMetaDeck', JSON.stringify(data));
-                devLog('?? Past Meta deck saved to localStorage:', deckSize, 'cards');
+                devLog('💾 Past Meta deck saved to localStorage:', deckSize, 'cards');
             } catch (e) {
-                console.error('? Error saving Past Meta deck:', e);
+                console.error('❌ Error saving Past Meta deck:', e);
             }
         }
 

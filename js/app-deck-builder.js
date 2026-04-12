@@ -1595,7 +1595,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (imageUrl && imageUrl.trim() !== '') {
                     imgHtml = `<img src="${imageUrl}" alt="${card.card_name}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${escapeJsStr(card.card_name)} (${card.set_code || ''} ${card.set_number || ''})');">`;
                 } else {
-                    imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">??</div>`;
+                    imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">🃏</div>`;
                 }
 
                 const html = `
@@ -2875,7 +2875,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         devLog(`[autoComplete] No preferred version for ${card.card_name}, using original: ${setCode} ${setNumber}`);
                     }
                     
-                    // ?? PERFORMANCE: Use batch add (no display updates per card)
+                    // ⚡ PERFORMANCE: Use batch add (no display updates per card)
                     for (let i = 0; i < card.addCount; i++) {
                         addCardToDeckBatch(source, card.card_name, setCode, setNumber);
                     }
@@ -2894,7 +2894,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     savePastMetaDeck();
                 }
                 
-                // ?? PERFORMANCE: Update display ONCE at the end (not 60 times!)
+                // ⚡ PERFORMANCE: Update display ONCE at the end (not 60 times!)
                 scheduleDeckDisplayUpdate(source);
             }
         }
@@ -2969,7 +2969,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             devLog('[autoCompleteConsistency] Total available cards:', cards.length);
             
             // Clear existing deck
-            devLog('[autoCompleteConsistency] ??? Clearing existing deck...');
+            devLog('[autoCompleteConsistency] 🗑️ Clearing existing deck...');
             if (source === 'cityLeague') {
                 window.cityLeagueDeck = {};
                 window.cityLeagueDeckOrder = [];

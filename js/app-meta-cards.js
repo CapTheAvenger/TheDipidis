@@ -1,4 +1,4 @@
-// app-meta-cards.js — extracted from app.js
+﻿// app-meta-cards.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
         /**
@@ -1067,7 +1067,7 @@
                         <div class="meta-card-list-thumb pointer bg-grey" onclick="showSingleCard(this.querySelector('img').src, '${cardNameEscaped} (${setCode} ${setNumber})')">
                             <img src="${imageUrl}" alt="${cardName}" class="meta-card-list-img" onerror="handleCardImageError(this, '${setCode}', '${setNumber}'); this.nextElementSibling.classList.remove('d-none');" loading="lazy">
                             <div class="meta-card-list-img-fallback d-none d-flex align-center justify-center color-white bg-blue-dark flex-col p-8" style="height:160px;">
-                                <div class="fs-2em mb-5">??</div>
+                                <div class="fs-2em mb-5">🃏</div>
                                 <div class="fs-07em ta-center">${setCode}<br>${setNumber}</div>
                             </div>
                         </div>
@@ -1246,7 +1246,7 @@
                             if (hasMatchupTables) {
                                 // Remove inline grid style, let CSS take over
                                 grid.classList.add('matchups-grid-container');
-                                devLog('? Removed inline grid styles from matchup container');
+                                devLog('✅ Removed inline grid styles from matchup container');
                             }
                         }
                     });
@@ -1280,7 +1280,7 @@
                     // Render top cards widget (format staples)
                     await renderCurrentMetaTopCards();
                     
-                    devLog('? Current Meta data loaded successfully');
+                    devLog('✅ Current Meta data loaded successfully');
                 } else {
                     currentMetaContent.innerHTML = '<div style="color: #e74c3c; padding: 20px;">Error loading comparison data</div>';
                 }
@@ -1340,7 +1340,7 @@
                 
                 // Check if this is the Full Comparison Table (has Old Rank, New Rank, Rank ? columns)
                 if (headers.includes('Old Rank') && headers.includes('New Rank') && headers.includes('Rank ?')) {
-                    devLog('?? Patching Full Comparison Table...');
+                    devLog('🔧 Patching Full Comparison Table...');
 
                     if (!table.parentElement || !table.parentElement.classList.contains('current-meta-full-table-wrap')) {
                         const wrapper = document.createElement('div');
@@ -1433,7 +1433,7 @@
                         });
                     });
                     
-                    devLog('? Full Comparison Table patched successfully');
+                    devLog('✅ Full Comparison Table patched successfully');
                 }
             });
         }
@@ -1444,7 +1444,7 @@
                 // Load CSV data
                 const csvData = await loadCSV('limitless_online_decks_comparison.csv');
                 if (!csvData || csvData.length === 0) {
-                    console.warn('?? No CSV data available for stat patching');
+                    console.warn('⚠️ No CSV data available for stat patching');
                     return;
                 }
                 
@@ -1515,7 +1515,7 @@
                             }
                         });
                         
-                        devLog('? Archetype Overview patched:', {
+                        devLog('✅ Archetype Overview patched:', {
                             totalArchetypes,
                             groupedArchetypes,
                             top3Count: decksByCount.map(d => d.name),
@@ -1524,7 +1524,7 @@
                     }
                 });
             } catch (error) {
-                console.error('? Error patching Archetype Overview:', error);
+                console.error('❌ Error patching Archetype Overview:', error);
             }
         }
         
@@ -1554,7 +1554,7 @@
                                 currentFormat = resolved;
                             }
                             currentFormat = currentFormat === 'SVI-POR' ? 'TEF-POR' : currentFormat;
-                            devLog(`?? Loaded format from settings: ${currentFormat}`);
+                            devLog(`📋 Loaded format from settings: ${currentFormat}`);
                             break;
                         }
                     }
@@ -1621,7 +1621,7 @@
                             existingP.insertAdjacentHTML('afterend', statsHtml);
                         }
                         
-                        devLog('? Meta stats patched:', {
+                        devLog('✅ Meta stats patched:', {
                             onlineStats: metaStats,
                             majorTournaments,
                             totalPlayers,
@@ -1630,6 +1630,6 @@
                     }
                 });
             } catch (error) {
-                console.error('? Error patching Meta stats:', error);
+                console.error('❌ Error patching Meta stats:', error);
             }
         }

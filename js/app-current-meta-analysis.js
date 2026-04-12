@@ -418,7 +418,7 @@
                     clearCurrentMetaDeckView();
                 }
             } else {
-                console.warn('?? No deck selected - filter saved for when deck is selected');
+                console.warn('⚠️ No deck selected - filter saved for when deck is selected');
             }
         }
         
@@ -677,7 +677,7 @@
             // Find the matchup tables directly from the loaded HTML content (1:1 same as Current Meta Tab)
             const currentMetaContent = document.getElementById('currentMetaContent');
             if (!currentMetaContent) {
-                console.error('? Current Meta content not loaded');
+                console.error('❌ Current Meta content not loaded');
                 if (matchupsSection) matchupsSection.classList.add('d-none');
                 return;
             }
@@ -915,7 +915,7 @@
         
         // Set overview rarity mode
         function setCurrentMetaOverviewRarityMode(mode) {
-            devLog('?? Setting Current Meta overview rarity mode to:', mode);
+            devLog('⚙️ Setting Current Meta overview rarity mode to:', mode);
             currentMetaRarityMode = mode;
             
             if (mode === 'all') {
@@ -948,7 +948,7 @@
             if (cards && cards.length > 0) {
                 applyCurrentMetaFilter();  // Use filter function to preserve percentage filter
             } else {
-                console.warn('?? No cards available to render - mode saved for when deck is selected');
+                console.warn('⚠️ No cards available to render - mode saved for when deck is selected');
             }
             
             if (window.currentMetaDeck && Object.keys(window.currentMetaDeck).length > 0) {
@@ -1481,7 +1481,7 @@
             const button = gridButtons[0];
             
             if (!gridViewContainer || !tableViewContainer) {
-                console.warn('?? Grid or table container not found');
+                console.warn('⚠️ Grid or table container not found');
                 return;
             }
             

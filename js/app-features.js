@@ -13,16 +13,16 @@
             if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
                 devLog('[Deck Compare] Loading cards database...');
                 document.getElementById('deckCompareModal').style.display = 'flex';
-                document.getElementById('deckCompareResult').innerHTML = '<div class="loading">? Loading card database...</div>';
+                document.getElementById('deckCompareResult').innerHTML = '<div class="loading">⏳ Loading card database...</div>';
                 document.getElementById('deckCompareResult').classList.remove('d-none');
                 
                 try {
                     await loadAllCardsDatabase();
-                    devLog('[Deck Compare] ? Database loaded successfully');
+                    devLog('[Deck Compare] ✅ Database loaded successfully');
                     document.getElementById('deckCompareResult').classList.add('d-none');
                 } catch (error) {
                     console.error('[Deck Compare] Failed to load database:', error);
-                    document.getElementById('deckCompareResult').innerHTML = '<div class="error">? Error loading card database</div>';
+                    document.getElementById('deckCompareResult').innerHTML = '<div class="error">❌ Error loading card database</div>';
                     return;
                 }
             }
@@ -322,68 +322,77 @@
             const unchanged = allDisplayCards.filter(c => c.changeType === 'unchanged');
             
             let html = `
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; color: white;">
-                    <div style="display:flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
-                        <h3 style="margin: 0 0 15px 0; font-size: 1.3em;">?? Comparison Results: ${oldDeckName} vs Current Deck</h3>
-                        <button onclick="addComparisonNewCardsToProxy()" style="margin-bottom: 15px; border: none; border-radius: 8px; padding: 8px 12px; background: #e74c3c; color: white; font-weight: 700; cursor: pointer;">Proxy: Add New Cards</button>
+                <div id="deckCompareContent">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; color: white;">
+                    <div style="display:flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <h3 style="margin: 0; font-size: 1.1em;">📊 ${oldDeckName} vs Current Deck</h3>
+                        <div style="display: flex; gap: 6px;">
+                            <button onclick="openCompareScreenshotModal()" style="border: none; border-radius: 6px; padding: 6px 10px; background: rgba(255,255,255,0.25); color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;" title="Screenshot for sharing">📸 Share</button>
+                            <button onclick="addComparisonNewCardsToProxy()" style="border: none; border-radius: 6px; padding: 6px 10px; background: #e74c3c; color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;">Proxy: New Cards</button>
+                        </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 2em; font-weight: bold;">${removed.length}</div>
-                            <div style="font-size: 0.9em; opacity: 0.9;">? Removed</div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px;">
+                        <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold;">${removed.length}</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">❌ Removed</div>
                         </div>
-                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 2em; font-weight: bold;">${added.length}</div>
-                            <div style="font-size: 0.9em; opacity: 0.9;">? Added</div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold;">${added.length}</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">🆕 Added</div>
                         </div>
-                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 2em; font-weight: bold;">${changed.length}</div>
-                            <div style="font-size: 0.9em; opacity: 0.9;">?? Changed</div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold;">${changed.length}</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">🔄 Changed</div>
                         </div>
-                        <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 2em; font-weight: bold;">${unchanged.length}</div>
-                            <div style="font-size: 0.9em; opacity: 0.9;">? Unchanged</div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold;">${unchanged.length}</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">✅ Same</div>
                         </div>
                     </div>
                 </div>
             `;
             
-            // Display cards grouped by change type
+            // Display cards grouped by change type (compact layout)
             const groups = [
-                { type: 'removed', title: '? Removed Cards', color: '#e74c3c', cards: removed },
-                { type: 'new', title: '? Added Cards', color: '#27ae60', cards: added },
-                { type: 'changed', title: '?? Changed Count', color: '#f39c12', cards: changed },
-                { type: 'unchanged', title: '? Unchanged Cards', color: '#95a5a6', cards: unchanged }
+                { type: 'removed', title: '❌ Removed', color: '#e74c3c', cards: removed },
+                { type: 'new', title: '🆕 Added', color: '#27ae60', cards: added },
+                { type: 'changed', title: '🔄 Changed', color: '#f39c12', cards: changed },
+                { type: 'unchanged', title: '✅ Unchanged', color: '#95a5a6', cards: unchanged }
             ];
             
             groups.forEach(group => {
                 if (group.cards.length > 0) {
                     html += `
-                        <div style="margin-bottom: 20px;">
-                            <h4 style="background: ${group.color}; color: white; padding: 10px 15px; border-radius: 6px; margin: 0 0 10px 0;">${group.title} (${group.cards.length})</h4>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <h4 style="background: ${group.color}; color: white; padding: 6px 12px; border-radius: 6px; margin: 0 0 6px 0; font-size: 0.95em;">${group.title} (${group.cards.length})</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px;">
                     `;
                     
                     group.cards.forEach(card => {
-                        const countDisplay = group.type === 'removed' ? `${card.oldCount} ? 0` :
-                                           group.type === 'new' ? `0 ? ${card.newCount}` :
-                                           group.type === 'changed' ? `${card.oldCount} ? ${card.newCount}` :
-                                           `${card.newCount}`;
-                        const proxyCount = group.type === 'new' ? parseProxyCount(card.newCount, 1) : 1;
+                        const countDisplay = group.type === 'removed' ? `${card.oldCount} → 0` :
+                                           group.type === 'new' ? `0 → ${card.newCount}` :
+                                           group.type === 'changed' ? `${card.oldCount} → ${card.newCount}` :
+                                           `${card.newCount}x`;
                         const cardNameEscaped = escapeJsStr(card.name || '');
                         const cardSetEscaped = escapeJsStr(card.set || '');
                         const cardNumberEscaped = escapeJsStr(card.number || '');
                         
                         const cardData = cardsBySetNumberMap[`${card.set}-${card.number}`];
                         const imageUrl = cardData ? cardData.image_url : '';
+
+                        // Only show proxy button for added cards or count-increased changes
+                        const showProxy = group.type === 'new' || (group.type === 'changed' && card.newCount > card.oldCount);
+                        const proxyCount = group.type === 'new' ? parseProxyCount(card.newCount, 1) : (card.newCount - card.oldCount);
+                        const proxyBtn = showProxy
+                            ? `<button onclick="addCardToProxy('${cardNameEscaped}', '${cardSetEscaped}', '${cardNumberEscaped}', ${proxyCount})" style="margin-top: 4px; border: none; border-radius: 4px; padding: 3px 6px; background: #e74c3c; color: white; font-weight: 600; cursor: pointer; width: 100%; font-size: 0.7em;">+Proxy</button>`
+                            : '';
                         
                         html += `
-                            <div style="background: white; border: 2px solid ${group.color}; border-radius: 8px; padding: 10px; text-align: center;">
-                                ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" loading="lazy" decoding="async" style="width: 100%; border-radius: 6px; margin-bottom: 8px;">` : ''}
-                                <div style="font-weight: 600; font-size: 0.9em; margin-bottom: 4px;">${card.name}</div>
-                                <div style="font-size: 0.8em; color: #666; margin-bottom: 4px;">${card.set} ${card.number}</div>
-                                <div style="font-size: 1.1em; font-weight: bold; color: ${group.color};">${countDisplay}</div>
-                                <button onclick="addCardToProxy('${cardNameEscaped}', '${cardSetEscaped}', '${cardNumberEscaped}', ${proxyCount})" style="margin-top: 8px; border: none; border-radius: 6px; padding: 6px 8px; background: #e74c3c; color: white; font-weight: 700; cursor: pointer; width: 100%;">Add to Proxy</button>
+                            <div style="background: white; border: 2px solid ${group.color}; border-radius: 6px; padding: 6px; text-align: center;">
+                                ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" loading="lazy" decoding="async" style="width: 100%; border-radius: 4px; margin-bottom: 4px; aspect-ratio: 2.5/3.5; object-fit: cover;">` : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:#999;">${card.set} ${card.number}</div>`}
+                                <div style="font-weight: 600; font-size: 0.75em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${card.name}">${card.name}</div>
+                                <div style="font-size: 0.95em; font-weight: bold; color: ${group.color};">${countDisplay}</div>
+                                ${proxyBtn}
                             </div>
                         `;
                     });
@@ -394,9 +403,195 @@
                     `;
                 }
             });
+
+            html += `</div>`;
             
             resultDiv.innerHTML = html;
         }
+
+        // ── Compare Screenshot Modal ─────────────────────────────
+        async function openCompareScreenshotModal() {
+            const content = document.getElementById('deckCompareContent');
+            if (!content) {
+                showToast('No comparison to share', 'warning');
+                return;
+            }
+
+            const modal = document.getElementById('shareImageModal');
+            const preview = document.getElementById('shareImagePreview');
+            const titleEl = document.getElementById('shareImageTitle');
+            const shareBtn = document.getElementById('shareImageShareBtn');
+
+            titleEl.textContent = '📸 Deck Compare';
+            preview.innerHTML = '<p style="color:#888; font-size:1.1em;">⏳ ' + (getLang() === 'de' ? 'Bild wird erstellt...' : 'Generating image…') + '</p>';
+            window._shareImageBlob = null;
+            window._shareImageTitle = 'Deck_Compare';
+
+            modal.classList.add('show');
+
+            // Show native share button only if supported
+            const testBlob = new Blob(['test'], { type: 'image/png' });
+            const testFile = new File([testBlob], 'test.png', { type: 'image/png' });
+            if (shareBtn) shareBtn.style.display = (navigator.canShare && navigator.canShare({ files: [testFile] })) ? '' : 'none';
+
+            try {
+                // Use html2canvas to capture the compare content
+                if (typeof html2canvas === 'undefined') {
+                    // Load html2canvas dynamically
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                }
+
+                const canvas = await html2canvas(content, {
+                    backgroundColor: '#f5f5f5',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false
+                });
+
+                window._shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+
+                preview.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(window._shareImageBlob);
+                img.alt = 'Deck Compare';
+                img.style.cssText = 'max-width:100%; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+                img.onload = () => URL.revokeObjectURL(img.src);
+                preview.appendChild(img);
+            } catch (e) {
+                console.error('Screenshot failed:', e);
+                preview.innerHTML = '<p style="color:#e74c3c;">❌ ' + (getLang() === 'de' ? 'Screenshot fehlgeschlagen' : 'Screenshot failed') + '</p>';
+            }
+        }
+        window.openCompareScreenshotModal = openCompareScreenshotModal;
+
+        // ── Standalone Profile Compare ───────────────────────────
+        function profileCompareDecklists() {
+            const textA = document.getElementById('profileCompareListA')?.value?.trim();
+            const textB = document.getElementById('profileCompareListB')?.value?.trim();
+            const resultDiv = document.getElementById('profileCompareResult');
+
+            if (!textA || !textB) {
+                showToast(getLang() === 'de' ? 'Bitte beide Decklisten einfügen' : 'Please paste both decklists', 'warning');
+                return;
+            }
+
+            const deckA = parseDeckList(textA);
+            const deckB = parseDeckList(textB);
+
+            if (deckA.length === 0 || deckB.length === 0) {
+                showToast(getLang() === 'de' ? 'Konnte Deckliste(n) nicht erkennen' : 'Could not parse decklist(s)', 'error');
+                return;
+            }
+
+            // Build comparison
+            const oldMap = {};
+            deckA.forEach(c => oldMap[c.key] = c);
+            const newMap = {};
+            deckB.forEach(c => newMap[c.key] = c);
+
+            const allKeys = new Set([...Object.keys(oldMap), ...Object.keys(newMap)]);
+            const allDisplayCards = [];
+
+            allKeys.forEach(key => {
+                const oldCard = oldMap[key];
+                const newCard = newMap[key];
+
+                if (oldCard && !newCard) {
+                    allDisplayCards.push({ name: oldCard.name, set: oldCard.set, number: oldCard.number, oldCount: oldCard.count, newCount: 0, changeType: 'removed' });
+                } else if (!oldCard && newCard) {
+                    allDisplayCards.push({ name: newCard.name, set: newCard.set, number: newCard.number, oldCount: 0, newCount: newCard.count, changeType: 'new' });
+                } else if (oldCard.count !== newCard.count) {
+                    allDisplayCards.push({ name: newCard.name, set: newCard.set, number: newCard.number, oldCount: oldCard.count, newCount: newCard.count, changeType: 'changed' });
+                } else {
+                    allDisplayCards.push({ name: newCard.name, set: newCard.set, number: newCard.number, oldCount: oldCard.count, newCount: newCard.count, changeType: 'unchanged' });
+                }
+            });
+
+            // Render into the profile result div using the same display function
+            const origTarget = document.getElementById('deckCompareResult');
+            resultDiv.classList.remove('d-none');
+            // Temporarily swap the target to render into profile
+            const fakeName = 'Deck A';
+            window.lastDeckComparisonCards = allDisplayCards;
+
+            // Inline render (reuse display logic)
+            const removed = allDisplayCards.filter(c => c.changeType === 'removed');
+            const added = allDisplayCards.filter(c => c.changeType === 'new');
+            const changed = allDisplayCards.filter(c => c.changeType === 'changed');
+            const unchanged = allDisplayCards.filter(c => c.changeType === 'unchanged');
+
+            let html = `
+                <div id="deckCompareContent">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; color: white;">
+                    <div style="display:flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <h3 style="margin: 0; font-size: 1.1em;">📊 Deck A vs Deck B</h3>
+                        <button onclick="openCompareScreenshotModal()" style="border: none; border-radius: 6px; padding: 6px 10px; background: rgba(255,255,255,0.25); color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;" title="Screenshot for sharing">📸 Share</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px;">
+                        <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold;">${removed.length}</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">❌ Removed</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold;">${added.length}</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">🆕 Added</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold;">${changed.length}</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">🔄 Changed</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 1.5em; font-weight: bold;">${unchanged.length}</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">✅ Same</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const groups = [
+                { type: 'removed', title: '❌ Removed', color: '#e74c3c', cards: removed },
+                { type: 'new', title: '🆕 Added', color: '#27ae60', cards: added },
+                { type: 'changed', title: '🔄 Changed', color: '#f39c12', cards: changed },
+                { type: 'unchanged', title: '✅ Unchanged', color: '#95a5a6', cards: unchanged }
+            ];
+
+            groups.forEach(group => {
+                if (group.cards.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 10px;">
+                            <h4 style="background: ${group.color}; color: white; padding: 6px 12px; border-radius: 6px; margin: 0 0 6px 0; font-size: 0.95em;">${group.title} (${group.cards.length})</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px;">
+                    `;
+                    group.cards.forEach(card => {
+                        const countDisplay = group.type === 'removed' ? `${card.oldCount} → 0` :
+                                           group.type === 'new' ? `0 → ${card.newCount}` :
+                                           group.type === 'changed' ? `${card.oldCount} → ${card.newCount}` :
+                                           `${card.newCount}x`;
+                        const cardData = cardsBySetNumberMap[`${card.set}-${card.number}`];
+                        const imageUrl = cardData ? cardData.image_url : '';
+                        html += `
+                            <div style="background: white; border: 2px solid ${group.color}; border-radius: 6px; padding: 6px; text-align: center;">
+                                ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" loading="lazy" decoding="async" style="width: 100%; border-radius: 4px; margin-bottom: 4px; aspect-ratio: 2.5/3.5; object-fit: cover;">` : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:#999;">${card.set} ${card.number}</div>`}
+                                <div style="font-weight: 600; font-size: 0.75em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${card.name}">${card.name}</div>
+                                <div style="font-size: 0.95em; font-weight: bold; color: ${group.color};">${countDisplay}</div>
+                            </div>
+                        `;
+                    });
+                    html += `</div></div>`;
+                }
+            });
+
+            html += `</div>`;
+            resultDiv.innerHTML = html;
+        }
+        window.profileCompareDecklists = profileCompareDecklists;
         
         // Add ESC key handler for Deck Compare
         document.addEventListener('keydown', function(e) {

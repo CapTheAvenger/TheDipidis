@@ -1178,22 +1178,27 @@ const BASE_PATH = './data/';
 
         function addComparisonNewCardsToProxy() {
             const comparisonCards = Array.isArray(window.lastDeckComparisonCards) ? window.lastDeckComparisonCards : [];
-            const newCards = comparisonCards.filter(card => card.changeType === 'new' && parseProxyCount(card.newCount, 0) > 0);
+            // Include new cards AND changed cards with increased count
+            const proxyCards = comparisonCards.filter(card => {
+                if (card.changeType === 'new' && parseProxyCount(card.newCount, 0) > 0) return true;
+                if (card.changeType === 'changed' && card.newCount > card.oldCount) return true;
+                return false;
+            });
 
-            if (newCards.length === 0) {
+            if (proxyCards.length === 0) {
                 showToast(t('proxy.noNewCards'), 'warning');
                 return;
             }
 
             let addedCopies = 0;
-            newCards.forEach(card => {
-                const count = parseProxyCount(card.newCount, 1);
+            proxyCards.forEach(card => {
+                const count = card.changeType === 'new' ? parseProxyCount(card.newCount, 1) : (card.newCount - card.oldCount);
                 addCardToProxy(card.name, card.set, card.number, count, true);
                 addedCopies += count;
             });
 
             renderProxyQueue();
-            showProxyToast(`${newCards.length} ${t('proxy.compCardsAdded')} (${addedCopies})`);
+            showProxyToast(`${proxyCards.length} ${t('proxy.compCardsAdded')} (${addedCopies})`);
 
         }
 
@@ -1440,7 +1445,7 @@ const BASE_PATH = './data/';
                     // Retry after 100ms
                     setTimeout(checkAndSelect, 100);
                 } else {
-                    console.error('? Timeout: Dropdown not populated after 5 seconds');
+                    console.error('⏰ Timeout: Dropdown not populated after 5 seconds');
                 }
             };
             
@@ -1483,7 +1488,7 @@ const BASE_PATH = './data/';
                     // Retry after 100ms
                     setTimeout(checkAndSelect, 100);
                 } else {
-                    console.error('? Timeout: Dropdown not populated after 5 seconds');
+                    console.error('⏰ Timeout: Dropdown not populated after 5 seconds');
                 }
             };
             
@@ -2218,7 +2223,7 @@ const BASE_PATH = './data/';
                     aceSpecsList = (jsonData.ace_specs || []).map(name => name.toLowerCase().trim());
                     devLog(`? Loaded ${aceSpecsList.length} Ace Spec cards from ace_specs.json`);
                 } else {
-                    console.error('? Failed to load ace_specs.json');
+                    console.error('❌ Failed to load ace_specs.json');
                 }
             } catch (error) {
                 console.error('Error loading ace specs list:', error);

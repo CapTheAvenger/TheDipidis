@@ -456,6 +456,11 @@ const translations = {
     'profile.dexImport':        'Dex Import',
     'profile.save':             'Save',
     'profile.metaBinder':       'Meta Binder',
+    'profile.compareDecklists':  'Compare Decklists',
+    'profile.compareNote':       'Paste two decklists to compare them side by side',
+    'profile.deckA':             'Deck A (Old)',
+    'profile.deckB':             'Deck B (New)',
+    'profile.compareBtn':        '🔍 Compare',
     'profile.nameAria':         'Display name',
 
     // ── Meta Binder ────────────────────────────────────────────
@@ -1376,6 +1381,11 @@ const translations = {
     'profile.dexImport':        'Dex Import',
     'profile.save':             'Speichern',
     'profile.metaBinder':       'Meta Binder',
+    'profile.compareDecklists':  'Decklisten vergleichen',
+    'profile.compareNote':       'Füge zwei Decklisten ein, um sie nebeneinander zu vergleichen',
+    'profile.deckA':             'Deck A (Alt)',
+    'profile.deckB':             'Deck B (Neu)',
+    'profile.compareBtn':        '🔍 Vergleichen',
     'profile.nameAria':         'Anzeigename',
 
     // ── Meta Binder ────────────────────────────────────────────

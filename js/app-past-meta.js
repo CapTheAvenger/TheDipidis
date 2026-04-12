@@ -1160,7 +1160,7 @@
             const button = gridButtons[0];
             
             if (!gridViewContainer || !tableViewContainer) {
-                console.warn('?? Grid or table container not found');
+                console.warn('⚠️ Grid or table container not found');
                 return;
             }
             
@@ -1173,9 +1173,9 @@
             pastMetaShowGridView = !pastMetaShowGridView;
             
             if (pastMetaShowGridView) {
-                if (button) button.textContent = '?? List View';
+                if (button) button.textContent = '📋 List View';
             } else {
-                if (button) button.textContent = '??? Grid View';
+                if (button) button.textContent = '📊 Grid View';
             }
             
             // Re-render with new view

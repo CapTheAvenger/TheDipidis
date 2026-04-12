@@ -1,4 +1,4 @@
-// app-city-league.js — extracted from app.js
+﻿// app-city-league.js — extracted from app.js
 // Part of Hausi's Pokemon TCG Analysis
 
         // =======================================================================
@@ -2469,7 +2469,7 @@
         
         // Set overview rarity mode and refresh display
         function setOverviewRarityMode(mode) {
-            debugVersionSelectionLog('?? Setting overview rarity mode to:', mode);
+            debugVersionSelectionLog('⚙️ Setting overview rarity mode to:', mode);
             overviewRarityMode = mode;
             
             // Synchronize with global rarity preference so deck builder uses same setting
@@ -2480,7 +2480,7 @@
             } else {
                 globalRarityPreference = mode; // 'min' or 'max'
             }
-            debugVersionSelectionLog('?? Global rarity preference synced to:', globalRarityPreference || 'none (original cards)');
+            debugVersionSelectionLog('🔄 Global rarity preference synced to:', globalRarityPreference || 'none (original cards)');
             
             // Update button styles - make sure elements exist first
             const btnMin = document.getElementById('overviewRarityMin');
@@ -2502,17 +2502,17 @@
             
             // Re-render the grid with current cards (preserve percentage filter)
             const cards = window.currentCityLeagueDeckCards;
-            debugVersionSelectionLog('?? Cards available for re-render:', cards ? cards.length : 'none');
+            debugVersionSelectionLog('📋 Cards available for re-render:', cards ? cards.length : 'none');
             if (cards && cards.length > 0) {
-                debugVersionSelectionLog('? Re-rendering grid with mode:', mode);
+                debugVersionSelectionLog('🔄 Re-rendering grid with mode:', mode);
                 applyCityLeagueFilter();  // Use filter function to preserve percentage filter
             } else {
-                debugVersionSelectionLog('?? No cards available to render - mode saved for when deck is selected');
+                debugVersionSelectionLog('⚠️ No cards available to render - mode saved for when deck is selected');
             }
             
             // Also update the deck display with new rarity preference
             if (window.cityLeagueDeck && Object.keys(window.cityLeagueDeck).length > 0) {
-                debugVersionSelectionLog('?? Re-rendering deck with new rarity preference');
+                debugVersionSelectionLog('🔄 Re-rendering deck with new rarity preference');
                 updateDeckDisplay('cityLeague');
             }
         }
@@ -2522,7 +2522,7 @@
         // ============================================================================
         // Render function for grid view (compact view)
         function renderCityLeagueDeckGrid(cards) {
-            debugVersionSelectionLog('?? renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
+            debugVersionSelectionLog('📊 renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
             const visualContainer = document.getElementById('cityLeagueDeckVisual');
             const gridContainer = document.getElementById('cityLeagueDeckGrid');
             if (!gridContainer) {
@@ -2566,7 +2566,7 @@
                 if (overviewRarityMode === 'all') {
                     // Show ALL international prints of this specific card
                     let allVersions = getInternationalPrintsForCard(originalSetCode, originalSetNumber);
-                    debugVersionSelectionLog(`?? All mode for ${cardName} (${originalSetCode} ${originalSetNumber}): found ${allVersions.length} int prints`);
+                    debugVersionSelectionLog(`📋 All mode for ${cardName} (${originalSetCode} ${originalSetNumber}): found ${allVersions.length} int prints`);
                     
                     if (allVersions && allVersions.length > 0) {
                         versionsToRender = allVersions.map(v => ({
@@ -2585,7 +2585,7 @@
                     const preferredVersion = getPreferredVersionForCard(cardName, originalSetCode, originalSetNumber);
                     
                     if (preferredVersion) {
-                        debugVersionSelectionLog(`?? ${overviewRarityMode} mode for ${cardName}: using PREFERRED version ${preferredVersion.set} ${preferredVersion.number} (${preferredVersion.rarity})`);
+                        debugVersionSelectionLog(`✨ ${overviewRarityMode} mode for ${cardName}: using PREFERRED version ${preferredVersion.set} ${preferredVersion.number} (${preferredVersion.rarity})`);
                         versionsToRender = [{
                             ...card,
                             set_code: preferredVersion.set,
@@ -2595,7 +2595,7 @@
                         }];
                     } else {
                         // No preferred version found, use original
-                        debugVersionSelectionLog(`?? ${overviewRarityMode} mode for ${cardName}: no preferred version found, using original`);
+                        debugVersionSelectionLog(`📋 ${overviewRarityMode} mode for ${cardName}: no preferred version found, using original`);
                         versionsToRender = [card];
                     }
                 }
@@ -2939,7 +2939,7 @@
             const button = gridButtons[0];
             
             if (!gridViewContainer || !tableViewContainer) {
-                console.warn('?? Grid or table container not found');
+                console.warn('⚠️ Grid or table container not found');
                 return;
             }
             

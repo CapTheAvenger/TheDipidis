@@ -411,9 +411,9 @@
 
         // ── Compare Screenshot Modal ─────────────────────────────
         async function openCompareScreenshotModal() {
-            const content = document.getElementById('deckCompareContent');
-            if (!content) {
-                showToast('No comparison to share', 'warning');
+            const cards = window.lastDeckComparisonCards;
+            if (!cards || !cards.length) {
+                showToast(getLang() === 'de' ? 'Kein Vergleich vorhanden' : 'No comparison to share', 'warning');
                 return;
             }
 
@@ -421,6 +421,9 @@
             const preview = document.getElementById('shareImagePreview');
             const titleEl = document.getElementById('shareImageTitle');
             const shareBtn = document.getElementById('shareImageShareBtn');
+
+            // Force modal above deck-compare overlay (z-10000)
+            modal.style.zIndex = '11000';
 
             titleEl.textContent = '📸 Deck Compare';
             preview.innerHTML = '<p style="color:#888; font-size:1.1em;">⏳ ' + (getLang() === 'de' ? 'Bild wird erstellt...' : 'Generating image…') + '</p>';
@@ -435,26 +438,7 @@
             if (shareBtn) shareBtn.style.display = (navigator.canShare && navigator.canShare({ files: [testFile] })) ? '' : 'none';
 
             try {
-                // Use html2canvas to capture the compare content
-                if (typeof html2canvas === 'undefined') {
-                    // Load html2canvas dynamically
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                }
-
-                const canvas = await html2canvas(content, {
-                    backgroundColor: '#f5f5f5',
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false
-                });
-
+                const canvas = await _buildCompareCanvas(cards);
                 window._shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
 
                 preview.innerHTML = '';
@@ -465,10 +449,216 @@
                 img.onload = () => URL.revokeObjectURL(img.src);
                 preview.appendChild(img);
             } catch (e) {
-                console.error('Screenshot failed:', e);
+                console.error('Compare screenshot failed:', e);
                 preview.innerHTML = '<p style="color:#e74c3c;">❌ ' + (getLang() === 'de' ? 'Screenshot fehlgeschlagen' : 'Screenshot failed') + '</p>';
             }
         }
+
+        /** Build a canvas image from comparison data (no html2canvas needed) */
+        async function _buildCompareCanvas(allCards) {
+            const groups = [
+                { type: 'removed', title: '❌ Removed', color: '#e74c3c', cards: allCards.filter(c => c.changeType === 'removed') },
+                { type: 'new', title: '🆕 Added', color: '#27ae60', cards: allCards.filter(c => c.changeType === 'new') },
+                { type: 'changed', title: '🔄 Changed', color: '#f39c12', cards: allCards.filter(c => c.changeType === 'changed') },
+                { type: 'unchanged', title: '✅ Unchanged', color: '#95a5a6', cards: allCards.filter(c => c.changeType === 'unchanged') }
+            ].filter(g => g.cards.length > 0);
+
+            const COLS = 6;
+            const CARD_W = 120, CARD_H = 168, GAP = 8, PAD = 20;
+            const HEADER_H = 70;     // top stats area
+            const GRP_HEADER = 32;   // group title bar
+            const LABEL_H = 32;      // name + count below card
+            const FOOTER_H = 28;
+
+            // Calculate total height
+            let totalH = PAD + HEADER_H;
+            groups.forEach(g => {
+                const rows = Math.ceil(g.cards.length / COLS);
+                totalH += GRP_HEADER + GAP + rows * (CARD_H + LABEL_H + GAP) + GAP;
+            });
+            totalH += FOOTER_H + PAD;
+
+            const canvasW = PAD * 2 + COLS * CARD_W + (COLS - 1) * GAP;
+            const canvas = document.createElement('canvas');
+            canvas.width = canvasW;
+            canvas.height = totalH;
+            const ctx = canvas.getContext('2d');
+
+            // roundRect polyfill
+            if (!ctx.roundRect) {
+                ctx.roundRect = function(x, y, w, h, r) {
+                    if (typeof r === 'number') r = [r, r, r, r];
+                    this.moveTo(x + r[0], y);
+                    this.lineTo(x + w - r[1], y);
+                    this.quadraticCurveTo(x + w, y, x + w, y + r[1]);
+                    this.lineTo(x + w, y + h - r[2]);
+                    this.quadraticCurveTo(x + w, y + h, x + w - r[2], y + h);
+                    this.lineTo(x + r[3], y + h);
+                    this.quadraticCurveTo(x, y + h, x, y + h - r[3]);
+                    this.lineTo(x, y + r[0]);
+                    this.quadraticCurveTo(x, y, x + r[0], y);
+                    this.closePath();
+                };
+            }
+
+            // Background
+            const grad = ctx.createLinearGradient(0, 0, canvasW, totalH);
+            grad.addColorStop(0, '#1a1a2e');
+            grad.addColorStop(1, '#16213e');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvasW, totalH);
+
+            // Header stats bar
+            const removed = allCards.filter(c => c.changeType === 'removed').length;
+            const added = allCards.filter(c => c.changeType === 'new').length;
+            const changed = allCards.filter(c => c.changeType === 'changed').length;
+            const unchanged = allCards.filter(c => c.changeType === 'unchanged').length;
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 22px system-ui, sans-serif';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('📊 Deck Compare', PAD, PAD + 18);
+
+            const stats = [
+                { label: '❌ ' + removed, color: '#e74c3c' },
+                { label: '🆕 ' + added, color: '#27ae60' },
+                { label: '🔄 ' + changed, color: '#f39c12' },
+                { label: '✅ ' + unchanged, color: '#95a5a6' }
+            ];
+            ctx.font = 'bold 14px system-ui, sans-serif';
+            let sx = PAD;
+            const sy = PAD + 48;
+            stats.forEach(s => {
+                const tw = ctx.measureText(s.label).width + 16;
+                ctx.fillStyle = s.color;
+                ctx.beginPath();
+                ctx.roundRect(sx, sy - 12, tw, 24, 12);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.fillText(s.label, sx + 8, sy);
+                sx += tw + 8;
+            });
+
+            // Pre-load all images as blobs (CORS-safe)
+            const imageCache = {};
+            const imgPromises = allCards.map(async (card) => {
+                const key = `${card.set}-${card.number}`;
+                if (imageCache[key]) return;
+                const cardData = cardsBySetNumberMap[key];
+                const src = cardData ? cardData.image_url : '';
+                if (!src) { imageCache[key] = null; return; }
+                try {
+                    const resp = await fetch(src, { mode: 'cors', cache: 'no-store' }).catch(() => null);
+                    if (!resp || !resp.ok) { imageCache[key] = null; return; }
+                    const blob = await resp.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    imageCache[key] = await new Promise(resolve => {
+                        const image = new Image();
+                        image.onload = () => { URL.revokeObjectURL(blobUrl); resolve(image); };
+                        image.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(null); };
+                        image.src = blobUrl;
+                    });
+                } catch { imageCache[key] = null; }
+            });
+            await Promise.all(imgPromises);
+
+            // Draw groups
+            let curY = PAD + HEADER_H;
+            groups.forEach(group => {
+                // Group header bar
+                ctx.fillStyle = group.color;
+                ctx.beginPath();
+                ctx.roundRect(PAD, curY, canvasW - PAD * 2, GRP_HEADER, 6);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 16px system-ui, sans-serif';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${group.title} (${group.cards.length})`, PAD + 10, curY + GRP_HEADER / 2);
+                curY += GRP_HEADER + GAP;
+
+                // Cards
+                group.cards.forEach((card, i) => {
+                    const col = i % COLS;
+                    const row = Math.floor(i / COLS);
+                    const x = PAD + col * (CARD_W + GAP);
+                    const y = curY + row * (CARD_H + LABEL_H + GAP);
+
+                    // Card border
+                    ctx.strokeStyle = group.color;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.roundRect(x, y, CARD_W, CARD_H, 6);
+                    ctx.stroke();
+
+                    // Card bg
+                    ctx.fillStyle = '#2a2a3e';
+                    ctx.beginPath();
+                    ctx.roundRect(x, y, CARD_W, CARD_H, 6);
+                    ctx.fill();
+
+                    const key = `${card.set}-${card.number}`;
+                    const img = imageCache[key];
+                    if (img) {
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.roundRect(x, y, CARD_W, CARD_H, 6);
+                        ctx.clip();
+                        ctx.drawImage(img, x, y, CARD_W, CARD_H);
+                        ctx.restore();
+                    } else {
+                        ctx.fillStyle = '#555';
+                        ctx.font = '11px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(card.set + ' ' + card.number, x + CARD_W / 2, y + CARD_H / 2);
+                        ctx.textAlign = 'start';
+                    }
+
+                    // Count badge on card
+                    const countText = group.type === 'removed' ? `${card.oldCount}→0` :
+                                      group.type === 'new' ? `0→${card.newCount}` :
+                                      group.type === 'changed' ? `${card.oldCount}→${card.newCount}` :
+                                      `${card.newCount}x`;
+                    ctx.font = 'bold 13px sans-serif';
+                    const badgeW = ctx.measureText(countText).width + 10;
+                    const bx = x + CARD_W - badgeW - 4;
+                    const by = y + 4;
+                    ctx.fillStyle = group.color;
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, badgeW, 20, 4);
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(countText, bx + badgeW / 2, by + 10);
+                    ctx.textAlign = 'start';
+                    ctx.textBaseline = 'alphabetic';
+
+                    // Card name below
+                    const nameY = y + CARD_H + 4;
+                    ctx.fillStyle = '#ddd';
+                    ctx.font = '11px system-ui, sans-serif';
+                    const maxNameW = CARD_W;
+                    let displayName = card.name || '';
+                    while (ctx.measureText(displayName).width > maxNameW && displayName.length > 3) {
+                        displayName = displayName.slice(0, -1);
+                    }
+                    if (displayName !== card.name) displayName += '…';
+                    ctx.fillText(displayName, x, nameY + 10);
+                });
+
+                const rows = Math.ceil(group.cards.length / COLS);
+                curY += rows * (CARD_H + LABEL_H + GAP) + GAP;
+            });
+
+            // Footer
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.font = '12px system-ui, sans-serif';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText("Hausi's Pokemon TCG Analysis", PAD, totalH - 8);
+
+            return canvas;
+        }
+
         window.openCompareScreenshotModal = openCompareScreenshotModal;
 
         // ── Standalone Profile Compare ───────────────────────────

@@ -3747,3 +3747,32 @@ window.dexImportExecute        = dexImportExecute;
 window.setCollectionSort       = setCollectionSort;
 window.setCollectionFilter     = setCollectionFilter;
 window.clearCollection         = clearCollection;
+
+// ── Wishlist Heart Badge (universal) ─────────────────────
+/**
+ * Returns the HTML for a small wishlist heart badge.
+ * Place inside a position:relative container.
+ */
+function getWishlistBadgeHtml(cardName, setCode, setNumber) {
+    const cardId = `${cardName}|${setCode}|${setNumber}`;
+    const isW = window.userWishlist && window.userWishlist.has(cardId);
+    return `<button class="wishlist-heart-badge${isW ? ' wishlisted' : ''}" data-card-id="${cardId.replace(/"/g, '&quot;')}" onclick="event.stopPropagation(); toggleWishlistBadge(this)" title="${isW ? 'Von Wunschliste entfernen' : 'Zur Wunschliste'}">` +
+        (isW ? '&#9829;' : '&#9825;') + '</button>';
+}
+
+function toggleWishlistBadge(btn) {
+    const cardId = btn.getAttribute('data-card-id');
+    if (!cardId) return;
+    toggleWishlist(cardId).then(() => {
+        // Update ALL badges for this cardId on the page
+        document.querySelectorAll(`.wishlist-heart-badge[data-card-id="${CSS.escape(cardId)}"]`).forEach(b => {
+            const isW = window.userWishlist && window.userWishlist.has(cardId);
+            b.classList.toggle('wishlisted', isW);
+            b.innerHTML = isW ? '&#9829;' : '&#9825;';
+            b.title = isW ? 'Von Wunschliste entfernen' : 'Zur Wunschliste';
+        });
+    });
+}
+
+window.getWishlistBadgeHtml = getWishlistBadgeHtml;
+window.toggleWishlistBadge  = toggleWishlistBadge;

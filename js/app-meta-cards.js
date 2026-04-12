@@ -791,6 +791,7 @@
                             
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
+                            ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(card.card_name, setCode, setNumber) : ''}
 
                             <!-- Card info section -->
                             <div class="card-info-bottom">
@@ -1071,6 +1072,7 @@
                             </div>
                         </div>
                         ${versionCount > 0 ? `<div class="card-badge card-badge-top-left">${versionCount}</div>` : ''}
+                        ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                         <button onclick="addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="card-badge card-badge-top-right pointer" title="Add to Deck">+</button>
                         <div class="card-info-bottom">
                             <div class="fs-11 color-grey fw-700">${setCode} ${setNumber}</div>

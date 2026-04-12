@@ -3839,6 +3839,11 @@
         });
 
         function showImageView(imageUrl, cardName) {
+            // Delegate to showSingleCard so users always see the action panel
+            if (typeof showSingleCard === 'function') {
+                showSingleCard(imageUrl, cardName);
+                return;
+            }
             const modal = document.getElementById('fullscreenCardModal');
             const img = document.getElementById('fullscreenCardImage');
             

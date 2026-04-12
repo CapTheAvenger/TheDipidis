@@ -2419,6 +2419,7 @@
                         <div class="city-league-card-image-container">
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped}');">
                             ${deckCount > 0 ? `<div class="city-league-card-deck-count">${deckCount}</div>` : ''}
+                            ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                         </div>
                         <!-- Card Info -->
                         <div class="city-league-card-info">
@@ -2731,6 +2732,7 @@
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
                             <!-- Red badge: Max Count (top-right) -->
                             <div class="city-league-card-badge city-league-card-badge-max">${finalMaxCount}</div>
+                            ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
                             ${otherPrintSparkleHtml}
@@ -3260,6 +3262,7 @@
                     if (currentDeckCount > 0) {
                         html += `<div class="city-league-img-badge">${currentDeckCount}</div>`;
                     }
+                    if (typeof getWishlistBadgeHtml === 'function') html += getWishlistBadgeHtml(cardName, setCode, setNumber);
                     html += `</div></td>`;
                     html += `<td data-label="${thCardsInDeck}"><strong>${currentDeckCount}/${maxCount}</strong></td>`;
                     html += `<td data-label="${thCardName}"><strong>${cardName}</strong></td>`;

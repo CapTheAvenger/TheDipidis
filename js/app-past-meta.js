@@ -1034,6 +1034,7 @@
                             <div class="card-image-container city-league-card-image-container">
                                 <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
                                 <div class="city-league-card-badge city-league-card-badge-max">${maxCount}</div>
+                                ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                                 ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
                                 ${otherPrintSparkleHtml}
                                 <div class="card-info-bottom city-league-card-info-bottom">

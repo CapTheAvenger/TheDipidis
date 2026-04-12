@@ -1031,6 +1031,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" class="card-img-std cursor-zoom" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped}')">
                         ${probBadge}
                         ${ownedBadge}
+                        ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(safeCardName, setCode, setNumber) : ''}
                         <div class="card-max-count">${count}</div>
                         <div class="deck-card-overlay">${overlayText}</div>
                         <div class="deck-card-actions">
@@ -1603,6 +1604,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                             ${imgHtml}
                             <!-- Red badge: Max Count (top-right) -->
                             <div class="card-badge card-badge-red pos-abs top-right">${maxCount}</div>
+                            ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(card.card_name, card.set_code || '', card.set_number || '') : ''}
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="card-badge card-badge-green pos-abs top-left">${deckCount}</div>` : ''}
                         </div>
@@ -2386,19 +2388,65 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
 
             // Limitless link in zoom modal
             const modalContent = overlay.querySelector('.single-card-modal-content');
+            // Remove previous action panel
+            const existingPanel = overlay.querySelector('#singleCardActionsPanel');
+            if (existingPanel) existingPanel.remove();
             const existingLimitlessBtn = overlay.querySelector('#singleCardLimitlessBtn');
             if (existingLimitlessBtn) existingLimitlessBtn.remove();
+
             const resolvedSet = inferredSet || normalizedCardData.set_code || '';
             const resolvedNum = inferredNumber || normalizedCardData.set_number || '';
-            if (modalContent && resolvedSet && resolvedNum) {
-                const lBtn = document.createElement('a');
-                lBtn.id = 'singleCardLimitlessBtn';
-                lBtn.href = `https://limitlesstcg.com/cards/${encodeURIComponent(resolvedSet)}/${encodeURIComponent(resolvedNum)}`;
-                lBtn.target = '_blank';
-                lBtn.rel = 'noopener noreferrer';
-                lBtn.textContent = `Limitless — ${resolvedSet} ${resolvedNum}`;
-                lBtn.style.cssText = 'display:block; margin-top:8px; padding:6px 14px; background:#6c3dc5; color:white; border-radius:6px; text-decoration:none; font-size:12px; font-weight:bold; text-align:center; letter-spacing:0.5px;';
-                modalContent.appendChild(lBtn);
+            const resolvedName = String(cardName || '').replace(/\s*\([A-Z0-9]+\s+[A-Z0-9]+\)$/, '');
+            const cardId = `${resolvedName}|${resolvedSet}|${resolvedNum}`;
+
+            if (modalContent) {
+                const panel = document.createElement('div');
+                panel.id = 'singleCardActionsPanel';
+                panel.className = 'single-card-actions-panel';
+                panel.onclick = function(e) { e.stopPropagation(); };
+
+                const isW = window.userWishlist && window.userWishlist.has(cardId);
+                const isOwned = window.userCollection && window.userCollection.has(cardId);
+                const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
+                const safeCardId = cardId.replace(/'/g, "\\'");
+                const safeCardName = resolvedName.replace(/'/g, "\\'");
+
+                let btns = '';
+                // Wishlist
+                btns += `<button class="sc-action-btn sc-action-wishlist${isW ? ' active' : ''}" onclick="toggleWishlist('${safeCardId}'); setTimeout(()=>{const p=document.getElementById('singleCardActionsPanel'); if(p){const b=p.querySelector('.sc-action-wishlist'); const w=window.userWishlist&&window.userWishlist.has('${safeCardId}'); b.classList.toggle('active',w); b.querySelector('.sc-action-icon').textContent=w?'♥':'♡';}},200);">
+                    <span class="sc-action-icon">${isW ? '♥' : '♡'}</span>
+                    <span class="sc-action-label">Wunschliste${isW ? ' ✓' : ''}</span>
+                </button>`;
+                // Collection +
+                btns += `<button class="sc-action-btn sc-action-collect" onclick="if(typeof toggleCollection==='function')toggleCollection('${safeCardId}')">
+                    <span class="sc-action-icon">+</span>
+                    <span class="sc-action-label">Sammlung${ownedCount ? ' (' + ownedCount + 'x)' : ''}</span>
+                </button>`;
+                // Rarity / Print
+                btns += `<button class="sc-action-btn sc-action-rarity" onclick="if(typeof openRaritySwitcher==='function')openRaritySwitcher('${safeCardName}','${safeCardName} (${resolvedSet} ${resolvedNum})')">
+                    <span class="sc-action-icon">★</span>
+                    <span class="sc-action-label">Anderes Print</span>
+                </button>`;
+                // Limitless
+                if (resolvedSet && resolvedNum) {
+                    btns += `<a class="sc-action-btn sc-action-limitless" href="https://limitlesstcg.com/cards/${encodeURIComponent(resolvedSet)}/${encodeURIComponent(resolvedNum)}" target="_blank" rel="noopener noreferrer">
+                        <span class="sc-action-icon">L</span>
+                        <span class="sc-action-label">Limitless öffnen</span>
+                    </a>`;
+                }
+                // Proxy
+                btns += `<button class="sc-action-btn sc-action-proxy" onclick="if(typeof addCardToProxy==='function')addCardToProxy('${safeCardName}','${resolvedSet}','${resolvedNum}',1)">
+                    <span class="sc-action-icon">P</span>
+                    <span class="sc-action-label">Proxy drucken</span>
+                </button>`;
+                // Cardmarket
+                btns += `<button class="sc-action-btn sc-action-market" onclick="if(typeof openCardmarket==='function')openCardmarket('','${safeCardName}')">
+                    <span class="sc-action-icon">€</span>
+                    <span class="sc-action-label">Cardmarket</span>
+                </button>`;
+
+                panel.innerHTML = btns;
+                modalContent.appendChild(panel);
             }
 
             document.body.style.overflow = 'hidden';

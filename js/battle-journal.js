@@ -96,7 +96,9 @@
             profilePending: document.getElementById('battleJournalProfilePending'),
             profileState: document.getElementById('battleJournalProfileState'),
             saveFx: document.getElementById('battleJournalSaveFx'),
-            themeToggle: document.getElementById('battleJournalThemeToggle')
+            themeToggle: document.getElementById('battleJournalThemeToggle'),
+            metaInput: document.getElementById('battleJournalMeta'),
+            typeInput: document.getElementById('battleJournalType')
         };
     }
 
@@ -480,6 +482,8 @@
             ownDeck: String(els.ownDeckValue?.value || '').trim(),
             opponentArchetype: String(els.opponentValue?.value || '').trim(),
             bestOf: String(els.bestOfInput?.value || '').trim(),
+            meta: String(els.metaInput?.value || '').trim(),
+            tournamentType: String(els.typeInput?.value || '').trim(),
             turnOrder: derived.turnOrder,
             result: derived.result,
             games: games
@@ -497,6 +501,9 @@
         if (els.ownDeckValue) els.ownDeckValue.value = draft.ownDeck || '';
         if (els.opponentValue) els.opponentValue.value = draft.opponentArchetype || '';
         if (els.bestOfInput) els.bestOfInput.value = draft.bestOf || '';
+        if (els.metaInput) els.metaInput.value = draft.meta || '';
+        if (els.typeInput) els.typeInput.value = draft.tournamentType || '';
+        document.querySelectorAll('.bj-type-chip').forEach(c => c.classList.toggle('is-selected', c.dataset.value === (draft.tournamentType || '')));
 
         renderDeckChoices();
         setBattleJournalChoice('bestOf', draft.bestOf || '');
@@ -512,7 +519,10 @@
         if (els.bestOfInput) els.bestOfInput.value = '';
         if (els.turnOrderInput) els.turnOrderInput.value = '';
         if (els.resultInput) els.resultInput.value = '';
+        if (els.metaInput) els.metaInput.value = '';
+        if (els.typeInput) els.typeInput.value = '';
         document.querySelectorAll('.battle-journal-choice').forEach(button => button.classList.remove('is-selected'));
+        document.querySelectorAll('.bj-type-chip').forEach(c => c.classList.remove('is-selected'));
         renderGameRows();
         renderDeckChoices();
         localStorage.removeItem(BATTLE_JOURNAL_DRAFT_KEY);
@@ -555,6 +565,8 @@
         return {
             id: `bj_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
             tournamentName: values.tournamentName || '',
+            meta: values.meta || '',
+            tournamentType: values.tournamentType || '',
             ownDeck: values.ownDeck,
             opponentArchetype: values.opponentArchetype,
             bestOf: values.bestOf || 'bo1',
@@ -601,6 +613,8 @@
     async function syncBattleJournalEntry(entry, user) {
         const payload = {
             tournamentName: entry.tournamentName || '',
+            meta: entry.meta || '',
+            tournamentType: entry.tournamentType || '',
             ownDeck: entry.ownDeck,
             opponentArchetype: entry.opponentArchetype,
             bestOf: entry.bestOf || 'bo1',
@@ -873,16 +887,19 @@
     function renderJournalHistory() {
         const listEl = document.getElementById('journalHistoryList');
         const statsEl = document.getElementById('journalHistoryStats');
-        const tournamentSelect = document.getElementById('journalFilterTournament');
         if (!listEl) return;
 
-        const filterTournament = tournamentSelect?.value || '';
+        const filterTournament = document.getElementById('journalFilterTournament')?.value || '';
         const filterResult = document.getElementById('journalFilterResult')?.value || '';
+        const filterMeta = document.getElementById('journalFilterMeta')?.value || '';
+        const filterType = document.getElementById('journalFilterType')?.value || '';
 
         // Filter
         let filtered = journalHistoryCache;
         if (filterTournament) filtered = filtered.filter(e => e.tournamentName === filterTournament);
         if (filterResult) filtered = filtered.filter(e => e.result === filterResult);
+        if (filterMeta) filtered = filtered.filter(e => (e.meta || '') === filterMeta);
+        if (filterType) filtered = filtered.filter(e => (e.tournamentType || '') === filterType);
 
         // Stats
         const totalW = filtered.filter(e => e.result === 'win').length;
@@ -910,51 +927,255 @@
             return;
         }
 
+        // Group by meta → tournament
+        const metaGroups = {};
+        filtered.forEach(entry => {
+            const metaKey = entry.meta || '';
+            const tournKey = entry.tournamentName || '';
+            if (!metaGroups[metaKey]) metaGroups[metaKey] = {};
+            if (!metaGroups[metaKey][tournKey]) metaGroups[metaKey][tournKey] = [];
+            metaGroups[metaKey][tournKey].push(entry);
+        });
+
         const locale = getLang() === 'de' ? 'de-DE' : 'en-GB';
-        listEl.innerHTML = filtered.map(entry => {
-            const resultClass = entry.result === 'win' ? 'is-win' : (entry.result === 'loss' ? 'is-loss' : 'is-tie');
-            const resultText = entry.result === 'win' ? battleJournalText('bj.win', 'Win')
-                : entry.result === 'loss' ? battleJournalText('bj.loss', 'Loss')
-                : battleJournalText('bj.tie', 'Tie');
-            const turnText = entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : (entry.turnOrder === 'second' ? battleJournalText('bj.secondShort', '2nd') : '');
-            const bestOfText = entry.bestOf === 'bo3' ? 'BO3' : 'BO1';
-            const dateStr = new Date(entry.createdAtMs || Date.now()).toLocaleString(locale, { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
-            const tournamentPart = entry.tournamentName ? `<div class="bj-history-tournament">${escapeHtml(entry.tournamentName)}</div>` : '';
-            const pendingBadge = entry._pending ? `<span class="bj-history-pending">${escapeHtml(battleJournalText('bj.histPending', 'pending'))}</span>` : '';
+        let html = '';
 
-            let bo3Line = '';
-            if (entry.bestOf === 'bo3' && Array.isArray(entry.bo3Games)) {
-                const gameTexts = entry.bo3Games
-                    .filter(g => g && (g.turnOrder || g.result))
-                    .map((g, i) => {
-                        const gTurn = g.turnOrder === 'first' ? '1st' : (g.turnOrder === 'second' ? '2nd' : '-');
-                        const gRes = g.result || '-';
-                        return `G${i + 1}: ${gTurn}/${gRes}`;
-                    });
-                if (gameTexts.length > 0) bo3Line = `<div class="bj-history-games">${escapeHtml(gameTexts.join(' · '))}</div>`;
-            }
+        const metaKeys = Object.keys(metaGroups).sort((a, b) => {
+            if (!a && b) return 1;
+            if (a && !b) return -1;
+            return a.localeCompare(b);
+        });
 
-            const clipText = formatEntryForClipboard(entry);
-            return `
-                <div class="bj-history-item ${resultClass}">
-                    <div class="bj-history-item-main">
-                        ${tournamentPart}
-                        <div class="bj-history-matchup">
-                            <strong>${escapeHtml(entry.ownDeck || 'Deck')}</strong>
-                            <span class="bj-history-vs">vs</span>
-                            <strong>${escapeHtml(entry.opponentArchetype || 'Opponent')}</strong>
+        metaKeys.forEach(metaKey => {
+            const metaLabel = metaKey || battleJournalText('bj.noMeta', 'No Meta');
+            const tournaments = metaGroups[metaKey];
+            const tournNames = Object.keys(tournaments).sort((a, b) => {
+                const aNewest = Math.max(...tournaments[a].map(e => e.createdAtMs || 0));
+                const bNewest = Math.max(...tournaments[b].map(e => e.createdAtMs || 0));
+                return bNewest - aNewest;
+            });
+
+            const metaEntries = Object.values(tournaments).flat();
+            const mW = metaEntries.filter(e => e.result === 'win').length;
+            const mL = metaEntries.filter(e => e.result === 'loss').length;
+            const mT = metaEntries.filter(e => e.result === 'tie').length;
+
+            html += `<div class="bj-meta-folder">
+                <div class="bj-meta-folder-header" onclick="this.parentElement.classList.toggle('is-collapsed')">
+                    <span class="bj-meta-folder-icon">📂</span>
+                    <span class="bj-meta-folder-label">${escapeHtml(metaLabel)}</span>
+                    <span class="bj-meta-folder-stats">${mW}W ${mL}L ${mT}T</span>
+                    <span class="bj-meta-folder-chevron">▾</span>
+                </div>
+                <div class="bj-meta-folder-content">`;
+
+            tournNames.forEach(tournKey => {
+                const entries = tournaments[tournKey];
+                const tournLabel = tournKey || battleJournalText('bj.noTournament', 'No Tournament');
+                const tW = entries.filter(e => e.result === 'win').length;
+                const tL = entries.filter(e => e.result === 'loss').length;
+                const tT = entries.filter(e => e.result === 'tie').length;
+                const tTotal = entries.length;
+                const tWinRate = tTotal > 0 ? Math.round((tW / tTotal) * 100) : 0;
+                const safeTournKey = escapeHtml(tournKey).replace(/'/g, "\\'");
+
+                html += `<div class="bj-tournament-block">
+                    <div class="bj-tournament-header">
+                        <div class="bj-tournament-info">
+                            <strong class="bj-tournament-name">${escapeHtml(tournLabel)}</strong>
+                            <span class="bj-tournament-record">${tW}-${tL}-${tT} (${tWinRate}%)</span>
                         </div>
-                        <div class="bj-history-meta">${escapeHtml(bestOfText)}${turnText ? ' · ' + escapeHtml(turnText) : ''} · ${escapeHtml(dateStr)} ${pendingBadge}</div>
-                        ${bo3Line}
-                        <div class="bj-history-clip">${escapeHtml(clipText)}</div>
+                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">📸</button>
+                    </div>`;
+
+                entries.forEach(entry => {
+                    html += _buildHistoryItemHtml(entry, locale);
+                });
+
+                html += `</div>`;
+            });
+
+            html += `</div></div>`;
+        });
+
+        listEl.innerHTML = html;
+    }
+
+    function _buildHistoryItemHtml(entry, locale) {
+        const resultClass = entry.result === 'win' ? 'is-win' : (entry.result === 'loss' ? 'is-loss' : 'is-tie');
+        const resultEmoji = entry.result === 'win' ? '✅' : (entry.result === 'loss' ? '❌' : '🟡');
+        const resultText = entry.result === 'win' ? battleJournalText('bj.win', 'Win')
+            : entry.result === 'loss' ? battleJournalText('bj.loss', 'Loss')
+            : battleJournalText('bj.tie', 'Tie');
+        const turnText = entry.turnOrder === 'first' ? battleJournalText('bj.firstShort', '1st') : (entry.turnOrder === 'second' ? battleJournalText('bj.secondShort', '2nd') : '');
+        const bestOfText = entry.bestOf === 'bo3' ? 'BO3' : 'BO1';
+        const dateStr = new Date(entry.createdAtMs || Date.now()).toLocaleString(locale, { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const pendingBadge = entry._pending ? `<span class="bj-history-pending">${escapeHtml(battleJournalText('bj.histPending', 'pending'))}</span>` : '';
+
+        let bo3Line = '';
+        if (entry.bestOf === 'bo3' && Array.isArray(entry.bo3Games)) {
+            const gameTexts = entry.bo3Games
+                .filter(g => g && (g.turnOrder || g.result))
+                .map((g, i) => {
+                    const gTurn = g.turnOrder === 'first' ? '1st' : (g.turnOrder === 'second' ? '2nd' : '-');
+                    const gRes = g.result || '-';
+                    return `G${i + 1}: ${gTurn}/${gRes}`;
+                });
+            if (gameTexts.length > 0) bo3Line = `<div class="bj-history-games">${escapeHtml(gameTexts.join(' · '))}</div>`;
+        }
+
+        const clipText = formatEntryForClipboard(entry);
+        return `
+            <div class="bj-history-item ${resultClass}">
+                <div class="bj-history-item-main">
+                    <div class="bj-history-matchup">
+                        <strong>${escapeHtml(entry.ownDeck || 'Deck')}</strong>
+                        <span class="bj-history-vs">vs</span>
+                        <strong>${escapeHtml(entry.opponentArchetype || 'Opponent')}</strong>
                     </div>
-                    <div class="bj-history-actions">
-                        <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">📋</button>
-                        <span class="battle-journal-result-pill ${resultClass}">${escapeHtml(resultText)}</span>
+                    <div class="bj-history-meta">${escapeHtml(bestOfText)}${turnText ? ' · ' + escapeHtml(turnText) : ''} · ${escapeHtml(dateStr)} ${pendingBadge}</div>
+                    ${bo3Line}
+                    <div class="bj-history-clip">${escapeHtml(clipText)}</div>
+                </div>
+                <div class="bj-history-actions">
+                    <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">📋</button>
+                    <span class="battle-journal-result-pill ${resultClass}">${resultEmoji} ${escapeHtml(resultText)}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function selectJournalType(value) {
+        const input = document.getElementById('battleJournalType');
+        if (input) input.value = value;
+        document.querySelectorAll('.bj-type-chip').forEach(c => {
+            c.classList.toggle('is-selected', c.dataset.value === value);
+        });
+    }
+
+    async function shareTournamentSummary(tournamentName) {
+        const entries = journalHistoryCache.filter(e => e.tournamentName === tournamentName);
+        if (entries.length === 0) return;
+
+        const wins = entries.filter(e => e.result === 'win').length;
+        const losses = entries.filter(e => e.result === 'loss').length;
+        const ties = entries.filter(e => e.result === 'tie').length;
+        const total = entries.length;
+        const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+
+        const canvas = document.createElement('canvas');
+        const W = 600, H = Math.min(80 + entries.length * 44 + 30, 800);
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = '#1a1f2e';
+        ctx.fillRect(0, 0, W, H);
+
+        // Pokéball gradient header
+        const grad = ctx.createLinearGradient(0, 0, W, 0);
+        grad.addColorStop(0, '#e74c3c');
+        grad.addColorStop(1, '#c0392b');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, 56);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 20px system-ui, sans-serif';
+        ctx.fillText(tournamentName || 'Tournament', 16, 36);
+
+        // Record line
+        ctx.fillStyle = '#a0aec0';
+        ctx.font = '14px system-ui, sans-serif';
+        ctx.fillText(`${wins}W-${losses}L-${ties}T  \u00b7  ${winRate}% Win Rate`, 16, 78);
+
+        // Match rows
+        let y = 100;
+        entries.forEach(entry => {
+            if (y + 40 > H) return;
+            const resultEmoji = entry.result === 'win' ? '\u2705' : (entry.result === 'loss' ? '\u274c' : '\ud83d\udfe1');
+            ctx.fillStyle = entry.result === 'win' ? 'rgba(39,174,96,0.15)' : (entry.result === 'loss' ? 'rgba(231,76,60,0.12)' : 'rgba(243,156,18,0.12)');
+            ctx.fillRect(12, y - 16, W - 24, 36);
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '14px system-ui, sans-serif';
+            ctx.fillText(`${resultEmoji}  ${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}`, 20, y + 4);
+            y += 44;
+        });
+
+        // Watermark
+        ctx.fillStyle = '#4a5568';
+        ctx.font = '11px system-ui, sans-serif';
+        ctx.fillText('Pok\u00e9mon TCG Analysis \u00b7 Battle Journal', 16, H - 8);
+
+        canvas.toBlob(async function(blob) {
+            if (!blob) return;
+            if (navigator.share && navigator.canShare) {
+                try {
+                    const file = new File([blob], (tournamentName || 'tournament') + '-summary.png', { type: 'image/png' });
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], title: tournamentName });
+                        return;
+                    }
+                } catch (_) { /* fallback */ }
+            }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (tournamentName || 'tournament') + '-summary.png';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(battleJournalText('bj.imageSaved', 'Image saved!'), 'success');
+        }, 'image/png');
+    }
+
+    function renderMatchupHeatmap() {
+        const container = document.getElementById('journalMatchupStats');
+        if (!container) return;
+
+        const filterMeta = document.getElementById('journalFilterMeta')?.value || '';
+        const filterType = document.getElementById('journalFilterType')?.value || '';
+        let entries = journalHistoryCache;
+        if (filterMeta) entries = entries.filter(e => (e.meta || '') === filterMeta);
+        if (filterType) entries = entries.filter(e => (e.tournamentType || '') === filterType);
+
+        if (entries.length === 0) {
+            container.innerHTML = '<p class="color-grey fs-13">' + escapeHtml(battleJournalText('bj.noMatchupData', 'No matchup data available.')) + '</p>';
+            return;
+        }
+
+        const matchups = {};
+        entries.forEach(entry => {
+            const opp = entry.opponentArchetype || 'Unknown';
+            if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0 };
+            matchups[opp].total++;
+            if (entry.result === 'win') matchups[opp].wins++;
+            else if (entry.result === 'loss') matchups[opp].losses++;
+            else matchups[opp].ties++;
+        });
+
+        const sorted = Object.entries(matchups).sort((a, b) => b[1].total - a[1].total);
+        let html = '<div class="bj-matchup-grid">';
+        sorted.forEach(function([opp, stats]) {
+            const winRate = stats.total > 0 ? Math.round((stats.wins / stats.total) * 100) : 0;
+            const barColor = winRate >= 60 ? '#1f8b4d' : (winRate >= 40 ? '#e67e22' : '#c0392b');
+            html += `
+                <div class="bj-matchup-row">
+                    <div class="bj-matchup-name">${escapeHtml(opp)}</div>
+                    <div class="bj-matchup-bar-wrap">
+                        <div class="bj-matchup-bar" style="width:${winRate}%;background:${barColor}"></div>
                     </div>
+                    <div class="bj-matchup-stats">${stats.wins}-${stats.losses}-${stats.ties} <span class="bj-matchup-rate">${winRate}%</span></div>
                 </div>
             `;
-        }).join('');
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function toggleMatchupStats() {
+        const panel = document.getElementById('journalMatchupStats');
+        if (!panel) return;
+        const isHidden = panel.classList.toggle('display-none');
+        if (!isHidden) renderMatchupHeatmap();
     }
 
     function populateJournalTournamentFilter() {
@@ -969,9 +1190,35 @@
         if (current && tournaments.includes(current)) select.value = current;
     }
 
+    function populateJournalFilters() {
+        populateJournalTournamentFilter();
+
+        const metaSelect = document.getElementById('journalFilterMeta');
+        if (metaSelect) {
+            const metas = [...new Set(journalHistoryCache.map(e => e.meta).filter(Boolean))].sort();
+            const current = metaSelect.value;
+            metaSelect.innerHTML = `<option value="">${escapeHtml(battleJournalText('bj.allMetas', 'All Formats'))}</option>`;
+            metas.forEach(m => {
+                metaSelect.innerHTML += `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`;
+            });
+            if (current && metas.includes(current)) metaSelect.value = current;
+        }
+
+        const typeSelect = document.getElementById('journalFilterType');
+        if (typeSelect) {
+            const types = [...new Set(journalHistoryCache.map(e => e.tournamentType).filter(Boolean))].sort();
+            const current = typeSelect.value;
+            typeSelect.innerHTML = `<option value="">${escapeHtml(battleJournalText('bj.allTypes', 'All Types'))}</option>`;
+            types.forEach(tp => {
+                typeSelect.innerHTML += `<option value="${escapeHtml(tp)}">${escapeHtml(tp)}</option>`;
+            });
+            if (current && types.includes(current)) typeSelect.value = current;
+        }
+    }
+
     async function openJournalHistoryTab() {
         await loadJournalHistory();
-        populateJournalTournamentFilter();
+        populateJournalFilters();
         renderJournalHistory();
     }
 
@@ -1044,6 +1291,10 @@
     window.copyJournalEntry = copyJournalEntry;
     window.copyAllJournalEntries = copyAllJournalEntries;
     window.clearAllJournalEntries = clearAllJournalEntries;
+    window.selectJournalType = selectJournalType;
+    window.shareTournamentSummary = shareTournamentSummary;
+    window.toggleMatchupStats = toggleMatchupStats;
+    window.renderMatchupHeatmap = renderMatchupHeatmap;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBattleJournal, { once: true });

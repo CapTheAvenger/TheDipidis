@@ -2529,6 +2529,12 @@
                             </div>
                             <div id="journalHistoryStats" class="battle-journal-history-stats mb-15"></div>
                             <div id="journalHistoryFilters" class="flex gap-10 mb-15 flex-wrap">
+                                <select id="journalFilterMeta" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark" aria-label="Filter by meta format">
+                                    <option value="" data-i18n="bj.allMetas">All Formats</option>
+                                </select>
+                                <select id="journalFilterType" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark" aria-label="Filter by tournament type">
+                                    <option value="" data-i18n="bj.allTypes">All Types</option>
+                                </select>
                                 <select id="journalFilterTournament" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark" aria-label="Filter by tournament">
                                     <option value="" data-i18n="bj.allTournaments">All Tournaments</option>
                                 </select>
@@ -2538,7 +2544,9 @@
                                     <option value="loss" data-i18n="bj.loss">Loss</option>
                                     <option value="tie" data-i18n="bj.tie">Tie</option>
                                 </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleMatchupStats()" data-i18n="bj.matchups">📊 Matchups</button>
                             </div>
+                            <div id="journalMatchupStats" class="display-none mb-15"></div>
                             <div id="journalHistoryList" class="battle-journal-history-list"></div>
                         </div>
 
@@ -3400,6 +3408,43 @@
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.tournamentName">Tournament Name</span>
                     <input id="battleJournalTournamentName" type="text" class="battle-journal-input" autocomplete="off" aria-label="Tournament name" data-i18n-placeholder="bj.tournamentNamePlaceholder" placeholder="e.g. City League Hamburg...">
+                </div>
+
+                <div class="battle-journal-grid">
+                    <div>
+                        <span class="battle-journal-label" data-i18n="bj.metaFormat">Meta Format</span>
+                        <select id="battleJournalMeta" class="battle-journal-input" aria-label="Meta format">
+                            <option value="">– Select –</option>
+                            <option value="TEF-POR">TEF-POR</option>
+                            <option value="SVI-ASC">SVI-ASC</option>
+                            <option value="SVI-PFL">SVI-PFL</option>
+                            <option value="SVI-MEG">SVI-MEG</option>
+                            <option value="SVI-BLK">SVI-BLK</option>
+                            <option value="SVI-DRI">SVI-DRI</option>
+                            <option value="SVI-JTG">SVI-JTG</option>
+                            <option value="BRS-PRE">BRS-PRE</option>
+                            <option value="BRS-SSP">BRS-SSP</option>
+                            <option value="BRS-SCR">BRS-SCR</option>
+                            <option value="BRS-SFA">BRS-SFA</option>
+                            <option value="BRS-TWM">BRS-TWM</option>
+                            <option value="BRS-TEF">BRS-TEF</option>
+                            <option value="BST-PAR">BST-PAR</option>
+                            <option value="SVI-PAF">SVI-PAF</option>
+                        </select>
+                    </div>
+                    <div>
+                        <span class="battle-journal-label" data-i18n="bj.tournamentType">Tournament Type</span>
+                        <input id="battleJournalType" type="hidden" value="">
+                        <div id="battleJournalTypeGroup" class="bj-type-chip-group">
+                            <button type="button" class="bj-type-chip" data-value="City League" onclick="selectJournalType('City League')">🏙️ City League</button>
+                            <button type="button" class="bj-type-chip" data-value="Regional" onclick="selectJournalType('Regional')">🏆 Regional</button>
+                            <button type="button" class="bj-type-chip" data-value="Special Event" onclick="selectJournalType('Special Event')">⭐ Special</button>
+                            <button type="button" class="bj-type-chip" data-value="League Cup" onclick="selectJournalType('League Cup')">🥤 Cup</button>
+                            <button type="button" class="bj-type-chip" data-value="League Challenge" onclick="selectJournalType('League Challenge')">🎯 Challenge</button>
+                            <button type="button" class="bj-type-chip" data-value="Online" onclick="selectJournalType('Online')">🌐 Online</button>
+                            <button type="button" class="bj-type-chip" data-value="Casual" onclick="selectJournalType('Casual')">🎲 Casual</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div>

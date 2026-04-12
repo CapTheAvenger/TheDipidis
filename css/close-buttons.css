@@ -114,7 +114,7 @@
   opacity: 1;
 }
 
-/* Tooltip on hover — "Verlassen" */
+/* Tooltip on hover — i18n via CSS custom property */
 .auth-modal-close::after,
 .image-view-close::after,
 .bj-edit-modal-close::after,
@@ -124,7 +124,7 @@
 .battle-journal-close::after,
 .draw-sim-close-btn::after,
 .help-modal-close::after {
-  content: 'Verlassen';
+  content: var(--close-tooltip, 'Close');
   position: absolute;
   bottom: -22px;
   left: 50%;

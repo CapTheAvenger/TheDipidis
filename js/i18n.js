@@ -1937,6 +1937,9 @@ function updateTranslationsInDOM() {
   // Update the language toggle button label (show active language)
   const toggle = document.getElementById('langToggleBtn');
   if (toggle) toggle.textContent = currentLang === 'de' ? 'DE' : 'EN';
+
+  // Update CSS custom property for close-button tooltips
+  document.documentElement.style.setProperty('--close-tooltip', `'${t('btn.close')}'`);
 }
 
 // Expose i18n functions globally

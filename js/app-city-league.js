@@ -2417,7 +2417,7 @@
                     <div class="card-table-row city-league-card-table-row" data-card-name="${cardName.toLowerCase()}">
                         <!-- Card Image -->
                         <div class="city-league-card-image-container">
-                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped}');">
+                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
                             ${deckCount > 0 ? `<div class="city-league-card-deck-count">${deckCount}</div>` : ''}
                             ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
                         </div>
@@ -2729,7 +2729,7 @@
                 cardHtmls.push(`
                     <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                         <div class="card-image-container city-league-card-image-container">
-                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped}');">
+                            <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
                             <!-- Red badge: Max Count (top-right) -->
                             <div class="city-league-card-badge city-league-card-badge-max">${finalMaxCount}</div>
                             ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(cardName, setCode, setNumber) : ''}
@@ -3258,7 +3258,7 @@
                     html += '<tr>';
                     // Image with green badge if card is in deck
                     html += `<td class="col-image" data-label="${thImage}"><div class="city-league-img-badge-wrap">`;
-                    html += `<img src="${imageUrl}" alt="${cardName}" loading="lazy" class="city-league-card-img" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${escapeJsStr(cardName)}')">`;
+                    html += `<img src="${imageUrl}" alt="${cardName}" loading="lazy" class="city-league-card-img" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${escapeJsStr(cardName)} (${setCode} ${setNumber})')">`;
                     if (currentDeckCount > 0) {
                         html += `<div class="city-league-img-badge">${currentDeckCount}</div>`;
                     }

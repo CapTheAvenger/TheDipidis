@@ -1749,8 +1749,9 @@
             devLog(`  - Failed meta filter: ${failedMetaFilter}`);
             devLog(`  - Failed format set: ${failedFormatSet}`);
             // Deduplicate cards (same card name, different prints) - prefer print from coverage data
-            // Only deduplicate if showOnlyOnePrint is enabled
-            if (showOnlyOnePrint) {
+            // Only deduplicate if showOnlyOnePrint is enabled AND no search term active
+            // When user searches for a specific card, always show all prints
+            if (showOnlyOnePrint && !searchTerm) {
                 deduplicateCardsForDisplay(window.filteredCardsData);
             }
             

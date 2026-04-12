@@ -1028,7 +1028,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 
                 html += `
                     <div class="deck-card pos-rel" title="${safeCardName} (${count}x) - ${percentage}%">
-                        <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" class="card-img-std cursor-zoom" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped}')">
+                        <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" class="card-img-std cursor-zoom" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})')">
                         ${probBadge}
                         ${ownedBadge}
                         ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(safeCardName, setCode, setNumber) : ''}
@@ -1593,7 +1593,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 // Card image or placeholder
                 let imgHtml = '';
                 if (imageUrl && imageUrl.trim() !== '') {
-                    imgHtml = `<img src="${imageUrl}" alt="${card.card_name}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${escapeJsStr(card.card_name)}');">`;
+                    imgHtml = `<img src="${imageUrl}" alt="${card.card_name}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${escapeJsStr(card.card_name)} (${card.set_code || ''} ${card.set_number || ''})');">`;
                 } else {
                     imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">??</div>`;
                 }
@@ -1734,7 +1734,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 
                 if (imageUrl && imageUrl.trim() !== '') {
                     return `
-                        <div class="compact-card" title="${cardName} (${count}x)" style="cursor: zoom-in;" onclick="showSingleCard(this.querySelector('img').src, '${cardNameEscaped}')">
+                        <div class="compact-card" title="${cardName} (${count}x)" style="cursor: zoom-in;" onclick="showSingleCard(this.querySelector('img').src, '${cardNameEscaped} (${card.set_code || ''} ${card.set_number || ''})')">
                             <img src="${imageUrl}" 
                                  alt="${cardName}" 
                                  loading="lazy"

@@ -6352,26 +6352,25 @@ details[open] > .tier-trending-summary::after {
     font-weight: 700;
     font-size: .72rem;
     text-align: center;
-    white-space: nowrap;
+    white-space: normal;
     background: #1a2340;
     color: #fff;
     border-bottom: 2px solid rgba(255,255,255,.15);
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: 100px;
+    line-height: 1.25;
+    vertical-align: bottom;
 }
 .ma-heatmap-row-header {
     padding: 6px 10px;
     font-weight: 700;
     font-size: .78rem;
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.25;
     position: sticky;
     left: 0;
     z-index: 2;
     background: var(--card-bg, #fff);
     max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     border-right: 1px solid rgba(0,0,0,.08);
     box-shadow: 2px 0 4px rgba(0,0,0,.06);
 }

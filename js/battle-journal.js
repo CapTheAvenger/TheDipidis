@@ -1331,12 +1331,12 @@
 
         let html = '<div class="ma-heatmap-scroll"><table class="ma-heatmap-table"><thead><tr><th class="ma-heatmap-corner"></th>';
         oppArr.forEach(opp => {
-            html += `<th class="ma-heatmap-col-header" title="${escapeHtml(opp)}">${escapeHtml(_truncate(opp, 10))}</th>`;
+            html += `<th class="ma-heatmap-col-header" title="${escapeHtml(opp)}">${escapeHtml(opp).replace(/ /g, '<br>')}</th>`;
         });
         html += '</tr></thead><tbody>';
 
         myArr.forEach(my => {
-            html += `<tr><td class="ma-heatmap-row-header" title="${escapeHtml(my)}">${escapeHtml(_truncate(my, 12))}</td>`;
+            html += `<tr><td class="ma-heatmap-row-header" title="${escapeHtml(my)}">${escapeHtml(my).replace(/ /g, '<br>')}</td>`;
             oppArr.forEach(opp => {
                 const key = my + '|||' + opp;
                 const cell = grid[key];

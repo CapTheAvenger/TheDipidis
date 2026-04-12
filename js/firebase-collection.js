@@ -1617,8 +1617,8 @@ function updateDecksUI() {
     
     return `
       <div class="saved-deck-item" data-deck-name="${safeDeckNameHtml}" data-deck-archetype="${safeDeckArchetypeHtml}" data-deck-folder="${safeFolderHtml}" data-deck-active="${isActive}" style="background: white; border-radius: 10px; box-shadow: ${isActive ? '0 0 12px rgba(76,175,80,0.5), 0 2px 8px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.1)'}; overflow: hidden; margin-bottom: 10px; ${activeBorder}">
-        <div onclick="toggleDeckCollapse('${deckId}')" style="padding: 15px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: ${activeGradient}; color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-          <div style="flex: 1;">
+        <div class="deck-header-row" onclick="toggleDeckCollapse('${deckId}')" style="padding: 15px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: ${activeGradient}; color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+          <div class="deck-name-col" style="flex: 1; min-width: 0;">
             <h3 style="margin: 0 0 3px 0; font-size: 1.1em; font-weight: 600;">${safeDeckNameHtml}${activeLabel}</h3>
             <div style="font-size: 0.85em; opacity: 0.9;">
               ${safeDeckArchetypeHtml} • ${totalCards} Cards (${uniqueCards} Unique)
@@ -1627,7 +1627,7 @@ function updateDecksUI() {
               ${deck.folder ? '📁 ' + safeFolderHtml + ' • ' : ''}🕐 ${safeCreatedHtml}
             </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="deck-action-buttons" style="display: flex; align-items: center; gap: 8px;">
             <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" style="padding: 6px 12px; background: ${isActive ? 'rgba(76,175,80,0.95)' : 'rgba(255,255,255,0.25)'}; color: white; border: ${isActive ? '2px solid #fff' : '2px solid rgba(255,255,255,0.5)'}; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
               ${isActive ? '✅' : '⬜'}
             </button>

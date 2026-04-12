@@ -2158,7 +2158,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             return 'Deck';
         }
 
-        /** Export a saved deck (My Decks) as image by deck index. */
+        // ── Deck Grid Preview Modal ──────────────────────────────────
+        let _currentPreviewDeckIndex = -1;
+
+        /** Export a saved deck (My Decks): opens grid preview modal first. */
         function exportSavedDeckAsImage(deckIndex) {
             const decks = window.userDecks || [];
             if (deckIndex < 0 || deckIndex >= decks.length) return;
@@ -2172,9 +2175,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 return;
             }
 
-            showToast(getLang() === 'de' ? 'Bild wird erstellt...' : 'Creating image...', 'info');
+            _currentPreviewDeckIndex = deckIndex;
 
-            // Build card entries with image URLs (reusing existing lookup maps)
+            // Set title
+            document.getElementById('deckGridPreviewTitle').textContent = deckName;
+
+            // Build sorted card entries
             const sortedEntries = sortCardsByType(
                 Object.entries(cards)
                     .filter(([, count]) => count > 0)
@@ -2204,23 +2210,86 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     })
             );
 
-            // Render onto a temporary off-screen grid so exportDeckAsImage can read it
+            // Render card grid
+            const gridContainer = document.getElementById('deckGridPreviewCards');
+            gridContainer.innerHTML = '';
+
+            const totalCards = sortedEntries.reduce((s, c) => s + (c.deck_count_in_selected || 1), 0);
+            document.getElementById('deckGridPreviewCount').textContent = `${totalCards} ${getLang() === 'de' ? 'Karten' : 'Cards'}`;
+
+            sortedEntries.forEach(card => {
+                const count = card.deck_count_in_selected || 1;
+                for (let i = 0; i < count; i++) {
+                    const img = document.createElement('img');
+                    img.src = getBestCardImage(card);
+                    img.alt = card.card_name || '';
+                    img.style.cssText = 'width:100%; border-radius:6px; aspect-ratio:63/88; object-fit:cover; display:block;';
+                    img.loading = 'lazy';
+                    img.onerror = function() { this.src = 'images/card-back.png'; };
+                    gridContainer.appendChild(img);
+                }
+            });
+
+            // Show modal
+            document.getElementById('deckGridPreviewModal').style.display = 'flex';
+        }
+
+        function closeDeckGridPreview() {
+            document.getElementById('deckGridPreviewModal').style.display = 'none';
+            _currentPreviewDeckIndex = -1;
+        }
+
+        /** Called by the save button inside the grid preview modal. */
+        function saveDeckGridAsImage() {
+            if (_currentPreviewDeckIndex < 0) return;
+            const decks = window.userDecks || [];
+            const deck = decks[_currentPreviewDeckIndex];
+            if (!deck) return;
+
+            const deckName = deck.name || deck.archetype || 'Saved Deck';
+            const cards = deck.cards || {};
+
+            showToast(getLang() === 'de' ? 'Bild wird erstellt...' : 'Creating image...', 'info');
+
+            // Build temp off-screen grid for canvas export
+            const sortedEntries = sortCardsByType(
+                Object.entries(cards)
+                    .filter(([, count]) => count > 0)
+                    .map(([deckKey, count]) => {
+                        const baseMatch = deckKey.match(/^(.+?)\s*\(([A-Z0-9-]+)\s+([A-Z0-9-]+)\)$/);
+                        const cardName = baseMatch ? baseMatch[1] : deckKey;
+                        const setCode  = baseMatch ? baseMatch[2] : '';
+                        const setNumber = baseMatch ? baseMatch[3] : '';
+                        let imageUrl = '';
+                        if (setCode && setNumber) {
+                            imageUrl = getUnifiedCardImage(setCode, setNumber);
+                            if (!imageUrl && window.cardsBySetNumberMap) {
+                                const dbCard = window.cardsBySetNumberMap[`${setCode}-${setNumber}`];
+                                if (dbCard) imageUrl = dbCard.image_url || '';
+                            }
+                        }
+                        return {
+                            card_name: cardName, set_code: setCode, set_number: setNumber,
+                            image_url: imageUrl,
+                            type: _lookupCardType(cardName, setCode, setNumber),
+                            deck_count_in_selected: count
+                        };
+                    })
+            );
+
             const tempGrid = document.createElement('div');
             tempGrid.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
             sortedEntries.forEach(card => {
                 const div = document.createElement('div');
                 div.className = 'compact-card';
                 div.setAttribute('data-export-card', '1');
-
                 const img = document.createElement('img');
                 img.src = getBestCardImage(card);
                 div.appendChild(img);
-
                 const badge = document.createElement('div');
                 badge.className = 'compact-badge';
                 badge.textContent = String(card.deck_count_in_selected || 1);
                 div.appendChild(badge);
-
                 tempGrid.appendChild(div);
             });
             document.body.appendChild(tempGrid);

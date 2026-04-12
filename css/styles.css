@@ -6416,17 +6416,32 @@ details[open] > .tier-trending-summary::after {
     background: #1a2340;
 }
 .ma-heatmap-col-header {
-    padding: 6px 8px;
+    padding: 4px 0 8px 0;
     font-weight: 700;
-    font-size: .72rem;
-    text-align: center;
-    white-space: normal;
+    font-size: .7rem;
+    text-align: left;
+    white-space: nowrap;
     background: #1a2340;
     color: #fff;
     border-bottom: 2px solid rgba(255,255,255,.15);
-    max-width: 100px;
-    line-height: 1.25;
+    min-width: 36px;
+    max-width: 36px;
+    width: 36px;
     vertical-align: bottom;
+    height: 120px;
+    position: relative;
+}
+.ma-heatmap-col-header .col-label {
+    display: block;
+    transform: rotate(-45deg);
+    transform-origin: left bottom;
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    white-space: nowrap;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .ma-heatmap-row-header {
     padding: 6px 10px;

@@ -1321,7 +1321,11 @@
         });
 
         const myArr = [...myDecks].sort();
-        const oppArr = [...oppDecks].sort();
+        const oppArr = [...oppDecks].sort((x, y) => {
+            const tx = [...myDecks].reduce((s, d) => s + (grid[d + '|||' + x]?.total || 0), 0);
+            const ty = [...myDecks].reduce((s, d) => s + (grid[d + '|||' + y]?.total || 0), 0);
+            return ty - tx;
+        });
 
         // If only 1 deck, skip 2D — the bar list is enough
         if (myArr.length <= 1 && oppArr.length <= 1) {
@@ -1331,7 +1335,7 @@
 
         let html = '<div class="ma-heatmap-scroll"><table class="ma-heatmap-table"><thead><tr><th class="ma-heatmap-corner"></th>';
         oppArr.forEach(opp => {
-            html += `<th class="ma-heatmap-col-header" title="${escapeHtml(opp)}">${escapeHtml(opp).replace(/ /g, '<br>')}</th>`;
+            html += `<th class="ma-heatmap-col-header" title="${escapeHtml(opp)}"><span class="col-label">${escapeHtml(opp)}</span></th>`;
         });
         html += '</tr></thead><tbody>';
 

@@ -439,15 +439,14 @@
 
             try {
                 const canvas = await _buildCompareCanvas(cards);
-                window._shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
 
                 preview.innerHTML = '';
                 const img = document.createElement('img');
-                img.src = URL.createObjectURL(window._shareImageBlob);
+                img.src = canvas.toDataURL('image/png');
                 img.alt = 'Deck Compare';
                 img.style.cssText = 'max-width:100%; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.3);';
-                img.onload = () => URL.revokeObjectURL(img.src);
                 preview.appendChild(img);
+                window._shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
             } catch (e) {
                 console.error('Compare screenshot failed:', e);
                 preview.innerHTML = '<p style="color:#e74c3c;">❌ ' + (getLang() === 'de' ? 'Screenshot fehlgeschlagen' : 'Screenshot failed') + '</p>';
@@ -539,28 +538,8 @@
                 sx += tw + 8;
             });
 
-            // Pre-load all images as blobs (CORS-safe)
+            // No image fetching — draw colored placeholder boxes for instant rendering
             const imageCache = {};
-            const imgPromises = allCards.map(async (card) => {
-                const key = `${card.set}-${card.number}`;
-                if (imageCache[key]) return;
-                const cardData = cardsBySetNumberMap[key];
-                const src = cardData ? cardData.image_url : '';
-                if (!src) { imageCache[key] = null; return; }
-                try {
-                    const resp = await fetch(src, { mode: 'cors', cache: 'no-store' }).catch(() => null);
-                    if (!resp || !resp.ok) { imageCache[key] = null; return; }
-                    const blob = await resp.blob();
-                    const blobUrl = URL.createObjectURL(blob);
-                    imageCache[key] = await new Promise(resolve => {
-                        const image = new Image();
-                        image.onload = () => { URL.revokeObjectURL(blobUrl); resolve(image); };
-                        image.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(null); };
-                        image.src = blobUrl;
-                    });
-                } catch { imageCache[key] = null; }
-            });
-            await Promise.all(imgPromises);
 
             // Draw groups
             let curY = PAD + HEADER_H;
@@ -766,11 +745,18 @@
                                            `${card.newCount}x`;
                         const cardData = cardsBySetNumberMap[`${card.set}-${card.number}`];
                         const imageUrl = cardData ? cardData.image_url : '';
+                        const proxyQty = group.type === 'new' ? card.newCount : card.newCount - card.oldCount;
+                        const showProxy = (group.type === 'new' || (group.type === 'changed' && card.newCount > card.oldCount)) && proxyQty > 0;
+                        const escapedName = (card.name || '').replace(/'/g, "\\'");
+                        const escapedSet = (card.set || '').replace(/'/g, "\\'");
+                        const escapedNum = (card.number || '').replace(/'/g, "\\'");
+                        const proxyBtn = showProxy ? `<button onclick="addCardToProxy('${escapedName}','${escapedSet}','${escapedNum}',${proxyQty})" style="margin-top:4px;border:none;border-radius:4px;padding:3px 8px;background:#e74c3c;color:white;font-weight:600;cursor:pointer;font-size:0.7em;width:100%;">🎴 +${proxyQty} Proxy</button>` : '';
                         html += `
                             <div style="background: white; border: 2px solid ${group.color}; border-radius: 6px; padding: 6px; text-align: center;">
                                 ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" loading="lazy" decoding="async" style="width: 100%; border-radius: 4px; margin-bottom: 4px; aspect-ratio: 2.5/3.5; object-fit: cover;">` : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:#999;">${card.set} ${card.number}</div>`}
                                 <div style="font-weight: 600; font-size: 0.75em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${card.name}">${card.name}</div>
                                 <div style="font-size: 0.95em; font-weight: bold; color: ${group.color};">${countDisplay}</div>
+                                ${proxyBtn}
                             </div>
                         `;
                     });

@@ -1076,15 +1076,13 @@
 
 /* === STEP 5: PROFILE TABS SCROLL + MY DECKS COMPACT === */
 
-/* Profile sub-tabs: horizontally scrollable */
+/* Profile sub-tabs: wrap to multiple rows */
 #profile-tab-nav {
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
+    white-space: normal;
     scrollbar-width: none;
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 0;
     padding-bottom: 4px;
 }

@@ -1,11 +1,11 @@
 ﻿// Service Worker for Pokemon TCG Analysis PWA
-// v202604130150
+// v202604130200
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS / images → Cache-first    (pre-cached fresh on install; new CACHE_NAME = full refresh)
 //   Data files        → Stale-while-revalidate (fast load + background update)
 
-const CACHE_NAME = 'tcg-analysis-v202604130150';
+const CACHE_NAME = 'tcg-analysis-v202604130200';
 
 // Static shell â€” cached on install
 const SHELL_ASSETS = [

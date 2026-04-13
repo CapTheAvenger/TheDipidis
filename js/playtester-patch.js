@@ -89,7 +89,7 @@ function injectFieldButtons(){
 window.ptBenchSizes=window.ptBenchSizes||{p1:5,p2:5};
 window.ptToggleBenchSize=function(player){const cur=window.ptBenchSizes[player];const n=cur===5?8:5;window.ptBenchSizes[player]=n;const btn=document.getElementById('ptBenchToggle-'+player);if(btn){btn.textContent=(player==='p1'?'P1':'P2')+': '+n+' Slots';btn.className='pt-bench-toggle '+(n===8?'s8':'s5');}['5','6','7'].forEach(function(i){const s=document.getElementById('ptBench'+i+'-'+player);if(s)s.style.display=n===8?'block':'none';});};
 
-function injectAreaZeroControl(){if(document.getElementById('ptAreaZeroControl'))return;const cb=document.querySelector('.pt-controls');if(!cb)return;const d=document.createElement('div');d.id='ptAreaZeroControl';d.style.marginLeft='auto';d.innerHTML='<span style="font-size:11px;color:rgba(255,215,0,0.8);font-weight:600;">\uD83C\uDFDF\uFE0F</span><button id="ptBenchToggle-p1" class="pt-bench-toggle s5" onclick="ptToggleBenchSize('p1')">P1: 5 Slots</button><button id="ptBenchToggle-p2" class="pt-bench-toggle s5" onclick="ptToggleBenchSize('p2')">P2: 5 Slots</button>';cb.appendChild(d);}
+function injectAreaZeroControl(){if(document.getElementById('ptAreaZeroControl'))return;const cb=document.querySelector('.pt-controls');if(!cb)return;const d=document.createElement('div');d.id='ptAreaZeroControl';d.style.marginLeft='auto';d.innerHTML='<span style="font-size:11px;color:rgba(255,215,0,0.8);font-weight:600;">\uD83C\uDFDF\uFE0F</span><button id="ptBenchToggle-p1" class="pt-bench-toggle s5" onclick="ptToggleBenchSize(\'p1\')">P1: 5 Slots</button><button id="ptBenchToggle-p2" class="pt-bench-toggle s5" onclick="ptToggleBenchSize(\'p2\')">P2: 5 Slots</button>';cb.appendChild(d);}
 
 function applyBoardUI(){
   injectStyles();
@@ -293,8 +293,8 @@ function injectAreaZeroControl(){
   d.id='ptAreaZeroControl';
   d.style.marginLeft='auto';
   d.innerHTML='<span style="font-size:11px;color:rgba(255,215,0,0.8);font-weight:600;">🏟️ AREA ZERO:</span>'+
-    '<button id="ptBenchToggle-p1" class="pt-bench-toggle s5" onclick="ptToggleBenchSize('p1')">P1: 5 Slots</button>'+
-    '<button id="ptBenchToggle-p2" class="pt-bench-toggle s5" onclick="ptToggleBenchSize('p2')">P2: 5 Slots</button>';
+    '<button id="ptBenchToggle-p1" class="pt-bench-toggle s5" onclick="ptToggleBenchSize(\'p1\')">P1: 5 Slots</button>'+
+    '<button id="ptBenchToggle-p2" class="pt-bench-toggle s5" onclick="ptToggleBenchSize(\'p2\')">P2: 5 Slots</button>';
   cb.appendChild(d);
 }
 

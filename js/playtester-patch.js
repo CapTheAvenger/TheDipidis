@@ -1,5 +1,5 @@
 /* ============================================================
-   PLAYTESTER MEGA-PATCH v5.0 - Mobile-First, Clean Layout
+   PLAYTESTER MEGA-PATCH v5.1 - Mobile-First, Clean Layout
    Changes:
    - Single clean IIFE (removed duplicate)
    - Fixed: DeckSearch modal no longer forced open
@@ -23,6 +23,9 @@ function injectStyles(){
   var css=`
 /* HIDE LEFT SIDEBAR */
 .pt-deck-controls,.pt-legend-box{display:none!important}
+
+/* HIDE OLD FIELD ACTION BUTTONS (replaced by bottom bar) */
+#pt-side-buttons-left{display:none!important}
 
 /* HIDE RIGHT PANEL */
 #ptZoomPanel{display:none!important}

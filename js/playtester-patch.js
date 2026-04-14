@@ -1,5 +1,5 @@
 /* ================================================================
-   PLAYTESTER MEGA-PATCH v5.2b - Mobile-First, Clean Layout
+   PLAYTESTER MEGA-PATCH v5.2c - Mobile-First, Clean Layout
    Changes from v5.1:
    - Fixed: DeckSearch modal no longer forced open
    - Left sidebar (Deck-Controls + Legend) hidden
@@ -230,39 +230,33 @@ function expandDeckCards(cards,prefix){
 
 window.startMyDecksPlaytest=function(){
   var p1sel=document.getElementById('ptmp-p1'),p2sel=document.getElementById('ptmp-p2');
-  if(!p1sel||!p2sel)return;
+  if(!p1sel||!p2sel){alert('Deck selector not found. Please reopen the deck chooser.');return;}
   var uid=firebase.auth().currentUser.uid;
   var col=firebase.firestore().collection('users').doc(uid).collection('decks');
   Promise.all([col.doc(p1sel.value).get(),col.doc(p2sel.value).get()]).then(function(r){
-    var d1=buildDeck(r[0].data()),d2=buildDeck(r[1].data());
-    if(!d1||!d2||d1.length===0||d2.length===0){
-      alert('Could not load decks. Please try again.');return;
-    }
-    var exp1=expandDeckCards(d1,'p1');
-    var exp2=expandDeckCards(d2,'p2');
-    if(typeof ptState!=='undefined'){
-      // Initialize player states if null (game not yet started)
-      if(!ptState.p1&&typeof getInitialPlayerState==='function')ptState.p1=getInitialPlayerState();
-      if(!ptState.p2&&typeof getInitialPlayerState==='function')ptState.p2=getInitialPlayerState();
-      if(ptState.p1){
-        ptState.p1.deck=exp1;
-        ptState.p1.hand=[];ptState.p1.discard=[];ptState.p1.prizes=[];ptState.p1.lostzone=[];
-      }
-      if(ptState.p2){
-        ptState.p2.deck=exp2;
-        ptState.p2.hand=[];ptState.p2.discard=[];ptState.p2.prizes=[];ptState.p2.lostzone=[];
-      }
-    }
+    var d1=r[0].data(),d2=r[1].data();
+    if(!d1||!d2){alert('Could not load decks. Please try again.');return;}
+    var c1=d1.cards||{},c2=d2.cards||{};
+    var lines1=[],lines2=[];
+    Object.keys(c1).forEach(function(k){
+      var m=k.match(/^(.+)\s+\(([A-Z0-9]+)\s+(\d+[A-Z]*)\)$/);
+      if(m)lines1.push(c1[k]+' '+m[1]+' '+m[2]+' '+m[3]);
+    });
+    Object.keys(c2).forEach(function(k){
+      var m=k.match(/^(.+)\s+\(([A-Z0-9]+)\s+(\d+[A-Z]*)\)$/);
+      if(m)lines2.push(c2[k]+' '+m[1]+' '+m[2]+' '+m[3]);
+    });
+    var code1=lines1.join('\n'),code2=lines2.join('\n');
     window.closeMyDecksPlaytest();
-    if(typeof ptNewGame==='function'){
-      if(typeof ptCurrentPlayer!=='undefined')window.ptCurrentPlayer='p1';
-      ptNewGame();
+    if(typeof parseSandboxDeckToExactPrints==='function'){
+      parseSandboxDeckToExactPrints(code1,'p1');
+      parseSandboxDeckToExactPrints(code2,'p2');
       setTimeout(function(){
-        if(typeof ptOpenStartPhase==='function')ptOpenStartPhase();
-        setTimeout(applyBoardUI,400);
-      },200);
+        if(typeof startStandalonePlaytester==='function')startStandalonePlaytester();
+        setTimeout(applyBoardUI,800);
+      },500);
     }
-  }).catch(function(e){console.error('Start:',e);});
+  }).catch(function(e){console.error('Start:',e);alert('Error loading decks: '+e.message);});
 };
 
 // ============================================================

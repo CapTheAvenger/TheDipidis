@@ -801,10 +801,9 @@
                                     ${card.metaShare > 0 ? `<div class="color-yellow fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
                                 </div>
                                 
-                                <!-- Card Actions: Row 1 = - ★ + | Row 2 = L P price -->
+                                <!-- Card Actions: Row 1 = ★ + | Row 2 = L P price -->
                                 <div class="card-action-buttons card-action-buttons-col">
-                                    <div class="city-league-card-action-row">
-                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-remove-btn" title="Remove from deck">-</button>
+                                    <div class="city-league-card-action-row" style="grid-template-columns: 1fr 1fr;">
                                         <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="city-league-card-action-btn city-league-card-rarity-btn" title="Switch rarity/print">★</button>
                                         <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-add-btn" title="Add to deck">+</button>
                                     </div>

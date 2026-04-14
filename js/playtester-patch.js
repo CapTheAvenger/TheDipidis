@@ -1,7 +1,6 @@
 /* ================================================================
-   PLAYTESTER MEGA-PATCH v5.2 - Mobile-First, Clean Layout
-   Changes:
-   - Single clean IIFE (removed duplicate)
+   PLAYTESTER MEGA-PATCH v5.2b - Mobile-First, Clean Layout
+   Changes from v5.1:
    - Fixed: DeckSearch modal no longer forced open
    - Left sidebar (Deck-Controls + Legend) hidden
    - Right Deck Panel (ptZoomPanel) hidden
@@ -11,7 +10,7 @@
    - Area Zero bench toggle (5 <-> 8 slots)
    - v5.2: startMyDecksPlaytest correctly loads Firebase decks
            and starts game via ptNewGame + ptOpenStartPhase
-   - v5.2: modal guard - Playtest button hidden while game running
+   - v5.2b: handle null ptState.p1/p2 (uninitialised game state)
    ================================================================ */
 
 (function(){
@@ -123,11 +122,6 @@ function injectStyles(){
   color:white!important;
 }
 
-/* === HIDE PLAYTEST BUTTON WHEN GAME IS ACTIVE === */
-body.pt-game-active .pt-open-my-decks-btn {
-  display:none!important;
-}
-
 /* === MY DECKS MODAL === */
 #myDecksPlaytestModal {
   position:fixed;
@@ -175,6 +169,23 @@ window.openMyDecksPlaytest=function(){
       '<button onclick="startMyDecksPlaytest()" style="flex:2;padding:12px;background:linear-gradient(135deg,#27ae60 0,#1e8449 100%);color:#fff;font-weight:700;border:none;border-radius:8px;cursor:pointer;font-size:14px;box-shadow:0 4px 10px rgba(39,174,96,.3)">&#9654;&#65039; Start Playtest</button>'+
       '</div></div>';
     document.body.appendChild(modal);
+  } else {
+    // Existing modal might have old HTML - replace inner content to ensure correct IDs
+    if(!document.getElementById('ptmp-p1')){
+      modal.innerHTML=
+        '<div class="rarity-switcher-modal-content" style="max-width:500px;background:#f8f9fa">'+
+        '<span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()" aria-label="Close">&#10005;</span>'+
+        '<h2 style="margin-top:0;color:#27ae60;border-bottom:2px solid #e1e8ed;padding-bottom:10px">&#127918; Playtest &#127952; My Decks</h2>'+
+        '<p style="color:#555;margin-bottom:20px">Choose a deck for each player, then start the match!</p>'+
+        '<div style="margin-bottom:16px"><label for="ptmp-p1" style="display:block;font-weight:700;margin-bottom:6px;color:#3b4cca">Player 1 &#128309;</label>'+
+        '<select id="ptmp-p1" style="width:100%;padding:10px 12px;border:2px solid #3b4cca;border-radius:8px;font-size:14px;background:#fff;cursor:pointer"></select></div>'+
+        '<div style="margin-bottom:24px"><label for="ptmp-p2" style="display:block;font-weight:700;margin-bottom:6px;color:#e3350d">Player 2 &#128308;</label>'+
+        '<select id="ptmp-p2" style="width:100%;padding:10px 12px;border:2px solid #e3350d;border-radius:8px;font-size:14px;background:#fff;cursor:pointer"></select></div>'+
+        '<div style="display:flex;gap:12px">'+
+        '<button onclick="closeMyDecksPlaytest()" style="flex:1;padding:12px;background:#e1e8ed;color:#2c3e50;font-weight:700;border:2px solid #ccd6dd;border-radius:8px;cursor:pointer;font-size:14px">Cancel</button>'+
+        '<button onclick="startMyDecksPlaytest()" style="flex:2;padding:12px;background:linear-gradient(135deg,#27ae60 0,#1e8449 100%);color:#fff;font-weight:700;border:none;border-radius:8px;cursor:pointer;font-size:14px;box-shadow:0 4px 10px rgba(39,174,96,.3)">&#9654;&#65039; Start Playtest</button>'+
+        '</div></div>';
+    }
   }
   modal.style.display='flex';
   var uid=firebase.auth().currentUser.uid;
@@ -230,13 +241,19 @@ window.startMyDecksPlaytest=function(){
     var exp1=expandDeckCards(d1,'p1');
     var exp2=expandDeckCards(d2,'p2');
     if(typeof ptState!=='undefined'){
-      ptState.p1.deck=exp1;
-      ptState.p1.hand=[];ptState.p1.discard=[];ptState.p1.prizes=[];ptState.p1.lostzone=[];
-      ptState.p2.deck=exp2;
-      ptState.p2.hand=[];ptState.p2.discard=[];ptState.p2.prizes=[];ptState.p2.lostzone=[];
+      // Initialize player states if null (game not yet started)
+      if(!ptState.p1&&typeof getInitialPlayerState==='function')ptState.p1=getInitialPlayerState();
+      if(!ptState.p2&&typeof getInitialPlayerState==='function')ptState.p2=getInitialPlayerState();
+      if(ptState.p1){
+        ptState.p1.deck=exp1;
+        ptState.p1.hand=[];ptState.p1.discard=[];ptState.p1.prizes=[];ptState.p1.lostzone=[];
+      }
+      if(ptState.p2){
+        ptState.p2.deck=exp2;
+        ptState.p2.hand=[];ptState.p2.discard=[];ptState.p2.prizes=[];ptState.p2.lostzone=[];
+      }
     }
     window.closeMyDecksPlaytest();
-    document.body.classList.add('pt-game-active');
     if(typeof ptNewGame==='function'){
       if(typeof ptCurrentPlayer!=='undefined')window.ptCurrentPlayer='p1';
       ptNewGame();

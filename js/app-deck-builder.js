@@ -1023,13 +1023,10 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const cardId = `${safeCardName}|${setCode}|${setNumber}`;
                 const isOwned = window.userCollection && window.userCollection.has(cardId);
                 const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
-                const prob = getOpeningHandProbability(count, 60);
-                const probBadge = `<div class="start-hand-prob" title="${t('deck.openHandProb')}">Hand: ${prob}%</div>`;
                 
                 html += `
                     <div class="deck-card pos-rel" title="${safeCardName} (${count}x) - ${percentage}%">
                         <img src="${imageUrl}" alt="${safeCardName}" loading="lazy" class="card-img-std cursor-zoom" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})')">
-                        ${probBadge}
                         ${ownedBadge}
                         ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(safeCardName, setCode, setNumber) : ''}
                         <div class="card-max-count">${count}</div>

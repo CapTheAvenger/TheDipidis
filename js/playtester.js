@@ -3456,6 +3456,8 @@ function ptUpdateOpponentHandCountDisplay() {
     const handCount = (ptState[opp] && ptState[opp].hand) ? ptState[opp].hand.length : 0;
     const el = document.getElementById('ptOpponentHandCountValue');
     if (el) el.innerText = handCount;
+    const el2 = document.getElementById('ptOppHandCount');
+    if (el2) el2.innerText = handCount;
 }
 
 function ptRenderAll() {

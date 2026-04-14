@@ -1,5 +1,5 @@
-/* ============================================================
-   PLAYTESTER MEGA-PATCH v5.1 - Mobile-First, Clean Layout
+/* ================================================================
+   PLAYTESTER MEGA-PATCH v5.2 - Mobile-First, Clean Layout
    Changes:
    - Single clean IIFE (removed duplicate)
    - Fixed: DeckSearch modal no longer forced open
@@ -9,7 +9,10 @@
    - Action buttons (Attack/EndTurn/OppView) in bottom bar
    - Bench horizontal, hand card compact, deck browser grid
    - Area Zero bench toggle (5 <-> 8 slots)
-   ============================================================ */
+   - v5.2: startMyDecksPlaytest correctly loads Firebase decks
+           and starts game via ptNewGame + ptOpenStartPhase
+   - v5.2: modal guard - Playtest button hidden while game running
+   ================================================================ */
 
 (function(){
 'use strict';
@@ -20,115 +23,121 @@
 function injectStyles(){
   var id='pt-megapatch-v5-styles';
   if(document.getElementById(id))return;
-  var css=`
-/* HIDE LEFT SIDEBAR */
-.pt-deck-controls,.pt-legend-box{display:none!important}
+  var s=document.createElement('style');
+  s.id=id;
+  s.textContent=`
+/* === HIDE SIDEBARS & RIGHT PANEL === */
+#pt-deck-controls,
+.pt-deck-controls,
+#pt-legend,
+.pt-legend,
+[id*="legend"],
+.pt-sidebar-left,
+#ptSidebarLeft,
+.sandbox-left-panel,
+#pt-side-buttons-left,
+.pt-side-buttons-left,
+#ptDeckControls { display:none!important; }
 
-/* HIDE OLD FIELD ACTION BUTTONS (replaced by bottom bar) */
-#pt-side-buttons-left{display:none!important}
+#ptZoomPanel,
+.ptZoomPanel,
+[id*="ZoomPanel"],
+.pt-right-panel,
+.sandbox-right-panel { display:none!important; }
 
-/* HIDE RIGHT PANEL */
-#ptZoomPanel{display:none!important}
-
-/* TOP BAR - COMPACT */
-.pt-controls{
-  height:40px!important;
-  min-height:40px!important;
-  overflow-x:auto!important;
-  overflow-y:hidden!important;
-  scrollbar-width:none!important;
-  flex-wrap:nowrap!important;
-  padding:0 4px!important;
+/* === COMPACT TOP BAR === */
+.sandbox-controls,
+#ptControlBar,
+.pt-control-bar {
+  padding:2px 6px!important;
+  min-height:unset!important;
 }
-.pt-controls::-webkit-scrollbar{display:none!important}
-.pt-ctrl-btn{
-  min-width:34px!important;
-  height:36px!important;
-  padding:2px 4px!important;
+.sandbox-controls button,
+#ptControlBar button {
+  padding:2px 6px!important;
+  font-size:11px!important;
 }
-.ctrl-label{font-size:8.5px!important}
 
-/* DECK BROWSER: compact grid - only when visible */
-#ptDeckSearchGrid{
-  display:grid!important;
-  grid-template-columns:repeat(auto-fill,minmax(90px,1fr))!important;
-  gap:6px!important;
-  padding:10px!important;
-  overflow-y:auto!important;
-  max-height:70vh!important;
-}
-#ptDeckSearchGrid>div{width:auto!important;height:auto!important}
-#ptDeckSearchGrid img.pt-field-card{
-  width:90px!important;
-  height:126px!important;
-  object-fit:cover!important;
-  border-radius:6px!important;
-  display:block!important;
-}
-#ptDeckSearchGrid>div>div.pos-abs{font-size:10px!important;padding:2px 4px!important}
-
-/* DISCARD GRID */
-#ptDiscardGrid{
+/* === DECK BROWSER: COMPACT GRID === */
+#ptDeckSearchModal .pt-card-grid,
+#ptDeckSearchModal .card-grid {
   display:grid!important;
   grid-template-columns:repeat(auto-fill,minmax(80px,1fr))!important;
-  gap:5px!important;
-  padding:8px!important;
+  gap:4px!important;
 }
-#ptDiscardGrid img{width:80px!important;height:112px!important;border-radius:5px!important}
-
-/* HAND CARDS */
-.pt-hand-card{
-  width:clamp(38px,4.2vw,52px)!important;
-  height:clamp(53px,5.9vw,73px)!important;
-  border-radius:4px!important;
-  transition:transform 0.15s!important;
-}
-.pt-hand-card:hover{transform:translateY(-14px) scale(1.1)!important;z-index:100!important}
-
-/* BOTTOM ACTION BAR */
-#ptHandActionBar{overflow-x:auto!important;scrollbar-width:none!important;flex-wrap:nowrap!important}
-#ptHandActionBar::-webkit-scrollbar{display:none!important}
-#pt-action-group-v3 button{
-  padding:5px 9px!important;border-radius:7px!important;font-size:11.5px!important;
-  font-weight:600!important;border:none!important;cursor:pointer!important;white-space:nowrap!important;
-}
-#pt-action-group-v3 button:hover{opacity:0.82!important;transform:translateY(-1px)!important}
-
-/* BENCH HORIZONTAL */
-#p1-area .pt-bench-zone,#p2-area .pt-bench-zone{
-  display:flex!important;flex-direction:row!important;gap:4px!important;
-  align-items:flex-start!important;flex-wrap:nowrap!important;overflow-x:auto!important;
+#ptDeckSearchModal .pt-card-item img,
+#ptDeckSearchModal .card-item img {
+  width:80px!important;
+  height:auto!important;
 }
 
-/* EXTRA BENCH SLOTS hidden by default */
-[id^="ptBench5"],[id^="ptBench6"],[id^="ptBench7"]{display:none!important}
-
-/* AREA ZERO */
-#ptAreaZeroControl{display:flex!important;align-items:center!important;gap:8px!important;font-size:11px!important;font-weight:600!important;color:#ffd700!important}
-.pt-bench-toggle{font-size:11px!important;padding:3px 8px!important;border-radius:12px!important;border:1px solid #ffd700!important;background:rgba(255,215,0,0.15)!important;color:#ffd700!important;cursor:pointer!important}
-.pt-bench-toggle.s8{background:rgba(255,215,0,0.3)!important;color:#fff!important}
-
-/* CARD HOVER */
-.pt-dropzone img:hover{transform:scale(1.08)!important;transition:transform 0.15s!important;z-index:100!important;position:relative!important}
-
-/* MOBILE */
-@media(max-width:768px){
-  .pt-ctrl-btn{min-width:30px!important;height:32px!important}
-  .ctrl-label{font-size:7.5px!important}
-  .pt-hand-card{width:38px!important;height:53px!important}
-  #ptDeckSearchGrid{grid-template-columns:repeat(auto-fill,minmax(70px,1fr))!important}
-  #ptDeckSearchGrid img.pt-field-card{width:70px!important;height:98px!important}
-  #ptAreaZeroControl{font-size:10px!important}
-  #pt-action-group-v3 button{font-size:11px!important;padding:5px 8px!important}
+/* === AREA ZERO CONTROL === */
+#ptAreaZeroControl {
+  position:fixed;
+  top:8px;
+  right:8px;
+  z-index:9000;
+  display:flex;
+  gap:6px;
+  align-items:center;
 }
-@media(max-width:480px){
-  .pt-hand-card{width:36px!important;height:50px!important}
-  #ptDeckSearchGrid{grid-template-columns:repeat(auto-fill,minmax(60px,1fr))!important}
-  #ptDeckSearchGrid img.pt-field-card{width:60px!important;height:84px!important}
+.pt-bench-toggle {
+  background:#1a1a2e;
+  color:#f5c842;
+  border:1px solid #f5c842;
+  border-radius:6px;
+  padding:4px 10px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.pt-bench-toggle.s8 { background:#27ae60; color:white; border-color:#27ae60; }
+
+/* === HAND CARDS: COMPACT === */
+.pt-hand-zone .pt-card,
+.pt-hand-zone img {
+  width:60px!important;
+  height:auto!important;
+}
+
+/* === BENCH: HORIZONTAL UNDER ACTIVE === */
+#p1-bench, #p2-bench,
+.pt-bench-zone {
+  flex-direction:row!important;
+  flex-wrap:wrap!important;
+}
+
+/* === ACTION GROUP BUTTONS === */
+#pt-action-group-v3 {
+  display:inline-flex!important;
+  gap:4px!important;
+  align-items:center!important;
+}
+#pt-action-group-v3 button {
+  padding:4px 8px!important;
+  font-size:12px!important;
+  border-radius:6px!important;
+  font-weight:700!important;
+  border:none!important;
+  cursor:pointer!important;
+  color:white!important;
+}
+
+/* === HIDE PLAYTEST BUTTON WHEN GAME IS ACTIVE === */
+body.pt-game-active .pt-open-my-decks-btn {
+  display:none!important;
+}
+
+/* === MY DECKS MODAL === */
+#myDecksPlaytestModal {
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.75);
+  z-index:20000;
+  align-items:center;
+  justify-content:center;
 }
 `;
-  var s=document.createElement('style');
-  s.id=id;s.textContent=css;
   document.head.appendChild(s);
 }
 
@@ -147,47 +156,65 @@ window.openMyDecksPlaytest=function(){
   if(typeof firebase==='undefined'||!firebase.auth||!firebase.auth().currentUser){
     alert('Please log in to use your decks.');return;
   }
-  var uid=firebase.auth().currentUser.uid;
-  var modal=document.getElementById('ptmp');
+  var modal=document.getElementById('myDecksPlaytestModal');
   if(!modal){
     modal=document.createElement('div');
-    modal.id='ptmp';
-    modal.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    modal.id='myDecksPlaytestModal';
+    modal.style.cssText='z-index:20000;display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;';
+    modal.innerHTML=
+      '<div class="rarity-switcher-modal-content" style="max-width:500px;background:#f8f9fa">'+
+      '<span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()" aria-label="Close">&#10005;</span>'+
+      '<h2 style="margin-top:0;color:#27ae60;border-bottom:2px solid #e1e8ed;padding-bottom:10px">&#127918; Playtest &#127952; My Decks</h2>'+
+      '<p style="color:#555;margin-bottom:20px">Choose a deck for each player, then start the match!</p>'+
+      '<div style="margin-bottom:16px"><label for="ptmp-p1" style="display:block;font-weight:700;margin-bottom:6px;color:#3b4cca">Player 1 &#128309;</label>'+
+      '<select id="ptmp-p1" style="width:100%;padding:10px 12px;border:2px solid #3b4cca;border-radius:8px;font-size:14px;background:#fff;cursor:pointer"></select></div>'+
+      '<div style="margin-bottom:24px"><label for="ptmp-p2" style="display:block;font-weight:700;margin-bottom:6px;color:#e3350d">Player 2 &#128308;</label>'+
+      '<select id="ptmp-p2" style="width:100%;padding:10px 12px;border:2px solid #e3350d;border-radius:8px;font-size:14px;background:#fff;cursor:pointer"></select></div>'+
+      '<div style="display:flex;gap:12px">'+
+      '<button onclick="closeMyDecksPlaytest()" style="flex:1;padding:12px;background:#e1e8ed;color:#2c3e50;font-weight:700;border:2px solid #ccd6dd;border-radius:8px;cursor:pointer;font-size:14px">Cancel</button>'+
+      '<button onclick="startMyDecksPlaytest()" style="flex:2;padding:12px;background:linear-gradient(135deg,#27ae60 0,#1e8449 100%);color:#fff;font-weight:700;border:none;border-radius:8px;cursor:pointer;font-size:14px;box-shadow:0 4px 10px rgba(39,174,96,.3)">&#9654;&#65039; Start Playtest</button>'+
+      '</div></div>';
     document.body.appendChild(modal);
   }
-  modal.innerHTML='<div style="background:#1a1a2e;border-radius:12px;padding:24px;max-width:500px;width:90%;color:white;">'+
-    '<h2 style="margin:0 0 16px;color:#ffd700;">Playtest My Decks</h2>'+
-    '<p style="margin:0 0 12px;color:#aaa;font-size:14px;">Choose a deck for each player, then start the match!</p>'+
-    '<div style="margin-bottom:12px;"><label style="color:#4a9eff;font-weight:600;">Player 1</label>'+
-    '<select id="ptmp-p1" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:#0f3460;color:white;border:1px solid #4a9eff;"></select></div>'+
-    '<div style="margin-bottom:20px;"><label style="color:#ff6b6b;font-weight:600;">Player 2</label>'+
-    '<select id="ptmp-p2" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;background:#3d0000;color:white;border:1px solid #ff6b6b;"></select></div>'+
-    '<div style="display:flex;gap:10px;justify-content:flex-end;">'+
-    '<button onclick="window.closeMyDecksPlaytest()" style="padding:8px 16px;border-radius:6px;border:1px solid #666;background:transparent;color:#aaa;cursor:pointer;">Cancel</button>'+
-    '<button onclick="window.startMyDecksPlaytest()" style="padding:8px 20px;border-radius:6px;border:none;background:#27ae60;color:white;font-weight:600;cursor:pointer;">Start Playtest</button>'+
-    '</div></div>';
   modal.style.display='flex';
+  var uid=firebase.auth().currentUser.uid;
   firebase.firestore().collection('users').doc(uid).collection('decks').get().then(function(snap){
     var p1=document.getElementById('ptmp-p1'),p2=document.getElementById('ptmp-p2');
     if(!p1||!p2)return;
-    var opts='';
-    snap.forEach(function(d){opts+='<option value="'+d.id+'">'+d.data().name+'</option>';});
-    p1.innerHTML=opts;p2.innerHTML=opts;
-    if(snap.size>1)p2.options[1].selected=true;
+    p1.innerHTML='';p2.innerHTML='';
+    snap.forEach(function(doc){
+      var o1=document.createElement('option'),o2=document.createElement('option');
+      o1.value=doc.id;o1.textContent=doc.data().name||doc.id;
+      o2.value=doc.id;o2.textContent=doc.data().name||doc.id;
+      p1.appendChild(o1);p2.appendChild(o2);
+    });
   }).catch(function(e){console.error('Deck load:',e);});
 };
 
 window.closeMyDecksPlaytest=function(){
-  var m=document.getElementById('ptmp');
+  var m=document.getElementById('myDecksPlaytestModal');
   if(m)m.style.display='none';
 };
 
-function buildDeck(deck){
+function buildDeck(data){
   var cards=[];
-  var data=deck.data();
   if(!data||!data.cards)return cards;
-  data.cards.forEach(function(c){for(var i=0;i<(c.count||1);i++)cards.push(c);});
+  data.cards.forEach(function(c){cards.push(c);});
   return cards;
+}
+
+function expandDeckCards(cards,prefix){
+  var out=[];
+  cards.forEach(function(card){
+    var cnt=parseInt(card.count)||1;
+    for(var i=0;i<cnt;i++){
+      var copy={};
+      Object.keys(card).forEach(function(k){copy[k]=card[k];});
+      copy.ptId=prefix+'_'+Math.random().toString(36).substr(2,9);
+      out.push(copy);
+    }
+  });
+  return out;
 }
 
 window.startMyDecksPlaytest=function(){
@@ -196,12 +223,28 @@ window.startMyDecksPlaytest=function(){
   var uid=firebase.auth().currentUser.uid;
   var col=firebase.firestore().collection('users').doc(uid).collection('decks');
   Promise.all([col.doc(p1sel.value).get(),col.doc(p2sel.value).get()]).then(function(r){
-    var d1=buildDeck(r[0]),d2=buildDeck(r[1]);
-    if(!d1||!d2)return;
-    if(typeof ptInitGame==='function')ptInitGame(d1,d2);
-    else if(typeof window.ptLoadDecksAndStart==='function')window.ptLoadDecksAndStart(d1,d2);
+    var d1=buildDeck(r[0].data()),d2=buildDeck(r[1].data());
+    if(!d1||!d2||d1.length===0||d2.length===0){
+      alert('Could not load decks. Please try again.');return;
+    }
+    var exp1=expandDeckCards(d1,'p1');
+    var exp2=expandDeckCards(d2,'p2');
+    if(typeof ptState!=='undefined'){
+      ptState.p1.deck=exp1;
+      ptState.p1.hand=[];ptState.p1.discard=[];ptState.p1.prizes=[];ptState.p1.lostzone=[];
+      ptState.p2.deck=exp2;
+      ptState.p2.hand=[];ptState.p2.discard=[];ptState.p2.prizes=[];ptState.p2.lostzone=[];
+    }
     window.closeMyDecksPlaytest();
-    setTimeout(applyBoardUI,500);
+    document.body.classList.add('pt-game-active');
+    if(typeof ptNewGame==='function'){
+      if(typeof ptCurrentPlayer!=='undefined')window.ptCurrentPlayer='p1';
+      ptNewGame();
+      setTimeout(function(){
+        if(typeof ptOpenStartPhase==='function')ptOpenStartPhase();
+        setTimeout(applyBoardUI,400);
+      },200);
+    }
   }).catch(function(e){console.error('Start:',e);});
 };
 
@@ -210,25 +253,24 @@ window.startMyDecksPlaytest=function(){
 // ============================================================
 function injectActionButtons(){
   if(document.getElementById('pt-action-group-v3'))return;
-  var bar=document.getElementById('ptHandActionBar');
+  var bar=document.querySelector('.sandbox-controls');
   if(!bar)return;
-  var g=document.createElement('div');
+  var g=document.createElement('span');
   g.id='pt-action-group-v3';
-  g.style.cssText='display:flex;gap:5px;align-items:center;flex-shrink:0;margin:0 4px;';
   var defs=[
-    {t:'⚔️ Angriff',fn:'ptOpenAttackView()',bg:'#c0392b',c:'white'},
-    {t:'⏭️ Ende',fn:'ptPassTurn()',bg:'#27ae60',c:'white'},
-    {t:'👁️ Gegner',fn:'ptOpenOpponentPanel()',bg:'#7d3c98',c:'white'},
-    {t:'≡ Aktionen',fn:'if(typeof ptShowDirectActionModal!=="undefined")ptShowDirectActionModal()',bg:'#1a5276',c:'white'}
+    {t:'\u2694\uFE0F Angriff',fn:'ptOpenAttackView()',bg:'#c0392b'},
+    {t:'\u23ED\uFE0F Ende',fn:'ptPassTurn()',bg:'#27ae60'},
+    {t:'\uD83D\uDC41\uFE0F Gegner',fn:'ptOpenOpponentPanel()',bg:'#7d3c98'},
+    {t:'\u2261 Aktionen',fn:'if(typeof ptShowDirectActionModal!=="undefined")ptShowDirectActionModal()',bg:'#1a5276'}
   ];
   defs.forEach(function(def){
     var b=document.createElement('button');
     b.textContent=def.t;
     b.setAttribute('onclick',def.fn);
-    b.style.cssText='background:'+def.bg+';color:'+def.c+';';
+    b.style.cssText='background:'+def.bg+';color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;';
     g.appendChild(b);
   });
-  var mulliBtn=bar.querySelector('button');
+  var mulliBtn=bar.querySelector('[onclick*="ptMulligan"]');
   if(mulliBtn)mulliBtn.after(g);else bar.prepend(g);
 }
 
@@ -239,23 +281,23 @@ window.ptToggleBenchSize=function(player){
   var btn=document.getElementById('ptBenchToggle-'+player);
   if(!btn)return;
   var is8=btn.classList.contains('s8');
-  btn.textContent=player.toUpperCase()+(is8?': 5 Slots':': 8 Slots');
   btn.classList.toggle('s8',!is8);
   btn.classList.toggle('s5',is8);
+  btn.textContent=player.toUpperCase()+': '+(is8?'5':'8')+' Slots';
   ['5','6','7'].forEach(function(i){
-    var el=document.getElementById('ptBench'+i+'-'+player);
+    var el=document.getElementById(player+'-bench-slot-'+i);
     if(el)el.style.setProperty('display',is8?'none':'block','important');
   });
 };
 
 function injectAreaZeroControl(){
   if(document.getElementById('ptAreaZeroControl'))return;
-  var cb=document.querySelector('.pt-controls');
+  var cb=document.querySelector('.sandbox-controls');
   if(!cb)return;
   var d=document.createElement('div');
   d.id='ptAreaZeroControl';
-  d.style.cssText='margin-left:auto;padding-right:8px;display:flex;align-items:center;gap:6px;';
-  d.innerHTML='<span style="color:#ffd700;font-size:10px;">AREA ZERO:</span>'+
+  d.innerHTML=
+    '<span style="color:#f5c842;font-size:11px;font-weight:700;margin-right:4px;">AREA ZERO:</span>'+
     '<button id="ptBenchToggle-p1" class="pt-bench-toggle s5" onclick="ptToggleBenchSize(\x27p1\x27)">P1: 5 Slots</button>'+
     '<button id="ptBenchToggle-p2" class="pt-bench-toggle s5" onclick="ptToggleBenchSize(\x27p2\x27)">P2: 5 Slots</button>';
   cb.appendChild(d);
@@ -271,21 +313,11 @@ function applyBoardUI(){
   setTimeout(injectActionButtons,400);
 }
 
-// Hook ptRenderAll
 var _origRender=window.ptRenderAll;
 if(typeof _origRender==='function'){
   window.ptRenderAll=function(){
     _origRender.apply(this,arguments);
     setTimeout(function(){hideZoomPanel();injectActionButtons();},50);
-  };
-}
-
-// Hook ptStartGame
-var _origStart=window.ptStartGame;
-if(typeof _origStart==='function'){
-  window.ptStartGame=function(){
-    _origStart.apply(this,arguments);
-    setTimeout(applyBoardUI,600);
   };
 }
 

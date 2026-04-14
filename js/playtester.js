@@ -3612,7 +3612,8 @@ function ptRenderHand() {
         img.onerror   = function() { this.src = CARD_BACK_URL; };
         img.onclick   = () => {
             ptSelectHandCard(i);
-            if (typeof ptMobileCardTap === 'function') {
+            // Only open mobile context menu on actual touch devices
+            if (typeof ptMobileCardTap === 'function' && 'ontouchstart' in window) {
                 ptMobileCardTap(ptCurrentPlayer, 'hand', i);
             }
         };
@@ -3629,14 +3630,16 @@ function ptRenderHand() {
                 playBtn.className = 'pt-hand-play-btn';
                 playBtn.innerHTML = '▶';
                 playBtn.title     = 'Play Card';
-                playBtn.onclick   = e => ptPlayFromHand(i, e);
+                playBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: false });
+                playBtn.addEventListener('click', e => { e.stopPropagation(); e.stopImmediatePropagation(); ptPlayFromHand(i, e); });
                 wrapper.appendChild(playBtn);
             }
             const discBtn = document.createElement('button');
             discBtn.className = 'pt-hand-disc-btn';
             discBtn.innerHTML = '🗑️';
             discBtn.title     = 'Discard';
-            discBtn.onclick   = e => ptDiscardFromHand(i, e);
+            discBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: false });
+            discBtn.addEventListener('click', e => { e.stopPropagation(); e.stopImmediatePropagation(); ptDiscardFromHand(i, e); });
             wrapper.appendChild(discBtn);
         }
         zone.appendChild(wrapper);

@@ -406,8 +406,8 @@ body {
 .pt-hand-card { width: clamp(48px, 7vw, 62px); height: auto; aspect-ratio: 2.5 / 3.5; border-radius: 4px; cursor: pointer; display: block; transition: transform 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
 .pt-hand-card:hover { transform: translateY(-15px) scale(1.2); z-index: 5; position: relative; }
 .pt-hand-card.pt-card-selected { outline: 3px solid var(--pokemon-yellow); transform: translateY(-20px) scale(1.2); z-index: 6; }
-.pt-hand-disc-btn { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 4px; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
-.pt-hand-play-btn { position: absolute; top: 2px; left: 2px; background: rgba(0,120,0,0.8); color: #fff; border: none; border-radius: 4px; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+.pt-hand-disc-btn { position: absolute; top: 2px; right: 2px; background: rgba(180,0,0,0.85); color: #fff; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 20; pointer-events: auto; }
+.pt-hand-play-btn { position: absolute; top: 2px; left: 2px; background: rgba(0,120,0,0.85); color: #fff; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 20; pointer-events: auto; }
 .pt-hand-play-btn:hover { background: rgba(0,160,0,0.95); }
 .pt-hand-wrapper:hover .pt-hand-disc-btn,
 .pt-hand-wrapper:hover .pt-hand-play-btn { display: flex; }

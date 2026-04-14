@@ -1,5 +1,5 @@
 /* ================================================================
-   PLAYTESTER MEGA-PATCH v5.2c - Mobile-First, Clean Layout
+   PLAYTESTER MEGA-PATCH v5.2d - Mobile-First, Clean Layout
    Changes from v5.1:
    - Fixed: DeckSearch modal no longer forced open
    - Left sidebar (Deck-Controls + Legend) hidden
@@ -141,6 +141,8 @@ function injectStyles(){
 function hideZoomPanel(){
   var zp=document.getElementById('ptZoomPanel');
   if(zp)zp.setAttribute('style','display:none!important');
+  var rp=document.querySelector('.pt-right-panel');
+  if(rp)rp.setAttribute('style','display:none!important');
 }
 
 // ============================================================
@@ -264,7 +266,7 @@ window.startMyDecksPlaytest=function(){
 // ============================================================
 function injectActionButtons(){
   if(document.getElementById('pt-action-group-v3'))return;
-  var bar=document.querySelector('.sandbox-controls');
+  var bar=document.querySelector('.pt-controls')||document.querySelector('.sandbox-controls');
   if(!bar)return;
   var g=document.createElement('span');
   g.id='pt-action-group-v3';
@@ -303,7 +305,7 @@ window.ptToggleBenchSize=function(player){
 
 function injectAreaZeroControl(){
   if(document.getElementById('ptAreaZeroControl'))return;
-  var cb=document.querySelector('.sandbox-controls');
+  var cb=document.querySelector('.pt-controls')||document.querySelector('.sandbox-controls');
   if(!cb)return;
   var d=document.createElement('div');
   d.id='ptAreaZeroControl';

@@ -3612,8 +3612,8 @@ function ptRenderHand() {
         img.onerror   = function() { this.src = CARD_BACK_URL; };
         img.onclick   = () => {
             ptSelectHandCard(i);
-            // Only open mobile context menu on actual touch devices
-            if (typeof ptMobileCardTap === 'function' && 'ontouchstart' in window) {
+            // Only open mobile context menu on real touch devices (not desktop with touch support)
+            if (typeof ptMobileCardTap === 'function' && window.matchMedia('(pointer: coarse)').matches) {
                 ptMobileCardTap(ptCurrentPlayer, 'hand', i);
             }
         };
@@ -3630,16 +3630,20 @@ function ptRenderHand() {
                 playBtn.className = 'pt-hand-play-btn';
                 playBtn.innerHTML = '▶';
                 playBtn.title     = 'Play Card';
-                playBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: false });
-                playBtn.addEventListener('click', e => { e.stopPropagation(); e.stopImmediatePropagation(); ptPlayFromHand(i, e); });
+                playBtn.addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+                playBtn.addEventListener('mousedown', e => { e.stopPropagation(); e.preventDefault(); });
+                playBtn.addEventListener('click', e => { e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault(); ptPlayFromHand(i, e); });
+                playBtn.addEventListener('dblclick', e => { e.stopPropagation(); e.preventDefault(); });
                 wrapper.appendChild(playBtn);
             }
             const discBtn = document.createElement('button');
             discBtn.className = 'pt-hand-disc-btn';
             discBtn.innerHTML = '🗑️';
             discBtn.title     = 'Discard';
-            discBtn.addEventListener('touchstart', e => { e.stopPropagation(); }, { passive: false });
-            discBtn.addEventListener('click', e => { e.stopPropagation(); e.stopImmediatePropagation(); ptDiscardFromHand(i, e); });
+            discBtn.addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+            discBtn.addEventListener('mousedown', e => { e.stopPropagation(); e.preventDefault(); });
+            discBtn.addEventListener('click', e => { e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault(); ptDiscardFromHand(i, e); });
+            discBtn.addEventListener('dblclick', e => { e.stopPropagation(); e.preventDefault(); });
             wrapper.appendChild(discBtn);
         }
         zone.appendChild(wrapper);

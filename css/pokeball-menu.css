@@ -402,12 +402,12 @@ body {
 .pt-hand-scroll-btn { width: 34px; height: 72px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color:#fff; font-size:18px; font-weight:900; cursor:pointer; flex-shrink:0; transition: background .15s, opacity .15s, transform .15s; }
 .pt-hand-scroll-btn:hover { background: rgba(255,255,255,0.18); transform: scale(1.03); }
 .pt-hand-scroll-btn:disabled { opacity: 0.28; cursor: default; transform: none; }
-.pt-hand-wrapper { position: relative; display: inline-block; flex-shrink: 0; }
-.pt-hand-card { width: clamp(48px, 7vw, 62px); height: auto; aspect-ratio: 2.5 / 3.5; border-radius: 4px; cursor: pointer; display: block; transition: transform 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); }
-.pt-hand-card:hover { transform: translateY(-15px) scale(1.2); z-index: 5; position: relative; }
-.pt-hand-card.pt-card-selected { outline: 3px solid var(--pokemon-yellow); transform: translateY(-20px) scale(1.2); z-index: 6; }
-.pt-hand-disc-btn { position: absolute; top: 2px; right: 2px; background: rgba(180,0,0,0.85); color: #fff; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 20; pointer-events: auto; }
-.pt-hand-play-btn { position: absolute; top: 2px; left: 2px; background: rgba(0,120,0,0.85); color: #fff; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 20; pointer-events: auto; }
+.pt-hand-wrapper { position: relative; display: inline-block; flex-shrink: 0; z-index: 0; }
+.pt-hand-card { width: clamp(48px, 7vw, 62px); height: auto; aspect-ratio: 2.5 / 3.5; border-radius: 4px; cursor: pointer; display: block; transition: transform 0.2s; box-shadow: 2px 2px 5px rgba(0,0,0,0.4); position: relative; z-index: 1; }
+.pt-hand-card:hover { transform: translateY(-15px) scale(1.2); }
+.pt-hand-card.pt-card-selected { outline: 3px solid var(--pokemon-yellow); transform: translateY(-20px) scale(1.2); }
+.pt-hand-disc-btn { position: absolute; top: 2px; right: 2px; background: rgba(180,0,0,0.85); color: #fff; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 30; pointer-events: auto; }
+.pt-hand-play-btn { position: absolute; top: 2px; left: 2px; background: rgba(0,120,0,0.85); color: #fff; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 12px; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 30; pointer-events: auto; }
 .pt-hand-play-btn:hover { background: rgba(0,160,0,0.95); }
 .pt-hand-wrapper:hover .pt-hand-disc-btn,
 .pt-hand-wrapper:hover .pt-hand-play-btn { display: flex; }

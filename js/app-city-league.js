@@ -2736,7 +2736,6 @@
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="city-league-card-badge city-league-card-badge-deck">${deckCount}</div>` : ''}
                             ${otherPrintSparkleHtml}
-                            ${showTrendOverlay ? `<div class="trend-badge-overlay">${trendIndicator}</div>` : ''}
                             <!-- Card info section - Mobile Overlay -->
                             <div class="card-info-bottom city-league-card-info-bottom">
                                 <div class="card-info-text city-league-card-info-text">

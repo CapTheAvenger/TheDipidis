@@ -1575,10 +1575,10 @@ img[src*="limitlesstcg"] {
 .bg-blue-light { background: #e8f4fd !important; }
 .border-left-blue { border-left: 4px solid #3498db !important; }
 .city-league-other-print-sparkle {
-    top: 7px;
+    top: 52px;
 }
 .city-league-other-print-sparkle-hasdeck {
-    top: 29px;
+    top: 52px;
 }
 
 /* Cardmarket button uses data-market-cursor for state styling (available vs unavailable). */
@@ -1659,7 +1659,7 @@ img[src*="limitlesstcg"] {
 
 .city-league-other-print-sparkle {
     position: absolute;
-    left: 7px;
+    right: 4px;
     display: inline-flex;
     align-items: center;
     gap: 5px;

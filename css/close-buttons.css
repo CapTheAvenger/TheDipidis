@@ -144,11 +144,14 @@
 .bj-edit-modal-close,
 .ma-modal-close,
 .fullscreen-close,
-.single-card-close,
 .battle-journal-close,
 .draw-sim-close-btn,
 .help-modal-close {
   position: relative;
+  overflow: visible;
+}
+/* single-card-close uses position:fixed — only add overflow */
+.single-card-close {
   overflow: visible;
 }
 

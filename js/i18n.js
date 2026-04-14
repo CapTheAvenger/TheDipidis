@@ -955,7 +955,7 @@ const translations = {
     'action.otherPrint':        'Show Other Prints',
     'action.openLimitless':     'Open Limitless Card Details',
     'action.printProxy':        'Add to Proxy Printer',
-    'action.cardmarket':        'Cardmarket',
+    'action.cardmarket':        'Open Cardmarket',
 
     // ── Wishlist Badge ───────────────────────────────────────
     'wishBadge.add':            'Add to Wishlist',
@@ -1947,7 +1947,7 @@ const translations = {
     'action.otherPrint':        'Andere Prints zeigen',
     'action.openLimitless':     'Limitless Kartendetails öffnen',
     'action.printProxy':        'Zum Proxy-Drucker hinzufügen',
-    'action.cardmarket':        'Cardmarket',
+    'action.cardmarket':        'Cardmarket öffnen',
 
     // ── Wishlist Badge ───────────────────────────────────────
     'wishBadge.add':            'Zur Wunschliste',

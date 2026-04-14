@@ -630,9 +630,7 @@ def run():
             'sc-action-rarity':    'Show Other Prints',
             'sc-action-limitless': 'Open Limitless Card Details',
             'sc-action-proxy':     'Add to Proxy Printer',
-            'sc-action-market':    'Cardmarket',
-        }
-        for cls, expected in EN_ACTION_EXPECT.items():
+            'sc-action-market':    'Open Cardmarket',
             actual = en_labels.get(cls, '<missing>')
             check(f"AP.EN {cls}='{expected}'",
                   actual == expected,
@@ -663,9 +661,7 @@ def run():
             'sc-action-rarity':    'Anderes Print',
             'sc-action-limitless': 'Limitless Kartendetails öffnen',
             'sc-action-proxy':     'Zum Proxy-Drucker hinzufügen',
-            'sc-action-market':    'Cardmarket',
-        }
-        for cls, expected in DE_ACTION_EXPECT.items():
+            'sc-action-market':    'Cardmarket öffnen',
             actual = de_labels.get(cls, '<missing>')
             check(f"AP.DE {cls}='{expected}'",
                   actual == expected,

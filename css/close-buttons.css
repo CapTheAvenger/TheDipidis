@@ -121,6 +121,7 @@
 .bj-edit-modal-close::after,
 .ma-modal-close::after,
 .fullscreen-close::after,
+.single-card-close::after,
 .battle-journal-close::after,
 .draw-sim-close-btn::after,
 .help-modal-close::after {
@@ -143,6 +144,7 @@
 .bj-edit-modal-close,
 .ma-modal-close,
 .fullscreen-close,
+.single-card-close,
 .battle-journal-close,
 .draw-sim-close-btn,
 .help-modal-close {

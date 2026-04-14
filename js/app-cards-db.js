@@ -862,16 +862,16 @@
             if (!container) return;
 
             const elementTypes = [
-                { value: 'Grass', label: '🌿 Grass', color: '#78C850' },
-                { value: 'Fire', label: '🔥 Fire', color: '#F08030' },
-                { value: 'Water', label: '💧 Water', color: '#6890F0' },
-                { value: 'Lightning', label: '⚡ Lightning', color: '#F8D030' },
-                { value: 'Psychic', label: '🔮 Psychic', color: '#F85888' },
-                { value: 'Fighting', label: '👊 Fighting', color: '#C03028' },
-                { value: 'Darkness', label: '🌑 Darkness', color: '#705848' },
-                { value: 'Metal', label: '⚙️ Metal', color: '#B8B8D0' },
-                { value: 'Dragon', label: '🐉 Dragon', color: '#7038F8' },
-                { value: 'Colorless', label: '⭐ Colorless', color: '#A8A878' }
+                { value: 'Grass', label: 'Grass', color: '#78C850' },
+                { value: 'Fire', label: 'Fire', color: '#F08030' },
+                { value: 'Water', label: 'Water', color: '#6890F0' },
+                { value: 'Lightning', label: 'Lightning', color: '#F8D030' },
+                { value: 'Psychic', label: 'Psychic', color: '#F85888' },
+                { value: 'Fighting', label: 'Fighting', color: '#C03028' },
+                { value: 'Darkness', label: 'Darkness', color: '#705848' },
+                { value: 'Metal', label: 'Metal', color: '#B8B8D0' },
+                { value: 'Dragon', label: 'Dragon', color: '#7038F8' },
+                { value: 'Colorless', label: 'Colorless', color: '#A8A878' }
             ];
 
             container.innerHTML = elementTypes.map(et => (
@@ -1082,7 +1082,7 @@
             // Add separator before metas
             const separator = document.createElement('div');
             separator.className = 'meta-filter-separator';
-            separator.innerHTML = '<strong class="label-block meta-filter-title">🗓️ Tournament Formats:</strong>';
+            separator.innerHTML = '<strong class="label-block meta-filter-title">Tournament Formats:</strong>';
             container.appendChild(separator);
             
             sortedMetas.forEach(meta => {
@@ -2343,16 +2343,16 @@
             
             const copyBtn = document.createElement('button');
             copyBtn.type = 'button';
-            copyBtn.textContent = '📋 Copy Names';
+            copyBtn.textContent = 'Copy Names';
             copyBtn.title = 'Copy all filtered card names to clipboard';
             copyBtn.className = 'btn-green btn-outline btn-lg';
             copyBtn.onclick = () => {
                 const cardNames = window.filteredCardsData.map(c => c.name).join('\n');
                 navigator.clipboard.writeText(cardNames).then(() => {
-                    copyBtn.textContent = '✅ Copied!';
+                    copyBtn.textContent = 'Copied!';
                     copyBtn.classList.add('btn-success');
                     setTimeout(() => {
-                        copyBtn.textContent = '📋 Copy Names';
+                        copyBtn.textContent = 'Copy Names';
                         copyBtn.classList.remove('btn-success');
                     }, 2000);
                 }).catch(err => {
@@ -2464,7 +2464,7 @@
             
             const toggleShowAllBtn = document.createElement('button');
             toggleShowAllBtn.type = 'button';
-            toggleShowAllBtn.textContent = showAllCards ? '📄 Paginated' : '📋 Show All';
+            toggleShowAllBtn.textContent = showAllCards ? 'Paginated' : 'Show All';
             toggleShowAllBtn.title = showAllCards ? 'Switch back to paginated view' : 'Show all cards at once';
             toggleShowAllBtn.className = 'btn-purple btn-outline btn-lg';
             toggleShowAllBtn.onclick = () => {
@@ -3432,7 +3432,7 @@
                     });
                 }
                 const _rsOtherPrintLine = _rsOtherPrintsQty > 0
-                    ? `<div class="card-database-other-prints-line">✨ ${t('rarity.otherPrints')}: ${_rsOtherPrintsQty}x</div>`
+                    ? `<div class="card-database-other-prints-line">${t('rarity.otherPrints')}: ${_rsOtherPrintsQty}x</div>`
                     : '';
 
                 const optionSet = String(version.set || '').toUpperCase();

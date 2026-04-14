@@ -4656,7 +4656,7 @@ h3:first-child {
     }
 }
 /* ==========================================================================
-   🔥 META DECK BANNER (Tier List Style)
+   META DECK BANNER (Tier List Style)
    ========================================================================== */
 .deck-tier-section {
     margin-bottom: 40px;
@@ -5376,7 +5376,7 @@ details[open] > .tier-trending-summary::after {
 }
 
 /* ==========================================================================
-   🔥 TOP CARDS WIDGET (Format Staples)
+   TOP CARDS WIDGET (Format Staples)
    ========================================================================== */
 .top-cards-container {
     background: linear-gradient(135deg, #ffffff 0%, var(--bg-light) 100%);
@@ -8082,3 +8082,70 @@ body.battle-journal-open {
 html[lang="de"] .lang-en { display: none !important; }
 html[lang="en"] .lang-de { display: none !important; }
 html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
+
+/* ==========================================
+   DECK ACTION BUTTONS – Text-Labels
+   ========================================== */
+.deck-action-btn {
+  padding: 5px 10px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.78em;
+  transition: all 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* ==========================================
+   PLAYTESTER TOP-BAR BUTTONS
+   ========================================== */
+.pt-top-btn {
+  font-size: 12px;
+  padding: 5px 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.pt-top-btn:hover {
+  background: rgba(0,0,0,0.08);
+}
+
+.deck-btn-irl {
+  background: rgba(255,255,255,0.25);
+  border: 2px solid rgba(255,255,255,0.5);
+}
+.deck-btn-irl--active {
+  background: rgba(76,175,80,0.95);
+  border: 2px solid #fff;
+}
+.deck-btn-irl:hover { background: rgba(255,255,255,0.4); }
+.deck-btn-irl--active:hover { background: #43a047; }
+
+.deck-btn-compare { background: rgba(155, 89, 182, 0.9); }
+.deck-btn-compare:hover { background: #8e44ad; }
+
+.deck-btn-folder { background: rgba(241, 196, 15, 0.9); color: #333; }
+.deck-btn-folder:hover { background: #f39c12; }
+
+.deck-btn-copy { background: rgba(52, 152, 219, 0.9); }
+.deck-btn-copy:hover { background: #2980b9; }
+
+.deck-btn-limitless { background: rgba(230, 126, 34, 0.9); }
+.deck-btn-limitless:hover { background: #d35400; }
+
+.deck-btn-export { background: rgba(26, 188, 156, 0.9); }
+.deck-btn-export:hover { background: #16a085; }
+
+.deck-btn-rename { background: rgba(142, 68, 173, 0.7); }
+.deck-btn-rename:hover { background: #7d3c98; }
+
+.deck-btn-delete { background: rgba(231, 76, 60, 0.9); }
+.deck-btn-delete:hover { background: #c0392b; }

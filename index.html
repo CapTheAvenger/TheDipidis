@@ -298,15 +298,15 @@
                                 <div class="action-divider"></div>
                                 <div class="city-league-action-group deck-builder-metrics-inline d-none" id="cityLeagueDeckSummary">
                                     <div class="toolbar-metric" title="Cards in deck">
-                                        <span class="toolbar-metric-icon">🃏</span>
+                                        <span class="toolbar-metric-icon">#</span>
                                         <span id="cityLeagueDeckCount" class="city-league-deck-count toolbar-metric-value">0</span><span class="toolbar-metric-sep">/60</span>
                                     </div>
                                     <div class="toolbar-metric" title="Unique cards">
-                                        <span class="toolbar-metric-icon">🔹</span>
+                                        <span class="toolbar-metric-icon">♦</span>
                                         <span id="cityLeagueDeckCountUnique" class="city-league-deck-count-unique toolbar-metric-value">(0 Unique)</span>
                                     </div>
                                     <div class="toolbar-metric toolbar-metric-price" title="Estimated price">
-                                        <span class="toolbar-metric-icon">💰</span>
+                                        <span class="toolbar-metric-icon">€</span>
                                         <span id="cityLeagueDeckPrice" class="toolbar-metric-value">0.00�</span>
                                     </div>
                                 </div>
@@ -745,15 +745,15 @@
                             <div class="action-divider"></div>
                             <div class="current-meta-action-group deck-builder-metrics-inline d-none" id="currentMetaDeckSummary">
                                 <div class="toolbar-metric" title="Cards in deck">
-                                    <span class="toolbar-metric-icon">🃏</span>
+                                    <span class="toolbar-metric-icon">#</span>
                                     <span id="currentMetaDeckCount" class="current-meta-deck-count toolbar-metric-value">0</span><span class="toolbar-metric-sep">/60</span>
                                 </div>
                                 <div class="toolbar-metric" title="Unique cards">
-                                    <span class="toolbar-metric-icon">🔹</span>
+                                    <span class="toolbar-metric-icon">♦</span>
                                     <span id="currentMetaDeckCountUnique" class="current-meta-deck-count-unique toolbar-metric-value">(0 Unique)</span>
                                 </div>
                                 <div class="toolbar-metric toolbar-metric-price" title="Estimated price">
-                                    <span class="toolbar-metric-icon">💰</span>
+                                    <span class="toolbar-metric-icon">€</span>
                                     <span id="currentMetaDeckPrice" class="toolbar-metric-value">0.00�</span>
                                 </div>
                             </div>
@@ -965,15 +965,15 @@
                             <div class="action-divider"></div>
                             <div class="past-meta-action-group deck-builder-metrics-inline d-none" id="pastMetaDeckSummary">
                                 <div class="toolbar-metric" title="Cards in deck">
-                                    <span class="toolbar-metric-icon">🃏</span>
+                                    <span class="toolbar-metric-icon">#</span>
                                     <span id="pastMetaDeckCount" class="past-meta-deck-count toolbar-metric-value">0</span><span class="toolbar-metric-sep">/60</span>
                                 </div>
                                 <div class="toolbar-metric" title="Unique cards">
-                                    <span class="toolbar-metric-icon">🔹</span>
+                                    <span class="toolbar-metric-icon">♦</span>
                                     <span id="pastMetaDeckCountUnique" class="past-meta-deck-count-unique toolbar-metric-value">(0 Unique)</span>
                                 </div>
                                 <div class="toolbar-metric toolbar-metric-price" title="Estimated price">
-                                    <span class="toolbar-metric-icon">💰</span>
+                                    <span class="toolbar-metric-icon">€</span>
                                     <span id="pastMetaDeckPrice" class="toolbar-metric-value">0.00�</span>
                                 </div>
                             </div>
@@ -2432,10 +2432,10 @@
                                     <option value="" data-i18n="profile.allSets">All Sets</option>
                                 </select>
                                 <button onclick="openWishlistGridModal()" style="background: linear-gradient(135deg, #e67e22, #d35400); color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;" title="Show as grid image for sharing">
-                                    📸 Grid
+                                    Grid
                                 </button>
                                 <button onclick="copyWishlistToClipboard()" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 6px;" title="Copy wishlist to clipboard">
-                                    📋 Copy
+                                    Copy
                                 </button>
                             </div>
                             <div id="wishlist-search-results" class="mb-8 fs-14 color-grey fw-500"></div>
@@ -2502,7 +2502,7 @@
 
                             <div class="meta-binder-actions mb-15">
                                 <button onclick="buildCustomBinder()" class="btn btn-primary" id="cbGenerateBtn" disabled>Generate Custom Binder</button>
-                                <button onclick="cbSaveCurrentAsPreset()" class="btn btn-outline" title="Aktuelle Auswahl als Preset speichern">💾 Speichern</button>
+                                <button onclick="cbSaveCurrentAsPreset()" class="btn btn-outline" title="Aktuelle Auswahl als Preset speichern">Speichern</button>
                                 <button id="cbAddWishlist" onclick="cbAddMissingToWishlist()" class="btn btn-outline" disabled>Add Missing to Wishlist</button>
                                 <button id="cbSendProxy" onclick="cbSendMissingToProxy()" class="btn btn-outline" disabled>Proxy All Missing</button>
                             </div>
@@ -2539,11 +2539,11 @@
                                 </select>
                                 <select id="journalFilterType" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark" aria-label="Filter by tournament type">
                                     <option value="" data-i18n="bj.allTypes">All Types</option>
-                                    <option value="Regional/SPE/IC">🏆 Regional/SPE/IC</option>
-                                    <option value="Challenge">🎯 Challenge</option>
-                                    <option value="Cup">🥤 Cup</option>
-                                    <option value="Online">🌐 Online</option>
-                                    <option value="Testing">🧪 Testing</option>
+                                    <option value="Regional/SPE/IC">Regional/SPE/IC</option>
+                                    <option value="Challenge">Challenge</option>
+                                    <option value="Cup">Cup</option>
+                                    <option value="Online">Online</option>
+                                    <option value="Testing">Testing</option>
                                 </select>
                                 <select id="journalFilterTournament" onchange="renderJournalHistory()" class="select-blue px-12 py-8 br-8 fs-14 bg-white color-dark" aria-label="Filter by tournament">
                                     <option value="" data-i18n="bj.allTournaments">All Tournaments</option>
@@ -2554,7 +2554,7 @@
                                     <option value="loss" data-i18n="bj.loss">Loss</option>
                                     <option value="tie" data-i18n="bj.tie">Tie</option>
                                 </select>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleMatchupStats()" data-i18n="bj.matchups">📊 Matchup Spreadsheet</button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleMatchupStats()" data-i18n="bj.matchups">Matchup Spreadsheet</button>
                             </div>
                             <div id="journalMatchupStats" class="display-none mb-15"></div>
                             <div id="journalHistoryList" class="battle-journal-history-list"></div>
@@ -2574,7 +2574,7 @@
                                     <textarea id="profileCompareListB" rows="12" placeholder="4 Charizard ex SV3 6&#10;3 Arcanine ex OBF 33&#10;..." class="w-100 py-8 px-10 border-grey br-6 fs-14 font-mono" style="resize: vertical;"></textarea>
                                 </div>
                             </div>
-                            <button onclick="profileCompareDecklists()" class="btn btn-primary btn-lift mb-15" data-i18n="profile.compareBtn">🔍 Compare</button>
+                            <button onclick="profileCompareDecklists()" class="btn btn-primary btn-lift mb-15" data-i18n="profile.compareBtn">Compare</button>
                             <div id="profileCompareResult" class="d-none"></div>
                         </div>
 
@@ -2690,13 +2690,13 @@
     <div id="shareImageModal" class="image-view-modal" role="dialog" aria-modal="true" aria-label="Share deck image" onclick="if(event.target === this) closeShareImageModal()">
         <div class="image-view-content" style="max-width:960px; text-align:center;">
             <div class="image-view-header">
-                <h3 id="shareImageTitle">📸 Share Deck Image</h3>
+                <h3 id="shareImageTitle">Share Deck Image</h3>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <button class="image-view-export" onclick="shareImageDownload()" title="Save Image" aria-label="Save image to device">
-                        💾
+                        Save
                     </button>
                     <button id="shareImageShareBtn" class="image-view-export" onclick="shareImageNative()" title="Share" aria-label="Share via WhatsApp, etc." style="display:none;">
-                        📤
+                        Share
                     </button>
                     <button class="image-view-close" onclick="closeShareImageModal()" aria-label="Close" data-i18n-aria="btn.close"></button>
                 </div>
@@ -2711,7 +2711,7 @@
     <div id="bjEditTournamentModal" class="ui-modal-backdrop" style="display:none; z-index:9999;" onclick="if(event.target===this)closeEditTournamentModal()" role="dialog" aria-modal="true" aria-label="Edit tournament">
       <div class="ui-modal bj-edit-modal">
         <div class="bj-edit-modal-header">
-          <h3 data-i18n="bj.editTournament">✏️ Edit Tournament</h3>
+          <h3 data-i18n="bj.editTournament">Edit Tournament</h3>
           <button onclick="closeEditTournamentModal()" class="bj-edit-modal-close" aria-label="Close" data-i18n-aria="btn.close">&times;</button>
         </div>
         <div class="bj-edit-modal-body">
@@ -2741,16 +2741,16 @@
           <label class="bj-edit-label" data-i18n="bj.tournamentType">Tournament Type</label>
           <input id="bjEditTournType" type="hidden" value="">
           <div id="bjEditTournTypeGroup" class="bj-type-chip-group">
-            <button type="button" class="bj-type-chip" data-value="Regional/SPE/IC" onclick="selectEditTournType('Regional/SPE/IC')">🏆 Regional/SPE/IC</button>
-            <button type="button" class="bj-type-chip" data-value="Challenge" onclick="selectEditTournType('Challenge')">🎯 Challenge</button>
-            <button type="button" class="bj-type-chip" data-value="Cup" onclick="selectEditTournType('Cup')">🥤 Cup</button>
-            <button type="button" class="bj-type-chip" data-value="Online" onclick="selectEditTournType('Online')">🌐 Online</button>
-            <button type="button" class="bj-type-chip" data-value="Testing" onclick="selectEditTournType('Testing')">🧪 Testing</button>
+            <button type="button" class="bj-type-chip" data-value="Regional/SPE/IC" onclick="selectEditTournType('Regional/SPE/IC')">Regional/SPE/IC</button>
+            <button type="button" class="bj-type-chip" data-value="Challenge" onclick="selectEditTournType('Challenge')">Challenge</button>
+            <button type="button" class="bj-type-chip" data-value="Cup" onclick="selectEditTournType('Cup')">Cup</button>
+            <button type="button" class="bj-type-chip" data-value="Online" onclick="selectEditTournType('Online')">Online</button>
+            <button type="button" class="bj-type-chip" data-value="Testing" onclick="selectEditTournType('Testing')">Testing</button>
           </div>
 
           <!-- Your Deck for this tournament (batch-updates all entries) -->
           <div class="bj-edit-form-group" style="margin-top: 16px;">
-            <label class="bj-edit-label" for="bjEditTournDeck">🃏 <span data-i18n="bj.yourDeck">Your Deck</span> <span style="font-size:11px;opacity:0.6;" data-i18n="bj.updatesAllMatches">(updates all matches in this tournament)</span></label>
+            <label class="bj-edit-label" for="bjEditTournDeck"><span data-i18n="bj.yourDeck">Your Deck</span> <span style="font-size:11px;opacity:0.6;" data-i18n="bj.updatesAllMatches">(updates all matches in this tournament)</span></label>
             <input
               id="bjEditTournDeck"
               type="text"
@@ -2764,7 +2764,7 @@
         </div>
         <div class="bj-edit-modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeEditTournamentModal()" data-i18n="bj.cancel">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="saveEditTournament()">💾 <span data-i18n="bj.save">Save</span></button>
+          <button type="button" class="btn btn-primary" onclick="saveEditTournament()"><span data-i18n="bj.save">Save</span></button>
         </div>
       </div>
     </div>
@@ -2773,7 +2773,7 @@
     <div id="bjEditEntryModal" class="ui-modal-backdrop" style="display:none; z-index:9999;" onclick="if(event.target===this)closeEditEntryModal()" role="dialog" aria-modal="true" aria-label="Edit match entry">
       <div class="ui-modal bj-edit-modal">
         <div class="bj-edit-modal-header">
-          <h3 data-i18n="bj.editMatch">✏️ Edit Match</h3>
+          <h3 data-i18n="bj.editMatch">Edit Match</h3>
           <button onclick="closeEditEntryModal()" class="bj-edit-modal-close" aria-label="Close" data-i18n-aria="btn.close">&times;</button>
         </div>
         <div class="bj-edit-modal-body">
@@ -2800,7 +2800,7 @@
         </div>
         <div class="bj-edit-modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeEditEntryModal()" data-i18n="bj.cancel">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="saveEditEntry()">💾 <span data-i18n="bj.save">Save</span></button>
+          <button type="button" class="btn btn-primary" onclick="saveEditEntry()"><span data-i18n="bj.save">Save</span></button>
         </div>
       </div>
     </div>
@@ -2815,7 +2815,7 @@
         <!-- HEADER -->
         <div class="ma-modal-header">
           <div>
-            <h2 class="ma-modal-title">📊 Matchup-Analyse</h2>
+            <h2 class="ma-modal-title">Matchup-Analyse</h2>
             <p class="ma-modal-subtitle" id="maSubtitle">Dein Deck-Matchup-Explorer</p>
           </div>
           <button class="ma-modal-close" onclick="closeMatchupAnalysisModal()" aria-label="Close" data-i18n-aria="btn.close">&times;</button>
@@ -2830,24 +2830,24 @@
             </select>
           </div>
           <div class="ma-filter-group">
-            <label class="ma-filter-label">🌍 Meta</label>
+            <label class="ma-filter-label">Meta</label>
             <select id="maFilterMeta" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Meta Format">
               <option value="">All Formats</option>
             </select>
           </div>
           <div class="ma-filter-group ma-filter-group--wide">
-            <label class="ma-filter-label">🏆 Turnier-Typ</label>
+            <label class="ma-filter-label">Turnier-Typ</label>
             <div id="maFilterTypeChips" class="ma-chip-row">
               <button type="button" class="ma-chip ma-chip--active" data-value="" onclick="toggleMATypeChip(this)">Alle</button>
-              <button type="button" class="ma-chip" data-value="Regional/SPE/IC" onclick="toggleMATypeChip(this)">🏆 Regional/SPE/IC</button>
-              <button type="button" class="ma-chip" data-value="Challenge" onclick="toggleMATypeChip(this)">🎯 Challenge</button>
-              <button type="button" class="ma-chip" data-value="Cup" onclick="toggleMATypeChip(this)">🥤 Cup</button>
-              <button type="button" class="ma-chip" data-value="Online" onclick="toggleMATypeChip(this)">🌐 Online</button>
-              <button type="button" class="ma-chip" data-value="Testing" onclick="toggleMATypeChip(this)">🧪 Testing</button>
+              <button type="button" class="ma-chip" data-value="Regional/SPE/IC" onclick="toggleMATypeChip(this)">Regional/SPE/IC</button>
+              <button type="button" class="ma-chip" data-value="Challenge" onclick="toggleMATypeChip(this)">Challenge</button>
+              <button type="button" class="ma-chip" data-value="Cup" onclick="toggleMATypeChip(this)">Cup</button>
+              <button type="button" class="ma-chip" data-value="Online" onclick="toggleMATypeChip(this)">Online</button>
+              <button type="button" class="ma-chip" data-value="Testing" onclick="toggleMATypeChip(this)">Testing</button>
             </div>
           </div>
           <div class="ma-filter-group">
-            <label class="ma-filter-label">📅 Turnier</label>
+            <label class="ma-filter-label">Turnier</label>
             <select id="maFilterTournament" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Tournament">
               <option value="">All Tournaments</option>
             </select>
@@ -2859,25 +2859,25 @@
 
         <!-- 2D HEATMAP -->
         <div class="ma-section">
-          <h3 class="ma-section-title">🔥 Matchup-Heatmap</h3>
+          <h3 class="ma-section-title">Matchup-Heatmap</h3>
           <div id="maHeatmapWrap" class="ma-heatmap-wrap"></div>
         </div>
 
         <!-- RANKING LISTS -->
         <div class="ma-rankings">
           <div class="ma-section ma-rank-half">
-            <h3 class="ma-section-title">🏆 Beste Matchups</h3>
+            <h3 class="ma-section-title">Beste Matchups</h3>
             <div id="maRankBest"></div>
           </div>
           <div class="ma-section ma-rank-half">
-            <h3 class="ma-section-title">💀 Schlechteste Matchups</h3>
+            <h3 class="ma-section-title">Schlechteste Matchups</h3>
             <div id="maRankWorst"></div>
           </div>
         </div>
 
         <!-- 1D BAR LIST (existing style) -->
         <div class="ma-section">
-          <h3 class="ma-section-title">📋 Alle Gegner-Matchups</h3>
+          <h3 class="ma-section-title">Alle Gegner-Matchups</h3>
           <div id="maBarList"></div>
         </div>
       </div>
@@ -2907,7 +2907,7 @@
                 <h3 data-i18n="modal.deckCardsOverview">Deck Cards Overview</h3>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <button class="image-view-export" onclick="openShareImageModal()" title="Share as Image" aria-label="Open share image preview">
-                        📸
+                        Share
                     </button>
                     <button class="image-view-close" onclick="closeImageView()" aria-label="Close" data-i18n-aria="btn.close"></button>
                 </div>
@@ -2923,7 +2923,7 @@
                 <h3>Wishlist Overview</h3>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <button class="image-view-export" onclick="exportWishlistAsImage()" title="Save as Image">
-                        📸
+                        Save
                     </button>
                     <button class="image-view-close" onclick="closeWishlistGridModal()" aria-label="Close" data-i18n-aria="btn.close"></button>
                 </div>
@@ -3002,15 +3002,15 @@
         <div id="ptActionLogPanel"><div id="ptActionLogContent"></div></div>
 
         <div class="pt-controls" style="display:flex; justify-content:space-around; align-items:center; flex-wrap:nowrap; overflow:visible; padding:5px; background:#fff; border-bottom:1px solid #ccc; width: 100%; position:relative; z-index:1000;">
-            <button title="Multiplayer" onclick="openMultiplayerMenu()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Open multiplayer menu">👥</button>
-            <button title="Start / Reset" onclick="startPlaytesterSetup()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Start or reset playtester">▶️</button>
-            <button title="Flip Board" onclick="ptFlipBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Flip board to opponent view">🔄</button>
-            <button title="Log" onclick="ptToggleLog()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Toggle action log">📝</button>
-            <button title="M�nze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Flip coin">🪙</button>
-            <button title="Zoom" onclick="ptZoomBoard()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Zoom board">🔍</button>
+            <button class="pt-top-btn" title="Multiplayer" onclick="openMultiplayerMenu()" aria-label="Open multiplayer menu">Multi</button>
+            <button class="pt-top-btn" title="Start / Reset" onclick="startPlaytesterSetup()" aria-label="Start or reset playtester">Start</button>
+            <button class="pt-top-btn" title="Flip Board" onclick="ptFlipBoard()" aria-label="Flip board to opponent view">Flip</button>
+            <button class="pt-top-btn" title="Log" onclick="ptToggleLog()" aria-label="Toggle action log">Log</button>
+            <button class="pt-top-btn" title="M�nze" onclick="mpFlipCoin ? mpFlipCoin() : showToast('Nur im Multiplayer')" aria-label="Flip coin">Coin</button>
+            <button class="pt-top-btn" title="Zoom" onclick="ptZoomBoard()" aria-label="Zoom board">Zoom</button>
 
-            <button title="Undo" onclick="ptUndo()" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Undo last action">↩️</button>
-            <button title="Mulligan" onclick="ptMulligan(ptCurrentPlayer)" style="font-size:20px; padding:5px; border:none; background:transparent;" aria-label="Mulligan hand">🃏</button>
+            <button class="pt-top-btn" title="Undo" onclick="ptUndo()" aria-label="Undo last action">Undo</button>
+            <button class="pt-top-btn" title="Mulligan" onclick="ptMulligan(ptCurrentPlayer)" aria-label="Mulligan hand">Mull</button>
             <button id="ptVstarMarker" title="V Marker" class="pt-marker pt-marker-vstar" onclick="ptToggleMarker('vstar')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;" aria-label="Toggle V marker">V</button>
             <button id="ptGxMarker" title="GX Marker" class="pt-marker pt-marker-gx" onclick="ptToggleMarker('gx')" style="font-size:14px; padding:5px 6px; border:none; background:transparent;" aria-label="Toggle GX marker">GX</button>
         </div>
@@ -3019,37 +3019,37 @@
             <div style="background:#fff; padding:15px; border-radius:12px; width:90%; max-width:350px; display:flex; flex-direction:column; gap:12px;">
                 <h3 style="margin:0; text-align:center; font-size:16px;">Spiel-Aktionen</h3>
 
-                <button class="btn-primary" style="padding:10px; border-radius:6px;" onclick="ptOpenDeckSearch(); document.getElementById('ptDirectActionModal').style.display='none'">🔍 Deck Search</button>
+                <button class="btn-primary" style="padding:10px; border-radius:6px;" onclick="ptOpenDeckSearch(); document.getElementById('ptDirectActionModal').style.display='none'">Deck Search</button>
 
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="ptDrawCards(document.getElementById('inpDraw').value); document.getElementById('ptDirectActionModal').style.display='none'">🃏 Draw</button>
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="ptDrawCards(document.getElementById('inpDraw').value); document.getElementById('ptDirectActionModal').style.display='none'">Draw</button>
                     <input type="number" id="inpDraw" value="1" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Number of cards to draw">
                 </div>
 
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="ptLookCards(document.getElementById('inpLook').value); document.getElementById('ptDirectActionModal').style.display='none'">👀 Look Top</button>
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="ptLookCards(document.getElementById('inpLook').value); document.getElementById('ptDirectActionModal').style.display='none'">Look Top</button>
                     <input type="number" id="inpLook" value="5" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Number of cards to look at">
                 </div>
 
                 <div style="display:flex; gap:5px; align-items:center;">
                     <input type="number" id="inpJudgeP1" value="4" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 1 Judge hand size">
-                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px; background:#f39c12; color:#fff; border:none;" onclick="executeCustomJudge()">⚖️ Judge</button>
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px; background:#f39c12; color:#fff; border:none;" onclick="executeCustomJudge()">Judge</button>
                     <input type="number" id="inpJudgeP2" value="4" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 2 Judge hand size">
                 </div>
 
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="executeOwnShuffleDraw()">🔄 Own Shuffle</button>
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="executeOwnShuffleDraw()">Own Shuffle</button>
                     <input type="number" id="inpOwnSD" value="6" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Own shuffle and draw count">
                 </div>
 
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="executeOppShuffleDraw()">🔄 Opp Shuffle</button>
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px;" onclick="executeOppShuffleDraw()">Opp Shuffle</button>
                     <input type="number" id="inpOppSD" value="4" style="width:60px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Opponent shuffle and draw count">
                 </div>
 
                 <div style="display:flex; gap:5px; align-items:center;">
                     <input type="number" id="inpIonoP1" value="6" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 1 Iono hand size">
-                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px; background:#e74c3c; color:#fff; border:none;" onclick="executeCustomIono()">⚡ Iono</button>
+                    <button class="btn-secondary" style="flex:1; padding:10px; border-radius:6px; background:#e74c3c; color:#fff; border:none;" onclick="executeCustomIono()">Iono</button>
                     <input type="number" id="inpIonoP2" value="6" style="width:50px; text-align:center; font-size:16px; border:1px solid #ccc; border-radius:6px;" aria-label="Player 2 Iono hand size">
                 </div>
 
@@ -3062,7 +3062,7 @@
             background:rgba(20,20,20,0.98); border:2px solid #FFCB05; border-radius:12px; padding:20px; 
             min-width:320px; box-shadow:0 8px 24px rgba(0,0,0,0.8);" role="dialog" aria-modal="true" aria-label="Online multiplayer menu">
             <div style="color:#FFCB05; font-weight:900; font-size:1.3rem; margin-bottom:15px; display:flex; align-items:center; gap:8px;">
-                👥 Online Multiplayer
+                Online Multiplayer
             </div>
             <div style="display:flex; flex-direction:column; gap:12px;">
                 <select id="mpDeckSelect" class="control-input" style="width:100%; margin-bottom:4px; padding:10px; font-size:1rem; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05;" aria-label="Select deck for multiplayer match">
@@ -3071,14 +3071,14 @@
                 <div style="margin:10px 0; text-align:center; font-weight:900; font-size:13px; color:#888; letter-spacing:1px;">ODER</div>
                 <textarea id="mpDeckInput" rows="4" style="width:100%; padding:10px; border-radius:8px; background:#1a1a2e; color:#fff; border:1px solid #FFCB05; font-family:monospace; font-size:12px; resize:vertical; box-sizing:border-box;" placeholder="Pok�mon: 10&#10;4 Comfey LOR 79&#10;..." aria-label="Paste decklist for multiplayer match"></textarea>
                 <button class="pt-btn" style="width:100%; font-size:1.1rem; padding:12px;" onclick="mpCreateGame()">
-                    🎮 Create Game (Host)
+                    Create Game (Host)
                 </button>
                 <button class="pt-btn" style="width:100%; font-size:1.1rem; padding:12px;" onclick="mpJoinGame()">
-                    🔗 Join Game (Guest)
+                    Join Game (Guest)
                 </button>
                 <div style="border-top:1px solid #444; margin:8px 0; padding-top:12px;">
                     <div style="color:#aaa; font-size:0.85rem; margin-bottom:8px;">
-                        🔒 Requires Firebase Login
+                        Requires Firebase Login
                     </div>
                     <button class="pt-btn pt-danger" style="width:100%; font-size:0.9rem;" onclick="toggleMultiplayerMenu()">
                         Close
@@ -3094,13 +3094,13 @@
                 background:rgba(10,10,10,0.88); border:1px solid #333; border-radius:6px;
                 padding:8px 10px; color:#ddd; font-size:9px; box-shadow:0 4px 12px rgba(0,0,0,0.8);
                 flex-direction:column; gap:4px; user-select:none; pointer-events:none; width:155px;">
-                <div style="color:#FFCB05; font-weight:900; font-size:10px; display:flex; align-items:center; gap:4px; margin-bottom:1px;">📖 LEGEND</div>
+                <div style="color:#FFCB05; font-weight:900; font-size:10px; display:flex; align-items:center; gap:4px; margin-bottom:1px;">LEGEND</div>
                 <div class="pt-legend-item"><div style="width:12px; height:12px; background:#ff6b6b; border-radius:50%; border:1px solid #fff; flex-shrink:0;"></div><span>DMG-Badge: Klick +10 | Shift -10</span></div>
-                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">👆</span><span>Rechtsklick auf Karte: Men�</span></div>
+                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">•</span><span>Rechtsklick auf Karte: Men�</span></div>
                 <div class="pt-legend-item"><div style="width:14px; height:14px; background:transparent; border:1px solid #f1c40f; color:#f1c40f; border-radius:50%; font-weight:900; font-size:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">A</div><span>Ability (gelb = used)</span></div>
                 <div class="pt-legend-item"><div style="width:8px; height:13px; background:#ccc; border-radius:2px; border:1px solid #fff; flex-shrink:0;"></div><span>Tool � linke Seite</span></div>
-                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">✋</span><span>Auf Hand: In "Hand"-Zone ziehen</span></div>
-                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">↕️</span><span>Drag &amp; Drop</span></div>
+                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">•</span><span>Auf Hand: In "Hand"-Zone ziehen</span></div>
+                <div class="pt-legend-item"><span style="font-size:11px; flex-shrink:0;">•</span><span>Drag &amp; Drop</span></div>
             </div>
 
             <div id="playtester-board" class="pt-arena">
@@ -3108,7 +3108,7 @@
                 <!-- -- CENTER: Stadium (right) + Action Buttons (left) � always stay upright -- -->
                 <div class="pt-stadium-anchor" style="position: absolute; top: 50%; left: 75%; transform: translate(-50%, -50%); z-index: 5;">
                     <div class="static-element" style="background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); text-align: center; position: relative;">
-                        <div class="pt-zone-label" style="color:#a8e6cf; margin-bottom: 6px;">🏟️ Stadium</div>
+                        <div class="pt-zone-label" style="color:#a8e6cf; margin-bottom: 6px;">Stadium</div>
                         <div style="position: relative; display: inline-block;">
                             <div id="ptStadiumZone" class="pt-empty-slot pt-dropzone"
                                  ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'stadium')"
@@ -3137,12 +3137,12 @@
                             <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p2">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDeckMenu('p2')">
-                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p2', 1)" title="🃏 Karte ziehen">🃏</div>
-                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p2')" title="🔍 Deck durchsuchen">🔍</div>
+                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p2', 1)" title="Karte ziehen">Draw</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p2')" title="Deck durchsuchen">Search</div>
                                 </div>
                                 <div class="pt-deck-controls">
-                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p2')">🔍 Search</button>
-                                    <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p2')">🔀 Shuffle</button>
+                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p2')">Search</button>
+                                    <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p2')">Shuffle</button>
                                     <div class="pt-stepper-group">
                                         <button class="pt-stepper-btn" onclick="updateStepper('p2-draw-val',-1)">-</button>
                                         <span id="p2-draw-val" class="pt-stepper-val">1</span>
@@ -3167,7 +3167,7 @@
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p2">0</span>)</div>
                                 <div id="ptDiscardPile-p2" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p2-discard')" onclick="ptOpenOpponentPanel('discard')"></div>
-                                <button class="pt-mobile-lost-shortcut" onclick="ptOpenOpponentPanel('lostzone')">🌀 Lost</button>
+                                <button class="pt-mobile-lost-shortcut" onclick="ptOpenOpponentPanel('lostzone')">Lost</button>
                             </div>
                         </div>
 
@@ -3199,8 +3199,8 @@
                                      style="min-height: clamp(84px, 12vw, 105px); min-width: clamp(60px, 9vw, 75px);"></div>
                                 <div id="ptActiveModifier-p2" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
-                                    <button id="ptItemLock-p2" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','itemLock')">🚫</button>
-                                    <button id="ptToolLock-p2" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','toolLock')">🔧</button>
+                                    <button id="ptItemLock-p2" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','itemLock')">ITEM</button>
+                                    <button id="ptToolLock-p2" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p2','toolLock')">TOOL</button>
                                 </div>
                             </div>
                         </div>
@@ -3221,12 +3221,12 @@
                             <div style="text-align:center; position: relative;">
                                 <div class="pt-zone-label">Deck (<span id="ptDeckCount-p1">0</span>)</div>
                                 <div class="pt-deck-pile" onclick="ptDeckMenu('p1')">
-                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p1', 1)" title="🃏 Karte ziehen">🃏</div>
-                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p1')" title="🔍 Deck durchsuchen">🔍</div>
+                                    <div class="pt-deck-half pt-deck-top" onclick="event.stopPropagation();ptDrawCards('p1', 1)" title="Karte ziehen">Draw</div>
+                                    <div class="pt-deck-half pt-deck-bot" onclick="event.stopPropagation();ptOpenDeckSearch('p1')" title="Deck durchsuchen">Search</div>
                                 </div>
                                 <div class="pt-deck-controls">
-                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p1')">🔍 Search</button>
-                                    <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p1')">🔀 Shuffle</button>
+                                    <button class="pt-btn-small" style="width:100%; background:#2a52be; border-color:#3B4CCA; margin-bottom:4px;" onclick="ptOpenDeckSearch('p1')">Search</button>
+                                    <button class="pt-btn-small" style="width:100%; margin-bottom:4px;" onclick="ptShuffleDeck('p1')">Shuffle</button>
                                     <div class="pt-stepper-group">
                                         <button class="pt-stepper-btn" onclick="updateStepper('p1-draw-val',-1)">-</button>
                                         <span id="p1-draw-val" class="pt-stepper-val">1</span>
@@ -3251,7 +3251,7 @@
                                 <div class="pt-zone-label">Discard (<span id="ptDiscardCount-p1">0</span>)</div>
                                 <div id="ptDiscardPile-p1" class="pt-dropzone"
                                      ondragover="ptHandleDragOver(event)" ondragleave="ptHandleDragLeave(event)" ondrop="ptHandleDrop(event,'p1-discard')" onclick="ptOpenDiscard('p1')"></div>
-                                <button class="pt-mobile-lost-shortcut" onclick="ptOpenLostZone('p1')">🌀 Lost</button>
+                                <button class="pt-mobile-lost-shortcut" onclick="ptOpenLostZone('p1')">Lost</button>
                             </div>
                         </div>
 
@@ -3283,8 +3283,8 @@
                                      style="min-height: clamp(84px, 12vw, 105px); min-width: clamp(60px, 9vw, 75px);"></div>
                                 <div id="ptActiveModifier-p1" class="pt-dmg-modifier" title="L-Klick: +10 DMG Buff | R-Klick: Reset" onclick="ptToggleDmgMod(this, 10)" oncontextmenu="ptToggleDmgMod(this, 0); return false;">+0</div>
                                 <div style="position: absolute; right: -32px; top: 8px; display: flex; flex-direction: column; gap: 5px;">
-                                    <button id="ptItemLock-p1" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','itemLock')">🚫</button>
-                                    <button id="ptToolLock-p1" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','toolLock')">🔧</button>
+                                    <button id="ptItemLock-p1" class="pt-status-marker" title="Item Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','itemLock')">ITEM</button>
+                                    <button id="ptToolLock-p1" class="pt-status-marker" title="Tool Lock (Klick zum Umschalten)" onclick="ptToggleLock('p1','toolLock')">TOOL</button>
                                 </div>
                             </div>
                         </div>
@@ -3297,10 +3297,10 @@
         </div>
 
         <div id="pt-side-buttons-left">
-            <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()" data-i18n="pt.btnAttack">⚔️ Attack</button>
-            <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()" data-i18n="pt.btnEndTurn">⏭️ End Turn</button>
-            <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()" data-i18n="pt.btnOppView">👁️ Opponent</button>
-            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="if(typeof ptShowDirectActionModal!=='undefined')ptShowDirectActionModal();else document.getElementById('ptDirectActionModal').style.display='flex'" data-i18n="pt.btnActions">≡ Actions</button>
+            <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()" data-i18n="pt.btnAttack">Attack</button>
+            <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()" data-i18n="pt.btnEndTurn">End Turn</button>
+            <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()" data-i18n="pt.btnOppView">Opponent</button>
+            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="if(typeof ptShowDirectActionModal!=='undefined')ptShowDirectActionModal();else document.getElementById('ptDirectActionModal').style.display='flex'" data-i18n="pt.btnActions">Actions</button>
         </div>
 
         <div class="pt-hand-zone">
@@ -3330,14 +3330,14 @@
     <div id="ptOppPanel" style="display:none;position:fixed;inset:0;z-index:21000;background:rgba(0,0,0,0.82);align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'" role="dialog" aria-modal="true" aria-label="Opponent panel">
         <div style="background:#1a1a2e;border:2px solid #e74c3c;border-radius:14px;padding:20px;width:min(98vw,680px);max-height:90vh;overflow-y:auto;color:#fff;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <h3 style="margin:0;color:#e74c3c;" id="ptOppPanelTitle">👁️ Gegner</h3>
-                <button class="pt-btn pt-danger" onclick="document.getElementById('ptOppPanel').style.display='none'">?</button>
+                <h3 style="margin:0;color:#e74c3c;" id="ptOppPanelTitle">Gegner</h3>
+                <button class="pt-btn pt-danger" onclick="document.getElementById('ptOppPanel').style.display='none'">Close</button>
             </div>
             <!-- Tabs -->
             <div style="display:flex;gap:6px;margin-bottom:14px;" id="ptOppTabs">
-                <button id="ptOppTab-field"    onclick="ptOppSwitchTab('field')"    style="flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:#e74c3c;color:#fff;">🏟️ Feld</button>
-                <button id="ptOppTab-discard"  onclick="ptOppSwitchTab('discard')"  style="flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:#333;color:#aaa;">🗑️ Discard</button>
-                <button id="ptOppTab-lostzone" onclick="ptOppSwitchTab('lostzone')" style="flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:#333;color:#aaa;">🌀 Lost Zone</button>
+                <button id="ptOppTab-field"    onclick="ptOppSwitchTab('field')"    style="flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:#e74c3c;color:#fff;">Feld</button>
+                <button id="ptOppTab-discard"  onclick="ptOppSwitchTab('discard')"  style="flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:#333;color:#aaa;">Discard</button>
+                <button id="ptOppTab-lostzone" onclick="ptOppSwitchTab('lostzone')" style="flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:#333;color:#aaa;">Lost Zone</button>
             </div>
             <div id="ptOppPanelContent"></div>
         </div>
@@ -3346,8 +3346,8 @@
     <!-- -- Zoom / Card Search Side Panel -- -->
     <div id="ptZoomPanel" style="position:fixed;top:0;right:0;bottom:0;width:min(96vw,360px);z-index:21500;background:#111827;border-left:2px solid #3B4CCA;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;">
         <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #1f2937;flex-shrink:0;">
-            <span style="color:#FFCB05;font-weight:900;font-size:1.05em;">🔍 Card Zoom &amp; Search</span>
-            <button class="pt-btn pt-danger" onclick="ptZoomClose()">?</button>
+            <span style="color:#FFCB05;font-weight:900;font-size:1.05em;">Card Zoom &amp; Search</span>
+            <button class="pt-btn pt-danger" onclick="ptZoomClose()">Close</button>
         </div>
         <div style="padding:10px 14px;border-bottom:1px solid #1f2937;flex-shrink:0;display:flex;gap:8px;">
             <input id="ptZoomSearch" type="text" placeholder="Search card name�" aria-label="Search card name" oninput="ptRenderZoomPanel(this.value)" style="flex:1;padding:8px 10px;background:#1f2937;color:#fff;border:1px solid #374151;border-radius:6px;font-size:13px;">
@@ -3363,21 +3363,21 @@
 
     <!-- Attack View Modal -->
     <div id="ptAttackModal" style="display:none;position:fixed;inset:0;z-index:23000;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;flex-direction:column;gap:12px;overflow-y:auto;padding:16px 8px;" role="dialog" aria-modal="true" aria-label="Attack view">
-        <div style="color:#FFCB05;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;opacity:0.8;flex-shrink:0;">⚔️ Angriff</div>
+        <div style="color:#FFCB05;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;opacity:0.8;flex-shrink:0;">Angriff</div>
         <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center;width:100%;max-width:960px;">
             <!-- My active Pok�mon large -->
             <div style="text-align:center;flex-shrink:0;">
-                <div style="color:#3B4CCA;font-size:11px;font-weight:700;margin-bottom:6px;">🃏 Mein Aktives</div>
+                <div style="color:#3B4CCA;font-size:11px;font-weight:700;margin-bottom:6px;">Mein Aktives</div>
                 <img id="ptAttackMyImg" src="" style="max-width:min(44vw,320px);max-height:min(65vh,460px);border-radius:10px;display:block;box-shadow:0 8px 40px rgba(59,76,202,0.6);border:2px solid #3B4CCA;" onerror="this.src=''">
                 <div id="ptAttackMyName" style="color:#fff;margin-top:6px;font-weight:700;font-size:13px;"></div>
             </div>
             <!-- Opp panel -->
             <div style="flex:1;min-width:280px;max-width:440px;max-height:min(75vh,560px);overflow-y:auto;background:rgba(20,20,30,0.9);border-radius:10px;border:1px solid rgba(231,76,60,0.45);padding:10px;">
-                <div style="color:#e74c3c;font-size:11px;font-weight:700;margin-bottom:8px;">👁️ Gegner Feld</div>
+                <div style="color:#e74c3c;font-size:11px;font-weight:700;margin-bottom:8px;">Gegner Feld</div>
                 <div id="ptAttackOppContent"></div>
             </div>
         </div>
-        <button onclick="ptCloseAttackView()" style="flex-shrink:0;background:#c0392b;color:#fff;border:2px solid #e74c3c;border-radius:8px;padding:10px 28px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:.5px;">⚔️ Angriff &amp; Zug beenden</button>
+        <button onclick="ptCloseAttackView()" style="flex-shrink:0;background:#c0392b;color:#fff;border:2px solid #e74c3c;border-radius:8px;padding:10px 28px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:.5px;">Angriff &amp; Zug beenden</button>
         <div style="color:#888;font-size:11px;flex-shrink:0;">Zug wird beendet &amp; Gegner zieht eine Karte</div>
     </div>
 
@@ -3391,8 +3391,8 @@
 
     <div id="ptHotkeyModal" style="display:none;position:fixed;top:50%;left:50%; transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e; border:2px solid #3B4CCA;border-radius:12px;padding:24px;color:#fff; font-family:monospace;font-size:13px;min-width:320px;box-shadow:0 10px 30px rgba(0,0,0,0.8);" role="dialog" aria-modal="true" aria-label="Hotkey reference">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <h3 style="margin:0;color:#FFCB05;">⌨️ Hotkeys</h3>
-            <button class="pt-btn pt-danger" onclick="document.getElementById('ptHotkeyModal').style.display='none'">?</button>
+            <h3 style="margin:0;color:#FFCB05;">Hotkeys</h3>
+            <button class="pt-btn pt-danger" onclick="document.getElementById('ptHotkeyModal').style.display='none'">Close</button>
         </div>
         <table style="width:100%;border-collapse:collapse;">
             <tr><td style="padding:4px 8px;color:#a8e6cf;"><b>D</b></td><td style="padding:4px 8px;">Draw 1 card</td></tr>
@@ -3417,12 +3417,12 @@
 
     <div id="ptTopCardsModal" style="display:none;position:fixed;top:50%;left:50%; transform:translate(-50%,-50%);z-index:20000;background:#1a1a2e; border:2px solid #FFCB05;border-radius:12px;padding:20px; min-width:360px;max-width:95vw;max-height:80vh;overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.9);" role="dialog" aria-modal="true" aria-label="Top deck control">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-            <h3 style="margin:0;color:#FFCB05;">&#128301; Top Deck Control</h3>
-            <button class="pt-btn pt-danger" onclick="ptCloseTopCards()">?</button>
+            <h3 style="margin:0;color:#FFCB05;">Top Deck Control</h3>
+            <button class="pt-btn pt-danger" onclick="ptCloseTopCards()">Close</button>
         </div>
         <div id="ptTopCardsContent"><div id="ptTopCardsGrid" style="display:flex;flex-wrap:wrap;gap:15px;justify-content:center;"></div></div>
         <div style="display:flex;gap:8px;margin-top:14px;justify-content:center;flex-wrap:wrap;">
-            <button class="pt-btn" style="background:#2a52be;border-color:#3B4CCA;" onclick="ptShuffleRemainingLookedCardsIntoDeck()">🔀 Shuffle Rest Into Deck</button>
+            <button class="pt-btn" style="background:#2a52be;border-color:#3B4CCA;" onclick="ptShuffleRemainingLookedCardsIntoDeck()">Shuffle Rest Into Deck</button>
             <button class="pt-btn" onclick="ptCloseTopCards()">Done (return to deck)</button>
         </div>
     </div>
@@ -3430,17 +3430,17 @@
     <div id="ptDeckSearchModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.85); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDeckSearch()" role="dialog" aria-modal="true" aria-label="Deck search">
         <div style="background:#2a2a2a;border-radius:12px;padding:20px;max-width:90vw;width:860px;max-height:90vh;overflow-y:auto;border:2px solid #3B4CCA;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
-                <h3 style="color:#fff;margin:0;">🔍 Deck durchsuchen</h3>
+                <h3 style="color:#fff;margin:0;">Deck durchsuchen</h3>
                 <div style="display:flex;gap:8px;align-items:center;">
                     <span style="color:#aaa;font-size:12px;">Klick�=�Hand�|�Rechtsklick�=�Lost�Zone</span>
-                    <button class="pt-btn pt-danger" onclick="ptCloseDeckSearch()">?</button>
+                    <button class="pt-btn pt-danger" onclick="ptCloseDeckSearch()">Close</button>
                 </div>
             </div>
             <!-- Sort toolbar -->
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
                 <span style="color:#aaa;font-size:11px;flex-shrink:0;">Sortierung:</span>
-                <button id="ptDSortDeck" onclick="_ptSetDeckSort('deck')" style="padding:4px 10px;font-size:11px;border:1px solid #3B4CCA;border-radius:5px;cursor:pointer;background:#2a52be;color:#fff;">📋 Deck-Reihenfolge</button>
-                <button id="ptDSortType" onclick="_ptSetDeckSort('type')" style="padding:4px 10px;font-size:11px;border:1px solid #555;border-radius:5px;cursor:pointer;background:#333;color:#ccc;">📊 Pok�mon ? Supporter ? Item ? Tool ? Stadion ? Energie</button>
+                <button id="ptDSortDeck" onclick="_ptSetDeckSort('deck')" style="padding:4px 10px;font-size:11px;border:1px solid #3B4CCA;border-radius:5px;cursor:pointer;background:#2a52be;color:#fff;">Deck-Reihenfolge</button>
+                <button id="ptDSortType" onclick="_ptSetDeckSort('type')" style="padding:4px 10px;font-size:11px;border:1px solid #555;border-radius:5px;cursor:pointer;background:#333;color:#ccc;">Pok�mon › Supporter › Item › Tool › Stadion › Energie</button>
             </div>
             <div id="ptDeckSearchGrid" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;"></div>
         </div>
@@ -3449,13 +3449,13 @@
     <div id="ptDiscardModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0; z-index:16000;background:rgba(0,0,0,0.82); align-items:center;justify-content:center;" onclick="if(event.target===this)ptCloseDiscardModal()" role="dialog" aria-modal="true" aria-label="Discard pile">
         <div style="background:#2a2a2a;border-radius:12px;padding:20px; max-width:90vw;max-height:85vh;overflow-y:auto;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;">
-                <h3 id="ptDiscardModalTitle" style="color:#fff;margin:0;">🗑️ Discard Pile</h3>
-                <button class="pt-btn pt-danger" onclick="ptCloseDiscardModal()">?</button>
+                <h3 id="ptDiscardModalTitle" style="color:#fff;margin:0;">Discard Pile</h3>
+                <button class="pt-btn pt-danger" onclick="ptCloseDiscardModal()">Close</button>
             </div>
             <div id="ptDiscardSortBar" style="display:none;align-items:center;gap:6px;margin-bottom:12px;">
                 <span style="font-size:11px;color:#aaa;">Sortierung:</span>
-                <button id="ptDscSortOrder" onclick="ptSetDiscardSort('order')" style="border:1px solid #3B4CCA;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#2a52be;color:#fff;">📋 Reihenfolge</button>
-                <button id="ptDscSortType"  onclick="ptSetDiscardSort('type')"  style="border:1px solid #555;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#333;color:#ccc;">📊 Typ</button>
+                <button id="ptDscSortOrder" onclick="ptSetDiscardSort('order')" style="border:1px solid #3B4CCA;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#2a52be;color:#fff;">Reihenfolge</button>
+                <button id="ptDscSortType"  onclick="ptSetDiscardSort('type')"  style="border:1px solid #555;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;background:#333;color:#ccc;">Typ</button>
             </div>
             <div id="ptDiscardGrid" style="display:flex;flex-wrap:wrap;gap:9px;"></div>
         </div>
@@ -3464,20 +3464,20 @@
     <!-- My Decks Playtest Modal -->
     <div id="myDecksPlaytestModal" class="rarity-switcher-modal" onclick="if(event.target===this)closeMyDecksPlaytest()" style="z-index: 20000; display: none;" role="dialog" aria-modal="true" aria-label="My Decks playtest selector">
         <div class="rarity-switcher-modal-content" style="max-width: 500px; background: #f8f9fa;">
-            <span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()" aria-label="Close" data-i18n-aria="btn.close">?</span>
-            <h2 style="margin-top: 0; color: #27ae60; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">🎮 Playtest � My Decks</h2>
+            <span class="rarity-switcher-close" onclick="closeMyDecksPlaytest()" aria-label="Close" data-i18n-aria="btn.close">&times;</span>
+            <h2 style="margin-top: 0; color: #27ae60; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">Playtest � My Decks</h2>
             <p style="color: #555; margin-bottom: 20px;">Choose a deck for each player, then start the match!</p>
             <div style="margin-bottom: 16px;">
-                <label for="myDeckSelectP1" style="display: block; font-weight: 700; margin-bottom: 6px; color: #3B4CCA;">Player 1 🔵</label>
+                <label for="myDeckSelectP1" style="display: block; font-weight: 700; margin-bottom: 6px; color: #3B4CCA;">Player 1</label>
                 <select id="myDeckSelectP1" style="width: 100%; padding: 10px 12px; border: 2px solid #3B4CCA; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
             </div>
             <div style="margin-bottom: 24px;">
-                <label for="myDeckSelectP2" style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;">Player 2 🔴</label>
+                <label for="myDeckSelectP2" style="display: block; font-weight: 700; margin-bottom: 6px; color: #E3350D;">Player 2</label>
                 <select id="myDeckSelectP2" style="width: 100%; padding: 10px 12px; border: 2px solid #E3350D; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;"></select>
             </div>
             <div style="display: flex; gap: 12px;">
                 <button onclick="closeMyDecksPlaytest()" style="flex:1; padding:12px; background:#e1e8ed; color:#2c3e50; font-weight:700; border:2px solid #ccd6dd; border-radius:8px; cursor:pointer; font-size:14px;">Cancel</button>
-                <button onclick="startMyDecksPlaytest()" style="flex:2; padding:12px; background:linear-gradient(135deg,#27ae60 0%,#1e8449 100%); color:white; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-size:14px; box-shadow:0 4px 10px rgba(39,174,96,0.3);">▶️ Start Playtest</button>
+                <button onclick="startMyDecksPlaytest()" style="flex:2; padding:12px; background:linear-gradient(135deg,#27ae60 0%,#1e8449 100%); color:white; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-size:14px; box-shadow:0 4px 10px rgba(39,174,96,0.3);">Start Playtest</button>
             </div>
         </div>
     </div>
@@ -3485,8 +3485,8 @@
     <!-- Playtester Setup Modal -->
     <div id="playtesterSetupModal" class="rarity-switcher-modal" onclick="if(event.target === this) closePlaytesterSetup()" style="z-index: 20000; display: none;" role="dialog" aria-modal="true" aria-label="Playtester setup">
         <div class="rarity-switcher-modal-content" style="max-width: 600px; background: #f8f9fa;">
-            <span class="rarity-switcher-close" onclick="closePlaytesterSetup()">?</span>
-            <h2 style="margin-top: 0; color: #3B4CCA; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">🎮 Playtester Setup</h2>
+            <span class="rarity-switcher-close" onclick="closePlaytesterSetup()">&times;</span>
+            <h2 style="margin-top: 0; color: #3B4CCA; border-bottom: 2px solid #e1e8ed; padding-bottom: 10px;">Playtester Setup</h2>
             <p style="margin-bottom: 15px; color: #555; font-size: 1.05em;">
                 Your current deck <strong>(Player 1)</strong> is ready. What should <strong>Player 2</strong> play?
             </p>
@@ -3496,10 +3496,10 @@
             </div>
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                 <button class="btn" onclick="startPlaytesterWithMirror()" style="flex: 1; background: #e1e8ed; color: #2c3e50; font-weight: bold; border: 2px solid #ccd6dd; padding: 12px; border-radius: 8px; cursor: pointer;">
-                    🪞 Mirror Match (Same Deck)
+                    Mirror Match (Same Deck)
                 </button>
                 <button class="btn" onclick="startPlaytesterWithOpponent()" style="flex: 1; background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%); color: white; font-weight: bold; border: none; box-shadow: 0 4px 10px rgba(39,174,96,0.3); padding: 12px; border-radius: 8px; cursor: pointer;">
-                    ▶️ Start vs. Opponent
+                    Start vs. Opponent
                 </button>
             </div>
         </div>
@@ -3508,11 +3508,11 @@
     <div id="ptCardContextMenu" class="pt-card-context-menu" oncontextmenu="return false;"
          onmouseenter="ptCancelMenuClose()" onmouseleave="ptScheduleMenuClose()">
         <div class="pt-menu-row">
-            <div class="pt-status-btn" title="Poison"    onclick="ptMenuAction('status','poison')">☠️</div>
-            <div class="pt-status-btn" title="Burn"      onclick="ptMenuAction('status','burn')">🔥</div>
-            <div class="pt-status-btn" title="Asleep"    onclick="ptMenuAction('status','asleep')">💤</div>
-            <div class="pt-status-btn" title="Paralyzed" onclick="ptMenuAction('status','paralyzed')">?</div>
-            <div class="pt-status-btn" title="Confused"  onclick="ptMenuAction('status','confused')">😵</div>
+            <div class="pt-status-btn" title="Poison"    onclick="ptMenuAction('status','poison')">PSN</div>
+            <div class="pt-status-btn" title="Burn"      onclick="ptMenuAction('status','burn')">BRN</div>
+            <div class="pt-status-btn" title="Asleep"    onclick="ptMenuAction('status','asleep')">SLP</div>
+            <div class="pt-status-btn" title="Paralyzed" onclick="ptMenuAction('status','paralyzed')">PAR</div>
+            <div class="pt-status-btn" title="Confused"  onclick="ptMenuAction('status','confused')">CNF</div>
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
@@ -3523,14 +3523,14 @@
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
-            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','hand')"    title="Auf die Hand">?</button>
-            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','deck')"    title="Ins Deck mischen">🔀</button>
-            <button class="pt-menu-btn red"  onclick="ptMenuAction('utility','discard')" title="Ablagestapel">🗑️</button>
-            <button class="pt-menu-btn" style="background:#c0392b;color:#fff;" onclick="ptMenuAction('utility','retreat')" title="Bench ? Aktiv tauschen (Retreat)">🔄 Retreat</button>
+            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','hand')"    title="Auf die Hand">Hand</button>
+            <button class="pt-menu-btn blue" onclick="ptMenuAction('utility','deck')"    title="Ins Deck mischen">Deck</button>
+            <button class="pt-menu-btn red"  onclick="ptMenuAction('utility','discard')" title="Ablagestapel">Discard</button>
+            <button class="pt-menu-btn" style="background:#c0392b;color:#fff;" onclick="ptMenuAction('utility','retreat')" title="Bench � Aktiv tauschen (Retreat)">Retreat</button>
         </div>
         <div class="pt-menu-sep"></div>
         <div class="pt-menu-row">
-            <button class="pt-menu-btn red" style="width:100%;font-weight:800;" onclick="ptMenuAction('utility','ko')" title="Pok�mon sofort K.O. setzen">💀 K.O.</button>
+            <button class="pt-menu-btn red" style="width:100%;font-weight:800;" onclick="ptMenuAction('utility','ko')" title="Pok�mon sofort K.O. setzen">K.O.</button>
         </div>
     </div>
 
@@ -3538,7 +3538,7 @@
     <div id="ptContextMenu">
         <div id="ptContextHeader">
             <span id="ptContextCardName">Karte</span>
-            <button id="ptContextClose" onclick="ptHideContextMenu()" aria-label="Schlie�en">�</button>
+            <button id="ptContextClose" onclick="ptHideContextMenu()" aria-label="Schlie� en">&times;</button>
         </div>
         <div id="ptContextActions">
             <!-- Buttons werden dynamisch erstellt -->
@@ -3602,11 +3602,11 @@
                         <span class="battle-journal-label" data-i18n="bj.tournamentType">Tournament Type</span>
                         <input id="battleJournalType" type="hidden" value="">
                         <div id="battleJournalTypeGroup" class="bj-type-chip-group">
-                            <button type="button" class="bj-type-chip" data-value="Regional/SPE/IC" onclick="selectJournalType('Regional/SPE/IC')">🏆 Regional/SPE/IC</button>
-                            <button type="button" class="bj-type-chip" data-value="Challenge" onclick="selectJournalType('Challenge')">🎯 Challenge</button>
-                            <button type="button" class="bj-type-chip" data-value="Cup" onclick="selectJournalType('Cup')">🥤 Cup</button>
-                            <button type="button" class="bj-type-chip" data-value="Online" onclick="selectJournalType('Online')">🌐 Online</button>
-                            <button type="button" class="bj-type-chip" data-value="Testing" onclick="selectJournalType('Testing')">🧪 Testing</button>
+                            <button type="button" class="bj-type-chip" data-value="Regional/SPE/IC" onclick="selectJournalType('Regional/SPE/IC')">Regional/SPE/IC</button>
+                            <button type="button" class="bj-type-chip" data-value="Challenge" onclick="selectJournalType('Challenge')">Challenge</button>
+                            <button type="button" class="bj-type-chip" data-value="Cup" onclick="selectJournalType('Cup')">Cup</button>
+                            <button type="button" class="bj-type-chip" data-value="Online" onclick="selectJournalType('Online')">Online</button>
+                            <button type="button" class="bj-type-chip" data-value="Testing" onclick="selectJournalType('Testing')">Testing</button>
                         </div>
                     </div>
                 </div>
@@ -3802,7 +3802,7 @@
 
     function showUpdateToast() {
         var toast = document.createElement('div');
-        toast.textContent = '🔄 Neue Version wird geladen�';
+        toast.textContent = 'Neue Version wird geladen…';
         toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);' +
             'background:#1a73e8;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;' +
             'z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.3);transition:opacity .5s;';

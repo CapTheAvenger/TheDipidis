@@ -257,7 +257,7 @@ function runComboCalculation() {
     }
 
     const display = document.getElementById('comboResultDisplay');
-    if (display) display.textContent = `⏳ ${t('draw.calculating')}`;
+    if (display) display.textContent = `${t('draw.calculating')}`;
 
     calculateComboChance(_simulatorDeck, _comboTargets).then(chance => {
         if (display) {

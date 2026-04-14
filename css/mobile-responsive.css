@@ -182,13 +182,15 @@
 @media (max-width: 768px) {
     .proxy-action-btns-flex {
         display: flex !important;
-        flex-direction: column !important;
-        gap: 10px !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: center !important;
     }
     
     .proxy-action-btns-flex .btn,
     .proxy-action-btns-flex button {
-        width: 100% !important;
+        flex: 1 1 auto !important;
+        min-width: 120px !important;
     }
 }
 
@@ -303,16 +305,18 @@
         gap: 8px !important;
     }
     
-    /* Proxy panel button rows stack */
+    /* Proxy panel button rows wrap */
     .proxy-panel-btn-row {
         display: flex !important;
-        flex-direction: column !important;
+        flex-wrap: wrap !important;
         gap: 8px !important;
+        justify-content: center !important;
     }
     
     .proxy-panel-btn-row button,
     .proxy-panel-btn-row .btn {
-        width: 100% !important;
+        flex: 1 1 auto !important;
+        min-width: 120px !important;
     }
 }
 
@@ -649,7 +653,7 @@
     }
 }
 
-/* === STEP 3: TOUCH TARGETS (>=44px) === */
+/* === STEP 3: TOUCH TARGETS (>=38px) === */
 @media (max-width: 768px) {
     .btn-modern,
     .tab-btn,
@@ -667,7 +671,7 @@
     input:not([type="hidden"]),
     select,
     textarea {
-        min-height: 44px !important;
+        min-height: 38px !important;
     }
 
     .btn-modern,
@@ -678,8 +682,8 @@
     .pt-side-btn,
     .pt-stepper-btn,
     .pt-stepper-action {
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
     }
 
     .pt-bottom-input,
@@ -1107,17 +1111,30 @@
     }
     .saved-deck-item .deck-action-buttons {
         flex-wrap: wrap !important;
-        gap: 6px !important;
+        gap: 5px !important;
         width: 100%;
         justify-content: flex-start !important;
+        margin-top: 8px;
     }
-    .saved-deck-item .deck-action-buttons button {
-        padding: 5px 10px !important;
-        font-size: 0.85em !important;
+    .saved-deck-item .deck-action-buttons .deck-action-btn {
+        padding: 4px 8px !important;
+        font-size: 0.72em !important;
+        flex: 0 0 auto;
+        min-height: 30px;
     }
     .saved-deck-item .deck-action-buttons div[id$="-arrow"] {
         margin-left: auto;
+        font-size: 1.2em;
     }
 }
 
 /* End of Mobile Responsive CSS — SCHRITT 1 */
+
+/* === DECK ACTION BUTTONS – Smartphone (<=480px) === */
+@media (max-width: 480px) {
+    .saved-deck-item .deck-action-buttons .deck-action-btn {
+        padding: 3px 7px !important;
+        font-size: 0.7em !important;
+        min-height: 28px;
+    }
+}

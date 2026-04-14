@@ -620,8 +620,8 @@
         els.overlay.classList.toggle('is-dark', isDark);
         if (els.themeToggle) {
             els.themeToggle.textContent = isDark
-                ? battleJournalText('bj.themeLight', '☀️ Light')
-                : battleJournalText('bj.themeDark', '🌙 Dark');
+                ? battleJournalText('bj.themeLight', 'Light')
+                : battleJournalText('bj.themeDark', 'Dark');
         }
     }
 
@@ -1001,7 +1001,7 @@
 
             html += `<div class="bj-meta-folder">
                 <div class="bj-meta-folder-header" onclick="this.parentElement.classList.toggle('is-collapsed')">
-                    <span class="bj-meta-folder-icon">📂</span>
+                    <span class="bj-meta-folder-icon"></span>
                     <span class="bj-meta-folder-label">${escapeHtml(metaLabel)}</span>
                     <span class="bj-meta-folder-stats">${mW}W ${mL}L ${mT}T</span>
                     <span class="bj-meta-folder-chevron">▾</span>
@@ -1027,9 +1027,9 @@
                             <strong class="bj-tournament-name">${escapeHtml(tournLabel)}</strong>
                             <span class="bj-tournament-record">${tW}-${tL}-${tT} (${tWinRate}%)</span>
                         </div>
-                        <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">➕</button>
-                        <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">✏️</button>
-                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">📸</button>
+                        <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">+ Match</button>
+                        <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">Edit</button>
+                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">Share</button>
                     </div>`;
 
                 entries.forEach(entry => {
@@ -1047,7 +1047,7 @@
 
     function _buildHistoryItemHtml(entry, locale) {
         const resultClass = entry.result === 'win' ? 'is-win' : (entry.result === 'loss' ? 'is-loss' : 'is-tie');
-        const resultEmoji = entry.result === 'win' ? '✅' : (entry.result === 'loss' ? '❌' : '🟡');
+        const resultEmoji = entry.result === 'win' ? 'W' : (entry.result === 'loss' ? 'L' : 'T');
         const resultText = entry.result === 'win' ? battleJournalText('bj.win', 'Win')
             : entry.result === 'loss' ? battleJournalText('bj.loss', 'Loss')
             : battleJournalText('bj.tie', 'Tie');
@@ -1082,9 +1082,9 @@
                     <div class="bj-history-clip">${escapeHtml(clipText)}</div>
                 </div>
                 <div class="bj-history-actions">
-                    <button type="button" class="bj-history-edit-btn" onclick="openEditEntryModal('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.editEntry', 'Edit'))}">✏️</button>
-                    <button type="button" class="bj-history-delete-btn" onclick="deleteJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.deleteEntry', 'Delete'))}">🗑️</button>
-                    <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">📋</button>
+                    <button type="button" class="bj-history-edit-btn" onclick="openEditEntryModal('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.editEntry', 'Edit'))}">Edit</button>
+                    <button type="button" class="bj-history-delete-btn" onclick="deleteJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.deleteEntry', 'Delete'))}">Del</button>
+                    <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">Copy</button>
                     <span class="battle-journal-result-pill ${resultClass}">${resultEmoji} ${escapeHtml(resultText)}</span>
                 </div>
             </div>

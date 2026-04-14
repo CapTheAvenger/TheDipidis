@@ -281,7 +281,7 @@ async function saveCurrentDeckToProfile(source) {
     await db.collection('users').doc(user.uid)
       .collection('decks').add(deckData);
     
-    showNotification(`Deck "${trimmedName}" saved successfully! 🎉`, 'success');
+    showNotification(`Deck "${trimmedName}" saved successfully!`, 'success');
     
     // Reload user decks
     await loadUserDecks(user.uid);
@@ -820,7 +820,7 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
             <div style="padding: 8px; background: white;">
               <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
               <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
-              <div style="font-size: 0.8em; color: #27ae60; font-weight: 600; margin-top: 4px;">💰 ${priceDisplay}</div>
+              <div style="font-size: 0.8em; color: #27ae60; font-weight: 600; margin-top: 4px;">${priceDisplay}</div>
             </div>
           </div>
         `);
@@ -839,10 +839,10 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
     } else if (searchFilter) {
       collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current search filter.', icon: 'cards' });
     } else {
-      collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: '➕ Browse Cards', buttonOnclick: "switchTab('cards')" });
+      collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: 'Browse Cards', buttonOnclick: "switchTab('cards')" });
     }
   } else if (collectionGrid) {
-    collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: '➕ Browse Cards', buttonOnclick: "switchTab('cards')" });
+    collectionGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Collection is empty!', description: 'Start adding cards by clicking the \"＋\" button on any card image in the Cards tab.', icon: 'professor', buttonText: 'Browse Cards', buttonOnclick: "switchTab('cards')" });
   }
 
   // Update tab counter
@@ -955,7 +955,7 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
       if (cardSet) setsInWishlist.add(cardSet);
     });
     const currentVal = setDropdown.value;
-    setDropdown.innerHTML = '<option value="">📦 All Sets</option>';
+    setDropdown.innerHTML = '<option value="">All Sets</option>';
     [...setsInWishlist].sort().forEach(s => {
       const opt = document.createElement('option');
       opt.value = s;
@@ -1040,8 +1040,8 @@ function updateWishlistUI(searchFilter = '', setFilter = '') {
               <button onclick="addOwnedFromWishlist('${safeCardIdJs}')" style="background: #4CAF50; color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; line-height: 1;" title="Add to collection (owned: ${ownedCount})">+</button>
             </div>
             ${cmUrl
-              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">💰 ${priceDisplay}</a>`
-              : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">💰 ${priceDisplay}</div>`}
+              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
+              : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">${priceDisplay}</div>`}
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
               <span style="font-size: 0.72em; color: #8e44ad; font-weight: 600;">Max:</span>
               <input type="text" inputmode="decimal" value="${maxPriceVal}" placeholder="—"
@@ -1288,7 +1288,7 @@ function updateDecksUI() {
   }
 
   if (!window.userDecks || window.userDecks.length === 0) {
-    decksGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No saved Decks yet!', description: 'Build a deck in the City League or Current Meta tab and save it to see it here.', icon: 'pokeball', buttonText: '🏗️ Build a Deck', buttonOnclick: "switchTab('cityLeague')" });
+    decksGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No saved Decks yet!', description: 'Build a deck in the City League or Current Meta tab and save it to see it here.', icon: 'pokeball', buttonText: 'Build a Deck', buttonOnclick: "switchTab('cityLeague')" });
     return;
   }
   
@@ -1297,7 +1297,7 @@ function updateDecksUI() {
     console.warn('[updateDecksUI] Card database not loaded yet. Showing decks without card images.');
     decksGrid.innerHTML = `
       <div style="background: #fff8dc; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-        <p style="margin: 0; color: #856404;">⏳ Loading card database... Deck cards will appear once loaded.</p>
+        <p style="margin: 0; color: #856404;">Loading card database... Deck cards will appear once loaded.</p>
       </div>
       ${window.userDecks.map(deck => {
         const totalCards = deck.totalCards || Object.values(deck.cards || {}).reduce((sum, count) => sum + count, 0);
@@ -1312,10 +1312,10 @@ function updateDecksUI() {
               <strong>Archetype:</strong> ${safeArchetypeHtml}
             </p>
             <p style="color: #34495e; margin: 10px 0; font-weight: 600;">
-              🎴 ${totalCards} Cards (${uniqueCards} Unique)
+              ${totalCards} Cards (${uniqueCards} Unique)
             </p>
             <button onclick="deleteDeck('${safeDeckIdJs}')" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-              🗑️ Delete
+              Delete
             </button>
           </div>
         `;
@@ -1573,7 +1573,7 @@ function updateDecksUI() {
         const safeCardmarketTitleHtml = escapeHtml(eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available');
         const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber, window.userCollectionCounts);
         const otherPrintSparkle = otherPrintOwnedCount > 0
-          ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Owned other INT prints: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));">✨</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
+          ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Owned other INT prints: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));"></span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
           : '';
         
         cardsHtml += `
@@ -1624,40 +1624,40 @@ function updateDecksUI() {
               ${safeDeckArchetypeHtml} • ${totalCards} Cards (${uniqueCards} Unique)
             </div>
             <div style="font-size: 0.75em; opacity: 0.7; margin-top: 2px;">
-              ${deck.folder ? '📁 ' + safeFolderHtml + ' • ' : ''}🕐 ${safeCreatedHtml}
+              ${deck.folder ? safeFolderHtml + ' • ' : ''}${safeCreatedHtml}
             </div>
           </div>
-          <div class="deck-action-buttons" style="display: flex; align-items: center; gap: 8px;">
-            <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" style="padding: 6px 12px; background: ${isActive ? 'rgba(76,175,80,0.95)' : 'rgba(255,255,255,0.25)'}; color: white; border: ${isActive ? '2px solid #fff' : '2px solid rgba(255,255,255,0.5)'}; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
-              ${isActive ? '✅' : '⬜'}
+          <div class="deck-action-buttons" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <button onclick="event.stopPropagation(); toggleDeckActive('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-irl${isActive ? ' deck-btn-irl--active' : ''}" title="${isActive ? (getLang()==='de' ? 'Als nicht gebaut markieren' : 'Mark as not built') : (getLang()==='de' ? 'Als IRL gebaut markieren' : 'Mark as IRL built')}">
+              IRL ${isActive ? '✓' : ''}
             </button>
-            <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(155, 89, 182, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#8e44ad'" onmouseout="this.style.background='rgba(155, 89, 182, 0.9)'" title="Compare with another deck">
-              ⚖️
+            <button onclick="event.stopPropagation(); openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="Compare with another deck">
+              ${getLang()==='de' ? 'Vergleich' : 'Compare'}
             </button>
-            <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" style="padding: 6px 12px; background: rgba(241, 196, 15, 0.9); color: #333; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#f39c12'" onmouseout="this.style.background='rgba(241, 196, 15, 0.9)'" title="Move to folder">
-              📁
+            <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" class="deck-action-btn deck-btn-folder" title="Move to folder">
+              ${getLang()==='de' ? 'Ordner' : 'Folder'}
             </button>
-            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(52, 152, 219, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#2980b9'" onmouseout="this.style.background='rgba(52, 152, 219, 0.9)'" title="Copy deck list">
-              📋
+            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="Copy deck list">
+              ${getLang()==='de' ? 'Kopieren' : 'Copy'}
             </button>
-            <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" style="padding: 6px 12px; background: rgba(230, 126, 34, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#d35400'" onmouseout="this.style.background='rgba(230, 126, 34, 0.9)'" title="Copy & open Limitless Builder">
-              🏆
+            <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-limitless" title="Copy &amp; open Limitless Builder">
+              Limitless
             </button>
-            <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" style="padding: 6px 12px; background: rgba(26, 188, 156, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#16a085'" onmouseout="this.style.background='rgba(26, 188, 156, 0.9)'" title="Save as image">
-              📸
+            <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" class="deck-action-btn deck-btn-export" title="Save as image">
+              ${getLang()==='de' ? 'Bild' : 'Image'}
             </button>
-            <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" style="padding: 6px 12px; background: rgba(142, 68, 173, 0.7); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#7d3c98'" onmouseout="this.style.background='rgba(142, 68, 173, 0.7)'" title="Rename deck">
-              ✏️
+            <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" class="deck-action-btn deck-btn-rename" title="Rename deck">
+              ${getLang()==='de' ? 'Umbenennen' : 'Rename'}
             </button>
-            <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" style="padding: 6px 12px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s;" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='rgba(231, 76, 60, 0.9)'" title="Delete deck">
-              🗑️
+            <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-delete" title="Delete deck">
+              ${getLang()==='de' ? 'Löschen' : 'Delete'}
             </button>
-            <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg);">▼</div>
+            <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg); margin-left: auto;">▼</div>
           </div>
         </div>
         <div id="${deckId}" style="display: none; padding: 15px; background: #f8f9fa;">
           <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-            <button onclick="openCompareSavedDeck(${deckIndex})" style="padding: 6px 12px; background: #8e44ad; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 0.85em;" title="Compare this deck">⚖️ Compare</button>
+            <button onclick="openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="Compare this deck">Compare</button>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
             ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
@@ -1750,7 +1750,7 @@ function compareActiveDecks() {
   modal.innerHTML = `
     <div style="background:#1a1a2e;border-radius:14px;max-width:500px;width:100%;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,0.35);color:#eee;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <h2 style="margin:0;font-size:1.2em;color:#4CAF50;">⚖️ ${isDE ? 'Gebaute Decks vergleichen' : 'Compare Built Decks'}</h2>
+        <h2 style="margin:0;font-size:1.2em;color:#4CAF50;">${isDE ? 'Gebaute Decks vergleichen' : 'Compare Built Decks'}</h2>
         <button onclick="this.closest('#compare-active-modal').remove()" style="background:none;border:none;color:#aaa;font-size:24px;cursor:pointer;">✕</button>
       </div>
       <p style="color:#bbb;font-size:0.9em;margin:0 0 16px;">${isDE ? 'Wähle 2 deiner gebauten Decks zum Vergleichen:' : 'Choose 2 of your built decks to compare:'}</p>
@@ -1770,7 +1770,7 @@ function compareActiveDecks() {
       </div>
       <div style="display:flex;justify-content:flex-end;gap:8px;">
         <button onclick="this.closest('#compare-active-modal').remove()" style="padding:10px 20px;border:1px solid #555;border-radius:8px;background:transparent;color:#aaa;cursor:pointer;font-weight:600;">${isDE ? 'Abbrechen' : 'Cancel'}</button>
-        <button id="compare-active-run" style="padding:10px 20px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer;font-weight:700;">⚖️ ${isDE ? 'Vergleichen' : 'Compare'}</button>
+        <button id="compare-active-run" style="padding:10px 20px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer;font-weight:700;">${isDE ? 'Vergleichen' : 'Compare'}</button>
       </div>
     </div>
   `;
@@ -2312,7 +2312,7 @@ async function showDeckFolderSelectModal(options = {}) {
     folders.forEach(folder => {
       const option = document.createElement('option');
       option.value = folder;
-      option.textContent = `📁 ${folder}`;
+      option.textContent = folder;
       select.appendChild(option);
     });
 
@@ -2441,7 +2441,7 @@ async function createDeckFolder() {
     return;
   }
   await persistDeckFolderName(trimmed);
-  showNotification(`Folder "${trimmed}" created. Use the 📁 button on a deck to move it.`, 'success');
+  showNotification(`Folder "${trimmed}" created. Use the Folder button on a deck to move it.`, 'success');
   renderFolderNav();
 }
 
@@ -2487,7 +2487,7 @@ function renderFolderNav() {
     folders.map(f => {
       const safe = escapeHtml(f);
       const safeJs = escapeJsSingleQuoted(f);
-      return `<button onclick="filterDecksByFolder('${safeJs}')" style="padding: 6px 14px; background: #f0f0f0; color: #333; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">📁 ${safe}</button>`;
+      return `<button onclick="filterDecksByFolder('${safeJs}')" style="padding: 6px 14px; background: #f0f0f0; color: #333; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">${safe}</button>`;
     }).join('');
 }
 
@@ -2623,7 +2623,7 @@ function renderFolderSummary(folder) {
   let html = `
     <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 12px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-        <h3 style="margin: 0; font-size: 1.2em;">📊 ${isDE ? 'Ordner-Analyse' : 'Folder Analysis'}: ${escapeHtml(folder)}</h3>
+        <h3 style="margin: 0; font-size: 1.2em;">${isDE ? 'Ordner-Analyse' : 'Folder Analysis'}: ${escapeHtml(folder)}</h3>
         <div style="font-size: 0.85em; opacity: 0.8;">
           ${totalDecks} ${isDE ? 'Deck-Versionen' : 'Deck Versions'} • ${coreTotal} ${isDE ? 'Core-Karten' : 'Core Cards'} • ${flexCards.length + techCards.length} ${isDE ? 'variable Slots' : 'Flex Slots'}
         </div>
@@ -2633,7 +2633,7 @@ function renderFolderSummary(folder) {
   // Core Section
   if (coreCards.length > 0) {
     html += buildSummarySection(
-      isDE ? '🔒 Core (100% identisch)' : '🔒 Core (100% identical)',
+      isDE ? 'Core (100% identisch)' : 'Core (100% identical)',
       `${coreCards.length} ${isDE ? 'Karten' : 'cards'}, ${coreTotal} ${isDE ? 'Kopien' : 'copies'}`,
       coreCards,
       '#4CAF50',
@@ -2644,7 +2644,7 @@ function renderFolderSummary(folder) {
   // Flex Section (in all decks, varying count)
   if (flexCards.length > 0) {
     html += buildSummarySection(
-      isDE ? '🔄 Flex (in allen Decks, variabler Count)' : '🔄 Flex (in all decks, varying count)',
+      isDE ? 'Flex (in allen Decks, variabler Count)' : 'Flex (in all decks, varying count)',
       `${flexCards.length} ${isDE ? 'Karten' : 'cards'}`,
       flexCards,
       '#FF9800',
@@ -2655,7 +2655,7 @@ function renderFolderSummary(folder) {
   // Tech Section (not in all decks)
   if (techCards.length > 0) {
     html += buildSummarySection(
-      isDE ? '🧪 Tech (nicht in allen Versionen)' : '🧪 Tech (not in all versions)',
+      isDE ? 'Tech (nicht in allen Versionen)' : 'Tech (not in all versions)',
       `${techCards.length} ${isDE ? 'Karten' : 'cards'}`,
       techCards,
       '#E91E63',
@@ -2838,14 +2838,14 @@ async function openCompareSavedDeck(deckIndex) {
   modal.innerHTML = `
     <div style="background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.35);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <h2 style="margin:0;font-size:1.25em;">⚖️ Compare Deck: ${safeBaseDeckName}</h2>
+        <h2 style="margin:0;font-size:1.25em;">Compare Deck: ${safeBaseDeckName}</h2>
         <button id="deck-compare-source-close" style="background:none;border:none;font-size:24px;cursor:pointer;line-height:1;">✕</button>
       </div>
       <p style="margin:0 0 14px 0;color:#555;">${getLang()==='de' ? 'Wähle, womit du vergleichen möchtest:' : 'Choose what to compare with:'}</p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-        <button id="compare-source-paste" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">${getLang()==='de' ? '📋 Limitless / PTCGL Liste einfügen' : '📋 Paste Limitless / PTCGL list'}</button>
-        <button id="compare-source-saved" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">${getLang()==='de' ? '💾 Gespeichertes Deck auswählen' : '💾 Choose saved deck'}</button>
+        <button id="compare-source-paste" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">${getLang()==='de' ? 'Limitless / PTCGL Liste einfügen' : 'Paste Limitless / PTCGL list'}</button>
+        <button id="compare-source-saved" style="padding:10px 12px;border:1px solid #d0d7de;border-radius:8px;background:#f8f9fa;cursor:pointer;font-weight:700;">${getLang()==='de' ? 'Gespeichertes Deck ausw\u00e4hlen' : 'Choose saved deck'}</button>
       </div>
 
       <div id="compare-source-pane"></div>
@@ -2876,7 +2876,7 @@ async function openCompareSavedDeck(deckIndex) {
         <textarea id="compare-paste-text" style="width:100%;min-height:180px;padding:10px;border:1px solid #ccc;border-radius:8px;resize:vertical;font-family:Consolas,monospace;font-size:12px;" placeholder="${getLang()==='de' ? 'Beispiel:' : 'Example:'}\n4 Charizard ex MEW 006\n3 Pidgeot ex OBF 164\n..."></textarea>
         <div id="compare-paste-preview" style="margin-top:10px;padding:10px;border-radius:8px;background:#fff7e6;border:1px solid #ffe0a6;color:#7a5a00;font-size:12px;">${getLang()==='de' ? 'Noch keine Liste erkannt. Füge eine Deckliste ein.' : 'No list detected yet. Paste a deck list.'}</div>
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
-          <button id="compare-paste-run" style="padding:8px 12px;border:none;border-radius:8px;background:#27ae60;color:white;cursor:pointer;font-weight:700;">${getLang()==='de' ? '⚖️ Vergleichen' : '⚖️ Compare'}</button>
+          <button id="compare-paste-run" style="padding:8px 12px;border:none;border-radius:8px;background:#27ae60;color:white;cursor:pointer;font-weight:700;">${getLang()==='de' ? 'Vergleichen' : 'Compare'}</button>
         </div>
       `;
 
@@ -2902,7 +2902,7 @@ async function openCompareSavedDeck(deckIndex) {
         preview.style.border = ok ? '1px solid #b9e6bd' : '1px solid #f0b9b9';
         preview.style.color = ok ? '#1f6b2a' : '#8a1f1f';
         preview.innerHTML = `
-          <strong>${ok ? (getLang()==='de' ? '✅ Parser erkannt' : '✅ Parser recognized') : (getLang()==='de' ? '⚠️ Keine gültigen Karten erkannt' : '⚠️ No valid cards recognized')}</strong><br>
+          <strong>${ok ? (getLang()==='de' ? 'Parser erkannt' : 'Parser recognized') : (getLang()==='de' ? 'Keine gültigen Karten erkannt' : 'No valid cards recognized')}</strong><br>
           ${getLang()==='de' ? `Zeilen: ${stats.nonEmptyLines} • Erkannt: ${stats.recognizedLines} • Ignoriert (Header): ${stats.ignoredHeaderLines} • Nicht erkannt: ${stats.unrecognizedLines}` : `Lines: ${stats.nonEmptyLines} • Recognized: ${stats.recognizedLines} • Ignored (Header): ${stats.ignoredHeaderLines} • Unrecognized: ${stats.unrecognizedLines}`}<br>
           ${getLang()==='de' ? 'Karten gesamt' : 'Total cards'}: <strong>${stats.totalCards}</strong> • Unique: <strong>${stats.uniqueCards}</strong>
         `;
@@ -3169,7 +3169,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional') {
   modal.innerHTML = `
     <div style="background:white;border-radius:12px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;padding:25px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-        <h2 style="margin:0;font-size:1.3em;">⚖️ Deck Comparison</h2>
+        <h2 style="margin:0;font-size:1.3em;">Deck Comparison</h2>
         <button onclick="this.closest('#deck-compare-modal').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-bottom:12px;">
@@ -3186,7 +3186,7 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional') {
       ${onlyB.length ? `<div style="margin-bottom:12px;"><h4 style="color:#764ba2;margin:0 0 5px 0;">Only in ${safeNameB} (${onlyB.length})</h4><div style="font-size:0.9em;color:#555;">${onlyB.join('<br>')}</div></div>` : ''}
       ${different.length ? `<div style="margin-bottom:12px;"><h4 style="color:#e67e22;margin:0 0 5px 0;">Different counts (${different.length})</h4><div style="font-size:0.9em;color:#555;">${different.join('<br>')}</div></div>` : ''}
       <div style="margin-bottom:12px;"><h4 style="color:#27ae60;margin:0 0 5px 0;">Same cards (${same.length})</h4><div style="font-size:0.9em;color:#555;">${same.length > 0 ? same.join('<br>') : 'No cards in common'}</div></div>
-      ${totalProxyCopies > 0 ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid #eee;text-align:center;"><button onclick="addCompareNewCardsToProxy()" style="padding:10px 20px;border:none;border-radius:8px;background:#e74c3c;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#c0392b';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.35)'" onmouseout="this.style.background='#e74c3c';this.style.transform='';this.style.boxShadow=''">🖨️ ${getLang()==='de' ? 'Alle neuen Karten zum Proxy Printer hinzufügen' : 'Add all new cards to Proxy Printer'} (${totalProxyCopies})</button></div>` : ''}
+      ${totalProxyCopies > 0 ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid #eee;text-align:center;"><button onclick="addCompareNewCardsToProxy()" style="padding:10px 20px;border:none;border-radius:8px;background:#e74c3c;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#c0392b';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.35)'" onmouseout="this.style.background='#e74c3c';this.style.transform='';this.style.boxShadow=''">${getLang()==='de' ? 'Alle neuen Karten zum Proxy Printer hinzufügen' : 'Add all new cards to Proxy Printer'} (${totalProxyCopies})</button></div>` : ''}
     </div>
   `;
   
@@ -3629,7 +3629,7 @@ function dexImportShowPreview(matched, unmatched) {
     const totalQty = matched.reduce((s, m) => s + m.qty, 0);
     const unmatchedBlock = unmatched.length > 0 ? `
         <details style="margin-bottom:12px;">
-            <summary style="cursor:pointer;color:#856404;font-weight:600;padding:4px 0;">⚠️ ${unmatched.length} ${getLang()==='de' ? 'nicht gefundene Karten (anzeigen)' : 'unmatched cards (show)'}</summary>
+            <summary style="cursor:pointer;color:#856404;font-weight:600;padding:4px 0;">${unmatched.length} ${getLang()==='de' ? 'nicht gefundene Karten (anzeigen)' : 'unmatched cards (show)'}</summary>
             <ul style="font-size:11px;color:#666;max-height:130px;overflow-y:auto;margin-top:8px;padding-left:18px;">
                 ${unmatched.map(u => `<li>${escapeHtml(u.rawName || '?')} (${escapeHtml(u.rawSet)} ${escapeHtml(u.rawNum)}) — ${u.qty}x</li>`).join('')}
             </ul>
@@ -3657,17 +3657,17 @@ function dexImportShowPreview(matched, unmatched) {
         <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
             <button onclick="dexImportExecute('merge')"
                     style="flex:1;min-width:160px;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
-              ${getLang()==='de' ? '🔀 Abgleichen (Merge)' : '🔀 Merge'}<br><small style="font-weight:400;opacity:.85;">${getLang()==='de' ? 'Importierte Mengen ersetzen, andere Karten bleiben' : 'Imported quantities replace existing, other cards remain'}</small>
+              ${getLang()==='de' ? 'Abgleichen (Merge)' : 'Merge'}<br><small style="font-weight:400;opacity:.85;">${getLang()==='de' ? 'Importierte Mengen ersetzen, andere Karten bleiben' : 'Imported quantities replace existing, other cards remain'}</small>
             </button>
             <button onclick="dexImportExecute('replace')"
                     style="flex:1;min-width:160px;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;border-radius:8px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;line-height:1.4;">
-                ${getLang()==='de' ? '🔄 Ersetzen (Replace)' : '🔄 Replace'}<br><small style="font-weight:400;opacity:.85;">${getLang()==='de' ? 'Kollektion komplett ersetzen' : 'Completely replace collection'}</small>
+                ${getLang()==='de' ? 'Ersetzen (Replace)' : 'Replace'}<br><small style="font-weight:400;opacity:.85;">${getLang()==='de' ? 'Kollektion komplett ersetzen' : 'Completely replace collection'}</small>
             </button>
         </div>` : `<p style="color:#888;text-align:center;">${getLang()==='de' ? 'Keine Karten in der Datenbank gefunden.' : 'No cards found in the database.'}</p>`;
 
     modal.innerHTML = `
         <div style="background:#fff;border-radius:14px;max-width:660px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
-            <h2 style="margin-top:0;color:#667eea;margin-bottom:18px;">${getLang()==='de' ? '📥 Dex Import Vorschau' : '📥 Dex Import Preview'}</h2>
+            <h2 style="margin-top:0;color:#667eea;margin-bottom:18px;">${getLang()==='de' ? 'Dex Import Vorschau' : 'Dex Import Preview'}</h2>
             <div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
                 <div style="background:#d4edda;border-radius:8px;padding:10px 16px;flex:1;text-align:center;min-width:100px;">
                     <div style="font-size:1.6em;font-weight:900;color:#155724;">${matched.length}</div>
@@ -3734,7 +3734,7 @@ async function dexImportExecute(mode) {
 
         updateCollectionUI();
         const totalQty = matched.reduce((s, m) => s + m.qty, 0);
-        showNotification(getLang()==='de' ? `✅ ${matched.length} Karten (${totalQty} Exemplare) importiert!` : `✅ ${matched.length} cards (${totalQty} copies) imported!`, 'success');
+        showNotification(getLang()==='de' ? `${matched.length} Karten (${totalQty} Exemplare) importiert!` : `${matched.length} cards (${totalQty} copies) imported!`, 'success');
     } catch (err) {
         console.error('Dex import error:', err);
         showNotification((getLang()==='de' ? 'Fehler beim Import: ' : 'Import error: ') + err.message, 'error');

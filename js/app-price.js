@@ -16,11 +16,11 @@
                 const response = await fetch(`${PROXY_URL}/health`, { timeout: 2000 });
                 proxyServerAvailable = response.ok;
                 if (proxyServerAvailable) {
-                    devLog('✅ Live price proxy server is running');
+                    devLog('[OK] Live price proxy server is running');
                 }
             } catch (e) {
                 proxyServerAvailable = false;
-                devLog('ℹ️ Live price proxy server not running (prices from database)');
+                devLog('[INFO] Live price proxy server not running (prices from database)');
             }
             
             return proxyServerAvailable;

@@ -56,7 +56,10 @@ const translations = {
     'btn.consistency':        'Consistency',
     'btn.testDraw':           'Test Draw',
     'btn.playtest':           'Playtest',
-    'btn.gridView':           'Grid',
+    'btn.gridView':           'Grid View',
+    'btn.copyList':           'Copy List',
+    'btn.savePreset':         'Save Preset',
+    'btn.matchupData':        'Matchup Data',
     'btn.deckToProxy':        'Deck → Proxy',
     'btn.loadMetaAnalysis':   'Load Meta Analysis',
 
@@ -253,10 +256,10 @@ const translations = {
     'pt.errPasteBothDecks':     'Please paste both deck lists!',
 
     // ── playtester.js — board buttons ────────────────────────
-    'pt.btnAttack':             '⚔️ Attack',
-    'pt.btnEndTurn':            '⏭️ End Turn',
-    'pt.btnOppView':            '👁️ Opponent',
-    'pt.btnActions':            '≡ Actions',
+    'pt.btnAttack':             'Attack',
+    'pt.btnEndTurn':            'End Turn',
+    'pt.btnOppView':            'Opponent Board',
+    'pt.btnActions':            'Actions',
 
     // ── Heatmap (Current Meta) ───────────────────────────────
     'heatmap.title':            'Matchup Heatmap',
@@ -466,7 +469,7 @@ const translations = {
     'profile.compareNote':       'Paste two decklists to compare them side by side',
     'profile.deckA':             'Deck A (Old)',
     'profile.deckB':             'Deck B (New)',
-    'profile.compareBtn':        '🔍 Compare',
+    'profile.compareBtn':        'Compare',
     'profile.nameAria':         'Display name',
 
     // ── Meta Binder ────────────────────────────────────────────
@@ -587,6 +590,11 @@ const translations = {
     'bj.updatesAllMatches':     '(updates all matches in this tournament)',
     'bj.noMeta':                'No Meta',
     'bj.noTournament':          'No Tournament',
+    'bj.typeRegional':          'Regional / IC',
+    'bj.typeChallenge':         'Challenge',
+    'bj.typeCup':               'Cup',
+    'bj.typeOnline':            'Online',
+    'bj.typeTesting':           'Testing',
 
     // ── Matchup Analysis ────────────────────────────────────
     'ma.matches':               'Matches',
@@ -942,7 +950,7 @@ const translations = {
 
     // ── Card Zoom Action Panel ───────────────────────────────
     'action.wishlist':          'Wishlist',
-    'action.wishlistActive':    'Wishlist ✓',
+    'action.wishlistActive':    'Wishlist',
     'action.collection':        'Collection',
     'action.otherPrint':        'Other Print',
     'action.openLimitless':     'Open Limitless',
@@ -970,10 +978,10 @@ const translations = {
     'binder.deleted':           'Binder "{name}" deleted.',
 
     // ── Multiplayer Status ───────────────────────────────────
-    'mp.searchingDeck':         '🔍 Opponent is searching their deck...',
-    'mp.searchingDiscard':      '🔍 Opponent is searching their discard pile...',
-    'mp.choosingPrizes':        '🏆 Opponent is choosing prize cards...',
-    'mp.thinking':              '🤔 Opponent is thinking...',
+    'mp.searchingDeck':         'Opponent is searching their deck...',
+    'mp.searchingDiscard':      'Opponent is searching their discard pile...',
+    'mp.choosingPrizes':        'Opponent is choosing prize cards...',
+    'mp.thinking':              'Opponent is thinking...',
     'mp.promoting':             '⭐ Opponent is choosing a new active Pokémon...',
     'mp.opponentDefault':       '⏳ Opponent:',
     'mp.opponentMoved':         'Opponent made a move',
@@ -1038,7 +1046,10 @@ const translations = {
     'btn.consistency':        'Konsistenz',
     'btn.testDraw':           'Testhand',
     'btn.playtest':           'Playtesten',
-    'btn.gridView':           'Raster',
+    'btn.gridView':           'Rasteransicht',
+    'btn.copyList':           'Liste kopieren',
+    'btn.savePreset':         'Preset speichern',
+    'btn.matchupData':        'Matchup-Daten',
     'btn.deckToProxy':        'Deck → Proxy',
     'btn.loadMetaAnalysis':   'Meta-Analyse laden',
 
@@ -1235,10 +1246,10 @@ const translations = {
     'pt.errPasteBothDecks':     'Bitte beide Deck-Listen einfügen!',
 
     // ── playtester.js — board buttons ────────────────────────
-    'pt.btnAttack':             '⚔️ Angriff',
-    'pt.btnEndTurn':            '⏭️ Ende',
-    'pt.btnOppView':            '👁️ Gegner',
-    'pt.btnActions':            '≡ Aktionen',
+    'pt.btnAttack':             'Angreifen',
+    'pt.btnEndTurn':            'Zug beenden',
+    'pt.btnOppView':            'Gegnerisches Feld',
+    'pt.btnActions':            'Aktionen',
 
     // ── Heatmap (Current Meta) ───────────────────────────────
     'heatmap.title':            'Matchup Heatmap',
@@ -1450,7 +1461,7 @@ const translations = {
     'profile.compareNote':       'Füge zwei Decklisten ein, um sie nebeneinander zu vergleichen',
     'profile.deckA':             'Deck A (Alt)',
     'profile.deckB':             'Deck B (Neu)',
-    'profile.compareBtn':        '🔍 Vergleichen',
+    'profile.compareBtn':        'Vergleichen',
     'profile.nameAria':         'Anzeigename',
 
     // ── Meta Binder ────────────────────────────────────────────
@@ -1571,6 +1582,11 @@ const translations = {
     'bj.updatesAllMatches':     '(aktualisiert alle Matches in diesem Turnier)',
     'bj.noMeta':                'Kein Meta',
     'bj.noTournament':          'Kein Turnier',
+    'bj.typeRegional':          'Regional / IC',
+    'bj.typeChallenge':         'Challenge',
+    'bj.typeCup':               'Cup',
+    'bj.typeOnline':            'Online',
+    'bj.typeTesting':           'Testing',
 
     // ── Matchup-Analyse ─────────────────────────────────────
     'ma.matches':               'Matches',
@@ -1954,10 +1970,10 @@ const translations = {
     'binder.deleted':           'Binder "{name}" gelöscht.',
 
     // ── Multiplayer Status ───────────────────────────────────
-    'mp.searchingDeck':         '🔍 Gegner durchsucht sein Deck...',
-    'mp.searchingDiscard':      '🔍 Gegner durchsucht seinen Ablagestapel...',
-    'mp.choosingPrizes':        '🏆 Gegner wählt Preiskarten...',
-    'mp.thinking':              '🤔 Gegner überlegt...',
+    'mp.searchingDeck':         'Gegner durchsucht sein Deck...',
+    'mp.searchingDiscard':      'Gegner durchsucht seinen Ablagestapel...',
+    'mp.choosingPrizes':        'Gegner wählt Preiskarten...',
+    'mp.thinking':              'Gegner überlegt...',
     'mp.promoting':             '⭐ Gegner wählt neues aktives Pokémon...',
     'mp.opponentDefault':       '⏳ Gegner:',
     'mp.opponentMoved':         'Gegner hat gezogen',

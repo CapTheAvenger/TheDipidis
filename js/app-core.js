@@ -376,7 +376,7 @@ const BASE_PATH = './data/';
             grid._skeletonTimer = setTimeout(function () {
                 if (grid.classList.contains('card-grid-loading')) {
                     grid.innerHTML = '<div class="skeleton-error-message">' +
-                        '⚠️ Loading took too long.<br>' +
+                        'Loading took too long.<br>' +
                         '<span class="retry-link" onclick="location.reload()">Reload page</span>' +
                         '</div>';
                     grid.classList.remove('card-grid-loading');
@@ -1378,7 +1378,7 @@ const BASE_PATH = './data/';
             // Store for deferred application — populateCityLeagueDeckSelect picks this up
             window.pendingCombinedArchetypeSelection = {
                 value: groupValue,
-                label: `🧩 ${displayName} (All Variants Combined)`
+                label: `${displayName} (All Variants Combined)`
             };
 
             if (typeof switchTabAndUpdateMenu === 'function') {
@@ -1397,7 +1397,7 @@ const BASE_PATH = './data/';
         
         // Navigate to City League Analysis with pre-selected deck
         function navigateToAnalysisWithDeck(archetypeName) {
-            devLog('🔍 Navigating to analysis with deck:', archetypeName);
+            devLog('Navigating to analysis with deck:', archetypeName);
             window.pendingCityLeagueDeckSelection = archetypeName;
             
             // Switch to City League Analysis tab
@@ -1438,15 +1438,15 @@ const BASE_PATH = './data/';
                         // consume it so initSearchableSelect creates the display with the correct value.
                         if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
                         if (typeof loadCityLeagueDeckData === 'function') loadCityLeagueDeckData(matchingOption.value);
-                        devLog('✅ Deck selected:', matchingOption.value, combinedOption ? '(combined)' : '(exact)');
+                        devLog('Deck selected:', matchingOption.value, combinedOption ? '(combined)' : '(exact)');
                     } else {
-                        console.warn('⚠️ Deck not found in dropdown:', archetypeName);
+                        console.warn('Deck not found in dropdown:', archetypeName);
                     }
                 } else if (attempts < maxAttempts) {
                     // Retry after 100ms
                     setTimeout(checkAndSelect, 100);
                 } else {
-                    console.error('⏰ Timeout: Dropdown not populated after 5 seconds');
+                    console.error('[TIMEOUT] Timeout: Dropdown not populated after 5 seconds');
                 }
             };
             
@@ -1456,7 +1456,7 @@ const BASE_PATH = './data/';
         
         // Navigate to Current Meta Analysis tab and select a deck
         function navigateToCurrentMetaWithDeck(archetypeName) {
-            devLog('🔍 Navigating to Current Meta with deck:', archetypeName);
+            devLog('Navigating to Current Meta with deck:', archetypeName);
             window.pendingCurrentMetaDeckSelection = archetypeName;
             
             // Switch to Current Meta Analysis tab
@@ -1481,15 +1481,15 @@ const BASE_PATH = './data/';
                         select.value = matchingOption.value;
                         if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
                         if (typeof loadCurrentMetaDeckData === 'function') loadCurrentMetaDeckData(matchingOption.value);
-                        devLog('✅ Deck selected:', matchingOption.value);
+                        devLog('Deck selected:', matchingOption.value);
                     } else {
-                        console.warn('⚠️ Deck not found in dropdown:', archetypeName);
+                        console.warn('Deck not found in dropdown:', archetypeName);
                     }
                 } else if (attempts < maxAttempts) {
                     // Retry after 100ms
                     setTimeout(checkAndSelect, 100);
                 } else {
-                    console.error('⏰ Timeout: Dropdown not populated after 5 seconds');
+                    console.error('[TIMEOUT] Timeout: Dropdown not populated after 5 seconds');
                 }
             };
             
@@ -1512,7 +1512,7 @@ const BASE_PATH = './data/';
 
             if (!Array.isArray(variants) || variants.length === 0) return;
 
-            devLog('🔍 Navigating to CM Analysis with combined deck:', mainName, variants);
+            devLog('Navigating to CM Analysis with combined deck:', mainName, variants);
 
             // Switch to Current Meta Analysis tab
             switchTab('current-analysis');
@@ -1540,14 +1540,14 @@ const BASE_PATH = './data/';
                         select.value = matchingOption.value;
                         if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
                         if (typeof loadCurrentMetaDeckData === 'function') loadCurrentMetaDeckData(matchingOption.value);
-                        devLog('✅ CM Combined deck selected:', matchingOption.value);
+                        devLog('CM Combined deck selected:', matchingOption.value);
                     } else {
-                        console.warn('⚠️ No variant found in CM dropdown:', variants);
+                        console.warn('No variant found in CM dropdown:', variants);
                     }
                 } else if (attempts < maxAttempts) {
                     setTimeout(checkAndSelect, 100);
                 } else {
-                    console.error('❌ Timeout: CM dropdown not populated after 5 seconds');
+                    console.error('Timeout: CM dropdown not populated after 5 seconds');
                 }
             };
 
@@ -2014,7 +2014,7 @@ const BASE_PATH = './data/';
                 if (resp.ok) {
                     pokedexNumbers = await resp.json();
                     window.pokedexNumbers = pokedexNumbers;
-                    devLog(`✅ Loaded ${Object.keys(pokedexNumbers).length} Pokédex entries`);
+                    devLog(`Loaded ${Object.keys(pokedexNumbers).length} Pokédex entries`);
                 }
             } catch (e) {
                 console.warn('Could not load pokemon_dex_numbers.json', e);
@@ -2224,7 +2224,7 @@ const BASE_PATH = './data/';
                     aceSpecsList = (jsonData.ace_specs || []).map(name => name.toLowerCase().trim());
                     devLog(`? Loaded ${aceSpecsList.length} Ace Spec cards from ace_specs.json`);
                 } else {
-                    console.error('❌ Failed to load ace_specs.json');
+                    console.error('Failed to load ace_specs.json');
                 }
             } catch (error) {
                 console.error('Error loading ace specs list:', error);
@@ -2352,7 +2352,7 @@ const BASE_PATH = './data/';
                 map.set(`${normalizedSet}-${normalizedNumber}`, card);
                 map.set(`${normalizedSet}-${normalizedNumber.padStart(3, '0')}`, card);
             });
-            devLog(`📇 Built Map index for ${map.size} set+number combinations`);
+            devLog(`Built Map index for ${map.size} set+number combinations`);
             return map;
         }
         

@@ -25,7 +25,7 @@
         // When in M4 mode, M3 data is loaded for comparison to show:
         // - Share trends (M4 vs M3)
         // - Average placement trends (lower rank = better)
-        // - Visual indicators (⬆️ improved, ⬇️ declined, ➖ unchanged)
+        // - Visual indicators (improved, declined, unchanged)
         //
         // The selected format is persisted in localStorage.
         // =======================================================================
@@ -460,8 +460,8 @@
                     <div class="city-league-info-card">
                         <h3 class="city-league-info-card-title">${t('cl.top10Changes')}</h3>
                         <div class="city-league-info-card-details">
-                            ${entries.length > 0 ? `<strong class="city-league-info-card-entry">➕ ${t('cl.entries')}</strong><br>${entries.map(arch => `${arch}`).join('<br>')}<br><br>` : ''}
-                            ${exits.length > 0 ? `<strong class="city-league-info-card-exit">➖ ${t('cl.exits')}</strong><br>${exits.map(arch => `${arch}`).join('<br>')}<br>` : ''}
+                            ${entries.length > 0 ? `<strong class="city-league-info-card-entry">+ ${t('cl.entries')}</strong><br>${entries.map(arch => `${arch}`).join('<br>')}<br><br>` : ''}
+                            ${exits.length > 0 ? `<strong class="city-league-info-card-exit">- ${t('cl.exits')}</strong><br>${exits.map(arch => `${arch}`).join('<br>')}<br>` : ''}
                             ${entries.length === 0 && exits.length === 0 ? t('cl.noTop10Changes') : ''}
                         </div>
                     </div>
@@ -597,8 +597,8 @@
                     </div>
                 </div>
                 <div class="city-league-info-generated-block">
-                    <span class="city-league-info-generated-date">📅 ${t('cl.generated')} ${generatedDate}</span>
-                    <span class="city-league-info-generated-total">📋 ${t('cl.totalTracked')} ${totalArchetypes}</span>
+                    <span class="city-league-info-generated-date">${t('cl.generated')} ${generatedDate}</span>
+                    <span class="city-league-info-generated-total">${t('cl.totalTracked')} ${totalArchetypes}</span>
                 </div>`;
             
             content.innerHTML = html;
@@ -1106,7 +1106,7 @@
                 combinedGroups.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = 'GROUP:' + g.variants.join('|');
-                    opt.textContent = `🧩 ${g.main.charAt(0).toUpperCase() + g.main.slice(1)} — ${t('cl.allVariants')} (${g.totalDecks} ${t('cl.decks')})`;
+                    opt.textContent = `${g.main.charAt(0).toUpperCase() + g.main.slice(1)} — ${t('cl.allVariants')} (${g.totalDecks} ${t('cl.decks')})`;
                     combinedOptGroup.appendChild(opt);
                 });
                 select.appendChild(combinedOptGroup);
@@ -1132,7 +1132,7 @@
                     select.value = matchingOption.value;
                     window.pendingCityLeagueDeckSelection = null;
                     loadCityLeagueDeckData(matchingOption.value);
-                    devLog('✅ Applied pending City League deck selection:', matchingOption.value);
+                    devLog('[OK] Applied pending City League deck selection:', matchingOption.value);
                 }
             }
 
@@ -1363,7 +1363,7 @@
             select.value = pending.value;
             syncSearchableSelectDisplay(select);
             loadCityLeagueDeckData(pending.value);
-            devLog('✅ Applied combined archetype:', pending.value.replace('GROUP:', '').split('|')[0]);
+            devLog('[OK] Applied combined archetype:', pending.value.replace('GROUP:', '').split('|')[0]);
         }
 
         function refreshCityLeagueDeckSelect() {
@@ -1976,7 +1976,7 @@
             
             // Reset button text to show list view option
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
-            gridButtons.forEach(btn => btn.textContent = '📋 List View');
+            gridButtons.forEach(btn => btn.textContent = 'List View');
             
             // Apply current filter (this renders the grid - do not call renderCityLeagueDeckGrid separately)
             applyCityLeagueFilter();
@@ -1994,7 +1994,7 @@
             
             // Reset button text
             const gridButtons = document.querySelectorAll('button[onclick="toggleDeckGridView()"]');
-            gridButtons.forEach(btn => btn.textContent = '📋 List View');
+            gridButtons.forEach(btn => btn.textContent = 'List View');
         }
         
         function normalizeSetCode(rawSetCode) {
@@ -2216,7 +2216,7 @@
             }
 
             if (fallbackUrl) {
-                devLog(`🖼️ Image Error → Trying fallback: ${fallbackUrl}`);
+                devLog(`Image Error → Trying fallback: ${fallbackUrl}`);
                 img.setAttribute('data-fallback-tried', 'true');
                 img.setAttribute('data-image-source', 'fallback-limitless');
                 img.src = fallbackUrl;
@@ -2286,7 +2286,7 @@
                     // Fallback: Replace /jp/ with /en/ if we don't have set/number info
                     const originalUrl = url;
                     url = url.replace('/jp/', '/en/');
-                    devLog(`🔄 Japanese → English Proxy: ${originalUrl} → ${url}`);
+                    devLog(`Japanese → English Proxy: ${originalUrl} → ${url}`);
                     return url;
                 }
             }
@@ -2469,7 +2469,7 @@
         
         // Set overview rarity mode and refresh display
         function setOverviewRarityMode(mode) {
-            debugVersionSelectionLog('⚙️ Setting overview rarity mode to:', mode);
+            debugVersionSelectionLog('[Config] Setting overview rarity mode to:', mode);
             overviewRarityMode = mode;
             
             // Synchronize with global rarity preference so deck builder uses same setting
@@ -2480,7 +2480,7 @@
             } else {
                 globalRarityPreference = mode; // 'min' or 'max'
             }
-            debugVersionSelectionLog('🔄 Global rarity preference synced to:', globalRarityPreference || 'none (original cards)');
+            debugVersionSelectionLog('Global rarity preference synced to:', globalRarityPreference || 'none (original cards)');
             
             // Update button styles - make sure elements exist first
             const btnMin = document.getElementById('overviewRarityMin');
@@ -2502,17 +2502,17 @@
             
             // Re-render the grid with current cards (preserve percentage filter)
             const cards = window.currentCityLeagueDeckCards;
-            debugVersionSelectionLog('📋 Cards available for re-render:', cards ? cards.length : 'none');
+            debugVersionSelectionLog('Cards available for re-render:', cards ? cards.length : 'none');
             if (cards && cards.length > 0) {
-                debugVersionSelectionLog('🔄 Re-rendering grid with mode:', mode);
+                debugVersionSelectionLog('Re-rendering grid with mode:', mode);
                 applyCityLeagueFilter();  // Use filter function to preserve percentage filter
             } else {
-                debugVersionSelectionLog('⚠️ No cards available to render - mode saved for when deck is selected');
+                debugVersionSelectionLog('[WARN] No cards available to render - mode saved for when deck is selected');
             }
             
             // Also update the deck display with new rarity preference
             if (window.cityLeagueDeck && Object.keys(window.cityLeagueDeck).length > 0) {
-                debugVersionSelectionLog('🔄 Re-rendering deck with new rarity preference');
+                debugVersionSelectionLog('Re-rendering deck with new rarity preference');
                 updateDeckDisplay('cityLeague');
             }
         }
@@ -2522,7 +2522,7 @@
         // ============================================================================
         // Render function for grid view (compact view)
         function renderCityLeagueDeckGrid(cards) {
-            debugVersionSelectionLog('📊 renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
+            debugVersionSelectionLog('renderCityLeagueDeckGrid called with:', cards.length, 'cards, mode:', overviewRarityMode);
             const visualContainer = document.getElementById('cityLeagueDeckVisual');
             const gridContainer = document.getElementById('cityLeagueDeckGrid');
             if (!gridContainer) {
@@ -2566,7 +2566,7 @@
                 if (overviewRarityMode === 'all') {
                     // Show ALL international prints of this specific card
                     let allVersions = getInternationalPrintsForCard(originalSetCode, originalSetNumber);
-                    debugVersionSelectionLog(`📋 All mode for ${cardName} (${originalSetCode} ${originalSetNumber}): found ${allVersions.length} int prints`);
+                    debugVersionSelectionLog(`All mode for ${cardName} (${originalSetCode} ${originalSetNumber}): found ${allVersions.length} int prints`);
                     
                     if (allVersions && allVersions.length > 0) {
                         versionsToRender = allVersions.map(v => ({
@@ -2585,7 +2585,7 @@
                     const preferredVersion = getPreferredVersionForCard(cardName, originalSetCode, originalSetNumber);
                     
                     if (preferredVersion) {
-                        debugVersionSelectionLog(`✨ ${overviewRarityMode} mode for ${cardName}: using PREFERRED version ${preferredVersion.set} ${preferredVersion.number} (${preferredVersion.rarity})`);
+                        debugVersionSelectionLog(`${overviewRarityMode} mode for ${cardName}: using PREFERRED version ${preferredVersion.set} ${preferredVersion.number} (${preferredVersion.rarity})`);
                         versionsToRender = [{
                             ...card,
                             set_code: preferredVersion.set,
@@ -2595,7 +2595,7 @@
                         }];
                     } else {
                         // No preferred version found, use original
-                        debugVersionSelectionLog(`📋 ${overviewRarityMode} mode for ${cardName}: no preferred version found, using original`);
+                        debugVersionSelectionLog(`${overviewRarityMode} mode for ${cardName}: no preferred version found, using original`);
                         versionsToRender = [card];
                     }
                 }
@@ -2721,7 +2721,7 @@
                 const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
                 const otherPrintSparkleHtml = otherPrintOwnedCount > 0
                     ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}" title="Owned other INT prints: ${otherPrintOwnedCount}x">
-                        <span class="city-league-other-print-sparkle-icon">✨</span>
+                        <span class="city-league-other-print-sparkle-icon"></span>
                         <span class="city-league-other-print-sparkle-count">${otherPrintOwnedCount}</span>
                     </div>`
                     : '';
@@ -2939,7 +2939,7 @@
             const button = gridButtons[0];
             
             if (!gridViewContainer || !tableViewContainer) {
-                console.warn('⚠️ Grid or table container not found');
+                console.warn('[WARN] Grid or table container not found');
                 return;
             }
             
@@ -2955,12 +2955,12 @@
                 // Switch to list/table view
                 gridViewContainer.classList.add('d-none');
                 tableViewContainer.classList.remove('d-none', 'city-league-deck-table-view-hidden');
-                if (button) button.textContent = '📊 Grid View';
+                if (button) button.textContent = 'Grid View';
             } else {
                 // Switch back to grid view
                 tableViewContainer.classList.add('d-none');
                 gridViewContainer.classList.remove('d-none', 'city-league-deck-visual-hidden');
-                if (button) button.textContent = '📋 List View';
+                if (button) button.textContent = 'List View';
             }
             
             // Re-apply filter to preserve percentage filter and render correct view
@@ -3280,10 +3280,10 @@
             
             // Render all FOUR tiers
             let html = '';
-            html += renderTier(coreCards, t('cl.tierCore'), '🔥');
-            html += renderTier(aceSpecCards, t('cl.tierAceSpec'), '💎');
-            html += renderTier(techCards, t('cl.tierTech'), '🛠️');
-            html += renderTier(spicyCards, t('cl.tierSpicy'), '🌶️');
+            html += renderTier(coreCards, t('cl.tierCore'), '');
+            html += renderTier(aceSpecCards, t('cl.tierAceSpec'), '');
+            html += renderTier(techCards, t('cl.tierTech'), '');
+            html += renderTier(spicyCards, t('cl.tierSpicy'), '');
             
             if (html === '') {
                 html = '<p class="city-league-empty-state">' + t('cl.noCardsFound') + '</p>';

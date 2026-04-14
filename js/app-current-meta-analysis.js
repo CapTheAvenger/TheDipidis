@@ -292,7 +292,7 @@
             
             if (top10.length > 0) {
                 const optgroup = document.createElement('optgroup');
-                optgroup.label = '🏆 Top 10 Meta Decks';
+                optgroup.label = 'Top 10 Meta Decks';
                 top10.forEach(deck => {
                     const option = document.createElement('option');
                     option.value = deck.name;
@@ -304,7 +304,7 @@
             
             if (rest.length > 0) {
                 const optgroup = document.createElement('optgroup');
-                optgroup.label = '🎴 All Other Decks';
+                optgroup.label = 'All Other Decks';
                 rest.forEach(deck => {
                     const option = document.createElement('option');
                     option.value = deck.name;
@@ -419,7 +419,7 @@
                     clearCurrentMetaDeckView();
                 }
             } else {
-                console.warn('⚠️ No deck selected - filter saved for when deck is selected');
+                console.warn('No deck selected - filter saved for when deck is selected');
             }
         }
         
@@ -678,7 +678,7 @@
             // Find the matchup tables directly from the loaded HTML content (1:1 same as Current Meta Tab)
             const currentMetaContent = document.getElementById('currentMetaContent');
             if (!currentMetaContent) {
-                console.error('❌ Current Meta content not loaded');
+                console.error('Current Meta content not loaded');
                 if (matchupsSection) matchupsSection.classList.add('d-none');
                 return;
             }
@@ -838,7 +838,7 @@
                 const totalGames = matchup.total_games || '0';
                 
                 detailsEl.innerHTML = `
-                    <h4 style="margin-top: 0; color: #2c3e50;">⚡ Matchup: vs ${escapeHtml(opponent)}</h4>
+                    <h4 style="margin-top: 0; color: #2c3e50;">Matchup: vs ${escapeHtml(opponent)}</h4>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 10px;">
                         <div>
                             <strong style="color: #333;">Win Rate:</strong><br>
@@ -916,7 +916,7 @@
         
         // Set overview rarity mode
         function setCurrentMetaOverviewRarityMode(mode) {
-            devLog('⚙️ Setting Current Meta overview rarity mode to:', mode);
+            devLog('Setting Current Meta overview rarity mode to:', mode);
             currentMetaRarityMode = mode;
             
             if (mode === 'all') {
@@ -949,7 +949,7 @@
             if (cards && cards.length > 0) {
                 applyCurrentMetaFilter();  // Use filter function to preserve percentage filter
             } else {
-                console.warn('⚠️ No cards available to render - mode saved for when deck is selected');
+                console.warn('No cards available to render - mode saved for when deck is selected');
             }
             
             if (window.currentMetaDeck && Object.keys(window.currentMetaDeck).length > 0) {
@@ -1194,7 +1194,7 @@
                     const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
                     const otherPrintSparkleHtml = otherPrintOwnedCount > 0
                         ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}" title="Owned other INT prints: ${otherPrintOwnedCount}x">
-                            <span class="city-league-other-print-sparkle-icon">✨</span>
+                            <span class="city-league-other-print-sparkle-icon"></span>
                             <span class="city-league-other-print-sparkle-count">${otherPrintOwnedCount}</span>
                         </div>`
                         : '';
@@ -1413,10 +1413,10 @@
             
             // Render all FOUR tiers
             let html = '';
-            html += renderTier(coreCards, 'Core Cards (80% - 100%)', '🔥');
-            html += renderTier(aceSpecCards, 'Ace Spec (Max 1 per Deck)', '💎');
-            html += renderTier(techCards, 'Tech Cards (15% - 79%)', '🛠️');
-            html += renderTier(spicyCards, 'Spicy Techs (< 15%)', '🌶️');
+            html += renderTier(coreCards, 'Core Cards (80% - 100%)', '');
+            html += renderTier(aceSpecCards, 'Ace Spec (Max 1 per Deck)', '');
+            html += renderTier(techCards, 'Tech Cards (15% - 79%)', '');
+            html += renderTier(spicyCards, 'Spicy Techs (< 15%)', '');
             
             if (html === '') {
                 html = '<p style="text-align: center; padding: 20px; color: #444;">No cards found</p>';
@@ -1482,7 +1482,7 @@
             const button = gridButtons[0];
             
             if (!gridViewContainer || !tableViewContainer) {
-                console.warn('⚠️ Grid or table container not found');
+                console.warn('Grid or table container not found');
                 return;
             }
             
@@ -1496,10 +1496,10 @@
             
             if (isGridViewActive) {
                 gridViewContainer.classList.add('d-none');
-                if (button) button.textContent = '🖼️ Grid View';
+                if (button) button.textContent = 'Grid View';
             } else {
                 tableViewContainer.classList.add('d-none');
-                if (button) button.textContent = '📋 List View';
+                if (button) button.textContent = 'List View';
             }
             
             // Re-apply filter to preserve percentage filter and render correct view

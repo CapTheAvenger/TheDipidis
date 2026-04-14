@@ -265,7 +265,7 @@
             setPastMetaRarityMode('min');
             
             const tournamentCount = [...new Set(pastMetaDecks.map(d => d.tournament_id))].length;
-            devLog(`✅ Loaded ${pastMetaDecks.length} decks from ${tournamentCount} tournaments (lazy card loading)`);
+            devLog(`Loaded ${pastMetaDecks.length} decks from ${tournamentCount} tournaments (lazy card loading)`);
             showToast(`Past Meta: ${pastMetaDecks.length} decks loaded`, 'success');
             window.pastMetaLoaded = true;
           } catch (err) {
@@ -1024,7 +1024,7 @@
                     const otherPrintOwnedCount = getOtherInternationalPrintOwnedCount(setCode, setNumber);
                     const otherPrintSparkleHtml = otherPrintOwnedCount > 0
                         ? `<div class="city-league-other-print-sparkle${deckCount > 0 ? ' city-league-other-print-sparkle-hasdeck' : ''}" title="Owned other INT prints: ${otherPrintOwnedCount}x">
-                            <span class="city-league-other-print-sparkle-icon">✨</span>
+                            <span class="city-league-other-print-sparkle-icon"></span>
                             <span class="city-league-other-print-sparkle-count">${otherPrintOwnedCount}</span>
                         </div>`
                         : '';
@@ -1160,7 +1160,7 @@
             const button = gridButtons[0];
             
             if (!gridViewContainer || !tableViewContainer) {
-                console.warn('⚠️ Grid or table container not found');
+                console.warn('[WARN] Grid or table container not found');
                 return;
             }
             
@@ -1173,9 +1173,9 @@
             pastMetaShowGridView = !pastMetaShowGridView;
             
             if (pastMetaShowGridView) {
-                if (button) button.textContent = '📋 List View';
+                if (button) button.textContent = 'List View';
             } else {
-                if (button) button.textContent = '📊 Grid View';
+                if (button) button.textContent = 'Grid View';
             }
             
             // Re-render with new view

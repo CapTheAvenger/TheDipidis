@@ -62,9 +62,9 @@
             if (!shareChange || Math.abs(shareChange) < 0.1) return '';
             
             if (shareChange > 0) {
-                return `<span class="stat-badge stat-trend-up">⬆️ +${Math.abs(shareChange).toFixed(1)}%</span>`;
+                return `<span class="stat-badge stat-trend-up">+${Math.abs(shareChange).toFixed(1)}%</span>`;
             } else {
-                return `<span class="stat-badge stat-trend-down">⬇️ -${Math.abs(shareChange).toFixed(1)}%</span>`;
+                return `<span class="stat-badge stat-trend-down">-${Math.abs(shareChange).toFixed(1)}%</span>`;
             }
         }
 
@@ -472,8 +472,8 @@
                                 </div>
                                 <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
                                 <div class="tier-hero-stats">
-                                    <span class="stat-badge">📦 ${item.totalCount} ${t('cl.decks')}</span>
-                                    <span class="stat-badge rank-performance-hint" title="${escapeHtml(t('cl.heroRankHint'))}">🏆 ${t('cl.heroAvgRank')} ${avgRankText}</span>
+                                    <span class="stat-badge">${item.totalCount} ${t('cl.decks')}</span>
+                                    <span class="stat-badge rank-performance-hint" title="${escapeHtml(t('cl.heroRankHint'))}">${t('cl.heroAvgRank')} ${avgRankText}</span>
                                 </div>
                             </div>
                         </div>`;
@@ -557,7 +557,7 @@
                             : null;
 
                         let rankClass = "trend-neutral";
-                        rankIcon = "➖";
+                        rankIcon = "\u2013";
 
                         if (Number.isFinite(currentR) && Number.isFinite(previousR) && previousR > 0) {
                             // TCG LOGIK: Kleinerer Rang = Besser (Aufstieg)
@@ -575,7 +575,7 @@
 
                         // 3. SHARE-TREND (Höher ist besser!)
                         let shareClass = "trend-neutral";
-                        shareIcon = "➖";
+                        shareIcon = "\u2013";
                         if (normalizedPreviousS !== null) {
                             if (normalizedCurrentS > normalizedPreviousS) {
                                 // Mehr Marktanteil
@@ -600,10 +600,10 @@
                     const statsHtml = `
                         <div class="deck-banner-stats" style="display: flex; flex-direction: column; align-items: flex-start;">
                             <span class="stat-badge rank-performance-hint" style="background: #fff3e0; color: #e65100;" title="Lower Rank = Better Performance">
-                                🏆 Rank: ${currentRank} ${m3RankDisplay} ${isM4WithComparison ? `<span class="trend-icon ${rankTrendClass}">${rankIcon}</span>` : ''}
+                                Rank: ${currentRank} ${m3RankDisplay} ${isM4WithComparison ? `<span class="trend-icon ${rankTrendClass}">${rankIcon}</span>` : ''}
                             </span>
                             <span class="stat-badge">
-                                📊 Share: ${currentShare}% ${m3ShareDisplay} ${isM4WithComparison ? `<span class="trend-icon ${shareTrendClass}">${shareIcon}</span>` : ''}
+                                Share: ${currentShare}% ${m3ShareDisplay} ${isM4WithComparison ? `<span class="trend-icon ${shareTrendClass}">${shareIcon}</span>` : ''}
                             </span>
                         </div>
                     `;
@@ -772,8 +772,8 @@
                                 </div>
                                 <div class="tier-hero-meta">${variantCount} ${variantLabel}</div>
                                 <div class="tier-hero-stats">
-                                    <span class="stat-badge">📊 Share: ${shareText}%</span>
-                                    <span class="stat-badge" title="Weighted average winrate">🏆 WR: ${winrateText}%</span>
+                                    <span class="stat-badge">Share: ${shareText}%</span>
+                                    <span class="stat-badge" title="Weighted average winrate">WR: ${winrateText}%</span>
                                 </div>
                             </div>
                         </div>`;
@@ -871,9 +871,9 @@
                     const countChange = parseInt(deck.count_change || 0);
                     if (!trendHtml) {
                         if (countChange > 0) {
-                            trendHtml = `<span class="stat-badge stat-trend-up">⬆️ +${countChange}</span>`;
+                            trendHtml = `<span class="stat-badge stat-trend-up">+${countChange}</span>`;
                         } else if (countChange < 0) {
-                            trendHtml = `<span class="stat-badge stat-trend-down">⬇️ ${countChange}</span>`;
+                            trendHtml = `<span class="stat-badge stat-trend-down">${countChange}</span>`;
                         }
                     }
                     
@@ -1006,7 +1006,7 @@
             let html = `
                 <div class="top-cards-container">
                     <h3 style="color: #2c3e50; margin: 0 0 15px 0; font-size: 1.3em; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                        🔥 Most Used Cards (Format Staples)
+                        Most Used Cards (Format Staples)
                     </h3>
                     <div class="top-cards-grid">`;
             

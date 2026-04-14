@@ -1397,8 +1397,8 @@
                         <div class="deck-banner-content">
                             <div class="deck-banner-name">${safeName}</div>
                             <div class="deck-banner-stats" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
-                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="Lower Rank = Better Performance">🏆 ${currentMetaLabel}: ${rankText}</span>
-                                <span class="stat-badge">📊 ${currentMetaLabel}: ${shareText}</span>
+                                <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="Lower Rank = Better Performance">${currentMetaLabel}: ${rankText}</span>
+                                <span class="stat-badge">${currentMetaLabel}: ${shareText}</span>
                                 <span class="stat-badge">City current: ${cityCurrentText}</span>
                                 <span class="stat-badge">City past: ${cityPastText}</span>
                             </div>
@@ -1517,8 +1517,8 @@
             filtersEl.innerHTML = `
                 <div class="filter-group">
                     <button class="meta-binder-filter-btn active" data-filter="all" onclick="setMetaBinderFilter('all')">${mbText('mb.filterAll', 'Alle')} (${totalUnique})</button>
-                    <button class="meta-binder-filter-btn" data-filter="owned" onclick="setMetaBinderFilter('owned')">✅ ${mbText('mb.filterOwned', 'Im Besitz')} (${ownedComplete})</button>
-                    <button class="meta-binder-filter-btn" data-filter="missing" onclick="setMetaBinderFilter('missing')">❌ ${mbText('mb.filterMissing', 'Fehlend')} (${missingUnique})</button>
+                    <button class="meta-binder-filter-btn" data-filter="owned" onclick="setMetaBinderFilter('owned')">${mbText('mb.filterOwned', 'Im Besitz')} (${ownedComplete})</button>
+                    <button class="meta-binder-filter-btn" data-filter="missing" onclick="setMetaBinderFilter('missing')">${mbText('mb.filterMissing', 'Fehlend')} (${missingUnique})</button>
                     <button class="meta-binder-filter-btn" data-filter="new" onclick="setMetaBinderFilter('new')">🆕 ${mbText('mb.filterNew', 'Neu')} (${newCount})</button>
                 </div>
                 <div class="filter-group">

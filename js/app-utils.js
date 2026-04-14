@@ -959,7 +959,7 @@ function showTableSkeleton(containerOrId, opts) {
                     );
                     
                     if (correctSVEVersion) {
-                        debugVersionSelectionLog(`⚡ Basic Energy "${cardName}": Using SVE ${correctSVEVersion.number} ⚡`);
+                        debugVersionSelectionLog(`Basic Energy "${cardName}": Using SVE ${correctSVEVersion.number}`);
                         preferredVersionCache.set(cacheKey, correctSVEVersion);
                         return correctSVEVersion;
                     }
@@ -968,7 +968,7 @@ function showTableSkeleton(containerOrId, opts) {
                 // Fallback: If specific SVE number not found, use any SVE version
                 const sveVersions = versions.filter(v => v.set === 'SVE');
                 if (sveVersions.length > 0) {
-                    debugVersionSelectionLog(`⚡ Basic Energy "${cardName}": Using fallback SVE ${sveVersions[0].number}`);
+                    debugVersionSelectionLog(`Basic Energy "${cardName}": Using fallback SVE ${sveVersions[0].number}`);
                     preferredVersionCache.set(cacheKey, sveVersions[0]);
                     return sveVersions[0];
                 }
@@ -1238,4 +1238,4 @@ function showTableSkeleton(containerOrId, opts) {
         }
 
         // ============================================================================
-        // 🔥 META DECK TIER LIST SYSTEM (PokemonMeta.com Style)
+        // META DECK TIER LIST SYSTEM (PokemonMeta.com Style)

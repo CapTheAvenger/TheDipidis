@@ -268,10 +268,10 @@ function injectActionButtons(){
   var g=document.createElement('span');
   g.id='pt-action-group-v3';
   var defs=[
-    {t:'\u2694\uFE0F Angriff',fn:'ptOpenAttackView()',bg:'#c0392b'},
-    {t:'\u23ED\uFE0F Ende',fn:'ptPassTurn()',bg:'#27ae60'},
-    {t:'\uD83D\uDC41\uFE0F Gegner',fn:'ptOpenOpponentPanel()',bg:'#7d3c98'},
-    {t:'\u2261 Aktionen',fn:'if(typeof ptShowDirectActionModal!=="undefined")ptShowDirectActionModal()',bg:'#1a5276'}
+    {t:'Angriff',fn:'ptOpenAttackView()',bg:'#c0392b'},
+    {t:'Ende',fn:'ptPassTurn()',bg:'#27ae60'},
+    {t:'Gegner',fn:'ptOpenOpponentPanel()',bg:'#7d3c98'},
+    {t:'Aktionen',fn:'if(typeof ptShowDirectActionModal!=="undefined")ptShowDirectActionModal()',bg:'#1a5276'}
   ];
   defs.forEach(function(def){
     var b=document.createElement('button');

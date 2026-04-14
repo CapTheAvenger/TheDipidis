@@ -13,16 +13,16 @@
             if (!window.allCardsDatabase || window.allCardsDatabase.length === 0) {
                 devLog('[Deck Compare] Loading cards database...');
                 document.getElementById('deckCompareModal').style.display = 'flex';
-                document.getElementById('deckCompareResult').innerHTML = '<div class="loading">⏳ Loading card database...</div>';
+                document.getElementById('deckCompareResult').innerHTML = '<div class="loading">Loading card database...</div>';
                 document.getElementById('deckCompareResult').classList.remove('d-none');
                 
                 try {
                     await loadAllCardsDatabase();
-                    devLog('[Deck Compare] ✅ Database loaded successfully');
+                    devLog('[Deck Compare] Database loaded successfully');
                     document.getElementById('deckCompareResult').classList.add('d-none');
                 } catch (error) {
                     console.error('[Deck Compare] Failed to load database:', error);
-                    document.getElementById('deckCompareResult').innerHTML = '<div class="error">❌ Error loading card database</div>';
+                    document.getElementById('deckCompareResult').innerHTML = '<div class="error">Error loading card database</div>';
                     return;
                 }
             }
@@ -325,16 +325,16 @@
                 <div id="deckCompareContent">
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; color: white;">
                     <div style="display:flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
-                        <h3 style="margin: 0; font-size: 1.1em;">📊 ${oldDeckName} vs Current Deck</h3>
+                        <h3 style="margin: 0; font-size: 1.1em;">${oldDeckName} vs Current Deck</h3>
                         <div style="display: flex; gap: 6px;">
-                            <button onclick="openCompareScreenshotModal()" style="border: none; border-radius: 6px; padding: 6px 10px; background: rgba(255,255,255,0.25); color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;" title="Screenshot for sharing">📸 Share</button>
+                            <button onclick="openCompareScreenshotModal()" style="border: none; border-radius: 6px; padding: 6px 10px; background: rgba(255,255,255,0.25); color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;" title="Screenshot for sharing">Share</button>
                             <button onclick="addComparisonNewCardsToProxy()" style="border: none; border-radius: 6px; padding: 6px 10px; background: #e74c3c; color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;">Proxy: New Cards</button>
                         </div>
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px;">
                         <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
                             <div style="font-size: 1.5em; font-weight: bold;">${removed.length}</div>
-                            <div style="font-size: 0.75em; opacity: 0.9;">❌ Removed</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">Removed</div>
                         </div>
                         <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
                             <div style="font-size: 1.5em; font-weight: bold;">${added.length}</div>
@@ -342,11 +342,11 @@
                         </div>
                         <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
                             <div style="font-size: 1.5em; font-weight: bold;">${changed.length}</div>
-                            <div style="font-size: 0.75em; opacity: 0.9;">🔄 Changed</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">Changed</div>
                         </div>
                         <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
                             <div style="font-size: 1.5em; font-weight: bold;">${unchanged.length}</div>
-                            <div style="font-size: 0.75em; opacity: 0.9;">✅ Same</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">Same</div>
                         </div>
                     </div>
                 </div>
@@ -354,10 +354,10 @@
             
             // Display cards grouped by change type (compact layout)
             const groups = [
-                { type: 'removed', title: '❌ Removed', color: '#e74c3c', cards: removed },
+                { type: 'removed', title: 'Removed', color: '#e74c3c', cards: removed },
                 { type: 'new', title: '🆕 Added', color: '#27ae60', cards: added },
-                { type: 'changed', title: '🔄 Changed', color: '#f39c12', cards: changed },
-                { type: 'unchanged', title: '✅ Unchanged', color: '#95a5a6', cards: unchanged }
+                { type: 'changed', title: 'Changed', color: '#f39c12', cards: changed },
+                { type: 'unchanged', title: 'Unchanged', color: '#95a5a6', cards: unchanged }
             ];
             
             groups.forEach(group => {
@@ -425,8 +425,8 @@
             // Force modal above deck-compare overlay (z-10000)
             modal.style.zIndex = '11000';
 
-            titleEl.textContent = '📸 Deck Compare';
-            preview.innerHTML = '<p style="color:#888; font-size:1.1em;">⏳ ' + (getLang() === 'de' ? 'Bild wird erstellt...' : 'Generating image…') + '</p>';
+            titleEl.textContent = 'Deck Compare';
+            preview.innerHTML = '<p style="color:#888; font-size:1.1em;">' + (getLang() === 'de' ? 'Bild wird erstellt...' : 'Generating image…') + '</p>';
             window._shareImageBlob = null;
             window._shareImageTitle = 'Deck_Compare';
 
@@ -449,17 +449,17 @@
                 window._shareImageBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
             } catch (e) {
                 console.error('Compare screenshot failed:', e);
-                preview.innerHTML = '<p style="color:#e74c3c;">❌ ' + (getLang() === 'de' ? 'Screenshot fehlgeschlagen' : 'Screenshot failed') + '</p>';
+                preview.innerHTML = '<p style="color:#e74c3c;">' + (getLang() === 'de' ? 'Screenshot fehlgeschlagen' : 'Screenshot failed') + '</p>';
             }
         }
 
         /** Build a canvas image from comparison data (no html2canvas needed) */
         async function _buildCompareCanvas(allCards) {
             const groups = [
-                { type: 'removed', title: '❌ Removed', color: '#e74c3c', cards: allCards.filter(c => c.changeType === 'removed') },
+                { type: 'removed', title: 'Removed', color: '#e74c3c', cards: allCards.filter(c => c.changeType === 'removed') },
                 { type: 'new', title: '🆕 Added', color: '#27ae60', cards: allCards.filter(c => c.changeType === 'new') },
-                { type: 'changed', title: '🔄 Changed', color: '#f39c12', cards: allCards.filter(c => c.changeType === 'changed') },
-                { type: 'unchanged', title: '✅ Unchanged', color: '#95a5a6', cards: allCards.filter(c => c.changeType === 'unchanged') }
+                { type: 'changed', title: 'Changed', color: '#f39c12', cards: allCards.filter(c => c.changeType === 'changed') },
+                { type: 'unchanged', title: 'Unchanged', color: '#95a5a6', cards: allCards.filter(c => c.changeType === 'unchanged') }
             ].filter(g => g.cards.length > 0);
 
             const COLS = 6;
@@ -516,13 +516,13 @@
             ctx.fillStyle = '#fff';
             ctx.font = 'bold 22px system-ui, sans-serif';
             ctx.textBaseline = 'middle';
-            ctx.fillText('📊 Deck Compare', PAD, PAD + 18);
+            ctx.fillText('Deck Compare', PAD, PAD + 18);
 
             const stats = [
-                { label: '❌ ' + removed, color: '#e74c3c' },
+                { label: '' + removed, color: '#e74c3c' },
                 { label: '🆕 ' + added, color: '#27ae60' },
-                { label: '🔄 ' + changed, color: '#f39c12' },
-                { label: '✅ ' + unchanged, color: '#95a5a6' }
+                { label: '' + changed, color: '#f39c12' },
+                { label: '' + unchanged, color: '#95a5a6' }
             ];
             ctx.font = 'bold 14px system-ui, sans-serif';
             let sx = PAD;
@@ -700,13 +700,13 @@
                 <div id="deckCompareContent">
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 12px 16px; border-radius: 10px; margin-bottom: 12px; color: white;">
                     <div style="display:flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
-                        <h3 style="margin: 0; font-size: 1.1em;">📊 Deck A vs Deck B</h3>
-                        <button onclick="openCompareScreenshotModal()" style="border: none; border-radius: 6px; padding: 6px 10px; background: rgba(255,255,255,0.25); color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;" title="Screenshot for sharing">📸 Share</button>
+                        <h3 style="margin: 0; font-size: 1.1em;">Deck A vs Deck B</h3>
+                        <button onclick="openCompareScreenshotModal()" style="border: none; border-radius: 6px; padding: 6px 10px; background: rgba(255,255,255,0.25); color: white; font-weight: 600; cursor: pointer; font-size: 0.85em;" title="Screenshot for sharing">Share</button>
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px;">
                         <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
                             <div style="font-size: 1.5em; font-weight: bold;">${removed.length}</div>
-                            <div style="font-size: 0.75em; opacity: 0.9;">❌ Removed</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">Removed</div>
                         </div>
                         <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
                             <div style="font-size: 1.5em; font-weight: bold;">${added.length}</div>
@@ -714,21 +714,21 @@
                         </div>
                         <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
                             <div style="font-size: 1.5em; font-weight: bold;">${changed.length}</div>
-                            <div style="font-size: 0.75em; opacity: 0.9;">🔄 Changed</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">Changed</div>
                         </div>
                         <div style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 6px; text-align: center;">
                             <div style="font-size: 1.5em; font-weight: bold;">${unchanged.length}</div>
-                            <div style="font-size: 0.75em; opacity: 0.9;">✅ Same</div>
+                            <div style="font-size: 0.75em; opacity: 0.9;">Same</div>
                         </div>
                     </div>
                 </div>
             `;
 
             const groups = [
-                { type: 'removed', title: '❌ Removed', color: '#e74c3c', cards: removed },
+                { type: 'removed', title: 'Removed', color: '#e74c3c', cards: removed },
                 { type: 'new', title: '🆕 Added', color: '#27ae60', cards: added },
-                { type: 'changed', title: '🔄 Changed', color: '#f39c12', cards: changed },
-                { type: 'unchanged', title: '✅ Unchanged', color: '#95a5a6', cards: unchanged }
+                { type: 'changed', title: 'Changed', color: '#f39c12', cards: changed },
+                { type: 'unchanged', title: 'Unchanged', color: '#95a5a6', cards: unchanged }
             ];
 
             groups.forEach(group => {
@@ -750,7 +750,7 @@
                         const escapedName = (card.name || '').replace(/'/g, "\\'");
                         const escapedSet = (card.set || '').replace(/'/g, "\\'");
                         const escapedNum = (card.number || '').replace(/'/g, "\\'");
-                        const proxyBtn = showProxy ? `<button onclick="addCardToProxy('${escapedName}','${escapedSet}','${escapedNum}',${proxyQty})" style="margin-top:4px;border:none;border-radius:4px;padding:3px 8px;background:#e74c3c;color:white;font-weight:600;cursor:pointer;font-size:0.7em;width:100%;">🎴 +${proxyQty} Proxy</button>` : '';
+                        const proxyBtn = showProxy ? `<button onclick="addCardToProxy('${escapedName}','${escapedSet}','${escapedNum}',${proxyQty})" style="margin-top:4px;border:none;border-radius:4px;padding:3px 8px;background:#e74c3c;color:white;font-weight:600;cursor:pointer;font-size:0.7em;width:100%;">+${proxyQty} Proxy</button>` : '';
                         html += `
                             <div style="background: white; border: 2px solid ${group.color}; border-radius: 6px; padding: 6px; text-align: center;">
                                 ${imageUrl ? `<img src="${imageUrl}" alt="${card.name}" loading="lazy" decoding="async" style="width: 100%; border-radius: 4px; margin-bottom: 4px; aspect-ratio: 2.5/3.5; object-fit: cover;">` : `<div style="width:100%;aspect-ratio:2.5/3.5;background:#ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:#999;">${card.set} ${card.number}</div>`}
@@ -956,9 +956,9 @@
             } else if (source === 'pastMeta') {
                 deck = window.pastMetaDeck; order = window.pastMetaDeckOrder; archetype = window.pastMetaCurrentArchetype;
             } else return;
-            if (!deck || typeof deck !== 'object') { showDeckShareToast('⚠️ No deck data available!'); return; }
+            if (!deck || typeof deck !== 'object') { showDeckShareToast('No deck data available!'); return; }
             const total = Object.values(deck || {}).reduce((s, c) => s + c, 0);
-            if (total === 0) { showDeckShareToast('⚠️ No cards in deck to share!'); return; }
+            if (total === 0) { showDeckShareToast('No cards in deck to share!'); return; }
             
             const payload = { deck, order, archetype, source, timestamp: Date.now() };
 
@@ -972,8 +972,8 @@
                     url.searchParams.set('sharedDeck', shareId);
                     
                     navigator.clipboard.writeText(url.toString()).then(() => {
-                        showDeckShareToast(`🔗 Short link copied! (${total} cards)`);
-                    }).catch(() => { showInputModal({ title: '🔗 Share Link', message: 'Copy this share link:', defaultValue: url.toString(), readonly: true }); });
+                        showDeckShareToast(`Short link copied! (${total} cards)`);
+                    }).catch(() => { showInputModal({ title: 'Share Link', message: 'Copy this share link:', defaultValue: url.toString(), readonly: true }); });
                     return;
                 } catch (err) {
                     console.warn('[shareDeck] Firebase Firestore failed, falling back to Base64:', err);
@@ -985,8 +985,8 @@
             const url = new URL(window.location.href);
             url.searchParams.set('deck', encoded);
             navigator.clipboard.writeText(url.toString()).then(() => {
-                showDeckShareToast(`🔗 Share link copied! (${total} cards)`);
-            }).catch(() => { showInputModal({ title: '🔗 Share Link', message: 'Copy this share link:', defaultValue: url.toString(), readonly: true }); });
+                showDeckShareToast(`Share link copied! (${total} cards)`);
+            }).catch(() => { showInputModal({ title: 'Share Link', message: 'Copy this share link:', defaultValue: url.toString(), readonly: true }); });
         }
 
         function generateShortId() {
@@ -1031,7 +1031,7 @@
                             return;
                         } else {
                             console.warn('[importDeckFromUrl] Shared deck not found:', sharedId);
-                            showDeckShareToast('❌ Shared deck not found!');
+                            showDeckShareToast('Shared deck not found!');
                             return;
                         }
                     } catch (err) {
@@ -1088,7 +1088,7 @@
             setTimeout(() => clearInterval(poll), 30000);
             
             const total = Object.values(deck).reduce((s, c) => s + c, 0);
-            showDeckShareToast(`🎴 Deck imported: ${total} cards`);
+            showDeckShareToast(`Deck imported: ${total} cards`);
         }
 
         // ================================================================
@@ -1115,7 +1115,7 @@
 
             const total = Object.values(deck || {}).reduce((s, c) => s + c, 0);
             if (total === 0) {
-                showDeckShareToast('⚠️ No cards in deck to export!');
+                showDeckShareToast('No cards in deck to export!');
                 return;
             }
 
@@ -1185,7 +1185,7 @@
 
             // Copy to clipboard
             navigator.clipboard.writeText(ptcglText).then(() => {
-                showDeckShareToast(`✅ PTCGL export copied! (${total} cards)`);
+                showDeckShareToast(`PTCGL export copied! (${total} cards)`);
             }).catch(() => {
                 // Fallback: show in modal
                 showInputModal({ title: 'PTCGL Export', message: 'Copy this PTCGL deck list:', defaultValue: ptcglText, readonly: true, textarea: true });
@@ -1248,7 +1248,7 @@
             }
 
             if (importCount === 0) {
-                showDeckShareToast('❌ No valid cards found in PTCGL text!');
+                showDeckShareToast('No valid cards found in PTCGL text!');
                 return;
             }
 
@@ -1266,7 +1266,7 @@
 
             updateDeckDisplay(source);
             const totalCards = Object.values(newDeck).reduce((s, c) => s + c, 0);
-            showDeckShareToast(`✅ PTCGL import: ${importCount} cards (${totalCards} total)${errorCount > 0 ? ` | ${errorCount} errors` : ''}`);
+            showDeckShareToast(`PTCGL import: ${importCount} cards (${totalCards} total)${errorCount > 0 ? ` | ${errorCount} errors` : ''}`);
         }
 
         // ================================================================
@@ -1335,8 +1335,8 @@
             const brickColor = probBrick <= 0.10 ? '#27ae60' : probBrick <= 0.25 ? '#e67e22' : '#e74c3c';
             el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:0.85em;">
                 <span style="font-weight:600;color:#555;">&#127922; Opening Hand (7 cards):</span>
-                <span title="P(at least 1 Basic Pokémon in opening 7)" style="background:${basicColor};color:white;padding:3px 12px;border-radius:12px;font-weight:700;cursor:default;">✅ Basic in hand: ${(probBasic*100).toFixed(1)}%</span>
-                <span title="P(no Basic Pokémon = forced mulligan)" style="background:${brickColor};color:white;padding:3px 12px;border-radius:12px;font-weight:700;cursor:default;">☠️ Mulligan: ${(probBrick*100).toFixed(1)}%</span>
+                <span title="P(at least 1 Basic Pokémon in opening 7)" style="background:${basicColor};color:white;padding:3px 12px;border-radius:12px;font-weight:700;cursor:default;">Basic in hand: ${(probBasic*100).toFixed(1)}%</span>
+                <span title="P(no Basic Pokémon = forced mulligan)" style="background:${brickColor};color:white;padding:3px 12px;border-radius:12px;font-weight:700;cursor:default;">Mulligan: ${(probBrick*100).toFixed(1)}%</span>
                 <span style="color:#999;">(${basicCount} Basics / ${N} cards)</span>
             </div>`;
             el.style.display = 'block';

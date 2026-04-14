@@ -44,7 +44,7 @@ function ptUndo() {
     if (ptStateHistory.length === 0) { ptShowMessage(t('pt.nothingToUndo')); return; }
     ptState = ptStateHistory.pop();
     ptRenderAll();
-    ptLog('↩️ Undone.');
+    ptLog('Undone.');
 }
 
 // Globale Speicher für importierte Sandbox-Decks
@@ -101,12 +101,12 @@ function ptShowManual() {
     box.style.lineHeight = '1.6';
     box.innerHTML = `
 <div class="d-flex justify-space-between align-center mb-14">
-  <h2 class="m-0 color-yellow" style="font-size:22px">${getLang()==='de' ? '📖 Playtester – Bedienungsanleitung' : '📖 Playtester – User Guide'}</h2>
+  <h2 class="m-0 color-yellow" style="font-size:22px">${getLang()==='de' ? 'Playtester – Bedienungsanleitung' : 'Playtester – User Guide'}</h2>
   <button onclick="document.getElementById('ptManualOverlay').remove()" class="bg-none border-none color-white fs-24 pointer">&times;</button>
 </div>
 
 ${getLang()==='de' ? `
-<details open><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">⌨️ Tastenkürzel</summary>
+<details open><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Tastenkürzel</summary>
 <table style="width:100%;border-collapse:collapse;margin:6px 0 12px">
 <tr><td style="padding:3px 8px;color:#f5c542;width:60px"><b>D</b></td><td>Karte ziehen</td></tr>
 <tr><td style="padding:3px 8px;color:#f5c542"><b>S</b></td><td>Deck mischen</td></tr>
@@ -116,7 +116,7 @@ ${getLang()==='de' ? `
 </table>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🎮 Spielablauf</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Spielablauf</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Start:</b> Klicke den Play ▶ Button → 7 Karten werden gezogen, 6 Preiskarten gelegt</li>
 <li><b>Aufstellung:</b> Wähle dein Aktives Pokémon und optionale Bank-Pokémon</li>
@@ -127,26 +127,26 @@ ${getLang()==='de' ? `
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🃏 Karten-Interaktionen</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Karten-Interaktionen</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Karte spielen:</b> Handkarte anklicken (auswählen) → Zielzone auf dem Feld anklicken</li>
 <li><b>Drag & Drop:</b> Karten aus der Hand oder dem Feld auf Zielzonen ziehen</li>
 <li><b>Zoom:</b> Besetzte Zone anklicken (ohne Auswahl) → Vollbild-Ansicht</li>
-<li><b>Handkarte entsorgen:</b> 🗑️ Button auf der Handkarte</li>
-<li><b>Handkarte spielen:</b> ▶ Button – spielt Trainer automatisch (falls registriert)</li>
+<li><b>Handkarte entsorgen:</b> Disc-Button auf der Handkarte</li>
+<li><b>Handkarte spielen:</b> Play-Button – spielt Trainer automatisch (falls registriert)</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">📋 Hover-Menü (Feldkarten)</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Hover-Menü (Feldkarten)</summary>
 <p style="margin:4px 0">Fahre mit der Maus über eine besetzte Zone → Kontextmenü erscheint:</p>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Schaden:</b> +10 / +20 / +30 / +50 / +100 / −10 / Schaden löschen</li>
-<li><b>Status:</b> Gift ☠️ · Verbrennung 🔥 · Schlaf 💤 · Paralyse ⚡ · Verwirrung 💫</li>
-<li><b>Aktionen:</b> Zurück auf Hand ⬆️ · Ins Deck mischen · Ablagestapel 🗑️ · K.O. · Energie ablegen · Rückzug</li>
+<li><b>Status:</b> Gift (PSN) · Verbrennung (BRN) · Schlaf (SLP) · Paralyse (PAR) · Verwirrung (CNF)</li>
+<li><b>Aktionen:</b> Zurück auf Hand · Ins Deck mischen · Ablagestapel · K.O. · Energie ablegen · Rückzug</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">📦 Deck-Kontrollen</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Deck-Kontrollen</summary>
 <p style="margin:4px 0">Fahre mit der Maus über das Deck → Buttons erscheinen:</p>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Karte ziehen</b> – Oberste Karte auf die Hand nehmen</li>
@@ -156,32 +156,32 @@ ${getLang()==='de' ? `
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">⚡ Seitenleiste-Buttons</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Seitenleiste-Buttons</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Attack:</b> Zeigt Angriffs-Ansicht (Aktives vs Gegner) → Schließen = Zug beenden</li>
 <li><b>End Turn:</b> Zug beenden mit Gift-/Verbrennungseffekten</li>
-<li><b>👁️ Opp. View:</b> Gegner-Panel öffnen → Feld, Ablagestapel, Lost Zone einsehen & bearbeiten</li>
-<li><b>⚡ Actions:</b> Aktionsmenü → Iono, Judge, Shuffle & Draw, Mulligan u.v.m.</li>
+<li><b>Opp. View:</b> Gegner-Panel öffnen → Feld, Ablagestapel, Lost Zone einsehen & bearbeiten</li>
+<li><b>Actions:</b> Aktionsmenü → Iono, Judge, Shuffle & Draw, Mulligan u.v.m.</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🎯 Top-Leiste Buttons</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Top-Leiste Buttons</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>MP:</b> Multiplayer-Modus starten</li>
-<li><b>▶ Start:</b> Neues Spiel starten</li>
-<li><b>🔄 Flip:</b> Feld drehen (Singleplayer)</li>
-<li><b>🚪 Quit:</b> Playtester verlassen</li>
-<li><b>🪙 Coin:</b> Münze werfen</li>
-<li><b>🔍 Zoom:</b> Zoom-Panel (alle Karten auf dem Feld)</li>
-<li><b>↩️ Undo:</b> Letzten Zug rückgängig machen</li>
-<li><b>🔀 Mulligan:</b> Mulligan-Phase starten</li>
+<li><b>Start:</b> Neues Spiel starten</li>
+<li><b>Flip:</b> Feld drehen (Singleplayer)</li>
+<li><b>Quit:</b> Playtester verlassen</li>
+<li><b>Coin:</b> Münze werfen</li>
+<li><b>Zoom:</b> Zoom-Panel (alle Karten auf dem Feld)</li>
+<li><b>Undo:</b> Letzten Zug rückgängig machen</li>
+<li><b>Mulligan:</b> Mulligan-Phase starten</li>
 <li><b>V / GX:</b> VSTAR-Power / GX-Angriff als benutzt markieren</li>
-<li><b>💾 Save / Load:</b> Spielstand speichern und laden</li>
-<li><b>ℹ️ Info:</b> Diese Anleitung anzeigen</li>
+<li><b>Save / Load:</b> Spielstand speichern und laden</li>
+<li><b>Info:</b> Diese Anleitung anzeigen</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🗂️ Ablagestapel & Lost Zone</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Ablagestapel & Lost Zone</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Ablagestapel öffnen:</b> Klick auf Ablagestapel-Zone → Rasteransicht</li>
 <li><b>Karte zurück auf Hand:</b> Karte anklicken</li>
@@ -190,19 +190,19 @@ ${getLang()==='de' ? `
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🏷️ Markierungen & Anzeigen</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Markierungen & Anzeigen</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Schadensbadge:</b> Rotes Badge auf der Karte zeigt aktuellen Schaden</li>
 <li><b>Ability-Marker "A":</b> Rechts unten auf dem Pokémon – Klick = Fähigkeit benutzt/reset</li>
 <li><b>Statusicons:</b> Unter dem Aktiven: Gift/Verbrennung/Schlaf/Paralyse/Verwirrung</li>
 <li><b>Energie-Anhänge:</b> Kleine Kreise am unteren Kartenrand</li>
 <li><b>Tool-Anhänge:</b> Kleine Kartenminiatur am linken Rand</li>
-<li><b>Stack-Badge 🃏:</b> Zeigt Evolutionsstufen – Klick öffnet alle Karten im Stapel</li>
+<li><b>Stack-Badge:</b> Zeigt Evolutionsstufen – Klick öffnet alle Karten im Stapel</li>
 <li><b>DMG-Modifikator:</b> Bonusschaden pro Spieler (über Aktionsmenü einstellbar)</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🔄 Preiskarten</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Preiskarten</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>K.O.:</b> Nach einem K.O. öffnet sich der Preiskarten-Wähler</li>
 <li><b>Anzahl:</b> 1 Preis für normale Pokémon, 2 für V/ex, 3 für VMAX/VSTAR</li>
@@ -212,7 +212,7 @@ ${getLang()==='de' ? `
 
 <p style="text-align:center;margin-top:16px;color:#6c7086;font-size:12px">Klicke außerhalb oder ✕ zum Schließen</p>
 ` : `
-<details open><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">⌨️ Keyboard Shortcuts</summary>
+<details open><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Keyboard Shortcuts</summary>
 <table style="width:100%;border-collapse:collapse;margin:6px 0 12px">
 <tr><td style="padding:3px 8px;color:#f5c542;width:60px"><b>D</b></td><td>Draw card</td></tr>
 <tr><td style="padding:3px 8px;color:#f5c542"><b>S</b></td><td>Shuffle deck</td></tr>
@@ -222,7 +222,7 @@ ${getLang()==='de' ? `
 </table>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🎮 Gameplay</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Gameplay</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Start:</b> Click Play ▶ → 7 cards drawn, 6 prize cards placed</li>
 <li><b>Setup:</b> Choose your Active Pokémon and optional Bench Pokémon</li>
@@ -233,26 +233,26 @@ ${getLang()==='de' ? `
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🃏 Card Interactions</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Card Interactions</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Play card:</b> Click hand card (select) → Click target zone on the field</li>
 <li><b>Drag & Drop:</b> Drag cards from hand or field to target zones</li>
 <li><b>Zoom:</b> Click occupied zone (without selection) → Full-screen view</li>
-<li><b>Discard from hand:</b> 🗑️ button on hand card</li>
-<li><b>Play hand card:</b> ▶ button – plays Trainer automatically (if registered)</li>
+<li><b>Discard from hand:</b> Disc button on hand card</li>
+<li><b>Play hand card:</b> Play button – plays Trainer automatically (if registered)</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">📋 Hover Menu (Field Cards)</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Hover Menu (Field Cards)</summary>
 <p style="margin:4px 0">Hover over an occupied zone → Context menu appears:</p>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Damage:</b> +10 / +20 / +30 / +50 / +100 / −10 / Clear damage</li>
-<li><b>Status:</b> Poison ☠️ · Burn 🔥 · Sleep 💤 · Paralysis ⚡ · Confusion 💫</li>
-<li><b>Actions:</b> Return to hand ⬆️ · Shuffle into deck · Discard 🗑️ · K.O. · Discard energy · Retreat</li>
+<li><b>Status:</b> Poison (PSN) · Burn (BRN) · Sleep (SLP) · Paralysis (PAR) · Confusion (CNF)</li>
+<li><b>Actions:</b> Return to hand · Shuffle into deck · Discard · K.O. · Discard energy · Retreat</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">📦 Deck Controls</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Deck Controls</summary>
 <p style="margin:4px 0">Hover over deck → Buttons appear:</p>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Draw</b> – Take top card to hand</li>
@@ -262,32 +262,32 @@ ${getLang()==='de' ? `
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">⚡ Sidebar Buttons</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Sidebar Buttons</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Attack:</b> Shows attack view (Active vs Opponent) → Close = End turn</li>
 <li><b>End Turn:</b> End turn with Poison/Burn effects</li>
-<li><b>👁️ Opp. View:</b> Open opponent panel → View & edit field, discard, Lost Zone</li>
-<li><b>⚡ Actions:</b> Actions menu → Iono, Judge, Shuffle & Draw, Mulligan etc.</li>
+<li><b>Opp. View:</b> Open opponent panel → View & edit field, discard, Lost Zone</li>
+<li><b>Actions:</b> Actions menu → Iono, Judge, Shuffle & Draw, Mulligan etc.</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🎯 Top Bar Buttons</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Top Bar Buttons</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>MP:</b> Start multiplayer mode</li>
-<li><b>▶ Start:</b> Start new game</li>
-<li><b>🔄 Flip:</b> Flip board (Singleplayer)</li>
-<li><b>🚪 Quit:</b> Leave playtester</li>
-<li><b>🪙 Coin:</b> Flip coin</li>
-<li><b>🔍 Zoom:</b> Zoom panel (all cards on field)</li>
-<li><b>↩️ Undo:</b> Undo last action</li>
-<li><b>🔀 Mulligan:</b> Start mulligan phase</li>
+<li><b>Start:</b> Start new game</li>
+<li><b>Flip:</b> Flip board (Singleplayer)</li>
+<li><b>Quit:</b> Leave playtester</li>
+<li><b>Coin:</b> Flip coin</li>
+<li><b>Zoom:</b> Zoom panel (all cards on field)</li>
+<li><b>Undo:</b> Undo last action</li>
+<li><b>Mulligan:</b> Start mulligan phase</li>
 <li><b>V / GX:</b> Mark VSTAR Power / GX Attack as used</li>
-<li><b>💾 Save / Load:</b> Save and load game state</li>
-<li><b>ℹ️ Info:</b> Show this guide</li>
+<li><b>Save / Load:</b> Save and load game state</li>
+<li><b>Info:</b> Show this guide</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🗂️ Discard Pile & Lost Zone</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Discard Pile & Lost Zone</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Open discard:</b> Click discard zone → Grid view</li>
 <li><b>Return to hand:</b> Click a card</li>
@@ -296,19 +296,19 @@ ${getLang()==='de' ? `
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🏷️ Markers & Indicators</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Markers & Indicators</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>Damage badge:</b> Red badge on card shows current damage</li>
 <li><b>Ability marker "A":</b> Bottom right of Pokémon – Click = Ability used/reset</li>
 <li><b>Status icons:</b> Below Active: Poison/Burn/Sleep/Paralysis/Confusion</li>
 <li><b>Energy attachments:</b> Small circles at card bottom</li>
 <li><b>Tool attachments:</b> Small card thumbnail on left edge</li>
-<li><b>Stack badge 🃏:</b> Shows evolution stages – Click opens all cards in stack</li>
+<li><b>Stack badge:</b> Shows evolution stages – Click opens all cards in stack</li>
 <li><b>DMG modifier:</b> Bonus damage per player (set via Actions menu)</li>
 </ul>
 </details>
 
-<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">🔄 Prize Cards</summary>
+<details><summary style="font-weight:bold;color:#89b4fa;cursor:pointer;margin-bottom:6px">Prize Cards</summary>
 <ul style="padding-left:18px;margin:6px 0 12px">
 <li><b>K.O.:</b> After a K.O. the prize card picker opens</li>
 <li><b>Amount:</b> 1 prize for normal Pokémon, 2 for V/ex, 3 for VMAX/VSTAR</li>
@@ -911,13 +911,13 @@ function ptRenderStartPhaseModal() {
     const isMP = ptState.isMultiplayer;
     const localRole = ptState.localRole;
     const mpHeaderText = isMP
-        ? `🌐 <strong>Multiplayer Setup</strong> — ${getLang()==='de' ? `Du bist` : `You are`} <strong>${localRole === 'p1' ? '🔵 Player 1' : '🔴 Player 2'}</strong>. ${getLang()==='de' ? `Wähle dein Aktives &amp; Bank-Pokémon, dann klicke` : `Choose your Active &amp; Bench Pokémon, then click`} <strong>${getLang()==='de' ? `Bereit!` : `Ready!`}</strong>`
-        : `🔵 <strong>P1</strong> ${getLang()==='de' ? `geht zuerst. Wähle dein Aktives &amp; Bank-Pokémon, dann auf` : `goes first. Choose your Active &amp; Bench Pokémon, then click`} <strong>Let's Battle!</strong>`;
+        ? `<strong>Multiplayer Setup</strong> — ${getLang()==='de' ? `Du bist` : `You are`} <strong>${localRole === 'p1' ? 'Player 1' : 'Player 2'}</strong>. ${getLang()==='de' ? `Wähle dein Aktives &amp; Bank-Pokémon, dann klicke` : `Choose your Active &amp; Bench Pokémon, then click`} <strong>${getLang()==='de' ? `Bereit!` : `Ready!`}</strong>`
+        : `<strong>P1</strong> ${getLang()==='de' ? `geht zuerst. Wähle dein Aktives &amp; Bank-Pokémon, dann auf` : `goes first. Choose your Active &amp; Bench Pokémon, then click`} <strong>Let's Battle!</strong>`;
     const mpBtnText = isMP ? t('pt.ready') : t('pt.letsBattle');
     const mpHintText = isMP ? t('pt.clickBasicActive') : t('pt.bothPlayersChooseActive');
 
     html += `
-        <h2 style="color:#FFCB05;text-align:center;margin-top:0;">🃏 Setup Phase</h2>
+        <h2 style="color:#FFCB05;text-align:center;margin-top:0;">Setup Phase</h2>
         <p style="text-align:center;color:#ccc;margin-bottom:8px;">${mpHeaderText}</p>
         <div class="pt-setup-players" style="display:flex;flex-direction:column;gap:20px;margin-bottom:20px;">
             ${ptRenderStartHandHTML('p1')}
@@ -936,7 +936,7 @@ function ptRenderStartPhaseModal() {
 }
 
 function ptRenderStartHandHTML(player) {
-    const label = player === 'p1' ? '🔵 Player 1' : '🔴 Player 2';
+    const label = player === 'p1' ? 'Player 1' : 'Player 2';
     const borderColor = player === 'p1' ? '#3B4CCA' : '#E3350D';
 
     // === MULTIPLAYER: Gegnerhand verdeckt ===
@@ -953,8 +953,8 @@ function ptRenderStartHandHTML(player) {
         }
         const oppReady = ptState.mpSetupReady && ptState.mpSetupReady[player];
         const readyBanner = oppReady
-            ? `<div style="background:#27ae60;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;">✅ ${getLang()==='de' ? 'Bereit!' : 'Ready!'}</div>`
-            : `<div style="background:#e67e22;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;">⏳ ${getLang()==='de' ? 'Wählt Karten...' : 'Choosing cards...'}</div>`;
+            ? `<div style="background:#27ae60;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;">${getLang()==='de' ? 'Bereit!' : 'Ready!'}</div>`
+            : `<div style="background:#e67e22;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;">${getLang()==='de' ? 'Wählt Karten...' : 'Choosing cards...'}</div>`;
         return `<div style="border:2px solid ${borderColor};border-radius:10px;padding:14px;">
             <div style="font-weight:900;margin-bottom:8px;font-size:1em;color:${borderColor};">
                 <span>${label} (${getLang()==='de' ? 'Gegner' : 'Opponent'})</span>
@@ -993,11 +993,11 @@ function ptRenderStartHandHTML(player) {
     }).join('');
 
     const noBasicWarn = !hasBasic
-        ? `<div style="background:#e74c3c;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;margin-bottom:8px;text-align:center;">⚠️ No Basic Pokémon! Do a Mulligan.</div>` : '';
+        ? `<div style="background:#e74c3c;color:#fff;padding:7px 12px;border-radius:7px;font-size:11px;font-weight:700;margin-bottom:8px;text-align:center;">No Basic Pokémon! Do a Mulligan.</div>` : '';
 
     const statusMsg = activeIdx !== null
-        ? `✅ Active: <strong>${_ptEscHtml(ptState[player].hand[activeIdx]?.name||'?')}</strong>${benchIdxs.length ? ` &nbsp;|&nbsp; Bench: ${benchIdxs.length}` : ''}`
-        : `<span style="color:#f1c40f;">⬆️ Click a Basic to set as Active</span>`;
+        ? `Active: <strong>${_ptEscHtml(ptState[player].hand[activeIdx]?.name||'?')}</strong>${benchIdxs.length ? ` &nbsp;|&nbsp; Bench: ${benchIdxs.length}` : ''}`
+        : `<span style="color:#f1c40f;">Click a Basic to set as Active</span>`;
 
     const mulBtnStyle = `padding:5px 14px;background:#8e44ad;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;`;
     const clrBtnStyle = `padding:5px 14px;background:rgba(255,255,255,0.1);color:#fff;border:1px solid #555;border-radius:6px;cursor:pointer;font-size:11px;`;
@@ -1179,7 +1179,7 @@ function ptConfirmStartActives() {
         // Sync to Firebase (field-level update — no race condition)
         if (typeof mpSyncSetupReady === 'function') mpSyncSetupReady();
 
-        ptLog(getLang()==='de' ? `✅ ${localRole.toUpperCase()} ist bereit!` : `✅ ${localRole.toUpperCase()} is ready!`);
+        ptLog(getLang()==='de' ? `${localRole.toUpperCase()} ist bereit!` : `${localRole.toUpperCase()} is ready!`);
 
         // Re-render setup modal (shows 'Warte auf Gegner...')
         ptRenderStartPhaseModal();
@@ -1217,7 +1217,7 @@ function ptConfirmStartActives() {
     ptStartChoices = { p1: { active: null, bench: [] }, p2: { active: null, bench: [] } };
     const fpModal = document.getElementById('ptStartPhaseModal');
     if (fpModal) fpModal.style.display = 'none';
-    ptLog(getLang()==='de' ? `✅ Spiel gestartet! P1 geht zuerst. Preiskarten verteilt. Viel Spaß!` : `✅ Game started! P1 goes first. Prize cards dealt. Have fun!`);
+    ptLog(getLang()==='de' ? `Spiel gestartet! P1 geht zuerst. Preiskarten verteilt. Viel Spaß!` : `Game started! P1 goes first. Prize cards dealt. Have fun!`);
     ptRenderAll();
 
     // Check mulligan draws: if one player had mulligans and the other didn't,
@@ -1459,7 +1459,7 @@ function ptRunCommand(playerOverride) {
         ptLog(`🪙 ${n} coin(s): ${heads}x HEADS.`);
     } else if (action === 'dice') {
         const roll = Math.floor(Math.random() * 6) + 1;
-        ptLog(`🎲 Dice roll: ${roll}`);
+        ptLog(`Dice roll: ${roll}`);
     } else if (action === 'iono' || action === 'judge') {
         ['p1', 'p2'].forEach(pp => {
             ptState[pp].deck.push(...ptState[pp].hand);
@@ -1471,7 +1471,7 @@ function ptRunCommand(playerOverride) {
             }
             for (let i = 0; i < n; i++) if (deck.length > 0) ptState[pp].hand.push(deck.pop());
         });
-        ptLog(`🔄 Iono/Judge: Both players drew ${n} card(s).`);
+        ptLog(`Iono/Judge: Both players drew ${n} card(s).`);
         ptRenderAll(); needsSync = true;
     } else if (action === 'roxanne' || action === 'marnie') {
         ['p1', 'p2'].forEach(pp => {
@@ -1479,7 +1479,7 @@ function ptRunCommand(playerOverride) {
             ptState[pp].hand = [];
             for (let i = 0; i < n; i++) if (ptState[pp].deck.length > 0) ptState[pp].hand.push(ptState[pp].deck.pop());
         });
-        ptLog(`⬇️ Marnie/Roxanne: Both players drew ${n} card(s).`);
+        ptLog(`Marnie/Roxanne: Both players drew ${n} card(s).`);
         ptRenderAll(); needsSync = true;
     } else if (action === 'shuffle' || action === 'sh') {
         ptShuffleDeck(p); needsSync = true;
@@ -1501,7 +1501,7 @@ function ptRunCommand(playerOverride) {
         }
         const [energyCard] = ptState[p].hand.splice(energyIdx, 1);
         ptState[p].field[zone].push(energyCard);
-        ptLog(`⚡ Attached "${energyCard.name}" to ${p} ${zone}.`);
+        ptLog(`Attached "${energyCard.name}" to ${p} ${zone}.`);
         ptRenderAll(); needsSync = true;
     } else {
         ptShowMessage(t('pt.errUnknownCmd'));
@@ -1536,10 +1536,10 @@ function ptRenderTopCards() {
                  ondblclick="ptViewCard(event,'${safeImg}')" title="${_ptEscHtml(c.name)}">
             <div style="color:#fff;font-size:10px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_ptEscHtml(c.name)}</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
-                <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'hand')">⬆️ Hand</button>
-                <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'lost')">🌌 Lost</button>
-                <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'bottom')">⏬ Bottom</button>
-                <button class="pt-action-btn red" onclick="ptRouteTopCard(${i},'discard')">🗑️ Discard</button>
+                <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'hand')">Hand</button>
+                <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'lost')">Lost</button>
+                <button class="pt-action-btn" onclick="ptRouteTopCard(${i},'bottom')">Bottom</button>
+                <button class="pt-action-btn red" onclick="ptRouteTopCard(${i},'discard')">Discard</button>
             </div>
         </div>`;
     }).join('');
@@ -1821,7 +1821,7 @@ function ptGlobalJudge() {
             [deck[i], deck[j]] = [deck[j], deck[i]];
         }
         for (let i = 0; i < JUDGE_DRAW; i++) if (deck.length > 0) ptState[me].hand.push(deck.pop());
-        ptLog(getLang()==='de' ? `⚖️ Judge: ${me.toUpperCase()} mischt Hand ins Deck, zieht ${JUDGE_DRAW}.` : `⚖️ Judge: ${me.toUpperCase()} shuffles hand into deck, draws ${JUDGE_DRAW}.`);
+        ptLog(getLang()==='de' ? `Judge: ${me.toUpperCase()} mischt Hand ins Deck, zieht ${JUDGE_DRAW}.` : `Judge: ${me.toUpperCase()} shuffles hand into deck, draws ${JUDGE_DRAW}.`);
         ptRenderAll();
         if (typeof syncGlobalEffect === 'function') {
             syncGlobalEffect('JUDGE', { drawCount: JUDGE_DRAW }, 'Judge: both draw ' + JUDGE_DRAW);
@@ -1840,7 +1840,7 @@ function ptGlobalJudge() {
         }
         for (let i = 0; i < JUDGE_DRAW; i++) if (deck.length > 0) ptState[p].hand.push(deck.pop());
     });
-    ptLog(getLang()==='de' ? `⚖️ Judge: Beide mischen Hand ins Deck, shufflen, ziehen je ${JUDGE_DRAW}.` : `⚖️ Judge: Both shuffle hand into deck, draw ${JUDGE_DRAW} each.`);
+    ptLog(getLang()==='de' ? `Judge: Beide mischen Hand ins Deck, shufflen, ziehen je ${JUDGE_DRAW}.` : `Judge: Both shuffle hand into deck, draw ${JUDGE_DRAW} each.`);
     ptRenderAll();
 }
 
@@ -1859,7 +1859,7 @@ function _ptLocalJudge(myRole) {
         [deck[i], deck[j]] = [deck[j], deck[i]];
     }
     for (let i = 0; i < JUDGE_DRAW; i++) if (deck.length > 0) ptState[myRole].hand.push(deck.pop());
-    ptLog(getLang()==='de' ? `⚖️ Judge (Gegner): Hand ins Deck gemischt, ${JUDGE_DRAW} gezogen.` : `⚖️ Judge (Opponent): Hand shuffled into deck, drew ${JUDGE_DRAW}.`);
+    ptLog(getLang()==='de' ? `Judge (Gegner): Hand ins Deck gemischt, ${JUDGE_DRAW} gezogen.` : `Judge (Opponent): Hand shuffled into deck, drew ${JUDGE_DRAW}.`);
     if (typeof showToast === 'function') showToast(t('pt.oppJudgePlayed').replace('{n}', JUDGE_DRAW), 'info', 4000);
 }
 
@@ -1881,7 +1881,7 @@ function ptGlobalIono() {
             ptState[me].hand = [];
         }
         for (let i = 0; i < amt; i++) if (ptState[me].deck.length > 0) ptState[me].hand.push(ptState[me].deck.pop());
-        ptLog(getLang()==='de' ? `⚡ Iono: ${me.toUpperCase()} legt Hand unter Deck, zieht ${amt} (Prizes).` : `⚡ Iono: ${me.toUpperCase()} puts hand to bottom of deck, draws ${amt} (Prizes).`);
+        ptLog(getLang()==='de' ? `Iono: ${me.toUpperCase()} legt Hand unter Deck, zieht ${amt} (Prizes).` : `Iono: ${me.toUpperCase()} puts hand to bottom of deck, draws ${amt} (Prizes).`);
         ptRenderAll();
         if (typeof syncGlobalEffect === 'function') {
             syncGlobalEffect('IONO', {}, 'Iono played');
@@ -1905,7 +1905,7 @@ function ptGlobalIono() {
         }
         for (let i = 0; i < amt; i++) if (ptState[p].deck.length > 0) ptState[p].hand.push(ptState[p].deck.pop());
     });
-    ptLog(getLang()==='de' ? `⚡ Iono: Hände unter das Deck gelegt. P1 zieht ${draws.p1} (Prizes), P2 zieht ${draws.p2} (Prizes).` : `⚡ Iono: Hands placed to bottom of deck. P1 draws ${draws.p1} (Prizes), P2 draws ${draws.p2} (Prizes).`);
+    ptLog(getLang()==='de' ? `Iono: Hände unter das Deck gelegt. P1 zieht ${draws.p1} (Prizes), P2 zieht ${draws.p2} (Prizes).` : `Iono: Hands placed to bottom of deck. P1 draws ${draws.p1} (Prizes), P2 draws ${draws.p2} (Prizes).`);
     ptRenderAll();
 }
 
@@ -1925,7 +1925,7 @@ function _ptLocalIono(myRole) {
         ptState[myRole].hand = [];
     }
     for (let i = 0; i < amt; i++) if (ptState[myRole].deck.length > 0) ptState[myRole].hand.push(ptState[myRole].deck.pop());
-    ptLog(getLang()==='de' ? `⚡ Iono (Gegner): Hand unter Deck gelegt, ${amt} Karten gezogen.` : `⚡ Iono (Opponent): Hand placed to bottom of deck, drew ${amt} cards.`);
+    ptLog(getLang()==='de' ? `Iono (Gegner): Hand unter Deck gelegt, ${amt} Karten gezogen.` : `Iono (Opponent): Hand placed to bottom of deck, drew ${amt} cards.`);
     if (typeof showToast === 'function') showToast(t('pt.oppIonoPlayed').replace('{n}', amt), 'info', 4000);
 }
 
@@ -1942,7 +1942,7 @@ function ptToggleDmgMod(element, amount) {
     } else {
         element.classList.add('active');
         element.innerText = '+' + amount;
-        ptLog(getLang()==='de' ? `💪 DMG Buff: +${amount} gesamt.` : `💪 DMG Buff: +${amount} total.`);
+        ptLog(getLang()==='de' ? `DMG Buff: +${amount} gesamt.` : `DMG Buff: +${amount} total.`);
     }
 }
 
@@ -2067,8 +2067,8 @@ function ptOpenPromoteModal(player) {
         const toolCards = cards.filter(c => { const ct = (c.cardType||'').toLowerCase(); return ct === 'tool' || (ct.includes('trainer') && !ct.includes('supporter') && !ct.includes('stadium')); });
         let infoHTML = '';
         if (dmg > 0) infoHTML += `<span style="color:#e74c3c;font-weight:900;">${dmg} DMG</span> `;
-        if (energyCards.length > 0) infoHTML += `<span style="color:#f39c12;">⚡${energyCards.length}</span> `;
-        if (toolCards.length > 0) infoHTML += `<span style="color:#3498db;">🛠️ ${_ptEscHtml(toolCards[0].name)}</span>`;
+        if (energyCards.length > 0) infoHTML += `<span style="color:#f39c12;">E${energyCards.length}</span> `;
+        if (toolCards.length > 0) infoHTML += `<span style="color:#3498db;">${_ptEscHtml(toolCards[0].name)}</span>`;
         html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;max-width:100px;"
                       onclick="ptPromoteBench('${player}','${zoneId}')"
                       onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
@@ -2205,7 +2205,7 @@ function _ptRefreshDeckSearchGrid() {
             const group = _ptDeckCardSortOrder(card);
             if (group !== lastGroup) {
                 lastGroup = group;
-                const groupLabel = ['🐾 Pokémon', '🧑‍⚕️ Supporter', '🧰 Item', '🔧 Tool', '🏟️ Stadion', '✨ Special Energy', '⚡ Basic Energy', '🃏 Trainer'][group] || '';
+                const groupLabel = ['Pokémon', 'Supporter', 'Item', 'Tool', 'Stadion', 'Special Energy', 'Basic Energy', 'Trainer'][group] || '';
                 const sep = document.createElement('div');
                 sep.className = 'w-100 ta-left color-yellow fs-10 fw-900 px-4';
                 sep.textContent = groupLabel;
@@ -2624,14 +2624,14 @@ function ptEnergyDiscard(player, zoneId) {
     if (energies.length === 1) {
         const removed = cards.splice(energies[0].idx, 1)[0];
         ptState[player].discard.push(removed);
-        ptLog(`⚡🗑️ ${_ptEscHtml(removed.name)} → Discard`);
+        ptLog(`Energy: ${_ptEscHtml(removed.name)} → Discard`);
         ptSaveState(); ptRenderAll();
         if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Energy discard');
         return;
     }
     // Multiple energies – show pick modal
     let html = `<div style="background:#1a1a2e;border:2px solid #f39c12;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:520px;">
-        <h3 style="color:#f39c12;margin-top:0;">⚡🗑️ ${getLang()==='de' ? 'Energy ablegen' : 'Discard Energy'}</h3>
+        <h3 style="color:#f39c12;margin-top:0;">${getLang()==='de' ? 'Energy ablegen' : 'Discard Energy'}</h3>
         <p style="color:#ccc;font-size:12px;margin-bottom:16px;">${getLang()==='de' ? 'Wähle eine Energy-Karte zum Ablegen.' : 'Choose an Energy card to discard.'}</p>
         <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
     energies.forEach(e => {
@@ -2664,7 +2664,7 @@ function ptFinishEnergyDiscard(player, zoneId, idx) {
     if (!cards || idx >= cards.length) return;
     const removed = cards.splice(idx, 1)[0];
     ptState[player].discard.push(removed);
-    ptLog(`⚡🗑️ ${_ptEscHtml(removed.name)} → Discard`);
+    ptLog(`Energy: ${_ptEscHtml(removed.name)} → Discard`);
     ptSaveState(); ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Energy discard');
 }
@@ -3017,7 +3017,7 @@ function ptKnockOutZone(player, zoneId, prizeTakerOverride) {
     ptState[player].damage[zoneId] = 0;
     if (zoneId === 'active') ptState[player].status = [];
 
-    ptLog(getLang()==='de' ? `☠️ ${zoneId} (${player}) K.O. → Discard (${count} Karten).` : `☠️ ${zoneId} (${player}) K.O. → Discard (${count} cards).`);
+    ptLog(getLang()==='de' ? `${zoneId} (${player}) K.O. → Discard (${count} Karten).` : `${zoneId} (${player}) K.O. → Discard (${count} cards).`);
     ptRenderAll();
 
     if (player !== ptCurrentPlayer) {
@@ -3073,7 +3073,7 @@ function toggleStatus(player, statusType, event) {
 function ptToggleLock(player, type) {
     ptState[player][type] = !ptState[player][type];
     const label = type === 'itemLock' ? 'Item-Lock' : 'Tool-Lock';
-    const state = ptState[player][type] ? 'AN 🔴' : 'AUS 🟢';
+    const state = ptState[player][type] ? 'AN' : 'AUS';
     ptLog(`${label} für ${player.toUpperCase()}: ${state}`);
     ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase(label + ' ' + state);
@@ -3127,10 +3127,10 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
         const lockBar = `<div style="display:flex;gap:8px;margin-bottom:14px;padding:10px;background:rgba(255,255,255,0.04);border-radius:8px;align-items:center;">
             <span style="font-size:11px;color:#aaa;margin-right:4px;">Locks:</span>
             <button onclick="ptToggleLock('${opp}','itemLock')" style="${iLock ? lkOn : lkOff}" title="${getLang()==='de' ? 'Item-Lock: Gegner kann keine Items spielen' : 'Item-Lock: Opponent cannot play Items'}">
-                🚫 ${iLock ? '✅ Item-Lock ON' : 'Item-Lock'}
+                ITEM ${iLock ? 'Item-Lock ON' : 'Item-Lock'}
             </button>
             <button onclick="ptToggleLock('${opp}','toolLock')" style="${tLock ? lkOn : lkOff}" title="${getLang()==='de' ? 'Tool-Lock: Gegner kann keine Tools spielen' : 'Tool-Lock: Opponent cannot play Tools'}">
-                🔧 ${tLock ? '✅ Tool-Lock ON' : 'Tool-Lock'}
+                TOOL ${tLock ? 'Tool-Lock ON' : 'Tool-Lock'}
             </button>
         </div>`;
         const zones = ['active', 'bench0', 'bench1', 'bench2', 'bench3', 'bench4'];
@@ -3153,10 +3153,10 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
             const statusBtns = zoneId === 'active' ? `
                 <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">
                     <button onclick="toggleStatus('${opp}','poisoned');ptRefreshOpponentField('${opp}')" style="${sSel('poisoned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="${getLang()==='de' ? 'Vergiftet' : 'Poisoned'}">☠️</button>
-                    <button onclick="toggleStatus('${opp}','burned');ptRefreshOpponentField('${opp}')" style="${sSel('burned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="${getLang()==='de' ? 'Verbrannt' : 'Burned'}">🔥</button>
-                    <button onclick="toggleStatus('${opp}','asleep');ptRefreshOpponentField('${opp}')" style="${sSel('asleep')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="${getLang()==='de' ? 'Schlaf' : 'Asleep'}">💤</button>
+                    <button onclick="toggleStatus('${opp}','burned');ptRefreshOpponentField('${opp}')" style="${sSel('burned')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="${getLang()==='de' ? 'Verbrannt' : 'Burned'}">BRN</button>
+                    <button onclick="toggleStatus('${opp}','asleep');ptRefreshOpponentField('${opp}')" style="${sSel('asleep')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="${getLang()==='de' ? 'Schlaf' : 'Asleep'}">SLP</button>
                     <button onclick="toggleStatus('${opp}','paralyzed');ptRefreshOpponentField('${opp}')" style="${sSel('paralyzed')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="${getLang()==='de' ? 'Paralyse' : 'Paralyzed'}">⚡</button>
-                    <button onclick="toggleStatus('${opp}','confused');ptRefreshOpponentField('${opp}')" style="${sSel('confused')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="${getLang()==='de' ? 'Verwirrt' : 'Confused'}">💫</button>
+                    <button onclick="toggleStatus('${opp}','confused');ptRefreshOpponentField('${opp}')" style="${sSel('confused')}border:none;border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer;" title="${getLang()==='de' ? 'Verwirrt' : 'Confused'}">CNF</button>
                 </div>` : '';
             // Also show all attached cards (energy/tools)
             const attachedHTML = cards.slice(1).map(ac => {
@@ -3181,7 +3181,7 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
                          onerror="this.src='${CARD_BACK_URL}'" onclick="ptViewCard('${safeImg}','${_ptEscJs(card.name)}')" title="${getLang()==='de' ? 'Klick zum Vergrößern' : 'Click to zoom'}">
                     <div style="flex:1;">
                         <div style="font-weight:700;font-size:12px;margin-bottom:4px;">${_ptEscHtml(card.name)}</div>
-                        <div style="font-size:16px;font-weight:900;color:#ff6b6b;margin-bottom:6px;">💥 ${dmg} ${getLang()==='de' ? 'Schaden' : 'Damage'}</div>
+                        <div style="font-size:16px;font-weight:900;color:#ff6b6b;margin-bottom:6px;">${dmg} ${getLang()==='de' ? 'Schaden' : 'Damage'}</div>
                         ${statusBtns}
                         <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:5px;">
                             <button onclick="addDamage('${opp}','${zoneId}',10);ptRefreshOpponentField('${opp}')"  style="background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">+10</button>
@@ -3190,14 +3190,14 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
                             <button onclick="addDamage('${opp}','${zoneId}',50);ptRefreshOpponentField('${opp}')"  style="background:#c0392b;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;">+50</button>
                             <button onclick="addDamage('${opp}','${zoneId}',100);ptRefreshOpponentField('${opp}')" style="background:#922b21;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;">+100</button>
                             <button onclick="addDamage('${opp}','${zoneId}',-10);ptRefreshOpponentField('${opp}')" style="background:#27ae60;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">-10</button>
-                            <button onclick="clearDamage('${opp}','${zoneId}');ptRefreshOpponentField('${opp}')"   style="background:#1a9e5b;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">💚 Heal</button>
+                            <button onclick="clearDamage('${opp}','${zoneId}');ptRefreshOpponentField('${opp}')"   style="background:#1a9e5b;color:#fff;border:none;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;">Heal</button>
                         </div>
                         <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.08);">
                             <button onclick="ptOppKnockOutZone('${opp}','${zoneId}')" style="background:#922b21;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;" title="${getLang()==='de' ? 'Pokémon K.O. setzen und Prize triggern' : 'Knock out Pokémon and trigger Prize'}">☠️ K.O.</button>
-                            <button onclick="ptOppDiscardZone('${opp}','${zoneId}')" style="background:#7d3c98;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="${getLang()==='de' ? 'Zone ohne Prize in den Discard legen' : 'Discard zone without Prize'}">🗑️ Discard</button>
+                            <button onclick="ptOppDiscardZone('${opp}','${zoneId}')" style="background:#7d3c98;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="${getLang()==='de' ? 'Zone ohne Prize in den Discard legen' : 'Discard zone without Prize'}">Discard</button>
                             ${zoneId !== 'active' ? `<button onclick="ptOppSetActive('${opp}','${zoneId}')" style="background:#1a5276;color:#fff;border:none;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;" title="${getLang()==='de' ? 'Als Active setzen' : 'Set as Active'}">⭐ ${getLang()==='de' ? 'Active setzen' : 'Set Active'}</button>` : ''}
                         </div>
-                        ${attachedRemovableHTML ? `<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.06);"><span style="font-size:9px;color:#aaa;margin-right:2px;">⚡🔧</span>${attachedRemovableHTML}</div>` : ''}
+                        ${attachedRemovableHTML ? `<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,0.06);"><span style="font-size:9px;color:#aaa;margin-right:2px;">E/T</span>${attachedRemovableHTML}</div>` : ''}
                     </div>
                 </div>
             </div>`;
@@ -3208,7 +3208,7 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
     } else if (tab === 'discard') {
         // ─ Discard pile (view-only, click to zoom)
         const discard = ptState[opp].discard;
-        if (discard.length === 0) { el.innerHTML = '<div style="color:#aaa;text-align:center;padding:30px;">🗑️ ' + (getLang()==='de' ? 'Ablagestapel ist leer.' : 'Discard pile is empty.') + '</div>'; return; }
+        if (discard.length === 0) { el.innerHTML = '<div style="color:#aaa;text-align:center;padding:30px;">' + (getLang()==='de' ? 'Ablagestapel ist leer.' : 'Discard pile is empty.') + '</div>'; return; }
         el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">` +
             discard.map((c, i) => {
                 const si = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
@@ -3221,7 +3221,7 @@ function ptRenderOpponentPanel(opp, tab, containerId) {
     } else if (tab === 'lostzone') {
         // ─ Lost zone (view-only, click to zoom)
         const lz = ptState[opp].lostzone || [];
-        if (lz.length === 0) { el.innerHTML = '<div style="color:#aaa;text-align:center;padding:30px;">🌌 Lost Zone ist leer.</div>'; return; }
+        if (lz.length === 0) { el.innerHTML = '<div style="color:#aaa;text-align:center;padding:30px;">Lost Zone ist leer.</div>'; return; }
         el.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">` +
             lz.map((c, i) => {
                 const si = (c.imageUrl || CARD_BACK_URL).replace(/'/g, "\\'");
@@ -3277,7 +3277,7 @@ function _ptRefreshDiscardGrid(player) {
     const grid = document.getElementById('ptDiscardGrid');
     if (!grid) return;
     const sorted = _ptGetSortedDiscard(player);
-    const groupLabels = ['🐾 Pokémon','🧑‍⚕️ Supporter','🧰 Item','🔧 Tool','🏟️ Stadion','✨ Special Energy','⚡ Basic Energy'];
+    const groupLabels = ['Pokémon','Supporter','Item','Tool','Stadion','Special Energy','Basic Energy'];
     let lastGroup = -1;
     let html = '';
     sorted.forEach(({ card: c, origIdx: i }) => {
@@ -3286,7 +3286,7 @@ function _ptRefreshDiscardGrid(player) {
             const g = _ptDiscardCardSortOrder(c);
             if (g !== lastGroup) {
                 lastGroup = g;
-                html += `<div style="width:100%;font-size:10px;font-weight:900;color:#FFCB05;padding:4px 0 2px 2px;">${groupLabels[g] || '🃏 Andere'}</div>`;
+                html += `<div style="width:100%;font-size:10px;font-weight:900;color:#FFCB05;padding:4px 0 2px 2px;">${groupLabels[g] || 'Andere'}</div>`;
             }
         }
         html += `<div style="position:relative;cursor:pointer;" title="${_ptEscHtml(c.name)}">
@@ -3305,7 +3305,7 @@ function _ptRefreshDiscardGrid(player) {
 
 function ptOpenDiscard(player) {
     const title = document.getElementById('ptDiscardModalTitle');
-    if (title) title.textContent = getLang()==='de' ? `🗑️ Discard (${player.toUpperCase()}) – Klick=Hand | Rechtsklick=Lost Zone` : `🗑️ Discard (${player.toUpperCase()}) – Click=Hand | Right-click=Lost Zone`;
+    if (title) title.textContent = getLang()==='de' ? `Discard (${player.toUpperCase()}) – Klick=Hand | Rechtsklick=Lost Zone` : `Discard (${player.toUpperCase()}) – Click=Hand | Right-click=Lost Zone`;
     if (!ptState[player] || ptState[player].discard.length === 0) { ptShowMessage(t('pt.errDiscardEmpty')); return; }
     // Inject sort toolbar
     const sortBar = document.getElementById('ptDiscardSortBar');
@@ -3344,7 +3344,7 @@ function ptOpenLostZone(player) {
     const lz = ptState[player].lostzone || [];
     if (lz.length === 0) { ptShowMessage(t('pt.errLostZoneEmpty')); return; }
     const title = document.getElementById('ptDiscardModalTitle');
-    if (title) title.textContent = `🌌 Lost Zone (${player.toUpperCase()}) – Click = Return to hand`;
+    if (title) title.textContent = `Lost Zone (${player.toUpperCase()}) – Click = Return to hand`;
     const sortBar = document.getElementById('ptDiscardSortBar');
     if (sortBar) {
         sortBar.style.display = 'none';
@@ -3375,7 +3375,7 @@ function ptOppDiscardZone(opp, zoneId) {
     }
     ptState[opp].damage[zoneId] = 0;
     if (zoneId === 'active') ptState[opp].status = [];
-    ptLog(getLang()==='de' ? `🗑️ ${zoneId} (${opp}) → Discard (${count} Karten).` : `🗑️ ${zoneId} (${opp}) → Discard (${count} cards).`);
+    ptLog(getLang()==='de' ? `${zoneId} (${opp}) → Discard (${count} Karten).` : `${zoneId} (${opp}) → Discard (${count} cards).`);
     ptRenderAll();
     ptRefreshOpponentField(opp);
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp discard: ' + zoneId);
@@ -3393,7 +3393,7 @@ function ptOppSetActive(opp, zoneId) {
     const dmgBench  = ptState[opp].damage[zoneId] || 0;
     ptState[opp].damage.active  = dmgBench;
     ptState[opp].damage[zoneId] = dmgActive;
-    ptLog(getLang()==='de' ? `🔄 ${opp}: ${zoneId} wird neues Active-Pokémon.` : `🔄 ${opp}: ${zoneId} becomes new Active Pokémon.`);
+    ptLog(getLang()==='de' ? `${opp}: ${zoneId} wird neues Active-Pokémon.` : `${opp}: ${zoneId} becomes new Active Pokémon.`);
     ptRenderAll();
     ptRenderOpponentPanel(opp, 'field');
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp set active: ' + zoneId);
@@ -3404,7 +3404,7 @@ function ptOppRemoveAttached(opp, zoneId, cardIndex) {
     if (!cards || cardIndex < 0 || cardIndex >= cards.length) return;
     const removed = cards.splice(cardIndex, 1)[0];
     ptState[opp].discard.push(removed);
-    ptLog(getLang()==='de' ? `🗑️ ${removed.name} von ${opp.toUpperCase()} ${zoneId} entfernt → Discard.` : `🗑️ ${removed.name} removed from ${opp.toUpperCase()} ${zoneId} → Discard.`);
+    ptLog(getLang()==='de' ? `${removed.name} von ${opp.toUpperCase()} ${zoneId} entfernt → Discard.` : `${removed.name} removed from ${opp.toUpperCase()} ${zoneId} → Discard.`);
     ptRenderAll();
     ptRefreshOpponentField(opp);
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Opp remove: ' + removed.name);
@@ -3506,7 +3506,7 @@ function ptRenderAll() {
                     onerror="this.src='${CARD_BACK_URL}'"
                     onclick="${lostClick}" title="${getLang()==='de' ? `Lost Zone – ${ptState[p].lostzone.length} Karten (klicken zum Öffnen)` : `Lost Zone – ${ptState[p].lostzone.length} cards (click to open)`}">`;
             } else {
-                lostPileEl.innerHTML = `<div class="pt-empty-slot" style="font-size:16px;cursor:pointer;" onclick="${lostClick}">🌀</div>`;
+                lostPileEl.innerHTML = `<div class="pt-empty-slot" style="font-size:16px;cursor:pointer;" onclick="${lostClick}">Lost</div>`;
             }
         }
 
@@ -3628,7 +3628,7 @@ function ptRenderHand() {
             if (isTrainer) {
                 const playBtn = document.createElement('button');
                 playBtn.className = 'pt-hand-play-btn';
-                playBtn.innerHTML = '▶';
+                playBtn.innerHTML = 'Play';
                 playBtn.title     = 'Play Card';
                 playBtn.addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
                 playBtn.addEventListener('mousedown', e => { e.stopPropagation(); e.preventDefault(); });
@@ -3638,7 +3638,7 @@ function ptRenderHand() {
             }
             const discBtn = document.createElement('button');
             discBtn.className = 'pt-hand-disc-btn';
-            discBtn.innerHTML = '🗑️';
+            discBtn.innerHTML = 'Disc';
             discBtn.title     = 'Discard';
             discBtn.addEventListener('touchstart', e => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
             discBtn.addEventListener('mousedown', e => { e.stopPropagation(); e.preventDefault(); });
@@ -3795,7 +3795,7 @@ function ptOpenPrizePicker(player, suggestedPicks = 1, taker = ptCurrentPlayer) 
     _ptPrizeSelection = new Set();
 
     let html = `<div style="background:#1a1a2e;border:2px solid #FFCB05;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:480px;">
-        <h3 style="color:#FFCB05;margin-top:0;">🏆 ${getLang()==='de' ? 'Preiskarten nehmen' : 'Take Prize Cards'}</h3>
+        <h3 style="color:#FFCB05;margin-top:0;">${getLang()==='de' ? 'Preiskarten nehmen' : 'Take Prize Cards'}</h3>
         <p style="color:#ccc;font-size:12px;margin-bottom:6px;">${getLang()==='de' ? `Markiere die Preiskarten die du nehmen möchtest (Empfehlung: ${suggestedPicks})` : `Select the prize cards you want to take (suggested: ${suggestedPicks})`}</p>
         <p id="ptPrizeCounter" style="color:#FFCB05;font-size:14px;font-weight:bold;margin:4px 0 14px;">0 / ${prizes.length} ${getLang()==='de' ? 'ausgewählt' : 'selected'}</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:18px;">`;
@@ -3874,7 +3874,7 @@ function ptConfirmPrizeSelection() {
             taken.push(card.name);
         }
     });
-    ptLog(getLang()==='de' ? `🏆 ${taker.toUpperCase()} nimmt ${taken.length} Preiskarte${taken.length === 1 ? '' : 'n'}: ${taken.join(', ')}.` : `🏆 ${taker.toUpperCase()} takes ${taken.length} prize card${taken.length === 1 ? '' : 's'}: ${taken.join(', ')}. Noch ${ptState[player].prizes.length} übrig.`);
+    ptLog(getLang()==='de' ? `${taker.toUpperCase()} nimmt ${taken.length} Preiskarte${taken.length === 1 ? '' : 'n'}: ${taken.join(', ')}.` : `${taker.toUpperCase()} takes ${taken.length} prize card${taken.length === 1 ? '' : 's'}: ${taken.join(', ')}. Noch ${ptState[player].prizes.length} übrig.`);
     _ptPrizeSelection = new Set();
     // Clear MP prize pick flag
     if (ptState.mpPrizePickNeeded) ptState.mpPrizePickNeeded = null;
@@ -3909,11 +3909,11 @@ function generateNeutralZone(zoneId, labelText, width = 82) {
              ondblclick="ptViewCard(event,'${safeImg}')"
              oncontextmenu="event.preventDefault();event.stopPropagation();ptZoomViewCard('${safeImg}','${safeName}')"
              title="${_ptEscHtml(card.name)} (right-click to zoom)">
-        ${zoneId === 'stadium' && ptState.stadiumPlayedBy ? `<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:${ptState.stadiumPlayedBy==='p1'?'#3B4CCA':'#E3350D'};color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:4px;white-space:nowrap;z-index:50;">${ptState.stadiumPlayedBy==='p1'?'🔵 P1':'🔴 P2'}</div>` : ''}
+        ${zoneId === 'stadium' && ptState.stadiumPlayedBy ? `<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:${ptState.stadiumPlayedBy==='p1'?'#3B4CCA':'#E3350D'};color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:4px;white-space:nowrap;z-index:50;">${ptState.stadiumPlayedBy==='p1'?'P1':'P2'}</div>` : ''}
         <div class="pt-field-actions" style="z-index:100;bottom:-28px;">
             <button class="pt-action-btn" onclick="returnToHand('${ptCurrentPlayer}','${zoneId}',event)">⬆️</button>
-            <button class="pt-action-btn" onclick="moveToLostZone('${ptCurrentPlayer}','${zoneId}',event)">🌌</button>
-            <button class="pt-action-btn red" onclick="discardTopCard('${ptCurrentPlayer}','${zoneId}',event)">🗑️</button>
+            <button class="pt-action-btn" onclick="moveToLostZone('${ptCurrentPlayer}','${zoneId}',event)">Lost</button>
+            <button class="pt-action-btn red" onclick="discardTopCard('${ptCurrentPlayer}','${zoneId}',event)">Disc</button>
         </div>
     </div>`;
 }
@@ -4135,13 +4135,13 @@ function ptAbilityLunatone(player, zoneId) {
     }
     const discarded = hand.splice(energyIdx, 1)[0];
     ptState[player].discard.push(discarded);
-    ptLog(`✨ Lunatone Ability: "${discarded.name}" → Discard.`);
+    ptLog(`Lunatone Ability: "${discarded.name}" → Discard.`);
     // Draw 3
     for (let i = 0; i < 3; i++) {
         if (ptState[player].deck.length === 0) break;
         ptState[player].hand.push(ptState[player].deck.pop());
     }
-    ptLog(getLang()==='de' ? `✨ Lunatone Ability: 3 Karten gezogen.` : `✨ Lunatone Ability: Drew 3 cards.`);
+    ptLog(getLang()==='de' ? `Lunatone Ability: 3 Karten gezogen.` : `Lunatone Ability: Drew 3 cards.`);
     return true;
 }
 
@@ -4175,12 +4175,12 @@ function ptTrainerBossOrders(player, card) {
     }
     if (occupied.length === 1) {
         ptSwapZones(opp, occupied[0], null);
-        ptLog(getLang()==='de' ? `📋 Boss's Orders: ${opp.toUpperCase()} ${_ptEscHtml(_ptGetTopPokemon(opp, 'active')?.name || '?')} → Aktiv erzwungen!` : `📋 Boss's Orders: ${opp.toUpperCase()} ${_ptEscHtml(_ptGetTopPokemon(opp, 'active')?.name || '?')} → Forced active!`);
+        ptLog(getLang()==='de' ? `Boss's Orders: ${opp.toUpperCase()} ${_ptEscHtml(_ptGetTopPokemon(opp, 'active')?.name || '?')} → Aktiv erzwungen!` : `Boss's Orders: ${opp.toUpperCase()} ${_ptEscHtml(_ptGetTopPokemon(opp, 'active')?.name || '?')} → Forced active!`);
         return true;
     }
     const _tp = (cards) => [...cards].reverse().find(c => { const ct = (c.cardType||'').toLowerCase(); return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer'); }) || cards[0];
     let html = `<div style="background:#1a1a2e;border:2px solid #E3350D;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:520px;">
-        <h3 style="color:#E3350D;margin-top:0;">📋 Boss's Orders</h3>
+        <h3 style="color:#E3350D;margin-top:0;">Boss's Orders</h3>
         <p style="color:#ccc;font-size:12px;margin-bottom:16px;">${getLang()==='de' ? 'Wähle ein gegnerisches Bankpokémon das in die Aktive Position gezwungen wird.' : 'Choose an opponent\'s Bench Pokémon to force into the Active position.'}</p>
         <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
     occupied.forEach(bz => {
@@ -4204,7 +4204,7 @@ function ptTrainerBossOrders(player, card) {
     }
     modal.innerHTML = html;
     modal.style.display = 'flex';
-    ptLog(getLang()==='de' ? `📋 Boss's Orders: Wähle gegnerisches Bankpokémon…` : `📋 Boss's Orders: Choose opponent's Bench Pokémon…`);
+    ptLog(getLang()==='de' ? `Boss's Orders: Wähle gegnerisches Bankpokémon…` : `Boss's Orders: Choose opponent's Bench Pokémon…`);
     return true;
 }
 
@@ -4213,7 +4213,7 @@ function ptFinishBossOrders(oppPlayer, benchZone) {
     if (modal) modal.style.display = 'none';
     ptSwapZones(oppPlayer, benchZone, null);
     const newActive = _ptGetTopPokemon(oppPlayer, 'active');
-    ptLog(getLang()==='de' ? `📋 Boss's Orders: ${oppPlayer.toUpperCase()} ${_ptEscHtml(newActive?.name || '?')} → Aktiv erzwungen!` : `📋 Boss's Orders: ${oppPlayer.toUpperCase()} ${_ptEscHtml(newActive?.name || '?')} → Forced active!`);
+    ptLog(getLang()==='de' ? `Boss's Orders: ${oppPlayer.toUpperCase()} ${_ptEscHtml(newActive?.name || '?')} → Aktiv erzwungen!` : `Boss's Orders: ${oppPlayer.toUpperCase()} ${_ptEscHtml(newActive?.name || '?')} → Forced active!`);
     ptSaveState(); ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Boss Orders: forced ' + (newActive?.name || ''));
 }
@@ -4279,7 +4279,7 @@ function ptAbilityDudunsparce(player, zoneId) {
 // Ability: open deck search (Fan Rotom, Cynthia's Gabite)
 function ptAbilityDeckSearch(player, zoneId) {
     const topPoke = _ptGetTopPokemon(player, zoneId);
-    ptLog(`🔍 ${_ptEscHtml(topPoke?.name || 'Ability')}: Deck Search…`);
+    ptLog(`${_ptEscHtml(topPoke?.name || 'Ability')}: Deck Search…`);
     ptOpenDeckSearch(player);
     return true;
 }
@@ -4299,7 +4299,7 @@ function ptAbilityZoroarkTrade(player, zoneId) {
     if (hand.length === 0) { ptShowMessage(t('pt.errNoHandCards')); return false; }
     // Show pick modal to choose 1 card to discard
     let html = `<div style="background:#1a1a2e;border:2px solid #9b59b6;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
-        <h3 style="color:#9b59b6;margin-top:0;">🌑 N's Zoroark ex — Trade</h3>
+        <h3 style="color:#9b59b6;margin-top:0;">N's Zoroark ex — Trade</h3>
         <p style="color:#ccc;font-size:12px;margin-bottom:16px;">${getLang()==='de' ? 'Wähle 1 Karte zum Ablegen, dann ziehst du 2 Karten.' : 'Choose 1 card to discard, then draw 2 cards.'}</p>
         <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;">`;
     hand.forEach((c, i) => {
@@ -4321,7 +4321,7 @@ function ptAbilityZoroarkTrade(player, zoneId) {
     }
     modal.innerHTML = html;
     modal.classList.remove('d-none');
-    ptLog(getLang()==='de' ? `🌑 N's Zoroark ex: Wähle 1 Karte zum Ablegen…` : `🌑 N's Zoroark ex: Choose 1 card to discard…`);
+    ptLog(getLang()==='de' ? `N's Zoroark ex: Wähle 1 Karte zum Ablegen…` : `N's Zoroark ex: Choose 1 card to discard…`);
     return true;
 }
 
@@ -4329,14 +4329,14 @@ function ptFinishZoroarkTrade(player, handIdx) {
     const modal = document.getElementById('ptZoroarkModal');
     if (modal) modal.style.display = 'none';
     const removed = ptState[player].hand.splice(handIdx, 1)[0];
-    if (removed) { ptState[player].discard.push(removed); ptLog(`🌑 Trade: "${removed.name}" → Discard.`); }
+    if (removed) { ptState[player].discard.push(removed); ptLog(`Trade: "${removed.name}" → Discard.`); }
     let drawn = 0;
     for (let i = 0; i < 2; i++) {
         if (ptState[player].deck.length === 0) break;
         ptState[player].hand.push(ptState[player].deck.pop());
         drawn++;
     }
-    ptLog(getLang()==='de' ? `🌑 Trade: ${drawn} Karten gezogen.` : `🌑 Trade: Drew ${drawn} cards.`);
+    ptLog(getLang()==='de' ? `Trade: ${drawn} Karten gezogen.` : `Trade: Drew ${drawn} cards.`);
     ptSaveState(); ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Zoroark Trade');
 }
@@ -4348,7 +4348,7 @@ function _ptLookTopSupporterImpl(player, count, sourceName) {
     if (take === 0) { ptShowMessage(t('pt.errDeckEmpty')); return; }
     const topCards = deck.splice(deck.length - take, take).reverse();
     let html = `<div style="background:#1a1a2e;border:2px solid #3498db;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:92vw;max-height:85vh;overflow-y:auto;">
-        <h3 style="color:#3498db;margin-top:0;">🔎 ${_ptEscHtml(sourceName)} — Top ${take} ${getLang()==='de' ? 'Karten' : 'Cards'}</h3>
+        <h3 style="color:#3498db;margin-top:0;">${_ptEscHtml(sourceName)} — Top ${take} ${getLang()==='de' ? 'Karten' : 'Cards'}</h3>
         <p style="color:#ccc;font-size:12px;margin-bottom:16px;">${getLang()==='de' ? 'Wähle einen Supporter für die Hand. Alle anderen Karten werden ins Deck zurückgemischt.' : 'Choose a Supporter for your hand. All other cards will be shuffled back into the deck.'}</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:18px;">`;
     topCards.forEach((c, i) => {
@@ -4379,14 +4379,14 @@ function _ptLookTopSupporterImpl(player, count, sourceName) {
         if (idx >= 0 && idx < topCards.length) {
             const picked = topCards.splice(idx, 1)[0];
             ptState[player].hand.push(picked);
-            ptLog(`🔎 ${_ptEscHtml(sourceName)}: "${picked.name}" → Hand!`);
+            ptLog(`${_ptEscHtml(sourceName)}: "${picked.name}" → Hand!`);
         } else {
-            ptLog(getLang()==='de' ? `🔎 ${_ptEscHtml(sourceName)}: Kein Supporter gewählt.` : `🔎 ${_ptEscHtml(sourceName)}: No Supporter chosen.`);
+            ptLog(getLang()==='de' ? `${_ptEscHtml(sourceName)}: Kein Supporter gewählt.` : `${_ptEscHtml(sourceName)}: No Supporter chosen.`);
         }
         // Shuffle remaining back into deck
         topCards.forEach(c => deck.push(c));
         for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
-        ptLog(getLang()==='de' ? `🔎 Restliche Karten ins Deck zurückgemischt.` : `🔎 Remaining cards shuffled back into deck.`);
+        ptLog(getLang()==='de' ? `Restliche Karten ins Deck zurückgemischt.` : `Remaining cards shuffled back into deck.`);
         delete window._ptFinishLookTopSup;
         ptSaveState(); ptRenderAll();
         if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Look top cards');
@@ -4395,7 +4395,7 @@ function _ptLookTopSupporterImpl(player, count, sourceName) {
 
 // Trainer: open deck search (Dawn, Hilda, Poké Pad, Crispin, Buddy-Buddy Poffin)
 function ptTrainerDeckSearch(player, card) {
-    ptLog(`🔍 ${_ptEscHtml(card.name)}: Deck Search…`);
+    ptLog(`${_ptEscHtml(card.name)}: Deck Search…`);
     ptOpenDeckSearch(player);
     return true;
 }
@@ -4420,7 +4420,7 @@ function ptTrainerLillie(player, card) {
         ptState[player].hand.push(deck.pop());
         drawn++;
     }
-    ptLog(getLang()==='de' ? `📖 Lillie's Determination: Hand ins Deck gemischt, ${drawn} Karten gezogen${prizesLeft === 6 ? ' (6 Prizes → 8!)' : ''}.` : `📖 Lillie's Determination: Hand shuffled into deck, drew ${drawn} cards${prizesLeft === 6 ? ' (6 Prizes → 8!)' : ''}.`);
+    ptLog(getLang()==='de' ? `Lillie's Determination: Hand ins Deck gemischt, ${drawn} Karten gezogen${prizesLeft === 6 ? ' (6 Prizes → 8!)' : ''}.` : `Lillie's Determination: Hand shuffled into deck, drew ${drawn} cards${prizesLeft === 6 ? ' (6 Prizes → 8!)' : ''}.`);
     ptSaveState(); ptRenderAll();
     return true;
 }
@@ -4434,7 +4434,7 @@ function ptTrainerUltraBall(player, card) {
     }
     // Show modal to pick 2 cards to discard
     let html = `<div style="background:#1a1a2e;border:2px solid #f39c12;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
-        <h3 style="color:#f39c12;margin-top:0;">🔴 Ultra Ball — ${getLang()==='de' ? '2 Karten ablegen' : 'Discard 2 Cards'}</h3>
+        <h3 style="color:#f39c12;margin-top:0;">Ultra Ball — ${getLang()==='de' ? '2 Karten ablegen' : 'Discard 2 Cards'}</h3>
         <p style="color:#ccc;font-size:12px;margin-bottom:16px;">${getLang()==='de' ? 'Wähle 2 Karten aus deiner Hand zum Ablegen.' : 'Choose 2 cards from your hand to discard.'}</p>
         <div id="ptUBCards" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;">`;
     hand.forEach((c, i) => {
@@ -4458,7 +4458,7 @@ function ptTrainerUltraBall(player, card) {
     modal.innerHTML = html;
     modal.style.display = 'flex';
     window._ptUBSelected = [];
-    ptLog(getLang()==='de' ? `🔴 Ultra Ball: Wähle 2 Karten zum Ablegen…` : `🔴 Ultra Ball: Choose 2 cards to discard…`);
+    ptLog(getLang()==='de' ? `Ultra Ball: Wähle 2 Karten zum Ablegen…` : `Ultra Ball: Choose 2 cards to discard…`);
     return true;
 }
 
@@ -4488,7 +4488,7 @@ function ptUBFinish(player) {
         const removed = ptState[player].hand.splice(idx, 1)[0];
         if (removed) {
             ptState[player].discard.push(removed);
-            ptLog(`🔴 Ultra Ball: ${_ptEscHtml(removed.name)} → Discard`);
+            ptLog(`Ultra Ball: ${_ptEscHtml(removed.name)} → Discard`);
         }
     });
     delete window._ptUBSelected;
@@ -4506,14 +4506,14 @@ function ptTrainerDiscardRetrieve(player, card) {
 
 // Ciphermaniac's Codebreaking: search deck for 2 cards, put on top
 function ptTrainerCiphermaniac(player, card) {
-    ptLog(getLang()==='de' ? `🔮 ${_ptEscHtml(card.name)}: Deck durchsuchen – 2 Karten oben drauf legen…` : `🔮 ${_ptEscHtml(card.name)}: Search deck – place 2 cards on top…`);
+    ptLog(getLang()==='de' ? `${_ptEscHtml(card.name)}: Deck durchsuchen – 2 Karten oben drauf legen…` : `${_ptEscHtml(card.name)}: Search deck – place 2 cards on top…`);
     ptOpenDeckSearch(player);
     return true;
 }
 
 // Tool Scrapper: open opponent panel (field tab) to remove tools
 function ptTrainerToolScrapper(player, card) {
-    ptLog(getLang()==='de' ? `🔧 ${_ptEscHtml(card.name)}: Gegner-Feld öffnen – Tools entfernen…` : `🔧 ${_ptEscHtml(card.name)}: Opening opponent field – remove tools…`);
+    ptLog(getLang()==='de' ? `${_ptEscHtml(card.name)}: Gegner-Feld öffnen – Tools entfernen…` : `${_ptEscHtml(card.name)}: Opening opponent field – remove tools…`);
     ptOpenOpponentPanel('field');
     return true;
 }
@@ -4539,7 +4539,7 @@ function ptTrainerCarmine(player, card) {
         ptState[player].hand.push(ptState[player].deck.pop());
         drawn++;
     }
-    ptLog(getLang()==='de' ? `🔥 Carmine: ${discCount} Karten abgelegt, ${drawn} Karten gezogen.` : `🔥 Carmine: Discarded ${discCount} cards, drew ${drawn} cards.`);
+    ptLog(getLang()==='de' ? `Carmine: ${discCount} Karten abgelegt, ${drawn} Karten gezogen.` : `Carmine: Discarded ${discCount} cards, drew ${drawn} cards.`);
     ptSaveState(); ptRenderAll();
     return true;
 }
@@ -4651,7 +4651,7 @@ function ptTrainerSecretBox(player, card) {
     const hand = ptState[player].hand;
     if (hand.length < 3) { ptShowMessage(t('pt.errMinThreeHandCards')); return false; }
     let html = `<div style="background:#1a1a2e;border:2px solid #8e44ad;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
-        <h3 style="color:#8e44ad;margin-top:0;">📦 Secret Box — ${getLang()==='de' ? '3 Karten ablegen' : 'Discard 3 Cards'}</h3>
+        <h3 style="color:#8e44ad;margin-top:0;">Secret Box — ${getLang()==='de' ? '3 Karten ablegen' : 'Discard 3 Cards'}</h3>
         <p style="color:#ccc;font-size:12px;margin-bottom:16px;">${getLang()==='de' ? 'Wähle 3 Karten aus deiner Hand zum Ablegen.' : 'Choose 3 cards from your hand to discard.'}</p>
         <div id="ptSBCards" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;">`;
     hand.forEach((c, i) => {
@@ -4675,7 +4675,7 @@ function ptTrainerSecretBox(player, card) {
     modal.innerHTML = html;
     modal.classList.remove('d-none');
     window._ptSBSelected = [];
-    ptLog(getLang()==='de' ? `📦 Secret Box: Wähle 3 Karten zum Ablegen…` : `📦 Secret Box: Choose 3 cards to discard…`);
+    ptLog(getLang()==='de' ? `Secret Box: Wähle 3 Karten zum Ablegen…` : `Secret Box: Choose 3 cards to discard…`);
     return true;
 }
 
@@ -4694,7 +4694,7 @@ function ptSBFinish(player) {
     const sel = (window._ptSBSelected || []).sort((a, b) => b - a);
     sel.forEach(idx => {
         const removed = ptState[player].hand.splice(idx, 1)[0];
-        if (removed) { ptState[player].discard.push(removed); ptLog(`📦 Secret Box: ${_ptEscHtml(removed.name)} → Discard`); }
+        if (removed) { ptState[player].discard.push(removed); ptLog(`Secret Box: ${_ptEscHtml(removed.name)} → Discard`); }
     });
     delete window._ptSBSelected;
     ptSaveState(); ptRenderAll();
@@ -4719,7 +4719,7 @@ function ptTrainerUnfairStamp(player, card) {
         // Initiator draws 5
         const myDraw = (me === player) ? 5 : 2;
         for (let i = 0; i < myDraw; i++) if (ptState[me].deck.length > 0) ptState[me].hand.push(ptState[me].deck.pop());
-        ptLog(getLang()==='de' ? `📜 Unfair Stamp: ${me.toUpperCase()} mischt Hand ins Deck, zieht ${myDraw}.` : `📜 Unfair Stamp: ${me.toUpperCase()} shuffles hand into deck, draws ${myDraw}.`);
+        ptLog(getLang()==='de' ? `Unfair Stamp: ${me.toUpperCase()} mischt Hand ins Deck, zieht ${myDraw}.` : `Unfair Stamp: ${me.toUpperCase()} shuffles hand into deck, draws ${myDraw}.`);
         ptRenderAll();
         if (typeof syncGlobalEffect === 'function') {
             syncGlobalEffect('UNFAIR_STAMP', { initiator: player, drawCount: (me === player) ? 2 : 5 }, 'Unfair Stamp played');
@@ -4738,7 +4738,7 @@ function ptTrainerUnfairStamp(player, card) {
     });
     for (let i = 0; i < 5; i++) if (ptState[player].deck.length > 0) ptState[player].hand.push(ptState[player].deck.pop());
     for (let i = 0; i < 2; i++) if (ptState[opp].deck.length > 0) ptState[opp].hand.push(ptState[opp].deck.pop());
-    ptLog(getLang()==='de' ? `📜 Unfair Stamp: Beide mischen Hand ins Deck. ${player.toUpperCase()} zieht 5, ${opp.toUpperCase()} zieht 2.` : `📜 Unfair Stamp: Both shuffle hand into deck. ${player.toUpperCase()} draws 5, ${opp.toUpperCase()} draws 2.`);
+    ptLog(getLang()==='de' ? `Unfair Stamp: Beide mischen Hand ins Deck. ${player.toUpperCase()} zieht 5, ${opp.toUpperCase()} zieht 2.` : `Unfair Stamp: Both shuffle hand into deck. ${player.toUpperCase()} draws 5, ${opp.toUpperCase()} draws 2.`);
     ptRenderAll();
     return false;
 }
@@ -4755,7 +4755,7 @@ function _ptLocalUnfairStamp(myRole, drawCount) {
         [ptState[myRole].deck[i], ptState[myRole].deck[j]] = [ptState[myRole].deck[j], ptState[myRole].deck[i]];
     }
     for (let i = 0; i < drawCount; i++) if (ptState[myRole].deck.length > 0) ptState[myRole].hand.push(ptState[myRole].deck.pop());
-    ptLog(getLang()==='de' ? `📜 Unfair Stamp (Gegner): Hand ins Deck gemischt, ${drawCount} gezogen.` : `📜 Unfair Stamp (Opponent): Hand shuffled into deck, drew ${drawCount}.`);
+    ptLog(getLang()==='de' ? `Unfair Stamp (Gegner): Hand ins Deck gemischt, ${drawCount} gezogen.` : `Unfair Stamp (Opponent): Hand shuffled into deck, drew ${drawCount}.`);
     if (typeof showToast === 'function') showToast(t('pt.oppUnfairStampPlayed').replace('{n}', drawCount), 'info', 4000);
 }
 
@@ -4772,7 +4772,7 @@ function _ptLocalOppShuffleDraw(myRole, drawCount) {
     }
     const drawn = Math.min(drawCount, deck.length);
     for (let k = 0; k < drawn; k++) ptState[myRole].hand.push(deck.pop());
-    ptLog(getLang()==='de' ? `🔄 Gegner: Shuffle & Draw – Hand ins Deck gemischt, ${drawn} gezogen.` : `🔄 Opponent: Shuffle & Draw – Hand shuffled into deck, drew ${drawn}.`);
+    ptLog(getLang()==='de' ? `Gegner: Shuffle & Draw – Hand ins Deck gemischt, ${drawn} gezogen.` : `Opponent: Shuffle & Draw – Hand shuffled into deck, drew ${drawn}.`);
     if (typeof showToast === 'function') showToast(t('pt.oppShuffleDrawPlayed').replace('{n}', drawn), 'info', 4000);
 }
 
@@ -4804,17 +4804,17 @@ function ptShowWinScreen(winner) {
 
     modal.innerHTML = `
         <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:3px solid #FFCB05;border-radius:18px;padding:36px 44px;text-align:center;color:#fff;max-width:520px;width:100%;box-shadow:0 12px 48px rgba(0,0,0,0.7);">
-            <div style="font-size:52px;margin-bottom:12px;">🏆</div>
+            <div style="font-size:52px;margin-bottom:12px;">WINNER</div>
             <h2 style="color:#FFCB05;margin:0 0 8px;font-size:1.6rem;">${label} ${getLang()==='de' ? 'hat gewonnen!' : 'wins!'}</h2>
             <p style="color:#ccc;font-size:14px;margin-bottom:24px;">${getLang()==='de' ? 'Alle Prize-Karten genommen.' : 'All Prize cards taken.'}</p>
             <div style="display:flex;flex-direction:column;gap:10px;">
-                <button onclick="ptRematch('p1')" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#3B4CCA,#2a3aab);color:#fff;box-shadow:0 3px 10px rgba(59,76,202,0.4);">🔄 Rematch — P1 first</button>
-                <button onclick="ptRematch('p2')" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;box-shadow:0 3px 10px rgba(231,76,60,0.4);">🔄 Rematch — P2 first</button>
-                <button onclick="ptToggleNewDecks()" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;box-shadow:0 3px 10px rgba(243,156,18,0.4);">🃏 Rematch — ${getLang()==='de' ? 'Neue Decks' : 'New Decks'}</button>
+                <button onclick="ptRematch('p1')" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#3B4CCA,#2a3aab);color:#fff;box-shadow:0 3px 10px rgba(59,76,202,0.4);">Rematch — P1 first</button>
+                <button onclick="ptRematch('p2')" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;box-shadow:0 3px 10px rgba(231,76,60,0.4);">Rematch — P2 first</button>
+                <button onclick="ptToggleNewDecks()" style="padding:12px;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;box-shadow:0 3px 10px rgba(243,156,18,0.4);">Rematch — ${getLang()==='de' ? 'Neue Decks' : 'New Decks'}</button>
                 <div id="ptNewDecksPanel" style="display:none;text-align:left;background:rgba(0,0,0,0.3);border-radius:10px;padding:16px;margin-top:4px;">
                     ${hasDecks ? `
                     <div style="margin-bottom:12px;">
-                        <label style="color:#FFCB05;font-weight:700;font-size:13px;display:block;margin-bottom:4px;">📂 My Decks</label>
+                        <label style="color:#FFCB05;font-weight:700;font-size:13px;display:block;margin-bottom:4px;">My Decks</label>
                         <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
                             <span style="color:#aaa;font-size:12px;min-width:22px;">P1:</span>
                             <select id="ptWinDeckP1" style="flex:1;padding:8px;border-radius:6px;border:1px solid #555;background:#1a1a2e;color:#fff;font-size:13px;">${deckOptions}</select>
@@ -4826,7 +4826,7 @@ function ptShowWinScreen(winner) {
                         <button onclick="ptRematchMyDecks()" style="width:100%;margin-top:10px;padding:10px;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;">▶ ${getLang()==='de' ? 'Start mit My Decks' : 'Start with My Decks'}</button>
                         <div style="color:#666;font-size:11px;text-align:center;margin:10px 0 6px;font-weight:700;">${getLang()==='de' ? '— ODER —' : '— OR —'}</div>
                     ` : ''}
-                    <label style="color:#FFCB05;font-weight:700;font-size:13px;display:block;margin-bottom:4px;">📋 ${getLang()==='de' ? 'Deck-Liste einfügen' : 'Paste Deck List'}</label>
+                    <label style="color:#FFCB05;font-weight:700;font-size:13px;display:block;margin-bottom:4px;">${getLang()==='de' ? 'Deck-Liste einfügen' : 'Paste Deck List'}</label>
                     <div style="display:flex;gap:6px;margin-bottom:6px;">
                         <span style="color:#aaa;font-size:12px;min-width:22px;padding-top:6px;">P1:</span>
                         <textarea id="ptWinListP1" placeholder="4 Comfey LOR 79&#10;..." style="flex:1;height:70px;padding:8px;border-radius:6px;border:1px solid #555;background:#1a1a2e;color:#fff;font-family:monospace;font-size:11px;resize:vertical;"></textarea>
@@ -4837,11 +4837,11 @@ function ptShowWinScreen(winner) {
                     </div>
                     <button onclick="ptRematchPasteDecks()" style="width:100%;padding:10px;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;">▶ ${getLang()==='de' ? 'Start mit Deck-Listen' : 'Start with Deck Lists'}</button>
                 </div>
-                <button onclick="ptQuitGame()" style="padding:10px;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:#555;color:#fff;">🚪 Quit</button>
+                <button onclick="ptQuitGame()" style="padding:10px;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;background:#555;color:#fff;">Quit</button>
             </div>
         </div>`;
     modal.style.display = 'flex';
-    ptLog(getLang()==='de' ? `🏆🏆🏆 ${label} gewinnt das Spiel! 🏆🏆🏆` : `🏆🏆🏆 ${label} wins the game! 🏆🏆🏆`);
+    ptLog(getLang()==='de' ? `${label} gewinnt das Spiel!` : `${label} wins the game!`);
 }
 
 function ptToggleNewDecks() {
@@ -4914,7 +4914,7 @@ function ptRematch(firstPlayer) {
     const handZone = document.querySelector('.pt-hand-zone');
     if (handZone) handZone.style.borderTopColor = firstPlayer === 'p1' ? '#3B4CCA' : '#e74c3c';
     ptUpdateAreaPointerEvents();
-    ptLog(`🔄 Rematch! ${firstPlayer.toUpperCase()} beginnt.`);
+    ptLog(`Rematch! ${firstPlayer.toUpperCase()} beginnt.`);
     ptRenderAll();
 }
 
@@ -5103,7 +5103,7 @@ function ptOpenZoneStack(player, zoneId) {
         const safeImg  = (c.imageUrl || CARD_BACK_URL).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         const isEnergy  = (c.cardType || '').toLowerCase().includes('energy');
         const isTool    = (c.cardType || '').toLowerCase().includes('trainer') || (c.cardType || '') === 'tool';
-        const badge     = isEnergy ? '⚡' : isTool ? '🔧' : i === 0 ? t('pt.basic') : `🔼 ${getLang()==='de' ? 'Stufe' : 'Stage'} ${i}`;
+        const badge     = isEnergy ? 'E' : isTool ? 'T' : i === 0 ? t('pt.basic') : `Stg ${getLang()==='de' ? 'Stufe' : 'Stage'} ${i}`;
         return `<div style="position:relative;cursor:pointer;text-align:center;" title="${_ptEscHtml(c.name)}">
             <img src="${c.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:6px;display:block;"
                  onerror="this.src='${CARD_BACK_URL}'"

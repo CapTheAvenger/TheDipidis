@@ -51,25 +51,25 @@ function ptShowContextMenu(cardInfo) {
         if (isTrainer) {
             buttons.push({ text: getLang()==='de' ? '▶ Karte spielen' : '▶ Play card', action: () => { if (typeof ptPlayFromHand === 'function') ptPlayFromHand(index, null); } });
         }
-        buttons.push({ text: getLang()==='de' ? '🎯 Als Aktives spielen' : '🎯 Play as Active', action: () => _ptMobilePlayToActive(player, index) });
-        buttons.push({ text: getLang()==='de' ? '🪑 Auf die Bank' : '🪑 Play to Bench', action: () => _ptMobilePlayToBench(player, index) });
-        buttons.push({ text: getLang()==='de' ? '🗑️ Ablegen' : '🗑️ Discard', action: () => _ptMobileDiscard(player, index) });
-        buttons.push({ text: getLang()==='de' ? '🔀 Ins Deck mischen' : '🔀 Shuffle into deck', action: () => _ptMobileShuffleIntoDeck(player, index) });
+        buttons.push({ text: getLang()==='de' ? 'Als Aktives spielen' : 'Play as Active', action: () => _ptMobilePlayToActive(player, index) });
+        buttons.push({ text: getLang()==='de' ? 'Auf die Bank' : 'Play to Bench', action: () => _ptMobilePlayToBench(player, index) });
+        buttons.push({ text: getLang()==='de' ? 'Ablegen' : 'Discard', action: () => _ptMobileDiscard(player, index) });
+        buttons.push({ text: getLang()==='de' ? 'Ins Deck mischen' : 'Shuffle into deck', action: () => _ptMobileShuffleIntoDeck(player, index) });
     } else if (zone === 'active') {
         // Aktives Pokémon
-        buttons.push({ text: getLang()==='de' ? '🤚 Zurück auf die Hand' : '🤚 Return to hand', action: () => _ptMobileReturnToHand(player, 'active') });
-        buttons.push({ text: getLang()==='de' ? '🗑️ Ablegen' : '🗑️ Discard', action: () => _ptMobileDiscardFromField(player, 'active') });
-        buttons.push({ text: getLang()==='de' ? '➕ Schaden +10' : '➕ Damage +10', action: () => _ptMobileAdjustDamage(player, 'active', 10) });
-        buttons.push({ text: getLang()==='de' ? '➖ Schaden -10' : '➖ Damage -10', action: () => _ptMobileAdjustDamage(player, 'active', -10) });
-        buttons.push({ text: '💥 K.O.', action: () => _ptMobileKnockout(player, 'active') });
+        buttons.push({ text: getLang()==='de' ? 'Zurück auf die Hand' : 'Return to hand', action: () => _ptMobileReturnToHand(player, 'active') });
+        buttons.push({ text: getLang()==='de' ? 'Ablegen' : 'Discard', action: () => _ptMobileDiscardFromField(player, 'active') });
+        buttons.push({ text: getLang()==='de' ? '+ Schaden +10' : '+ Damage +10', action: () => _ptMobileAdjustDamage(player, 'active', 10) });
+        buttons.push({ text: getLang()==='de' ? '- Schaden -10' : '- Damage -10', action: () => _ptMobileAdjustDamage(player, 'active', -10) });
+        buttons.push({ text: 'K.O.', action: () => _ptMobileKnockout(player, 'active') });
     } else if (zone.startsWith('bench')) {
         // Bank-Pokémon
-        buttons.push({ text: getLang()==='de' ? '🔄 Tausch zu Aktiv' : '🔄 Switch to Active', action: () => _ptMobileSwitchToActive(player, zone) });
-        buttons.push({ text: getLang()==='de' ? '🤚 Zurück auf die Hand' : '🤚 Return to hand', action: () => _ptMobileReturnToHand(player, zone) });
-        buttons.push({ text: getLang()==='de' ? '🗑️ Ablegen' : '🗑️ Discard', action: () => _ptMobileDiscardFromField(player, zone) });
-        buttons.push({ text: getLang()==='de' ? '➕ Schaden +10' : '➕ Damage +10', action: () => _ptMobileAdjustDamage(player, zone, 10) });
-        buttons.push({ text: getLang()==='de' ? '➖ Schaden -10' : '➖ Damage -10', action: () => _ptMobileAdjustDamage(player, zone, -10) });
-        buttons.push({ text: '💥 K.O.', action: () => _ptMobileKnockout(player, zone) });
+        buttons.push({ text: getLang()==='de' ? 'Tausch zu Aktiv' : 'Switch to Active', action: () => _ptMobileSwitchToActive(player, zone) });
+        buttons.push({ text: getLang()==='de' ? 'Zurück auf die Hand' : 'Return to hand', action: () => _ptMobileReturnToHand(player, zone) });
+        buttons.push({ text: getLang()==='de' ? 'Ablegen' : 'Discard', action: () => _ptMobileDiscardFromField(player, zone) });
+        buttons.push({ text: getLang()==='de' ? '+ Schaden +10' : '+ Damage +10', action: () => _ptMobileAdjustDamage(player, zone, 10) });
+        buttons.push({ text: getLang()==='de' ? '- Schaden -10' : '- Damage -10', action: () => _ptMobileAdjustDamage(player, zone, -10) });
+        buttons.push({ text: 'K.O.', action: () => _ptMobileKnockout(player, zone) });
     }
     
     // Erstelle Button-Elemente
@@ -109,7 +109,7 @@ function ptShowContextMenu(cardInfo) {
         limitlessBtn.style.transition = 'background 0.2s';
 
         const label = document.createElement('span');
-        label.textContent = getLang()==='de' ? '📊 Auf Limitless ansehen' : '📊 View on Limitless';
+        label.textContent = getLang()==='de' ? 'Auf Limitless ansehen' : 'View on Limitless';
         const arrow = document.createElement('span');
         arrow.style.fontSize = '1.2em';
         arrow.textContent = '↗';
@@ -532,15 +532,15 @@ function ptShowRadialMenu(touch, player, zone) {
             const ct = (c.cardType || c.supertype || '').toLowerCase();
             return ct.includes('energy');
         });
-        actions.push({ icon: '💥', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Dmg +10 opp'); } });
-        actions.push({ icon: '☠️', label: 'K.O.', action: () => { if (typeof ptOppKnockOutZone === 'function') ptOppKnockOutZone(player, zone); } });
-        actions.push({ icon: '🗑️', label: 'Discard', action: () => { if (typeof ptOppDiscardZone === 'function') ptOppDiscardZone(player, zone); } });
-        if (zoneHasEnergy) actions.push({ icon: '⚡🗑️', label: 'E.Disc', action: () => { if (typeof ptEnergyDiscard === 'function') ptEnergyDiscard(player, zone); } });
+        actions.push({ icon: 'Dmg+', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Dmg +10 opp'); } });
+        actions.push({ icon: 'KO', label: 'K.O.', action: () => { if (typeof ptOppKnockOutZone === 'function') ptOppKnockOutZone(player, zone); } });
+        actions.push({ icon: 'Disc', label: 'Discard', action: () => { if (typeof ptOppDiscardZone === 'function') ptOppDiscardZone(player, zone); } });
+        if (zoneHasEnergy) actions.push({ icon: 'E.Disc', label: 'E.Disc', action: () => { if (typeof ptEnergyDiscard === 'function') ptEnergyDiscard(player, zone); } });
         if (zone !== 'active') {
             actions.push({ icon: '⭐', label: getLang()==='de' ? 'Aktiv' : 'Active', action: () => { if (typeof ptOppSetActive === 'function') ptOppSetActive(player, zone); } });
         }
-        actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
-        actions.push({ icon: '⚙️', label: getLang()==='de' ? 'Menü' : 'Menu', action: () => { if (typeof ptOpenOpponentPanel === 'function') ptOpenOpponentPanel('field', zone); } });
+        actions.push({ icon: 'H', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
+        actions.push({ icon: 'M', label: getLang()==='de' ? 'Menü' : 'Menu', action: () => { if (typeof ptOpenOpponentPanel === 'function') ptOpenOpponentPanel('field', zone); } });
     } else {
         // ── Own zone: attach, damage, retreat, hand, discard, menu ──
         const hasEnergy = ptState[player].hand.some(c => {
@@ -556,18 +556,18 @@ function ptShowRadialMenu(touch, player, zone) {
             return ct.includes('energy');
         });
 
-        if (hasEnergy) actions.push({ icon: '⚡', label: 'Energy', action: () => _ptRadialAttachEnergy(player, zone) });
-        if (hasTool) actions.push({ icon: '🔧', label: 'Tool', action: () => _ptRadialAttachTool(player, zone) });
-        if (zoneHasEnergy) actions.push({ icon: '⚡🗑️', label: 'E.Disc', action: () => { if (typeof ptEnergyDiscard === 'function') ptEnergyDiscard(player, zone); } });
-        actions.push({ icon: '💥', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); } });
+        if (hasEnergy) actions.push({ icon: 'E', label: 'Energy', action: () => _ptRadialAttachEnergy(player, zone) });
+        if (hasTool) actions.push({ icon: 'Tool', label: 'Tool', action: () => _ptRadialAttachTool(player, zone) });
+        if (zoneHasEnergy) actions.push({ icon: 'E.Disc', label: 'E.Disc', action: () => { if (typeof ptEnergyDiscard === 'function') ptEnergyDiscard(player, zone); } });
+        actions.push({ icon: 'Dmg+', label: 'Dmg+', action: () => { addDamage(player, zone, 10, null); } });
         if (zone === 'active') {
-            actions.push({ icon: '↩️', label: 'Retreat', action: () => { if (typeof ptRetreat === 'function') ptRetreat(player, zone); } });
+            actions.push({ icon: 'Ret', label: 'Retreat', action: () => { if (typeof ptRetreat === 'function') ptRetreat(player, zone); } });
         } else {
-            actions.push({ icon: '🔄', label: getLang()==='de' ? 'Aktiv' : 'Active', action: () => { _ptMobileSwitchToActive(player, zone); } });
+            actions.push({ icon: 'Sw', label: getLang()==='de' ? 'Aktiv' : 'Active', action: () => { _ptMobileSwitchToActive(player, zone); } });
         }
-        actions.push({ icon: '✋', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
-        actions.push({ icon: '🗑️', label: getLang()==='de' ? 'Ablegen' : 'Discard', action: () => { discardTopCard(player, zone, null); } });
-        actions.push({ icon: '⚙️', label: getLang()==='de' ? 'Menü' : 'Menu', action: () => _ptRadialOpenContextMenu(player, zone) });
+        actions.push({ icon: 'H', label: 'Hand', action: () => { returnToHand(player, zone, null); } });
+        actions.push({ icon: 'Disc', label: getLang()==='de' ? 'Ablegen' : 'Discard', action: () => { discardTopCard(player, zone, null); } });
+        actions.push({ icon: 'M', label: getLang()==='de' ? 'Menü' : 'Menu', action: () => _ptRadialOpenContextMenu(player, zone) });
     }
 
     // Arrange in a circle
@@ -657,7 +657,7 @@ function _ptRadialAttachEnergy(player, zone) {
     if (energyIdx === -1) return;
     const [energyCard] = ptState[player].hand.splice(energyIdx, 1);
     ptState[player].field[zone].push(energyCard);
-    if (typeof ptLog === 'function') ptLog(`⚡ Attached "${energyCard.name}" to ${zone}.`);
+    if (typeof ptLog === 'function') ptLog(`Attached "${energyCard.name}" to ${zone}.`);
     if (typeof ptRenderAll === 'function') ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && typeof ptState !== 'undefined' && ptState.isMultiplayer) syncStateToFirebase('Attach Energy');
 }
@@ -670,7 +670,7 @@ function _ptRadialAttachTool(player, zone) {
     if (toolIdx === -1) return;
     const [toolCard] = ptState[player].hand.splice(toolIdx, 1);
     ptState[player].field[zone].push(toolCard);
-    if (typeof ptLog === 'function') ptLog(`🔧 Attached "${toolCard.name}" to ${zone}.`);
+    if (typeof ptLog === 'function') ptLog(`Attached "${toolCard.name}" to ${zone}.`);
     if (typeof ptRenderAll === 'function') ptRenderAll();
     if (typeof syncStateToFirebase === 'function' && typeof ptState !== 'undefined' && ptState.isMultiplayer) syncStateToFirebase('Attach Tool');
 }
@@ -684,7 +684,7 @@ function _ptRadialEvolve(player, zone) {
     if (evolveIdx === -1) return;
     const [evoCard] = ptState[player].hand.splice(evolveIdx, 1);
     ptState[player].field[zone].push(evoCard);
-    if (typeof ptLog === 'function') ptLog(`🔼 Evolved ${zone} with "${evoCard.name}".`);
+    if (typeof ptLog === 'function') ptLog(`Evolved ${zone} with "${evoCard.name}".`);
     if (typeof ptRenderAll === 'function') ptRenderAll();
 }
 

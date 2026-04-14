@@ -273,7 +273,7 @@ function listenToGameState(gameId) {
             ptState.isMultiplayer = true;
             if (!ptState.mpSetupReady) ptState.mpSetupReady = { p1: false, p2: false };
 
-            // 🔍 DIAGNOSE: State-Validierung
+            // DIAGNOSE: State-Validierung
             const lr = ptState.localRole;
             const localHand = ptState[lr] && ptState[lr].hand ? ptState[lr].hand : [];
             const localDeck = ptState[lr] && ptState[lr].deck ? ptState[lr].deck : [];
@@ -282,7 +282,7 @@ function listenToGameState(gameId) {
                 const sample = localHand[0];
                 mpLog(`[MP-DIAG] Sample card: name="${sample.name}", imageUrl="${(sample.imageUrl||'').substring(0,60)}...", cardType="${sample.cardType}"`);
             } else {
-                mpWarn('[MP-DIAG] ⚠️ Hand ist LEER! Firebase-State p1.hand:', data.state.p1?.hand?.length, 'p2.hand:', data.state.p2?.hand?.length);
+                mpWarn('[MP-DIAG] Hand ist LEER! Firebase-State p1.hand:', data.state.p1?.hand?.length, 'p2.hand:', data.state.p2?.hand?.length);
                 // Safety: If hand is empty but deck has cards, redraw 7
                 if (localDeck.length > 0) {
                     mpLog('[MP-DIAG] Safety redraw: shuffling deck and drawing 7 cards');
@@ -394,7 +394,7 @@ function listenToGameState(gameId) {
                     }
                     const fpModal = document.getElementById('ptStartPhaseModal');
                     if (fpModal) fpModal.style.display = 'none';
-                    if (typeof ptLog === 'function') ptLog(getLang()==='de' ? '✅ Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!' : '✅ Both players ready! Prize cards dealt. Have fun!');
+                    if (typeof ptLog === 'function') ptLog(getLang()==='de' ? 'Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!' : 'Both players ready! Prize cards dealt. Have fun!');
 
                     // Mulligan draw offer after MP setup
                     const p1m = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p1 || 0) : 0;
@@ -453,7 +453,7 @@ function listenToGameState(gameId) {
                 // Update Message
                 if (typeof ptShowMessage === 'function') {
                     const action = data.lastActionDescription || t('mp.opponentMoved');
-                    ptShowMessage(`🌐 ${action}`);
+                    ptShowMessage(`${action}`);
                 }
                 // Deck search indicator: show persistent hint while opponent searches
                 if (data.lastActionDescription === 'Searching deck...' && typeof showToast === 'function') {
@@ -515,7 +515,7 @@ function listenToGameState(gameId) {
                 }
                 const fpModal2 = document.getElementById('ptStartPhaseModal');
                 if (fpModal2) fpModal2.style.display = 'none';
-                if (typeof ptLog === 'function') ptLog(getLang()==='de' ? '✅ Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!' : '✅ Both players ready! Prize cards dealt. Have fun!');
+                if (typeof ptLog === 'function') ptLog(getLang()==='de' ? 'Beide Spieler bereit! Preiskarten verteilt. Viel Spaß!' : 'Both players ready! Prize cards dealt. Have fun!');
 
                 const p1m2 = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p1 || 0) : 0;
                 const p2m2 = (typeof ptMulliganCount !== 'undefined') ? (ptMulliganCount.p2 || 0) : 0;
@@ -891,7 +891,7 @@ function showMultiplayerLobby(roomCode, status) {
     if (status === 'waiting') {
         lobby.innerHTML = `
             <div style="text-align: center; max-width: 500px; padding: 40px; background: #1a1a1a; border-radius: 20px; border: 3px solid #FFCB05;">
-                <h2 style="color: #FFCB05; font-size: 2.5rem; margin-bottom: 20px;">🎮 Multiplayer Lobby</h2>
+                <h2 style="color: #FFCB05; font-size: 2.5rem; margin-bottom: 20px;">Multiplayer Lobby</h2>
                 <p style="font-size: 1.2rem; margin-bottom: 30px;">${t('mp.waitingForOpponent')}</p>
                 <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                     <p style="color: #aaa; margin-bottom: 10px;">Room Code:</p>
@@ -912,7 +912,7 @@ function showMultiplayerLobby(roomCode, status) {
     } else if (status === 'playing') {
         lobby.innerHTML = `
             <div style="text-align: center; max-width: 500px; padding: 40px; background: #1a1a1a; border-radius: 20px; border: 3px solid #27ae60;">
-                <h2 style="color: #27ae60; font-size: 2.5rem; margin-bottom: 20px;">✅ ${t('mp.gameStarting')}</h2>
+                <h2 style="color: #27ae60; font-size: 2.5rem; margin-bottom: 20px;">${t('mp.gameStarting')}</h2>
                 <p style="font-size: 1.2rem;">${t('mp.opponentFound')}</p>
             </div>
         `;
@@ -1049,7 +1049,7 @@ async function mpJoinGame() {
         const deckObj = mpGetSelectedDeck();
         if (!deckObj) return;
 
-        const roomCode = await showInputModal({ title: getLang()==='de' ? '🔑 Room beitreten' : '🔑 Join Room', message: getLang()==='de' ? 'Room-Code eingeben (5 Zeichen):' : 'Enter room code (5 characters):', placeholder: 'ABCDE' });
+        const roomCode = await showInputModal({ title: getLang()==='de' ? 'Room beitreten' : 'Join Room', message: getLang()==='de' ? 'Room-Code eingeben (5 Zeichen):' : 'Enter room code (5 characters):', placeholder: 'ABCDE' });
         if (!roomCode || roomCode.trim().length !== 5) {
             if (roomCode !== null) showToast(getLang()==='de' ? 'Ungültiger Room-Code!' : 'Invalid room code!', 'error');
             return;
@@ -1100,7 +1100,7 @@ async function mpFlipCoin() {
  */
 function _mpShowCoinResult(result, flipper) {
     const isHeads = result === 'heads';
-    const emoji = isHeads ? '🟡' : '⚫';
+    const emoji = isHeads ? 'H' : 'T';
     const label = isHeads ? (getLang()==='de' ? 'KOPF (Heads)' : 'HEADS') : (getLang()==='de' ? 'ZAHL (Tails)' : 'TAILS');
     const bgColor = isHeads ? 'rgba(241,196,15,0.95)' : 'rgba(52,73,94,0.95)';
     const textColor = isHeads ? '#000' : '#fff';

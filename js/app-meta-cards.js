@@ -993,7 +993,7 @@
             if (totalFound > MAX_RENDER) {
                 htmlString += `
                     <div style="text-align: center; padding: 20px; color: #7f8c8d; font-size: 14px; width: 100%; grid-column: 1 / -1;">
-                        ⚠️ <b>+ ${totalFound - MAX_RENDER} ${t('metaCards.moreCardsFound')}</b><br>
+                        <b>+ ${totalFound - MAX_RENDER} ${t('metaCards.moreCardsFound')}</b><br>
                         ${t('metaCards.typeMoreToFilter')}
                     </div>
                 `;
@@ -1213,15 +1213,15 @@
                             document.head.removeChild(scriptElement); // Clean up immediately
                             scriptsExecuted++;
                         } catch (scriptError) {
-                            console.warn('⚠️ Error executing loaded script:', scriptError);
+                            console.warn('[WARN] Error executing loaded script:', scriptError);
                         }
                     }
                 });
-                devLog(`📦 Loaded ${scriptsExecuted} scripts (matchup data + functions)`);
+                devLog(`Loaded ${scriptsExecuted} scripts (matchup data + functions)`);
                 
                 // Verify that matchup data was loaded
                 const matchupVars = Object.keys(window).filter(k => k.startsWith('matchupData_'));
-                devLog(`✅ Available matchup variables: ${matchupVars.length}`);
+                devLog(`Available matchup variables: ${matchupVars.length}`);
                 
                 // Populate matchup registry for fast access (avoids repeated window scan)
                 window._matchupRegistry = window._matchupRegistry || {};
@@ -1246,7 +1246,7 @@
                             if (hasMatchupTables) {
                                 // Remove inline grid style, let CSS take over
                                 grid.classList.add('matchups-grid-container');
-                                devLog('✅ Removed inline grid styles from matchup container');
+                                devLog('Removed inline grid styles from matchup container');
                             }
                         }
                     });
@@ -1280,7 +1280,7 @@
                     // Render top cards widget (format staples)
                     await renderCurrentMetaTopCards();
                     
-                    devLog('✅ Current Meta data loaded successfully');
+                    devLog('Current Meta data loaded successfully');
                 } else {
                     currentMetaContent.innerHTML = '<div style="color: #e74c3c; padding: 20px;">Error loading comparison data</div>';
                 }
@@ -1340,7 +1340,7 @@
                 
                 // Check if this is the Full Comparison Table (has Old Rank, New Rank, Rank ? columns)
                 if (headers.includes('Old Rank') && headers.includes('New Rank') && headers.includes('Rank ?')) {
-                    devLog('🔧 Patching Full Comparison Table...');
+                    devLog('Patching Full Comparison Table...');
 
                     if (!table.parentElement || !table.parentElement.classList.contains('current-meta-full-table-wrap')) {
                         const wrapper = document.createElement('div');
@@ -1433,7 +1433,7 @@
                         });
                     });
                     
-                    devLog('✅ Full Comparison Table patched successfully');
+                    devLog('Full Comparison Table patched successfully');
                 }
             });
         }
@@ -1444,7 +1444,7 @@
                 // Load CSV data
                 const csvData = await loadCSV('limitless_online_decks_comparison.csv');
                 if (!csvData || csvData.length === 0) {
-                    console.warn('⚠️ No CSV data available for stat patching');
+                    console.warn('[WARN] No CSV data available for stat patching');
                     return;
                 }
                 
@@ -1515,7 +1515,7 @@
                             }
                         });
                         
-                        devLog('✅ Archetype Overview patched:', {
+                        devLog('Archetype Overview patched:', {
                             totalArchetypes,
                             groupedArchetypes,
                             top3Count: decksByCount.map(d => d.name),
@@ -1524,7 +1524,7 @@
                     }
                 });
             } catch (error) {
-                console.error('❌ Error patching Archetype Overview:', error);
+                console.error('[ERR] Error patching Archetype Overview:', error);
             }
         }
         
@@ -1554,7 +1554,7 @@
                                 currentFormat = resolved;
                             }
                             currentFormat = currentFormat === 'SVI-POR' ? 'TEF-POR' : currentFormat;
-                            devLog(`📋 Loaded format from settings: ${currentFormat}`);
+                            devLog(`Loaded format from settings: ${currentFormat}`);
                             break;
                         }
                     }
@@ -1621,7 +1621,7 @@
                             existingP.insertAdjacentHTML('afterend', statsHtml);
                         }
                         
-                        devLog('✅ Meta stats patched:', {
+                        devLog('Meta stats patched:', {
                             onlineStats: metaStats,
                             majorTournaments,
                             totalPlayers,
@@ -1630,6 +1630,6 @@
                     }
                 });
             } catch (error) {
-                console.error('❌ Error patching Meta stats:', error);
+                console.error('[ERR] Error patching Meta stats:', error);
             }
         }

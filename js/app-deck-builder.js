@@ -1024,7 +1024,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const isOwned = window.userCollection && window.userCollection.has(cardId);
                 const ownedBadge = isOwned ? '<div style="position: absolute; top: 5px; left: 5px; background: #4CAF50; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 4;">✓</div>' : '';
                 const prob = getOpeningHandProbability(count, 60);
-                const probBadge = `<div class="start-hand-prob" title="${t('deck.openHandProb')}">✋ ${prob}%</div>`;
+                const probBadge = `<div class="start-hand-prob" title="${t('deck.openHandProb')}">Hand: ${prob}%</div>`;
                 
                 html += `
                     <div class="deck-card pos-rel" title="${safeCardName} (${count}x) - ${percentage}%">
@@ -1595,7 +1595,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 if (imageUrl && imageUrl.trim() !== '') {
                     imgHtml = `<img src="${imageUrl}" alt="${card.card_name}" loading="lazy" referrerpolicy="no-referrer" style="width: 100%; aspect-ratio: 2.5/3.5; object-fit: cover; cursor: zoom-in;" onerror="handleCardImageError(this, '${card.set_code || ''}', '${card.set_number || ''}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${escapeJsStr(card.card_name)} (${card.set_code || ''} ${card.set_number || ''})');">`;
                 } else {
-                    imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;">🃏</div>`;
+                    imgHtml = `<div style="width: 100%; aspect-ratio: 2.5/3.5; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2em;"></div>`;
                 }
 
                 const html = `
@@ -2050,8 +2050,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             const titleEl = document.getElementById('shareImageTitle');
             const shareBtn = document.getElementById('shareImageShareBtn');
 
-            titleEl.textContent = '📸 ' + (deckName || 'Deck');
-            preview.innerHTML = '<p style="color:#888; font-size:1.1em;">⏳ ' + (getLang() === 'de' ? 'Bild wird erstellt...' : 'Generating image…') + '</p>';
+            titleEl.textContent = (deckName || 'Deck');
+            preview.innerHTML = '<p style="color:#888; font-size:1.1em;">' + (getLang() === 'de' ? 'Bild wird erstellt...' : 'Generating image…') + '</p>';
             _shareImageBlob = null;
             _shareImageTitle = deckName || 'Deck';
 
@@ -2071,7 +2071,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             // Render canvas
             const canvas = await _buildDeckCanvas(grid, deckName);
             if (!canvas) {
-                preview.innerHTML = '<p style="color:#e74c3c;">❌ ' + (getLang() === 'de' ? 'Bild konnte nicht erstellt werden' : 'Could not generate image') + '</p>';
+                preview.innerHTML = '<p style="color:#e74c3c;">' + (getLang() === 'de' ? 'Bild konnte nicht erstellt werden' : 'Could not generate image') + '</p>';
                 return;
             }
 
@@ -2792,7 +2792,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             // --- FEHLENDE KARTEN INTELLIGENT AUFFÜLLEN ---
             // ===================================================================
-            // 🚨 FIX: FALLBACK - Deck auf exakt 60 Karten auffüllen
+            // FIX: FALLBACK - Deck auf exakt 60 Karten auffüllen
             // ===================================================================
             if (currentTotal < 60) {
                 devLog(`[autoComplete] Deck has only ${currentTotal} cards. Filling up to 60...`);
@@ -2875,7 +2875,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         devLog(`[autoComplete] No preferred version for ${card.card_name}, using original: ${setCode} ${setNumber}`);
                     }
                     
-                    // ⚡ PERFORMANCE: Use batch add (no display updates per card)
+                    // PERFORMANCE: Use batch add (no display updates per card)
                     for (let i = 0; i < card.addCount; i++) {
                         addCardToDeckBatch(source, card.card_name, setCode, setNumber);
                     }
@@ -2894,7 +2894,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     savePastMetaDeck();
                 }
                 
-                // ⚡ PERFORMANCE: Update display ONCE at the end (not 60 times!)
+                // PERFORMANCE: Update display ONCE at the end (not 60 times!)
                 scheduleDeckDisplayUpdate(source);
             }
         }
@@ -2965,11 +2965,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 return;
             }
             
-            devLog('[autoCompleteConsistency] 🔄 Starting CONSISTENCY-based deck generation');
+            devLog('[autoCompleteConsistency] Starting CONSISTENCY-based deck generation');
             devLog('[autoCompleteConsistency] Total available cards:', cards.length);
             
             // Clear existing deck
-            devLog('[autoCompleteConsistency] 🗑️ Clearing existing deck...');
+            devLog('[autoCompleteConsistency] Clearing existing deck...');
             if (source === 'cityLeague') {
                 window.cityLeagueDeck = {};
                 window.cityLeagueDeckOrder = [];
@@ -3200,7 +3200,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             let currentTotal = 0;
 
             // ==========================================
-            // 🚨 KUGELSICHERER ACE SPEC CHECKER 🚨
+            // KUGELSICHERER ACE SPEC CHECKER
             // Hardcoded Namensliste + Rarity/Rules-Check
             // KEIN CSV is_ace_spec, KEIN aceSpecsList.json
             // ==========================================
@@ -3256,7 +3256,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             let radiantAdded = false; // Deck-wide: max 1 Radiant Pokémon total
 
             // ==========================================
-            // 🚨 1. ACE SPEC PRIORITY (Lokal) 🚨
+            // 1. ACE SPEC PRIORITY (Lokal)
             // ==========================================
             // Finde die ECHTE Ace Spec unter den verfügbaren Karten (höchster Score)
             const aceSpecSlotCard = deckCards
@@ -3271,7 +3271,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
 
             // ==========================================
-            // 🚨 2. STUFE 1 (Core: consistencyScore >= 75) 🚨
+            // 2. STUFE 1 (Core: consistencyScore >= 75)
             // Meta-boosted + trending cards can exceed 100
             // ==========================================
             deckCards.forEach(card => {
@@ -3294,7 +3294,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             });
 
             // ==========================================
-            // 🚨 3. STUFE 2 (Extended: consistencyScore >= 25) 🚨
+            // 3. STUFE 2 (Extended: consistencyScore >= 25)
             // Lower threshold than before (30% share) because meta-relevant
             // cards with 20% share can now score >=25 via meta boost
             // ==========================================
@@ -3320,7 +3320,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             });
 
             // ==========================================
-            // 🚨 4. FALLBACK: Basis-Energien auffüllen 🚨
+            // 4. FALLBACK: Basis-Energien auffüllen
             // ==========================================
             if (currentTotal < 60) {
                 const topBasicEnergy = deckCards.filter(c => isBasicEnergyCardEntry(c)).sort((a, b) => b.sharePercent - a.sharePercent)[0];

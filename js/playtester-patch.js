@@ -70,13 +70,12 @@ function injectStyles(){
 
 /* === AREA ZERO CONTROL === */
 #ptAreaZeroControl {
-  position:fixed;
-  top:8px;
-  right:8px;
-  z-index:9000;
   display:flex;
-  gap:6px;
+  gap:4px;
   align-items:center;
+  justify-content:center;
+  margin-top:8px;
+  flex-wrap:wrap;
 }
 .pt-bench-toggle {
   background:#1a1a2e;

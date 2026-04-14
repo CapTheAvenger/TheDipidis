@@ -14,6 +14,7 @@ const translations = {
     'app.subtitle':           'Your Portal for Meta Analysis & Deck Building',
     'header.signIn':          'Sign In',
     'header.myProfile':       'My Profile',
+    'header.cardDatabase':    'Card Database',
     'header.switchLanguageTitle':'Switch language',
 
     // ── Sidebar / Main Menu ──────────────────────────────────
@@ -1004,6 +1005,7 @@ const translations = {
     'app.subtitle':           'Dein Portal für Meta-Analyse & Deckbau',
     'header.signIn':          'Anmelden',
     'header.myProfile':       'Mein Profil',
+    'header.cardDatabase':    'Kartendatenbank',
     'header.switchLanguageTitle':'Sprache wechseln',
 
     // ── Sidebar / Main Menu ──────────────────────────────────

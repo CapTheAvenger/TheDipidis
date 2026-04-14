@@ -114,7 +114,8 @@
   opacity: 1;
 }
 
-/* Tooltip on hover — i18n via CSS custom property */
+/* Label below close buttons — always visible, i18n via CSS custom property */
+.btn-escape-rope::after,
 .auth-modal-close::after,
 .image-view-close::after,
 .bj-edit-modal-close::after,
@@ -125,38 +126,27 @@
 .help-modal-close::after {
   content: var(--close-tooltip, 'Close');
   position: absolute;
-  bottom: -22px;
+  bottom: -16px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 10px;
   font-weight: 600;
-  color: #fff;
-  background: rgba(0,0,0,0.7);
-  padding: 2px 5px;
-  border-radius: 3px;
+  color: #666;
   white-space: nowrap;
-  opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
 }
 
-/* Make parent relative for tooltip positioning */
+/* Make parent relative for label positioning */
+.btn-escape-rope,
 .auth-modal-close,
+.image-view-close,
 .bj-edit-modal-close,
 .ma-modal-close,
+.fullscreen-close,
 .battle-journal-close,
 .draw-sim-close-btn,
 .help-modal-close {
   position: relative;
+  overflow: visible;
 }
 
-.auth-modal-close:hover::after,
-.image-view-close:hover::after,
-.bj-edit-modal-close:hover::after,
-.ma-modal-close:hover::after,
-.fullscreen-close:hover::after,
-.battle-journal-close:hover::after,
-.draw-sim-close-btn:hover::after,
-.help-modal-close:hover::after {
-  opacity: 1;
-}

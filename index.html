@@ -3292,10 +3292,10 @@
         </div>
 
         <div id="pt-side-buttons-left">
-            <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()" style="background:rgb(192,57,43);color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;">⚔️ Angriff</button>
-            <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()" style="background:rgb(39,174,96);color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;">⏭️ Ende</button>
-            <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()" style="background:rgb(125,60,152);color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;">👁️ Gegner</button>
-            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="if(typeof ptShowDirectActionModal!=='undefined')ptShowDirectActionModal();else document.getElementById('ptDirectActionModal').style.display='flex'" style="background:rgb(26,82,118);color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;">≡ Aktionen</button>
+            <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()" data-i18n="pt.btnAttack">⚔️ Attack</button>
+            <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()" data-i18n="pt.btnEndTurn">⏭️ End Turn</button>
+            <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()" data-i18n="pt.btnOppView">👁️ Opponent</button>
+            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="if(typeof ptShowDirectActionModal!=='undefined')ptShowDirectActionModal();else document.getElementById('ptDirectActionModal').style.display='flex'" data-i18n="pt.btnActions">≡ Actions</button>
         </div>
 
         <div class="pt-hand-zone">

@@ -252,6 +252,12 @@ const translations = {
     'pt.errSelectBothDecks':    'Please select both decks!',
     'pt.errPasteBothDecks':     'Please paste both deck lists!',
 
+    // ── playtester.js — board buttons ────────────────────────
+    'pt.btnAttack':             '⚔️ Attack',
+    'pt.btnEndTurn':            '⏭️ End Turn',
+    'pt.btnOppView':            '👁️ Opponent',
+    'pt.btnActions':            '≡ Actions',
+
     // ── Heatmap (Current Meta) ───────────────────────────────
     'heatmap.title':            'Matchup Heatmap',
     'heatmap.yLabel':           'Y-axis (Your deck)',
@@ -1227,6 +1233,12 @@ const translations = {
     'pt.errMinThreeHandCards':  'Nicht genug Karten auf der Hand (min. 3)!',
     'pt.errSelectBothDecks':    'Bitte beide Decks auswählen!',
     'pt.errPasteBothDecks':     'Bitte beide Deck-Listen einfügen!',
+
+    // ── playtester.js — board buttons ────────────────────────
+    'pt.btnAttack':             '⚔️ Angriff',
+    'pt.btnEndTurn':            '⏭️ Ende',
+    'pt.btnOppView':            '👁️ Gegner',
+    'pt.btnActions':            '≡ Aktionen',
 
     // ── Heatmap (Current Meta) ───────────────────────────────
     'heatmap.title':            'Matchup Heatmap',

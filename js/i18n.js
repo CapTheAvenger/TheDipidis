@@ -952,9 +952,9 @@ const translations = {
     'action.wishlist':          'Wishlist',
     'action.wishlistActive':    'Wishlist',
     'action.collection':        'Collection',
-    'action.otherPrint':        'Other Print',
-    'action.openLimitless':     'Open Limitless',
-    'action.printProxy':        'Print Proxy',
+    'action.otherPrint':        'Show Other Prints',
+    'action.openLimitless':     'Open Limitless Card Details',
+    'action.printProxy':        'Add to Proxy Printer',
     'action.cardmarket':        'Cardmarket',
 
     // ── Wishlist Badge ───────────────────────────────────────
@@ -1944,9 +1944,9 @@ const translations = {
     'action.wishlist':          'Wunschliste',
     'action.wishlistActive':    'Wunschliste ✓',
     'action.collection':        'Sammlung',
-    'action.otherPrint':        'Anderes Print',
-    'action.openLimitless':     'Limitless öffnen',
-    'action.printProxy':        'Proxy drucken',
+    'action.otherPrint':        'Andere Prints zeigen',
+    'action.openLimitless':     'Limitless Kartendetails öffnen',
+    'action.printProxy':        'Zum Proxy-Drucker hinzufügen',
     'action.cardmarket':        'Cardmarket',
 
     // ── Wishlist Badge ───────────────────────────────────────

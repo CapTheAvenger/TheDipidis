@@ -627,9 +627,9 @@ def run():
         EN_ACTION_EXPECT = {
             'sc-action-wishlist':  'Wishlist',
             'sc-action-collect':   'Collection',
-            'sc-action-rarity':    'Other Print',
-            'sc-action-limitless': 'Open Limitless',
-            'sc-action-proxy':     'Print Proxy',
+            'sc-action-rarity':    'Show Other Prints',
+            'sc-action-limitless': 'Open Limitless Card Details',
+            'sc-action-proxy':     'Add to Proxy Printer',
             'sc-action-market':    'Cardmarket',
         }
         for cls, expected in EN_ACTION_EXPECT.items():
@@ -661,8 +661,8 @@ def run():
             'sc-action-wishlist':  'Wunschliste',
             'sc-action-collect':   'Sammlung',
             'sc-action-rarity':    'Anderes Print',
-            'sc-action-limitless': 'Limitless öffnen',
-            'sc-action-proxy':     'Proxy drucken',
+            'sc-action-limitless': 'Limitless Kartendetails öffnen',
+            'sc-action-proxy':     'Zum Proxy-Drucker hinzufügen',
             'sc-action-market':    'Cardmarket',
         }
         for cls, expected in DE_ACTION_EXPECT.items():

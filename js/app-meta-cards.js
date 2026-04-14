@@ -803,15 +803,15 @@
                                 
                                 <!-- Card Actions: Row 1 = - ★ + | Row 2 = L P price -->
                                 <div class="card-action-buttons card-action-buttons-col">
-                                    <div class="card-action-row">
-                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" class="btn-red card-action-btn" title="Remove from deck">-</button>
-                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="btn-yellow card-action-btn" title="Switch rarity/print">★</button>
-                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="btn-green card-action-btn" title="Add to deck">+</button>
+                                    <div class="city-league-card-action-row">
+                                        <button onclick="event.stopPropagation(); removeCardFromDeck('${source}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-remove-btn" title="Remove from deck">-</button>
+                                        <button onclick="event.stopPropagation(); openRaritySwitcher('${cardNameEscaped}', '${cardNameEscaped} (${setCode} ${setNumber})')" class="city-league-card-action-btn city-league-card-rarity-btn" title="Switch rarity/print">★</button>
+                                        <button onclick="event.stopPropagation(); addCardToDeck('${source}', '${cardNameEscaped}', '${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-add-btn" title="Add to deck">+</button>
                                     </div>
-                                    <div class="card-action-row card-action-row-wide">
-                                        ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" class="btn-purple card-action-btn btn-xs" title="Open on Limitless">L</button>` : '<span></span>'}
-                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" class="btn-gradient-red card-action-btn btn-xs" title="Add to proxy">P</button>
-                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" class="btn-gradient-orange card-action-btn btn-xs" style="background: ${priceBackground}; cursor: ${eurPrice ? 'pointer' : 'not-allowed'};" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
+                                    <div class="city-league-card-action-row" style="grid-template-columns: 1fr 1fr 2fr;">
+                                        ${setCode && setNumber ? `<button onclick="event.stopPropagation(); openLimitlessCard('${setCode}', '${setNumber}')" class="city-league-card-action-btn city-league-card-limitless-btn" title="Open on Limitless">L</button>` : '<span></span>'}
+                                        <button onclick="event.stopPropagation(); addCardToProxy('${cardNameEscaped}', '${setCode}', '${setNumber}', 1)" class="city-league-card-action-btn city-league-card-proxy-btn" title="Add to proxy">P</button>
+                                        <button onclick="event.stopPropagation(); openCardmarket('${cardmarketUrlEscaped}', '${cardNameEscaped}')" class="city-league-card-action-btn city-league-card-market-btn" data-market-bg="${priceBackground}" data-market-cursor="${eurPrice ? 'pointer' : 'not-allowed'}" title="${eurPrice ? 'Buy on Cardmarket: ' + eurPrice : 'Price not available'}">${priceDisplay}</button>
                                     </div>
                                 </div>
                             </div>

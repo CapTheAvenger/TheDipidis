@@ -7114,6 +7114,20 @@ body.battle-journal-open {
     transition: transform 0.2s, box-shadow 0.2s;
     margin-left: 10px;
     vertical-align: middle;
+    position: relative;
+    overflow: visible;
+}
+.tab-help-btn::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 600;
+    color: #666;
+    white-space: nowrap;
+    pointer-events: none;
 }
 .tab-help-btn:hover {
     transform: scale(1.1);

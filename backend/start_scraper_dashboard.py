@@ -62,9 +62,14 @@ def run_script(script_filename: str, wait_at_end: bool = True) -> None:
         time.sleep(2)
         return
 
-    # Prefer .venv Python so that pip-installed packages (seleniumbase etc.) are available
+    # Prefer venv Python so that pip-installed packages (seleniumbase etc.) are available
     project_root = os.path.dirname(backend_dir)
-    venv_python = os.path.join(project_root, ".venv", "Scripts", "python.exe")
+    # Check both "venv" and ".venv" folder names
+    venv_python = os.path.join(project_root, "venv", "Scripts", "python.exe")
+    if not os.path.isfile(venv_python):
+        venv_python = os.path.join(project_root, ".venv", "Scripts", "python.exe")
+    if not os.path.isfile(venv_python):
+        venv_python = os.path.join(project_root, "venv", "bin", "python")
     if not os.path.isfile(venv_python):
         venv_python = os.path.join(project_root, ".venv", "bin", "python")
     python_exe = venv_python if os.path.isfile(venv_python) else sys.executable

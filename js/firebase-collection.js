@@ -1587,10 +1587,19 @@ function updateDecksUI() {
             
             <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.75); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 3;">${count}</div>
             
-            <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; z-index: 3;">
-                      <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeDeckKeyJs}', '${safeProfileHintJs}')" 
+            <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; z-index: 3; display: flex; flex-direction: column; gap: 2px;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
+                  <button onclick="event.stopPropagation(); myDeckChangeCardCount(${deckIndex}, '${safeDeckKeyJs}', -1)" 
+                      style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      title="${getLang()==='de' ? 'Anzahl verringern' : 'Decrease count'}">-</button>
+                  <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeDeckKeyJs}', '${safeProfileHintJs}')" 
                       style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="Switch rarity/print">★</button>
+                  <button onclick="event.stopPropagation(); myDeckChangeCardCount(${deckIndex}, '${safeDeckKeyJs}', 1)" 
+                      style="background: #28a745; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      title="${getLang()==='de' ? 'Anzahl erh\u00f6hen' : 'Increase count'}">+</button>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;">
                   <button onclick="event.stopPropagation(); openCardmarket('${safeCardmarketUrlJs}', '${safeCardNameJs}')" 
                       style="background: ${priceBackground}; color: white; height: 22px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
                     title="${safeCardmarketTitleHtml}">${safePriceDisplayHtml}</button>
@@ -1600,6 +1609,10 @@ function updateDecksUI() {
                   <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')" 
                       style="background: ${isWishlisted ? '#E91E63' : '#bdc3c7'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">❤</button>
+                  <button onclick="event.stopPropagation(); myDeckRemoveCard(${deckIndex}, '${safeDeckKeyJs}')" 
+                      style="background: #c0392b; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      title="${getLang()==='de' ? 'Karte komplett entfernen' : 'Remove card from deck'}">Del</button>
+              </div>
             </div>
           </div>
         `;
@@ -1656,8 +1669,19 @@ function updateDecksUI() {
           </div>
         </div>
         <div id="${deckId}" style="display: none; padding: 15px; background: #f8f9fa;">
-          <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-            <button onclick="openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="Compare this deck">Compare</button>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
+            <div style="position: relative; flex: 1; min-width: 200px;">
+              <input type="text" id="${deckId}-card-search" placeholder="${getLang()==='de' ? 'Karte suchen & hinzufügen...' : 'Search & add card...'}" 
+                     oninput="myDeckShowAutocomplete(this, ${deckIndex})" 
+                     style="width: 100%; padding: 8px 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 0.9em; box-sizing: border-box; outline: none; transition: border-color 0.2s;"
+                     onfocus="this.style.borderColor='#667eea'" onblur="setTimeout(()=>{this.style.borderColor='#ddd'; myDeckHideAutocomplete('${deckId}')}, 200)"
+                     autocomplete="off">
+              <div id="${deckId}-autocomplete" class="d-none" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 300px; overflow-y: auto; z-index: 100;"></div>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span style="font-size: 0.85em; color: #666; font-weight: 600;">${totalCards}/60</span>
+              <button onclick="openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="Compare this deck">Compare</button>
+            </div>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
             ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
@@ -1693,6 +1717,191 @@ async function toggleDeckActive(deckId) {
     console.error('Error toggling deck active:', error);
     showNotification('Error updating deck', 'error');
   }
+}
+
+// ============================================================
+// My Decks: Change Card Count (+/-)
+// ============================================================
+async function myDeckChangeCardCount(deckIndex, deckKey, delta) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const deck = (window.userDecks || [])[deckIndex];
+  if (!deck || !deck.cards) return;
+
+  const currentCount = deck.cards[deckKey] || 0;
+  const newCount = currentCount + delta;
+
+  if (newCount <= 0) {
+    // Remove card entirely
+    delete deck.cards[deckKey];
+  } else if (newCount > 4 && !deckKey.toLowerCase().includes('energy')) {
+    showNotification(getLang() === 'de' ? 'Maximal 4 Kopien erlaubt' : 'Max 4 copies allowed', 'warning');
+    return;
+  } else {
+    deck.cards[deckKey] = newCount;
+  }
+
+  deck.totalCards = Object.values(deck.cards).reduce((sum, c) => sum + c, 0);
+
+  try {
+    await db.collection('users').doc(user.uid)
+      .collection('decks').doc(deck.id)
+      .update({
+        cards: deck.cards,
+        totalCards: deck.totalCards,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    updateDecksUI();
+    // Re-open the deck after UI rebuild
+    setTimeout(() => {
+      const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
+      if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
+    }, 50);
+  } catch (error) {
+    console.error('Error updating card count:', error);
+    showNotification('Error updating deck', 'error');
+  }
+}
+
+// ============================================================
+// My Decks: Remove Card Entirely
+// ============================================================
+async function myDeckRemoveCard(deckIndex, deckKey) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const deck = (window.userDecks || [])[deckIndex];
+  if (!deck || !deck.cards) return;
+
+  delete deck.cards[deckKey];
+  deck.totalCards = Object.values(deck.cards).reduce((sum, c) => sum + c, 0);
+
+  try {
+    await db.collection('users').doc(user.uid)
+      .collection('decks').doc(deck.id)
+      .update({
+        cards: deck.cards,
+        totalCards: deck.totalCards,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    showNotification(getLang() === 'de' ? 'Karte entfernt' : 'Card removed', 'success');
+    updateDecksUI();
+    // Re-open the deck after UI rebuild
+    setTimeout(() => {
+      const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
+      if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
+    }, 50);
+  } catch (error) {
+    console.error('Error removing card:', error);
+    showNotification('Error updating deck', 'error');
+  }
+}
+
+// ============================================================
+// My Decks: Add Card via Search
+// ============================================================
+async function myDeckAddCard(deckIndex, cardName, setCode, setNumber) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const deck = (window.userDecks || [])[deckIndex];
+  if (!deck) return;
+  if (!deck.cards) deck.cards = {};
+
+  const deckKey = `${cardName} (${setCode} ${setNumber})`;
+  const currentCount = deck.cards[deckKey] || 0;
+
+  if (currentCount >= 4 && !cardName.toLowerCase().includes('energy')) {
+    showNotification(getLang() === 'de' ? 'Bereits 4 Kopien im Deck' : 'Already 4 copies in deck', 'warning');
+    return;
+  }
+
+  deck.cards[deckKey] = currentCount + 1;
+  deck.totalCards = Object.values(deck.cards).reduce((sum, c) => sum + c, 0);
+
+  try {
+    await db.collection('users').doc(user.uid)
+      .collection('decks').doc(deck.id)
+      .update({
+        cards: deck.cards,
+        totalCards: deck.totalCards,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    showNotification(`${cardName} ${getLang() === 'de' ? 'hinzugefügt' : 'added'}`, 'success');
+    updateDecksUI();
+    // Re-open the deck after UI rebuild
+    setTimeout(() => {
+      const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
+      if (deckEl && deckEl.style.display === 'none') {
+        toggleDeckCollapse(`saved-deck-${deckIndex}`);
+      }
+    }, 100);
+  } catch (error) {
+    console.error('Error adding card:', error);
+    showNotification('Error updating deck', 'error');
+  }
+}
+
+// ============================================================
+// My Decks: Autocomplete for Card Search
+// ============================================================
+function myDeckShowAutocomplete(inputEl, deckIndex) {
+  const deckId = `saved-deck-${deckIndex}`;
+  const dropdown = document.getElementById(`${deckId}-autocomplete`);
+  if (!dropdown) return;
+
+  const searchTerm = (inputEl.value || '').trim().toLowerCase();
+  if (searchTerm.length < 2) {
+    dropdown.classList.add('d-none');
+    return;
+  }
+
+  const cardsDb = window.allCardsDatabase || window.allCardsData || [];
+  if (cardsDb.length === 0) {
+    dropdown.classList.add('d-none');
+    return;
+  }
+
+  // Find matching cards — unique by name, max 12
+  const matches = [];
+  const seen = new Set();
+  for (const card of cardsDb) {
+    if (!card.name || seen.has(card.name)) continue;
+    const nameDe = (card.name_de || card.german_name || '').toLowerCase();
+    if (card.name.toLowerCase().includes(searchTerm) || nameDe.includes(searchTerm)) {
+      matches.push(card);
+      seen.add(card.name);
+      if (matches.length >= 12) break;
+    }
+  }
+
+  if (matches.length === 0) {
+    dropdown.classList.add('d-none');
+    return;
+  }
+
+  dropdown.innerHTML = matches.map(card => {
+    const safeNameJs = escapeJsSingleQuoted(card.name);
+    const safeSet = escapeJsSingleQuoted(card.set || '');
+    const safeNum = escapeJsSingleQuoted(card.number || '');
+    const safeNameHtml = escapeHtml(card.name);
+    const imgUrl = card.image_url || '';
+    return `
+      <div onclick="myDeckAddCard(${deckIndex}, '${safeNameJs}', '${safeSet}', '${safeNum}'); myDeckHideAutocomplete('${deckId}'); document.getElementById('${deckId}-card-search').value='';" 
+           style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.15s;"
+           onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='white'">
+        ${imgUrl ? `<img src="${escapeHtml(imgUrl)}" style="width: 32px; height: 45px; object-fit: cover; border-radius: 3px;" loading="lazy" onerror="this.style.display='none'">` : ''}
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 0.85em; font-weight: 600; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeNameHtml}</div>
+          <div style="font-size: 0.7em; color: #999;">${escapeHtml(card.set || '')} ${escapeHtml(card.number || '')} · ${escapeHtml(card.type || '')}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  dropdown.classList.remove('d-none');
+}
+
+function myDeckHideAutocomplete(deckId) {
+  const dropdown = document.getElementById(`${deckId}-autocomplete`);
+  if (dropdown) dropdown.classList.add('d-none');
 }
 
 // ============================================================

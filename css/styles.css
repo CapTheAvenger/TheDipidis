@@ -7896,8 +7896,8 @@ body.battle-journal-open {
 /* 1. Linker Button-Block zentrieren */
 #pt-side-buttons-left {
   position: absolute;
-  left: 50%;
-  transform: translate(calc(-100% - 20px), -50%);
+  left: 25%;
+  transform: translate(-50%, -50%);
   top: 50%;
   display: flex;
   flex-direction: column;

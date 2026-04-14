@@ -34,8 +34,6 @@ function injectStyles(){
 .pt-sidebar-left,
 #ptSidebarLeft,
 .sandbox-left-panel,
-#pt-side-buttons-left,
-.pt-side-buttons-left,
 #ptDeckControls { display:none!important; }
 
 #ptZoomPanel,

@@ -3292,10 +3292,10 @@
         </div>
 
         <div id="pt-side-buttons-left">
-            <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()">⚔️ Attack</button>
-            <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()">⏭️ End Turn</button>
-            <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()">👁️ Opp. View</button>
-            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="document.getElementById('ptDirectActionModal').style.display='flex'">? Actions</button>
+            <button class="pt-side-btn attack-btn" onclick="ptOpenAttackView()" style="background:rgb(192,57,43);color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;">⚔️ Angriff</button>
+            <button class="pt-side-btn endturn-btn" onclick="ptPassTurn()" style="background:rgb(39,174,96);color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;">⏭️ Ende</button>
+            <button class="pt-side-btn oppview-btn" onclick="ptOpenOpponentPanel()" style="background:rgb(125,60,152);color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;">👁️ Gegner</button>
+            <button id="fab-action-btn" class="pt-side-btn fab-side-btn" onclick="if(typeof ptShowDirectActionModal!=='undefined')ptShowDirectActionModal();else document.getElementById('ptDirectActionModal').style.display='flex'" style="background:rgb(26,82,118);color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;">≡ Aktionen</button>
         </div>
 
         <div class="pt-hand-zone">
@@ -3303,49 +3303,6 @@
 
                 <div class="pt-zone-label" style="margin: 0; color: white;">
                     Hand (<span id="ptHandCount">0</span>) &mdash; P<span id="activePlayerIndicator">1</span>
-                </div>
-
-                <div id="ptHandActionBar" style="display: flex; gap: 6px; align-items: center; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap;">
-
-                    <button class="pt-btn" style="padding: 4px 8px; background:#e67e22; color:white; border-color:#d35400;" onclick="ptUndo()" title="Letzte Aktion r�ckg�ngig machen">↩️ Undo</button>
-
-                        <button class="pt-btn" style="padding: 4px 8px; background:#8e44ad; color:white; border-color:#9b59b6;" onclick="ptMulligan(ptCurrentPlayer)" title="Hand ins Deck, 7 neue ziehen">🃏 Mulligan</button>
-
-                    <button class="pt-btn pt-mobile-toggle" style="padding: 4px 8px; background:#555; color:white; border-color:#777;" onclick="ptToggleMobileActions()" title="More actions">☰</button>
-
-                    <div id="ptExtendedActions" style="display:contents;">
-                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
-
-                    <span style="color: #ccc; font-size: 10px; font-weight: bold;">Self:</span>
-                    <input type="number" id="ptHandDrawAmt" value="1" style="width: 30px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; border-radius: 4px; text-align: center; font-size: 11px; padding: 2px; outline: none;" aria-label="Number of cards to draw">
-                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px;" onclick="ptHandAction('shuffle_deck')">🔀 Deck</button>
-                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px;" onclick="ptHandAction('shuffle_bottom')">⬇️ Bot</button>
-
-                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
-
-                    <span style="color: #2ecc71; font-size: 10px; font-weight: bold; margin-left: 2px;">Judge:</span>
-                    <input type="number" id="ptJudgeDrawP1" value="4" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1" aria-label="Player 1 Judge draw count">
-                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#27ae60; color:white; border-color:#2ecc71;" onclick="ptGlobalJudge()" title="Beide mischen Hand INS Deck und ziehen X">⚖️</button>
-                    <input type="number" id="ptJudgeDrawP2" value="4" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2" aria-label="Player 2 Judge draw count">
-
-                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
-
-                    <span style="color: #f1c40f; font-size: 10px; font-weight: bold; margin-left: 2px;">Iono:</span>
-                    <input type="number" id="ptIonoDrawP1" value="6" min="0" max="20" class="pt-bottom-input blue-border" title="Draw P1" aria-label="Player 1 Iono draw count">
-                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#f39c12; color:white; border-color:#e67e22;" onclick="ptGlobalIono()" title="Beide legen Hand UNTER das Deck und ziehen X">🔄</button>
-                    <input type="number" id="ptIonoDrawP2" value="6" min="0" max="20" class="pt-bottom-input red-border" title="Draw P2" aria-label="Player 2 Iono draw count">
-
-                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
-
-                    <span style="color: #e74c3c; font-size: 10px; font-weight: bold;">Opp:</span>
-                    <button class="pt-btn" style="padding: 4px 8px; font-size: 10px; background:#c0392b; color:white; border-color:#e74c3c;" onclick="ptOpponentShuffleAndDraw()" title="Gegner mischt Hand ins Deck und zieht X Karten">🔄 S&amp;D</button>
-
-                    <span style="color: rgba(255,255,255,0.25); margin: 0 2px;">|</span>
-
-                    <span style="color: #ccc; font-size: 10px; font-weight: bold;">Cmd:</span>
-                    <input type="text" id="ptCommandInput-p1" class="pt-cmd-input" placeholder="/draw 3�" style="width: 80px;" onkeydown="if(event.key==='Enter'){ptRunCommand();event.preventDefault();}"
-                           title="Commands: /draw N  /mill N  /top N  /iono N  /roxanne N  /shuffle  /coin N  /dice  /attach [active|bench0-4]" aria-label="Playtester command input">
-                    </div>
                 </div>
 
             </div>

@@ -1653,11 +1653,11 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="Copy deck list">
               ${getLang()==='de' ? 'Kopieren' : 'Copy'}
             </button>
-            <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-limitless" title="Copy &amp; open Limitless Builder">
-              Limitless
-            </button>
-            <button onclick="event.stopPropagation(); window.open('https://my.limitlesstcg.com/', '_blank')" class="deck-action-btn deck-btn-export" title="Print Decklist">
+            <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="Copy &amp; open Limitless Builder">
               Print Decklist
+            </button>
+            <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" class="deck-action-btn deck-btn-export" title="${getLang()==='de' ? 'Als Bild speichern' : 'Save as image'}">
+              ${getLang()==='de' ? 'Bild' : 'Image'}
             </button>
             <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" class="deck-action-btn deck-btn-rename" title="Rename deck">
               ${getLang()==='de' ? 'Umbenennen' : 'Rename'}

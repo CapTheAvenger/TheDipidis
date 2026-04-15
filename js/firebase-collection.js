@@ -1273,7 +1273,18 @@ function updateProfileUI(profile) {
 function updateDecksUI() {
   const decksGrid = document.getElementById('decks-grid');
   if (!decksGrid) return;
-  
+
+  // Remember which decks are currently expanded so we can restore after rebuild
+  const expandedDeckIds = new Set();
+  decksGrid.querySelectorAll('[id^="saved-deck-"]').forEach(el => {
+    if (el.id && !el.id.endsWith('-arrow') && el.style.display !== 'none') {
+      // Map by deck Firestore ID (stable across index changes)
+      const idx = parseInt(el.id.replace('saved-deck-', ''), 10);
+      const deck = (window.userDecks || [])[idx];
+      if (deck && deck.id) expandedDeckIds.add(deck.id);
+    }
+  });
+
   // Update deck count
   const decksCount = document.getElementById('profile-decks-count');
   if (decksCount) {
@@ -1694,6 +1705,15 @@ function updateDecksUI() {
     `;
   }).join('');
   
+  // Restore previously expanded decks
+  if (expandedDeckIds.size > 0) {
+    (window.userDecks || []).forEach((deck, idx) => {
+      if (deck && deck.id && expandedDeckIds.has(deck.id)) {
+        toggleDeckCollapse(`saved-deck-${idx}`);
+      }
+    });
+  }
+
   // Render folder navigation if any folders exist
   renderFolderNav();
 }
@@ -2283,6 +2303,22 @@ function sortCardsByTypeSimple(cards) {
     'Special Energy': 6,
     'Energy': 7
   };
+
+  // Resolve Pokedex number from card data or global map
+  function _getDexNum(card) {
+    const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);
+    if (!isNaN(direct) && direct > 0) return direct;
+    const dexMap = window.pokedexNumbers || {};
+    const rawName = String(card.card_name || card.name || '').trim().toLowerCase();
+    const directMap = parseInt(dexMap[rawName], 10);
+    if (!isNaN(directMap) && directMap > 0) return directMap;
+    const baseName = rawName
+      .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
+      .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+    const baseMap = parseInt(dexMap[baseName], 10);
+    if (!isNaN(baseMap) && baseMap > 0) return baseMap;
+    return 99999;
+  }
   
   return cards.sort((a, b) => {
     const cardTypeA = a.type || a.card_type || '';
@@ -2299,7 +2335,7 @@ function sortCardsByTypeSimple(cards) {
       return orderA - orderB;
     }
     
-    // For Pokemon: sort by element first, then by percentage
+    // For Pokemon: sort by element type, then Pokedex number
     if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
       const elementA = cardTypeA.charAt(0);
       const elementB = cardTypeB.charAt(0);
@@ -2312,25 +2348,20 @@ function sortCardsByTypeSimple(cards) {
         return elemOrderA - elemOrderB;
       }
       
-      // Same element: sort by percentage (highest first), then by set code/number
-      const percA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
-      const percB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
-      
-      if (percA !== percB) {
-        return percB - percA;
+      // Same element: sort by Pokedex number
+      const dexA = _getDexNum(a);
+      const dexB = _getDexNum(b);
+      if (dexA !== dexB) {
+        return dexA - dexB;
       }
       
-      const setCodeA = a.set || a.set_code || '';
-      const setCodeB = b.set || b.set_code || '';
-      
-      if (setCodeA !== setCodeB) {
-        return setCodeA.localeCompare(setCodeB);
-      }
-      
-      const setNumA = parseInt(((a.number || a.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
-      const setNumB = parseInt(((b.number || b.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
-      if (setNumA !== setNumB) {
-        return setNumA - setNumB;
+      // Same Pokedex: sort by evolution stage
+      const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');
+      const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');
+      const evolOrderA = evolutionOrder[evolutionA] || 99;
+      const evolOrderB = evolutionOrder[evolutionB] || 99;
+      if (evolOrderA !== evolOrderB) {
+        return evolOrderA - evolOrderB;
       }
       
       const nameA = a.card_name || a.name || '';
@@ -2338,20 +2369,14 @@ function sortCardsByTypeSimple(cards) {
       return nameA.localeCompare(nameB);
     }
     
-    // For non-Pokemon cards: Sort by PERCENTAGE (highest first), then set number, then name
-    const percA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
-    const percB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
-    
-    if (percA !== percB) {
-      return percB - percA;
+    // For non-Pokemon cards: sort by count/quantity (highest first)
+    const countA = a.deck_count_in_selected || a.deck_count || a.count || 0;
+    const countB = b.deck_count_in_selected || b.deck_count || b.count || 0;
+    if (countA !== countB) {
+      return countB - countA;
     }
     
-    const setNumA = parseInt(((a.number || a.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
-    const setNumB = parseInt(((b.number || b.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
-    if (setNumA !== setNumB) {
-      return setNumA - setNumB;
-    }
-    
+    // Same count: by name
     const nameA = a.card_name || a.name || '';
     const nameB = b.card_name || b.name || '';
     return nameA.localeCompare(nameB);

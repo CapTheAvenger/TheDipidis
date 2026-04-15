@@ -1364,7 +1364,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         return elemOrderA - elemOrderB;
                     }
                     
-                    // SAME ELEMENT: Sort by Pokedex number
+                    // SAME ELEMENT: Sort by share% descending first
+                    if (percA !== percB) {
+                        return percB - percA;
+                    }
+                    
+                    // Same share: sort by Pokedex number
                     const dexA = _getDexNum(a);
                     const dexB = _getDexNum(b);
                     if (dexA !== dexB) {
@@ -1386,16 +1391,16 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     return nameA.localeCompare(nameB);
                 }
                 
-                // For non-Pokemon cards: Sort by count/quantity (highest first)
+                // For non-Pokemon cards: Sort by share% descending first
+                if (percA !== percB) {
+                    return percB - percA;
+                }
+                
+                // Same share: sort by count/quantity (highest first)
                 const countA = a.deck_count_in_selected || a.total_count || a.card_count || 0;
                 const countB = b.deck_count_in_selected || b.total_count || b.card_count || 0;
                 if (countA !== countB) {
                     return countB - countA;
-                }
-                
-                // Same count: sort by percentage if available
-                if (percA !== percB) {
-                    return percB - percA;
                 }
                 
                 // Finally by name

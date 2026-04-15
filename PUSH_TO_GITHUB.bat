@@ -52,7 +52,13 @@ if errorlevel 1 (
     )
 )
 
-echo [3/7] Staging all tracked and new files...
+echo [3/7] Bumping version strings ^(cache busting^)...
+powershell -ExecutionPolicy Bypass -File "%~dp0bump-version.ps1"
+if errorlevel 1 (
+    echo [WARN] bump-version.ps1 failed, continuing with old versions.
+)
+
+echo [3a/7] Staging all tracked and new files...
 git add -A
 if errorlevel 1 (
     echo [ERROR] git add failed.

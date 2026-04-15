@@ -1,11 +1,11 @@
-﻿// Service Worker for Pokemon TCG Analysis PWA
-// v202604130210
+// Service Worker for Pokemon TCG Analysis PWA
+// v202604151916
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS / images → Cache-first    (pre-cached fresh on install; new CACHE_NAME = full refresh)
 //   Data files        → Stale-while-revalidate (fast load + background update)
 
-const CACHE_NAME = 'tcg-analysis-v202604130210';
+const CACHE_NAME = 'tcg-analysis-v202604151916';
 
 // Static shell â€” cached on install
 const SHELL_ASSETS = [
@@ -106,7 +106,13 @@ self.addEventListener('fetch', function(event) {
 
   var cleanUrl = cleanCacheUrl(url);
 
-  // â”€â”€ HTML / navigation: NETWORK-FIRST â”€â”€
+  // — version.json: ALWAYS network-only (cache-busting check) —
+  if (url.pathname.endsWith('/version.json') || url.pathname === '/version.json') {
+    event.respondWith(fetch(event.request, { cache: 'no-store' }));
+    return;
+  }
+
+  // — HTML / navigation: NETWORK-FIRST —
   // Always try the network so users see the latest index.html.
   // Falls back to cache only when offline.
   if (event.request.mode === 'navigate' ||

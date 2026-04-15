@@ -793,7 +793,8 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                                     card_type: exactCard.type || 'Unknown',
                                     set_code: exactCard.set,
                                     set_number: exactCard.number,
-                                    rarity: exactCard.rarity
+                                    rarity: exactCard.rarity,
+                                    pokedex_number: exactCard.pokedex_number || ''
                                 };
                             } else {
                                 const baseCardData = cardDataByName[baseName];
@@ -1250,12 +1251,26 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const percA = parseFloat((a.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
                 const percB = parseFloat((b.percentage_in_archetype || '0').toString().replace(',', '.')) || 0;
                 
-                // For Pokemon: sort by element first, then by percentage
+                // Helper: resolve Pokedex number from card data or global map
+                function _getDexNum(card) {
+                    const direct = parseInt(card.pokedex_number || card.pokedex || card.dex_number, 10);
+                    if (!isNaN(direct) && direct > 0) return direct;
+                    const dexMap = window.pokedexNumbers || {};
+                    const rawName = String(card.card_name || card.name || '').trim().toLowerCase();
+                    const directMap = parseInt(dexMap[rawName], 10);
+                    if (!isNaN(directMap) && directMap > 0) return directMap;
+                    const baseName = rawName
+                        .replace(/\b(ex|vmax|vstar|v-union|v|gx|radiant|mega)\b/g, '')
+                        .replace(/[^a-z0-9\s-]/g, ' ').replace(/\s+/g, ' ').trim();
+                    const baseMap = parseInt(dexMap[baseName], 10);
+                    if (!isNaN(baseMap) && baseMap > 0) return baseMap;
+                    return 99999;
+                }
+
+                // For Pokemon: sort by element type, then Pokedex number
                 if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
                     const elementA = cardTypeA.charAt(0);
                     const elementB = cardTypeB.charAt(0);
-                    const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');
-                    const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');
                     
                     const elemOrderA = elementOrder[elementA] || 99;
                     const elemOrderB = elementOrder[elementB] || 99;
@@ -1265,52 +1280,38 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                         return elemOrderA - elemOrderB;
                     }
                     
-                    // SAME ELEMENT: Sort by PERCENTAGE (highest first)
-                    if (percA !== percB) {
-                        return percB - percA;
+                    // SAME ELEMENT: Sort by Pokedex number
+                    const dexA = _getDexNum(a);
+                    const dexB = _getDexNum(b);
+                    if (dexA !== dexB) {
+                        return dexA - dexB;
                     }
                     
-                    // Same percentage: sort by ORIGINAL SET CODE + SET NUMBER (keeps same-set cards together)
-                    // Use original_set_code/original_set_number for consistent sorting even when Max Rarity is selected
-                    const setCodeA = a.original_set_code || a.set_code || '';
-                    const setCodeB = b.original_set_code || b.set_code || '';
-                    
-                    if (setCodeA !== setCodeB) {
-                        return setCodeA.localeCompare(setCodeB);
-                    }
-                    
-                    // Same set code: sort by ORIGINAL SET NUMBER (numerically)
-                    const setNumA = parseInt(((a.original_set_number || a.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
-                    const setNumB = parseInt(((b.original_set_number || b.set_number) || '0').toString().replace(/[^\d]/g, '')) || 0;
-                    if (setNumA !== setNumB) {
-                        return setNumA - setNumB;
-                    }
-                    
-                    // Same set+number: sort by card name (keeps related Pokemon together)
-                    const nameA = a.card_name || a.name || '';
-                    const nameB = b.card_name || b.name || '';
-                    const nameCompare = nameA.localeCompare(nameB);
-                    if (nameCompare !== 0) {
-                        return nameCompare;
-                    }
-                    
-                    // Same name: sort by evolution stage (Basic ? Stage1 ? Stage2)
+                    // Same Pokedex: sort by evolution stage (Basic → Stage1 → Stage2)
+                    const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');
+                    const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');
                     const evolOrderA = evolutionOrder[evolutionA] || 99;
                     const evolOrderB = evolutionOrder[evolutionB] || 99;
+                    if (evolOrderA !== evolOrderB) {
+                        return evolOrderA - evolOrderB;
+                    }
                     
-                    return evolOrderA - evolOrderB;
+                    // Fallback: by name
+                    const nameA = a.card_name || a.name || '';
+                    const nameB = b.card_name || b.name || '';
+                    return nameA.localeCompare(nameB);
                 }
                 
-                // For non-Pokemon cards: Sort by PERCENTAGE (highest first)
+                // For non-Pokemon cards: Sort by count/quantity (highest first)
+                const countA = a.deck_count_in_selected || a.total_count || a.card_count || 0;
+                const countB = b.deck_count_in_selected || b.total_count || b.card_count || 0;
+                if (countA !== countB) {
+                    return countB - countA;
+                }
+                
+                // Same count: sort by percentage if available
                 if (percA !== percB) {
                     return percB - percA;
-                }
-                
-                // Same percentage: sort by set number
-                const setNumA = parseInt((a.set_number || '0').toString().replace(/[^\d]/g, '')) || 0;
-                const setNumB = parseInt((b.set_number || '0').toString().replace(/[^\d]/g, '')) || 0;
-                if (setNumA !== setNumB) {
-                    return setNumA - setNumB;
                 }
                 
                 // Finally by name

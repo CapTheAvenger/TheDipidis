@@ -208,6 +208,58 @@
         }
         
         /**
+         * Fuzzy lookup for cardDataByArchetype.
+         * Handles apostrophe/possessive differences (Rocket's → Rocket), "ex" suffixes, partial matches.
+         */
+        function _normArchName(name) {
+            return String(name || '').toLowerCase()
+                .replace(/[''`]s\b/g, '')   // strip possessive 's (Rocket's → Rocket)
+                .replace(/[''`]/g, '')        // strip remaining apostrophes
+                .replace(/\s+/g, ' ').trim();
+        }
+
+        function fuzzyArchetypeLookup(archetypeName, cardDataByArchetype) {
+            if (!archetypeName || !cardDataByArchetype) return [];
+
+            // 1) Exact match
+            if (cardDataByArchetype[archetypeName]) return cardDataByArchetype[archetypeName];
+
+            const norm = _normArchName(archetypeName);
+            const normalizedMap = window._cardArchetypeNormalizedMap || {};
+
+            // 2) Normalized exact match (handles apostrophe/possessive)
+            if (normalizedMap[norm]) return cardDataByArchetype[normalizedMap[norm]] || [];
+
+            // 3) Try with/without "ex" suffix
+            const normEx = norm.endsWith(' ex') ? norm : norm + ' ex';
+            const normNoEx = norm.endsWith(' ex') ? norm.slice(0, -3).trim() : norm;
+            if (normalizedMap[normEx]) return cardDataByArchetype[normalizedMap[normEx]] || [];
+            if (normalizedMap[normNoEx]) return cardDataByArchetype[normalizedMap[normNoEx]] || [];
+
+            // 4) Partial match: archetype key starts with our query or vice versa
+            const allNormKeys = Object.keys(normalizedMap);
+            const startMatch = allNormKeys.find(k => k.startsWith(norm) || norm.startsWith(k));
+            if (startMatch) return cardDataByArchetype[normalizedMap[startMatch]] || [];
+
+            // 5) Word-overlap matching (for multi-word names like "Rocket's Mewtwo" → "Rocket Mewtwo Ex")
+            const normWords = norm.split(' ');
+            const ignoreWords = new Set(['ex', 'jtg', 'tef', 'scr', 'twm', 'dri', 'meg', 'box']);
+            let bestKey = null;
+            let bestOverlap = 0;
+            allNormKeys.forEach(k => {
+                const kWords = k.split(' ').filter(w => !ignoreWords.has(w));
+                const overlap = normWords.filter(w => kWords.includes(w)).length;
+                if (overlap > bestOverlap) {
+                    bestOverlap = overlap;
+                    bestKey = k;
+                }
+            });
+            if (bestKey && bestOverlap >= 1) return cardDataByArchetype[normalizedMap[bestKey]] || [];
+
+            return [];
+        }
+
+        /**
          * Find the best representative image for an archetype
          * Priority: 1) Pokemon ex/VSTAR/VMAX, 2) Stage 2, 3) First Pokemon
          * @param {string} archetypeName - Name of the archetype
@@ -219,6 +271,29 @@
                 return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="280"%3E%3Crect fill="%23ddd" width="200" height="280"/%3E%3C/svg%3E';
             }
             
+            // Priority 0: If a non-Pokemon card matches the archetype name, use it
+            // (e.g., "Festival Lead" → "Festival Grounds" stadium card)
+            const archetypeBase = archetypeName.split(' ').slice(0, 2).join(' ').toLowerCase();
+            const archetypeFirstWord = archetypeName.split(' ')[0].toLowerCase();
+            const nameMatchAll = archetypeCardsData.filter(card => {
+                const cardName = (card.card_name || '').toLowerCase();
+                return cardName.includes(archetypeBase) || cardName.startsWith(archetypeFirstWord);
+            });
+            if (nameMatchAll.length > 0) {
+                // Prefer Pokemon cards over Trainers, but still use Trainer if no Pokemon match
+                const pokemonMatch = nameMatchAll.filter(c => {
+                    const t = (c.type || '').toLowerCase();
+                    return !t.includes('trainer') && !t.includes('energy') && !t.includes('item') && !t.includes('supporter') && !t.includes('stadium');
+                });
+                if (pokemonMatch.length > 0) {
+                    pokemonMatch.sort((a, b) => parseFloat(b.percentage_in_archetype || 0) - parseFloat(a.percentage_in_archetype || 0));
+                    return pokemonMatch[0].image_url || '';
+                }
+                // Use Trainer/Stadium match (e.g., Festival Grounds)
+                nameMatchAll.sort((a, b) => parseFloat(b.percentage_in_archetype || 0) - parseFloat(a.percentage_in_archetype || 0));
+                return nameMatchAll[0].image_url || '';
+            }
+
             // Filter only Pokemon cards
             const pokemonCards = archetypeCardsData.filter(card => {
                 const cardType = card.type || '';
@@ -230,27 +305,6 @@
             });
             
             if (pokemonCards.length === 0) return '';
-            
-            // Extract base archetype name (first word or first two words)
-            const archetypeBase = archetypeName.split(' ').slice(0, 2).join(' ').toLowerCase();
-            const archetypeFirstWord = archetypeName.split(' ')[0].toLowerCase();
-            
-            // Priority 1: Cards that match the archetype name exactly
-            const matchingNameCards = pokemonCards.filter(card => {
-                const cardName = (card.card_name || '').toLowerCase();
-                // Check if card name contains the archetype name or first word
-                return cardName.includes(archetypeBase) || cardName.startsWith(archetypeFirstWord);
-            });
-            
-            if (matchingNameCards.length > 0) {
-                // Sort by percentage_in_archetype (highest usage = main attacker)
-                matchingNameCards.sort((a, b) => {
-                    const pctA = parseFloat(a.percentage_in_archetype || 0);
-                    const pctB = parseFloat(b.percentage_in_archetype || 0);
-                    return pctB - pctA;
-                });
-                return matchingNameCards[0].image_url || '';
-            }
             
             // Priority 2: Pokemon ex, VSTAR, VMAX, V-UNION (sorted by usage)
             const specialPokemon = pokemonCards.filter(card => {
@@ -351,6 +405,12 @@
                         const arch = card.archetype;
                         if (!cardDataByArchetype[arch]) cardDataByArchetype[arch] = [];
                         cardDataByArchetype[arch].push(card);
+                    });
+
+                    // Build normalized lookup for fuzzy matching (same as current meta)
+                    window._cardArchetypeNormalizedMap = {};
+                    Object.keys(cardDataByArchetype).forEach(key => {
+                        window._cardArchetypeNormalizedMap[_normArchName(key)] = key;
                     });
                 } catch (e) {
                     console.warn('Could not load card data for images:', e);
@@ -527,7 +587,7 @@
                     );
                     
                     // Get archetype image
-                    const archetypeCards = cardDataByArchetype[archetypeName] || [];
+                    const archetypeCards = fuzzyArchetypeLookup(archetypeName, cardDataByArchetype);
                     const imageUrl = imageMap
                         ? (imageMap[archetypeName] || '')
                         : getArchetypeImage(archetypeName, archetypeCards);
@@ -669,6 +729,15 @@
                     if (!cardDataByArchetype[arch]) cardDataByArchetype[arch] = [];
                     cardDataByArchetype[arch].push(card);
                 });
+
+                // Build normalized lookup for fuzzy archetype matching
+                // Handles apostrophe differences (N's vs Ns), "ex" suffix, etc.
+                window._cardArchetypeNormalizedMap = {};
+                const allArchKeys = Object.keys(cardDataByArchetype);
+                allArchKeys.forEach(key => {
+                    const norm = _normArchName(key);
+                    window._cardArchetypeNormalizedMap[norm] = key;
+                });
             } catch (e) {
                 console.warn('Could not load meta data for tier list:', e);
                 return;
@@ -749,7 +818,7 @@
                         <div class="tier-hero-grid">`;
 
                 topHeroArchetypes.forEach((item, index) => {
-                    const representativeCards = cardDataByArchetype[item.representativeVariant] || [];
+                    const representativeCards = fuzzyArchetypeLookup(item.representativeVariant, cardDataByArchetype);
                     const imageUrl = getArchetypeImage(item.representativeVariant, representativeCards);
                     const combinedMainEscaped = escapeJsStr(item.key || item.label || item.representativeVariant || '');
                     const combinedVariantsJsonEscaped = escapeJsStr(encodeURIComponent(JSON.stringify(item.variants || [])));
@@ -861,7 +930,7 @@
                     const powerScore = calculatePowerScore(share, winRate);
                     
                     // Get archetype image
-                    const archetypeCards = cardDataByArchetype[archetypeName] || [];
+                    const archetypeCards = fuzzyArchetypeLookup(archetypeName, cardDataByArchetype);
                     const imageUrl = getArchetypeImage(archetypeName, archetypeCards);
                     
                     // Trend indicator

@@ -1856,27 +1856,44 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             ctx.fillText(countText, pillX + 10, PAD + HEADER_H / 2);
 
             // Pre-load all card images as same-origin blobs to avoid CORS canvas tainting
+            // Strategy: try Image with crossOrigin first (cache-bust to force CORS response),
+            // if that fails fall back to fetch-as-blob, then to drawing the already-loaded <img>.
             const imgPromises = Array.from(cards).map(async (cardEl) => {
                 const imgEl = cardEl.querySelector('img');
-                const src = imgEl ? imgEl.src : '';
-                if (!src) return null;
-
-                try {
-                    const resp = await fetch(src, { mode: 'cors', cache: 'no-store' }).catch(() => null);
-                    if (!resp || !resp.ok) return null;
-
-                    const blob = await resp.blob();
-                    const blobUrl = URL.createObjectURL(blob);
-
-                    return new Promise(resolve => {
-                        const image = new Image();
-                        image.onload  = () => { URL.revokeObjectURL(blobUrl); resolve(image); };
-                        image.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(null); };
-                        image.src = blobUrl;
-                    });
-                } catch (e) {
+                const src = imgEl ? (imgEl.currentSrc || imgEl.src) : '';
+                if (!src || src.startsWith('data:')) {
+                    // SVG placeholder or data URI – use existing element directly
+                    if (src && imgEl && imgEl.complete && imgEl.naturalWidth > 0) return imgEl;
                     return null;
                 }
+
+                // 1) Try crossOrigin Image with cache-buster (avoids cached non-CORS response)
+                const corsImg = await new Promise(resolve => {
+                    const image = new Image();
+                    image.crossOrigin = 'anonymous';
+                    image.onload  = () => resolve(image);
+                    image.onerror = () => resolve(null);
+                    image.src = src + (src.includes('?') ? '&' : '?') + '_cors=' + Date.now();
+                });
+                if (corsImg) return corsImg;
+
+                // 2) Fallback: fetch as blob (works for same-origin or CORS-enabled servers)
+                try {
+                    const resp = await fetch(src, { mode: 'cors' }).catch(() => null);
+                    if (resp && resp.ok) {
+                        const blob = await resp.blob();
+                        const blobUrl = URL.createObjectURL(blob);
+                        const blobImg = await new Promise(resolve => {
+                            const image = new Image();
+                            image.onload  = () => { URL.revokeObjectURL(blobUrl); resolve(image); };
+                            image.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(null); };
+                            image.src = blobUrl;
+                        });
+                        if (blobImg) return blobImg;
+                    }
+                } catch (_) { /* ignore */ }
+
+                return null;
             });
 
             const images = await Promise.all(imgPromises);

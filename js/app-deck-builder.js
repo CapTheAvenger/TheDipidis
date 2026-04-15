@@ -2209,24 +2209,47 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     })
             );
 
-            // Render card grid
+            // Consolidate international prints (same card name, different sets)
+            const consolidated = [];
+            const nameMap = new Map();
+            sortedEntries.forEach(card => {
+                const key = (card.card_name || '').trim().toLowerCase();
+                if (nameMap.has(key)) {
+                    const existing = nameMap.get(key);
+                    existing.deck_count_in_selected = (existing.deck_count_in_selected || 1) + (card.deck_count_in_selected || 1);
+                } else {
+                    const entry = Object.assign({}, card);
+                    nameMap.set(key, entry);
+                    consolidated.push(entry);
+                }
+            });
+
+            // Render card grid — one cell per unique card with count badge
             const gridContainer = document.getElementById('deckGridPreviewCards');
             gridContainer.innerHTML = '';
 
-            const totalCards = sortedEntries.reduce((s, c) => s + (c.deck_count_in_selected || 1), 0);
+            const totalCards = consolidated.reduce((s, c) => s + (c.deck_count_in_selected || 1), 0);
             document.getElementById('deckGridPreviewCount').textContent = `${totalCards} ${getLang() === 'de' ? 'Karten' : 'Cards'}`;
 
-            sortedEntries.forEach(card => {
+            consolidated.forEach(card => {
                 const count = card.deck_count_in_selected || 1;
-                for (let i = 0; i < count; i++) {
-                    const img = document.createElement('img');
-                    img.src = getBestCardImage(card);
-                    img.alt = card.card_name || '';
-                    img.style.cssText = 'width:100%; border-radius:6px; aspect-ratio:63/88; object-fit:cover; display:block;';
-                    img.loading = 'lazy';
-                    img.onerror = function() { this.src = 'images/card-back.png'; };
-                    gridContainer.appendChild(img);
-                }
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'position:relative;';
+
+                const img = document.createElement('img');
+                img.src = getBestCardImage(card);
+                img.alt = card.card_name || '';
+                img.style.cssText = 'width:100%; border-radius:6px; aspect-ratio:63/88; object-fit:cover; display:block;';
+                img.loading = 'lazy';
+                img.onerror = function() { this.src = 'images/card-back.png'; };
+                wrapper.appendChild(img);
+
+                const badge = document.createElement('div');
+                badge.className = 'compact-badge';
+                badge.textContent = String(count);
+                wrapper.appendChild(badge);
+
+                gridContainer.appendChild(wrapper);
             });
 
             // Show modal

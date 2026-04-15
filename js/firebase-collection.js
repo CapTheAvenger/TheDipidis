@@ -1656,11 +1656,14 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-limitless" title="Copy &amp; open Limitless Builder">
               Limitless
             </button>
-            <button onclick="event.stopPropagation(); exportSavedDeckAsImage(${deckIndex})" class="deck-action-btn deck-btn-export" title="Save as image">
-              ${getLang()==='de' ? 'Bild' : 'Image'}
+            <button onclick="event.stopPropagation(); window.open('https://my.limitlesstcg.com/', '_blank')" class="deck-action-btn deck-btn-export" title="Print Decklist">
+              Print Decklist
             </button>
             <button onclick="event.stopPropagation(); renameDeck(${deckIndex})" class="deck-action-btn deck-btn-rename" title="Rename deck">
               ${getLang()==='de' ? 'Umbenennen' : 'Rename'}
+            </button>
+            <button onclick="event.stopPropagation(); duplicateDeck(${deckIndex})" class="deck-action-btn deck-btn-duplicate" title="${getLang()==='de' ? 'Deck duplizieren' : 'Duplicate deck'}">
+              ${getLang()==='de' ? 'Duplizieren' : 'Duplicate'}
             </button>
             <button onclick="event.stopPropagation(); deleteDeck('${safeDeckDeleteIdJs}')" class="deck-action-btn deck-btn-delete" title="Delete deck">
               ${getLang()==='de' ? 'Löschen' : 'Delete'}
@@ -2625,7 +2628,6 @@ async function persistDeckFolderName(folderName) {
     if (!window.deckFolders) window.deckFolders = [];
     if (!window.deckFolders.includes(trimmed)) {
       window.deckFolders.push(trimmed);
-      window.deckFolders.sort((a, b) => a.localeCompare(b));
     }
   } catch (error) {
     console.error('Error persisting deck folder:', error);
@@ -2678,12 +2680,32 @@ async function deleteDeckFolder(folderName) {
   }
 }
 
+async function persistDeckFolderOrder(orderedFolders) {
+  const user = auth.currentUser;
+  if (!user || !Array.isArray(orderedFolders)) return;
+  try {
+    await db.collection('users').doc(user.uid).set({
+      deckFolders: orderedFolders,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch (error) {
+    console.error('Error persisting folder order:', error);
+  }
+}
+
 function getDeckFolders() {
   if (!window.userDecks && !window.deckFolders) return [];
-  const folders = new Set();
-  (window.userDecks || []).forEach(d => { if (d.folder) folders.add(d.folder); });
-  (window.deckFolders || []).forEach(f => { if (f) folders.add(f); });
-  return Array.from(folders).sort();
+  // Preserve user-defined order from deckFolders array
+  const ordered = (window.deckFolders || []).filter(Boolean);
+  // Add any folders used by decks but not yet in the ordered list
+  const known = new Set(ordered);
+  (window.userDecks || []).forEach(d => {
+    if (d.folder && !known.has(d.folder)) {
+      ordered.push(d.folder);
+      known.add(d.folder);
+    }
+  });
+  return ordered;
 }
 
 async function createDeckFolder() {
@@ -2738,15 +2760,78 @@ function renderFolderNav() {
     return;
   }
   nav.classList.remove('display-none');
+  nav.style.display = 'flex';
+  nav.style.flexWrap = 'wrap';
+  nav.style.gap = '6px';
+  nav.style.alignItems = 'center';
+
   nav.innerHTML = `<button onclick="filterDecksByFolder('')" style="padding: 6px 14px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">All</button>` +
     folders.map(f => {
       const safe = escapeHtml(f);
       const safeJs = escapeJsSingleQuoted(f);
-      return `<span style="display:inline-flex;align-items:center;gap:0;background:#f0f0f0;border:1px solid #ddd;border-radius:20px;overflow:hidden;">` +
+      return `<span draggable="true" data-folder="${safe}" style="display:inline-flex;align-items:center;gap:0;background:#f0f0f0;border:1px solid #ddd;border-radius:20px;overflow:hidden;cursor:grab;transition:transform 0.15s,opacity 0.15s;">` +
         `<button onclick="filterDecksByFolder('${safeJs}')" style="padding:6px 10px 6px 14px;background:transparent;color:#333;border:none;cursor:pointer;font-weight:600;font-size:0.85em;">${safe}</button>` +
         `<button onclick="event.stopPropagation();deleteDeckFolder('${safeJs}')" title="Delete folder" style="padding:4px 10px 4px 4px;background:transparent;color:#999;border:none;cursor:pointer;font-size:0.9em;line-height:1;">&times;</button>` +
         `</span>`;
     }).join('');
+
+  // Drag & Drop reordering
+  let draggedEl = null;
+  nav.querySelectorAll('span[draggable]').forEach(span => {
+    span.addEventListener('dragstart', e => {
+      draggedEl = span;
+      span.style.opacity = '0.4';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    span.addEventListener('dragend', () => {
+      span.style.opacity = '1';
+      nav.querySelectorAll('span[draggable]').forEach(s => {
+        s.style.borderLeft = '';
+        s.style.borderRight = '';
+      });
+      draggedEl = null;
+    });
+    span.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (!draggedEl || draggedEl === span) return;
+      const rect = span.getBoundingClientRect();
+      const midX = rect.left + rect.width / 2;
+      nav.querySelectorAll('span[draggable]').forEach(s => {
+        s.style.borderLeft = '';
+        s.style.borderRight = '';
+      });
+      if (e.clientX < midX) {
+        span.style.borderLeft = '3px solid #667eea';
+      } else {
+        span.style.borderRight = '3px solid #667eea';
+      }
+    });
+    span.addEventListener('dragleave', () => {
+      span.style.borderLeft = '';
+      span.style.borderRight = '';
+    });
+    span.addEventListener('drop', e => {
+      e.preventDefault();
+      span.style.borderLeft = '';
+      span.style.borderRight = '';
+      if (!draggedEl || draggedEl === span) return;
+      const rect = span.getBoundingClientRect();
+      const midX = rect.left + rect.width / 2;
+      if (e.clientX < midX) {
+        nav.insertBefore(draggedEl, span);
+      } else {
+        nav.insertBefore(draggedEl, span.nextSibling);
+      }
+      // Read new order from DOM and persist
+      const newOrder = [];
+      nav.querySelectorAll('span[data-folder]').forEach(s => {
+        newOrder.push(s.dataset.folder);
+      });
+      window.deckFolders = newOrder;
+      persistDeckFolderOrder(newOrder);
+    });
+  });
 }
 
 function filterDecksByFolder(folder) {
@@ -3489,6 +3574,38 @@ function addCompareNewCardsToProxy() {
   if (modal) modal.remove();
 }
 
+// Duplicate a saved deck into the same folder with an incremented name
+async function duplicateDeck(deckIndex) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const decks = window.userDecks || [];
+  if (deckIndex < 0 || deckIndex >= decks.length) return;
+  const deck = decks[deckIndex];
+  const baseName = (deck.name || deck.archetype || 'Deck').replace(/\s*\(\d+\)$/, '');
+
+  // Find next available number
+  const existing = decks.map(d => d.name || d.archetype || '');
+  let num = 2;
+  while (existing.includes(`${baseName} (${num})`)) num++;
+
+  const newDeck = {
+    name: `${baseName} (${num})`,
+    archetype: deck.archetype || '',
+    cards: Object.assign({}, deck.cards || {}),
+    folder: deck.folder || '',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  try {
+    await db.collection('users').doc(user.uid).collection('decks').add(newDeck);
+    showToast(getLang() === 'de' ? `Deck dupliziert als "${newDeck.name}"` : `Deck duplicated as "${newDeck.name}"`, 'success');
+    await loadUserDecks(user.uid);
+  } catch (err) {
+    console.error('Error duplicating deck:', err);
+    showToast(getLang() === 'de' ? 'Fehler beim Duplizieren' : 'Error duplicating deck', 'error');
+  }
+}
+
 // Ensure inline onclick handlers can resolve functions consistently
 window.toggleDeckCollapse = toggleDeckCollapse;
 window.createDeckFolder = createDeckFolder;
@@ -3497,6 +3614,7 @@ window.moveDeckToFolder = moveDeckToFolder;
 window.renderFolderNav = renderFolderNav;
 window.filterDecksByFolder = filterDecksByFolder;
 window.renderFolderSummary = renderFolderSummary;
+window.duplicateDeck = duplicateDeck;
 window.openCompareSavedDeck = openCompareSavedDeck;
 window.showDeckComparison = showDeckComparison;
 window.addCompareNewCardsToProxy = addCompareNewCardsToProxy;

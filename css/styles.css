@@ -8162,5 +8162,8 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
 .deck-btn-rename { background: rgba(142, 68, 173, 0.7); }
 .deck-btn-rename:hover { background: #7d3c98; }
 
+.deck-btn-duplicate { background: rgba(46, 204, 113, 0.9); }
+.deck-btn-duplicate:hover { background: #27ae60; }
+
 .deck-btn-delete { background: rgba(231, 76, 60, 0.9); }
 .deck-btn-delete:hover { background: #c0392b; }

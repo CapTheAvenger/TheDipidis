@@ -7103,8 +7103,8 @@ body.battle-journal-open {
     background-color: white;
     cursor: pointer;
     padding: 0;
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     background-image: url('../images/professor_oak_icon.png');
     background-size: contain;
     background-repeat: no-repeat;
@@ -7120,10 +7120,10 @@ body.battle-journal-open {
 .tab-help-btn::after {
     content: attr(title);
     position: absolute;
-    bottom: -18px;
+    bottom: -14px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 700;
     color: #fff;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
@@ -7273,8 +7273,8 @@ body.battle-journal-open {
     }
 
     .tab-help-btn {
-        width: 36px;
-        height: 36px;
+        width: 28px;
+        height: 28px;
     }
 
     #toast-container {

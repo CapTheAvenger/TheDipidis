@@ -77,6 +77,13 @@ function onUserSignedOut() {
   if (signinBtn) signinBtn.classList.remove('signin-btn-hidden');
   if (userInfoBar) { userInfoBar.classList.add('user-info-hidden'); userInfoBar.style.display = ''; }
 
+  // Reset profile button label back to i18n default
+  const emailDisplay = document.getElementById('user-email-display');
+  if (emailDisplay) {
+    const lang = (document.documentElement.lang || 'en').toLowerCase();
+    emailDisplay.textContent = lang.startsWith('de') ? 'Mein Profil' : 'My Profile';
+  }
+
   clearUserData();
 
   // Cleanup any active multiplayer listeners to avoid Firestore cost leaks

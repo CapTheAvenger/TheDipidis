@@ -120,12 +120,6 @@
 .user-info {
     display: flex;
     align-items: center;
-    gap: 15px;
-}
-.user-email-display {
-    color: rgba(255,255,255,0.8);
-    font-weight: 600;
-    font-size: 0.9em;
 }
 .profile-btn {
     background: rgba(59,76,202,0.3);

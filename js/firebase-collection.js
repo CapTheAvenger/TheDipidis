@@ -2955,8 +2955,7 @@ function renderFolderSummary(folder) {
         });
       }
       const entry = cardAnalysis.get(normName);
-      entry.counts[deckIdx] = count;
-      // Keep the most common print info (first occurrence)
+      entry.counts[deckIdx] += count; // accumulate different prints of the same card
     }
   });
 

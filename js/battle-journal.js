@@ -1443,11 +1443,6 @@
         return str.length > max ? str.slice(0, max - 1) + '\u2026' : str;
     }
 
-    // Keep legacy inline section working (now just opens modal)
-    function renderMatchupHeatmap() {
-        openMatchupAnalysisModal();
-    }
-
     function populateJournalTournamentFilter() {
         const select = document.getElementById('journalFilterTournament');
         if (!select) return;
@@ -1797,7 +1792,6 @@
     window.selectJournalType = selectJournalType;
     window.shareTournamentSummary = shareTournamentSummary;
     window.toggleMatchupStats = toggleMatchupStats;
-    window.renderMatchupHeatmap = renderMatchupHeatmap;
     window.openMatchupAnalysisModal = openMatchupAnalysisModal;
     window.closeMatchupAnalysisModal = closeMatchupAnalysisModal;
     window.renderMatchupAnalysis = renderMatchupAnalysis;

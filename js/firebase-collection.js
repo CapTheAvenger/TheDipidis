@@ -2632,6 +2632,52 @@ async function persistDeckFolderName(folderName) {
   }
 }
 
+async function deleteDeckFolder(folderName) {
+  if (!folderName) return;
+  const decksInFolder = (window.userDecks || []).filter(d => d.folder === folderName);
+  const msg = decksInFolder.length > 0
+    ? `Ordner "${folderName}" löschen?\n${decksInFolder.length} Deck(s) werden aus dem Ordner entfernt (nicht gelöscht).`
+    : `Ordner "${folderName}" löschen?`;
+  if (!confirm(msg)) return;
+
+  const user = auth.currentUser;
+  if (!user) return;
+
+  try {
+    // Remove folder from Firestore user doc
+    await db.collection('users').doc(user.uid).set({
+      deckFolders: firebase.firestore.FieldValue.arrayRemove(folderName),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    // Clear folder from all decks that had it
+    const batch = db.batch();
+    for (const deck of decksInFolder) {
+      if (deck.id) {
+        batch.update(
+          db.collection('users').doc(user.uid).collection('decks').doc(deck.id),
+          { folder: '', updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+        );
+        deck.folder = '';
+      }
+    }
+    if (decksInFolder.length > 0) await batch.commit();
+
+    // Update local state
+    if (window.deckFolders) {
+      window.deckFolders = window.deckFolders.filter(f => f !== folderName);
+    }
+
+    showNotification(`Ordner "${folderName}" gelöscht`, 'success');
+    filterDecksByFolder('');
+    renderFolderNav();
+    updateDecksUI();
+  } catch (error) {
+    console.error('Error deleting deck folder:', error);
+    showNotification('Fehler beim Löschen des Ordners', 'error');
+  }
+}
+
 function getDeckFolders() {
   if (!window.userDecks && !window.deckFolders) return [];
   const folders = new Set();
@@ -2696,7 +2742,10 @@ function renderFolderNav() {
     folders.map(f => {
       const safe = escapeHtml(f);
       const safeJs = escapeJsSingleQuoted(f);
-      return `<button onclick="filterDecksByFolder('${safeJs}')" style="padding: 6px 14px; background: #f0f0f0; color: #333; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85em;">${safe}</button>`;
+      return `<span style="display:inline-flex;align-items:center;gap:0;background:#f0f0f0;border:1px solid #ddd;border-radius:20px;overflow:hidden;">` +
+        `<button onclick="filterDecksByFolder('${safeJs}')" style="padding:6px 10px 6px 14px;background:transparent;color:#333;border:none;cursor:pointer;font-weight:600;font-size:0.85em;">${safe}</button>` +
+        `<button onclick="event.stopPropagation();deleteDeckFolder('${safeJs}')" title="Delete folder" style="padding:4px 10px 4px 4px;background:transparent;color:#999;border:none;cursor:pointer;font-size:0.9em;line-height:1;">&times;</button>` +
+        `</span>`;
     }).join('');
 }
 
@@ -2704,13 +2753,31 @@ function filterDecksByFolder(folder) {
   // Highlight active folder button
   const nav = document.getElementById('decks-folder-nav');
   if (nav) {
-    nav.querySelectorAll('button').forEach((btn, i) => {
-      if (i === 0 && !folder) {
-        btn.style.background = '#667eea'; btn.style.color = 'white'; btn.style.border = 'none';
-      } else if (btn.textContent.includes(folder) && folder) {
-        btn.style.background = '#667eea'; btn.style.color = 'white'; btn.style.border = 'none';
+    // First direct button = "All"
+    const allBtn = nav.querySelector(':scope > button');
+    if (allBtn) {
+      if (!folder) {
+        allBtn.style.background = '#667eea'; allBtn.style.color = 'white'; allBtn.style.border = 'none';
       } else {
-        btn.style.background = '#f0f0f0'; btn.style.color = '#333'; btn.style.border = '1px solid #ddd';
+        allBtn.style.background = '#f0f0f0'; allBtn.style.color = '#333'; allBtn.style.border = '1px solid #ddd';
+      }
+    }
+    // Folder spans
+    nav.querySelectorAll(':scope > span').forEach(span => {
+      const nameBtn = span.querySelector('button');
+      const folderName = nameBtn ? nameBtn.textContent.trim() : '';
+      if (folder && folderName === folder) {
+        span.style.background = '#667eea';
+        span.style.borderColor = '#667eea';
+        if (nameBtn) { nameBtn.style.color = 'white'; }
+        const delBtn = span.querySelectorAll('button')[1];
+        if (delBtn) delBtn.style.color = 'rgba(255,255,255,0.7)';
+      } else {
+        span.style.background = '#f0f0f0';
+        span.style.borderColor = '#ddd';
+        if (nameBtn) { nameBtn.style.color = '#333'; }
+        const delBtn = span.querySelectorAll('button')[1];
+        if (delBtn) delBtn.style.color = '#999';
       }
     });
   }
@@ -3425,6 +3492,7 @@ function addCompareNewCardsToProxy() {
 // Ensure inline onclick handlers can resolve functions consistently
 window.toggleDeckCollapse = toggleDeckCollapse;
 window.createDeckFolder = createDeckFolder;
+window.deleteDeckFolder = deleteDeckFolder;
 window.moveDeckToFolder = moveDeckToFolder;
 window.renderFolderNav = renderFolderNav;
 window.filterDecksByFolder = filterDecksByFolder;

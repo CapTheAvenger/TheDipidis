@@ -408,7 +408,91 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             
             updateDeckDisplay(source);
         }
-        
+
+        // ---------------------------------------------------------------
+        // Deck Builder Inline Autocomplete (Add Card via search field)
+        // ---------------------------------------------------------------
+        function deckBuilderShowAutocomplete(inputEl, source) {
+            const dropdownId = source + 'DeckAutocomplete';
+            const dropdown = document.getElementById(dropdownId);
+            if (!dropdown) return;
+
+            const searchTerm = (inputEl.value || '').trim().toLowerCase();
+            if (searchTerm.length < 2) {
+                dropdown.classList.add('d-none');
+                return;
+            }
+
+            const cardsDb = window.allCardsDatabase || window.allCardsData || [];
+            if (cardsDb.length === 0) {
+                dropdown.classList.add('d-none');
+                return;
+            }
+
+            // Find matching cards — unique by name, max 10
+            const matches = [];
+            const seen = new Set();
+            for (const card of cardsDb) {
+                if (!card.name || seen.has(card.name)) continue;
+                const nameEn = (card.name || '').toLowerCase();
+                const nameDe = (card.name_de || card.german_name || '').toLowerCase();
+                const setCode = (card.set || '').toLowerCase();
+                const cardNum = (card.number || '').toLowerCase();
+                const dexNum = (card.pokedex_number || '').toString();
+                const setNumCombo = setCode + ' ' + cardNum;
+                if (nameEn.includes(searchTerm) || nameDe.includes(searchTerm) ||
+                    setNumCombo.includes(searchTerm) || (dexNum && dexNum === searchTerm)) {
+                    matches.push(card);
+                    seen.add(card.name);
+                    if (matches.length >= 10) break;
+                }
+            }
+
+            if (matches.length === 0) {
+                dropdown.classList.add('d-none');
+                return;
+            }
+
+            // Get current deck counts
+            const deck = source === 'cityLeague' ? (window.cityLeagueDeck || {})
+                       : source === 'currentMeta' ? (window.currentMetaDeck || {})
+                       : (window.pastMetaDeck || {});
+
+            dropdown.innerHTML = matches.map(card => {
+                const safeNameJs = (card.name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                const safeSet = (card.set || '').replace(/'/g, "\\'");
+                const safeNum = (card.number || '').replace(/'/g, "\\'");
+                const safeNameHtml = (card.name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const imgUrl = card.image_url || (card.set && card.number ? getUnifiedCardImage(card.set, card.number) : '');
+                const typeBadge = card.type ? '<span style="font-size:0.65em;color:#888;margin-left:4px;">' + (card.type || '').replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>' : '';
+                // Count how many of this card are already in deck
+                let deckCount = 0;
+                for (const key in deck) {
+                    if (key === card.name || key.startsWith(card.name + ' (')) {
+                        deckCount += deck[key] || 0;
+                    }
+                }
+                const countBadge = deckCount > 0 ? '<span style="background:#667eea;color:#fff;padding:1px 7px;border-radius:10px;font-size:0.75em;font-weight:700;margin-left:auto;">' + deckCount + 'x</span>' : '';
+
+                return '<div onclick="addCardToDeck(\'' + source + '\', \'' + safeNameJs + '\', \'' + safeSet + '\', \'' + safeNum + '\'); deckBuilderShowAutocomplete(document.getElementById(\'' + source + 'DeckGridSearch\'), \'' + source + '\')" ' +
+                    'style="display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background 0.15s;" ' +
+                    'onmouseover="this.style.background=\'#f0f4ff\'" onmouseout="this.style.background=\'white\'">' +
+                    (imgUrl ? '<img src="' + imgUrl.replace(/"/g, '&quot;') + '" style="width:32px;height:45px;object-fit:cover;border-radius:3px;" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
+                    '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-size:0.85em;font-weight:600;color:#2c3e50;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + safeNameHtml + typeBadge + '</div>' +
+                    '<div style="font-size:0.7em;color:#999;">' + (card.set || '') + ' ' + (card.number || '') + '</div>' +
+                    '</div>' +
+                    countBadge +
+                    '</div>';
+            }).join('');
+            dropdown.classList.remove('d-none');
+        }
+
+        function deckBuilderHideAutocomplete(source) {
+            const dropdown = document.getElementById(source + 'DeckAutocomplete');
+            if (dropdown) dropdown.classList.add('d-none');
+        }
+
         function removeCardFromDeck(source, deckKey) {
             if (source !== 'cityLeague' && source !== 'currentMeta' && source !== 'pastMeta') return;
             

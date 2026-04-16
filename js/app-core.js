@@ -1982,6 +1982,10 @@ const BASE_PATH = './data/';
         let overviewCardTypeFilter = 'all'; // Current card type filter for overview section (all, Pokemon, Supporter, Item, Tool, Stadium, Energy, Special Energy, Ace Spec)
         let currentMetaOverviewCardTypeFilter = 'all'; // Card type filter for Current Meta overview
         let pastMetaOverviewCardTypeFilter = 'all'; // Card type filter for Past Meta overview
+        // Generation counters to cancel stale batch renders (prevents duplicate cards from rAF race)
+        let _cityLeagueRenderGen = 0;
+        let _currentMetaRenderGen = 0;
+        let _pastMetaRenderGen = 0;
         window.pendingCityLeagueDeckSelection = null; // Preserves cross-tab deck selection during async reloads
         const versionSelectionDebugEnabled = () => window.location.search.includes('debugVersionSelection=1');
 

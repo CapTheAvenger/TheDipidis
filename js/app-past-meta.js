@@ -1064,11 +1064,14 @@
             }); // End of cards.forEach
             
             // Progressive batch rendering: show first cards instantly, load rest in background
+            // Increment generation counter to cancel any in-flight batch from a previous render call
+            const renderGen = ++_pastMetaRenderGen;
             const BATCH_SIZE = 12;
             gridContainer.innerHTML = cardHtmls.slice(0, BATCH_SIZE).join('');
             if (cardHtmls.length > BATCH_SIZE) {
                 let offset = BATCH_SIZE;
                 (function renderNextBatch() {
+                    if (renderGen !== _pastMetaRenderGen) return; // stale render — abort
                     if (offset >= cardHtmls.length) return;
                     const batch = cardHtmls.slice(offset, offset + BATCH_SIZE);
                     gridContainer.insertAdjacentHTML('beforeend', batch.join(''));

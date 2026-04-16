@@ -1696,23 +1696,27 @@
     min-height: unset !important;
     font-size: 0.6em !important;
   }
+  .city-league-card-info-text {
+    text-align: center !important;
+  }
   .city-league-card-title-mobile {
-    font-size: 0.65em !important;
+    font-size: 0.6em !important;
     line-height: 1.2 !important;
     margin-bottom: 1px !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    font-weight: 700 !important;
   }
   .city-league-card-set-mobile {
-    font-size: 0.55em !important;
+    font-size: 0.6em !important;
     line-height: 1.15 !important;
     margin-bottom: 0 !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
   }
   .city-league-card-stats-mobile {
-    font-size: 0.55em !important;
+    font-size: 0.6em !important;
     line-height: 1.15 !important;
     margin-bottom: 0 !important;
     white-space: nowrap !important;
@@ -1722,13 +1726,14 @@
   .city-league-card-set-stats-row {
     display: flex !important;
     align-items: baseline !important;
+    justify-content: center !important;
     gap: 4px !important;
     flex-wrap: nowrap !important;
     overflow: hidden !important;
     margin-bottom: 1px !important;
   }
   .city-league-card-avg-mobile {
-    font-size: 0.5em !important;
+    font-size: 0.6em !important;
     color: #b8860b !important;
     line-height: 1.15 !important;
     margin-bottom: 1px !important;
@@ -1737,7 +1742,7 @@
     text-overflow: ellipsis !important;
   }
   .city-league-card-deck-stats-mobile {
-    font-size: 0.55em !important;
+    font-size: 0.6em !important;
     line-height: 1.15 !important;
   }
 }
@@ -1818,6 +1823,7 @@
   #currentMetaMetaGrid .city-league-card-set-stats-row {
     display: flex !important;
     align-items: baseline !important;
+    justify-content: center !important;
     gap: 4px !important;
     flex-wrap: nowrap !important;
     overflow: hidden !important;
@@ -1853,13 +1859,14 @@
     padding-top: 0 !important;
   }
 
-  /* ── Text block: tighter ── */
+  /* ── Text block: tighter, centered ── */
   .meta-card-grid .card-info-text,
   .meta-card-analysis-grid .card-info-text,
   #cityLeagueMetaGrid .card-info-text,
   #currentMetaMetaGrid .card-info-text {
     margin-bottom: 0 !important;
     line-height: 1.1 !important;
+    text-align: center !important;
   }
 
   /* ── Action buttons: smaller ── */

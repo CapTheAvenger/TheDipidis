@@ -2317,3 +2317,17 @@
         font-size: 0.75em;
     }
 }
+
+@media (max-width: 430px) {
+  /* Deck grid: immer 3 Spalten, kleinere Min-Breite */
+  .city-league-deck-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
+  }
+  /* Stat grid: Beschriftung kompakt */
+  .city-league-stat-label {
+    font-size: 0.6rem !important;
+    text-align: center !important;
+    word-break: break-word !important;
+  }
+}

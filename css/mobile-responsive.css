@@ -1138,3 +1138,270 @@
         min-height: 28px;
     }
 }
+
+/* ========================================================
+   MOBILE FIX v2 – iPhone 17 (390px) UI Improvements
+   ======================================================== */
+
+/* 1. DECK GRID: Force 3 columns on narrow mobile (390px and below)
+   Problem: city-league-deck-grid uses minmax(120px) which gives only 2 cards per row
+   Fix: Override to always show 3 cards per row at ≤390px */
+@media (max-width: 390px) {
+  .city-league-deck-grid,
+  .currentMetaDeckGrid,
+  .deck-grid,
+  .pastMetaDeckGrid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
+  }
+}
+
+/* 2. WISHLIST HEART BADGE: Scale down on small cards
+   Problem: 22px badge is too large when cards are small (3-per-row = ~118px wide)
+   Fix: Reduce badge size proportionally on mobile */
+@media (max-width: 480px) {
+  .wishlist-heart-badge {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 9px !important;
+    top: 20px !important;
+    right: 3px !important;
+  }
+}
+
+/* 3. CITY LEAGUE CARD INFO BOTTOM: Compress on mobile
+   Problem: The info area below cards (title, set, stats, action buttons)
+   is too tall and covers too much of the card visual
+   Fix: Reduce padding, font-size and min-height; push less content */
+@media (max-width: 480px) {
+  .city-league-card-info-bottom {
+    padding: 2px 3px !important;
+    min-height: unset !important;
+    font-size: 0.55em !important;
+    gap: 1px !important;
+  }
+  .city-league-card-title-mobile {
+    font-size: 0.58em !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .city-league-card-set-mobile,
+  .city-league-card-stats-mobile,
+  .city-league-card-deck-stats-mobile {
+    font-size: 0.52em !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  /* Action buttons: smaller height on mobile */
+  .city-league-card-action-btn {
+    height: 16px !important;
+    font-size: 0.6em !important;
+    padding: 0 2px !important;
+    border-radius: 3px !important;
+  }
+  .city-league-card-action-buttons {
+    gap: 2px !important;
+    margin-top: 2px !important;
+  }
+  .city-league-card-action-row {
+    gap: 2px !important;
+  }
+}
+
+/* 4. CITY LEAGUE STATS GRID: Fix cut-off "AVERAGE PLACEMENT" label
+   Problem: 3-column stat grid has unequal widths, cutting off labels
+   Fix: Use equal columns and allow text wrap */
+@media (max-width: 480px) {
+  #city-league-analysis .city-league-stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+  }
+  #city-league-analysis .city-league-stat-label {
+    font-size: 0.52rem !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    hyphens: auto !important;
+    text-align: center !important;
+  }
+  #city-league-analysis .city-league-stat-card {
+    padding: 5px 4px !important;
+    min-height: 55px !important;
+    align-items: center !important;
+  }
+  #city-league-analysis .city-league-stat-value {
+    font-size: 0.95rem !important;
+    text-align: center !important;
+  }
+}
+
+/* 5. ARCHETYPE CARDS: Show 2 per row in meta overview lists
+   Problem: Archetype/deck overview cards are 1-per-row, wasting space
+   Fix: 2 columns on mobile */
+@media (max-width: 480px) {
+  .tier-hero-card,
+  .archetype-tier-list .tier-row,
+  .city-league-meta-archetype-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* For flex-based archetype lists */
+  .archetypes-list,
+  .meta-archetype-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* 6. PROFILE STATS GRID: 2x2 layout instead of 1-column
+   Problem: Name, Cards Owned, Collection Value, Saved Decks each take full width
+   Fix: 2-column grid */
+@media (max-width: 480px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .profile-stats-grid .stat-card {
+    padding: 10px 8px !important;
+    font-size: 0.85em !important;
+  }
+}
+
+/* 7. BATTLE JOURNAL CARD: Fix button overflow
+   Problem: "Log Match" and "Sync Now" buttons overflow out of container
+   Fix: Flex-column layout for the action area */
+@media (max-width: 480px) {
+  .battle-journal-profile-card {
+    overflow: hidden !important;
+  }
+  .battle-journal-profile-card .battle-journal-actions,
+  .battle-journal-profile-card > div {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .battle-journal-profile-card button {
+    flex: 1 1 auto !important;
+    min-width: 100px !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* 8. MY DECKS: Fix button overlap with deck name
+   Problem: Action buttons (IRL, Compare, Folder, Copy, Print...) overlap deck name text
+   Fix: Stack buttons below the deck info, not overlapping */
+@media (max-width: 600px) {
+  .saved-deck-item .deck-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+  .saved-deck-item .deck-name-col {
+    width: 100% !important;
+  }
+  .saved-deck-item .deck-action-buttons {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    justify-content: flex-start !important;
+    margin-top: 0 !important;
+  }
+  .saved-deck-item .deck-action-btn {
+    flex: 0 0 auto !important;
+    font-size: 0.68em !important;
+    padding: 3px 7px !important;
+    min-height: 26px !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* 9. PROXY PRINTER: Fix "Add Decklist to Queue" button text cutoff
+   Problem: Button text clipped in 2-column layout
+   Fix: Stack panels to 1 column at narrow widths */
+@media (max-width: 480px) {
+  .proxy-panels-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .proxy-add-decklist-btn,
+  .proxy-add-card-btn {
+    width: 100% !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    padding: 8px 12px !important;
+  }
+}
+
+/* 10. DROPDOWN SELECTS: Fix Tournament/Format filters text cutoff
+   Problem: Select options like "-- All Tournaments" get clipped
+   Fix: Ensure selects have enough width and text is readable */
+@media (max-width: 480px) {
+  .control-input.modern-select,
+  select.control-input,
+  .cl-format-select {
+    font-size: 0.82em !important;
+    padding: 6px 8px !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+  /* Fix 2-col filter layouts that cause clipping */
+  #past-meta .controls .control-row:first-of-type {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+}
+
+/* 11. HEADER USER BUTTON: Prevent overflow at 390px
+   Problem: "Jens Haushalter" button clips at screen edge
+   Fix: Constrain max-width and allow text truncation */
+@media (max-width: 480px) {
+  .header-flex-user .auth-user-btn,
+  .header-flex-user [class*="user-btn"],
+  .header-flex-user button:last-child {
+    max-width: 110px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 0.75em !important;
+    padding: 4px 8px !important;
+  }
+  .header-flex-user .user-avatar {
+    width: 20px !important;
+    height: 20px !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+/* 12. CARD DB ACTION BUTTONS IN CARD GRID: Scale down on mobile
+   Problem: +/- and wishlist buttons on card thumbnails in Cards tab are too large
+   Fix: Scale down action overlay buttons */
+@media (max-width: 480px) {
+  .card-action-overlay,
+  .card-grid-actions {
+    font-size: 0.7em !important;
+  }
+  .card-grid-actions .btn,
+  .card-grid-actions button {
+    padding: 2px 4px !important;
+    min-height: 20px !important;
+    font-size: 0.7em !important;
+  }
+}
+
+/* 13. CHART LABELS: Fix horizontal bar chart label clipping
+   Problem: Deck names ("Mega Lucario Hariyama") get clipped on left side of chart
+   Fix: Add left margin / padding to chart container */
+@media (max-width: 480px) {
+  canvas {
+    max-width: 100% !important;
+  }
+  [class*="chart-container"],
+  [class*="chart-wrapper"] {
+    overflow-x: auto !important;
+    padding-left: 0 !important;
+  }
+}

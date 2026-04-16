@@ -3237,8 +3237,30 @@
                 color: rgba(30, 30, 50, 0.6) !important;
             }
 
-            .card-item .card-info-text > div:nth-child(3) {
+            /* Set+Stats row wrapper: inline flex */
+            .card-item .city-league-card-set-stats-row {
+                display: flex !important;
+                align-items: baseline !important;
+                gap: 4px !important;
+                flex-wrap: nowrap !important;
+                overflow: hidden !important;
+            }
+
+            .card-item .city-league-card-set-stats-row .city-league-card-set-mobile {
+                color: rgba(30, 30, 50, 0.6) !important;
+                white-space: nowrap !important;
+                flex-shrink: 0 !important;
+            }
+
+            .card-item .city-league-card-set-stats-row .city-league-card-stats-mobile {
                 color: #b8860b !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .card-item .card-info-text > div:nth-child(3) {
+                color: rgba(30, 30, 50, 0.55) !important;
             }
             
             .card-item .card-action-buttons {

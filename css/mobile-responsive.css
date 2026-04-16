@@ -1208,7 +1208,17 @@
     margin-top: 2px !important;
   }
   .city-league-card-action-row {
+    display: flex !important;
     gap: 2px !important;
+  }
+  .city-league-card-action-row:last-child .city-league-card-market-btn {
+    flex: 1 1 auto !important;
+  }
+  .city-league-card-action-row:last-child .city-league-card-limitless-btn,
+  .city-league-card-action-row:last-child .city-league-card-proxy-btn {
+    width: 18px !important;
+    max-width: 18px !important;
+    flex-shrink: 0 !important;
   }
 }
 
@@ -1697,15 +1707,25 @@
   .city-league-card-set-mobile {
     font-size: 0.55em !important;
     line-height: 1.15 !important;
-    margin-bottom: 1px !important;
+    margin-bottom: 0 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
   .city-league-card-stats-mobile {
     font-size: 0.55em !important;
     line-height: 1.15 !important;
-    margin-bottom: 1px !important;
+    margin-bottom: 0 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+  }
+  .city-league-card-set-stats-row {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+    overflow: hidden !important;
+    margin-bottom: 1px !important;
   }
   .city-league-card-deck-stats-mobile {
     font-size: 0.55em !important;
@@ -1773,7 +1793,7 @@
     margin-bottom: 0 !important;
   }
 
-  /* ── Set code (2nd child): visible, muted ── */
+  /* ── Set code (2nd child = set-stats-row wrapper): flex row ── */
   .meta-card-grid .card-info-text > div:nth-child(2),
   .meta-card-analysis-grid .card-info-text > div:nth-child(2),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(2),
@@ -1783,13 +1803,31 @@
     line-height: 1.15 !important;
   }
 
-  /* ── Stats line (3rd child): compact, dark gold ── */
+  .meta-card-grid .city-league-card-set-stats-row,
+  .meta-card-analysis-grid .city-league-card-set-stats-row,
+  #cityLeagueMetaGrid .city-league-card-set-stats-row,
+  #currentMetaMetaGrid .city-league-card-set-stats-row {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+    overflow: hidden !important;
+  }
+
+  .meta-card-grid .city-league-card-set-stats-row .city-league-card-stats-mobile,
+  .meta-card-analysis-grid .city-league-card-set-stats-row .city-league-card-stats-mobile,
+  #cityLeagueMetaGrid .city-league-card-set-stats-row .city-league-card-stats-mobile,
+  #currentMetaMetaGrid .city-league-card-set-stats-row .city-league-card-stats-mobile {
+    color: #b8860b !important;
+  }
+
+  /* ── Deck stats (3rd child, was 4th): muted ── */
   .meta-card-grid .card-info-text > div:nth-child(3),
   .meta-card-analysis-grid .card-info-text > div:nth-child(3),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(3),
   #currentMetaMetaGrid .card-info-text > div:nth-child(3) {
     font-size: 0.9em !important;
-    color: #b8860b !important;
+    color: rgba(30, 30, 50, 0.55) !important;
     line-height: 1.15 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
@@ -1822,6 +1860,7 @@
   .meta-card-analysis-grid .city-league-card-action-row,
   #cityLeagueMetaGrid .city-league-card-action-row,
   #currentMetaMetaGrid .city-league-card-action-row {
+    display: flex !important;
     gap: 2px !important;
   }
 

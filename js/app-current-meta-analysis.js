@@ -1210,8 +1210,7 @@
                                 <div class="card-info-bottom city-league-card-info-bottom">
                                     <div class="card-info-text city-league-card-info-text">
                                         <div class="city-league-card-title-mobile">${cardName}${cardNameWarning}</div>
-                                        <div class="city-league-card-set-mobile">${setCode} ${setNumber}</div>
-                                        <div class="city-league-card-stats-mobile">${resolvedPercentage > 0 ? `${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)` : ''}</div>
+                                        <div class="city-league-card-set-stats-row"><div class="city-league-card-set-mobile">${setCode} ${setNumber}</div><div class="city-league-card-stats-mobile">${resolvedPercentage > 0 ? `${percentage}% | Ø ${avgCountInUsedDecks}x (${avgCountOverall}x)` : ''}</div></div>
                                         <div class="city-league-card-deck-stats-mobile">${decksWithCardDisplay}/${totalDecksDisplay} (${percentage}%)</div>
                                     </div>
                                     <div class="card-action-buttons city-league-card-action-buttons">

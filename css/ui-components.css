@@ -1737,12 +1737,21 @@ img[src*="limitlesstcg"] {
     margin-top: 5px;
 }
 .city-league-card-action-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    display: flex;
     gap: 3px;
 }
+.city-league-card-action-row > button {
+    flex: 1 1 0%;
+}
 .city-league-card-action-row:last-child {
-    grid-template-columns: 1fr 1fr 1.7fr;
+    display: flex;
+}
+.city-league-card-action-row:last-child .city-league-card-market-btn {
+    flex: 1 1 auto;
+}
+.city-league-card-action-row:last-child .city-league-card-limitless-btn,
+.city-league-card-action-row:last-child .city-league-card-proxy-btn {
+    flex: 0 0 auto;
 }
 .city-league-card-action-btn {
     border: none;

@@ -79,11 +79,12 @@ function signInWithGoogle() {
   if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
     const clientId = window.GOOGLE_CLIENT_ID || '';
     if (!clientId || clientId.startsWith('PLACEHOLDER_')) {
-      console.warn('[Auth] Google Sign-In blocked: GOOGLE_CLIENT_ID missing — falling back to Firebase popup');
+      console.warn('[Auth] GOOGLE_CLIENT_ID missing — falling back to Firebase popup');
       signInWithGoogleFirebaseFallback();
       return;
     }
 
+    console.info('[Auth] Using GIS token flow (client_id present, GIS loaded)');
     const tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: 'email profile',
@@ -111,24 +112,44 @@ function signInWithGoogle() {
   }
 
   // Fallback: GIS library not loaded (ad-blocker, DNS filter, etc.)
-  // Use signInWithRedirect directly — signInWithPopup often opens as a
-  // broken tab on devices like ROG Ally, causing "requested action invalid".
-  // signInWithRedirect stores auth state properly and completes on reload.
-  console.info('[Auth] GIS library not available — using Firebase signInWithRedirect');
+  // Try signInWithPopup first — it works on most desktop browsers.
+  // signInWithRedirect is broken on devices that block 3rd-party cookies
+  // (ROG Ally, iOS ITP, etc.) because the firebaseapp.com auth handler
+  // can't write back to the origin's sessionStorage.
+  console.info('[Auth] GIS library not available — trying signInWithPopup');
   signInWithGoogleFirebaseFallback();
 }
 
-// Fallback: Firebase signInWithRedirect (robust on all desktop browsers)
+// Fallback: Firebase signInWithPopup
 function signInWithGoogleFirebaseFallback() {
   var provider = new firebase.auth.GoogleAuthProvider();
   provider.addScope('email');
   provider.addScope('profile');
 
-  showNotification(
-    getLang()==='de' ? 'Weiterleitung zu Google…' : 'Redirecting to Google…',
-    'info'
-  );
-  firebase.auth().signInWithRedirect(provider);
+  firebase.auth().signInWithPopup(provider)
+    .then(function(result) {
+      if (typeof devLog === 'function') devLog('✓ Google sign-in (popup):', result.user.email);
+      showNotification(getLang()==='de' ? 'Mit Google angemeldet!' : 'Signed in with Google!', 'success');
+    })
+    .catch(function(err) {
+      console.error('Firebase popup sign-in error:', err.code, err.message);
+
+      // Popup blocked or closed → show actionable instructions
+      if (err.code === 'auth/popup-blocked') {
+        showNotification(
+          getLang()==='de'
+            ? 'Pop-up blockiert! Bitte erlaube Pop-ups für diese Seite in den Browser-Einstellungen und versuche es erneut.'
+            : 'Popup blocked! Please allow popups for this site in your browser settings and try again.',
+          'error'
+        );
+        return;
+      }
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        // User closed the popup — no error notification needed
+        return;
+      }
+      showNotification(getErrorMessage(err.code), 'error');
+    });
 }
 
 // Sign out

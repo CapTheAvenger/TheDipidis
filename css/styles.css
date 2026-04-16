@@ -3259,7 +3259,13 @@
                 text-overflow: ellipsis !important;
             }
 
-            .card-item .card-info-text > div:nth-child(3) {
+            .card-item .city-league-card-avg-mobile {
+                color: #b8860b !important;
+                font-size: 0.6em !important;
+                line-height: 1.15 !important;
+            }
+
+            .card-item .card-info-text > div:nth-child(4) {
                 color: rgba(30, 30, 50, 0.55) !important;
             }
             

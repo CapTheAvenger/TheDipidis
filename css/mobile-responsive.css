@@ -1727,6 +1727,15 @@
     overflow: hidden !important;
     margin-bottom: 1px !important;
   }
+  .city-league-card-avg-mobile {
+    font-size: 0.5em !important;
+    color: #b8860b !important;
+    line-height: 1.15 !important;
+    margin-bottom: 1px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
   .city-league-card-deck-stats-mobile {
     font-size: 0.55em !important;
     line-height: 1.15 !important;
@@ -1821,11 +1830,21 @@
     color: #b8860b !important;
   }
 
-  /* ── Deck stats (3rd child, was 4th): muted ── */
-  .meta-card-grid .card-info-text > div:nth-child(3),
-  .meta-card-analysis-grid .card-info-text > div:nth-child(3),
-  #cityLeagueMetaGrid .card-info-text > div:nth-child(3),
-  #currentMetaMetaGrid .card-info-text > div:nth-child(3) {
+  /* ── Avg line (3rd child): gold ── */
+  .meta-card-grid .city-league-card-avg-mobile,
+  .meta-card-analysis-grid .city-league-card-avg-mobile,
+  #cityLeagueMetaGrid .city-league-card-avg-mobile,
+  #currentMetaMetaGrid .city-league-card-avg-mobile {
+    font-size: 0.85em !important;
+    color: #b8860b !important;
+    line-height: 1.15 !important;
+  }
+
+  /* ── Deck stats (4th child): muted ── */
+  .meta-card-grid .card-info-text > div:nth-child(4),
+  .meta-card-analysis-grid .card-info-text > div:nth-child(4),
+  #cityLeagueMetaGrid .card-info-text > div:nth-child(4),
+  #currentMetaMetaGrid .card-info-text > div:nth-child(4) {
     font-size: 0.9em !important;
     color: rgba(30, 30, 50, 0.55) !important;
     line-height: 1.15 !important;

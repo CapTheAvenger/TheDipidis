@@ -1175,7 +1175,7 @@
                         const firstItem = document.querySelector('#cardSearchAutocomplete .cards-autocomplete-item');
                         if (firstItem) {
                             e.preventDefault();
-                            firstItem.focus();
+                            firstItem.focus({ preventScroll: true });
                         }
                     }
                 });
@@ -1277,7 +1277,7 @@
                 event.preventDefault();
                 hideCardAutocomplete();
                 const searchInput = document.getElementById('cardSearch');
-                if (searchInput) searchInput.focus();
+                if (searchInput) searchInput.focus({ preventScroll: true });
                 return;
             }
 
@@ -1288,7 +1288,7 @@
                 if (currentIndex === -1 || items.length === 0) return;
                 const delta = event.key === 'ArrowDown' ? 1 : -1;
                 const nextIndex = (currentIndex + delta + items.length) % items.length;
-                items[nextIndex].focus();
+                items[nextIndex].focus({ preventScroll: true });
             }
         }
         window.handleCardAutocompleteKeydown = handleCardAutocompleteKeydown;

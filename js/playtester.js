@@ -1381,7 +1381,7 @@ function setupHotkeys() {
                 e.preventDefault();
                 let input = document.getElementById('ptCommandInput-' + ptCurrentPlayer)
                          || document.getElementById('ptCommandInput-p1');
-                if(input) input.focus();
+                if(input) input.focus({ preventScroll: true });
                 break;
         }
     };

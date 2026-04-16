@@ -1244,7 +1244,7 @@
                 dropdown.classList.add('open');
                 search.value = '';
                 buildList('');
-                search.focus();
+                search.focus({ preventScroll: true });
             }
 
             function close() {

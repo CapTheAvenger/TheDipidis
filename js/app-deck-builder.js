@@ -582,6 +582,9 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 pendingDeckRefreshBySource[source] = requestAnimationFrame(() => {
                     pendingDeckRefreshBySource[source] = null;
 
+                    // Preserve scroll position across re-render to prevent page jumping
+                    const scrollY = window.scrollY;
+
                     if (source === 'cityLeague') {
                         applyCityLeagueFilter();
                     } else if (source === 'currentMeta') {
@@ -591,6 +594,11 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                     }
 
                     updateOpeningHandStats(source);
+
+                    // Restore scroll position if it shifted due to layout changes
+                    if (Math.abs(window.scrollY - scrollY) > 2) {
+                        window.scrollTo({ top: scrollY, behavior: 'instant' });
+                    }
                 });
             }, 140);
         }

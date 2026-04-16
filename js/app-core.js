@@ -101,11 +101,11 @@ const BASE_PATH = './data/';
                     const focusable = modal.querySelectorAll('input, textarea, button, [tabindex]:not([tabindex="-1"])');
                     if (focusable.length === 0) return;
                     const first = focusable[0], last = focusable[focusable.length - 1];
-                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-                    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus({ preventScroll: true }); }
+                    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus({ preventScroll: true }); }
                 });
                 
-                setTimeout(() => { input.focus(); if (opts.readonly) input.select(); }, 50);
+                setTimeout(() => { input.focus({ preventScroll: true }); if (opts.readonly) input.select(); }, 50);
             });
         }
 

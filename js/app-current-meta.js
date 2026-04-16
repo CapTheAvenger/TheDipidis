@@ -322,7 +322,7 @@
                     requestAnimationFrame(() => {
                         const input = document.getElementById(activeHeatmapInputId);
                         if (!input) return;
-                        input.focus();
+                        input.focus({ preventScroll: true });
                         if (typeof activeSelectionStart === 'number' && typeof activeSelectionEnd === 'number') {
                             try {
                                 input.setSelectionRange(activeSelectionStart, activeSelectionEnd);

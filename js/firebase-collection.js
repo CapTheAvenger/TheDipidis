@@ -2602,7 +2602,7 @@ async function showDeckFolderSelectModal(options = {}) {
     modal.appendChild(btnRow);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
-    setTimeout(() => select.focus(), 50);
+    setTimeout(() => select.focus({ preventScroll: true }), 50);
   });
 }
 
@@ -3376,7 +3376,7 @@ async function openCompareSavedDeck(deckIndex) {
     renderSavedList('');
     if (searchInput) {
       searchInput.addEventListener('input', () => renderSavedList(searchInput.value));
-      setTimeout(() => searchInput.focus(), 0);
+      setTimeout(() => searchInput.focus({ preventScroll: true }), 0);
     }
   }
 

@@ -1855,6 +1855,7 @@
             #currentMetaDeckGrid {
                 grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
                 gap: 2px;
+                row-gap: 12px !important;
             }
             
             .card-database-grid {
@@ -3008,6 +3009,7 @@
             #currentMetaDeckGrid {
                 grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)) !important;
                 gap: 3px;
+                row-gap: 12px !important;
             }
 
             /* Modals für mobile optimiert */
@@ -3169,32 +3171,38 @@
         /* ============================== */
         @media (max-width: 768px) {
             /* ============================== */
-            /* DECK CARD OVERLAYS (City League, Current Meta, Past Meta) */
+            /* DECK CARDS — Info BELOW image (not overlay) */
             /* ============================== */
             
-            /* Karten Grid: Info als Overlay am unteren Rand (Mobile) */
             .card-item .card-image-container {
                 position: relative !important;
             }
             
+            /* Info sits below the card image in normal flow */
             .card-item .card-info-bottom {
-                position: absolute !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
+                position: relative !important;
+                bottom: auto !important;
+                left: auto !important;
+                right: auto !important;
                 height: auto !important;
-                background: linear-gradient(to top, 
-                    rgba(255, 255, 255, 0.97) 0%, 
-                    rgba(255, 255, 255, 0.92) 70%, 
-                    rgba(255, 255, 255, 0) 100%) !important;
-                backdrop-filter: blur(3px) !important;
-                padding: 6px 4px 3px 4px !important;
+                background: #1e1e2e !important;
+                color: #fff !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                padding: 4px 4px 3px !important;
                 min-height: unset !important;
                 max-height: unset !important;
                 display: flex !important;
                 flex-direction: column !important;
-                justify-content: flex-end !important;
+                justify-content: flex-start !important;
                 z-index: 10 !important;
+                overflow: hidden !important;
+            }
+            
+            /* Card items: dark bg so info area blends, rounded corners */
+            .card-item {
+                background: #1e1e2e !important;
+                border-radius: 10px !important;
                 overflow: hidden !important;
             }
             
@@ -3214,11 +3222,21 @@
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
+                color: #fff !important;
             }
             
             .card-item .card-info-text > div:nth-child(1) {
                 font-weight: 700 !important;
                 font-size: 0.75em !important;
+                color: #fff !important;
+            }
+
+            .card-item .card-info-text > div:nth-child(2) {
+                color: rgba(255,255,255,0.6) !important;
+            }
+
+            .card-item .card-info-text > div:nth-child(3) {
+                color: #ffd700 !important;
             }
             
             .card-item .card-action-buttons {

@@ -1733,18 +1733,32 @@
     gap: 5px !important;
   }
 
-  /* ── Overlay: much more compact so card image is visible ── */
+  /* ── Info below image, not overlay ── */
   .meta-card-grid .card-info-bottom,
   .meta-card-analysis-grid .card-info-bottom,
   #cityLeagueMetaGrid .card-info-bottom,
   #currentMetaMetaGrid .card-info-bottom {
-    padding: 2px 3px 2px 3px !important;
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    padding: 4px 4px 3px !important;
     font-size: 0.5em !important;
-    background: linear-gradient(to top,
-      rgba(30, 30, 40, 0.92) 0%,
-      rgba(30, 30, 40, 0.80) 60%,
-      rgba(30, 30, 40, 0) 100%) !important;
+    background: #1e1e2e !important;
     color: #fff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-radius: 0 0 8px 8px !important;
+  }
+
+  /* Meta card items: dark bg, rounded */
+  .meta-card-grid .card-item,
+  .meta-card-analysis-grid .card-item,
+  #cityLeagueMetaGrid .card-item,
+  #currentMetaMetaGrid .card-item {
+    background: #1e1e2e !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
   }
 
   /* ── Card name: 1 line, bold, white ── */
@@ -1759,12 +1773,14 @@
     margin-bottom: 0 !important;
   }
 
-  /* ── Set code (2nd child): HIDE on mobile to save space ── */
+  /* ── Set code (2nd child): visible, grey ── */
   .meta-card-grid .card-info-text > div:nth-child(2),
   .meta-card-analysis-grid .card-info-text > div:nth-child(2),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(2),
   #currentMetaMetaGrid .card-info-text > div:nth-child(2) {
-    display: none !important;
+    font-size: 0.85em !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    line-height: 1.15 !important;
   }
 
   /* ── Stats line (3rd child): compact, yellow ── */

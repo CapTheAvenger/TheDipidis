@@ -1,12 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202604161303
+// v202604161310
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
 //   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
 //   Images            → Cache-first    (rarely change)
 //   Data files        → Stale-while-revalidate (fast load + background update)
 
-const CACHE_NAME = 'tcg-analysis-v202604161303';
+const CACHE_NAME = 'tcg-analysis-v202604161310';
 
 // Static shell â€” cached on install
 const SHELL_ASSETS = [
@@ -61,6 +61,7 @@ const SHELL_ASSETS = [
 ];
 
 // Install: pre-cache shell assets with cache-busting (bypass HTTP cache)
+// Tolerates individual asset failures so the SW update is never blocked.
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
@@ -68,8 +69,15 @@ self.addEventListener('install', function(event) {
         SHELL_ASSETS.map(function(assetUrl) {
           return fetch(assetUrl, { cache: 'no-store' })
             .then(function(response) {
-              if (!response.ok) throw new Error('Failed to fetch ' + assetUrl);
+              if (!response.ok) {
+                console.warn('[SW] Failed to pre-cache ' + assetUrl + ' (' + response.status + ')');
+                return; // skip this asset, don't block install
+              }
               return cache.put(assetUrl, response);
+            })
+            .catch(function(err) {
+              console.warn('[SW] Pre-cache error for ' + assetUrl + ':', err.message);
+              // Don't throw — allow install to succeed anyway
             });
         })
       );

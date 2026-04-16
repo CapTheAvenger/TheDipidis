@@ -6,6 +6,25 @@ if (!window.__firebaseRuntimeInitialized) {
  * ==================================
  */
 
+// Handle redirect result on page load (for browsers where signInWithPopup fails
+// and we fell back to signInWithRedirect, e.g. ROG Ally / embedded browsers)
+(function handleRedirectResult() {
+  if (typeof firebase === 'undefined' || !firebase.auth) return;
+  firebase.auth().getRedirectResult()
+    .then(function(result) {
+      if (result && result.user) {
+        if (typeof devLog === 'function') devLog('✓ Google sign-in (redirect):', result.user.email);
+        showNotification(getLang()==='de' ? 'Mit Google angemeldet!' : 'Signed in with Google!', 'success');
+      }
+    })
+    .catch(function(err) {
+      // auth/credential-already-in-use is harmless (user already signed in)
+      if (err.code !== 'auth/credential-already-in-use') {
+        console.error('Redirect sign-in error:', err);
+      }
+    });
+})();
+
 // Sign up with email and password
 async function signUp(email, password) {
   try {
@@ -92,24 +111,24 @@ function signInWithGoogle() {
   }
 
   // Fallback: GIS library not loaded (ad-blocker, DNS filter, etc.)
-  console.info('[Auth] GIS library not available — using Firebase signInWithPopup fallback');
+  // Use signInWithRedirect directly — signInWithPopup often opens as a
+  // broken tab on devices like ROG Ally, causing "requested action invalid".
+  // signInWithRedirect stores auth state properly and completes on reload.
+  console.info('[Auth] GIS library not available — using Firebase signInWithRedirect');
   signInWithGoogleFirebaseFallback();
 }
 
-// Fallback: Firebase's built-in signInWithPopup (works even when GIS is blocked)
+// Fallback: Firebase signInWithRedirect (robust on all desktop browsers)
 function signInWithGoogleFirebaseFallback() {
-  const provider = new firebase.auth.GoogleAuthProvider();
+  var provider = new firebase.auth.GoogleAuthProvider();
   provider.addScope('email');
   provider.addScope('profile');
-  firebase.auth().signInWithPopup(provider)
-    .then(function(result) {
-      if (typeof devLog === 'function') devLog('✓ Google sign-in (Firebase popup):', result.user.email);
-      showNotification(getLang()==='de' ? 'Mit Google angemeldet!' : 'Signed in with Google!', 'success');
-    })
-    .catch(function(err) {
-      console.error('Firebase popup sign-in error:', err);
-      showNotification(getErrorMessage(err.code), 'error');
-    });
+
+  showNotification(
+    getLang()==='de' ? 'Weiterleitung zu Google…' : 'Redirecting to Google…',
+    'info'
+  );
+  firebase.auth().signInWithRedirect(provider);
 }
 
 // Sign out

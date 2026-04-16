@@ -1721,9 +1721,7 @@
   }
 }
 
-/* ─── C. META CARD ANALYSIS: 4 cards per row on mobile ─── */
-/* Problem: Only 2 cards per row = huge cards = too much scrolling.
-   Fix: Force 4 columns like the Deck Builder "Your Deck" grid */
+/* ─── C. META CARD ANALYSIS: 3 cards per row, ultra-compact overlay ─── */
 @media (max-width: 768px) {
   .meta-card-grid,
   .meta-card-analysis-grid,
@@ -1731,42 +1729,116 @@
   .current-meta-meta-grid,
   #cityLeagueMetaGrid,
   #currentMetaMetaGrid {
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 6px !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
   }
 
-  /* Make Meta Card Analysis card info compact (match Card Overview style) */
+  /* ── Overlay: much more compact so card image is visible ── */
   .meta-card-grid .card-info-bottom,
   .meta-card-analysis-grid .card-info-bottom,
   #cityLeagueMetaGrid .card-info-bottom,
   #currentMetaMetaGrid .card-info-bottom {
-    padding: 3px 4px !important;
-    font-size: 0.55em !important;
+    padding: 2px 3px 2px 3px !important;
+    font-size: 0.5em !important;
+    background: linear-gradient(to top,
+      rgba(30, 30, 40, 0.92) 0%,
+      rgba(30, 30, 40, 0.80) 60%,
+      rgba(30, 30, 40, 0) 100%) !important;
+    color: #fff !important;
   }
 
+  /* ── Card name: 1 line, bold, white ── */
+  .meta-card-grid .card-info-text > div:nth-child(1),
+  .meta-card-analysis-grid .card-info-text > div:nth-child(1),
+  #cityLeagueMetaGrid .card-info-text > div:nth-child(1),
+  #currentMetaMetaGrid .card-info-text > div:nth-child(1) {
+    font-size: 1em !important;
+    font-weight: 700 !important;
+    color: #fff !important;
+    line-height: 1.15 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* ── Set code (2nd child): HIDE on mobile to save space ── */
+  .meta-card-grid .card-info-text > div:nth-child(2),
+  .meta-card-analysis-grid .card-info-text > div:nth-child(2),
+  #cityLeagueMetaGrid .card-info-text > div:nth-child(2),
+  #currentMetaMetaGrid .card-info-text > div:nth-child(2) {
+    display: none !important;
+  }
+
+  /* ── Stats line (3rd child): compact, yellow ── */
+  .meta-card-grid .card-info-text > div:nth-child(3),
+  .meta-card-analysis-grid .card-info-text > div:nth-child(3),
+  #cityLeagueMetaGrid .card-info-text > div:nth-child(3),
+  #currentMetaMetaGrid .card-info-text > div:nth-child(3) {
+    font-size: 0.9em !important;
+    color: #ffd700 !important;
+    line-height: 1.15 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  /* ── Text block: tighter ── */
   .meta-card-grid .card-info-text,
   .meta-card-analysis-grid .card-info-text,
   #cityLeagueMetaGrid .card-info-text,
   #currentMetaMetaGrid .card-info-text {
-    font-size: 0.7em !important;
-    line-height: 1.2 !important;
+    margin-bottom: 0 !important;
+    line-height: 1.1 !important;
   }
 
-  .meta-card-grid .card-action-btn,
-  .meta-card-analysis-grid .card-action-btn,
-  #cityLeagueMetaGrid .card-action-btn,
-  #currentMetaMetaGrid .card-action-btn {
-    height: 16px !important;
+  /* ── Action buttons: smaller ── */
+  .meta-card-grid .city-league-card-action-btn,
+  .meta-card-analysis-grid .city-league-card-action-btn,
+  #cityLeagueMetaGrid .city-league-card-action-btn,
+  #currentMetaMetaGrid .city-league-card-action-btn {
+    height: 15px !important;
+    min-height: 15px !important;
+    max-height: 15px !important;
     font-size: 7px !important;
     padding: 0 2px !important;
     border-radius: 3px !important;
   }
 
-  .meta-card-grid .card-action-row,
-  .meta-card-analysis-grid .card-action-row,
-  #cityLeagueMetaGrid .card-action-row,
-  #currentMetaMetaGrid .card-action-row {
+  .meta-card-grid .city-league-card-action-row,
+  .meta-card-analysis-grid .city-league-card-action-row,
+  #cityLeagueMetaGrid .city-league-card-action-row,
+  #currentMetaMetaGrid .city-league-card-action-row {
     gap: 2px !important;
+  }
+
+  .meta-card-grid .card-action-buttons,
+  .meta-card-analysis-grid .card-action-buttons,
+  #cityLeagueMetaGrid .card-action-buttons,
+  #currentMetaMetaGrid .card-action-buttons,
+  .meta-card-grid .city-league-card-action-buttons,
+  .meta-card-analysis-grid .city-league-card-action-buttons,
+  #cityLeagueMetaGrid .city-league-card-action-buttons,
+  #currentMetaMetaGrid .city-league-card-action-buttons {
+    gap: 1px !important;
+    margin-top: 1px !important;
+  }
+
+  /* ── Deck-count badge & wishlist badge: smaller ── */
+  .meta-card-grid .card-badge,
+  .meta-card-analysis-grid .card-badge,
+  #cityLeagueMetaGrid .card-badge,
+  #currentMetaMetaGrid .card-badge {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 0.6em !important;
+  }
+
+  .meta-card-grid .wishlist-heart-badge,
+  .meta-card-analysis-grid .wishlist-heart-badge,
+  #cityLeagueMetaGrid .wishlist-heart-badge,
+  #currentMetaMetaGrid .wishlist-heart-badge {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 10px !important;
+    top: 20px !important;
   }
 }
 
@@ -1777,7 +1849,7 @@
   .current-meta-meta-grid,
   #cityLeagueMetaGrid,
   #currentMetaMetaGrid {
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 5px !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
   }
 }

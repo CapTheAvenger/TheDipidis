@@ -4817,7 +4817,8 @@ h3:first-child {
     }
 
     .tier-hero-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
     }
 
     .tier-hero-card {
@@ -8170,3 +8171,38 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
 
 .deck-btn-delete { background: rgba(231, 76, 60, 0.9); }
 .deck-btn-delete:hover { background: #c0392b; }
+
+/* ==============================================================
+   UI IMPROVEMENTS v3 – Desktop Improvements
+   ============================================================== */
+
+/* ─── Desktop: My Decks action buttons – better compact layout ─── */
+.saved-deck-item .deck-header-row {
+  position: relative !important;
+}
+
+.saved-deck-item .deck-action-buttons {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  align-items: center !important;
+}
+
+/* ─── Desktop: Most Used Cards grid – ensure equal rows ─── */
+[class*="most-used-cards"] .card-grid,
+[class*="most-used"] [class*="grid"] {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+  gap: 12px !important;
+}
+
+/* ─── Tier card grid: Fill empty last-row space better ─── */
+.tier-section .tier-hero-grid {
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)) !important;
+}
+
+@media (max-width: 1200px) {
+  .tier-section .tier-hero-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  }
+}

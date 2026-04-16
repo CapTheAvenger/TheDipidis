@@ -1405,3 +1405,233 @@
     padding-left: 0 !important;
   }
 }
+
+/* ==============================================================
+   UI IMPROVEMENTS v3 – Desktop + Mobile (iPhone 17 / 390px)
+   ============================================================== */
+
+/* ─── 1. HEADER: Fix "Jens Haushalter" button overflow on mobile ─── */
+@media (max-width: 600px) {
+  .header {
+    padding: 10px 12px !important;
+  }
+  .header-flex-row {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  .header-flex-user {
+    max-width: calc(100vw - 24px) !important;
+    overflow: hidden !important;
+    flex-shrink: 1 !important;
+  }
+  /* Shrink the user button text on very small screens */
+  .header-flex-user .auth-user-btn,
+  .header-flex-user > button:not(.pokeball-btn),
+  .header-flex-user [class*="user"] {
+    max-width: 130px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 0.78em !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+  /* Shrink avatar icon in user button */
+  .header-flex-user img,
+  .header-flex-user .user-avatar {
+    width: 22px !important;
+    height: 22px !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+/* ─── 2. TIER GRID: Show 2 deck cards per row on mobile ─── */
+/* Problem: .tier-hero-grid has grid-template-columns: 1fr at ≤768px → forces 1 per row */
+@media (max-width: 768px) {
+  .tier-hero-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .tier-hero-card {
+    min-height: 100px !important;
+  }
+  .tier-hero-card .tier-hero-content {
+    padding: 8px 10px !important;
+  }
+  .tier-hero-card .archetype-card-title {
+    font-size: 0.9rem !important;
+  }
+}
+@media (max-width: 400px) {
+  .tier-hero-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+  .tier-hero-card {
+    min-height: 88px !important;
+  }
+  .tier-hero-card .archetype-card-title {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* ─── 3. TOP ARCHETYPES GRID (City League Meta / Current Meta): 2 per row on mobile ─── */
+@media (max-width: 768px) {
+  /* The top archetype cards (#1 Dragapult, #2 Ogerpon ...) */
+  .city-league-top-archetypes .tier-deck-grid,
+  .city-league-meta-archetype-section .tier-deck-grid,
+  [class*="archetype-grid"],
+  [class*="archetype-list"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* ─── 4. DECK ANALYSIS CARD GRID: Force 3 columns on mobile ─── */
+/* Problem: city-league-deck-grid uses minmax(122px) which gives 1 card per row at 244px container */
+@media (max-width: 430px) {
+  .city-league-deck-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
+  }
+}
+/* Extra fix: if container is very narrow */
+@media (max-width: 360px) {
+  .city-league-deck-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 4px !important;
+  }
+}
+
+/* ─── 5. MY DECKS DECK HEADER: Fix button overlap with deck name ─── */
+/* Problem: flex-wrap: nowrap causes buttons to overflow over the deck name */
+@media (max-width: 768px) {
+  .saved-deck-item .deck-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    flex-wrap: wrap !important;
+    padding: 10px 12px !important;
+    gap: 8px !important;
+  }
+  .saved-deck-item .deck-name-col {
+    width: 100% !important;
+    padding-right: 0 !important;
+  }
+  .saved-deck-item .deck-name-col h3 {
+    font-size: 15px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    margin-bottom: 2px !important;
+  }
+  .saved-deck-item .deck-action-buttons {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+    justify-content: flex-start !important;
+    margin-top: 0 !important;
+    position: static !important;
+  }
+  .saved-deck-item .deck-action-btn {
+    flex: 0 0 auto !important;
+    font-size: 0.7em !important;
+    padding: 4px 8px !important;
+    min-height: 28px !important;
+    white-space: nowrap !important;
+  }
+  /* Collapse arrow should be on the right */
+  .saved-deck-item [id$="-arrow"],
+  .saved-deck-item .deck-toggle-arrow {
+    position: absolute !important;
+    right: 12px !important;
+    top: 12px !important;
+  }
+}
+
+/* ─── 6. PAST META TOURNAMENT FILTER: Fix text overflow ─── */
+/* Problem: "-- All Tournaments" becomes "-- All Tournam" */
+@media (max-width: 600px) {
+  #past-meta .control-row:first-of-type,
+  #past-meta .controls .control-row:first-of-type {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  #past-meta select.control-input,
+  #past-meta .control-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+  }
+}
+
+/* ─── 7. PROFILE STATS GRID: Ensure 2x2 layout ─── */
+/* Problem: auto-fit minmax(200px) gives 1-column layout at 390px container width ~316px */
+@media (max-width: 600px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .profile-stats-grid .stat-card {
+    padding: 12px 10px !important;
+    font-size: 0.88em !important;
+    text-align: center !important;
+  }
+  .profile-stats-grid .stat-card h3,
+  .profile-stats-grid .stat-card .stat-value {
+    font-size: 1.1em !important;
+  }
+}
+
+/* ─── 8. CARDS TAB ACTION BUTTONS: Scale down overlay buttons on mobile ─── */
+@media (max-width: 600px) {
+  /* The + - count buttons on card thumbnails in the Card Database */
+  .card-item .card-grid-action-row,
+  .card-item [class*="action-row"] {
+    padding: 2px 4px !important;
+    gap: 3px !important;
+  }
+  .card-item .card-action-overlay button,
+  .card-item [class*="action"] button {
+    min-height: 22px !important;
+    min-width: 22px !important;
+    font-size: 0.75em !important;
+    padding: 1px 4px !important;
+  }
+  /* Wishlist badge on card thumbnails */
+  .wishlist-heart-badge {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* ─── 9. BATTLE JOURNAL: Fix button overflow ─── */
+@media (max-width: 600px) {
+  .battle-journal-profile-card {
+    overflow: visible !important;
+  }
+  .battle-journal-profile-card > .flex,
+  .battle-journal-profile-card [class*="flex"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .battle-journal-profile-card button {
+    flex: 1 1 auto !important;
+    min-width: 100px !important;
+  }
+}
+
+/* ─── 10. PROXY PRINTER: Fix panel layout on mobile ─── */
+@media (max-width: 480px) {
+  .proxy-panels-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .proxy-add-decklist-btn,
+  .proxy-panel .btn-modern {
+    width: 100% !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+}

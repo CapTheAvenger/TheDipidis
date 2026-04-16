@@ -3185,9 +3185,9 @@
                 left: auto !important;
                 right: auto !important;
                 height: auto !important;
-                margin-top: -28px !important;
-                background: rgba(20, 20, 35, 0.82) !important;
-                color: #fff !important;
+                margin-top: -40px !important;
+                background: rgba(255, 255, 255, 0.88) !important;
+                color: #1a1a2e !important;
                 backdrop-filter: blur(6px) !important;
                 -webkit-backdrop-filter: blur(6px) !important;
                 padding: 4px 4px 3px !important;
@@ -3224,21 +3224,21 @@
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
-                color: #fff !important;
+                color: #1a1a2e !important;
             }
             
             .card-item .card-info-text > div:nth-child(1) {
                 font-weight: 700 !important;
                 font-size: 0.75em !important;
-                color: #fff !important;
+                color: #1a1a2e !important;
             }
 
             .card-item .card-info-text > div:nth-child(2) {
-                color: rgba(255,255,255,0.6) !important;
+                color: rgba(30, 30, 50, 0.6) !important;
             }
 
             .card-item .card-info-text > div:nth-child(3) {
-                color: #ffd700 !important;
+                color: #b8860b !important;
             }
             
             .card-item .card-action-buttons {

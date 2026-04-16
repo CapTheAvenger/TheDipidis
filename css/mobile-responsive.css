@@ -1742,11 +1742,11 @@
     bottom: auto !important;
     left: auto !important;
     right: auto !important;
-    margin-top: -28px !important;
+    margin-top: -40px !important;
     padding: 4px 4px 3px !important;
     font-size: 0.5em !important;
-    background: rgba(20, 20, 35, 0.82) !important;
-    color: #fff !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    color: #1a1a2e !important;
     backdrop-filter: blur(6px) !important;
     -webkit-backdrop-filter: blur(6px) !important;
     border-radius: 0 0 8px 8px !important;
@@ -1761,35 +1761,35 @@
     overflow: hidden !important;
   }
 
-  /* ── Card name: 1 line, bold, white ── */
+  /* ── Card name: 1 line, bold, dark ── */
   .meta-card-grid .card-info-text > div:nth-child(1),
   .meta-card-analysis-grid .card-info-text > div:nth-child(1),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(1),
   #currentMetaMetaGrid .card-info-text > div:nth-child(1) {
     font-size: 1em !important;
     font-weight: 700 !important;
-    color: #fff !important;
+    color: #1a1a2e !important;
     line-height: 1.15 !important;
     margin-bottom: 0 !important;
   }
 
-  /* ── Set code (2nd child): visible, grey ── */
+  /* ── Set code (2nd child): visible, muted ── */
   .meta-card-grid .card-info-text > div:nth-child(2),
   .meta-card-analysis-grid .card-info-text > div:nth-child(2),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(2),
   #currentMetaMetaGrid .card-info-text > div:nth-child(2) {
     font-size: 0.85em !important;
-    color: rgba(255, 255, 255, 0.6) !important;
+    color: rgba(30, 30, 50, 0.6) !important;
     line-height: 1.15 !important;
   }
 
-  /* ── Stats line (3rd child): compact, yellow ── */
+  /* ── Stats line (3rd child): compact, dark gold ── */
   .meta-card-grid .card-info-text > div:nth-child(3),
   .meta-card-analysis-grid .card-info-text > div:nth-child(3),
   #cityLeagueMetaGrid .card-info-text > div:nth-child(3),
   #currentMetaMetaGrid .card-info-text > div:nth-child(3) {
     font-size: 0.9em !important;
-    color: #ffd700 !important;
+    color: #b8860b !important;
     line-height: 1.15 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;

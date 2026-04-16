@@ -56,41 +56,60 @@ function signInWithGoogle() {
     return;
   }
 
-  if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
-    showNotification(getLang()==='de' ? 'Google Sign-In nicht verfügbar. Bitte Seite neu laden.' : 'Google Sign-In not available. Please reload the page.', 'error');
-    return;
-  }
-
-  const clientId = window.GOOGLE_CLIENT_ID || '';
-  if (!clientId || clientId.startsWith('PLACEHOLDER_')) {
-    console.warn('[Auth] Google Sign-In blocked: GOOGLE_CLIENT_ID in js/firebase-credentials.js is missing or placeholder');
-    showNotification(getLang()==='de' ? 'Google Client-ID ist nicht konfiguriert. Trage GOOGLE_CLIENT_ID in js/firebase-credentials.js ein.' : 'Google Client-ID is not configured. Enter GOOGLE_CLIENT_ID in js/firebase-credentials.js.', 'error');
-    return;
-  }
-
-  const tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: clientId,
-    scope: 'email profile',
-    callback: function(response) {
-      if (response.error) {
-        console.error('Google OAuth error:', response.error);
-        showNotification((getLang()==='de' ? 'Google Sign-In fehlgeschlagen: ' : 'Google Sign-In failed: ') + response.error, 'error');
-        return;
-      }
-      const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
-      firebase.auth().signInWithCredential(credential)
-        .then(function(result) {
-          if (typeof devLog === 'function') devLog('✓ Google sign-in:', result.user.email);
-          showNotification(getLang()==='de' ? 'Mit Google angemeldet!' : 'Signed in with Google!', 'success');
-        })
-        .catch(function(err) {
-          console.error('Firebase credential error:', err);
-          showNotification(getErrorMessage(err.code), 'error');
-        });
+  // Primary path: Google Identity Services (GIS) — works on most browsers
+  if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+    const clientId = window.GOOGLE_CLIENT_ID || '';
+    if (!clientId || clientId.startsWith('PLACEHOLDER_')) {
+      console.warn('[Auth] Google Sign-In blocked: GOOGLE_CLIENT_ID missing — falling back to Firebase popup');
+      signInWithGoogleFirebaseFallback();
+      return;
     }
-  });
 
-  tokenClient.requestAccessToken({ prompt: 'select_account' });
+    const tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: 'email profile',
+      callback: function(response) {
+        if (response.error) {
+          console.error('Google OAuth error:', response.error);
+          showNotification((getLang()==='de' ? 'Google Sign-In fehlgeschlagen: ' : 'Google Sign-In failed: ') + response.error, 'error');
+          return;
+        }
+        const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
+        firebase.auth().signInWithCredential(credential)
+          .then(function(result) {
+            if (typeof devLog === 'function') devLog('✓ Google sign-in (GIS):', result.user.email);
+            showNotification(getLang()==='de' ? 'Mit Google angemeldet!' : 'Signed in with Google!', 'success');
+          })
+          .catch(function(err) {
+            console.error('Firebase credential error:', err);
+            showNotification(getErrorMessage(err.code), 'error');
+          });
+      }
+    });
+
+    tokenClient.requestAccessToken({ prompt: 'select_account' });
+    return;
+  }
+
+  // Fallback: GIS library not loaded (ad-blocker, DNS filter, etc.)
+  console.info('[Auth] GIS library not available — using Firebase signInWithPopup fallback');
+  signInWithGoogleFirebaseFallback();
+}
+
+// Fallback: Firebase's built-in signInWithPopup (works even when GIS is blocked)
+function signInWithGoogleFirebaseFallback() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.addScope('email');
+  provider.addScope('profile');
+  firebase.auth().signInWithPopup(provider)
+    .then(function(result) {
+      if (typeof devLog === 'function') devLog('✓ Google sign-in (Firebase popup):', result.user.email);
+      showNotification(getLang()==='de' ? 'Mit Google angemeldet!' : 'Signed in with Google!', 'success');
+    })
+    .catch(function(err) {
+      console.error('Firebase popup sign-in error:', err);
+      showNotification(getErrorMessage(err.code), 'error');
+    });
 }
 
 // Sign out

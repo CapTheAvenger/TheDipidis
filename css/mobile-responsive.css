@@ -1733,7 +1733,7 @@
     gap: 5px !important;
   }
 
-  /* ── Info below image, not overlay ── */
+  /* ── Info: slight overlap onto card image ── */
   .meta-card-grid .card-info-bottom,
   .meta-card-analysis-grid .card-info-bottom,
   #cityLeagueMetaGrid .card-info-bottom,
@@ -1742,21 +1742,21 @@
     bottom: auto !important;
     left: auto !important;
     right: auto !important;
+    margin-top: -28px !important;
     padding: 4px 4px 3px !important;
     font-size: 0.5em !important;
-    background: #1e1e2e !important;
+    background: rgba(20, 20, 35, 0.82) !important;
     color: #fff !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
     border-radius: 0 0 8px 8px !important;
   }
 
-  /* Meta card items: dark bg, rounded */
+  /* Meta card items: rounded */
   .meta-card-grid .card-item,
   .meta-card-analysis-grid .card-item,
   #cityLeagueMetaGrid .card-item,
   #currentMetaMetaGrid .card-item {
-    background: #1e1e2e !important;
     border-radius: 10px !important;
     overflow: hidden !important;
   }

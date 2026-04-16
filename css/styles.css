@@ -3178,17 +3178,18 @@
                 position: relative !important;
             }
             
-            /* Info sits below the card image in normal flow */
+            /* Info slightly overlaps bottom of card image */
             .card-item .card-info-bottom {
                 position: relative !important;
                 bottom: auto !important;
                 left: auto !important;
                 right: auto !important;
                 height: auto !important;
-                background: #1e1e2e !important;
+                margin-top: -28px !important;
+                background: rgba(20, 20, 35, 0.82) !important;
                 color: #fff !important;
-                backdrop-filter: none !important;
-                -webkit-backdrop-filter: none !important;
+                backdrop-filter: blur(6px) !important;
+                -webkit-backdrop-filter: blur(6px) !important;
                 padding: 4px 4px 3px !important;
                 min-height: unset !important;
                 max-height: unset !important;
@@ -3197,11 +3198,12 @@
                 justify-content: flex-start !important;
                 z-index: 10 !important;
                 overflow: hidden !important;
+                border-radius: 0 0 8px 8px !important;
             }
             
-            /* Card items: dark bg so info area blends, rounded corners */
+            /* Card items: rounded corners */
             .card-item {
-                background: #1e1e2e !important;
+                background: transparent !important;
                 border-radius: 10px !important;
                 overflow: hidden !important;
             }

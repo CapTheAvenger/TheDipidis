@@ -1,11 +1,12 @@
 // Service Worker for Pokemon TCG Analysis PWA
-// v202604161204
+// v202604161214
 // Strategies:
 //   HTML / navigation → Network-first  (users always see latest version)
-//   JS / CSS / images → Cache-first    (pre-cached fresh on install; new CACHE_NAME = full refresh)
+//   JS / CSS          → Network-first  (always serve fresh; fall back to cache offline)
+//   Images            → Cache-first    (rarely change)
 //   Data files        → Stale-while-revalidate (fast load + background update)
 
-const CACHE_NAME = 'tcg-analysis-v202604161204';
+const CACHE_NAME = 'tcg-analysis-v202604161214';
 
 // Static shell â€” cached on install
 const SHELL_ASSETS = [
@@ -77,7 +78,7 @@ self.addEventListener('install', function(event) {
   self.skipWaiting();
 });
 
-// Activate: clean old caches, then take control of all clients
+// Activate: clean old caches, take control, then force-reload all open tabs
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(keys) {
@@ -87,6 +88,13 @@ self.addEventListener('activate', function(event) {
       );
     }).then(function() {
       return self.clients.claim();
+    }).then(function() {
+      // Notify all open tabs to reload so they pick up the new assets
+      return self.clients.matchAll({ type: 'window' }).then(function(clients) {
+        clients.forEach(function(client) {
+          client.postMessage({ type: 'SW_UPDATED', version: CACHE_NAME });
+        });
+      });
     })
   );
 });
@@ -157,9 +165,28 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // â”€â”€ Static assets (JS / CSS / images): CACHE-FIRST â”€â”€
-  // Pre-cached during install. A new CACHE_NAME triggers a full re-fetch
-  // of every shell asset, so cached copies are always current for this SW version.
+  // — JS / CSS: NETWORK-FIRST (always serve latest, fallback to cache offline) —
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-cache' })
+        .then(function(response) {
+          if (response && response.ok) {
+            var clone = response.clone();
+            caches.open(CACHE_NAME).then(function(cache) {
+              cache.put(cleanUrl, clone);
+            });
+          }
+          return response;
+        })
+        .catch(function() {
+          return caches.match(cleanUrl);
+        })
+    );
+    return;
+  }
+
+  // — Static assets (images, fonts, etc.): CACHE-FIRST —
+  // Images rarely change, so cache-first is fine for performance.
   event.respondWith(
     caches.match(cleanUrl).then(function(cached) {
       if (cached) return cached;

@@ -286,6 +286,7 @@
             try {
                 devLog('[Cards Tab] Phase 2: Loading enrichment data...');
                 await loadPlayableCards();
+                enrichPlayablePrintIds(); // expand with international_prints from card DB
                 await loadDeckCoverageStats();
                 await loadFormatsForCards();
 
@@ -372,6 +373,15 @@
         async function loadPlayableCards() {
             window.playableCardsSet = new Set(); // All playables (City League + Current Meta + Tournament)
             window.cityLeagueCardsSet = new Set(); // Only City League cards
+            window.playablePrintIds = new Set(); // Specific print IDs (SET-NUMBER) of playable cards
+            window.cityLeaguePrintIds = new Set(); // Specific print IDs for City League cards
+            
+            function addPrintId(setCode, setNumber, targetSet) {
+                if (setCode && setNumber) {
+                    const id = (setCode.trim() + '-' + String(setNumber).trim()).toUpperCase();
+                    targetSet.add(id);
+                }
+            }
             
             try {
                 // Load City League Analysis CSV
@@ -384,6 +394,8 @@
                                 window.playableCardsSet.add(cardNameNorm);
                                 window.cityLeagueCardsSet.add(cardNameNorm);
                             }
+                            addPrintId(card.set_code, card.set_number, window.playablePrintIds);
+                            addPrintId(card.set_code, card.set_number, window.cityLeaguePrintIds);
                         }
                     });
                     devLog(`Loaded ${cityLeagueCards.length} playable cards from City League, unique: ${window.cityLeagueCardsSet.size}`);
@@ -398,6 +410,7 @@
                         if (card.card_name) {
                             const cardNameNorm = normalizeCardName(card.card_name);
                             if (cardNameNorm) window.playableCardsSet.add(cardNameNorm);
+                            addPrintId(card.set_code, card.set_number, window.playablePrintIds);
                         }
                     });
                     devLog(`Loaded ${currentMetaCards.length} playable cards from Current Meta`);
@@ -412,6 +425,7 @@
                         if (card.card_name) {
                             const cardNameNorm = normalizeCardName(card.card_name);
                             if (cardNameNorm) window.playableCardsSet.add(cardNameNorm);
+                            addPrintId(card.set_code, card.set_number, window.playablePrintIds);
                         }
                     });
                     devLog(`Loaded ${tournamentCards.length} playable cards from Tournament JH`);
@@ -421,9 +435,49 @@
                 
                 devLog(`Total unique playable cards (All Playables): ${window.playableCardsSet.size}`);
                 devLog(`City League only cards: ${window.cityLeagueCardsSet.size}`);
+                devLog(`Playable print IDs: ${window.playablePrintIds.size}`);
+                devLog(`City League print IDs: ${window.cityLeaguePrintIds.size}`);
             } catch (error) {
                 console.error('Error loading playable cards:', error);
             }
+        }
+        
+        /**
+         * Expand playablePrintIds / cityLeaguePrintIds with international_prints
+         * from the card database. For each known playable print (SET-NUMBER),
+         * find the matching card in allCardsData and add all its international_prints.
+         */
+        function enrichPlayablePrintIds() {
+            if (!window.allCardsData || !window.playablePrintIds) return;
+            
+            // Build quick lookup: printId → card's international_prints string
+            const printToIntl = new Map();
+            window.allCardsData.forEach(card => {
+                if (!card || !card.set || !card.number) return;
+                const id = (card.set + '-' + String(card.number).trim()).toUpperCase();
+                if (card.international_prints) {
+                    printToIntl.set(id, card.international_prints);
+                }
+            });
+            
+            function expandSet(printIds) {
+                const extra = [];
+                printIds.forEach(id => {
+                    const intlStr = printToIntl.get(id);
+                    if (!intlStr) return;
+                    intlStr.split(',').forEach(p => {
+                        const trimmed = p.trim().toUpperCase();
+                        if (trimmed && !printIds.has(trimmed)) extra.push(trimmed);
+                    });
+                });
+                extra.forEach(id => printIds.add(id));
+            }
+            
+            const beforePlay = window.playablePrintIds.size;
+            const beforeCity = window.cityLeaguePrintIds ? window.cityLeaguePrintIds.size : 0;
+            expandSet(window.playablePrintIds);
+            if (window.cityLeaguePrintIds) expandSet(window.cityLeaguePrintIds);
+            devLog(`[PlayablePrints] Expanded playable: ${beforePlay} → ${window.playablePrintIds.size}, city league: ${beforeCity} → ${window.cityLeaguePrintIds ? window.cityLeaguePrintIds.size : 0}`);
         }
         
         // Set release dates for temporal filtering (format: YYYY-MM-DD)
@@ -1503,14 +1557,29 @@
                     if (basicMetaFilters.includes('total')) {
                         metaMatch = true; // Show all cards
                     } else if (basicMetaFilters.includes('all_playables')) {
-                        // All playables: City League + Current Meta + Tournament
-                        if (window.playableCardsSet && window.playableCardsSet.has(cardNameNorm)) {
-                            metaMatch = true;
+                        if (showOnlyOnePrint) {
+                            // Standard Print: match by name (dedup picks best later)
+                            if (window.playableCardsSet && window.playableCardsSet.has(cardNameNorm)) {
+                                metaMatch = true;
+                            }
+                        } else {
+                            // All Prints: match by specific print ID (SET-NUMBER)
+                            // Only show prints that are actual playable prints or their international reprints
+                            const printId = (card.set + '-' + String(card.number).trim()).toUpperCase();
+                            if (window.playablePrintIds && window.playablePrintIds.has(printId)) {
+                                metaMatch = true;
+                            }
                         }
                     } else if (basicMetaFilters.includes('city_league')) {
-                        // City League only: Only cards from City League decks
-                        if (window.cityLeagueCardsSet && window.cityLeagueCardsSet.has(cardNameNorm)) {
-                            metaMatch = true;
+                        if (showOnlyOnePrint) {
+                            if (window.cityLeagueCardsSet && window.cityLeagueCardsSet.has(cardNameNorm)) {
+                                metaMatch = true;
+                            }
+                        } else {
+                            const printId = (card.set + '-' + String(card.number).trim()).toUpperCase();
+                            if (window.cityLeaguePrintIds && window.cityLeaguePrintIds.has(printId)) {
+                                metaMatch = true;
+                            }
                         }
                     }
                     

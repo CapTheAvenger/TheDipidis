@@ -2095,7 +2095,7 @@
         #fullCardOverlay,
         #singleCardModal,
         .single-card-modal {
-            display: none;
+            display: none !important;
             position: fixed;
             top: 0;
             left: 0;
@@ -2115,6 +2115,7 @@
         #singleCardModal.active,
         .single-card-modal.active,
         .single-card-modal.show {
+            display: flex !important;
             opacity: 1;
         }
 
@@ -3930,7 +3931,7 @@
         }
 /* Fullscreen Card Modal */
 .fullscreen-card-modal {
-    display: none;
+    display: none !important;
     position: fixed;
     top: 0;
     left: 0;
@@ -3945,7 +3946,7 @@
 }
 
 .fullscreen-card-modal.active {
-    display: flex;
+    display: flex !important;
 }
 
 .fullscreen-card-modal img {

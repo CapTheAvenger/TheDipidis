@@ -2605,12 +2605,12 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             }
             overlay._closing = false;
 
-            overlay.style.display = 'flex';
+            overlay.style.removeProperty('display');
             overlay.classList.remove('d-none');
             // Force reflow before adding animation class
-            void overlay.offsetWidth;
             overlay.classList.add('active');
             overlay.classList.add('show');
+            void overlay.offsetWidth;
             img.classList.add('active');
 
             if (window._singleCardOverlayClickHandler) {
@@ -2662,17 +2662,19 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 window._singleCardEscHandler = null;
             }
 
-            // After transition, hide completely
+            // CSS uses display:none !important on :not(.active):not(.show),
+            // so removing those classes already hides the modal instantly.
+            // Clean up inline display and d-none for consistency.
+            overlay.style.removeProperty('display');
+            overlay.classList.remove('d-flex');
+            overlay.classList.add('d-none');
+
+            // Allow reopen after brief delay
+            if (overlay._hideTimeout) clearTimeout(overlay._hideTimeout);
             overlay._hideTimeout = setTimeout(() => {
                 overlay._hideTimeout = null;
-                if (!overlay.classList.contains('active') && !overlay.classList.contains('show')) {
-                    overlay.style.display = 'none';
-                    overlay.classList.remove('d-flex');
-                    overlay.classList.add('d-none');
-                }
-                document.body.style.overflow = '';
                 overlay._closing = false;
-            }, 300);
+            }, 100);
         }
 
         // Backward compatibility for existing inline handlers.

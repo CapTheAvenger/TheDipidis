@@ -1707,27 +1707,46 @@ img[src*="limitlesstcg"] {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 1px;
     color: #333;
-    font-size: 0.58em;
+    font-size: 0.55em;
 }
 .city-league-card-set-mobile {
-    color: #333;
-    font-size: 0.52em;
-    margin-bottom: 1px;
+    color: #666;
+    font-size: 0.55em;
+    margin-bottom: 0;
     font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .city-league-card-stats-mobile {
-    color: #333;
+    color: #b8860b;
+    font-size: 0.55em;
+    margin-bottom: 0;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.city-league-card-set-stats-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 1px;
+    overflow: hidden;
+}
+.city-league-card-avg-mobile {
+    color: #b8860b;
     font-size: 0.55em;
     margin-bottom: 1px;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .city-league-card-deck-stats-mobile {
     font-weight: 600;
-    color: #333;
-    font-size: 0.58em;
+    color: #666;
+    font-size: 0.55em;
 }
 
 .city-league-card-action-buttons {
@@ -1841,7 +1860,6 @@ img[src*="limitlesstcg"] {
 
 #city-league-analysis .city-league-card-stats-mobile,
 #city-league-analysis .city-league-card-deck-stats-mobile {
-    font-size: 0.53em;
     margin-bottom: 0;
     line-height: 1.2;
 }
@@ -1852,12 +1870,11 @@ img[src*="limitlesstcg"] {
 }
 
 #city-league-analysis .city-league-card-action-row {
-    grid-template-columns: 1fr 1fr 1fr;
     gap: 2px;
 }
 
 #city-league-analysis .city-league-card-action-row:last-child {
-    grid-template-columns: 1fr 1fr 1.7fr;
+    gap: 2px;
 }
 
 #city-league-analysis .city-league-card-action-btn,
@@ -1884,7 +1901,6 @@ img[src*="limitlesstcg"] {
 
 #current-analysis .city-league-card-stats-mobile,
 #current-analysis .city-league-card-deck-stats-mobile {
-    font-size: 0.53em;
     margin-bottom: 0;
     line-height: 1.2;
 }
@@ -1895,12 +1911,10 @@ img[src*="limitlesstcg"] {
 }
 
 #current-analysis .city-league-card-action-row {
-    grid-template-columns: 1fr 1fr 1fr;
     gap: 2px;
 }
 
 #current-analysis .city-league-card-action-row:last-child {
-    grid-template-columns: 1fr 1fr 1.7fr;
     gap: 2px;
 }
 
@@ -1928,7 +1942,6 @@ img[src*="limitlesstcg"] {
 
 #past-meta .city-league-card-stats-mobile,
 #past-meta .city-league-card-deck-stats-mobile {
-    font-size: 0.53em;
     margin-bottom: 0;
     line-height: 1.2;
 }
@@ -1939,12 +1952,10 @@ img[src*="limitlesstcg"] {
 }
 
 #past-meta .city-league-card-action-row {
-    grid-template-columns: 1fr 1fr 1fr;
     gap: 2px;
 }
 
 #past-meta .city-league-card-action-row:last-child {
-    grid-template-columns: 1fr 1fr 1.7fr;
     gap: 2px;
 }
 

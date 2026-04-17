@@ -2228,6 +2228,8 @@
                     n = n.replace(/\s+(vstar|vmax|vunion|v-union|ex|gx|v\b|lv\.x|legend|sp|lvl\.\s*x|breaking|star|prime|restored|radiant|ancient|future)$/i, '').trim();
                     // Strip leftover trailing suffixes like " ex" again in case of double
                     n = n.replace(/\s+ex$/i, '').trim();
+                    // Strip Mega form suffixes: "charizard x" → "charizard", "mewtwo y" → "mewtwo"
+                    n = n.replace(/\s+[xyz]$/i, '').trim();
                     return n;
                 }
 

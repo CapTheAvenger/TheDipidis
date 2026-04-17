@@ -1710,19 +1710,19 @@ img[src*="limitlesstcg"] {
     font-weight: 700;
     margin-bottom: 1px;
     color: #333;
-    font-size: 0.55em;
+    font-size: 0.7em;
 }
 .city-league-card-set-mobile {
-    color: #666;
-    font-size: 0.55em;
+    color: #333;
+    font-size: 0.7em;
     margin-bottom: 0;
     font-weight: 600;
     white-space: nowrap;
     flex-shrink: 0;
 }
 .city-league-card-stats-mobile {
-    color: #b8860b;
-    font-size: 0.55em;
+    color: #333;
+    font-size: 0.7em;
     margin-bottom: 0;
     font-weight: 600;
     white-space: nowrap;
@@ -1730,13 +1730,14 @@ img[src*="limitlesstcg"] {
 .city-league-card-set-stats-row {
     display: flex;
     align-items: baseline;
+    justify-content: center;
     gap: 6px;
     margin-bottom: 1px;
     overflow: hidden;
 }
 .city-league-card-avg-mobile {
-    color: #b8860b;
-    font-size: 0.55em;
+    color: #333;
+    font-size: 0.7em;
     margin-bottom: 1px;
     font-weight: 600;
     white-space: nowrap;
@@ -1745,8 +1746,8 @@ img[src*="limitlesstcg"] {
 }
 .city-league-card-deck-stats-mobile {
     font-weight: 600;
-    color: #666;
-    font-size: 0.55em;
+    color: #333;
+    font-size: 0.7em;
 }
 
 .city-league-card-action-buttons {
@@ -1766,11 +1767,11 @@ img[src*="limitlesstcg"] {
     display: flex;
 }
 .city-league-card-action-row:last-child .city-league-card-market-btn {
-    flex: 1 1 auto;
+    flex: 2 1 0%;
 }
 .city-league-card-action-row:last-child .city-league-card-limitless-btn,
 .city-league-card-action-row:last-child .city-league-card-proxy-btn {
-    flex: 0 0 auto;
+    flex: 1 1 0%;
 }
 .city-league-card-action-btn {
     border: none;

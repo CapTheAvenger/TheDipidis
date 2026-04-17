@@ -59,9 +59,9 @@ async function addToCollection(cardId) {
     // Update collection display and stats
     updateCollectionUI();
     
-    // Re-render cards to show green checkmark
+    // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
     }
   } catch (error) {
     console.error('Error adding to collection:', error);
@@ -100,9 +100,9 @@ async function removeFromCollection(cardId) {
     // Update collection display and stats
     updateCollectionUI();
     
-    // Re-render cards to update checkmark
+    // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
     }
   } catch (error) {
     console.error('Error removing from collection:', error);
@@ -147,9 +147,9 @@ async function addToWishlist(cardId) {
     // Update wishlist display
     updateWishlistUI();
     
-    // Re-render cards to update wishlist button
+    // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
     }
   } catch (error) {
     console.error('Error adding to wishlist:', error);
@@ -184,9 +184,9 @@ async function removeFromWishlist(cardId) {
     // Update wishlist display
     updateWishlistUI();
     
-    // Re-render cards to update wishlist button
+    // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
-      renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
     }
   } catch (error) {
     console.error('Error removing from wishlist:', error);

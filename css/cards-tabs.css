@@ -54,6 +54,15 @@
 #cityLeagueDeckOverview .virtual-card-slot {
     width: 100%;
     contain: layout style paint;
+    overflow: hidden;
+    overflow-anchor: none;
+}
+
+/* Prevent hover transform on touch devices (causes reflows) */
+@media (hover: none) {
+    #cards .card-database-item:hover {
+        transform: none !important;
+    }
 }
 
 #cards .card-database-item {

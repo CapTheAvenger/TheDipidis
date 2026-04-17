@@ -2271,6 +2271,12 @@
             const resultsInfo = document.getElementById('cardResultsInfo');
             const shouldScrollToTop = options.scrollToTop !== false;
 
+            // Wishlist/Collection updates: only refresh button states, don't rebuild grid
+            if (options.wishlistUpdate === true) {
+                _updateCardButtonStates();
+                return;
+            }
+
             destroyCardsVirtualGrid();
             
             if (cards.length === 0) {
@@ -2329,6 +2335,54 @@
             }
         }
 
+        // Update only button states (wishlist/collection) without rebuilding the grid
+        function _updateCardButtonStates() {
+            const items = document.querySelectorAll('#cards .card-database-item[data-card-id]');
+            items.forEach(item => {
+                const cardId = item.getAttribute('data-card-id');
+                if (!cardId) return;
+
+                const owned = (window.userCollectionCounts && window.userCollectionCounts.get(cardId)) || 0;
+
+                // Owned badge
+                let ownedBadge = item.querySelector('.card-database-owned-badge');
+                if (owned > 0) {
+                    if (!ownedBadge) {
+                        ownedBadge = document.createElement('div');
+                        ownedBadge.className = 'card-database-owned-badge';
+                        const imgWrap = item.querySelector('.card-database-image-wrap');
+                        if (imgWrap) imgWrap.appendChild(ownedBadge);
+                    }
+                    ownedBadge.textContent = owned;
+                } else if (ownedBadge) {
+                    ownedBadge.remove();
+                }
+
+                // Wishlist button
+                const inWishlist = window.userWishlist && window.userWishlist.has(cardId);
+                const wishBtn = item.querySelector('[onclick*="toggleWishlistFromCardDbButton"]');
+                if (wishBtn) {
+                    wishBtn.style.background = inWishlist ? '#E91E63' : '#F48FB1';
+                    wishBtn.style.borderColor = inWishlist ? '#E91E63' : '#F48FB1';
+                    wishBtn.innerHTML = inWishlist ? '&#9829;' : '&#9825;';
+                    wishBtn.title = inWishlist ? 'Remove from wishlist' : 'Add to wishlist';
+                }
+
+                // Collection remove button style
+                const removeBtn = item.querySelector('[onclick*="removeCollectionFromCardDbButton"]');
+                if (removeBtn) {
+                    removeBtn.style.color = owned > 0 ? '#fff' : '#999';
+                    removeBtn.style.background = owned > 0 ? '#dc3545' : '#fff';
+                }
+
+                // Collection add button title
+                const addBtn = item.querySelector('[onclick*="addCollectionFromCardDbButton"]');
+                if (addBtn) {
+                    addBtn.title = `Add to collection (${owned}/4)`;
+                }
+            });
+        }
+
         function destroyCardsVirtualGrid() {
             if (cardsVirtualState.observer) {
                 cardsVirtualState.observer.disconnect();
@@ -2364,7 +2418,9 @@
                     requestAnimationFrame(() => {
                         const measured = Math.round(slot.getBoundingClientRect().height || 0);
                         if (measured > 120) {
-                            slot.style.minHeight = '';
+                            // Fix min-height to measured value instead of removing it
+                            // This prevents layout-shifts when slots render
+                            slot.style.minHeight = measured + 'px';
                             slot._measuredHeight = measured;
                             cardsVirtualState.estimatedHeight = Math.round((cardsVirtualState.estimatedHeight * 0.85) + (measured * 0.15));
                         }
@@ -2392,7 +2448,7 @@
                 });
             }, {
                 root: null,
-                rootMargin: '700px 0px 700px 0px',
+                rootMargin: '1200px 0px 1200px 0px',
                 threshold: 0.01
             });
 
@@ -2562,6 +2618,7 @@
             
             const item = document.createElement('div');
             item.className = 'card-database-item';
+            item.setAttribute('data-card-id', `${card.name || ''}|${card.set || ''}|${card.number || ''}`);
             
             const rarityClass = getRarityClass(card.rarity);
             

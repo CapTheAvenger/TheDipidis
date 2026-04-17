@@ -200,7 +200,7 @@
         const cardsVirtualState = {
             observer: null,
             slots: [],
-            estimatedHeight: 460,
+            estimatedHeight: 320,
             renderedCount: 0
         };
         let _loadCardsRunning = false;
@@ -2416,7 +2416,8 @@
                     slot.dataset.rendered = 'true';
                     cardsVirtualState.renderedCount += 1;
                     requestAnimationFrame(() => {
-                        const measured = Math.round(slot.getBoundingClientRect().height || 0);
+                        const inner = slot.firstElementChild;
+                        const measured = Math.round((inner ? inner.getBoundingClientRect().height : slot.getBoundingClientRect().height) || 0);
                         if (measured > 120) {
                             // Fix min-height to measured value instead of removing it
                             // This prevents layout-shifts when slots render

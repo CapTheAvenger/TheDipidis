@@ -687,11 +687,6 @@
         }
     }
 
-                console.warn('[MetaBinder] Firestore save failed', e);
-            }
-        }
-    }
-
     /**
      * Recalculate ownership for a list of saved card definitions
      * using the current collection state.

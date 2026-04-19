@@ -1894,7 +1894,7 @@
             return {
                 name: card.name,
                 html: `
-                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${safeSet}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-deck-count="${String(card.decks ? card.decks.length : 0)}" data-card-id="${safeCardId}" title="Wird verwendet in: ${deckList}${ownershipHint}">
+                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${safeSet}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-deck-count="${String(card.decks ? card.decks.length : 0)}" data-card-id="${safeCardId}" data-family-refs="${escapeHtml((Array.isArray(card.familyRefs) ? card.familyRefs : []).join(','))}" data-max-count="${String(card.maxCount || 0)}" title="Wird verwendet in: ${deckList}${ownershipHint}">
                     ${imageUrl
                         ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                            <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
@@ -2193,58 +2193,81 @@
     function refreshMetaBinderOwnership() {
         const grid = document.getElementById('meta-binder-grid');
         if (!grid) return;
-        const collectionCounts = window.userCollectionCounts || new Map();
-        const cards = grid.querySelectorAll('.meta-binder-card[data-card-id]');
-        cards.forEach(el => {
+        const collCounts = window.userCollectionCounts || new Map();
+
+        grid.querySelectorAll('.meta-binder-card[data-card-id]').forEach(el => {
             const cardId = el.getAttribute('data-card-id');
             if (!cardId) return;
-            const owned = collectionCounts.get(cardId) || 0;
-            // Read maxCount from the "Nx" need badge
+
             const needEl = el.querySelector('.meta-binder-card-need');
             const maxCount = needEl ? (parseInt(needEl.textContent, 10) || 1) : 1;
-            const isComplete = owned >= maxCount;
+
+            // ownedExact: count for this specific print
+            const ownedExact = collCounts.get(cardId) || 0;
+
+            // ownedIntlTotal: sum across all family prints
+            const familyRefsRaw = el.getAttribute('data-family-refs') || '';
+            const cardName = el.getAttribute('data-name') || '';
+            let ownedIntlTotal = 0;
+            if (familyRefsRaw && cardName) {
+                familyRefsRaw.split(',').forEach(ref => {
+                    const dashIdx = ref.indexOf('-');
+                    if (dashIdx < 0) return;
+                    const set = ref.substring(0, dashIdx).trim();
+                    const num = ref.substring(dashIdx + 1).trim();
+                    if (!set || !num) return;
+                    ownedIntlTotal += collCounts.get(cardName + '|' + set + '|' + num) || 0;
+                });
+            } else {
+                ownedIntlTotal = ownedExact;
+            }
+
+            // Determine 3-state ownership
+            const isOwned = ownedExact >= maxCount;
+            const isIntl = !isOwned && ownedIntlTotal >= maxCount;
+            const isMissing = !isOwned && !isIntl;
 
             // Update CSS classes
-            el.classList.toggle('meta-binder-card-owned', isComplete);
-            el.classList.toggle('card-owned', isComplete);
-            el.classList.toggle('meta-binder-card-missing', !isComplete);
-            el.classList.toggle('card-missing', !isComplete);
-            el.classList.remove('meta-binder-card-owned-intl');
+            el.classList.toggle('meta-binder-card-owned', isOwned);
+            el.classList.toggle('card-owned', isOwned || isIntl);
+            el.classList.toggle('meta-binder-card-owned-intl', isIntl);
+            el.classList.toggle('meta-binder-card-missing', isMissing);
+            el.classList.toggle('card-missing', isMissing);
 
-            // Update count label
-            const countOk = el.querySelector('.meta-binder-count-ok');
-            const countMissing = el.querySelector('.meta-binder-count-missing');
-            const countIntl = el.querySelector('.meta-binder-count-intl');
-            const oldLabel = countOk || countMissing || countIntl;
-            if (oldLabel) {
-                if (isComplete) {
-                    oldLabel.className = 'meta-binder-count-ok';
-                    oldLabel.textContent = `${owned}/${maxCount} ✓`;
+            // Update count badge
+            const badge = el.querySelector('.meta-binder-count-ok') || el.querySelector('.meta-binder-count-missing') || el.querySelector('.meta-binder-count-intl');
+            if (badge) {
+                if (isOwned) {
+                    badge.className = 'meta-binder-count-ok';
+                    badge.textContent = ownedExact + '/' + maxCount + ' \u2713';
+                } else if (isIntl) {
+                    badge.className = 'meta-binder-count-intl';
+                    badge.textContent = ownedIntlTotal + '/' + maxCount + ' \u2713';
                 } else {
-                    oldLabel.className = 'meta-binder-count-missing';
-                    oldLabel.textContent = `${owned}/${maxCount}`;
+                    badge.className = 'meta-binder-count-missing';
+                    badge.textContent = ownedIntlTotal + '/' + maxCount;
                 }
             }
 
-            // Update +/- button titles and - button styling
+            // Update +/- buttons
             const plusBtn = el.querySelector('.btn-green[data-card-id]');
             const minusBtn = el.querySelector('.btn-red[data-card-id]');
-            if (plusBtn) plusBtn.title = `Add to collection (${owned}/4)`;
+            if (plusBtn) plusBtn.title = 'Add to collection (' + ownedExact + '/4)';
             if (minusBtn) {
-                minusBtn.title = `Remove from collection (${owned}/4)`;
-                minusBtn.style.color = owned > 0 ? '#fff' : '#999';
-                minusBtn.style.background = owned > 0 ? '#dc3545' : '#fff';
+                minusBtn.title = 'Remove from collection (' + ownedExact + '/4)';
+                minusBtn.style.color = ownedExact > 0 ? '#fff' : '#999';
+                minusBtn.style.background = ownedExact > 0 ? '#dc3545' : '#fff';
             }
 
-            // Update wishlist button
+            // Update wishlist heart button
             const wishBtn = el.querySelector('.btn-wishlist[data-card-id]');
             if (wishBtn) {
                 const onWishlist = window.userWishlist && window.userWishlist.has(cardId);
+                const missingNow = Math.max(0, maxCount - ownedExact);
+                wishBtn.setAttribute('data-missing', String(missingNow));
                 wishBtn.style.background = onWishlist ? '#E91E63' : '#F48FB1';
                 wishBtn.style.borderColor = onWishlist ? '#E91E63' : '#F48FB1';
                 wishBtn.innerHTML = onWishlist ? '&#9829;' : '&#9825;';
-                const missingNow = Math.max(0, maxCount - owned);
-                wishBtn.setAttribute('data-missing', String(missingNow));
                 wishBtn.title = onWishlist
                     ? 'Remove from wishlist'
                     : 'Add missing (' + missingNow + ') to wishlist';

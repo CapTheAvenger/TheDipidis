@@ -77,7 +77,7 @@
         function normalizeCurrentMetaArchetypeKey(value) {
             return String(value || '')
                 .toLowerCase()
-                .replace(/[''`]/g, '')
+                .replace(/['\u2019\u2018`]s\b/g, '').replace(/['\u2019\u2018`]/g, '')
                 .replace(/\bex\b/g, '')
                 .replace(/[^a-z0-9\s-]/g, ' ')
                 .replace(/\s+/g, ' ')

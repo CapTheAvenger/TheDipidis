@@ -80,6 +80,7 @@ async function addToCollection(cardId) {
     
     // Update Meta Binder ownership visuals
     if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
+    if (typeof refreshCustomBinderOwnership === 'function') refreshCustomBinderOwnership();
 
     // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
@@ -124,6 +125,7 @@ async function removeFromCollection(cardId) {
     
     // Update Meta Binder ownership visuals
     if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
+    if (typeof refreshCustomBinderOwnership === 'function') refreshCustomBinderOwnership();
 
     // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
@@ -164,6 +166,7 @@ async function addToWishlistWithCount(cardId, count) {
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
     }
     if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
+    if (typeof refreshCustomBinderOwnership === 'function') refreshCustomBinderOwnership();
   } catch (error) {
     console.error('Error adding to wishlist:', error);
     showNotification('Error updating wishlist', 'error');
@@ -1023,6 +1026,7 @@ async function clearWishlist() {
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
     }
     if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
+    if (typeof refreshCustomBinderOwnership === 'function') refreshCustomBinderOwnership();
 
     showNotification(getLang()==='de' ? 'Wishlist wurde geleert' : 'Wishlist cleared', 'success');
   } catch (error) {

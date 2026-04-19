@@ -7,7 +7,7 @@
          */
         function normalizeArchetypeForMatch(name) {
             return (name || '').toLowerCase()
-                .replace(/[''`]/g, '')           // Rocket's → Rockets
+                .replace(/['\u2019\u2018`]s\b/g, '').replace(/['\u2019\u2018`]/g, '')  // Rocket's → Rocket
                 .replace(/\bex\b/g, '')          // strip standalone "ex"
                 .replace(/\b(scr|jtg|tef|twm|pfl|dri|meg)\b/g, '') // strip set-code suffixes
                 .replace(/\s+/g, ' ').trim();

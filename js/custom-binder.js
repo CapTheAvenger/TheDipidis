@@ -67,7 +67,7 @@
         cbPresets.push({ id, name: name.trim(), archetypes: cbSelectedArchetypes.map(a => ({ name: a.name, source: a.source })) });
         cbSavePresets();
         cbRenderPresetBar();
-        if (typeof showToast === 'function') showToast(`Binder "${name.trim()}" gespeichert.`, 'success');
+        if (typeof showToast === 'function') showToast(cbText('cb.presetSaved', 'Binder saved.').replace('{name}', name.trim()), 'success');
     }
 
     function cbLoadPreset(id) {
@@ -104,8 +104,8 @@
             const safeName = escapeHtml(p.name);
             const safeId = escapeHtml(p.id);
             return `<span class="cb-preset-chip">
-                <button type="button" class="cb-preset-load" onclick="cbLoadPreset('${safeId}')" title="Laden: ${safeName}">${safeName} <small class="opacity-60">(${p.archetypes.length})</small></button>
-                <button type="button" class="cb-preset-delete" onclick="cbDeletePreset('${safeId}')" title="Löschen">&times;</button>
+                <button type="button" class="cb-preset-load" onclick="cbLoadPreset('${safeId}')" title="${cbText('cb.load','Load')}: ${safeName}">${safeName} <small class="opacity-60">(${p.archetypes.length})</small></button>
+                <button type="button" class="cb-preset-delete" onclick="cbDeletePreset('${safeId}')" title="${cbText('cb.delete','Delete')}">&times;</button>
             </span>`;
         }).join('');
     }
@@ -586,34 +586,34 @@
             filtersEl.classList.remove('display-none');
             filtersEl.innerHTML = `
                 <div class="filter-group">
-                    <button class="meta-binder-filter-btn active" data-filter="all" onclick="cbSetFilter('all')">Alle (${totalUnique})</button>
-                    <button class="meta-binder-filter-btn" data-filter="owned" onclick="cbSetFilter('owned')">Im Besitz (${ownedComplete})</button>
-                    <button class="meta-binder-filter-btn" data-filter="missing" onclick="cbSetFilter('missing')">Fehlend (${missingUnique})</button>
+                    <button class="meta-binder-filter-btn active" data-filter="all" onclick="cbSetFilter('all')">${cbText('cb.filterAll','All')} (${totalUnique})</button>
+                    <button class="meta-binder-filter-btn" data-filter="owned" onclick="cbSetFilter('owned')">${cbText('cb.filterOwned','In Collection')} (${ownedComplete})</button>
+                    <button class="meta-binder-filter-btn" data-filter="missing" onclick="cbSetFilter('missing')">${cbText('cb.filterMissing','Missing')} (${missingUnique})</button>
                     <button class="meta-binder-filter-btn" data-filter="new" onclick="cbSetFilter('new')">🆕 Neu (${newCount})</button>
                 </div>
                 <div class="filter-group">
                     <select id="cbFilterType" onchange="cbApplyFilter()" class="select-system">
-                        <option value="all">Alle Typen</option>
-                        <option value="Pokemon-Grass">Pokemon: Pflanze</option>
-                        <option value="Pokemon-Fire">Pokemon: Feuer</option>
-                        <option value="Pokemon-Water">Pokemon: Wasser</option>
-                        <option value="Pokemon-Lightning">Pokemon: Elektro</option>
-                        <option value="Pokemon-Psychic">Pokemon: Psycho</option>
-                        <option value="Pokemon-Fighting">Pokemon: Kampf</option>
-                        <option value="Pokemon-Darkness">Pokemon: Unlicht</option>
-                        <option value="Pokemon-Metal">Pokemon: Metall</option>
-                        <option value="Pokemon-Dragon">Pokemon: Drache</option>
-                        <option value="Pokemon-Colorless">Pokemon: Farblos</option>
-                        <option value="Supporter">Unterstützer</option>
-                        <option value="Item">Item</option>
-                        <option value="Tool">Ausrüstung</option>
-                        <option value="Stadium">Stadion</option>
-                        <option value="Special Energy">Spezial-Energie</option>
-                        <option value="Basic Energy">Basis-Energie</option>
+                        <option value="all">${cbText('cb.filterAllTypes','All Types')}</option>
+                        <option value="Pokemon-Grass">${cbText('profile.filterPokemonGrass','Pokémon: Grass')}</option>
+                        <option value="Pokemon-Fire">${cbText('profile.filterPokemonFire','Pokémon: Fire')}</option>
+                        <option value="Pokemon-Water">${cbText('profile.filterPokemonWater','Pokémon: Water')}</option>
+                        <option value="Pokemon-Lightning">${cbText('profile.filterPokemonLightning','Pokémon: Lightning')}</option>
+                        <option value="Pokemon-Psychic">${cbText('profile.filterPokemonPsychic','Pokémon: Psychic')}</option>
+                        <option value="Pokemon-Fighting">${cbText('profile.filterPokemonFighting','Pokémon: Fighting')}</option>
+                        <option value="Pokemon-Darkness">${cbText('profile.filterPokemonDarkness','Pokémon: Darkness')}</option>
+                        <option value="Pokemon-Metal">${cbText('profile.filterPokemonMetal','Pokémon: Metal')}</option>
+                        <option value="Pokemon-Dragon">${cbText('profile.filterPokemonDragon','Pokémon: Dragon')}</option>
+                        <option value="Pokemon-Colorless">${cbText('profile.filterPokemonColorless','Pokémon: Colorless')}</option>
+                        <option value="Supporter">${cbText('profile.filterSupporter','Supporter')}</option>
+                        <option value="Item">${cbText('profile.filterItem','Item')}</option>
+                        <option value="Tool">${cbText('profile.filterTool','Tool')}</option>
+                        <option value="Stadium">Stadium</option>
+                        <option value="Special Energy">${cbText('profile.filterSpecialEnergy','Special Energy')}</option>
+                        <option value="Basic Energy">${cbText('profile.filterBasicEnergy','Basic Energy')}</option>
                         <option value="ACE SPEC">ACE SPEC</option>
                     </select>
                     <select id="cbFilterSet" onchange="cbApplyFilter()" class="select-system">
-                        <option value="all">Alle Sets</option>
+                        <option value="all">${cbText('cb.filterAllSets','All Sets')}</option>
                     </select>
                 </div>`;
 
@@ -645,7 +645,7 @@
             });
 
         setSelect.innerHTML = [
-            '<option value="all">Alle Sets</option>',
+            `<option value="all">${cbText('cb.filterAllSets','All Sets')}</option>`,
             ...setCodes.map(code => `<option value="${escapeHtml(code)}">${escapeHtml(code)}</option>`)
         ].join('');
     }
@@ -740,6 +740,7 @@
                     </div>
                 </div>`;
         }).join('');
+        refreshCustomBinderOwnership();
     }
 
     // ── Quick Actions ──
@@ -804,8 +805,59 @@
         cbRenderPresetBar();
     }
 
+    // ── Ownership Refresh (analog to refreshMetaBinderOwnership) ──
+    function refreshCustomBinderOwnership() {
+        const grid = document.getElementById('cbGrid');
+        if (!grid) return;
+        const t = window.userCollectionCounts || new Map();
+        grid.querySelectorAll('.meta-binder-card[data-card-id]').forEach(e => {
+            const n = e.getAttribute('data-card-id');
+            if (!n) return;
+            const needEl = e.querySelector('.meta-binder-card-need');
+            const a = needEl && parseInt(needEl.textContent, 10) || 1;
+            const i = t.get(n) || 0;
+            const s = e.getAttribute('data-family-refs') || '';
+            const o = e.getAttribute('data-name') || '';
+            let c = 0;
+            if (s && o) {
+                s.split(',').forEach(ref => {
+                    const pos = ref.indexOf('-');
+                    if (pos < 0) return;
+                    const set = ref.substring(0, pos).trim();
+                    const num = ref.substring(pos + 1).trim();
+                    c += t.get(o + '|' + set + '|' + num) || 0;
+                });
+            } else {
+                c = i;
+            }
+            const l = i >= a, d = !l && c >= a, u = !l && !d;
+            e.classList.toggle('meta-binder-card-owned', l);
+            e.classList.toggle('card-owned', l || d);
+            e.classList.toggle('meta-binder-card-owned-intl', d);
+            e.classList.toggle('meta-binder-card-missing', u);
+            e.classList.toggle('card-missing', u);
+            const m = e.querySelector('.meta-binder-count-ok') ||
+                      e.querySelector('.meta-binder-count-intl') ||
+                      e.querySelector('.meta-binder-count-missing');
+            if (m) {
+                if (l) { m.className = 'meta-binder-count-ok'; m.textContent = i + '/' + a + ' \u2713'; }
+                else if (d) { m.className = 'meta-binder-count-intl'; m.textContent = c + '/' + a + ' \u2713'; }
+                else { m.className = 'meta-binder-count-missing'; m.textContent = i + '/' + a; }
+            }
+            const y = e.querySelector('.btn-wishlist[data-card-id]');
+            if (y) {
+                const missing = Math.max(0, a - i);
+                y.setAttribute('data-missing', String(missing));
+                y.style.background = window.userWishlist && window.userWishlist.has(n) ? '#E91E63' : '#F48FB1';
+                y.style.borderColor = y.style.background;
+                y.innerHTML = window.userWishlist && window.userWishlist.has(n) ? '&#9829;' : '&#9825;';
+            }
+        });
+    }
+
     // ── Expose ──
     window.buildCustomBinder = buildCustomBinder;
+    window.refreshCustomBinderOwnership = refreshCustomBinderOwnership;
     window.cbAddArchetype = cbAddArchetype;
     window.cbToggleArchetype = cbToggleArchetype;
     window.cbRemoveArchetype = cbRemoveArchetype;

@@ -441,7 +441,7 @@
         }
 
         // Compute delta with own cache key
-        const delta = cbComputeDelta(binderMap, shared);
+        const delta = await cbComputeDelta(binderMap, shared);
         window._cbDelta = delta;
 
         cbRenderBinder(delta, shared);
@@ -462,7 +462,7 @@
     }
 
     // ── Delta with separate cache key ──
-    function cbComputeDelta(binderMap, shared) {
+    async function cbComputeDelta(binderMap, shared) {
         // Use shared computeDelta but swap cache key temporarily
         const origCache = localStorage.getItem('metaBinderCacheV1');
 
@@ -476,7 +476,7 @@
         // Temporarily set the cache so computeDelta uses our key
         localStorage.setItem('metaBinderCacheV1', JSON.stringify(Array.from(previousIds)));
 
-        const delta = shared.computeDelta(binderMap);
+        const delta = await shared.computeDelta(binderMap);
 
         // Save to CB cache, restore original meta binder cache
         localStorage.setItem(CB_CACHE_KEY, JSON.stringify(Array.from(binderMap.keys())));

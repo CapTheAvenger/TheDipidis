@@ -660,21 +660,120 @@
 
     /**
      * Save the current binder snapshot.
-     * Logged-in users: to Firestore.
-     * Also keep localStorage as quick fallback.
+     * Logged-in users: to Firestore (IDs for comparison + full card defs for reload).
      */
-    async function saveBinderSnapshot(cardIds) {
+    async function saveBinderSnapshot(cardIds, cards) {
         const arr = Array.from(cardIds);
         const user = window.auth?.currentUser;
         if (user && window.db) {
             try {
-                await window.db.collection('users').doc(user.uid).update({
+                const payload = {
                     metaBinderSnapshot: arr,
                     metaBinderSnapshotDate: new Date().toISOString()
-                });
+                };
+                // Save card definitions for "load last binder" feature
+                if (Array.isArray(cards) && cards.length > 0) {
+                    payload.metaBinderCards = cards.map(c => ({
+                        cardId: c.cardId, name: c.name, set: c.set, number: c.number,
+                        maxCount: c.maxCount, decks: c.decks || [], type: c.type || '',
+                        rarity: c.rarity || '', isAceSpec: !!c.isAceSpec,
+                        familyRefs: c.familyRefs || []
+                    }));
+                }
+                await window.db.collection('users').doc(user.uid).update(payload);
             } catch (e) {
                 console.warn('[MetaBinder] Firestore save failed', e);
             }
+        }
+    }
+
+                console.warn('[MetaBinder] Firestore save failed', e);
+            }
+        }
+    }
+
+    /**
+     * Recalculate ownership for a list of saved card definitions
+     * using the current collection state.
+     */
+    function recalcOwnership(savedCards) {
+        const collectionCounts = window.userCollectionCounts || new Map();
+        const ownedByPrintRef = new Map();
+        collectionCounts.forEach((qty, collKey) => {
+            const ownedQty = parseInt(qty, 10) || 0;
+            if (ownedQty <= 0) return;
+            const parts = String(collKey || '').split('|');
+            if (parts.length < 3) return;
+            const ref = normalizeIntlPrintRef(parts[1], parts[2]);
+            if (!ref || ref === '-') return;
+            ownedByPrintRef.set(ref, (ownedByPrintRef.get(ref) || 0) + ownedQty);
+        });
+        function countOwnedIntlRefs(refs) {
+            if (!Array.isArray(refs) || refs.length === 0) return 0;
+            let total = 0;
+            refs.forEach(ref => {
+                const parsed = parseIntlPrintRef(ref);
+                const normalized = normalizeIntlPrintRef(parsed.set, parsed.number);
+                if (!normalized || normalized === '-') return;
+                total += ownedByPrintRef.get(normalized) || 0;
+            });
+            return total;
+        }
+        return savedCards.map(c => {
+            const exactCardId = buildCardId(c.name, c.set, c.number);
+            const ownedExact = collectionCounts.get(exactCardId) || 0;
+            const ownedIntlTotal = countOwnedIntlRefs(c.familyRefs);
+            const needed = c.maxCount || 0;
+            const effectiveOwned = ownedIntlTotal;
+            const missing = Math.max(0, needed - effectiveOwned);
+            const ownershipMode = ownedExact >= needed
+                ? 'exact'
+                : (ownedIntlTotal >= needed ? 'intl-complete' : 'missing');
+            return {
+                cardId: c.cardId, name: c.name, set: c.set, number: c.number,
+                maxCount: needed, owned: effectiveOwned, ownedExact, ownedIntlTotal,
+                missing, ownershipMode, isNew: false,
+                decks: c.decks || [], type: c.type || '',
+                rarity: c.rarity || '', isAceSpec: !!c.isAceSpec,
+                familyRefs: c.familyRefs || []
+            };
+        });
+    }
+
+    /**
+     * Load the last saved Meta Binder from Firestore and render it.
+     * Ownership is recalculated from the current collection.
+     */
+    async function loadSavedMetaBinder() {
+        const user = window.auth?.currentUser;
+        if (!user || !window.db) {
+            showToast(mbText('mb.loginRequired', 'Bitte einloggen um den letzten Binder zu laden.'), 'warning');
+            return;
+        }
+        try {
+            showToast(mbText('mb.loadingSaved', 'Lade gespeicherten Binder…'), 'info');
+            const doc = await window.db.collection('users').doc(user.uid).get();
+            const data = doc.exists ? doc.data() : {};
+            const savedCards = Array.isArray(data.metaBinderCards) ? data.metaBinderCards : [];
+            const savedDate = data.metaBinderSnapshotDate || null;
+            if (savedCards.length === 0) {
+                showToast(mbText('mb.noSaved', 'Kein gespeicherter Binder vorhanden. Bitte zuerst generieren.'), 'warning');
+                return;
+            }
+            const cards = recalcOwnership(savedCards);
+            const delta = {
+                cards,
+                droppedCards: [],
+                hasProfile: true,
+                snapshotDate: savedDate
+            };
+            window._metaBinderDelta = delta;
+            renderMetaBinder(delta);
+            const dateStr = savedDate ? new Date(savedDate).toLocaleDateString('de-DE') : '?';
+            showToast(mbText('mb.loadedSaved', `Binder vom ${dateStr} geladen – Besitzstand aktualisiert.`), 'success');
+        } catch (e) {
+            console.error('[MetaBinder] loadSavedMetaBinder failed', e);
+            showToast(mbText('mb.loadError', 'Fehler beim Laden des Binders.'), 'error');
         }
     }
 
@@ -756,7 +855,7 @@
         }
 
         // Save current binder snapshot to Firestore (logged-in) 
-        await saveBinderSnapshot(currentIds);
+        await saveBinderSnapshot(currentIds, results);
 
         return { cards: results, droppedCards, hasProfile, snapshotDate };
     }
@@ -1967,6 +2066,7 @@
     }
 
     window.buildMetaBinder = buildMetaBinderWithChunkWatch;
+    window.loadSavedMetaBinder = loadSavedMetaBinder;
     window.metaBinderAddMissingToWishlist = metaBinderAddMissingToWishlist;
     window.metaBinderSendMissingToProxy = metaBinderSendMissingToProxy;
     window.metaBinderProxyNewCards = metaBinderProxyNewCards;

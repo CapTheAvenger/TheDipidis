@@ -533,6 +533,9 @@
             const rarity = String(row.rarity || '').toLowerCase();
             const group = String(row.group || '').toLowerCase();
             const flag = String(row.is_ace_spec || '').toLowerCase();
+            // ACE SPECs are always Ultra Rare or higher — Common/Uncommon/Rare can never be ACE SPEC
+            const nonAceRarities = ['common', 'uncommon', 'rare'];
+            if (nonAceRarities.some(r => rarity === r)) return false;
             return rarity.includes('ace spec') || group.includes('ace spec') || flag === 'yes' || flag === 'true';
         }
 

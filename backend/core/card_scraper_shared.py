@@ -532,8 +532,8 @@ class CardDatabaseLookup:
     def is_ace_spec_by_name(self, card_name: str) -> bool:
         norm = self.normalize_name(card_name)
         if norm not in self.cards: return False
-        v = self.cards[norm][0]
-        return 'ace spec' in v['type'].lower() or ('ultra rare' in v['rarity'].lower() and v['supertype'] == 'Trainer')
+        # A card is ACE SPEC only if any variant's type explicitly contains 'ace spec'
+        return any('ace spec' in v['type'].lower() for v in self.cards[norm])
 
     def get_card_type(self, card_name: str) -> str:
         """Returns 'Pokemon', 'Trainer', or 'Energy'."""

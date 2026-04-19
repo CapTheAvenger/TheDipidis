@@ -767,7 +767,7 @@
             };
             window._metaBinderDelta = delta;
             renderMetaBinder(delta);
-            const dateStr = savedDate ? new Date(savedDate).toLocaleDateString('de-DE') : '?';
+            const dateStr = savedDate ? new Date(savedDate).toLocaleDateString(typeof getLang === 'function' && getLang() === 'de' ? 'de-DE' : 'en-US') : '?';
             showToast(mbText('mb.loadedSaved', `Binder vom ${dateStr} geladen – Besitzstand aktualisiert.`), 'success');
         } catch (e) {
             console.error('[MetaBinder] loadSavedMetaBinder failed', e);
@@ -1505,6 +1505,7 @@
         const fragment = document.createDocumentFragment();
         cards.forEach(card => fragment.appendChild(card));
         grid.appendChild(fragment);
+        grid.querySelectorAll('.meta-binder-print-group').forEach(g => g.remove());
     }
 
     window.sortMetaBinder = sortMetaBinder;
@@ -1686,7 +1687,7 @@
         let comparisonHint = '';
         if (hasProfile && snapshotDate) {
             const d = new Date(snapshotDate);
-            comparisonHint = ` (vs. ${d.toLocaleDateString('de-DE')})`;
+            comparisonHint = ` (vs. ${d.toLocaleDateString(typeof getLang === 'function' && getLang() === 'de' ? 'de-DE' : 'en-US')})`;
         }
         const newLabel = hasProfile
             ? mbText('mb.newSinceLastGen', 'Neu seit letztem Generate') + comparisonHint
@@ -1764,8 +1765,8 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <button id="mbBtnStandardPrint" class="meta-binder-filter-btn active" onclick="setMetaBinderPrintView(false)">Standard Print</button>
-                    <button id="mbBtnAllPrints" class="meta-binder-filter-btn" onclick="setMetaBinderPrintView(true)">All Prints</button>
+                    <button id="mbBtnStandardPrint" class="meta-binder-filter-btn active" onclick="setMetaBinderPrintView(false)">${mbText('mb.standardPrint', 'Standard Print')}</button>
+                    <button id="mbBtnAllPrints" class="meta-binder-filter-btn" onclick="setMetaBinderPrintView(true)">${mbText('mb.allPrints', 'All Prints')}</button>
                 </div>`;
         }
 
@@ -1937,6 +1938,7 @@
         }
 
             sortMetaBinder();
+            refreshMetaBinderOwnership();
     }
 
     // ── Ensure meta data is loaded before building the binder ──

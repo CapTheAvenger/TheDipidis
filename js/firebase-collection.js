@@ -64,6 +64,9 @@ async function addToCollection(cardId) {
     // Update collection display and stats
     updateCollectionUI();
     
+    // Update Meta Binder ownership visuals
+    if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
+
     // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
@@ -105,6 +108,9 @@ async function removeFromCollection(cardId) {
     // Update collection display and stats
     updateCollectionUI();
     
+    // Update Meta Binder ownership visuals
+    if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
+
     // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
@@ -719,6 +725,23 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
     window.userCollection.forEach(cardId => {
       updateCardUI(cardId);
     });
+  }
+
+  // If the card database hasn't loaded yet, schedule a re-render once it arrives
+  if ((!window.allCardsDatabase || window.allCardsDatabase.length === 0) && window.userCollection && window.userCollection.size > 0) {
+    if (!window._collectionUIPendingRetry) {
+      window._collectionUIPendingRetry = true;
+      const retryHandler = () => {
+        window._collectionUIPendingRetry = false;
+        updateCollectionUI(searchFilter, filterMode);
+      };
+      if (window.__appResourcesSettled) {
+        // Resources already settled but DB still empty – use a short timeout fallback
+        setTimeout(retryHandler, 500);
+      } else {
+        window.addEventListener('app:resources-settled', retryHandler, { once: true });
+      }
+    }
   }
   
   // Update collection grid in profile

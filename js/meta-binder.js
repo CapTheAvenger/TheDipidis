@@ -2143,8 +2143,67 @@
         _startChunkPoll();
     }
 
+    // ── Live-refresh ownership visuals for Meta Binder cards ──
+    function refreshMetaBinderOwnership() {
+        const grid = document.getElementById('meta-binder-grid');
+        if (!grid) return;
+        const collectionCounts = window.userCollectionCounts || new Map();
+        const cards = grid.querySelectorAll('.meta-binder-card[data-card-id]');
+        cards.forEach(el => {
+            const cardId = el.getAttribute('data-card-id');
+            if (!cardId) return;
+            const owned = collectionCounts.get(cardId) || 0;
+            // Read maxCount from the "Nx" need badge
+            const needEl = el.querySelector('.meta-binder-card-need');
+            const maxCount = needEl ? (parseInt(needEl.textContent, 10) || 1) : 1;
+            const isComplete = owned >= maxCount;
+
+            // Update CSS classes
+            el.classList.toggle('meta-binder-card-owned', isComplete);
+            el.classList.toggle('card-owned', isComplete);
+            el.classList.toggle('meta-binder-card-missing', !isComplete);
+            el.classList.toggle('card-missing', !isComplete);
+            el.classList.remove('meta-binder-card-owned-intl');
+
+            // Update count label
+            const countOk = el.querySelector('.meta-binder-count-ok');
+            const countMissing = el.querySelector('.meta-binder-count-missing');
+            const countIntl = el.querySelector('.meta-binder-count-intl');
+            const oldLabel = countOk || countMissing || countIntl;
+            if (oldLabel) {
+                if (isComplete) {
+                    oldLabel.className = 'meta-binder-count-ok';
+                    oldLabel.textContent = `${owned}/${maxCount} ✓`;
+                } else {
+                    oldLabel.className = 'meta-binder-count-missing';
+                    oldLabel.textContent = `${owned}/${maxCount}`;
+                }
+            }
+
+            // Update +/- button titles and - button styling
+            const plusBtn = el.querySelector('.btn-green[data-card-id]');
+            const minusBtn = el.querySelector('.btn-red[data-card-id]');
+            if (plusBtn) plusBtn.title = `Add to collection (${owned}/4)`;
+            if (minusBtn) {
+                minusBtn.title = `Remove from collection (${owned}/4)`;
+                minusBtn.style.color = owned > 0 ? '#fff' : '#999';
+                minusBtn.style.background = owned > 0 ? '#dc3545' : '#fff';
+            }
+
+            // Update wishlist button
+            const wishBtn = el.querySelector('.btn-wishlist[data-card-id]');
+            if (wishBtn) {
+                const onWishlist = window.userWishlist && window.userWishlist.has(cardId);
+                wishBtn.style.background = onWishlist ? '#E91E63' : '#F48FB1';
+                wishBtn.style.borderColor = onWishlist ? '#E91E63' : '#F48FB1';
+                wishBtn.innerHTML = onWishlist ? '&#9829;' : '&#9825;';
+            }
+        });
+    }
+
     window.buildMetaBinder = buildMetaBinderWithChunkWatch;
     window.loadSavedMetaBinder = loadSavedMetaBinder;
+    window.refreshMetaBinderOwnership = refreshMetaBinderOwnership;
     window.metaBinderAddMissingToWishlist = metaBinderAddMissingToWishlist;
     window.metaBinderSendMissingToProxy = metaBinderSendMissingToProxy;
     window.metaBinderProxyNewCards = metaBinderProxyNewCards;

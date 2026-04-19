@@ -69,20 +69,29 @@ def create_merged_database():
     prices_dict = {}
     frontend_prices = os.path.join(frontend_data, 'price_data.csv')
     backend_prices = os.path.join(data_dir, 'price_data.csv')
-    backend_map = {}
-    for p in load_csv(backend_prices):
-        key = f"{p.get('set')}_{p.get('number')}"
-        if p.get('eur_price'):
-            backend_map[key] = p
+    # Load frontend prices first (may be more complete from prior runs)
     for p in load_csv(frontend_prices):
         key = f"{p.get('set')}_{p.get('number')}"
         if p.get('eur_price'):
             prices_dict[key] = p
-    # Backend entries only override if frontend has no price for that key
-    for key, p in backend_map.items():
-        if key not in prices_dict:
+    fe_count = len(prices_dict)
+    # Backend prices override when they are newer (latest scrape)
+    be_override = 0
+    for p in load_csv(backend_prices):
+        key = f"{p.get('set')}_{p.get('number')}"
+        if not p.get('eur_price'):
+            continue
+        existing = prices_dict.get(key)
+        if not existing:
             prices_dict[key] = p
-    print(f"✓ Preise geladen: {len(prices_dict)} Einträge (frontend + backend)")
+            be_override += 1
+        else:
+            be_ts = p.get('last_updated', '')
+            fe_ts = existing.get('last_updated', '')
+            if be_ts >= fe_ts:
+                prices_dict[key] = p
+                be_override += 1
+    print(f"✓ Preise geladen: {len(prices_dict)} Einträge ({fe_count} frontend, {be_override} backend-override)")
     en_keys = {f"{c.get('set')}_{c.get('number')}" for c in english_cards}
     jp_to_add = [c for c in japanese_cards if f"{c.get('set')}_{c.get('number')}" not in en_keys]
     

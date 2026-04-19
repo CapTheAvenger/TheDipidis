@@ -1740,28 +1740,28 @@
                 </div>
                 <div class="filter-group">
                     <select id="mbFilterType" onchange="applyComplexMetaFilter()" class="select-system">
-                        <option value="all">Alle Typen</option>
-                        <option value="Pokemon-Grass">Pokemon: Pflanze</option>
-                        <option value="Pokemon-Fire">Pokemon: Feuer</option>
-                        <option value="Pokemon-Water">Pokemon: Wasser</option>
-                        <option value="Pokemon-Lightning">Pokemon: Elektro</option>
-                        <option value="Pokemon-Psychic">Pokemon: Psycho</option>
-                        <option value="Pokemon-Fighting">Pokemon: Kampf</option>
-                        <option value="Pokemon-Darkness">Pokemon: Unlicht</option>
-                        <option value="Pokemon-Metal">Pokemon: Metall</option>
-                        <option value="Pokemon-Dragon">Pokemon: Drache</option>
-                        <option value="Pokemon-Colorless">Pokemon: Farblos</option>
-                        <option value="Supporter">Unterstutzer</option>
-                        <option value="Item">Item</option>
-                        <option value="Tool">Ausrustung</option>
-                        <option value="Stadium">Stadion</option>
-                        <option value="Special Energy">Spezial-Energie</option>
-                        <option value="Basic Energy">Basis-Energie</option>
-                        <option value="ACE SPEC">ACE SPEC</option>
+                        <option value="all">${mbText('mb.filterTypeAll', 'All Types')}</option>
+                        <option value="Pokemon-Grass">${mbText('cl.typePokemonGrass', 'Pokémon: Grass')}</option>
+                        <option value="Pokemon-Fire">${mbText('cl.typePokemonFire', 'Pokémon: Fire')}</option>
+                        <option value="Pokemon-Water">${mbText('cl.typePokemonWater', 'Pokémon: Water')}</option>
+                        <option value="Pokemon-Lightning">${mbText('cl.typePokemonLightning', 'Pokémon: Lightning')}</option>
+                        <option value="Pokemon-Psychic">${mbText('cl.typePokemonPsychic', 'Pokémon: Psychic')}</option>
+                        <option value="Pokemon-Fighting">${mbText('cl.typePokemonFighting', 'Pokémon: Fighting')}</option>
+                        <option value="Pokemon-Darkness">${mbText('cl.typePokemonDarkness', 'Pokémon: Darkness')}</option>
+                        <option value="Pokemon-Metal">${mbText('cl.typePokemonMetal', 'Pokémon: Metal')}</option>
+                        <option value="Pokemon-Dragon">${mbText('cl.typePokemonDragon', 'Pokémon: Dragon')}</option>
+                        <option value="Pokemon-Colorless">${mbText('cl.typePokemonColorless', 'Pokémon: Colorless')}</option>
+                        <option value="Supporter">${mbText('cl.typeSupporter', 'Supporter')}</option>
+                        <option value="Item">${mbText('cl.typeItem', 'Item')}</option>
+                        <option value="Tool">${mbText('cl.typeTool', 'Tool')}</option>
+                        <option value="Stadium">${mbText('cl.typeStadium', 'Stadium')}</option>
+                        <option value="Special Energy">${mbText('cl.typeSpecEnergy', 'Special Energy')}</option>
+                        <option value="Basic Energy">${mbText('cl.typeBasicEnergy', 'Basic Energy')}</option>
+                        <option value="ACE SPEC">${mbText('cl.typeAceSpec', 'Ace Spec')}</option>
                     </select>
 
                     <select id="mbFilterSet" onchange="applyComplexMetaFilter()" class="select-system">
-                        <option value="all">Alle Sets</option>
+                        <option value="all">${mbText('mb.filterSetAll', 'All Sets')}</option>
                     </select>
                 </div>
                 <div class="filter-group">

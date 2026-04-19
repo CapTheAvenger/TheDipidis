@@ -77,10 +77,19 @@ def _fetch_single_price(card: dict, base_delay: float) -> dict:
                 # Best match: the row with class="current" IS this card's print
                 current_row = prints_table.select_one("tr.current")
                 if current_row:
-                    eur_link = current_row.select_one("a.card-price.eur")
-                    if eur_link:
-                        eur_price = eur_link.get_text(strip=True)
-                        logger.info("  + LT Preis [%s]: %s (Current-Row)", card_id, eur_price)
+                    # Validate that the current row actually belongs to this card number
+                    num_span = current_row.select_one("span.prints-table-card-number")
+                    row_number = num_span.get_text(strip=True).lstrip("#") if num_span else ""
+                    expected_number = str(card['number']).lstrip("0") or "0"
+                    row_number_norm = row_number.lstrip("0") or "0"
+                    if row_number_norm == expected_number:
+                        eur_link = current_row.select_one("a.card-price.eur")
+                        if eur_link:
+                            eur_price = eur_link.get_text(strip=True)
+                            logger.info("  + LT Preis [%s]: %s (Current-Row)", card_id, eur_price)
+                    else:
+                        logger.info("  ! LT tr.current Nummer #%s != erwartet #%s [%s], ueberspringe",
+                                    row_number, card['number'], card_id)
                 # Fallback: match by card number in <span class="prints-table-card-number">
                 if not eur_price:
                     for row in prints_table.select("tr"):

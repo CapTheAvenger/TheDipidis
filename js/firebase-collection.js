@@ -56,6 +56,11 @@ async function addToCollection(cardId) {
     updateCardUI(cardId);
     showNotification(`Added to collection (${newCount}/4)`, 'success');
     
+    // Auto-decrement wishlist: if the card is on the wishlist, reduce by 1
+    if (window.userWishlist && window.userWishlist.has(cardId)) {
+      await removeFromWishlist(cardId);
+    }
+    
     // Update collection display and stats
     updateCollectionUI();
     

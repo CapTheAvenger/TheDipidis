@@ -1,8 +1,6 @@
 (function () {
     'use strict';
 
-    const META_BINDER_CACHE_KEY = 'metaBinderCacheV1';
-
     function mbText(key, fallback) {
         if (typeof t === 'function') {
             const translated = t(key);
@@ -638,7 +636,49 @@
     }
 
     // ── Delta: compare with collection and cached previous binder ──
-    function computeDelta(binderMap) {
+    /**
+     * Load the previous binder snapshot.
+     * Logged-in users: from Firestore (cross-device).
+     * Guest users: empty set (no comparison).
+     */
+    async function loadPreviousBinderIds() {
+        const user = window.auth?.currentUser;
+        if (user && window.db) {
+            try {
+                const doc = await window.db.collection('users').doc(user.uid).get();
+                const data = doc.exists ? doc.data() : {};
+                const arr = Array.isArray(data.metaBinderSnapshot) ? data.metaBinderSnapshot : [];
+                const ts = data.metaBinderSnapshotDate || null;
+                return { ids: new Set(arr), date: ts, hasProfile: true };
+            } catch (e) {
+                console.warn('[MetaBinder] Firestore load failed, falling back to localStorage', e);
+            }
+        }
+        // Guest: no comparison data
+        return { ids: new Set(), date: null, hasProfile: false };
+    }
+
+    /**
+     * Save the current binder snapshot.
+     * Logged-in users: to Firestore.
+     * Also keep localStorage as quick fallback.
+     */
+    async function saveBinderSnapshot(cardIds) {
+        const arr = Array.from(cardIds);
+        const user = window.auth?.currentUser;
+        if (user && window.db) {
+            try {
+                await window.db.collection('users').doc(user.uid).update({
+                    metaBinderSnapshot: arr,
+                    metaBinderSnapshotDate: new Date().toISOString()
+                });
+            } catch (e) {
+                console.warn('[MetaBinder] Firestore save failed', e);
+            }
+        }
+    }
+
+    async function computeDelta(binderMap) {
         const collectionCounts = window.userCollectionCounts || new Map();
         const ownedByPrintRef = new Map();
 
@@ -664,12 +704,11 @@
             return total;
         }
 
-        // Load previous binder from cache
-        let previousIds = new Set();
-        try {
-            const cached = JSON.parse(localStorage.getItem(META_BINDER_CACHE_KEY) || '[]');
-            previousIds = new Set(cached);
-        } catch (_) { /* ignore */ }
+        // Load previous binder snapshot (Firestore for logged-in, empty for guests)
+        const prev = await loadPreviousBinderIds();
+        const previousIds = prev.ids;
+        const hasProfile = prev.hasProfile;
+        const snapshotDate = prev.date;
 
         const results = [];
         binderMap.forEach((entry, cardId) => {
@@ -694,7 +733,7 @@
                 ownedIntlTotal,
                 missing,
                 ownershipMode,
-                isNew: !wasInPrevious,
+                isNew: hasProfile && previousIds.size > 0 ? !wasInPrevious : false,
                 decks: entry.decks,
                 type: entry.type,
                 rarity: entry.rarity,
@@ -704,19 +743,22 @@
         });
 
         // Cards that were in the previous binder but no longer needed
+        // For guests without profile: no New/Dropped comparison
         const currentIds = new Set(binderMap.keys());
         const droppedCards = [];
-        previousIds.forEach(oldId => {
-            if (!currentIds.has(oldId)) {
-                const [name, set, number] = oldId.split('|');
-                droppedCards.push({ cardId: oldId, name: name || oldId, set: set || '', number: number || '' });
-            }
-        });
+        if (hasProfile && previousIds.size > 0) {
+            previousIds.forEach(oldId => {
+                if (!currentIds.has(oldId)) {
+                    const [name, set, number] = oldId.split('|');
+                    droppedCards.push({ cardId: oldId, name: name || oldId, set: set || '', number: number || '' });
+                }
+            });
+        }
 
-        // Save current binder as new cache
-        localStorage.setItem(META_BINDER_CACHE_KEY, JSON.stringify(Array.from(binderMap.keys())));
+        // Save current binder snapshot to Firestore (logged-in) 
+        await saveBinderSnapshot(currentIds);
 
-        return { cards: results, droppedCards };
+        return { cards: results, droppedCards, hasProfile, snapshotDate };
     }
 
     function parseLocaleNumber(value) {
@@ -1471,7 +1513,7 @@
         const filtersEl = document.getElementById('metaBinderFilters');
         if (!grid) return;
 
-        const { cards, droppedCards } = delta;
+        const { cards, droppedCards, hasProfile, snapshotDate } = delta;
         window._metaBinderDroppedCards = droppedCards;
         const totalUnique = cards.length;
         const totalCopies = cards.reduce((s, c) => s + c.maxCount, 0);
@@ -1480,6 +1522,20 @@
         const ownedComplete = cards.filter(c => c.missing === 0).length;
         const newCount = cards.filter(c => c.isNew).length;
         const droppedCount = droppedCards.length;
+
+        // Determine label for New/Dropped based on profile availability
+        const hasSnapshot = hasProfile && (newCount > 0 || droppedCount > 0 || snapshotDate);
+        let comparisonHint = '';
+        if (hasProfile && snapshotDate) {
+            const d = new Date(snapshotDate);
+            comparisonHint = ` (vs. ${d.toLocaleDateString('de-DE')})`;
+        }
+        const newLabel = hasProfile
+            ? mbText('mb.newSinceLastGen', 'Neu seit letztem Generate') + comparisonHint
+            : mbText('mb.newNeedProfile', 'Neu (Login nötig)');
+        const droppedLabel = hasProfile
+            ? mbText('mb.droppedSinceLastGen', 'Dropped') + comparisonHint
+            : mbText('mb.droppedNeedProfile', 'Dropped (Login nötig)');
 
         // Stats bar
         if (statsEl) {
@@ -1501,13 +1557,13 @@
                     <span class="meta-binder-stat-value meta-binder-stat-red">${missingUnique} / ${missingCopies}</span>
                     <span class="meta-binder-stat-label">${mbText('mb.missing', 'Missing (Cards / Copies)')}</span>
                 </div>
-                <div class="meta-binder-stat">
-                    <span class="meta-binder-stat-value" style="color:#3B4CCA">${newCount}</span>
-                    <span class="meta-binder-stat-label">${mbText('mb.newThisWeek', 'New This Week')}</span>
+                <div class="meta-binder-stat"${!hasProfile ? ' title="Login nötig für Vergleich"' : ''}>
+                    <span class="meta-binder-stat-value" style="color:#3B4CCA">${hasProfile ? newCount : '–'}</span>
+                    <span class="meta-binder-stat-label">${newLabel}</span>
                 </div>
-                <button class="meta-binder-stat meta-binder-stat-clickable" type="button" onclick="openMetaBinderDroppedModal()" title="${mbText('mb.openDroppedModal', 'Show dropped cards')}">
-                    <span class="meta-binder-stat-value" style="color:#e67e22">${droppedCount}</span>
-                    <span class="meta-binder-stat-label">${mbText('mb.droppedCount', 'Dropped')}</span>
+                <button class="meta-binder-stat meta-binder-stat-clickable" type="button" onclick="openMetaBinderDroppedModal()" title="${mbText('mb.openDroppedModal', 'Show dropped cards')}"${!hasProfile ? ' disabled' : ''}>
+                    <span class="meta-binder-stat-value" style="color:#e67e22">${hasProfile ? droppedCount : '–'}</span>
+                    <span class="meta-binder-stat-label">${droppedLabel}</span>
                 </button>`;
         }
 
@@ -1521,7 +1577,7 @@
                     <button class="meta-binder-filter-btn active" data-filter="all" onclick="setMetaBinderFilter('all')">${mbText('mb.filterAll', 'Alle')} (${totalUnique})</button>
                     <button class="meta-binder-filter-btn" data-filter="owned" onclick="setMetaBinderFilter('owned')">${mbText('mb.filterOwned', 'Im Besitz')} (${ownedComplete})</button>
                     <button class="meta-binder-filter-btn" data-filter="missing" onclick="setMetaBinderFilter('missing')">${mbText('mb.filterMissing', 'Fehlend')} (${missingUnique})</button>
-                    <button class="meta-binder-filter-btn" data-filter="new" onclick="setMetaBinderFilter('new')">🆕 ${mbText('mb.filterNew', 'Neu')} (${newCount})</button>
+                    ${hasProfile ? `<button class="meta-binder-filter-btn" data-filter="new" onclick="setMetaBinderFilter('new')">🆕 ${mbText('mb.filterNew', 'Neu')} (${newCount})</button>` : ''}
                 </div>
                 <div class="filter-group">
                     <select id="mbFilterType" onchange="applyComplexMetaFilter()" class="select-system">
@@ -1797,7 +1853,7 @@
             return;
         }
 
-        const delta = computeDelta(binderMap);
+        const delta = await computeDelta(binderMap);
 
         // Store on window for the action buttons
         window._metaBinderDelta = delta;

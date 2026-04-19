@@ -698,7 +698,8 @@
                 decks: entry.decks,
                 type: entry.type,
                 rarity: entry.rarity,
-                isAceSpec: !!entry.isAceSpec
+                isAceSpec: !!entry.isAceSpec,
+                familyRefs: entry.familyRefs || []
             });
         });
 

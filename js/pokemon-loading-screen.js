@@ -21,7 +21,7 @@
     { key: 'city_league_images',                url: 'data/city_league_images.json',               type: 'json' },
     { key: 'pokemon_dex_numbers',               url: 'data/pokemon_dex_numbers.json',              type: 'json' },
     { key: 'sets',                              url: 'data/sets.json',                             type: 'json' },
-    { key: 'pokemon_sets_mapping',              url: 'data/pokemon_sets_mapping.csv',              type: 'csv' },
+    { key: 'pokemon_sets_mapping',              url: 'pokemon_sets_mapping.csv',                   type: 'csv' },
     { key: 'ace_specs',                         url: 'data/ace_specs.json',                        type: 'json' },
   ];
 

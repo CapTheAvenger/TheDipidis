@@ -994,6 +994,43 @@ async function clearCollection() {
   }
 }
 
+async function clearWishlist() {
+  const user = auth.currentUser;
+  if (!user) {
+    showNotification('Please sign in to use this feature', 'error');
+    return;
+  }
+
+  if (!window.userWishlist || window.userWishlist.size === 0) {
+    showNotification(getLang()==='de' ? 'Wishlist ist bereits leer' : 'Wishlist is already empty', 'info');
+    return;
+  }
+
+  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Wishlist leeren?' : 'Really clear the entire wishlist?');
+  if (!ok) return;
+
+  try {
+    await db.collection('users').doc(user.uid).set({
+      wishlist: [],
+      wishlistCounts: {}
+    }, { merge: true });
+
+    window.userWishlist = new Set();
+    window.userWishlistCounts = new Map();
+    updateWishlistUI();
+
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
+    }
+    if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
+
+    showNotification(getLang()==='de' ? 'Wishlist wurde geleert' : 'Wishlist cleared', 'success');
+  } catch (error) {
+    console.error('Error clearing wishlist:', error);
+    showNotification(getLang()==='de' ? 'Fehler beim Leeren der Wishlist' : 'Error clearing the wishlist', 'error');
+  }
+}
+
 // Update wishlist UI
 function updateWishlistUI(searchFilter = '', setFilter = '') {
   const wishlistGrid = document.getElementById('wishlist-grid');
@@ -4231,6 +4268,7 @@ window.dexImportExecute        = dexImportExecute;
 window.setCollectionSort       = setCollectionSort;
 window.setCollectionFilter     = setCollectionFilter;
 window.clearCollection         = clearCollection;
+window.clearWishlist           = clearWishlist;
 
 // ── Wishlist Heart Badge (universal) ─────────────────────
 /**

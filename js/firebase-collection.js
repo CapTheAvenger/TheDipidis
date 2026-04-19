@@ -4298,3 +4298,401 @@ function toggleWishlistBadge(btn) {
 
 window.getWishlistBadgeHtml = getWishlistBadgeHtml;
 window.toggleWishlistBadge  = toggleWishlistBadge;
+
+// ══════════════════════════════════════════════════════════
+// ██  TRADE LIST  ██  (1:1 clone of Wishlist)
+// ══════════════════════════════════════════════════════════
+
+// Add card to tradelist with a specific count
+async function addToTradelistWithCount(cardId, count) {
+  const user = auth.currentUser;
+  if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
+  const qty = Math.max(1, Math.min(count, 4));
+  try {
+    await db.collection('users').doc(user.uid).update({
+      tradelist: firebase.firestore.FieldValue.arrayUnion(cardId),
+      [`tradelistCounts.${cardId}`]: qty
+    });
+    if (!window.userTradelist) window.userTradelist = new Set();
+    window.userTradelist.add(cardId);
+    if (!window.userTradelistCounts) window.userTradelistCounts = new Map();
+    window.userTradelistCounts.set(cardId, qty);
+    showNotification(`Added to trade list (${qty}x)`, 'success');
+    updateTradelistUI();
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData)
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, tradelistUpdate: true });
+  } catch (error) {
+    console.error('Error adding to tradelist:', error);
+    showNotification('Error updating trade list', 'error');
+  }
+}
+
+// Add card to tradelist (or increment count)
+async function addToTradelist(cardId) {
+  const user = auth.currentUser;
+  if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
+  const currentCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 0) : 0;
+  if (currentCount >= 4) { showNotification('Maximum 4 copies per card', 'info'); return; }
+  const newCount = currentCount + 1;
+  try {
+    await db.collection('users').doc(user.uid).update({
+      tradelist: firebase.firestore.FieldValue.arrayUnion(cardId),
+      [`tradelistCounts.${cardId}`]: newCount
+    });
+    if (!window.userTradelist) window.userTradelist = new Set();
+    window.userTradelist.add(cardId);
+    if (!window.userTradelistCounts) window.userTradelistCounts = new Map();
+    window.userTradelistCounts.set(cardId, newCount);
+    showNotification(`Added to trade list (${newCount}x)`, 'success');
+    updateTradelistUI();
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData)
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, tradelistUpdate: true });
+  } catch (error) {
+    console.error('Error adding to tradelist:', error);
+    showNotification('Error updating trade list', 'error');
+  }
+}
+
+// Remove from tradelist (decrement count, remove if 0)
+async function removeFromTradelist(cardId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const currentCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 1) : 1;
+  const newCount = currentCount - 1;
+  try {
+    if (newCount <= 0) {
+      await db.collection('users').doc(user.uid).update({
+        tradelist: firebase.firestore.FieldValue.arrayRemove(cardId),
+        [`tradelistCounts.${cardId}`]: firebase.firestore.FieldValue.delete()
+      });
+      window.userTradelist.delete(cardId);
+      if (window.userTradelistCounts) window.userTradelistCounts.delete(cardId);
+    } else {
+      await db.collection('users').doc(user.uid).update({
+        [`tradelistCounts.${cardId}`]: newCount
+      });
+      if (window.userTradelistCounts) window.userTradelistCounts.set(cardId, newCount);
+    }
+    showNotification(newCount > 0 ? `Trade list: ${newCount}x` : 'Removed from trade list', 'success');
+    updateTradelistUI();
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData)
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, tradelistUpdate: true });
+  } catch (error) {
+    console.error('Error removing from tradelist:', error);
+  }
+}
+
+// Toggle tradelist
+async function toggleTradelist(cardId) {
+  if (!window.userTradelist) window.userTradelist = new Set();
+  if (window.userTradelist.has(cardId)) {
+    await removeFromTradelist(cardId);
+  } else {
+    await addToTradelist(cardId);
+  }
+}
+
+// Clear entire tradelist
+async function clearTradelist() {
+  const user = auth.currentUser;
+  if (!user) { showNotification('Please sign in to use this feature', 'error'); return; }
+  if (!window.userTradelist || window.userTradelist.size === 0) {
+    showNotification(getLang()==='de' ? 'Trade List ist bereits leer' : 'Trade list is already empty', 'info');
+    return;
+  }
+  const ok = confirm(getLang()==='de' ? 'Wirklich die gesamte Trade List leeren?' : 'Really clear the entire trade list?');
+  if (!ok) return;
+  try {
+    await db.collection('users').doc(user.uid).set({
+      tradelist: [],
+      tradelistCounts: {},
+      tradelistMinPrices: {}
+    }, { merge: true });
+    window.userTradelist = new Set();
+    window.userTradelistCounts = new Map();
+    window.userTradelistMinPrices = new Map();
+    updateTradelistUI();
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData)
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, tradelistUpdate: true });
+    showNotification(getLang()==='de' ? 'Trade List wurde geleert' : 'Trade list cleared', 'success');
+  } catch (error) {
+    console.error('Error clearing tradelist:', error);
+    showNotification(getLang()==='de' ? 'Fehler beim Leeren der Trade List' : 'Error clearing the trade list', 'error');
+  }
+}
+
+// ── Update Trade List UI ─────────────────────────────────
+function updateTradelistUI(searchFilter = '', setFilter = '') {
+  const tradelistGrid = document.getElementById('tradelist-grid');
+  if (!tradelistGrid) return;
+
+  const tabCount = document.getElementById('tab-count-tradelist');
+  if (tabCount) {
+    const n = window.userTradelist ? window.userTradelist.size : 0;
+    tabCount.textContent = n > 0 ? `(${n})` : '';
+  }
+
+  if (!window.userTradelist || window.userTradelist.size === 0) {
+    tradelistGrid.innerHTML = '<p style="color: #999;">No cards in trade list yet</p>';
+    const searchResults = document.getElementById('tradelist-search-results');
+    if (searchResults) searchResults.textContent = '';
+    return;
+  }
+
+  const allCards = window.allCardsDatabase || [];
+
+  // Populate set dropdown
+  const setDropdown = document.getElementById('tradelist-set-filter');
+  if (setDropdown) {
+    const setsInTradelist = new Set();
+    window.userTradelist.forEach(cardId => {
+      const [, cardSet] = cardId.split('|');
+      if (cardSet) setsInTradelist.add(cardSet);
+    });
+    const currentVal = setDropdown.value;
+    setDropdown.innerHTML = '<option value="">All Sets</option>';
+    [...setsInTradelist].sort().forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      if (s === currentVal) opt.selected = true;
+      setDropdown.appendChild(opt);
+    });
+  }
+
+  const tradelistHtml = [];
+  let totalCards = 0;
+  let matchingCards = 0;
+  let totalValue = 0;
+
+  window.userTradelist.forEach(cardId => {
+    const [cardName, cardSet, cardNumber] = cardId.split('|');
+    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    if (card && card.image_url) {
+      totalCards++;
+      const tradeCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 1) : 1;
+
+      if (setFilter && cardSet !== setFilter) return;
+      if (searchFilter) {
+        const searchLower = searchFilter.toLowerCase();
+        if (!card.name.toLowerCase().includes(searchLower) &&
+            !cardSet.toLowerCase().includes(searchLower) &&
+            !cardNumber.toLowerCase().includes(searchLower)) return;
+      }
+      matchingCards++;
+
+      const safeNameHtml = escapeHtml(card.name);
+      const safeSetHtml = escapeHtml(cardSet);
+      const safeNumberHtml = escapeHtml(cardNumber);
+      const safeImageAttr = escapeHtml(card.image_url);
+      const safeImageJs = escapeJsSingleQuoted(card.image_url);
+      const safeNameJs = escapeJsSingleQuoted(card.name);
+      const safeCardIdJs = escapeJsSingleQuoted(cardId);
+
+      const price = card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+      const priceDisplay = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} \u20ac` : 'N/A';
+      if (!isNaN(price) && price > 0) totalValue += price * tradeCount;
+
+      const rawCmUrl = card.cardmarket_url || '';
+      const cmUrl = rawCmUrl ? rawCmUrl.split('?')[0] + '?sellerCountry=7&language=1,3' : '';
+      const safeCmUrl = escapeHtml(cmUrl);
+
+      const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
+      const maxCopies = (typeof getLegalMaxCopies === 'function') ? getLegalMaxCopies(card) : 4;
+      const maxLabel = maxCopies >= 59 ? '\u221e' : maxCopies;
+
+      const minPrice = window.userTradelistMinPrices ? (window.userTradelistMinPrices.get(cardId) || '') : '';
+      const minPriceVal = minPrice ? parseFloat(minPrice).toFixed(2).replace('.', ',') : '';
+
+      tradelistHtml.push(`
+        <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+          <img src="${safeImageAttr}" alt="${safeNameHtml}" style="width: 100%; display: block; cursor: pointer;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}" onclick="showImageView('${safeImageJs}', '${safeNameJs}')">
+          <div style="position: absolute; top: 5px; left: 5px; background: #16a085; color: white; min-width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0 4px;" title="${tradeCount}x for trade">${tradeCount}x</div>
+          <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 4px;">
+            <button onclick="addToTradelist('${safeCardIdJs}')" style="background: #16a085; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Add copy (${tradeCount}/4)">+</button>
+            <button onclick="removeFromTradelist('${safeCardIdJs}')" style="background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Remove copy">\u2212</button>
+          </div>
+          <div style="padding: 8px; background: white;">
+            <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">${safeNameHtml}</div>
+            <div style="font-size: 0.75em; color: #666;">${safeSetHtml} ${safeNumberHtml}</div>
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+              <span style="font-size: 0.75em; color: ${ownedCount > 0 ? '#4CAF50' : '#999'}; font-weight: 600;">\u2713 ${ownedCount}/${maxLabel}</span>
+            </div>
+            ${cmUrl
+              ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
+              : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">${priceDisplay}</div>`}
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+              <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">Min:</span>
+              <input type="text" inputmode="decimal" value="${minPriceVal}" placeholder="\u2014"
+                aria-label="Minimum price for ${safeNameHtml}"
+                style="width: 52px; padding: 2px 4px; border: 1.5px solid #ddd; border-radius: 4px; font-size: 0.75em; font-weight: 600; color: #16a085; text-align: right; outline: none;"
+                onfocus="this.style.borderColor='#16a085'" onblur="this.style.borderColor='#ddd'; saveTradelistMinPrice('${safeCardIdJs}', this.value)"
+                onkeydown="if(event.key==='Enter'){this.blur();}">
+              <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">\u20ac</span>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+  });
+
+  const searchResults = document.getElementById('tradelist-search-results');
+  if (searchResults) {
+    const isFiltered = searchFilter || setFilter;
+    const valueStr = totalValue > 0 ? ` \u00b7 ~${totalValue.toFixed(2).replace('.', ',')} \u20ac` : '';
+    searchResults.textContent = isFiltered
+      ? `Showing ${matchingCards} of ${totalCards} cards${valueStr}`
+      : (totalCards > 0 ? `${totalCards} cards${valueStr}` : '');
+  }
+
+  if (tradelistHtml.length > 0) {
+    tradelistGrid.innerHTML = tradelistHtml.join('');
+  } else if (searchFilter || setFilter) {
+    tradelistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'No cards found', description: 'No cards match your current filters.', icon: 'cards' });
+  } else {
+    tradelistGrid.innerHTML = getEmptyStateBoxHtml({ title: 'Your Trade List is empty!', description: 'Add cards to your trade list by clicking the trade button on any card.', icon: 'pokeball' });
+  }
+}
+
+// Grid modal for tradelist
+function openTradelistGridModal() {
+  if (!window.userTradelist || window.userTradelist.size === 0) {
+    showNotification('Trade list is empty', 'info');
+    return;
+  }
+  const modal = document.getElementById('tradelistGridModal');
+  const grid = document.getElementById('tradelistCompactGrid');
+  if (!modal || !grid) return;
+  const allCards = window.allCardsDatabase || [];
+  let html = '';
+  window.userTradelist.forEach(cardId => {
+    const [cardName, cardSet, cardNumber] = cardId.split('|');
+    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    if (!card || !card.image_url) return;
+    const tradeCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 1) : 1;
+    const minPrice = window.userTradelistMinPrices ? (window.userTradelistMinPrices.get(cardId) || 0) : 0;
+    const safeImage = escapeHtml(card.image_url);
+    const safeName = escapeHtml(card.name);
+    const minPriceStrip = minPrice > 0
+      ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(22,160,133,0.85);color:#fff;text-align:center;font-size:8px;font-weight:700;padding:2px 0;border-radius:0 0 5px 5px;white-space:nowrap;overflow:hidden;">min ${minPrice.toFixed(2).replace('.',',')}\u20ac</div>`
+      : '';
+    html += `<div class="compact-card" data-export-card${minPrice > 0 ? ` data-min-price="${minPrice.toFixed(2)}"` : ''}>
+      <img src="${safeImage}" alt="${safeName}" style="width:100%;display:block;border-radius:5px;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}">
+      ${tradeCount > 1 ? `<span class="compact-badge" style="position:absolute;top:2px;right:2px;background:#16a085;color:#fff;border-radius:50%;min-width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,.4);padding:0 3px;">${tradeCount}x</span>` : ''}
+      ${minPriceStrip}
+    </div>`;
+  });
+  grid.innerHTML = html || '<p style="color:#999;">No cards to display</p>';
+  modal.classList.add('show');
+}
+
+function closeTradelistGridModal() {
+  const modal = document.getElementById('tradelistGridModal');
+  if (modal) modal.classList.remove('show');
+}
+
+function exportTradelistAsImage() {
+  const grid = document.getElementById('tradelistCompactGrid');
+  if (!grid) return;
+  if (typeof exportDeckAsImage === 'function') {
+    exportDeckAsImage(grid, 'Trade List');
+  } else {
+    showNotification('Image export not available', 'error');
+  }
+}
+
+// Save min price for tradelist card
+async function saveTradelistMinPrice(cardId, rawValue) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const cleaned = rawValue.replace(',', '.').trim();
+  const val = parseFloat(cleaned);
+  try {
+    if (!cleaned || isNaN(val) || val <= 0) {
+      await db.collection('users').doc(user.uid).update({
+        [`tradelistMinPrices.${cardId}`]: firebase.firestore.FieldValue.delete()
+      });
+      if (window.userTradelistMinPrices) window.userTradelistMinPrices.delete(cardId);
+    } else {
+      const rounded = Math.round(val * 100) / 100;
+      await db.collection('users').doc(user.uid).update({
+        [`tradelistMinPrices.${cardId}`]: rounded
+      });
+      if (!window.userTradelistMinPrices) window.userTradelistMinPrices = new Map();
+      window.userTradelistMinPrices.set(cardId, rounded);
+    }
+  } catch (error) {
+    console.error('Error saving tradelist min price:', error);
+  }
+}
+
+// Copy tradelist to clipboard
+function copyTradelistToClipboard() {
+  if (!window.userTradelist || window.userTradelist.size === 0) {
+    showNotification('Trade list is empty', 'info');
+    return;
+  }
+  const allCards = window.allCardsDatabase || [];
+  const lines = [];
+  let totalVal = 0;
+  window.userTradelist.forEach(cardId => {
+    const [cardName, cardSet, cardNumber] = cardId.split('|');
+    const card = allCards.find(c => c.name === cardName && c.set === cardSet && c.number === cardNumber);
+    const count = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 1) : 1;
+    const price = card && card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
+    const priceStr = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} \u20ac` : '';
+    const minP = window.userTradelistMinPrices ? (window.userTradelistMinPrices.get(cardId) || 0) : 0;
+    const minPStr = minP > 0 ? ` (min ${minP.toFixed(2).replace('.', ',')} \u20ac)` : '';
+    if (!isNaN(price) && price > 0) totalVal += price * count;
+    lines.push(`${count}x ${cardName} (${cardSet} ${cardNumber})${priceStr ? ' - ' + priceStr : ''}${minPStr}`);
+  });
+  const totalStr = totalVal > 0 ? `\n\nTotal: ~${totalVal.toFixed(2).replace('.', ',')} \u20ac` : '';
+  const text = `Trade List (${window.userTradelist.size} cards):\n${lines.join('\n')}${totalStr}`;
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    navigator.clipboard.writeText(text).then(() => {
+      showNotification('Trade list copied to clipboard!', 'success');
+    }).catch(() => _fallbackCopyTradelist(text));
+  } else {
+    _fallbackCopyTradelist(text);
+  }
+}
+
+function _fallbackCopyTradelist(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showNotification('Trade list copied!', 'success'); } catch (_) { showNotification('Copy failed', 'error'); }
+  document.body.removeChild(ta);
+}
+
+// Filter tradelist
+function filterTradelist() {
+  const searchInput = document.getElementById('tradelist-search');
+  const setInput = document.getElementById('tradelist-set-filter');
+  const searchTerm = searchInput ? searchInput.value.trim() : '';
+  const setTerm = setInput ? setInput.value : '';
+  updateTradelistUI(searchTerm, setTerm);
+}
+
+// Toggle tradelist from card database button
+function toggleTradelistFromCardDbButton(buttonEl) {
+  const cardId = buttonEl?.getAttribute('data-card-id') || '';
+  if (!cardId) return;
+  toggleTradelist(cardId);
+}
+
+window.clearTradelist                = clearTradelist;
+window.addToTradelist                = addToTradelist;
+window.addToTradelistWithCount       = addToTradelistWithCount;
+window.removeFromTradelist           = removeFromTradelist;
+window.toggleTradelist               = toggleTradelist;
+window.updateTradelistUI             = updateTradelistUI;
+window.filterTradelist               = filterTradelist;
+window.openTradelistGridModal        = openTradelistGridModal;
+window.closeTradelistGridModal       = closeTradelistGridModal;
+window.exportTradelistAsImage        = exportTradelistAsImage;
+window.saveTradelistMinPrice         = saveTradelistMinPrice;
+window.copyTradelistToClipboard      = copyTradelistToClipboard;
+window.toggleTradelistFromCardDbButton = toggleTradelistFromCardDbButton;

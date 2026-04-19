@@ -2648,6 +2648,7 @@
             const userOwnsCard = window.userCollection && window.userCollection.has(cardId);
             const ownedCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
             const userWantsCard = window.userWishlist && window.userWishlist.has(cardId);
+            const userTradesCard = window.userTradelist && window.userTradelist.has(cardId);
 
             // Show other-print ownership strictly from the card's international_prints family.
             const altPrintOwnedCount = ownedCount === 0
@@ -2711,6 +2712,7 @@
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="addCollectionFromCardDbButton(this)" class="btn-green card-badge" title="Add to collection (${ownedCount}/4)" aria-label="Add ${displayName} to collection">+</button>
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="removeCollectionFromCardDbButton(this)" class="btn-red card-badge" style="color: ${ownedCount > 0 ? '#fff' : '#999'}; background: ${ownedCount > 0 ? '#dc3545' : '#fff'};" title="Remove from collection (${ownedCount}/4)" aria-label="Remove ${displayName} from collection">-</button>
                         <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleWishlistFromCardDbButton(this)" class="btn-wishlist card-badge" style="color: ${userWantsCard ? '#fff' : '#fff'}; background: ${userWantsCard ? '#E91E63' : '#F48FB1'}; border: 2px solid ${userWantsCard ? '#E91E63' : '#F48FB1'};" title="${userWantsCard ? 'Remove from wishlist' : 'Add to wishlist'}" aria-label="${userWantsCard ? 'Remove ' + displayName + ' from wishlist' : 'Add ' + displayName + ' to wishlist'}">${userWantsCard ? '&#9829;' : '&#9825;'}</button>
+                        <button type="button" data-card-id="${escapeHtml(cardId)}" onclick="toggleTradelistFromCardDbButton(this)" class="btn-tradelist card-badge" style="color: #fff; background: ${userTradesCard ? '#16a085' : '#a3d9cd'}; border: 2px solid ${userTradesCard ? '#16a085' : '#a3d9cd'};" title="${userTradesCard ? 'Remove from trade list' : 'Add to trade list'}" aria-label="${userTradesCard ? 'Remove ' + displayName + ' from trade list' : 'Add ' + displayName + ' to trade list'}">${userTradesCard ? '&#8644;' : '&#8644;'}</button>
                     </div>
                 </div>
                 <div class="card-database-info">

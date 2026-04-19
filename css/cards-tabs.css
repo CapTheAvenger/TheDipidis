@@ -145,6 +145,12 @@
     border-color: #F48FB1 !important;
 }
 
+#cards .card-database-top-actions .btn-tradelist.card-badge {
+    background: #a3d9cd !important;
+    color: #fff !important;
+    border-color: #a3d9cd !important;
+}
+
 #cards .card-database-info {
     padding: 3px !important;
     background: linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%) !important;

@@ -21,6 +21,9 @@ if (!window.userCollectionCounts) window.userCollectionCounts = new Map();
 if (!window.userWishlist)         window.userWishlist         = new Set();
 if (!window.userWishlistCounts)  window.userWishlistCounts  = new Map();
 if (!window.userWishlistMaxPrices) window.userWishlistMaxPrices = new Map();
+if (!window.userTradelist)       window.userTradelist       = new Set();
+if (!window.userTradelistCounts) window.userTradelistCounts = new Map();
+if (!window.userTradelistMinPrices) window.userTradelistMinPrices = new Map();
 if (!window.deckFolders)          window.deckFolders          = [];
 
 // ---------------------------------------------------------------------------
@@ -52,6 +55,9 @@ function onUserSignedIn(user) {
   window.userWishlist         = new Set();
   window.userWishlistCounts  = new Map();
   window.userWishlistMaxPrices = new Map();
+  window.userTradelist       = new Set();
+  window.userTradelistCounts = new Map();
+  window.userTradelistMinPrices = new Map();
   window.userDecks            = [];
 
   loadUserData(user.uid);
@@ -346,6 +352,31 @@ async function loadUserData(userId) {
         });
       }
       if (typeof updateWishlistUI === 'function') updateWishlistUI();
+
+      // Tradelist
+      window.userTradelist = new Set(data.tradelist || []);
+      const tCounts = data.tradelistCounts || {};
+      window.userTradelistCounts = new Map();
+      if (typeof tCounts === 'object') {
+        Object.entries(tCounts).forEach(([k, v]) => {
+          const n = parseInt(v, 10);
+          if (!isNaN(n) && n > 0) window.userTradelistCounts.set(k, n);
+        });
+      }
+      window.userTradelist.forEach(cardId => {
+        if (!window.userTradelistCounts.has(cardId)) {
+          window.userTradelistCounts.set(cardId, 1);
+        }
+      });
+      const tMinPrices = data.tradelistMinPrices || {};
+      window.userTradelistMinPrices = new Map();
+      if (typeof tMinPrices === 'object') {
+        Object.entries(tMinPrices).forEach(([k, v]) => {
+          const n = parseFloat(v);
+          if (!isNaN(n) && n > 0) window.userTradelistMinPrices.set(k, n);
+        });
+      }
+      if (typeof updateTradelistUI === 'function') updateTradelistUI();
     } else {
       await createUserProfile(userId);
     }

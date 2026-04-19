@@ -28,6 +28,20 @@ function escapeJsSingleQuoted(value) {
     .replace(/\n/g, '\\n');
 }
 
+// Shared helper: lookup card by set+number via the global cardIndexBySetNumber Map
+// (the function getIndexedCardBySetNumber lives inside app-city-league.js and is NOT on window)
+function _lookupCardBySetNumber(setCode, number) {
+  const idx = window.cardIndexBySetNumber;
+  if (!(idx instanceof Map) || idx.size === 0) return null;
+  const s = String(setCode || '').toUpperCase().trim();
+  const n = String(number || '').trim();
+  if (!s || !n) return null;
+  return idx.get(`${s}-${n}`)
+    || idx.get(`${s}-${(n.replace(/^0+/, '') || '0')}`)
+    || idx.get(`${s}-${(n.replace(/^0+/, '') || '0').padStart(3, '0')}`)
+    || null;
+}
+
 // Add card to collection (increment count, max 4)
 async function addToCollection(cardId) {
   const user = auth.currentUser;
@@ -768,11 +782,13 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
         c.number === cardNumber
       );
 
-      // Fallback lookup via prebuilt set+number index (handles number normalization/padding differences)
-      if (!card && typeof window.getIndexedCardBySetNumber === 'function') {
-        card = window.getIndexedCardBySetNumber(cardSet, cardNumber)
-          || window.getIndexedCardBySetNumber(cardSet, String(parseInt(cardNumber, 10) || cardNumber))
-          || window.getIndexedCardBySetNumber(cardSet, String(cardNumber).padStart(3, '0'));
+      // Fallback lookup via prebuilt set+number index (handles name mismatches and number normalization)
+      if (!card && window.cardIndexBySetNumber instanceof Map && window.cardIndexBySetNumber.size > 0) {
+        const normSet = cardSet.toUpperCase().trim();
+        const normNum = cardNumber.trim();
+        card = window.cardIndexBySetNumber.get(`${normSet}-${normNum}`)
+          || window.cardIndexBySetNumber.get(`${normSet}-${(normNum.replace(/^0+/, '') || '0')}`)
+          || window.cardIndexBySetNumber.get(`${normSet}-${(normNum.replace(/^0+/, '') || '0').padStart(3, '0')}`);
       }
       
       if (card && card.image_url) {

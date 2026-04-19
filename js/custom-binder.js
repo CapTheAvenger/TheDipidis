@@ -9,6 +9,7 @@
     let cbAllArchetypes = [];      // [{name, source, label}]
     let cbArchetypesLoaded = false;
     let cbFilter = 'all';
+    let cbAllPrints = false;
     let _cbSkipNextClose = false;
     let _cbTierGroups = null; // cached tier groups for dropdown
     let cbPresets = []; // [{id, name, archetypes: [{name, source}]}]
@@ -615,6 +616,10 @@
                     <select id="cbFilterSet" onchange="cbApplyFilter()" class="select-system">
                         <option value="all">${cbText('cb.filterAllSets','All Sets')}</option>
                     </select>
+                </div>
+                <div class="filter-group">
+                    <button id="cbBtnStandardPrint" class="meta-binder-filter-btn active" onclick="cbSetPrintView(false)">${cbText('mb.standardPrint','Standard Print')}</button>
+                    <button id="cbBtnAllPrints" class="meta-binder-filter-btn" onclick="cbSetPrintView(true)">${cbText('mb.allPrints','All Prints')}</button>
                 </div>`;
 
             // Populate set filter
@@ -661,6 +666,15 @@
         cbApplyFilter();
     }
 
+    function cbSetPrintView(showAll) {
+        cbAllPrints = showAll;
+        const btnStd = document.getElementById('cbBtnStandardPrint');
+        const btnAll = document.getElementById('cbBtnAllPrints');
+        if (btnStd) btnStd.classList.toggle('active', !showAll);
+        if (btnAll) btnAll.classList.toggle('active', showAll);
+        cbApplyFilter();
+    }
+
     function cbApplyFilter() {
         const delta = window._cbDelta;
         if (!delta) return;
@@ -696,14 +710,42 @@
             return true;
         });
 
-        const sorted = shared.sortMetaCards([...filtered]);
+        // All Prints expansion
+        if (cbAllPrints) {
+            const collectionCounts = window.userCollectionCounts || new Map();
+            const expanded = [];
+            filtered.forEach(card => {
+                const refs = Array.isArray(card.familyRefs) ? card.familyRefs : [];
+                if (refs.length <= 1) { expanded.push(card); return; }
+                refs.forEach(ref => {
+                    const parsed = shared.parseIntlPrintRef(ref);
+                    if (!parsed.set || !parsed.number) return;
+                    const printCardId = shared.buildCardId(card.name, parsed.set, parsed.number);
+                    const ownedExact = collectionCounts.get(printCardId) || 0;
+                    expanded.push({
+                        ...card,
+                        set: parsed.set, number: parsed.number,
+                        cardId: printCardId, ownedExact, owned: ownedExact,
+                        ownedIntlTotal: ownedExact,
+                        missing: Math.max(0, card.maxCount - ownedExact),
+                        ownershipMode: ownedExact >= card.maxCount ? 'exact' : 'missing',
+                        familyRefs: refs, _isPrintExpansion: true
+                    });
+                });
+            });
+            filtered = expanded;
+        }
+
+        const sorted = cbAllPrints
+            ? shared.sortMetaCardsAllPrints([...filtered])
+            : shared.sortMetaCards([...filtered]);
 
         if (sorted.length === 0) {
             grid.innerHTML = `<p class="color-grey">${cbText('mb.empty', 'No cards found for current filter.')}</p>`;
             return;
         }
 
-        grid.innerHTML = sorted.map(card => {
+        const cardHtmlEntries = sorted.map(card => {
             const imageUrl = shared.findCardImage(card.name, card.set, card.number);
             const statusClass = card.ownershipMode === 'exact'
                 ? 'meta-binder-card-owned card-owned'
@@ -731,7 +773,7 @@
             const userWantsCard = window.userWishlist && window.userWishlist.has(card.cardId);
             const missingCount = Math.max(0, card.maxCount - ownedCount);
 
-            return `
+            return { name: card.name, html: `
                 <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${escapeHtml(String(card.set || ''))}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-card-id="${safeCardId}" data-family-refs="${escapeHtml((Array.isArray(card.familyRefs) ? card.familyRefs : []).join(','))}" data-max-count="${String(card.maxCount || 0)}" title="Decks: ${deckList}">
                     ${imageUrl
                         ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
@@ -748,8 +790,28 @@
                         <div class="deck-indicator-count">${card.decks.length} Decks</div>
                         ${countLabel}
                     </div>
-                </div>`;
-        }).join('');
+                </div>` };
+        });
+
+        // In All Prints mode: group same-name cards into horizontal rows
+        if (cbAllPrints) {
+            const groups = [];
+            let currentGroup = null;
+            cardHtmlEntries.forEach(entry => {
+                if (!currentGroup || currentGroup.name !== entry.name) {
+                    currentGroup = { name: entry.name, cards: [] };
+                    groups.push(currentGroup);
+                }
+                currentGroup.cards.push(entry.html);
+            });
+            grid.innerHTML = '<style>.cb-print-group{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;margin-bottom:16px;padding:10px;background:rgba(0,0,0,0.03);border-radius:10px;border:1px solid rgba(0,0,0,0.06)}.cb-print-group .meta-binder-card{margin:0}</style>'
+                + groups.map(g => g.cards.length > 1
+                    ? `<div class="cb-print-group">${g.cards.join('')}</div>`
+                    : g.cards[0]
+                ).join('');
+        } else {
+            grid.innerHTML = cardHtmlEntries.map(e => e.html).join('');
+        }
         refreshCustomBinderOwnership();
     }
 
@@ -874,6 +936,7 @@
     window.cbToggleArchetypeDropdown = cbToggleArchetypeDropdown;
     window.cbFilterArchetypeList = cbFilterArchetypeList;
     window.cbSetFilter = cbSetFilter;
+    window.cbSetPrintView = cbSetPrintView;
     window.cbApplyFilter = cbApplyFilter;
     window.cbAddMissingToWishlist = cbAddMissingToWishlist;
     window.cbSendMissingToProxy = cbSendMissingToProxy;

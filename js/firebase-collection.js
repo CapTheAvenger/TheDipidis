@@ -4477,6 +4477,10 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
       totalCards++;
       const tradeCount = window.userTradelistCounts ? (window.userTradelistCounts.get(cardId) || 1) : 1;
 
+      // Always count min price for total (before filter)
+      const minPriceRaw = window.userTradelistMinPrices ? (window.userTradelistMinPrices.get(cardId) || '') : '';
+      if (minPriceRaw) totalMinValue += parseFloat(minPriceRaw) * tradeCount;
+
       if (setFilter && cardSet !== setFilter) return;
       if (searchFilter) {
         const searchLower = searchFilter.toLowerCase();
@@ -4506,9 +4510,8 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
       const maxCopies = (typeof getLegalMaxCopies === 'function') ? getLegalMaxCopies(card) : 4;
       const maxLabel = maxCopies >= 59 ? '\u221e' : maxCopies;
 
-      const minPrice = window.userTradelistMinPrices ? (window.userTradelistMinPrices.get(cardId) || '') : '';
+      const minPrice = minPriceRaw;
       const minPriceVal = minPrice ? parseFloat(minPrice).toFixed(2).replace('.', ',') : '';
-      if (minPrice) totalMinValue += parseFloat(minPrice) * tradeCount;
 
       tradelistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
@@ -4580,7 +4583,7 @@ function openTradelistGridModal() {
     const safeImage = escapeHtml(card.image_url);
     const safeName = escapeHtml(card.name);
     const minPriceStrip = minPrice > 0
-      ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(22,160,133,0.85);color:#fff;text-align:center;font-size:8px;font-weight:700;padding:2px 0;border-radius:0 0 5px 5px;white-space:nowrap;overflow:hidden;">min ${minPrice.toFixed(2).replace('.',',')}\u20ac</div>`
+      ? `<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(22,160,133,0.85);color:#fff;text-align:center;font-size:8px;font-weight:700;padding:2px 0;border-radius:0 0 5px 5px;white-space:nowrap;overflow:hidden;">ca ${minPrice.toFixed(2).replace('.',',')} \u20ac</div>`
       : '';
     html += `<div class="compact-card" data-export-card${minPrice > 0 ? ` data-min-price="${minPrice.toFixed(2)}"` : ''}>
       <img src="${safeImage}" alt="${safeName}" style="width:100%;display:block;border-radius:5px;" loading="lazy" decoding="async" onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}">
@@ -4648,7 +4651,7 @@ function copyTradelistToClipboard() {
     const price = card && card.eur_price ? parseFloat(card.eur_price.replace(',', '.')) : 0;
     const priceStr = (!isNaN(price) && price > 0) ? `${price.toFixed(2).replace('.', ',')} \u20ac` : '';
     const minP = window.userTradelistMinPrices ? (window.userTradelistMinPrices.get(cardId) || 0) : 0;
-    const minPStr = minP > 0 ? ` (min ${minP.toFixed(2).replace('.', ',')} \u20ac)` : '';
+    const minPStr = minP > 0 ? ` (ca ${minP.toFixed(2).replace('.', ',')} \u20ac)` : '';
     if (!isNaN(price) && price > 0) totalVal += price * count;
     lines.push(`${count}x ${cardName} (${cardSet} ${cardNumber})${priceStr ? ' - ' + priceStr : ''}${minPStr}`);
   });

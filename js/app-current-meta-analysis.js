@@ -83,6 +83,14 @@
                 .replace(/\s+/g, ' ')
                 .trim();
         }
+
+        /**
+         * Strip trailing " ex"/" Ex" from archetype names so that
+         * dropdown values (e.g. "Ceruledge Ex") match Limitless data keys ("Ceruledge").
+         */
+        function stripExSuffix(name) {
+            return String(name || '').replace(/\s+ex$/i, '').trim();
+        }
         
         // Load Current Meta Analysis Data
         async function loadCurrentMetaAnalysis() {
@@ -296,7 +304,7 @@
                 top10.forEach(deck => {
                     const option = document.createElement('option');
                     option.value = deck.name;
-                    option.textContent = `${deck.name}`;
+                    option.textContent = stripExSuffix(deck.name);
                     optgroup.appendChild(option);
                 });
                 select.appendChild(optgroup);
@@ -308,7 +316,7 @@
                 rest.forEach(deck => {
                     const option = document.createElement('option');
                     option.value = deck.name;
-                    option.textContent = `${deck.name}`;
+                    option.textContent = stripExSuffix(deck.name);
                     optgroup.appendChild(option);
                 });
                 select.appendChild(optgroup);
@@ -533,7 +541,8 @@
                 // Get winrate from deck stats
                 let winrate = '-';
                 const deckStats = window.currentMetaDeckStats || [];
-                const deckStatEntry = deckStats.find(d => d.deck_name && d.deck_name.toLowerCase() === archetype.toLowerCase());
+                const cleanArch = stripExSuffix(archetype);
+                const deckStatEntry = deckStats.find(d => d.deck_name && stripExSuffix(d.deck_name).toLowerCase() === cleanArch.toLowerCase());
                 if (deckStatEntry && deckStatEntry.win_rate) {
                     winrate = deckStatEntry.win_rate;
                 }
@@ -549,7 +558,7 @@
                     
                     // Get matchups against top 20
                     const relevantMatchups = matchupData.filter(m => 
-                        m.deck_name && m.deck_name.toLowerCase() === archetype.toLowerCase() &&
+                        m.deck_name && stripExSuffix(m.deck_name).toLowerCase() === cleanArch.toLowerCase() &&
                         m.opponent && top20Decks.some(deck => deck && deck.toLowerCase() === m.opponent.toLowerCase())
                     );
                     
@@ -687,10 +696,11 @@
             const allH3 = currentMetaContent.querySelectorAll('h3');
             let matchingSection = null;
             
+            const cleanArchForH3 = stripExSuffix(archetype);
             for (let h3 of allH3) {
                 const h3Text = h3.textContent.trim();
-                // Check if h3 starts with the archetype name
-                if (h3Text.startsWith(archetype + ' ')) {
+                // Check if h3 starts with the archetype name (try both original and stripped)
+                if (h3Text.startsWith(archetype + ' ') || h3Text.startsWith(cleanArchForH3 + ' ')) {
                     // Found it! The parent div contains the matchup tables
                     matchingSection = h3.parentElement;
                     devLog(`? Found HTML section for: ${archetype}`);
@@ -763,9 +773,16 @@
             }
             
             // Populate opponent dropdown from window.matchupData (for search feature)
-            const deckNameForVar = archetype.replace(/\s+/g, '_').replace(/'/g, '');
+            // Try stripped name first (Limitless uses "Ceruledge", dropdown may have "Ceruledge Ex")
+            const cleanArchForVar = stripExSuffix(archetype);
+            const deckNameForVar = cleanArchForVar.replace(/\s+/g, '_').replace(/'/g, '');
             const varName = 'matchupData_' + deckNameForVar;
-            const matchupData = window[varName];
+            let matchupData = window[varName];
+            // Fallback: try original archetype name in case data uses the Ex variant
+            if (!matchupData) {
+                const fallbackVar = 'matchupData_' + archetype.replace(/\s+/g, '_').replace(/'/g, '');
+                matchupData = window[fallbackVar];
+            }
             
             const dropdown = document.getElementById('currentMetaOpponentDropdown');
             if (matchupData) {

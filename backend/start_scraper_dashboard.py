@@ -50,9 +50,67 @@ SCRIPTS = {
     "10": os.path.join("core", "prepare_card_data.py")
 }
 
+TASK_NAMES = {
+    "1": "Update Sets",
+    "2": "All Cards Scraper",
+    "3": "Japanese Cards Scraper",
+    "4": "Card Price Scraper",
+    "5": "Current Meta Analysis",
+    "6": "Limitless Online Scraper",
+    "7": "City League Analysis",
+    "8": "City League Archetypes",
+    "9": "Historical Meta Scraper",
+    "10": "Prepare Frontend Data",
+}
+
 BATCH_BASE = ["1", "2", "3", "4", "10"]
 BATCH_META = ["5", "6", "7", "8", "9", "10"]
 BATCH_FULL = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+
+def git_commit_push(description: str) -> None:
+    """Bump version, stage all changes, commit, and push to origin main."""
+    project_root = os.path.dirname(os.path.dirname(__file__))
+
+    # 1) Bump version via PowerShell script
+    bump_script = os.path.join(project_root, "bump-version.ps1")
+    if os.path.isfile(bump_script):
+        print("\n  Version bump ...")
+        subprocess.run(
+            ["powershell", "-ExecutionPolicy", "Bypass", "-File", bump_script],
+            cwd=project_root, check=False,
+        )
+
+    # 2) git add -A
+    print("  Git: Staging changes ...")
+    r = subprocess.run(["git", "add", "-A"], cwd=project_root,
+                        capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f"  [GIT ERROR] git add: {r.stderr.strip()}")
+        return
+
+    # 3) Check if there's anything to commit
+    r = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=project_root)
+    if r.returncode == 0:
+        print("  Git: Keine Aenderungen zum Committen.")
+        return
+
+    # 4) git commit
+    msg = f"Auto: {description}"
+    r = subprocess.run(["git", "commit", "-m", msg], cwd=project_root,
+                        capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f"  [GIT ERROR] git commit: {r.stderr.strip()}")
+        return
+    print(f"  Git: Committed - {msg}")
+
+    # 5) git push
+    print("  Git: Pushing to origin/main ...")
+    r = subprocess.run(["git", "push", "origin", "main"], cwd=project_root,
+                        capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f"  [GIT ERROR] git push: {r.stderr.strip()}")
+        return
+    print("  Git: Push erfolgreich!")
 
 def run_script(script_filename: str, wait_at_end: bool = True) -> None:
     backend_dir = os.path.dirname(__file__)
@@ -103,6 +161,7 @@ def run_batch(batch_list: list, batch_name: str) -> None:
     print(f"  BATCH '{batch_name}' KOMPLETT ABGESCHLOSSEN!")
     print("  Das Frontend ist jetzt auf dem neuesten Stand.")
     print("=" * 52)
+    git_commit_push(f"Batch {batch_name}")
     input("\n  Press Enter to return to menu...")
 
 def main() -> None:
@@ -116,6 +175,7 @@ def main() -> None:
             break
         elif choice in SCRIPTS:
             run_script(SCRIPTS[choice])
+            git_commit_push(TASK_NAMES.get(choice, f"Task {choice}"))
         elif choice == "b":
             run_batch(BATCH_BASE, "BASE DATA UPDATE")
         elif choice == "m":

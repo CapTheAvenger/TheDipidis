@@ -1457,6 +1457,16 @@
 
     // ── Active filter for the binder view ──
     let metaBinderFilter = 'all'; // 'all', 'new', 'missing'
+    let metaBinderAllPrints = false;
+
+    function setMetaBinderPrintView(showAll) {
+        metaBinderAllPrints = showAll;
+        const btnStd = document.getElementById('mbBtnStandardPrint');
+        const btnAll = document.getElementById('mbBtnAllPrints');
+        if (btnStd) btnStd.classList.toggle('active', !showAll);
+        if (btnAll) btnAll.classList.toggle('active', showAll);
+        applyComplexMetaFilter();
+    }
 
     function setMetaBinderFilter(filter) {
         metaBinderFilter = filter;
@@ -1698,6 +1708,10 @@
                     <select id="mbFilterSet" onchange="applyComplexMetaFilter()" class="select-system">
                         <option value="all">Alle Sets</option>
                     </select>
+                </div>
+                <div class="filter-group">
+                    <button id="mbBtnStandardPrint" class="meta-binder-filter-btn active" onclick="setMetaBinderPrintView(false)">Standard Print</button>
+                    <button id="mbBtnAllPrints" class="meta-binder-filter-btn" onclick="setMetaBinderPrintView(true)">All Prints</button>
                 </div>`;
         }
 
@@ -1746,6 +1760,39 @@
             if (setFilter !== 'all' && cardSet !== setFilter) return false;
             return true;
         });
+
+        // ── All Prints expansion ──
+        if (metaBinderAllPrints) {
+            const collectionCounts = window.userCollectionCounts || new Map();
+            const expanded = [];
+            filtered.forEach(card => {
+                const refs = Array.isArray(card.familyRefs) ? card.familyRefs : [];
+                if (refs.length <= 1) {
+                    expanded.push(card);
+                    return;
+                }
+                refs.forEach(ref => {
+                    const parsed = parseIntlPrintRef(ref);
+                    if (!parsed.set || !parsed.number) return;
+                    const printCardId = buildCardId(card.name, parsed.set, parsed.number);
+                    const ownedExact = collectionCounts.get(printCardId) || 0;
+                    expanded.push({
+                        ...card,
+                        set: parsed.set,
+                        number: parsed.number,
+                        cardId: printCardId,
+                        ownedExact,
+                        owned: ownedExact,
+                        ownedIntlTotal: ownedExact,
+                        missing: Math.max(0, card.maxCount - ownedExact),
+                        ownershipMode: ownedExact >= card.maxCount ? 'exact' : 'missing',
+                        familyRefs: refs,
+                        _isPrintExpansion: true
+                    });
+                });
+            });
+            filtered = expanded;
+        }
 
         const sorted = sortMetaCards([...filtered]);
 
@@ -2066,6 +2113,7 @@
     window.metaBinderSendMissingToProxy = metaBinderSendMissingToProxy;
     window.metaBinderProxyNewCards = metaBinderProxyNewCards;
     window.setMetaBinderFilter = setMetaBinderFilter;
+    window.setMetaBinderPrintView = setMetaBinderPrintView;
     window.applyComplexMetaFilter = applyComplexMetaFilter;
     window.openMetaBinderDroppedModal = openMetaBinderDroppedModal;
     window.closeMetaBinderDroppedModal = closeMetaBinderDroppedModal;

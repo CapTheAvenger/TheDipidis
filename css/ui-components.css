@@ -3716,6 +3716,23 @@ img[src*="limitlesstcg"] {
     box-shadow: 0 1px 4px rgba(0,0,0,0.25);
 }
 
+.meta-binder-prints-btn {
+    display: block;
+    width: 100%;
+    padding: 4px 0;
+    border: none;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.meta-binder-prints-btn:hover {
+    background: linear-gradient(135deg, #2980b9, #1a6da0);
+}
+
 .meta-binder-card-fallback {
     display: flex;
     align-items: center;

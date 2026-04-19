@@ -1630,9 +1630,12 @@
             const safeCardId = escapeHtml(card.cardId || buildCardId(card.name, card.set, card.number));
             const ownedCount = card.ownedExact || 0;
             const userWantsCard = window.userWishlist && window.userWishlist.has(card.cardId);
+            const printCount = Array.isArray(card.familyRefs) ? card.familyRefs.length : 0;
+            const safeSet = escapeHtml(String(card.set || ''));
+            const safeNumber = escapeHtml(String(card.number || ''));
 
             return `
-                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${escapeHtml(String(card.set || ''))}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-card-id="${safeCardId}" title="Wird verwendet in: ${deckList}${ownershipHint}">
+                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${safeSet}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-card-id="${safeCardId}" title="Wird verwendet in: ${deckList}${ownershipHint}">
                     ${imageUrl
                         ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                            <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
@@ -1648,6 +1651,7 @@
                         <div class="deck-indicator-count">${card.decks.length} Decks</div>
                         ${countLabel}
                     </div>
+                    ${printCount > 1 ? `<button type="button" class="meta-binder-prints-btn" onclick="openRaritySwitcherFromDB('${safeName.replace(/'/g, "\\'")}','${safeSet}','${safeNumber}')" title="${printCount} Prints verfügbar" aria-label="Show all prints for ${safeName}">🖨 ${printCount} Prints</button>` : ''}
                 </div>`;
         }).join('');
 

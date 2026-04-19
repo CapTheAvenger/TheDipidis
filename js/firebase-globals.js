@@ -107,34 +107,65 @@ function _runIntlIdMigration(userId) {
   window.userCollection.forEach(function(id) { if (id.startsWith('intl:')) brokenIds.push(id); });
   if (brokenIds.length === 0) return;
 
-  var idx = window.cardIndexBySetNumber;
-  if (!(idx instanceof Map) || idx.size === 0) {
-    console.warn('[Collection] intl: migration – card index still empty, aborting');
+  if (!Array.isArray(window.allCardsDatabase) || window.allCardsDatabase.length === 0) {
+    console.warn('[Collection] intl: migration – allCardsDatabase not loaded, aborting');
     return;
   }
 
   console.log('[Collection] Migrating', brokenIds.length, 'broken intl: card IDs…');
+
+  // Build a name-lookup map (lowercase name → card) for "intl:cardname" entries
+  var nameMap = {};
+  window.allCardsDatabase.forEach(function(c) {
+    var n = String(c.name || c.name_en || '').trim().toLowerCase();
+    if (n && !nameMap[n]) nameMap[n] = c; // first match wins (usually latest set)
+  });
+
+  var idx = window.cardIndexBySetNumber; // Map for "intl:SET-NUM" entries
   var migrateUpdates = {};
   var migrateRemoveCounts = {};
   var migratedCount = 0;
 
   brokenIds.forEach(function(brokenId) {
-    var m = brokenId.match(/intl:([A-Z0-9]+)-(\d+)/);
-    if (!m) return;
-    var setCode = m[1];
-    var number = m[2];
-    var card = idx.get(setCode + '-' + number)
-      || idx.get(setCode + '-' + (number.replace(/^0+/, '') || '0'));
-    if (!card && Array.isArray(window.allCardsDatabase)) {
-      card = window.allCardsDatabase.find(function(c) {
-        return String(c.set || '').toUpperCase() === setCode && String(c.number) === number;
-      });
-    }
-    if (!card) { console.warn('[Collection] Cannot resolve:', brokenId); return; }
+    var raw = brokenId.substring(5); // strip "intl:"
+    var card = null;
 
-    var correctId = (card.name || card.name_en || '') + '|' + setCode + '|' + number;
+    // Format A: "intl:SET-NUM" (e.g. intl:PRE-116)
+    var setNumMatch = raw.match(/^([A-Z0-9]+)-(\d+)$/i);
+    if (setNumMatch) {
+      var setCode = setNumMatch[1].toUpperCase();
+      var number = setNumMatch[2];
+      if (idx instanceof Map && idx.size > 0) {
+        card = idx.get(setCode + '-' + number)
+          || idx.get(setCode + '-' + (number.replace(/^0+/, '') || '0'));
+      }
+      if (!card) {
+        card = window.allCardsDatabase.find(function(c) {
+          return String(c.set || '').toUpperCase() === setCode && String(c.number) === number;
+        });
+      }
+    }
+
+    // Format B: "intl:cardname" (e.g. intl:max rod)
+    if (!card) {
+      var nameLower = raw.toLowerCase().trim();
+      card = nameMap[nameLower];
+      // Also try with " ex" suffix variations
+      if (!card && !nameLower.endsWith(' ex')) {
+        card = nameMap[nameLower + ' ex'];
+      }
+    }
+
+    if (!card) {
+      console.warn('[Collection] Cannot resolve:', brokenId);
+      return;
+    }
+
+    var correctId = (card.name || card.name_en || '') + '|' + (card.set || '') + '|' + (card.number || '');
     var qty = window.userCollectionCounts ? (window.userCollectionCounts.get(brokenId) || 1) : 1;
     qty = Math.min(qty, 4);
+
+    console.log('[Collection] Migrating:', brokenId, '→', correctId);
 
     // In-memory fix
     window.userCollection.delete(brokenId);

@@ -340,8 +340,9 @@
             // never lose against ultra/secret variants.
             if (!r) return 4;
 
-            // Order matters: "uncommon" must be checked before "common" because of includes().
-            if (r.includes('uncommon')) return 2;
+            // Common and Uncommon are both standard playable prints — same tier
+            // so that set recency (newer set wins) breaks the tie.
+            if (r.includes('uncommon')) return 1;
             if (r.includes('common')) return 1;
 
             // Low / regular rare tiers

@@ -770,11 +770,14 @@
                 let eurPrice = '';
                 let cardmarketUrl = '';
                 if (setCode && setNumber) {
-                    let priceCard = (cardsBySetNumberMap || {})[`${setCode}-${setNumber}`] || null;
-                    if (!priceCard) {
-                        const normalizedNumber = setNumber.replace(/^0+/, '') || '0';
-                        priceCard = (cardsBySetNumberMap || {})[`${setCode}-${normalizedNumber}`] || null;
-                    }
+                    const setNorm = String(setCode).trim().toUpperCase();
+                    const numPadded = String(setNumber).trim();
+                    const numStripped = numPadded.replace(/^0+/, '') || '0';
+                    let priceCard = (cardsBySetNumberMap || {})[`${setNorm}-${numStripped}`]
+                                 || (cardsBySetNumberMap || {})[`${setNorm}-${numPadded}`]
+                                 || (cardsBySetNumberMap || {})[`${setCode}-${numStripped}`]
+                                 || (cardsBySetNumberMap || {})[`${setCode}-${numPadded}`]
+                                 || null;
                     if (priceCard) {
                         eurPrice = priceCard.eur_price || '';
                         cardmarketUrl = priceCard.cardmarket_url || '';

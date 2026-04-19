@@ -1347,6 +1347,11 @@
             const catOrderB = META_BINDER_CATEGORY_ORDER[bCategory] || 99;
             if (catOrderA !== catOrderB) return catOrderA - catOrderB;
 
+            // Trainer cards: sort by deck count descending (most-used first)
+            const aDeckCount = Number.isFinite(a.deckCount) ? a.deckCount : 0;
+            const bDeckCount = Number.isFinite(b.deckCount) ? b.deckCount : 0;
+            if (aDeckCount !== bDeckCount) return bDeckCount - aDeckCount;
+
             const catSetOrderA = Number.isFinite(a.setOrder) ? a.setOrder : 0;
             const catSetOrderB = Number.isFinite(b.setOrder) ? b.setOrder : 0;
             if (catSetOrderA !== catSetOrderB) return catSetOrderB - catSetOrderA;
@@ -1396,7 +1401,8 @@
                     typeMeta: getMetaBinderTypeMeta(a),
                     dexNumber: getMetaBinderPokemonDex(a, aCardDb),
                     setOrder: getMetaBinderSetOrderValue(a.set),
-                    numberSort: parseCardNumberForSort(a.number)
+                    numberSort: parseCardNumberForSort(a.number),
+                    deckCount: Array.isArray(a.decks) ? a.decks.length : 0
                 },
                 {
                     name: b.name,
@@ -1405,7 +1411,8 @@
                     typeMeta: getMetaBinderTypeMeta(b),
                     dexNumber: getMetaBinderPokemonDex(b, bCardDb),
                     setOrder: getMetaBinderSetOrderValue(b.set),
-                    numberSort: parseCardNumberForSort(b.number)
+                    numberSort: parseCardNumberForSort(b.number),
+                    deckCount: Array.isArray(b.decks) ? b.decks.length : 0
                 }
             );
         });
@@ -1422,6 +1429,16 @@
             const aCat = META_BINDER_CATEGORY_ORDER[getMetaBinderSortCategory(aTypeMeta)] || 99;
             const bCat = META_BINDER_CATEGORY_ORDER[getMetaBinderSortCategory(bTypeMeta)] || 99;
             if (aCat !== bCat) return aCat - bCat;
+
+            // For Trainer categories: sort by deck count descending before grouping by name
+            const trainerCats = new Set(['Supporter', 'Item', 'Tool', 'Stadium', 'Special Energy']);
+            const aCatName = getMetaBinderSortCategory(aTypeMeta);
+            const bCatName = getMetaBinderSortCategory(bTypeMeta);
+            if (trainerCats.has(aCatName) && trainerCats.has(bCatName)) {
+                const aDeck = Array.isArray(a.decks) ? a.decks.length : 0;
+                const bDeck = Array.isArray(b.decks) ? b.decks.length : 0;
+                if (aDeck !== bDeck) return bDeck - aDeck;
+            }
 
             // Primary: group by card name
             const nameCmp = META_BINDER_NAME_COLLATOR.compare(
@@ -1465,7 +1482,8 @@
                 },
                 dexNumber: parseMetaBinderDomNumber(a.dataset.pokedex),
                 setOrder: parseMetaBinderDomNumber(a.dataset.setOrder),
-                numberSort: parseMetaBinderDomNumber(a.dataset.numberSort)
+                numberSort: parseMetaBinderDomNumber(a.dataset.numberSort),
+                deckCount: parseMetaBinderDomNumber(a.dataset.deckCount)
             },
             {
                 name: String(b.dataset.name || ''),
@@ -1477,7 +1495,8 @@
                 },
                 dexNumber: parseMetaBinderDomNumber(b.dataset.pokedex),
                 setOrder: parseMetaBinderDomNumber(b.dataset.setOrder),
-                numberSort: parseMetaBinderDomNumber(b.dataset.numberSort)
+                numberSort: parseMetaBinderDomNumber(b.dataset.numberSort),
+                deckCount: parseMetaBinderDomNumber(b.dataset.deckCount)
             }
         ));
 
@@ -1837,7 +1856,8 @@
             return;
         }
 
-        grid.innerHTML = sorted.map(card => {
+        // Build card HTML for each entry
+        const cardHtmlEntries = sorted.map(card => {
             const imageUrl = findCardImage(card.name, card.set, card.number);
             const statusClass = card.ownershipMode === 'exact'
                 ? 'meta-binder-card-owned card-owned'
@@ -1869,8 +1889,10 @@
             const safeSet = escapeHtml(String(card.set || ''));
             const safeNumber = escapeHtml(String(card.number || ''));
 
-            return `
-                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${safeSet}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-card-id="${safeCardId}" title="Wird verwendet in: ${deckList}${ownershipHint}">
+            return {
+                name: card.name,
+                html: `
+                <div class="meta-binder-card ${statusClass}" data-type="${escapeHtml(typeMeta.type)}" data-set="${safeSet}" data-supertype="${escapeHtml(typeMeta.supertype)}" data-is-ace-spec="${typeMeta.isAceSpec ? 'true' : 'false'}" data-name="${safeName}" data-pokedex="${String(dexNumber)}" data-set-order="${String(setOrder)}" data-number-sort="${String(numberSort)}" data-deck-count="${String(card.decks ? card.decks.length : 0)}" data-card-id="${safeCardId}" title="Wird verwendet in: ${deckList}${ownershipHint}">
                     ${imageUrl
                         ? `<img src="${safeImage}" alt="${safeName}" class="meta-binder-card-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
                            <div class="meta-binder-card-fallback" style="display:none">${safeName}</div>`
@@ -1887,8 +1909,30 @@
                         ${countLabel}
                     </div>
                     ${printCount > 1 ? `<button type="button" class="meta-binder-prints-btn" onclick="openRaritySwitcherFromDB('${safeName.replace(/'/g, "\\'")}','${safeSet}','${safeNumber}')" title="${printCount} Prints verfügbar" aria-label="Show all prints for ${safeName}">🖨 ${printCount} Prints</button>` : ''}
-                </div>`;
-        }).join('');
+                </div>`
+            };
+        });
+
+        // In All Prints mode: group consecutive same-name cards into horizontal flex rows
+        if (metaBinderAllPrints) {
+            const groups = [];
+            let currentGroup = null;
+            cardHtmlEntries.forEach(entry => {
+                if (!currentGroup || currentGroup.name !== entry.name) {
+                    currentGroup = { name: entry.name, cards: [] };
+                    groups.push(currentGroup);
+                }
+                currentGroup.cards.push(entry.html);
+            });
+            grid.innerHTML = '<style>.meta-binder-print-group{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;margin-bottom:16px;padding:10px;background:rgba(0,0,0,0.03);border-radius:10px;border:1px solid rgba(0,0,0,0.06)}.meta-binder-print-group .meta-binder-card{margin:0}</style>'
+                + groups.map(g =>
+                    g.cards.length > 1
+                        ? `<div class="meta-binder-print-group">${g.cards.join('')}</div>`
+                        : g.cards[0]
+                ).join('');
+        } else {
+            grid.innerHTML = cardHtmlEntries.map(e => e.html).join('');
+        }
 
             sortMetaBinder();
     }

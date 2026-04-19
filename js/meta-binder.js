@@ -1352,17 +1352,19 @@
             const bDeckCount = Number.isFinite(b.deckCount) ? b.deckCount : 0;
             if (aDeckCount !== bDeckCount) return bDeckCount - aDeckCount;
 
+            // Name before setOrder — keeps all prints of a card grouped together
+            const catNameA = String(a.name || '');
+            const catNameB = String(b.name || '');
+            const catNameCmp = META_BINDER_NAME_COLLATOR.compare(catNameA, catNameB);
+            if (catNameCmp !== 0) return catNameCmp;
+
             const catSetOrderA = Number.isFinite(a.setOrder) ? a.setOrder : 0;
             const catSetOrderB = Number.isFinite(b.setOrder) ? b.setOrder : 0;
             if (catSetOrderA !== catSetOrderB) return catSetOrderB - catSetOrderA;
 
             const catNumberA = Number.isFinite(a.numberSort) ? a.numberSort : Number.MAX_SAFE_INTEGER;
             const catNumberB = Number.isFinite(b.numberSort) ? b.numberSort : Number.MAX_SAFE_INTEGER;
-            if (catNumberA !== catNumberB) return catNumberA - catNumberB;
-
-            const catNameA = String(a.name || '');
-            const catNameB = String(b.name || '');
-            return META_BINDER_NAME_COLLATOR.compare(catNameA, catNameB);
+            return catNumberA !== catNumberB ? catNumberA - catNumberB : 0;
         }
 
         // Stable fallback for all categories:

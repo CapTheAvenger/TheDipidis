@@ -12,6 +12,7 @@
     function normalizeArchetypeKey(value) {
         return String(value || '')
             .toLowerCase()
+            .replace(/['\u2019\u2018`]s\b/g, '').replace(/['\u2019\u2018`]/g, '')
             .replace(/\bmega\b/g, '')
             .replace(/\s+/g, ' ')
             .trim();

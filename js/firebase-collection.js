@@ -4464,6 +4464,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
   let totalCards = 0;
   let matchingCards = 0;
   let totalValue = 0;
+  let totalMinValue = 0;
 
   window.userTradelist.forEach(cardId => {
     const [cardName, cardSet, cardNumber] = cardId.split('|');
@@ -4503,6 +4504,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
 
       const minPrice = window.userTradelistMinPrices ? (window.userTradelistMinPrices.get(cardId) || '') : '';
       const minPriceVal = minPrice ? parseFloat(minPrice).toFixed(2).replace('.', ',') : '';
+      if (minPrice) totalMinValue += parseFloat(minPrice) * tradeCount;
 
       tradelistHtml.push(`
         <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
@@ -4522,7 +4524,7 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
               ? `<a href="${safeCmUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 4px; padding: 3px 8px; background: linear-gradient(135deg, #27ae60, #219a52); color: white; border-radius: 6px; font-size: 0.78em; font-weight: 600; text-decoration: none; box-shadow: 0 1px 4px rgba(0,0,0,0.15);" title="View on Cardmarket">${priceDisplay}</a>`
               : `<div style="font-size: 0.8em; color: #999; margin-top: 4px;">${priceDisplay}</div>`}
             <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
-              <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">Min:</span>
+              <span style="font-size: 0.72em; color: #16a085; font-weight: 600;">ca</span>
               <input type="text" inputmode="decimal" value="${minPriceVal}" placeholder="\u2014"
                 aria-label="Minimum price for ${safeNameHtml}"
                 style="width: 52px; padding: 2px 4px; border: 1.5px solid #ddd; border-radius: 4px; font-size: 0.75em; font-weight: 600; color: #16a085; text-align: right; outline: none;"
@@ -4539,10 +4541,10 @@ function updateTradelistUI(searchFilter = '', setFilter = '') {
   const searchResults = document.getElementById('tradelist-search-results');
   if (searchResults) {
     const isFiltered = searchFilter || setFilter;
-    const valueStr = totalValue > 0 ? ` \u00b7 ~${totalValue.toFixed(2).replace('.', ',')} \u20ac` : '';
+    const minValStr = totalMinValue > 0 ? ` \u00b7 Trade-Wert: ca ${totalMinValue.toFixed(2).replace('.', ',')} \u20ac` : '';
     searchResults.textContent = isFiltered
-      ? `Showing ${matchingCards} of ${totalCards} cards${valueStr}`
-      : (totalCards > 0 ? `${totalCards} cards${valueStr}` : '');
+      ? `Showing ${matchingCards} of ${totalCards} cards${minValStr}`
+      : (totalCards > 0 ? `${totalCards} cards${minValStr}` : '');
   }
 
   if (tradelistHtml.length > 0) {

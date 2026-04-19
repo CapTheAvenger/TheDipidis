@@ -2241,6 +2241,11 @@
                 wishBtn.style.background = onWishlist ? '#E91E63' : '#F48FB1';
                 wishBtn.style.borderColor = onWishlist ? '#E91E63' : '#F48FB1';
                 wishBtn.innerHTML = onWishlist ? '&#9829;' : '&#9825;';
+                const missingNow = Math.max(0, maxCount - owned);
+                wishBtn.setAttribute('data-missing', String(missingNow));
+                wishBtn.title = onWishlist
+                    ? 'Remove from wishlist'
+                    : 'Add missing (' + missingNow + ') to wishlist';
             }
         });
     }

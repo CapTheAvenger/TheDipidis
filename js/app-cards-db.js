@@ -2761,8 +2761,18 @@
             if (window.userWishlist && window.userWishlist.has(cardId)) {
                 removeFromWishlist(cardId);
             } else {
-                const missing = parseInt(buttonEl?.getAttribute('data-missing') || '1', 10);
-                const qty = Math.max(1, missing);
+                // Live-recalculate missing count from current collection state
+                let missingNow;
+                const cardEl = buttonEl.closest('.meta-binder-card');
+                if (cardEl) {
+                    const needEl = cardEl.querySelector('.meta-binder-card-need');
+                    const maxCount = needEl ? (parseInt(needEl.textContent, 10) || 1) : 1;
+                    const owned = (window.userCollectionCounts && window.userCollectionCounts.get(cardId)) || 0;
+                    missingNow = Math.max(0, maxCount - owned);
+                } else {
+                    missingNow = parseInt(buttonEl?.getAttribute('data-missing') || '1', 10);
+                }
+                const qty = Math.max(1, missingNow);
                 if (typeof addToWishlistWithCount === 'function') {
                     addToWishlistWithCount(cardId, qty);
                 } else {

@@ -2191,7 +2191,7 @@
 
     // ── Live-refresh ownership visuals for Meta Binder cards ──
     function refreshMetaBinderOwnership() {
-        const grid = document.getElementById('meta-binder-grid');
+        const grid = document.getElementById('metaBinderGrid');
         if (!grid) return;
         const collCounts = window.userCollectionCounts || new Map();
 

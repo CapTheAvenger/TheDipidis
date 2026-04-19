@@ -100,6 +100,88 @@ function onUserSignedOut() {
 // Firestore data loaders
 // ---------------------------------------------------------------------------
 
+// ── Deferred migration: fix broken "intl:" card IDs once card DB is ready ──
+function _runIntlIdMigration(userId) {
+  if (!window.userCollection) return;
+  var brokenIds = [];
+  window.userCollection.forEach(function(id) { if (id.startsWith('intl:')) brokenIds.push(id); });
+  if (brokenIds.length === 0) return;
+
+  var idx = window.cardIndexBySetNumber;
+  if (!(idx instanceof Map) || idx.size === 0) {
+    console.warn('[Collection] intl: migration – card index still empty, aborting');
+    return;
+  }
+
+  console.log('[Collection] Migrating', brokenIds.length, 'broken intl: card IDs…');
+  var migrateUpdates = {};
+  var migrateRemoveCounts = {};
+  var migratedCount = 0;
+
+  brokenIds.forEach(function(brokenId) {
+    var m = brokenId.match(/intl:([A-Z0-9]+)-(\d+)/);
+    if (!m) return;
+    var setCode = m[1];
+    var number = m[2];
+    var card = idx.get(setCode + '-' + number)
+      || idx.get(setCode + '-' + (number.replace(/^0+/, '') || '0'));
+    if (!card && Array.isArray(window.allCardsDatabase)) {
+      card = window.allCardsDatabase.find(function(c) {
+        return String(c.set || '').toUpperCase() === setCode && String(c.number) === number;
+      });
+    }
+    if (!card) { console.warn('[Collection] Cannot resolve:', brokenId); return; }
+
+    var correctId = (card.name || card.name_en || '') + '|' + setCode + '|' + number;
+    var qty = window.userCollectionCounts ? (window.userCollectionCounts.get(brokenId) || 1) : 1;
+    qty = Math.min(qty, 4);
+
+    // In-memory fix
+    window.userCollection.delete(brokenId);
+    if (window.userCollectionCounts) window.userCollectionCounts.delete(brokenId);
+    window.userCollection.add(correctId);
+    if (window.userCollectionCounts) window.userCollectionCounts.set(correctId, qty);
+
+    // Firestore batch
+    migrateRemoveCounts['collectionCounts.' + brokenId] = firebase.firestore.FieldValue.delete();
+    migrateUpdates['collectionCounts.' + correctId] = qty;
+    migratedCount++;
+  });
+
+  if (migratedCount > 0) {
+    migrateUpdates.collection = Array.from(window.userCollection);
+    var docRef = window.db.collection('users').doc(userId);
+    docRef.update(migrateUpdates).then(function() {
+      return docRef.update(migrateRemoveCounts);
+    }).then(function() {
+      console.log('[Collection] Migrated', migratedCount, 'broken intl: IDs');
+      if (typeof updateCollectionUI === 'function') updateCollectionUI();
+    }).catch(function(err) {
+      console.warn('[Collection] intl: migration write failed:', err);
+    });
+
+    // Immediately refresh UI with corrected in-memory data
+    if (typeof updateCollectionUI === 'function') updateCollectionUI();
+  }
+}
+
+function _scheduleIntlIdMigration(userId) {
+  if (!window.userCollection) return;
+  var hasBroken = false;
+  window.userCollection.forEach(function(id) { if (id.startsWith('intl:')) hasBroken = true; });
+  if (!hasBroken) return;
+
+  // If card DB is already loaded, migrate now
+  if (window.cardIndexBySetNumber instanceof Map && window.cardIndexBySetNumber.size > 0) {
+    _runIntlIdMigration(userId);
+    return;
+  }
+  // Otherwise wait for resources to settle
+  window.addEventListener('app:resources-settled', function() {
+    _runIntlIdMigration(userId);
+  }, { once: true });
+}
+
 async function loadUserData(userId) {
   try {
     const doc = await window.db.collection('users').doc(userId).get();
@@ -197,59 +279,8 @@ async function loadUserData(userId) {
 
       // ── Migrate broken "intl:SET-NUM|SET-NUM" card IDs to "Name|SET|NUMBER" ──
       // (Meta Binder + button used internal familyKey instead of proper cardId)
-      const brokenIntlIds = [...window.userCollection].filter(id => id.startsWith('intl:'));
-      if (brokenIntlIds.length > 0) {
-        console.log('[Collection] Found', brokenIntlIds.length, 'broken intl: card IDs, migrating…');
-        const idx = window.cardIndexBySetNumber;
-        const migrateUpdates = {};
-        const migrateRemoveArr = [];
-        const migrateRemoveCounts = {};
-        brokenIntlIds.forEach(brokenId => {
-          // Extract first SET-NUMBER from "intl:SET-NUM|SET-NUM"
-          const m = brokenId.match(/intl:([A-Z0-9]+)-(\d+)/);
-          if (!m) return;
-          const setCode = m[1];
-          const number = m[2];
-          // Lookup card name via set+number index
-          let card = null;
-          if (idx instanceof Map && idx.size > 0) {
-            card = idx.get(setCode + '-' + number) || idx.get(setCode + '-' + (number.replace(/^0+/, '') || '0'));
-          }
-          if (!card && Array.isArray(window.allCardsDatabase)) {
-            card = window.allCardsDatabase.find(function(c) { return c.set === setCode && String(c.number) === number; });
-          }
-          if (!card) { console.warn('[Collection] Cannot resolve broken ID:', brokenId); return; }
-          const correctId = (card.name || card.name_en || '') + '|' + setCode + '|' + number;
-          const qty = window.userCollectionCounts.get(brokenId) || 1;
-          // Update in-memory
-          window.userCollection.delete(brokenId);
-          window.userCollectionCounts.delete(brokenId);
-          window.userCollection.add(correctId);
-          window.userCollectionCounts.set(correctId, Math.min(qty, 4));
-          // Prepare Firestore update
-          migrateRemoveArr.push(brokenId);
-          migrateRemoveCounts['collectionCounts.' + brokenId] = firebase.firestore.FieldValue.delete();
-          migrateUpdates['collectionCounts.' + correctId] = Math.min(qty, 4);
-        });
-        // Write to Firestore
-        if (migrateRemoveArr.length > 0) {
-          try {
-            var docRef = window.db.collection('users').doc(userId);
-            // Step 1: Add correct IDs + counts
-            migrateUpdates.collection = [...window.userCollection];
-            docRef.update(migrateUpdates).then(function() {
-              // Step 2: Remove old broken count fields
-              return docRef.update(migrateRemoveCounts);
-            }).then(function() {
-              console.log('[Collection] Migrated', migrateRemoveArr.length, 'broken intl: IDs to proper format');
-            }).catch(function(err) {
-              console.warn('[Collection] intl: migration write failed:', err);
-            });
-          } catch (migErr) {
-            console.warn('[Collection] intl: migration failed:', migErr);
-          }
-        }
-      }
+      // Must run AFTER card DB is loaded so we can resolve names.
+      _scheduleIntlIdMigration(userId);
 
       if (typeof updateCollectionUI === 'function') updateCollectionUI();
 

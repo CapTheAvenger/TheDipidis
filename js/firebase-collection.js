@@ -783,12 +783,8 @@ function updateCollectionUI(searchFilter = '', filterMode = '') {
       );
 
       // Fallback lookup via prebuilt set+number index (handles name mismatches and number normalization)
-      if (!card && window.cardIndexBySetNumber instanceof Map && window.cardIndexBySetNumber.size > 0) {
-        const normSet = cardSet.toUpperCase().trim();
-        const normNum = cardNumber.trim();
-        card = window.cardIndexBySetNumber.get(`${normSet}-${normNum}`)
-          || window.cardIndexBySetNumber.get(`${normSet}-${(normNum.replace(/^0+/, '') || '0')}`)
-          || window.cardIndexBySetNumber.get(`${normSet}-${(normNum.replace(/^0+/, '') || '0').padStart(3, '0')}`);
+      if (!card) {
+        card = _lookupCardBySetNumber(cardSet, cardNumber);
       }
       
       if (card && card.image_url) {
@@ -1506,9 +1502,9 @@ function updateDecksUI() {
           setCode = parsedKey.setCode;
           setNumber = parsedKey.setNumber;
           
-          // METHOD 1: Fast lookup using cardsBySetNumberMap (preferred)
-          if (!cardData && typeof window.getIndexedCardBySetNumber === 'function') {
-            cardData = window.getIndexedCardBySetNumber(setCode, setNumber);
+          // METHOD 1: Fast lookup using set+number index (preferred)
+          if (!cardData) {
+            cardData = _lookupCardBySetNumber(setCode, setNumber);
           }
 
           if (!cardData && window.cardsBySetNumberMap && setCode && setNumber) {
@@ -3100,10 +3096,8 @@ function renderFolderSummary(folder) {
 function lookupCardData(entry) {
   if (!window.allCardsDatabase || !entry) return null;
   if (entry.setCode && entry.setNumber) {
-    if (typeof window.getIndexedCardBySetNumber === 'function') {
-      const found = window.getIndexedCardBySetNumber(entry.setCode, entry.setNumber);
-      if (found) return found;
-    }
+    const found0 = _lookupCardBySetNumber(entry.setCode, entry.setNumber);
+    if (found0) return found0;
     if (window.cardsBySetNumberMap) {
       const found = window.cardsBySetNumberMap[`${entry.setCode}-${entry.setNumber}`];
       if (found) return found;
@@ -3458,10 +3452,8 @@ function showDeckComparison(deckA, deckB, compareMode = 'functional') {
 
   function getCardRecordBySetNumber(setCode, setNumber) {
     if (!setCode || !setNumber) return null;
-    if (typeof window.getIndexedCardBySetNumber === 'function') {
-      const c = window.getIndexedCardBySetNumber(setCode, setNumber);
-      if (c) return c;
-    }
+    const c0 = _lookupCardBySetNumber(setCode, setNumber);
+    if (c0) return c0;
     if (window.cardsBySetNumberMap) {
       const key = `${setCode}-${setNumber}`;
       if (window.cardsBySetNumberMap[key]) return window.cardsBySetNumberMap[key];

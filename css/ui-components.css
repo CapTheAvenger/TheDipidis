@@ -3684,6 +3684,38 @@ img[src*="limitlesstcg"] {
     display: block;
 }
 
+.meta-binder-card-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 2;
+}
+.meta-binder-card:hover .meta-binder-card-actions,
+.meta-binder-card:focus-within .meta-binder-card-actions {
+    opacity: 1;
+}
+@media (hover: none) {
+    .meta-binder-card-actions { opacity: 1; }
+}
+.meta-binder-card-actions .card-badge {
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.8);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
 .meta-binder-card-fallback {
     display: flex;
     align-items: center;

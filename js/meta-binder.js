@@ -1910,7 +1910,7 @@
                         <div class="deck-indicator-count">${card.decks.length} Decks</div>
                         ${countLabel}
                     </div>
-                    ${printCount > 1 ? `<button type="button" class="meta-binder-prints-btn" onclick="openRaritySwitcherFromDB('${safeName.replace(/'/g, "\\'")}','${safeSet}','${safeNumber}')" title="${printCount} Prints verfügbar" aria-label="Show all prints for ${safeName}">🖨 ${printCount} Prints</button>` : ''}
+                    ${printCount > 1 ? `<button type="button" class="meta-binder-prints-btn" onclick="openRaritySwitcherFromDB('${escapeArchetypeForJs(card.name)}','${safeSet}','${safeNumber}')" title="${printCount} Prints verfügbar" aria-label="Show all prints for ${safeName}">🖨 ${printCount} Prints</button>` : ''}
                 </div>`
             };
         });

@@ -3684,36 +3684,59 @@ img[src*="limitlesstcg"] {
     display: block;
 }
 
-.meta-binder-card-actions {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
+.meta-binder-card .card-database-top-actions {
+    position: absolute !important;
+    top: 4px !important;
+    right: 4px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    gap: 3px !important;
+    z-index: 3 !important;
     opacity: 0;
     transition: opacity 0.2s ease;
-    z-index: 2;
 }
-.meta-binder-card:hover .meta-binder-card-actions,
-.meta-binder-card:focus-within .meta-binder-card-actions {
+.meta-binder-card:hover .card-database-top-actions,
+.meta-binder-card:focus-within .card-database-top-actions {
     opacity: 1;
 }
 @media (hover: none) {
-    .meta-binder-card-actions { opacity: 1; }
+    .meta-binder-card .card-database-top-actions { opacity: 1; }
 }
-.meta-binder-card-actions .card-badge {
-    width: 26px;
-    height: 26px;
-    font-size: 0.85rem;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid rgba(255,255,255,0.8);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+.meta-binder-card .card-database-top-actions .card-badge {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    flex: 0 0 21px !important;
+    width: 21px !important;
+    height: 21px !important;
+    min-width: 21px !important;
+    min-height: 21px !important;
+    max-width: 21px !important;
+    max-height: 21px !important;
+    padding: 0 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    border: 1.5px solid rgba(0,0,0,0.15) !important;
+}
+.meta-binder-card .card-database-top-actions .btn-green.card-badge {
+    background: #28a745 !important;
+    color: #fff !important;
+}
+.meta-binder-card .card-database-top-actions .btn-red.card-badge {
+    background: #dc3545 !important;
+    color: #fff !important;
+}
+.meta-binder-card .card-database-top-actions .btn-wishlist.card-badge {
+    background: #F48FB1 !important;
+    color: #fff !important;
+    border-color: #F48FB1 !important;
 }
 
 .meta-binder-prints-btn {

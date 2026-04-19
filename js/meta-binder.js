@@ -1408,6 +1408,36 @@
         });
     }
 
+    /**
+     * Sort for All Prints mode: group by name, within each name newest set first.
+     * Category order (Pokemon > Supporter > Item …) is kept as primary sort.
+     */
+    function sortMetaCardsAllPrints(cards) {
+        return cards.sort((a, b) => {
+            const aTypeMeta = getMetaBinderTypeMeta(a);
+            const bTypeMeta = getMetaBinderTypeMeta(b);
+            const aCat = META_BINDER_CATEGORY_ORDER[getMetaBinderSortCategory(aTypeMeta)] || 99;
+            const bCat = META_BINDER_CATEGORY_ORDER[getMetaBinderSortCategory(bTypeMeta)] || 99;
+            if (aCat !== bCat) return aCat - bCat;
+
+            // Primary: group by card name
+            const nameCmp = META_BINDER_NAME_COLLATOR.compare(
+                String(a.name || ''), String(b.name || '')
+            );
+            if (nameCmp !== 0) return nameCmp;
+
+            // Secondary: newest set first within same name
+            const setA = getMetaBinderSetOrderValue(a.set) || 0;
+            const setB = getMetaBinderSetOrderValue(b.set) || 0;
+            if (setA !== setB) return setB - setA;
+
+            // Tertiary: card number
+            const numA = parseCardNumberForSort(a.number);
+            const numB = parseCardNumberForSort(b.number);
+            return numA - numB;
+        });
+    }
+
     function parseMetaBinderDomNumber(value) {
         const raw = String(value || '').trim();
         const parsed = parseInt(raw, 10);
@@ -1794,7 +1824,10 @@
             filtered = expanded;
         }
 
-        const sorted = sortMetaCards([...filtered]);
+        // In All Prints mode: group by card name so all prints appear together
+        const sorted = metaBinderAllPrints
+            ? sortMetaCardsAllPrints([...filtered])
+            : sortMetaCards([...filtered]);
 
         if (sorted.length === 0) {
             grid.innerHTML = `<p class="color-grey">${mbText('mb.empty', 'No meta card data found. Make sure Current Meta or City League data is loaded.')}</p>`;

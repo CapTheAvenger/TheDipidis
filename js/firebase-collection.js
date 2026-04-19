@@ -141,6 +141,35 @@ async function toggleCollection(cardId) {
   await addToCollection(cardId);
 }
 
+// Add card to wishlist with a specific count (used by Meta Binder to set missing qty)
+async function addToWishlistWithCount(cardId, count) {
+  const user = auth.currentUser;
+  if (!user) {
+    showNotification('Please sign in to use this feature', 'error');
+    return;
+  }
+  const qty = Math.max(1, Math.min(count, 4));
+  try {
+    await db.collection('users').doc(user.uid).update({
+      wishlist: firebase.firestore.FieldValue.arrayUnion(cardId),
+      [`wishlistCounts.${cardId}`]: qty
+    });
+    if (!window.userWishlist) window.userWishlist = new Set();
+    window.userWishlist.add(cardId);
+    if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
+    window.userWishlistCounts.set(cardId, qty);
+    showNotification(`Added to wishlist (${qty}x)`, 'success');
+    updateWishlistUI();
+    if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
+      renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
+    }
+    if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
+  } catch (error) {
+    console.error('Error adding to wishlist:', error);
+    showNotification('Error updating wishlist', 'error');
+  }
+}
+
 // Add card to wishlist (or increment count)
 async function addToWishlist(cardId) {
   const user = auth.currentUser;

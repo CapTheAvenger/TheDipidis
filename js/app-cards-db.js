@@ -2754,6 +2754,24 @@
             toggleWishlist(cardId);
         }
 
+        // Meta Binder wishlist toggle: adds missing qty on first click, removes on second
+        function toggleWishlistMetaBinder(buttonEl) {
+            const cardId = buttonEl?.getAttribute('data-card-id') || '';
+            if (!cardId) return;
+            if (window.userWishlist && window.userWishlist.has(cardId)) {
+                removeFromWishlist(cardId);
+            } else {
+                const missing = parseInt(buttonEl?.getAttribute('data-missing') || '1', 10);
+                const qty = Math.max(1, missing);
+                if (typeof addToWishlistWithCount === 'function') {
+                    addToWishlistWithCount(cardId, qty);
+                } else {
+                    addToWishlist(cardId);
+                }
+            }
+        }
+        window.toggleWishlistMetaBinder = toggleWishlistMetaBinder;
+
         function openRarityFromCardDbButton(buttonEl) {
             const cardName = buttonEl?.getAttribute('data-card-name') || '';
             const cardSet = buttonEl?.getAttribute('data-card-set') || '';

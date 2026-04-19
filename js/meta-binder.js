@@ -1862,9 +1862,9 @@
             const ownershipHint = card.ownershipMode === 'intl-complete'
                 ? ' (filled via other international prints)'
                 : '';
-            const safeCardId = escapeHtml(card.cardId || buildCardId(card.name, card.set, card.number));
+            const safeCardId = escapeHtml(buildCardId(card.name, card.set, card.number));
             const ownedCount = card.ownedExact || 0;
-            const userWantsCard = window.userWishlist && window.userWishlist.has(card.cardId);
+            const userWantsCard = window.userWishlist && window.userWishlist.has(buildCardId(card.name, card.set, card.number));
             const printCount = Array.isArray(card.familyRefs) ? card.familyRefs.length : 0;
             const safeSet = escapeHtml(String(card.set || ''));
             const safeNumber = escapeHtml(String(card.number || ''));

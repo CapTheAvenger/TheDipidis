@@ -194,6 +194,63 @@ async function loadUserData(userId) {
           window.userCollectionCounts.set(cardId, 1);
         }
       });
+
+      // ── Migrate broken "intl:SET-NUM|SET-NUM" card IDs to "Name|SET|NUMBER" ──
+      // (Meta Binder + button used internal familyKey instead of proper cardId)
+      const brokenIntlIds = [...window.userCollection].filter(id => id.startsWith('intl:'));
+      if (brokenIntlIds.length > 0) {
+        console.log('[Collection] Found', brokenIntlIds.length, 'broken intl: card IDs, migrating…');
+        const idx = window.cardIndexBySetNumber;
+        const migrateUpdates = {};
+        const migrateRemoveArr = [];
+        const migrateRemoveCounts = {};
+        brokenIntlIds.forEach(brokenId => {
+          // Extract first SET-NUMBER from "intl:SET-NUM|SET-NUM"
+          const m = brokenId.match(/intl:([A-Z0-9]+)-(\d+)/);
+          if (!m) return;
+          const setCode = m[1];
+          const number = m[2];
+          // Lookup card name via set+number index
+          let card = null;
+          if (idx instanceof Map && idx.size > 0) {
+            card = idx.get(setCode + '-' + number) || idx.get(setCode + '-' + (number.replace(/^0+/, '') || '0'));
+          }
+          if (!card && Array.isArray(window.allCardsDatabase)) {
+            card = window.allCardsDatabase.find(function(c) { return c.set === setCode && String(c.number) === number; });
+          }
+          if (!card) { console.warn('[Collection] Cannot resolve broken ID:', brokenId); return; }
+          const correctId = (card.name || card.name_en || '') + '|' + setCode + '|' + number;
+          const qty = window.userCollectionCounts.get(brokenId) || 1;
+          // Update in-memory
+          window.userCollection.delete(brokenId);
+          window.userCollectionCounts.delete(brokenId);
+          window.userCollection.add(correctId);
+          window.userCollectionCounts.set(correctId, Math.min(qty, 4));
+          // Prepare Firestore update
+          migrateRemoveArr.push(brokenId);
+          migrateRemoveCounts['collectionCounts.' + brokenId] = firebase.firestore.FieldValue.delete();
+          migrateUpdates['collectionCounts.' + correctId] = Math.min(qty, 4);
+        });
+        // Write to Firestore
+        if (migrateRemoveArr.length > 0) {
+          try {
+            var docRef = window.db.collection('users').doc(userId);
+            // Step 1: Add correct IDs + counts
+            migrateUpdates.collection = [...window.userCollection];
+            docRef.update(migrateUpdates).then(function() {
+              // Step 2: Remove old broken count fields
+              return docRef.update(migrateRemoveCounts);
+            }).then(function() {
+              console.log('[Collection] Migrated', migrateRemoveArr.length, 'broken intl: IDs to proper format');
+            }).catch(function(err) {
+              console.warn('[Collection] intl: migration write failed:', err);
+            });
+          } catch (migErr) {
+            console.warn('[Collection] intl: migration failed:', migErr);
+          }
+        }
+      }
+
       if (typeof updateCollectionUI === 'function') updateCollectionUI();
 
       // Profile (render after collection is loaded so cards/value are correct)

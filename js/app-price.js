@@ -41,10 +41,15 @@
             }
             
             try {
-                // Try Limitless first (has both Cardmarket URL and price)
+                // Try cardmarket_url first (print-specific product page)
+                // Fallback to Limitless (may aggregate variants)
                 let url = '';
-                if (card.card_url) {
-                    url = card.card_url.startsWith('/') 
+                let source = 'limitless';
+                if (card.cardmarket_url) {
+                    url = card.cardmarket_url.split('?')[0];
+                    source = 'cardmarket';
+                } else if (card.card_url) {
+                    url = card.card_url.startsWith('/')
                         ? `https://limitlesstcg.com${card.card_url}`
                         : card.card_url;
                 } else if (card.set && card.number) {
@@ -52,28 +57,7 @@
                 }
                 
                 if (url) {
-                    const params = new URLSearchParams({ url, source: 'limitless' });
-                    const response = await fetch(`${PROXY_URL}/fetch-price?${params}`);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success && data.price) {
-                            // Cache result
-                            livePriceCache.set(cacheKey, {
-                                data: data,
-                                timestamp: Date.now()
-                            });
-                            return data;
-                        }
-                    }
-                }
-                
-                // Fallback: Try Cardmarket URL if available
-                if (card.cardmarket_url) {
-                    const params = new URLSearchParams({ 
-                        url: card.cardmarket_url, 
-                        source: 'cardmarket' 
-                    });
+                    const params = new URLSearchParams({ url, source });
                     const response = await fetch(`${PROXY_URL}/fetch-price?${params}`);
                     
                     if (response.ok) {
@@ -100,8 +84,13 @@
             
             const price = livePrice.price;
             
-            // Update button text
-            buttonElement.textContent = price;
+            // Card DB price buttons have an inner <span class="card-database-price-value">
+            const valueSpan = buttonElement.querySelector('.card-database-price-value');
+            if (valueSpan) {
+                valueSpan.textContent = `Ø ${price}`;
+            } else {
+                buttonElement.textContent = price;
+            }
             // Add modular class for live price state
             buttonElement.classList.add('price-btn-live');
             buttonElement.title = `Live Price: ${price} (Click to buy on Cardmarket)`;
@@ -119,8 +108,13 @@
                 
                 await Promise.all(batch.map(async (card, idx) => {
                     const globalIdx = i + idx;
-                    const buttonId = `${buttonIdPrefix}-${globalIdx}`;
-                    const buttonElement = document.getElementById(buttonId);
+                    // Try ID-based lookup first (Meta Binder), then data-card-id (Card DB)
+                    let buttonElement = document.getElementById(`${buttonIdPrefix}-${globalIdx}`);
+                    if (!buttonElement && card.name && card.set && card.number) {
+                        const cardId = `${card.name}|${card.set}|${card.number}`;
+                        const item = document.querySelector(`.card-database-item[data-card-id="${CSS.escape(cardId)}"]`);
+                        buttonElement = item ? item.querySelector('.card-database-price-btn, .card-database-price-placeholder') : null;
+                    }
                     
                     if (buttonElement) {
                         const livePrice = await fetchLivePrice(card);

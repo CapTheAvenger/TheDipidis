@@ -1830,6 +1830,13 @@
                         renderCardDatabase(window.filteredCardsData, { scrollToTop: false });
                         cardsFilterRenderState.isFiltering = false;
 
+                        // Auto-fetch live prices for visible cards when proxy is available
+                        if (typeof autoFetchLivePrices === 'function' && window.filteredCardsData.length > 0) {
+                            const startIdx = showAllCards ? 0 : (currentCardsPage - 1) * cardsPerPage;
+                            const endIdx = showAllCards ? window.filteredCardsData.length : Math.min(startIdx + cardsPerPage, window.filteredCardsData.length);
+                            autoFetchLivePrices(window.filteredCardsData.slice(startIdx, endIdx));
+                        }
+
                         if (cardsFilterRenderState.pending) {
                                 cardsFilterRenderState.pending = false;
                                 window.scheduleFilterAndRenderCards(60);

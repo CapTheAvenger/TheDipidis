@@ -307,6 +307,22 @@
         _cbTierGroups = groups.length > 0 ? groups : null;
     }
 
+    // ── Helper: extract main pokemon key from archetype name ──
+    function cbGetMainPokemon(name) {
+        const raw = String(name || '').trim().toLowerCase();
+        if (!raw) return '';
+        if (raw.startsWith('mega ')) return raw.split(' ').slice(0, 2).join(' ');
+        if (raw.startsWith('alolan ') || raw.startsWith('galarian ') || raw.startsWith('hisuian ')) return raw.split(' ').slice(0, 2).join(' ');
+        if (raw.startsWith("rocket's") || raw.startsWith("rocket\u2019s")) return "rocket's";
+        if (raw.startsWith("n's") || raw.startsWith("n\u2019s")) return "n's";
+        if (raw.startsWith("ethan's") || raw.startsWith("ethan\u2019s")) return "ethan's";
+        return raw.split(' ')[0];
+    }
+
+    function cbTitleCase(s) {
+        return String(s || '').split(' ').filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
+
     function cbRenderDropdownList() {
         const dd = document.getElementById('cbArchetypeDropdown');
         if (!dd || dd.classList.contains('display-none')) return;
@@ -320,6 +336,22 @@
             (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(a.name) : a.name.toLowerCase()) + '|' + a.source
         ));
 
+        // Get ranking map for sorting
+        const exactMap = window._metaBinderCurrentMetaExactMap instanceof Map
+            ? window._metaBinderCurrentMetaExactMap : null;
+
+        // Helper: get rank for an archetype name
+        const getRank = (name) => {
+            if (!exactMap) return 9999;
+            const entry = exactMap.get(String(name).trim().toLowerCase());
+            return (entry && Number.isFinite(entry.rank)) ? entry.rank : 9999;
+        };
+        const getShare = (name) => {
+            if (!exactMap) return 0;
+            const entry = exactMap.get(String(name).trim().toLowerCase());
+            return (entry && Number.isFinite(entry.share)) ? entry.share : 0;
+        };
+
         let items = cbAllArchetypes;
         if (query) {
             items = items.filter(a => a.name.toLowerCase().includes(query));
@@ -332,59 +364,136 @@
 
         let html = '';
 
-        // ── Tier list from Meta Binder or fallback (only when not searching) ──
+        // ── Top 5 Main Pokemon quick-select (only when not searching) ──
         if (!query) {
-            const tierGroups = _cbTierGroups || (Array.isArray(window._metaBinderArchetypeGroups) && window._metaBinderArchetypeGroups.length > 0
-                ? window._metaBinderArchetypeGroups : null);
+            // Build main pokemon groups from current-meta items
+            const currentMetaItems = items.filter(a => a.source === 'current-meta');
+            const mainGroupMap = new Map();
+            currentMetaItems.forEach(a => {
+                const mainKey = cbGetMainPokemon(a.name);
+                if (!mainKey) return;
+                if (!mainGroupMap.has(mainKey)) {
+                    mainGroupMap.set(mainKey, { key: mainKey, label: cbTitleCase(mainKey), variants: [], totalShare: 0 });
+                }
+                const g = mainGroupMap.get(mainKey);
+                g.variants.push(a);
+                g.totalShare += getShare(a.name);
+            });
 
-            if (tierGroups && tierGroups.length > 0) {
-                html += '<div class="custom-binder-dropdown-group-label" style="color:var(--accent,#3b4cca);font-weight:900;">⭐ Top Decks</div>';
-                const tierSeen = new Set();
-                tierGroups.forEach(group => {
-                    (group.items || []).forEach((item, idx) => {
-                        const name = item.name;
-                        const source = item.source || 'current-meta';
-                        const tierKey = (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(name) : name.toLowerCase()) + '|' + source;
-                        if (tierSeen.has(tierKey)) return;
-                        tierSeen.add(tierKey);
-                        const isSelected = selectedKeys.has(tierKey);
-                        const safeName = escapeHtml(name);
-                        const safeSource = escapeHtml(source);
-                        const sourceTag = source === 'current-meta' ? 'Meta' : (source === 'city-current' ? 'City' : 'Past');
-                        const rankText = Number.isFinite(item.currentMetaRank) ? `#${item.currentMetaRank}` : '';
-                        html += `<button type="button" class="custom-binder-dropdown-item ${isSelected ? 'is-selected' : ''}" 
-                            onclick="cbToggleArchetype('${name.replace(/'/g, "\\'")}','${safeSource}')">
-                            <span class="cb-dd-check">${isSelected ? '✓' : ''}</span> ${safeName} <small class="opacity-60">(${sourceTag}${rankText ? ' ' + rankText : ''})</small>
-                        </button>`;
+            const topMainGroups = Array.from(mainGroupMap.values())
+                .filter(g => g.variants.length > 0)
+                .sort((a, b) => b.totalShare - a.totalShare)
+                .slice(0, 5);
+
+            if (topMainGroups.length > 0) {
+                html += '<div class="custom-binder-dropdown-group-label" style="color:var(--accent,#3b4cca);font-weight:900;">🏆 Top Main Pokemon</div>';
+                html += '<div class="cb-main-pokemon-grid">';
+                topMainGroups.forEach((g, idx) => {
+                    // Check if all variants are already selected
+                    const allSelected = g.variants.every(a => {
+                        const key = (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(a.name) : a.name.toLowerCase()) + '|' + a.source;
+                        return selectedKeys.has(key);
                     });
+                    const shareText = g.totalShare > 0 ? g.totalShare.toFixed(1) + '%' : '';
+                    const variantCount = g.variants.length;
+                    const variantNames = g.variants.map(v => v.name.replace(/'/g, "\\'")).join('|||');
+                    html += `<button type="button" class="cb-main-pokemon-btn ${allSelected ? 'is-selected' : ''}"
+                        onclick="cbToggleMainPokemonGroup('${variantNames}','current-meta')" title="${g.variants.map(v => v.name).join(', ')}">
+                        <span class="cb-mpg-rank">#${idx + 1}</span>
+                        <span class="cb-mpg-name">${escapeHtml(g.label)}</span>
+                        <span class="cb-mpg-meta">${variantCount} ${variantCount === 1 ? 'Deck' : 'Decks'}${shareText ? ' · ' + shareText : ''}</span>
+                    </button>`;
                 });
+                html += '</div>';
                 html += '<div style="border-top:2px solid var(--border-color,#ddd);margin:6px 0;"></div>';
             }
         }
 
-        // ── Group by source (alphabetical) ──
+        // ── All decks sorted by Current Meta ranking ──
+        // Group by source, sort each group by rank
         const groups = {};
         items.forEach(a => {
             if (!groups[a.label]) groups[a.label] = [];
             groups[a.label].push(a);
         });
 
-        for (const [label, archetypes] of Object.entries(groups)) {
+        // Preferred source order: Current Meta first, then City League, then Past
+        const sourceOrder = ['Current Meta', 'City League', 'City League Past'];
+        const sortedLabels = Object.keys(groups).sort((a, b) => {
+            const ia = sourceOrder.indexOf(a);
+            const ib = sourceOrder.indexOf(b);
+            return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+        });
+
+        for (const label of sortedLabels) {
+            const archetypes = groups[label];
+            // Sort by meta rank (ascending), unranked last, then alphabetically
+            archetypes.sort((a, b) => {
+                const ra = getRank(a.name);
+                const rb = getRank(b.name);
+                if (ra !== rb) return ra - rb;
+                return a.name.localeCompare(b.name);
+            });
+
             html += `<div class="custom-binder-dropdown-group-label">${escapeHtml(label)}</div>`;
-            archetypes.slice(0, 50).forEach(a => {
+            archetypes.slice(0, 60).forEach((a, idx) => {
                 const key = (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(a.name) : a.name.toLowerCase()) + '|' + a.source;
                 const isSelected = selectedKeys.has(key);
                 const safeName = escapeHtml(a.name);
-                const safeSource = escapeHtml(a.source);
+                const rank = getRank(a.name);
+                const share = getShare(a.name);
+                const rankBadge = rank < 9999 ? `<span class="cb-dd-rank">#${rank}</span>` : '';
+                const shareText = share > 0 ? `<small class="opacity-60">${share.toFixed(1)}%</small>` : '';
                 html += `<button type="button" class="custom-binder-dropdown-item ${isSelected ? 'is-selected' : ''}" 
-                    onclick="cbToggleArchetype('${a.name.replace(/'/g, "\\'")}','${safeSource}')">
-                    <span class="cb-dd-check">${isSelected ? '✓' : ''}</span> ${safeName}
+                    onclick="cbToggleArchetype('${a.name.replace(/'/g, "\\'")}','${escapeHtml(a.source)}')">
+                    <span class="cb-dd-check">${isSelected ? '✓' : ''}</span>${rankBadge} ${safeName} ${shareText}
                 </button>`;
             });
         }
 
         dd.innerHTML = html;
     }
+
+    // ── Toggle all variants of a main pokemon group ──
+    function cbToggleMainPokemonGroup(variantNamesStr, source) {
+        const names = variantNamesStr.split('|||');
+        const shared = mb();
+        // Check if all are already selected → deselect all, else select all
+        const allSelected = names.every(name => {
+            const key = (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(name) : name.toLowerCase()) + '|' + source;
+            return cbSelectedArchetypes.some(a =>
+                ((shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(a.name) : a.name.toLowerCase()) + '|' + a.source) === key
+            );
+        });
+
+        if (allSelected) {
+            // Remove all variants
+            names.forEach(name => {
+                const normKey = shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(name) : name.toLowerCase();
+                cbSelectedArchetypes = cbSelectedArchetypes.filter(a =>
+                    !((shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(a.name) : a.name.toLowerCase()) === normKey && a.source === source)
+                );
+            });
+        } else {
+            // Add missing variants (respect 30-deck limit)
+            names.forEach(name => {
+                const normKey = shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(name) : name.toLowerCase();
+                const already = cbSelectedArchetypes.some(a =>
+                    (shared.normalizeArchetypeKey ? shared.normalizeArchetypeKey(a.name) : a.name.toLowerCase()) === normKey && a.source === source
+                );
+                if (!already) {
+                    if (cbSelectedArchetypes.length >= 30) return;
+                    cbSelectedArchetypes.push({ name, source });
+                }
+            });
+        }
+
+        cbSaveSelections();
+        cbRenderChips();
+        _cbSkipNextClose = true;
+        cbRenderDropdownList();
+    }
+    window.cbToggleMainPokemonGroup = cbToggleMainPokemonGroup;
 
     function cbFilterArchetypeList() {
         if (!cbArchetypesLoaded) {

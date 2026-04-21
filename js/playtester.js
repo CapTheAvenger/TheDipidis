@@ -2402,6 +2402,16 @@ function ptClickZone(player, zoneId) {
         ptState.stadium.push(card);
         ptState.stadiumPlayedBy = localPlayer;
         ptLog(`Played Stadium: "${card.name}" (${localPlayer.toUpperCase()}).`);
+        // Area Zero Underdepths — auto-expand bench to 8 slots
+        if (/area zero/i.test(card.name || '')) {
+            ['p1', 'p2'].forEach(p => {
+                const btn = document.getElementById(`ptBenchToggle-${p}`);
+                if (btn && !btn.classList.contains('s8') && typeof window.ptToggleBenchSize === 'function') {
+                    window.ptToggleBenchSize(p);
+                }
+            });
+            ptLog(getLang()==='de' ? '🌀 Area Zero: Bank auf 8 Slots erweitert.' : '🌀 Area Zero: Bench expanded to 8 slots.');
+        }
     } else {
         ptState[player].field[zoneId].push(card);
         ptLog(`Placed "${card.name}" on ${player} ${zoneId}.`);
@@ -2701,6 +2711,11 @@ function ptRetreat(player, zoneId) {
     if (zoneId !== 'active') {
         // Bench → swap directly with active
         ptSwapZones(player, zoneId, null);
+        return;
+    }
+    // Paralysis blocks retreat
+    if (ptState[player].status.includes('paralyzed')) {
+        ptShowMessage(getLang()==='de' ? '⚡ Paralysiert – kein Retreat möglich!' : '⚡ Paralyzed – cannot retreat!');
         return;
     }
     // Active → first ask how many energy to discard (retreat cost 0-4)
@@ -4053,9 +4068,31 @@ function generateZoneHTML(player, zoneId, labelText, elementId) {
     if (zoneId === 'active') {
         const stat = ptState[player].status;
         if (stat.length > 0) {
-            html += `<div style="position:absolute;bottom:-10px;right:5px;
-                background:rgba(0,0,0,0.8);color:#fff;padding:2px 5px;
-                border-radius:4px;font-size:11px;z-index:99;">${stat.join(' ')}</div>`;
+            const _localP = ptState.isMultiplayer ? ptState.localRole : ptCurrentPlayer;
+            const isOwn = player === _localP;
+            const STATUS_META = {
+                poisoned:  { icon: '🟢', color: '#2ecc71', title: 'Poisoned: +10 DMG/turn' },
+                burned:    { icon: '🔥', color: '#e67e22', title: 'Burned: +20 DMG/turn' },
+                asleep:    { icon: '💤', color: '#3498db', title: 'Asleep: coin flip on opponent\'s turn' },
+                paralyzed: { icon: '⚡', color: '#e74c3c', title: 'Paralyzed: no attack/retreat; removed next turn' },
+                confused:  { icon: '😵', color: '#9b59b6', title: 'Confused: click to flip coin before attack' },
+            };
+            const badges = stat.map(s => {
+                const m = STATUS_META[s] || { icon: s, color: '#fff', title: s };
+                if (s === 'confused' && isOwn) {
+                    return `<span onclick="ptConfusedAttack('${player}');event.stopPropagation();"
+                                  title="${m.title}" style="cursor:pointer;color:${m.color};font-size:14px;">${m.icon}</span>`;
+                }
+                return `<span title="${m.title}" style="color:${m.color};font-size:14px;">${m.icon}</span>`;
+            }).join('');
+            const isParalyzed = isOwn && stat.includes('paralyzed');
+            html += `<div onclick="event.stopPropagation()"
+                         style="position:absolute;bottom:-12px;right:4px;background:rgba(0,0,0,0.85);
+                         padding:2px 6px;border-radius:5px;z-index:99;display:flex;align-items:center;gap:3px;
+                         ${isParalyzed ? 'border:1px solid #e74c3c;' : ''}">
+                ${badges}
+                ${isParalyzed ? `<span style="font-size:8px;color:#e74c3c;margin-left:2px;">No Atk/Ret</span>` : ''}
+            </div>`;
         }
     }
 
@@ -4111,6 +4148,8 @@ const _PT_TRAINER_ACTIONS = {
     'unfair-stamp':         ptTrainerUnfairStamp,
     'judge':                ptTrainerJudge,
     'iono':                 ptTrainerIono,
+    'prof-research':        ptTrainerProfResearch,
+    'switch-active':        ptTrainerSwitch,
 };
 
 let _ptCardActionsLoaded = false;
@@ -4830,6 +4869,94 @@ function ptTrainerJudge(player, card) {
 function ptTrainerIono(player, card) {
     ptGlobalIono();
     return false;
+}
+
+// Professor's Research / Elm's Lecture / etc. — discard hand, draw 7
+function ptTrainerProfResearch(player, card) {
+    ptSaveState();
+    const hand = ptState[player].hand;
+    const discCount = hand.length;
+    while (hand.length > 0) ptState[player].discard.push(hand.pop());
+    let drawn = 0;
+    for (let i = 0; i < 7; i++) {
+        if (ptState[player].deck.length === 0) break;
+        ptState[player].hand.push(ptState[player].deck.pop());
+        drawn++;
+    }
+    ptLog(getLang()==='de'
+        ? `${_ptEscHtml(card.name)}: ${discCount} Karten abgelegt, ${drawn} gezogen.`
+        : `${_ptEscHtml(card.name)}: Discarded ${discCount}, drew ${drawn}.`);
+    ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase(card.name + ' played');
+    return true;
+}
+
+// Switch / Switch Cart / Escape Rope — swap own active with chosen bench Pokémon
+function ptTrainerSwitch(player, card) {
+    const benchZones = ['bench0','bench1','bench2','bench3','bench4'];
+    const occupied = benchZones.filter(b => ptState[player].field[b].length > 0);
+    if (occupied.length === 0) { ptShowMessage(t('pt.errNoBenchPokemon')); return false; }
+    ptSaveState();
+    const _tp = cards => [...cards].reverse().find(c => {
+        const ct = (c.cardType||'').toLowerCase();
+        return !ct.includes('energy') && ct !== 'tool' && !ct.includes('trainer');
+    }) || cards[0];
+    let html = `<div style="background:#1a1a2e;border:2px solid #27ae60;border-radius:14px;padding:20px;text-align:center;color:#fff;max-width:90vw;">
+        <h3 style="color:#27ae60;margin-top:0;">🔄 ${_ptEscHtml(card.name)} — ${getLang()==='de' ? 'Bankpokémon wählen' : 'Choose Bench Pokémon'}</h3>
+        <p style="color:#ccc;font-size:12px;margin-bottom:16px;">${getLang()==='de' ? 'Wähle das Pokémon das aktiv wird.' : 'Choose which Pokémon becomes Active.'}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:18px;">`;
+    occupied.forEach(benchZone => {
+        const poke = _tp(ptState[player].field[benchZone]);
+        html += `<div style="cursor:pointer;text-align:center;transition:transform .15s;"
+                      onclick="ptTrainerSwitchConfirm('${player}','${benchZone}')"
+                      onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${poke?.imageUrl || CARD_BACK_URL}" style="width:82px;border-radius:8px;border:3px solid #27ae60;" onerror="this.src='${CARD_BACK_URL}'">
+            <div style="color:#fff;font-size:9px;margin-top:4px;max-width:82px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${_ptEscHtml(poke?.name || benchZone)}</div>
+        </div>`;
+    });
+    html += `</div>
+        <button onclick="document.getElementById('ptSwitchModal').style.display='none'" style="background:#555;color:#fff;border:none;padding:6px 18px;border-radius:8px;cursor:pointer;">${getLang()==='de' ? 'Abbrechen' : 'Cancel'}</button>
+    </div>`;
+    let modal = document.getElementById('ptSwitchModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'ptSwitchModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:99998;';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = html;
+    modal.style.display = 'flex';
+    return true;
+}
+
+function ptTrainerSwitchConfirm(player, benchZone) {
+    const modal = document.getElementById('ptSwitchModal');
+    if (modal) modal.style.display = 'none';
+    ptSwapZones(player, benchZone, null);
+    // Status resets when switching out active
+    ptState[player].status = [];
+    ptRenderAll();
+    if (typeof syncStateToFirebase === 'function' && ptState.isMultiplayer) syncStateToFirebase('Switch: ' + player + ' ' + benchZone);
+}
+
+// Confused-attack coin flip: Heads = attack normally, Tails = 30 damage to self
+function ptConfusedAttack(player) {
+    player = player || ptCurrentPlayer;
+    if (!ptState[player].status.includes('confused')) {
+        ptShowMessage(getLang()==='de' ? 'Pokémon ist nicht verwirrt.' : 'Pokémon is not confused.');
+        return;
+    }
+    ptSaveState();
+    const flip = Math.random() < 0.5;
+    if (flip) {
+        ptLog(getLang()==='de' ? '😵 Verwirrung: Kopf – normal angreifen!' : '😵 Confusion: Heads – attack normally!');
+        ptShowMessage(getLang()==='de' ? '😵 Kopf! Angriff wie normal.' : '😵 Heads! Attack normally.');
+    } else {
+        ptState[player].damage.active = (ptState[player].damage.active || 0) + 30;
+        ptLog(getLang()==='de' ? '😵 Verwirrung: Zahl – 30 STP Selbstschaden!' : '😵 Confusion: Tails – 30 damage to self!');
+        ptShowMessage(getLang()==='de' ? '😵 Zahl! 30 Selbstschaden.' : '😵 Tails! 30 self-damage.');
+        ptRenderAll();
+    }
 }
 
 // === WIN SCREEN ===

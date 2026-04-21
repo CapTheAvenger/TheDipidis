@@ -1,13 +1,16 @@
 {
   "_comment": "Playtester Card-Action-Datenbank. 'prints' = alle SetCode-Number Kombinationen (inkl. int Prints). 'action' = ID der JS-Funktion die ausgeführt wird.",
-
   "abilities": [
     {
       "id": "lunatone-sol-calc",
       "cardName": "Lunatone",
       "abilityName": "Sol Calc",
       "action": "lunatone",
-      "prints": ["ASC-105", "MEG-74", "MEP-4"],
+      "prints": [
+        "ASC-105",
+        "MEG-74",
+        "MEP-4"
+      ],
       "description": "Discard a Basic Energy from hand, draw 3 cards"
     },
     {
@@ -15,7 +18,12 @@
       "cardName": "Drakloak",
       "abilityName": "Trickster",
       "action": "drakloak",
-      "prints": ["ASC-159", "ASC-248", "PRE-72", "TWM-129"],
+      "prints": [
+        "ASC-159",
+        "ASC-248",
+        "PRE-72",
+        "TWM-129"
+      ],
       "description": "Look at top 2 cards, take 1 to hand, put other on bottom"
     },
     {
@@ -23,7 +31,16 @@
       "cardName": "Fezandipiti ex",
       "abilityName": "Adrenaline Flush",
       "action": "fezandipiti",
-      "prints": ["ASC-142", "ASC-288", "SFA-38", "SFA-84", "SFA-92", "MC-489", "M2A-114", "M2A-244"],
+      "prints": [
+        "ASC-142",
+        "ASC-288",
+        "SFA-38",
+        "SFA-84",
+        "SFA-92",
+        "MC-489",
+        "M2A-114",
+        "M2A-244"
+      ],
       "description": "Draw 3 cards"
     },
     {
@@ -31,7 +48,12 @@
       "cardName": "Dudunsparce",
       "abilityName": "Run Away Draw",
       "action": "dudunsparce",
-      "prints": ["PRE-80", "TEF-129", "PAL-157", "PAL-229"],
+      "prints": [
+        "PRE-80",
+        "TEF-129",
+        "PAL-157",
+        "PAL-229"
+      ],
       "description": "Draw 3 cards, then shuffle this Pokémon and all attached cards into deck"
     },
     {
@@ -39,7 +61,9 @@
       "cardName": "Kadabra",
       "abilityName": "Psychic Draw",
       "action": "draw-2",
-      "prints": ["MEG-55"],
+      "prints": [
+        "MEG-55"
+      ],
       "description": "Draw 2 cards"
     },
     {
@@ -47,7 +71,11 @@
       "cardName": "Alakazam",
       "abilityName": "Psychic Draw",
       "action": "fezandipiti",
-      "prints": ["MEG-56", "MEP-3", "MEP-9"],
+      "prints": [
+        "MEG-56",
+        "MEP-3",
+        "MEP-9"
+      ],
       "description": "Draw 3 cards"
     },
     {
@@ -55,7 +83,12 @@
       "cardName": "Fan Rotom",
       "abilityName": "Fan Call",
       "action": "ability-deck-search",
-      "prints": ["ASC-171", "ASC-250", "PRE-85", "SCR-118"],
+      "prints": [
+        "ASC-171",
+        "ASC-250",
+        "PRE-85",
+        "SCR-118"
+      ],
       "description": "Search deck for up to 3 Colorless Pokémon with 100 HP or less"
     },
     {
@@ -63,7 +96,12 @@
       "cardName": "Mega Kangaskhan ex",
       "abilityName": "Run Errand",
       "action": "draw-2",
-      "prints": ["MEG-104", "MEG-164", "MEG-182", "MEP-25"],
+      "prints": [
+        "MEG-104",
+        "MEG-164",
+        "MEG-182",
+        "MEP-25"
+      ],
       "description": "Draw 2 cards (Active Spot only)"
     },
     {
@@ -72,7 +110,14 @@
       "abilityName": "Attract Customers",
       "action": "look-top-supporter",
       "actionParam": 6,
-      "prints": ["PAF-127", "PAR-141", "SVI-62", "SVP-118", "TWM-131", "TWM-186"],
+      "prints": [
+        "PAF-127",
+        "PAR-141",
+        "SVI-62",
+        "SVP-118",
+        "TWM-131",
+        "TWM-186"
+      ],
       "description": "Look at top 6 cards, pick a Supporter to hand, shuffle rest back"
     },
     {
@@ -80,7 +125,10 @@
       "cardName": "Cynthia's Gabite",
       "abilityName": "Champion's Call",
       "action": "ability-deck-search",
-      "prints": ["ASC-110", "DRI-103"],
+      "prints": [
+        "ASC-110",
+        "DRI-103"
+      ],
       "description": "Search deck for a Cynthia's Pokémon"
     },
     {
@@ -88,83 +136,68 @@
       "cardName": "N's Zoroark ex",
       "abilityName": "Trade",
       "action": "zoroark-trade",
-      "prints": ["ASC-137", "ASC-286", "JTG-175", "JTG-185", "JTG-189", "JTG-98"],
+      "prints": [
+        "ASC-137",
+        "ASC-286",
+        "JTG-175",
+        "JTG-185",
+        "JTG-189",
+        "JTG-98"
+      ],
       "description": "Discard 1 card from hand, draw 2 cards"
     }
   ],
-
   "trainers": [
+    {
+      "id": "air-balloon",
+      "cardName": "Air Balloon",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-181",
+        "BLK-79",
+        "MEG-166",
+        "SSH-156",
+        "SSH-213"
+      ],
+      "description": "Tool: free retreat for Pokémon with 2 energy retreat cost"
+    },
+    {
+      "id": "arven",
+      "cardName": "Arven",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "OBF-186",
+        "PAF-235",
+        "SVI-166",
+        "SVI-235",
+        "SVI-249",
+        "SVP-238"
+      ],
+      "description": "Search deck for Item + Tool card"
+    },
     {
       "id": "boss-orders",
       "cardName": "Boss's Orders",
       "action": "boss-orders",
       "triggerZone": "playzone",
       "prints": [
-        "ASC-183", "ASC-256",
-        "PAL-172", "PAL-248", "PAL-265",
-        "BRS-132", "LOR-TG24", "MEG-114",
-        "RCL-154", "RCL-189", "RCL-200",
-        "SHF-58", "SP-251"
+        "ASC-183",
+        "ASC-256",
+        "PAL-172",
+        "PAL-248",
+        "PAL-265",
+        "BRS-132",
+        "LOR-TG24",
+        "MEG-114",
+        "RCL-154",
+        "RCL-189",
+        "RCL-200",
+        "SHF-58",
+        "SP-251"
       ],
       "description": "Switch opponent's bench Pokémon to active position"
-    },
-    {
-      "id": "dawn",
-      "cardName": "Dawn",
-      "action": "deck-search",
-      "triggerZone": "playzone",
-      "prints": ["PFL-87", "PFL-118", "PFL-129", "M2-77", "M2-106", "M2-115"],
-      "description": "Search deck for Basic + Stage 1 + Stage 2 Pokémon"
-    },
-    {
-      "id": "lillie-determination",
-      "cardName": "Lillie's Determination",
-      "action": "lillie",
-      "triggerZone": "playzone",
-      "prints": [
-        "ASC-192", "MEG-119", "MEG-169", "MEG-184",
-        "MP1-23", "MC-729", "MP-7", "MBD-20", "MBG-21",
-        "M1L-62", "M1L-86", "M1L-91", "M2A-175"
-      ],
-      "description": "Shuffle hand into deck, draw 6 (or 8 if 6 prizes remain)"
-    },
-    {
-      "id": "hilda",
-      "cardName": "Hilda",
-      "action": "deck-search",
-      "triggerZone": "playzone",
-      "prints": ["WHT-84", "WHT-164", "WHT-171", "MC-718", "MP-51", "M2A-172"],
-      "description": "Search deck for Evolution Pokémon + Energy card"
-    },
-    {
-      "id": "poke-pad",
-      "cardName": "Poké Pad",
-      "action": "deck-search",
-      "triggerZone": "playzone",
-      "prints": ["ASC-198", "MP1-15", "M3-70", "M3-103", "MC-662"],
-      "description": "Search deck for a Pokémon without Rule Box"
-    },
-    {
-      "id": "ultra-ball",
-      "cardName": "Ultra Ball",
-      "action": "ultra-ball",
-      "triggerZone": "playzone",
-      "prints": [
-        "ASC-213", "ASC-264", "MEG-131", "PAF-91",
-        "SVI-196", "SVP-245", "SVP-275", "CRZ-146",
-        "BRS-150", "BRS-186", "SLG-68", "SLG-68a",
-        "SUM-135", "SUM-161", "FCO-113", "ROS-93",
-        "FLF-99", "PLB-90", "PLF-122", "DEX-102", "MP1-14"
-      ],
-      "description": "Discard 2 cards from hand, then search deck for a Pokémon"
-    },
-    {
-      "id": "crispin",
-      "cardName": "Crispin",
-      "action": "deck-search",
-      "triggerZone": "playzone",
-      "prints": ["PRE-105", "PRE-171", "SCR-133", "SCR-164", "SVP-191", "MC-696"],
-      "description": "Search deck for up to 2 Basic Energy of different types"
     },
     {
       "id": "buddy-buddy-poffin",
@@ -172,112 +205,231 @@
       "action": "deck-search",
       "triggerZone": "playzone",
       "prints": [
-        "ASC-184", "MEG-167", "PRE-101", "TEF-144",
-        "TWM-223", "SVP-237", "SVP-244", "MC-648",
-        "MBD-10", "MBG-10", "M1S-81", "M2A-153"
+        "ASC-184",
+        "MEG-167",
+        "PRE-101",
+        "TEF-144",
+        "TWM-223",
+        "SVP-237",
+        "SVP-244",
+        "MC-648",
+        "MBD-10",
+        "MBG-10",
+        "M1S-81",
+        "M2A-153"
       ],
       "description": "Search deck for up to 2 Basic Pokémon with 70 HP or less"
-    },
-    {
-      "id": "night-stretcher",
-      "cardName": "Night Stretcher",
-      "action": "discard-retrieve",
-      "triggerZone": "playzone",
-      "prints": ["ASC-196", "MEG-173", "SFA-61", "SSP-251"],
-      "description": "Put a Pokémon or Basic Energy from discard into hand"
-    },
-    {
-      "id": "fighting-gong",
-      "cardName": "Fighting Gong",
-      "action": "deck-search",
-      "triggerZone": "playzone",
-      "prints": ["ASC-187", "MEG-116", "MEG-168"],
-      "description": "Search deck for Basic Fighting Energy or Basic Fighting Pokémon"
-    },
-    {
-      "id": "team-rockets-petrel",
-      "cardName": "Team Rocket's Petrel",
-      "action": "deck-search",
-      "triggerZone": "playzone",
-      "prints": ["ASC-207", "DRI-176", "DRI-226"],
-      "description": "Search deck for a Trainer card"
-    },
-    {
-      "id": "ciphermaniacs-codebreaking",
-      "cardName": "Ciphermaniac's Codebreaking",
-      "action": "ciphermaniac",
-      "triggerZone": "playzone",
-      "prints": ["PRE-104", "TEF-145", "TEF-198"],
-      "description": "Search deck for 2 cards, put on top of deck"
-    },
-    {
-      "id": "wondrous-patch",
-      "cardName": "Wondrous Patch",
-      "action": "discard-retrieve",
-      "triggerZone": "playzone",
-      "prints": ["PFL-94"],
-      "description": "Attach Basic Psychic Energy from discard to benched Psychic Pokémon"
-    },
-    {
-      "id": "tool-scrapper",
-      "cardName": "Tool Scrapper",
-      "action": "tool-scrapper",
-      "triggerZone": "playzone",
-      "prints": ["ASC-212", "DRX-116", "RCL-168", "RCL-208", "WHT-85"],
-      "description": "Choose up to 2 Pokémon Tool cards in play and discard them"
-    },
-    {
-      "id": "pokegear-30",
-      "cardName": "Pokégear 3.0",
-      "action": "look-top-supporter",
-      "actionParam": 7,
-      "triggerZone": "playzone",
-      "prints": ["BLK-84", "HS-96", "SSH-174", "SVI-186", "UNB-182", "UNB-182a", "UNB-182b", "UNB-233"],
-      "description": "Look at top 7 cards, pick a Supporter to hand, shuffle rest back"
     },
     {
       "id": "carmine",
       "cardName": "Carmine",
       "action": "carmine",
       "triggerZone": "playzone",
-      "prints": ["PRE-103", "TWM-145", "TWM-204", "TWM-217"],
+      "prints": [
+        "MC-715",
+        "PRE-103",
+        "TWM-145",
+        "TWM-204",
+        "TWM-217"
+      ],
       "description": "Discard hand, draw 5 cards"
+    },
+    {
+      "id": "ciphermaniacs-codebreaking",
+      "cardName": "Ciphermaniac's Codebreaking",
+      "action": "ciphermaniac",
+      "triggerZone": "playzone",
+      "prints": [
+        "MC-698",
+        "PRE-104",
+        "TEF-145",
+        "TEF-198"
+      ],
+      "description": "Search deck for 2 cards, put on top of deck"
+    },
+    {
+      "id": "counter-catcher",
+      "cardName": "Counter Catcher",
+      "action": "boss-orders",
+      "triggerZone": "playzone",
+      "prints": [
+        "CIN-120",
+        "CIN-91",
+        "PAR-160",
+        "PAR-264"
+      ],
+      "description": "If behind on prizes: gust opponent's bench"
+    },
+    {
+      "id": "crispin",
+      "cardName": "Crispin",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "PRE-105",
+        "PRE-171",
+        "SCR-133",
+        "SCR-164",
+        "SVP-191",
+        "MC-696"
+      ],
+      "description": "Search deck for up to 2 Basic Energy of different types"
+    },
+    {
+      "id": "dawn",
+      "cardName": "Dawn",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "PFL-87",
+        "PFL-118",
+        "PFL-129",
+        "M2-77",
+        "M2-106",
+        "M2-115"
+      ],
+      "description": "Search deck for Basic + Stage 1 + Stage 2 Pokémon"
+    },
+    {
+      "id": "earthen-vessel",
+      "cardName": "Earthen Vessel",
+      "action": "discard-retrieve",
+      "triggerZone": "playzone",
+      "prints": [
+        "PAR-163",
+        "PRE-106",
+        "SFA-96"
+      ],
+      "description": "Discard a Pokémon from hand, get 2 Basic Energy from deck"
+    },
+    {
+      "id": "energy-search",
+      "cardName": "Energy Search",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "BCR-128",
+        "BLW-93",
+        "CG-86",
+        "CRZ-128",
+        "DP-117",
+        "E1-153",
+        "FO-59",
+        "MC-639",
+        "MD-90",
+        "POR-72",
+        "RS-90",
+        "SSH-161",
+        "SVI-172",
+        "SVP-272",
+        "UF-94"
+      ],
+      "description": "Search deck for a Basic Energy card"
     },
     {
       "id": "energy-switch",
       "cardName": "Energy Switch",
       "action": "energy-switch",
       "triggerZone": "playzone",
-      "prints": ["BLW-94", "CES-129", "CRZ-129", "DP-107", "E2-120", "FFI-89", "GEN-61", "HS-91", "LTR-112", "MEG-115", "PK-75", "RG-90", "ROS-109", "RS-82", "SF-84", "SIT-212", "SSH-162", "SUM-117", "SVI-173", "UF-84"],
+      "prints": [
+        "BLW-94",
+        "CES-129",
+        "CRZ-129",
+        "DP-107",
+        "E2-120",
+        "FFI-89",
+        "GEN-61",
+        "HS-91",
+        "HSP-29",
+        "LTR-112",
+        "MC-638",
+        "MEG-115",
+        "PK-75",
+        "RG-90",
+        "ROS-109",
+        "RS-82",
+        "SF-84",
+        "SIT-212",
+        "SSH-162",
+        "SUM-117",
+        "SVI-173",
+        "UF-84"
+      ],
       "description": "Move a basic Energy from one of your Pokémon to another"
     },
     {
-      "id": "secret-box",
-      "cardName": "Secret Box",
-      "action": "secret-box",
-      "triggerZone": "playzone",
-      "prints": ["TWM-163"],
-      "description": "Discard 3 cards from hand, search deck for Item + Tool + Supporter + Stadium"
-    },
-    {
-      "id": "unfair-stamp",
-      "cardName": "Unfair Stamp",
-      "action": "unfair-stamp",
-      "triggerZone": "playzone",
-      "prints": ["TWM-165"],
-      "description": "Both players shuffle hand into deck. You draw 5, opponent draws 2."
-    },
-    {
-      "id": "judge",
-      "cardName": "Judge",
-      "action": "judge",
+      "id": "escape-rope",
+      "cardName": "Escape Rope",
+      "action": "switch-active",
       "triggerZone": "playzone",
       "prints": [
-        "BKT-143", "BKT-143a", "LOT-209", "UPR-209", "SVI-176",
-        "FST-235", "GEN-108", "PAL-236",
-        "M2-77", "M2-106", "M2-115"
+        "BST-125",
+        "BUS-114",
+        "BUS-163",
+        "PLS-120",
+        "PRC-127"
       ],
-      "description": "Both players shuffle hand into deck, then draw 4 cards each."
+      "description": "Both players switch active Pokémon"
+    },
+    {
+      "id": "evolution-incense",
+      "cardName": "Evolution Incense",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "SSH-163"
+      ],
+      "description": "Search deck for Evolution Pokémon"
+    },
+    {
+      "id": "fighting-gong",
+      "cardName": "Fighting Gong",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-187",
+        "MEG-116",
+        "MEG-168"
+      ],
+      "description": "Search deck for Basic Fighting Energy or Basic Fighting Pokémon"
+    },
+    {
+      "id": "great-ball",
+      "cardName": "Great Ball",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "BCR-129",
+        "BKP-100",
+        "CPA-52",
+        "CRZ-132",
+        "DS-90",
+        "EPO-93",
+        "PAL-183",
+        "PK-77",
+        "RG-92",
+        "SF-85",
+        "SLG-60",
+        "SSH-164",
+        "SUM-119",
+        "XY-118"
+      ],
+      "description": "Look at top 7 cards, pick a Pokémon"
+    },
+    {
+      "id": "hilda",
+      "cardName": "Hilda",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "WHT-84",
+        "WHT-164",
+        "WHT-171",
+        "MC-718",
+        "MP-51",
+        "M2A-172"
+      ],
+      "description": "Search deck for Evolution Pokémon + Energy card"
     },
     {
       "id": "iono",
@@ -285,11 +437,462 @@
       "action": "iono",
       "triggerZone": "playzone",
       "prints": [
-        "PAL-185", "PAL-254", "PAL-269",
-        "SVP-76", "SVP-172", "MEG-174",
-        "M1L-68", "M1L-93"
+        "M1L-68",
+        "M1L-93",
+        "MEG-174",
+        "PAF-237",
+        "PAF-80",
+        "PAL-185",
+        "PAL-254",
+        "PAL-269",
+        "SVP-124",
+        "SVP-172",
+        "SVP-76"
       ],
       "description": "Both players shuffle hand to bottom of deck, then draw cards equal to remaining prizes."
+    },
+    {
+      "id": "judge",
+      "cardName": "Judge",
+      "action": "judge",
+      "triggerZone": "playzone",
+      "prints": [
+        "BKT-143",
+        "BKT-143a",
+        "DRI-167",
+        "DRI-222",
+        "FLI-108",
+        "FST-235",
+        "GEN-108",
+        "LOT-209",
+        "M2-106",
+        "M2-115",
+        "M2-77",
+        "MC-711",
+        "MP1-22",
+        "PAF-228",
+        "PAL-236",
+        "POR-76",
+        "SIT-TG25",
+        "SMP-334",
+        "SVI-176",
+        "UL-78",
+        "UPR-209"
+      ],
+      "description": "Both players shuffle hand into deck, then draw 4 cards each."
+    },
+    {
+      "id": "lacey",
+      "cardName": "Lacey",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "MC-716",
+        "PRE-114",
+        "PRE-175",
+        "SCR-139",
+        "SCR-166",
+        "SCR-172"
+      ],
+      "description": "Search deck for a colorless Pokémon"
+    },
+    {
+      "id": "level-ball",
+      "cardName": "Level Ball",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "AOR-76",
+        "BST-129",
+        "BST-181",
+        "NXD-89"
+      ],
+      "description": "Search deck for Pokémon with 90 HP or less"
+    },
+    {
+      "id": "lillie-determination",
+      "cardName": "Lillie's Determination",
+      "action": "lillie",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-192",
+        "MEG-119",
+        "MEG-169",
+        "MEG-184",
+        "MP1-23",
+        "MC-729",
+        "MP-7",
+        "MBD-20",
+        "MBG-21",
+        "M1L-62",
+        "M1L-86",
+        "M1L-91",
+        "M2A-175"
+      ],
+      "description": "Shuffle hand into deck, draw 6 (or 8 if 6 prizes remain)"
+    },
+    {
+      "id": "nest-ball",
+      "cardName": "Nest Ball",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "PAF-84",
+        "SUM-123",
+        "SUM-158",
+        "SVI-181",
+        "SVI-255"
+      ],
+      "description": "Search deck for Basic Pokémon"
+    },
+    {
+      "id": "night-stretcher",
+      "cardName": "Night Stretcher",
+      "action": "discard-retrieve",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-196",
+        "MEG-173",
+        "SFA-61",
+        "SSP-251"
+      ],
+      "description": "Put a Pokémon or Basic Energy from discard into hand"
+    },
+    {
+      "id": "poke-pad",
+      "cardName": "Poké Pad",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-198",
+        "M3-103",
+        "M3-70",
+        "MC-662",
+        "MP1-15",
+        "POR-113",
+        "POR-81"
+      ],
+      "description": "Search deck for a Pokémon without Rule Box"
+    },
+    {
+      "id": "pokegear-30",
+      "cardName": "Pokégear 3.0",
+      "action": "look-top-supporter",
+      "actionParam": 7,
+      "triggerZone": "playzone",
+      "prints": [
+        "BLK-84",
+        "HS-96",
+        "SSH-174",
+        "SVI-186",
+        "UNB-182",
+        "UNB-182a",
+        "UNB-182b",
+        "UNB-233"
+      ],
+      "description": "Look at top 7 cards, pick a Supporter to hand, shuffle rest back"
+    },
+    {
+      "id": "prime-catcher",
+      "cardName": "Prime Catcher",
+      "action": "boss-orders",
+      "triggerZone": "playzone",
+      "prints": [
+        "MC-656",
+        "PRE-119",
+        "TEF-157"
+      ],
+      "description": "Gust + switch your own active with bench"
+    },
+    {
+      "id": "professor-elm-s-lecture",
+      "cardName": "Professor Elm's Lecture",
+      "action": "prof-research",
+      "triggerZone": "playzone",
+      "prints": [
+        "LOT-188",
+        "LOT-188A",
+        "LOT-213",
+        "SMP-250"
+      ],
+      "description": "Discard hand, draw 7"
+    },
+    {
+      "id": "professor-juniper",
+      "cardName": "Professor Juniper",
+      "action": "prof-research",
+      "triggerZone": "playzone",
+      "prints": [
+        "BLW-101",
+        "DEX-98",
+        "PLB-84",
+        "PLF-116"
+      ],
+      "description": "Discard hand, draw 7"
+    },
+    {
+      "id": "professor-kukui",
+      "cardName": "Professor Kukui",
+      "action": "prof-research",
+      "triggerZone": "playzone",
+      "prints": [
+        "SUM-128",
+        "SUM-148"
+      ],
+      "description": "Discard hand, draw 7 (also +20 damage)"
+    },
+    {
+      "id": "professor-oak",
+      "cardName": "Professor Oak",
+      "action": "prof-research",
+      "triggerZone": "playzone",
+      "prints": [
+        "BS-88",
+        "BS2-116"
+      ],
+      "description": "Discard hand, draw 7"
+    },
+    {
+      "id": "professor-sycamore",
+      "cardName": "Professor Sycamore",
+      "action": "prof-research",
+      "triggerZone": "playzone",
+      "prints": [
+        "BKP-107",
+        "BKP-107A",
+        "PHF-101",
+        "STS-114",
+        "XY-122"
+      ],
+      "description": "Discard hand, draw 7"
+    },
+    {
+      "id": "professor-s-research",
+      "cardName": "Professor's Research",
+      "action": "prof-research",
+      "triggerZone": "playzone",
+      "prints": [
+        "BLK-85",
+        "BRS-147",
+        "CEL-23",
+        "CEL-24",
+        "CPA-62",
+        "CRZ-150",
+        "JTG-155",
+        "PAF-87",
+        "PAF-88",
+        "PGO-78",
+        "PGO-84",
+        "PRE-122",
+        "PRE-123",
+        "PRE-124",
+        "PRE-125",
+        "SHF-60",
+        "SP-152",
+        "SP-178",
+        "SSH-178",
+        "SSH-201",
+        "SSH-209",
+        "SVI-189",
+        "SVI-190",
+        "SVI-240",
+        "SVI-241"
+      ],
+      "description": "Discard hand, draw 7"
+    },
+    {
+      "id": "quick-ball",
+      "cardName": "Quick Ball",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "FST-237",
+        "MD-86",
+        "MT-114",
+        "SSH-179",
+        "SSH-216"
+      ],
+      "description": "Discard a card, search deck for Basic Pokémon"
+    },
+    {
+      "id": "rare-candy",
+      "cardName": "Rare Candy",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "CES-142",
+        "CRZ-141",
+        "DEX-100",
+        "EM-83",
+        "GE-102",
+        "GRI-165",
+        "HP-90",
+        "MC-655",
+        "MEG-125",
+        "MEG-175",
+        "P5-7",
+        "P8-10",
+        "PAF-89",
+        "PGO-69",
+        "PLB-105",
+        "PLB-85",
+        "PRC-135",
+        "SMP-NAN1",
+        "SMP-NAN2",
+        "SMP-NAN3",
+        "SS-88",
+        "SSH-180",
+        "SUM-129",
+        "SVI-191",
+        "SVI-256",
+        "SVP-246",
+        "UL-82"
+      ],
+      "description": "Evolve a Basic to Stage 2, skipping Stage 1"
+    },
+    {
+      "id": "secret-box",
+      "cardName": "Secret Box",
+      "action": "secret-box",
+      "triggerZone": "playzone",
+      "prints": [
+        "TWM-163"
+      ],
+      "description": "Discard 3 cards from hand, search deck for Item + Tool + Supporter + Stadium"
+    },
+    {
+      "id": "switch",
+      "cardName": "Switch",
+      "action": "switch-active",
+      "triggerZone": "playzone",
+      "prints": [
+        "BCR-135",
+        "BLW-104",
+        "BS-95",
+        "BS2-123",
+        "CES-147",
+        "CRZ-144",
+        "DF-83",
+        "DP-119",
+        "DS-102",
+        "E1-157",
+        "EVO-88",
+        "HS-102",
+        "HSP-32",
+        "HSP-32A",
+        "HSP-32B",
+        "KSS-38",
+        "MC-663",
+        "MEG-130",
+        "MEW-206",
+        "MP1-16",
+        "PFL-123",
+        "PRC-163",
+        "RG-102",
+        "ROS-91",
+        "RS-92",
+        "SF-93",
+        "SLG-67",
+        "SSH-183",
+        "SUM-132",
+        "SUM-160",
+        "SVI-194",
+        "SVP-248",
+        "SVP-276",
+        "SW-128"
+      ],
+      "description": "Switch your Active Pokémon with a Bench Pokémon"
+    },
+    {
+      "id": "switch-cart",
+      "cardName": "Switch Cart",
+      "action": "switch-active",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASR-154"
+      ],
+      "description": "Switch your Active Pokémon with a Bench Pokémon; heal 30"
+    },
+    {
+      "id": "team-rockets-petrel",
+      "cardName": "Team Rocket's Petrel",
+      "action": "deck-search",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-207",
+        "DRI-176",
+        "DRI-226",
+        "MC-734"
+      ],
+      "description": "Search deck for a Trainer card"
+    },
+    {
+      "id": "tool-scrapper",
+      "cardName": "Tool Scrapper",
+      "action": "tool-scrapper",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-212",
+        "DRX-116",
+        "RCL-168",
+        "RCL-208",
+        "WHT-85"
+      ],
+      "description": "Choose up to 2 Pokémon Tool cards in play and discard them"
+    },
+    {
+      "id": "ultra-ball",
+      "cardName": "Ultra Ball",
+      "action": "ultra-ball",
+      "triggerZone": "playzone",
+      "prints": [
+        "ASC-213",
+        "ASC-264",
+        "BRS-150",
+        "BRS-186",
+        "CRZ-146",
+        "DEX-102",
+        "FCO-113",
+        "FLF-99",
+        "MC-651",
+        "MEG-131",
+        "MP1-14",
+        "PAF-91",
+        "PLB-90",
+        "PLF-122",
+        "ROS-93",
+        "SLG-68",
+        "SLG-68a",
+        "SMP-NAN32",
+        "SUM-135",
+        "SUM-161",
+        "SVI-196",
+        "SVP-245",
+        "SVP-275"
+      ],
+      "description": "Discard 2 cards from hand, then search deck for a Pokémon"
+    },
+    {
+      "id": "unfair-stamp",
+      "cardName": "Unfair Stamp",
+      "action": "unfair-stamp",
+      "triggerZone": "playzone",
+      "prints": [
+        "MC-633",
+        "TWM-165"
+      ],
+      "description": "Both players shuffle hand into deck. You draw 5, opponent draws 2."
+    },
+    {
+      "id": "wondrous-patch",
+      "cardName": "Wondrous Patch",
+      "action": "discard-retrieve",
+      "triggerZone": "playzone",
+      "prints": [
+        "PFL-94",
+        "POR-117"
+      ],
+      "description": "Attach Basic Psychic Energy from discard to benched Psychic Pokémon"
     }
   ]
 }

@@ -9,7 +9,7 @@
         let currentMetaRarityMode = 'min'; // 'min', 'max', 'all'
         let currentMetaGlobalRarityPreference = 'min';
         let currentMetaTournamentStartDate = null; // Date object from settings start_date
-        let _currentMetaRenderGen = 0; // incremented on each render to cancel stale batches
+        // _currentMetaRenderGen is declared in app-core.js (alongside _cityLeagueRenderGen and _pastMetaRenderGen)
 
         // Parse "14th March 2026" style dates into Date objects
         function parseEnglishTournamentDate(str) {

@@ -2430,41 +2430,41 @@ function sortCardsByTypeSimple(cards) {
     return 99999;
   }
   
-  return cards.sort((a, b) => {
+  const sorted = cards.sort((a, b) => {
     const cardTypeA = a.type || a.card_type || '';
     const cardTypeB = b.type || b.card_type || '';
-    
+
     const categoryA = getCardTypeCategory(cardTypeA);
     const categoryB = getCardTypeCategory(cardTypeB);
-    
+
     const orderA = typeOrder[categoryA] || 99;
     const orderB = typeOrder[categoryB] || 99;
-    
+
     // FIRST: Sort by main category (Pokemon, Supporter, etc.)
     if (orderA !== orderB) {
       return orderA - orderB;
     }
-    
+
     // For Pokemon: sort by element type, then Pokedex number
     if (categoryA === 'Pokemon' && categoryB === 'Pokemon') {
       const elementA = cardTypeA.charAt(0);
       const elementB = cardTypeB.charAt(0);
-      
+
       const elemOrderA = elementOrder[elementA] || 99;
       const elemOrderB = elementOrder[elementB] || 99;
-      
+
       // Different element: sort by element order
       if (elemOrderA !== elemOrderB) {
         return elemOrderA - elemOrderB;
       }
-      
+
       // Same element: sort by Pokedex number
       const dexA = _getDexNum(a);
       const dexB = _getDexNum(b);
       if (dexA !== dexB) {
         return dexA - dexB;
       }
-      
+
       // Same Pokedex: sort by evolution stage
       const evolutionA = cardTypeA.substring(1).replace(/\s+/g, '');
       const evolutionB = cardTypeB.substring(1).replace(/\s+/g, '');
@@ -2473,24 +2473,63 @@ function sortCardsByTypeSimple(cards) {
       if (evolOrderA !== evolOrderB) {
         return evolOrderA - evolOrderB;
       }
-      
+
       const nameA = a.card_name || a.name || '';
       const nameB = b.card_name || b.name || '';
       return nameA.localeCompare(nameB);
     }
-    
+
     // For non-Pokemon cards: sort by count/quantity (highest first)
     const countA = a.deck_count_in_selected || a.deck_count || a.count || 0;
     const countB = b.deck_count_in_selected || b.deck_count || b.count || 0;
     if (countA !== countB) {
       return countB - countA;
     }
-    
+
     // Same count: by name
     const nameA = a.card_name || a.name || '';
     const nameB = b.card_name || b.name || '';
     return nameA.localeCompare(nameB);
   });
+
+  // ── Post-pass: group different prints of the same card together ──
+  // The main sort ranks by category/count/dex/etc. Different prints of
+  // the same card (e.g. 3 prints of Lillie's Determination) can end up
+  // scattered because each print may have its own count and set number.
+  // This pass collects cards by normalized name and drops each group at
+  // the position of its first-occurring print — preserving the overall
+  // category/percentage hierarchy while keeping all prints adjacent.
+  // Within each group, prints are sub-sorted by set code → set number.
+  const firstIdx = new Map();
+  const groups   = new Map();
+  sorted.forEach((card, idx) => {
+    const rawName = card.card_name || card.name || card.name_en || '';
+    const key = String(rawName).trim().toLowerCase();
+    if (!groups.has(key)) {
+      groups.set(key, []);
+      firstIdx.set(key, idx);
+    }
+    groups.get(key).push(card);
+  });
+  const orderedKeys = Array.from(firstIdx.entries())
+    .sort((a, b) => a[1] - b[1])
+    .map(([k]) => k);
+  const grouped = [];
+  orderedKeys.forEach(key => {
+    const list = groups.get(key);
+    if (list.length > 1) {
+      list.sort((a, b) => {
+        const sa = String(a.set_code || a.set || '').toUpperCase();
+        const sb = String(b.set_code || b.set || '').toUpperCase();
+        if (sa !== sb) return sa.localeCompare(sb);
+        const na = parseInt(a.set_number || a.number, 10) || 0;
+        const nb = parseInt(b.set_number || b.number, 10) || 0;
+        return na - nb;
+      });
+    }
+    grouped.push(...list);
+  });
+  return grouped;
 }
 
 // Toggle deck collapse

@@ -707,10 +707,12 @@ window.MetaCall = (function () {
     if (arrow) arrow.textContent = opening ? '▼' : '▶';
   }
 
-  // Toggle flat ↔ grouped field view
+  // Toggle flat ↔ grouped field view — preserve scroll so user sees the change
   function _toggleGroupField() {
     _groupByMain = !_groupByMain;
+    const sy = window.scrollY;
     renderAll();
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, sy)));
   }
 
   // ── Public Init ────────────────────────────────────────────

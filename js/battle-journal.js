@@ -1361,23 +1361,24 @@
             return;
         }
 
-        let html = '<div class="ma-heatmap-scroll"><table class="ma-heatmap-table"><thead><tr><th class="ma-heatmap-corner"></th>';
+        const COL_W = 100; // px — explicit column width beats any table-layout heuristic
+        let html = `<div class="ma-heatmap-scroll"><table class="ma-heatmap-table" style="width:max-content"><thead><tr><th class="ma-heatmap-corner" style="min-width:110px"></th>`;
         oppArr.forEach(opp => {
-            html += `<th class="ma-heatmap-col-header" title="${escapeHtml(opp)}"><span class="col-label">${escapeHtml(opp)}</span></th>`;
+            html += `<th class="ma-heatmap-col-header" style="min-width:${COL_W}px;width:${COL_W}px" title="${escapeHtml(opp)}"><span class="col-label">${escapeHtml(opp)}</span></th>`;
         });
         html += '</tr></thead><tbody>';
 
         myArr.forEach(my => {
-            html += `<tr><td class="ma-heatmap-row-header" title="${escapeHtml(my)}">${escapeHtml(my).replace(/ /g, '<br>')}</td>`;
+            html += `<tr><td class="ma-heatmap-row-header" style="min-width:110px" title="${escapeHtml(my)}">${escapeHtml(my).replace(/ /g, '<br>')}</td>`;
             oppArr.forEach(opp => {
                 const key = my + '|||' + opp;
                 const cell = grid[key];
                 if (!cell || cell.total === 0) {
-                    html += '<td class="ma-heatmap-cell ma-heatmap-empty">–</td>';
+                    html += `<td class="ma-heatmap-cell ma-heatmap-empty" style="min-width:${COL_W}px">–</td>`;
                 } else {
                     const wr = Math.round((cell.w / cell.total) * 100);
                     const cls = wr >= 60 ? 'ma-heatmap-good' : (wr >= 40 ? 'ma-heatmap-mid' : 'ma-heatmap-bad');
-                    html += `<td class="ma-heatmap-cell ${cls}" title="${escapeHtml(my)} vs ${escapeHtml(opp)}: ${cell.w}-${cell.l}-${cell.t} (${wr}%)">${wr}<span class="ma-heatmap-pct">%</span><div class="ma-heatmap-sub">${cell.w}-${cell.l}-${cell.t}</div></td>`;
+                    html += `<td class="ma-heatmap-cell ${cls}" style="min-width:${COL_W}px" title="${escapeHtml(my)} vs ${escapeHtml(opp)}: ${cell.w}-${cell.l}-${cell.t} (${wr}%)">${wr}<span class="ma-heatmap-pct">%</span><div class="ma-heatmap-sub">${cell.w}-${cell.l}-${cell.t}</div></td>`;
                 }
             });
             html += '</tr>';

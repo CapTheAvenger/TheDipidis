@@ -3196,6 +3196,18 @@
             <option value="first" data-i18n="bj.goingFirst">1st (Going first)</option>
             <option value="second" data-i18n="bj.goingSecond">2nd (Going second)</option>
           </select>
+
+          <div class="bj-edit-divider"></div>
+
+          <label class="bj-brick-label bj-edit-brick-label">
+            <input type="checkbox" id="bjEditEntryBrick" class="bj-brick-checkbox">
+            <span class="bj-brick-icon">🧱</span>
+            <span class="bj-brick-text">Brick</span>
+            <span class="bj-brick-hint">(Verloren durch Pech)</span>
+          </label>
+
+          <label class="bj-edit-label" style="margin-top:10px">Notizen</label>
+          <textarea id="bjEditEntryNotes" class="bj-notes-textarea bj-edit-notes" rows="2" maxlength="200" placeholder="Stichpunkte..."></textarea>
         </div>
         <div class="bj-edit-modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeEditEntryModal()" data-i18n="bj.cancel">Cancel</button>

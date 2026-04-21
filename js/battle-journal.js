@@ -1106,6 +1106,7 @@
                     <div class="bj-history-clip">${escapeHtml(clipText)}</div>
                 </div>
                 <div class="bj-history-actions">
+                    <button type="button" class="bj-history-brick-btn${entry.brick ? ' is-active' : ''}" onclick="toggleBrickEntry('${escapeHtml(entry.id)}')" title="${entry.brick ? 'Brick entfernen' : 'Als Brick markieren'}">🧱</button>
                     <button type="button" class="bj-history-edit-btn" onclick="openEditEntryModal('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.editEntry', 'Edit'))}">Edit</button>
                     <button type="button" class="bj-history-delete-btn" onclick="deleteJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.deleteEntry', 'Delete'))}">Del</button>
                     <button type="button" class="bj-history-copy-btn" onclick="copyJournalEntry('${escapeHtml(entry.id)}')" title="${escapeHtml(battleJournalText('bj.copyEntry', 'Copy'))}">Copy</button>
@@ -1701,6 +1702,10 @@
         document.getElementById('bjEditEntryOpponent').value = entry.opponentArchetype || '';
         document.getElementById('bjEditEntryResult').value = entry.result || '';
         document.getElementById('bjEditEntryTurnOrder').value = entry.turnOrder || '';
+        const brickEl = document.getElementById('bjEditEntryBrick');
+        if (brickEl) brickEl.checked = entry.brick || false;
+        const notesEl = document.getElementById('bjEditEntryNotes');
+        if (notesEl) notesEl.value = entry.notes || '';
 
         // Copy deck suggestions from main form datalist
         const srcList = document.getElementById('battleJournalOwnDeckList');
@@ -1716,10 +1721,12 @@
     }
 
     async function saveEditEntry() {
-        const newOwnDeck = String(document.getElementById('bjEditEntryOwnDeck')?.value || '').trim();
-        const newOpponent = String(document.getElementById('bjEditEntryOpponent')?.value || '').trim();
-        const newResult = String(document.getElementById('bjEditEntryResult')?.value || '').trim();
+        const newOwnDeck   = String(document.getElementById('bjEditEntryOwnDeck')?.value || '').trim();
+        const newOpponent  = String(document.getElementById('bjEditEntryOpponent')?.value || '').trim();
+        const newResult    = String(document.getElementById('bjEditEntryResult')?.value || '').trim();
         const newTurnOrder = String(document.getElementById('bjEditEntryTurnOrder')?.value || '').trim();
+        const newBrick     = document.getElementById('bjEditEntryBrick')?.checked || false;
+        const newNotes     = String(document.getElementById('bjEditEntryNotes')?.value || '').trim();
 
         if (!newOwnDeck || !newOpponent) {
             showToast(battleJournalText('bj.editDeckRequired', 'Deck and opponent are required.'), 'warning');
@@ -1735,6 +1742,8 @@
                 e.opponentArchetype = newOpponent;
                 e.result = newResult;
                 e.turnOrder = newTurnOrder;
+                e.brick = newBrick;
+                e.notes = newNotes;
                 outboxChanged = true;
             }
         });
@@ -1754,6 +1763,8 @@
                         opponentArchetype: newOpponent,
                         result: newResult,
                         turnOrder: newTurnOrder,
+                        brick: newBrick,
+                        notes: newNotes,
                         syncedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
@@ -1770,11 +1781,41 @@
             cached.opponentArchetype = newOpponent;
             cached.result = newResult;
             cached.turnOrder = newTurnOrder;
+            cached.brick = newBrick;
+            cached.notes = newNotes;
         }
 
         closeEditEntryModal();
         renderJournalHistory();
         showToast(battleJournalText('bj.editEntrySaved', 'Match updated!'), 'success');
+    }
+
+    async function toggleBrickEntry(entryId) {
+        const cached = journalHistoryCache.find(e => e.id === entryId);
+        if (!cached) return;
+        const newBrick = !cached.brick;
+
+        // Update outbox if pending
+        const outbox = getBattleJournalOutbox();
+        let outboxChanged = false;
+        outbox.forEach(e => { if (e.id === entryId) { e.brick = newBrick; outboxChanged = true; } });
+        if (outboxChanged) saveBattleJournalOutbox(outbox);
+
+        // Update Firestore if synced
+        const user = window.auth?.currentUser;
+        if (!outboxChanged && user && window.db && typeof window.db.collection === 'function') {
+            try {
+                const docRef = window.db.collection('users').doc(user.uid).collection('battleJournal').doc(entryId);
+                await docRef.update({ brick: newBrick, syncedAt: firebase.firestore.FieldValue.serverTimestamp() });
+            } catch (err) {
+                console.error('[Battle Journal] toggleBrickEntry Firestore error', err);
+            }
+        }
+
+        // Update cache
+        cached.brick = newBrick;
+        renderJournalHistory();
+        showToast(newBrick ? '🧱 Brick markiert' : 'Brick entfernt', 'success');
     }
 
     async function deleteJournalEntry(entryId) {
@@ -1835,6 +1876,7 @@
     window.openEditEntryModal = openEditEntryModal;
     window.closeEditEntryModal = closeEditEntryModal;
     window.saveEditEntry = saveEditEntry;
+    window.toggleBrickEntry = toggleBrickEntry;
     window.deleteJournalEntry = deleteJournalEntry;
     window.continueJournalTournament = continueJournalTournament;
 

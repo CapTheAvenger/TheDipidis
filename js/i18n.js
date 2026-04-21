@@ -602,6 +602,12 @@ const translations = {
     'mc.ptsAbbr':               'Pts.',
     'mc.thresholdTag':          '{n} Pts.',
     'mc.personalGames':         '{n} personal games · Bayesian Blending',
+    'mc.customDecksTitle':      'Custom Decks',
+    'mc.customDecksHint':       'Add up to {max} decks you expect more of at your event than the online data suggests. Their share is pulled from Junk.',
+    'mc.customDecksMaxed':      'Limit reached ({n} of {n}).',
+    'mc.addCustomDeck':         'Add Custom Deck',
+    'mc.customDeckNamePh':      'Deck name…',
+    'mc.remove':                'Remove',
 
     // ── Battle Journal ───────────────────────────────────────
     'bj.profileTitle':          'Battle Journal',
@@ -1707,6 +1713,12 @@ const translations = {
     'mc.ptsAbbr':               'Pkt.',
     'mc.thresholdTag':          '{n} Pkt.',
     'mc.personalGames':         '{n} pers. Spiele · Bayesian Blending',
+    'mc.customDecksTitle':      'Eigene Decks',
+    'mc.customDecksHint':       'Bis zu {max} Decks hinzufügen, die du bei deinem Turnier stärker vertreten erwartest als online. Ihr Anteil wird von Junk abgezogen.',
+    'mc.customDecksMaxed':      'Limit erreicht ({n} von {n}).',
+    'mc.addCustomDeck':         'Deck hinzufügen',
+    'mc.customDeckNamePh':      'Deckname…',
+    'mc.remove':                'Entfernen',
 
     // ── Battle Journal ───────────────────────────────────────
     'bj.profileTitle':          'Battle Journal',

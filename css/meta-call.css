@@ -530,6 +530,106 @@
   background: #fff5f5;
 }
 
+/* --- Custom Decks panel --- */
+.mc-custom-decks-panel .mc-custom-hint {
+  font-size: 0.82rem;
+  color: #6b7c93;
+  margin: -4px 0 12px 0;
+  line-height: 1.45;
+}
+.mc-custom-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.mc-custom-row {
+  display: grid;
+  grid-template-columns: 1fr 86px 36px;
+  gap: 8px;
+  align-items: center;
+}
+.mc-custom-name-input,
+.mc-custom-share-input {
+  padding: 8px 10px;
+  border: 1px solid #d0dae5;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  background: #fff;
+  transition: border-color 0.15s, background 0.15s;
+}
+.mc-custom-name-input:focus,
+.mc-custom-share-input:focus {
+  outline: none;
+  border-color: #3498db;
+  background: #fafcff;
+}
+.mc-custom-share-input {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.mc-custom-remove-btn {
+  background: #fff;
+  border: 1px solid #e8d4d4;
+  color: #c0392b;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mc-custom-remove-btn:hover {
+  background: #fff0ee;
+  border-color: #e74c3c;
+}
+.mc-custom-add-btn {
+  background: #eaf4ff;
+  border: 1px dashed #89b7e0;
+  color: #2170c4;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mc-custom-add-btn:hover {
+  background: #dcecff;
+  border-color: #3498db;
+  border-style: solid;
+}
+.mc-custom-max-hint {
+  font-size: 0.82rem;
+  color: #8b9bb0;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+}
+
+/* Custom deck rows in the field table get a subtle highlight */
+.metacall-table tbody tr.mc-row-custom {
+  background: #f0f8ff;
+  border-color: #c8deef;
+}
+
+@media (max-width: 600px) {
+  .mc-custom-row {
+    grid-template-columns: 1fr 72px 36px;
+    gap: 6px;
+  }
+  .mc-custom-name-input,
+  .mc-custom-share-input {
+    padding: 7px 8px;
+    font-size: 0.88rem;
+  }
+}
+
 /* Section title separator */
 .mc-section-sep {
   font-size: 0.78rem;

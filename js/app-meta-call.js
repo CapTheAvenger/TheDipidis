@@ -23,6 +23,10 @@ window.MetaCall = (function () {
   let _journalRateKeys  = [];  // opponents with 3+ journal games (for badge display)
   let _journalStats     = {};  // opponent -> {wins, losses, ties, total, winRate}
   let _groupByMain      = false; // group field table by main pokemon
+  let _customDecks      = [];    // [{name, share}] — user-added decks expected at the tourney
+
+  const TOP_N = 12;              // show top N decks; everything else rolls into Junk
+  const MAX_CUSTOM = 3;          // max custom decks the user can add
 
   // ── CSV Helper ─────────────────────────────────────────────
   function parseCSV(text, sep) {
@@ -182,36 +186,111 @@ window.MetaCall = (function () {
   }
 
   // ── Field Composition ──────────────────────────────────────
+  // Build the tournament field: top N decks + custom decks + Junk (auto-rest).
+  //
+  // Budget model (total = 100%):
+  //   1. Start at baseline: each top-N deck = its normalized online share,
+  //      Junk = sum of online share of decks outside top N.
+  //   2. User personal estimate on a top deck → set that deck's share to
+  //      the given value, DELTA is deducted from Junk.
+  //   3. Custom decks → added to field, share deducted from Junk.
+  //   4. Junk slider sets a minimum-junk floor: if current junk is below
+  //      the slider value, pull the shortfall from non-overridden top
+  //      decks proportionally.
+  //   5. If junk goes negative (too many overrides), cap at 0 and reduce
+  //      non-overridden top decks proportionally.
+  //
+  // This matches Pokémon's official "Main decks ≥ 5% + Best of the Rest +
+  // Unclassified" reporting style (see Seville 2026 Phase 1 slides).
   function buildField() {
     if (!_shareList) return [];
-    const junkPct   = Math.max(0, Math.min(90, _settings.junkPct || 0));
-    const metaScale = (100 - junkPct) / 100;
-    const totalOnline = _shareList.reduce((s, d) => s + d.onlineShare, 0) || 1;
 
-    const field = _shareList.map(deck => {
-      const normOnline = (deck.onlineShare / totalOnline) * 100;
-      const personal   = _personalShares[deck.name];
-      const finalNorm  = personal !== undefined ? (normOnline + personal) / 2 : normOnline;
-      const finalShare = finalNorm * metaScale;
-      return {
-        name         : deck.name,
-        onlineShare  : normOnline,
-        personalShare: personal,
-        finalShare,
-        count        : Math.round(_settings.totalPlayers * finalShare / 100),
-      };
+    // Normalize online shares so the full list sums to 100
+    const totalOnline = _shareList.reduce((s, d) => s + d.onlineShare, 0) || 1;
+    const sorted = [..._shareList]
+      .map(d => ({ name: d.name, onlineShare: (d.onlineShare / totalOnline) * 100 }))
+      .sort((a, b) => b.onlineShare - a.onlineShare);
+
+    const topDecks  = sorted.slice(0, TOP_N);
+    const restDecks = sorted.slice(TOP_N);
+    const restShare = restDecks.reduce((s, d) => s + d.onlineShare, 0);
+
+    // Baseline allocation
+    const alloc = {};
+    topDecks.forEach(d => { alloc[d.name] = d.onlineShare; });
+    let junk = restShare;
+
+    // Apply personal estimates on top decks — delta comes from Junk
+    topDecks.forEach(d => {
+      const personal = _personalShares[d.name];
+      if (personal !== undefined) {
+        junk -= (personal - alloc[d.name]);
+        alloc[d.name] = personal;
+      }
     });
 
-    if (junkPct > 0) {
+    // Custom decks — each pulls its share from Junk
+    const customs = _customDecks.filter(c => c && c.name && Number(c.share) > 0);
+    customs.forEach(c => { junk -= Number(c.share); });
+
+    // Junk slider = minimum floor (pulls from non-overridden top decks if needed)
+    const junkFloor = Math.max(0, Math.min(100, Number(_settings.junkPct) || 0));
+    if (junkFloor > junk) {
+      const needed = junkFloor - junk;
+      const nonOv  = topDecks.filter(d => _personalShares[d.name] === undefined);
+      const nonOvSum = nonOv.reduce((s, d) => s + alloc[d.name], 0);
+      if (nonOvSum > 0) {
+        nonOv.forEach(d => { alloc[d.name] -= (alloc[d.name] / nonOvSum) * needed; });
+      }
+      junk = junkFloor;
+    }
+
+    // Cap negative junk (user over-allocated) by reducing non-overridden top decks
+    if (junk < 0) {
+      const overshoot = -junk;
+      const nonOv     = topDecks.filter(d => _personalShares[d.name] === undefined);
+      const nonOvSum  = nonOv.reduce((s, d) => s + alloc[d.name], 0);
+      if (nonOvSum > 0) {
+        nonOv.forEach(d => {
+          alloc[d.name] = Math.max(0, alloc[d.name] - (alloc[d.name] / nonOvSum) * overshoot);
+        });
+      }
+      junk = 0;
+    }
+
+    // Assemble field
+    const field = [];
+    topDecks.forEach(deck => {
+      field.push({
+        name         : deck.name,
+        onlineShare  : deck.onlineShare,
+        personalShare: _personalShares[deck.name],
+        finalShare   : alloc[deck.name],
+        count        : Math.round(_settings.totalPlayers * alloc[deck.name] / 100),
+      });
+    });
+
+    customs.forEach(c => {
+      const share = Number(c.share);
+      field.push({
+        name         : c.name,
+        onlineShare  : 0,
+        personalShare: share,
+        finalShare   : share,
+        count        : Math.round(_settings.totalPlayers * share / 100),
+        isCustom     : true,
+      });
+    });
+
+    if (junk > 0.01) {
       field.push({
         name        : '_junk',
-        displayName : 'Junk Decks',
-        onlineShare : junkPct,
-        personalShare: undefined,
-        finalShare  : junkPct,
-        count       : Math.round(_settings.totalPlayers * junkPct / 100),
+        onlineShare : restShare,
+        finalShare  : junk,
+        count       : Math.round(_settings.totalPlayers * junk / 100),
       });
     }
+
     return field;
   }
 
@@ -331,20 +410,25 @@ window.MetaCall = (function () {
 
   function _renderFlatDeckRow(deck, maxShare) {
     const isJunk      = deck.name === '_junk';
+    const isCustom    = !!deck.isCustom;
     const label       = isJunk ? t('mc.junkDecks') : esc(deck.name);
     const lambda      = _settings.rounds * deck.finalShare / 100;
     const hasPersonal = deck.personalShare !== undefined;
-    const barW        = Math.round((deck.finalShare / maxShare) * 100);
-    const personalCell = isJunk
+    const barW        = Math.round((deck.finalShare / Math.max(maxShare, 0.01)) * 100);
+    const rowClass    = isJunk ? 'mc-row-junk' : (isCustom ? 'mc-row-custom' : '');
+    // Junk and custom decks don't have editable "personal estimate" in the field
+    // (junk is computed, custom is set in the custom-decks panel)
+    const personalCell = (isJunk || isCustom)
       ? '<span style="color:#aaa">—</span>'
       : `<input type="number" min="0" max="100" step="0.1" placeholder="—"
                 value="${hasPersonal ? deck.personalShare : ''}"
                 class="mc-personal-input" data-deck="${esc(deck.name)}"
                 oninput="MetaCall._onPersonalShare('${esc(deck.name)}', this.value)"
                 style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
-    return `<tr class="${isJunk ? 'mc-row-junk' : ''}">
+    const onlineDisplay = isCustom ? '—' : deck.onlineShare.toFixed(2) + '%';
+    return `<tr class="${rowClass}">
       <td><span class="mc-deck-name">${label}</span></td>
-      <td><span class="mc-share-online">${deck.onlineShare.toFixed(2)}%</span></td>
+      <td><span class="mc-share-online">${onlineDisplay}</span></td>
       <td>${personalCell}</td>
       <td><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
       <td><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
@@ -421,6 +505,7 @@ window.MetaCall = (function () {
 <div class="metacall-panel">
   <div class="metacall-panel-title">
     ${t('mc.panelField')}
+    <span class="mc-badge">Top ${TOP_N}</span>
     <span class="mc-badge">${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')}</span>
     <button class="mc-group-toggle-btn" onclick="MetaCall._toggleGroupField()">
       ${_groupByMain ? t('mc.flatView') : t('mc.groupByPokemon')}
@@ -444,6 +529,44 @@ window.MetaCall = (function () {
       <tbody>${rows}</tbody>
     </table>
   </div>
+</div>`;
+  }
+
+  function renderCustomDecksPanel() {
+    const suggestionOpts = (_shareList || [])
+      .map(d => `<option value="${esc(d.name)}">`).join('');
+
+    const rowsHtml = _customDecks.map((c, idx) => `
+      <div class="mc-custom-row">
+        <input type="text" class="mc-custom-name-input" list="mc-custom-datalist"
+               placeholder="${esc(t('mc.customDeckNamePh'))}" value="${esc(c.name || '')}"
+               oninput="MetaCall._onCustomDeckName(${idx}, this.value)">
+        <input type="number" class="mc-custom-share-input" min="0" max="100" step="0.1"
+               placeholder="%" value="${c.share > 0 ? c.share : ''}"
+               oninput="MetaCall._onCustomDeckShare(${idx}, this.value)">
+        <button type="button" class="mc-custom-remove-btn" title="${esc(t('mc.remove'))}"
+                onclick="MetaCall._removeCustomDeck(${idx})">×</button>
+      </div>`).join('');
+
+    const canAdd = _customDecks.length < MAX_CUSTOM;
+    const maxedLabel = t('mc.customDecksMaxed').replace(/\{n\}/g, MAX_CUSTOM);
+    const hintText   = t('mc.customDecksHint').replace('{max}', MAX_CUSTOM);
+    const addBtn = canAdd
+      ? `<button type="button" class="mc-custom-add-btn" onclick="MetaCall._addCustomDeck()">
+           + ${t('mc.addCustomDeck')}
+         </button>`
+      : `<p class="mc-custom-max-hint">${maxedLabel}</p>`;
+
+    return `
+<div class="metacall-panel mc-custom-decks-panel" id="mc-custom-decks-panel">
+  <div class="metacall-panel-title">
+    ${t('mc.customDecksTitle')}
+    <span class="mc-badge">${_customDecks.length}/${MAX_CUSTOM}</span>
+  </div>
+  <p class="mc-custom-hint">${hintText}</p>
+  <div class="mc-custom-list">${rowsHtml}</div>
+  ${addBtn}
+  <datalist id="mc-custom-datalist">${suggestionOpts}</datalist>
 </div>`;
   }
 
@@ -649,6 +772,7 @@ window.MetaCall = (function () {
   </div>
   ${renderSettingsPanel()}
   ${renderFieldPanel(field)}
+  ${renderCustomDecksPanel()}
   ${renderMyDeckPanel()}
   ${renderResultsPanel(field)}
 </div>`;
@@ -720,7 +844,42 @@ window.MetaCall = (function () {
       _personalShares[deckName] = Math.max(0, Math.min(100, num));
     }
     clearTimeout(_personalShares.__timer);
-    _personalShares.__timer = setTimeout(renderAll, 600);
+    _personalShares.__timer = setTimeout(refreshResults, 600);
+  }
+
+  // ── Custom Decks ─────────────────────────────────────────────
+  function _addCustomDeck() {
+    if (_customDecks.length >= MAX_CUSTOM) return;
+    _customDecks.push({ name: '', share: 0 });
+    refreshCustomDecksPanel();
+    refreshResults();
+  }
+
+  function _removeCustomDeck(idx) {
+    if (idx < 0 || idx >= _customDecks.length) return;
+    _customDecks.splice(idx, 1);
+    refreshCustomDecksPanel();
+    refreshResults();
+  }
+
+  function _onCustomDeckName(idx, val) {
+    if (idx < 0 || idx >= _customDecks.length) return;
+    _customDecks[idx].name = String(val || '').trim();
+    clearTimeout(_customDecks.__nameTimer);
+    _customDecks.__nameTimer = setTimeout(refreshResults, 500);
+  }
+
+  function _onCustomDeckShare(idx, val) {
+    if (idx < 0 || idx >= _customDecks.length) return;
+    const num = parseFloat(val);
+    _customDecks[idx].share = isNaN(num) ? 0 : Math.max(0, Math.min(100, num));
+    clearTimeout(_customDecks.__shareTimer);
+    _customDecks.__shareTimer = setTimeout(refreshResults, 500);
+  }
+
+  function refreshCustomDecksPanel() {
+    const panel = document.getElementById('mc-custom-decks-panel');
+    if (panel) panel.outerHTML = renderCustomDecksPanel();
   }
 
   function _onWrOverride(deckName, val) {
@@ -800,5 +959,9 @@ window.MetaCall = (function () {
     _toggleOverrides,
     _toggleGroup,
     _toggleGroupField,
+    _addCustomDeck,
+    _removeCustomDeck,
+    _onCustomDeckName,
+    _onCustomDeckShare,
   };
 })();

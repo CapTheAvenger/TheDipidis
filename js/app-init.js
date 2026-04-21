@@ -58,6 +58,9 @@
                 window.dispatchEvent(new CustomEvent('app:resources-settled'));
                 window.dispatchEvent(new CustomEvent('app:ui-ready'));
                 devLog('[Init] All resources settled. UI is ready.');
+
+                // Preload MetaCall CSV data in background so the tab opens instantly
+                setTimeout(() => { window.MetaCall?.preload?.(); }, 1500);
             } catch (e) {
                 console.error('[init] App initialization failed:', e);
             } finally {

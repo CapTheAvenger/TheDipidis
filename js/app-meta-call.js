@@ -624,7 +624,8 @@ window.MetaCall = (function () {
     if (resultsWrap) {
       const tmp = document.createElement('div');
       tmp.innerHTML = renderResultsPanel(field);
-      resultsWrap.outerHTML = tmp.querySelector('.metacall-panel').outerHTML;
+      const newPanel = tmp.querySelector('.metacall-panel');
+      if (newPanel) resultsWrap.innerHTML = newPanel.innerHTML;
     }
   }
 
@@ -632,7 +633,7 @@ window.MetaCall = (function () {
   function _onSetting(key, val) {
     if (isNaN(val) || val <= 0) return;
     _settings[key] = val;
-    renderAll();
+    refreshResults();
   }
 
   function _onJunk(val) {
@@ -641,7 +642,7 @@ window.MetaCall = (function () {
     const d = document.getElementById('mc-junk-display');
     if (v) v.textContent = val + '%';
     if (d) d.textContent = val + '%';
-    renderAll();
+    refreshResults();
   }
 
   function _onMyDeck(val) {
@@ -736,6 +737,7 @@ window.MetaCall = (function () {
 
   return {
     init,
+    preload: loadData,
     _onSetting,
     _onJunk,
     _onMyDeck,

@@ -6477,8 +6477,7 @@ details[open] > .tier-trending-summary::after {
     background: #1a2340;
     color: #fff;
     border-bottom: 2px solid rgba(255,255,255,.15);
-    min-width: 68px;
-    max-width: 90px;
+    min-width: 90px;
     line-height: 1.25;
     vertical-align: bottom;
 }
@@ -8371,13 +8370,7 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
     cursor: help;
 }
 
-/* ── Heatmap mobile ── */
-.ma-heatmap-wrap {
-    overflow: hidden !important; /* let scroll handle it */
-}
-.ma-heatmap-scroll {
-    max-height: 70vh !important;  /* more room on mobile */
-}
+/* ── Heatmap mobile ── (overflow: visible on wrap is set above; scroll container handles clipping) */
 
 /* ── Matchup Analysis – mobile filter bar ── */
 @media (max-width: 600px) {
@@ -8399,21 +8392,26 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
         font-size: 0.75rem !important;
         padding: 5px 10px !important;
     }
+    .ma-heatmap-scroll {
+        max-height: 70vh !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
     .ma-heatmap-col-header {
-        min-width: 90px !important;
-        max-width: 120px !important;
-        font-size: 0.7rem !important;
+        min-width: 100px !important;
+        font-size: 0.72rem !important;
     }
     .ma-heatmap-cell {
-        min-width: 90px !important;
-        font-size: 0.85rem !important;
+        min-width: 100px !important;
+        font-size: 0.88rem !important;
         padding: 10px 6px !important;
     }
     .ma-heatmap-row-header {
         font-size: 0.75rem !important;
-        min-width: 100px !important;
-        max-width: 130px !important;
+        min-width: 110px !important;
+        max-width: 140px !important;
         padding: 6px 8px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
     }
 }
 

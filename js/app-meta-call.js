@@ -243,40 +243,40 @@ window.MetaCall = (function () {
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">
-    Turniereinstellungen
-    <span class="mc-badge">Anpassbar</span>
+    ${t('mc.panelSettings')}
+    <span class="mc-badge">${t('mc.badgeCustomizable')}</span>
   </div>
   <div class="metacall-settings-grid">
     <div class="metacall-field-group">
-      <label>Spieler</label>
+      <label>${t('mc.labelPlayers')}</label>
       <input type="number" id="mc-players" min="8" max="9999" value="${s.totalPlayers}"
              oninput="MetaCall._onSetting('totalPlayers', +this.value)">
     </div>
     <div class="metacall-field-group">
-      <label>Runden</label>
+      <label>${t('mc.labelRounds')}</label>
       <input type="number" id="mc-rounds" min="1" max="15" value="${s.rounds}"
              oninput="MetaCall._onSetting('rounds', +this.value)">
     </div>
     <div class="metacall-field-group">
-      <label>Punkte für Day 2</label>
+      <label>${t('mc.labelDay2Points')}</label>
       <input type="number" id="mc-day2pts" min="1" max="45" value="${s.day2Points}"
              oninput="MetaCall._onSetting('day2Points', +this.value)">
     </div>
     <div class="metacall-field-group">
-      <label>Junk-Win% (vs Junk)</label>
+      <label>${t('mc.labelJunkWinRate')}</label>
       <input type="number" id="mc-junk-wr" min="0" max="100" value="${s.junkWinRate}"
              oninput="MetaCall._onSetting('junkWinRate', +this.value)">
     </div>
   </div>
   <div class="metacall-field-group" style="max-width:420px">
-    <label>Junk-Spieler <span id="mc-junk-display">${s.junkPct}%</span></label>
+    <label>${t('mc.labelJunkPlayers')} <span id="mc-junk-display">${s.junkPct}%</span></label>
     <div class="mc-junk-row">
       <input type="range" id="mc-junk-slider" min="0" max="70" step="5" value="${s.junkPct}"
              oninput="MetaCall._onJunk(+this.value)">
       <span class="mc-junk-value" id="mc-junk-val">${s.junkPct}%</span>
     </div>
     <p style="font-size:0.76rem;color:#999;margin:4px 0 0">
-      z.B. 30 % → 30% der Spieler spielen irgendetwas und haben keine Ahnung vom Meta.
+      ${t('mc.junkExplanation')}
     </p>
   </div>
 </div>`;
@@ -284,7 +284,7 @@ window.MetaCall = (function () {
 
   function _renderFlatDeckRow(deck, maxShare) {
     const isJunk      = deck.name === '_junk';
-    const label       = isJunk ? 'Junk Decks' : esc(deck.name);
+    const label       = isJunk ? t('mc.junkDecks') : esc(deck.name);
     const lambda      = _settings.rounds * deck.finalShare / 100;
     const hasPersonal = deck.personalShare !== undefined;
     const barW        = Math.round((deck.finalShare / maxShare) * 100);
@@ -327,7 +327,7 @@ window.MetaCall = (function () {
   <td>
     <span class="mc-group-arrow" id="mc-gt-${gid}">▶</span>
     <span class="mc-deck-name">${esc(group.main)}</span>
-    <span class="mc-group-count">${group.variants.length} Varianten</span>
+    <span class="mc-group-count">${group.variants.length} ${t('mc.variants')}</span>
   </td>
   <td><span class="mc-share-online">${group.totalOnline.toFixed(2)}%</span></td>
   <td><span style="color:#aaa">—</span></td>
@@ -373,25 +373,25 @@ window.MetaCall = (function () {
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">
-    Feld-Zusammensetzung
-    <span class="mc-badge">${_settings.totalPlayers.toLocaleString()} Spieler</span>
+    ${t('mc.panelField')}
+    <span class="mc-badge">${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')}</span>
     <button class="mc-group-toggle-btn" onclick="MetaCall._toggleGroupField()">
-      ${_groupByMain ? 'Flache Ansicht' : 'Nach Pokémon'}
+      ${_groupByMain ? t('mc.flatView') : t('mc.groupByPokemon')}
     </button>
   </div>
   <p style="font-size:0.8rem;color:#888;margin:-8px 0 12px">
-    „Meine Schätzung" optional — wird mit dem Online-Share gemittelt.
+    ${t('mc.personalShareExpl')}
   </p>
   <div class="metacall-table-wrap">
     <table class="metacall-table">
       <thead>
         <tr>
-          <th>Deck</th>
-          <th>Online %</th>
-          <th>Meine Schätzung</th>
-          <th>Final %</th>
-          <th>Spieler</th>
-          <th>Ø Begegnungen (${_settings.rounds} R.)</th>
+          <th>${t('mc.headerDeck')}</th>
+          <th>${t('mc.headerOnline')}</th>
+          <th>${t('mc.headerPersonal')}</th>
+          <th>${t('mc.headerFinal')}</th>
+          <th>${t('mc.headerPlayers')}</th>
+          <th>${t('mc.headerAvgEnc')} (${_settings.rounds} R.)</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -408,49 +408,45 @@ window.MetaCall = (function () {
 
     return `
 <div class="metacall-panel">
-  <div class="metacall-panel-title">Mein Deck</div>
+  <div class="metacall-panel-title">${t('mc.panelMyDeck')}</div>
   <div class="mc-deck-select-row">
     <select id="mc-my-deck" onchange="MetaCall._onMyDeck(this.value)">
-      <option value="">— Deck wählen —</option>
+      <option value="">${t('mc.selectDeckPlaceholder')}</option>
       ${options}
     </select>
     <button class="mc-override-toggle" onclick="MetaCall._toggleOverrides()" id="mc-override-btn">
-      Win-Rates anpassen ▼
+      ${t('mc.adjustWinRates')}
     </button>
     <div class="mc-brick-filter-wrap">
-      <label class="mc-brick-filter-label">🧱 Journal-Bricks</label>
+      <label class="mc-brick-filter-label">${t('mc.journalBricks')}</label>
       <select class="mc-brick-filter-select" onchange="MetaCall._onBrickFilter(this.value)">
-        <option value="all" ${!_settings.excludeBricks ? 'selected' : ''}>Inkl. Bricks</option>
-        <option value="exclude" ${_settings.excludeBricks ? 'selected' : ''}>Exkl. Bricks</option>
+        <option value="all" ${!_settings.excludeBricks ? 'selected' : ''}>${t('mc.inclBricks')}</option>
+        <option value="exclude" ${_settings.excludeBricks ? 'selected' : ''}>${t('mc.exclBricks')}</option>
       </select>
     </div>
   </div>
   <div class="mc-override-panel" id="mc-override-panel">
     ${renderOverrideTable()}
   </div>
-  <div class="mc-swiss-note">
-    <strong>Swiss-Hinweis:</strong> Ab Runde 4–5 trifft Swiss-Pairing Spieler mit ähnlichem Ergebnis.
-    Starke Spieler treffen dann tendenziell stärkere Gegner — das Modell geht von Random-Pairing aus
-    und kann die Wahrscheinlichkeit daher leicht überschätzen.
-  </div>
+  <div class="mc-swiss-note">${t('mc.swissNote')}</div>
 </div>`;
   }
 
   function renderOverrideTable() {
     if (!_settings.myDeck || !_shareList) {
-      return '<p style="color:#aaa;font-size:0.85rem;padding:8px 0">Erst Deck auswählen.</p>';
+      return `<p style="color:#aaa;font-size:0.85rem;padding:8px 0">${t('mc.selectDeckFirst')}</p>`;
     }
     const field = buildField().filter(d => d.name !== '_junk');
     const rows  = field.map(deck => {
       const m   = getMatchup(_settings.myDeck, deck.name);
       const wr  = Math.round(m.pWin * 100);
       const ind = wr >= 55 ? 'favorable' : wr <= 45 ? 'unfavorable' : 'even';
-      const lbl = wr >= 55 ? 'Vorteil' : wr <= 45 ? 'Nachteil' : 'Even';
+      const lbl = wr >= 55 ? t('mc.favorable') : wr <= 45 ? t('mc.unfavorable') : t('mc.even');
       const ov  = _winRateOverrides[deck.name];
       const js  = _journalStats[deck.name];
       const fromJournal = _journalRateKeys.includes(deck.name);
       const badge = fromJournal && js
-        ? ` <span class="mc-journal-badge-inline" title="${js.total} pers. Spiele · Bayesian Blending">📓 ${js.total} Spiele</span>`
+        ? ` <span class="mc-journal-badge-inline" title="${t('mc.personalGames').replace('{n}', js.total)}">📓 ${js.total}</span>`
         : '';
       return `<tr>
         <td style="font-size:0.85rem;font-weight:600">${esc(deck.name)}${badge}</td>
@@ -465,12 +461,10 @@ window.MetaCall = (function () {
     }).join('');
 
     return `
-<p style="font-size:0.78rem;color:#888;margin:10px 0 8px">
-  Manuelle WR überschreibt alles. Leer = Meta + Journal werden automatisch gemischt.
-</p>
+<p style="font-size:0.78rem;color:#888;margin:10px 0 8px">${t('mc.overrideHint')}</p>
 <table class="mc-override-table">
   <thead>
-    <tr><th>Gegner</th><th>WR (gemischt)</th><th>Indikator</th><th>Manuelle WR</th></tr>
+    <tr><th>${t('mc.colOpponent')}</th><th>${t('mc.colWrBlended')}</th><th>${t('mc.colIndicator')}</th><th>${t('mc.colManualWr')}</th></tr>
   </thead>
   <tbody>${rows}</tbody>
 </table>`;
@@ -480,9 +474,7 @@ window.MetaCall = (function () {
     if (!_settings.myDeck) {
       return `
 <div class="metacall-panel">
-  <div class="mc-no-deck-msg">
-    Wähle dein Deck oben aus, um die Day-2-Chance zu berechnen.
-  </div>
+  <div class="mc-no-deck-msg">${t('mc.noDeckMsg')}</div>
 </div>`;
     }
 
@@ -498,8 +490,8 @@ window.MetaCall = (function () {
 <div class="mc-journal-influence">
   <span class="mc-ji-icon">📓</span>
   <div>
-    <strong>Journal-Einfluss aktiv:</strong> ${journalOpps.length} Matchups · ${totalJGames} persönliche Spiele fließen ein
-    <span class="mc-ji-hint"> (Meta = 30 Gewicht · Journal = Spielanzahl)</span>
+    <strong>${t('mc.journalInfluence')}</strong> ${t('mc.journalMatchups').replace('{n}', journalOpps.length).replace('{g}', totalJGames)}
+    <span class="mc-ji-hint"> ${t('mc.journalWeightHint')}</span>
   </div>
 </div>` : '';
 
@@ -525,12 +517,12 @@ window.MetaCall = (function () {
       const wrPct  = Math.round(m.pWin * 100);
       const wrCls  = wrPct >= 55 ? 'favorable' : wrPct <= 45 ? 'unfavorable' : 'even';
       const barW   = Math.round((lambda / maxEnc) * 100);
-      const name   = deck.name === '_junk' ? 'Junk' : deck.name;
+      const name   = deck.name === '_junk' ? t('mc.junkDecks') : deck.name;
       const p1     = poissonP(1, lambda) * 100;
       const p2     = poissonP(2, lambda) * 100;
       const js     = _journalStats[deck.name];
       const jTag   = js && js.total > 0
-        ? `<span class="mc-enc-journal-tag" title="${js.total} pers. Spiele · blended">📓${js.total}</span>`
+        ? `<span class="mc-enc-journal-tag" title="${t('mc.personalGames').replace('{n}', js.total)}">📓${js.total}</span>`
         : '';
       return `<div class="mc-encounter-row">
         <div>
@@ -542,48 +534,55 @@ window.MetaCall = (function () {
       </div>`;
     }).join('');
 
+    const day2Sub = t('mc.day2Sub')
+      .replace('{pts}', _settings.day2Points)
+      .replace('{r}',   _settings.rounds)
+      .replace('{n}',   _settings.totalPlayers.toLocaleString());
+
     return `
 <div class="metacall-panel">
-  <div class="metacall-panel-title">Ergebnis</div>
+  <div class="metacall-panel-title">${t('mc.panelResult')}</div>
   ${journalBadge}
   <div class="metacall-results-grid">
 
     <div class="mc-day2-card">
       <div class="mc-day2-deck-name">${esc(_settings.myDeck)}</div>
       <div class="mc-day2-pct${cls}">${pct}%</div>
-      <div class="mc-day2-label">Day-2-Chance</div>
-      <div class="mc-day2-sub">${_settings.day2Points} Pkt. in ${_settings.rounds} R. · ${_settings.totalPlayers.toLocaleString()} Spieler</div>
+      <div class="mc-day2-label">${t('mc.day2Chance')}</div>
+      <div class="mc-day2-sub">${day2Sub}</div>
       <div class="mc-day2-stats">
         <div class="mc-day2-stat">
           <div class="mc-day2-stat-val" style="color:#27ae60">${expWin.toFixed(1)}</div>
-          <div class="mc-day2-stat-lbl">Ø Siege</div>
+          <div class="mc-day2-stat-lbl">${t('mc.avgWins')}</div>
         </div>
         <div class="mc-day2-stat">
           <div class="mc-day2-stat-val" style="color:#f39c12">${expTie.toFixed(1)}</div>
-          <div class="mc-day2-stat-lbl">Ø Ties</div>
+          <div class="mc-day2-stat-lbl">${t('mc.avgTies')}</div>
         </div>
         <div class="mc-day2-stat">
           <div class="mc-day2-stat-val" style="color:#e74c3c">${expLoss.toFixed(1)}</div>
-          <div class="mc-day2-stat-lbl">Ø Niederl.</div>
+          <div class="mc-day2-stat-lbl">${t('mc.avgLosses')}</div>
         </div>
       </div>
     </div>
 
     <div>
       <div class="mc-histogram-wrap">
-        <div class="mc-histogram-title">Punkteverteilung nach ${_settings.rounds} Runden</div>
+        <div class="mc-histogram-title">${t('mc.histTitle').replace('{r}', _settings.rounds)}</div>
         <div class="mc-histogram" style="position:relative">
           ${histBars}
           <div class="mc-threshold-line" style="left:${thresholdPct}%">
-            <div class="mc-threshold-tag">${_settings.day2Points} Pkt.</div>
+            <div class="mc-threshold-tag">${t('mc.thresholdTag').replace('{n}', _settings.day2Points)}</div>
           </div>
         </div>
         <div class="mc-histogram-axis">
-          <span>0 Pkt.</span><span style="color:#27ae60">≥${_settings.day2Points} = Day 2</span><span>${maxPts} Pkt.</span>
+          <span>0 ${t('mc.ptsAbbr')}</span>
+          <span style="color:#27ae60">${t('mc.histDay2Label').replace('{n}', _settings.day2Points)}</span>
+          <span>${maxPts} ${t('mc.ptsAbbr')}</span>
         </div>
       </div>
 
-      <div class="mc-section-sep">Erwartete Begegnungen (Poisson-Approximation)</div>
+      <div class="mc-section-sep">${t('mc.encounters')}</div>
       <div class="mc-encounter-list">${encRows}</div>
     </div>
   </div>
@@ -598,8 +597,8 @@ window.MetaCall = (function () {
     container.innerHTML = `
 <div class="metacall-wrap">
   <div class="metacall-header">
-    <h2>Meta Call</h2>
-    <p class="color-grey">Prognostiziere das Turnierfeld und berechne deine Day-2-Chancen.</p>
+    <h2>${t('mc.title')}</h2>
+    <p class="color-grey">${t('mc.subtitle')}</p>
   </div>
   ${renderSettingsPanel()}
   ${renderFieldPanel(field)}
@@ -723,18 +722,23 @@ window.MetaCall = (function () {
 
     container.innerHTML = `
 <div class="metacall-wrap">
-  <div class="metacall-header"><h2>Meta Call</h2></div>
-  <div class="metacall-loading">Lade Meta-Daten…</div>
+  <div class="metacall-header"><h2>${t('mc.title')}</h2></div>
+  <div class="metacall-loading">${t('mb.loading')}</div>
 </div>`;
 
     const ok = await loadData();
     if (!ok) {
       container.innerHTML = `<div class="metacall-error">
-        Meta-Daten konnten nicht geladen werden. Bitte Seite neu laden.
+        ${t('mb.loadError')}
       </div>`;
       return;
     }
     renderAll();
+
+    // Re-render when language is switched while MetaCall is open
+    document.addEventListener('languageChanged', () => {
+      if (_shareList) renderAll();
+    }, { once: false });
   }
 
   return {

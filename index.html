@@ -1742,6 +1742,32 @@
                                         <li><strong>Auto-clipboard:</strong> After saving, a WhatsApp-style summary (e.g. &ldquo;WW Dragapult Dusknoir&rdquo;) is copied automatically</li>
                                         <li><strong>Last Tournament:</strong> Quick-apply your last tournament name with one tap</li>
                                         <li><strong>Sync:</strong> Entries are saved locally and synced to Firebase when online</li>
+                                    <li><strong>🧱 Brick:</strong> Mark a match as a &ldquo;Brick&rdquo; — a loss caused by bad luck, not skill. Quick-toggle directly on the match banner, or edit via the match&rsquo;s Edit menu</li>
+                                    <li><strong>Notes:</strong> Add a short text note to any match (visible in the history, saved to the cloud)</li>
+                                    </ul>
+                                    <p><strong>Matchup Analysis (inside Journal):</strong></p>
+                                    <ul class="tutorial-tab-info-features-list">
+                                        <li><strong>Heatmap:</strong> 2D win-rate grid — your decks vs all opponents you&rsquo;ve faced. Scrollable horizontally on mobile</li>
+                                        <li><strong>Brick Filter:</strong> Filter the analysis to include Bricks, exclude them, or show only Brick games — isolate skill-based results</li>
+                                        <li><strong>Bar Charts:</strong> Per-matchup win rates sorted by encounter frequency</li>
+                                    </ul>
+                                </div>
+
+                                <!-- MetaCall Tab -->
+                                <div class="how-to-use-info-block">
+                                    <h3 class="tutorial-tab-title">Meta Call</h3>
+                                    <p><strong>Access:</strong> My Profile → Meta Call tab</p>
+                                    <p><strong>Purpose:</strong> Predict your Day 2 chance at a Swiss tournament based on the current meta field</p>
+                                    <p><strong>Features:</strong></p>
+                                    <ul class="tutorial-tab-info-features-list">
+                                        <li><strong>Tournament Settings:</strong> Set player count, rounds, Day 2 threshold, and Junk player percentage</li>
+                                        <li><strong>Field Composition:</strong> Shows online meta share for each deck — optionally override with your own estimate. Toggle "Group by Pokémon" to collapse deck variants</li>
+                                        <li><strong>My Deck:</strong> Select your deck to compute Day 2 probability via Markov chain simulation</li>
+                                        <li><strong>Journal Blending:</strong> If you have ≥3 personal games vs a matchup, those are Bayesian-blended with meta data (meta = 30-game weight). A 📓 badge shows how many games influenced each matchup</li>
+                                        <li><strong>Brick Filter:</strong> Exclude Brick matches from journal win rates before blending — isolates skill-based results</li>
+                                        <li><strong>Win Rate Overrides:</strong> Manually override any matchup win rate — takes full priority over meta + journal</li>
+                                        <li><strong>Point Histogram:</strong> Probability distribution across all possible point totals after N rounds</li>
+                                        <li><strong>Encounter List:</strong> Expected encounter frequency per matchup (Poisson approximation)</li>
                                     </ul>
                                 </div>
 
@@ -2199,6 +2225,32 @@
                                         <li><strong>Auto-Clipboard:</strong> Nach dem Speichern wird eine WhatsApp-Zusammenfassung (z.B. &bdquo;WW Dragapult Dusknoir&ldquo;) automatisch kopiert</li>
                                         <li><strong>Letztes Turnier:</strong> Turniernamen mit einem Tipp schnell &uuml;bernehmen</li>
                                         <li><strong>Sync:</strong> Eintr&auml;ge werden lokal gespeichert und bei Online-Verbindung mit Firebase synchronisiert</li>
+                                        <li><strong>🧱 Brick:</strong> Markiere ein Match als &bdquo;Brick&ldquo; &mdash; eine Niederlage durch Pech, nicht durch schlechtes Spiel. Direkt am Match-Banner per Quick-Toggle oder &uuml;ber das Bearbeiten-Men&uuml;</li>
+                                        <li><strong>Notizen:</strong> Kurze Textnotiz zu jedem Match hinterlegen (in der History sichtbar, wird synchronisiert)</li>
+                                    </ul>
+                                    <p><strong>Matchup-Analyse (im Journal):</strong></p>
+                                    <ul class="de-tab-block-list">
+                                        <li><strong>Heatmap:</strong> 2D-Siegquoten-Raster &mdash; deine Decks gegen alle Gegner. Horizontal scrollbar auf Mobilger&auml;ten</li>
+                                        <li><strong>Brick-Filter:</strong> Analyse nach Bricks filtern &mdash; Bricks einschlie&szlig;en, ausschlie&szlig;en oder nur Brick-Spiele anzeigen. Isoliert f&auml;higkeitsbasierte Ergebnisse</li>
+                                        <li><strong>Balkendiagramme:</strong> Matchup-Siegquoten, sortiert nach H&auml;ufigkeit der Begegnungen</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Meta Call Tab DE -->
+                                <div class="bg-light px-20 br-8 border-left-blue">
+                                    <h3 class="color-blue mt-0">Meta Call</h3>
+                                    <p><strong>Zugriff:</strong> Mein Profil &rarr; Tab &bdquo;Meta Call&ldquo;</p>
+                                    <p><strong>Zweck:</strong> Day-2-Chance bei einem Swiss-Turnier auf Basis des aktuellen Meta-Felds berechnen</p>
+                                    <p><strong>Funktionen:</strong></p>
+                                    <ul class="de-tab-block-list">
+                                        <li><strong>Turniereinstellungen:</strong> Spieleranzahl, Runden, Day-2-Schwelle und Junk-Spieler-Anteil festlegen</li>
+                                        <li><strong>Feld-Zusammensetzung:</strong> Zeigt den Online-Meta-Anteil je Deck &mdash; optional mit eigener Sch&auml;tzung &uuml;berschreiben. Mit &bdquo;Nach Pok&eacute;mon&ldquo; Varianten zusammenfassen</li>
+                                        <li><strong>Mein Deck:</strong> Eigenes Deck ausw&auml;hlen &mdash; Day-2-Wahrscheinlichkeit per Markov-Ketten-Simulation berechnen</li>
+                                        <li><strong>Journal-Blending:</strong> Bei &ge;3 eigenen Spielen gegen ein Matchup werden diese Bayesianisch mit Meta-Daten gemischt (Meta = Gewicht 30). Ein 📓-Badge zeigt, wie viele Spiele eingeflossen sind</li>
+                                        <li><strong>Brick-Filter:</strong> Brick-Matches aus den Journal-Siegquoten ausschlie&szlig;en &mdash; nur f&auml;higkeitsbasierte Ergebnisse einflie&szlig;en lassen</li>
+                                        <li><strong>Win-Rate-Override:</strong> Matchup-Siegquote manuell &uuml;berschreiben &mdash; hat h&ouml;chste Priorit&auml;t vor Meta + Journal</li>
+                                        <li><strong>Punkte-Histogramm:</strong> Wahrscheinlichkeitsverteilung &uuml;ber alle m&ouml;glichen Punktest&auml;nde nach N Runden</li>
+                                        <li><strong>Begegnungsliste:</strong> Erwartete Begegnungsh&auml;ufigkeit pro Matchup (Poisson-N&auml;herung)</li>
                                     </ul>
                                 </div>
 

@@ -611,6 +611,15 @@ const translations = {
     'mc.share':                 'Share',
     'mc.shareField':            'Share Meta Share image',
     'mc.shareDay2':             'Share Day 2 prognosis image',
+    'mc.scenarios':             'Scenarios',
+    'mc.scenarioNone':          '— no scenario —',
+    'mc.scenarioSave':          'Save…',
+    'mc.scenarioUpdate':        'Update',
+    'mc.scenarioDelete':        'Delete scenario',
+    'mc.scenarioPromptName':    'Scenario name:',
+    'mc.scenarioOverwrite':     'Overwrite existing scenario "{name}"?',
+    'mc.scenarioDeleteConfirm': 'Delete scenario "{name}"?',
+    'mc.scenarioNameTooLong':   'Name is too long (max 60 characters).',
 
     // ── Battle Journal ───────────────────────────────────────
     'bj.profileTitle':          'Battle Journal',
@@ -1725,6 +1734,15 @@ const translations = {
     'mc.share':                 'Teilen',
     'mc.shareField':            'Meta-Share-Bild teilen',
     'mc.shareDay2':             'Day-2-Prognose-Bild teilen',
+    'mc.scenarios':             'Szenarien',
+    'mc.scenarioNone':          '— kein Szenario —',
+    'mc.scenarioSave':          'Speichern…',
+    'mc.scenarioUpdate':        'Aktualisieren',
+    'mc.scenarioDelete':        'Szenario löschen',
+    'mc.scenarioPromptName':    'Name des Szenarios:',
+    'mc.scenarioOverwrite':     'Bestehendes Szenario „{name}" überschreiben?',
+    'mc.scenarioDeleteConfirm': 'Szenario „{name}" wirklich löschen?',
+    'mc.scenarioNameTooLong':   'Name ist zu lang (max. 60 Zeichen).',
 
     // ── Battle Journal ───────────────────────────────────────
     'bj.profileTitle':          'Battle Journal',

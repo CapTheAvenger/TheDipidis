@@ -24,9 +24,11 @@ window.MetaCall = (function () {
   let _journalStats     = {};  // opponent -> {wins, losses, ties, total, winRate}
   let _groupByMain      = false; // group field table by main pokemon
   let _customDecks      = [];    // [{name, share}] — user-added decks expected at the tourney
+  let _currentScenarioName = ''; // name of the currently loaded saved scenario
 
   const TOP_N = 12;              // show top N decks; everything else rolls into Junk
   const MAX_CUSTOM = 3;          // max custom decks the user can add
+  const SCENARIOS_STORAGE_KEY = 'metacall_scenarios_v1';
 
   // ── CSV Helper ─────────────────────────────────────────────
   function parseCSV(text, sep) {
@@ -762,6 +764,7 @@ window.MetaCall = (function () {
     <h2>${t('mc.title')}</h2>
     <p class="color-grey">${t('mc.subtitle')}</p>
   </div>
+  ${renderScenariosBar()}
   ${renderSettingsPanel()}
   ${renderFieldPanel(field)}
   ${renderCustomDecksPanel()}
@@ -1151,7 +1154,10 @@ window.MetaCall = (function () {
         if (rates[opp].total >= 3) _journalRateKeys.push(opp);
       });
     }
+    // Preserve scroll so the user stays where they were picking the deck
+    const sy = window.scrollY;
     renderAll();
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, sy)));
   }
 
   function _onBrickFilter(val) {
@@ -1213,8 +1219,10 @@ window.MetaCall = (function () {
     } else {
       _winRateOverrides[deckName] = Math.max(0, Math.min(100, num));
     }
+    // refreshResults only — don't rebuild the override panel itself or the
+    // user loses focus and the whole panel collapses back to closed state
     clearTimeout(_winRateOverrides.__timer);
-    _winRateOverrides.__timer = setTimeout(renderAll, 600);
+    _winRateOverrides.__timer = setTimeout(refreshResults, 600);
   }
 
   function _toggleOverrides() {
@@ -1242,6 +1250,144 @@ window.MetaCall = (function () {
     const sy = window.scrollY;
     renderAll();
     requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, sy)));
+  }
+
+  // ── Saved Scenarios ──────────────────────────────────────────
+  //
+  // A "scenario" captures the full MetaCall editing state under a user-
+  // chosen name so the user can come back later and keep iterating.
+  // Persisted in localStorage as:
+  //   { [name]: { savedAt, settings, personalShares, winRateOverrides,
+  //               customDecks, groupByMain } }
+
+  function _loadScenarios() {
+    try {
+      const raw = localStorage.getItem(SCENARIOS_STORAGE_KEY);
+      return raw ? (JSON.parse(raw) || {}) : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function _writeScenarios(obj) {
+    try {
+      localStorage.setItem(SCENARIOS_STORAGE_KEY, JSON.stringify(obj || {}));
+    } catch (e) {
+      console.error('[MetaCall] Failed to persist scenarios:', e);
+    }
+  }
+
+  function _snapshotState() {
+    return {
+      savedAt          : new Date().toISOString(),
+      settings         : { ..._settings },
+      personalShares   : { ..._personalShares },
+      winRateOverrides : { ..._winRateOverrides },
+      customDecks      : _customDecks.map(c => ({ name: c.name, share: c.share })),
+      groupByMain      : _groupByMain,
+    };
+  }
+
+  function _applyState(state) {
+    if (!state) return;
+    _settings = { ..._settings, ...(state.settings || {}) };
+    _personalShares   = { ...(state.personalShares   || {}) };
+    _winRateOverrides = { ...(state.winRateOverrides || {}) };
+    _customDecks      = Array.isArray(state.customDecks)
+      ? state.customDecks.map(c => ({ name: c.name || '', share: Number(c.share) || 0 }))
+      : [];
+    _groupByMain      = !!state.groupByMain;
+
+    // Rebuild journal stats for the new deck if one is set
+    _journalStats = {};
+    _journalRateKeys = [];
+    if (_settings.myDeck && typeof window.getBattleJournalWinRates === 'function') {
+      const rates = window.getBattleJournalWinRates(_settings.myDeck, 1, { excludeBricks: _settings.excludeBricks });
+      Object.keys(rates).forEach(opp => {
+        _journalStats[opp] = rates[opp];
+        if (rates[opp].total >= 3) _journalRateKeys.push(opp);
+      });
+    }
+  }
+
+  function _saveScenario() {
+    const existing = _loadScenarios();
+    const preset   = _currentScenarioName || '';
+    const name = (prompt(t('mc.scenarioPromptName'), preset) || '').trim();
+    if (!name) return;
+    if (name.length > 60) {
+      alert(t('mc.scenarioNameTooLong'));
+      return;
+    }
+    if (existing[name] && name !== _currentScenarioName) {
+      if (!confirm(t('mc.scenarioOverwrite').replace('{name}', name))) return;
+    }
+    existing[name] = _snapshotState();
+    _writeScenarios(existing);
+    _currentScenarioName = name;
+    refreshScenariosBar();
+  }
+
+  function _onScenarioSelect(name) {
+    if (!name) {
+      _currentScenarioName = '';
+      refreshScenariosBar();
+      return;
+    }
+    const scenarios = _loadScenarios();
+    const state = scenarios[name];
+    if (!state) return;
+    _applyState(state);
+    _currentScenarioName = name;
+    const sy = window.scrollY;
+    renderAll();
+    requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, sy)));
+  }
+
+  function _deleteScenario() {
+    if (!_currentScenarioName) return;
+    const name = _currentScenarioName;
+    if (!confirm(t('mc.scenarioDeleteConfirm').replace('{name}', name))) return;
+    const existing = _loadScenarios();
+    delete existing[name];
+    _writeScenarios(existing);
+    _currentScenarioName = '';
+    refreshScenariosBar();
+  }
+
+  function refreshScenariosBar() {
+    const bar = document.getElementById('mc-scenarios-bar');
+    if (bar) bar.outerHTML = renderScenariosBar();
+  }
+
+  function renderScenariosBar() {
+    const scenarios = _loadScenarios();
+    const names = Object.keys(scenarios).sort((a, b) =>
+      (scenarios[b].savedAt || '').localeCompare(scenarios[a].savedAt || ''));
+
+    const options = [
+      `<option value="">${esc(t('mc.scenarioNone'))}</option>`,
+      ...names.map(n =>
+        `<option value="${esc(n)}" ${n === _currentScenarioName ? 'selected' : ''}>${esc(n)}</option>`),
+    ].join('');
+
+    const hasCurrent = !!_currentScenarioName;
+    const saveLabel  = hasCurrent ? t('mc.scenarioUpdate') : t('mc.scenarioSave');
+
+    return `
+<div class="mc-scenarios-bar" id="mc-scenarios-bar">
+  <label class="mc-scenarios-label">💾 ${t('mc.scenarios')}</label>
+  <select class="mc-scenarios-select" onchange="MetaCall._onScenarioSelect(this.value)">
+    ${options}
+  </select>
+  <button type="button" class="mc-scenarios-save-btn" onclick="MetaCall._saveScenario()">
+    ${saveLabel}
+  </button>
+  ${hasCurrent
+    ? `<button type="button" class="mc-scenarios-del-btn" onclick="MetaCall._deleteScenario()"
+              title="${esc(t('mc.scenarioDelete'))}">🗑</button>`
+    : ''}
+</div>`;
   }
 
   // ── Public Init ────────────────────────────────────────────
@@ -1286,6 +1432,9 @@ window.MetaCall = (function () {
     _removeCustomDeck,
     _onCustomDeckName,
     _onCustomDeckShare,
+    _saveScenario,
+    _onScenarioSelect,
+    _deleteScenario,
     exportFieldShareImage,
     exportDay2ShareImage,
   };

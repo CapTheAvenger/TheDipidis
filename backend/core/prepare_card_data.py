@@ -260,6 +260,13 @@ EXTENDED_MIN_ORDER = 113   # SSH and newer
 # Promo sets span multiple eras; assign them to standard for fast first-load.
 PROMO_ERA_SETS = {"SVP", "MEP", "SP", "HSP", "SMP", "SV", "SWSHP"}
 
+# Sets that are superseded by a later release and should be excluded from the
+# card database entirely. Preview sets that got a proper release under a
+# different name (often with slightly different card names — e.g. "Rock
+# Fighting Energy" in M3 → "Rocky Fighting Energy" in POR) leave stale
+# autocomplete suggestions if kept around, so we drop them here.
+SUPERSEDED_SETS = {"M3"}  # POR fully supersedes M3 (115 of 116 cards duplicated)
+
 
 def split_card_database_chunks(all_cards: list, frontend_data: str):
     """Split all_cards_merged data into era-based JSON chunks + manifest.
@@ -273,9 +280,16 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
     set_order = load_set_order()
 
     standard, extended, legacy = [], [], []
+    dropped_superseded = 0
 
     for card in all_cards:
         set_code = (card.get("set") or "").strip()
+
+        # Drop superseded preview sets (e.g. M3 → POR rename)
+        if set_code.upper() in SUPERSEDED_SETS:
+            dropped_superseded += 1
+            continue
+
         order = set_order.get(set_code, set_order.get(set_code.upper(), 0))
 
         if set_code.upper() in PROMO_ERA_SETS or order >= STANDARD_MIN_ORDER:
@@ -284,6 +298,9 @@ def split_card_database_chunks(all_cards: list, frontend_data: str):
             extended.append(card)
         else:
             legacy.append(card)
+
+    if dropped_superseded:
+        print(f"  dropped {dropped_superseded} cards from superseded sets: {sorted(SUPERSEDED_SETS)}")
 
     import hashlib
 

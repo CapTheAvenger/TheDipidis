@@ -12,8 +12,8 @@ window.MetaCall = (function () {
     totalPlayers  : 1300,
     rounds        : 8,
     day2Points    : 16,
-    junkPct       : 0,
-    junkWinRate   : 80,
+    junkPct       : 0,        // legacy: minimum-junk floor (UI removed; auto-computed now)
+    junkWinRate   : 55,       // assumed WR vs small-share decks lumped into Junk (slight edge)
     myDeck        : '',
     excludeBricks : false,
   };
@@ -388,22 +388,6 @@ window.MetaCall = (function () {
       <input type="number" id="mc-day2pts" min="1" max="45" value="${s.day2Points}"
              oninput="MetaCall._onSetting('day2Points', +this.value)">
     </div>
-    <div class="metacall-field-group">
-      <label>${t('mc.labelJunkWinRate')}</label>
-      <input type="number" id="mc-junk-wr" min="0" max="100" value="${s.junkWinRate}"
-             oninput="MetaCall._onSetting('junkWinRate', +this.value)">
-    </div>
-  </div>
-  <div class="metacall-field-group" style="max-width:420px">
-    <label>${t('mc.labelJunkPlayers')} <span id="mc-junk-display">${s.junkPct}%</span></label>
-    <div class="mc-junk-row">
-      <input type="range" id="mc-junk-slider" min="0" max="70" step="5" value="${s.junkPct}"
-             oninput="MetaCall._onJunk(+this.value)">
-      <span class="mc-junk-value" id="mc-junk-val">${s.junkPct}%</span>
-    </div>
-    <p style="font-size:0.76rem;color:#999;margin:4px 0 0">
-      ${t('mc.junkExplanation')}
-    </p>
   </div>
 </div>`;
   }
@@ -1155,15 +1139,6 @@ window.MetaCall = (function () {
     refreshResults();
   }
 
-  function _onJunk(val) {
-    _settings.junkPct = val;
-    const v = document.getElementById('mc-junk-val');
-    const d = document.getElementById('mc-junk-display');
-    if (v) v.textContent = val + '%';
-    if (d) d.textContent = val + '%';
-    refreshResults();
-  }
-
   function _onMyDeck(val) {
     _settings.myDeck = val;
     _winRateOverrides = {};
@@ -1300,7 +1275,6 @@ window.MetaCall = (function () {
     init,
     preload: loadData,
     _onSetting,
-    _onJunk,
     _onMyDeck,
     _onPersonalShare,
     _onWrOverride,

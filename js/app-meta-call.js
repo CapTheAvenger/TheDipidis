@@ -854,6 +854,7 @@ window.MetaCall = (function () {
         </div>
         <div class="mc-share-preview-actions">
           <button type="button" class="mc-share-preview-btn-share">📤 ${esc(t('mc.share'))}</button>
+          <button type="button" class="mc-share-preview-btn-download">💾 ${esc(t('mc.download'))}</button>
           <button type="button" class="mc-share-preview-btn-secondary">${esc(t('mc.close'))}</button>
         </div>
       </div>`;
@@ -867,6 +868,23 @@ window.MetaCall = (function () {
     modal.querySelector('.mc-share-preview-btn-share').addEventListener('click', () => {
       canvas.toBlob(blob => {
         _shareOrDownloadBlob(blob, filename, title, text);
+        close();
+      }, 'image/png');
+    });
+
+    // Direct download button — always saves to disk, never triggers
+    // the OS share sheet (which on Windows gives no "Save to file" option).
+    modal.querySelector('.mc-share-preview-btn-download').addEventListener('click', () => {
+      canvas.toBlob(blob => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         close();
       }, 'image/png');
     });

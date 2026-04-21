@@ -1324,7 +1324,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 'Energy': 7
             };
             
-            return cards.sort((a, b) => {
+            const sorted = cards.sort((a, b) => {
                 const cardTypeA = a.type || a.card_type || '';
                 const cardTypeB = b.type || b.card_type || '';
                 
@@ -1416,8 +1416,50 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 const nameB = b.card_name || b.name || '';
                 return nameA.localeCompare(nameB);
             });
+
+            // ── Post-pass: group different prints of the same card together ──
+            //
+            // The main sort above ranks cards by category → element → % → etc.
+            // But different prints of the same card (e.g. 3 prints of Lillie's
+            // Determination) can end up scattered if their per-print data
+            // differs (counts, set numbers, etc.). A secondary grouping makes
+            // sure all prints of a given card name appear adjacent.
+            //
+            // Algorithm preserves the overall sort order: each name group is
+            // placed at the position of its first-occurring print in `sorted`.
+            // Within each group, prints are sub-sorted by set code → number.
+            const firstIdx = new Map();
+            const groups   = new Map();
+            sorted.forEach((card, idx) => {
+                const rawName = card.card_name || card.name || card.name_en || '';
+                const key = String(rawName).trim().toLowerCase();
+                if (!groups.has(key)) {
+                    groups.set(key, []);
+                    firstIdx.set(key, idx);
+                }
+                groups.get(key).push(card);
+            });
+            const orderedKeys = Array.from(firstIdx.entries())
+                .sort((a, b) => a[1] - b[1])
+                .map(([k]) => k);
+            const grouped = [];
+            orderedKeys.forEach(key => {
+                const list = groups.get(key);
+                if (list.length > 1) {
+                    list.sort((a, b) => {
+                        const sa = String(a.set_code || a.set || '').toUpperCase();
+                        const sb = String(b.set_code || b.set || '').toUpperCase();
+                        if (sa !== sb) return sa.localeCompare(sb);
+                        const na = parseInt(a.set_number || a.number, 10) || 0;
+                        const nb = parseInt(b.set_number || b.number, 10) || 0;
+                        return na - nb;
+                    });
+                }
+                grouped.push(...list);
+            });
+            return grouped;
         }
-        
+
         function deduplicateCards(cards) {
             /**
              * Fuer jede Karte (gleicher Name) nur die neueste low-rarity Version behalten

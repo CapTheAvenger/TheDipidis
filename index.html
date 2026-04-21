@@ -3251,6 +3251,14 @@
               <option value="">All Tournaments</option>
             </select>
           </div>
+          <div class="ma-filter-group">
+            <label class="ma-filter-label">🧱 Bricks</label>
+            <select id="maFilterBrick" onchange="renderMatchupAnalysis()" class="ma-filter-select" aria-label="Brick filter">
+              <option value="all">Inkl. Bricks</option>
+              <option value="exclude">Exkl. Bricks</option>
+              <option value="only">Nur Bricks</option>
+            </select>
+          </div>
         </div>
 
         <!-- SUMMARY STATS -->
@@ -4055,6 +4063,17 @@
 
                 <div id="battleJournalGameDetails" class="battle-journal-bo3-details d-none">
                     <span class="battle-journal-label" data-i18n="bj.gameDetails">Game Details</span>
+                </div>
+
+                <!-- Brick + Notes -->
+                <div class="bj-extra-fields">
+                    <label class="bj-brick-label">
+                        <input type="checkbox" id="battleJournalBrick" class="bj-brick-checkbox">
+                        <span class="bj-brick-icon">🧱</span>
+                        <span class="bj-brick-text" data-i18n="bj.brick">Brick</span>
+                        <span class="bj-brick-hint" data-i18n="bj.brickHint">(Verloren durch Pech, nicht durch Matchup)</span>
+                    </label>
+                    <textarea id="battleJournalNotes" class="bj-notes-textarea" placeholder="Stichpunkte... (max. 200 Zeichen)" rows="2" maxlength="200"></textarea>
                 </div>
 
                 <div class="battle-journal-actions">

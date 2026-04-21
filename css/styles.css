@@ -8257,3 +8257,178 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
   }
 }
+/* ============================================================
+   Battle Journal – Brick + Notes + Mobile (2026-04)
+   ============================================================ */
+
+/* Extra fields row (brick + notes) */
+.bj-extra-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0 4px;
+    border-top: 1px solid rgba(0,0,0,.07);
+}
+
+/* Brick checkbox label */
+.bj-brick-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.9rem;
+}
+.bj-brick-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #e67e22;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.bj-brick-icon { font-size: 1rem; }
+.bj-brick-text { font-weight: 700; color: #c0392b; }
+.bj-brick-hint {
+    font-size: 0.76rem;
+    color: #999;
+    font-weight: 400;
+}
+
+/* Notes textarea */
+.bj-notes-textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid rgba(0,0,0,.14);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    resize: vertical;
+    font-family: inherit;
+    color: inherit;
+    background: var(--input-bg, rgba(0,0,0,.03));
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+.bj-notes-textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    background: #fff;
+}
+.battle-journal-sheet.is-dark .bj-notes-textarea {
+    background: rgba(255,255,255,.07);
+    border-color: rgba(255,255,255,.15);
+    color: #fff;
+}
+.battle-journal-sheet.is-dark .bj-notes-textarea::placeholder { color: rgba(255,255,255,.4); }
+
+/* Brick badge in history items */
+.bj-brick-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(230,126,34,.15);
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,.25);
+    border-radius: 5px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+.bj-history-item.is-brick {
+    border-left-color: #e67e22 !important;
+    opacity: 0.85;
+}
+.bj-history-notes {
+    font-size: 0.78rem;
+    color: #6b7c93;
+    margin-top: 3px;
+    font-style: italic;
+    line-height: 1.4;
+}
+.battle-journal-sheet.is-dark .bj-history-notes { color: rgba(255,255,255,.5); }
+
+/* Brick count in bar list */
+.bj-brick-count {
+    font-size: 0.72rem;
+    color: #e67e22;
+    margin-left: 6px;
+    cursor: help;
+}
+
+/* ── Heatmap mobile ── */
+.ma-heatmap-wrap {
+    overflow: hidden !important; /* let scroll handle it */
+}
+.ma-heatmap-scroll {
+    max-height: 70vh !important;  /* more room on mobile */
+}
+
+/* ── Matchup Analysis – mobile filter bar ── */
+@media (max-width: 600px) {
+    .ma-filter-bar {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        padding: 10px 12px !important;
+    }
+    .ma-filter-group--wide {
+        grid-column: 1 / -1 !important;
+    }
+    .ma-modal-shell {
+        margin: 0 !important;
+        border-radius: 12px 12px 0 0 !important;
+        min-height: 80vh !important;
+    }
+    .ma-chip {
+        font-size: 0.75rem !important;
+        padding: 5px 10px !important;
+    }
+    .ma-heatmap-cell {
+        min-width: 52px !important;
+        font-size: 0.82rem !important;
+    }
+    .ma-heatmap-row-header {
+        font-size: 0.72rem !important;
+        max-width: 90px !important;
+        padding: 5px 7px !important;
+    }
+}
+
+/* ── Journal form – mobile ── */
+@media (max-width: 600px) {
+    .battle-journal-sheet {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 95dvh !important;
+        border-radius: 16px 16px 0 0 !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .battle-journal-form {
+        gap: 12px !important;
+    }
+    .battle-journal-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .battle-journal-choice {
+        min-height: 44px !important;
+        font-size: 0.9rem !important;
+    }
+    .bj-type-chip {
+        min-height: 38px !important;
+        font-size: 0.8rem !important;
+        padding: 7px 11px !important;
+    }
+    .battle-journal-primary-btn,
+    .battle-journal-secondary-btn {
+        min-height: 48px !important;
+        font-size: 0.95rem !important;
+    }
+    .bj-extra-fields {
+        gap: 8px;
+    }
+    .bj-brick-hint {
+        display: none; /* hide hint text on very small screens */
+    }
+}

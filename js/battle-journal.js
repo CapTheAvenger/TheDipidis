@@ -98,7 +98,9 @@
             saveFx: document.getElementById('battleJournalSaveFx'),
             themeToggle: document.getElementById('battleJournalThemeToggle'),
             metaInput: document.getElementById('battleJournalMeta'),
-            typeInput: document.getElementById('battleJournalType')
+            typeInput: document.getElementById('battleJournalType'),
+            brickInput: document.getElementById('battleJournalBrick'),
+            notesInput: document.getElementById('battleJournalNotes')
         };
     }
 
@@ -505,6 +507,8 @@
             bestOf: String(els.bestOfInput?.value || '').trim(),
             meta: String(els.metaInput?.value || '').trim(),
             tournamentType: String(els.typeInput?.value || '').trim(),
+            brick: els.brickInput?.checked || false,
+            notes: String(els.notesInput?.value || '').trim(),
             turnOrder: derived.turnOrder,
             result: derived.result,
             games: games
@@ -524,6 +528,8 @@
         if (els.bestOfInput) els.bestOfInput.value = draft.bestOf || '';
         if (els.metaInput) els.metaInput.value = draft.meta || '';
         if (els.typeInput) els.typeInput.value = draft.tournamentType || '';
+        if (els.brickInput) els.brickInput.checked = draft.brick || false;
+        if (els.notesInput) els.notesInput.value = draft.notes || '';
         document.querySelectorAll('.bj-type-chip').forEach(c => c.classList.toggle('is-selected', c.dataset.value === (draft.tournamentType || '')));
 
         renderDeckChoices();
@@ -544,6 +550,10 @@
         if (els.typeInput) els.typeInput.value = '';
         document.querySelectorAll('.battle-journal-choice').forEach(button => button.classList.remove('is-selected'));
         document.querySelectorAll('.bj-type-chip').forEach(c => c.classList.remove('is-selected'));
+        const brickEl = document.getElementById('battleJournalBrick');
+        if (brickEl) brickEl.checked = false;
+        const notesEl = document.getElementById('battleJournalNotes');
+        if (notesEl) notesEl.value = '';
         renderGameRows();
         renderDeckChoices();
         localStorage.removeItem(BATTLE_JOURNAL_DRAFT_KEY);
@@ -594,11 +604,13 @@
             turnOrder: derived.turnOrder,
             result: derived.result,
             bo3Games: games,
+            brick: values.brick || false,
+            notes: values.notes || '',
             createdAtMs: Date.now(),
             sourceTab: activeTab,
             sourceArchetype,
             userId: window.auth?.currentUser?.uid || null,
-            schemaVersion: 3
+            schemaVersion: 4
         };
     }
 
@@ -642,12 +654,14 @@
             turnOrder: entry.turnOrder,
             result: entry.result,
             bo3Games: Array.isArray(entry.bo3Games) ? entry.bo3Games : [],
+            brick: entry.brick || false,
+            notes: entry.notes || '',
             sourceTab: entry.sourceTab || null,
             sourceArchetype: entry.sourceArchetype || null,
             createdAtMs: entry.createdAtMs,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             syncedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            schemaVersion: entry.schemaVersion || 3
+            schemaVersion: entry.schemaVersion || 4
         };
 
         await window.db
@@ -794,6 +808,12 @@
         }
         if (els.opponentValue) {
             els.opponentValue.addEventListener('input', () => persistBattleJournalDraftFromForm());
+        }
+        if (els.brickInput) {
+            els.brickInput.addEventListener('change', () => persistBattleJournalDraftFromForm());
+        }
+        if (els.notesInput) {
+            els.notesInput.addEventListener('input', () => persistBattleJournalDraftFromForm());
         }
 
         renderGameRows();
@@ -1068,17 +1088,21 @@
             if (gameTexts.length > 0) bo3Line = `<div class="bj-history-games">${escapeHtml(gameTexts.join(' · '))}</div>`;
         }
 
+        const brickBadge = entry.brick ? `<span class="bj-brick-badge">🧱 Brick</span>` : '';
+        const notesLine  = entry.notes ? `<div class="bj-history-notes">${escapeHtml(entry.notes)}</div>` : '';
         const clipText = formatEntryForClipboard(entry);
         return `
-            <div class="bj-history-item ${resultClass}">
+            <div class="bj-history-item ${resultClass}${entry.brick ? ' is-brick' : ''}">
                 <div class="bj-history-item-main">
                     <div class="bj-history-matchup">
                         <strong>${escapeHtml(entry.ownDeck || 'Deck')}</strong>
                         <span class="bj-history-vs">vs</span>
                         <strong>${escapeHtml(entry.opponentArchetype || 'Opponent')}</strong>
+                        ${brickBadge}
                     </div>
                     <div class="bj-history-meta">${escapeHtml(bestOfText)}${turnText ? ' · ' + escapeHtml(turnText) : ''} · ${escapeHtml(dateStr)} ${pendingBadge}</div>
                     ${bo3Line}
+                    ${notesLine}
                     <div class="bj-history-clip">${escapeHtml(clipText)}</div>
                 </div>
                 <div class="bj-history-actions">
@@ -1247,17 +1271,20 @@
     }
 
     function renderMatchupAnalysis() {
-        const fDeck = document.getElementById('maFilterDeck')?.value || '';
-        const fMeta = document.getElementById('maFilterMeta')?.value || '';
+        const fDeck  = document.getElementById('maFilterDeck')?.value || '';
+        const fMeta  = document.getElementById('maFilterMeta')?.value || '';
         const activeChips = document.querySelectorAll('#maFilterTypeChips .ma-chip--active');
         const fTypes = [...activeChips].map(c => c.dataset.value).filter(Boolean);
         const fTourn = document.getElementById('maFilterTournament')?.value || '';
+        const fBrick = document.getElementById('maFilterBrick')?.value || 'all';
 
         let entries = journalHistoryCache;
-        if (fDeck) entries = entries.filter(e => e.ownDeck === fDeck);
-        if (fMeta) entries = entries.filter(e => (e.meta || '') === fMeta);
+        if (fDeck)  entries = entries.filter(e => e.ownDeck === fDeck);
+        if (fMeta)  entries = entries.filter(e => (e.meta || '') === fMeta);
         if (fTypes.length) entries = entries.filter(e => fTypes.includes(e.tournamentType || ''));
         if (fTourn) entries = entries.filter(e => e.tournamentName === fTourn);
+        if (fBrick === 'exclude') entries = entries.filter(e => !e.brick);
+        if (fBrick === 'only')    entries = entries.filter(e => !!e.brick);
 
         // Subtitle
         const sub = document.getElementById('maSubtitle');
@@ -1413,25 +1440,30 @@
         const matchups = {};
         entries.forEach(entry => {
             const opp = entry.opponentArchetype || 'Unknown';
-            if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0 };
+            if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0, bricks: 0 };
             matchups[opp].total++;
+            if (entry.brick) matchups[opp].bricks++;
             if (entry.result === 'win') matchups[opp].wins++;
             else if (entry.result === 'loss') matchups[opp].losses++;
             else matchups[opp].ties++;
         });
 
+        // Sort by total games descending (most played first)
         const sorted = Object.entries(matchups).sort((a, b) => b[1].total - a[1].total);
         let html = '<div class="bj-matchup-grid">';
         sorted.forEach(function([opp, stats]) {
             const winRate = stats.total > 0 ? Math.round((stats.wins / stats.total) * 100) : 0;
             const barColor = winRate >= 60 ? '#1f8b4d' : (winRate >= 40 ? '#e67e22' : '#c0392b');
+            const brickTag = stats.bricks > 0
+                ? `<span class="bj-brick-count" title="${stats.bricks} Brick(s)">🧱 ${stats.bricks}</span>`
+                : '';
             html += `
                 <div class="bj-matchup-row">
                     <div class="bj-matchup-name">${escapeHtml(opp)}</div>
                     <div class="bj-matchup-bar-wrap">
                         <div class="bj-matchup-bar" style="width:${winRate}%;background:${barColor}"></div>
                     </div>
-                    <div class="bj-matchup-stats">${stats.wins}-${stats.losses}-${stats.ties} <span class="bj-matchup-rate">${winRate}%</span></div>
+                    <div class="bj-matchup-stats">${stats.wins}-${stats.losses}-${stats.ties} <span class="bj-matchup-rate">${winRate}%</span>${brickTag}</div>
                 </div>
             `;
         });
@@ -1813,15 +1845,16 @@
      * @param {number} [minGames=3] - Minimum games required to include an opponent
      * @returns {{ [opponentArchetype: string]: { wins, losses, ties, total, winRate } }}
      */
-    function getBattleJournalWinRates(ownDeck, minGames) {
-        minGames = minGames || 3;
+    function getBattleJournalWinRates(ownDeck, minGames, options) {
+        minGames = minGames || 1;
+        const excludeBricks = (options && options.excludeBricks) || false;
         const normOwn = (ownDeck || '').toLowerCase().trim();
         const all = Array.isArray(journalHistoryCache) ? journalHistoryCache : [];
         const matchups = {};
         all.forEach(function(e) {
             if (!e || !e.opponentArchetype) return;
+            if (excludeBricks && e.brick) return;
             const entryDeck = (e.ownDeck || '').toLowerCase().trim();
-            // Accept exact match or prefix match (e.g. "Dragapult" matches "Dragapult Dusknoir")
             if (!entryDeck || (entryDeck !== normOwn && !entryDeck.startsWith(normOwn) && !normOwn.startsWith(entryDeck))) return;
             const opp = e.opponentArchetype;
             if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0 };

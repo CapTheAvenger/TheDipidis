@@ -9,12 +9,13 @@ window.MetaCall = (function () {
   let _shareList  = null;  // [{name, onlineShare}] sorted desc
 
   let _settings = {
-    totalPlayers : 1300,
-    rounds       : 8,
-    day2Points   : 16,
-    junkPct      : 0,
-    junkWinRate  : 80,
-    myDeck       : '',
+    totalPlayers  : 1300,
+    rounds        : 8,
+    day2Points    : 16,
+    junkPct       : 0,
+    junkWinRate   : 80,
+    myDeck        : '',
+    excludeBricks : false,
   };
 
   let _personalShares   = {};  // deckName -> % estimate
@@ -416,6 +417,13 @@ window.MetaCall = (function () {
     <button class="mc-override-toggle" onclick="MetaCall._toggleOverrides()" id="mc-override-btn">
       Win-Rates anpassen ▼
     </button>
+    <div class="mc-brick-filter-wrap">
+      <label class="mc-brick-filter-label">🧱 Journal-Bricks</label>
+      <select class="mc-brick-filter-select" onchange="MetaCall._onBrickFilter(this.value)">
+        <option value="all" ${!_settings.excludeBricks ? 'selected' : ''}>Inkl. Bricks</option>
+        <option value="exclude" ${_settings.excludeBricks ? 'selected' : ''}>Exkl. Bricks</option>
+      </select>
+    </div>
   </div>
   <div class="mc-override-panel" id="mc-override-panel">
     ${renderOverrideTable()}
@@ -642,14 +650,19 @@ window.MetaCall = (function () {
     _journalStats     = {};
     _journalRateKeys  = [];
     if (val && typeof window.getBattleJournalWinRates === 'function') {
-      // Load all journal data (min 1 game) for blending; badge threshold = 3
-      const rates = window.getBattleJournalWinRates(val, 1);
+      const rates = window.getBattleJournalWinRates(val, 1, { excludeBricks: _settings.excludeBricks });
       Object.keys(rates).forEach(opp => {
         _journalStats[opp] = rates[opp];
         if (rates[opp].total >= 3) _journalRateKeys.push(opp);
       });
     }
     renderAll();
+  }
+
+  function _onBrickFilter(val) {
+    _settings.excludeBricks = (val === 'exclude');
+    // Reload journal stats with new filter
+    _onMyDeck(_settings.myDeck);
   }
 
   function _onPersonalShare(deckName, val) {
@@ -728,6 +741,7 @@ window.MetaCall = (function () {
     _onMyDeck,
     _onPersonalShare,
     _onWrOverride,
+    _onBrickFilter,
     _toggleOverrides,
     _toggleGroup,
     _toggleGroupField,

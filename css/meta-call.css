@@ -598,6 +598,33 @@
   background: #d5e8f8;
 }
 
+/* Brick filter in My Deck panel */
+.mc-brick-filter-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+.mc-brick-filter-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7c93;
+  white-space: nowrap;
+}
+.mc-brick-filter-select {
+  padding: 5px 8px;
+  border: 1px solid #d0dae5;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  background: #f7f9fc;
+  color: #1a2533;
+  cursor: pointer;
+}
+.mc-brick-filter-select:focus {
+  outline: none;
+  border-color: #e67e22;
+}
+
 /* --- Journal Influence badge (results panel) --- */
 .mc-journal-influence {
   display: flex;

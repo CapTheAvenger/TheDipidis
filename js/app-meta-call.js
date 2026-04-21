@@ -366,6 +366,18 @@ window.MetaCall = (function () {
       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // Escape for JS string literal inside HTML attribute — needed for
+  // deck names with apostrophes (e.g. "N's Zoroark", "Rocket's Mewtwo",
+  // "Cynthia's Garchomp"). The apostrophe would otherwise terminate the
+  // JS string and break the inline oninput / onclick handler.
+  function escJs(s) {
+    return String(s)
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")
+      .replace(/\r/g, '\\r')
+      .replace(/\n/g, '\\n');
+  }
+
   function renderSettingsPanel() {
     const s = _settings;
     return `
@@ -409,7 +421,7 @@ window.MetaCall = (function () {
       : `<input type="number" min="0" max="100" step="0.1" placeholder="—"
                 value="${hasPersonal ? deck.personalShare : ''}"
                 class="mc-personal-input" data-deck="${esc(deck.name)}"
-                oninput="MetaCall._onPersonalShare('${esc(deck.name)}', this.value)"
+                oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)"
                 style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
     const onlineDisplay = isCustom ? '—' : deck.onlineShare.toFixed(2) + '%';
     return `<tr class="${rowClass}">
@@ -464,7 +476,7 @@ window.MetaCall = (function () {
           const pCell  = `<input type="number" min="0" max="100" step="0.1" placeholder="—"
                             value="${hasP ? deck.personalShare : ''}"
                             class="mc-personal-input" data-deck="${esc(deck.name)}"
-                            oninput="MetaCall._onPersonalShare('${esc(deck.name)}', this.value)"
+                            oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)"
                             style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
           return `<tr class="mc-group-detail mc-group-hidden" data-group="${gid}">
             <td style="padding-left:26px"><span class="mc-deck-name mc-variant-name">${esc(deck.name)}</span></td>
@@ -614,7 +626,7 @@ window.MetaCall = (function () {
         <td class="mc-wr-override">
           <input type="number" min="0" max="100" placeholder="${wr}"
                  value="${ov !== undefined ? ov : ''}"
-                 oninput="MetaCall._onWrOverride('${esc(deck.name)}', this.value)">
+                 oninput="MetaCall._onWrOverride('${escJs(deck.name)}', this.value)">
         </td>
       </tr>`;
     }).join('');

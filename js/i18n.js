@@ -718,6 +718,8 @@ const translations = {
     'ma.noRankData':            'No data.',
     'ma.minTwoMatches':         'Min. 2 matches against the same opponent needed.',
     'ma.mit':                   'with',
+    'ma.overview':              'Matchup Overview',
+    'ma.forDeck':               'For',
 
     // ── Current Meta Analysis ────────────────────────────────
     'currentMeta.topArchetypes':      'Top Archetypes',
@@ -1821,6 +1823,8 @@ const translations = {
     'ma.noRankData':            'Keine Daten.',
     'ma.minTwoMatches':         'Mind. 2 Matches gegen selben Gegner nötig.',
     'ma.mit':                   'mit',
+    'ma.overview':              'Matchup-Übersicht',
+    'ma.forDeck':               'Für',
 
     // ── Current-Meta-Analyse ─────────────────────────────────
     'currentMeta.topArchetypes':      'Top Archetypes',

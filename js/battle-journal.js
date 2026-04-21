@@ -1355,9 +1355,10 @@
             return ty - tx;
         });
 
-        // If only 1 deck, skip 2D — the bar list is enough
-        if (myArr.length <= 1 && oppArr.length <= 1) {
-            wrap.innerHTML = `<p class="color-grey fs-13">${escapeHtml(battleJournalText('ma.needTwoDecks', 'Need at least 2 different decks for heatmap.'))}</p>`;
+        // When one axis has ≤1 entry, a 2D heatmap adds no information — use a compact list instead.
+        // This is the common case (tracking 1 personal deck vs many opponents).
+        if (myArr.length < 2 || oppArr.length < 2) {
+            wrap.innerHTML = _renderMatchupList(myArr, oppArr, grid);
             return;
         }
 
@@ -1386,6 +1387,44 @@
 
         html += '</tbody></table></div>';
         wrap.innerHTML = html;
+    }
+
+    // Compact list view — used when a 2D heatmap adds no info (1 axis has ≤1 entry).
+    // Sorted by game count desc so the most-played matchups are at the top.
+    function _renderMatchupList(myArr, oppArr, grid) {
+        // Figure out which axis varies — the single item on the other axis is the "context"
+        const isMultiOpp = oppArr.length >= myArr.length;
+        const varAxis   = isMultiOpp ? oppArr : myArr;
+        const fixedItem = isMultiOpp ? myArr[0] : oppArr[0];
+
+        const pairs = varAxis.map(name => {
+            const key = isMultiOpp ? (fixedItem + '|||' + name) : (name + '|||' + fixedItem);
+            return { name, cell: grid[key] || { w: 0, l: 0, t: 0, total: 0 } };
+        }).filter(p => p.cell.total > 0)
+          .sort((a, b) => b.cell.total - a.cell.total);
+
+        if (pairs.length === 0) {
+            return `<p class="color-grey fs-13">${escapeHtml(battleJournalText('ma.noData', 'No matchup data.'))}</p>`;
+        }
+
+        // Header: which deck is being analyzed
+        const contextLabel = fixedItem
+            ? `<div class="ma-matchup-list-context">${escapeHtml(battleJournalText('ma.forDeck', 'For'))} <strong>${escapeHtml(fixedItem)}</strong></div>`
+            : '';
+
+        const rowsHtml = pairs.map(({ name, cell }) => {
+            const wr  = Math.round((cell.w / cell.total) * 100);
+            const cls = wr >= 60 ? 'ma-wr-good' : (wr >= 40 ? 'ma-wr-mid' : 'ma-wr-bad');
+            const record = `${cell.w}W-${cell.l}L${cell.t > 0 ? '-' + cell.t + 'T' : ''}`;
+            return `
+                <div class="ma-matchup-row">
+                    <div class="ma-matchup-name" title="${escapeHtml(name)}">${escapeHtml(name)}</div>
+                    <div class="ma-matchup-record">${record}<span class="ma-matchup-total">${cell.total}</span></div>
+                    <div class="ma-matchup-wr ${cls}">${wr}%</div>
+                </div>`;
+        }).join('');
+
+        return `${contextLabel}<div class="ma-matchup-list">${rowsHtml}</div>`;
     }
 
     function _renderMARankings(entries) {

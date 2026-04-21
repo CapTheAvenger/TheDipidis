@@ -688,68 +688,144 @@
     font-size: 2.4rem;
   }
 
-  /* Field table: hide "My Estimate" (col3) and "Players" (col5) on mobile */
-  .metacall-table th:nth-child(3),
-  .metacall-table td:nth-child(3),
-  .metacall-table th:nth-child(5),
-  .metacall-table td:nth-child(5) {
-    display: none;
-  }
+  /* ───────────────────────────────────────────────────────────
+     Field Composition: card layout on mobile (replaces table).
+     Each <tr> becomes a 2-row card:
+       Row 1:  Deck name (wraps if long) .... Final %
+       Row 2:  Online | Est. input | Encounter bar
+     ─────────────────────────────────────────────────────────── */
+  .metacall-table-wrap { overflow: visible; }
 
-  /* Fixed layout so columns don't fight for space */
-  .metacall-table {
+  .metacall-table,
+  .metacall-table tbody {
+    display: block;
     width: 100%;
-    table-layout: fixed;
+    border-collapse: separate;
+    table-layout: auto;
+  }
+  .metacall-table thead { display: none; }
+
+  .metacall-table tbody tr {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-areas:
+      "name   name  name  final"
+      "online est   enc   enc";
+    column-gap: 10px;
+    row-gap: 7px;
+    align-items: center;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    background: #fafbfd;
+    border: 1px solid #e8edf5;
+    border-radius: 10px;
+  }
+  .metacall-table tbody tr.mc-row-junk {
+    background: #fff8f0;
+    border-color: #f0d6b3;
   }
 
-  /* Explicit column widths: deck = remaining space, others = fixed */
-  .metacall-table th:nth-child(2),
-  .metacall-table td:nth-child(2) { width: 56px; }   /* Online % */
-  .metacall-table th:nth-child(4),
-  .metacall-table td:nth-child(4) { width: 56px; }   /* Final % */
-  .metacall-table th:nth-child(6),
-  .metacall-table td:nth-child(6) { width: 92px; }   /* Avg Enc */
-
-  /* Truncation enforced at the CELL level (not span) so overflow is clipped */
-  .metacall-table td:first-child,
-  .metacall-table th:first-child {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding-right: 6px;
+  /* Generic cell reset inside the card */
+  .metacall-table tbody td {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    border: none;
+    font-size: 0.84rem;
   }
 
-  .metacall-table th,
-  .metacall-table td {
-    padding: 7px 5px;
-    font-size: 0.82rem;
-  }
+  /* Hide redundant Players column (already derivable from final %) */
+  .metacall-table tbody td:nth-child(5) { display: none; }
 
-  /* Header: stretch share-percentage headers to right-align numbers below */
-  .metacall-table th:nth-child(2),
-  .metacall-table th:nth-child(4) {
-    text-align: right;
+  /* Deck name — full width, bold, can wrap to 2 lines */
+  .metacall-table tbody td:nth-child(1) {
+    grid-area: name;
+    font-weight: 600;
+    font-size: 0.96rem;
+    color: #1a2533;
+    line-height: 1.22;
   }
-  .metacall-table td:nth-child(2),
-  .metacall-table td:nth-child(4) {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Span no longer needs its own clipping — cell handles it */
-  .mc-deck-name {
+  .metacall-table tbody td:nth-child(1) .mc-deck-name {
     display: inline;
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+    text-overflow: clip;
+    max-width: none;
   }
 
-  /* Compact encounters bar */
-  .mc-encounters-bar {
-    gap: 5px;
-  }
-  .mc-encounters-bar .mc-bar-bg {
-    min-width: 28px;
-  }
-  .mc-encounters-label {
-    font-size: 0.72rem;
+  /* Online % — subtle prefix "Online" for context */
+  .metacall-table tbody td:nth-child(2) {
+    grid-area: online;
     white-space: nowrap;
+  }
+  .metacall-table tbody td:nth-child(2)::before {
+    content: "Online";
+    font-size: 0.62rem;
+    color: #8b9bb0;
+    font-weight: 600;
+    margin-right: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Estimate input — prefix "Est." + bigger input */
+  .metacall-table tbody td:nth-child(3) {
+    grid-area: est;
+  }
+  .metacall-table tbody td:nth-child(3)::before {
+    content: "Est.";
+    font-size: 0.62rem;
+    color: #8b9bb0;
+    font-weight: 600;
+    margin-right: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .metacall-table tbody td:nth-child(3) .mc-personal-input {
+    width: 58px !important;
+    min-height: 32px;
+    padding: 4px 5px !important;
+    font-size: 0.84rem !important;
+  }
+
+  /* Final % — prominent, right-aligned in row 1 */
+  .metacall-table tbody td:nth-child(4) {
+    grid-area: final;
+    justify-content: flex-end;
+  }
+  .metacall-table tbody td:nth-child(4) .mc-share-final {
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  /* Encounter bar — bottom right, flexes to fill remaining space */
+  .metacall-table tbody td:nth-child(6) {
+    grid-area: enc;
+    min-width: 0;
+  }
+  .metacall-table tbody td:nth-child(6) .mc-encounters-bar {
+    gap: 6px;
+    width: 100%;
+  }
+  .metacall-table tbody td:nth-child(6) .mc-bar-bg {
+    min-width: 0;
+    flex: 1;
+  }
+  .metacall-table tbody td:nth-child(6) .mc-encounters-label {
+    font-size: 0.74rem;
+    white-space: nowrap;
+  }
+
+  /* Group header rows (when "Group by Pokémon" is active) — keep arrow visible */
+  .metacall-table tbody tr.mc-group-header {
+    cursor: pointer;
+  }
+  .metacall-table tbody tr.mc-group-header .mc-group-arrow {
+    margin-right: 4px;
+  }
+  .metacall-table tbody tr.mc-group-detail {
+    background: #f4f7fc;
+    border-color: #dde4ee;
   }
 }

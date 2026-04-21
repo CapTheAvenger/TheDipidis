@@ -27,13 +27,14 @@ def print_menu() -> None:
     print("  [7]  City League Analysis (Deep Dive JP)")
     print("  [8]  City League Archetypes (Trends JP)")
     print("  [9]  Historical Meta Scraper (JH)")
+    print("  [10] Labs Major Tournament Scraper")
     print("  --- FRONTEND ---")
-    print("  [10] Prepare Frontend Data (Merge)")
+    print("  [11] Prepare Frontend Data (Merge)")
     print("-" * 52)
     print("  --- BATCH SHORTCUTS ---")
-    print("  [B]  Base Data Update (1, 2, 3, 4 + 10)")
-    print("  [M]  Meta Update / Dienstags-Update (5 bis 10)")
-    print("  [F]  Full System Update (1 bis 10)")
+    print("  [B]  Base Data Update (1, 2, 3, 4 + 11)")
+    print("  [M]  Meta Update / Dienstags-Update (5 bis 11)")
+    print("  [F]  Full System Update (1 bis 11)")
     print("  [0]  Exit")
     print("=" * 52)
 
@@ -47,7 +48,8 @@ SCRIPTS = {
     "7": os.path.join("scrapers", "city_league_analysis_scraper.py"),
     "8": os.path.join("scrapers", "city_league_archetype_scraper.py"),
     "9": os.path.join("scrapers", "tournament_scraper_JH.py"),
-    "10": os.path.join("core", "prepare_card_data.py")
+    "10": os.path.join("scrapers", "labs_tournament_scraper.py"),
+    "11": os.path.join("core", "prepare_card_data.py")
 }
 
 TASK_NAMES = {
@@ -60,12 +62,13 @@ TASK_NAMES = {
     "7": "City League Analysis",
     "8": "City League Archetypes",
     "9": "Historical Meta Scraper",
-    "10": "Prepare Frontend Data",
+    "10": "Labs Major Tournament Scraper",
+    "11": "Prepare Frontend Data",
 }
 
-BATCH_BASE = ["1", "2", "3", "4", "10"]
-BATCH_META = ["5", "6", "7", "8", "9", "10"]
-BATCH_FULL = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+BATCH_BASE = ["1", "2", "3", "4", "11"]
+BATCH_META = ["5", "6", "7", "8", "9", "10", "11"]
+BATCH_FULL = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"]
 
 def git_commit_push(description: str) -> None:
     """Bump version, stage all changes, commit, and push to origin main."""

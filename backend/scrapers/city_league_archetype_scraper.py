@@ -52,6 +52,7 @@ DEFAULT_SETTINGS = {
     "max_workers": 5,
     "output_file": "city_league_archetypes.csv",
     "region": "jp",
+    "min_tournament_size": 32,
     "additional_tournament_ids": []
 }
 
@@ -489,12 +490,16 @@ def main():
     logger.info("Starte Multithreading Download fuer %s Turniere...", len(new_tournaments))
     all_data = []
 
+    min_size = settings.get("min_tournament_size", 32)
     with concurrent.futures.ThreadPoolExecutor(max_workers=settings.get("max_workers", 5)) as executor:
         future_to_t = {executor.submit(_scrape_single_tournament, t): t for t in new_tournaments}
         for future in concurrent.futures.as_completed(future_to_t):
             t = future_to_t[future]
             try:
                 res = future.result()
+                if len(res) < min_size:
+                    logger.info(f"  {t.get('shop', t['tournament_id'])} (ID: {t['tournament_id']}) -> {len(res)} Decks (< {min_size} – uebersprungen)")
+                    continue
                 all_data.extend(res)
                 logger.info(f"  {t.get('shop', t['tournament_id'])} (ID: {t['tournament_id']}) -> {len(res)} Decks")
             except Exception as e:

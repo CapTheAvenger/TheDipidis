@@ -37,7 +37,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
         window.currentCityLeagueArchetype = null;
         window.currentMetaDeck = {};
         window.currentMetaDeckOrder = [];
-        window.currentCurrentMetaArchetype = null;
+        window.currentMetaArchetype = null;
         window.pastMetaDeck = {};
         window.pastMetaDeckOrder = [];
         window.pastMetaCurrentArchetype = null;
@@ -617,7 +617,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 } else if (source === 'currentMeta') {
                     window.currentMetaDeck = {};
                     window.currentMetaDeckOrder = [];
-                    window.currentCurrentMetaArchetype = null;
+                    window.currentMetaArchetype = null;
                     // CRITICAL: Remove from localStorage completely
                     localStorage.removeItem('currentMetaDeck');
                     devLog('[clearDeck] Current Meta deck cleared and removed from localStorage');
@@ -752,7 +752,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             try {
                 const allDecks = {
                     cityLeague:  { deck: window.cityLeagueDeck  || {}, order: window.cityLeagueDeckOrder  || [], archetype: window.currentCityLeagueArchetype  || null },
-                    currentMeta: { deck: window.currentMetaDeck || {}, order: window.currentMetaDeckOrder || [], archetype: window.currentCurrentMetaArchetype || null },
+                    currentMeta: { deck: window.currentMetaDeck || {}, order: window.currentMetaDeckOrder || [], archetype: window.currentMetaArchetype || null },
                     pastMeta:    { deck: window.pastMetaDeck    || {}, order: window.pastMetaDeckOrder    || [], archetype: window.pastMetaCurrentArchetype    || null },
                     timestamp: new Date().toISOString()
                 };
@@ -2276,7 +2276,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
                 return window.currentCityLeagueArchetype || 'City League Deck';
             }
             if (cmTab && cmTab.classList.contains('active')) {
-                return window.currentCurrentMetaArchetype || 'Current Meta Deck';
+                return window.currentMetaArchetype || 'Current Meta Deck';
             }
             if (pmTab && pmTab.classList.contains('active')) {
                 return window.pastMetaCurrentArchetype || 'Past Meta Deck';
@@ -2752,7 +2752,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (source === 'cityLeague') {
                 currentArchetype = window.currentCityLeagueArchetype;
             } else if (source === 'currentMeta') {
-                currentArchetype = window.currentCurrentMetaArchetype;
+                currentArchetype = window.currentMetaArchetype;
             } else if (source === 'pastMeta') {
                 currentArchetype = window.pastMetaCurrentArchetype;
             }
@@ -3138,7 +3138,7 @@ try { localStorage.removeItem('autosave_deck'); } catch (_) {}
             if (source === 'cityLeague') {
                 currentArchetype = window.currentCityLeagueArchetype;
             } else if (source === 'currentMeta') {
-                currentArchetype = window.currentCurrentMetaArchetype;
+                currentArchetype = window.currentMetaArchetype;
             } else if (source === 'pastMeta') {
                 currentArchetype = window.pastMetaCurrentArchetype;
             }

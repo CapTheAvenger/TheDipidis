@@ -952,7 +952,7 @@
             if (source === 'cityLeague') {
                 deck = window.cityLeagueDeck; order = window.cityLeagueDeckOrder; archetype = window.currentCityLeagueArchetype;
             } else if (source === 'currentMeta') {
-                deck = window.currentMetaDeck; order = window.currentMetaDeckOrder; archetype = window.currentCurrentMetaArchetype;
+                deck = window.currentMetaDeck; order = window.currentMetaDeckOrder; archetype = window.currentMetaArchetype;
             } else if (source === 'pastMeta') {
                 deck = window.pastMetaDeck; order = window.pastMetaDeckOrder; archetype = window.pastMetaCurrentArchetype;
             } else return;
@@ -1064,7 +1064,7 @@
             } else if (source === 'currentMeta') {
                 window.currentMetaDeck = deck;
                 window.currentMetaDeckOrder = order || Object.keys(deck);
-                window.currentCurrentMetaArchetype = archetype || null;
+                window.currentMetaArchetype = archetype || null;
             } else if (source === 'pastMeta') {
                 window.pastMetaDeck = deck;
                 window.pastMetaDeckOrder = order || Object.keys(deck);
@@ -1107,7 +1107,7 @@
                 archetype = window.currentCityLeagueArchetype || 'My Deck';
             } else if (source === 'currentMeta') {
                 deck = window.currentMetaDeck;
-                archetype = window.currentCurrentMetaArchetype || 'My Deck';
+                archetype = window.currentMetaArchetype || 'My Deck';
             } else if (source === 'pastMeta') {
                 deck = window.pastMetaDeck;
                 archetype = window.pastMetaCurrentArchetype || 'My Deck';

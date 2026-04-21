@@ -741,6 +741,7 @@ function ptNewGame() {
     ptState.stadium  = [];
     ptState.stadiumPlayedBy = null;
     ptState.playZone = [];
+    ptState.turnCount = 0;
     ptCurrentPlayer  = 'p1';
     ptActionLog      = [];
     ptStartPhase     = true;
@@ -2022,13 +2023,40 @@ function ptPassTurn() {
     if (ptState[p].status.includes('burned'))   dmg += 20;
     if (dmg > 0) {
         ptState[p].damage.active += dmg;
-        ptLog(`Status damage: +${dmg} DMG.`);
+        ptLog(getLang()==='de' ? `Statusschaden: +${dmg} STP.` : `Status damage: +${dmg} DMG.`);
     }
-    ptLog('Turn ended.');
+    // Paralysis: auto-remove when the paralyzed player ends their own turn
+    if (ptState[p].status.includes('paralyzed')) {
+        ptState[p].status.splice(ptState[p].status.indexOf('paralyzed'), 1);
+        ptLog(getLang()==='de' ? '⚡ Paralyse aufgehoben.' : '⚡ Paralysis removed.');
+    }
+    ptState.turnCount = (ptState.turnCount || 0) + 1;
+    ptLog(getLang()==='de' ? `Zug beendet. (Zug ${ptState.turnCount})` : `Turn ended. (Turn ${ptState.turnCount})`);
     ptFlipBoard();
     // After turn flip: if new active player has no active Pokémon but has bench,
     // they must promote one BEFORE drawing.
     const newP = ptCurrentPlayer;
+
+    // Sleep: coin flip at start of the sleeping player's turn
+    if (ptState[newP].status.includes('asleep')) {
+        const woke = Math.random() < 0.5;
+        if (woke) {
+            ptState[newP].status.splice(ptState[newP].status.indexOf('asleep'), 1);
+            ptLog(getLang()==='de' ? '💤 Aufgewacht! (Kopf)' : '💤 Woke up! (Heads)');
+            ptShowMessage(getLang()==='de' ? '💤 Aufgewacht!' : '💤 Woke up!');
+        } else {
+            ptLog(getLang()==='de' ? '💤 Schläft noch… (Zahl) – kann nicht angreifen.' : '💤 Still asleep… (Tails) – cannot attack.');
+            ptShowMessage(getLang()==='de' ? '💤 Noch schläfrig! Kein Angriff möglich.' : '💤 Still asleep! Cannot attack this turn.');
+        }
+    }
+    // Confusion: reminder when it's the confused player's turn
+    if (ptState[newP].status.includes('confused')) {
+        ptShowMessage(getLang()==='de' ? '😵 Verwirrt! Münzwurf vor dem Angriff nicht vergessen.' : '😵 Confused! Remember to flip before attacking.');
+    }
+    // Update turn counter display
+    const tcEl = document.getElementById('ptTurnCounter');
+    if (tcEl) tcEl.innerText = getLang()==='de' ? `Zug ${ptState.turnCount}` : `Turn ${ptState.turnCount}`;
+
     const noActive = ptState[newP].field.active.length === 0;
     const hasBench  = ['bench0','bench1','bench2','bench3','bench4'].some(b => ptState[newP].field[b].length > 0);
     if (noActive && hasBench) {
@@ -3037,6 +3065,13 @@ function ptKnockOutZone(player, zoneId, prizeTakerOverride) {
             } else {
                 setTimeout(() => ptOpenPromoteModal(player), 120);
             }
+        } else {
+            // No Pokémon left on field → opponent wins
+            const winner = ptGetOpponentPlayer(player);
+            ptLog(getLang()==='de'
+                ? `${player.toUpperCase()} hat kein Pokémon mehr – ${winner.toUpperCase()} gewinnt!`
+                : `${player.toUpperCase()} has no Pokémon left – ${winner.toUpperCase()} wins!`);
+            setTimeout(() => ptShowWinScreen(winner), 500);
         }
     }
 
@@ -3461,6 +3496,8 @@ function ptUpdateOpponentHandCountDisplay() {
 }
 
 function ptRenderAll() {
+    const tcEl = document.getElementById('ptTurnCounter');
+    if (tcEl) tcEl.innerText = getLang()==='de' ? `Zug ${ptState.turnCount || 0}` : `Turn ${ptState.turnCount || 0}`;
     ['p1', 'p2'].forEach(p => {
         const deckEl = document.getElementById(`ptDeckCount-${p}`);
         if (deckEl) deckEl.innerText = ptState[p].deck.length;
@@ -3773,15 +3810,24 @@ function ptTakePrize(player, index) {
 }
 
 function ptGetPrizeCountForKnockout(card) {
-    const name = (card?.name || '').toLowerCase();
-    const type = (card?.cardType || card?.supertype || '').toLowerCase();
-    const haystack = `${name} ${type}`;
-    if (haystack.includes('tag team')) return 3;
-    if (haystack.includes('vmax') || haystack.includes('v-star') || haystack.includes('vstar')) return 3;
-    if (haystack.includes('mega') || /\bm\s/.test(name)) {
-        if (/\bex\b/.test(haystack)) return 3;
-    }
-    if (/\bex\b/.test(haystack) || /\bv\b/.test(haystack) || /\bgx\b/.test(haystack)) return 2;
+    const name     = (card?.name || '').toLowerCase();
+    const cardType = (card?.cardType || card?.supertype || '').toLowerCase();
+    const subtypes = (card?.subtypes || []).map(s => s.toLowerCase());
+
+    // Check subtypes array first (most reliable when available)
+    if (subtypes.some(s => ['tag team', 'tagteam', 'v-max', 'vmax', 'vstar', 'v-star'].includes(s))) return 3;
+    if (subtypes.some(s => ['mega', 'mega ex'].includes(s)) && subtypes.includes('ex')) return 3;
+    if (subtypes.some(s => ['ex', 'v', 'gx', 'prime'].includes(s))) return 2;
+
+    // Fallback: name heuristics
+    if (name.includes('tag team') || name.includes('&')) return 3;
+    if (name.includes('vmax') || name.includes('vstar') || name.includes('v-star')) return 3;
+    // "Mega X-ex" pattern (e.g. "Mega Charizard ex")
+    if (/^mega\s/.test(name) && /\bex$/.test(name.trim())) return 3;
+    // new-style "Name ex" — match trailing "ex" but not "ex" inside a word (e.g. "Exeggutor")
+    if (/\bex$/.test(name.trim()) || /\bex\s/.test(name)) return 2;
+    if (/\bv\b/.test(name) || /\bgx\b/.test(name)) return 2;
+
     return 1;
 }
 

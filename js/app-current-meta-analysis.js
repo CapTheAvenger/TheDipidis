@@ -9,6 +9,7 @@
         let currentMetaRarityMode = 'min'; // 'min', 'max', 'all'
         let currentMetaGlobalRarityPreference = 'min';
         let currentMetaTournamentStartDate = null; // Date object from settings start_date
+        let _currentMetaRenderGen = 0; // incremented on each render to cancel stale batches
 
         // Parse "14th March 2026" style dates into Date objects
         function parseEnglishTournamentDate(str) {
@@ -343,13 +344,13 @@
                 if (matchingOption) {
                     select.value = matchingOption.value;
                     window.pendingCurrentMetaDeckSelection = null;
-                    window.currentCurrentMetaArchetype = matchingOption.value;
+                    window.currentMetaArchetype = matchingOption.value;
                     loadCurrentMetaDeckData(matchingOption.value);
                 }
             }
 
             if (!pendingMeta) {
-                const savedArchetype = String(window.currentCurrentMetaArchetype || '').trim();
+                const savedArchetype = String(window.currentMetaArchetype || '').trim();
                 if (savedArchetype) {
                     const savedOption = Array.from(select.options).find(option =>
                         option.value && option.value.toLowerCase() === savedArchetype.toLowerCase()
@@ -362,7 +363,7 @@
             }
 
             if (!select.value) {
-                window.currentCurrentMetaArchetype = '';
+                window.currentMetaArchetype = '';
                 clearCurrentMetaDeckView();
             }
 
@@ -463,7 +464,7 @@
                 return;
             }
             
-            window.currentCurrentMetaArchetype = archetype;
+            window.currentMetaArchetype = archetype;
             
             // Check if we have a saved deck for this archetype
             const savedDeck = localStorage.getItem('currentMetaDeck');

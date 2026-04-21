@@ -299,7 +299,7 @@ const BASE_PATH = './data/';
         window.pastMetaDeck = window.pastMetaDeck || {};
         window.pastMetaDeckOrder = window.pastMetaDeckOrder || [];
         window.currentCityLeagueArchetype = window.currentCityLeagueArchetype || null;
-        window.currentCurrentMetaArchetype = window.currentCurrentMetaArchetype || null;
+        window.currentMetaArchetype = window.currentMetaArchetype || null;
         window.pastMetaCurrentArchetype = window.pastMetaCurrentArchetype || null;
         window.proxyQueue = window.proxyQueue || [];
 
@@ -1337,7 +1337,7 @@ const BASE_PATH = './data/';
                         if (match) {
                             select.value = match.value;
                             // Don't clear pending — let populateCurrentMetaDeckSelect consume it
-                            window.currentCurrentMetaArchetype = match.value;
+                            window.currentMetaArchetype = match.value;
                             if (typeof syncSearchableSelectDisplay === 'function') syncSearchableSelectDisplay(select);
                             if (typeof loadCurrentMetaDeckData === 'function') loadCurrentMetaDeckData(match.value);
                         }

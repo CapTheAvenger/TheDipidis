@@ -109,9 +109,9 @@
     function getBattleJournalCurrentOwnDeck() {
         const activeTab = getBattleJournalActiveTab();
         if (activeTab === 'city-league' || activeTab === 'city-league-analysis') return String(window.currentCityLeagueArchetype || '').trim();
-        if (activeTab === 'current-meta' || activeTab === 'current-analysis') return String(window.currentCurrentMetaArchetype || '').trim();
+        if (activeTab === 'current-meta' || activeTab === 'current-analysis') return String(window.currentMetaArchetype || '').trim();
         if (activeTab === 'past-meta') return String(window.pastMetaCurrentArchetype || '').trim();
-        return String(window.currentCurrentMetaArchetype || window.currentCityLeagueArchetype || window.pastMetaCurrentArchetype || '').trim();
+        return String(window.currentMetaArchetype || window.currentCityLeagueArchetype || window.pastMetaCurrentArchetype || '').trim();
     }
 
     function getValuesFromSelect(selectId) {
@@ -1805,6 +1805,44 @@
     window.saveEditEntry = saveEditEntry;
     window.deleteJournalEntry = deleteJournalEntry;
     window.continueJournalTournament = continueJournalTournament;
+
+    /**
+     * Returns per-opponent win rates from journal entries for a given own-deck name.
+     * Used by Meta Call to pre-populate win-rate overrides.
+     * @param {string} ownDeck - Deck name to filter by (case-insensitive, partial match allowed)
+     * @param {number} [minGames=3] - Minimum games required to include an opponent
+     * @returns {{ [opponentArchetype: string]: { wins, losses, ties, total, winRate } }}
+     */
+    function getBattleJournalWinRates(ownDeck, minGames) {
+        minGames = minGames || 3;
+        const normOwn = (ownDeck || '').toLowerCase().trim();
+        const all = Array.isArray(journalHistoryCache) ? journalHistoryCache : [];
+        const matchups = {};
+        all.forEach(function(e) {
+            if (!e || !e.opponentArchetype) return;
+            const entryDeck = (e.ownDeck || '').toLowerCase().trim();
+            // Accept exact match or prefix match (e.g. "Dragapult" matches "Dragapult Dusknoir")
+            if (!entryDeck || (entryDeck !== normOwn && !entryDeck.startsWith(normOwn) && !normOwn.startsWith(entryDeck))) return;
+            const opp = e.opponentArchetype;
+            if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0 };
+            matchups[opp].total++;
+            if (e.result === 'win')       matchups[opp].wins++;
+            else if (e.result === 'loss') matchups[opp].losses++;
+            else                          matchups[opp].ties++;
+        });
+        const result = {};
+        Object.keys(matchups).forEach(function(opp) {
+            var m = matchups[opp];
+            if (m.total >= minGames) {
+                result[opp] = {
+                    wins: m.wins, losses: m.losses, ties: m.ties, total: m.total,
+                    winRate: Math.round((m.wins / m.total) * 100),
+                };
+            }
+        });
+        return result;
+    }
+    window.getBattleJournalWinRates = getBattleJournalWinRates;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBattleJournal, { once: true });

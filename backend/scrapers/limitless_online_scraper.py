@@ -90,7 +90,7 @@ def scrape_deck_statistics(
                 "players": int(m.group(2)),
                 "matches": int(m.group(3)),
             }
-            meta_path = os.path.join("data", "limitless_meta_stats.json")
+            meta_path = os.path.join(get_data_dir(), "limitless_meta_stats.json")
             with open(meta_path, "w", encoding="utf-8") as f:
                 json.dump(meta_stats, f, indent=2)
             logger.info("Meta statistics saved: %s", meta_stats)

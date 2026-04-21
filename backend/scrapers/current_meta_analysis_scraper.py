@@ -163,6 +163,10 @@ def _fetch_meta_live_decklist(list_url: str, deck_name: str, deck_slug: str, car
         })
 
     if cards:
+        total = sum(c['count'] for c in cards)
+        if not (59 <= total <= 61):
+            logger.warning("Ungueltige Deckgroesse %d fuer '%s' – uebersprungen.", total, deck_name)
+            return None
         return {
             "archetype": normalize_archetype_name(deck_name),
             "deck_slug": deck_slug,
@@ -283,7 +287,8 @@ def _fetch_meta_play_decklist(url: str, archetype: str, card_db: CardDatabaseLoo
             except Exception as exc:
                 logger.debug("JSON parse attempt failed: %s", exc)
 
-    if cards and sum(c['count'] for c in cards) == 60:
+    total = sum(c['count'] for c in cards)
+    if cards and 59 <= total <= 61:
         return {
             'archetype': normalize_archetype_name(archetype),
             'cards': cards,

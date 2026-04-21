@@ -394,7 +394,7 @@
                     window.currentMetaDeckOrder = data.order;
                 }
                 if (data.archetype) {
-                    window.currentCurrentMetaArchetype = data.archetype;
+                    window.currentMetaArchetype = data.archetype;
                     // Pre-select archetype in dropdown if it exists (but don't display deck yet)
                     devLog('Saved archetype found:', data.archetype, '(waiting for user to select archetype)');
                 }
@@ -421,7 +421,7 @@
                 const data = {
                     deck: deck,
                     order: window.currentMetaDeckOrder || [],
-                    archetype: window.currentCurrentMetaArchetype || null,
+                    archetype: window.currentMetaArchetype || null,
                     timestamp: new Date().toISOString()
                 };
                 

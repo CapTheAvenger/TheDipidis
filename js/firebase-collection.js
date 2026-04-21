@@ -279,7 +279,7 @@ async function saveCurrentDeckToProfile(source) {
     archetype = window.currentCityLeagueArchetype;
   } else if (source === 'currentMeta') {
     deck = window.currentMetaDeck || {};
-    archetype = window.currentCurrentMetaArchetype;
+    archetype = window.currentMetaArchetype;
   } else if (source === 'pastMeta') {
     deck = window.pastMetaDeck || {};
     archetype = window.pastMetaCurrentArchetype;
@@ -1771,8 +1771,8 @@ function updateDecksUI() {
             <button onclick="event.stopPropagation(); moveDeckToFolder(${deckIndex})" class="deck-action-btn deck-btn-folder" title="Move to folder">
               ${getLang()==='de' ? 'Ordner' : 'Folder'}
             </button>
-            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="Copy deck list">
-              ${getLang()==='de' ? 'Kopieren' : 'Copy'}
+            <button onclick="event.stopPropagation(); copyMyDeck(${deckIndex})" class="deck-action-btn deck-btn-copy" title="Copy in PTCGL format (Pokémon TCG Live)">
+              PTCGL
             </button>
             <button onclick="event.stopPropagation(); copyDeckAndOpenLimitless(${deckIndex})" class="deck-action-btn deck-btn-print" title="Copy &amp; open Limitless Builder">
               Print Decklist
@@ -2552,6 +2552,11 @@ function switchProfileTab(tabName) {
   // Auto-load journal history when switching to journal tab
   if (tabName === 'journal' && typeof openJournalHistoryTab === 'function') {
     openJournalHistoryTab();
+  }
+
+  // Auto-init Meta Call
+  if (tabName === 'metacall' && typeof MetaCall !== 'undefined') {
+    MetaCall.init();
   }
 }
 // Filter collection by search term

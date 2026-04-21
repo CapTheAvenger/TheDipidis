@@ -77,7 +77,7 @@
                 "start_date": "13.03.2026",
                 "end_date": "auto",
                 "max_decklists_per_league": 50,
-                "additional_tournament_ids": []
+                "additional_tournament_ids": [548]
             }
         },
         "output_file": "city_league_analysis.csv",
@@ -92,7 +92,16 @@
         "delay_between_requests": 1.5,
         "output_file": "city_league_archetypes.csv",
         "region": "jp",
-        "additional_tournament_ids": []
+        "min_tournament_size": 32,
+        "additional_tournament_ids": [548]
+    },
+
+    "labs_tournament_scraper": {
+        "from_date": "2026-04-24",
+        "tournament_types": ["regional", "international", "worlds"],
+        "delay": 1.5,
+        "overwrite": false,
+        "_comment": "from_date: YYYY-MM-DD. tournament_types: regional/international/special/worlds. overwrite: true replaces CSV instead of appending."
     },
 
     "tournament_JH": {

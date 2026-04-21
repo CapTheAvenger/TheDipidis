@@ -624,7 +624,7 @@
             if (!searchInput) return;
 
             // Keep an explicit runtime hook in addition to inline HTML handlers.
-            searchInput.oninput = filterCityLeagueTable;
+            searchInput.oninput = debouncedFilterCityLeagueTable;
         }
         
         // Group archetypes by main Pokemon (first word/words before space)

@@ -280,6 +280,11 @@ function injectActionButtons(){
     b.style.cssText='background:'+def.bg+';color:white;padding:4px 8px;font-size:12px;border-radius:6px;font-weight:700;border:none;cursor:pointer;margin-right:2px;';
     g.appendChild(b);
   });
+  var tc=document.createElement('span');
+  tc.id='ptTurnCounter';
+  tc.style.cssText='color:#FFCB05;font-size:11px;font-weight:700;padding:4px 7px;background:rgba(255,203,5,0.12);border-radius:5px;border:1px solid rgba(255,203,5,0.3);margin-left:4px;';
+  tc.innerText='Zug 0';
+  g.appendChild(tc);
   var mulliBtn=bar.querySelector('[onclick*="ptMulligan"]');
   if(mulliBtn)mulliBtn.after(g);else bar.prepend(g);
 }

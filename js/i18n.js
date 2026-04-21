@@ -608,6 +608,9 @@ const translations = {
     'mc.addCustomDeck':         'Add Custom Deck',
     'mc.customDeckNamePh':      'Deck name…',
     'mc.remove':                'Remove',
+    'mc.share':                 'Share',
+    'mc.shareField':            'Share Meta Share image',
+    'mc.shareDay2':             'Share Day 2 prognosis image',
 
     // ── Battle Journal ───────────────────────────────────────
     'bj.profileTitle':          'Battle Journal',
@@ -1719,6 +1722,9 @@ const translations = {
     'mc.addCustomDeck':         'Deck hinzufügen',
     'mc.customDeckNamePh':      'Deckname…',
     'mc.remove':                'Entfernen',
+    'mc.share':                 'Teilen',
+    'mc.shareField':            'Meta-Share-Bild teilen',
+    'mc.shareDay2':             'Day-2-Prognose-Bild teilen',
 
     // ── Battle Journal ───────────────────────────────────────
     'bj.profileTitle':          'Battle Journal',

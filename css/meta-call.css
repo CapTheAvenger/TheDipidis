@@ -698,6 +698,34 @@
   background: #d5e8f8;
 }
 
+/* Share-image button in panel titles */
+.mc-share-btn {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #27ae60, #16a085);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 11px;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.mc-share-btn:hover {
+  filter: brightness(1.1);
+}
+.mc-share-btn:active {
+  transform: scale(0.96);
+}
+/* When there's already a toggle button, don't push share off to the far right */
+.mc-group-toggle-btn + .mc-share-btn {
+  margin-left: 6px;
+}
+
 /* Brick filter in My Deck panel */
 .mc-brick-filter-wrap {
   display: flex;

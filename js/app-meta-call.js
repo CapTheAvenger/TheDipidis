@@ -510,6 +510,9 @@ window.MetaCall = (function () {
     <button class="mc-group-toggle-btn" onclick="MetaCall._toggleGroupField()">
       ${_groupByMain ? t('mc.flatView') : t('mc.groupByPokemon')}
     </button>
+    <button class="mc-share-btn" onclick="MetaCall.exportFieldShareImage()" title="${esc(t('mc.shareField'))}">
+      📤 ${t('mc.share')}
+    </button>
   </div>
   <p style="font-size:0.8rem;color:#888;margin:-8px 0 12px">
     ${t('mc.personalShareExpl')}
@@ -711,7 +714,12 @@ window.MetaCall = (function () {
 
     return `
 <div class="metacall-panel">
-  <div class="metacall-panel-title">${t('mc.panelResult')}</div>
+  <div class="metacall-panel-title">
+    ${t('mc.panelResult')}
+    <button class="mc-share-btn" onclick="MetaCall.exportDay2ShareImage()" title="${esc(t('mc.shareDay2'))}">
+      📤 ${t('mc.share')}
+    </button>
+  </div>
   ${journalBadge}
   <div class="metacall-results-grid">
 
@@ -797,6 +805,347 @@ window.MetaCall = (function () {
       const newPanel = tmp.querySelector('.metacall-panel');
       if (newPanel) resultsWrap.innerHTML = newPanel.innerHTML;
     }
+  }
+
+  // ── Share Images (WhatsApp-friendly PNG export) ───────────
+  //
+  // Two shareable views:
+  //   A) Field Share      — meta field only (no personal deck info)
+  //   B) Day 2 Image      — deck choice + Day 2 chance + top matchups
+  //
+  // Both use the Web Share API on mobile (navigator.share with files),
+  // falling back to PNG download on desktop.
+
+  function _shareCanvas(canvas, filename, title, text) {
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const file = new File([blob], filename, { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title, text });
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+          // fall through to download
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, 'image/png');
+  }
+
+  // Shared canvas helpers
+  function _paintBackground(ctx, w, h) {
+    const bg = ctx.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, '#1a2340');
+    bg.addColorStop(1, '#0f1528');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    const accent = ctx.createLinearGradient(0, 0, w, 0);
+    accent.addColorStop(0, '#3498db');
+    accent.addColorStop(0.5, '#9b59b6');
+    accent.addColorStop(1, '#e74c3c');
+    ctx.fillStyle = accent;
+    ctx.fillRect(0, 0, w, 6);
+  }
+
+  function _paintHeader(ctx, w, title, subtitle) {
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 38px system-ui, -apple-system, sans-serif';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(title, 28, 60);
+
+    ctx.fillStyle = '#9ab1d4';
+    ctx.font = '16px system-ui, -apple-system, sans-serif';
+    ctx.fillText(subtitle, 28, 88);
+  }
+
+  function _paintFooter(ctx, w, h) {
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(0, h - 42, w, 1);
+
+    ctx.fillStyle = '#6b7c93';
+    ctx.font = '12px system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('thedipidis.de · Meta Call', 28, h - 16);
+
+    ctx.textAlign = 'right';
+    ctx.fillText(new Date().toLocaleDateString(), w - 28, h - 16);
+    ctx.textAlign = 'left';
+  }
+
+  // ── A) Field Composition Share Image ─────────────────────
+  function exportFieldShareImage() {
+    if (!_shareList) return;
+    const field = buildField();
+    if (!field.length) return;
+
+    const W = 860;
+    const ROW_H = 46;
+    const HEADER_H = 120;
+    const SECTION_H = 48;
+    const FOOTER_H = 50;
+    const H = HEADER_H + SECTION_H + field.length * ROW_H + 28 + FOOTER_H;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    _paintBackground(ctx, W, H);
+    _paintHeader(ctx, W, 'META CALL',
+      `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')} · Day 2: ${_settings.day2Points} ${t('mc.ptsAbbr')}`);
+
+    // Section label
+    ctx.fillStyle = '#3498db';
+    ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(t('mc.panelField').toUpperCase(), 28, HEADER_H + 24);
+
+    const maxShare = Math.max(...field.map(d => d.finalShare), 0.1);
+    let y = HEADER_H + SECTION_H;
+
+    const barX  = 300;
+    const barW  = 360;
+    const barH  = 10;
+    const pctX  = W - 120;
+    const countX = W - 28;
+
+    field.forEach((deck, i) => {
+      const isJunk   = deck.name === '_junk';
+      const isCustom = !!deck.isCustom;
+
+      if (i % 2 === 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillRect(16, y, W - 32, ROW_H);
+      }
+
+      // Deck name (truncate if very long)
+      ctx.fillStyle = isJunk ? '#f39c12' : (isCustom ? '#c39bd3' : '#e2e8f0');
+      ctx.font = (isJunk || isCustom) ? 'bold 17px system-ui, sans-serif' : '600 17px system-ui, sans-serif';
+      let label = isJunk ? t('mc.junkDecks') : deck.name;
+      if (isCustom) label += ' ★';
+      const maxLabelW = barX - 40;
+      if (ctx.measureText(label).width > maxLabelW) {
+        while (label.length > 4 && ctx.measureText(label + '…').width > maxLabelW) {
+          label = label.slice(0, -1);
+        }
+        label += '…';
+      }
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, 28, y + ROW_H / 2);
+
+      // Bar
+      ctx.fillStyle = 'rgba(255,255,255,0.07)';
+      ctx.fillRect(barX, y + ROW_H / 2 - barH / 2, barW, barH);
+      const pct = Math.max(0, Math.min(1, deck.finalShare / maxShare));
+      const fillGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+      if (isJunk) {
+        fillGrad.addColorStop(0, '#e67e22'); fillGrad.addColorStop(1, '#f39c12');
+      } else if (isCustom) {
+        fillGrad.addColorStop(0, '#8e44ad'); fillGrad.addColorStop(1, '#c39bd3');
+      } else {
+        fillGrad.addColorStop(0, '#27ae60'); fillGrad.addColorStop(1, '#2ecc71');
+      }
+      ctx.fillStyle = fillGrad;
+      ctx.fillRect(barX, y + ROW_H / 2 - barH / 2, barW * pct, barH);
+
+      // Percentage
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 17px system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(deck.finalShare.toFixed(1) + '%', pctX, y + ROW_H / 2);
+
+      // Player count
+      ctx.fillStyle = '#9ab1d4';
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.fillText('(' + deck.count.toLocaleString() + ')', countX, y + ROW_H / 2);
+      ctx.textAlign = 'left';
+
+      y += ROW_H;
+    });
+
+    _paintFooter(ctx, W, H);
+    _shareCanvas(canvas, `metacall-field-${_formatDateFilename()}.png`,
+      'Meta Call — Field Composition',
+      `Meta share prognosis for ${_settings.totalPlayers.toLocaleString()} players · ${_settings.rounds} rounds`);
+  }
+
+  // ── B) Day 2 Share Image (with personal deck) ─────────────
+  function exportDay2ShareImage() {
+    if (!_shareList || !_settings.myDeck) return;
+    const field = buildField();
+    if (!field.length) return;
+
+    const { day2Prob, expWin, expTie, expLoss } = calcDay2(field);
+    const pct = (day2Prob * 100).toFixed(1);
+
+    // Top matchups by expected encounter (Poisson λ)
+    const topMatchups = [...field]
+      .sort((a, b) => b.finalShare - a.finalShare)
+      .slice(0, 10);
+
+    const W = 860;
+    const ROW_H = 44;
+    const HEADER_H = 120;
+    const CARD_H = 200;
+    const STATS_H = 50;
+    const SECTION_H = 48;
+    const FOOTER_H = 50;
+    const H = HEADER_H + CARD_H + STATS_H + SECTION_H + topMatchups.length * ROW_H + 28 + FOOTER_H;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    _paintBackground(ctx, W, H);
+    _paintHeader(ctx, W, 'META CALL',
+      `${_settings.myDeck} · ${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')}`);
+
+    // Day 2 big card
+    const cardY = HEADER_H + 10;
+    const cardX = (W - 480) / 2;
+    const cardW = 480;
+    const cardH = 170;
+
+    const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
+    const pctNum = parseFloat(pct);
+    if (pctNum >= 60) {
+      cardGrad.addColorStop(0, '#27ae60'); cardGrad.addColorStop(1, '#16a085');
+    } else if (pctNum >= 40) {
+      cardGrad.addColorStop(0, '#f39c12'); cardGrad.addColorStop(1, '#e67e22');
+    } else {
+      cardGrad.addColorStop(0, '#e74c3c'); cardGrad.addColorStop(1, '#c0392b');
+    }
+    ctx.fillStyle = cardGrad;
+    _roundRect(ctx, cardX, cardY, cardW, cardH, 16);
+    ctx.fill();
+
+    // Day 2 big number
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 72px system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(pct + '%', W / 2, cardY + 70);
+
+    ctx.font = 'bold 18px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillText(t('mc.day2Chance').toUpperCase(), W / 2, cardY + 115);
+
+    ctx.font = '14px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.fillText(`${_settings.day2Points} ${t('mc.ptsAbbr')} · ${_settings.rounds} ${t('mc.roundsAbbr')}`, W / 2, cardY + 140);
+
+    // Expected stats
+    const statsY = cardY + cardH + 30;
+    ctx.textBaseline = 'middle';
+    const statBlocks = [
+      { label: t('mc.avgWins'),   val: expWin.toFixed(1),  color: '#2ecc71' },
+      { label: t('mc.avgTies'),   val: expTie.toFixed(1),  color: '#f39c12' },
+      { label: t('mc.avgLosses'), val: expLoss.toFixed(1), color: '#e74c3c' },
+    ];
+    const blockW = W / 3;
+    statBlocks.forEach((b, i) => {
+      const cx = blockW * i + blockW / 2;
+      ctx.fillStyle = b.color;
+      ctx.font = 'bold 24px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(b.val, cx, statsY);
+      ctx.fillStyle = '#9ab1d4';
+      ctx.font = '12px system-ui, sans-serif';
+      ctx.fillText(b.label, cx, statsY + 20);
+    });
+    ctx.textAlign = 'left';
+
+    // Matchups section
+    const secY = HEADER_H + CARD_H + STATS_H;
+    ctx.fillStyle = '#3498db';
+    ctx.font = 'bold 13px system-ui, sans-serif';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(t('mc.encounters').toUpperCase(), 28, secY + 24);
+
+    let y = secY + SECTION_H;
+    topMatchups.forEach((deck, i) => {
+      const isJunk   = deck.name === '_junk';
+      const isCustom = !!deck.isCustom;
+      const m        = getMatchup(_settings.myDeck, deck.name);
+      const wr       = Math.round(m.pWin * 100);
+      const lambda   = _settings.rounds * deck.finalShare / 100;
+
+      if (i % 2 === 0) {
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillRect(16, y, W - 32, ROW_H);
+      }
+
+      // Deck name
+      ctx.fillStyle = isJunk ? '#f39c12' : (isCustom ? '#c39bd3' : '#e2e8f0');
+      ctx.font = '600 16px system-ui, sans-serif';
+      ctx.textBaseline = 'middle';
+      let label = isJunk ? t('mc.junkDecks') : deck.name;
+      if (isCustom) label += ' ★';
+      const maxLabelW = 320;
+      if (ctx.measureText(label).width > maxLabelW) {
+        while (label.length > 4 && ctx.measureText(label + '…').width > maxLabelW) {
+          label = label.slice(0, -1);
+        }
+        label += '…';
+      }
+      ctx.fillText(label, 28, y + ROW_H / 2);
+
+      // Encounters
+      ctx.fillStyle = '#9ab1d4';
+      ctx.font = '14px system-ui, sans-serif';
+      ctx.fillText(`∅ ${lambda.toFixed(2)}`, 360, y + ROW_H / 2);
+
+      // WR bar
+      const wrBarX = 460;
+      const wrBarW = 260;
+      const wrBarH = 10;
+      ctx.fillStyle = 'rgba(255,255,255,0.07)';
+      ctx.fillRect(wrBarX, y + ROW_H / 2 - wrBarH / 2, wrBarW, wrBarH);
+      const wrColor = wr >= 55 ? '#2ecc71' : wr <= 45 ? '#e74c3c' : '#f39c12';
+      ctx.fillStyle = wrColor;
+      ctx.fillRect(wrBarX, y + ROW_H / 2 - wrBarH / 2, wrBarW * Math.max(0, Math.min(1, wr / 100)), wrBarH);
+
+      // WR number
+      ctx.fillStyle = wrColor;
+      ctx.font = 'bold 16px system-ui, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(wr + '%', W - 28, y + ROW_H / 2);
+      ctx.textAlign = 'left';
+
+      y += ROW_H;
+    });
+
+    _paintFooter(ctx, W, H);
+    _shareCanvas(canvas, `metacall-day2-${_formatDateFilename()}.png`,
+      `Meta Call — ${_settings.myDeck}`,
+      `Day 2 chance: ${pct}% · ${_settings.myDeck} vs ${_settings.totalPlayers.toLocaleString()} players`);
+  }
+
+  function _roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y,     x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x,     y + h, r);
+    ctx.arcTo(x,     y + h, x,     y,     r);
+    ctx.arcTo(x,     y,     x + w, y,     r);
+    ctx.closePath();
+  }
+
+  function _formatDateFilename() {
+    const d = new Date();
+    return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
   }
 
   // ── Event Handlers ─────────────────────────────────────────
@@ -963,5 +1312,7 @@ window.MetaCall = (function () {
     _removeCustomDeck,
     _onCustomDeckName,
     _onCustomDeckShare,
+    exportFieldShareImage,
+    exportDay2ShareImage,
   };
 })();

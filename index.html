@@ -1747,27 +1747,33 @@
                                     </ul>
                                     <p><strong>Matchup Analysis (inside Journal):</strong></p>
                                     <ul class="tutorial-tab-info-features-list">
-                                        <li><strong>Heatmap:</strong> 2D win-rate grid — your decks vs all opponents you&rsquo;ve faced. Scrollable horizontally on mobile</li>
-                                        <li><strong>Brick Filter:</strong> Filter the analysis to include Bricks, exclude them, or show only Brick games — isolate skill-based results</li>
+                                        <li><strong>Matchup Overview:</strong> Adaptive display &mdash; with only one personal deck tracked, shows a compact list (opponent name &middot; W-L-T record &middot; color-coded win-rate pill), sorted by most-played first. With 2+ decks <em>and</em> 2+ opponents, switches to a 2D heatmap. Horizontal scroll on mobile</li>
+                                        <li><strong>Brick Filter:</strong> Include bricks, exclude them, or show only brick games &mdash; isolate skill-based results</li>
                                         <li><strong>Bar Charts:</strong> Per-matchup win rates sorted by encounter frequency</li>
+                                        <li><strong>Rankings:</strong> Best and worst matchups at a glance</li>
                                     </ul>
                                 </div>
 
                                 <!-- MetaCall Tab -->
                                 <div class="how-to-use-info-block">
                                     <h3 class="tutorial-tab-title">Meta Call</h3>
-                                    <p><strong>Access:</strong> My Profile → Meta Call tab</p>
-                                    <p><strong>Purpose:</strong> Predict your Day 2 chance at a Swiss tournament based on the current meta field</p>
+                                    <p><strong>Access:</strong> My Profile &rarr; Meta Call tab</p>
+                                    <p><strong>Purpose:</strong> Predict your Day 2 chance at a Swiss tournament by combining the current online meta with your own adjustments.</p>
                                     <p><strong>Features:</strong></p>
                                     <ul class="tutorial-tab-info-features-list">
-                                        <li><strong>Tournament Settings:</strong> Set player count, rounds, Day 2 threshold, and Junk player percentage</li>
-                                        <li><strong>Field Composition:</strong> Shows online meta share for each deck — optionally override with your own estimate. Toggle "Group by Pokémon" to collapse deck variants</li>
-                                        <li><strong>My Deck:</strong> Select your deck to compute Day 2 probability via Markov chain simulation</li>
-                                        <li><strong>Journal Blending:</strong> If you have ≥3 personal games vs a matchup, those are Bayesian-blended with meta data (meta = 30-game weight). A 📓 badge shows how many games influenced each matchup</li>
-                                        <li><strong>Brick Filter:</strong> Exclude Brick matches from journal win rates before blending — isolates skill-based results</li>
-                                        <li><strong>Win Rate Overrides:</strong> Manually override any matchup win rate — takes full priority over meta + journal</li>
+                                        <li><strong>Tournament Settings:</strong> Player count, number of rounds, Day 2 point threshold</li>
+                                        <li><strong>Saved Scenarios:</strong> Save a complete setup (estimates, custom decks, WR overrides, selected deck) under a name &mdash; reload anytime via dropdown. Useful for building multiple tournament prognoses in parallel (e.g. &ldquo;Frankfurt Regional&rdquo;, &ldquo;Nationals 2026&rdquo;)</li>
+                                        <li><strong>Field Composition (Top 12):</strong> The 12 most-played decks by online share with editable &ldquo;My Estimate&rdquo; per deck. All remaining decks are rolled into &ldquo;Others&rdquo; automatically &mdash; total always sums to 100%</li>
+                                        <li><strong>Custom Decks (up to 10):</strong> Add decks you expect locally but aren&rsquo;t in the top 12. Their share is pulled from &ldquo;Others&rdquo;. If the deck name matches an existing archetype, real matchup data loads; unknown names default to 50/50 (adjustable via WR override)</li>
+                                        <li><strong>Group by Pok&eacute;mon:</strong> Collapse variants (e.g. all Dragapult builds) into one expandable row</li>
+                                        <li><strong>My Deck:</strong> Select your deck &mdash; Day 2 probability is computed via Markov-chain simulation over all matchups</li>
+                                        <li><strong>Journal Blending (strict match):</strong> Only applies when the exact same deck name appears in your Battle Journal. Per-opponent win rates are then Bayesian-blended with meta data (meta = 30-game weight). Without a matching journal entry, only online meta data is used</li>
+                                        <li><strong>Brick Filter:</strong> Exclude brick matches from journal win rates before blending</li>
+                                        <li><strong>Win Rate Overrides:</strong> Manually override any matchup &mdash; takes full priority over meta + journal</li>
+                                        <li><strong>Day 2 Chance + Day 1 Win Rate:</strong> Twin display &mdash; Day 2 % (probability of hitting the threshold) next to Day 1 WR (expected average win rate per round)</li>
                                         <li><strong>Point Histogram:</strong> Probability distribution across all possible point totals after N rounds</li>
                                         <li><strong>Encounter List:</strong> Expected encounter frequency per matchup (Poisson approximation)</li>
+                                        <li><strong>Share Image:</strong> Two PNG exports: <em>Field only</em> (no personal data) and <em>My Day 2 prognosis</em> (deck + Day 2 % + Day 1 WR + all matchups). Preview modal with Share, Download, Close buttons &mdash; Share opens the OS dialog (WhatsApp / Discord / ...), Download always saves a file to disk</li>
                                     </ul>
                                 </div>
 
@@ -2230,9 +2236,10 @@
                                     </ul>
                                     <p><strong>Matchup-Analyse (im Journal):</strong></p>
                                     <ul class="de-tab-block-list">
-                                        <li><strong>Heatmap:</strong> 2D-Siegquoten-Raster &mdash; deine Decks gegen alle Gegner. Horizontal scrollbar auf Mobilger&auml;ten</li>
-                                        <li><strong>Brick-Filter:</strong> Analyse nach Bricks filtern &mdash; Bricks einschlie&szlig;en, ausschlie&szlig;en oder nur Brick-Spiele anzeigen. Isoliert f&auml;higkeitsbasierte Ergebnisse</li>
-                                        <li><strong>Balkendiagramme:</strong> Matchup-Siegquoten, sortiert nach H&auml;ufigkeit der Begegnungen</li>
+                                        <li><strong>Matchup-&Uuml;bersicht:</strong> Adaptive Darstellung &mdash; bei nur einem eigenen Deck eine kompakte Liste (Gegner &middot; W-L-T-Record &middot; farbcodierte Win-Rate-Pille), sortiert nach H&auml;ufigkeit. Bei 2+ Decks <em>und</em> 2+ Gegnern wird stattdessen eine 2D-Heatmap angezeigt. Horizontal scrollbar auf Mobile</li>
+                                        <li><strong>Brick-Filter:</strong> Bricks einschlie&szlig;en, ausschlie&szlig;en oder nur Brick-Spiele anzeigen &mdash; isoliert f&auml;higkeitsbasierte Ergebnisse</li>
+                                        <li><strong>Balkendiagramme:</strong> Matchup-Win-Rates nach H&auml;ufigkeit sortiert</li>
+                                        <li><strong>Rankings:</strong> Beste und schlechteste Matchups auf einen Blick</li>
                                     </ul>
                                 </div>
 
@@ -2240,17 +2247,22 @@
                                 <div class="bg-light px-20 br-8 border-left-blue">
                                     <h3 class="color-blue mt-0">Meta Call</h3>
                                     <p><strong>Zugriff:</strong> Mein Profil &rarr; Tab &bdquo;Meta Call&ldquo;</p>
-                                    <p><strong>Zweck:</strong> Day-2-Chance bei einem Swiss-Turnier auf Basis des aktuellen Meta-Felds berechnen</p>
+                                    <p><strong>Zweck:</strong> Day-2-Chance bei einem Swiss-Turnier berechnen &mdash; aus dem aktuellen Online-Meta plus deinen Anpassungen.</p>
                                     <p><strong>Funktionen:</strong></p>
                                     <ul class="de-tab-block-list">
-                                        <li><strong>Turniereinstellungen:</strong> Spieleranzahl, Runden, Day-2-Schwelle und Junk-Spieler-Anteil festlegen</li>
-                                        <li><strong>Feld-Zusammensetzung:</strong> Zeigt den Online-Meta-Anteil je Deck &mdash; optional mit eigener Sch&auml;tzung &uuml;berschreiben. Mit &bdquo;Nach Pok&eacute;mon&ldquo; Varianten zusammenfassen</li>
-                                        <li><strong>Mein Deck:</strong> Eigenes Deck ausw&auml;hlen &mdash; Day-2-Wahrscheinlichkeit per Markov-Ketten-Simulation berechnen</li>
-                                        <li><strong>Journal-Blending:</strong> Bei &ge;3 eigenen Spielen gegen ein Matchup werden diese Bayesianisch mit Meta-Daten gemischt (Meta = Gewicht 30). Ein 📓-Badge zeigt, wie viele Spiele eingeflossen sind</li>
-                                        <li><strong>Brick-Filter:</strong> Brick-Matches aus den Journal-Siegquoten ausschlie&szlig;en &mdash; nur f&auml;higkeitsbasierte Ergebnisse einflie&szlig;en lassen</li>
-                                        <li><strong>Win-Rate-Override:</strong> Matchup-Siegquote manuell &uuml;berschreiben &mdash; hat h&ouml;chste Priorit&auml;t vor Meta + Journal</li>
+                                        <li><strong>Turniereinstellungen:</strong> Spieleranzahl, Runden, Day-2-Punktegrenze</li>
+                                        <li><strong>Szenarien:</strong> Komplette Einstellung (Sch&auml;tzungen, eigene Decks, WR-Overrides, gew&auml;hltes Deck) unter einem Namen speichern &mdash; jederzeit per Dropdown wieder laden. N&uuml;tzlich um mehrere Turnierprognosen parallel zu pflegen (z.B. &bdquo;Frankfurt Regional&ldquo;, &bdquo;Nationals 2026&ldquo;)</li>
+                                        <li><strong>Feld-Zusammensetzung (Top 12):</strong> Die 12 meist-gespielten Decks nach Online-Share mit editierbarem &bdquo;Meine Sch&auml;tzung&ldquo;. Alle &uuml;brigen Decks werden automatisch zu &bdquo;Others&ldquo; zusammengefasst &mdash; Summe bleibt immer 100%</li>
+                                        <li><strong>Eigene Decks (bis zu 10):</strong> Decks hinzuf&uuml;gen die du lokal erwartest aber nicht in den Top 12 sind. Ihr Anteil wird von &bdquo;Others&ldquo; abgezogen. Bei bekanntem Deck-Namen werden echte Matchup-Daten geladen; unbekannte Namen defaulten auf 50/50 (per WR-Override anpassbar)</li>
+                                        <li><strong>Nach Pok&eacute;mon:</strong> Varianten (z.B. alle Dragapult-Builds) in einer aufklappbaren Zeile zusammenfassen</li>
+                                        <li><strong>Mein Deck:</strong> Eigenes Deck ausw&auml;hlen &mdash; Day-2-Wahrscheinlichkeit per Markov-Ketten-Simulation &uuml;ber alle Matchups</li>
+                                        <li><strong>Journal-Blending (strikter Match):</strong> Nur wenn der <em>exakt</em> gleiche Deckname in deinem Battle Journal vorkommt werden die Win-Rates pro Gegner Bayesianisch mit den Meta-Daten gemischt (Meta = Gewicht 30). Ohne passenden Journal-Eintrag werden ausschlie&szlig;lich Online-Meta-Daten verwendet</li>
+                                        <li><strong>Brick-Filter:</strong> Brick-Matches aus den Journal-Siegquoten ausschlie&szlig;en</li>
+                                        <li><strong>Win-Rate-Override:</strong> Matchup-Win-Rate manuell &uuml;berschreiben &mdash; hat h&ouml;chste Priorit&auml;t vor Meta + Journal</li>
+                                        <li><strong>Day-2-Chance + Day-1-Winrate:</strong> Zwillings-Anzeige &mdash; Day-2-% (Wahrscheinlichkeit die Punktegrenze zu erreichen) neben der Day-1-Winrate (erwartete durchschnittliche Siegquote pro Runde)</li>
                                         <li><strong>Punkte-Histogramm:</strong> Wahrscheinlichkeitsverteilung &uuml;ber alle m&ouml;glichen Punktest&auml;nde nach N Runden</li>
                                         <li><strong>Begegnungsliste:</strong> Erwartete Begegnungsh&auml;ufigkeit pro Matchup (Poisson-N&auml;herung)</li>
+                                        <li><strong>Bild teilen:</strong> Zwei PNG-Exporte: <em>Nur Feld</em> (ohne pers&ouml;nliche Daten) und <em>Meine Day-2-Prognose</em> (Deck + Day-2-% + Day-1-WR + alle Matchups). Vorschau-Modal mit Teilen / Herunterladen / Schlie&szlig;en &mdash; Teilen &ouml;ffnet den OS-Share-Dialog (WhatsApp / Discord / &hellip;), Herunterladen speichert direkt als Datei</li>
                                     </ul>
                                 </div>
 

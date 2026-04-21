@@ -18,8 +18,10 @@ window.MetaCall = (function () {
   };
 
   let _personalShares   = {};  // deckName -> % estimate
-  let _winRateOverrides = {};  // deckName -> 0-100
-  let _journalRateKeys  = [];  // opponent names whose override came from Battle Journal
+  let _winRateOverrides = {};  // deckName -> 0-100 (manual user overrides only)
+  let _journalRateKeys  = [];  // opponents with 3+ journal games (for badge display)
+  let _journalStats     = {};  // opponent -> {wins, losses, ties, total, winRate}
+  let _groupByMain      = false; // group field table by main pokemon
 
   // ── CSV Helper ─────────────────────────────────────────────
   function parseCSV(text, sep) {
@@ -42,15 +44,19 @@ window.MetaCall = (function () {
     return parseFloat((str || '0').replace(',', '.')) || 0;
   }
 
+  // Extract "main pokemon" = first segment before " / "
+  function extractMainPokemon(name) {
+    if (!name || name === '_junk') return name;
+    return name.split(/\s*\/\s*/)[0].trim();
+  }
+
   // ── Data Loading ───────────────────────────────────────────
   async function loadData() {
     if (_matchupMap && _shareList) return true;
     try {
-      // 1) Share data
       const shareResp = await fetch('data/limitless_online_decks_comparison.csv?t=' + Date.now());
       if (!shareResp.ok) throw new Error('share CSV not found');
-      const shareText = await shareResp.text();
-      const shareRows = parseCSV(shareText, ';');
+      const shareRows = parseCSV(await shareResp.text(), ';');
 
       _shareList = shareRows
         .filter(r => r.deck_name && (r.new_share || r.old_share))
@@ -61,11 +67,9 @@ window.MetaCall = (function () {
         .filter(d => d.onlineShare > 0)
         .sort((a, b) => b.onlineShare - a.onlineShare);
 
-      // 2) Matchup data
       const matchResp = await fetch('data/limitless_online_decks_matchups.csv?t=' + Date.now());
       if (!matchResp.ok) throw new Error('matchup CSV not found');
-      const matchText = await matchResp.text();
-      const matchRows = parseCSV(matchText, ';');
+      const matchRows = parseCSV(await matchResp.text(), ';');
 
       _matchupMap = {};
       matchRows.forEach(r => {
@@ -73,7 +77,6 @@ window.MetaCall = (function () {
         const dk = normalize(r.deck_name);
         const ok = normalize(r.opponent);
         if (!_matchupMap[dk]) _matchupMap[dk] = {};
-
         let pWin, pTie, pLoss;
         if (r.record && r.record.includes('-')) {
           const parts = r.record.split(/\s*-\s*/).map(s => parseInt(s.trim(), 10));
@@ -84,12 +87,11 @@ window.MetaCall = (function () {
           pLoss = tot > 0 ? L / tot : 0.48;
         } else {
           pWin  = parseEU(r.win_rate) / 100;
-          pTie = 0.02;
+          pTie  = 0.02;
           pLoss = Math.max(0, 1 - pWin - pTie);
         }
         _matchupMap[dk][ok] = { pWin, pTie, pLoss };
       });
-
       return true;
     } catch (e) {
       console.error('[MetaCall] Data load error:', e);
@@ -97,26 +99,38 @@ window.MetaCall = (function () {
     }
   }
 
-  // ── Matchup Lookup ─────────────────────────────────────────
+  // ── Matchup Lookup with Journal Blending ───────────────────
   function getMatchup(myDeck, opponent) {
     if (opponent === '_junk') {
       const wr = _settings.junkWinRate / 100;
       return { pWin: wr, pTie: 0.02, pLoss: Math.max(0, 1 - wr - 0.02) };
     }
+    // Manual override (user-entered) takes top priority
     const ov = _winRateOverrides[opponent];
     if (ov !== undefined && ov !== '') {
       const pWin = Math.min(0.98, Math.max(0, ov / 100));
-      const pTie = 0.02;
-      return { pWin, pTie, pLoss: Math.max(0, 1 - pWin - pTie) };
+      return { pWin, pTie: 0.02, pLoss: Math.max(0, 1 - pWin - 0.02) };
     }
+    // Base meta rate
     const mk = normalize(myDeck);
     const ok = normalize(opponent);
     const hit = _matchupMap?.[mk]?.[ok];
-    if (hit) return hit;
-    // symmetric fallback
-    const rev = _matchupMap?.[ok]?.[mk];
-    if (rev) return { pWin: rev.pLoss, pTie: rev.pTie, pLoss: rev.pWin };
-    return { pWin: 0.50, pTie: 0.02, pLoss: 0.48 };
+    const rev = !hit ? _matchupMap?.[ok]?.[mk] : null;
+    const metaBase = hit ? hit
+      : rev ? { pWin: rev.pLoss, pTie: rev.pTie, pLoss: rev.pWin }
+      : { pWin: 0.50, pTie: 0.02, pLoss: 0.48 };
+
+    // Bayesian blend with journal data (meta treated as 30-game prior)
+    const js = _journalStats[opponent];
+    if (js && js.total >= 1) {
+      const META_CONFIDENCE = 30;
+      const journalWR   = js.wins / js.total;
+      const totalWeight = META_CONFIDENCE + js.total;
+      const blendedWin  = (metaBase.pWin * META_CONFIDENCE + journalWR * js.total) / totalWeight;
+      const pTie        = metaBase.pTie;
+      return { pWin: blendedWin, pTie, pLoss: Math.max(0, 1 - blendedWin - pTie) };
+    }
+    return metaBase;
   }
 
   // ── Field Composition ──────────────────────────────────────
@@ -124,23 +138,19 @@ window.MetaCall = (function () {
     if (!_shareList) return [];
     const junkPct   = Math.max(0, Math.min(90, _settings.junkPct || 0));
     const metaScale = (100 - junkPct) / 100;
-
-    // Normalise online shares to 100%
     const totalOnline = _shareList.reduce((s, d) => s + d.onlineShare, 0) || 1;
 
     const field = _shareList.map(deck => {
-      const normOnline  = (deck.onlineShare / totalOnline) * 100;
-      const personal    = _personalShares[deck.name];
-      const finalNorm   = personal !== undefined
-        ? (normOnline + personal) / 2
-        : normOnline;
-      const finalShare  = finalNorm * metaScale;
+      const normOnline = (deck.onlineShare / totalOnline) * 100;
+      const personal   = _personalShares[deck.name];
+      const finalNorm  = personal !== undefined ? (normOnline + personal) / 2 : normOnline;
+      const finalShare = finalNorm * metaScale;
       return {
-        name        : deck.name,
-        onlineShare : normOnline,
+        name         : deck.name,
+        onlineShare  : normOnline,
         personalShare: personal,
         finalShare,
-        count       : Math.round(_settings.totalPlayers * finalShare / 100),
+        count        : Math.round(_settings.totalPlayers * finalShare / 100),
       };
     });
 
@@ -155,6 +165,23 @@ window.MetaCall = (function () {
       });
     }
     return field;
+  }
+
+  // Group field entries by main pokemon
+  function buildGroups(field) {
+    const groups = {}, order = [];
+    field.forEach(deck => {
+      const main = extractMainPokemon(deck.name);
+      if (!groups[main]) { groups[main] = []; order.push(main); }
+      groups[main].push(deck);
+    });
+    return order.map(main => ({
+      main,
+      variants   : groups[main],
+      totalShare : groups[main].reduce((s, d) => s + d.finalShare, 0),
+      totalOnline: groups[main].reduce((s, d) => s + d.onlineShare, 0),
+      totalCount : groups[main].reduce((s, d) => s + d.count, 0),
+    }));
   }
 
   // ── Markov Chain – Day 2 Probability ──────────────────────
@@ -184,7 +211,6 @@ window.MetaCall = (function () {
     let day2Prob = 0;
     for (let pt = day2Points; pt <= maxPts; pt++) day2Prob += dp[pt];
 
-    // Expected W / D / L
     let expWin = 0, expTie = 0, expLoss = 0;
     for (const deck of field) {
       const share = deck.finalShare / 100;
@@ -193,7 +219,6 @@ window.MetaCall = (function () {
       expTie  += rounds * share * pTie;
       expLoss += rounds * share * pLoss;
     }
-
     return { day2Prob, dp, expWin, expTie, expLoss };
   }
 
@@ -256,47 +281,102 @@ window.MetaCall = (function () {
 </div>`;
   }
 
-  function renderFieldPanel(field) {
-    const maxShare = Math.max(...field.map(d => d.finalShare), 0.1);
-    const rows = field.map(deck => {
-      const isJunk   = deck.name === '_junk';
-      const label    = isJunk ? 'Junk Decks' : esc(deck.name);
-      const lambda   = _settings.rounds * deck.finalShare / 100;
-      const hasPersonal = deck.personalShare !== undefined;
-      const encLabel = lambda.toFixed(2);
-      const barW     = Math.round((deck.finalShare / maxShare) * 100);
-
-      const onlineCell   = `<span class="mc-share-online">${deck.onlineShare.toFixed(2)}%</span>`;
-      const personalCell = isJunk
-        ? '<span style="color:#aaa">—</span>'
-        : `<input type="number" min="0" max="100" step="0.1" placeholder="—"
-                  value="${hasPersonal ? deck.personalShare : ''}"
-                  class="mc-personal-input"
-                  data-deck="${esc(deck.name)}"
-                  oninput="MetaCall._onPersonalShare('${esc(deck.name)}', this.value)"
-                  style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
-      const finalCell = `<span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span>`;
-      const encCell   = `
+  function _renderFlatDeckRow(deck, maxShare) {
+    const isJunk      = deck.name === '_junk';
+    const label       = isJunk ? 'Junk Decks' : esc(deck.name);
+    const lambda      = _settings.rounds * deck.finalShare / 100;
+    const hasPersonal = deck.personalShare !== undefined;
+    const barW        = Math.round((deck.finalShare / maxShare) * 100);
+    const personalCell = isJunk
+      ? '<span style="color:#aaa">—</span>'
+      : `<input type="number" min="0" max="100" step="0.1" placeholder="—"
+                value="${hasPersonal ? deck.personalShare : ''}"
+                class="mc-personal-input" data-deck="${esc(deck.name)}"
+                oninput="MetaCall._onPersonalShare('${esc(deck.name)}', this.value)"
+                style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
+    return `<tr class="${isJunk ? 'mc-row-junk' : ''}">
+      <td><span class="mc-deck-name">${label}</span></td>
+      <td><span class="mc-share-online">${deck.onlineShare.toFixed(2)}%</span></td>
+      <td>${personalCell}</td>
+      <td><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
+      <td><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
+      <td>
         <div class="mc-encounters-bar">
           <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
-          <span class="mc-encounters-label">∅ ${encLabel}</span>
-        </div>`;
+          <span class="mc-encounters-label">∅ ${lambda.toFixed(2)}</span>
+        </div>
+      </td>
+    </tr>`;
+  }
 
-      return `<tr class="${isJunk ? 'mc-row-junk' : ''}">
-        <td><span class="mc-deck-name">${label}</span></td>
-        <td>${onlineCell}</td>
-        <td>${personalCell}</td>
-        <td>${finalCell}</td>
-        <td><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
-        <td>${encCell}</td>
-      </tr>`;
-    }).join('');
+  function renderFieldPanel(field) {
+    let rows;
+    if (_groupByMain) {
+      const groups  = buildGroups(field);
+      const maxShare = Math.max(...groups.map(g => g.totalShare), 0.1);
+      rows = groups.map((group, gi) => {
+        if (group.variants.length === 1) {
+          return _renderFlatDeckRow(group.variants[0], maxShare);
+        }
+        const gid    = `mcg-${gi}`;
+        const lambda = _settings.rounds * group.totalShare / 100;
+        const barW   = Math.round((group.totalShare / maxShare) * 100);
+        const header = `
+<tr class="mc-group-header" onclick="MetaCall._toggleGroup('${gid}')">
+  <td>
+    <span class="mc-group-arrow" id="mc-gt-${gid}">▶</span>
+    <span class="mc-deck-name">${esc(group.main)}</span>
+    <span class="mc-group-count">${group.variants.length} Varianten</span>
+  </td>
+  <td><span class="mc-share-online">${group.totalOnline.toFixed(2)}%</span></td>
+  <td><span style="color:#aaa">—</span></td>
+  <td><span class="mc-share-final">${group.totalShare.toFixed(2)}%</span></td>
+  <td><span class="mc-players-count">${group.totalCount.toLocaleString()}</span></td>
+  <td>
+    <div class="mc-encounters-bar">
+      <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%"></div></div>
+      <span class="mc-encounters-label">∅ ${lambda.toFixed(2)}</span>
+    </div>
+  </td>
+</tr>`;
+        const details = group.variants.map(deck => {
+          const hasP   = deck.personalShare !== undefined;
+          const dLam   = _settings.rounds * deck.finalShare / 100;
+          const dBarW  = Math.round((deck.finalShare / maxShare) * 100);
+          const pCell  = `<input type="number" min="0" max="100" step="0.1" placeholder="—"
+                            value="${hasP ? deck.personalShare : ''}"
+                            class="mc-personal-input" data-deck="${esc(deck.name)}"
+                            oninput="MetaCall._onPersonalShare('${esc(deck.name)}', this.value)"
+                            style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
+          return `<tr class="mc-group-detail mc-group-hidden" data-group="${gid}">
+            <td style="padding-left:26px"><span class="mc-deck-name mc-variant-name">${esc(deck.name)}</span></td>
+            <td><span class="mc-share-online">${deck.onlineShare.toFixed(2)}%</span></td>
+            <td>${pCell}</td>
+            <td><span class="mc-share-final${hasP ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
+            <td><span class="mc-players-count">${deck.count.toLocaleString()}</span></td>
+            <td>
+              <div class="mc-encounters-bar">
+                <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${dBarW}%"></div></div>
+                <span class="mc-encounters-label">∅ ${dLam.toFixed(2)}</span>
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+        return header + details;
+      }).join('');
+    } else {
+      const maxShare = Math.max(...field.map(d => d.finalShare), 0.1);
+      rows = field.map(deck => _renderFlatDeckRow(deck, maxShare)).join('');
+    }
 
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">
     Feld-Zusammensetzung
     <span class="mc-badge">${_settings.totalPlayers.toLocaleString()} Spieler</span>
+    <button class="mc-group-toggle-btn" onclick="MetaCall._toggleGroupField()">
+      ${_groupByMain ? 'Flache Ansicht' : 'Nach Pokémon'}
+    </button>
   </div>
   <p style="font-size:0.8rem;color:#888;margin:-8px 0 12px">
     „Meine Schätzung" optional — wird mit dem Online-Share gemittelt.
@@ -320,7 +400,7 @@ window.MetaCall = (function () {
   }
 
   function renderMyDeckPanel() {
-    const decks = (_shareList || []).map(d => d.name);
+    const decks   = (_shareList || []).map(d => d.name);
     const options = decks.map(n =>
       `<option value="${esc(n)}" ${n === _settings.myDeck ? 'selected' : ''}>${esc(n)}</option>`
     ).join('');
@@ -358,9 +438,12 @@ window.MetaCall = (function () {
       const wr  = Math.round(m.pWin * 100);
       const ind = wr >= 55 ? 'favorable' : wr <= 45 ? 'unfavorable' : 'even';
       const lbl = wr >= 55 ? 'Vorteil' : wr <= 45 ? 'Nachteil' : 'Even';
-      const ov         = _winRateOverrides[deck.name];
+      const ov  = _winRateOverrides[deck.name];
+      const js  = _journalStats[deck.name];
       const fromJournal = _journalRateKeys.includes(deck.name);
-      const badge       = fromJournal ? ' <span title="Aus Battle Journal" style="font-size:0.68rem;background:#e8f4fd;color:#2980b9;border-radius:4px;padding:1px 5px;font-weight:700;">Journal</span>' : '';
+      const badge = fromJournal && js
+        ? ` <span class="mc-journal-badge-inline" title="${js.total} pers. Spiele · Bayesian Blending">📓 ${js.total} Spiele</span>`
+        : '';
       return `<tr>
         <td style="font-size:0.85rem;font-weight:600">${esc(deck.name)}${badge}</td>
         <td><span class="mc-wr-meta">${wr}%</span></td>
@@ -375,11 +458,11 @@ window.MetaCall = (function () {
 
     return `
 <p style="font-size:0.78rem;color:#888;margin:10px 0 8px">
-  Eigene Win-Rate eintragen um Meta-Daten zu überschreiben (leer = Meta-Daten).
+  Manuelle WR überschreibt alles. Leer = Meta + Journal werden automatisch gemischt.
 </p>
 <table class="mc-override-table">
   <thead>
-    <tr><th>Gegner</th><th>Meta-WR</th><th>Indikator</th><th>Meine WR</th></tr>
+    <tr><th>Gegner</th><th>WR (gemischt)</th><th>Indikator</th><th>Manuelle WR</th></tr>
   </thead>
   <tbody>${rows}</tbody>
 </table>`;
@@ -400,22 +483,32 @@ window.MetaCall = (function () {
     const cls    = day2Prob >= 0.6 ? '' : day2Prob >= 0.4 ? ' pct-mid' : ' pct-low';
     const maxPts = _settings.rounds * 3;
 
+    // Journal influence summary
+    const journalOpps = Object.keys(_journalStats).filter(opp => (_journalStats[opp] || {}).total > 0);
+    const totalJGames = journalOpps.reduce((s, opp) => s + (_journalStats[opp].total || 0), 0);
+    const journalBadge = journalOpps.length > 0 ? `
+<div class="mc-journal-influence">
+  <span class="mc-ji-icon">📓</span>
+  <div>
+    <strong>Journal-Einfluss aktiv:</strong> ${journalOpps.length} Matchups · ${totalJGames} persönliche Spiele fließen ein
+    <span class="mc-ji-hint"> (Meta = 30 Gewicht · Journal = Spielanzahl)</span>
+  </div>
+</div>` : '';
+
     // Points histogram
-    const maxProb = Math.max(...dp, 0.001);
+    const maxProb  = Math.max(...dp, 0.001);
     const histBars = Array.from(dp).map((prob, pts) => {
-      const h    = Math.round((prob / maxProb) * 100);
-      const cls  = pts >= _settings.day2Points ? 'above-threshold' : 'below-threshold';
-      const lbl  = pts % 3 === 0 ? pts : '';
+      const h   = Math.round((prob / maxProb) * 100);
+      const cls = pts >= _settings.day2Points ? 'above-threshold' : 'below-threshold';
+      const lbl = pts % 3 === 0 ? pts : '';
       return `<div class="mc-hist-bar-wrap">
         <div class="mc-hist-bar ${cls}" style="height:${h}%"></div>
         <div class="mc-hist-label">${lbl}</div>
       </div>`;
     }).join('');
 
-    // Threshold line position (approx)
     const thresholdPct = (_settings.day2Points / maxPts * 100).toFixed(1);
 
-    // Matchup encounter breakdown (top 10 by finalShare)
     const topDecks = [...field].sort((a, b) => b.finalShare - a.finalShare).slice(0, 12);
     const maxEnc   = Math.max(...topDecks.map(d => _settings.rounds * d.finalShare / 100), 0.1);
     const encRows  = topDecks.map(deck => {
@@ -427,9 +520,13 @@ window.MetaCall = (function () {
       const name   = deck.name === '_junk' ? 'Junk' : deck.name;
       const p1     = poissonP(1, lambda) * 100;
       const p2     = poissonP(2, lambda) * 100;
+      const js     = _journalStats[deck.name];
+      const jTag   = js && js.total > 0
+        ? `<span class="mc-enc-journal-tag" title="${js.total} pers. Spiele · blended">📓${js.total}</span>`
+        : '';
       return `<div class="mc-encounter-row">
         <div>
-          <div class="mc-enc-name" title="${esc(deck.name)}">${esc(name)}</div>
+          <div class="mc-enc-name" title="${esc(deck.name)}">${esc(name)}${jTag}</div>
           <div class="mc-enc-wr ${wrCls}">WR ${wrPct}% · P(1×) ${p1.toFixed(0)}% · P(2×) ${p2.toFixed(0)}%</div>
         </div>
         <div class="mc-enc-bar-bg"><div class="mc-enc-bar-fill" style="width:${barW}%"></div></div>
@@ -440,6 +537,7 @@ window.MetaCall = (function () {
     return `
 <div class="metacall-panel">
   <div class="metacall-panel-title">Ergebnis</div>
+  ${journalBadge}
   <div class="metacall-results-grid">
 
     <div class="mc-day2-card">
@@ -506,15 +604,13 @@ window.MetaCall = (function () {
     const container = document.getElementById('profile-metacall');
     if (!container || !_shareList) return;
     const field = buildField();
-    // Re-render field rows (encounter bars change with settings)
-    const fieldPanel = container.querySelector('.metacall-table tbody');
-    if (fieldPanel) {
+    const fieldTbody = container.querySelector('.metacall-table tbody');
+    if (fieldTbody) {
       const tmp = document.createElement('div');
       tmp.innerHTML = renderFieldPanel(field);
       const newTbody = tmp.querySelector('tbody');
-      if (newTbody) fieldPanel.innerHTML = newTbody.innerHTML;
+      if (newTbody) fieldTbody.innerHTML = newTbody.innerHTML;
     }
-    // Re-render results
     const resultsPanel = container.querySelector('.metacall-results-grid');
     const resultsWrap  = resultsPanel ? resultsPanel.closest('.metacall-panel') : null;
     if (resultsWrap) {
@@ -524,7 +620,7 @@ window.MetaCall = (function () {
     }
   }
 
-  // ── Event Handlers (called from inline onclick) ────────────
+  // ── Event Handlers ─────────────────────────────────────────
   function _onSetting(key, val) {
     if (isNaN(val) || val <= 0) return;
     _settings[key] = val;
@@ -543,15 +639,15 @@ window.MetaCall = (function () {
   function _onMyDeck(val) {
     _settings.myDeck = val;
     _winRateOverrides = {};
-    // Auto-populate overrides from Battle Journal if data exists
+    _journalStats     = {};
+    _journalRateKeys  = [];
     if (val && typeof window.getBattleJournalWinRates === 'function') {
-      const journalRates = window.getBattleJournalWinRates(val, 3);
-      Object.keys(journalRates).forEach(function(opp) {
-        _winRateOverrides[opp] = journalRates[opp].winRate;
+      // Load all journal data (min 1 game) for blending; badge threshold = 3
+      const rates = window.getBattleJournalWinRates(val, 1);
+      Object.keys(rates).forEach(opp => {
+        _journalStats[opp] = rates[opp];
+        if (rates[opp].total >= 3) _journalRateKeys.push(opp);
       });
-      _journalRateKeys = Object.keys(journalRates); // track which came from journal
-    } else {
-      _journalRateKeys = [];
     }
     renderAll();
   }
@@ -563,7 +659,6 @@ window.MetaCall = (function () {
     } else {
       _personalShares[deckName] = Math.max(0, Math.min(100, num));
     }
-    // Defer full re-render slightly for typing UX
     clearTimeout(_personalShares.__timer);
     _personalShares.__timer = setTimeout(renderAll, 600);
   }
@@ -588,6 +683,22 @@ window.MetaCall = (function () {
     if (open && _settings.myDeck) panel.innerHTML = renderOverrideTable();
   }
 
+  // Expand/collapse a pokemon variant group in the field table
+  function _toggleGroup(gid) {
+    const rows   = document.querySelectorAll(`.mc-group-detail[data-group="${gid}"]`);
+    const arrow  = document.getElementById(`mc-gt-${gid}`);
+    if (!rows.length) return;
+    const opening = rows[0].classList.contains('mc-group-hidden');
+    rows.forEach(r => r.classList.toggle('mc-group-hidden', !opening));
+    if (arrow) arrow.textContent = opening ? '▼' : '▶';
+  }
+
+  // Toggle flat ↔ grouped field view
+  function _toggleGroupField() {
+    _groupByMain = !_groupByMain;
+    renderAll();
+  }
+
   // ── Public Init ────────────────────────────────────────────
   async function init() {
     const container = document.getElementById('profile-metacall');
@@ -610,7 +721,6 @@ window.MetaCall = (function () {
     renderAll();
   }
 
-  // Expose handlers to global scope (called from inline onclick)
   return {
     init,
     _onSetting,
@@ -619,5 +729,7 @@ window.MetaCall = (function () {
     _onPersonalShare,
     _onWrOverride,
     _toggleOverrides,
+    _toggleGroup,
+    _toggleGroupField,
   };
 })();

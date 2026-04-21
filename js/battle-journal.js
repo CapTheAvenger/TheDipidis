@@ -1930,14 +1930,18 @@
     function getBattleJournalWinRates(ownDeck, minGames, options) {
         minGames = minGames || 1;
         const excludeBricks = (options && options.excludeBricks) || false;
+        // Strict match: the journal entry's ownDeck must equal the selected deck
+        // (after lowercase+trim). Prior loose startsWith matching leaked data
+        // between similar names (e.g. "Lucario" vs "Lucario Hariyama").
         const normOwn = (ownDeck || '').toLowerCase().trim();
+        if (!normOwn) return {};
         const all = Array.isArray(journalHistoryCache) ? journalHistoryCache : [];
         const matchups = {};
         all.forEach(function(e) {
             if (!e || !e.opponentArchetype) return;
             if (excludeBricks && e.brick) return;
             const entryDeck = (e.ownDeck || '').toLowerCase().trim();
-            if (!entryDeck || (entryDeck !== normOwn && !entryDeck.startsWith(normOwn) && !normOwn.startsWith(entryDeck))) return;
+            if (entryDeck !== normOwn) return;
             const opp = e.opponentArchetype;
             if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0 };
             matchups[opp].total++;

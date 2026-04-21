@@ -27,7 +27,7 @@ window.MetaCall = (function () {
   let _currentScenarioName = ''; // name of the currently loaded saved scenario
 
   const TOP_N = 12;              // show top N decks; everything else rolls into Junk
-  const MAX_CUSTOM = 3;          // max custom decks the user can add
+  const MAX_CUSTOM = 10;         // max custom decks the user can add
   const SCENARIOS_STORAGE_KEY = 'metacall_scenarios_v1';
 
   // ── CSV Helper ─────────────────────────────────────────────
@@ -803,21 +803,12 @@ window.MetaCall = (function () {
   // Both use the Web Share API on mobile (navigator.share with files),
   // falling back to PNG download on desktop.
 
-  function _shareCanvas(canvas, filename, title, text) {
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-      const file = new File([blob], filename, { type: 'image/png' });
+  // Actual share/download action (called from the preview modal).
+  function _shareOrDownloadBlob(blob, filename, title, text) {
+    if (!blob) return;
+    const file = new File([blob], filename, { type: 'image/png' });
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title, text });
-          return;
-        } catch (err) {
-          if (err && err.name === 'AbortError') return;
-          // fall through to download
-        }
-      }
-
+    const doDownload = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -826,7 +817,59 @@ window.MetaCall = (function () {
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }, 'image/png');
+    };
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title, text }).catch(err => {
+        if (err && err.name === 'AbortError') return;
+        doDownload();
+      });
+    } else {
+      doDownload();
+    }
+  }
+
+  // Show a preview modal with the generated image, then let the user
+  // decide to share/download or just close. Matches the user flow:
+  // "erst das Bild selbst sehen, dann teilen".
+  function _showSharePreview(canvas, filename, title, text) {
+    const dataUrl = canvas.toDataURL('image/png');
+
+    // Remove any existing preview first
+    const old = document.getElementById('mc-share-preview-modal');
+    if (old) old.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'mc-share-preview-modal';
+    modal.className = 'mc-share-preview-modal';
+    modal.innerHTML = `
+      <div class="mc-share-preview-backdrop"></div>
+      <div class="mc-share-preview-content" role="dialog" aria-modal="true">
+        <div class="mc-share-preview-header">
+          <h3>${esc(t('mc.sharePreviewTitle'))}</h3>
+          <button type="button" class="mc-share-preview-close" aria-label="${esc(t('mc.close'))}">×</button>
+        </div>
+        <div class="mc-share-preview-body">
+          <img src="${dataUrl}" alt="Meta Call share preview" class="mc-share-preview-img">
+        </div>
+        <div class="mc-share-preview-actions">
+          <button type="button" class="mc-share-preview-btn-share">📤 ${esc(t('mc.share'))}</button>
+          <button type="button" class="mc-share-preview-btn-secondary">${esc(t('mc.close'))}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const close = () => { modal.remove(); };
+    modal.querySelector('.mc-share-preview-backdrop').addEventListener('click', close);
+    modal.querySelector('.mc-share-preview-close').addEventListener('click', close);
+    modal.querySelector('.mc-share-preview-btn-secondary').addEventListener('click', close);
+
+    modal.querySelector('.mc-share-preview-btn-share').addEventListener('click', () => {
+      canvas.toBlob(blob => {
+        _shareOrDownloadBlob(blob, filename, title, text);
+        close();
+      }, 'image/png');
+    });
   }
 
   // Shared canvas helpers
@@ -873,7 +916,10 @@ window.MetaCall = (function () {
   // ── A) Field Composition Share Image ─────────────────────
   function exportFieldShareImage() {
     if (!_shareList) return;
-    const field = buildField();
+    // Sort descending by final share so the image matches the user's mental
+    // hierarchy (biggest expected presence first). Custom decks and junk mix
+    // into the list based on their share, not appended at the end.
+    const field = [...buildField()].sort((a, b) => b.finalShare - a.finalShare);
     if (!field.length) return;
 
     const W = 860;
@@ -962,7 +1008,7 @@ window.MetaCall = (function () {
     });
 
     _paintFooter(ctx, W, H);
-    _shareCanvas(canvas, `metacall-field-${_formatDateFilename()}.png`,
+    _showSharePreview(canvas, `metacall-field-${_formatDateFilename()}.png`,
       'Meta Call — Field Composition',
       `Meta share prognosis for ${_settings.totalPlayers.toLocaleString()} players · ${_settings.rounds} rounds`);
   }
@@ -975,11 +1021,11 @@ window.MetaCall = (function () {
 
     const { day2Prob, expWin, expTie, expLoss } = calcDay2(field);
     const pct = (day2Prob * 100).toFixed(1);
+    const day1WR = _settings.rounds > 0 ? (expWin / _settings.rounds) * 100 : 0;
 
-    // Top matchups by expected encounter (Poisson λ)
-    const topMatchups = [...field]
-      .sort((a, b) => b.finalShare - a.finalShare)
-      .slice(0, 10);
+    // ALL matchups (sorted desc by final share), not just the top 10 —
+    // user wants the full picture visible.
+    const matchups = [...field].sort((a, b) => b.finalShare - a.finalShare);
 
     const W = 860;
     const ROW_H = 44;
@@ -988,7 +1034,7 @@ window.MetaCall = (function () {
     const STATS_H = 50;
     const SECTION_H = 48;
     const FOOTER_H = 50;
-    const H = HEADER_H + CARD_H + STATS_H + SECTION_H + topMatchups.length * ROW_H + 28 + FOOTER_H;
+    const H = HEADER_H + CARD_H + STATS_H + SECTION_H + matchups.length * ROW_H + 28 + FOOTER_H;
 
     const canvas = document.createElement('canvas');
     canvas.width = W;
@@ -999,10 +1045,10 @@ window.MetaCall = (function () {
     _paintHeader(ctx, W, 'META CALL',
       `${_settings.myDeck} · ${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')} · ${_settings.rounds} ${t('mc.roundsAbbr')}`);
 
-    // Day 2 big card
+    // Day 2 / Day 1 WR twin card
     const cardY = HEADER_H + 10;
-    const cardX = (W - 480) / 2;
-    const cardW = 480;
+    const cardX = (W - 620) / 2;
+    const cardW = 620;
     const cardH = 170;
 
     const cardGrad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY + cardH);
@@ -1018,20 +1064,38 @@ window.MetaCall = (function () {
     _roundRect(ctx, cardX, cardY, cardW, cardH, 16);
     ctx.fill();
 
-    // Day 2 big number
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 72px system-ui, -apple-system, sans-serif';
+    // Vertical divider between the two halves
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.fillRect(cardX + cardW / 2 - 1, cardY + 28, 2, cardH - 56);
+
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(pct + '%', W / 2, cardY + 70);
 
-    ctx.font = 'bold 18px system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fillText(t('mc.day2Chance').toUpperCase(), W / 2, cardY + 115);
+    // LEFT: Day 2 chance
+    const leftCx = cardX + cardW / 4;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 58px system-ui, -apple-system, sans-serif';
+    ctx.fillText(pct + '%', leftCx, cardY + 66);
+    ctx.font = 'bold 14px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillText(t('mc.day2Chance').toUpperCase(), leftCx, cardY + 108);
+    ctx.font = '13px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.78)';
+    ctx.fillText(`${_settings.day2Points} ${t('mc.ptsAbbr')} · ${_settings.rounds} ${t('mc.roundsAbbr')}`, leftCx, cardY + 132);
 
-    ctx.font = '14px system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.75)';
-    ctx.fillText(`${_settings.day2Points} ${t('mc.ptsAbbr')} · ${_settings.rounds} ${t('mc.roundsAbbr')}`, W / 2, cardY + 140);
+    // RIGHT: Day 1 avg win rate
+    const rightCx = cardX + cardW * 3 / 4;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 58px system-ui, -apple-system, sans-serif';
+    ctx.fillText(day1WR.toFixed(1) + '%', rightCx, cardY + 66);
+    ctx.font = 'bold 14px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillText(t('mc.day1WinRate').toUpperCase(), rightCx, cardY + 108);
+    ctx.font = '13px system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.78)';
+    ctx.fillText(t('mc.day1WinRateSub').replace('{r}', _settings.rounds), rightCx, cardY + 132);
+
+    ctx.textAlign = 'left';
 
     // Expected stats
     const statsY = cardY + cardH + 30;
@@ -1062,7 +1126,7 @@ window.MetaCall = (function () {
     ctx.fillText(t('mc.encounters').toUpperCase(), 28, secY + 24);
 
     let y = secY + SECTION_H;
-    topMatchups.forEach((deck, i) => {
+    matchups.forEach((deck, i) => {
       const isJunk   = deck.name === '_junk';
       const isCustom = !!deck.isCustom;
       const m        = getMatchup(_settings.myDeck, deck.name);
@@ -1115,7 +1179,7 @@ window.MetaCall = (function () {
     });
 
     _paintFooter(ctx, W, H);
-    _shareCanvas(canvas, `metacall-day2-${_formatDateFilename()}.png`,
+    _showSharePreview(canvas, `metacall-day2-${_formatDateFilename()}.png`,
       `Meta Call — ${_settings.myDeck}`,
       `Day 2 chance: ${pct}% · ${_settings.myDeck} vs ${_settings.totalPlayers.toLocaleString()} players`);
   }

@@ -45,10 +45,57 @@ window.MetaCall = (function () {
     return parseFloat((str || '0').replace(',', '.')) || 0;
   }
 
-  // Extract "main pokemon" = first segment before " / "
+  // Extract the "main pokemon" for grouping purposes.
+  //
+  // Real-world Limitless deck names use SPACES to separate Pokémon, not " / ".
+  // Examples from the data:
+  //   "Dragapult"               → "Dragapult"
+  //   "Dragapult Blaziken"      → "Dragapult"          (2nd Pokémon is the tech partner)
+  //   "N's Zoroark"             → "N's Zoroark"        (trainer-linked: keep "X's Y")
+  //   "Mega Absol Box"          → "Mega Absol"         (form prefix: keep "Mega Y")
+  //   "Raging Bolt Ogerpon"     → "Raging Bolt"        (2-word Paradox Pokémon name)
+  //   "Alolan Exeggutor ex"     → "Alolan Exeggutor"   (regional form)
+  //
+  // Also supports legacy " / " separator in case some sources still use it.
+  const _FORM_PREFIXES = new Set([
+    'Mega', 'Alolan', 'Galarian', 'Hisuian', 'Paldean',
+    'White', 'Black', 'Primal', 'Origin', 'Shiny',
+  ]);
+  const _COMPOUND_POKEMON_FIRSTS = new Set([
+    // Paradox Pokémon (2-word names)
+    'Iron', 'Raging', 'Flutter', 'Walking', 'Brute', 'Sandy',
+    'Roaring', 'Scream', 'Slither', 'Gouging',
+  ]);
+
   function extractMainPokemon(name) {
     if (!name || name === '_junk') return name;
-    return name.split(/\s*\/\s*/)[0].trim();
+    let s = String(name).trim();
+
+    // Legacy " / " separator — take the first segment if present
+    if (s.includes('/')) s = s.split(/\s*\/\s*/)[0].trim();
+
+    const words = s.split(/\s+/);
+    if (words.length <= 1) return s;
+
+    const first = words[0];
+
+    // "X's Y" — trainer's Pokémon (N's Zoroark, Rocket's Mewtwo, ...)
+    if (/'s$/.test(first)) {
+      return words.slice(0, 2).join(' ');
+    }
+
+    // "Mega/Alolan/etc. Y" — form prefix + species
+    if (_FORM_PREFIXES.has(first)) {
+      return words.slice(0, 2).join(' ');
+    }
+
+    // Compound Pokémon name (Iron Thorns, Raging Bolt, Flutter Mane, ...)
+    if (_COMPOUND_POKEMON_FIRSTS.has(first)) {
+      return words.slice(0, 2).join(' ');
+    }
+
+    // Default: single-word species name — first word is the main
+    return first;
   }
 
   // ── Data Loading ───────────────────────────────────────────

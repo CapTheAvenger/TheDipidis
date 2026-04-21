@@ -688,7 +688,7 @@
     font-size: 2.4rem;
   }
 
-  /* Field table: hide "Meine Schätzung" (col3) and "Spieler" (col5) on mobile */
+  /* Field table: hide "My Estimate" (col3) and "Players" (col5) on mobile */
   .metacall-table th:nth-child(3),
   .metacall-table td:nth-child(3),
   .metacall-table th:nth-child(5),
@@ -696,33 +696,60 @@
     display: none;
   }
 
-  /* Compact table cells */
+  /* Fixed layout so columns don't fight for space */
+  .metacall-table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  /* Explicit column widths: deck = remaining space, others = fixed */
+  .metacall-table th:nth-child(2),
+  .metacall-table td:nth-child(2) { width: 56px; }   /* Online % */
+  .metacall-table th:nth-child(4),
+  .metacall-table td:nth-child(4) { width: 56px; }   /* Final % */
+  .metacall-table th:nth-child(6),
+  .metacall-table td:nth-child(6) { width: 92px; }   /* Avg Enc */
+
+  /* Truncation enforced at the CELL level (not span) so overflow is clipped */
+  .metacall-table td:first-child,
+  .metacall-table th:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 6px;
+  }
+
   .metacall-table th,
   .metacall-table td {
-    padding: 5px 6px;
+    padding: 7px 5px;
     font-size: 0.82rem;
   }
 
-  /* Deck name: truncate with ellipsis so it doesn't overflow */
+  /* Header: stretch share-percentage headers to right-align numbers below */
+  .metacall-table th:nth-child(2),
+  .metacall-table th:nth-child(4) {
+    text-align: right;
+  }
+  .metacall-table td:nth-child(2),
+  .metacall-table td:nth-child(4) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Span no longer needs its own clipping — cell handles it */
   .mc-deck-name {
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-    vertical-align: middle;
+    display: inline;
   }
 
   /* Compact encounters bar */
+  .mc-encounters-bar {
+    gap: 5px;
+  }
   .mc-encounters-bar .mc-bar-bg {
-    min-width: 40px;
+    min-width: 28px;
   }
   .mc-encounters-label {
-    font-size: 0.75rem;
-  }
-
-  /* Make the table use its natural width so horizontal scroll works */
-  .metacall-table {
-    width: auto;
-    min-width: 100%;
+    font-size: 0.72rem;
+    white-space: nowrap;
   }
 }

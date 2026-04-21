@@ -946,11 +946,15 @@ window.MetaCall = (function () {
   // ── A) Field Composition Share Image ─────────────────────
   function exportFieldShareImage() {
     if (!_shareList) return;
-    // Sort descending by final share so the image matches the user's mental
-    // hierarchy (biggest expected presence first). Custom decks and junk mix
-    // into the list based on their share, not appended at the end.
-    const field = [...buildField()].sort((a, b) => b.finalShare - a.finalShare);
-    if (!field.length) return;
+    // Sort descending by final share so the meta-relevant decks are on
+    // top, but pin the "Others" bucket (junk) to the bottom regardless of
+    // its share — we want to see the real decks first, then the catch-all.
+    const rawField = buildField();
+    if (!rawField.length) return;
+    const junkEntry = rawField.find(d => d.name === '_junk') || null;
+    const field = rawField.filter(d => d.name !== '_junk')
+                          .sort((a, b) => b.finalShare - a.finalShare);
+    if (junkEntry) field.push(junkEntry);
 
     const W = 860;
     const ROW_H = 46;
@@ -1054,8 +1058,12 @@ window.MetaCall = (function () {
     const day1WR = _settings.rounds > 0 ? (expWin / _settings.rounds) * 100 : 0;
 
     // ALL matchups (sorted desc by final share), not just the top 10 —
-    // user wants the full picture visible.
-    const matchups = [...field].sort((a, b) => b.finalShare - a.finalShare);
+    // user wants the full picture visible. "Others" (junk) pinned to the
+    // bottom so meta-relevant matchups stay at the top.
+    const junkEntry = field.find(d => d.name === '_junk') || null;
+    const matchups  = field.filter(d => d.name !== '_junk')
+                           .sort((a, b) => b.finalShare - a.finalShare);
+    if (junkEntry) matchups.push(junkEntry);
 
     const W = 860;
     const ROW_H = 44;

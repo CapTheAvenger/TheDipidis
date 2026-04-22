@@ -27,11 +27,13 @@ window.TestingGroups = (function () {
   let _currentGroupId   = null;   // id of the opened group
   let _currentGroup     = null;   // full group doc
   let _currentRole      = null;   // 'owner' | 'editor' | 'viewer' | null
-  let _pollTimer        = null;   // refresh-every-30s handle
   let _bootstrapData    = null;   // lazy-loaded testing_group_bootstrap.json
   let _saveTimers       = {};     // per-field debounce timers
+  let _snapUnsubscribe  = null;   // realtime-listener teardown
+  let _activityUnsubscribe = null;
+  let _pendingInvite    = null;   // {groupId, token} parsed from URL hash
+  let _editingKey       = null;   // which input is focused? pauses remote updates
 
-  const POLL_INTERVAL_MS = 30000;
   const SAVE_DEBOUNCE_MS = 600;
 
   // ── Firestore helpers ────────────────────────────────────
@@ -209,7 +211,7 @@ window.TestingGroups = (function () {
       _currentGroupId = groupId;
       _currentGroup   = { id: snap.id, ...data };
       _currentRole    = (data.members && data.members[u.uid] && data.members[u.uid].role) || 'viewer';
-      _startPolling();
+      _startRealtimeListener();
       renderAll();
     } catch (err) {
       console.error('[TestingGroups] openGroup failed', err);
@@ -218,34 +220,121 @@ window.TestingGroups = (function () {
   }
 
   function closeGroup() {
-    _stopPolling();
+    _stopRealtimeListener();
     _currentGroupId = null;
     _currentGroup   = null;
     _currentRole    = null;
     renderAll();
   }
 
-  async function _refreshCurrentGroup() {
-    if (!_currentGroupId) return;
+  // ── Realtime sync ──────────────────────────────────────
+  // Swaps the old 30s polling for Firestore onSnapshot so other users'
+  // edits appear instantly. We still guard against overwriting an input
+  // the local user is actively typing into (_editingKey); full re-render
+  // only runs when structural changes occur (deck list, members).
+  function _startRealtimeListener() {
+    _stopRealtimeListener();
     const db = _db();
-    if (!db) return;
-    try {
-      const snap = await db.collection('testingGroups').doc(_currentGroupId).get();
-      if (!snap.exists) return;
-      _currentGroup = { id: snap.id, ...snap.data() };
-      _renderGroupDetail();
-    } catch (err) {
-      console.warn('[TestingGroups] refresh failed', err);
-    }
+    if (!db || !_currentGroupId) return;
+
+    _snapUnsubscribe = db.collection('testingGroups').doc(_currentGroupId)
+      .onSnapshot(snap => {
+        if (!snap.exists) {
+          // Group deleted or access revoked
+          closeGroup();
+          return;
+        }
+        const newData = { id: snap.id, ...snap.data() };
+        const u = _currentUser();
+        if (u && !(newData.memberUids || []).includes(u.uid)) {
+          // You were removed from the group
+          closeGroup();
+          return;
+        }
+        _applySnapshot(newData);
+      }, err => {
+        console.warn('[TestingGroups] realtime listener error', err);
+      });
+
+    // Activity log live-updates too
+    _activityUnsubscribe = db.collection('testingGroups').doc(_currentGroupId)
+      .collection('activity')
+      .orderBy('timestamp', 'desc')
+      .limit(50)
+      .onSnapshot(snap => _renderActivitySnapshot(snap),
+                  err => console.warn('[TestingGroups] activity listener', err));
   }
 
-  function _startPolling() {
-    _stopPolling();
-    _pollTimer = setInterval(_refreshCurrentGroup, POLL_INTERVAL_MS);
+  function _stopRealtimeListener() {
+    if (_snapUnsubscribe) { _snapUnsubscribe(); _snapUnsubscribe = null; }
+    if (_activityUnsubscribe) { _activityUnsubscribe(); _activityUnsubscribe = null; }
   }
-  function _stopPolling() {
-    if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+
+  // Smart delta-update: compares old vs new and updates only the bits
+  // that actually changed, so users never lose input focus while typing.
+  function _applySnapshot(newData) {
+    const old = _currentGroup || {};
+    const u = _currentUser();
+    _currentGroup = newData;
+    _currentRole = (newData.members && u && newData.members[u.uid] && newData.members[u.uid].role) || 'viewer';
+
+    const oldDecks   = (old.data && old.data.decks) || [];
+    const newDecks   = (newData.data && newData.data.decks) || [];
+    const oldName    = old.name;
+    const newName    = newData.name;
+
+    const decksChanged  = JSON.stringify(oldDecks) !== JSON.stringify(newDecks);
+    const membersChanged= JSON.stringify(old.memberUids || []) !== JSON.stringify(newData.memberUids || [])
+                         || JSON.stringify(old.members || {}) !== JSON.stringify(newData.members || {});
+
+    if (decksChanged || membersChanged || oldName !== newName) {
+      _renderGroupDetail();  // structural change → full re-render
+      return;
+    }
+
+    // Only cell-value changes → update in place without stealing focus
+    const oldMat = (old.data && old.data.matchups) || {};
+    const newMat = (newData.data && newData.data.matchups) || {};
+    newDecks.forEach(rowDeck => {
+      newDecks.forEach(colDeck => {
+        const oldV = (oldMat[rowDeck] || {})[colDeck];
+        const newV = (newMat[rowDeck] || {})[colDeck];
+        if (oldV !== newV) _updateCellDom(rowDeck, colDeck, newV);
+      });
+    });
+
+    const oldQty = (old.data && old.data.quantity) || {};
+    const newQty = (newData.data && newData.data.quantity) || {};
+    newDecks.forEach(d => {
+      if (oldQty[d] !== newQty[d]) _updateQuantityDom(d, newQty[d]);
+    });
+
+    _updateWinrateRow();
   }
+
+  function _updateCellDom(rowDeck, colDeck, newValue) {
+    if (_editingKey === `matchup:${rowDeck}:${colDeck}`) return;  // respect active edit
+    const cell = document.querySelector(
+      `.tg-matchup-table td[data-row="${_attrEsc(rowDeck)}"][data-col="${_attrEsc(colDeck)}"]`);
+    if (!cell) return;
+    const input = cell.querySelector('input');
+    const wrClass = (newValue == null) ? '' : (newValue >= 55 ? 'tg-cell-good' : newValue <= 45 ? 'tg-cell-bad' : 'tg-cell-mid');
+    cell.className = 'tg-cell ' + wrClass + (rowDeck === colDeck ? ' tg-cell-diag' : '');
+    if (input) input.value = newValue == null ? '' : newValue;
+    else cell.textContent = newValue == null ? '—' : newValue;
+  }
+
+  function _updateQuantityDom(deck, newValue) {
+    if (_editingKey === `quantity:${deck}`) return;
+    const cell = document.querySelector(
+      `.tg-matchup-table tfoot td[data-qty="${_attrEsc(deck)}"]`);
+    if (!cell) return;
+    const input = cell.querySelector('input');
+    if (input) input.value = newValue == null ? '' : newValue;
+    else cell.textContent = newValue == null ? '—' : (newValue + '%');
+  }
+
+  function _attrEsc(s) { return String(s).replace(/"/g, '&quot;'); }
 
   // ── Edits ────────────────────────────────────────────────
 
@@ -499,6 +588,181 @@ window.TestingGroups = (function () {
     }
   }
 
+  // ── Invite Links ─────────────────────────────────────────
+  // Owner generates a link with a random token. The token is stored in
+  // a separate /testingGroupInvites/{groupId} doc that's world-readable
+  // by authenticated users. Non-members click the link, the client reads
+  // the invite, validates the token, then writes the user into the
+  // group's memberUids. Firestore rule on the group allows this update
+  // only if (a) user is adding themselves and (b) an invite doc exists.
+
+  function _randomToken() {
+    const arr = new Uint8Array(16);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function generateInviteLink(role) {
+    if (_currentRole !== 'owner') { alert(t('tg.errOwnerOnly')); return null; }
+    role = (role === 'viewer' || role === 'editor') ? role : 'editor';
+    const db = _db();
+    const u  = _currentUser();
+    if (!db || !u || !_currentGroupId) return null;
+    const token = _randomToken();
+    try {
+      await db.collection('testingGroupInvites').doc(_currentGroupId).set({
+        token, role,
+        groupName: (_currentGroup && _currentGroup.name) || '',
+        createdBy: u.uid,
+        createdAt: _fsNow(),
+      });
+      const url = `${location.origin}${location.pathname}#tg-join=${_currentGroupId}_${token}`;
+      return url;
+    } catch (err) {
+      console.error('[TestingGroups] generateInviteLink failed', err);
+      alert(t('tg.errSave') + '\n' + (err.message || err));
+      return null;
+    }
+  }
+
+  async function revokeInviteLink() {
+    if (_currentRole !== 'owner') return;
+    if (!confirm(t('tg.confirmRevokeInvite'))) return;
+    const db = _db();
+    if (!db || !_currentGroupId) return;
+    try {
+      await db.collection('testingGroupInvites').doc(_currentGroupId).delete();
+      alert(t('tg.inviteRevoked'));
+    } catch (err) {
+      console.error('[TestingGroups] revokeInviteLink failed', err);
+    }
+  }
+
+  // Called when a user arrives via #tg-join=<groupId>_<token>
+  async function acceptInvite(groupId, token) {
+    await _ensurePublicProfile();
+    const u  = _currentUser();
+    const db = _db();
+    if (!u || !db) {
+      _pendingInvite = { groupId, token };
+      alert(t('tg.inviteRequiresSignIn'));
+      return;
+    }
+    try {
+      // 1) Validate the invite
+      const invSnap = await db.collection('testingGroupInvites').doc(groupId).get();
+      if (!invSnap.exists) { alert(t('tg.errInviteExpired')); return; }
+      const invite = invSnap.data() || {};
+      if (invite.token !== token) { alert(t('tg.errInviteInvalid')); return; }
+
+      // 2) If already a member, just open the group
+      const groupSnap = await db.collection('testingGroups').doc(groupId).get();
+      if (groupSnap.exists) {
+        const data = groupSnap.data() || {};
+        if ((data.memberUids || []).includes(u.uid)) {
+          await loadMyGroups();
+          await openGroup(groupId);
+          return;
+        }
+      }
+
+      // 3) Ask for confirmation
+      const groupName = invite.groupName || t('tg.unknownGroup');
+      const role      = (invite.role === 'viewer' || invite.role === 'editor') ? invite.role : 'editor';
+      const confirmMsg = t('tg.confirmJoin')
+        .replace('{group}', groupName)
+        .replace('{role}', t('tg.role.' + role));
+      if (!confirm(confirmMsg)) return;
+
+      // 4) Add self to group
+      const memberEntry = {
+        role,
+        displayName: u.displayName || u.email || 'Member',
+        email: (u.email || '').toLowerCase(),
+        joinedAt: Date.now(),
+      };
+      await db.collection('testingGroups').doc(groupId).update({
+        memberUids: firebase.firestore.FieldValue.arrayUnion(u.uid),
+        [`members.${u.uid}`]: memberEntry,
+        updatedAt: _fsNow(),
+      });
+      await _logActivity(groupId, 'member_joined_via_invite', u.email, null, role);
+
+      // 5) Navigate into the group
+      await loadMyGroups();
+      if (typeof switchTabAndUpdateMenu === 'function') switchTabAndUpdateMenu('profile');
+      if (typeof switchProfileTab === 'function') switchProfileTab('testinggroups');
+      await openGroup(groupId);
+    } catch (err) {
+      console.error('[TestingGroups] acceptInvite failed', err);
+      alert(t('tg.errInviteFailed') + '\n' + (err.message || err));
+    }
+  }
+
+  // ── Rename group ─────────────────────────────────────────
+  async function renameGroup(newName) {
+    if (_currentRole !== 'owner') { alert(t('tg.errOwnerOnly')); return; }
+    const clean = String(newName || '').trim();
+    if (!clean) return;
+    if (clean === (_currentGroup && _currentGroup.name)) return;
+    const db = _db();
+    if (!db || !_currentGroupId) return;
+    const oldName = _currentGroup && _currentGroup.name;
+    try {
+      await db.collection('testingGroups').doc(_currentGroupId).update({
+        name: clean,
+        updatedAt: _fsNow(),
+      });
+      await _logActivity(_currentGroupId, 'group_renamed', null, oldName, clean);
+      // Also update the invite doc's cached groupName, if one exists
+      try {
+        await db.collection('testingGroupInvites').doc(_currentGroupId).update({ groupName: clean });
+      } catch (_) { /* no active invite — ignore */ }
+    } catch (err) {
+      console.error('[TestingGroups] renameGroup failed', err);
+      alert(t('tg.errSave'));
+    }
+  }
+
+  // ── Rename deck ──────────────────────────────────────────
+  // Moves matchup entries + quantity from oldName to newName and keeps
+  // the deck order stable.
+  async function renameDeck(oldName, newName) {
+    if (_currentRole !== 'owner') { alert(t('tg.errOwnerOnly')); return; }
+    const clean = String(newName || '').trim();
+    if (!clean || clean === oldName) return;
+    const g = _currentGroup;
+    if (!g || !g.data) return;
+    if ((g.data.decks || []).includes(clean)) { alert(t('tg.errDeckExists')); return; }
+    const db = _db();
+    if (!db || !_currentGroupId) return;
+
+    try {
+      const newDecks = (g.data.decks || []).map(d => d === oldName ? clean : d);
+      const newQty   = { ...(g.data.quantity || {}) };
+      if (oldName in newQty) { newQty[clean] = newQty[oldName]; delete newQty[oldName]; }
+      const newMat   = {};
+      Object.keys(g.data.matchups || {}).forEach(rowDeck => {
+        const targetRow = (rowDeck === oldName) ? clean : rowDeck;
+        newMat[targetRow] = {};
+        Object.keys(g.data.matchups[rowDeck] || {}).forEach(colDeck => {
+          const targetCol = (colDeck === oldName) ? clean : colDeck;
+          newMat[targetRow][targetCol] = g.data.matchups[rowDeck][colDeck];
+        });
+      });
+      await db.collection('testingGroups').doc(_currentGroupId).update({
+        'data.decks':    newDecks,
+        'data.quantity': newQty,
+        'data.matchups': newMat,
+        updatedAt: _fsNow(),
+      });
+      await _logActivity(_currentGroupId, 'deck_renamed', null, oldName, clean);
+    } catch (err) {
+      console.error('[TestingGroups] renameDeck failed', err);
+      alert(t('tg.errSave'));
+    }
+  }
+
   async function leaveGroup() {
     const u = _currentUser();
     const g = _currentGroup;
@@ -662,20 +926,24 @@ window.TestingGroups = (function () {
         const valDisp = (val == null) ? '' : val;
         const wrClass = (val == null) ? '' : (val >= 55 ? 'tg-cell-good' : val <= 45 ? 'tg-cell-bad' : 'tg-cell-mid');
         const isDiag  = rowDeck === colDeck;
+        const dataAttrs = `data-row="${_attrEsc(rowDeck)}" data-col="${_attrEsc(colDeck)}"`;
         if (readonly || isDiag) {
-          return `<td class="tg-cell ${wrClass} ${isDiag ? 'tg-cell-diag' : ''}">${valDisp === '' ? '—' : valDisp}</td>`;
+          return `<td class="tg-cell ${wrClass} ${isDiag ? 'tg-cell-diag' : ''}" ${dataAttrs}>${valDisp === '' ? '—' : valDisp}</td>`;
         }
-        return `<td class="tg-cell ${wrClass}">
+        return `<td class="tg-cell ${wrClass}" ${dataAttrs}>
           <input type="number" min="0" max="100" step="1" value="${valDisp}"
+            onfocus="TestingGroups._markEditing('matchup:${_jsEsc(rowDeck)}:${_jsEsc(colDeck)}')"
+            onblur="TestingGroups._markEditing(null)"
             onchange="TestingGroups.onMatchupEdit('${_jsEsc(rowDeck)}', '${_jsEsc(colDeck)}', this.value)"
             class="tg-cell-input">
         </td>`;
       }).join('');
-      const removeBtn = (_currentRole === 'owner')
-        ? `<button class="tg-deck-remove" title="${_esc(t('tg.removeDeck'))}" onclick="TestingGroups.removeDeck('${_jsEsc(rowDeck)}')">×</button>`
+      const deckControls = (_currentRole === 'owner')
+        ? `<button class="tg-deck-rename" title="${_esc(t('tg.renameDeck'))}" onclick="TestingGroups._uiRenameDeck('${_jsEsc(rowDeck)}')">✎</button>
+           <button class="tg-deck-remove" title="${_esc(t('tg.removeDeck'))}" onclick="TestingGroups.removeDeck('${_jsEsc(rowDeck)}')">×</button>`
         : '';
       return `<tr>
-        <th class="tg-row-head"><span>${_esc(rowDeck)}</span>${removeBtn}</th>
+        <th class="tg-row-head"><span>${_esc(rowDeck)}</span>${deckControls}</th>
         ${cells}
       </tr>`;
     }).join('');
@@ -683,10 +951,13 @@ window.TestingGroups = (function () {
     // Quantity row
     const quantityCells = decks.map(d => {
       const v = qty[d] == null ? '' : qty[d];
+      const dataAttr = `data-qty="${_attrEsc(d)}"`;
       return readonly
-        ? `<td class="tg-cell tg-cell-qty">${v === '' ? '—' : v + '%'}</td>`
-        : `<td class="tg-cell tg-cell-qty">
+        ? `<td class="tg-cell tg-cell-qty" ${dataAttr}>${v === '' ? '—' : v + '%'}</td>`
+        : `<td class="tg-cell tg-cell-qty" ${dataAttr}>
              <input type="number" min="0" max="100" step="0.5" value="${v}"
+               onfocus="TestingGroups._markEditing('quantity:${_jsEsc(d)}')"
+               onblur="TestingGroups._markEditing(null)"
                onchange="TestingGroups.onQuantityEdit('${_jsEsc(d)}', this.value)"
                class="tg-cell-input">
            </td>`;
@@ -708,13 +979,22 @@ window.TestingGroups = (function () {
     const membersHtml = _renderMembersSection();
     const activityHtml = `<div id="tg-activity-section"><h3>${_esc(t('tg.activity'))}</h3><div id="tg-activity-log" class="tg-activity-log"><em>${_esc(t('tg.activityLoading'))}</em></div></div>`;
 
+    const titleHtml = (_currentRole === 'owner')
+      ? `<h2 class="tg-detail-title" ondblclick="TestingGroups._uiRenameGroup()" title="${_esc(t('tg.renameGroupHint'))}">${_esc(g.name)} <span class="tg-rename-hint">✎</span></h2>`
+      : `<h2 class="tg-detail-title">${_esc(g.name)}</h2>`;
+
+    const inviteBtn = (_currentRole === 'owner')
+      ? `<button class="tg-btn" onclick="TestingGroups._uiInvite()">🔗 ${_esc(t('tg.inviteLink'))}</button>`
+      : '';
+
     container.innerHTML = `
 <div class="tg-wrap">
   <div class="tg-detail-header">
     <button class="tg-btn tg-btn-back" onclick="TestingGroups.closeGroup()">← ${_esc(t('tg.back'))}</button>
-    <h2 class="tg-detail-title">${_esc(g.name)}</h2>
+    ${titleHtml}
     <span class="tg-role tg-role-${_currentRole}">${_esc(t('tg.role.' + _currentRole))}</span>
     <div class="tg-detail-actions">
+      ${inviteBtn}
       <button class="tg-btn" onclick="TestingGroups.exportJson()">💾 ${_esc(t('tg.exportJson'))}</button>
       <button class="tg-btn tg-btn-primary" onclick="TestingGroups.loadIntoMetaCall()">→ ${_esc(t('tg.loadIntoMetaCall'))}</button>
       ${_currentRole === 'owner'
@@ -743,8 +1023,8 @@ window.TestingGroups = (function () {
   ${membersHtml}
   ${activityHtml}
 </div>`;
-
-    _loadActivityLog();
+    // Activity is kept fresh by the realtime listener set up in
+    // _startRealtimeListener(); nothing to do here.
   }
 
   function _renderMembersSection() {
@@ -816,38 +1096,60 @@ window.TestingGroups = (function () {
     emailInp.value = '';
   }
 
-  async function _loadActivityLog() {
+  function _renderActivitySnapshot(snap) {
     const el = document.getElementById('tg-activity-log');
-    const db = _db();
-    if (!el || !db || !_currentGroupId) return;
-    try {
-      const snap = await db.collection('testingGroups').doc(_currentGroupId)
-        .collection('activity')
-        .orderBy('timestamp', 'desc')
-        .limit(50).get();
-      if (snap.empty) { el.innerHTML = `<em>${_esc(t('tg.activityEmpty'))}</em>`; return; }
-      const rows = snap.docs.map(d => {
-        const a = d.data() || {};
-        const when = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : new Date();
-        const whenStr = when.toLocaleString();
-        const actionLabel = t('tg.action.' + (a.action || 'update')) || a.action;
-        const fieldStr = a.field ? `<strong>${_esc(a.field)}</strong>` : '';
-        const change = (a.oldValue != null && a.newValue != null)
-          ? `${_esc(a.oldValue)} → ${_esc(a.newValue)}`
-          : (a.newValue != null ? _esc(a.newValue) : '');
-        return `<div class="tg-activity-row">
-          <span class="tg-activity-user">${_esc(a.displayName || '—')}</span>
-          <span class="tg-activity-action">${_esc(actionLabel)}</span>
-          ${fieldStr}
-          <span class="tg-activity-change">${change}</span>
-          <span class="tg-activity-time">${_esc(whenStr)}</span>
-        </div>`;
-      }).join('');
-      el.innerHTML = rows;
-    } catch (err) {
-      console.warn('[TestingGroups] activity load failed', err);
-      el.innerHTML = `<em>${_esc(t('tg.activityError'))}</em>`;
-    }
+    if (!el) return;
+    if (snap.empty) { el.innerHTML = `<em>${_esc(t('tg.activityEmpty'))}</em>`; return; }
+    const rows = snap.docs.map(d => {
+      const a = d.data() || {};
+      const when = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : new Date();
+      const whenStr = when.toLocaleString();
+      const actionLabel = t('tg.action.' + (a.action || 'update')) || a.action;
+      const fieldStr = a.field ? `<strong>${_esc(a.field)}</strong>` : '';
+      const change = (a.oldValue != null && a.newValue != null)
+        ? `${_esc(a.oldValue)} → ${_esc(a.newValue)}`
+        : (a.newValue != null ? _esc(a.newValue) : '');
+      return `<div class="tg-activity-row">
+        <span class="tg-activity-user">${_esc(a.displayName || '—')}</span>
+        <span class="tg-activity-action">${_esc(actionLabel)}</span>
+        ${fieldStr}
+        <span class="tg-activity-change">${change}</span>
+        <span class="tg-activity-time">${_esc(whenStr)}</span>
+      </div>`;
+    }).join('');
+    el.innerHTML = rows;
+  }
+
+  // Called by inputs on focus/blur so the realtime listener doesn't
+  // clobber the value the user is actively editing.
+  function _markEditing(key) { _editingKey = key || null; }
+
+  function _uiInvite() {
+    if (_currentRole !== 'owner') return;
+    const role = prompt(t('tg.invitePromptRole'), 'editor');
+    if (!role) return;
+    if (role !== 'editor' && role !== 'viewer') { alert(t('tg.errInviteRole')); return; }
+    generateInviteLink(role).then(url => {
+      if (!url) return;
+      // Copy to clipboard + show in a confirm so owner can paste elsewhere too
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).catch(() => {});
+      }
+      alert(t('tg.inviteReady').replace('{url}', url));
+    });
+  }
+
+  function _uiRenameGroup() {
+    if (_currentRole !== 'owner') return;
+    const cur = (_currentGroup && _currentGroup.name) || '';
+    const next = prompt(t('tg.renameGroupPrompt'), cur);
+    if (next && next.trim() && next.trim() !== cur) renameGroup(next.trim());
+  }
+
+  function _uiRenameDeck(oldName) {
+    if (_currentRole !== 'owner') return;
+    const next = prompt(t('tg.renameDeckPrompt').replace('{name}', oldName), oldName);
+    if (next && next.trim() && next.trim() !== oldName) renameDeck(oldName, next.trim());
   }
 
   function _computeAggregateWR(deck, decks, qty, matrix) {
@@ -893,11 +1195,41 @@ window.TestingGroups = (function () {
     return key;
   }
 
+  // ── URL hash handling (invite links) ─────────────────────
+  // A deep-link of the form #tg-join=<groupId>_<token> is handed off
+  // here. If the user is signed in we run the invite flow immediately;
+  // otherwise we remember the invite until auth completes.
+  function handleHashInvite() {
+    const raw = (location.hash || '').match(/^#tg-join=([^&]+)/);
+    if (!raw) return;
+    const parts = decodeURIComponent(raw[1]).split('_');
+    if (parts.length < 2) return;
+    const groupId = parts[0];
+    const token   = parts.slice(1).join('_');
+    if (!groupId || !token) return;
+    // Clear the hash so a refresh doesn't re-trigger
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
+    acceptInvite(groupId, token);
+  }
+
   // ── Init (called when Profile → Testing Groups tab opens) ─
   async function init() {
     await _ensurePublicProfile();
     await loadMyGroups();
     renderAll();
+    // If a pending invite was parsed before the user signed in, finish it now.
+    if (_pendingInvite && _currentUser()) {
+      const inv = _pendingInvite; _pendingInvite = null;
+      acceptInvite(inv.groupId, inv.token);
+    }
+  }
+
+  // Parse hash on script load so invite flows work even before Testing
+  // Groups tab is opened. If not signed in yet, the flow asks the user
+  // to sign in first and waits via _pendingInvite.
+  if (typeof window !== 'undefined') {
+    window.addEventListener('load', handleHashInvite);
+    window.addEventListener('hashchange', handleHashInvite);
   }
 
   return {
@@ -907,19 +1239,29 @@ window.TestingGroups = (function () {
     closeGroup,
     createGroup,
     deleteGroup,
+    renameGroup,
     onMatchupEdit,
     onQuantityEdit,
     addDeck,
     removeDeck,
+    renameDeck,
     addMemberByEmail,
     changeMemberRole,
     removeMember,
     leaveGroup,
     exportJson,
     loadIntoMetaCall,
+    generateInviteLink,
+    revokeInviteLink,
+    acceptInvite,
+    handleHashInvite,
     // UI glue
     _uiCreate,
     _uiAddDeck,
     _uiAddMember,
+    _uiInvite,
+    _uiRenameGroup,
+    _uiRenameDeck,
+    _markEditing,
   };
 })();

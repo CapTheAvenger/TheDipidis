@@ -221,18 +221,34 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.tg-deck-remove {
+.tg-deck-remove, .tg-deck-rename {
   background: transparent;
   border: none;
-  color: #c0392b;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1;
   padding: 0 3px;
   opacity: 0.5;
   transition: opacity 0.15s;
 }
-.tg-deck-remove:hover { opacity: 1; }
+.tg-deck-remove { color: #c0392b; }
+.tg-deck-rename { color: #3498db; font-size: 0.85rem; }
+.tg-deck-remove:hover, .tg-deck-rename:hover { opacity: 1; }
+
+.tg-detail-title {
+  cursor: default;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tg-detail-title[ondblclick] { cursor: pointer; }
+.tg-rename-hint {
+  font-size: 0.82rem;
+  color: #9aa6b8;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.tg-detail-title:hover .tg-rename-hint { opacity: 1; }
 
 .tg-cell {
   min-width: 74px;

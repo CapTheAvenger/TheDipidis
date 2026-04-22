@@ -32,6 +32,19 @@ service cloud.firestore {
     }
 
     // ─────────────────────────────────────────────────────────
+    // Testing Group Invites — one invite doc per group, world-readable
+    // by authenticated users so a non-member clicking a shared link
+    // can validate the token before attempting to join.
+    // Only the group owner can create/update/delete.
+    // ─────────────────────────────────────────────────────────
+    match /testingGroupInvites/{groupId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && get(/databases/$(database)/documents/testingGroups/$(groupId))
+             .data.ownerUid == request.auth.uid;
+    }
+
+    // ─────────────────────────────────────────────────────────
     // Testing Groups — collaborative matchup tables
     // ─────────────────────────────────────────────────────────
     match /testingGroups/{groupId} {
@@ -49,8 +62,19 @@ service cloud.firestore {
         return request.auth != null
           && resource.data.members[request.auth.uid].role == role;
       }
-      function canEdit() {
-        return isOwner() || roleIs('editor');
+      // Join-via-invite guard: the write must only add the caller to
+      // memberUids + members, and must not touch anything else. A valid
+      // invite doc must exist for this group.
+      function isValidSelfJoin() {
+        return request.auth != null
+          && !resource.data.memberUids.hasAny([request.auth.uid])
+          && request.resource.data.memberUids
+               .removeAll(resource.data.memberUids) == [request.auth.uid]
+          && resource.data.memberUids
+               .removeAll(request.resource.data.memberUids).size() == 0
+          && request.resource.data.diff(resource.data)
+               .affectedKeys().hasOnly(['memberUids', 'members', 'updatedAt'])
+          && exists(/databases/$(database)/documents/testingGroupInvites/$(groupId));
       }
 
       // Members can read the group.
@@ -65,6 +89,7 @@ service cloud.firestore {
 
       // Owner: full update / delete.
       // Editor: can only modify the 'data' field + 'updatedAt'.
+      // Non-member: can add themselves via a valid invite.
       // Viewer: cannot write.
       allow update: if
         (isOwner()) ||
@@ -72,7 +97,8 @@ service cloud.firestore {
           roleIs('editor') &&
           request.resource.data.diff(resource.data)
             .affectedKeys().hasOnly(['data', 'updatedAt'])
-        );
+        ) ||
+        isValidSelfJoin();
 
       allow delete: if isOwner();
 

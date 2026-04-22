@@ -241,7 +241,7 @@
    When an archetype has a Pokémon-icon mapping we show the icon(s) instead
    of the rotated deck name, which is denser and much easier to scan.
    Combo archetypes stack the 2 icons vertically so they fit the narrow
-   44px column without overlap. */
+   column without overlap. */
 .tg-matchup-table thead th.tg-col-head-icon {
   height: 68px;
   padding: 4px;
@@ -255,6 +255,54 @@
   width: auto;
   margin: 0;
   line-height: 1;
+}
+/* Combo icons in column headers stack cleanly — override the default
+   group's slight overlap so two icons sit flush under each other, not
+   diagonal. Plain horizontal overlap (used in row headers with --inline)
+   stays unaffected. */
+.tg-matchup-table thead th.tg-col-head-icon .tcg-pokemon-icon-group {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.tg-matchup-table thead th.tg-col-head-icon
+  .tcg-pokemon-icon-group .tcg-pokemon-icon + .tcg-pokemon-icon {
+  margin-top: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* ── ICON MODE ────────────────────────────────────────────────────────────
+   When every deck in the group has a Pokémon-icon mapping, JS adds
+   .tg-icon-mode to the <table>. In this mode the matchup matrix drops its
+   200px row-header (deck name is redundant with the icon) so the whole
+   table becomes noticeably more compact. Fallback rows (no icon → still
+   show the name) keep their width via the `.tg-row-head-has-text` class
+   added by JS on a per-row basis — but in pure icon-mode nothing has
+   text so this case is vanishingly rare. */
+.tg-matchup-table.tg-icon-mode .tg-row-head,
+.tg-matchup-table.tg-icon-mode .tg-corner {
+  min-width: 90px !important;   /* Just enough for the "Quantity %" tfoot
+                                    label while saving ~110px over the
+                                    text-mode default of 200px. */
+  width: 90px !important;
+  padding: 4px !important;
+}
+.tg-matchup-table.tg-icon-mode .tg-row-head {
+  text-align: center !important;
+}
+.tg-matchup-table.tg-icon-mode .tg-row-head-inner {
+  justify-content: center;
+  min-height: unset;
+}
+.tg-matchup-table.tg-icon-mode thead tr {
+  height: 68px;
+}
+/* Rename/remove controls don't fit a 60px row-head comfortably — drop
+   them in icon-mode. Owner can still rename/remove from the deck row's
+   hover menu when the table is switched out of icon-mode (future: toggle
+   button), or via the underlying data edit. */
+.tg-matchup-table.tg-icon-mode .tg-row-head-controls {
+  display: none;
 }
 
 /* CORNER (top-left) — sticks to BOTH top and left, highest z-index */
@@ -487,7 +535,7 @@
   width: 100%;
   box-sizing: border-box;
   padding: 3px 0;
-  margin: 0 auto;
+  margin: 0;
   border: 1px solid transparent;
   background: transparent;
   border-radius: 4px;
@@ -497,6 +545,9 @@
   color: inherit;
   font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
+  /* Explicit text-indent reset — some browsers inherit a tiny indent
+     from parent text-align quirks which makes numbers look off-center. */
+  text-indent: 0;
 }
 .tg-cell-input::-webkit-outer-spin-button,
 .tg-cell-input::-webkit-inner-spin-button {

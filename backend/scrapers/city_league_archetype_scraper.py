@@ -33,6 +33,21 @@ from card_scraper_shared import (
     parse_tournament_date
 )
 
+# Archetype matcher (Phase 3): given a Japanese-row's list of Pokemon slugs,
+# try to resolve it to a canonical Limitless archetype name. Falls back to
+# the original name-based match when the scraper module or data file is
+# unavailable — so a stale/missing archetype_icons.json never breaks the
+# scraper entirely.
+try:
+    from archetype_matcher import ArchetypeMatcher  # type: ignore
+    _matcher: 'Optional[ArchetypeMatcher]' = ArchetypeMatcher().load()
+except Exception as _matcher_err:  # FileNotFoundError, import errors, etc.
+    _matcher = None
+    logging.getLogger("archetype_scraper").warning(
+        "ArchetypeMatcher unavailable (%s) — falling back to name-only matching",
+        _matcher_err,
+    )
+
 # Fix Windows console encoding for Unicode characters
 setup_console_encoding()
 
@@ -187,9 +202,19 @@ def _scrape_single_tournament(tournament: dict) -> list:
         # Bereinige Namen (entferne -EX, -VSTAR, etc. und fixe Mega)
         cleaned_names = [fix_mega_pokemon_name(clean_pokemon_name(n)) for n in raw_names]
         archetype_raw = ' '.join(cleaned_names)
-        
-        # Normalisiere Archetype-Namen für konsistente Analyse
-        archetype = normalize_archetype_name(archetype_raw) if archetype_raw else ''
+
+        # Phase 3: try slug-signature match against Limitless canonical names
+        # FIRST (order-insensitive, apostrophe-robust, mega-form aware). Falls
+        # back to the historical normalize_archetype_name() flow if the
+        # matcher isn't loaded or the signature isn't in the index yet.
+        archetype = ''
+        if _matcher is not None and cleaned_names:
+            slug_candidates = [n.strip().lower().replace(' ', '-') for n in cleaned_names]
+            canonical = _matcher.canonicalize_by_slugs(slug_candidates)
+            if canonical:
+                archetype = canonical
+        if not archetype:
+            archetype = normalize_archetype_name(archetype_raw) if archetype_raw else ''
 
         if placement.isdigit() and archetype:
             results.append({

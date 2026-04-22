@@ -1034,6 +1034,20 @@ window.TestingGroups = (function () {
     return `<span class="${groupCls}">${imgs}</span>`;
   }
 
+  let _iconsPreloadHooked = false;
+  function _hookIconsPreloadOnce() {
+    // The Pokémon-icon dataset loads async; the first group open after
+    // page load probably paints in text-mode because icons aren't ready.
+    // Schedule one re-render after preload resolves so iconMode flips on
+    // automatically. We only hook once — subsequent renders see cached data.
+    if (_iconsPreloadHooked) return;
+    if (typeof window.ArchetypeIcons === 'undefined') return;
+    _iconsPreloadHooked = true;
+    window.ArchetypeIcons.preload().then(() => {
+      if (_currentGroupId) _renderGroupDetail();
+    }).catch(() => { /* already logged by helper */ });
+  }
+
   function renderAll() {
     const container = document.getElementById('profile-testinggroups');
     if (!container) return;
@@ -1044,6 +1058,7 @@ window.TestingGroups = (function () {
     if (!_currentGroupId) {
       _renderGroupList();
     } else {
+      _hookIconsPreloadOnce();
       _renderGroupDetail();
     }
   }
@@ -1107,6 +1122,17 @@ window.TestingGroups = (function () {
     const visibleDecks = (_rowFilter && _rowFilter.size)
       ? decks.filter(d => _rowFilter.has(d))
       : decks;
+
+    // Icon-mode detection: if EVERY deck has a Pokémon-icon mapping, we can
+    // safely shrink the row-header column from 200px to ~90px since the
+    // deck name would be redundant with the icon. As soon as even one deck
+    // lacks a mapping (custom/unknown name), fall back to text-mode so
+    // that row still has room for its label. Requires ArchetypeIcons to be
+    // preloaded — if it isn't, err on the text-mode side.
+    const iconMode = decks.length > 0
+      && typeof window.ArchetypeIcons !== 'undefined'
+      && decks.every(d => window.ArchetypeIcons.getIconUrls(d).length > 0);
+    const tableCls = iconMode ? 'tg-matchup-table tg-icon-mode' : 'tg-matchup-table';
 
     // Header row: Pokémon icons (with deck-name fallback + tooltip).
     // When ArchetypeIcons has a mapping we show 1–2 icons centered in the
@@ -1253,7 +1279,7 @@ window.TestingGroups = (function () {
   ${filterBar}
 
   <div class="tg-table-wrap">
-    <table class="tg-matchup-table">
+    <table class="${tableCls}">
       <thead>
         <tr><th class="tg-corner">${_esc(t('tg.matchupTable'))}</th>${headerCells}</tr>
       </thead>

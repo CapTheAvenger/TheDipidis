@@ -199,6 +199,13 @@ def merge_into_json(
             unchanged.append(existing_key)
             continue
 
+        # Empty list is a deliberate "no icons — show the name" marker.
+        # Never overwrite those, even on --force, since the source of
+        # truth is human judgement (decks with ambiguous visual identity).
+        if archetypes[existing_key] == []:
+            unchanged.append(existing_key)
+            continue
+
         if force:
             archetypes[existing_key] = slugs
             updated.append(existing_key)

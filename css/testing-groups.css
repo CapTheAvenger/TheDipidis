@@ -512,6 +512,16 @@
 .tg-matchup-table tfoot .tg-row-head .tg-row-head-inner {
   justify-content: center;
   text-align: center;
+  overflow: visible;     /* tbody default is hidden — labels were clipping */
+  min-height: 32px;      /* tbody uses 22px; tfoot labels are taller rows */
+  height: 100%;
+  white-space: nowrap;
+}
+
+/* Explicit tfoot row height so the label cell has room for the padded
+   content without collapsing under sticky positioning. */
+.tg-matchup-table tfoot tr {
+  height: 36px;
 }
 
 /* tfoot value cells — .tg-cell-qty hosts an editable input, .tg-cell-wr
@@ -521,11 +531,33 @@
 .tg-matchup-table tfoot .tg-cell-wr {
   text-align: center;
   vertical-align: middle;
-  padding: 5px 3px;
   font-weight: 700;
 }
-.tg-matchup-table tfoot .tg-cell-qty { background: #f9fafc; }
-.tg-matchup-table tfoot .tg-cell-wr  { background: #eaf4ff; }
+.tg-matchup-table tfoot .tg-cell-qty {
+  background: #f9fafc;
+  padding: 4px 2px;
+}
+.tg-matchup-table tfoot .tg-cell-wr {
+  background: #eaf4ff;
+  font-size: 0.82rem;    /* matches body cell size for visual consistency */
+  padding: 6px 3px;
+  white-space: nowrap;   /* "55.8%" must never wrap in the narrow cell */
+}
+
+/* Quantity input — strip the spinner arrows in all browsers. Base
+   .tg-cell-input already does this, repeated here with higher specificity
+   so scoped resets on the footer don't accidentally re-enable them. */
+.tg-matchup-table tfoot .tg-cell-qty .tg-cell-input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+  width: 100%;
+}
+.tg-matchup-table tfoot .tg-cell-qty .tg-cell-input::-webkit-inner-spin-button,
+.tg-matchup-table tfoot .tg-cell-qty .tg-cell-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
 
 .tg-detail-title {
   cursor: default;

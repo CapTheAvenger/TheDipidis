@@ -992,10 +992,8 @@ window.TestingGroups = (function () {
         : '';
       return `<tr>
         <th class="tg-row-head">
-          <div class="tg-row-head-inner">
-            <span>${_esc(rowDeck)}</span>
-            ${deckControls}
-          </div>
+          <div class="tg-row-head-inner"><span>${_esc(rowDeck)}</span></div>
+          ${deckControls}
         </th>
         ${cells}
       </tr>`;
@@ -1023,10 +1021,23 @@ window.TestingGroups = (function () {
       return `<td class="tg-cell tg-cell-wr ${wrCls}">${wr == null ? '—' : wr.toFixed(1) + '%'}</td>`;
     }).join('');
 
+    // Autocomplete list — deck names from MetaCall's current meta share
+    // list. Typing into the "Add Deck" input suggests real archetype
+    // names so they match MetaCall's calculations on import.
+    const suggestionNames = (typeof window.MetaCall !== 'undefined'
+                             && typeof window.MetaCall.getDeckNames === 'function')
+      ? window.MetaCall.getDeckNames() : [];
+    const datalistOpts = suggestionNames
+      .map(n => `<option value="${_esc(n)}">`).join('');
+
     const addDeckControl = (_currentRole === 'owner')
       ? `<div class="tg-add-deck-row">
-           <input type="text" id="tg-new-deck" class="tg-input" placeholder="${_esc(t('tg.newDeckPh'))}" maxlength="40">
+           <input type="text" id="tg-new-deck" class="tg-input"
+             list="tg-deck-suggestions"
+             placeholder="${_esc(t('tg.newDeckPh'))}" maxlength="40"
+             autocomplete="off">
            <button class="tg-btn" onclick="TestingGroups._uiAddDeck()">+ ${_esc(t('tg.addDeck'))}</button>
+           <datalist id="tg-deck-suggestions">${datalistOpts}</datalist>
          </div>` : '';
 
     // Row filter chips — each deck toggleable, click to add/remove from
@@ -1289,6 +1300,12 @@ window.TestingGroups = (function () {
   // ── Init (called when Profile → Testing Groups tab opens) ─
   async function init() {
     await _ensurePublicProfile();
+    // Warm up MetaCall's deck list in the background so the "Add Deck"
+    // autocomplete has the real current-meta archetype names ready by
+    // the time the user opens a group.
+    if (window.MetaCall && typeof window.MetaCall.preload === 'function') {
+      window.MetaCall.preload().catch(() => {});
+    }
     await loadMyGroups();
     renderAll();
     // If a pending invite was parsed before the user signed in, finish it now.

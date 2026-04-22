@@ -1574,6 +1574,10 @@ window.MetaCall = (function () {
   return {
     init,
     preload: loadData,
+    // Expose the current online deck list (sorted by share desc) so
+    // Testing Groups can offer autocomplete that matches the names the
+    // MetaCall calculation expects.
+    getDeckNames: () => (_shareList || []).map(d => d.name),
     _onSetting,
     _onMyDeck,
     _onPersonalShare,

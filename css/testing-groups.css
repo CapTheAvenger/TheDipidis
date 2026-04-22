@@ -222,12 +222,14 @@
 }
 
 /* ROW HEADERS (Y-axis, first cell of every body row) — sticks to left
-   while scrolling horizontally. IMPORTANT: must NOT use display:flex
-   on a <th>, it wrecks the table layout and makes the cell overlap
-   the neighboring data cell. z-index below the thead so column headers
-   always paint on top of row headers when scrolling vertically. */
+   while scrolling horizontally. Controls (✎ ×) are an overlay that
+   appears on hover, so the deck name gets the FULL cell width and
+   doesn't have to share space with the buttons. */
 .tg-row-head {
-  position: sticky;
+  position: sticky;   /* sticks to left when scrolling horizontally;
+                         also establishes a containing block so that
+                         absolute-positioned .tg-row-head-controls
+                         positions against the <th>. */
   left: 0;
   z-index: 10;
   background: #f4f7fc;
@@ -240,32 +242,58 @@
   border-right: 1px solid #c8d3e2;
   box-shadow: 2px 0 4px rgba(0,0,0,.06);
 }
+
 .tg-row-head-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 4px;
   min-height: 22px;
+  line-height: 22px;
 }
 .tg-row-head-inner > span {
-  flex: 1;
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Controls overlay: floats at the right edge of the row-head, hidden
+   unless the row is hovered. Shadow on the left creates a soft fade
+   over the deck name so long names stay readable behind the buttons. */
 .tg-row-head-controls {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
   display: inline-flex;
-  gap: 2px;
-  opacity: 0.35;
-  transition: opacity 0.15s;
+  gap: 1px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  background: #f4f7fc;
+  box-shadow: -8px 0 10px #f4f7fc;   /* fade long names behind the buttons */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
 }
-.tg-row-head:hover .tg-row-head-controls { opacity: 1; }
+.tg-row-head:hover .tg-row-head-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* Touch devices: no hover, so always show but semi-transparent */
+@media (hover: none) {
+  .tg-row-head-controls {
+    opacity: 0.55;
+    pointer-events: auto;
+  }
+}
 
 .tg-deck-remove, .tg-deck-rename {
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1;
   padding: 2px 4px;
   border-radius: 4px;
@@ -273,7 +301,7 @@
 }
 .tg-deck-remove { color: #c0392b; }
 .tg-deck-remove:hover { background: #fdecea; }
-.tg-deck-rename { color: #3498db; font-size: 0.85rem; }
+.tg-deck-rename { color: #3498db; font-size: 0.82rem; }
 .tg-deck-rename:hover { background: #e7f2fb; }
 
 /* ── Row filter bar ──────────────────────────────────────── */

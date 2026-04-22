@@ -506,9 +506,38 @@ window.TestingGroups = (function () {
     if (!_currentGroup.data.quantity) _currentGroup.data.quantity = {};
     _currentGroup.data.quantity[deck] = val;
 
+    // Any quantity change shifts both the Rest-residual and every
+    // column's weighted Winrate, so refresh both immediately (local,
+    // optimistic) in addition to the debounced Firestore write.
+    _updateRestQtyDom();
+    _updateWinrateRow();
+
     const key = `quantity:${deck}`;
     clearTimeout(_saveTimers[key]);
     _saveTimers[key] = setTimeout(() => _commitQuantity(deck, prev, val), SAVE_DEBOUNCE_MS);
+  }
+
+  // Recompute and re-render only the Rest bucket's quantity cell.
+  // Called after any non-Rest quantity edit so the residual stays
+  // in sync without re-rendering the whole footer.
+  function _updateRestQtyDom() {
+    const g = _currentGroup;
+    if (!g || !g.data) return;
+    const decks = g.data.decks || [];
+    const qty   = g.data.quantity || {};
+    const restName = decks.find(d => String(d || '').trim().toLowerCase() === 'rest');
+    if (!restName) return;
+    const sum = decks.reduce((s, d) => {
+      if (d === restName) return s;
+      const v = parseFloat(qty[d]);
+      return s + (Number.isFinite(v) ? v : 0);
+    }, 0);
+    const rest = Math.max(0, Math.min(100, 100 - sum));
+    const cell = document.querySelector(
+      `.tg-matchup-table tfoot .tg-cell-qty[data-qty="${_attrEsc(restName)}"]`);
+    if (cell) {
+      cell.textContent = rest.toFixed(rest % 1 === 0 ? 0 : 1) + '%';
+    }
   }
 
   async function _commitQuantity(deck, oldValue, newValue) {
@@ -1550,20 +1579,44 @@ window.TestingGroups = (function () {
   }
 
   function _computeAggregateWR(deck, decks, qty, matrix) {
-    const row = matrix[deck];
-    if (!row) return null;
+    // Column-based aggregate: read every cell in `deck`'s COLUMN
+    // (every other row's WR vs this deck), quantity-weighted by the
+    // row-deck's share. The raw column average is "field's WR vs deck";
+    // we return the inverse so the published label "Winrates" still
+    // means "this deck's WR vs the field".
+    //
+    // Column-based (vs the prior row-based impl) is what the user
+    // expects visually: every cell the user edits *above* a column's
+    // Winrate cell now directly flows into that cell on the next
+    // _updateWinrateRow() pass.
+    //
+    // Rest-quantity is recomputed here too (100 − sum of named decks)
+    // so the weighting stays consistent with the footer's displayed
+    // value even when the stored qty["Rest"] is stale.
+    const isRest = (n) => String(n || '').trim().toLowerCase() === 'rest';
+    const namedSum = decks.reduce((s, d) => {
+      if (isRest(d)) return s;
+      const v = parseFloat(qty[d]);
+      return s + (Number.isFinite(v) ? v : 0);
+    }, 0);
+    const restQty = Math.max(0, Math.min(100, 100 - namedSum));
+    const effQty = (name) => isRest(name) ? restQty : parseFloat(qty[name]);
+
     let totalW = 0, totalQ = 0;
     decks.forEach(opp => {
       if (opp === deck) return;
-      const q = Number(qty[opp]);
-      const w = Number(row[opp]);
+      const oppRow = matrix[opp];
+      if (!oppRow) return;
+      const q = Number(effQty(opp));
+      const w = Number(oppRow[deck]);    // opp's WR vs `deck`
       if (!isNaN(q) && q > 0 && !isNaN(w)) {
         totalW += (w / 100) * q;
         totalQ += q;
       }
     });
     if (totalQ <= 0) return null;
-    return (totalW / totalQ) * 100;
+    // Column avg = field's WR vs deck → invert for deck's WR vs field.
+    return (1 - totalW / totalQ) * 100;
   }
 
   function _updateWinrateRow() {

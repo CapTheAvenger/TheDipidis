@@ -58,6 +58,18 @@ window.TestingGroups = (function () {
     return firebase.firestore.FieldValue.serverTimestamp();
   }
 
+  // Format a Firestore/JS error for a user-facing alert. Permission-
+  // denied is the most common friction point (stale security rules),
+  // so we call that out explicitly with the "re-publish rules" hint.
+  function _errMsg(err) {
+    if (!err) return '';
+    const code = err.code || '';
+    if (code === 'permission-denied' || /insufficient permissions/i.test(err.message || '')) {
+      return t('tg.errPermissionDenied');
+    }
+    return err.message || String(err);
+  }
+
   // Make sure the logged-in user has a publicProfiles/{uid} entry so
   // other users can find them by email when adding to a group.
   async function _ensurePublicProfile() {
@@ -142,7 +154,7 @@ window.TestingGroups = (function () {
       return ref.id;
     } catch (err) {
       console.error('[TestingGroups] createGroup failed', err);
-      alert(t('tg.errCreate') + '\n' + (err.message || err));
+      alert(t('tg.errCreate') + '\n' + _errMsg(err));
       return null;
     }
   }
@@ -162,7 +174,7 @@ window.TestingGroups = (function () {
       renderAll();
     } catch (err) {
       console.error('[TestingGroups] deleteGroup failed', err);
-      alert(t('tg.errDelete') + '\n' + (err.message || err));
+      alert(t('tg.errDelete') + '\n' + _errMsg(err));
     }
   }
 
@@ -234,7 +246,7 @@ window.TestingGroups = (function () {
       renderAll();
     } catch (err) {
       console.error('[TestingGroups] openGroup failed', err);
-      alert(t('tg.errOpen') + '\n' + (err.message || err));
+      alert(t('tg.errOpen') + '\n' + _errMsg(err));
     }
   }
 
@@ -694,7 +706,7 @@ window.TestingGroups = (function () {
       return url;
     } catch (err) {
       console.error('[TestingGroups] generateInviteLink failed', err);
-      alert(t('tg.errSave') + '\n' + (err.message || err));
+      alert(t('tg.errSave') + '\n' + _errMsg(err));
       return null;
     }
   }
@@ -768,7 +780,7 @@ window.TestingGroups = (function () {
       alert(t('tg.requestSent').replace('{group}', groupName));
     } catch (err) {
       console.error('[TestingGroups] acceptInvite failed', err);
-      alert(t('tg.errInviteFailed') + '\n' + (err.message || err));
+      alert(t('tg.errInviteFailed') + '\n' + _errMsg(err));
     }
   }
 
@@ -801,7 +813,7 @@ window.TestingGroups = (function () {
       await _logActivity(_currentGroupId, 'request_approved', req.email, null, role);
     } catch (err) {
       console.error('[TestingGroups] approveJoinRequest failed', err);
-      alert(t('tg.errSave') + '\n' + (err.message || err));
+      alert(t('tg.errSave') + '\n' + _errMsg(err));
     }
   }
 

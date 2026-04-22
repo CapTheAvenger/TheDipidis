@@ -4041,7 +4041,7 @@
 /* ==========================================================================
    ?? COMPETITIVE TIER-LISTEN (Core vs. Tech)
    ========================================================================== */
-/* Verleiht den Kategorien-�berschriften in der Deck-Ansicht einen Premium-Look */
+/* Verleiht den Kategorien-Überschriften in der Deck-Ansicht einen Premium-Look */
 h3:has(text:contains("Core")), 
 h3:has(text:contains("Ace")), 
 h3:has(text:contains("Tech")),
@@ -4063,7 +4063,7 @@ h3:has(text:contains("Tech")),
     gap: 10px;
 }
 
-/* Die Ace Spec �berschrift in Lila/Pink abheben */
+/* Die Ace Spec Überschrift in Lila/Pink abheben */
 h3:has(text:contains("Ace Spec")),
 h3:contains("Ace Spec") {
     background: linear-gradient(135deg, #9c27b0 0%, #e91e63 100%) !important;
@@ -4102,7 +4102,7 @@ h3:first-child {
     border: 1px solid #e0e0e0;
 }
 
-/* Spaltenk�pfe stylen */
+/* Spaltenköpfe stylen */
 .matchup-heatmap th {
     background-color: var(--bg-light);
     color: #333333;
@@ -4169,7 +4169,7 @@ h3:first-child {
         font-size: 0.9rem;
     }
 
-    /* Daumen-freundliche Buttons (Mindestens 44px H�he f�r Touch) */
+    /* Daumen-freundliche Buttons (Mindestens 44px Höhe für Touch) */
     button, .btn, .nav-btn, .action-btn {
         min-height: 44px;
         display: inline-flex;
@@ -4177,7 +4177,7 @@ h3:first-child {
         justify-content: center;
     }
 
-    /* Tier-Listen �berschriften auf dem Handy anpassen */
+    /* Tier-Listen Überschriften auf dem Handy anpassen */
     h3:has(text:contains("Core")), 
     h3:has(text:contains("Ace")), 
     h3:has(text:contains("Tech")) {
@@ -4186,7 +4186,7 @@ h3:first-child {
         margin: 20px 0 10px 0 !important;
     }
 
-    /* Modal-Fenster (Popups) f�r Handys maximieren */
+    /* Modal-Fenster (Popups) für Handys maximieren */
     .modal-content, .fullscreen-card-modal {
         width: 95% !important;
         margin: 10px auto !important;
@@ -4200,7 +4200,7 @@ h3:first-child {
    ?? PLAYTESTER MOBILE OPTIMIZATION
    ========================================================================== */
 
-/* Ausgew�hlte Karte Highlight */
+/* Ausgewählte Karte Highlight */
 .pt-selected {
     box-shadow: 0 0 0 3px var(--pokemon-yellow), 0 0 20px rgba(255, 203, 5, 0.6) !important;
     transform: scale(1.05) !important;

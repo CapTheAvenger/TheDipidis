@@ -70,6 +70,54 @@ document.addEventListener('languageChanged', function() {
     if (activeBtn && badge) badge.innerText = labelEl ? labelEl.textContent.trim() : activeBtn.innerText.trim();
 });
 
+// ── Deep-linking via URL hash ────────────────────────────────
+// Users arriving via share-links like https://thedipidis.app/#tutorial
+// should land directly on that tab. Also supports friendlier aliases
+// in both languages so we can share URLs that read naturally.
+(function setupHashDeepLink() {
+    const HASH_ALIASES = {
+        'tutorial':          'tutorial',
+        'how-to-use':        'tutorial',
+        'howto':             'tutorial',
+        'help':              'tutorial',
+        'hilfe':             'tutorial',
+        'anleitung':         'tutorial',
+        'city-league':       'city-league',
+        'current-meta':      'current-meta',
+        'past-meta':         'past-meta',
+        'cards':             'cards',
+        'proxy':             'proxy',
+        'playtester':        'sandbox',
+        'sandbox':           'sandbox',
+        'profile':           'profile',
+        'metacall':          'profile',    // Meta Call lives inside Profile tab
+        'meta-call':         'profile',
+        'journal':           'profile',    // Battle Journal too
+    };
+
+    function applyHash() {
+        const raw = (window.location.hash || '').replace(/^#/, '').toLowerCase().trim();
+        if (!raw) return;
+        const tabId = HASH_ALIASES[raw];
+        if (!tabId) return;
+        if (typeof switchTabAndUpdateMenu === 'function') {
+            switchTabAndUpdateMenu(tabId);
+        } else if (typeof switchTab === 'function') {
+            switchTab(tabId);
+        }
+    }
+
+    // Fire once on initial load, after the app is ready
+    if (window.__appResourcesSettled) {
+        applyHash();
+    } else {
+        window.addEventListener('app:ui-ready', applyHash, { once: true });
+    }
+
+    // Also respond to hash changes while the user is already on the page
+    window.addEventListener('hashchange', applyHash);
+})();
+
 // Wrap all DOM event logic in DOMContentLoaded for safety
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {

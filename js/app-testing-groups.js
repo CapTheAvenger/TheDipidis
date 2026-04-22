@@ -34,6 +34,7 @@ window.TestingGroups = (function () {
   let _pendingInvite    = null;   // {groupId, token} parsed from URL hash
   let _editingKey       = null;   // which input is focused? pauses remote updates
   let _rowFilter        = null;   // Set<deckName> of rows to show, or null = all
+  let _knownMembers     = new Map(); // email → displayName (across my own groups)
 
   const SAVE_DEBOUNCE_MS = 600;
 
@@ -166,14 +167,27 @@ window.TestingGroups = (function () {
   async function loadMyGroups() {
     const u = _currentUser();
     const db = _db();
-    if (!u || !db) { _myGroups = []; return _myGroups; }
+    if (!u || !db) { _myGroups = []; _knownMembers = new Map(); return _myGroups; }
     try {
       const snap = await db.collection('testingGroups')
         .where('memberUids', 'array-contains', u.uid)
         .get();
+      const seen = new Map();
       _myGroups = snap.docs.map(d => {
         const data = d.data() || {};
         const mem  = (data.members && data.members[u.uid]) || {};
+        // Collect every co-member email from all my groups — pool for
+        // autocomplete suggestions when adding members to a new group.
+        // Scoping to "groups I'm in" means no email harvesting from
+        // other users' private groups.
+        const members = data.members || {};
+        Object.keys(members).forEach(uid => {
+          const m = members[uid] || {};
+          const email = (m.email || '').toLowerCase().trim();
+          if (email && uid !== u.uid && !seen.has(email)) {
+            seen.set(email, m.displayName || email);
+          }
+        });
         return {
           id: d.id,
           name: data.name || '(unnamed)',
@@ -184,6 +198,7 @@ window.TestingGroups = (function () {
           updatedAt: data.updatedAt,
         };
       });
+      _knownMembers = seen;
       // Owner groups first, then by name
       _myGroups.sort((a, b) => {
         if ((a.role === 'owner') !== (b.role === 'owner')) return a.role === 'owner' ? -1 : 1;
@@ -1138,16 +1153,32 @@ window.TestingGroups = (function () {
       </tr>`;
     }).join('');
 
+    // Autocomplete: emails of people I already share groups with,
+    // minus anyone already in THIS group.
+    const alreadyIn = new Set((g.memberUids || []).map(uid => {
+      const m = (g.members || {})[uid] || {};
+      return (m.email || '').toLowerCase();
+    }));
+    const suggestions = Array.from(_knownMembers.entries())
+      .filter(([email]) => !alreadyIn.has(email))
+      .sort((a, b) => a[0].localeCompare(b[0]));
+    const datalistOpts = suggestions
+      .map(([email, displayName]) =>
+        `<option value="${_esc(email)}">${_esc(displayName)}</option>`).join('');
+
     const addForm = (_currentRole === 'owner')
       ? `<div class="tg-add-member-row">
-           <input type="email" id="tg-new-member-email" class="tg-input" placeholder="${_esc(t('tg.addMemberEmailPh'))}">
+           <input type="email" id="tg-new-member-email" class="tg-input"
+             list="tg-member-suggestions" autocomplete="off"
+             placeholder="${_esc(t('tg.addMemberEmailPh'))}">
            <select id="tg-new-member-role" class="tg-input tg-input-narrow">
              <option value="editor">${_esc(t('tg.role.editor'))}</option>
              <option value="viewer">${_esc(t('tg.role.viewer'))}</option>
            </select>
            <button class="tg-btn tg-btn-primary" onclick="TestingGroups._uiAddMember()">+ ${_esc(t('tg.addMember'))}</button>
+           <datalist id="tg-member-suggestions">${datalistOpts}</datalist>
          </div>
-         <p class="tg-hint">${_esc(t('tg.addMemberHint'))}</p>`
+         <p class="tg-hint">${_esc(t('tg.addMemberHint'))}${suggestions.length ? ' ' + _esc(t('tg.addMemberAutocompleteHint')).replace('{n}', suggestions.length) : ''}</p>`
       : '';
 
     return `

@@ -35,6 +35,8 @@ window.TestingGroups = (function () {
   let _editingKey       = null;   // which input is focused? pauses remote updates
   let _rowFilter        = null;   // Set<deckName> of rows to show, or null = all
   let _knownMembers     = new Map(); // email → displayName (across my own groups)
+  let _requestsUnsubscribe = null;   // pending-join-requests listener
+  let _pendingRequests  = [];        // [{uid, displayName, email, role, requestedAt}]
 
   const SAVE_DEBOUNCE_MS = 600;
 
@@ -319,11 +321,27 @@ window.TestingGroups = (function () {
       .limit(50)
       .onSnapshot(snap => _renderActivitySnapshot(snap),
                   err => console.warn('[TestingGroups] activity listener', err));
+
+    // Pending join requests (owner-only — rules reject the read for
+    // non-owners, so we just skip the subscription silently)
+    _requestsUnsubscribe = db.collection('testingGroups').doc(_currentGroupId)
+      .collection('joinRequests')
+      .onSnapshot(snap => {
+        _pendingRequests = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+        _renderPendingRequestsSection();
+      }, err => {
+        // Permission-denied is expected for non-owner members; no-op.
+        if (err && err.code !== 'permission-denied') {
+          console.warn('[TestingGroups] joinRequests listener', err);
+        }
+      });
   }
 
   function _stopRealtimeListener() {
     if (_snapUnsubscribe) { _snapUnsubscribe(); _snapUnsubscribe = null; }
     if (_activityUnsubscribe) { _activityUnsubscribe(); _activityUnsubscribe = null; }
+    if (_requestsUnsubscribe) { _requestsUnsubscribe(); _requestsUnsubscribe = null; }
+    _pendingRequests = [];
   }
 
   // Smart delta-update: compares old vs new and updates only the bits
@@ -695,6 +713,9 @@ window.TestingGroups = (function () {
   }
 
   // Called when a user arrives via #tg-join=<groupId>_<token>
+  // Creates a JOIN REQUEST (not direct-join) — the owner then decides
+  // whether to approve. Removes the need for existing members to know
+  // a new teammate's email address.
   async function acceptInvite(groupId, token) {
     await _ensurePublicProfile();
     const u  = _currentUser();
@@ -711,47 +732,92 @@ window.TestingGroups = (function () {
       const invite = invSnap.data() || {};
       if (invite.token !== token) { alert(t('tg.errInviteInvalid')); return; }
 
-      // 2) If already a member, just open the group
+      // 2) Already a member? Just jump in.
       const groupSnap = await db.collection('testingGroups').doc(groupId).get();
       if (groupSnap.exists) {
         const data = groupSnap.data() || {};
         if ((data.memberUids || []).includes(u.uid)) {
           await loadMyGroups();
+          if (typeof switchTabAndUpdateMenu === 'function') switchTabAndUpdateMenu('profile');
+          if (typeof switchProfileTab === 'function') switchProfileTab('testinggroups');
           await openGroup(groupId);
           return;
         }
       }
 
-      // 3) Ask for confirmation
+      // 3) Confirm intent to send a join request
       const groupName = invite.groupName || t('tg.unknownGroup');
       const role      = (invite.role === 'viewer' || invite.role === 'editor') ? invite.role : 'editor';
-      const confirmMsg = t('tg.confirmJoin')
+      const confirmMsg = t('tg.confirmRequestJoin')
         .replace('{group}', groupName)
         .replace('{role}', t('tg.role.' + role));
       if (!confirm(confirmMsg)) return;
 
-      // 4) Add self to group
-      const memberEntry = {
-        role,
-        displayName: u.displayName || u.email || 'Member',
-        email: (u.email || '').toLowerCase(),
-        joinedAt: Date.now(),
-      };
-      await db.collection('testingGroups').doc(groupId).update({
-        memberUids: firebase.firestore.FieldValue.arrayUnion(u.uid),
-        [`members.${u.uid}`]: memberEntry,
-        updatedAt: _fsNow(),
-      });
-      await _logActivity(groupId, 'member_joined_via_invite', u.email, null, role);
+      // 4) Create the join-request doc. The Firestore rule allows this
+      //    write iff the caller is authenticated, the doc id matches
+      //    their uid, and a valid invite exists for this group.
+      await db.collection('testingGroups').doc(groupId)
+        .collection('joinRequests').doc(u.uid).set({
+          uid: u.uid,
+          displayName: u.displayName || u.email || 'Member',
+          email: (u.email || '').toLowerCase(),
+          role,
+          requestedAt: _fsNow(),
+        });
 
-      // 5) Navigate into the group
-      await loadMyGroups();
-      if (typeof switchTabAndUpdateMenu === 'function') switchTabAndUpdateMenu('profile');
-      if (typeof switchProfileTab === 'function') switchProfileTab('testinggroups');
-      await openGroup(groupId);
+      alert(t('tg.requestSent').replace('{group}', groupName));
     } catch (err) {
       console.error('[TestingGroups] acceptInvite failed', err);
       alert(t('tg.errInviteFailed') + '\n' + (err.message || err));
+    }
+  }
+
+  // ── Owner actions on pending join requests ──────────────
+  async function approveJoinRequest(uid) {
+    if (_currentRole !== 'owner') return;
+    const db = _db();
+    if (!db || !_currentGroupId) return;
+    try {
+      const reqRef = db.collection('testingGroups').doc(_currentGroupId)
+        .collection('joinRequests').doc(uid);
+      const snap = await reqRef.get();
+      if (!snap.exists) return;
+      const req = snap.data() || {};
+      const role = (req.role === 'viewer' || req.role === 'editor') ? req.role : 'editor';
+      const memberEntry = {
+        role,
+        displayName: req.displayName || req.email || 'Member',
+        email: (req.email || '').toLowerCase(),
+        joinedAt: Date.now(),
+      };
+      // Add to memberUids + members
+      await db.collection('testingGroups').doc(_currentGroupId).update({
+        memberUids: firebase.firestore.FieldValue.arrayUnion(uid),
+        [`members.${uid}`]: memberEntry,
+        updatedAt: _fsNow(),
+      });
+      // Delete the request
+      await reqRef.delete();
+      await _logActivity(_currentGroupId, 'request_approved', req.email, null, role);
+    } catch (err) {
+      console.error('[TestingGroups] approveJoinRequest failed', err);
+      alert(t('tg.errSave') + '\n' + (err.message || err));
+    }
+  }
+
+  async function denyJoinRequest(uid) {
+    if (_currentRole !== 'owner') return;
+    if (!confirm(t('tg.confirmDenyRequest'))) return;
+    const db = _db();
+    if (!db || !_currentGroupId) return;
+    try {
+      const req = _pendingRequests.find(r => r.uid === uid);
+      await db.collection('testingGroups').doc(_currentGroupId)
+        .collection('joinRequests').doc(uid).delete();
+      await _logActivity(_currentGroupId, 'request_denied', (req && req.email) || uid, null, null);
+    } catch (err) {
+      console.error('[TestingGroups] denyJoinRequest failed', err);
+      alert(t('tg.errSave'));
     }
   }
 
@@ -1097,7 +1163,8 @@ window.TestingGroups = (function () {
         <div class="tg-filter-chips">${filterChips}</div>
       </div>`;
 
-    const membersHtml = _renderMembersSection();
+    const pendingHtml  = `<div id="tg-pending-requests"></div>`;  // filled by _renderPendingRequestsSection()
+    const membersHtml  = _renderMembersSection();
     const activityHtml = `<div id="tg-activity-section"><h3>${_esc(t('tg.activity'))}</h3><div id="tg-activity-log" class="tg-activity-log"><em>${_esc(t('tg.activityLoading'))}</em></div></div>`;
 
     const titleHtml = (_currentRole === 'owner')
@@ -1142,11 +1209,56 @@ window.TestingGroups = (function () {
     </table>
   </div>
 
+  ${pendingHtml}
   ${membersHtml}
   ${activityHtml}
 </div>`;
-    // Activity is kept fresh by the realtime listener set up in
-    // _startRealtimeListener(); nothing to do here.
+    // Activity + pending requests are kept fresh by the realtime
+    // listeners set up in _startRealtimeListener(). The pending section
+    // re-renders on its own when the snapshot arrives.
+    _renderPendingRequestsSection();
+  }
+
+  // Called when the joinRequests snapshot fires. Re-renders only the
+  // pending-requests section without touching the matchup table.
+  function _renderPendingRequestsSection() {
+    const el = document.getElementById('tg-pending-requests');
+    if (!el) return;
+    if (_currentRole !== 'owner' || _pendingRequests.length === 0) {
+      el.innerHTML = '';
+      return;
+    }
+    const rows = _pendingRequests.map(r => {
+      const role = (r.role === 'viewer' || r.role === 'editor') ? r.role : 'editor';
+      return `<div class="tg-request-row">
+        <div class="tg-request-info">
+          <div class="tg-request-name">${_esc(r.displayName || r.email || '—')}</div>
+          <div class="tg-request-meta">
+            <span class="tg-email">${_esc(r.email || '')}</span>
+            · ${_esc(t('tg.requestedRole'))} <span class="tg-role tg-role-${role}">${_esc(t('tg.role.' + role))}</span>
+          </div>
+        </div>
+        <div class="tg-request-actions">
+          <button class="tg-btn tg-btn-primary tg-btn-sm"
+                  onclick="TestingGroups.approveJoinRequest('${_jsEsc(r.uid)}')">
+            ✓ ${_esc(t('tg.approve'))}
+          </button>
+          <button class="tg-btn tg-btn-danger tg-btn-sm"
+                  onclick="TestingGroups.denyJoinRequest('${_jsEsc(r.uid)}')">
+            ✗ ${_esc(t('tg.deny'))}
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+    el.innerHTML = `
+      <div class="tg-pending-section">
+        <h3>
+          ${_esc(t('tg.pendingRequests'))}
+          <span class="tg-pending-badge">${_pendingRequests.length}</span>
+        </h3>
+        <p class="tg-hint">${_esc(t('tg.pendingRequestsHint'))}</p>
+        <div class="tg-request-list">${rows}</div>
+      </div>`;
   }
 
   function _renderMembersSection() {
@@ -1398,6 +1510,8 @@ window.TestingGroups = (function () {
     generateInviteLink,
     revokeInviteLink,
     acceptInvite,
+    approveJoinRequest,
+    denyJoinRequest,
     handleHashInvite,
     toggleRowFilter,
     clearRowFilter,

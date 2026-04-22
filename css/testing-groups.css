@@ -404,9 +404,15 @@
 .tg-cell-mid  { background: rgba(243,156,18,0.14); color: #b35c10; }
 .tg-cell-bad  { background: rgba(192,57,43,0.14);  color: #962d22; }
 
+/* Input fills the cell and centers its value — this way both readonly
+   cells (bare number) and editable cells (input) render at exactly the
+   same visual position so the matrix looks aligned across the board. */
 .tg-cell-input {
-  width: 54px;
-  padding: 4px 3px;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 2px;
+  margin: 0;
   border: 1px solid transparent;
   background: transparent;
   border-radius: 4px;
@@ -434,6 +440,76 @@
 }
 .tg-cell-qty { background: #f9fafc; }
 .tg-cell-wr { background: #eaf4ff; font-weight: 700; }
+
+/* ── Pending join requests (owner-only) ────────────────── */
+.tg-pending-section {
+  background: #fff8e6;
+  border: 1px solid #f0d98a;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.tg-pending-section h3 {
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #856404;
+}
+.tg-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
+  background: #e67e22;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+.tg-pending-section .tg-hint {
+  margin: 0 0 12px;
+}
+.tg-request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tg-request-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #f0e1bd;
+  border-radius: 8px;
+}
+.tg-request-info { flex: 1; min-width: 0; }
+.tg-request-name {
+  font-weight: 700;
+  color: #1a2533;
+  margin-bottom: 2px;
+}
+.tg-request-meta {
+  font-size: 0.82rem;
+  color: #6b7c93;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tg-request-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+  .tg-request-row { flex-direction: column; align-items: stretch; }
+  .tg-request-actions { justify-content: space-between; }
+}
 
 /* ── Members section ────────────────────────────────────── */
 .tg-members-section { margin-bottom: 24px; }

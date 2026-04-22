@@ -62,20 +62,6 @@ service cloud.firestore {
         return request.auth != null
           && resource.data.members[request.auth.uid].role == role;
       }
-      // Join-via-invite guard: the write must only add the caller to
-      // memberUids + members, and must not touch anything else. A valid
-      // invite doc must exist for this group.
-      function isValidSelfJoin() {
-        return request.auth != null
-          && !resource.data.memberUids.hasAny([request.auth.uid])
-          && request.resource.data.memberUids
-               .removeAll(resource.data.memberUids) == [request.auth.uid]
-          && resource.data.memberUids
-               .removeAll(request.resource.data.memberUids).size() == 0
-          && request.resource.data.diff(resource.data)
-               .affectedKeys().hasOnly(['memberUids', 'members', 'updatedAt'])
-          && exists(/databases/$(database)/documents/testingGroupInvites/$(groupId));
-      }
 
       // Members can read the group.
       allow read: if isMember();
@@ -89,16 +75,16 @@ service cloud.firestore {
 
       // Owner: full update / delete.
       // Editor: can only modify the 'data' field + 'updatedAt'.
-      // Non-member: can add themselves via a valid invite.
       // Viewer: cannot write.
+      // Non-members must go through the /joinRequests subcollection
+      // now — owners approve/deny there and then update the group.
       allow update: if
         (isOwner()) ||
         (
           roleIs('editor') &&
           request.resource.data.diff(resource.data)
             .affectedKeys().hasOnly(['data', 'updatedAt'])
-        ) ||
-        isValidSelfJoin();
+        );
 
       allow delete: if isOwner();
 
@@ -112,6 +98,27 @@ service cloud.firestore {
                .data.memberUids.hasAny([request.auth.uid])
           && request.resource.data.uid == request.auth.uid;
         allow update, delete: if false;
+      }
+
+      // Join requests — created by non-members via invite link, read/
+      // deleted by the group owner (approve = delete + group update,
+      // deny = delete). Doc id = requesting user's uid so we get
+      // unique-per-user for free.
+      match /joinRequests/{uid} {
+        // Requester can create their own request IF a valid invite
+        // exists for this group.
+        allow create: if request.auth != null
+          && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && exists(/databases/$(database)/documents/testingGroupInvites/$(groupId));
+        // Requester can read + delete (cancel) their own request.
+        // Owner of the group can read + delete any request.
+        allow read, delete: if request.auth != null && (
+          request.auth.uid == uid ||
+          get(/databases/$(database)/documents/testingGroups/$(groupId))
+               .data.ownerUid == request.auth.uid
+        );
+        allow update: if false;
       }
     }
   }

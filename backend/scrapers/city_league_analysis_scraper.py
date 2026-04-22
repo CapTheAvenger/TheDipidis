@@ -27,12 +27,27 @@ except ImportError:
 
 # Import shared scraper utilities
 from card_scraper_shared import (
-    setup_console_encoding, get_app_path, get_data_dir, CardDatabaseLookup, 
+    setup_console_encoding, get_app_path, get_data_dir, CardDatabaseLookup,
     aggregate_card_data, save_to_csv, fetch_page, normalize_archetype_name,
     load_scraped_ids, save_scraped_ids, _get_scraper, resolve_date_range,
     safe_fetch_html, setup_logging, load_settings, parse_tournament_date,
     extract_cards_from_decklist_soup
 )
+
+# Phase 3: canonicalize Japanese City League archetype names against the
+# current-meta Limitless names. Source-of-truth hierarchy is:
+#   Limitless current meta  ← authoritative names
+#   City League (JP)        ← rename to match, since it's early-signal only
+# Graceful fallback if the matcher isn't available.
+try:
+    from archetype_matcher import ArchetypeMatcher  # type: ignore
+    _matcher: 'Optional[ArchetypeMatcher]' = ArchetypeMatcher().load()
+except Exception as _matcher_err:
+    _matcher = None
+    logging.getLogger("city_league_analysis_scraper").warning(
+        "ArchetypeMatcher unavailable (%s) — City League names will not be canonicalized",
+        _matcher_err,
+    )
 
 # Fix Windows console encoding for Unicode characters
 setup_console_encoding()
@@ -174,7 +189,19 @@ def process_tournament_decklists(
     for row in rows:
         # Archetype Name
         img_tags = row.select('img.pokemon')
-        deck_name = ' '.join(img['alt'].title() for img in img_tags if img.has_attr('alt')) or "Unknown"
+        alt_slugs = [img['alt'] for img in img_tags if img.has_attr('alt')]
+
+        # Prefer the canonical Limitless current-meta name so this deck lines
+        # up with the international meta rows downstream. Only fall back to
+        # the title-cased alt join when the slug signature isn't in the index
+        # — which typically means a new JP archetype that hasn't hit the
+        # international meta yet.
+        canonical = None
+        if _matcher is not None and alt_slugs:
+            slug_candidates = [s.strip().lower().replace(' ', '-') for s in alt_slugs]
+            canonical = _matcher.canonicalize_by_slugs(slug_candidates)
+
+        deck_name = canonical or (' '.join(s.title() for s in alt_slugs) or "Unknown")
         
         # Link finden
         link_tag = row.select_one('a[href*="/decks/list/"]')

@@ -16,6 +16,15 @@
 
   const DATA_URL = 'data/archetype_icons.json';
 
+  // Cache-buster so a fresh deploy's JSON is picked up even when the
+  // browser cached an older version of this script. We intentionally
+  // use a runtime-variable token so repeat calls within one session
+  // still hit the browser cache, but a new session (= new script load
+  // after deploy) fetches fresh data.
+  const CACHE_TOKEN = (typeof document !== 'undefined' && document.currentScript)
+    ? (document.currentScript.src.match(/[?&]v=([^&]+)/) || [,'dev'])[1]
+    : 'dev';
+
   let _data = null;
   let _normalizedIndex = null;
   let _loadPromise = null;
@@ -38,7 +47,12 @@
   async function preload() {
     if (_data) return _data;
     if (_loadPromise) return _loadPromise;
-    _loadPromise = fetch(DATA_URL, { cache: 'force-cache' })
+    // Use the script's own ?v= token as a query-string cache-buster so
+    // the JSON stays tied to the deploy that shipped this script. Remove
+    // force-cache — it made stale JSON stick even after the script was
+    // updated, which hid newly-added archetypes like Raging Bolt Noctowl.
+    const urlWithVersion = DATA_URL + '?v=' + encodeURIComponent(CACHE_TOKEN);
+    _loadPromise = fetch(urlWithVersion)
       .then(r => {
         if (!r.ok) throw new Error(`archetype_icons.json HTTP ${r.status}`);
         return r.json();

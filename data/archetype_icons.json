@@ -3,7 +3,7 @@
     "urlPrefix": "https://r2.limitlesstcg.net/pokemon/gen9/",
     "urlSuffix": ".png",
     "description": "Maps current-meta archetype names to the sequence of Pokémon species/form identifiers that identify them visually. The helper getArchetypeIconUrls() resolves each array entry into a Limitless R2 icon URL. Add new archetypes or fix guesses as they surface; broken URLs are handled gracefully by the img onerror fallback in the UI.",
-    "lastScrapedAt": "2026-04-22T23:54:11",
+    "lastScrapedAt": "2026-04-23T00:03:09",
     "lastScrapedCount": 118
   },
   "archetypes": {
@@ -23,7 +23,7 @@
       "froslass"
     ],
     "Lucario Hariyama": [
-      "lucario",
+      "lucario-mega",
       "hariyama"
     ],
     "Alakazam Dudunsparce": [
@@ -37,16 +37,18 @@
       "reshiram"
     ],
     "Rocket's Mewtwo": [
-      "mewtwo"
+      "mewtwo",
+      "spidops"
     ],
     "Rocket's Honchkrow": [
-      "honchkrow"
+      "honchkrow",
+      "porygon2"
     ],
     "Rocket's Spidops": [
       "spidops"
     ],
     "Starmie Froslass": [
-      "starmie",
+      "starmie-mega",
       "froslass"
     ],
     "Ogerpon Meganium": [
@@ -54,7 +56,8 @@
       "meganium"
     ],
     "Ogerpon Box": [
-      "ogerpon"
+      "ogerpon",
+      "ogerpon-wellspring"
     ],
     "Grimmsnarl Froslass": [
       "grimmsnarl",
@@ -72,7 +75,8 @@
       "ogerpon"
     ],
     "Mega Absol Box": [
-      "absol-mega"
+      "absol-mega",
+      "kangaskhan-mega"
     ],
     "Mega Absol ex": [
       "absol-mega"
@@ -131,20 +135,21 @@
       "dusknoir"
     ],
     "Diancie Dusknoir": [
-      "diancie",
+      "diancie-mega",
       "dusknoir"
     ],
     "Hop's Trevenant": [
       "trevenant"
     ],
     "Hop's Zacian": [
-      "zacian"
+      "zacian-crowned",
+      "snorlax"
     ],
     "Decidueye": [
       "decidueye"
     ],
     "Ursaluna Lunatone": [
-      "ursaluna",
+      "ursaluna-bloodmoon",
       "lunatone"
     ],
     "Mega Froslass": [
@@ -154,11 +159,12 @@
       "froslass-mega"
     ],
     "Lopunny Dudunsparce": [
-      "lopunny",
+      "lopunny-mega",
       "dudunsparce"
     ],
     "Toxtricity Box": [
-      "toxtricity"
+      "toxtricity",
+      "absol-mega"
     ],
     "Mega Charizard X": [
       "charizard-mega-x"
@@ -184,11 +190,11 @@
       "typhlosion"
     ],
     "Zygarde Barbaracle": [
-      "zygarde",
+      "zygarde-mega",
       "barbaracle"
     ],
     "Sharpedo Toxtricity": [
-      "sharpedo",
+      "sharpedo-mega",
       "toxtricity"
     ],
     "Mega Abomasnow": [
@@ -213,7 +219,7 @@
       "dragonite-mega"
     ],
     "Kangaskhan Bouffalant": [
-      "kangaskhan",
+      "kangaskhan-mega",
       "bouffalant"
     ],
     "Iron Thorns Crustle": [
@@ -227,22 +233,25 @@
       "zygarde-mega"
     ],
     "Joltik Box": [
-      "joltik"
+      "joltik",
+      "pikachu"
     ],
     "Joltik Toolbox": [
       "joltik"
     ],
     "Dudunsparce Control": [
-      "dudunsparce"
+      "dudunsparce",
+      "elgyem"
     ],
     "Palafin": [
-      "palafin"
+      "palafin-hero"
     ],
     "Alolan Exeggutor ex": [
-      "exeggutor-alolan"
+      "exeggutor-alola"
     ],
     "Iono's Bellibolt": [
-      "bellibolt"
+      "bellibolt",
+      "voltorb"
     ],
     "Gardevoir Munkidori": [
       "gardevoir",
@@ -263,9 +272,7 @@
     ],
     "Festival Lead": [],
     "Psy Box": [],
-    "Tera Box": [
-      "tatsugiri"
-    ],
+    "Tera Box": [],
     "Clefairy Box": [
       "clefairy"
     ],

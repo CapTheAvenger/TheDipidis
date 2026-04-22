@@ -543,6 +543,16 @@
   background: #f9fafc;
   padding: 4px 2px;
 }
+
+/* Rest bucket: auto-computed residual. Soft italic + slightly muted
+   colour makes it obvious at a glance that this value isn't user-
+   editable — same visual language as the diagonal (self-mirror) cells
+   in the matrix body. */
+.tg-matchup-table tfoot .tg-cell-qty.tg-cell-qty-rest {
+  font-style: italic;
+  color: #667185;
+  background: #eef2f7;
+}
 .tg-matchup-table tfoot .tg-cell-wr {
   background: #eaf4ff;
   font-size: 0.82rem;    /* matches body cell size for visual consistency */

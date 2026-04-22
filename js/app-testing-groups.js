@@ -1187,10 +1187,28 @@ window.TestingGroups = (function () {
       </tr>`;
     }).join('');
 
-    // Quantity row
+    // Quantity row. "Rest" (case-insensitive) is treated as the residual
+    // bucket and auto-computed as 100 - sum(named decks), readonly — it
+    // represents whatever share of the meta the group hasn't bothered
+    // to enumerate by name. Re-computed on every render so edits to
+    // other quantities flow through automatically.
+    const _isRest = (name) => String(name || '').trim().toLowerCase() === 'rest';
+    const _restTotal = decks.reduce((sum, d) => {
+      if (_isRest(d)) return sum;
+      const v = parseFloat(qty[d]);
+      return sum + (Number.isFinite(v) ? v : 0);
+    }, 0);
+    const _restQty = Math.max(0, Math.min(100, 100 - _restTotal));
+
     const quantityCells = decks.map(d => {
-      const v = qty[d] == null ? '' : qty[d];
       const dataAttr = `data-qty="${_attrEsc(d)}"`;
+      if (_isRest(d)) {
+        // Residual bucket — always computed, never user-editable
+        const disp = _restQty.toFixed(_restQty % 1 === 0 ? 0 : 1) + '%';
+        return `<td class="tg-cell tg-cell-qty tg-cell-qty-rest" ${dataAttr}
+                    title="${_esc(t('tg.restAutoComputed') || 'Auto: 100% − sum of named decks')}">${disp}</td>`;
+      }
+      const v = qty[d] == null ? '' : qty[d];
       return readonly
         ? `<td class="tg-cell tg-cell-qty" ${dataAttr}>${v === '' ? '—' : v + '%'}</td>`
         : `<td class="tg-cell tg-cell-qty" ${dataAttr}>

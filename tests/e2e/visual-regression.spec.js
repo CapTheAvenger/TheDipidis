@@ -91,6 +91,12 @@ async function goToTab(page, tabId) {
 // ---------------------------------------------------------------------------
 test.describe('Card Action Buttons', () => {
     test.beforeEach(async ({ page }) => {
+        // Both tests in this describe depend on Windows-only pixel rendering.
+        // Skip the expensive setup on non-Windows CI runners — otherwise
+        // beforeEach burns the whole 60s wait looking for DOM that the
+        // skipped test never asserts on.
+        test.skip(!RUN_PIXEL_SNAPSHOTS, 'Card action button checks run on Windows only');
+
         await openStablePage(page);
         await goToTab(page, 'city-league-analysis');
 

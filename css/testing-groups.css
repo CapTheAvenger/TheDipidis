@@ -226,15 +226,15 @@
 }
 .tg-matchup-table thead th span {
   display: block;
-  transform: rotate(-55deg);
+  transform: rotate(-35deg);
   transform-origin: bottom left;
-  width: 120px;
+  width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   line-height: 1;
   margin-bottom: -4px;
-  margin-left: 20px;
+  margin-left: 10px;
 }
 
 /* CORNER (top-left) — sticks to BOTH top and left, highest z-index */
@@ -408,6 +408,16 @@
   bottom: 0;
   z-index: 15;
   background: #e8edf5;
+  /* Match body cell padding exactly so numbers align column-for-column
+     with the matchup values above. Without this the footer inherits
+     different padding from the thead override and looks off-center. */
+  padding: 5px 3px;
+}
+.tg-matchup-table tfoot .tg-cell-qty,
+.tg-matchup-table tfoot .tg-cell-wr {
+  text-align: center;
+  padding: 5px 3px;
+  vertical-align: middle;
 }
 .tg-matchup-table tfoot .tg-cell-qty { background: #f9fafc; }
 .tg-matchup-table tfoot .tg-cell-wr  { background: #eaf4ff; }
@@ -450,8 +460,8 @@
   display: block;
   width: 100%;
   box-sizing: border-box;
-  padding: 3px 1px;
-  margin: 0;
+  padding: 3px 0;
+  margin: 0 auto;
   border: 1px solid transparent;
   background: transparent;
   border-radius: 4px;

@@ -217,8 +217,8 @@
   font-weight: 700;
   font-size: 0.82rem;
   height: 130px;
-  min-width: 44px;
-  width: 44px;
+  min-width: 52px;
+  width: 52px;
   padding: 4px 4px 8px;
   vertical-align: bottom;
   white-space: nowrap;
@@ -464,8 +464,8 @@
 .tg-detail-title:hover .tg-rename-hint { opacity: 1; }
 
 .tg-cell {
-  min-width: 44px;
-  width: 44px;
+  min-width: 52px;
+  width: 52px;
   background: #fff;
   font-variant-numeric: tabular-nums;
   font-size: 0.86rem;

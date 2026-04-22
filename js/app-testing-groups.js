@@ -1145,10 +1145,16 @@ window.TestingGroups = (function () {
              <button class="tg-deck-remove" title="${_esc(t('tg.removeDeck'))}" onclick="TestingGroups.removeDeck('${_jsEsc(rowDeck)}')">×</button>
            </span>`
         : '';
-      const rowIcons = _iconHtml(rowDeck, 'sm', 'inline');
+      // When the archetype has an icon mapping, show only the icon — it's
+      // easier to scan and the full name lives in the title tooltip.
+      // Custom/unknown decks still get the text label as a fallback.
+      const rowIcons = _iconHtml(rowDeck, 'md', 'inline');
+      const rowLabelHtml = rowIcons
+        ? rowIcons
+        : `<span>${_esc(rowDeck)}</span>`;
       return `<tr>
-        <th class="tg-row-head">
-          <div class="tg-row-head-inner">${rowIcons}<span>${_esc(rowDeck)}</span></div>
+        <th class="tg-row-head" title="${_esc(rowDeck)}">
+          <div class="tg-row-head-inner">${rowLabelHtml}</div>
           ${deckControls}
         </th>
         ${cells}

@@ -3,7 +3,8 @@
 Komplettes Pokemon TCG Scraping & Analysis System mit interaktiver Web-Oberfläche, Deck Builder, Proxy Printer, Playtester und Firebase-User-Profilen.
 
 ## 🌐 Live Demo
-**GitHub Pages:** https://captheavenger.github.io/TheDipidis/
+**Website:** https://thedipidis.app/
+**GitHub Pages backend:** https://captheavenger.github.io/TheDipidis/ (redirects to the custom domain)
 
 ## 📁 Projekt-Struktur
 

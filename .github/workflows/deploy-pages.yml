@@ -144,6 +144,7 @@ jobs:
           cp version.json _site/
           cp service-worker.js _site/
           cp .nojekyll _site/
+          cp CNAME _site/ 2>/dev/null || true
           cp -r css _site/css
           cp -r js _site/js
           cp -r images _site/images 2>/dev/null || true

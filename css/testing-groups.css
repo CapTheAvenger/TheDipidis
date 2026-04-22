@@ -202,12 +202,13 @@
   box-sizing: border-box;
 }
 
-/* ROW of COLUMN HEADERS (X-axis) — rotated -55° so full deck names fit
-   into narrow 44px columns. Much more readable at 21+ columns than the
-   previous truncated / line-clamped approach.
-   Sticky-top still works: the <th> is sticky while the span inside
-   handles the rotation. z-index keeps the thead above row-head and
-   body cells. */
+/* ROW of COLUMN HEADERS (X-axis) — unified UPRIGHT layout.
+   Icons sit centered in the cell; text-only headers (Festival Lead, Psy
+   Box, Rest, etc.) wrap within the 52px column width so they stay
+   readable without needing rotation. Same 68px height on every cell so
+   the whole thead row is visually flat. overflow:visible guards against
+   Pokémon icons being clipped when the cell briefly reflows on image
+   load. */
 .tg-matchup-table thead th {
   position: sticky;
   top: 0;
@@ -215,54 +216,58 @@
   background: #1a2340;
   color: #fff;
   font-weight: 700;
-  font-size: 0.82rem;
-  height: 130px;
+  font-size: 0.72rem;
+  height: 68px;
   min-width: 52px;
   width: 52px;
-  padding: 4px 4px 8px;
-  vertical-align: bottom;
-  white-space: nowrap;
+  padding: 4px 2px;
+  vertical-align: middle;
+  text-align: center;
+  overflow: visible;
   box-shadow: 0 2px 4px rgba(0,0,0,.12);
 }
-.tg-matchup-table thead th span {
-  display: block;
-  transform: rotate(-35deg);
-  transform-origin: bottom left;
-  width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  line-height: 1;
-  margin-bottom: -4px;
-  margin-left: 10px;
+/* Belt-and-braces reset — kill any legacy rotation/writing-mode that
+   might reach the inner span/group via descendant selectors. */
+.tg-matchup-table thead th > span,
+.tg-matchup-table thead th .tg-col-icons,
+.tg-matchup-table thead th .tcg-pokemon-icon-group {
+  transform: none !important;
+  writing-mode: horizontal-tb;
 }
 
-/* Icon variant of the column header: upright, centered, no rotation.
-   When an archetype has a Pokémon-icon mapping we show the icon(s) instead
-   of the rotated deck name, which is denser and much easier to scan.
-   Combo archetypes stack the 2 icons vertically so they fit the narrow
-   column without overlap. */
+/* Text-only column header (no icon mapping): wrap long deck names
+   inside the 52px column instead of rotating. "Festival Lead" breaks
+   onto two lines; "Rest" sits as a single line. */
+.tg-matchup-table thead th.tg-col-head > span {
+  display: block;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  line-height: 1.1;
+  width: 100%;
+  margin: 0;
+}
+
+/* Icon column header: icon (or 2 stacked icons) centered in the cell. */
 .tg-matchup-table thead th.tg-col-head-icon {
-  height: 68px;
   padding: 4px;
-  vertical-align: middle;
 }
 .tg-matchup-table thead th.tg-col-head-icon .tg-col-icons {
-  display: flex;
-  justify-content: center;
+  display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  transform: none;
+  justify-content: center;
+  gap: 2px;
   width: auto;
   margin: 0;
   line-height: 1;
 }
-/* Combo icons in column headers stack cleanly — override the default
-   group's slight overlap so two icons sit flush under each other, not
-   diagonal. Plain horizontal overlap (used in row headers with --inline)
-   stays unaffected. */
 .tg-matchup-table thead th.tg-col-head-icon .tcg-pokemon-icon-group {
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 2px;
 }
 .tg-matchup-table thead th.tg-col-head-icon
@@ -737,15 +742,12 @@
   .tg-detail-header { flex-direction: column; align-items: stretch; }
   .tg-detail-actions { margin-left: 0; }
   .tg-matchup-table { font-size: 0.78rem; }
-  /* Shorter rotated headers on mobile so they don't eat half the viewport */
+  /* Mobile thead: same upright layout as desktop, just tighter */
   .tg-matchup-table thead th {
-    height: 100px;
-    min-width: 40px;
-    width: 40px;
-  }
-  .tg-matchup-table thead th span {
-    width: 90px;
-    font-size: 0.76rem;
+    height: 58px;
+    min-width: 44px;
+    width: 44px;
+    font-size: 0.64rem;
   }
   .tg-corner, .tg-row-head {
     min-width: 140px !important;

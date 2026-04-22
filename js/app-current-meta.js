@@ -198,17 +198,41 @@
                     rowLookupMaps.set(rowDeck, lookup);
                 });
                 
+                // Small helper: Pokémon-icon HTML for an archetype, empty
+                // string when no mapping exists. Keeps the text label as
+                // fallback when ArchetypeIcons is missing or unknown.
+                const iconHtml = (name) => {
+                    if (typeof window.ArchetypeIcons === 'undefined') return '';
+                    const urls = window.ArchetypeIcons.getIconUrls(name);
+                    if (!urls || !urls.length) return '';
+                    const imgs = urls.map(u =>
+                        `<img class="tcg-pokemon-icon tcg-pokemon-icon--sm" src="${u}" alt="" loading="lazy" onerror="this.style.display='none'">`
+                    ).join('');
+                    return urls.length > 1
+                        ? `<span class="tcg-pokemon-icon-group tcg-pokemon-icon-group--inline">${imgs}</span>`
+                        : imgs;
+                };
+                const escAttr = (s) => String(s).replace(/"/g, '&quot;');
+
                 // Tabellenkopf (X-Achse mit Zeilenumbrüchen)
                 tableHtml += '<thead><tr><th class="heatmap-th-x">' + t('heatmap.yourDeck') + '</th>';
                 xDecks.forEach(colDeck => {
-                    // KEIN Substring mehr → CSS word-wrap für Zeilenumbrüche
-                    tableHtml += `<th title="${colDeck}" class="heatmap-th-y">${colDeck}</th>`;
+                    // Icons stacked above the wrapped name; title keeps full name on hover
+                    const ic = iconHtml(colDeck);
+                    const inner = ic
+                        ? `<span style="display:flex;flex-direction:column;align-items:center;gap:2px;">${ic}<span>${colDeck}</span></span>`
+                        : colDeck;
+                    tableHtml += `<th title="${escAttr(colDeck)}" class="heatmap-th-y">${inner}</th>`;
                 });
                 tableHtml += '</tr></thead><tbody>';
-                
+
                 // Tabellenzeilen (Y-Achse)
                 yDecks.forEach(rowDeck => {
-                    tableHtml += `<tr><th class="heatmap-th-row">${rowDeck}</th>`;
+                    const rIc = iconHtml(rowDeck);
+                    const rowLabel = rIc
+                        ? `<span style="display:inline-flex;align-items:center;gap:6px;">${rIc}<span>${rowDeck}</span></span>`
+                        : rowDeck;
+                    tableHtml += `<tr><th class="heatmap-th-row" title="${escAttr(rowDeck)}">${rowLabel}</th>`;
                     const rowLookup = rowLookupMaps.get(rowDeck);
                     
                     xDecks.forEach(colDeck => {

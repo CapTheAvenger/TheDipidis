@@ -392,6 +392,23 @@ window.MetaCall = (function () {
       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  // Render Limitless Pokémon icons for an archetype name. Returns an
+  // <img> or .tcg-pokemon-icon-group HTML ready to inline next to the
+  // deck-name text. Empty string when the mapping is absent or the
+  // ArchetypeIcons helper hasn't loaded yet — callers MUST keep the
+  // text label so missing icons degrade gracefully.
+  function _mcIconHtml(deckName) {
+    if (typeof window.ArchetypeIcons === 'undefined') return '';
+    const urls = window.ArchetypeIcons.getIconUrls(deckName);
+    if (!urls || !urls.length) return '';
+    const imgs = urls.map(u =>
+      `<img class="tcg-pokemon-icon tcg-pokemon-icon--sm" src="${esc(u)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+    ).join('');
+    return urls.length > 1
+      ? `<span class="tcg-pokemon-icon-group tcg-pokemon-icon-group--inline">${imgs}</span>`
+      : imgs;
+  }
+
   // Escape for JS string literal inside HTML attribute — needed for
   // deck names with apostrophes (e.g. "N's Zoroark", "Rocket's Mewtwo",
   // "Cynthia's Garchomp"). The apostrophe would otherwise terminate the
@@ -435,7 +452,8 @@ window.MetaCall = (function () {
   function _renderFlatDeckRow(deck, maxShare) {
     const isJunk      = deck.name === '_junk';
     const isCustom    = !!deck.isCustom;
-    const label       = isJunk ? t('mc.junkDecks') : esc(deck.name);
+    const icons       = isJunk ? '' : _mcIconHtml(deck.name);
+    const label       = isJunk ? t('mc.junkDecks') : (icons + esc(deck.name));
     const lambda      = _settings.rounds * deck.finalShare / 100;
     const hasPersonal = deck.personalShare !== undefined;
     const barW        = Math.round((deck.finalShare / Math.max(maxShare, 0.01)) * 100);
@@ -481,7 +499,7 @@ window.MetaCall = (function () {
 <tr class="mc-group-header" onclick="MetaCall._toggleGroup('${gid}')">
   <td>
     <span class="mc-group-arrow" id="mc-gt-${gid}">▶</span>
-    <span class="mc-deck-name">${esc(group.main)}</span>
+    <span class="mc-deck-name">${_mcIconHtml(group.main)}${esc(group.main)}</span>
     <span class="mc-group-count">${group.variants.length} ${t('mc.variants')}</span>
   </td>
   <td><span class="mc-share-online">${group.totalOnline.toFixed(2)}%</span></td>
@@ -505,7 +523,7 @@ window.MetaCall = (function () {
                             oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)"
                             style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
           return `<tr class="mc-group-detail mc-group-hidden" data-group="${gid}">
-            <td style="padding-left:26px"><span class="mc-deck-name mc-variant-name">${esc(deck.name)}</span></td>
+            <td style="padding-left:26px"><span class="mc-deck-name mc-variant-name">${_mcIconHtml(deck.name)}${esc(deck.name)}</span></td>
             <td><span class="mc-share-online">${deck.onlineShare.toFixed(2)}%</span></td>
             <td>${pCell}</td>
             <td><span class="mc-share-final${hasP ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>

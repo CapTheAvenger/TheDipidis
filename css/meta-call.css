@@ -121,6 +121,12 @@
   font-weight: 600;
   color: #1a2533;
   white-space: nowrap;
+  /* Inline flex so Pokémon icons (if present) sit next to the deck
+     name without breaking layout. Gap keeps a small breath between
+     the icon and the text. */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .mc-share-online {
   color: #3498db;

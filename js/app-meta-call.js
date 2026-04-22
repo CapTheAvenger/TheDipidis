@@ -29,9 +29,8 @@ window.MetaCall = (function () {
   const TOP_N = 12;              // show top N decks; everything else rolls into Junk
   const MAX_CUSTOM = 10;         // max custom decks the user can add
   const SCENARIOS_STORAGE_KEY = 'metacall_scenarios_v1';
-  // Brand shown in share-image footer. Update this one line when the
-  // custom domain goes live (e.g. 'thedipidis.de' → 'pokemon-tcg-hub.de').
-  const BRAND_FOOTER = 'thedipidis.de';
+  // Brand shown in share-image footer.
+  const BRAND_FOOTER = 'thedipidis.app';
 
   // ── CSV Helper ─────────────────────────────────────────────
   function parseCSV(text, sep) {

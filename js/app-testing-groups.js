@@ -1579,20 +1579,23 @@ window.TestingGroups = (function () {
   }
 
   function _computeAggregateWR(deck, decks, qty, matrix) {
-    // Column-based aggregate: read every cell in `deck`'s COLUMN
-    // (every other row's WR vs this deck), quantity-weighted by the
-    // row-deck's share. The raw column average is "field's WR vs deck";
-    // we return the inverse so the published label "Winrates" still
-    // means "this deck's WR vs the field".
+    // Row-based aggregate (this IS what we want — the original intent):
+    // for each opponent in `deck`'s ROW, take deck's WR vs that opponent
+    // weighted by the opponent's share of the meta. That average is
+    // directly "this deck's WR vs the field".
     //
-    // Column-based (vs the prior row-based impl) is what the user
-    // expects visually: every cell the user edits *above* a column's
-    // Winrate cell now directly flows into that cell on the next
-    // _updateWinrateRow() pass.
+    // The previous switch to column-based was based on a misread of a
+    // visual alignment bug: the tfoot was drifting under the thead due
+    // to tfoot cells not inheriting thead's rendered 55px width, which
+    // made it LOOK like winrates sat under the wrong columns. The real
+    // fix is CSS (shared --tg-col-width var), not a semantic inversion.
     //
-    // Rest-quantity is recomputed here too (100 − sum of named decks)
-    // so the weighting stays consistent with the footer's displayed
-    // value even when the stored qty["Rest"] is stale.
+    // Rest-quantity is recomputed here (100 − sum of named decks) so
+    // the weighting stays consistent with the footer's displayed value
+    // even when the stored qty["Rest"] is stale.
+    const row = matrix[deck];
+    if (!row) return null;
+
     const isRest = (n) => String(n || '').trim().toLowerCase() === 'rest';
     const namedSum = decks.reduce((s, d) => {
       if (isRest(d)) return s;
@@ -1605,18 +1608,15 @@ window.TestingGroups = (function () {
     let totalW = 0, totalQ = 0;
     decks.forEach(opp => {
       if (opp === deck) return;
-      const oppRow = matrix[opp];
-      if (!oppRow) return;
       const q = Number(effQty(opp));
-      const w = Number(oppRow[deck]);    // opp's WR vs `deck`
+      const w = Number(row[opp]);    // deck's WR vs opp
       if (!isNaN(q) && q > 0 && !isNaN(w)) {
         totalW += (w / 100) * q;
         totalQ += q;
       }
     });
     if (totalQ <= 0) return null;
-    // Column avg = field's WR vs deck → invert for deck's WR vs field.
-    return (1 - totalW / totalQ) * 100;
+    return (totalW / totalQ) * 100;
   }
 
   function _updateWinrateRow() {

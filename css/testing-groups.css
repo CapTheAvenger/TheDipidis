@@ -197,6 +197,14 @@
      since the tfoot uses slightly different per-cell padding than the
      tbody, the winrates/quantity values drift off the matrix grid. */
   table-layout: fixed;
+  /* Single source of truth for data-column width. All three of
+     thead-th.tg-col-head, tbody-td.tg-cell, tfoot-td.tg-cell read this
+     so they render at the same width — without it, Chromium lets the
+     tfoot cells fall back to their own .tg-cell rule (52px) while
+     thead cells are stretched to 55px by Pokémon-icon content, and
+     the 3px drift accumulates over 21+ columns into a visible shift
+     at the end of the Quantity/Winrates rows. */
+  --tg-col-width: 55px;
 }
 .tg-matchup-table th,
 .tg-matchup-table td {
@@ -224,8 +232,8 @@
   font-weight: 700;
   font-size: 0.72rem;
   height: 68px;
-  min-width: 52px;
-  width: 52px;
+  min-width: var(--tg-col-width);
+  width: var(--tg-col-width);
   padding: 4px 2px;
   vertical-align: middle;
   text-align: center;
@@ -538,6 +546,12 @@
   text-align: center;
   vertical-align: middle;
   font-weight: 700;
+  /* Explicit width from the shared variable — some browsers (Chromium)
+     don't inherit the thead's rendered width for tfoot cells under
+     table-layout: fixed, even when .tg-cell already declares it. The
+     double-declaration guarantees column alignment no matter what. */
+  min-width: var(--tg-col-width) !important;
+  width: var(--tg-col-width) !important;
 }
 .tg-matchup-table tfoot .tg-cell-qty {
   background: #f9fafc;
@@ -591,8 +605,13 @@
 .tg-detail-title:hover .tg-rename-hint { opacity: 1; }
 
 .tg-cell {
-  min-width: 52px;
-  width: 52px;
+  /* Shared data-column width across thead/tbody/tfoot — read the table
+     variable so a single override propagates everywhere. Important for
+     tfoot: without this explicit rule Chromium gives tfoot cells the
+     OLD fixed 52px even when thead is rendered wider (icon content
+     stretches it), producing a growing horizontal drift. */
+  min-width: var(--tg-col-width) !important;
+  width: var(--tg-col-width) !important;
   background: #fff;
   font-variant-numeric: tabular-nums;
   font-size: 0.86rem;
@@ -812,18 +831,23 @@
   .tg-detail-header { flex-direction: column; align-items: stretch; }
   .tg-detail-actions { margin-left: 0; }
   .tg-matchup-table { font-size: 0.78rem; }
-  /* Mobile thead: same upright layout as desktop, just tighter */
+  /* Mobile thead: same upright layout as desktop, just tighter.
+     Width comes from the shared --tg-col-width variable (set below
+     in this breakpoint) so thead/tbody/tfoot stay in sync on mobile. */
   .tg-matchup-table thead th {
     height: 58px;
-    min-width: 44px;
-    width: 44px;
     font-size: 0.64rem;
   }
   .tg-corner, .tg-row-head {
     min-width: 140px !important;
     width: 140px !important;
   }
-  .tg-cell { min-width: 40px; width: 40px; font-size: 0.78rem; }
+  /* Mobile override: redefine the shared variable once so both the
+     thead width rule and the .tg-cell/tfoot width rules shrink together.
+     Without this the mobile thead would get the default 55px while
+     body/tfoot got 40px → the same drift, just on small screens. */
+  .tg-matchup-table { --tg-col-width: 40px; }
+  .tg-cell { font-size: 0.78rem; }
   .tg-cell-input { font-size: 0.78rem; }
   .tg-members-table .tg-email { display: none; }
 }

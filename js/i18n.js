@@ -694,6 +694,9 @@ const translations = {
     'tg.renameGroupPrompt':     'New group name:',
     'tg.renameDeck':            'Rename deck',
     'tg.renameDeckPrompt':      'New name for "{name}":',
+    'tg.filterRows':            'Show rows:',
+    'tg.rowsVisible':           'rows visible',
+    'tg.filterClear':           'Show all',
 
     'mc.sharePreviewTitle':     'Share Preview',
     'mc.close':                 'Close',
@@ -1905,6 +1908,9 @@ const translations = {
     'tg.renameGroupPrompt':     'Neuer Gruppenname:',
     'tg.renameDeck':            'Deck umbenennen',
     'tg.renameDeckPrompt':      'Neuer Name für „{name}":',
+    'tg.filterRows':            'Zeilen anzeigen:',
+    'tg.rowsVisible':           'Zeilen sichtbar',
+    'tg.filterClear':           'Alle anzeigen',
 
     'mc.sharePreviewTitle':     'Vorschau',
     'mc.close':                 'Schließen',

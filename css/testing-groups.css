@@ -148,6 +148,7 @@
 .tg-add-deck-row .tg-input { flex: 1; max-width: 280px; }
 
 .tg-table-wrap {
+  position: relative;
   overflow: auto;
   max-height: 70vh;
   border: 1px solid #dde5f0;
@@ -168,7 +169,10 @@
   border-bottom: 1px solid #eef2f7;
   text-align: center;
   vertical-align: middle;
+  box-sizing: border-box;
 }
+
+/* ROW of COLUMN HEADERS (X-axis) — sticks to top while scrolling vertically */
 .tg-matchup-table thead th {
   position: sticky;
   top: 0;
@@ -178,7 +182,7 @@
   font-weight: 700;
   font-size: 0.72rem;
   min-width: 74px;
-  max-width: 110px;
+  width: 74px;
   padding: 8px 4px;
 }
 .tg-matchup-table thead th span {
@@ -189,16 +193,26 @@
   white-space: normal;
   line-height: 1.2;
 }
+
+/* CORNER (top-left) — sticks to both top and left, highest z-index */
 .tg-corner {
-  position: sticky;
+  position: sticky !important;
   left: 0;
   top: 0;
-  z-index: 5 !important;
-  background: #1a2340;
+  z-index: 6 !important;
+  background: #1a2340 !important;
   color: #fff;
-  min-width: 170px !important;
+  min-width: 200px !important;
+  width: 200px !important;
   text-align: left !important;
+  padding: 8px 12px !important;
+  box-shadow: 2px 0 4px rgba(0,0,0,.08);
 }
+
+/* ROW HEADERS (Y-axis, first cell of every body row) — sticks to left
+   while scrolling horizontally. IMPORTANT: must NOT use display:flex
+   on a <th>, it wrecks the table layout and makes the cell overlap
+   the neighboring data cell. */
 .tg-row-head {
   position: sticky;
   left: 0;
@@ -207,33 +221,112 @@
   color: #1a2533;
   font-weight: 600;
   text-align: left !important;
-  min-width: 170px;
+  min-width: 200px;
+  width: 200px;
   padding: 5px 10px !important;
   border-right: 1px solid #c8d3e2;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 6px;
+  box-shadow: 2px 0 4px rgba(0,0,0,.06);
 }
-.tg-row-head span {
+.tg-row-head-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 22px;
+}
+.tg-row-head-inner > span {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.tg-row-head-controls {
+  display: inline-flex;
+  gap: 2px;
+  opacity: 0.35;
+  transition: opacity 0.15s;
+}
+.tg-row-head:hover .tg-row-head-controls { opacity: 1; }
+
 .tg-deck-remove, .tg-deck-rename {
   background: transparent;
   border: none;
   cursor: pointer;
   font-size: 1rem;
   line-height: 1;
-  padding: 0 3px;
-  opacity: 0.5;
-  transition: opacity 0.15s;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.15s;
 }
 .tg-deck-remove { color: #c0392b; }
+.tg-deck-remove:hover { background: #fdecea; }
 .tg-deck-rename { color: #3498db; font-size: 0.85rem; }
-.tg-deck-remove:hover, .tg-deck-rename:hover { opacity: 1; }
+.tg-deck-rename:hover { background: #e7f2fb; }
+
+/* ── Row filter bar ──────────────────────────────────────── */
+.tg-filter-bar {
+  background: #f9fafc;
+  border: 1px solid #e8edf5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+.tg-filter-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.tg-filter-header strong {
+  font-size: 0.88rem;
+  color: #1a2533;
+}
+.tg-filter-count {
+  font-size: 0.78rem;
+  color: #6b7c93;
+  margin-left: auto;
+}
+.tg-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.tg-chip {
+  padding: 4px 10px;
+  border: 1px solid #d0dae5;
+  border-radius: 14px;
+  background: #fff;
+  color: #55637a;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.tg-chip:hover {
+  background: #eef2f7;
+  border-color: #b8c5d6;
+}
+.tg-chip-active {
+  background: #3498db;
+  border-color: #3498db;
+  color: #fff;
+}
+.tg-chip-active:hover {
+  background: #2980b9;
+  border-color: #2980b9;
+}
+
+/* Footer row headers (Quantity / Winrates labels) also sticky-left */
+.tg-matchup-table tfoot .tg-row-head {
+  z-index: 4;
+  background: #e8edf5;
+  box-shadow: 2px 0 4px rgba(0,0,0,.08);
+}
+.tg-matchup-table tfoot th {
+  position: sticky;
+  bottom: 0;
+}
 
 .tg-detail-title {
   cursor: default;
@@ -396,7 +489,10 @@
   .tg-detail-actions { margin-left: 0; }
   .tg-matchup-table { font-size: 0.78rem; }
   .tg-matchup-table thead th { min-width: 60px; padding: 6px 2px; }
-  .tg-corner, .tg-row-head { min-width: 120px !important; }
+  .tg-corner, .tg-row-head {
+    min-width: 140px !important;
+    width: 140px !important;
+  }
   .tg-cell-input { width: 44px; font-size: 0.8rem; }
   .tg-members-table .tg-email { display: none; }
 }

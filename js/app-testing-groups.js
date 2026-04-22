@@ -33,6 +33,7 @@ window.TestingGroups = (function () {
   let _activityUnsubscribe = null;
   let _pendingInvite    = null;   // {groupId, token} parsed from URL hash
   let _editingKey       = null;   // which input is focused? pauses remote updates
+  let _rowFilter        = null;   // Set<deckName> of rows to show, or null = all
 
   const SAVE_DEBOUNCE_MS = 600;
 
@@ -211,6 +212,7 @@ window.TestingGroups = (function () {
       _currentGroupId = groupId;
       _currentGroup   = { id: snap.id, ...data };
       _currentRole    = (data.members && data.members[u.uid] && data.members[u.uid].role) || 'viewer';
+      _loadRowFilter(groupId);
       _startRealtimeListener();
       renderAll();
     } catch (err) {
@@ -224,7 +226,46 @@ window.TestingGroups = (function () {
     _currentGroupId = null;
     _currentGroup   = null;
     _currentRole    = null;
+    _rowFilter      = null;
     renderAll();
+  }
+
+  // ── Row filter (multi-select) ────────────────────────────
+  function _filterKey(groupId) { return `tg-rowfilter-${groupId}`; }
+
+  function _loadRowFilter(groupId) {
+    try {
+      const raw = localStorage.getItem(_filterKey(groupId));
+      if (!raw) { _rowFilter = null; return; }
+      const arr = JSON.parse(raw);
+      _rowFilter = Array.isArray(arr) && arr.length ? new Set(arr) : null;
+    } catch (_) { _rowFilter = null; }
+  }
+
+  function _saveRowFilter() {
+    if (!_currentGroupId) return;
+    try {
+      if (_rowFilter && _rowFilter.size) {
+        localStorage.setItem(_filterKey(_currentGroupId), JSON.stringify([..._rowFilter]));
+      } else {
+        localStorage.removeItem(_filterKey(_currentGroupId));
+      }
+    } catch (_) {}
+  }
+
+  function toggleRowFilter(deckName) {
+    if (!_rowFilter) _rowFilter = new Set();
+    if (_rowFilter.has(deckName)) _rowFilter.delete(deckName);
+    else _rowFilter.add(deckName);
+    if (_rowFilter.size === 0) _rowFilter = null;
+    _saveRowFilter();
+    _renderGroupDetail();
+  }
+
+  function clearRowFilter() {
+    _rowFilter = null;
+    _saveRowFilter();
+    _renderGroupDetail();
   }
 
   // ── Realtime sync ──────────────────────────────────────
@@ -915,12 +956,17 @@ window.TestingGroups = (function () {
     const matrix  = (g.data && g.data.matchups)|| {};
     const readonly = !_canEdit();
 
+    // Filter state: which rows to actually render (columns always full)
+    const visibleDecks = (_rowFilter && _rowFilter.size)
+      ? decks.filter(d => _rowFilter.has(d))
+      : decks;
+
     // Header row: deck names
     const headerCells = decks.map(d =>
       `<th class="tg-col-head" title="${_esc(d)}"><span>${_esc(d)}</span></th>`).join('');
 
     // Matchup rows
-    const matrixRows = decks.map(rowDeck => {
+    const matrixRows = visibleDecks.map(rowDeck => {
       const cells = decks.map(colDeck => {
         const val = (matrix[rowDeck] || {})[colDeck];
         const valDisp = (val == null) ? '' : val;
@@ -939,11 +985,18 @@ window.TestingGroups = (function () {
         </td>`;
       }).join('');
       const deckControls = (_currentRole === 'owner')
-        ? `<button class="tg-deck-rename" title="${_esc(t('tg.renameDeck'))}" onclick="TestingGroups._uiRenameDeck('${_jsEsc(rowDeck)}')">✎</button>
-           <button class="tg-deck-remove" title="${_esc(t('tg.removeDeck'))}" onclick="TestingGroups.removeDeck('${_jsEsc(rowDeck)}')">×</button>`
+        ? `<span class="tg-row-head-controls">
+             <button class="tg-deck-rename" title="${_esc(t('tg.renameDeck'))}" onclick="TestingGroups._uiRenameDeck('${_jsEsc(rowDeck)}')">✎</button>
+             <button class="tg-deck-remove" title="${_esc(t('tg.removeDeck'))}" onclick="TestingGroups.removeDeck('${_jsEsc(rowDeck)}')">×</button>
+           </span>`
         : '';
       return `<tr>
-        <th class="tg-row-head"><span>${_esc(rowDeck)}</span>${deckControls}</th>
+        <th class="tg-row-head">
+          <div class="tg-row-head-inner">
+            <span>${_esc(rowDeck)}</span>
+            ${deckControls}
+          </div>
+        </th>
         ${cells}
       </tr>`;
     }).join('');
@@ -976,6 +1029,26 @@ window.TestingGroups = (function () {
            <button class="tg-btn" onclick="TestingGroups._uiAddDeck()">+ ${_esc(t('tg.addDeck'))}</button>
          </div>` : '';
 
+    // Row filter chips — each deck toggleable, click to add/remove from
+    // the "visible rows" set. Empty set = show all.
+    const filterChips = decks.map(d => {
+      const active = _rowFilter && _rowFilter.has(d);
+      return `<button class="tg-chip ${active ? 'tg-chip-active' : ''}"
+                onclick="TestingGroups.toggleRowFilter('${_jsEsc(d)}')">${_esc(d)}</button>`;
+    }).join('');
+    const filterInfo = _rowFilter && _rowFilter.size
+      ? `<span class="tg-filter-count">${_rowFilter.size}/${decks.length} ${_esc(t('tg.rowsVisible'))}</span>
+         <button class="tg-btn tg-btn-sm" onclick="TestingGroups.clearRowFilter()">${_esc(t('tg.filterClear'))}</button>`
+      : `<span class="tg-filter-count">${decks.length} ${_esc(t('tg.rowsVisible'))}</span>`;
+    const filterBar = `
+      <div class="tg-filter-bar">
+        <div class="tg-filter-header">
+          <strong>${_esc(t('tg.filterRows'))}</strong>
+          ${filterInfo}
+        </div>
+        <div class="tg-filter-chips">${filterChips}</div>
+      </div>`;
+
     const membersHtml = _renderMembersSection();
     const activityHtml = `<div id="tg-activity-section"><h3>${_esc(t('tg.activity'))}</h3><div id="tg-activity-log" class="tg-activity-log"><em>${_esc(t('tg.activityLoading'))}</em></div></div>`;
 
@@ -1004,6 +1077,7 @@ window.TestingGroups = (function () {
   </div>
 
   ${addDeckControl}
+  ${filterBar}
 
   <div class="tg-table-wrap">
     <table class="tg-matchup-table">
@@ -1014,8 +1088,8 @@ window.TestingGroups = (function () {
         ${matrixRows}
       </tbody>
       <tfoot>
-        <tr><th class="tg-row-head">${_esc(t('tg.quantity'))}</th>${quantityCells}</tr>
-        <tr><th class="tg-row-head">${_esc(t('tg.winrates'))}</th>${winrateCells}</tr>
+        <tr><th class="tg-row-head"><div class="tg-row-head-inner"><span>${_esc(t('tg.quantity'))}</span></div></th>${quantityCells}</tr>
+        <tr><th class="tg-row-head"><div class="tg-row-head-inner"><span>${_esc(t('tg.winrates'))}</span></div></th>${winrateCells}</tr>
       </tfoot>
     </table>
   </div>
@@ -1255,6 +1329,8 @@ window.TestingGroups = (function () {
     revokeInviteLink,
     acceptInvite,
     handleHashInvite,
+    toggleRowFilter,
+    clearRowFilter,
     // UI glue
     _uiCreate,
     _uiAddDeck,

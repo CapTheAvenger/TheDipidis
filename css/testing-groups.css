@@ -149,19 +149,18 @@
 
 .tg-table-wrap {
   position: relative;
-  overflow: auto;
-  /* Use `height` (not max-height) so the container ALWAYS creates its
-     own vertical scroll context. With max-height alone, if the content
-     is only slightly taller than 70vh the browser may choose to scroll
-     the page instead of the wrap — and then position:sticky on the
-     thead has no scroll ancestor to pin against and just scrolls away. */
-  height: min(70vh, 720px);
-  min-height: 360px;
+  /* Horizontal scroll for wide tables, but NO vertical scroll context.
+     overflow-y: clip prevents the browser from creating a vertical scroll
+     container — so sticky-top on the thead attaches to the VIEWPORT
+     (page scroll) and the whole table is visible without an internal
+     scrollable window. Requires Chrome 90+ / Firefox 81+ / Safari 16+;
+     all evergreen enough for our users. */
+  overflow-x: auto;
+  overflow-y: clip;
   border: 1px solid #dde5f0;
   border-radius: 10px;
   background: #fff;
   margin-bottom: 20px;
-  /* iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
 }
 .tg-matchup-table {

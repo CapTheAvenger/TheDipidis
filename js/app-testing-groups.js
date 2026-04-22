@@ -874,7 +874,7 @@ window.TestingGroups = (function () {
   // custom decks; matchup WRs become per-opponent overrides for the
   // currently-selected deck in MetaCall.
 
-  function loadIntoMetaCall() {
+  async function loadIntoMetaCall() {
     const g = _currentGroup;
     if (!g || !g.data) return;
     if (typeof window.MetaCall === 'undefined') {
@@ -882,13 +882,35 @@ window.TestingGroups = (function () {
       return;
     }
     if (!window.MetaCall._testingGroupLoad) {
-      // Fallback: just copy to clipboard as JSON for now
       exportJson();
       alert(t('tg.metaCallNotReady'));
       return;
     }
-    window.MetaCall._testingGroupLoad(g.data);
-    alert(t('tg.loadedIntoMetaCall'));
+    // CRITICAL: ensure MetaCall's _shareList is fully loaded before we
+    // attempt to match testing-group deck names against canonical meta
+    // names. If preload() hasn't finished (or was never triggered) the
+    // _testingGroupLoad() call silently returns and the user sees no
+    // effect — which is exactly the bug reported for this commit.
+    try {
+      if (typeof window.MetaCall.preload === 'function') {
+        await window.MetaCall.preload();
+      }
+    } catch (err) {
+      console.warn('[TestingGroups] MetaCall preload failed, trying anyway', err);
+    }
+    const result = window.MetaCall._testingGroupLoad(g.data);
+    // Jump to the MetaCall tab so the user sees the imported data
+    // immediately instead of having to navigate there manually.
+    if (typeof switchProfileTab === 'function') {
+      switchProfileTab('metacall');
+    }
+    const summary = (result && typeof result === 'object')
+      ? t('tg.loadedIntoMetaCallSummary')
+          .replace('{personal}', result.personalCount || 0)
+          .replace('{custom}',   result.customCount   || 0)
+          .replace('{wr}',       result.overrideCount || 0)
+      : t('tg.loadedIntoMetaCall');
+    alert(summary);
   }
 
   // ── Rendering ────────────────────────────────────────────

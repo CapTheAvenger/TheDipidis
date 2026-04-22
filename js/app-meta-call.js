@@ -1344,7 +1344,17 @@ window.MetaCall = (function () {
   // We don't touch settings (players / rounds / day2Points) — those stay
   // as the user set them.
   function _testingGroupLoad(groupData) {
-    if (!groupData || !_shareList) return;
+    if (!groupData) {
+      console.warn('[MetaCall] _testingGroupLoad: no groupData');
+      return { personalCount: 0, customCount: 0, overrideCount: 0 };
+    }
+    if (!_shareList) {
+      // This is the silent-fail scenario — caller should await preload()
+      // before reaching here. Log loudly so any future caller who skips
+      // preload notices in the console.
+      console.error('[MetaCall] _testingGroupLoad: _shareList not loaded yet; aborting');
+      return { personalCount: 0, customCount: 0, overrideCount: 0 };
+    }
     const decks   = groupData.decks   || [];
     const qty     = groupData.quantity|| {};
     const matrix  = groupData.matchups|| {};
@@ -1391,6 +1401,16 @@ window.MetaCall = (function () {
     }
 
     renderAll();
+
+    // Return a summary so TestingGroups can show the user what was
+    // actually imported (helps debug when names don't match).
+    const summary = {
+      personalCount: Object.keys(_personalShares).length,
+      customCount:   _customDecks.length,
+      overrideCount: Object.keys(_winRateOverrides).length,
+    };
+    console.log('[MetaCall] Testing group loaded:', summary);
+    return summary;
   }
 
   function refreshCustomDecksPanel() {

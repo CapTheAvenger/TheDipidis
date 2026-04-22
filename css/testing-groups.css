@@ -150,11 +150,19 @@
 .tg-table-wrap {
   position: relative;
   overflow: auto;
-  max-height: 70vh;
+  /* Use `height` (not max-height) so the container ALWAYS creates its
+     own vertical scroll context. With max-height alone, if the content
+     is only slightly taller than 70vh the browser may choose to scroll
+     the page instead of the wrap — and then position:sticky on the
+     thead has no scroll ancestor to pin against and just scrolls away. */
+  height: min(70vh, 720px);
+  min-height: 360px;
   border: 1px solid #dde5f0;
   border-radius: 10px;
   background: #fff;
   margin-bottom: 20px;
+  /* iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
 }
 .tg-matchup-table {
   border-collapse: separate;
@@ -172,11 +180,14 @@
   box-sizing: border-box;
 }
 
-/* ROW of COLUMN HEADERS (X-axis) — sticks to top while scrolling vertically */
+/* ROW of COLUMN HEADERS (X-axis) — sticks to top while scrolling vertically
+   z-index: must be higher than every <th>/<td> in the body so the thead
+   always paints on top. Body row-heads are z-index 10; thead columns are
+   z-index 20; the corner cell (overlaps both) is z-index 30. */
 .tg-matchup-table thead th {
   position: sticky;
   top: 0;
-  z-index: 3;
+  z-index: 20;
   background: #1a2340;
   color: #fff;
   font-weight: 700;
@@ -184,6 +195,7 @@
   min-width: 74px;
   width: 74px;
   padding: 8px 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.12);
 }
 .tg-matchup-table thead th span {
   display: -webkit-box;
@@ -194,29 +206,30 @@
   line-height: 1.2;
 }
 
-/* CORNER (top-left) — sticks to both top and left, highest z-index */
+/* CORNER (top-left) — sticks to BOTH top and left, highest z-index */
 .tg-corner {
   position: sticky !important;
   left: 0;
   top: 0;
-  z-index: 6 !important;
+  z-index: 30 !important;
   background: #1a2340 !important;
   color: #fff;
   min-width: 200px !important;
   width: 200px !important;
   text-align: left !important;
   padding: 8px 12px !important;
-  box-shadow: 2px 0 4px rgba(0,0,0,.08);
+  box-shadow: 2px 2px 4px rgba(0,0,0,.18);
 }
 
 /* ROW HEADERS (Y-axis, first cell of every body row) — sticks to left
    while scrolling horizontally. IMPORTANT: must NOT use display:flex
    on a <th>, it wrecks the table layout and makes the cell overlap
-   the neighboring data cell. */
+   the neighboring data cell. z-index below the thead so column headers
+   always paint on top of row headers when scrolling vertically. */
 .tg-row-head {
   position: sticky;
   left: 0;
-  z-index: 2;
+  z-index: 10;
   background: #f4f7fc;
   color: #1a2533;
   font-weight: 600;
@@ -317,16 +330,23 @@
   border-color: #2980b9;
 }
 
-/* Footer row headers (Quantity / Winrates labels) also sticky-left */
+/* Footer row headers (Quantity / Winrates labels) — sticky-BOTTOM-left.
+   Same z-index tier as thead so they paint above body cells but below
+   the corner shadow. */
 .tg-matchup-table tfoot .tg-row-head {
-  z-index: 4;
+  z-index: 25;   /* row-head is 10, thead 20, footer-row-head 25, corner 30 */
   background: #e8edf5;
   box-shadow: 2px 0 4px rgba(0,0,0,.08);
 }
+.tg-matchup-table tfoot td,
 .tg-matchup-table tfoot th {
   position: sticky;
   bottom: 0;
+  z-index: 15;
+  background: #e8edf5;
 }
+.tg-matchup-table tfoot .tg-cell-qty { background: #f9fafc; }
+.tg-matchup-table tfoot .tg-cell-wr  { background: #eaf4ff; }
 
 .tg-detail-title {
   cursor: default;

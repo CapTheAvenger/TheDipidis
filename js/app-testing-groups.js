@@ -297,6 +297,17 @@ window.TestingGroups = (function () {
     _renderGroupDetail();
   }
 
+  // "+ All" — activate every chip so the user can quickly narrow down
+  // by deselecting the few they don't want, instead of clicking 20+
+  // individually.
+  function selectAllRowFilter() {
+    const g = _currentGroup;
+    const decks = (g && g.data && g.data.decks) || [];
+    _rowFilter = new Set(decks);
+    _saveRowFilter();
+    _renderGroupDetail();
+  }
+
   // ── Realtime sync ──────────────────────────────────────
   // Swaps the old 30s polling for Firestore onSnapshot so other users'
   // edits appear instantly. We still guard against overwriting an input
@@ -1162,15 +1173,14 @@ window.TestingGroups = (function () {
       return `<button class="tg-chip ${active ? 'tg-chip-active' : ''}"
                 onclick="TestingGroups.toggleRowFilter('${_jsEsc(d)}')">${_esc(d)}</button>`;
     }).join('');
-    const filterInfo = _rowFilter && _rowFilter.size
-      ? `<span class="tg-filter-count">${_rowFilter.size}/${decks.length} ${_esc(t('tg.rowsVisible'))}</span>
-         <button class="tg-btn tg-btn-sm" onclick="TestingGroups.clearRowFilter()">${_esc(t('tg.filterClear'))}</button>`
-      : `<span class="tg-filter-count">${decks.length} ${_esc(t('tg.rowsVisible'))}</span>`;
+    const activeCount = _rowFilter ? _rowFilter.size : decks.length;
     const filterBar = `
       <div class="tg-filter-bar">
         <div class="tg-filter-header">
           <strong>${_esc(t('tg.filterRows'))}</strong>
-          ${filterInfo}
+          <button class="tg-btn tg-btn-sm" onclick="TestingGroups.selectAllRowFilter()">+ ${_esc(t('tg.filterAll'))}</button>
+          <button class="tg-btn tg-btn-sm" onclick="TestingGroups.clearRowFilter()">− ${_esc(t('tg.filterNone'))}</button>
+          <span class="tg-filter-count">${activeCount}/${decks.length} ${_esc(t('tg.rowsVisible'))}</span>
         </div>
         <div class="tg-filter-chips">${filterChips}</div>
       </div>`;
@@ -1527,6 +1537,7 @@ window.TestingGroups = (function () {
     handleHashInvite,
     toggleRowFilter,
     clearRowFilter,
+    selectAllRowFilter,
     // UI glue
     _uiCreate,
     _uiAddDeck,

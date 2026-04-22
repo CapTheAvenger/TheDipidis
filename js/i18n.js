@@ -708,6 +708,8 @@ const translations = {
     'tg.filterRows':            'Show rows:',
     'tg.rowsVisible':           'rows visible',
     'tg.filterClear':           'Show all',
+    'tg.filterAll':             'All',
+    'tg.filterNone':            'None',
 
     'mc.sharePreviewTitle':     'Share Preview',
     'mc.close':                 'Close',
@@ -1933,6 +1935,8 @@ const translations = {
     'tg.filterRows':            'Zeilen anzeigen:',
     'tg.rowsVisible':           'Zeilen sichtbar',
     'tg.filterClear':           'Alle anzeigen',
+    'tg.filterAll':             'Alle',
+    'tg.filterNone':            'Keine',
 
     'mc.sharePreviewTitle':     'Vorschau',
     'mc.close':                 'Schließen',

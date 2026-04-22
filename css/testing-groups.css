@@ -153,8 +153,7 @@
      overflow-y: clip prevents the browser from creating a vertical scroll
      container — so sticky-top on the thead attaches to the VIEWPORT
      (page scroll) and the whole table is visible without an internal
-     scrollable window. Requires Chrome 90+ / Firefox 81+ / Safari 16+;
-     all evergreen enough for our users. */
+     scrollable window. Requires Chrome 90+ / Firefox 81+ / Safari 16+. */
   overflow-x: auto;
   overflow-y: clip;
   border: 1px solid #dde5f0;
@@ -162,6 +161,30 @@
   background: #fff;
   margin-bottom: 20px;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Thick, visible scrollbar so users immediately understand the table
+   is horizontally scrollable. Works in Chrome/Edge/Safari; Firefox
+   falls back to its native scrollbar width. */
+.tg-table-wrap::-webkit-scrollbar {
+  height: 12px;
+}
+.tg-table-wrap::-webkit-scrollbar-track {
+  background: #eef2f7;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+.tg-table-wrap::-webkit-scrollbar-thumb {
+  background: #8fa3c1;
+  border-radius: 6px;
+  border: 2px solid #eef2f7;
+}
+.tg-table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #3498db;
+}
+.tg-table-wrap {
+  scrollbar-color: #8fa3c1 #eef2f7;  /* Firefox */
+  scrollbar-width: thin;
 }
 .tg-matchup-table {
   border-collapse: separate;
@@ -171,7 +194,7 @@
 }
 .tg-matchup-table th,
 .tg-matchup-table td {
-  padding: 5px 6px;
+  padding: 5px 3px;
   border-right: 1px solid #eef2f7;
   border-bottom: 1px solid #eef2f7;
   text-align: center;
@@ -179,13 +202,12 @@
   box-sizing: border-box;
 }
 
-/* ROW of COLUMN HEADERS (X-axis) — sticks to top while scrolling vertically
-   z-index: must be higher than every <th>/<td> in the body so the thead
-   always paints on top. Body row-heads are z-index 10; thead columns are
-   z-index 20; the corner cell (overlaps both) is z-index 30.
-   Horizontal padding MUST match body cell padding (6px) so the header
-   text centers over the same content-area as the value below it —
-   otherwise values look visually shifted relative to their column header. */
+/* ROW of COLUMN HEADERS (X-axis) — rotated -55° so full deck names fit
+   into narrow 44px columns. Much more readable at 21+ columns than the
+   previous truncated / line-clamped approach.
+   Sticky-top still works: the <th> is sticky while the span inside
+   handles the rotation. z-index keeps the thead above row-head and
+   body cells. */
 .tg-matchup-table thead th {
   position: sticky;
   top: 0;
@@ -193,19 +215,26 @@
   background: #1a2340;
   color: #fff;
   font-weight: 700;
-  font-size: 0.72rem;
-  min-width: 74px;
-  width: 74px;
-  padding: 8px 6px;
+  font-size: 0.82rem;
+  height: 130px;
+  min-width: 44px;
+  width: 44px;
+  padding: 4px 4px 8px;
+  vertical-align: bottom;
+  white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0,0,0,.12);
 }
 .tg-matchup-table thead th span {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  display: block;
+  transform: rotate(-55deg);
+  transform-origin: bottom left;
+  width: 120px;
   overflow: hidden;
-  white-space: normal;
-  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1;
+  margin-bottom: -4px;
+  margin-left: 20px;
 }
 
 /* CORNER (top-left) — sticks to BOTH top and left, highest z-index */
@@ -317,13 +346,18 @@
 .tg-filter-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 8px;
   flex-wrap: wrap;
 }
 .tg-filter-header strong {
   font-size: 0.88rem;
   color: #1a2533;
+  margin-right: 4px;
+}
+.tg-filter-header .tg-btn-sm {
+  padding: 4px 10px;
+  font-size: 0.78rem;
 }
 .tg-filter-count {
   font-size: 0.78rem;
@@ -388,15 +422,17 @@
 .tg-rename-hint {
   font-size: 0.82rem;
   color: #9aa6b8;
-  opacity: 0;
+  opacity: 0.35;   /* always subtly visible, hover raises */
   transition: opacity 0.15s;
 }
 .tg-detail-title:hover .tg-rename-hint { opacity: 1; }
 
 .tg-cell {
-  min-width: 74px;
+  min-width: 44px;
+  width: 44px;
   background: #fff;
   font-variant-numeric: tabular-nums;
+  font-size: 0.86rem;
 }
 .tg-cell-diag {
   background: #f4f7fc;
@@ -414,7 +450,7 @@
   display: block;
   width: 100%;
   box-sizing: border-box;
-  padding: 4px 2px;
+  padding: 3px 1px;
   margin: 0;
   border: 1px solid transparent;
   background: transparent;
@@ -614,11 +650,21 @@
   .tg-detail-header { flex-direction: column; align-items: stretch; }
   .tg-detail-actions { margin-left: 0; }
   .tg-matchup-table { font-size: 0.78rem; }
-  .tg-matchup-table thead th { min-width: 60px; padding: 6px 2px; }
+  /* Shorter rotated headers on mobile so they don't eat half the viewport */
+  .tg-matchup-table thead th {
+    height: 100px;
+    min-width: 40px;
+    width: 40px;
+  }
+  .tg-matchup-table thead th span {
+    width: 90px;
+    font-size: 0.76rem;
+  }
   .tg-corner, .tg-row-head {
     min-width: 140px !important;
     width: 140px !important;
   }
-  .tg-cell-input { width: 44px; font-size: 0.8rem; }
+  .tg-cell { min-width: 40px; width: 40px; font-size: 0.78rem; }
+  .tg-cell-input { font-size: 0.78rem; }
   .tg-members-table .tg-email { display: none; }
 }

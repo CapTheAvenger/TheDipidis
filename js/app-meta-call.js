@@ -46,7 +46,26 @@ window.MetaCall = (function () {
   }
 
   function normalize(name) {
-    return (name || '').toLowerCase().replace(/[\s\-'''\u2019\u2018\u201B`´]/g, '');
+    // Strip whitespace, hyphens, and ALL common apostrophe variants so
+    // deck names match regardless of which typography the source used.
+    // Covers: straight (U+0027), left/right curly (U+2018/U+2019), reverse
+    // high-9 (U+201B), grave accent (U+0060), acute accent (U+00B4), and
+    // the less-common modifier letter apostrophe (U+02BC).
+    return (name || '').toLowerCase().replace(/[\s\-\u0027\u2018\u2019\u201B\u0060\u00B4\u02BC]/g, '');
+  }
+
+  // Look up a value in an object by key, falling back to a normalize-equal
+  // comparison when the exact key isn't present. Used for WR overrides and
+  // journal stats so that "N's Zoroark" (U+0027) in the stored key matches
+  // "N's Zoroark" (U+2019) in the lookup name.
+  function _findByNormalized(obj, name) {
+    if (!obj) return undefined;
+    if (Object.prototype.hasOwnProperty.call(obj, name)) return obj[name];
+    const norm = normalize(name);
+    for (const k of Object.keys(obj)) {
+      if (normalize(k) === norm) return obj[k];
+    }
+    return undefined;
   }
 
   function parseEU(str) {
@@ -161,8 +180,11 @@ window.MetaCall = (function () {
       const wr = _settings.junkWinRate / 100;
       return { pWin: wr, pTie: 0.02, pLoss: Math.max(0, 1 - wr - 0.02) };
     }
-    // Manual override (user-entered) takes top priority
-    const ov = _winRateOverrides[opponent];
+    // Manual override (user-entered) takes top priority. Use normalize-
+    // aware lookup so that e.g. 'N's Zoroark' stored via Testing Groups
+    // with a straight apostrophe still matches the online-share name
+    // 'N's Zoroark' with a curly apostrophe.
+    const ov = _findByNormalized(_winRateOverrides, opponent);
     if (ov !== undefined && ov !== '') {
       const pWin = Math.min(0.98, Math.max(0, ov / 100));
       return { pWin, pTie: 0.02, pLoss: Math.max(0, 1 - pWin - 0.02) };
@@ -177,7 +199,9 @@ window.MetaCall = (function () {
       : { pWin: 0.50, pTie: 0.02, pLoss: 0.48 };
 
     // Bayesian blend with journal data (meta treated as 30-game prior)
-    const js = _journalStats[opponent];
+    // Same normalize-aware lookup — the opponent name in the journal
+    // may use a different apostrophe style than the online share name.
+    const js = _findByNormalized(_journalStats, opponent);
     if (js && js.total >= 1) {
       const META_CONFIDENCE = 30;
       const journalWR   = js.wins / js.total;
@@ -1346,15 +1370,23 @@ window.MetaCall = (function () {
       }
     });
 
-    // 2) Win-rate overrides, only if the user has picked a deck
+    // 2) Win-rate overrides, only if the user has picked a deck.
+    //    Apostrophe-robust: find myDeck's row via normalize so a testing
+    //    group key "N's Zoroark" (straight) matches "N's Zoroark" (curly)
+    //    stored in _settings.myDeck (which came from _shareList). Store
+    //    each override under the CANONICAL _shareList name so later
+    //    lookups from getMatchup() hit cleanly.
     _winRateOverrides = {};
     if (_settings.myDeck) {
-      const myRow = matrix[_settings.myDeck] || {};
+      const myDeckNorm = normalize(_settings.myDeck);
+      const myRowKey   = Object.keys(matrix).find(k => normalize(k) === myDeckNorm);
+      const myRow      = (myRowKey && matrix[myRowKey]) || {};
       Object.keys(myRow).forEach(opp => {
         const wr = Number(myRow[opp]);
-        if (!isNaN(wr) && wr >= 0 && wr <= 100) {
-          _winRateOverrides[opp] = wr;
-        }
+        if (isNaN(wr) || wr < 0 || wr > 100) return;
+        // Prefer canonical name from online share list
+        const canonical = (_shareList.find(d => normalize(d.name) === normalize(opp)) || {}).name || opp;
+        _winRateOverrides[canonical] = wr;
       });
     }
 

@@ -1930,18 +1930,25 @@
     function getBattleJournalWinRates(ownDeck, minGames, options) {
         minGames = minGames || 1;
         const excludeBricks = (options && options.excludeBricks) || false;
-        // Strict match: the journal entry's ownDeck must equal the selected deck
-        // (after lowercase+trim). Prior loose startsWith matching leaked data
-        // between similar names (e.g. "Lucario" vs "Lucario Hariyama").
-        const normOwn = (ownDeck || '').toLowerCase().trim();
+        // Strict-but-apostrophe-robust match: the journal entry's ownDeck
+        // must equal the selected deck after normalizing out whitespace,
+        // hyphens and every common apostrophe variant. Prior loose
+        // startsWith match leaked data between similar names; a pure
+        // lowercase+trim match missed legitimate hits when the journal
+        // had "N's Zoroark" (U+0027) but the UI selected "N's Zoroark"
+        // (U+2019) from the online share list.
+        function _normDeck(s) {
+            return String(s || '').toLowerCase()
+                .replace(/[\s\-\u0027\u2018\u2019\u201B\u0060\u00B4\u02BC]/g, '');
+        }
+        const normOwn = _normDeck(ownDeck);
         if (!normOwn) return {};
         const all = Array.isArray(journalHistoryCache) ? journalHistoryCache : [];
         const matchups = {};
         all.forEach(function(e) {
             if (!e || !e.opponentArchetype) return;
             if (excludeBricks && e.brick) return;
-            const entryDeck = (e.ownDeck || '').toLowerCase().trim();
-            if (entryDeck !== normOwn) return;
+            if (_normDeck(e.ownDeck) !== normOwn) return;
             const opp = e.opponentArchetype;
             if (!matchups[opp]) matchups[opp] = { wins: 0, losses: 0, ties: 0, total: 0 };
             matchups[opp].total++;

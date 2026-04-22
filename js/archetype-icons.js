@@ -126,10 +126,28 @@
     return `<span class="${groupCls}">${imgs}</span>`;
   }
 
+  // Direct Pokémon-slug renderer — useful when the caller already knows
+  // the species slug (e.g. City League's `d.main` field is just the
+  // main-Pokémon slug without an archetype wrapping) and doesn't need
+  // the archetype-name → slugs lookup.
+  function slugIconHtml(slug, opts) {
+    if (!slug) return '';
+    const meta = (_data && _data._meta) || {};
+    const prefix = meta.urlPrefix || 'https://r2.limitlesstcg.net/pokemon/gen9/';
+    const suffix = meta.urlSuffix || '.png';
+    const size = (opts && opts.size) || 'sm';
+    const alt = (opts && opts.alt) || '';
+    return `<img class="tcg-pokemon-icon tcg-pokemon-icon--${size}" ` +
+           `src="${_escAttr(prefix + String(slug).toLowerCase() + suffix)}" ` +
+           `alt="${_escAttr(alt)}" loading="lazy" ` +
+           `onerror="this.style.display='none'">`;
+  }
+
   global.ArchetypeIcons = {
     preload,
     getIconUrls,
     getIconHtml,
+    slugIconHtml,
     hasIcons,
     normalize
   };

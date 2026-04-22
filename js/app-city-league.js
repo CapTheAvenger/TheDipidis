@@ -497,7 +497,7 @@
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr class="city-league-info-table-row" tabindex="0">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${d.archetype}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.old_count}</td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count}</td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-exit">${change}</td>
@@ -533,7 +533,7 @@
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr class="city-league-info-table-row" tabindex="0">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${d.archetype}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count} <span class="city-league-info-table-count-change">(${countChangeText})</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-entry">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: #27ae60;">(-${improvement.toFixed(2)})</span></td>
                         </tr>`;
@@ -562,7 +562,7 @@
                     const archetypeEscaped = escapeJsStr(d.archetype);
                     html += `
                         <tr class="city-league-info-table-row" tabindex="0">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${d.archetype}</a></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype" title="${t('cl.goToAnalysis')} ${d.archetype}"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${d.archetype}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center">${d.new_count} <span class="city-league-info-table-count-change">(${countChangeText})</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-exit">${d.new_avg_placement} <span class="city-league-info-table-placement" style="--placement-color: #e74c3c;">(+${decline.toFixed(2)})</span></td>
                         </tr>`;
@@ -726,7 +726,7 @@
 
                     tableHTML += `
                         <tr class="city-league-info-table-row city-league-info-table-row-mobile" title="${d.variants.join(', ')}">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-mobile" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="${t('cl.analyzeVariants')}">${displayName}</td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-mobile" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="${t('cl.analyzeVariants')}"><span style="display:inline-flex;align-items:center;gap:6px;">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.slugIconHtml(d.main,{size:'sm'}):'')}${displayName}</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-variants-mobile">${d.variant_count}</td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-mobile">${d.new_count} <span class="city-league-info-table-count-change-mobile" style="color: ${changeColor};">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-mobile">${d.new_avg_placement} <span class="city-league-info-table-placement-mobile" style="color: ${placementColor};">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
@@ -763,7 +763,7 @@
                     
                     tableHTML += `
                         <tr class="city-league-info-table-row city-league-info-table-row-desktop" title="${d.variants.join(', ')}">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-desktop" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="${t('cl.analyzeVariants')}">${displayName}</td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-desktop" onclick="analyzeCombinedArchetype('${escapeJsStr(d.main || '')}', '${variantsJson}')" title="${t('cl.analyzeVariants')}"><span style="display:inline-flex;align-items:center;gap:6px;">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.slugIconHtml(d.main,{size:'sm'}):'')}${displayName}</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-variants-desktop">${d.variant_count}</td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-desktop">${d.new_count} <span class="city-league-info-table-count-change-desktop" style="--change-color: ${changeColor};">(${changeText})</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-desktop">${d.new_avg_placement} <span class="city-league-info-table-placement-desktop" style="--placement-color: ${placementColor};">(${placementText})</span></td>
@@ -811,7 +811,7 @@
                     
                     tableHTML += `
                         <tr class="city-league-info-table-row city-league-info-table-row-mobile" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-mobile"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${escapeHtml(d.archetype)}</a></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-mobile"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-mobile">${d.new_count} <span class="city-league-info-table-count-change-mobile" style="color: ${changeColor};">(${changeValue > 0 ? '+' : ''}${changeValue})</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-mobile">${d.new_avg_placement} <span class="city-league-info-table-placement-mobile" style="color: ${placementColor};">(${placementChange > 0 ? '+' : ''}${placementChange.toFixed(2)})</span></td>
                         </tr>`;
@@ -843,7 +843,7 @@
                     
                     tableHTML += `
                         <tr class="city-league-info-table-row city-league-info-table-row-desktop" title="${t('cl.goToAnalysis')} ${escapeHtml(d.archetype)}">
-                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-desktop"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${escapeHtml(d.archetype)}</a></td>
+                            <td class="city-league-info-table-cell city-league-info-table-cell-archetype city-league-info-table-cell-main-desktop"><a href="javascript:void(0)" onclick="jumpToCardAnalysis('${archetypeEscaped}', 'cityLeague')" class="archetype-jump-link">${(typeof window.ArchetypeIcons!=='undefined'?window.ArchetypeIcons.getIconHtml(d.archetype,{size:'sm',layout:'inline'}):'')}${escapeHtml(d.archetype)}</a></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-count-desktop">${d.new_count} <span class="city-league-info-table-count-change-desktop" style="color: ${changeColor};">(${changeText})</span></td>
                             <td class="city-league-info-table-cell city-league-info-table-cell-center city-league-info-table-cell-placement-desktop">${d.new_avg_placement} <span class="city-league-info-table-placement-desktop" style="color: ${placementColor};">(${placementText})</span></td>
                         </tr>`;

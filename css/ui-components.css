@@ -3518,6 +3518,10 @@ img[src*="limitlesstcg"] {
     margin: 0;
     font-size: 0.95rem;
     color: #263252;
+    /* Flex so a leading Pokémon icon sits next to the group title. */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .meta-binder-archetype-grid {

@@ -1595,11 +1595,14 @@
                 const cityCurrentText = formatMetaBinderMetric(item.cityCurrentAvgRank, 1);
                 const cityPastText = formatMetaBinderMetric(item.cityPastAvgRank, 1);
 
+                const bannerIcon = (typeof window.ArchetypeIcons !== 'undefined')
+                    ? window.ArchetypeIcons.getIconHtml(item.name, { size: 'sm', layout: 'inline' })
+                    : '';
                 return `
                     <div class="deck-banner-card" onclick="${navFn}('${escapedJsName}')">
                         ${item.imageUrl ? `<div class="deck-banner-bg" style="background-image: url('${safeImage}')"></div>` : ''}
                         <div class="deck-banner-content">
-                            <div class="deck-banner-name">${safeName}</div>
+                            <div class="deck-banner-name">${bannerIcon}${safeName}</div>
                             <div class="deck-banner-stats" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
                                 <span class="stat-badge rank-performance-hint" style="background:#fff3e0;color:#e65100;" title="Lower Rank = Better Performance">${currentMetaLabel}: ${rankText}</span>
                                 <span class="stat-badge">${currentMetaLabel}: ${shareText}</span>
@@ -1610,11 +1613,14 @@
                     </div>`;
             }).join('');
 
+            const groupIcon = (typeof window.ArchetypeIcons !== 'undefined')
+                ? window.ArchetypeIcons.getIconHtml(group.title, { size: 'md', layout: 'inline' })
+                : '';
             return `
                 <div class="meta-binder-archetype-group">
                     <details class="meta-binder-archetype-panel" open>
                         <summary class="meta-binder-archetype-summary">
-                            <h3 class="meta-binder-archetype-title">${escapeHtml(group.title)}</h3>
+                            <h3 class="meta-binder-archetype-title">${groupIcon}${escapeHtml(group.title)}</h3>
                             <span class="meta-binder-archetype-count">${group.items.length}</span>
                         </summary>
                         <div class="meta-binder-archetype-grid">${cardsHtml}</div>

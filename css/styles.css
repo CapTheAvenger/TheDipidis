@@ -4353,7 +4353,11 @@ h3:first-child {
     text-decoration: none;
     font-weight: 700;
     transition: color 0.2s ease, text-decoration 0.2s ease;
-    display: inline-block;
+    /* Inline-flex so an optional Pokémon icon sits next to the name
+       without breaking the table cell's horizontal flow. */
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 2px 0;
 }
 
@@ -5315,6 +5319,10 @@ details[open] > .tier-trending-summary::after {
     font-weight: 800;
     color: #333;
     margin-bottom: 5px;
+    /* Flex so a prepended Pokémon icon sits inline with the deck name. */
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .deck-banner-stats {

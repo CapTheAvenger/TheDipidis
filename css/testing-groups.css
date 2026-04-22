@@ -182,7 +182,10 @@
 /* ROW of COLUMN HEADERS (X-axis) — sticks to top while scrolling vertically
    z-index: must be higher than every <th>/<td> in the body so the thead
    always paints on top. Body row-heads are z-index 10; thead columns are
-   z-index 20; the corner cell (overlaps both) is z-index 30. */
+   z-index 20; the corner cell (overlaps both) is z-index 30.
+   Horizontal padding MUST match body cell padding (6px) so the header
+   text centers over the same content-area as the value below it —
+   otherwise values look visually shifted relative to their column header. */
 .tg-matchup-table thead th {
   position: sticky;
   top: 0;
@@ -193,7 +196,7 @@
   font-size: 0.72rem;
   min-width: 74px;
   width: 74px;
-  padding: 8px 4px;
+  padding: 8px 6px;
   box-shadow: 0 2px 4px rgba(0,0,0,.12);
 }
 .tg-matchup-table thead th span {

@@ -759,16 +759,37 @@ img[src*="limitlesstcg"] {
 .heatmap-th-y {
     background: #34495e !important;
     color: #fff !important;
-    padding: 8px 4px !important;
+    padding: 6px 4px !important;
     text-align: center !important;
     font-weight: 600 !important;
     border: 1px solid #2c3e50 !important;
-    min-width: 80px !important;
-    max-width: 100px !important;
+    min-width: 90px !important;
+    max-width: 110px !important;
     white-space: normal !important;
-    word-wrap: break-word !important;
-    font-size: 0.8rem !important;
-    line-height: 1.2 !important;
+    word-break: normal !important;           /* don't split mid-word; wrap at spaces */
+    overflow-wrap: normal !important;        /* same — no mid-word breaks */
+    hyphens: auto !important;                /* fallback for very long single tokens */
+    font-size: 0.75rem !important;
+    line-height: 1.15 !important;
+    vertical-align: bottom !important;
+}
+/* Icon + label stack inside the column header. Icons first, text below,
+   both center-aligned. The inner wrapper owns the flex so adding
+   padding/border on the <th> doesn't shift icons relative to text. */
+.heatmap-th-y > span {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 3px !important;
+}
+.heatmap-th-y .col-label,
+.heatmap-th-y > span > span {
+    display: block !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: auto !important;
+    line-height: 1.15 !important;
 }
 .heatmap-th-row {
     position: sticky !important;
@@ -776,15 +797,32 @@ img[src*="limitlesstcg"] {
     z-index: 2 !important;
     background: #ecf0f1 !important;
     color: #2c3e50 !important;
-    padding: 10px 8px !important;
+    padding: 8px 8px !important;
     text-align: left !important;
     font-weight: bold !important;
     border: 1px solid #bdc3c7 !important;
     white-space: normal !important;
-    word-wrap: break-word !important;
-    max-width: 120px !important;
-    font-size: 0.9rem !important;
-    line-height: 1.3 !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: auto !important;
+    max-width: 140px !important;
+    min-width: 110px !important;
+    font-size: 0.85rem !important;
+    line-height: 1.25 !important;
+    vertical-align: middle !important;
+}
+/* Inline icon + text in row headers — left-aligned, tight gap. */
+.heatmap-th-row > span {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+.heatmap-th-row > span > span {
+    display: inline-block !important;
+    min-width: 0 !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    hyphens: auto !important;
 }
 .heatmap-td {
     padding: 10px 6px !important;

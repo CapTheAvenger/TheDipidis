@@ -71,6 +71,81 @@
     return _loadPromise;
   }
 
+  // Noise tokens we strip when guessing slugs from a name. These never
+  // correspond to a Pokémon; they're card-type or deck-archetype labels.
+  const _NOISE_TOKENS = new Set([
+    'ex','v','vmax','vstar','gx','tag','team',
+    'box','lead','control','toolbox','tera','build',
+    'the','of','and','with','dx','lv'
+  ]);
+
+  // Form-prefix words that should combine with the NEXT token to form a
+  // Limitless slug like "lucario-mega". Handles "Mega Lucario" → lucario-mega,
+  // "Alolan Exeggutor" → exeggutor-alola, "Paldean Tauros" → tauros-paldea,
+  // "Bloodmoon Ursaluna" → ursaluna-bloodmoon.
+  const _FORM_PREFIX_SUFFIX = {
+    'mega':      'mega',
+    'alolan':    'alola',
+    'alola':     'alola',
+    'galarian':  'galar',
+    'galar':     'galar',
+    'hisuian':   'hisui',
+    'hisui':     'hisui',
+    'paldean':   'paldea',
+    'paldea':    'paldea',
+    'bloodmoon': 'bloodmoon',
+    'wellspring':'wellspring',
+    'cornerstone':'cornerstone',
+    'hearthflame':'hearthflame',
+    'tealmask':  'teal-mask',
+  };
+
+  function _sanitizeWord(w) {
+    // Drop apostrophe-s possessives ("N's" → "N", "Rocket's" → "Rocket"),
+    // stray punctuation, and any other apostrophe variants.
+    return String(w || '')
+      .replace(/['\u2018\u2019\u201B\u0060\u00B4\u02BC]s?$/i, '')
+      .replace(/[.,;:!?()[\]/]/g, '')
+      .trim();
+  }
+
+  // Guess a small slug list from the archetype name itself. Used as a
+  // fallback when archetype_icons.json doesn't have an entry — broken
+  // guesses hide themselves via <img onerror>, so wrong guesses degrade
+  // to "partial icons + text" rather than "no icons + text". Max 2 slugs
+  // so we never spam a row with 4 imgs.
+  function _speculativeSlugs(name) {
+    if (!name) return [];
+    const raw = String(name).split(/\s+/).map(_sanitizeWord).filter(Boolean);
+    const slugs = [];
+    const seen = new Set();
+    for (let i = 0; i < raw.length && slugs.length < 2; i++) {
+      const w = raw[i].toLowerCase();
+      if (!w || _NOISE_TOKENS.has(w)) continue;
+
+      // Form prefix + next word → "lucario-mega"-style slug.
+      const formSuffix = _FORM_PREFIX_SUFFIX[w];
+      if (formSuffix && raw[i + 1]) {
+        const nxt = raw[i + 1].toLowerCase();
+        if (!_NOISE_TOKENS.has(nxt)) {
+          const combined = nxt + '-' + formSuffix;
+          if (!seen.has(combined)) {
+            slugs.push(combined);
+            seen.add(combined);
+          }
+          i++; // consume the pokémon word
+          continue;
+        }
+      }
+
+      if (!seen.has(w)) {
+        slugs.push(w);
+        seen.add(w);
+      }
+    }
+    return slugs;
+  }
+
   function getIconUrls(archetypeName) {
     if (!_data || !_normalizedIndex) return [];
     const arch = _data.archetypes || {};
@@ -80,12 +155,25 @@
 
     // Fast path: exact key match.
     let species = arch[archetypeName];
-    if (!species) {
-      // Fallback: normalize-equal scan via prebuilt index.
+    if (!Array.isArray(species)) {
+      // Fallback 1: normalize-equal scan via prebuilt index.
       species = _normalizedIndex.get(normalize(archetypeName));
     }
-    if (!Array.isArray(species) || species.length === 0) return [];
-    return species.map(s => prefix + s + suffix);
+
+    // Explicit empty-list entries (e.g. Psy Box, Tera Box) are a manual
+    // "no icon wanted here" marker — respect them and don't run the
+    // speculative fallback, which would guess random slugs.
+    if (Array.isArray(species)) {
+      if (species.length === 0) return [];
+      return species.map(s => prefix + s + suffix);
+    }
+
+    // Fallback 2: no entry at all → guess slugs from the name words.
+    // Covers newly-discovered archetypes that haven't been scraped yet,
+    // and JP City League names that slipped past the backend matcher.
+    const speculative = _speculativeSlugs(archetypeName);
+    if (!speculative.length) return [];
+    return speculative.map(s => prefix + s + suffix);
   }
 
   function hasIcons(archetypeName) {

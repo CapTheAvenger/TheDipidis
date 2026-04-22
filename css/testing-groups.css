@@ -239,9 +239,11 @@
 
 /* Icon variant of the column header: upright, centered, no rotation.
    When an archetype has a Pokémon-icon mapping we show the icon(s) instead
-   of the rotated deck name, which is denser and much easier to scan. */
+   of the rotated deck name, which is denser and much easier to scan.
+   Combo archetypes stack the 2 icons vertically so they fit the narrow
+   44px column without overlap. */
 .tg-matchup-table thead th.tg-col-head-icon {
-  height: 56px;
+  height: 68px;
   padding: 4px;
   vertical-align: middle;
 }

@@ -1016,21 +1016,22 @@ window.TestingGroups = (function () {
   // Render Limitless icons for a deck archetype. Returns HTML for 1–2 <img>
   // tags wrapped in a .tcg-pokemon-icon-group; empty string if no mapping
   // exists. Broken URLs hide themselves via onerror so missing species don't
-  // leave blank squares. `modifier` lets callers pick size/stacking.
-  function _iconHtml(deckName, modifier) {
+  // leave blank squares.
+  //   size: 'sm' | 'md' | 'lg'  — icon dimensions
+  //   layout: 'stacked' | 'inline'  — combo icon orientation (default: stacked)
+  function _iconHtml(deckName, size, layout) {
     if (typeof window.ArchetypeIcons === 'undefined') return '';
     const urls = window.ArchetypeIcons.getIconUrls(deckName);
     if (!urls || !urls.length) return '';
-    const mod = modifier || 'md';
+    const sz = size || 'md';
     const imgs = urls.map(u =>
-      `<img class="tcg-pokemon-icon tcg-pokemon-icon--${mod}" src="${_attrEsc(u)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+      `<img class="tcg-pokemon-icon tcg-pokemon-icon--${sz}" src="${_attrEsc(u)}" alt="" loading="lazy" onerror="this.style.display='none'">`
     ).join('');
-    const groupCls = (urls.length > 1 && mod === 'sm')
-      ? 'tcg-pokemon-icon-group tcg-pokemon-icon-group--stacked'
-      : 'tcg-pokemon-icon-group';
-    return urls.length > 1
-      ? `<span class="${groupCls}">${imgs}</span>`
-      : imgs;
+    if (urls.length === 1) return imgs;
+    const groupCls = (layout === 'inline')
+      ? 'tcg-pokemon-icon-group tcg-pokemon-icon-group--inline'
+      : 'tcg-pokemon-icon-group'; // default = stacked vertical
+    return `<span class="${groupCls}">${imgs}</span>`;
   }
 
   function renderAll() {
@@ -1112,7 +1113,7 @@ window.TestingGroups = (function () {
     // column; otherwise we fall back to the rotated deck name so unknown
     // archetypes still render. Full name lives in the title for hover.
     const headerCells = decks.map(d => {
-      const icons = _iconHtml(d, 'md');
+      const icons = _iconHtml(d, 'md'); // combo → stacked (default)
       const inner = icons
         ? `<span class="tg-col-icons">${icons}</span>`
         : `<span>${_esc(d)}</span>`;
@@ -1144,7 +1145,7 @@ window.TestingGroups = (function () {
              <button class="tg-deck-remove" title="${_esc(t('tg.removeDeck'))}" onclick="TestingGroups.removeDeck('${_jsEsc(rowDeck)}')">×</button>
            </span>`
         : '';
-      const rowIcons = _iconHtml(rowDeck, 'sm');
+      const rowIcons = _iconHtml(rowDeck, 'sm', 'inline');
       return `<tr>
         <th class="tg-row-head">
           <div class="tg-row-head-inner">${rowIcons}<span>${_esc(rowDeck)}</span></div>

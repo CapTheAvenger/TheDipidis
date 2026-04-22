@@ -1,42 +1,61 @@
 /* Shared Pokémon-icon styling for meta archetypes. Icons are hotlinked from
  * Limitless R2 (https://r2.limitlesstcg.net/pokemon/gen9/...). Missing icons
- * are hidden via <img onerror="this.style.display='none'"> by the caller. */
+ * are hidden via <img onerror="this.style.display='none'"> by the caller.
+ *
+ * !important on width/height is intentional — mobile-responsive.css has a
+ * blanket `img { height: auto !important }` at <=768px that otherwise blows
+ * these icons up to their natural 240px size. */
 
 .tcg-pokemon-icon {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
+  display: inline-block !important;
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
   object-fit: contain;
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
   vertical-align: middle;
   user-select: none;
   pointer-events: none;
+  flex: 0 0 auto;
 }
 
-.tcg-pokemon-icon--sm { width: 20px; height: 20px; }
-.tcg-pokemon-icon--md { width: 28px; height: 28px; }
-.tcg-pokemon-icon--lg { width: 40px; height: 40px; }
+.tcg-pokemon-icon--sm {
+  width: 18px !important; height: 18px !important;
+  max-width: 18px !important; max-height: 18px !important;
+}
+.tcg-pokemon-icon--md {
+  width: 28px !important; height: 28px !important;
+  max-width: 28px !important; max-height: 28px !important;
+}
+.tcg-pokemon-icon--lg {
+  width: 40px !important; height: 40px !important;
+  max-width: 40px !important; max-height: 40px !important;
+}
 
-/* Group wrapper — for combo archetypes with 2 icons side-by-side. */
+/* Group wrapper — combo archetypes (2 Pokémon). Default is vertical stack
+   because the main consumer is a narrow 44px column header. */
 .tcg-pokemon-icon-group {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 2px;
+  justify-content: center;
+  gap: 0;
   line-height: 1;
 }
 
 .tcg-pokemon-icon-group .tcg-pokemon-icon + .tcg-pokemon-icon {
-  margin-left: -6px; /* slight overlap so combo pairs read as a unit */
+  margin-top: -2px; /* slight overlap so combo pairs read as a unit */
 }
 
-/* Stacked variant — for tight column headers where horizontal space is scarce. */
-.tcg-pokemon-icon-group--stacked {
-  flex-direction: column;
-  gap: 0;
+/* Horizontal variant — used in row headers where width is plentiful and
+   we want the two icons next to each other inline with the text. */
+.tcg-pokemon-icon-group--inline {
+  flex-direction: row;
+  gap: 1px;
 }
-
-.tcg-pokemon-icon-group--stacked .tcg-pokemon-icon + .tcg-pokemon-icon {
-  margin-left: 0;
-  margin-top: -4px;
+.tcg-pokemon-icon-group--inline .tcg-pokemon-icon + .tcg-pokemon-icon {
+  margin-top: 0;
+  margin-left: -4px;
 }

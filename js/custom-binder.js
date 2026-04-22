@@ -184,8 +184,13 @@
             el.innerHTML = cbSelectedArchetypes.map((a, i) => {
                 const safeName = escapeHtml(a.name);
                 const sourceTag = a.source === 'current-meta' ? 'Meta' : (a.source === 'city-current' ? 'City' : 'Past');
-                return `<span class="custom-binder-chip" title="${escapeHtml(a.source)}">
-                    ${safeName} <small class="opacity-60">(${sourceTag})</small>
+                const sourceCls = a.source === 'current-meta' ? 'cb-src-meta'
+                                : (a.source === 'city-current' ? 'cb-src-city' : 'cb-src-past');
+                const icon = (typeof window.ArchetypeIcons !== 'undefined')
+                    ? window.ArchetypeIcons.getIconHtml(a.name, { size: 'sm', layout: 'inline' })
+                    : '';
+                return `<span class="custom-binder-chip ${sourceCls}" title="${escapeHtml(a.source)}">
+                    ${icon}${safeName} <small class="cb-src-tag">${sourceTag}</small>
                     <button type="button" class="custom-binder-chip-remove" onclick="cbRemoveArchetype(${i})" aria-label="Remove">&times;</button>
                 </span>`;
             }).join('');
@@ -397,9 +402,18 @@
                     const shareText = g.totalShare > 0 ? g.totalShare.toFixed(1) + '%' : '';
                     const variantCount = g.variants.length;
                     const variantNames = g.variants.map(v => v.name.replace(/'/g, "\\'")).join('|||');
+                    // Top-5 button shows the main Pokémon's icon (uses first
+                    // variant's name since the group label might itself be
+                    // the raw Pokémon slug — getIconHtml falls back to []
+                    // either way if no match is found).
+                    const icon = (typeof window.ArchetypeIcons !== 'undefined')
+                        ? (window.ArchetypeIcons.getIconHtml(g.label, { size: 'md' })
+                           || window.ArchetypeIcons.getIconHtml(g.variants[0] && g.variants[0].name, { size: 'md' }))
+                        : '';
                     html += `<button type="button" class="cb-main-pokemon-btn ${allSelected ? 'is-selected' : ''}"
                         onclick="cbToggleMainPokemonGroup('${variantNames}','current-meta')" title="${g.variants.map(v => v.name).join(', ')}">
                         <span class="cb-mpg-rank">#${idx + 1}</span>
+                        ${icon}
                         <span class="cb-mpg-name">${escapeHtml(g.label)}</span>
                         <span class="cb-mpg-meta">${variantCount} ${variantCount === 1 ? 'Deck' : 'Decks'}${shareText ? ' · ' + shareText : ''}</span>
                     </button>`;
@@ -444,9 +458,12 @@
                 const share = getShare(a.name);
                 const rankBadge = rank < 9999 ? `<span class="cb-dd-rank">#${rank}</span>` : '';
                 const shareText = share > 0 ? `<small class="opacity-60">${share.toFixed(1)}%</small>` : '';
-                html += `<button type="button" class="custom-binder-dropdown-item ${isSelected ? 'is-selected' : ''}" 
+                const icon = (typeof window.ArchetypeIcons !== 'undefined')
+                    ? window.ArchetypeIcons.getIconHtml(a.name, { size: 'sm', layout: 'inline' })
+                    : '';
+                html += `<button type="button" class="custom-binder-dropdown-item ${isSelected ? 'is-selected' : ''}"
                     onclick="cbToggleArchetype('${a.name.replace(/'/g, "\\'")}','${escapeHtml(a.source)}')">
-                    <span class="cb-dd-check">${isSelected ? '✓' : ''}</span>${rankBadge} ${safeName} ${shareText}
+                    <span class="cb-dd-check">${isSelected ? '✓' : ''}</span>${rankBadge}${icon} ${safeName} ${shareText}
                 </button>`;
             });
         }

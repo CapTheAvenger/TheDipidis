@@ -4088,6 +4088,29 @@ img[src*="limitlesstcg"] {
     background: rgba(231,76,60,0.35);
 }
 
+/* Source-coded chip tints — makes it instantly clear where each
+   selected archetype came from. Blue = Current Meta (authoritative),
+   amber = City League JP (early signal), slate = past meta. */
+.custom-binder-chip.cb-src-meta {
+    background: linear-gradient(135deg, rgba(52,152,219,0.12), rgba(52,152,219,0.05));
+    border-color: rgba(52,152,219,0.30);
+}
+.custom-binder-chip.cb-src-city {
+    background: linear-gradient(135deg, rgba(243,156,18,0.12), rgba(243,156,18,0.05));
+    border-color: rgba(243,156,18,0.32);
+}
+.custom-binder-chip.cb-src-past {
+    background: linear-gradient(135deg, rgba(130,145,170,0.12), rgba(130,145,170,0.05));
+    border-color: rgba(130,145,170,0.32);
+}
+.custom-binder-chip .cb-src-tag {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    padding: 1px 5px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.5);
+}
+
 /* ── Preset Bar ── */
 .cb-preset-bar {
     display: flex;

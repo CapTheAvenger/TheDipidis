@@ -92,9 +92,44 @@
     return getIconUrls(archetypeName).length > 0;
   }
 
+  // HTML-attribute escape for the img src= (URLs are safe, but belt-and
+  // braces — a CDN path change shouldn't ever blow up the callsite).
+  function _escAttr(s) {
+    return String(s == null ? '' : s).replace(/"/g, '&quot;');
+  }
+
+  // Centralised icon renderer so every feature uses the same markup.
+  // Returns HTML string — either a single <img> (single-Pokémon deck)
+  // or a <span.tcg-pokemon-icon-group> wrapping 1-2 <img>s. Empty string
+  // when the archetype has no mapping OR ArchetypeIcons hasn't loaded
+  // yet. Callers MUST keep a text label so unknown archetypes degrade.
+  //
+  // Options:
+  //   size:   'sm' (18px) | 'md' (28px) | 'lg' (40px)   default: 'md'
+  //   layout: 'stacked' (vertical) | 'inline' (horizontal) default: 'stacked'
+  //   alt:    accessibility text for screen readers; default empty
+  function getIconHtml(archetypeName, opts) {
+    const urls = getIconUrls(archetypeName);
+    if (!urls.length) return '';
+    const size = (opts && opts.size) || 'md';
+    const layout = (opts && opts.layout) || 'stacked';
+    const alt = (opts && opts.alt) || '';
+    const imgs = urls.map(u =>
+      `<img class="tcg-pokemon-icon tcg-pokemon-icon--${size}" ` +
+      `src="${_escAttr(u)}" alt="${_escAttr(alt)}" ` +
+      `loading="lazy" onerror="this.style.display='none'">`
+    ).join('');
+    if (urls.length === 1) return imgs;
+    const groupCls = layout === 'inline'
+      ? 'tcg-pokemon-icon-group tcg-pokemon-icon-group--inline'
+      : 'tcg-pokemon-icon-group';
+    return `<span class="${groupCls}">${imgs}</span>`;
+  }
+
   global.ArchetypeIcons = {
     preload,
     getIconUrls,
+    getIconHtml,
     hasIcons,
     normalize
   };

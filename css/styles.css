@@ -6566,6 +6566,12 @@ details[open] > .tier-trending-summary::after {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Flex so a prepended Pokémon icon sits inline with the name text.
+       min-width:0 lets the ellipsis still kick in on narrow containers. */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
 }
 .ma-rank-wr {
     font-size: .88rem;
@@ -8406,6 +8412,11 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    /* Flex row so an optional Pokémon icon sits inline with the name. */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
 }
 .ma-matchup-record {
     font-size: 0.82rem;

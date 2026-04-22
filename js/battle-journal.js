@@ -1363,14 +1363,25 @@
         }
 
         const COL_W = 100; // px — explicit column width beats any table-layout heuristic
+        // Pokémon icons: stacked above column label, inline next to row label.
+        const _iconStacked = (n) => (window.ArchetypeIcons ? window.ArchetypeIcons.getIconHtml(n, { size: 'sm' }) : '');
+        const _iconInline  = (n) => (window.ArchetypeIcons ? window.ArchetypeIcons.getIconHtml(n, { size: 'sm', layout: 'inline' }) : '');
         let html = `<div class="ma-heatmap-scroll"><table class="ma-heatmap-table" style="width:max-content"><thead><tr><th class="ma-heatmap-corner" style="min-width:110px"></th>`;
         oppArr.forEach(opp => {
-            html += `<th class="ma-heatmap-col-header" style="min-width:${COL_W}px;width:${COL_W}px" title="${escapeHtml(opp)}"><span class="col-label">${escapeHtml(opp)}</span></th>`;
+            const ic = _iconStacked(opp);
+            const label = ic
+                ? `<span style="display:flex;flex-direction:column;align-items:center;gap:2px;">${ic}<span class="col-label">${escapeHtml(opp)}</span></span>`
+                : `<span class="col-label">${escapeHtml(opp)}</span>`;
+            html += `<th class="ma-heatmap-col-header" style="min-width:${COL_W}px;width:${COL_W}px" title="${escapeHtml(opp)}">${label}</th>`;
         });
         html += '</tr></thead><tbody>';
 
         myArr.forEach(my => {
-            html += `<tr><td class="ma-heatmap-row-header" style="min-width:110px" title="${escapeHtml(my)}">${escapeHtml(my).replace(/ /g, '<br>')}</td>`;
+            const ic = _iconInline(my);
+            const rowLabel = ic
+                ? `<span style="display:inline-flex;align-items:center;gap:6px;">${ic}<span>${escapeHtml(my).replace(/ /g, '<br>')}</span></span>`
+                : escapeHtml(my).replace(/ /g, '<br>');
+            html += `<tr><td class="ma-heatmap-row-header" style="min-width:110px" title="${escapeHtml(my)}">${rowLabel}</td>`;
             oppArr.forEach(opp => {
                 const key = my + '|||' + opp;
                 const cell = grid[key];
@@ -1416,9 +1427,12 @@
             const wr  = Math.round((cell.w / cell.total) * 100);
             const cls = wr >= 60 ? 'ma-wr-good' : (wr >= 40 ? 'ma-wr-mid' : 'ma-wr-bad');
             const record = `${cell.w}W-${cell.l}L${cell.t > 0 ? '-' + cell.t + 'T' : ''}`;
+            const ic = window.ArchetypeIcons
+                ? window.ArchetypeIcons.getIconHtml(name, { size: 'sm', layout: 'inline' })
+                : '';
             return `
                 <div class="ma-matchup-row">
-                    <div class="ma-matchup-name" title="${escapeHtml(name)}">${escapeHtml(name)}</div>
+                    <div class="ma-matchup-name" title="${escapeHtml(name)}">${ic}${escapeHtml(name)}</div>
                     <div class="ma-matchup-record">${record}<span class="ma-matchup-total">${cell.total}</span></div>
                     <div class="ma-matchup-wr ${cls}">${wr}%</div>
                 </div>`;
@@ -1462,8 +1476,11 @@
 
     function _rankItemHtml(m, type) {
         const cls = type === 'best' ? 'ma-rank-good' : 'ma-rank-bad';
+        const ic = window.ArchetypeIcons
+            ? window.ArchetypeIcons.getIconHtml(m.name, { size: 'sm', layout: 'inline' })
+            : '';
         return `<div class="ma-rank-item ${cls}">
-            <span class="ma-rank-name">${escapeHtml(m.name)}</span>
+            <span class="ma-rank-name">${ic}${escapeHtml(m.name)}</span>
             <span class="ma-rank-wr">${m.wr}%</span>
             <span class="ma-rank-record">${m.w}-${m.l}-${m.t}</span>
         </div>`;

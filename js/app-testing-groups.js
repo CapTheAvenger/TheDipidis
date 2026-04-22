@@ -1301,6 +1301,51 @@ window.TestingGroups = (function () {
     // listeners set up in _startRealtimeListener(). The pending section
     // re-renders on its own when the snapshot arrives.
     _renderPendingRequestsSection();
+
+    // Keep the tfoot row-head width in lock-step with the tbody row-head.
+    // tbody row-heads grow past their declared 200px when content or the
+    // absolute-positioned rename/remove controls push them wider; tfoot
+    // labels don't, so without correction the footer cells drift ~11px
+    // to the left of the matrix grid.
+    _alignFooterRowHeadToBody();
+  }
+
+  // Measures the first tbody row-head and mirrors its actual rendered
+  // width onto every tfoot row-head. Runs on:
+  //   • first layout (called from _renderGroupDetail)
+  //   • image load (icons shift the width)
+  //   • window resize (responsive width changes)
+  function _alignFooterRowHeadToBody() {
+    const table = document.querySelector('.tg-matchup-table');
+    if (!table) return;
+    const apply = () => {
+      const bodyTh = table.querySelector('tbody tr:first-child th.tg-row-head');
+      if (!bodyTh) return;
+      const w = bodyTh.getBoundingClientRect().width;
+      if (!w) return;
+      table.querySelectorAll('tfoot th.tg-row-head').forEach(th => {
+        th.style.minWidth = w + 'px';
+        th.style.width = w + 'px';
+      });
+    };
+    // Run now (after innerHTML assignment the DOM is laid out), then
+    // again on the next frame so any layout from sticky positioning is
+    // finalised. Also re-run after each Pokémon icon finishes loading.
+    apply();
+    requestAnimationFrame(apply);
+    table.querySelectorAll('tbody img.tcg-pokemon-icon').forEach(img => {
+      if (img.complete) return;
+      img.addEventListener('load', apply, { once: true });
+      img.addEventListener('error', apply, { once: true });
+    });
+    // One resize listener per session — subsequent renders use the same
+    // listener since it always reads the CURRENT DOM state.
+    if (!_alignFooterRowHeadToBody._resizeBound) {
+      window.addEventListener('resize', () => {
+        if (document.querySelector('.tg-matchup-table')) apply();
+      });
+      _alignFooterRowHeadToBody._resizeBound = true;
+    }
   }
 
   // Called when the joinRequests snapshot fires. Re-renders only the

@@ -2597,6 +2597,11 @@ function switchProfileTab(tabName) {
   if (tabName === 'metacall' && typeof MetaCall !== 'undefined') {
     MetaCall.init();
   }
+
+  // Auto-init Testing Groups
+  if (tabName === 'testinggroups' && typeof TestingGroups !== 'undefined') {
+    TestingGroups.init();
+  }
 }
 // Filter collection by search term
 function filterCollection() {

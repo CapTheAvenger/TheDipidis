@@ -1311,6 +1311,56 @@ window.MetaCall = (function () {
     _customDecks.__shareTimer = setTimeout(refreshResults, 500);
   }
 
+  // Called by TestingGroups to import a group's data into this MetaCall
+  // session. We map group data as follows:
+  //   • group.quantity → personal-share overrides on matching top decks;
+  //     anything in the group but NOT in the top 12 becomes a custom deck
+  //   • group.matchups[myDeck] → per-opponent WR overrides (if a deck is
+  //     currently selected in MetaCall)
+  // We don't touch settings (players / rounds / day2Points) — those stay
+  // as the user set them.
+  function _testingGroupLoad(groupData) {
+    if (!groupData || !_shareList) return;
+    const decks   = groupData.decks   || [];
+    const qty     = groupData.quantity|| {};
+    const matrix  = groupData.matchups|| {};
+
+    // Normalize names from the online share list for fuzzy matching
+    const shareNames = new Set(_shareList.map(d => normalize(d.name)));
+
+    // 1) Personal shares for matching decks, custom decks otherwise
+    _personalShares = {};
+    _customDecks    = [];
+    decks.forEach(name => {
+      const q = Number(qty[name]);
+      if (isNaN(q) || q <= 0) return;
+      if (name === 'Rest') return;  // skip the residual bucket
+      if (shareNames.has(normalize(name))) {
+        // Find the actual canonical name in the online list
+        const canonical = (_shareList.find(d => normalize(d.name) === normalize(name)) || {}).name || name;
+        _personalShares[canonical] = q;
+      } else {
+        if (_customDecks.length < MAX_CUSTOM) {
+          _customDecks.push({ name, share: q });
+        }
+      }
+    });
+
+    // 2) Win-rate overrides, only if the user has picked a deck
+    _winRateOverrides = {};
+    if (_settings.myDeck) {
+      const myRow = matrix[_settings.myDeck] || {};
+      Object.keys(myRow).forEach(opp => {
+        const wr = Number(myRow[opp]);
+        if (!isNaN(wr) && wr >= 0 && wr <= 100) {
+          _winRateOverrides[opp] = wr;
+        }
+      });
+    }
+
+    renderAll();
+  }
+
   function refreshCustomDecksPanel() {
     const panel = document.getElementById('mc-custom-decks-panel');
     if (panel) panel.outerHTML = renderCustomDecksPanel();
@@ -1536,6 +1586,7 @@ window.MetaCall = (function () {
     _removeCustomDeck,
     _onCustomDeckName,
     _onCustomDeckShare,
+    _testingGroupLoad,
     _saveScenario,
     _onScenarioSelect,
     _deleteScenario,

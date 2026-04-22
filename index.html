@@ -98,6 +98,7 @@
     <link rel="stylesheet" href="css/de-overview-tabs.css?v=202604220111" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/profile-howto-info.css?v=202604220111" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/meta-call.css?v=202604220111" type="text/css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/testing-groups.css?v=202604220111" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/ux-step1.css?v=202604220111" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/ux-step2.css?v=202604220111" type="text/css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/ux-step3.css?v=202604220111" type="text/css" media="print" onload="this.media='all'">
@@ -2711,6 +2712,9 @@
                             <button class="profile-tab-btn" onclick="switchProfileTab('metacall')">
                                 <span>Meta Call</span>
                             </button>
+                            <button class="profile-tab-btn" onclick="switchProfileTab('testinggroups')">
+                                <span data-i18n="tg.title">Testing Groups</span>
+                            </button>
                         </div>
                         
                         <!-- Collection Tab -->
@@ -3040,6 +3044,11 @@
                         <!-- Meta Call Tab -->
                         <div id="profile-metacall" class="profile-tab-content display-none">
                             <!-- Rendered dynamically by MetaCall.init() -->
+                        </div>
+
+                        <!-- Testing Groups Tab -->
+                        <div id="profile-testinggroups" class="profile-tab-content display-none">
+                            <!-- Rendered dynamically by TestingGroups.init() -->
                         </div>
 
                         <!-- Settings Tab -->
@@ -4225,6 +4234,7 @@
     <script src="js/app-current-meta-analysis.js?v=202604220111" defer></script>
     <script src="js/app-features.js?v=202604220111" defer></script>
     <script src="js/app-meta-call.js?v=202604220111" defer></script>
+    <script src="js/app-testing-groups.js?v=202604220111" defer></script>
     <script src="js/battle-journal.js?v=202604220111" defer></script>
     <script src="js/meta-binder.js?v=202604220111" defer></script>
     <script src="js/custom-binder.js?v=202604220111" defer></script>

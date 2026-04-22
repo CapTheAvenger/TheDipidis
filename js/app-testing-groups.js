@@ -1013,6 +1013,26 @@ window.TestingGroups = (function () {
     return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   }
 
+  // Render Limitless icons for a deck archetype. Returns HTML for 1–2 <img>
+  // tags wrapped in a .tcg-pokemon-icon-group; empty string if no mapping
+  // exists. Broken URLs hide themselves via onerror so missing species don't
+  // leave blank squares. `modifier` lets callers pick size/stacking.
+  function _iconHtml(deckName, modifier) {
+    if (typeof window.ArchetypeIcons === 'undefined') return '';
+    const urls = window.ArchetypeIcons.getIconUrls(deckName);
+    if (!urls || !urls.length) return '';
+    const mod = modifier || 'md';
+    const imgs = urls.map(u =>
+      `<img class="tcg-pokemon-icon tcg-pokemon-icon--${mod}" src="${_attrEsc(u)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+    ).join('');
+    const groupCls = (urls.length > 1 && mod === 'sm')
+      ? 'tcg-pokemon-icon-group tcg-pokemon-icon-group--stacked'
+      : 'tcg-pokemon-icon-group';
+    return urls.length > 1
+      ? `<span class="${groupCls}">${imgs}</span>`
+      : imgs;
+  }
+
   function renderAll() {
     const container = document.getElementById('profile-testinggroups');
     if (!container) return;
@@ -1087,9 +1107,17 @@ window.TestingGroups = (function () {
       ? decks.filter(d => _rowFilter.has(d))
       : decks;
 
-    // Header row: deck names
-    const headerCells = decks.map(d =>
-      `<th class="tg-col-head" title="${_esc(d)}"><span>${_esc(d)}</span></th>`).join('');
+    // Header row: Pokémon icons (with deck-name fallback + tooltip).
+    // When ArchetypeIcons has a mapping we show 1–2 icons centered in the
+    // column; otherwise we fall back to the rotated deck name so unknown
+    // archetypes still render. Full name lives in the title for hover.
+    const headerCells = decks.map(d => {
+      const icons = _iconHtml(d, 'md');
+      const inner = icons
+        ? `<span class="tg-col-icons">${icons}</span>`
+        : `<span>${_esc(d)}</span>`;
+      return `<th class="tg-col-head${icons ? ' tg-col-head-icon' : ''}" title="${_esc(d)}">${inner}</th>`;
+    }).join('');
 
     // Matchup rows
     const matrixRows = visibleDecks.map(rowDeck => {
@@ -1116,9 +1144,10 @@ window.TestingGroups = (function () {
              <button class="tg-deck-remove" title="${_esc(t('tg.removeDeck'))}" onclick="TestingGroups.removeDeck('${_jsEsc(rowDeck)}')">×</button>
            </span>`
         : '';
+      const rowIcons = _iconHtml(rowDeck, 'sm');
       return `<tr>
         <th class="tg-row-head">
-          <div class="tg-row-head-inner"><span>${_esc(rowDeck)}</span></div>
+          <div class="tg-row-head-inner">${rowIcons}<span>${_esc(rowDeck)}</span></div>
           ${deckControls}
         </th>
         ${cells}

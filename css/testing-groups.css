@@ -237,6 +237,24 @@
   margin-left: 10px;
 }
 
+/* Icon variant of the column header: upright, centered, no rotation.
+   When an archetype has a Pokémon-icon mapping we show the icon(s) instead
+   of the rotated deck name, which is denser and much easier to scan. */
+.tg-matchup-table thead th.tg-col-head-icon {
+  height: 56px;
+  padding: 4px;
+  vertical-align: middle;
+}
+.tg-matchup-table thead th.tg-col-head-icon .tg-col-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: none;
+  width: auto;
+  margin: 0;
+  line-height: 1;
+}
+
 /* CORNER (top-left) — sticks to BOTH top and left, highest z-index */
 .tg-corner {
   position: sticky !important;
@@ -275,10 +293,10 @@
 }
 
 .tg-row-head-inner {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   padding-right: 4px;
   min-height: 22px;
   line-height: 22px;
@@ -288,6 +306,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.tg-row-head-inner .tcg-pokemon-icon,
+.tg-row-head-inner .tcg-pokemon-icon-group {
+  flex: 0 0 auto;
 }
 
 /* Controls overlay: floats at the right edge of the row-head, hidden

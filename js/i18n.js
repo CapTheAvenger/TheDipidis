@@ -678,7 +678,7 @@ const translations = {
     'tg.errMetaCallMissing':    'Meta Call is not loaded.',
     'tg.metaCallNotReady':      'Meta Call integration is not wired up yet — JSON was downloaded instead. You can import it manually.',
     'tg.loadedIntoMetaCall':    'Loaded into Meta Call.',
-    'tg.loadedIntoMetaCallSummary': 'Loaded into Meta Call:\n• {personal} personal shares\n• {custom} custom decks\n• {wr} win-rate overrides\n\nIf 0 personal shares were loaded, the deck names in this group likely don''t match the current Limitless names yet.',
+    'tg.loadedIntoMetaCallSummary': 'Loaded into Meta Call:\n• {personal} personal shares\n• {custom} custom decks\n• {wr} win-rate overrides\n\nIf 0 personal shares were loaded, the deck names in this group likely don\'t match the current Limitless names yet.',
     // Phase 2a: invite links, rename, realtime
     'tg.inviteLink':            'Invite Link',
     'tg.invitePromptRole':      'Role for invited users: "editor" or "viewer"',
@@ -693,7 +693,7 @@ const translations = {
     'tg.unknownGroup':          'this group',
     'tg.confirmJoin':           'Join "{group}" as {role}?',
     'tg.confirmRequestJoin':    'Send a join request to "{group}" (as {role})? The owner will review your request.',
-    'tg.requestSent':           'Join request sent to the owner of "{group}". You''ll appear in the member list once approved.',
+    'tg.requestSent':           'Join request sent to the owner of "{group}". You\'ll appear in the member list once approved.',
     'tg.pendingRequests':       'Pending join requests',
     'tg.pendingRequestsHint':   'These users opened your invite link. Approve to add them to the group.',
     'tg.requestedRole':         'wants:',

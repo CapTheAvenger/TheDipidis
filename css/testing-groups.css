@@ -473,30 +473,56 @@
   border-color: #2980b9;
 }
 
-/* Footer row headers (Quantity / Winrates labels) — sticky-BOTTOM-left.
-   Same z-index tier as thead so they paint above body cells but below
-   the corner shadow. */
-.tg-matchup-table tfoot .tg-row-head {
-  z-index: 25;   /* row-head is 10, thead 20, footer-row-head 25, corner 30 */
-  background: #e8edf5;
-  box-shadow: 2px 0 4px rgba(0,0,0,.08);
-}
+/* ── TFOOT (Quantity % / Winrates) ────────────────────────────────────────
+   The footer rows mirror the body's visual grid — same row-head
+   background and width as tbody — but are sticky-bottom so the totals
+   stay visible while the matrix scrolls. A 2px top border on the first
+   tfoot row visually separates the summary from the matchup data. */
+
+/* Sticky-bottom base + grid separator on the first tfoot row */
 .tg-matchup-table tfoot td,
 .tg-matchup-table tfoot th {
   position: sticky;
   bottom: 0;
   z-index: 15;
-  background: #e8edf5;
-  /* Match body cell padding exactly so numbers align column-for-column
-     with the matchup values above. Without this the footer inherits
-     different padding from the thead override and looks off-center. */
-  padding: 5px 3px;
+  padding: 5px 3px;     /* matches body cell padding exactly so values
+                           align column-for-column with the matrix */
+  vertical-align: middle;
+  text-align: center;
 }
+.tg-matchup-table tfoot tr:first-child th,
+.tg-matchup-table tfoot tr:first-child td {
+  border-top: 2px solid #1a2340;
+}
+
+/* tfoot row-header (the "Quantity %" / "Winrates" label cell on the
+   left): same background + width as tbody row-head so the whole left
+   gutter reads as one consistent column. Label text is centered —
+   these are header labels, not deck names, so left-align isn't right
+   here even though tbody row-heads are left-aligned. */
+.tg-matchup-table tfoot .tg-row-head {
+  z-index: 25;   /* row-head 10, thead 20, footer row-head 25, corner 30 */
+  background: #f4f7fc;
+  color: #1a2533;
+  font-weight: 700;
+  text-align: center !important;
+  padding: 5px 10px !important;   /* match tbody row-head padding */
+  box-shadow: 2px 0 4px rgba(0,0,0,.08);
+}
+.tg-matchup-table tfoot .tg-row-head .tg-row-head-inner {
+  justify-content: center;
+  text-align: center;
+}
+
+/* tfoot value cells — .tg-cell-qty hosts an editable input, .tg-cell-wr
+   shows the computed winrate percentage. Both centered and padded
+   identically to the matrix cells above so nothing looks offset. */
 .tg-matchup-table tfoot .tg-cell-qty,
 .tg-matchup-table tfoot .tg-cell-wr {
   text-align: center;
-  padding: 5px 3px;
   vertical-align: middle;
+  padding: 5px 3px;
+  font-weight: 700;
 }
 .tg-matchup-table tfoot .tg-cell-qty { background: #f9fafc; }
 .tg-matchup-table tfoot .tg-cell-wr  { background: #eaf4ff; }
@@ -564,13 +590,9 @@
   background: #fff;
 }
 
-.tg-matchup-table tfoot th {
-  background: #e8edf5;
-  color: #1a2533;
-  font-weight: 700;
-}
-.tg-cell-qty { background: #f9fafc; }
-.tg-cell-wr { background: #eaf4ff; font-weight: 700; }
+/* tfoot styling is now consolidated in the TFOOT block above — the old
+   duplicate rules that used to live here were making tfoot row-heads
+   render with a different (darker) background than tbody row-heads. */
 
 /* ── Pending join requests (owner-only) ────────────────── */
 .tg-pending-section {

@@ -1,0 +1,42 @@
+/* Shared Pokémon-icon styling for meta archetypes. Icons are hotlinked from
+ * Limitless R2 (https://r2.limitlesstcg.net/pokemon/gen9/...). Missing icons
+ * are hidden via <img onerror="this.style.display='none'"> by the caller. */
+
+.tcg-pokemon-icon {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  vertical-align: middle;
+  user-select: none;
+  pointer-events: none;
+}
+
+.tcg-pokemon-icon--sm { width: 20px; height: 20px; }
+.tcg-pokemon-icon--md { width: 28px; height: 28px; }
+.tcg-pokemon-icon--lg { width: 40px; height: 40px; }
+
+/* Group wrapper — for combo archetypes with 2 icons side-by-side. */
+.tcg-pokemon-icon-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 1;
+}
+
+.tcg-pokemon-icon-group .tcg-pokemon-icon + .tcg-pokemon-icon {
+  margin-left: -6px; /* slight overlap so combo pairs read as a unit */
+}
+
+/* Stacked variant — for tight column headers where horizontal space is scarce. */
+.tcg-pokemon-icon-group--stacked {
+  flex-direction: column;
+  gap: 0;
+}
+
+.tcg-pokemon-icon-group--stacked .tcg-pokemon-icon + .tcg-pokemon-icon {
+  margin-left: 0;
+  margin-top: -4px;
+}

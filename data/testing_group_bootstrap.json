@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "name": "Initial Testing Group Dataset",
+    "description": "Bootstrap data extracted from user's matchup spreadsheet (2026-04-22). Used as the starting state for new Testing Groups.",
+    "bootstrappedFrom": "screenshot upload",
+    "lastUpdated": "2026-04-22"
+  },
+  "decks": [
+    "Pult", "Blaziken Pult", "DuskPult", "Zoroark", "Lucario",
+    "Rockets Mewtwo", "Alakazam", "Grim", "Slop Box", "Arboliva",
+    "Bolt", "Owlless Bolt", "Greninja", "Festival Lead", "Garchomp",
+    "Mega Starmie", "Psy Box", "Rockets Honchkrow", "Clefairy Box",
+    "Crustle", "Rest"
+  ],
+  "quantity": {
+    "Pult": 10, "Blaziken Pult": 6, "DuskPult": 8, "Zoroark": 5,
+    "Lucario": 8, "Rockets Mewtwo": 2, "Alakazam": 10, "Grim": 2,
+    "Slop Box": 2, "Arboliva": 4, "Bolt": 3, "Owlless Bolt": 3,
+    "Greninja": 1, "Festival Lead": 3, "Garchomp": 3, "Mega Starmie": 2,
+    "Psy Box": 1, "Rockets Honchkrow": 2, "Clefairy Box": 1,
+    "Crustle": 2, "Rest": 20
+  },
+  "matchups": {
+    "Pult":              { "Pult": 50, "Blaziken Pult": 50, "DuskPult": 55, "Zoroark": 45, "Lucario": 55, "Rockets Mewtwo": 45, "Alakazam": 60, "Grim": 55, "Slop Box": 60, "Arboliva": 60, "Bolt": 60, "Owlless Bolt": 60, "Greninja": 65, "Festival Lead": 70, "Garchomp": 53, "Mega Starmie": 55, "Psy Box": 55, "Rockets Honchkrow": 45, "Clefairy Box": 50, "Crustle": 30, "Rest": 50 },
+    "Blaziken Pult":     { "Pult": 50, "Blaziken Pult": 50, "DuskPult": 40, "Zoroark": 45, "Lucario": 60, "Rockets Mewtwo": 50, "Alakazam": 45, "Grim": 55, "Slop Box": 55, "Arboliva": 60, "Bolt": 60, "Owlless Bolt": 60, "Greninja": 65, "Festival Lead": 65, "Garchomp": 45, "Mega Starmie": 53, "Psy Box": 50, "Rockets Honchkrow": 45, "Clefairy Box": 45, "Crustle": 35, "Rest": 50 },
+    "DuskPult":          { "Pult": 45, "Blaziken Pult": 60, "DuskPult": 50, "Zoroark": 45, "Lucario": 55, "Rockets Mewtwo": 55, "Alakazam": 55, "Grim": 65, "Slop Box": 40, "Arboliva": 50, "Bolt": 50, "Owlless Bolt": 52, "Greninja": 55, "Festival Lead": 80, "Garchomp": 45, "Mega Starmie": 45, "Psy Box": 55, "Rockets Honchkrow": 55, "Clefairy Box": 55, "Crustle": 70, "Rest": 50 },
+    "Zoroark":           { "Pult": 55, "Blaziken Pult": 55, "DuskPult": 55, "Zoroark": 50, "Lucario": 45, "Rockets Mewtwo": 50, "Alakazam": 55, "Grim": 55, "Slop Box": 55, "Arboliva": 55, "Bolt": 55, "Owlless Bolt": 55, "Greninja": 35, "Festival Lead": 35, "Garchomp": 35, "Mega Starmie": 75, "Psy Box": 60, "Rockets Honchkrow": 60, "Clefairy Box": 60, "Crustle": 40, "Rest": 50 },
+    "Lucario":           { "Pult": 45, "Blaziken Pult": 40, "DuskPult": 55, "Zoroark": 55, "Lucario": 50, "Rockets Mewtwo": 45, "Alakazam": 50, "Grim": 60, "Slop Box": 55, "Arboliva": 40, "Bolt": 55, "Owlless Bolt": 55, "Greninja": 65, "Festival Lead": 30, "Garchomp": 45, "Mega Starmie": 65, "Psy Box": 35, "Rockets Honchkrow": 35, "Clefairy Box": 35, "Crustle": 60, "Rest": 50 },
+    "Rockets Mewtwo":    { "Pult": 55, "Blaziken Pult": 50, "DuskPult": 45, "Zoroark": 45, "Lucario": 50, "Rockets Mewtwo": 50, "Alakazam": 99, "Grim": 50, "Slop Box": 40, "Arboliva": 35, "Bolt": 55, "Owlless Bolt": 55, "Greninja": 65, "Festival Lead": 40, "Garchomp": 80, "Mega Starmie": 40, "Psy Box": 45, "Rockets Honchkrow": 45, "Clefairy Box": 40, "Crustle": 70, "Rest": 50 },
+    "Alakazam":          { "Pult": 40, "Blaziken Pult": 55, "DuskPult": 45, "Zoroark": 45, "Lucario": 50, "Rockets Mewtwo": 1, "Alakazam": 50, "Grim": 40, "Slop Box": 50, "Arboliva": 65, "Grims": null, "Bolt": 70, "Owlless Bolt": 75, "Greninja": 40, "Festival Lead": 25, "Garchomp": 65, "Mega Starmie": 40, "Psy Box": 25, "Rockets Honchkrow": 1, "Clefairy Box": 75, "Crustle": 30, "Rest": 50 },
+    "Grim":              { "Pult": 45, "Blaziken Pult": 40, "DuskPult": 35, "Zoroark": 40, "Lucario": 40, "Rockets Mewtwo": 50, "Alakazam": 40, "Grim": 50, "Slop Box": 40, "Arboliva": 40, "Bolt": 45, "Owlless Bolt": 40, "Greninja": 45, "Festival Lead": 55, "Garchomp": 30, "Mega Starmie": 50, "Psy Box": 50, "Rockets Honchkrow": 50, "Clefairy Box": 45, "Crustle": 40, "Rest": 50 },
+    "Slop Box":          { "Pult": 40, "Blaziken Pult": 45, "DuskPult": 60, "Zoroark": 45, "Lucario": 60, "Rockets Mewtwo": 60, "Alakazam": 50, "Grim": 60, "Slop Box": 50, "Arboliva": 55, "Bolt": 55, "Owlless Bolt": 55, "Greninja": 70, "Festival Lead": 40, "Garchomp": 40, "Mega Starmie": 50, "Psy Box": 55, "Rockets Honchkrow": 50, "Clefairy Box": 55, "Crustle": 70, "Rest": 50 },
+    "Arboliva":          { "Pult": 40, "Blaziken Pult": 40, "DuskPult": 50, "Zoroark": 45, "Lucario": 60, "Rockets Mewtwo": 65, "Alakazam": 35, "Grim": 60, "Slop Box": 45, "Arboliva": 50, "Bolt": 45, "Owlless Bolt": 40, "Greninja": 60, "Festival Lead": 30, "Garchomp": 65, "Mega Starmie": 55, "Psy Box": 60, "Rockets Honchkrow": 60, "Clefairy Box": 40, "Crustle": 60, "Rest": 50 },
+    "Bolt":              { "Pult": 40, "Blaziken Pult": 40, "DuskPult": 50, "Zoroark": 45, "Lucario": 60, "Rockets Mewtwo": 45, "Alakazam": 30, "Grim": 55, "Slop Box": 45, "Arboliva": 55, "Bolt": 50, "Owlless Bolt": 45, "Greninja": 65, "Festival Lead": 30, "Garchomp": 60, "Mega Starmie": 70, "Psy Box": 40, "Rockets Honchkrow": 25, "Clefairy Box": 30, "Crustle": 40, "Rest": 50 },
+    "Owlless Bolt":      { "Pult": 40, "Blaziken Pult": 50, "DuskPult": 48, "Zoroark": 45, "Lucario": 45, "Rockets Mewtwo": 25, "Alakazam": 60, "Grim": 45, "Slop Box": 60, "Arboliva": 55, "Bolt": 55, "Owlless Bolt": 50, "Greninja": 65, "Festival Lead": 20, "Garchomp": 40, "Mega Starmie": 65, "Psy Box": 45, "Rockets Honchkrow": 25, "Clefairy Box": 30, "Crustle": 30, "Rest": 50 },
+    "Greninja":          { "Pult": 35, "Blaziken Pult": 35, "DuskPult": 45, "Zoroark": 50, "Lucario": 35, "Rockets Mewtwo": 35, "Alakazam": 55, "Grim": 30, "Slop Box": 40, "Arboliva": 35, "Bolt": 35, "Owlless Bolt": 35, "Greninja": 50, "Festival Lead": 35, "Garchomp": 50, "Mega Starmie": 35, "Psy Box": 50, "Rockets Honchkrow": 20, "Clefairy Box": 60, "Crustle": 30, "Rest": 50 },
+    "Festival Lead":     { "Pult": 30, "Blaziken Pult": 35, "DuskPult": 20, "Zoroark": 65, "Lucario": 70, "Rockets Mewtwo": 60, "Alakazam": 60, "Grim": 45, "Slop Box": 60, "Arboliva": 70, "Bolt": 70, "Owlless Bolt": 80, "Greninja": 40, "Festival Lead": 50, "Garchomp": 90, "Mega Starmie": 40, "Psy Box": 55, "Rockets Honchkrow": 50, "Clefairy Box": 55, "Crustle": 80, "Rest": 50 },
+    "Garchomp":          { "Pult": 47, "Blaziken Pult": 55, "DuskPult": 55, "Zoroark": 65, "Lucario": 55, "Rockets Mewtwo": 20, "Alakazam": 75, "Grim": 70, "Slop Box": 60, "Arboliva": 35, "Bolt": 40, "Owlless Bolt": 60, "Greninja": 65, "Festival Lead": 10, "Garchomp": 50, "Mega Starmie": 60, "Psy Box": 60, "Rockets Honchkrow": 35, "Clefairy Box": 50, "Crustle": 45, "Rest": 50 },
+    "Mega Starmie":      { "Pult": 45, "Blaziken Pult": 47, "DuskPult": 55, "Zoroark": 45, "Lucario": 35, "Rockets Mewtwo": 60, "Alakazam": 60, "Grim": 50, "Slop Box": 50, "Arboliva": 45, "Bolt": 30, "Owlless Bolt": 35, "Greninja": 65, "Festival Lead": 60, "Garchomp": 40, "Mega Starmie": 50, "Psy Box": 40, "Rockets Honchkrow": 35, "Clefairy Box": 35, "Crustle": 55, "Rest": 50 },
+    "Psy Box":           { "Pult": 45, "Blaziken Pult": 50, "DuskPult": 55, "Zoroark": 25, "Lucario": 65, "Rockets Mewtwo": 55, "Alakazam": 60, "Grim": 50, "Slop Box": 45, "Arboliva": 40, "Bolt": 60, "Owlless Bolt": 55, "Greninja": 80, "Festival Lead": 45, "Garchomp": 40, "Mega Starmie": 60, "Psy Box": 50, "Rockets Honchkrow": 25, "Clefairy Box": 55, "Crustle": 70, "Rest": 50 },
+    "Rockets Honchkrow": { "Pult": 55, "Blaziken Pult": 55, "DuskPult": 45, "Zoroark": 65, "Lucario": 55, "Rockets Mewtwo": 99, "Alakazam": 50, "Grim": 50, "Slop Box": 50, "Arboliva": 40, "Bolt": 75, "Owlless Bolt": 75, "Greninja": 40, "Festival Lead": 50, "Garchomp": 65, "Mega Starmie": 65, "Psy Box": 75, "Rockets Honchkrow": 50, "Clefairy Box": 60, "Crustle": 99, "Rest": 50 },
+    "Clefairy Box":      { "Pult": 50, "Blaziken Pult": 55, "DuskPult": 45, "Zoroark": 40, "Lucario": 65, "Rockets Mewtwo": 60, "Alakazam": 25, "Grim": 55, "Slop Box": 45, "Arboliva": 60, "Bolt": 70, "Owlless Bolt": 70, "Greninja": 40, "Festival Lead": 45, "Garchomp": 50, "Mega Starmie": 45, "Psy Box": 45, "Rockets Honchkrow": 40, "Clefairy Box": 50, "Crustle": 10, "Rest": 50 },
+    "Crustle":           { "Pult": 70, "Blaziken Pult": 65, "DuskPult": 30, "Zoroark": 60, "Lucario": 40, "Rockets Mewtwo": 30, "Alakazam": 70, "Grim": 60, "Slop Box": 30, "Arboliva": 40, "Bolt": 60, "Owlless Bolt": 70, "Greninja": 70, "Festival Lead": 20, "Garchomp": 55, "Mega Starmie": 45, "Psy Box": 30, "Rockets Honchkrow": 1, "Clefairy Box": 90, "Crustle": 50, "Rest": 50 },
+    "Rest":              { "Pult": 50, "Blaziken Pult": 50, "DuskPult": 50, "Zoroark": 50, "Lucario": 50, "Rockets Mewtwo": 50, "Alakazam": 50, "Grim": 50, "Slop Box": 50, "Arboliva": 50, "Bolt": 50, "Owlless Bolt": 50, "Greninja": 50, "Festival Lead": 50, "Garchomp": 50, "Mega Starmie": 50, "Psy Box": 50, "Rockets Honchkrow": 50, "Clefairy Box": 50, "Crustle": 50, "Rest": 50 }
+  }
+}

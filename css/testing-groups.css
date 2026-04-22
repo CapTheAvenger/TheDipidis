@@ -191,6 +191,12 @@
   border-spacing: 0;
   font-size: 0.82rem;
   white-space: nowrap;
+  /* table-layout: fixed — columns strictly honor the declared widths on
+     the first row's cells (52px on thead th). Without this, the browser
+     auto-negotiates widths from content + padding across all rows, and
+     since the tfoot uses slightly different per-cell padding than the
+     tbody, the winrates/quantity values drift off the matrix grid. */
+  table-layout: fixed;
 }
 .tg-matchup-table th,
 .tg-matchup-table td {

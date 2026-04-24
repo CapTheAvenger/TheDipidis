@@ -1934,3 +1934,68 @@
     gap: 4px !important;
   }
 }
+
+/* ===========================================================
+   My Decks + Collection — compact mobile layout (< 600px)
+   ===========================================================
+   The deck-card grid and per-card action buttons are rendered with
+   inline styles in firebase-collection.js (template strings without
+   stable classes), so each rule below uses !important to override.
+   Selectors stay structural (`> div:nth-child(2) > div:last-child`)
+   to reach the unclassed inner grid.
+   --------------------------------------------------------- */
+@media (max-width: 600px) {
+
+  /* ── My Decks: tighter wrapper, header, and action chips ── */
+  .saved-deck-item {
+    padding: 0 !important;
+    margin-bottom: 8px !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+  }
+  .saved-deck-item .deck-header-row {
+    padding: 8px 12px !important;
+  }
+  .saved-deck-item .deck-action-buttons {
+    gap: 3px !important;
+    margin-top: 4px !important;
+  }
+  .saved-deck-item .deck-action-btn {
+    padding: 3px 6px !important;
+    font-size: 0.70em !important;
+    white-space: nowrap !important;
+  }
+
+  /* ── My Decks: card grid — 5–6 cards per row instead of 2–3.
+     With minmax(85px,1fr) a 430px viewport fits 4 columns; on
+     smaller phones the auto-fill backs off naturally. ── */
+  .saved-deck-item > div:nth-child(2) > div:last-child {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important;
+    gap: 4px !important;
+  }
+  .saved-deck-item > div:nth-child(2) > div:last-child > div {
+    border-radius: 4px !important;
+  }
+  /* −/★/+ buttons inside each deck card */
+  .saved-deck-item > div:nth-child(2) > div:last-child > div button {
+    height: 18px !important;
+    font-size: 10px !important;
+    padding: 0 !important;
+    border-radius: 2px !important;
+  }
+  /* Search row above the grid */
+  .saved-deck-item > div:nth-child(2) > div:first-child {
+    padding: 4px 8px !important;
+  }
+
+  /* ── Collection grid: match the +/− corner buttons to the
+     count-badge size (25×25, 13px). The buttons render at 26×26/
+     16px from the inline style; this !important shrinks them so
+     both badges visually align. ── */
+  #collection-grid > div > div[style*="position: absolute"][style*="right: 5px"] button {
+    width: 25px !important;
+    height: 25px !important;
+    font-size: 13px !important;
+  }
+}

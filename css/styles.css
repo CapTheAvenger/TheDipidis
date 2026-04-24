@@ -8648,10 +8648,16 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .tech-options-autocomplete-row:hover { background: #f0f4ff; }
 .tech-options-autocomplete-row img {
-    width: 32px;
-    height: 45px;
+    /* !important needed because mobile-responsive.css applies a blanket
+       `img { max-width: 100% !important; height: auto !important }` at
+       <=768px which would otherwise blow this thumbnail up to natural
+       size — making the autocomplete dropdown unusable on phones. */
+    width: 32px !important;
+    height: 45px !important;
+    min-width: 32px !important;
     object-fit: cover;
     border-radius: 3px;
+    flex: 0 0 auto;
 }
 .tech-options-autocomplete-row .row-name {
     font-size: 0.85em;

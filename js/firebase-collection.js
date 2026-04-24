@@ -2150,7 +2150,7 @@ function myDeckShowAutocomplete(inputEl, deckIndex) {
       <div onclick="myDeckAddCard(${deckIndex}, '${safeNameJs}', '${safeSet}', '${safeNum}'); myDeckHideAutocomplete('${deckId}'); document.getElementById('${deckId}-card-search').value='';" 
            style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.15s;"
            onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='white'">
-        ${imgUrl ? `<img src="${escapeHtml(imgUrl)}" style="width: 32px; height: 45px; object-fit: cover; border-radius: 3px;" loading="lazy" onerror="this.style.display='none'">` : ''}
+        ${imgUrl ? `<img src="${escapeHtml(imgUrl)}" style="width: 32px !important; height: 45px !important; min-width: 32px; object-fit: cover; border-radius: 3px; flex: 0 0 auto;" loading="lazy" onerror="this.style.display='none'">` : ''}
         <div style="flex: 1; min-width: 0;">
           <div style="font-size: 0.85em; font-weight: 600; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${safeNameHtml}</div>
           <div style="font-size: 0.7em; color: #999;">${escapeHtml(card.set || '')} ${escapeHtml(card.number || '')} · ${escapeHtml(card.type || '')}</div>

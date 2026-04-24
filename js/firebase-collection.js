@@ -1834,32 +1834,32 @@ function updateDecksUI() {
             ${ownedBadge}
             ${otherPrintSparkle}
             
-            <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.75); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.5); z-index: 3;">${count}</div>
+            <div style="position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.75); color: white; width: clamp(18px, 5vw, 30px); height: clamp(18px, 5vw, 30px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: clamp(9px, 2.5vw, 16px); font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.5); z-index: 3;">${count}</div>
             
-            <div style="position: absolute; bottom: 5px; left: 5px; right: 5px; z-index: 3; display: flex; flex-direction: column; gap: 2px;">
+            <div style="position: absolute; bottom: 2px; left: 2px; right: 2px; z-index: 3; display: flex; flex-direction: column; gap: 1px;">
               <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
                   <button onclick="event.stopPropagation(); myDeckChangeCardCount(${deckIndex}, '${safeDeckKeyJs}', -1)" 
-                      style="background: #dc3545; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      style="background: #dc3545; color: white; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-size: clamp(9px, 2.5vw, 14px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="${getLang()==='de' ? 'Anzahl verringern' : 'Decrease count'}">-</button>
                   <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeDeckKeyJs}', '${safeProfileHintJs}')" 
-                      style="background: #ffc107; color: #333; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      style="background: #ffc107; color: #333; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-size: clamp(8px, 2vw, 11px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="Switch rarity/print">★</button>
                   <button onclick="event.stopPropagation(); myDeckChangeCardCount(${deckIndex}, '${safeDeckKeyJs}', 1)" 
-                      style="background: #28a745; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      style="background: #28a745; color: white; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-size: clamp(9px, 2.5vw, 14px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="${getLang()==='de' ? 'Anzahl erh\u00f6hen' : 'Increase count'}">+</button>
               </div>
               <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;">
                   <button onclick="event.stopPropagation(); openCardmarket('${safeCardmarketUrlJs}', '${safeCardNameJs}')" 
-                      style="background: ${priceBackground}; color: white; height: 22px; border: none; border-radius: 3px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: 8px; font-weight: bold; padding: 0 2px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
+                      style="background: ${priceBackground}; color: white; height: clamp(12px, 3vw, 22px); border: none; border-radius: 2px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: clamp(6px, 1.5vw, 8px); font-weight: bold; padding: 0 1px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
                     title="${safeCardmarketTitleHtml}">${safePriceDisplayHtml}</button>
                   <button onclick="event.stopPropagation(); toggleCollection('${safeCardIdJs}')" 
                       style="background: ${isOwned ? '#27ae60' : '#95a5a6'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: ${ownedCount > 0 ? '10' : '13'}px; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="Add to collection (${ownedCount}/4)">${ownedCount > 0 ? ownedCount + '/4' : '+'}</button>
                   <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')" 
-                      style="background: ${isWishlisted ? '#E91E63' : '#bdc3c7'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      style="background: ${isWishlisted ? '#E91E63' : '#bdc3c7'}; color: white; border: none; border-radius: 3px; height: clamp(12px, 3vw, 22px); cursor: pointer; font-weight: bold; font-size: clamp(8px, 2vw, 12px); display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">❤</button>
                   <button onclick="event.stopPropagation(); myDeckRemoveCard(${deckIndex}, '${safeDeckKeyJs}')" 
-                      style="background: #c0392b; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                      style="background: #c0392b; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: clamp(6px, 1.5vw, 9px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
                       title="${getLang()==='de' ? 'Karte komplett entfernen' : 'Remove card from deck'}">Del</button>
               </div>
             </div>
@@ -1879,7 +1879,7 @@ function updateDecksUI() {
     
     return `
       <div class="saved-deck-item" data-deck-name="${safeDeckNameHtml}" data-deck-archetype="${safeDeckArchetypeHtml}" data-deck-folder="${safeFolderHtml}" data-deck-active="${isActive}" style="background: white; border-radius: 10px; box-shadow: ${isActive ? '0 0 12px rgba(76,175,80,0.5), 0 2px 8px rgba(0,0,0,0.1)' : '0 2px 8px rgba(0,0,0,0.1)'}; overflow: hidden; margin-bottom: 10px; ${activeBorder}">
-        <div class="deck-header-row" onclick="toggleDeckCollapse('${deckId}')" style="padding: 15px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: ${activeGradient}; color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+        <div class="deck-header-row" onclick="toggleDeckCollapse('${deckId}')" style="padding: clamp(8px, 2vw, 15px) clamp(10px, 3vw, 20px); cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: ${activeGradient}; color: white; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
           <div class="deck-name-col" style="flex: 1; min-width: 0;">
             <h3 style="margin: 0 0 3px 0; font-size: 1.1em; font-weight: 600;">${safeDeckNameHtml}${activeLabel}</h3>
             <div style="font-size: 0.85em; opacity: 0.9;">
@@ -1920,7 +1920,7 @@ function updateDecksUI() {
             <div id="${deckId}-arrow" style="font-size: 1.5em; transition: transform 0.3s; transform: rotate(0deg); margin-left: auto;">▼</div>
           </div>
         </div>
-        <div id="${deckId}" style="display: none; padding: 15px; background: #f8f9fa;">
+        <div id="${deckId}" style="display: none; padding: clamp(4px, 1.5vw, 15px); background: #f8f9fa;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; flex-wrap: wrap;">
             <div style="position: relative; flex: 1; min-width: 200px;">
               <input type="text" id="${deckId}-card-search" placeholder="${getLang()==='de' ? 'Karte suchen & hinzufügen...' : 'Search & add card...'}" 
@@ -1935,7 +1935,7 @@ function updateDecksUI() {
               <button onclick="openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="Compare this deck">Compare</button>
             </div>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(55px, 15vw, 120px), 1fr)); gap: clamp(2px, 0.8vw, 10px);">
             ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
           </div>
           ${_renderTechOptionsSection(deck, deckIndex, deckId)}

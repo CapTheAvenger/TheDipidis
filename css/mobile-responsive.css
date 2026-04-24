@@ -1966,25 +1966,17 @@
     white-space: nowrap !important;
   }
 
-  /* ── My Decks: card grid — 5–6 cards per row instead of 2–3.
-     With minmax(85px,1fr) a 430px viewport fits 4 columns; on
-     smaller phones the auto-fill backs off naturally. ── */
-  .saved-deck-item > div:nth-child(2) > div:last-child {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important;
-    gap: 4px !important;
-  }
+  /* My Decks card grid + per-card button sizing is now driven by the
+     inline-style clamp() values in firebase-collection.js
+     (minmax(clamp(55px, 15vw, 120px), 1fr) etc.) so on phones the grid
+     scales fluidly to 5–6 cards per row and on desktop it stays at the
+     original 120px minimum. The earlier !important overrides here used
+     to hard-set 85px / 18px button height, which would now fight the
+     clamp() values. Only the small radius / search-row padding tweaks
+     remain — they don't conflict with the inline styles. */
   .saved-deck-item > div:nth-child(2) > div:last-child > div {
     border-radius: 4px !important;
   }
-  /* −/★/+ buttons inside each deck card */
-  .saved-deck-item > div:nth-child(2) > div:last-child > div button {
-    height: 18px !important;
-    font-size: 10px !important;
-    padding: 0 !important;
-    border-radius: 2px !important;
-  }
-  /* Search row above the grid */
   .saved-deck-item > div:nth-child(2) > div:first-child {
     padding: 4px 8px !important;
   }

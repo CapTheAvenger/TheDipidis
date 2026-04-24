@@ -1543,6 +1543,134 @@ function updateDecksUI() {
     return null;
   }
   
+  // Per-deck tech-options helpers — share the lookup chain above so we
+  // don't duplicate the find-card-by-deckKey logic. Tech-option entries
+  // are stored under deck.techOptions = { deckKey: { count, replaces, note } }
+  // and DO NOT count toward the 60-card total — they are alternatives the
+  // user is considering.
+  function _lookupCardForDeckKey(deckKey) {
+    const parsed = parseMyDeckCardKey(deckKey);
+    let cardData = null;
+    if (parsed.hasPrint) {
+      cardData = _lookupCardBySetNumber(parsed.setCode, parsed.setNumber);
+      if (!cardData && window.cardsBySetNumberMap) {
+        cardData = window.cardsBySetNumberMap[`${parsed.setCode}-${parsed.setNumber}`];
+      }
+      if (!cardData && window.allCardsDatabase) {
+        cardData = window.allCardsDatabase.find(c => c.set === parsed.setCode && c.number === parsed.setNumber);
+      }
+      if (!cardData) cardData = findFallbackDeckCardByName(parsed.name);
+    } else {
+      cardData = findFallbackDeckCardByName(parsed.name || deckKey);
+    }
+    return { cardData, parsed };
+  }
+
+  function _renderTechOptionsSection(deck, deckIndex, deckId) {
+    const tech = deck.techOptions || {};
+    const techKeys = Object.keys(tech).filter(k => (tech[k] && tech[k].count > 0));
+    const isDE = getLang() === 'de';
+    const headerLabel = isDE ? 'Tech-Optionen' : 'Tech Options';
+    const addPlaceholder = isDE ? 'Karte zum Überlegen suchen…' : 'Search a card to consider…';
+    const emptyHint = isDE
+      ? 'Karten die du für dieses Deck noch in Erwägung ziehst — zählen NICHT zu den 60.'
+      : "Cards you're still considering for this deck — they don't count toward the 60.";
+    const totalConsidering = techKeys.reduce((s, k) => s + (tech[k].count || 0), 0);
+
+    // Replaces-dropdown options come from the main deck. We display the
+    // bare card name (without the "(SET 123)" tail) so the dropdown stays
+    // readable, but keep the deckKey as the option value.
+    const mainDeckOptions = Object.keys(deck.cards || {})
+      .filter(k => (deck.cards[k] || 0) > 0)
+      .map(k => {
+        const parsed = parseMyDeckCardKey(k);
+        const display = (parsed && parsed.name) ? parsed.name : k;
+        return `<option value="${escapeHtml(k)}">${escapeHtml(display)}</option>`;
+      })
+      .join('');
+
+    // Build the considering-card grid
+    let cardsHtml = '';
+    techKeys.forEach(deckKey => {
+      const entry = tech[deckKey] || {};
+      const count = entry.count || 1;
+      const note  = entry.note || '';
+      const replaces = entry.replaces || '';
+      const { cardData } = _lookupCardForDeckKey(deckKey);
+      const cardName = (cardData && cardData.name) || parseMyDeckCardKey(deckKey).name || deckKey;
+      let imageUrl = (cardData && cardData.image_url) || '';
+      if (!imageUrl && cardData && typeof buildCardImageUrl === 'function') {
+        imageUrl = buildCardImageUrl(cardData.set, cardData.number, cardData.rarity || 'C');
+      }
+      if (!imageUrl) {
+        imageUrl = `https://via.placeholder.com/245x342/667eea/ffffff?text=${encodeURIComponent(cardName)}`;
+      }
+      const safeImage = escapeHtml(imageUrl);
+      const safeImageJs = escapeJsSingleQuoted(imageUrl);
+      const safeNameHtml = escapeHtml(cardName);
+      const safeNameJs = escapeJsSingleQuoted(cardName);
+      const safeKeyJs = escapeJsSingleQuoted(deckKey);
+      const safeReplacesAttr = escapeHtml(replaces);
+      const safeNoteHtml = escapeHtml(note);
+      const optionsWithSelection = mainDeckOptions
+        .replace(`value="${safeReplacesAttr}"`, `value="${safeReplacesAttr}" selected`);
+
+      cardsHtml += `
+        <div class="tech-option-card">
+          <img src="${safeImage}" alt="${safeNameHtml}" class="tech-option-img"
+               loading="lazy" onclick="showSingleCard('${safeImageJs}', '${safeNameJs}')"
+               onerror="if(!this.dataset.r){this.dataset.r='1';var s=this.src;this.src='';setTimeout(()=>this.src=s,2000);}">
+          <div class="tech-option-count-badge">${count}×</div>
+          <div class="tech-option-controls">
+            <button onclick="myDeckTechChangeCount(${deckIndex}, '${safeKeyJs}', -1)" class="tech-btn tech-btn-minus" title="${isDE ? 'Weniger' : 'Less'}">−</button>
+            <button onclick="myDeckTechChangeCount(${deckIndex}, '${safeKeyJs}', 1)" class="tech-btn tech-btn-plus" title="${isDE ? 'Mehr' : 'More'}">+</button>
+            <button onclick="myDeckTechRemove(${deckIndex}, '${safeKeyJs}')" class="tech-btn tech-btn-del" title="${isDE ? 'Entfernen' : 'Remove'}">✕</button>
+          </div>
+          <div class="tech-option-meta">
+            <label class="tech-option-label">${isDE ? 'Ersetzt' : 'Replaces'}
+              <select onchange="myDeckTechSetReplaces(${deckIndex}, '${safeKeyJs}', this.value)" class="tech-option-select">
+                <option value="">—</option>
+                ${optionsWithSelection}
+              </select>
+            </label>
+            <input type="text" maxlength="100" value="${safeNoteHtml}"
+                   placeholder="${isDE ? 'Warum? (optional)' : 'Why? (optional)'}"
+                   oninput="myDeckTechSetNote(${deckIndex}, '${safeKeyJs}', this.value)"
+                   class="tech-option-note">
+          </div>
+        </div>`;
+    });
+
+    return `
+      <div class="tech-options-section" id="${deckId}-tech">
+        <div class="tech-options-header" onclick="toggleTechOptions('${deckId}')">
+          <span class="tech-options-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px;">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+            ${headerLabel} <span class="tech-options-count">${techKeys.length} ${isDE ? '(' + totalConsidering + ' Kopien)' : '(' + totalConsidering + ' copies)'}</span>
+          </span>
+          <span class="tech-options-arrow" id="${deckId}-tech-arrow">▼</span>
+        </div>
+        <div class="tech-options-body" id="${deckId}-tech-body" style="display:none;">
+          <div class="tech-options-hint">${emptyHint}</div>
+          <div class="tech-options-add-row">
+            <input type="text" id="${deckId}-tech-search"
+                   class="tech-options-add-input"
+                   placeholder="${addPlaceholder}"
+                   oninput="myDeckTechShowAutocomplete(this, ${deckIndex})"
+                   onfocus="this.style.borderColor='#7c4dff'"
+                   onblur="setTimeout(() => { this.style.borderColor='#ddd'; myDeckTechHideAutocomplete('${deckId}'); }, 200)"
+                   autocomplete="off">
+            <div id="${deckId}-tech-autocomplete" class="tech-options-autocomplete d-none"></div>
+          </div>
+          <div class="tech-options-grid">
+            ${cardsHtml || `<p class="tech-options-empty">${isDE ? 'Noch keine Tech-Optionen — über das Suchfeld hinzufügen.' : 'No tech options yet — add via the search field above.'}</p>`}
+          </div>
+        </div>
+      </div>`;
+  }
+
   decksGrid.innerHTML = window.userDecks.map((deck, deckIndex) => {
     const totalCards = deck.totalCards || Object.values(deck.cards || {}).reduce((sum, count) => sum + count, 0);
     const uniqueCards = Object.keys(deck.cards || {}).length;
@@ -1810,6 +1938,7 @@ function updateDecksUI() {
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
             ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
           </div>
+          ${_renderTechOptionsSection(deck, deckIndex, deckId)}
         </div>
       </div>
     `;
@@ -2035,6 +2164,166 @@ function myDeckShowAutocomplete(inputEl, deckIndex) {
 function myDeckHideAutocomplete(deckId) {
   const dropdown = document.getElementById(`${deckId}-autocomplete`);
   if (dropdown) dropdown.classList.add('d-none');
+}
+
+// ============================================================
+// My Decks: Tech Options panel (alternative cards under consideration)
+// ------------------------------------------------------------
+// Stored in Firestore as deck.techOptions = { deckKey: { count, replaces, note } }.
+// Tech options DO NOT add to deck.totalCards — they're a side-pile of
+// candidates the user is still thinking about. The "replaces" field
+// holds the deckKey of a main-deck card the alt would swap into; "note"
+// is free-text up to 100 chars.
+// ============================================================
+function toggleTechOptions(deckId) {
+  const body = document.getElementById(`${deckId}-tech-body`);
+  const arrow = document.getElementById(`${deckId}-tech-arrow`);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+async function _persistTechOptions(deck) {
+  const user = auth.currentUser;
+  if (!user || !deck || !deck.id) return;
+  await db.collection('users').doc(user.uid)
+    .collection('decks').doc(deck.id)
+    .update({
+      techOptions: deck.techOptions || {},
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
+function _refreshDeckUiKeepOpen(deckIndex, keepTechOpen) {
+  updateDecksUI();
+  setTimeout(() => {
+    const deckEl = document.getElementById(`saved-deck-${deckIndex}`);
+    if (deckEl && deckEl.style.display === 'none') toggleDeckCollapse(`saved-deck-${deckIndex}`);
+    if (keepTechOpen) toggleTechOptions(`saved-deck-${deckIndex}`);
+  }, 60);
+}
+
+async function myDeckTechAdd(deckIndex, cardName, setCode, setNumber) {
+  const deck = (window.userDecks || [])[deckIndex];
+  if (!deck) return;
+  if (!deck.techOptions) deck.techOptions = {};
+  const deckKey = `${cardName} (${setCode} ${setNumber})`;
+  const cur = deck.techOptions[deckKey];
+  if (cur && cur.count >= 4 && !cardName.toLowerCase().includes('energy')) {
+    showNotification(getLang() === 'de' ? 'Bereits 4 in den Tech-Optionen' : 'Already 4 in tech options', 'warning');
+    return;
+  }
+  deck.techOptions[deckKey] = {
+    count: (cur && cur.count ? cur.count : 0) + 1,
+    replaces: (cur && cur.replaces) || '',
+    note: (cur && cur.note) || ''
+  };
+  try {
+    await _persistTechOptions(deck);
+    showNotification(`${cardName} ${getLang() === 'de' ? 'als Tech-Option hinzugefügt' : 'added as tech option'}`, 'success');
+    _refreshDeckUiKeepOpen(deckIndex, true);
+  } catch (e) {
+    console.error('myDeckTechAdd', e);
+    showNotification('Error updating deck', 'error');
+  }
+}
+
+async function myDeckTechChangeCount(deckIndex, deckKey, delta) {
+  const deck = (window.userDecks || [])[deckIndex];
+  if (!deck || !deck.techOptions || !deck.techOptions[deckKey]) return;
+  const cur = deck.techOptions[deckKey];
+  const next = (cur.count || 0) + delta;
+  if (next <= 0) {
+    delete deck.techOptions[deckKey];
+  } else if (next > 4 && !deckKey.toLowerCase().includes('energy')) {
+    showNotification(getLang() === 'de' ? 'Maximal 4 Kopien' : 'Max 4 copies', 'warning');
+    return;
+  } else {
+    cur.count = next;
+  }
+  try {
+    await _persistTechOptions(deck);
+    _refreshDeckUiKeepOpen(deckIndex, true);
+  } catch (e) {
+    console.error('myDeckTechChangeCount', e);
+  }
+}
+
+async function myDeckTechRemove(deckIndex, deckKey) {
+  const deck = (window.userDecks || [])[deckIndex];
+  if (!deck || !deck.techOptions) return;
+  delete deck.techOptions[deckKey];
+  try {
+    await _persistTechOptions(deck);
+    _refreshDeckUiKeepOpen(deckIndex, true);
+  } catch (e) {
+    console.error('myDeckTechRemove', e);
+  }
+}
+
+async function myDeckTechSetReplaces(deckIndex, deckKey, replacesKey) {
+  const deck = (window.userDecks || [])[deckIndex];
+  if (!deck || !deck.techOptions || !deck.techOptions[deckKey]) return;
+  deck.techOptions[deckKey].replaces = replacesKey || '';
+  try { await _persistTechOptions(deck); } catch (e) { console.error('myDeckTechSetReplaces', e); }
+}
+
+// Debounced note save so every keystroke doesn't fire a Firestore write.
+const _techNoteTimers = {};
+function myDeckTechSetNote(deckIndex, deckKey, note) {
+  const deck = (window.userDecks || [])[deckIndex];
+  if (!deck || !deck.techOptions || !deck.techOptions[deckKey]) return;
+  deck.techOptions[deckKey].note = String(note || '').slice(0, 100);
+  const k = `${deckIndex}|${deckKey}`;
+  clearTimeout(_techNoteTimers[k]);
+  _techNoteTimers[k] = setTimeout(async () => {
+    try { await _persistTechOptions(deck); }
+    catch (e) { console.error('myDeckTechSetNote', e); }
+  }, 600);
+}
+
+function myDeckTechShowAutocomplete(inputEl, deckIndex) {
+  const deckId = `saved-deck-${deckIndex}`;
+  const dropdown = document.getElementById(`${deckId}-tech-autocomplete`);
+  if (!dropdown) return;
+  const term = (inputEl.value || '').trim().toLowerCase();
+  if (term.length < 2) { dropdown.classList.add('d-none'); return; }
+  const cardsDb = window.allCardsDatabase || window.allCardsData || [];
+  if (cardsDb.length === 0) { dropdown.classList.add('d-none'); return; }
+  const matches = [];
+  const seen = new Set();
+  for (const card of cardsDb) {
+    if (!card.name || seen.has(card.name)) continue;
+    const nameDe = (card.name_de || card.german_name || '').toLowerCase();
+    if (card.name.toLowerCase().includes(term) || nameDe.includes(term)) {
+      matches.push(card); seen.add(card.name);
+      if (matches.length >= 12) break;
+    }
+  }
+  if (!matches.length) { dropdown.classList.add('d-none'); return; }
+  dropdown.innerHTML = matches.map(card => {
+    const safeNameJs = escapeJsSingleQuoted(card.name);
+    const safeSet = escapeJsSingleQuoted(card.set || '');
+    const safeNum = escapeJsSingleQuoted(card.number || '');
+    const safeNameHtml = escapeHtml(card.name);
+    const imgUrl = card.image_url || '';
+    return `
+      <div onclick="myDeckTechAdd(${deckIndex}, '${safeNameJs}', '${safeSet}', '${safeNum}'); myDeckTechHideAutocomplete('${deckId}'); document.getElementById('${deckId}-tech-search').value='';"
+           class="tech-options-autocomplete-row">
+        ${imgUrl ? `<img src="${escapeHtml(imgUrl)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+        <div>
+          <div class="row-name">${safeNameHtml}</div>
+          <div class="row-meta">${escapeHtml(card.set || '')} ${escapeHtml(card.number || '')} · ${escapeHtml(card.type || '')}</div>
+        </div>
+      </div>`;
+  }).join('');
+  dropdown.classList.remove('d-none');
+}
+
+function myDeckTechHideAutocomplete(deckId) {
+  const dd = document.getElementById(`${deckId}-tech-autocomplete`);
+  if (dd) dd.classList.add('d-none');
 }
 
 // ============================================================

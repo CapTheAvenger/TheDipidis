@@ -8562,3 +8562,225 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
         display: none; /* hide hint text on very small screens */
     }
 }
+
+/* ===========================================================
+   Tech Options panel — per-deck side-pile of cards the user is
+   considering. Lives below the main 60-card grid in My Decks,
+   collapsed by default. Cards here don't count toward the 60.
+   =========================================================== */
+.tech-options-section {
+    margin-top: 14px;
+    border: 1px solid #e1e7f0;
+    border-radius: 10px;
+    background: #f7f9fc;
+    overflow: hidden;
+}
+.tech-options-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: linear-gradient(90deg, #6c5ce7 0%, #a29bfe 100%);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: filter 0.15s;
+}
+.tech-options-header:hover { filter: brightness(1.06); }
+.tech-options-title { display: inline-flex; align-items: center; }
+.tech-options-count {
+    margin-left: 8px;
+    font-size: 0.78em;
+    font-weight: 600;
+    opacity: 0.85;
+}
+.tech-options-arrow {
+    font-size: 1.1em;
+    transition: transform 0.25s ease;
+    display: inline-block;
+}
+.tech-options-body {
+    padding: 12px 14px;
+}
+.tech-options-hint {
+    font-size: 0.78em;
+    color: #6b7c93;
+    margin-bottom: 10px;
+    font-style: italic;
+}
+.tech-options-add-row {
+    position: relative;
+    margin-bottom: 12px;
+}
+.tech-options-add-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9em;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.tech-options-autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 100;
+}
+.tech-options-autocomplete.d-none { display: none; }
+.tech-options-autocomplete-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.15s;
+}
+.tech-options-autocomplete-row:hover { background: #f0f4ff; }
+.tech-options-autocomplete-row img {
+    width: 32px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 3px;
+}
+.tech-options-autocomplete-row .row-name {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #2c3e50;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tech-options-autocomplete-row .row-meta {
+    font-size: 0.7em;
+    color: #999;
+}
+.tech-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+.tech-options-empty {
+    grid-column: 1 / -1;
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    padding: 16px;
+    margin: 0;
+}
+.tech-option-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid #e1e7f0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+}
+.tech-option-img {
+    width: 100%;
+    aspect-ratio: 245/342;
+    object-fit: cover;
+    display: block;
+    cursor: zoom-in;
+}
+.tech-option-count-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0,0,0,0.78);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 3px 7px;
+    border-radius: 999px;
+}
+.tech-option-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    padding: 4px;
+    background: #f4f7fc;
+}
+.tech-btn {
+    height: 24px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: filter 0.15s;
+}
+.tech-btn:hover { filter: brightness(1.10); }
+.tech-btn-minus { background: #dc3545; }
+.tech-btn-plus  { background: #28a745; }
+.tech-btn-del   { background: #c0392b; font-size: 11px; }
+.tech-option-meta {
+    padding: 6px 8px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.tech-option-label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.7em;
+    color: #6b7c93;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    gap: 2px;
+}
+.tech-option-select {
+    padding: 4px 6px;
+    border: 1px solid #d6dde7;
+    border-radius: 4px;
+    font-size: 0.85em;
+    background: #fff;
+    color: #1f2d3d;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 500;
+    width: 100%;
+    box-sizing: border-box;
+}
+.tech-option-note {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px 7px;
+    border: 1px solid #d6dde7;
+    border-radius: 4px;
+    font-size: 0.82em;
+    background: #fff;
+    color: #1f2d3d;
+    transition: border-color 0.15s;
+}
+.tech-option-note:focus { outline: none; border-color: #6c5ce7; }
+
+/* Mobile: tighter grid + smaller controls */
+@media (max-width: 600px) {
+    .tech-options-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+        gap: 6px !important;
+    }
+    .tech-options-header { padding: 8px 12px !important; }
+    .tech-options-body { padding: 8px 10px !important; }
+    .tech-option-meta { padding: 5px 6px 6px !important; gap: 4px !important; }
+    .tech-option-note { font-size: 0.78em !important; }
+    .tech-btn { height: 22px !important; font-size: 12px !important; }
+}

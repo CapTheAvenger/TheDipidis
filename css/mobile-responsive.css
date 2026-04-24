@@ -1991,3 +1991,52 @@
     font-size: 13px !important;
   }
 }
+
+/* ===========================================================
+   My Decks card — mobile button cleanup (<600px)
+   ===========================================================
+   At 5–6 cards per row each tile is only ~60–80px wide. With ALL
+   eight buttons (−/★/+ + price/coll/wish/✕) the card art is
+   completely covered. On mobile we drop the secondary actions
+   (rarity-switch, price, collection toggle, wishlist toggle) and
+   keep only the three essentials: −, +, ✕. Those secondary actions
+   are still reachable via the card-detail modal / desktop view.
+   --------------------------------------------------------- */
+@media (max-width: 600px) {
+
+  /* Top row inside the inline button-container — hide ★, leave −/+ */
+  .saved-deck-item div[style*="bottom: 2px"] > div:first-child {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .saved-deck-item div[style*="bottom: 2px"] > div:first-child > button:nth-child(2) {
+    display: none !important;
+  }
+
+  /* Bottom row — hide price/coll/wishlist, leave only ✕ as a full-
+     width button so it's easy to hit. */
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child {
+    grid-template-columns: 1fr !important;
+  }
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:not(:last-child) {
+    display: none !important;
+  }
+
+  /* Tighter, more proportional sizing on the remaining buttons.
+     Override the clamp() inline style so the buttons don't grow as
+     large at small viewports. 18px is still a comfortable tap target
+     because the buttons span half / full card width. */
+  .saved-deck-item div[style*="bottom: 2px"] button {
+    height: 18px !important;
+    font-size: 11px !important;
+    border-radius: 3px !important;
+  }
+
+  /* Deck-count badge (top-right) — clamp() at the smallest viewport
+     still produces an 18px circle which dominates a 60px-wide card.
+     Shrink to a tighter 16×16 with smaller font. */
+  .saved-deck-item div[style*="top: 3px"][style*="right: 3px"][style*="border-radius: 50%"] {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 10px !important;
+  }
+}

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(python -m py_compile current_meta_analysis_scraper.py)",
-      "Bash(python -m py_compile city_league_archetype_scraper.py)"
+      "Bash(python -m py_compile city_league_archetype_scraper.py)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

@@ -1850,17 +1850,17 @@ function updateDecksUI() {
               </div>
               <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;">
                   <button onclick="event.stopPropagation(); openCardmarket('${safeCardmarketUrlJs}', '${safeCardNameJs}')" 
-                      style="background: ${priceBackground}; color: white; height: clamp(12px, 3vw, 22px); border: none; border-radius: 2px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: clamp(6px, 1.5vw, 8px); font-weight: bold; padding: 0 1px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
+                      style="background: ${priceBackground}; color: white; height: clamp(14px, 3.5vw, 22px); border: none; border-radius: 2px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: clamp(7px, 1.8vw, 9px); font-weight: bold; padding: 0 1px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
                     title="${safeCardmarketTitleHtml}">${safePriceDisplayHtml}</button>
-                  <button onclick="event.stopPropagation(); toggleCollection('${safeCardIdJs}')" 
-                      style="background: ${isOwned ? '#27ae60' : '#95a5a6'}; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-weight: bold; font-size: ${ownedCount > 0 ? '10' : '13'}px; display: flex; align-items: center; justify-content: center; padding: 0;" 
+                  <button onclick="event.stopPropagation(); toggleCollection('${safeCardIdJs}')"
+                      style="background: ${isOwned ? '#27ae60' : '#95a5a6'}; color: white; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-weight: bold; font-size: ${ownedCount > 0 ? 'clamp(7px, 1.8vw, 10px)' : 'clamp(9px, 2.5vw, 13px)'}; display: flex; align-items: center; justify-content: center; padding: 0;"
                       title="Add to collection (${ownedCount}/4)">${ownedCount > 0 ? ownedCount + '/4' : '+'}</button>
-                  <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')" 
-                      style="background: ${isWishlisted ? '#E91E63' : '#bdc3c7'}; color: white; border: none; border-radius: 3px; height: clamp(12px, 3vw, 22px); cursor: pointer; font-weight: bold; font-size: clamp(8px, 2vw, 12px); display: flex; align-items: center; justify-content: center; padding: 0;" 
+                  <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')"
+                      style="background: ${isWishlisted ? '#E91E63' : '#bdc3c7'}; color: white; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-weight: bold; font-size: clamp(8px, 2vw, 12px); display: flex; align-items: center; justify-content: center; padding: 0;"
                       title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">❤</button>
-                  <button onclick="event.stopPropagation(); myDeckRemoveCard(${deckIndex}, '${safeDeckKeyJs}')" 
-                      style="background: #c0392b; color: white; border: none; border-radius: 3px; height: 22px; cursor: pointer; font-size: clamp(6px, 1.5vw, 9px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
-                      title="${getLang()==='de' ? 'Karte komplett entfernen' : 'Remove card from deck'}">Del</button>
+                  <button onclick="event.stopPropagation(); myDeckRemoveCard(${deckIndex}, '${safeDeckKeyJs}')"
+                      style="background: #c0392b; color: white; border: none; border-radius: 2px; height: clamp(12px, 3vw, 22px); cursor: pointer; font-size: clamp(8px, 2vw, 11px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;"
+                      title="${getLang()==='de' ? 'Karte komplett entfernen' : 'Remove card from deck'}">✕</button>
               </div>
             </div>
           </div>

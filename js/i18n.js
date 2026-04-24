@@ -15,6 +15,8 @@ const translations = {
     'header.signIn':          'Sign In',
     'header.myProfile':       'My Profile',
     'header.cardDatabase':    'Card Database',
+    'header.myDecks':         'My Decks',
+    'header.wishlist':        'Wishlist',
     'header.switchLanguageTitle':'Switch language',
 
     // ── Sidebar / Main Menu ──────────────────────────────────
@@ -1242,6 +1244,8 @@ const translations = {
     'header.signIn':          'Anmelden',
     'header.myProfile':       'Mein Profil',
     'header.cardDatabase':    'Kartendatenbank',
+    'header.myDecks':         'Meine Decks',
+    'header.wishlist':        'Wunschliste',
     'header.switchLanguageTitle':'Sprache wechseln',
 
     // ── Sidebar / Main Menu ──────────────────────────────────

@@ -52,6 +52,21 @@ function switchTabAndUpdateMenu(tabId) {
     if (menuTr) menuTr.classList.remove('open');
 }
 
+// Header shortcut: jump straight to a profile sub-tab (My Decks, Wishlist, …)
+// without forcing the user to first open the profile and then click the
+// sub-tab pill. switchProfileTab is defined in firebase-collection.js and
+// loaded later, so we wait one rAF for the profile DOM to be visible
+// before activating the sub-tab — otherwise the .profile-tab-content show
+// runs against an unrendered tree.
+function openProfileSection(subTab) {
+    switchTabAndUpdateMenu('profile');
+    requestAnimationFrame(() => {
+        if (typeof switchProfileTab === 'function') {
+            switchProfileTab(subTab);
+        }
+    });
+}
+
 document.addEventListener('click', function(e) {
     const menu    = document.getElementById('mainMenuDropdown');
     const trigger = document.getElementById('mainMenuTrigger');

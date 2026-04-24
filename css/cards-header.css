@@ -76,6 +76,58 @@
     height: 38px;
     object-fit: contain;
 }
+
+/* Generic header icon button — used for Wishlist & My Decks shortcuts.
+   Same hit-target and hover language as .header-dex-btn so the row
+   feels uniform, but uses an inline SVG (currentColor) so the icon
+   tint follows the header text colour and stays crisp at any DPR. */
+.header-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    color: #fff;
+    transition: transform 0.2s, color 0.2s, filter 0.2s;
+}
+.header-icon-btn:hover {
+    transform: scale(1.12);
+    filter: drop-shadow(0 2px 6px rgba(255,255,255,0.35));
+}
+.header-icon-btn:active { transform: scale(0.95); }
+.header-icon-svg {
+    width: 26px;
+    height: 26px;
+    pointer-events: none;
+}
+/* Distinct hover tint per shortcut so users learn which is which:
+   wishlist=heart-pink, my-decks=cyan. */
+.header-wishlist-btn:hover { color: #ff6b8a; }
+.header-mydecks-btn:hover  { color: #69d8ff; }
+
+/* Battle Journal FAB in icon-only mode: drop the inline label gap so
+   the badge sits flush against the icon. */
+.battle-journal-fab-iconbtn .battle-journal-fab-label { display: none; }
+.battle-journal-fab-iconbtn { padding-right: 12px; padding-left: 12px; }
+
+/* Profile button in icon-only mode: hide the email/text node visually
+   while keeping it in the DOM for screen readers. */
+.profile-btn-iconbtn .visually-hidden,
+.visually-hidden {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.profile-btn-iconbtn { padding: 4px 8px; }
 .lang-toggle-btn {
     background: rgba(255,255,255,0.12);
     border: 2px solid rgba(255,255,255,0.25);

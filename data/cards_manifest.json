@@ -1,13 +1,13 @@
 {
-  "version": "9e040dc6c153",
-  "generated": "2026-04-22T23:54:01.951686+02:00",
+  "version": "bd4b6030a719",
+  "generated": "2026-04-25T00:16:11.354297+02:00",
   "totalCards": 21364,
   "chunks": [
     {
       "file": "cards_chunk_standard.json",
       "era": "standard",
       "count": 3769,
-      "hash": "978b686d"
+      "hash": "17a8e073"
     },
     {
       "file": "cards_chunk_extended.json",
@@ -19,7 +19,7 @@
       "file": "cards_chunk_legacy.json",
       "era": "legacy",
       "count": 13024,
-      "hash": "acfe5fea"
+      "hash": "dd4765e8"
     }
   ]
 }

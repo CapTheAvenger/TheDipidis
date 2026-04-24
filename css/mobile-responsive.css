@@ -1993,51 +1993,72 @@
 }
 
 /* ===========================================================
-   My Decks card — minimal mobile UI (<= 900px tablet/narrow)
+   My Decks card — proportional mobile UI (<= 900px)
    ===========================================================
-   Cards on phones are ~70–100px tall (245:342 aspect at 60–80px
-   wide). Stacking two button rows of 18px buttons consumed nearly
-   40% of the card vertically — the art was hidden behind buttons.
-   Mobile UI radically reduced to a SINGLE 14px row of two buttons:
-     [ − ]  [ + ]
-   That covers ~14% of the card height instead of 37%, leaving the
-   art clearly visible. Decrementing past 0 already deletes the card
-   (myDeckChangeCardCount line 1867), so no separate ✕ button needed
-   — and rarity / price / collection / wishlist live on desktop and
-   in the card-detail modal anyway.
+   Goal: every button that exists on desktop stays visible on phone
+   too (−, ★, +, price, collection, wishlist, ✕), but sized so they
+   sit cleanly inside the card frame rather than smothering the art.
+
+   Math for an iPhone-14 ~390px viewport with the card grid set to
+   minmax(75px, 1fr):
+     - 5 cards per row → each ~76px wide → ~106px tall (245:342)
+     - 4 buttons in the bottom row → 76/4 − 2px gap ≈ 17px each
+     - Both button rows together: 13×2 + 1px gap = 27px
+       → ~25% of card height, leaving the top 75% for the art
    --------------------------------------------------------- */
 @media (max-width: 900px) {
 
-  /* Hide the entire bottom row (price / collection / wishlist / ✕). */
-  .saved-deck-item div[style*="bottom: 2px"] > div:last-child {
-    display: none !important;
+  /* Card-grid floor of 80px → 4 cards per row on iPhone 14 (390px
+     viewport, 4 × ~88px) and most other phones; 5 cards on tablets.
+     At 80px width the 4-button bottom row gives each button
+     (80−3px gap)/4 ≈ 19px width × 15 tall — matching the proportion
+     the user requested. */
+  .saved-deck-item > div:nth-child(2) > div:last-child {
+    grid-template-columns: repeat(auto-fill, minmax(clamp(80px, 21vw, 120px), 1fr)) !important;
+    gap: clamp(3px, 1vw, 10px) !important;
   }
 
-  /* Top row keeps only −/+: drop ★ and switch from 3 columns to 2. */
+  /* Both button rows visible (restore default 3 / 4 column grids
+     in case an earlier rule trimmed them). */
   .saved-deck-item div[style*="bottom: 2px"] > div:first-child {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
     gap: 1px !important;
   }
-  .saved-deck-item div[style*="bottom: 2px"] > div:first-child > button:nth-child(2) {
-    display: none !important;
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child {
+    grid-template-columns: repeat(4, 1fr) !important;
+    display: grid !important;
+    gap: 1px !important;
   }
 
-  /* Tight, proportional button sizing — overrides the inline
-     clamp() so buttons never balloon larger than 14px even when
-     the viewport-driven clamp would have produced more. */
+  /* All 7 buttons share one compact size. 15px tall × 2 rows + 1px
+     gap = 31px ≈ 25% of a 124px-tall card; the top 75% stays for
+     the art. */
   .saved-deck-item div[style*="bottom: 2px"] button {
-    height: 14px !important;
+    height: 15px !important;
     font-size: 10px !important;
-    border-radius: 3px !important;
+    border-radius: 2px !important;
     line-height: 1 !important;
+    padding: 0 !important;
+  }
+  /* ★ glyph + price text are wider than single chars — drop a
+     point so they fit cleanly inside their narrower cell. */
+  .saved-deck-item div[style*="bottom: 2px"] > div:first-child > button:nth-child(2) {
+    font-size: 9px !important;     /* ★ rarity-switch */
+  }
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:first-child {
+    font-size: 8px !important;     /* price (e.g. 0.13€) */
+  }
+  /* Collection toggle shows "x/4" when owned — needs an even smaller
+     font so two characters + slash fit. */
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:nth-child(2) {
+    font-size: 8px !important;
   }
 
-  /* Deck-count badge (top-right of card) — also smaller so it
-     doesn't dominate a 60–80px-wide card. */
+  /* Deck-count badge (top-right) — small enough not to dominate. */
   .saved-deck-item div[style*="top: 3px"][style*="right: 3px"][style*="border-radius: 50%"] {
-    width: 14px !important;
-    height: 14px !important;
-    font-size: 9px !important;
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 10px !important;
     top: 2px !important;
     right: 2px !important;
   }

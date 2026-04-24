@@ -1993,50 +1993,52 @@
 }
 
 /* ===========================================================
-   My Decks card — mobile button cleanup (<600px)
+   My Decks card — minimal mobile UI (<= 900px tablet/narrow)
    ===========================================================
-   At 5–6 cards per row each tile is only ~60–80px wide. With ALL
-   eight buttons (−/★/+ + price/coll/wish/✕) the card art is
-   completely covered. On mobile we drop the secondary actions
-   (rarity-switch, price, collection toggle, wishlist toggle) and
-   keep only the three essentials: −, +, ✕. Those secondary actions
-   are still reachable via the card-detail modal / desktop view.
+   Cards on phones are ~70–100px tall (245:342 aspect at 60–80px
+   wide). Stacking two button rows of 18px buttons consumed nearly
+   40% of the card vertically — the art was hidden behind buttons.
+   Mobile UI radically reduced to a SINGLE 14px row of two buttons:
+     [ − ]  [ + ]
+   That covers ~14% of the card height instead of 37%, leaving the
+   art clearly visible. Decrementing past 0 already deletes the card
+   (myDeckChangeCardCount line 1867), so no separate ✕ button needed
+   — and rarity / price / collection / wishlist live on desktop and
+   in the card-detail modal anyway.
    --------------------------------------------------------- */
-@media (max-width: 600px) {
+@media (max-width: 900px) {
 
-  /* Top row inside the inline button-container — hide ★, leave −/+ */
+  /* Hide the entire bottom row (price / collection / wishlist / ✕). */
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child {
+    display: none !important;
+  }
+
+  /* Top row keeps only −/+: drop ★ and switch from 3 columns to 2. */
   .saved-deck-item div[style*="bottom: 2px"] > div:first-child {
     grid-template-columns: 1fr 1fr !important;
+    gap: 1px !important;
   }
   .saved-deck-item div[style*="bottom: 2px"] > div:first-child > button:nth-child(2) {
     display: none !important;
   }
 
-  /* Bottom row — hide price/coll/wishlist, leave only ✕ as a full-
-     width button so it's easy to hit. */
-  .saved-deck-item div[style*="bottom: 2px"] > div:last-child {
-    grid-template-columns: 1fr !important;
-  }
-  .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:not(:last-child) {
-    display: none !important;
-  }
-
-  /* Tighter, more proportional sizing on the remaining buttons.
-     Override the clamp() inline style so the buttons don't grow as
-     large at small viewports. 18px is still a comfortable tap target
-     because the buttons span half / full card width. */
+  /* Tight, proportional button sizing — overrides the inline
+     clamp() so buttons never balloon larger than 14px even when
+     the viewport-driven clamp would have produced more. */
   .saved-deck-item div[style*="bottom: 2px"] button {
-    height: 18px !important;
-    font-size: 11px !important;
+    height: 14px !important;
+    font-size: 10px !important;
     border-radius: 3px !important;
+    line-height: 1 !important;
   }
 
-  /* Deck-count badge (top-right) — clamp() at the smallest viewport
-     still produces an 18px circle which dominates a 60px-wide card.
-     Shrink to a tighter 16×16 with smaller font. */
+  /* Deck-count badge (top-right of card) — also smaller so it
+     doesn't dominate a 60–80px-wide card. */
   .saved-deck-item div[style*="top: 3px"][style*="right: 3px"][style*="border-radius: 50%"] {
-    width: 16px !important;
-    height: 16px !important;
-    font-size: 10px !important;
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 9px !important;
+    top: 2px !important;
+    right: 2px !important;
   }
 }

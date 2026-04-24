@@ -2105,13 +2105,25 @@ async function myDeckAddCard(deckIndex, cardName, setCode, setNumber) {
 // ============================================================
 // My Decks: Autocomplete for Card Search
 // ============================================================
+// Strip everything but letters/digits and lowercase, so "Mauzi ex"
+// matches "Mauzi-ex" / "Mauzi-EX" / "Mauziex" / etc. Used by both
+// autocomplete dropdowns (main deck + tech options).
+function _normCardSearch(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]/gi, '');
+}
+
 function myDeckShowAutocomplete(inputEl, deckIndex) {
   const deckId = `saved-deck-${deckIndex}`;
   const dropdown = document.getElementById(`${deckId}-autocomplete`);
   if (!dropdown) return;
 
-  const searchTerm = (inputEl.value || '').trim().toLowerCase();
-  if (searchTerm.length < 2) {
+  const rawTerm = (inputEl.value || '').trim();
+  if (rawTerm.length < 2) {
+    dropdown.classList.add('d-none');
+    return;
+  }
+  const normTerm = _normCardSearch(rawTerm);
+  if (!normTerm) {
     dropdown.classList.add('d-none');
     return;
   }
@@ -2122,13 +2134,14 @@ function myDeckShowAutocomplete(inputEl, deckIndex) {
     return;
   }
 
-  // Find matching cards — unique by name, max 12
+  // Find matching cards — unique by name, max 12. Search is hyphen +
+  // punctuation tolerant: "Mauzi ex" matches "Mauzi-ex".
   const matches = [];
   const seen = new Set();
   for (const card of cardsDb) {
     if (!card.name || seen.has(card.name)) continue;
-    const nameDe = (card.name_de || card.german_name || '').toLowerCase();
-    if (card.name.toLowerCase().includes(searchTerm) || nameDe.includes(searchTerm)) {
+    const haystack = _normCardSearch(card.name + ' ' + (card.name_de || card.german_name || ''));
+    if (haystack.includes(normTerm)) {
       matches.push(card);
       seen.add(card.name);
       if (matches.length >= 12) break;
@@ -2287,16 +2300,18 @@ function myDeckTechShowAutocomplete(inputEl, deckIndex) {
   const deckId = `saved-deck-${deckIndex}`;
   const dropdown = document.getElementById(`${deckId}-tech-autocomplete`);
   if (!dropdown) return;
-  const term = (inputEl.value || '').trim().toLowerCase();
-  if (term.length < 2) { dropdown.classList.add('d-none'); return; }
+  const rawTerm = (inputEl.value || '').trim();
+  if (rawTerm.length < 2) { dropdown.classList.add('d-none'); return; }
+  const normTerm = _normCardSearch(rawTerm);
+  if (!normTerm) { dropdown.classList.add('d-none'); return; }
   const cardsDb = window.allCardsDatabase || window.allCardsData || [];
   if (cardsDb.length === 0) { dropdown.classList.add('d-none'); return; }
   const matches = [];
   const seen = new Set();
   for (const card of cardsDb) {
     if (!card.name || seen.has(card.name)) continue;
-    const nameDe = (card.name_de || card.german_name || '').toLowerCase();
-    if (card.name.toLowerCase().includes(term) || nameDe.includes(term)) {
+    const haystack = _normCardSearch(card.name + ' ' + (card.name_de || card.german_name || ''));
+    if (haystack.includes(normTerm)) {
       matches.push(card); seen.add(card.name);
       if (matches.length >= 12) break;
     }

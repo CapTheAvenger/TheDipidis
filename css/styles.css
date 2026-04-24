@@ -8772,15 +8772,83 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
 }
 .tech-option-note:focus { outline: none; border-color: #6c5ce7; }
 
-/* Mobile: tighter grid + smaller controls */
+/* ── Mobile: switch from card-grid to list-row layout ──
+   At <600px the 3-column grid squeezed every card into ~110px wide,
+   making the Replaces dropdown and Note input unreadable. Below we
+   restructure each .tech-option-card into a horizontal row: small
+   thumbnail on the left, count + buttons on the right of the image,
+   and the Replaces / Note controls span full width on a second line.
+   This gives every control its own line of breathing room without
+   overwhelming the panel vertically. */
 @media (max-width: 600px) {
-    .tech-options-grid {
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
-        gap: 6px !important;
-    }
     .tech-options-header { padding: 8px 12px !important; }
     .tech-options-body { padding: 8px 10px !important; }
-    .tech-option-meta { padding: 5px 6px 6px !important; gap: 4px !important; }
-    .tech-option-note { font-size: 0.78em !important; }
-    .tech-btn { height: 22px !important; font-size: 12px !important; }
+
+    /* Single-column list — every card is its own row, full panel width */
+    .tech-options-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+
+    .tech-option-card {
+        display: grid !important;
+        grid-template-columns: 64px 1fr !important;
+        grid-template-areas:
+            "img count"
+            "img controls"
+            "meta meta" !important;
+        column-gap: 10px !important;
+        row-gap: 6px !important;
+        padding: 8px !important;
+        align-items: start !important;
+    }
+
+    .tech-option-img {
+        grid-area: img !important;
+        width: 64px !important;
+        height: auto !important;
+        border-radius: 4px !important;
+        align-self: start !important;
+    }
+
+    /* Count badge moves out of the absolute corner — now sits inline
+       above the +/− buttons so it's visible at thumbnail size. */
+    .tech-option-count-badge {
+        position: static !important;
+        grid-area: count !important;
+        justify-self: start !important;
+        font-size: 11px !important;
+        padding: 2px 8px !important;
+    }
+
+    .tech-option-controls {
+        grid-area: controls !important;
+        background: transparent !important;
+        padding: 0 !important;
+        gap: 4px !important;
+        align-self: start !important;
+    }
+    .tech-btn {
+        height: 30px !important;        /* WCAG-compliant tap target */
+        font-size: 15px !important;
+        border-radius: 4px !important;
+    }
+    .tech-btn-del { font-size: 13px !important; }
+
+    /* Meta row spans both columns under the image so the Replaces select
+       and Note input each get ~330px on a 390px phone. */
+    .tech-option-meta {
+        grid-area: meta !important;
+        padding: 0 !important;
+        gap: 6px !important;
+        margin-top: 2px !important;
+    }
+    .tech-option-label {
+        font-size: 0.66em !important;
+    }
+    .tech-option-select,
+    .tech-option-note {
+        font-size: 0.85em !important;
+        padding: 7px 9px !important;     /* taller tap target */
+    }
 }

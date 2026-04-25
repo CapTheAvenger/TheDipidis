@@ -55,12 +55,16 @@
             games: Array.isArray(draft?.games)
                 ? draft.games.slice(0, 3).map(game => ({
                     turnOrder: String(game?.turnOrder || '').trim(),
-                    result: String(game?.result || '').trim()
+                    result: String(game?.result || '').trim(),
+                    brick: !!game?.brick,
+                    notes: String(game?.notes || '').slice(0, 200)
                 }))
                 : (Array.isArray(draft?.bo3Games)
                     ? draft.bo3Games.slice(0, 3).map(game => ({
                         turnOrder: String(game?.turnOrder || '').trim(),
-                        result: String(game?.result || '').trim()
+                        result: String(game?.result || '').trim(),
+                        brick: !!game?.brick,
+                        notes: String(game?.notes || '').slice(0, 200)
                     }))
                     : [])
         };
@@ -290,9 +294,22 @@
         const goingLabel = battleJournalText('bj.turnOrder', 'Going');
         const resultLabel = battleJournalText('bj.result', 'Result');
         const headerLabel = battleJournalText('bj.gameDetails', 'Game Details');
+        const brickTitle = battleJournalText('bj.brickToggleTitle', 'Brick (Pech-Spiel)');
+        const notesPlaceholder = battleJournalText('bj.gameNotesPlaceholder', 'Notiz zu diesem Game...');
+
+        // BO3 (count > 1): brick + notes belong on individual games. BO1 has
+        // a single game so the match-level brick/notes inputs already cover
+        // that case — adding them per-game would just duplicate.
+        const showPerGameExtras = count > 1;
 
         let html = `<span class="battle-journal-label">${escapeHtml(headerLabel)}</span>`;
         for (let i = 1; i <= count; i++) {
+            const extrasHtml = showPerGameExtras ? `
+                    <div class="battle-journal-game-extras">
+                        <input type="hidden" id="battleJournalGame${i}Brick" value="">
+                        <button type="button" class="bj-game-brick-btn" id="battleJournalGame${i}BrickBtn" data-game="${i}" onclick="setGameChoice(${i},'brick','1')" title="${escapeHtml(brickTitle)}" aria-label="${escapeHtml(brickTitle)}">🧱</button>
+                        <input type="text" id="battleJournalGame${i}Notes" class="bj-game-notes-input" maxlength="200" placeholder="${escapeHtml(notesPlaceholder)}" oninput="onGameNotesInput(${i})">
+                    </div>` : '';
             html += `
                 <div class="battle-journal-game-row">
                     <span class="battle-journal-bo3-game">Game ${i}</span>
@@ -308,7 +325,7 @@
                             <button type="button" class="battle-journal-choice battle-journal-choice-loss" data-field="game${i}Result" data-value="loss" onclick="setGameChoice(${i},'result','loss')">L</button>
                             <button type="button" class="battle-journal-choice battle-journal-choice-tie" data-field="game${i}Result" data-value="tie" onclick="setGameChoice(${i},'result','tie')">T</button>
                         </div>
-                    </div>
+                    </div>${extrasHtml}
                 </div>`;
         }
         els.gameDetails.innerHTML = html;
@@ -320,10 +337,17 @@
         for (let i = 1; i <= count; i++) {
             const turnEl = document.getElementById(`battleJournalGame${i}Turn`);
             const resultEl = document.getElementById(`battleJournalGame${i}Result`);
-            games.push({
+            const brickEl = document.getElementById(`battleJournalGame${i}Brick`);
+            const notesEl = document.getElementById(`battleJournalGame${i}Notes`);
+            const game = {
                 turnOrder: String(turnEl?.value || '').trim(),
                 result: String(resultEl?.value || '').trim()
-            });
+            };
+            // Per-game brick/notes only exist for BO3 (count > 1). Omit the
+            // fields entirely for BO1 so the saved object stays as before.
+            if (brickEl) game.brick = brickEl.value === '1';
+            if (notesEl) game.notes = String(notesEl.value || '').trim();
+            games.push(game);
         }
         return games;
     }
@@ -332,8 +356,9 @@
         const count = getGameCount();
         const games = Array.isArray(details) ? details : [];
         for (let i = 1; i <= count; i++) {
-            const turnVal = String(games[i - 1]?.turnOrder || '').trim();
-            const resultVal = String(games[i - 1]?.result || '').trim();
+            const g = games[i - 1] || {};
+            const turnVal = String(g.turnOrder || '').trim();
+            const resultVal = String(g.result || '').trim();
             const turnEl = document.getElementById(`battleJournalGame${i}Turn`);
             const resultEl = document.getElementById(`battleJournalGame${i}Result`);
             if (turnEl) turnEl.value = turnVal;
@@ -345,6 +370,16 @@
             document.querySelectorAll(`[data-field="game${i}Result"]`).forEach(btn => {
                 btn.classList.toggle('is-selected', btn.dataset.value === resultVal);
             });
+            // Per-game brick + notes — only present in DOM for BO3.
+            const brickEl = document.getElementById(`battleJournalGame${i}Brick`);
+            const brickBtn = document.getElementById(`battleJournalGame${i}BrickBtn`);
+            const notesEl = document.getElementById(`battleJournalGame${i}Notes`);
+            if (brickEl) {
+                const isBrick = !!g.brick;
+                brickEl.value = isBrick ? '1' : '';
+                if (brickBtn) brickBtn.classList.toggle('is-active', isBrick);
+            }
+            if (notesEl) notesEl.value = String(g.notes || '');
         }
     }
 
@@ -460,6 +495,19 @@
 
     // ── Game choice toggle (Turn / Result per game row) ─────
     function setGameChoice(gameNum, type, value) {
+        // Per-game brick toggle (BO3 only). The brick has no multi-value
+        // semantics — it's simply on/off — so we ignore the passed value
+        // and just flip the hidden flag.
+        if (type === 'brick') {
+            const hiddenEl = document.getElementById(`battleJournalGame${gameNum}Brick`);
+            const btn = document.getElementById(`battleJournalGame${gameNum}BrickBtn`);
+            if (!hiddenEl) return;
+            const newVal = hiddenEl.value === '1' ? '' : '1';
+            hiddenEl.value = newVal;
+            if (btn) btn.classList.toggle('is-active', newVal === '1');
+            persistBattleJournalDraftFromForm();
+            return;
+        }
         const fieldSuffix = type === 'turn' ? 'Turn' : 'Result';
         const hiddenEl = document.getElementById(`battleJournalGame${gameNum}${fieldSuffix}`);
         if (!hiddenEl) return;
@@ -469,6 +517,12 @@
         document.querySelectorAll(`[data-field="game${gameNum}${fieldSuffix}"]`).forEach(btn => {
             btn.classList.toggle('is-selected', btn.dataset.value === newVal);
         });
+        persistBattleJournalDraftFromForm();
+    }
+
+    function onGameNotesInput(_gameNum) {
+        // Per-game notes need draft persistence so a half-typed note
+        // survives a tab switch / reload, just like all other inputs.
         persistBattleJournalDraftFromForm();
     }
 
@@ -593,6 +647,17 @@
         const sourceArchetype = getBattleJournalCurrentOwnDeck();
         const games = values.games || [];
         const derived = deriveOverallResult(games);
+        const isBo3 = (values.bestOf || 'bo1') === 'bo3';
+        // For BO3 the brick + notes live per-game (inside bo3Games[i]).
+        // The match-level brick/notes still get stored — for BO3 they roll
+        // up to "any game flagged as brick" and "concatenated notes" so
+        // legacy code paths (history badges, summaries) keep working.
+        const matchBrick = isBo3
+            ? games.some(g => g && g.brick)
+            : !!values.brick;
+        const matchNotes = isBo3
+            ? games.map((g, i) => g && g.notes ? `G${i + 1}: ${g.notes}` : '').filter(Boolean).join(' | ')
+            : (values.notes || '');
         return {
             id: `bj_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
             tournamentName: values.tournamentName || '',
@@ -604,13 +669,13 @@
             turnOrder: derived.turnOrder,
             result: derived.result,
             bo3Games: games,
-            brick: values.brick || false,
-            notes: values.notes || '',
+            brick: matchBrick,
+            notes: matchNotes,
             createdAtMs: Date.now(),
             sourceTab: activeTab,
             sourceArchetype,
             userId: window.auth?.currentUser?.uid || null,
-            schemaVersion: 4
+            schemaVersion: 5
         };
     }
 
@@ -1049,7 +1114,8 @@
                         </div>
                         <button type="button" class="bj-tournament-add-btn" onclick="continueJournalTournament('${safeTournKey}','${safeMetaKey}','${safeGroupType}')" title="${escapeHtml(battleJournalText('bj.addMatch', 'Add match'))}">+ Match</button>
                         <button type="button" class="bj-tournament-edit-btn" onclick="openEditTournamentModal('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.editTournament', 'Edit tournament'))}">Edit</button>
-                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}')" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">Share</button>
+                        <button type="button" class="bj-tournament-share-btn" onclick="shareTournamentSummary('${safeTournKey}', false)" title="${escapeHtml(battleJournalText('bj.shareTournament', 'Share as image'))}">Share</button>
+                        <button type="button" class="bj-tournament-share-btn bj-tournament-share-details-btn" onclick="shareTournamentSummary('${safeTournKey}', true)" title="${escapeHtml(battleJournalText('bj.shareTournamentDetails', 'Share with brick + notes'))}">Share+</button>
                     </div>`;
 
                 entries.forEach(entry => {
@@ -1077,19 +1143,38 @@
         const pendingBadge = entry._pending ? `<span class="bj-history-pending">${escapeHtml(battleJournalText('bj.histPending', 'pending'))}</span>` : '';
 
         let bo3Line = '';
+        let bo3Detail = '';
         if (entry.bestOf === 'bo3' && Array.isArray(entry.bo3Games)) {
             const gameTexts = entry.bo3Games
                 .filter(g => g && (g.turnOrder || g.result))
                 .map((g, i) => {
                     const gTurn = g.turnOrder === 'first' ? '1st' : (g.turnOrder === 'second' ? '2nd' : '-');
                     const gRes = g.result || '-';
-                    return `G${i + 1}: ${gTurn}/${gRes}`;
+                    const brickMark = g.brick ? ' 🧱' : '';
+                    return `G${i + 1}: ${gTurn}/${gRes}${brickMark}`;
                 });
             if (gameTexts.length > 0) bo3Line = `<div class="bj-history-games">${escapeHtml(gameTexts.join(' · '))}</div>`;
+            // Per-game notes get their own indented lines so longer text
+            // doesn't get crammed into the compact summary line.
+            const noteLines = entry.bo3Games
+                .map((g, i) => g && g.notes ? `G${i + 1}: ${g.notes}` : '')
+                .filter(Boolean);
+            if (noteLines.length > 0) {
+                bo3Detail = noteLines
+                    .map(line => `<div class="bj-history-notes bj-history-game-note">${escapeHtml(line)}</div>`)
+                    .join('');
+            }
         }
 
         const brickBadge = entry.brick ? `<span class="bj-brick-badge">🧱 Brick</span>` : '';
-        const notesLine  = entry.notes ? `<div class="bj-history-notes">${escapeHtml(entry.notes)}</div>` : '';
+        // Suppress the rolled-up match-level notes for BO3 entries that
+        // already render per-game notes — would just duplicate.
+        const hasPerGameNotes = entry.bestOf === 'bo3'
+            && Array.isArray(entry.bo3Games)
+            && entry.bo3Games.some(g => g && g.notes);
+        const notesLine = (entry.notes && !hasPerGameNotes)
+            ? `<div class="bj-history-notes">${escapeHtml(entry.notes)}</div>`
+            : '';
         const clipText = formatEntryForClipboard(entry);
         return `
             <div class="bj-history-item ${resultClass}${entry.brick ? ' is-brick' : ''}">
@@ -1102,6 +1187,7 @@
                     </div>
                     <div class="bj-history-meta">${escapeHtml(bestOfText)}${turnText ? ' · ' + escapeHtml(turnText) : ''} · ${escapeHtml(dateStr)} ${pendingBadge}</div>
                     ${bo3Line}
+                    ${bo3Detail}
                     ${notesLine}
                     <div class="bj-history-clip">${escapeHtml(clipText)}</div>
                 </div>
@@ -1124,7 +1210,48 @@
         });
     }
 
-    async function shareTournamentSummary(tournamentName) {
+    // Pulls the per-entry detail strings (brick flags + notes) for the
+    // "Share with details" image. Falls back to legacy match-level fields
+    // when the entry predates per-game data.
+    function _entryDetailLines(entry) {
+        const lines = [];
+        const isBo3 = entry.bestOf === 'bo3' && Array.isArray(entry.bo3Games);
+        if (isBo3) {
+            entry.bo3Games.forEach((g, i) => {
+                if (!g) return;
+                const tag = `G${i + 1}`;
+                const turn = g.turnOrder === 'first' ? '1st' : (g.turnOrder === 'second' ? '2nd' : '\u2013');
+                const res  = g.result === 'win' ? 'W' : (g.result === 'loss' ? 'L' : (g.result === 'tie' ? 'T' : '\u2013'));
+                const head = `${tag}: ${turn}/${res}${g.brick ? ' \ud83e\uddf1' : ''}`;
+                lines.push(g.notes ? `${head} \u2014 ${g.notes}` : head);
+            });
+            const hasGameNotes = entry.bo3Games.some(g => g && g.notes);
+            if (!hasGameNotes && entry.notes) lines.push(entry.notes);
+        } else {
+            if (entry.brick) lines.push('\ud83e\uddf1 Brick');
+            if (entry.notes) lines.push(entry.notes);
+        }
+        return lines;
+    }
+
+    function _wrapCanvasText(ctx, text, maxWidth) {
+        const words = String(text || '').split(/\s+/);
+        const lines = [];
+        let current = '';
+        words.forEach(word => {
+            const probe = current ? current + ' ' + word : word;
+            if (ctx.measureText(probe).width <= maxWidth) {
+                current = probe;
+            } else {
+                if (current) lines.push(current);
+                current = word;
+            }
+        });
+        if (current) lines.push(current);
+        return lines;
+    }
+
+    async function shareTournamentSummary(tournamentName, withDetails) {
         const entries = journalHistoryCache.filter(e => e.tournamentName === tournamentName);
         if (entries.length === 0) return;
 
@@ -1134,8 +1261,31 @@
         const total = entries.length;
         const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
 
+        const W = 600;
+        const HEADER_H = 96;
+        const FOOTER_H = 24;
+        const BASE_ROW_H = 44;
+        const DETAIL_LINE_H = 18;
+        const DETAIL_FONT = '12px system-ui, sans-serif';
+        const ROW_FONT    = '14px system-ui, sans-serif';
+
+        // Pre-measure detail lines so the canvas is exactly tall enough
+        // for the chosen mode \u2014 no overflow, no excess whitespace.
+        const measureCanvas = document.createElement('canvas');
+        const measureCtx = measureCanvas.getContext('2d');
+        const rowSizes = entries.map(entry => {
+            if (!withDetails) return { detailLines: [], h: BASE_ROW_H };
+            measureCtx.font = DETAIL_FONT;
+            const detailLines = _entryDetailLines(entry).flatMap(line =>
+                _wrapCanvasText(measureCtx, line, W - 64)
+            );
+            const extra = detailLines.length ? detailLines.length * DETAIL_LINE_H + 4 : 0;
+            return { detailLines, h: BASE_ROW_H + extra };
+        });
+        const totalRowH = rowSizes.reduce((sum, r) => sum + r.h, 0);
+        const H = HEADER_H + totalRowH + FOOTER_H;
+
         const canvas = document.createElement('canvas');
-        const W = 600, H = Math.min(80 + entries.length * 44 + 30, 800);
         canvas.width = W;
         canvas.height = H;
         const ctx = canvas.getContext('2d');
@@ -1144,7 +1294,7 @@
         ctx.fillStyle = '#1a1f2e';
         ctx.fillRect(0, 0, W, H);
 
-        // Pokéball gradient header
+        // Pok\u00e9ball gradient header
         const grad = ctx.createLinearGradient(0, 0, W, 0);
         grad.addColorStop(0, '#e74c3c');
         grad.addColorStop(1, '#c0392b');
@@ -1160,28 +1310,43 @@
         ctx.fillText(`${wins}W-${losses}L-${ties}T  \u00b7  ${winRate}% Win Rate`, 16, 78);
 
         // Match rows
-        let y = 100;
-        entries.forEach(entry => {
-            if (y + 40 > H) return;
+        let y = HEADER_H + 4;
+        entries.forEach((entry, idx) => {
+            const size = rowSizes[idx];
             const resultEmoji = entry.result === 'win' ? '\u2705' : (entry.result === 'loss' ? '\u274c' : '\ud83d\udfe1');
             ctx.fillStyle = entry.result === 'win' ? 'rgba(39,174,96,0.15)' : (entry.result === 'loss' ? 'rgba(231,76,60,0.12)' : 'rgba(243,156,18,0.12)');
-            ctx.fillRect(12, y - 16, W - 24, 36);
+            ctx.fillRect(12, y - 16, W - 24, size.h - 8);
             ctx.fillStyle = '#e2e8f0';
-            ctx.font = '14px system-ui, sans-serif';
-            ctx.fillText(`${resultEmoji}  ${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}`, 20, y + 4);
-            y += 44;
+            ctx.font = ROW_FONT;
+            const brickMark = entry.brick ? '  \ud83e\uddf1' : '';
+            ctx.fillText(`${resultEmoji}  ${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}${brickMark}`, 20, y + 4);
+
+            if (withDetails && size.detailLines.length) {
+                ctx.fillStyle = '#cbd5e0';
+                ctx.font = DETAIL_FONT;
+                let dy = y + 24;
+                size.detailLines.forEach(line => {
+                    ctx.fillText(line, 32, dy);
+                    dy += DETAIL_LINE_H;
+                });
+            }
+            y += size.h;
         });
 
         // Watermark
         ctx.fillStyle = '#4a5568';
         ctx.font = '11px system-ui, sans-serif';
-        ctx.fillText('Pok\u00e9mon TCG Analysis \u00b7 Battle Journal', 16, H - 8);
+        const footerText = withDetails
+            ? 'Pok\u00e9mon TCG Analysis \u00b7 Battle Journal \u00b7 Details'
+            : 'Pok\u00e9mon TCG Analysis \u00b7 Battle Journal';
+        ctx.fillText(footerText, 16, H - 8);
 
+        const filenameSuffix = withDetails ? '-summary-details.png' : '-summary.png';
         canvas.toBlob(async function(blob) {
             if (!blob) return;
             if (navigator.share && navigator.canShare) {
                 try {
-                    const file = new File([blob], (tournamentName || 'tournament') + '-summary.png', { type: 'image/png' });
+                    const file = new File([blob], (tournamentName || 'tournament') + filenameSuffix, { type: 'image/png' });
                     if (navigator.canShare({ files: [file] })) {
                         await navigator.share({ files: [file], title: tournamentName });
                         return;
@@ -1191,7 +1356,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = (tournamentName || 'tournament') + '-summary.png';
+            a.download = (tournamentName || 'tournament') + filenameSuffix;
             a.click();
             URL.revokeObjectURL(url);
             showToast(battleJournalText('bj.imageSaved', 'Image saved!'), 'success');
@@ -1769,7 +1934,111 @@
         const destList = document.getElementById('bjEditEntryOwnDeckList');
         if (srcList && destList) destList.innerHTML = srcList.innerHTML;
 
+        // BO3 entries get the per-game editor; BO1 keeps the overall form.
+        const overallEl = document.getElementById('bjEditEntryOverallFields');
+        const gamesEl   = document.getElementById('bjEditEntryGamesContainer');
+        if (entry.bestOf === 'bo3') {
+            if (overallEl) overallEl.style.display = 'none';
+            if (gamesEl)   gamesEl.style.display = '';
+            // Legacy BO3 entries (schemaVersion < 5) only have match-level
+            // brick + notes — no per-game data. Pre-fill game 1 with that
+            // info so the user can see and edit it without losing context.
+            const seedGames = (entry.bo3Games || []).map(g => ({ ...(g || {}) }));
+            const hasPerGameData = seedGames.some(g => g && (g.brick || (g.notes && String(g.notes).trim())));
+            if (!hasPerGameData && (entry.brick || (entry.notes && String(entry.notes).trim()))) {
+                if (!seedGames[0]) seedGames[0] = {};
+                if (entry.brick && seedGames[0].brick === undefined) seedGames[0].brick = true;
+                if (entry.notes && !seedGames[0].notes) seedGames[0].notes = entry.notes;
+            }
+            _renderEditBo3Games(seedGames);
+        } else {
+            if (overallEl) overallEl.style.display = '';
+            if (gamesEl) {
+                gamesEl.style.display = 'none';
+                gamesEl.innerHTML = '';
+            }
+        }
+
         modal.style.display = 'flex';
+    }
+
+    // Builds the per-game editor (turn / result / brick / notes for each
+    // of the 3 BO3 games) inside the edit modal. Pre-fills from the saved
+    // entry so legacy entries that only have {turnOrder, result} still
+    // render — the brick + notes inputs just start empty.
+    function _renderEditBo3Games(savedGames) {
+        const wrap = document.getElementById('bjEditEntryGamesContainer');
+        if (!wrap) return;
+        const games = Array.isArray(savedGames) ? savedGames : [];
+        const firstLabel  = battleJournalText('bj.first', 'First');
+        const secondLabel = battleJournalText('bj.second', 'Second');
+        const brickTitle  = battleJournalText('bj.brickToggleTitle', 'Brick (Pech-Spiel)');
+        const notesPh     = battleJournalText('bj.gameNotesPlaceholder', 'Notiz zu diesem Game...');
+
+        let html = '';
+        for (let i = 1; i <= 3; i++) {
+            const g = games[i - 1] || {};
+            const turn = String(g.turnOrder || '');
+            const res  = String(g.result || '');
+            const brick = !!g.brick;
+            const notes = String(g.notes || '');
+            const sel = (a, b) => a === b ? ' is-selected' : '';
+            html += `
+                <div class="battle-journal-game-row bj-edit-game-row">
+                    <span class="battle-journal-bo3-game">Game ${i}</span>
+                    <input type="hidden" id="bjEditGame${i}Turn"   value="${escapeHtml(turn)}">
+                    <input type="hidden" id="bjEditGame${i}Result" value="${escapeHtml(res)}">
+                    <input type="hidden" id="bjEditGame${i}Brick"  value="${brick ? '1' : ''}">
+                    <div class="battle-journal-game-btns">
+                        <div class="battle-journal-choice-group">
+                            <button type="button" class="battle-journal-choice${sel(turn,'first')}"  data-edit-game="${i}" data-edit-field="Turn"   data-edit-value="first"  onclick="setEditGameChoice(${i},'turn','first')">${escapeHtml(firstLabel)}</button>
+                            <button type="button" class="battle-journal-choice${sel(turn,'second')}" data-edit-game="${i}" data-edit-field="Turn"   data-edit-value="second" onclick="setEditGameChoice(${i},'turn','second')">${escapeHtml(secondLabel)}</button>
+                        </div>
+                        <div class="battle-journal-choice-group battle-journal-choice-group-result">
+                            <button type="button" class="battle-journal-choice battle-journal-choice-win${sel(res,'win')}"   data-edit-game="${i}" data-edit-field="Result" data-edit-value="win"  onclick="setEditGameChoice(${i},'result','win')">W</button>
+                            <button type="button" class="battle-journal-choice battle-journal-choice-loss${sel(res,'loss')}" data-edit-game="${i}" data-edit-field="Result" data-edit-value="loss" onclick="setEditGameChoice(${i},'result','loss')">L</button>
+                            <button type="button" class="battle-journal-choice battle-journal-choice-tie${sel(res,'tie')}"   data-edit-game="${i}" data-edit-field="Result" data-edit-value="tie"  onclick="setEditGameChoice(${i},'result','tie')">T</button>
+                        </div>
+                    </div>
+                    <div class="battle-journal-game-extras">
+                        <button type="button" class="bj-game-brick-btn${brick ? ' is-active' : ''}" id="bjEditGame${i}BrickBtn" onclick="setEditGameChoice(${i},'brick','1')" title="${escapeHtml(brickTitle)}" aria-label="${escapeHtml(brickTitle)}">🧱</button>
+                        <input type="text" id="bjEditGame${i}Notes" class="bj-game-notes-input" maxlength="200" placeholder="${escapeHtml(notesPh)}" value="${escapeHtml(notes)}">
+                    </div>
+                </div>`;
+        }
+        wrap.innerHTML = html;
+    }
+
+    function setEditGameChoice(gameNum, type, _value) {
+        if (type === 'brick') {
+            const hidden = document.getElementById(`bjEditGame${gameNum}Brick`);
+            const btn = document.getElementById(`bjEditGame${gameNum}BrickBtn`);
+            if (!hidden) return;
+            const newVal = hidden.value === '1' ? '' : '1';
+            hidden.value = newVal;
+            if (btn) btn.classList.toggle('is-active', newVal === '1');
+            return;
+        }
+        const fieldSuffix = type === 'turn' ? 'Turn' : 'Result';
+        const hidden = document.getElementById(`bjEditGame${gameNum}${fieldSuffix}`);
+        if (!hidden) return;
+        const newVal = hidden.value === _value ? '' : _value;
+        hidden.value = newVal;
+        document.querySelectorAll(`[data-edit-game="${gameNum}"][data-edit-field="${fieldSuffix}"]`).forEach(btn => {
+            btn.classList.toggle('is-selected', btn.dataset.editValue === newVal);
+        });
+    }
+
+    function _readEditBo3Games() {
+        const games = [];
+        for (let i = 1; i <= 3; i++) {
+            const turn = String(document.getElementById(`bjEditGame${i}Turn`)?.value || '').trim();
+            const res  = String(document.getElementById(`bjEditGame${i}Result`)?.value || '').trim();
+            const brick = (document.getElementById(`bjEditGame${i}Brick`)?.value || '') === '1';
+            const notes = String(document.getElementById(`bjEditGame${i}Notes`)?.value || '').trim();
+            games.push({ turnOrder: turn, result: res, brick, notes });
+        }
+        return games;
     }
 
     function closeEditEntryModal() {
@@ -1778,16 +2047,45 @@
     }
 
     async function saveEditEntry() {
-        const newOwnDeck   = String(document.getElementById('bjEditEntryOwnDeck')?.value || '').trim();
-        const newOpponent  = String(document.getElementById('bjEditEntryOpponent')?.value || '').trim();
-        const newResult    = String(document.getElementById('bjEditEntryResult')?.value || '').trim();
-        const newTurnOrder = String(document.getElementById('bjEditEntryTurnOrder')?.value || '').trim();
-        const newBrick     = document.getElementById('bjEditEntryBrick')?.checked || false;
-        const newNotes     = String(document.getElementById('bjEditEntryNotes')?.value || '').trim();
+        const cached = journalHistoryCache.find(e => e.id === _editEntryId);
+        const isBo3  = cached && cached.bestOf === 'bo3';
+
+        const newOwnDeck  = String(document.getElementById('bjEditEntryOwnDeck')?.value || '').trim();
+        const newOpponent = String(document.getElementById('bjEditEntryOpponent')?.value || '').trim();
 
         if (!newOwnDeck || !newOpponent) {
             showToast(battleJournalText('bj.editDeckRequired', 'Deck and opponent are required.'), 'warning');
             return;
+        }
+
+        let updatePayload;
+        if (isBo3) {
+            const games = _readEditBo3Games();
+            const derived = deriveOverallResult(games);
+            const matchBrick = games.some(g => g && g.brick);
+            const matchNotes = games
+                .map((g, i) => g && g.notes ? `G${i + 1}: ${g.notes}` : '')
+                .filter(Boolean)
+                .join(' | ');
+            updatePayload = {
+                ownDeck: newOwnDeck,
+                opponentArchetype: newOpponent,
+                bo3Games: games,
+                result: derived.result,
+                turnOrder: derived.turnOrder,
+                brick: matchBrick,
+                notes: matchNotes,
+                schemaVersion: 5
+            };
+        } else {
+            updatePayload = {
+                ownDeck: newOwnDeck,
+                opponentArchetype: newOpponent,
+                result: String(document.getElementById('bjEditEntryResult')?.value || '').trim(),
+                turnOrder: String(document.getElementById('bjEditEntryTurnOrder')?.value || '').trim(),
+                brick: document.getElementById('bjEditEntryBrick')?.checked || false,
+                notes: String(document.getElementById('bjEditEntryNotes')?.value || '').trim()
+            };
         }
 
         // Update local outbox
@@ -1795,12 +2093,7 @@
         let outboxChanged = false;
         outbox.forEach(e => {
             if (e.id === _editEntryId) {
-                e.ownDeck = newOwnDeck;
-                e.opponentArchetype = newOpponent;
-                e.result = newResult;
-                e.turnOrder = newTurnOrder;
-                e.brick = newBrick;
-                e.notes = newNotes;
+                Object.assign(e, updatePayload);
                 outboxChanged = true;
             }
         });
@@ -1816,12 +2109,7 @@
                 const doc = await docRef.get();
                 if (doc.exists) {
                     await docRef.update({
-                        ownDeck: newOwnDeck,
-                        opponentArchetype: newOpponent,
-                        result: newResult,
-                        turnOrder: newTurnOrder,
-                        brick: newBrick,
-                        notes: newNotes,
+                        ...updatePayload,
                         syncedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
@@ -1832,15 +2120,7 @@
         }
 
         // Update local cache
-        const cached = journalHistoryCache.find(e => e.id === _editEntryId);
-        if (cached) {
-            cached.ownDeck = newOwnDeck;
-            cached.opponentArchetype = newOpponent;
-            cached.result = newResult;
-            cached.turnOrder = newTurnOrder;
-            cached.brick = newBrick;
-            cached.notes = newNotes;
-        }
+        if (cached) Object.assign(cached, updatePayload);
 
         closeEditEntryModal();
         renderJournalHistory();
@@ -1907,6 +2187,8 @@
     window.submitBattleJournalEntry = submitBattleJournalEntry;
     window.setBattleJournalChoice = setBattleJournalChoice;
     window.setGameChoice = setGameChoice;
+    window.onGameNotesInput = onGameNotesInput;
+    window.setEditGameChoice = setEditGameChoice;
     window.clearBattleJournalDraft = clearBattleJournalDraft;
     window.flushBattleJournalOutbox = flushBattleJournalOutbox;
     window.renderBattleJournalSummary = renderBattleJournalSummary;

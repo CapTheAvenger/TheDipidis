@@ -2018,11 +2018,19 @@
   /* ── Collection grid: match the +/− corner buttons to the
      count-badge size (25×25, 13px). The buttons render at 26×26/
      16px from the inline style; this !important shrinks them so
-     both badges visually align. ── */
+     both badges visually align. The min-width/min-height/padding
+     overrides are needed because a global mobile rule
+     `button { min-height: 44px; min-width: 44px; padding: 10px 15px }`
+     at @media (max-width: 430px) would otherwise inflate them back. ── */
   #collection-grid > div > div[style*="position: absolute"][style*="right: 5px"] button {
     width: 25px !important;
     height: 25px !important;
+    min-width: 25px !important;
+    min-height: 25px !important;
+    padding: 0 !important;
     font-size: 13px !important;
+    box-sizing: border-box !important;
+    line-height: 1 !important;
   }
 }
 

@@ -728,6 +728,9 @@ const translations = {
     'mc.scenarioOverwrite':     'Overwrite existing scenario "{name}"?',
     'mc.scenarioDeleteConfirm': 'Delete scenario "{name}"?',
     'mc.scenarioNameTooLong':   'Name is too long (max 60 characters).',
+    'mc.scenarioSaveError':     'Saving failed: {error}\n\nYour browser may be in private mode or storage is full.',
+    'mc.scenarioStorageEmpty':  'Storage empty — saved scenarios will appear here.',
+    'mc.scenarioStorageCorrupted': 'Storage corrupted — could not read saved scenarios.',
 
     // ── Battle Journal ───────────────────────────────────────
     'bj.profileTitle':          'Battle Journal',
@@ -1958,6 +1961,9 @@ const translations = {
     'mc.scenarioOverwrite':     'Bestehendes Szenario „{name}" überschreiben?',
     'mc.scenarioDeleteConfirm': 'Szenario „{name}" wirklich löschen?',
     'mc.scenarioNameTooLong':   'Name ist zu lang (max. 60 Zeichen).',
+    'mc.scenarioSaveError':     'Speichern fehlgeschlagen: {error}\n\nMöglicherweise ist dein Browser im privaten Modus oder der Speicher ist voll.',
+    'mc.scenarioStorageEmpty':  'Speicher leer — gespeicherte Szenarien erscheinen hier.',
+    'mc.scenarioStorageCorrupted': 'Speicher beschädigt — gespeicherte Szenarien konnten nicht gelesen werden.',
 
     // ── Battle Journal ───────────────────────────────────────
     'bj.profileTitle':          'Battle Journal',

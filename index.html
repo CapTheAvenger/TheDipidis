@@ -3277,31 +3277,37 @@
           <label class="bj-edit-label" data-i18n="bj.opponentArchetype">Opponent Archetype</label>
           <input id="bjEditEntryOpponent" type="text" class="bj-edit-input" autocomplete="off">
 
-          <label class="bj-edit-label" data-i18n="bj.result">Result</label>
-          <select id="bjEditEntryResult" class="bj-edit-input">
-            <option value="win" data-i18n="bj.win">Win</option>
-            <option value="loss" data-i18n="bj.loss">Loss</option>
-            <option value="tie" data-i18n="bj.tie">Tie</option>
-          </select>
+          <!-- BO1 / overall fields — shown for BO1 entries, hidden for BO3 -->
+          <div id="bjEditEntryOverallFields">
+            <label class="bj-edit-label" data-i18n="bj.result">Result</label>
+            <select id="bjEditEntryResult" class="bj-edit-input">
+              <option value="win" data-i18n="bj.win">Win</option>
+              <option value="loss" data-i18n="bj.loss">Loss</option>
+              <option value="tie" data-i18n="bj.tie">Tie</option>
+            </select>
 
-          <label class="bj-edit-label" data-i18n="bj.turnOrder">Turn Order</label>
-          <select id="bjEditEntryTurnOrder" class="bj-edit-input">
-            <option value="">—</option>
-            <option value="first" data-i18n="bj.goingFirst">1st (Going first)</option>
-            <option value="second" data-i18n="bj.goingSecond">2nd (Going second)</option>
-          </select>
+            <label class="bj-edit-label" data-i18n="bj.turnOrder">Turn Order</label>
+            <select id="bjEditEntryTurnOrder" class="bj-edit-input">
+              <option value="">—</option>
+              <option value="first" data-i18n="bj.goingFirst">1st (Going first)</option>
+              <option value="second" data-i18n="bj.goingSecond">2nd (Going second)</option>
+            </select>
 
-          <div class="bj-edit-divider"></div>
+            <div class="bj-edit-divider"></div>
 
-          <label class="bj-brick-label bj-edit-brick-label">
-            <input type="checkbox" id="bjEditEntryBrick" class="bj-brick-checkbox">
-            <span class="bj-brick-icon">🧱</span>
-            <span class="bj-brick-text">Brick</span>
-            <span class="bj-brick-hint">(Verloren durch Pech)</span>
-          </label>
+            <label class="bj-brick-label bj-edit-brick-label">
+              <input type="checkbox" id="bjEditEntryBrick" class="bj-brick-checkbox">
+              <span class="bj-brick-icon">🧱</span>
+              <span class="bj-brick-text">Brick</span>
+              <span class="bj-brick-hint">(Verloren durch Pech)</span>
+            </label>
 
-          <label class="bj-edit-label" style="margin-top:10px">Notizen</label>
-          <textarea id="bjEditEntryNotes" class="bj-notes-textarea bj-edit-notes" rows="2" maxlength="200" placeholder="Stichpunkte..."></textarea>
+            <label class="bj-edit-label" style="margin-top:10px">Notizen</label>
+            <textarea id="bjEditEntryNotes" class="bj-notes-textarea bj-edit-notes" rows="2" maxlength="200" placeholder="Stichpunkte..."></textarea>
+          </div>
+
+          <!-- BO3 per-game fields — populated dynamically for BO3 entries -->
+          <div id="bjEditEntryGamesContainer" class="bj-edit-games-container" style="display:none"></div>
         </div>
         <div class="bj-edit-modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeEditEntryModal()" data-i18n="bj.cancel">Cancel</button>

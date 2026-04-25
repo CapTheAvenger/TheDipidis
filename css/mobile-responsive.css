@@ -1995,27 +1995,30 @@
 /* ===========================================================
    My Decks card — proportional mobile UI (<= 900px)
    ===========================================================
-   Goal: every button that exists on desktop stays visible on phone
-   too (−, ★, +, price, collection, wishlist, ✕), but sized so they
-   sit cleanly inside the card frame rather than smothering the art.
-
-   Math for an iPhone-14 ~390px viewport with the card grid set to
-   minmax(75px, 1fr):
-     - 5 cards per row → each ~76px wide → ~106px tall (245:342)
-     - 4 buttons in the bottom row → 76/4 − 2px gap ≈ 17px each
-     - Both button rows together: 13×2 + 1px gap = 27px
-       → ~25% of card height, leaving the top 75% for the art
+   Goal: card art is the hero, buttons are slim chrome at the bottom.
+   Earlier iterations (15px tall, opaque) covered ~30% of every card
+   and made the grid look like a colour-block matrix instead of a
+   deck. Now: 11px tall, semi-transparent, all 7 buttons visible.
+     - 11px × 2 rows + 0px gap = 22px ≈ 17% of a 124px-tall card
+     - 83% of the card is now art, fully visible
+     - rgba() backgrounds let the card image show through faintly
    --------------------------------------------------------- */
 @media (max-width: 900px) {
 
-  /* Card-grid floor of 80px → 4 cards per row on iPhone 14 (390px
-     viewport, 4 × ~88px) and most other phones; 5 cards on tablets.
-     At 80px width the 4-button bottom row gives each button
-     (80−3px gap)/4 ≈ 19px width × 15 tall — matching the proportion
-     the user requested. */
+  /* Card grid: 4 cards per row on iPhone-14 (390px) so each card is
+     ~85px wide → ~119px tall — enough room for legible art. */
   .saved-deck-item > div:nth-child(2) > div:last-child {
     grid-template-columns: repeat(auto-fill, minmax(clamp(80px, 21vw, 120px), 1fr)) !important;
     gap: clamp(3px, 1vw, 10px) !important;
+  }
+
+  /* Outer button container — pulled tighter to the card edge so the
+     image can extend further down before being overlaid. */
+  .saved-deck-item div[style*="bottom: 2px"][style*="left: 2px"][style*="z-index: 3"] {
+    bottom: 1px !important;
+    left: 1px !important;
+    right: 1px !important;
+    gap: 0 !important;
   }
 
   /* Both button rows visible (restore default 3 / 4 column grids
@@ -2030,36 +2033,80 @@
     gap: 1px !important;
   }
 
-  /* All 7 buttons share one compact size. 15px tall × 2 rows + 1px
-     gap = 31px ≈ 25% of a 124px-tall card; the top 75% stays for
-     the art. */
+  /* All 7 buttons share one compact size. 11px tall × 2 rows + 0
+     gap = 22px ≈ 17% of a 124px-tall card. Semi-transparent so
+     the card art bleeds through the chrome instead of being
+     obliterated by it. */
   .saved-deck-item div[style*="bottom: 2px"] button {
-    height: 15px !important;
-    font-size: 10px !important;
+    height: 11px !important;
+    font-size: 8px !important;
     border-radius: 2px !important;
     line-height: 1 !important;
     padding: 0 !important;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
   }
-  /* ★ glyph + price text are wider than single chars — drop a
-     point so they fit cleanly inside their narrower cell. */
+
+  /* Slim down to the actual brand colours but at 0.78 alpha so the
+     underlying art is visible. Keeps each button identifiable while
+     feeling like an overlay rather than a billboard. */
+  .saved-deck-item div[style*="bottom: 2px"] > div:first-child > button:nth-child(1) {
+    background: rgba(220, 53, 69, 0.78) !important;   /* − minus */
+  }
   .saved-deck-item div[style*="bottom: 2px"] > div:first-child > button:nth-child(2) {
-    font-size: 9px !important;     /* ★ rarity-switch */
+    background: rgba(255, 193, 7, 0.78) !important;   /* ★ rarity */
+    font-size: 7px !important;
+  }
+  .saved-deck-item div[style*="bottom: 2px"] > div:first-child > button:nth-child(3) {
+    background: rgba(40, 167, 69, 0.78) !important;   /* + plus */
   }
   .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:first-child {
-    font-size: 8px !important;     /* price (e.g. 0.13€) */
+    /* price (e.g. 0.13€) — keeps gradient via inline style; just shrink */
+    font-size: 7px !important;
+    opacity: 0.85;
   }
-  /* Collection toggle shows "x/4" when owned — needs an even smaller
-     font so two characters + slash fit. */
   .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:nth-child(2) {
+    font-size: 7px !important;
+    opacity: 0.85;
+  }
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:nth-child(3) {
+    /* heart wishlist toggle */
+    opacity: 0.85;
+  }
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:nth-child(4) {
+    background: rgba(192, 57, 43, 0.78) !important;   /* ✕ remove */
     font-size: 8px !important;
   }
 
   /* Deck-count badge (top-right) — small enough not to dominate. */
   .saved-deck-item div[style*="top: 3px"][style*="right: 3px"][style*="border-radius: 50%"] {
-    width: 16px !important;
-    height: 16px !important;
-    font-size: 10px !important;
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 9px !important;
     top: 2px !important;
     right: 2px !important;
+    background: rgba(0, 0, 0, 0.65) !important;
+  }
+}
+
+/* Desktop / tablet (>900px): keep buttons compact too — no need for
+   22px chunky buttons when the cards are larger and the cursor is
+   precise. Gives the deck grid a cleaner, more art-forward look. */
+@media (min-width: 901px) {
+  .saved-deck-item div[style*="bottom: 2px"] button {
+    height: 14px !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+  }
+  .saved-deck-item div[style*="bottom: 2px"] > div:first-child > button:nth-child(2) {
+    font-size: 9px !important;
+  }
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:first-child,
+  .saved-deck-item div[style*="bottom: 2px"] > div:last-child > button:nth-child(2) {
+    font-size: 9px !important;
+  }
+  .saved-deck-item div[style*="bottom: 2px"][style*="z-index: 3"] {
+    gap: 0 !important;
   }
 }

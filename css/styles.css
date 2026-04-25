@@ -8374,7 +8374,80 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
     font-style: italic;
     line-height: 1.4;
 }
+.bj-history-game-note {
+    margin-left: 12px;
+    margin-top: 1px;
+}
 .battle-journal-sheet.is-dark .bj-history-notes { color: rgba(255,255,255,.5); }
+
+/* Per-game brick + notes (BO3 form rows) */
+.battle-journal-game-extras {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+.bj-game-brick-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(0,0,0,.14);
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0.45;
+    transition: opacity .12s, background .12s, border-color .12s;
+}
+.bj-game-brick-btn:hover { opacity: 0.8; }
+.bj-game-brick-btn.is-active {
+    opacity: 1;
+    background: rgba(230,126,34,.18);
+    border-color: rgba(192,57,43,.45);
+}
+.bj-game-notes-input {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 10px;
+    border: 1px solid rgba(0,0,0,.14);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: inherit;
+    background: var(--input-bg, rgba(0,0,0,.03));
+    box-sizing: border-box;
+}
+.bj-game-notes-input:focus {
+    outline: none;
+    border-color: #3498db;
+    background: #fff;
+}
+.battle-journal-sheet.is-dark .bj-game-notes-input {
+    background: rgba(255,255,255,.07);
+    border-color: rgba(255,255,255,.15);
+    color: #fff;
+}
+.battle-journal-sheet.is-dark .bj-game-notes-input::placeholder { color: rgba(255,255,255,.4); }
+.battle-journal-sheet.is-dark .bj-game-brick-btn { border-color: rgba(255,255,255,.15); }
+
+/* BO3 per-game editor inside the edit-entry modal */
+.bj-edit-games-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.bj-edit-game-row {
+    background: rgba(0,0,0,.03);
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,.06);
+}
+
+/* "Share with details" button — visually distinct sibling of Share */
+.bj-tournament-share-details-btn {
+    margin-left: 4px;
+}
 
 /* Brick count in bar list */
 .bj-brick-count {

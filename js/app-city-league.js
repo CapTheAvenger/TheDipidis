@@ -91,8 +91,10 @@
             }
             
             // Load M3 comparison data only on non-mobile to avoid blocking slower devices.
-            const isMobileRuntime = !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
-            if (format === 'M4' && !isMobileRuntime) {
+            // (Re-enabled for mobile: user wants the past-meta delta on phone too —
+            // the extra ~80 KB download is worth the trend arrows + (M3: ...) badges
+            // that turn the tier banners from raw numbers into actually-readable info.)
+            if (format === 'M4') {
                 await loadM3ComparisonData();
             }
             
@@ -201,8 +203,9 @@
                         : Promise.resolve(null)
                 ];
 
-                // NEU: Lade M3-Archetypen im Hintergrund, wenn wir in M4 sind (desktop only)
-                if (window.currentCityLeagueFormat === 'M4' && !isMobileRuntime) {
+                // Load M3 archetype data in the background when we're on M4
+                // (mobile included — see switchCityLeagueFormat note).
+                if (window.currentCityLeagueFormat === 'M4') {
                     fetchPromises.push(
                         fetch(`${BASE_PATH}city_league_archetypes_M3.csv?t=${timestamp}`)
                             .then(response => response.ok ? response.text() : null)
@@ -287,10 +290,11 @@
                     console.warn(`Comparison data missing for ${format}; using derived fallback from archetypes data`);
                 }
 
-                // Load M3 comparison data only on non-mobile to keep M4 load path fast and reliable.
-                if (format === 'M4' && !isMobileRuntime) {
+                // Load M3 comparison data on M4 (mobile included — see notes
+                // in switchCityLeagueFormat / loadCityLeagueData).
+                if (format === 'M4') {
                     await loadM3ComparisonData();
-                } else if (format === 'M4') {
+                } else {
                     window.m3BaselineData = {};
                     window.m3ArchetypeData = null;
                 }

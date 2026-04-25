@@ -174,12 +174,37 @@ jobs:
 
       - name: Cache-bust asset references
         run: |
+          # Use commit hash + timestamp so every deploy has a unique version,
+          # even when the same commit is re-deployed via workflow_dispatch.
           HASH=$(git rev-parse --short HEAD)
-          sed -i "s/\?v=[^\"]*/\?v=${HASH}/g" _site/index.html
+          STAMP=$(date -u +%Y%m%d%H%M)
+          VER="${STAMP}-${HASH}"
+
+          # 1) Asset query strings (?v=...) in HTML and JS
+          sed -i "s/\?v=[^\"]*/\?v=${VER}/g" _site/index.html
           for f in _site/js/*.js; do
-            sed -i "s/\?v=[^'\"]*/\?v=${HASH}/g" "$f"
+            sed -i "s/\?v=[^'\"]*/\?v=${VER}/g" "$f"
           done
-          echo "✓ Cache-busted with hash ${HASH}"
+
+          # 2) Embedded APP_VERSION in index.html — drives the version-check
+          #    that purges caches + force-reloads stale clients on next visit.
+          #    Regex tolerates both quote styles + post-minification spacing.
+          sed -i -E "s/(window\.APP_VERSION[[:space:]]*=[[:space:]]*)['\"][^'\"]*['\"]/\1\"${VER}\"/g" _site/index.html
+
+          # 3) Service Worker CACHE_NAME — forces a new SW install on every
+          #    deploy, so the activate handler clears old caches and signals
+          #    open tabs to reload.
+          sed -i -E "s/(CACHE_NAME[[:space:]]*=[[:space:]]*)['\"][^'\"]*['\"]/\1'tcg-analysis-v${VER}'/g" _site/service-worker.js
+          sed -i -E "s|// v[0-9A-Za-z._-]+|// v${VER}|" _site/service-worker.js
+
+          # 4) version.json — fetched network-only on every page load and
+          #    compared against APP_VERSION. Mismatch triggers the auto-purge.
+          printf '{"version":"%s"}' "${VER}" > _site/version.json
+
+          echo "✓ Cache-busted with version ${VER}"
+          echo "  index.html  APP_VERSION = ${VER}"
+          echo "  service-worker.js  CACHE_NAME = tcg-analysis-v${VER}"
+          echo "  version.json  ${VER}"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

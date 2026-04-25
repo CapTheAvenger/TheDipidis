@@ -1513,6 +1513,40 @@
   }
 }
 
+/* ─── 4b. CITY LEAGUE TIER BANNERS: Make M3 comparison fit on mobile ─── */
+/* The tier-section banner cards become ~120px wide at 3 per row on mobile,
+   which is too narrow for the default badge font. Shrink the font and let
+   the badges wrap so the (M3: …) comparison + trend arrow are visible. */
+@media (max-width: 768px) {
+  .tier-section .deck-banner-stats,
+  .tier-deck-grid .deck-banner-stats {
+    font-size: 0.7rem;
+    gap: 2px;
+  }
+  .tier-section .stat-badge,
+  .tier-deck-grid .stat-badge {
+    font-size: 0.58rem;
+    padding: 1px 4px;
+    flex-wrap: wrap;
+    column-gap: 3px;
+    row-gap: 1px;
+    line-height: 1.15;
+  }
+  .tier-section .stat-compare-value,
+  .tier-deck-grid .stat-compare-value {
+    font-size: 0.55rem;
+    margin-left: 0;
+  }
+  .tier-section .trend-icon,
+  .tier-deck-grid .trend-icon {
+    font-size: 0.65rem;
+    margin-left: 1px;
+    transform: scale(1.05);
+  }
+}
+
+/* ─── 5. MY DECKS DECK HEADER: Fix button overlap with deck name ─── */
+
 /* ─── 5. MY DECKS DECK HEADER: Fix button overlap with deck name ─── */
 /* Problem: flex-wrap: nowrap causes buttons to overflow over the deck name */
 @media (max-width: 768px) {

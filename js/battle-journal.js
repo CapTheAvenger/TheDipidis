@@ -57,6 +57,7 @@
                     turnOrder: String(game?.turnOrder || '').trim(),
                     result: String(game?.result || '').trim(),
                     brick: !!game?.brick,
+                    mulligan: !!game?.mulligan,
                     notes: String(game?.notes || '').slice(0, 200)
                 }))
                 : (Array.isArray(draft?.bo3Games)
@@ -64,6 +65,7 @@
                         turnOrder: String(game?.turnOrder || '').trim(),
                         result: String(game?.result || '').trim(),
                         brick: !!game?.brick,
+                        mulligan: !!game?.mulligan,
                         notes: String(game?.notes || '').slice(0, 200)
                     }))
                     : [])
@@ -104,6 +106,7 @@
             metaInput: document.getElementById('battleJournalMeta'),
             typeInput: document.getElementById('battleJournalType'),
             brickInput: document.getElementById('battleJournalBrick'),
+            mulliganInput: document.getElementById('battleJournalMulligan'),
             notesInput: document.getElementById('battleJournalNotes')
         };
     }
@@ -366,11 +369,12 @@
         const resultLabel = battleJournalText('bj.result', 'Result');
         const headerLabel = battleJournalText('bj.gameDetails', 'Game Details');
         const brickTitle = battleJournalText('bj.brickToggleTitle', 'Brick (Pech-Spiel)');
+        const mulliganTitle = battleJournalText('bj.mulliganToggleTitle', 'Mulligan in diesem Game');
         const notesPlaceholder = battleJournalText('bj.gameNotesPlaceholder', 'Notiz zu diesem Game...');
 
-        // BO3 (count > 1): brick + notes belong on individual games. BO1 has
-        // a single game so the match-level brick/notes inputs already cover
-        // that case — adding them per-game would just duplicate.
+        // BO3 (count > 1): brick + mulligan + notes belong on individual
+        // games. BO1 has a single game so the match-level inputs already
+        // cover that case — adding them per-game would just duplicate.
         const showPerGameExtras = count > 1;
 
         let html = `<span class="battle-journal-label">${escapeHtml(headerLabel)}</span>`;
@@ -379,6 +383,8 @@
                     <div class="battle-journal-game-extras">
                         <input type="hidden" id="battleJournalGame${i}Brick" value="">
                         <button type="button" class="bj-game-brick-btn" id="battleJournalGame${i}BrickBtn" data-game="${i}" onclick="setGameChoice(${i},'brick','1')" title="${escapeHtml(brickTitle)}" aria-label="${escapeHtml(brickTitle)}">🧱</button>
+                        <input type="hidden" id="battleJournalGame${i}Mulligan" value="">
+                        <button type="button" class="bj-game-mulligan-btn" id="battleJournalGame${i}MulliganBtn" data-game="${i}" onclick="setGameChoice(${i},'mulligan','1')" title="${escapeHtml(mulliganTitle)}" aria-label="${escapeHtml(mulliganTitle)}">🔄</button>
                         <input type="text" id="battleJournalGame${i}Notes" class="bj-game-notes-input" maxlength="200" placeholder="${escapeHtml(notesPlaceholder)}" oninput="onGameNotesInput(${i})">
                     </div>` : '';
             html += `
@@ -409,14 +415,16 @@
             const turnEl = document.getElementById(`battleJournalGame${i}Turn`);
             const resultEl = document.getElementById(`battleJournalGame${i}Result`);
             const brickEl = document.getElementById(`battleJournalGame${i}Brick`);
+            const mulliganEl = document.getElementById(`battleJournalGame${i}Mulligan`);
             const notesEl = document.getElementById(`battleJournalGame${i}Notes`);
             const game = {
                 turnOrder: String(turnEl?.value || '').trim(),
                 result: String(resultEl?.value || '').trim()
             };
-            // Per-game brick/notes only exist for BO3 (count > 1). Omit the
-            // fields entirely for BO1 so the saved object stays as before.
+            // Per-game brick/mulligan/notes only exist for BO3 (count > 1).
+            // Omit the fields entirely for BO1 so the saved object stays as before.
             if (brickEl) game.brick = brickEl.value === '1';
+            if (mulliganEl) game.mulligan = mulliganEl.value === '1';
             if (notesEl) game.notes = String(notesEl.value || '').trim();
             games.push(game);
         }
@@ -441,14 +449,21 @@
             document.querySelectorAll(`[data-field="game${i}Result"]`).forEach(btn => {
                 btn.classList.toggle('is-selected', btn.dataset.value === resultVal);
             });
-            // Per-game brick + notes — only present in DOM for BO3.
+            // Per-game brick + mulligan + notes — only present in DOM for BO3.
             const brickEl = document.getElementById(`battleJournalGame${i}Brick`);
             const brickBtn = document.getElementById(`battleJournalGame${i}BrickBtn`);
+            const mulliganEl = document.getElementById(`battleJournalGame${i}Mulligan`);
+            const mulliganBtn = document.getElementById(`battleJournalGame${i}MulliganBtn`);
             const notesEl = document.getElementById(`battleJournalGame${i}Notes`);
             if (brickEl) {
                 const isBrick = !!g.brick;
                 brickEl.value = isBrick ? '1' : '';
                 if (brickBtn) brickBtn.classList.toggle('is-active', isBrick);
+            }
+            if (mulliganEl) {
+                const isMull = !!g.mulligan;
+                mulliganEl.value = isMull ? '1' : '';
+                if (mulliganBtn) mulliganBtn.classList.toggle('is-active', isMull);
             }
             if (notesEl) notesEl.value = String(g.notes || '');
         }
@@ -566,12 +581,13 @@
 
     // ── Game choice toggle (Turn / Result per game row) ─────
     function setGameChoice(gameNum, type, value) {
-        // Per-game brick toggle (BO3 only). The brick has no multi-value
-        // semantics — it's simply on/off — so we ignore the passed value
-        // and just flip the hidden flag.
-        if (type === 'brick') {
-            const hiddenEl = document.getElementById(`battleJournalGame${gameNum}Brick`);
-            const btn = document.getElementById(`battleJournalGame${gameNum}BrickBtn`);
+        // Per-game brick / mulligan toggles (BO3 only). They have no multi-
+        // value semantics — just on/off — so we ignore the passed value and
+        // flip the hidden flag.
+        if (type === 'brick' || type === 'mulligan') {
+            const fieldName = type === 'brick' ? 'Brick' : 'Mulligan';
+            const hiddenEl = document.getElementById(`battleJournalGame${gameNum}${fieldName}`);
+            const btn = document.getElementById(`battleJournalGame${gameNum}${fieldName}Btn`);
             if (!hiddenEl) return;
             const newVal = hiddenEl.value === '1' ? '' : '1';
             hiddenEl.value = newVal;
@@ -633,6 +649,7 @@
             meta: String(els.metaInput?.value || '').trim(),
             tournamentType: String(els.typeInput?.value || '').trim(),
             brick: els.brickInput?.checked || false,
+            mulligan: els.mulliganInput?.checked || false,
             notes: String(els.notesInput?.value || '').trim(),
             turnOrder: derived.turnOrder,
             result: derived.result,
@@ -654,6 +671,7 @@
         if (els.metaInput) els.metaInput.value = draft.meta || '';
         if (els.typeInput) els.typeInput.value = draft.tournamentType || '';
         if (els.brickInput) els.brickInput.checked = draft.brick || false;
+        if (els.mulliganInput) els.mulliganInput.checked = draft.mulligan || false;
         if (els.notesInput) els.notesInput.value = draft.notes || '';
         document.querySelectorAll('.bj-type-chip').forEach(c => c.classList.toggle('is-selected', c.dataset.value === (draft.tournamentType || '')));
 
@@ -677,6 +695,8 @@
         document.querySelectorAll('.bj-type-chip').forEach(c => c.classList.remove('is-selected'));
         const brickEl = document.getElementById('battleJournalBrick');
         if (brickEl) brickEl.checked = false;
+        const mulliganEl = document.getElementById('battleJournalMulligan');
+        if (mulliganEl) mulliganEl.checked = false;
         const notesEl = document.getElementById('battleJournalNotes');
         if (notesEl) notesEl.value = '';
         renderGameRows();
@@ -719,13 +739,16 @@
         const games = values.games || [];
         const derived = deriveOverallResult(games);
         const isBo3 = (values.bestOf || 'bo1') === 'bo3';
-        // For BO3 the brick + notes live per-game (inside bo3Games[i]).
-        // The match-level brick/notes still get stored — for BO3 they roll
-        // up to "any game flagged as brick" and "concatenated notes" so
+        // For BO3 the brick + mulligan + notes live per-game (inside
+        // bo3Games[i]). The match-level fields still get stored — for BO3
+        // they roll up to "any game flagged" and "concatenated notes" so
         // legacy code paths (history badges, summaries) keep working.
         const matchBrick = isBo3
             ? games.some(g => g && g.brick)
             : !!values.brick;
+        const matchMulligan = isBo3
+            ? games.some(g => g && g.mulligan)
+            : !!values.mulligan;
         const matchNotes = isBo3
             ? games.map((g, i) => g && g.notes ? `G${i + 1}: ${g.notes}` : '').filter(Boolean).join(' | ')
             : (values.notes || '');
@@ -741,12 +764,13 @@
             result: derived.result,
             bo3Games: games,
             brick: matchBrick,
+            mulligan: matchMulligan,
             notes: matchNotes,
             createdAtMs: Date.now(),
             sourceTab: activeTab,
             sourceArchetype,
             userId: window.auth?.currentUser?.uid || null,
-            schemaVersion: 5
+            schemaVersion: 6
         };
     }
 
@@ -791,6 +815,7 @@
             result: entry.result,
             bo3Games: Array.isArray(entry.bo3Games) ? entry.bo3Games : [],
             brick: entry.brick || false,
+            mulligan: entry.mulligan || false,
             notes: entry.notes || '',
             sourceTab: entry.sourceTab || null,
             sourceArchetype: entry.sourceArchetype || null,
@@ -947,6 +972,9 @@
         }
         if (els.brickInput) {
             els.brickInput.addEventListener('change', () => persistBattleJournalDraftFromForm());
+        }
+        if (els.mulliganInput) {
+            els.mulliganInput.addEventListener('change', () => persistBattleJournalDraftFromForm());
         }
         if (els.notesInput) {
             els.notesInput.addEventListener('input', () => persistBattleJournalDraftFromForm());
@@ -1222,7 +1250,8 @@
                     const gTurn = g.turnOrder === 'first' ? '1st' : (g.turnOrder === 'second' ? '2nd' : '-');
                     const gRes = g.result || '-';
                     const brickMark = g.brick ? ' 🧱' : '';
-                    return `G${i + 1}: ${gTurn}/${gRes}${brickMark}`;
+                    const mullMark = g.mulligan ? ' 🔄' : '';
+                    return `G${i + 1}: ${gTurn}/${gRes}${brickMark}${mullMark}`;
                 });
             if (gameTexts.length > 0) bo3Line = `<div class="bj-history-games">${escapeHtml(gameTexts.join(' · '))}</div>`;
             // Per-game notes get their own indented lines so longer text
@@ -1238,6 +1267,7 @@
         }
 
         const brickBadge = entry.brick ? `<span class="bj-brick-badge">🧱 Brick</span>` : '';
+        const mulliganBadge = entry.mulligan ? `<span class="bj-mulligan-badge">🔄 Mulligan</span>` : '';
         // Suppress the rolled-up match-level notes for BO3 entries that
         // already render per-game notes — would just duplicate.
         const hasPerGameNotes = entry.bestOf === 'bo3'
@@ -1255,6 +1285,7 @@
                         <span class="bj-history-vs">vs</span>
                         <strong>${escapeHtml(entry.opponentArchetype || 'Opponent')}</strong>
                         ${brickBadge}
+                        ${mulliganBadge}
                     </div>
                     <div class="bj-history-meta">${escapeHtml(bestOfText)}${turnText ? ' · ' + escapeHtml(turnText) : ''} · ${escapeHtml(dateStr)} ${pendingBadge}</div>
                     ${bo3Line}
@@ -1293,13 +1324,18 @@
                 const tag = `G${i + 1}`;
                 const turn = g.turnOrder === 'first' ? '1st' : (g.turnOrder === 'second' ? '2nd' : '\u2013');
                 const res  = g.result === 'win' ? 'W' : (g.result === 'loss' ? 'L' : (g.result === 'tie' ? 'T' : '\u2013'));
-                const head = `${tag}: ${turn}/${res}${g.brick ? ' \ud83e\uddf1' : ''}`;
+                const brickMark = g.brick    ? ' \ud83e\uddf1' : '';
+                const mullMark  = g.mulligan ? ' \ud83d\udd04' : '';
+                const head = `${tag}: ${turn}/${res}${brickMark}${mullMark}`;
                 lines.push(g.notes ? `${head} \u2014 ${g.notes}` : head);
             });
             const hasGameNotes = entry.bo3Games.some(g => g && g.notes);
             if (!hasGameNotes && entry.notes) lines.push(entry.notes);
         } else {
-            if (entry.brick) lines.push('\ud83e\uddf1 Brick');
+            const flags = [];
+            if (entry.brick)    flags.push('\ud83e\uddf1 Brick');
+            if (entry.mulligan) flags.push('\ud83d\udd04 Mulligan');
+            if (flags.length) lines.push(flags.join(' \u00b7 '));
             if (entry.notes) lines.push(entry.notes);
         }
         return lines;
@@ -1389,8 +1425,9 @@
             ctx.fillRect(12, y - 16, W - 24, size.h - 8);
             ctx.fillStyle = '#e2e8f0';
             ctx.font = ROW_FONT;
-            const brickMark = entry.brick ? '  \ud83e\uddf1' : '';
-            ctx.fillText(`${resultEmoji}  ${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}${brickMark}`, 20, y + 4);
+            const brickMark = entry.brick    ? '  \ud83e\uddf1' : '';
+            const mullMark  = entry.mulligan ? '  \ud83d\udd04' : '';
+            ctx.fillText(`${resultEmoji}  ${entry.ownDeck || 'Deck'} vs ${entry.opponentArchetype || 'Opponent'}${brickMark}${mullMark}`, 20, y + 4);
 
             if (withDetails && size.detailLines.length) {
                 ctx.fillStyle = '#cbd5e0';
@@ -1997,6 +2034,8 @@
         document.getElementById('bjEditEntryTurnOrder').value = entry.turnOrder || '';
         const brickEl = document.getElementById('bjEditEntryBrick');
         if (brickEl) brickEl.checked = entry.brick || false;
+        const mulliganEl = document.getElementById('bjEditEntryMulligan');
+        if (mulliganEl) mulliganEl.checked = entry.mulligan || false;
         const notesEl = document.getElementById('bjEditEntryNotes');
         if (notesEl) notesEl.value = entry.notes || '';
 
@@ -2011,15 +2050,17 @@
         if (entry.bestOf === 'bo3') {
             if (overallEl) overallEl.style.display = 'none';
             if (gamesEl)   gamesEl.style.display = '';
-            // Legacy BO3 entries (schemaVersion < 5) only have match-level
-            // brick + notes — no per-game data. Pre-fill game 1 with that
-            // info so the user can see and edit it without losing context.
+            // Legacy BO3 entries (schemaVersion < 6) only have match-level
+            // brick / mulligan / notes — no per-game data. Pre-fill game 1
+            // with that info so the user can see and edit it without
+            // losing context.
             const seedGames = (entry.bo3Games || []).map(g => ({ ...(g || {}) }));
-            const hasPerGameData = seedGames.some(g => g && (g.brick || (g.notes && String(g.notes).trim())));
-            if (!hasPerGameData && (entry.brick || (entry.notes && String(entry.notes).trim()))) {
+            const hasPerGameData = seedGames.some(g => g && (g.brick || g.mulligan || (g.notes && String(g.notes).trim())));
+            if (!hasPerGameData && (entry.brick || entry.mulligan || (entry.notes && String(entry.notes).trim()))) {
                 if (!seedGames[0]) seedGames[0] = {};
-                if (entry.brick && seedGames[0].brick === undefined) seedGames[0].brick = true;
-                if (entry.notes && !seedGames[0].notes) seedGames[0].notes = entry.notes;
+                if (entry.brick    && seedGames[0].brick    === undefined) seedGames[0].brick = true;
+                if (entry.mulligan && seedGames[0].mulligan === undefined) seedGames[0].mulligan = true;
+                if (entry.notes    && !seedGames[0].notes)                 seedGames[0].notes = entry.notes;
             }
             _renderEditBo3Games(seedGames);
         } else {
@@ -2043,8 +2084,9 @@
         const games = Array.isArray(savedGames) ? savedGames : [];
         const firstLabel  = battleJournalText('bj.first', 'First');
         const secondLabel = battleJournalText('bj.second', 'Second');
-        const brickTitle  = battleJournalText('bj.brickToggleTitle', 'Brick (Pech-Spiel)');
-        const notesPh     = battleJournalText('bj.gameNotesPlaceholder', 'Notiz zu diesem Game...');
+        const brickTitle    = battleJournalText('bj.brickToggleTitle', 'Brick (Pech-Spiel)');
+        const mulliganTitle = battleJournalText('bj.mulliganToggleTitle', 'Mulligan in diesem Game');
+        const notesPh       = battleJournalText('bj.gameNotesPlaceholder', 'Notiz zu diesem Game...');
 
         let html = '';
         for (let i = 1; i <= 3; i++) {
@@ -2052,14 +2094,16 @@
             const turn = String(g.turnOrder || '');
             const res  = String(g.result || '');
             const brick = !!g.brick;
+            const mulligan = !!g.mulligan;
             const notes = String(g.notes || '');
             const sel = (a, b) => a === b ? ' is-selected' : '';
             html += `
                 <div class="battle-journal-game-row bj-edit-game-row">
                     <span class="battle-journal-bo3-game">Game ${i}</span>
-                    <input type="hidden" id="bjEditGame${i}Turn"   value="${escapeHtml(turn)}">
-                    <input type="hidden" id="bjEditGame${i}Result" value="${escapeHtml(res)}">
-                    <input type="hidden" id="bjEditGame${i}Brick"  value="${brick ? '1' : ''}">
+                    <input type="hidden" id="bjEditGame${i}Turn"     value="${escapeHtml(turn)}">
+                    <input type="hidden" id="bjEditGame${i}Result"   value="${escapeHtml(res)}">
+                    <input type="hidden" id="bjEditGame${i}Brick"    value="${brick ? '1' : ''}">
+                    <input type="hidden" id="bjEditGame${i}Mulligan" value="${mulligan ? '1' : ''}">
                     <div class="battle-journal-game-btns">
                         <div class="battle-journal-choice-group">
                             <button type="button" class="battle-journal-choice${sel(turn,'first')}"  data-edit-game="${i}" data-edit-field="Turn"   data-edit-value="first"  onclick="setEditGameChoice(${i},'turn','first')">${escapeHtml(firstLabel)}</button>
@@ -2072,7 +2116,8 @@
                         </div>
                     </div>
                     <div class="battle-journal-game-extras">
-                        <button type="button" class="bj-game-brick-btn${brick ? ' is-active' : ''}" id="bjEditGame${i}BrickBtn" onclick="setEditGameChoice(${i},'brick','1')" title="${escapeHtml(brickTitle)}" aria-label="${escapeHtml(brickTitle)}">🧱</button>
+                        <button type="button" class="bj-game-brick-btn${brick ? ' is-active' : ''}"       id="bjEditGame${i}BrickBtn"    onclick="setEditGameChoice(${i},'brick','1')"    title="${escapeHtml(brickTitle)}"    aria-label="${escapeHtml(brickTitle)}">🧱</button>
+                        <button type="button" class="bj-game-mulligan-btn${mulligan ? ' is-active' : ''}" id="bjEditGame${i}MulliganBtn" onclick="setEditGameChoice(${i},'mulligan','1')" title="${escapeHtml(mulliganTitle)}" aria-label="${escapeHtml(mulliganTitle)}">🔄</button>
                         <input type="text" id="bjEditGame${i}Notes" class="bj-game-notes-input" maxlength="200" placeholder="${escapeHtml(notesPh)}" value="${escapeHtml(notes)}">
                     </div>
                 </div>`;
@@ -2081,9 +2126,10 @@
     }
 
     function setEditGameChoice(gameNum, type, _value) {
-        if (type === 'brick') {
-            const hidden = document.getElementById(`bjEditGame${gameNum}Brick`);
-            const btn = document.getElementById(`bjEditGame${gameNum}BrickBtn`);
+        if (type === 'brick' || type === 'mulligan') {
+            const fieldName = type === 'brick' ? 'Brick' : 'Mulligan';
+            const hidden = document.getElementById(`bjEditGame${gameNum}${fieldName}`);
+            const btn = document.getElementById(`bjEditGame${gameNum}${fieldName}Btn`);
             if (!hidden) return;
             const newVal = hidden.value === '1' ? '' : '1';
             hidden.value = newVal;
@@ -2106,8 +2152,9 @@
             const turn = String(document.getElementById(`bjEditGame${i}Turn`)?.value || '').trim();
             const res  = String(document.getElementById(`bjEditGame${i}Result`)?.value || '').trim();
             const brick = (document.getElementById(`bjEditGame${i}Brick`)?.value || '') === '1';
+            const mulligan = (document.getElementById(`bjEditGame${i}Mulligan`)?.value || '') === '1';
             const notes = String(document.getElementById(`bjEditGame${i}Notes`)?.value || '').trim();
-            games.push({ turnOrder: turn, result: res, brick, notes });
+            games.push({ turnOrder: turn, result: res, brick, mulligan, notes });
         }
         return games;
     }
@@ -2133,7 +2180,8 @@
         if (isBo3) {
             const games = _readEditBo3Games();
             const derived = deriveOverallResult(games);
-            const matchBrick = games.some(g => g && g.brick);
+            const matchBrick    = games.some(g => g && g.brick);
+            const matchMulligan = games.some(g => g && g.mulligan);
             const matchNotes = games
                 .map((g, i) => g && g.notes ? `G${i + 1}: ${g.notes}` : '')
                 .filter(Boolean)
@@ -2145,8 +2193,9 @@
                 result: derived.result,
                 turnOrder: derived.turnOrder,
                 brick: matchBrick,
+                mulligan: matchMulligan,
                 notes: matchNotes,
-                schemaVersion: 5
+                schemaVersion: 6
             };
         } else {
             updatePayload = {
@@ -2155,6 +2204,7 @@
                 result: String(document.getElementById('bjEditEntryResult')?.value || '').trim(),
                 turnOrder: String(document.getElementById('bjEditEntryTurnOrder')?.value || '').trim(),
                 brick: document.getElementById('bjEditEntryBrick')?.checked || false,
+                mulligan: document.getElementById('bjEditEntryMulligan')?.checked || false,
                 notes: String(document.getElementById('bjEditEntryNotes')?.value || '').trim()
             };
         }

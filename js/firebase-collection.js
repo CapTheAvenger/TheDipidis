@@ -1825,42 +1825,45 @@ function updateDecksUI() {
           ? `<div style="position:absolute;top:${badgeBg ? '34px' : '8px'};left:7px;display:inline-flex;align-items:center;gap:5px;line-height:1;z-index:6;cursor:help;background:linear-gradient(135deg,#ffeb3b 0%,#ffd54f 100%);border:2px solid #ff9800;border-radius:14px;padding:2px 6px;box-shadow:0 3px 10px rgba(0,0,0,0.45),0 0 8px rgba(255,193,7,0.9);" title="Owned other INT prints: ${otherPrintOwnedCount}x"><span style="font-size:16px;font-weight:900;filter:drop-shadow(0 0 3px rgba(255,87,34,0.9));"></span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;border-radius:10px;background:#4a148c;color:#fff;font-size:11px;font-weight:800;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.3);">${otherPrintOwnedCount}</span></div>`
           : '';
         
+        const collLabel       = ownedCount > 0 ? `${ownedCount}/4` : '+';
+        const collOwnedClass  = isOwned ? ' my-deck-card-btn--coll-owned' : '';
+        const collTinyClass   = ownedCount > 0 ? ' my-deck-card-btn--coll-tiny' : '';
+        const wishOnClass     = isWishlisted ? ' my-deck-card-btn--wish-on' : '';
+        const marketDisabled  = eurPrice ? '' : ' my-deck-card-btn--market-na';
         cardsHtml += `
-          <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <img src="${safeImageAttr}" alt="${safeCardNameHtml}" style="width: 100%; display: block; cursor: zoom-in;" loading="lazy" 
+          <div class="my-deck-card-tile">
+            <img src="${safeImageAttr}" alt="${safeCardNameHtml}" class="my-deck-card-img" loading="lazy"
                  onerror="if(!this.dataset.retried){this.dataset.retried='1';var s=this.src;this.src='';setTimeout(()=>{this.src=s;},3000);}else{this.src='${safeFallbackImageAttr}'}"
                  onclick="showSingleCard('${safeImageJs}', '${safeCardNameJs}')">
-            
             ${ownedBadge}
             ${otherPrintSparkle}
-            
-            <div style="position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.75); color: white; width: clamp(18px, 5vw, 30px); height: clamp(18px, 5vw, 30px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: clamp(9px, 2.5vw, 16px); font-weight: bold; box-shadow: 0 1px 4px rgba(0,0,0,0.5); z-index: 3;">${count}</div>
-            
-            <div style="position: absolute; bottom: 2px; left: 2px; right: 2px; z-index: 3; display: flex; flex-direction: column; gap: 1px;">
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
-                  <button onclick="event.stopPropagation(); myDeckChangeCardCount(${deckIndex}, '${safeDeckKeyJs}', -1)" 
-                      style="background: #dc3545; color: white; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-size: clamp(9px, 2.5vw, 14px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
-                      title="${getLang()==='de' ? 'Anzahl verringern' : 'Decrease count'}">-</button>
-                  <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeDeckKeyJs}', '${safeProfileHintJs}')" 
-                      style="background: #ffc107; color: #333; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-size: clamp(8px, 2vw, 11px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
-                      title="Switch rarity/print">★</button>
-                  <button onclick="event.stopPropagation(); myDeckChangeCardCount(${deckIndex}, '${safeDeckKeyJs}', 1)" 
-                      style="background: #28a745; color: white; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-size: clamp(9px, 2.5vw, 14px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;" 
-                      title="${getLang()==='de' ? 'Anzahl erh\u00f6hen' : 'Increase count'}">+</button>
+            <div class="my-deck-card-count">${count}</div>
+            <div class="my-deck-card-actions">
+              <div class="my-deck-card-row">
+                <button onclick="event.stopPropagation(); myDeckChangeCardCount(${deckIndex}, '${safeDeckKeyJs}', -1)"
+                    class="my-deck-card-btn my-deck-card-btn--remove"
+                    title="${getLang()==='de' ? 'Anzahl verringern' : 'Decrease count'}">\u2212</button>
+                <button onclick="event.stopPropagation(); openRaritySwitcher('${safeCardNameJs}', '${safeDeckKeyJs}', '${safeProfileHintJs}')"
+                    class="my-deck-card-btn my-deck-card-btn--rarity"
+                    title="Switch rarity/print">\u2605</button>
+                <button onclick="event.stopPropagation(); myDeckChangeCardCount(${deckIndex}, '${safeDeckKeyJs}', 1)"
+                    class="my-deck-card-btn my-deck-card-btn--add"
+                    title="${getLang()==='de' ? 'Anzahl erh\u00f6hen' : 'Increase count'}">+</button>
               </div>
-              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;">
-                  <button onclick="event.stopPropagation(); openCardmarket('${safeCardmarketUrlJs}', '${safeCardNameJs}')" 
-                      style="background: ${priceBackground}; color: white; height: clamp(14px, 3.5vw, 22px); border: none; border-radius: 2px; cursor: ${eurPrice ? 'pointer' : 'not-allowed'}; font-size: clamp(7px, 1.8vw, 9px); font-weight: bold; padding: 0 1px; display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);" 
+              <div class="my-deck-card-row my-deck-card-row--four">
+                <button onclick="event.stopPropagation(); openCardmarket('${safeCardmarketUrlJs}', '${safeCardNameJs}')"
+                    class="my-deck-card-btn my-deck-card-btn--market${marketDisabled}"
+                    style="background:${priceBackground};"
                     title="${safeCardmarketTitleHtml}">${safePriceDisplayHtml}</button>
-                  <button onclick="event.stopPropagation(); toggleCollection('${safeCardIdJs}')"
-                      style="background: ${isOwned ? '#27ae60' : '#95a5a6'}; color: white; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-weight: bold; font-size: ${ownedCount > 0 ? 'clamp(7px, 1.8vw, 10px)' : 'clamp(9px, 2.5vw, 13px)'}; display: flex; align-items: center; justify-content: center; padding: 0;"
-                      title="Add to collection (${ownedCount}/4)">${ownedCount > 0 ? ownedCount + '/4' : '+'}</button>
-                  <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')"
-                      style="background: ${isWishlisted ? '#E91E63' : '#bdc3c7'}; color: white; border: none; border-radius: 2px; height: clamp(14px, 3.5vw, 22px); cursor: pointer; font-weight: bold; font-size: clamp(8px, 2vw, 12px); display: flex; align-items: center; justify-content: center; padding: 0;"
-                      title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">❤</button>
-                  <button onclick="event.stopPropagation(); myDeckRemoveCard(${deckIndex}, '${safeDeckKeyJs}')"
-                      style="background: #c0392b; color: white; border: none; border-radius: 2px; height: clamp(12px, 3vw, 22px); cursor: pointer; font-size: clamp(8px, 2vw, 11px); font-weight: bold; display: flex; align-items: center; justify-content: center; padding: 0;"
-                      title="${getLang()==='de' ? 'Karte komplett entfernen' : 'Remove card from deck'}">✕</button>
+                <button onclick="event.stopPropagation(); toggleCollection('${safeCardIdJs}')"
+                    class="my-deck-card-btn my-deck-card-btn--coll${collOwnedClass}${collTinyClass}"
+                    title="Add to collection (${ownedCount}/4)">${collLabel}</button>
+                <button onclick="event.stopPropagation(); toggleWishlist('${safeCardIdJs}')"
+                    class="my-deck-card-btn my-deck-card-btn--wish${wishOnClass}"
+                    title="${isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}">\u2764</button>
+                <button onclick="event.stopPropagation(); myDeckRemoveCard(${deckIndex}, '${safeDeckKeyJs}')"
+                    class="my-deck-card-btn my-deck-card-btn--delete"
+                    title="${getLang()==='de' ? 'Karte komplett entfernen' : 'Remove card from deck'}">\u2715</button>
               </div>
             </div>
           </div>
@@ -1935,7 +1938,7 @@ function updateDecksUI() {
               <button onclick="openCompareSavedDeck(${deckIndex})" class="deck-action-btn deck-btn-compare" title="Compare this deck">Compare</button>
             </div>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(55px, 15vw, 120px), 1fr)); gap: clamp(2px, 0.8vw, 10px);">
+          <div class="my-deck-cards-grid">
             ${cardsHtml || '<p style="color: #999; padding: 20px; text-align: center;">No cards found</p>'}
           </div>
           ${_renderTechOptionsSection(deck, deckIndex, deckId)}

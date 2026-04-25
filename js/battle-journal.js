@@ -156,9 +156,12 @@
     }
 
     function getExtendedOpponentChoices() {
+        // Pulled from international Current Meta + Past Meta dropdowns.
+        // City League is intentionally excluded — those archetype names
+        // are German/regional and the user plays the international scene,
+        // so the names from there don't match what they need to log.
         return uniqueSorted([
             ...getValuesFromSelect('currentMetaDeckSelect'),
-            ...getValuesFromSelect('cityLeagueDeckSelect'),
             ...getValuesFromSelect('pastMetaDeckSelect')
         ]);
     }
@@ -174,11 +177,14 @@
     function renderDeckChoices() {
         const els = battleJournalElements();
         const draft = getBattleJournalDraft();
+        // Same rationale as getExtendedOpponentChoices: international
+        // Current Meta + Past Meta names only, plus the user's own
+        // saved decks. City League is dropped to avoid German/local
+        // names polluting the suggestion list.
         const allOwnDeckChoices = uniqueSorted([
             getBattleJournalCurrentOwnDeck(),
             ...getBattleJournalSavedDeckNames(),
             ...getValuesFromSelect('currentMetaDeckSelect'),
-            ...getValuesFromSelect('cityLeagueDeckSelect'),
             ...getValuesFromSelect('pastMetaDeckSelect')
         ]);
         _bjOwnDeckChoices = allOwnDeckChoices;

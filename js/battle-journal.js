@@ -163,6 +163,14 @@
         ]);
     }
 
+    // Cached choice lists for the custom autocomplete dropdowns. The
+    // native <datalist> popup is broken/inline on Android (Samsung
+    // Internet, some Chromium variants) and was rendering suggestions
+    // as plain text on top of the form labels. We render our own
+    // floating popover instead — see bjShowAutocomplete below.
+    let _bjOwnDeckChoices  = [];
+    let _bjOpponentChoices = [];
+
     function renderDeckChoices() {
         const els = battleJournalElements();
         const draft = getBattleJournalDraft();
@@ -173,6 +181,7 @@
             ...getValuesFromSelect('cityLeagueDeckSelect'),
             ...getValuesFromSelect('pastMetaDeckSelect')
         ]);
+        _bjOwnDeckChoices = allOwnDeckChoices;
 
         if (els.ownDeckList) {
             els.ownDeckList.innerHTML = allOwnDeckChoices
@@ -184,6 +193,7 @@
             ...getTopOpponentChoices(),
             ...getExtendedOpponentChoices()
         ]);
+        _bjOpponentChoices = allOpponentChoices;
 
         if (els.opponentList) {
             els.opponentList.innerHTML = allOpponentChoices
@@ -198,6 +208,61 @@
         if (els.opponentValue && !els.opponentValue.value && draft.opponentArchetype) {
             els.opponentValue.value = draft.opponentArchetype;
         }
+    }
+
+    // Custom autocomplete (replaces native datalist for Android compat).
+    // Returns the input + dropdown elements + the choice array for the
+    // requested field.
+    function _bjAutocompleteEls(field) {
+        const isOwn = field === 'ownDeck';
+        return {
+            input: document.getElementById(isOwn ? 'battleJournalOwnDeckValue' : 'battleJournalOpponentValue'),
+            dropdown: document.getElementById(isOwn ? 'battleJournalOwnDeckAutocomplete' : 'battleJournalOpponentAutocomplete'),
+            choices: isOwn ? _bjOwnDeckChoices : _bjOpponentChoices
+        };
+    }
+
+    function bjShowAutocomplete(field) {
+        const { input, dropdown, choices } = _bjAutocompleteEls(field);
+        if (!input || !dropdown) return;
+        if (!Array.isArray(choices) || choices.length === 0) {
+            dropdown.classList.add('d-none');
+            return;
+        }
+        const term = String(input.value || '').trim().toLowerCase();
+        let matches = choices;
+        if (term) {
+            matches = choices.filter(name => name && name.toLowerCase().includes(term));
+        }
+        matches = matches.slice(0, 12);
+        if (matches.length === 0) {
+            dropdown.classList.add('d-none');
+            return;
+        }
+        dropdown.innerHTML = matches.map(name =>
+            `<div class="bj-autocomplete-item" role="option"
+                  onmousedown="event.preventDefault(); bjSelectAutocomplete('${field}', '${escapeJsSingleQuoted(name)}')"
+                  ontouchstart="event.preventDefault(); bjSelectAutocomplete('${field}', '${escapeJsSingleQuoted(name)}')"
+            >${escapeHtml(name)}</div>`
+        ).join('');
+        dropdown.classList.remove('d-none');
+    }
+
+    function bjHideAutocomplete(field) {
+        const { dropdown } = _bjAutocompleteEls(field);
+        if (dropdown) dropdown.classList.add('d-none');
+    }
+
+    function bjSelectAutocomplete(field, name) {
+        const { input } = _bjAutocompleteEls(field);
+        if (input) {
+            input.value = name;
+            // Fire input event so the draft persistence + any other
+            // listeners pick up the value just like a typed entry.
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.blur();
+        }
+        bjHideAutocomplete(field);
     }
 
     // ── Last tournament quick-select ─────────────────────────
@@ -2189,6 +2254,9 @@
     window.setGameChoice = setGameChoice;
     window.onGameNotesInput = onGameNotesInput;
     window.setEditGameChoice = setEditGameChoice;
+    window.bjShowAutocomplete = bjShowAutocomplete;
+    window.bjHideAutocomplete = bjHideAutocomplete;
+    window.bjSelectAutocomplete = bjSelectAutocomplete;
     window.clearBattleJournalDraft = clearBattleJournalDraft;
     window.flushBattleJournalOutbox = flushBattleJournalOutbox;
     window.renderBattleJournalSummary = renderBattleJournalSummary;

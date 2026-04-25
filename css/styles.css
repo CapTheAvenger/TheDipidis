@@ -8398,20 +8398,29 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
 }
 .battle-journal-sheet.is-dark .bj-notes-textarea::placeholder { color: rgba(255,255,255,.4); }
 
-/* Brick badge in history items */
-.bj-brick-badge {
+/* Brick / Mulligan badges in history items — same shape, tinted
+   differently so they're easy to tell apart at a glance. */
+.bj-brick-badge,
+.bj-mulligan-badge {
     display: inline-flex;
     align-items: center;
     gap: 3px;
     font-size: 0.7rem;
     font-weight: 700;
-    background: rgba(230,126,34,.15);
-    color: #c0392b;
-    border: 1px solid rgba(192,57,43,.25);
     border-radius: 5px;
     padding: 1px 6px;
     margin-left: 6px;
     vertical-align: middle;
+}
+.bj-brick-badge {
+    background: rgba(230,126,34,.15);
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,.25);
+}
+.bj-mulligan-badge {
+    background: rgba(52, 152, 219, .15);
+    color: #2980b9;
+    border: 1px solid rgba(41, 128, 185, .35);
 }
 .bj-history-item.is-brick {
     border-left-color: #e67e22 !important;
@@ -8437,7 +8446,8 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
     gap: 6px;
     margin-top: 4px;
 }
-.bj-game-brick-btn {
+.bj-game-brick-btn,
+.bj-game-mulligan-btn {
     flex-shrink: 0;
     width: 36px;
     height: 36px;
@@ -8450,12 +8460,22 @@ html:not([lang="de"]):not([lang="en"]) .lang-de { display: none !important; }
     opacity: 0.45;
     transition: opacity .12s, background .12s, border-color .12s;
 }
-.bj-game-brick-btn:hover { opacity: 0.8; }
+.bj-game-brick-btn:hover,
+.bj-game-mulligan-btn:hover { opacity: 0.8; }
 .bj-game-brick-btn.is-active {
     opacity: 1;
     background: rgba(230,126,34,.18);
     border-color: rgba(192,57,43,.45);
 }
+.bj-game-mulligan-btn.is-active {
+    opacity: 1;
+    background: rgba(52, 152, 219, .18);
+    border-color: rgba(41, 128, 185, .45);
+}
+
+/* Match-level mulligan label tinted blue (vs brick's red) so the
+   two checkboxes are visually distinguishable when stacked. */
+.bj-mulligan-text { color: #2980b9 !important; }
 .bj-game-notes-input {
     flex: 1;
     min-width: 0;

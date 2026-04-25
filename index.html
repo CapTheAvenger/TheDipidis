@@ -3302,6 +3302,13 @@
               <span class="bj-brick-hint">(Verloren durch Pech)</span>
             </label>
 
+            <label class="bj-brick-label bj-edit-brick-label bj-mulligan-label">
+              <input type="checkbox" id="bjEditEntryMulligan" class="bj-brick-checkbox">
+              <span class="bj-brick-icon">🔄</span>
+              <span class="bj-brick-text bj-mulligan-text">Mulligan</span>
+              <span class="bj-brick-hint">(Eröffnungshand neu)</span>
+            </label>
+
             <label class="bj-edit-label" style="margin-top:10px">Notizen</label>
             <textarea id="bjEditEntryNotes" class="bj-notes-textarea bj-edit-notes" rows="2" maxlength="200" placeholder="Stichpunkte..."></textarea>
           </div>
@@ -4189,13 +4196,19 @@
                     <span class="battle-journal-label" data-i18n="bj.gameDetails">Game Details</span>
                 </div>
 
-                <!-- Brick + Notes -->
+                <!-- Brick + Mulligan + Notes -->
                 <div class="bj-extra-fields">
                     <label class="bj-brick-label">
                         <input type="checkbox" id="battleJournalBrick" class="bj-brick-checkbox">
                         <span class="bj-brick-icon">🧱</span>
                         <span class="bj-brick-text" data-i18n="bj.brick">Brick</span>
                         <span class="bj-brick-hint" data-i18n="bj.brickHint">(Verloren durch Pech, nicht durch Matchup)</span>
+                    </label>
+                    <label class="bj-brick-label bj-mulligan-label">
+                        <input type="checkbox" id="battleJournalMulligan" class="bj-brick-checkbox">
+                        <span class="bj-brick-icon">🔄</span>
+                        <span class="bj-brick-text bj-mulligan-text" data-i18n="bj.mulligan">Mulligan</span>
+                        <span class="bj-brick-hint" data-i18n="bj.mulliganHint">(Eröffnungshand musste neu gezogen werden)</span>
                     </label>
                     <textarea id="battleJournalNotes" class="bj-notes-textarea" placeholder="Stichpunkte... (max. 200 Zeichen)" rows="2" maxlength="200"></textarea>
                 </div>

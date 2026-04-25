@@ -1493,11 +1493,44 @@ window.MetaCall = (function () {
     }
   }
 
+  // Inspect the raw storage state so the UI can distinguish between
+  // "never saved anything" and "saved data is unreadable / lost".
+  function _scenarioStorageStatus() {
+    try {
+      const raw = localStorage.getItem(SCENARIOS_STORAGE_KEY);
+      if (raw == null) return { state: 'empty', bytes: 0, count: 0 };
+      const bytes = raw.length;
+      let parsed;
+      try { parsed = JSON.parse(raw); }
+      catch (_) { return { state: 'corrupted', bytes, count: 0 }; }
+      const count = parsed && typeof parsed === 'object' ? Object.keys(parsed).length : 0;
+      return { state: count > 0 ? 'ok' : 'empty', bytes, count };
+    } catch (e) {
+      return { state: 'corrupted', bytes: 0, count: 0, error: String(e && e.message || e) };
+    }
+  }
+
+  // Returns true on success, false on failure. On failure, surfaces an
+  // alert so the user knows their save did not actually persist (older
+  // versions silently swallowed the error, which made data loss invisible).
   function _writeScenarios(obj) {
     try {
-      localStorage.setItem(SCENARIOS_STORAGE_KEY, JSON.stringify(obj || {}));
+      const payload = JSON.stringify(obj || {});
+      localStorage.setItem(SCENARIOS_STORAGE_KEY, payload);
+      // Read-back verification: confirms the value is actually in storage
+      // (catches private-mode browsers that accept setItem but discard).
+      const verify = localStorage.getItem(SCENARIOS_STORAGE_KEY);
+      if (verify !== payload) {
+        const msg = 'read-back mismatch';
+        console.error('[MetaCall] Scenario persist verification failed:', msg);
+        try { alert(t('mc.scenarioSaveError').replace('{error}', msg)); } catch (_) {}
+        return false;
+      }
+      return true;
     } catch (e) {
       console.error('[MetaCall] Failed to persist scenarios:', e);
+      try { alert(t('mc.scenarioSaveError').replace('{error}', String(e && e.message || e))); } catch (_) {}
+      return false;
     }
   }
 
@@ -1547,7 +1580,11 @@ window.MetaCall = (function () {
       if (!confirm(t('mc.scenarioOverwrite').replace('{name}', name))) return;
     }
     existing[name] = _snapshotState();
-    _writeScenarios(existing);
+    if (!_writeScenarios(existing)) {
+      // Persistence failed — do not pretend the save succeeded.
+      refreshScenariosBar();
+      return;
+    }
     _currentScenarioName = name;
     refreshScenariosBar();
   }
@@ -1598,6 +1635,17 @@ window.MetaCall = (function () {
     const hasCurrent = !!_currentScenarioName;
     const saveLabel  = hasCurrent ? t('mc.scenarioUpdate') : t('mc.scenarioSave');
 
+    // Diagnostic hint: when the dropdown has no entries, tell the user
+    // *why* — distinguishes "never saved" from "save data unreadable".
+    let hint = '';
+    if (names.length === 0) {
+      const status = _scenarioStorageStatus();
+      const msg = status.state === 'corrupted'
+        ? t('mc.scenarioStorageCorrupted')
+        : t('mc.scenarioStorageEmpty');
+      hint = `<div class="mc-scenarios-hint">${esc(msg)} (${SCENARIOS_STORAGE_KEY}: ${status.bytes}B)</div>`;
+    }
+
     return `
 <div class="mc-scenarios-bar" id="mc-scenarios-bar">
   <label class="mc-scenarios-label">💾 ${t('mc.scenarios')}</label>
@@ -1611,6 +1659,7 @@ window.MetaCall = (function () {
     ? `<button type="button" class="mc-scenarios-del-btn" onclick="MetaCall._deleteScenario()"
               title="${esc(t('mc.scenarioDelete'))}">🗑</button>`
     : ''}
+  ${hint}
 </div>`;
   }
 

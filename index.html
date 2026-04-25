@@ -4149,14 +4149,26 @@
 
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.ownDeck">Your Deck</span>
-                    <input id="battleJournalOwnDeckValue" type="text" class="battle-journal-input" list="battleJournalOwnDeckList" autocomplete="off" aria-label="Your deck" data-i18n-placeholder="bj.searchDeck" placeholder="Search deck...">
-                    <datalist id="battleJournalOwnDeckList"></datalist>
+                    <div class="bj-autocomplete-wrap">
+                        <input id="battleJournalOwnDeckValue" type="text" class="battle-journal-input" autocomplete="off" aria-label="Your deck" data-i18n-placeholder="bj.searchDeck" placeholder="Search deck..."
+                               oninput="bjShowAutocomplete('ownDeck')"
+                               onfocus="bjShowAutocomplete('ownDeck')"
+                               onblur="setTimeout(()=>bjHideAutocomplete('ownDeck'), 200)">
+                        <div id="battleJournalOwnDeckAutocomplete" class="bj-autocomplete d-none" role="listbox"></div>
+                        <datalist id="battleJournalOwnDeckList"></datalist>
+                    </div>
                 </div>
 
                 <div>
                     <span class="battle-journal-label" data-i18n="bj.opponentDeck">Opponent Archetype</span>
-                    <input id="battleJournalOpponentValue" type="text" class="battle-journal-input" list="battleJournalOpponentList" autocomplete="off" aria-label="Opponent archetype" data-i18n-placeholder="bj.searchOpponent" placeholder="Search opponent...">
-                    <datalist id="battleJournalOpponentList"></datalist>
+                    <div class="bj-autocomplete-wrap">
+                        <input id="battleJournalOpponentValue" type="text" class="battle-journal-input" autocomplete="off" aria-label="Opponent archetype" data-i18n-placeholder="bj.searchOpponent" placeholder="Search opponent..."
+                               oninput="bjShowAutocomplete('opponent')"
+                               onfocus="bjShowAutocomplete('opponent')"
+                               onblur="setTimeout(()=>bjHideAutocomplete('opponent'), 200)">
+                        <div id="battleJournalOpponentAutocomplete" class="bj-autocomplete d-none" role="listbox"></div>
+                        <datalist id="battleJournalOpponentList"></datalist>
+                    </div>
                 </div>
 
                 <div class="battle-journal-grid">

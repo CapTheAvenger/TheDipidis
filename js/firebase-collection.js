@@ -75,9 +75,13 @@ async function addToCollection(cardId) {
       await removeFromWishlist(cardId);
     }
     
-    // Update collection display and stats
-    updateCollectionUI();
-    
+    // Update collection display and stats — go via filterCollection so
+    // any active search/filter the user typed in #collection-search
+    // survives the +/- click. Plain updateCollectionUI() would reset
+    // both filter args to '' and snap the grid back to the full set.
+    if (typeof filterCollection === 'function') filterCollection();
+    else updateCollectionUI();
+
     // Update Meta Binder ownership visuals
     if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
     if (typeof refreshCustomBinderOwnership === 'function') refreshCustomBinderOwnership();
@@ -96,32 +100,34 @@ async function addToCollection(cardId) {
 async function removeFromCollection(cardId) {
   const user = auth.currentUser;
   if (!user) return;
-  
+
   const currentCount = window.userCollectionCounts ? (window.userCollectionCounts.get(cardId) || 0) : 0;
   const newCount = currentCount - 1;
-  
+
   try {
     if (newCount <= 0) {
       await db.collection('users').doc(user.uid).update({
         collection: firebase.firestore.FieldValue.arrayRemove(cardId),
         [`collectionCounts.${cardId}`]: firebase.firestore.FieldValue.delete()
       });
-      
+
       window.userCollection.delete(cardId);
       if (window.userCollectionCounts) window.userCollectionCounts.delete(cardId);
     } else {
       await db.collection('users').doc(user.uid).update({
         [`collectionCounts.${cardId}`]: newCount
       });
-      
+
       if (window.userCollectionCounts) window.userCollectionCounts.set(cardId, newCount);
     }
-    
+
     updateCardUI(cardId);
     showNotification(newCount > 0 ? `Collection: ${newCount}/4 copies` : 'Removed from collection', 'success');
-    
-    // Update collection display and stats
-    updateCollectionUI();
+
+    // Update collection display and stats — preserve any active search
+    // filter the user has in #collection-search (see addToCollection).
+    if (typeof filterCollection === 'function') filterCollection();
+    else updateCollectionUI();
     
     // Update Meta Binder ownership visuals
     if (typeof refreshMetaBinderOwnership === 'function') refreshMetaBinderOwnership();
@@ -161,7 +167,8 @@ async function addToWishlistWithCount(cardId, count) {
     if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
     window.userWishlistCounts.set(cardId, qty);
     showNotification(`Added to wishlist (${qty}x)`, 'success');
-    updateWishlistUI();
+    if (typeof filterWishlist === 'function') filterWishlist();
+    else updateWishlistUI();
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
     }
@@ -200,10 +207,11 @@ async function addToWishlist(cardId) {
     if (!window.userWishlistCounts) window.userWishlistCounts = new Map();
     window.userWishlistCounts.set(cardId, newCount);
     showNotification(`Added to wishlist (${newCount}x)`, 'success');
-    
-    // Update wishlist display
-    updateWishlistUI();
-    
+
+    // Update wishlist display — preserve any active search/set filter.
+    if (typeof filterWishlist === 'function') filterWishlist();
+    else updateWishlistUI();
+
     // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });
@@ -237,10 +245,11 @@ async function removeFromWishlist(cardId) {
       if (window.userWishlistCounts) window.userWishlistCounts.set(cardId, newCount);
     }
     showNotification(newCount > 0 ? `Wishlist: ${newCount}x` : 'Removed from wishlist', 'success');
-    
-    // Update wishlist display
-    updateWishlistUI();
-    
+
+    // Update wishlist display — preserve any active search/set filter.
+    if (typeof filterWishlist === 'function') filterWishlist();
+    else updateWishlistUI();
+
     // Update button states only (no grid rebuild)
     if (typeof renderCardDatabase === 'function' && window.filteredCardsData) {
       renderCardDatabase(window.filteredCardsData, { scrollToTop: false, wishlistUpdate: true });

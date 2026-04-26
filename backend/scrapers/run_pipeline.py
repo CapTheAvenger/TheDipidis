@@ -6,6 +6,7 @@ Run order (dependency-aware):
   Stage 1 – Independent data sources (run in parallel):
     - city_league_archetype_scraper   → city_league_archetypes.csv
     - labs_tournament_scraper         → labs_tournament_decks.csv / labs_tournaments.json
+    - online_tournament_scraper       → online_tournament_top8_decks.csv (Meta Call Predictor 2.0)
 
   Stage 2 – Depends on Stage 1 outputs:
     - city_league_analysis_scraper    → reads city_league_archetypes.csv
@@ -50,6 +51,7 @@ STAGES = {
     1: [
         "city_league_archetype_scraper",
         "labs_tournament_scraper",
+        "online_tournament_scraper",
     ],
     2: [
         "city_league_analysis_scraper",

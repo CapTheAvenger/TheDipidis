@@ -158,6 +158,53 @@
     font-weight: 500;
 }
 
+/* Profile tab groups — visual sections so the long sub-tab list is
+   easier to scan. Each group has a small label above its buttons and
+   a soft divider on the right separating it from the next group. */
+#profile-tab-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 22px;
+    align-items: flex-start;
+}
+.profile-tab-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+    padding-right: 14px;
+}
+.profile-tab-group + .profile-tab-group::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    top: 26px;
+    bottom: 4px;
+    width: 1px;
+    background: rgba(0, 0, 0, 0.08);
+}
+.profile-tab-group-label {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #95a5a6;
+    padding: 0 24px;
+    line-height: 1.2;
+    user-select: none;
+}
+.profile-tab-group-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+}
+/* Group accent colours pulse the label so the user can tell groups
+   apart at a glance without competing with the active-tab underline. */
+.profile-tab-group[data-group="cards"] .profile-tab-group-label { color: #2980b9; }
+.profile-tab-group[data-group="decks"] .profile-tab-group-label { color: #8e44ad; }
+.profile-tab-group[data-group="play"]  .profile-tab-group-label { color: #16a085; }
+.profile-tab-group[data-group="misc"]  .profile-tab-group-label { color: #7f8c8d; }
+
 .profile-tab-content {
     padding: 20px 0;
 }

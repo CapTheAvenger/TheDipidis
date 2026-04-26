@@ -1080,20 +1080,34 @@
 
 /* === STEP 5: PROFILE TABS SCROLL + MY DECKS COMPACT === */
 
-/* Profile sub-tabs: wrap to multiple rows */
+/* Profile sub-tabs: wrap to multiple rows. Each group stacks
+   vertically (label on top, buttons row below) and groups stack as
+   columns that wrap onto new rows when the screen narrows. */
 #profile-tab-nav {
     overflow: visible;
     white-space: normal;
     scrollbar-width: none;
     display: flex;
     flex-wrap: wrap;
-    gap: 0;
+    gap: 12px 16px;
     padding-bottom: 4px;
+    align-items: flex-start;
 }
 #profile-tab-nav::-webkit-scrollbar { display: none; }
 #profile-tab-nav .profile-tab-btn {
     flex-shrink: 0;
     white-space: nowrap;
+}
+#profile-tab-nav .profile-tab-group-label {
+    font-size: 9px;
+    padding: 0 18px;
+}
+#profile-tab-nav .profile-tab-group {
+    padding-right: 10px;
+}
+#profile-tab-nav .profile-tab-group + .profile-tab-group::before {
+    left: -8px;
+    top: 18px;
 }
 
 /* My Decks: compact mobile layout */

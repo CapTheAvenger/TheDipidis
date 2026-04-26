@@ -2161,3 +2161,45 @@
     right: 2px;
   }
 }
+
+/* ===========================================================
+   City League info tables (Improvers / Decliners / Comparison)
+   ===========================================================
+   Now that every archetype row has an inline Pokémon icon, the
+   bold 0.95em archetype text was overflowing into the count
+   column ("Dragapult Dudunsparce" colliding with "115 (+11)" on
+   the user's iPhone screenshot). Shrink the cell text + tighten
+   padding so icon + name + count + change all fit on one line
+   per row.
+   --------------------------------------------------------- */
+@media (max-width: 768px) {
+  .city-league-info-table-cell {
+    padding: 7px 6px;
+    font-size: 0.72em;
+    line-height: 1.25;
+  }
+  .city-league-info-table-cell-archetype {
+    word-break: break-word;
+  }
+  .city-league-info-table-cell-archetype .archetype-jump-link {
+    font-size: 0.95em;
+    font-weight: 700;
+  }
+  .city-league-info-table-count-change {
+    font-size: 0.85em;
+    margin-left: 2px;
+  }
+  .city-league-info-table-placement {
+    font-size: 0.95em;
+  }
+  .city-league-info-table-header {
+    font-size: 0.7em !important;
+    padding: 8px 6px !important;
+  }
+  /* Pokémon icons stay readable but a touch smaller so they
+     don't dominate the now-shrunken cell. */
+  .city-league-info-table-cell-archetype .tcg-pokemon-icon {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}

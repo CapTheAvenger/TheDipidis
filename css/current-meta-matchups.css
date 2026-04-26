@@ -460,13 +460,25 @@
        full comparison table; on the 3-col Best/Worst boxes they
        force the cells wider than the row, truncating WR + Record
        values like "65.8%" → "65...." and "166 - 101 - 6" → "166 - 10...".
-       Use the explicit % widths from .meta-matchup-th-* instead. */
+       Use the explicit % widths from .meta-matchup-th-* instead.
+       Also explicitly drop overflow / text-overflow so the
+       styles.css `.matchups-grid-container table td { ellipsis }`
+       rule (with !important) doesn't truncate "65.8%" → "65.8…". */
     #currentMetaContent .matchups-grid-container .meta-matchup-table th,
     #currentMetaContent .matchups-grid-container .meta-matchup-table td {
         min-width: 0 !important;
-        white-space: normal !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
         padding: 6px 4px !important;
         font-size: 0.78em !important;
+    }
+    /* Opponent column is the only one that benefits from wrapping —
+       long names like "Dragapult Dusknoir" use 2 lines instead of
+       overflowing into the WR column. */
+    #currentMetaContent .matchups-grid-container .meta-matchup-table td:first-child,
+    #currentMetaContent .matchups-grid-container .meta-matchup-table th:first-child {
+        white-space: normal !important;
     }
 
     #currentMetaContent .section > h2 {

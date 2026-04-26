@@ -241,16 +241,28 @@ window.MetaCall = (function () {
         });
       }
 
+      // Compute the empirical mean top-8 conversion across all decks WITH
+      // tournament data — that's the natural baseline for "an average deck".
+      // Replaces the previous hardcoded 0.25 baseline (which assumed a
+      // 32-player tournament with an 8-cut; we scrape ≥100-player events
+      // where the natural baseline is ~8%, so the old divisor systematically
+      // floored even average-performing decks at 0.5× and undervalued them).
+      const convStats = Object.values(_tournamentStats).filter(s => s && s.broughtShare > 0);
+      const meanConv = convStats.length > 0
+        ? convStats.reduce((a, s) => a + (s.top8Conv || 0), 0) / convStats.length
+        : 0.08; // fallback to 8% (8/100 cut) if no data
       _shareList.forEach(d => {
         const k = normalize(d.name);
         const ladderPct = (d.ladderShare / totalLadder) * 100;
         const stats = _tournamentStats[k];
         const broughtPct = stats ? stats.broughtShare : 0;
         const top8Conv   = stats ? stats.top8Conv : 0;
-        // top8 conversion vs the 25% baseline of an 8-cut at a 32-player
-        // tournament — clip 0.5..2.0 so a hot deck can ~double, a stale
-        // deck can ~halve.
-        const convFactor = Math.max(0.5, Math.min(2.0, (top8Conv / 0.25) || 0.5));
+        // Convert factor relative to the EMPIRICAL mean conversion so a
+        // factor of 1.0 means "average deck", >1.0 means over-performing,
+        // <1.0 means under-performing — irrespective of tournament size.
+        const convFactor = meanConv > 0
+          ? Math.max(0.5, Math.min(2.0, top8Conv / meanConv))
+          : 1.0;
         const top8Boost  = broughtPct * convFactor;
         const trendPct   = d.trend || 0;
 
@@ -262,13 +274,30 @@ window.MetaCall = (function () {
                     + 0.30 * broughtPct
                     + 0.20 * ladderPct;
         } else {
-          predicted = 0.40 * ladderPct
-                    + 0.30 * broughtPct
-                    + 0.20 * top8Boost
+          // Brought-share dominates because online-tournament participation
+          // is the strongest day-1 signal for a major. Re-balanced from the
+          // initial 40/30/20/10 toward 25/55/10/10 because the previous
+          // weights systematically under-predicted top decks (Dragapult
+          // shipped 7.85% vs real Phase-1 15%).
+          predicted = 0.25 * ladderPct
+                    + 0.55 * broughtPct
+                    + 0.10 * top8Boost
                     + 0.10 * trendPct;
         }
         // Floor at 0 — trend can drag a fading deck below zero otherwise.
         d.predictedShareRaw = Math.max(0, predicted);
+      });
+
+      // Concentration boost — power-law inflation that mimics the
+      // major-tournament bandwagon effect. Online tournaments admit
+      // casual / rogue lineups that would never see a Regional; players
+      // at majors pile onto the top picks instead. exponent 1.30 widens
+      // the gap between top decks and the long tail by ~30% before
+      // renormalisation. Empirically chosen so Dragapult lifts from
+      // ~8% to the 12-15% range observed at recent majors.
+      const CONCENTRATION_EXP = 1.30;
+      _shareList.forEach(d => {
+        d.predictedShareRaw = Math.pow(d.predictedShareRaw, CONCENTRATION_EXP);
       });
 
       // Renormalise predicted shares to sum 100% so the field-composition
@@ -687,7 +716,7 @@ window.MetaCall = (function () {
   <div class="metacall-panel-title">
     ${t('mc.panelField')}
     <span class="mc-badge">Top ${TOP_N}</span>
-    <span class="mc-badge">${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')}</span>
+    <span class="mc-badge" id="mc-players-badge">${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')}</span>
     <button class="mc-group-toggle-btn" onclick="MetaCall._toggleGroupField()">
       ${_groupByMain ? t('mc.flatView') : t('mc.groupByPokemon')}
     </button>
@@ -1000,7 +1029,18 @@ window.MetaCall = (function () {
     const ladderPct = entry.ladderShare || 0;
     const broughtPct = stats ? stats.broughtShare : 0;
     const top8Conv  = stats ? stats.top8Conv : 0;
-    const convFactor = Math.max(0.5, Math.min(2.0, (top8Conv / 0.25) || 0.5));
+    // Same baseline as the predictor — empirical mean across all decks
+    // with tournament data, so 1.0× = "average deck" regardless of the
+    // tournament size in the source CSV.
+    const allConvs = _tournamentStats
+      ? Object.values(_tournamentStats).filter(s => s && s.broughtShare > 0)
+      : [];
+    const meanConv = allConvs.length > 0
+      ? allConvs.reduce((a, s) => a + (s.top8Conv || 0), 0) / allConvs.length
+      : 0.08;
+    const convFactor = meanConv > 0
+      ? Math.max(0.5, Math.min(2.0, top8Conv / meanConv))
+      : 1.0;
     const trendPct  = entry.trend || 0;
     const trendArrow = trendPct > 0 ? '↑' : (trendPct < 0 ? '↓' : '→');
     const trendSign  = trendPct > 0 ? '+' : '';
@@ -1023,6 +1063,15 @@ window.MetaCall = (function () {
       tmp.innerHTML = renderFieldPanel(field);
       const newTbody = tmp.querySelector('tbody');
       if (newTbody) fieldTbody.innerHTML = newTbody.innerHTML;
+    }
+    // Player-count badge in the field-panel header is rendered alongside
+    // the panel title (not inside the tbody we just swapped). Sync it
+    // surgically so changing "Players" in Tournament Settings reflects
+    // immediately without re-rendering the whole panel and losing
+    // focus on any active personal-share input.
+    const playersBadge = container.querySelector('#mc-players-badge');
+    if (playersBadge) {
+      playersBadge.textContent = `${_settings.totalPlayers.toLocaleString()} ${t('mc.labelPlayers')}`;
     }
     const resultsPanel = container.querySelector('.metacall-results-grid');
     const resultsWrap  = resultsPanel ? resultsPanel.closest('.metacall-panel') : null;

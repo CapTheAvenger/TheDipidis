@@ -897,6 +897,21 @@
             }
 
             // ============================================================
+            // Live deck-name filter — user types, cards hide instantly.
+            // Filter runs against data-deck-name on every .deck-banner-
+            // card, so it works across all four tier sections + the
+            // hero section without needing a re-render.
+            // ============================================================
+            const filterHtml = `
+                <div class="tier-search-row">
+                    <input type="search" class="tier-search-input"
+                           placeholder="🔎 Search archetype…"
+                           aria-label="Filter deck cards"
+                           oninput="filterTierDeckCards(this.value)">
+                    <span class="tier-search-clear" onclick="this.previousElementSibling.value=''; filterTierDeckCards('');" title="Clear filter">✕</span>
+                </div>`;
+
+            // ============================================================
             // Side-by-side Overall vs Top-8 panel — pulls from the new
             // online_tournament_top8_decks.csv (Predictor 2.0 source).
             // Graceful fallback to empty string when the CSV isn't
@@ -1027,7 +1042,7 @@
                     </span>
                 </div>`;
 
-            let html = heroHtml + dataSourceHtml + overallTop8Html + moversHtml + '<div style="margin-bottom: 30px;">';
+            let html = heroHtml + dataSourceHtml + filterHtml + overallTop8Html + moversHtml + '<div style="margin-bottom: 30px;">';
 
             // Render each tier
             ['tier-1', 'tier-2', 'tier-3', 'tier-trending'].forEach(tierKey => {
@@ -1092,7 +1107,7 @@
                     }
 
                     html += `
-                        <div class="deck-banner-card" onclick="navigateToCurrentMetaWithDeck('${archetypeEscaped}')">
+                        <div class="deck-banner-card" data-deck-name="${escapeJsStr(archetypeName).toLowerCase()}" onclick="navigateToCurrentMetaWithDeck('${archetypeEscaped}')">
                             ${imageUrl ? `<div class="deck-banner-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
                             <div class="deck-banner-content">
                                 <div class="deck-banner-name">${archetypeName}</div>
@@ -1295,3 +1310,22 @@
             }
         }
         
+// ============================================================================
+// Live deck-name filter for the Current Meta tier list.
+// Hides .deck-banner-card whose data-deck-name doesn't include the term
+// (whitespace-insensitive). Tier section + hero card all flow through the
+// same selector so one input filters everything visible above.
+//
+// Empty section headers stay rendered — keeps the visual hierarchy intact;
+// users immediately see "your filter has no Tier 1 hits" rather than the
+// section disappearing under their cursor.
+// ============================================================================
+window.filterTierDeckCards = function (term) {
+    const t = String(term || '').toLowerCase().trim().replace(/\s+/g, '');
+    const cards = document.querySelectorAll('.deck-banner-card[data-deck-name]');
+    cards.forEach(card => {
+        const name = (card.getAttribute('data-deck-name') || '').replace(/\s+/g, '');
+        const match = !t || name.includes(t);
+        card.style.display = match ? '' : 'none';
+    });
+};

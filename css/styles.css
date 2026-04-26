@@ -9164,3 +9164,148 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
     .tier-trend-chip { font-size: 0.62rem; padding: 1px 4px; }
     .heatmap-td-n { font-size: 0.55em; }
 }
+
+/* ============================================================
+   Decklist Skeleton (TrainerHill-style) + tier deck-name filter
+   ============================================================
+   Skeleton splits the Card Overview grid into three buckets so
+   users instantly see Staples / Flex / Tech for an archetype.
+   The filter input above the tier sections hides cards whose
+   data-deck-name doesn't include the typed term.
+   --------------------------------------------------------- */
+
+/* Decklist skeleton wrapper + sections */
+.meta-card-skeleton-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    grid-column: 1 / -1;
+}
+.meta-card-skeleton-section {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+.meta-card-skeleton-section.meta-card-skeleton-niche {
+    cursor: pointer;
+}
+.meta-card-skeleton-section.meta-card-skeleton-niche > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+}
+.meta-card-skeleton-section.meta-card-skeleton-niche > summary::-webkit-details-marker {
+    display: none;
+}
+.meta-card-skeleton-section.meta-card-skeleton-niche > summary::before {
+    content: '▶';
+    display: inline-block;
+    font-size: 0.85em;
+    transition: transform 0.18s ease;
+    color: #95a5a6;
+}
+.meta-card-skeleton-section.meta-card-skeleton-niche[open] > summary::before {
+    transform: rotate(90deg);
+}
+.meta-card-skeleton-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f4f7fb;
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.meta-card-skeleton-section.meta-card-skeleton-niche .meta-card-skeleton-title {
+    margin: 0;
+}
+.meta-card-skeleton-hint {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #95a5a6;
+    margin-left: 6px;
+}
+.meta-card-skeleton-count {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    color: #cfdce9;
+    margin-left: auto;
+}
+.meta-card-skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+}
+
+/* Coloured usage bar overlaid on the card image */
+.card-usage-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(0,0,0,0.30);
+    z-index: 5;
+    overflow: hidden;
+}
+.card-usage-fill {
+    height: 100%;
+    transition: width 0.25s ease;
+    box-shadow: 0 0 4px rgba(0,0,0,0.30);
+}
+
+/* Live tier deck-name filter (TrainerHill-style search above the tiers) */
+.tier-search-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+}
+.tier-search-input {
+    flex: 1;
+    padding: 10px 38px 10px 14px;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    color: #f4f7fb;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+}
+.tier-search-input::placeholder { color: #95a5a6; }
+.tier-search-input:focus {
+    border-color: rgba(46,204,113,0.55);
+    background: rgba(255,255,255,0.10);
+}
+.tier-search-clear {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #95a5a6;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border-radius: 50%;
+    user-select: none;
+}
+.tier-search-clear:hover {
+    color: #f4f7fb;
+    background: rgba(255,255,255,0.10);
+}
+
+@media (max-width: 700px) {
+    .meta-card-skeleton-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 6px;
+    }
+    .tier-search-input { font-size: 0.86rem; padding: 8px 32px 8px 12px; }
+}

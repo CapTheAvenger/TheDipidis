@@ -470,15 +470,25 @@
         white-space: nowrap !important;
         overflow: visible !important;
         text-overflow: clip !important;
-        padding: 6px 4px !important;
+        padding: 6px 6px !important;
         font-size: 0.78em !important;
     }
-    /* Opponent column is the only one that benefits from wrapping —
-       long names like "Dragapult Dusknoir" use 2 lines instead of
-       overflowing into the WR column. */
+    /* Per-column alignment: name left (with wrap), WR centred,
+       Record right-anchored so the digits cling to the row edge
+       instead of leaving a chunk of whitespace on the right. */
     #currentMetaContent .matchups-grid-container .meta-matchup-table td:first-child,
     #currentMetaContent .matchups-grid-container .meta-matchup-table th:first-child {
         white-space: normal !important;
+        text-align: left !important;
+    }
+    #currentMetaContent .matchups-grid-container .meta-matchup-table td:nth-child(2),
+    #currentMetaContent .matchups-grid-container .meta-matchup-table th:nth-child(2) {
+        text-align: center !important;
+    }
+    #currentMetaContent .matchups-grid-container .meta-matchup-table td:nth-child(3),
+    #currentMetaContent .matchups-grid-container .meta-matchup-table th:nth-child(3) {
+        text-align: right !important;
+        padding-right: 10px !important;
     }
 
     #currentMetaContent .section > h2 {

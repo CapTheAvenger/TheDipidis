@@ -104,6 +104,21 @@
         "_comment": "from_date: YYYY-MM-DD. tournament_types: regional/international/special/worlds. overwrite: true replaces CSV instead of appending."
     },
 
+    "online_tournament_scraper": {
+        "format_filter": "POR",
+        "min_players": 100,
+        "max_tournaments": 200,
+        "delay_between_requests": 1.5,
+        "request_timeout": 20,
+        "max_retries": 2,
+        "recent_days_high_weight": 7,
+        "recent_weight": 1.0,
+        "older_weight": 0.5,
+        "max_listing_pages": 30,
+        "output_file": "online_tournament_top8_decks.csv",
+        "_comment": "Predictor 2.0 source. format_filter must be the live set code (POR / PFL / etc.). 50/50 time-weighting: recent_days_high_weight days = recent_weight, older = older_weight. Pulls only tournaments >= min_players; output sorted by total_brought_weighted desc."
+    },
+
     "tournament_JH": {
         "max_tournaments": 150,
         "delay_between_tournaments": 0,

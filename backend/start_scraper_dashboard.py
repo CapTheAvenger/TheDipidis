@@ -28,6 +28,7 @@ def print_menu() -> None:
     print("  [8]  City League Archetypes (Trends JP)")
     print("  [9]  Historical Meta Scraper (JH)")
     print("  [10] Labs Major Tournament Scraper")
+    print("  [13] Online Tournament Top-8 Scraper (Predictor 2.0)")
     print("  --- FRONTEND ---")
     print("  [11] Prepare Frontend Data (Merge)")
     print("  [12] Archetype Icons (Pokemon-Bilder Mapping)")
@@ -52,6 +53,7 @@ SCRIPTS = {
     "10": os.path.join("scrapers", "labs_tournament_scraper.py"),
     "11": os.path.join("core", "prepare_card_data.py"),
     "12": os.path.join("scrapers", "archetype_icons_scraper.py"),
+    "13": os.path.join("scrapers", "online_tournament_scraper.py"),
 }
 
 TASK_NAMES = {
@@ -67,11 +69,12 @@ TASK_NAMES = {
     "10": "Labs Major Tournament Scraper",
     "11": "Prepare Frontend Data",
     "12": "Archetype Icons Scraper",
+    "13": "Online Tournament Top-8 Scraper",
 }
 
 BATCH_BASE = ["1", "2", "3", "4", "11"]
-BATCH_META = ["5", "6", "7", "8", "9", "10", "11", "12"]
-BATCH_FULL = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+BATCH_META = ["5", "6", "7", "8", "9", "10", "13", "11", "12"]
+BATCH_FULL = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "13", "11", "12"]
 
 def git_commit_push(description: str) -> None:
     """Bump version, stage all changes, commit, and push to origin main."""

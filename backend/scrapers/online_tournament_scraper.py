@@ -427,7 +427,7 @@ def main() -> int:
                         help="Walk listing + log counts but skip standings + CSV write")
     args = parser.parse_args()
 
-    settings = load_settings("online_tournament_settings.json", DEFAULT_SETTINGS)
+    settings = load_settings("online_tournament_scraper_settings.json", DEFAULT_SETTINGS)
     if args.format:
         settings["format_filter"] = args.format
     if args.days is not None:

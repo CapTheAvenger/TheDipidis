@@ -895,9 +895,140 @@
             if (tierGroups['tier-trending'].length > 20) {
                 tierGroups['tier-trending'] = tierGroups['tier-trending'].slice(0, 20);
             }
-            
-            let html = heroHtml + '<div style="margin-bottom: 30px;">';
-            
+
+            // ============================================================
+            // Side-by-side Overall vs Top-8 panel — pulls from the new
+            // online_tournament_top8_decks.csv (Predictor 2.0 source).
+            // Graceful fallback to empty string when the CSV isn't
+            // available yet (older deploys / fresh clones). Stacks
+            // vertically on mobile via CSS.
+            // ============================================================
+            let overallTop8Html = '';
+            try {
+                const t8resp = await fetch(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
+                if (t8resp.ok) {
+                    const t8rows = await fetchAndParseCSV(`${BASE_PATH}online_tournament_top8_decks.csv?t=${timestamp}`);
+                    const totalBrought = t8rows.reduce((s, r) => s + parseFloat((r.total_brought_weighted || '0').replace(',', '.')), 0) || 1;
+                    const enriched = t8rows.map(r => {
+                        const brought = parseFloat((r.total_brought_weighted || '0').replace(',', '.'));
+                        const top8 = parseFloat((r.top8_count_weighted || '0').replace(',', '.'));
+                        return {
+                            name: r.deck_name,
+                            broughtPct: (brought / totalBrought) * 100,
+                            top8: top8,
+                            top8ConvPct: parseFloat((r.top8_conv_rate || '0').replace(',', '.')) * 100,
+                        };
+                    });
+                    const overallTop = [...enriched].sort((a, b) => b.broughtPct - a.broughtPct).slice(0, 12);
+                    const top8Top    = [...enriched].sort((a, b) => b.top8 - a.top8 || b.top8ConvPct - a.top8ConvPct).slice(0, 12);
+
+                    const renderRow = (d, i, valueLabel, valueText) => `
+                        <tr>
+                            <td class="cm-vt-rank">${i + 1}</td>
+                            <td class="cm-vt-name">${escapeJsStr(d.name)}</td>
+                            <td class="cm-vt-value" title="${valueLabel}">${valueText}</td>
+                        </tr>`;
+                    overallTop8Html = `
+                        <div class="cm-vs-top8-row">
+                            <div class="cm-vs-top8-block">
+                                <h3>🌐 Overall (Brought share)</h3>
+                                <table class="cm-vs-top8-table">
+                                    <thead><tr><th>#</th><th>Deck</th><th>Share</th></tr></thead>
+                                    <tbody>${overallTop.map((d, i) => renderRow(d, i, 'brought share', d.broughtPct.toFixed(1) + '%')).join('')}</tbody>
+                                </table>
+                            </div>
+                            <div class="cm-vs-top8-block">
+                                <h3>🏆 Top-8 (Conversion)</h3>
+                                <table class="cm-vs-top8-table">
+                                    <thead><tr><th>#</th><th>Deck</th><th>Top-8</th></tr></thead>
+                                    <tbody>${top8Top.map((d, i) => renderRow(d, i, 'top-8 conversion', d.top8ConvPct.toFixed(1) + '%')).join('')}</tbody>
+                                </table>
+                            </div>
+                        </div>`;
+                }
+            } catch (_e) { /* CSV missing — Predictor 2.0 not deployed yet */ }
+
+            // ============================================================
+            // Performance Improvers / Decliners (TrainerHill pattern).
+            // Filters decks where share moved >= 0.4 percentage points
+            // since the previous comparison snapshot. Top 5 each side.
+            // ============================================================
+            const movers = normalizedDecks
+                .filter(d => d.old_share > 0 && Math.abs((d.share || 0) - d.old_share) >= 0.4)
+                .map(d => ({
+                    archetype: d.archetype,
+                    share: d.share || 0,
+                    oldShare: d.old_share,
+                    delta: (d.share || 0) - d.old_share,
+                    winrate: d.winrate || 0,
+                }));
+            const improvers = [...movers].sort((a, b) => b.delta - a.delta).slice(0, 5);
+            const decliners = [...movers].sort((a, b) => a.delta - b.delta).slice(0, 5);
+
+            const renderMoverRow = (m, sign) => {
+                const sharePct = m.share.toFixed(1) + '%';
+                const oldPct   = m.oldShare.toFixed(1) + '%';
+                const delta    = (sign === 'up' ? '+' : '') + m.delta.toFixed(1) + '%';
+                const cls      = sign === 'up' ? 'tier-mover-up' : 'tier-mover-down';
+                return `<tr>
+                    <td class="tier-mover-name">${escapeJsStr(m.archetype)}</td>
+                    <td class="tier-mover-share">${sharePct}</td>
+                    <td class="tier-mover-prev">${oldPct}</td>
+                    <td class="tier-mover-delta ${cls}">${delta}</td>
+                </tr>`;
+            };
+
+            let moversHtml = '';
+            if (improvers.length > 0 || decliners.length > 0) {
+                moversHtml = `
+                <div class="tier-movers-row">
+                    ${improvers.length > 0 ? `
+                    <div class="tier-movers-block tier-movers-improvers">
+                        <h3>📈 Performance Improvers</h3>
+                        <table class="tier-movers-table">
+                            <thead><tr>
+                                <th>Deck</th>
+                                <th>Share</th>
+                                <th>Prev</th>
+                                <th>Δ</th>
+                            </tr></thead>
+                            <tbody>${improvers.map(m => renderMoverRow(m, 'up')).join('')}</tbody>
+                        </table>
+                    </div>` : ''}
+                    ${decliners.length > 0 ? `
+                    <div class="tier-movers-block tier-movers-decliners">
+                        <h3>📉 Performance Decliners</h3>
+                        <table class="tier-movers-table">
+                            <thead><tr>
+                                <th>Deck</th>
+                                <th>Share</th>
+                                <th>Prev</th>
+                                <th>Δ</th>
+                            </tr></thead>
+                            <tbody>${decliners.map(m => renderMoverRow(m, 'down')).join('')}</tbody>
+                        </table>
+                    </div>` : ''}
+                </div>`;
+            }
+
+            // ============================================================
+            // Data-Source transparency box. TrainerHill-inspired metadata
+            // strip telling the user how many deck entries / archetypes
+            // back the snapshot — builds confidence in the numbers.
+            // ============================================================
+            const totalDecks   = normalizedDecks.length;
+            const totalEntries = normalizedDecks.reduce((s, d) => s + (d.new_count || 0), 0);
+            const dataSourceHtml = `
+                <div class="tier-data-source">
+                    <span class="tier-data-source-icon">📊</span>
+                    <span class="tier-data-source-text">
+                        Data: <strong>${totalEntries.toLocaleString()}</strong> deck entries across
+                        <strong>${totalDecks}</strong> archetypes (Limitless Online, current snapshot)
+                    </span>
+                </div>`;
+
+            let html = heroHtml + dataSourceHtml + overallTop8Html + moversHtml + '<div style="margin-bottom: 30px;">';
+
             // Render each tier
             ['tier-1', 'tier-2', 'tier-3', 'tier-trending'].forEach(tierKey => {
                 const decks = tierGroups[tierKey];
@@ -948,6 +1079,18 @@
                     
                     const archetypeEscaped = escapeJsStr(archetypeName);
                     
+                    // Inline trend chip — ▲ +0.3% vs prev / ▼ -0.7% / → flat.
+                    // Previous value explicit so users immediately see the
+                    // delta without mental math (TrainerHill pattern).
+                    let inlineTrend = '';
+                    if (oldShare > 0 && Math.abs(shareChange) >= 0.05) {
+                        const arrow = shareChange > 0 ? '▲' : '▼';
+                        const cls   = shareChange > 0 ? 'tier-trend-up' : 'tier-trend-down';
+                        inlineTrend = `<span class="tier-trend-chip ${cls}" title="prev: ${oldShare.toFixed(1)}%">${arrow}&nbsp;${oldShare.toFixed(1)}%</span>`;
+                    } else if (oldShare > 0) {
+                        inlineTrend = `<span class="tier-trend-chip tier-trend-flat" title="prev: ${oldShare.toFixed(1)}%">→&nbsp;${oldShare.toFixed(1)}%</span>`;
+                    }
+
                     html += `
                         <div class="deck-banner-card" onclick="navigateToCurrentMetaWithDeck('${archetypeEscaped}')">
                             ${imageUrl ? `<div class="deck-banner-bg" style="background-image: url('${imageUrl}')"></div>` : ''}
@@ -955,6 +1098,7 @@
                                 <div class="deck-banner-name">${archetypeName}</div>
                                 <div class="deck-banner-stats">
                                     <span class="stat-badge">${share.toFixed(1)}% · ${winRate.toFixed(1)}% WR</span>
+                                    ${inlineTrend}
                                     ${trendHtml}
                                 </div>
                             </div>

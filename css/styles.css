@@ -9006,3 +9006,161 @@ html[data-theme="dark"] .ma-matchup-list-context strong { color: #e2e8f0; }
         padding: 7px 9px !important;     /* taller tap target */
     }
 }
+
+/* ============================================================
+   TrainerHill-inspired tier-meta enhancements
+   ============================================================
+   Trend chip, data-source pill, improvers/decliners pair, and
+   the Overall-vs-Top-8 dual-table panel above the tier sections.
+   --------------------------------------------------------- */
+
+/* Inline trend chip on each tier card — shows previous share with
+   ▲▼→ arrow next to the live numbers (TrainerHill pattern). */
+.tier-trend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 4px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.4;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    cursor: help;
+}
+.tier-trend-chip.tier-trend-up   { color: #2ecc71; border-color: rgba(46,204,113,0.4); }
+.tier-trend-chip.tier-trend-down { color: #e74c3c; border-color: rgba(231,76,60,0.4); }
+.tier-trend-chip.tier-trend-flat { color: #95a5a6; }
+
+/* Data-source transparency pill at the very top of the meta tab. */
+.tier-data-source {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(52,152,219,0.10);
+    border: 1px solid rgba(52,152,219,0.25);
+    border-radius: 999px;
+    font-size: 0.86rem;
+    color: #cfdce9;
+    margin-bottom: 16px;
+    max-width: 100%;
+}
+.tier-data-source-icon { font-size: 1.05em; flex: 0 0 auto; }
+.tier-data-source-text { line-height: 1.4; }
+.tier-data-source-text strong { color: #fff; }
+
+/* Improvers / Decliners — two side-by-side blocks above the tiers. */
+.tier-movers-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.tier-movers-block {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+.tier-movers-block h3 {
+    font-size: 1rem;
+    margin: 0 0 8px;
+    color: #f4f7fb;
+}
+.tier-movers-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.tier-movers-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #95a5a6;
+    padding: 4px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+.tier-movers-table td {
+    padding: 6px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.tier-movers-table tr:last-child td { border-bottom: none; }
+.tier-mover-name  { color: #f4f7fb; font-weight: 600; }
+.tier-mover-share { color: #cfdce9; font-variant-numeric: tabular-nums; }
+.tier-mover-prev  { color: #8ea0b3; font-variant-numeric: tabular-nums; font-size: 0.82rem; }
+.tier-mover-delta { font-weight: 800; font-variant-numeric: tabular-nums; }
+.tier-mover-delta.tier-mover-up   { color: #2ecc71; }
+.tier-mover-delta.tier-mover-down { color: #e74c3c; }
+
+/* Overall vs Top-8 dual-table panel — sits above the tier sections.
+   Stacks vertically on mobile so each table gets full width. */
+.cm-vs-top8-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.cm-vs-top8-block {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+.cm-vs-top8-block h3 {
+    font-size: 1rem;
+    margin: 0 0 8px;
+    color: #f4f7fb;
+}
+.cm-vs-top8-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.cm-vs-top8-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #95a5a6;
+    padding: 4px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+.cm-vs-top8-table td {
+    padding: 6px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.cm-vs-top8-table tr:last-child td { border-bottom: none; }
+.cm-vt-rank  { width: 24px; color: #8ea0b3; font-weight: 700; }
+.cm-vt-name  { color: #f4f7fb; font-weight: 600; }
+.cm-vt-value { color: #cfdce9; font-variant-numeric: tabular-nums; text-align: right; }
+
+/* Sample-size n= label on heatmap cells — small subscript under WR. */
+.heatmap-td-n {
+    display: block;
+    font-size: 0.62em;
+    font-weight: 500;
+    opacity: 0.65;
+    line-height: 1;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+}
+.heatmap-td-n.heatmap-td-n-low {
+    opacity: 0.85;
+    font-style: italic;
+}
+
+@media (max-width: 700px) {
+    .tier-movers-row,
+    .cm-vs-top8-row {
+        grid-template-columns: 1fr;
+    }
+    .tier-data-source { font-size: 0.78rem; padding: 6px 10px; }
+    .tier-trend-chip { font-size: 0.62rem; padding: 1px 4px; }
+    .heatmap-td-n { font-size: 0.55em; }
+}

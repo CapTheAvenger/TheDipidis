@@ -737,14 +737,30 @@
             }
             
             countSpan.textContent = `${cards.length} Cards`;
-            
+
             if (cards.length === 0) {
                 grid.innerHTML = getEmptyStateHtml();
                 return;
             }
-            
-            // Render cards (similar to card overview grid)
-            grid.innerHTML = cards.map(card => {
+
+            // ── Decklist Skeleton bucketing (TrainerHill pattern) ────
+            // Only when ONE specific archetype is selected; for "All"
+            // overview the metaShare semantics differ (cross-archetype
+            // share), so bucketing wouldn't be meaningful.
+            const selectedArchetypeForBucket = source === 'cityLeague'
+                ? (document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all')
+                : (document.getElementById('currentMetaArchetypeSelect')?.value || 'all');
+            const useSkeletonLayout = selectedArchetypeForBucket && selectedArchetypeForBucket !== 'all';
+
+            // Bucket thresholds — Main = de-facto-required, Options = flex,
+            // Niche = situational tech (collapsed by default).
+            const MAIN_MIN  = 85;
+            const NICHE_MAX = 50;
+
+            // Build the markup for ONE card. Hoisted out of cards.map() so
+            // both the flat overview and the bucketed skeleton view share
+            // identical card rendering.
+            const renderCardHtml = (card) => {
                 const imageUrl = getBestCardImage(card) || buildInlineCardPlaceholder(card.card_name);
                 const selectedArchetype = source === 'cityLeague'
                     ? (document.getElementById('cityLeagueArchetypeSelect')?.value || window.currentCityLeagueArchetype || 'all')
@@ -787,11 +803,27 @@
                 const priceBackground = eurPrice ? 'linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%)' : 'linear-gradient(135deg, #777 0%, #999 100%)';
                 const cardmarketUrlEscaped = escapeJsStr(cardmarketUrl || '');
                 
+                // Visual usage marker for skeleton layout — coloured bar on
+                // top of the card image showing %-of-decks with this card.
+                // Only shown when bucketing is active (single archetype).
+                const usagePct = Math.max(0, Math.min(100, card.metaShare || 0));
+                const usageBarHtml = useSkeletonLayout && usagePct > 0
+                    ? `<div class="card-usage-bar" title="${usagePct.toFixed(1)}% of decks play this card">
+                         <div class="card-usage-fill" style="width:${usagePct}%; background:${
+                             usagePct >= MAIN_MIN ? '#27ae60'
+                             : usagePct >= NICHE_MAX ? '#f39c12'
+                             : '#7f8c8d'
+                         };"></div>
+                       </div>`
+                    : '';
+
                 return `
                     <div class="card-item">
                         <div class="card-image-container">
                             <img src="${imageUrl}" alt="${escapeHtml(card.card_name)}" loading="lazy" class="card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
-                            
+
+                            ${usageBarHtml}
+
                             <!-- Green badge: Deck Count (top-left) - only show if > 0 -->
                             ${deckCount > 0 ? `<div class="card-badge card-badge-top-left">${deckCount}</div>` : ''}
                             ${typeof getWishlistBadgeHtml === 'function' ? getWishlistBadgeHtml(card.card_name, setCode, setNumber) : ''}
@@ -803,7 +835,7 @@
                                     <div class="color-grey fs-09">${setCode} ${setNumber}</div>
                                     ${card.metaShare > 0 ? `<div class="color-yellow fw-600 mb-1">${card.metaShare.toFixed(1)}% ${trendIndicator} | Ø ${Math.round(card.avgCount)}x</div>` : ''}
                                 </div>
-                                
+
                                 <!-- Card Actions: Row 1 = ★ + | Row 2 = L P price -->
                                 <div class="card-action-buttons card-action-buttons-col">
                                     <div class="city-league-card-action-row" style="grid-template-columns: 1fr 1fr;">
@@ -820,7 +852,48 @@
                         </div>
                     </div>
                 `;
-            }).join('');
+            };
+
+            if (!useSkeletonLayout) {
+                // Flat overview — preserves the existing layout behaviour.
+                grid.innerHTML = cards.map(renderCardHtml).join('');
+                return;
+            }
+
+            // ── Bucketed skeleton view ────────────────────────────────
+            // Cards are split by metaShare:
+            //   Main    >= 85%  → de-facto-required staples
+            //   Options 50-84% → flex / popular tech slots
+            //   Niche   30-49% → situational, collapsed by default
+            const mainCards    = cards.filter(c => c.metaShare >= MAIN_MIN);
+            const optionsCards = cards.filter(c => c.metaShare >= NICHE_MAX && c.metaShare < MAIN_MIN);
+            const nicheCards   = cards.filter(c => c.metaShare < NICHE_MAX);
+
+            const sectionHtml = (titleHtml, list, opts) => {
+                if (!list.length) return '';
+                const isCollapsed = !!(opts && opts.collapsed);
+                const inner = `<div class="meta-card-skeleton-grid">${list.map(renderCardHtml).join('')}</div>`;
+                if (isCollapsed) {
+                    return `
+                        <details class="meta-card-skeleton-section meta-card-skeleton-niche">
+                            <summary><span class="meta-card-skeleton-title">${titleHtml}</span><span class="meta-card-skeleton-count">${list.length}</span></summary>
+                            ${inner}
+                        </details>`;
+                }
+                return `
+                    <section class="meta-card-skeleton-section">
+                        <h3 class="meta-card-skeleton-title">${titleHtml} <span class="meta-card-skeleton-count">${list.length}</span></h3>
+                        ${inner}
+                    </section>`;
+            };
+
+            grid.innerHTML = `
+                <div class="meta-card-skeleton-wrap">
+                    ${sectionHtml('🟢 Main Cards <span class="meta-card-skeleton-hint">(≥' + MAIN_MIN + '% — staples)</span>', mainCards)}
+                    ${sectionHtml('🟡 Options <span class="meta-card-skeleton-hint">(' + NICHE_MAX + '–' + (MAIN_MIN - 1) + '% — flex slots)</span>', optionsCards)}
+                    ${sectionHtml('⚪ Niche <span class="meta-card-skeleton-hint">(<' + NICHE_MAX + '% — situational)</span>', nicheCards, { collapsed: true })}
+                </div>
+            `;
         }
         
         function setMetaShareFilter(source, threshold) {

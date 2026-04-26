@@ -7249,7 +7249,12 @@ body.battle-journal-open {
 .tab-help-btn::after {
     content: attr(title);
     position: absolute;
-    bottom: -14px;
+    /* Sits ABOVE the icon — earlier `bottom: -14px` placed the label
+       below the button, which intersected the red underline of the
+       parent .tier-section / panel header. Putting it above the icon
+       keeps the word fully clear of the line, with the icon still
+       vertically centred against the title text. */
+    top: -14px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;

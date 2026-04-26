@@ -1153,11 +1153,33 @@
          * A visual overlay with a built-in search input replaces it.
          */
         function initSearchableSelect(selectEl) {
+            if (!selectEl) return;
+            // Defensive: bail out cleanly if the select has been detached
+            // from the DOM (race condition between data reload + tab switch).
+            if (!selectEl.parentElement) {
+                console.warn('[initSearchableSelect] no parentElement on', selectEl.id);
+                return;
+            }
+            try {
+                _initSearchableSelectImpl(selectEl);
+            } catch (err) {
+                console.error('[initSearchableSelect] failed for', selectEl.id, err);
+                // Last-resort fallback: at least hide the native select so
+                // iOS doesn't open its own picker on top of nothing.
+                selectEl.style.cssText += ';display:none !important;';
+            }
+        }
+        function _initSearchableSelectImpl(selectEl) {
             // Remove previous instance if populateCityLeagueDeckSelect is called again
             const prev = selectEl.parentElement.querySelector('.searchable-select');
             if (prev) prev.remove();
 
-            selectEl.style.display = 'none';
+            // Force display:none with !important — a plain `display:none`
+            // on the inline style can be overridden by mobile-responsive
+            // rules that target `#past-meta select.control-input` etc.,
+            // which would let iOS open its native picker on top of the
+            // custom dropdown.
+            selectEl.style.cssText += ';display:none !important;';
 
             // --- Wrapper ---
             const wrapper = document.createElement('div');

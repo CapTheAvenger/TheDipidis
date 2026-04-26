@@ -2700,41 +2700,65 @@
                             </div>
                         </div>
 
-                        <!-- Tabs for Profile sections -->
+                        <!-- Tabs for Profile sections — grouped by purpose -->
                         <div id="profile-tab-nav" class="border-bottom-grey mb-20">
-                            <button class="profile-tab-btn active" onclick="switchProfileTab('collection')">
-                                <span data-i18n="profile.myCollection">My Collection</span> <span id="tab-count-collection" class="fs-80 opacity-75"></span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('decks')">
-                                <span data-i18n="profile.myDecks">My Decks</span> <span id="tab-count-decks" class="fs-80 opacity-75"></span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('wishlist')">
-                                <span data-i18n="profile.wishlist">Wishlist</span> <span id="tab-count-wishlist" class="fs-80 opacity-75"></span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('tradelist')">
-                                <span data-i18n="profile.tradelist">Trade List</span> <span id="tab-count-tradelist" class="fs-80 opacity-75"></span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('settings')">
-                                <span data-i18n="profile.settings">Settings</span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('metabinder')">
-                                <span data-i18n="profile.metaBinder">Meta Binder</span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('custombinder')">
-                                <span>Custom Binder</span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('journal')">
-                                <span data-i18n="bj.profileTitle">Battle Journal</span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('deckcompare')">
-                                <span data-i18n="profile.compareDecklists">Compare Decklists</span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('metacall')">
-                                <span>Meta Call</span>
-                            </button>
-                            <button class="profile-tab-btn" onclick="switchProfileTab('testinggroups')">
-                                <span data-i18n="tg.title">Testing Groups</span>
-                            </button>
+                            <!-- Group 1: Cards & Collection -->
+                            <div class="profile-tab-group" data-group="cards">
+                                <span class="profile-tab-group-label" data-i18n="profile.groupCards">Cards & Collection</span>
+                                <div class="profile-tab-group-buttons">
+                                    <button class="profile-tab-btn active" onclick="switchProfileTab('collection')">
+                                        <span data-i18n="profile.myCollection">My Collection</span> <span id="tab-count-collection" class="fs-80 opacity-75"></span>
+                                    </button>
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('wishlist')">
+                                        <span data-i18n="profile.wishlist">Wishlist</span> <span id="tab-count-wishlist" class="fs-80 opacity-75"></span>
+                                    </button>
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('tradelist')">
+                                        <span data-i18n="profile.tradelist">Trade List</span> <span id="tab-count-tradelist" class="fs-80 opacity-75"></span>
+                                    </button>
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('metabinder')">
+                                        <span data-i18n="profile.metaBinder">Meta Binder</span>
+                                    </button>
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('custombinder')">
+                                        <span>Custom Binder</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Group 2: Decks -->
+                            <div class="profile-tab-group" data-group="decks">
+                                <span class="profile-tab-group-label" data-i18n="profile.groupDecks">Decks</span>
+                                <div class="profile-tab-group-buttons">
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('decks')">
+                                        <span data-i18n="profile.myDecks">My Decks</span> <span id="tab-count-decks" class="fs-80 opacity-75"></span>
+                                    </button>
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('deckcompare')">
+                                        <span data-i18n="profile.compareDecklists">Compare Decklists</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Group 3: Play & Analysis -->
+                            <div class="profile-tab-group" data-group="play">
+                                <span class="profile-tab-group-label" data-i18n="profile.groupPlay">Play & Analysis</span>
+                                <div class="profile-tab-group-buttons">
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('journal')">
+                                        <span data-i18n="bj.profileTitle">Battle Journal</span>
+                                    </button>
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('testinggroups')">
+                                        <span data-i18n="tg.title">Testing Groups</span>
+                                    </button>
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('metacall')">
+                                        <span>Meta Call</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Group 4: Settings -->
+                            <div class="profile-tab-group" data-group="misc">
+                                <span class="profile-tab-group-label" data-i18n="profile.groupMisc">Account</span>
+                                <div class="profile-tab-group-buttons">
+                                    <button class="profile-tab-btn" onclick="switchProfileTab('settings')">
+                                        <span data-i18n="profile.settings">Settings</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Collection Tab -->

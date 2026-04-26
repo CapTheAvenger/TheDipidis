@@ -1236,3 +1236,109 @@
   .mc-deck-badge { font-size: 0.66rem; gap: 3px; }
   .mc-badge-chip { padding: 1px 4px; }
 }
+
+/* ============================================================
+   New chips — Testing Group + Battle Journal personal data
+   ============================================================ */
+.mc-badge-chip.mc-badge-tg {
+    background: rgba(155,89,182,0.14);
+    color: #6c3483;
+    border: 1px solid rgba(155,89,182,0.30);
+}
+.mc-badge-chip.mc-badge-tg:hover {
+    background: rgba(155,89,182,0.22);
+}
+.mc-badge-chip.mc-badge-journal {
+    background: rgba(241,196,15,0.16);
+    color: #7e5c00;
+    border: 1px solid rgba(241,196,15,0.34);
+}
+.mc-badge-chip.mc-badge-journal:hover {
+    background: rgba(241,196,15,0.26);
+}
+
+/* ============================================================
+   Recommendations panel — Top decks for predicted field
+   ============================================================ */
+.mc-rec-panel {
+    background: linear-gradient(135deg, rgba(46,204,113,0.04), rgba(52,152,219,0.04));
+    border-color: rgba(46,204,113,0.22);
+}
+.mc-rec-hint {
+    font-size: 0.82rem;
+    color: #6b7c93;
+    margin: -8px 0 14px;
+    font-style: italic;
+}
+.mc-rec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+.mc-rec-table th {
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 2px solid #e0e6ed;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7c93;
+    white-space: nowrap;
+}
+.mc-rec-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f3f7;
+    vertical-align: middle;
+}
+.mc-rec-table tr:last-child td { border-bottom: none; }
+.mc-rec-table tr:hover td { background: rgba(46,204,113,0.06); }
+.mc-rec-rank {
+    width: 32px;
+    font-weight: 800;
+    color: #95a5a6;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+.mc-rec-table tr:nth-child(1) .mc-rec-rank { color: #f1c40f; font-size: 1.05em; }
+.mc-rec-table tr:nth-child(2) .mc-rec-rank { color: #95a5a6; }
+.mc-rec-table tr:nth-child(3) .mc-rec-rank { color: #cd7f32; }
+.mc-rec-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #1a2533;
+}
+.mc-rec-day2 {
+    font-variant-numeric: tabular-nums;
+    color: #27ae60;
+}
+.mc-rec-wr,
+.mc-rec-wins {
+    font-variant-numeric: tabular-nums;
+    color: #6b7c93;
+    font-size: 0.88em;
+}
+.mc-rec-mine td {
+    background: rgba(155,89,182,0.06);
+}
+.mc-rec-mine-tag {
+    margin-left: 8px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(155,89,182,0.18);
+    color: #6c3483;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+@media (max-width: 700px) {
+    .mc-rec-panel { padding: 14px 14px; }
+    .mc-rec-table { font-size: 0.84rem; }
+    .mc-rec-table th { font-size: 0.66rem; padding: 4px 6px; }
+    .mc-rec-table td { padding: 6px 6px; }
+    .mc-rec-wins { display: none; }
+}

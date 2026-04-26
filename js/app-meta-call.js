@@ -341,7 +341,28 @@ window.MetaCall = (function () {
     }
   }
 
-  // ── Matchup Lookup with Journal Blending ───────────────────
+  // ── Matchup Lookup ─────────────────────────────────────────
+  // Base matchup — pure online-tournament matchup data, no Testing
+  // Group / Battle Journal blending. Used by the recommendations
+  // engine (where personal overrides only apply to the USER'S deck,
+  // not to candidate alternatives).
+  function getBaseMatchup(deckA, deckB) {
+    if (deckB === '_junk') {
+      const wr = _settings.junkWinRate / 100;
+      return { pWin: wr, pTie: 0.02, pLoss: Math.max(0, 1 - wr - 0.02) };
+    }
+    const a = normalize(deckA);
+    const b = normalize(deckB);
+    const hit = _matchupMap?.[a]?.[b];
+    const rev = !hit ? _matchupMap?.[b]?.[a] : null;
+    return hit ? hit
+      : rev ? { pWin: rev.pLoss, pTie: rev.pTie, pLoss: rev.pWin }
+      : { pWin: 0.50, pTie: 0.02, pLoss: 0.48 };
+  }
+
+  // Personal-blended matchup — folds in Testing Group win-rate overrides
+  // and Battle Journal records on top of getBaseMatchup. Only meaningful
+  // when `myDeck` is the user's actual deck of choice.
   function getMatchup(myDeck, opponent) {
     if (opponent === '_junk') {
       const wr = _settings.junkWinRate / 100;
@@ -507,8 +528,13 @@ window.MetaCall = (function () {
   }
 
   // ── Markov Chain – Day 2 Probability ──────────────────────
-  function calcDay2(field) {
-    const { rounds, day2Points, myDeck } = _settings;
+  function calcDay2(field, deckOverride) {
+    const { rounds, day2Points } = _settings;
+    // Two modes: blended (with TG / Journal) for the user's own deck,
+    // or base-only when computing recommendations for alternative decks
+    // where personal overrides don't apply.
+    const myDeck     = deckOverride || _settings.myDeck;
+    const matchupFn  = deckOverride ? getBaseMatchup : getMatchup;
     const maxPts = rounds * 3;
     let dp = new Float64Array(maxPts + 1);
     dp[0] = 1.0;
@@ -521,10 +547,15 @@ window.MetaCall = (function () {
         for (const deck of field) {
           const share = deck.finalShare / 100;
           if (share <= 1e-9) continue;
-          const { pWin, pTie, pLoss } = getMatchup(myDeck, deck.name);
-          if (pts + 3 <= maxPts) newDp[pts + 3] += p * share * pWin;
-          if (pts + 1 <= maxPts) newDp[pts + 1] += p * share * pTie;
-          newDp[pts]            += p * share * pLoss;
+          // Skip the candidate matching itself in the field (mirror
+          // matches contribute neutral but we treat them as ties).
+          const isMirror = normalize(deck.name) === normalize(myDeck);
+          const m = isMirror
+            ? { pWin: 0.45, pTie: 0.10, pLoss: 0.45 } // mirror approx
+            : matchupFn(myDeck, deck.name);
+          if (pts + 3 <= maxPts) newDp[pts + 3] += p * share * m.pWin;
+          if (pts + 1 <= maxPts) newDp[pts + 1] += p * share * m.pTie;
+          newDp[pts]            += p * share * m.pLoss;
         }
       }
       dp = newDp;
@@ -536,12 +567,40 @@ window.MetaCall = (function () {
     let expWin = 0, expTie = 0, expLoss = 0;
     for (const deck of field) {
       const share = deck.finalShare / 100;
-      const { pWin, pTie, pLoss } = getMatchup(myDeck, deck.name);
-      expWin  += rounds * share * pWin;
-      expTie  += rounds * share * pTie;
-      expLoss += rounds * share * pLoss;
+      const isMirror = normalize(deck.name) === normalize(myDeck);
+      const m = isMirror
+        ? { pWin: 0.45, pTie: 0.10, pLoss: 0.45 }
+        : matchupFn(myDeck, deck.name);
+      expWin  += rounds * share * m.pWin;
+      expTie  += rounds * share * m.pTie;
+      expLoss += rounds * share * m.pLoss;
     }
     return { day2Prob, dp, expWin, expTie, expLoss };
+  }
+
+  // ── Recommendations engine ─────────────────────────────────
+  // For each non-junk, non-custom deck in the field, simulates that
+  // deck playing through the predicted field (using base matchups,
+  // not personal blend) and returns the top N by Day-2 probability.
+  // The "winner" of the predicted meta — which deck a player should
+  // bring to maximise their tournament-win chance.
+  function calcRecommendations(field, topN = 5) {
+    if (!_shareList || !field || field.length === 0) return [];
+    const candidates = field
+      .filter(d => d.name && d.name !== '_junk' && !d.isCustom)
+      .map(d => d.name);
+    const results = candidates.map(name => {
+      const r = calcDay2(field, name);
+      return {
+        name,
+        day2Prob: r.day2Prob,
+        expWin: r.expWin,
+        avgWR: (r.expWin / _settings.rounds) * 100,
+      };
+    });
+    return results
+      .sort((a, b) => (b.day2Prob - a.day2Prob) || (b.avgWR - a.avgWR))
+      .slice(0, topN);
   }
 
   // Poisson P(k; λ)
@@ -995,6 +1054,52 @@ window.MetaCall = (function () {
   ${renderCustomDecksPanel()}
   ${renderMyDeckPanel()}
   ${renderResultsPanel(field)}
+  ${renderRecommendationsPanel(field)}
+</div>`;
+  }
+
+  // Recommendations panel — top N decks ranked by Day-2 probability
+  // against the predicted field. Uses base matchups (no personal
+  // overrides) since recommendations are about which deck to PICK,
+  // not how a specific deck performs. The user's currently-selected
+  // deck gets a small "you're playing this" badge so they see where
+  // their pick ranks vs the alternatives.
+  function renderRecommendationsPanel(field) {
+    const recs = calcRecommendations(field, 5);
+    if (!recs.length) return '';
+    const myDeckNorm = normalize(_settings.myDeck || '');
+    const rows = recs.map((r, i) => {
+      const isMine = myDeckNorm && normalize(r.name) === myDeckNorm;
+      const icon = (typeof window.ArchetypeIcons !== 'undefined')
+        ? window.ArchetypeIcons.getIconHtml(r.name, { size: 'sm', layout: 'inline' })
+        : '';
+      const day2Pct = (r.day2Prob * 100).toFixed(1).replace('.', ',');
+      const wrPct   = r.avgWR.toFixed(1).replace('.', ',');
+      return `<tr class="${isMine ? 'mc-rec-mine' : ''}">
+        <td class="mc-rec-rank">${i + 1}</td>
+        <td class="mc-rec-name">${icon}<span>${esc(r.name)}</span>${isMine ? `<span class="mc-rec-mine-tag">${esc(t('mc.recYourDeck'))}</span>` : ''}</td>
+        <td class="mc-rec-day2"><strong>${day2Pct}%</strong></td>
+        <td class="mc-rec-wr">${wrPct}%</td>
+        <td class="mc-rec-wins">∅ ${r.expWin.toFixed(1)}</td>
+      </tr>`;
+    }).join('');
+    return `
+<div class="metacall-panel mc-rec-panel">
+  <div class="metacall-panel-title">
+    🏆 ${t('mc.panelRecommendations')}
+    <span class="mc-badge">${t('mc.recBadgeTopN').replace('{n}', recs.length)}</span>
+  </div>
+  <p class="mc-rec-hint">${t('mc.recHint')}</p>
+  <table class="mc-rec-table">
+    <thead><tr>
+      <th>#</th>
+      <th>${t('mc.recDeck')}</th>
+      <th>${t('mc.recDay2')}</th>
+      <th>${t('mc.recAvgWr')}</th>
+      <th>${t('mc.recExpWins')}</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
 </div>`;
   }
 
@@ -1045,11 +1150,27 @@ window.MetaCall = (function () {
     const trendArrow = trendPct > 0 ? '↑' : (trendPct < 0 ? '↓' : '→');
     const trendSign  = trendPct > 0 ? '+' : '';
     const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
+    // Personal data chips — only render when the user has a deck
+    // selected AND the data exists for this opponent. The values come
+    // from Testing Group win-rate overrides (manual / synced) and the
+    // Battle Journal record. Both are MY DECK's perspective vs the
+    // opponent shown in this row.
+    const tgVal = _findByNormalized(_winRateOverrides, deckName);
+    const tgChip = (tgVal !== undefined && tgVal !== '' && !isNaN(parseFloat(tgVal)))
+      ? `<span class="mc-badge-chip mc-badge-tg" title="${esc(t('mc.badgeTg'))}">🎯&nbsp;${fmt(parseFloat(tgVal), 0)}%</span>`
+      : '';
+    const jStats = _findByNormalized(_journalStats, deckName);
+    const journalChip = (jStats && jStats.total > 0)
+      ? `<span class="mc-badge-chip mc-badge-journal" title="${esc(t('mc.badgeJournal'))}">📓&nbsp;${jStats.wins}-${jStats.losses}-${jStats.ties} (${jStats.winRate}%)</span>`
+      : '';
+
     return `<span class="mc-deck-badge">
       <span class="mc-badge-chip" title="${esc(t('mc.badgeLadder'))}">🌐&nbsp;${fmt(ladderPct, 1)}%</span>
       <span class="mc-badge-chip" title="${esc(t('mc.badgeTournament'))}">🏆&nbsp;${fmt(broughtPct, 1)}%</span>
       <span class="mc-badge-chip" title="${esc(t('mc.badgeTop8Conv'))}">⬆️&nbsp;${fmt(convFactor, 1)}× T8</span>
       <span class="mc-badge-chip" title="${esc(t('mc.badgeTrend'))}">${trendArrow}&nbsp;${trendSign}${fmt(trendPct, 1)}%</span>
+      ${tgChip}
+      ${journalChip}
     </span>`;
   }
 
@@ -1080,6 +1201,16 @@ window.MetaCall = (function () {
       tmp.innerHTML = renderResultsPanel(field);
       const newPanel = tmp.querySelector('.metacall-panel');
       if (newPanel) resultsWrap.innerHTML = newPanel.innerHTML;
+    }
+    // Recommendations panel — re-runs calcRecommendations with the
+    // updated field. Day-2 numbers shift whenever the field shifts so
+    // this always keeps the recommendation table in sync.
+    const recPanel = container.querySelector('.mc-rec-panel');
+    if (recPanel) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = renderRecommendationsPanel(field);
+      const newPanel = tmp.querySelector('.mc-rec-panel');
+      if (newPanel) recPanel.innerHTML = newPanel.innerHTML;
     }
   }
 

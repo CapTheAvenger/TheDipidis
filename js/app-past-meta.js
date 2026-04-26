@@ -237,9 +237,37 @@
             pastMetaDecks = [];
             await _loadPastMetaChunksIfNeeded(defaultFormat, pastMetaSetOrderMap, tournamentsByDate);
 
+            console.log(`[Past Meta] After chunk load: ${pastMetaDecks.length} decks for format "${defaultFormat}"`);
+
             if (pastMetaDecks.length === 0) {
-                showToast('No past tournament data found', 'error');
-                console.error('[Past Meta] No decks found in tournament CSV');
+                showToast('No past tournament data found for ' + defaultFormat, 'error');
+                console.error('[Past Meta] No decks found in tournament CSV — chunk may have failed to parse');
+                // Surface the failure in the UI so the user isn't staring
+                // at an empty "Select a Deck" dropdown wondering what's
+                // wrong. Also still wires up event listeners so they can
+                // try a different format manually.
+                const deckGrid = document.getElementById('pastMetaDeckGrid');
+                if (deckGrid) {
+                    deckGrid.innerHTML = `<div style="padding:24px;text-align:center;color:#c0392b;font-weight:600;">
+                        Konnten keine Decks für ${defaultFormat} laden.<br>
+                        <span style="font-weight:400;color:#666;font-size:0.9em;">
+                            Versuche oben ein anderes Format auszuwählen oder die Seite neu zu laden.
+                        </span>
+                    </div>`;
+                }
+                // Still register format change so user can switch
+                formatSelect.addEventListener('change', async () => {
+                    const format = formatSelect.value;
+                    await _loadPastMetaChunksIfNeeded(format, window._pastMetaSetOrderMap, window._pastMetaTournamentsByDate);
+                    updatePastMetaTournamentFilter();
+                    updatePastMetaDeckList();
+                });
+                // Wire up the deck select even with no data so iOS doesn't
+                // pop its native picker on top of the empty placeholder.
+                const deckSelectEarly = document.getElementById('pastMetaDeckSelect');
+                if (deckSelectEarly && typeof initSearchableSelect === 'function') {
+                    initSearchableSelect(deckSelectEarly);
+                }
                 return;
             }
             

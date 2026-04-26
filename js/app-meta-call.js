@@ -6,7 +6,13 @@ window.MetaCall = (function () {
 
   // ── Internal State ─────────────────────────────────────────
   let _matchupMap = null;  // normalize(deck) -> normalize(opp) -> {pWin, pTie, pLoss}
-  let _shareList  = null;  // [{name, onlineShare}] sorted desc
+  let _shareList  = null;  // [{name, onlineShare}] sorted desc — onlineShare is the
+                            // PREDICTED share once Predictor 2.0 has run; the raw ladder
+                            // share is kept on each entry as `ladderShare` for the badge.
+  let _trendMap   = null;  // normalize(deck) -> share_change (%-points week-over-week)
+  let _tournamentStats = null; // normalize(deck) -> { broughtShare, top8Conv, top16Conv, ... }
+  let _predictorMode  = 'A'; // 'A' = online-only fallback, 'B' = labs-major data available
+  let _labsMajorRows  = 0;   // count of labs CSV rows that informed the mode decision
 
   let _settings = {
     totalPlayers  : 1300,
@@ -133,14 +139,146 @@ window.MetaCall = (function () {
       if (!shareResp.ok) throw new Error('share CSV not found');
       const shareRows = parseCSV(await shareResp.text(), ';');
 
+      // Build the trend map (week-over-week share delta in pp) — used
+      // by Predictor 2.0 as the 10% trend term.
+      _trendMap = {};
+      shareRows.forEach(r => {
+        if (!r.deck_name) return;
+        _trendMap[normalize(r.deck_name)] = parseEU(r.share_change || '0');
+      });
+
+      // Provisional list — gets refined by Predictor 2.0 below once
+      // tournament + labs data is loaded. The predicted share replaces
+      // `onlineShare` so the rest of the field-composition code stays
+      // unchanged; the raw ladder share is kept on `ladderShare` for
+      // the per-deck badge.
       _shareList = shareRows
         .filter(r => r.deck_name && (r.new_share || r.old_share))
         .map(r => ({
           name        : r.deck_name,
           onlineShare : parseEU(r.new_share || r.old_share || '0'),
+          ladderShare : parseEU(r.new_share || r.old_share || '0'),
+          trend       : parseEU(r.share_change || '0'),
         }))
         .filter(d => d.onlineShare > 0)
         .sort((a, b) => b.onlineShare - a.onlineShare);
+
+      // Online tournament top-8 stats (Stage-1 scraper output). Optional —
+      // missing file means we run pure-ladder. Predictor 2.0 will then
+      // simply fall back to the ladder share.
+      _tournamentStats = {};
+      try {
+        const tournResp = await fetch('data/online_tournament_top8_decks.csv?t=' + Date.now());
+        if (tournResp.ok) {
+          const tournRows = parseCSV(await tournResp.text(), ';');
+          const broughtSum = tournRows.reduce(
+            (s, r) => s + parseEU(r.total_brought_weighted || '0'), 0
+          ) || 1;
+          tournRows.forEach(r => {
+            if (!r.deck_name) return;
+            const brought = parseEU(r.total_brought_weighted || '0');
+            _tournamentStats[normalize(r.deck_name)] = {
+              broughtShare: (brought / broughtSum) * 100,
+              top8Conv    : parseEU(r.top8_conv_rate  || '0'),  // 0..1
+              top16Conv   : parseEU(r.top16_conv_rate || '0'),
+              top8Count   : parseEU(r.top8_count_weighted  || '0'),
+              tournamentsSeen: parseInt(r.tournaments_seen || '0', 10),
+              avgWrTop8   : parseEU(r.avg_winrate_in_top8 || '0'),
+              sourceFormat: r.source_format || '',
+            };
+          });
+        }
+      } catch (_e) { /* optional source — tolerate missing */ }
+
+      // Labs major-tournament data (Stage-1 scraper output). Optional —
+      // presence flips Predictor 2.0 from Mode A to Mode B.
+      _labsMajorRows = 0;
+      let labsRowsByDeck = {};
+      try {
+        const labsResp = await fetch('data/labs_tournament_decks.csv?t=' + Date.now());
+        if (labsResp.ok) {
+          const labsRows = parseCSV(await labsResp.text(), ';');
+          // Aggregate share_pct per deck across the full labs CSV (could
+          // refine later to filter by recent tournaments only).
+          labsRows.forEach(r => {
+            if (!r.deck_name) return;
+            const k = normalize(r.deck_name);
+            const share = parseEU(r.share_pct || '0');
+            if (!labsRowsByDeck[k]) labsRowsByDeck[k] = { name: r.deck_name, share: 0, n: 0 };
+            labsRowsByDeck[k].share += share;
+            labsRowsByDeck[k].n += 1;
+          });
+          _labsMajorRows = labsRows.length;
+        }
+      } catch (_e) { /* optional source */ }
+
+      _predictorMode = _labsMajorRows > 0 ? 'B' : 'A';
+
+      // ── Predictor 2.0 — compute predicted share per deck ──
+      // Mode A (online-only):
+      //   predicted = 0.40 × ladder
+      //             + 0.30 × online_tournament_brought
+      //             + 0.20 × top8_conv_boost
+      //             + 0.10 × trend
+      // Mode B (with labs majors):
+      //   predicted = 0.50 × labs_recent_share
+      //             + 0.30 × online_tournament_brought
+      //             + 0.20 × ladder
+      //   (labs CSV has no placement column → folding the user-spec'd
+      //    "20% labs top8 + 20% online top8" into the 30% online_top8
+      //    + 20% ladder weights since we can't derive labs-top8 here.)
+      const totalLadder = _shareList.reduce((s, d) => s + d.onlineShare, 0) || 1;
+      const labsTotalShare = Object.values(labsRowsByDeck).reduce((s, d) => s + d.share, 0) || 1;
+      // Make sure every deck in labsRowsByDeck appears in _shareList so
+      // its share isn't dropped silently (treat unknowns with no ladder
+      // entry as if ladder == 0). For Mode A we don't need this.
+      if (_predictorMode === 'B') {
+        Object.values(labsRowsByDeck).forEach(d => {
+          const k = normalize(d.name);
+          if (!_shareList.find(x => normalize(x.name) === k)) {
+            _shareList.push({ name: d.name, onlineShare: 0, ladderShare: 0, trend: 0 });
+          }
+        });
+      }
+
+      _shareList.forEach(d => {
+        const k = normalize(d.name);
+        const ladderPct = (d.ladderShare / totalLadder) * 100;
+        const stats = _tournamentStats[k];
+        const broughtPct = stats ? stats.broughtShare : 0;
+        const top8Conv   = stats ? stats.top8Conv : 0;
+        // top8 conversion vs the 25% baseline of an 8-cut at a 32-player
+        // tournament — clip 0.5..2.0 so a hot deck can ~double, a stale
+        // deck can ~halve.
+        const convFactor = Math.max(0.5, Math.min(2.0, (top8Conv / 0.25) || 0.5));
+        const top8Boost  = broughtPct * convFactor;
+        const trendPct   = d.trend || 0;
+
+        let predicted;
+        if (_predictorMode === 'B') {
+          const labsRow = labsRowsByDeck[k];
+          const labsPct = labsRow ? (labsRow.share / labsTotalShare) * 100 : 0;
+          predicted = 0.50 * labsPct
+                    + 0.30 * broughtPct
+                    + 0.20 * ladderPct;
+        } else {
+          predicted = 0.40 * ladderPct
+                    + 0.30 * broughtPct
+                    + 0.20 * top8Boost
+                    + 0.10 * trendPct;
+        }
+        // Floor at 0 — trend can drag a fading deck below zero otherwise.
+        d.predictedShareRaw = Math.max(0, predicted);
+      });
+
+      // Renormalise predicted shares to sum 100% so the field-composition
+      // budget logic works unchanged.
+      const predictedSum = _shareList.reduce((s, d) => s + (d.predictedShareRaw || 0), 0) || 1;
+      _shareList.forEach(d => {
+        d.predictedShare = (d.predictedShareRaw / predictedSum) * 100;
+        d.onlineShare    = d.predictedShare; // legacy field name used by buildField()
+      });
+      _shareList.sort((a, b) => b.predictedShare - a.predictedShare);
 
       const matchResp = await fetch('data/limitless_online_decks_matchups.csv?t=' + Date.now());
       if (!matchResp.ok) throw new Error('matchup CSV not found');
@@ -468,8 +606,9 @@ window.MetaCall = (function () {
                 oninput="MetaCall._onPersonalShare('${escJs(deck.name)}', this.value)"
                 style="width:68px;padding:3px 5px;border:1px solid #d0dae5;border-radius:5px;font-size:0.84rem;text-align:center;">`;
     const onlineDisplay = isCustom ? '—' : deck.onlineShare.toFixed(2) + '%';
+    const badge = (isJunk || isCustom) ? '' : _renderDeckBadge(deck.name);
     return `<tr class="${rowClass}">
-      <td><span class="mc-deck-name">${label}</span></td>
+      <td><span class="mc-deck-name">${label}</span>${badge}</td>
       <td><span class="mc-share-online">${onlineDisplay}</span></td>
       <td>${personalCell}</td>
       <td><span class="mc-share-final${hasPersonal ? ' has-personal' : ''}">${deck.finalShare.toFixed(2)}%</span></td>
@@ -820,6 +959,7 @@ window.MetaCall = (function () {
     <h2>${t('mc.title')}</h2>
     <p class="color-grey">${t('mc.subtitle')}</p>
   </div>
+  ${renderPredictorBanner()}
   ${renderScenariosBar()}
   ${renderSettingsPanel()}
   ${renderFieldPanel(field)}
@@ -827,6 +967,50 @@ window.MetaCall = (function () {
   ${renderMyDeckPanel()}
   ${renderResultsPanel(field)}
 </div>`;
+  }
+
+  // Banner above the field panel that explains where the prediction
+  // is sourced from. Mode A (online-only / fresh format) uses a warm
+  // amber tone; Mode B (online + labs majors) uses a confident green.
+  function renderPredictorBanner() {
+    if (_predictorMode === 'B') {
+      const tournNum = _labsMajorRows;
+      return `<div class="mc-predictor-banner mc-predictor-banner-b">
+        <span class="mc-predictor-banner-icon">📊</span>
+        <span class="mc-predictor-banner-text">${t('mc.bannerModeB').replace('{n}', tournNum)}</span>
+      </div>`;
+    }
+    return `<div class="mc-predictor-banner mc-predictor-banner-a">
+      <span class="mc-predictor-banner-icon">⚡</span>
+      <span class="mc-predictor-banner-text">${t('mc.bannerModeA')}</span>
+    </div>`;
+  }
+
+  // Per-deck source breakdown rendered under the deck name in the
+  // field panel. Numbers are pulled from _shareList + _tournamentStats
+  // + trend so the user can see at a glance which signal pushed the
+  // prediction up or down. Falls back to "no tournament data" when
+  // the deck isn't in the online_tournament CSV.
+  function _renderDeckBadge(deckName) {
+    if (!_shareList) return '';
+    const k = normalize(deckName);
+    const entry = _shareList.find(d => normalize(d.name) === k);
+    if (!entry) return '';
+    const stats = _tournamentStats ? _tournamentStats[k] : null;
+    const ladderPct = entry.ladderShare || 0;
+    const broughtPct = stats ? stats.broughtShare : 0;
+    const top8Conv  = stats ? stats.top8Conv : 0;
+    const convFactor = Math.max(0.5, Math.min(2.0, (top8Conv / 0.25) || 0.5));
+    const trendPct  = entry.trend || 0;
+    const trendArrow = trendPct > 0 ? '↑' : (trendPct < 0 ? '↓' : '→');
+    const trendSign  = trendPct > 0 ? '+' : '';
+    const fmt = (n, dp) => n.toFixed(dp).replace('.', ',');
+    return `<span class="mc-deck-badge">
+      <span class="mc-badge-chip" title="${esc(t('mc.badgeLadder'))}">🌐&nbsp;${fmt(ladderPct, 1)}%</span>
+      <span class="mc-badge-chip" title="${esc(t('mc.badgeTournament'))}">🏆&nbsp;${fmt(broughtPct, 1)}%</span>
+      <span class="mc-badge-chip" title="${esc(t('mc.badgeTop8Conv'))}">⬆️&nbsp;${fmt(convFactor, 1)}× T8</span>
+      <span class="mc-badge-chip" title="${esc(t('mc.badgeTrend'))}">${trendArrow}&nbsp;${trendSign}${fmt(trendPct, 1)}%</span>
+    </span>`;
   }
 
   function refreshResults() {

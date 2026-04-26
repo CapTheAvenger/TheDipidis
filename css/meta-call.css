@@ -1169,3 +1169,70 @@
     border-color: #dde4ee;
   }
 }
+
+/* ===========================================================
+   Predictor 2.0 — banner + per-deck source badge
+   =========================================================== */
+
+/* Banner explaining where the prediction comes from. Mode A = amber
+   (just-the-ladder warning); Mode B = green (rich major data). */
+.mc-predictor-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.35;
+  border: 1px solid;
+}
+.mc-predictor-banner-icon {
+  font-size: 1.15em;
+  flex: 0 0 auto;
+}
+.mc-predictor-banner-text {
+  flex: 1 1 auto;
+}
+.mc-predictor-banner-a {
+  background: linear-gradient(90deg, rgba(255,178,30,0.12), rgba(255,178,30,0.04));
+  border-color: rgba(255,178,30,0.40);
+  color: #8a5a00;
+}
+.mc-predictor-banner-b {
+  background: linear-gradient(90deg, rgba(39,174,96,0.12), rgba(39,174,96,0.04));
+  border-color: rgba(39,174,96,0.40);
+  color: #145c33;
+}
+
+/* Per-deck source-breakdown badge sits under .mc-deck-name. Tiny chip
+   row showing where the predicted share came from (ladder, tournament,
+   top-8 conv factor, week-over-week trend). Stays subtle so the deck
+   name + share number remain the dominant visual elements. */
+.mc-deck-badge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7c93;
+}
+.mc-badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: #eef1f6;
+  white-space: nowrap;
+  cursor: help;
+}
+.mc-badge-chip:hover { background: #e3e8f0; color: #1f2d3d; }
+
+@media (max-width: 600px) {
+  .mc-predictor-banner { font-size: 0.78rem; padding: 8px 10px; }
+  .mc-deck-badge { font-size: 0.66rem; gap: 3px; }
+  .mc-badge-chip { padding: 1px 4px; }
+}

@@ -2773,7 +2773,7 @@
                     };"></div></div>`
                     : '';
 
-                cardHtmls.push({ pct: usagePct, html: `
+                cardHtmls.push({ pct: usagePct, isAceSpec: isAceSpecCard, html: `
                     <div class="card-item city-league-card-item" data-card-name="${cardName.toLowerCase()}" data-card-name-de="${germanCardNameEscaped}" data-card-set="${setCode.toLowerCase()}" data-card-number="${setNumber.toLowerCase()}" data-card-type="${filterCategory}">
                         <div class="card-image-container city-league-card-image-container">
                             <img src="${imageUrl}" alt="${cardName}" loading="lazy" referrerpolicy="no-referrer" class="city-league-card-image" onerror="handleCardImageError(this, '${setCode}', '${setNumber}')" onclick="if (typeof event !== 'undefined' && event) event.stopPropagation(); showSingleCard(this.src, '${cardNameEscaped} (${setCode} ${setNumber})');">
@@ -2836,17 +2836,41 @@
                 }
             } else {
                 // Bucket cards by usage % — Main / Options / Niche.
-                // Multiple versions of the same card already share the
-                // same `pct` so they end up in the same bucket together.
-                const mainItems    = cardHtmls.filter(c => c.pct >= SKELETON_MAIN_MIN);
-                const optionsItems = cardHtmls.filter(c => c.pct >= SKELETON_NICHE_MAX && c.pct < SKELETON_MAIN_MIN);
-                const nicheItems   = cardHtmls.filter(c => c.pct < SKELETON_NICHE_MAX);
+                // Multiple versions of the same card share the same `pct`
+                // so they end up in the same bucket together.
+                //
+                // Ace Spec exception: only one Ace Spec is legal per deck,
+                // so the usual %-thresholds don't really apply. Instead
+                // the most-played Ace Spec across this archetype's decks
+                // counts as Main, the 2nd / 3rd as Options, the rest as
+                // Niche — regardless of their absolute %.
+                const aceCards = cardHtmls.filter(c => c.isAceSpec);
+                const aceSorted = [...aceCards].sort((a, b) => b.pct - a.pct);
+                const aceMainSet    = new Set(aceSorted.slice(0, 1));
+                const aceOptionsSet = new Set(aceSorted.slice(1, 3));
+                // Anything beyond rank 3 falls through to Niche.
+
+                const bucketOf = (c) => {
+                    if (c.isAceSpec) {
+                        if (aceMainSet.has(c))    return 'main';
+                        if (aceOptionsSet.has(c)) return 'options';
+                        return 'niche';
+                    }
+                    if (c.pct >= SKELETON_MAIN_MIN)  return 'main';
+                    if (c.pct >= SKELETON_NICHE_MAX) return 'options';
+                    return 'niche';
+                };
+
+                const mainItems    = cardHtmls.filter(c => bucketOf(c) === 'main');
+                const optionsItems = cardHtmls.filter(c => bucketOf(c) === 'options');
+                const nicheItems   = cardHtmls.filter(c => bucketOf(c) === 'niche');
 
                 const sectionHtml = (titleHtml, items, opts) => {
                     if (!items.length) return '';
                     const inner = `<div class="card-grid card-grid-condensed deck-grid-skeleton-grid">${items.map(c => c.html).join('')}</div>`;
-                    if (opts && opts.collapsed) {
-                        return `<details class="meta-card-skeleton-section meta-card-skeleton-niche">
+                    if (opts && opts.collapsible) {
+                        // open by default; user can click summary to collapse
+                        return `<details class="meta-card-skeleton-section meta-card-skeleton-niche" open>
                             <summary><span class="meta-card-skeleton-title">${titleHtml}</span><span class="meta-card-skeleton-count">${items.length}</span></summary>
                             ${inner}
                         </details>`;
@@ -2858,9 +2882,9 @@
                 };
 
                 gridContainer.innerHTML = `<div class="meta-card-skeleton-wrap">
-                    ${sectionHtml('🟢 Main Cards <span class="meta-card-skeleton-hint">(≥' + SKELETON_MAIN_MIN + '% — staples)</span>', mainItems)}
-                    ${sectionHtml('🟡 Options <span class="meta-card-skeleton-hint">(' + SKELETON_NICHE_MAX + '–' + (SKELETON_MAIN_MIN - 1) + '% — flex)</span>', optionsItems)}
-                    ${sectionHtml('⚪ Niche <span class="meta-card-skeleton-hint">(<' + SKELETON_NICHE_MAX + '% — situational)</span>', nicheItems, { collapsed: true })}
+                    ${sectionHtml('🟢 Main Cards <span class="meta-card-skeleton-hint">(staples + #1 Ace Spec)</span>', mainItems)}
+                    ${sectionHtml('🟡 Options <span class="meta-card-skeleton-hint">(flex slots + Ace Spec #2–3)</span>', optionsItems)}
+                    ${sectionHtml('⚪ Situational <span class="meta-card-skeleton-hint">(rare picks — click to collapse)</span>', nicheItems, { collapsible: true })}
                 </div>`;
             }
             if (visualContainer) {

@@ -241,16 +241,21 @@ window.MetaCall = (function () {
         });
       }
 
-      // Compute the empirical mean top-8 conversion across all decks WITH
-      // tournament data — that's the natural baseline for "an average deck".
-      // Replaces the previous hardcoded 0.25 baseline (which assumed a
-      // 32-player tournament with an 8-cut; we scrape ≥100-player events
-      // where the natural baseline is ~8%, so the old divisor systematically
-      // floored even average-performing decks at 0.5× and undervalued them).
+      // Field-WEIGHTED mean top-8 conversion — sum(top8Conv × brought) /
+      // sum(brought). This equals total_top8_slots / total_brought_decks
+      // ≈ 8/100 = 0.08 for a 100-player tournament with an 8-cut. So a
+      // factor of 1.0× = "average deck performs at the natural cut rate".
+      //
+      // The previous arithmetic mean was systematically pulled down by the
+      // long tail (lots of rare decks with 0–3% conv) and produced 2.0×
+      // clamps for almost every top deck, which inflated everyone's top-8
+      // boost equally and shrank the gap between top and bottom in the
+      // final renormalisation.
       const convStats = Object.values(_tournamentStats).filter(s => s && s.broughtShare > 0);
+      const totalBroughtForConv = convStats.reduce((a, s) => a + s.broughtShare, 0) || 1;
       const meanConv = convStats.length > 0
-        ? convStats.reduce((a, s) => a + (s.top8Conv || 0), 0) / convStats.length
-        : 0.08; // fallback to 8% (8/100 cut) if no data
+        ? convStats.reduce((a, s) => a + (s.top8Conv || 0) * s.broughtShare, 0) / totalBroughtForConv
+        : 0.08;
       _shareList.forEach(d => {
         const k = normalize(d.name);
         const ladderPct = (d.ladderShare / totalLadder) * 100;
@@ -291,11 +296,12 @@ window.MetaCall = (function () {
       // Concentration boost — power-law inflation that mimics the
       // major-tournament bandwagon effect. Online tournaments admit
       // casual / rogue lineups that would never see a Regional; players
-      // at majors pile onto the top picks instead. exponent 1.30 widens
-      // the gap between top decks and the long tail by ~30% before
-      // renormalisation. Empirically chosen so Dragapult lifts from
-      // ~8% to the 12-15% range observed at recent majors.
-      const CONCENTRATION_EXP = 1.30;
+      // at majors pile onto the top picks instead. Empirically tuned
+      // against Prague Phase-1 data: with the corrected weighted-mean
+      // convFactor and exponent 1.50, Dragapult lifts from raw 8%
+      // brought → ~13–15% predicted, matching the observed major-
+      // tournament concentration ratio of ~1.875× on top picks.
+      const CONCENTRATION_EXP = 1.50;
       _shareList.forEach(d => {
         d.predictedShareRaw = Math.pow(d.predictedShareRaw, CONCENTRATION_EXP);
       });
@@ -1134,14 +1140,15 @@ window.MetaCall = (function () {
     const ladderPct = entry.ladderShare || 0;
     const broughtPct = stats ? stats.broughtShare : 0;
     const top8Conv  = stats ? stats.top8Conv : 0;
-    // Same baseline as the predictor — empirical mean across all decks
-    // with tournament data, so 1.0× = "average deck" regardless of the
-    // tournament size in the source CSV.
+    // Field-weighted baseline — same calc as in loadData so the badge
+    // shows the same factor that the predictor used. Weighted by
+    // broughtShare so the natural cut rate (~8%) is the 1.0× anchor.
     const allConvs = _tournamentStats
       ? Object.values(_tournamentStats).filter(s => s && s.broughtShare > 0)
       : [];
+    const totalBroughtForConv = allConvs.reduce((a, s) => a + s.broughtShare, 0) || 1;
     const meanConv = allConvs.length > 0
-      ? allConvs.reduce((a, s) => a + (s.top8Conv || 0), 0) / allConvs.length
+      ? allConvs.reduce((a, s) => a + (s.top8Conv || 0) * s.broughtShare, 0) / totalBroughtForConv
       : 0.08;
     const convFactor = meanConv > 0
       ? Math.max(0.5, Math.min(2.0, top8Conv / meanConv))

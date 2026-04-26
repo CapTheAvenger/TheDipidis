@@ -2165,27 +2165,16 @@
 /* ===========================================================
    City League info tables (Improvers / Decliners / Comparison)
    ===========================================================
-   Now that every archetype row has an inline Pokémon icon, the
-   bold 0.95em archetype text was overflowing into the count
-   column ("Dragapult Dudunsparce" colliding with "115 (+11)" on
-   the user's iPhone screenshot). Shrink the cell text + tighten
-   padding so icon + name + count + change all fit on one line
-   per row. !important on the key properties so the rule wins
-   regardless of any later cell-level overrides; nothing else
-   sets these values, but the user already reported one no-op
-   round so let's not take chances.
+   Every archetype row already shows a Pokémon icon, so the bold
+   text doesn't need to carry the full visual load. Just shrink
+   everything aggressively so icon + name + count + Δ all fit on
+   one line per row, no truncation.
    --------------------------------------------------------- */
 @media (max-width: 768px) {
   .city-league-info-table-cell {
     padding: 6px 4px !important;
-    font-size: 0.65em !important;
+    font-size: 0.6em !important;
     line-height: 1.25 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-  .city-league-info-table-cell-archetype {
-    word-break: break-word !important;
-    max-width: 60vw;
   }
   .city-league-info-table-cell-archetype .archetype-jump-link {
     font-size: 0.95em !important;
@@ -2201,12 +2190,12 @@
     white-space: nowrap;
   }
   .city-league-info-table-header {
-    font-size: 0.7em !important;
+    font-size: 0.65em !important;
     padding: 7px 4px !important;
   }
   /* Pokémon icons — small enough not to dominate the now-shrunken cell. */
   .city-league-info-table-cell-archetype .tcg-pokemon-icon {
-    width: 16px !important;
-    height: 16px !important;
+    width: 14px !important;
+    height: 14px !important;
   }
 }

@@ -455,6 +455,20 @@
         white-space: normal;
     }
 
+    /* Best/Worst matchup tables (3 cols) — opt out of the wide
+       min-width / nowrap rules above. Those were tuned for the
+       full comparison table; on the 3-col Best/Worst boxes they
+       force the cells wider than the row, truncating WR + Record
+       values like "65.8%" → "65...." and "166 - 101 - 6" → "166 - 10...".
+       Use the explicit % widths from .meta-matchup-th-* instead. */
+    #currentMetaContent .matchups-grid-container .meta-matchup-table th,
+    #currentMetaContent .matchups-grid-container .meta-matchup-table td {
+        min-width: 0 !important;
+        white-space: normal !important;
+        padding: 6px 4px !important;
+        font-size: 0.78em !important;
+    }
+
     #currentMetaContent .section > h2 {
         font-size: 1.05em;
     }

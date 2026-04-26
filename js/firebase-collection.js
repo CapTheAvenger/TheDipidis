@@ -754,9 +754,44 @@ function sortCollectionEntries(entries) {
     }
 
     if (mode === 'pokedex') {
-      const aDex = getCardPokedexNumber(a.card);
-      const bDex = getCardPokedexNumber(b.card);
-      if (aDex !== bDex) return aDex - bDex;
+      // Pokédex sort: Pokémon first by dex number; then non-Pokémon
+      // grouped by sub-category in a TCG-natural order:
+      //   Supporter → Item → Tool → Stadium → Special Energy → Basic Energy
+      // Within each sub-category: alphabetical, then newest set first
+      // for prints of the same card.
+      const trainerOrder = {
+        'supporter': 1,
+        'item': 2,
+        'tool': 3,
+        'stadium': 4,
+        'special-energy': 5,
+        'basic-energy': 6,
+        'energy': 7            // generic fallback after Basic Energy
+      };
+      const aCat = getCollectionCardCategory(a.card);
+      const bCat = getCollectionCardCategory(b.card);
+      const aIsPoke = aCat === 'pokemon';
+      const bIsPoke = bCat === 'pokemon';
+
+      // Pokémon always before any non-Pokémon
+      if (aIsPoke !== bIsPoke) return aIsPoke ? -1 : 1;
+
+      if (aIsPoke && bIsPoke) {
+        const aDex = getCardPokedexNumber(a.card);
+        const bDex = getCardPokedexNumber(b.card);
+        if (aDex !== bDex) return aDex - bDex;
+        return compareCardsByNewestSet(a.card, b.card, collator);
+      }
+
+      // Both non-Pokémon — apply sub-category order, alphabetical, set.
+      const aRank = trainerOrder[aCat] ?? 99;
+      const bRank = trainerOrder[bCat] ?? 99;
+      if (aRank !== bRank) return aRank - bRank;
+
+      const aName = String(a.card.name || '');
+      const bName = String(b.card.name || '');
+      const nameCmp = collator.compare(aName, bName);
+      if (nameCmp !== 0) return nameCmp;
 
       return compareCardsByNewestSet(a.card, b.card, collator);
     }
